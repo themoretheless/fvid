@@ -397,6 +397,7 @@ mod tests {
     use super::*;
     fn plan(delay: u64, count: u64, tail: i64) -> TrackPlan {
         TrackPlan {
+            trimmed_audio_sample_frames: 0,
             options: TrackOptions {
                 codec_delay_ns: delay,
                 ..Default::default()

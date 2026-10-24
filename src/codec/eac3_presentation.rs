@@ -214,7 +214,8 @@ struct Pending {
 }
 struct Stream {
     decoder: Eac3Decoder,
-    speakers: Vec<Speaker>,
+    // Transform/transient history belongs to coded planes, not speaker labels.
+    width: usize,
     native: transient::NativeBlocks<u64>,
 }
 struct ProgrammeWork {
@@ -222,6 +223,7 @@ struct ProgrammeWork {
     origin: Origin,
     order: SpeakerLayout,
     roles: Vec<Vec<Speaker>>,
+    dual: Vec<bool>,
     pcm: Vec<Vec<f32>>,
     samples: usize,
     gains: [[f32; 2]; BLOCKS],
@@ -236,6 +238,7 @@ struct Ready {
 pub struct PresentationDecoder {
     rate: u32,
     width: u16,
+    compression_mode: CompressionMode,
     lead: usize,
     initial_lead: usize,
     serial: u64,
@@ -256,6 +259,7 @@ impl PresentationDecoder {
         Ok(Self {
             rate,
             width,
+            compression_mode: CompressionMode::Line,
             lead: ENCODER_DELAY,
             initial_lead: ENCODER_DELAY,
             serial: 0,
@@ -273,6 +277,9 @@ impl PresentationDecoder {
         let mut s = Self::new(rate, width)?;
         s.set_priming(0);
         Ok(s)
+    }
+    pub(super) fn set_compression(&mut self, mode: CompressionMode) {
+        self.compression_mode=mode;
     }
     pub(super) fn set_priming(&mut self, n: usize) {
         self.lead = n;
@@ -301,22 +308,20 @@ impl PresentationDecoder {
                     "corrupt or wrong-rate E-AC-3 presentation substream",
                 ));
             }
-            if self.streams[i]
-                .as_ref()
-                .is_some_and(|s| s.speakers != roles)
-            {
-                return Err(unsupported("changing E-AC-3 substream speaker assignment"));
-            }
             if self.streams[i].is_none() {
                 let mut decoder = Eac3Decoder::new(&[], self.rate, d.frame.channels)?;
                 decoder.assembly_mode = true;
                 self.streams[i] = Some(Stream {
                     decoder,
-                    speakers: roles.clone(),
+                    width: roles.len(),
                     native: Default::default(),
                 });
             }
-            let child = &mut self.streams[i].as_mut().unwrap().decoder;
+            let stream = self.streams[i].as_mut().unwrap();
+            stream.width = roles.len();
+            let child = &mut stream.decoder;
+            child.channels = roles.len();
+            child.compression_mode = self.compression_mode;
             let mut decoded = Vec::new();
             let mut bits = Bits::at(bytes, d.frame.audio_bit);
             child.native_capture = Some(Vec::new());
@@ -331,9 +336,11 @@ impl PresentationDecoder {
             all_roles.push(roles);
         }
         // The last dependent supplies normal DRC for the complete programme.
-        if headers.last().unwrap().frame.layout == 0 && gains[..blocks].iter().any(|g| g[0] != g[1])
-        {
-            return Err(unsupported("dual-programme E-AC-3 expanded-output DRC"));
+        if headers.last().unwrap().frame.layout != 0 {
+            // A single-programme last dependent supplies one common DRC word.
+            for gain in &mut gains[..blocks] {
+                gain[1] = gain[0];
+            }
         }
         self.work_serial = self
             .work_serial
@@ -349,7 +356,10 @@ impl PresentationDecoder {
                 .iter()
                 .map(|r| Vec::with_capacity(samples * r.len()))
                 .collect(),
+            // Snapshot this programme's maps: delayed correction of an earlier
+            // programme must not adopt a later frame's speaker assignment.
             roles: all_roles,
+            dual: headers.iter().map(|h| h.frame.layout == 0).collect(),
             samples,
             gains,
         });
@@ -372,7 +382,7 @@ impl PresentationDecoder {
             let Some(stream) = self.streams[i].as_mut() else {
                 continue;
             };
-            let silent = transient::NativeBlock::silence(stream.speakers.len());
+            let silent = transient::NativeBlock::silence(stream.width);
             let mut output = Vec::new();
             for _ in 0..blocks {
                 output.extend(stream.native.push(
@@ -422,9 +432,14 @@ impl PresentationDecoder {
             let work = self.works.pop_front().unwrap();
             let width = usize::from(self.width);
             let mut mixed = vec![0.0; work.samples * width];
-            for (roles, pcm) in work.roles.iter().zip(&work.pcm) {
+            let mut programme = vec![0; width];
+            for ((roles, pcm), &dual) in work.roles.iter().zip(&work.pcm).zip(&work.dual) {
                 for (coded, role) in roles.iter().enumerate() {
                     let output = work.order.0.binary_search(role).unwrap();
+                    // DRC ownership follows the component that wins replacement,
+                    // not the physical left/right speaker number. Apply it once,
+                    // after correction and channel assembly, before final clip.
+                    programme[output] = usize::from(dual && coded == 1);
                     for n in 0..work.samples {
                         mixed[n * width + output] = pcm[n * roles.len() + coded];
                     }
@@ -433,7 +448,7 @@ impl PresentationDecoder {
             for n in 0..work.samples {
                 for ch in 0..width {
                     mixed[n * width + ch] =
-                        (mixed[n * width + ch] * work.gains[n / SAMPLES][0]).clamp(-1.0, 1.0);
+                        (mixed[n * width + ch] * work.gains[n / SAMPLES][programme[ch]]).clamp(-1.0, 1.0);
                 }
             }
             let skip = self.lead.min(work.samples);
@@ -544,6 +559,10 @@ impl PresentationDecoder {
     }
 }
 impl AudioDecode for PresentationDecoder {
+    fn set_dolby_compression(&mut self, mode: CompressionMode) {
+        self.set_compression(mode);
+    }
+
     fn decode_packet(
         &mut self,
         data: &[u8],

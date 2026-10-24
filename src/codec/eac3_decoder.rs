@@ -134,6 +134,8 @@ pub struct Frame {
     /// The Lo/Ro downmix coefficients this stream's mixing metadata carries, which is
     /// where an E-AC-3 fold finds its levels instead of the fixed ones AC-3 mixes by.
     pub downmix: Option<Downmix>,
+    /// BSI heavy-compression words for Ch1/Ch2; missing words use normal DRC.
+    pub compression: [Option<u8>; 2],
     /// The exponent strategy codes of the frame, in whichever of the two forms
     /// `expstre` writes them.
     pub exponents: Exponents,
@@ -550,7 +552,7 @@ fn read_substream_header(bits:&mut BitReader<'_>,extensions:bool)->Result<(Frame
         )));
     }
     let mut channel_map=None;
-    let (downmix,compression_present) = bsi(bits, acmod, lfeon, blocks, reduced_rate, strmtyp,&mut channel_map)?;
+    let (downmix,compression) = bsi(bits, acmod, lfeon, blocks, reduced_rate, strmtyp,&mut channel_map)?;
     if let Some(map)=channel_map {
         // Table E.1.4: six location bits name pairs, all other bits singletons.
         let pairs=0x0400u16|0x0200|0x0040|0x0020|0x0010|0x0004;
@@ -577,6 +579,7 @@ fn read_substream_header(bits:&mut BitReader<'_>,extensions:bool)->Result<(Frame
         coupling: audio.coupling,
         coupling_stated: audio.coupling_stated,
         downmix,
+        compression,
         exponents: audio.exponents,
         low_frequency_strategies: audio.low_frequency_strategies,
         converter_strategies: audio.converter_strategies,
@@ -586,7 +589,7 @@ fn read_substream_header(bits:&mut BitReader<'_>,extensions:bool)->Result<(Frame
         transient_windows: audio.transient_windows,
         aht: audio.aht,
         block_starts: audio.block_starts,
-    },substream_id,channel_map,compression_present))
+    },substream_id,channel_map,compression[0].is_some()))
 }
 
 /// The part of a `Frame` that `audfrm` states, kept apart so that [`header`] can
@@ -820,17 +823,15 @@ fn bsi(
     reduced_rate: bool,
     stream_type: u32,
     channel_map: &mut Option<u16>,
-) -> Result<(Option<Downmix>,bool)> {
+) -> Result<(Option<Downmix>,[Option<u8>;2])> {
     bits.skip(5)?; // dialnorm
-    let compression_present=bits.bit()?;
-    if compression_present {
-        bits.skip(8)?; // compr
-    }
+    let mut compression=[None;2];
+    if bits.bit()? {compression[0]=Some(bits.read(8)? as u8);}
     if acmod == 0 {
         // 1+1 mode gives some of the metadata a second value of its own.
         bits.skip(5)?; // dialnorm2
         if bits.bit()? {
-            bits.skip(8)?; // compr2
+            compression[1]=Some(bits.read(8)? as u8); // compr2
         }
     }
     if stream_type==1 && bits.bit()? {*channel_map=Some(bits.read(16)? as u16);}
@@ -855,7 +856,7 @@ fn bsi(
         let length = bits.read(6)? as usize;
         bits.skip((length + 1) * 8)?; // addbsi
     }
-    Ok((downmix,compression_present))
+    Ok((downmix,compression))
 }
 
 /// Step over the mixing metadata of Table E1.2, and take the two Lo/Ro coefficients a
@@ -1248,6 +1249,8 @@ impl Spx {
     }
 }
 
+pub use super::dolby_compression::CompressionMode;
+
 /// Enhanced AC-3 decoder: a packet of Annex E syncframes in, interleaved f32 out.
 ///
 /// Annex E changes the side information around an AC-3 block and almost nothing
@@ -1265,6 +1268,7 @@ pub struct Eac3Decoder {
     /// produce.
     channels: usize,
     force_stereo: bool,
+    compression_mode: CompressionMode,
     core: Core,
     /// Samples still owed to [`ENCODER_DELAY`], which the stream's first blocks pay off.
     lead: usize,
@@ -1309,6 +1313,7 @@ impl Eac3Decoder {
             sample_rate,
             channels: usize::from(channels),
             force_stereo:false,
+            compression_mode:CompressionMode::Line,
             core: Core::new(),
             lead: ENCODER_DELAY,
             initial_lead: ENCODER_DELAY,
@@ -1323,6 +1328,20 @@ impl Eac3Decoder {
             frame_gains:[[1.0;2];BLOCKS],
             presentation:if channels>6 {Some(Box::new(presentation::PresentationDecoder::new(sample_rate,channels)?))}else{None},
         })
+    }
+
+    /// Choose compression for subsequently decoded frames. Buffered PCM retains
+    /// its captured gain; reset preserves this selection. No calibration gain is added.
+    pub fn with_compression(mut self, mode: CompressionMode) -> Self {
+        self.compression_mode=mode;
+        if let Some(p)=self.presentation.as_mut(){p.set_compression(mode);}
+        self
+    }
+
+    /// Container counterpart of `with_compression`: container presentation
+    /// metadata supplies trimming, so no raw-stream encoder lead is removed.
+    pub fn for_container_with_compression(configuration:&[u8], sample_rate:u32, channels:u16, mode:CompressionMode)->Result<Self> {
+        Ok(Self::for_container(configuration,sample_rate,channels)?.with_compression(mode))
     }
 
     /// Explicit conventional L/R output. Unlike the native-first channel-count
@@ -1468,6 +1487,7 @@ impl Eac3Decoder {
         };
         // Reuse is a within-frame promise, and so is the coupling state a block
         // inherits when its frame says it states nothing.
+        self.core.discard_inactive_overlap(header);
         self.core.begin_frame();
         // Both tools may appear in one frame. Keep ordinary banding initialized
         // even when the first coupled block uses the enhanced tool.
@@ -1529,7 +1549,7 @@ impl Eac3Decoder {
         if header.acmod == 0 && bits.flag() {
             strategy.gain[1] = dynrng_gain(bits.take(8));
         }
-        self.frame_gains[blk]=strategy.gain;
+        self.frame_gains[blk]=self.compression_mode.gains(frame.compression,strategy.gain);
         say("dynrng", blk, bits.pos);
         // Spectral extension: `spxstre` is implicit at block 0, and a block that puts
         // SPX in use rebuilds its high bands by rules of their own. It is the only
@@ -1876,6 +1896,10 @@ impl Eac3Decoder {
             self.synthesise(header, &frame.spx_attenuation);
         }
         self.core.rematrix_restore(header);
+        // Compression is an output gain. Never feed the selected RF value back
+        // into dynrng's within-frame hold/reuse state.
+        let line_gain = self.core.strategy.gain;
+        self.core.strategy.gain = self.frame_gains[blk];
         if let Some(capture)=self.native_capture.as_mut() {
             let gains=if self.assembly_mode {[1.0;PLANES]}else{self.core.output_gains(header)};
             let reconstructed=self.core.inverse_planes(header);
@@ -1891,6 +1915,7 @@ impl Eac3Decoder {
             self.core.spectrum_to_sound_unclipped(header,folding,out);
             self.core.strategy.gain=gains;
         }else{self.core.spectrum_to_sound(header, folding, out);}
+        self.core.strategy.gain = line_gain;
         Ok(true)
     }
 
@@ -2056,6 +2081,11 @@ impl Eac3Decoder {
 }
 
 impl AudioDecode for Eac3Decoder {
+    fn set_dolby_compression(&mut self, mode: CompressionMode) {
+        self.compression_mode=mode;
+        if let Some(p)=self.presentation.as_mut(){p.set_compression(mode);}
+    }
+
     fn decode_packet(&mut self,data:&[u8],pts:i64,duration:u64)->Result<Option<crate::audio::DecodedAudio>> {
         if let Some(p)=self.presentation.as_mut(){return p.decode_packet(data,pts,duration);}
         let blocks=self.reconstruct_native(data,None)?;
@@ -2429,6 +2459,7 @@ mod tests {
                 coupling: [true; BLOCKS],
                 coupling_stated: [true, false, false, false, false, false],
                 downmix: None,
+                compression: [None;2],
                 exponents: Exponents::PerFrame {
                     coupling: Some(16),
                     channels: [16, 16, 0, 0, 0],
@@ -2477,6 +2508,7 @@ mod tests {
                 coupling: [true; BLOCKS],
                 coupling_stated: [true, false, false, false, false, false],
                 downmix: None,
+                compression: [None;2],
                 exponents: Exponents::PerFrame {
                     coupling: Some(22),
                     channels: [16, 16, 16, 16, 16],
@@ -3200,7 +3232,7 @@ mod spx_notch_regressions {
             decoder.spx.signal[0][..3].fill(1.0);
             decoder.spx.noise[0][..3].fill(0.0);
             decoder.core.coefficients(0).fill(1.0);
-            let header = Header {rate:0,frame_bytes:1024,acmod:2,nfchans:2,lfeon:false,clev:1.0,slev:1.0};
+            let header = Header {rate:0,frame_bytes:1024,acmod:2,nfchans:2,lfeon:false,clev:1.0,slev:1.0,compression:[None;2]};
             let mut attenuation = [None; CHANS];
             attenuation[0] = Some(code);
             decoder.synthesise(header, &attenuation);

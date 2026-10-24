@@ -1,0 +1,4305 @@
+{
+  "accepted": true,
+  "cases": [
+    {
+      "name": "w2-3-48000-0",
+      "rate": 48000,
+      "blocks": 3,
+      "maximum": 2,
+      "lfe_case": false,
+      "transient": false,
+      "components": [
+        {
+          "control": "w2-3-48000-0-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w2-3-48000-0-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w2-3-48000-0-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C"
+            ]
+          ],
+          "widths": [
+            2,
+            1,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "w2-3-48000-1",
+      "rate": 48000,
+      "blocks": 3,
+      "maximum": 2,
+      "lfe_case": false,
+      "transient": true,
+      "components": [
+        {
+          "control": "w2-3-48000-1-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w2-3-48000-1-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w2-3-48000-1-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C"
+            ]
+          ],
+          "widths": [
+            2,
+            1,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "w2-3-44100-0",
+      "rate": 44100,
+      "blocks": 3,
+      "maximum": 2,
+      "lfe_case": false,
+      "transient": false,
+      "components": [
+        {
+          "control": "w2-3-44100-0-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w2-3-44100-0-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w2-3-44100-0-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C"
+            ]
+          ],
+          "widths": [
+            2,
+            1,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "w2-3-44100-1",
+      "rate": 44100,
+      "blocks": 3,
+      "maximum": 2,
+      "lfe_case": false,
+      "transient": true,
+      "components": [
+        {
+          "control": "w2-3-44100-1-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w2-3-44100-1-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w2-3-44100-1-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C"
+            ]
+          ],
+          "widths": [
+            2,
+            1,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "w2-6-48000-0",
+      "rate": 48000,
+      "blocks": 6,
+      "maximum": 2,
+      "lfe_case": false,
+      "transient": false,
+      "components": [
+        {
+          "control": "w2-6-48000-0-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w2-6-48000-0-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w2-6-48000-0-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C"
+            ]
+          ],
+          "widths": [
+            2,
+            1,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "mp4": "w2-6-48000-0.mp4"
+    },
+    {
+      "name": "w2-6-48000-1",
+      "rate": 48000,
+      "blocks": 6,
+      "maximum": 2,
+      "lfe_case": false,
+      "transient": true,
+      "components": [
+        {
+          "control": "w2-6-48000-1-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w2-6-48000-1-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w2-6-48000-1-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C"
+            ]
+          ],
+          "widths": [
+            2,
+            1,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "mp4": "w2-6-48000-1.mp4"
+    },
+    {
+      "name": "w2-6-44100-0",
+      "rate": 44100,
+      "blocks": 6,
+      "maximum": 2,
+      "lfe_case": false,
+      "transient": false,
+      "components": [
+        {
+          "control": "w2-6-44100-0-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w2-6-44100-0-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w2-6-44100-0-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C"
+            ]
+          ],
+          "widths": [
+            2,
+            1,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "mp4": "w2-6-44100-0.mp4"
+    },
+    {
+      "name": "w2-6-44100-1",
+      "rate": 44100,
+      "blocks": 6,
+      "maximum": 2,
+      "lfe_case": false,
+      "transient": true,
+      "components": [
+        {
+          "control": "w2-6-44100-1-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w2-6-44100-1-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w2-6-44100-1-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C"
+            ]
+          ],
+          "widths": [
+            2,
+            1,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "mp4": "w2-6-44100-1.mp4"
+    },
+    {
+      "name": "w3-3-48000-0",
+      "rate": 48000,
+      "blocks": 3,
+      "maximum": 3,
+      "lfe_case": false,
+      "transient": false,
+      "components": [
+        {
+          "control": "w3-3-48000-0-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w3-3-48000-0-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w3-3-48000-0-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C",
+              "R"
+            ]
+          ],
+          "widths": [
+            3,
+            1,
+            3
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            null,
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "w3-3-48000-1",
+      "rate": 48000,
+      "blocks": 3,
+      "maximum": 3,
+      "lfe_case": false,
+      "transient": true,
+      "components": [
+        {
+          "control": "w3-3-48000-1-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w3-3-48000-1-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w3-3-48000-1-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C",
+              "R"
+            ]
+          ],
+          "widths": [
+            3,
+            1,
+            3
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "w3-3-44100-0",
+      "rate": 44100,
+      "blocks": 3,
+      "maximum": 3,
+      "lfe_case": false,
+      "transient": false,
+      "components": [
+        {
+          "control": "w3-3-44100-0-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w3-3-44100-0-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w3-3-44100-0-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C",
+              "R"
+            ]
+          ],
+          "widths": [
+            3,
+            1,
+            3
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            null,
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "w3-3-44100-1",
+      "rate": 44100,
+      "blocks": 3,
+      "maximum": 3,
+      "lfe_case": false,
+      "transient": true,
+      "components": [
+        {
+          "control": "w3-3-44100-1-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w3-3-44100-1-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w3-3-44100-1-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C",
+              "R"
+            ]
+          ],
+          "widths": [
+            3,
+            1,
+            3
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "w3-6-48000-0",
+      "rate": 48000,
+      "blocks": 6,
+      "maximum": 3,
+      "lfe_case": false,
+      "transient": false,
+      "components": [
+        {
+          "control": "w3-6-48000-0-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w3-6-48000-0-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w3-6-48000-0-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C",
+              "R"
+            ]
+          ],
+          "widths": [
+            3,
+            1,
+            3
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            null,
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "mp4": "w3-6-48000-0.mp4"
+    },
+    {
+      "name": "w3-6-48000-1",
+      "rate": 48000,
+      "blocks": 6,
+      "maximum": 3,
+      "lfe_case": false,
+      "transient": true,
+      "components": [
+        {
+          "control": "w3-6-48000-1-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w3-6-48000-1-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w3-6-48000-1-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C",
+              "R"
+            ]
+          ],
+          "widths": [
+            3,
+            1,
+            3
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "mp4": "w3-6-48000-1.mp4"
+    },
+    {
+      "name": "w3-6-44100-0",
+      "rate": 44100,
+      "blocks": 6,
+      "maximum": 3,
+      "lfe_case": false,
+      "transient": false,
+      "components": [
+        {
+          "control": "w3-6-44100-0-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w3-6-44100-0-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w3-6-44100-0-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C",
+              "R"
+            ]
+          ],
+          "widths": [
+            3,
+            1,
+            3
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            null,
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "mp4": "w3-6-44100-0.mp4"
+    },
+    {
+      "name": "w3-6-44100-1",
+      "rate": 44100,
+      "blocks": 6,
+      "maximum": 3,
+      "lfe_case": false,
+      "transient": true,
+      "components": [
+        {
+          "control": "w3-6-44100-1-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w3-6-44100-1-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w3-6-44100-1-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C",
+              "R"
+            ]
+          ],
+          "widths": [
+            3,
+            1,
+            3
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "mp4": "w3-6-44100-1.mp4"
+    },
+    {
+      "name": "w4-3-48000-0",
+      "rate": 48000,
+      "blocks": 3,
+      "maximum": 4,
+      "lfe_case": false,
+      "transient": false,
+      "components": [
+        {
+          "control": "w4-3-48000-0-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w4-3-48000-0-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w4-3-48000-0-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls"
+            ]
+          ],
+          "widths": [
+            4,
+            1,
+            4
+          ],
+          "coded_to_native": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "w4-3-48000-1",
+      "rate": 48000,
+      "blocks": 3,
+      "maximum": 4,
+      "lfe_case": false,
+      "transient": true,
+      "components": [
+        {
+          "control": "w4-3-48000-1-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w4-3-48000-1-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w4-3-48000-1-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls"
+            ]
+          ],
+          "widths": [
+            4,
+            1,
+            4
+          ],
+          "coded_to_native": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            null,
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "w4-3-44100-0",
+      "rate": 44100,
+      "blocks": 3,
+      "maximum": 4,
+      "lfe_case": false,
+      "transient": false,
+      "components": [
+        {
+          "control": "w4-3-44100-0-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w4-3-44100-0-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w4-3-44100-0-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls"
+            ]
+          ],
+          "widths": [
+            4,
+            1,
+            4
+          ],
+          "coded_to_native": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "w4-3-44100-1",
+      "rate": 44100,
+      "blocks": 3,
+      "maximum": 4,
+      "lfe_case": false,
+      "transient": true,
+      "components": [
+        {
+          "control": "w4-3-44100-1-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w4-3-44100-1-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w4-3-44100-1-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls"
+            ]
+          ],
+          "widths": [
+            4,
+            1,
+            4
+          ],
+          "coded_to_native": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            null,
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "w5-3-48000-0",
+      "rate": 48000,
+      "blocks": 3,
+      "maximum": 5,
+      "lfe_case": false,
+      "transient": false,
+      "components": [
+        {
+          "control": "w5-3-48000-0-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w5-3-48000-0-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w5-3-48000-0-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs"
+            ]
+          ],
+          "widths": [
+            5,
+            1,
+            5
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "w5-3-48000-1",
+      "rate": 48000,
+      "blocks": 3,
+      "maximum": 5,
+      "lfe_case": false,
+      "transient": true,
+      "components": [
+        {
+          "control": "w5-3-48000-1-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w5-3-48000-1-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w5-3-48000-1-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs"
+            ]
+          ],
+          "widths": [
+            5,
+            1,
+            5
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            null,
+            null,
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "w5-3-44100-0",
+      "rate": 44100,
+      "blocks": 3,
+      "maximum": 5,
+      "lfe_case": false,
+      "transient": false,
+      "components": [
+        {
+          "control": "w5-3-44100-0-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w5-3-44100-0-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w5-3-44100-0-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs"
+            ]
+          ],
+          "widths": [
+            5,
+            1,
+            5
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "w5-3-44100-1",
+      "rate": 44100,
+      "blocks": 3,
+      "maximum": 5,
+      "lfe_case": false,
+      "transient": true,
+      "components": [
+        {
+          "control": "w5-3-44100-1-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w5-3-44100-1-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "w5-3-44100-1-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs"
+            ]
+          ],
+          "widths": [
+            5,
+            1,
+            5
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            null,
+            null,
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "wlfe-3-48000-0",
+      "rate": 48000,
+      "blocks": 3,
+      "maximum": 2,
+      "lfe_case": true,
+      "transient": false,
+      "components": [
+        {
+          "control": "wlfe-3-48000-0-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "wlfe-3-48000-0-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "wlfe-3-48000-0-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "LFE"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            2,
+            1,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "wlfe-3-48000-1",
+      "rate": 48000,
+      "blocks": 3,
+      "maximum": 2,
+      "lfe_case": true,
+      "transient": true,
+      "components": [
+        {
+          "control": "wlfe-3-48000-1-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "wlfe-3-48000-1-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "wlfe-3-48000-1-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "LFE"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            2,
+            1,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "wlfe-3-44100-0",
+      "rate": 44100,
+      "blocks": 3,
+      "maximum": 2,
+      "lfe_case": true,
+      "transient": false,
+      "components": [
+        {
+          "control": "wlfe-3-44100-0-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "wlfe-3-44100-0-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "wlfe-3-44100-0-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "LFE"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            2,
+            1,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "wlfe-3-44100-1",
+      "rate": 44100,
+      "blocks": 3,
+      "maximum": 2,
+      "lfe_case": true,
+      "transient": true,
+      "components": [
+        {
+          "control": "wlfe-3-44100-1-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "wlfe-3-44100-1-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "wlfe-3-44100-1-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "LFE"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            2,
+            1,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ]
+    },
+    {
+      "name": "wlfe-6-48000-0",
+      "rate": 48000,
+      "blocks": 6,
+      "maximum": 2,
+      "lfe_case": true,
+      "transient": false,
+      "components": [
+        {
+          "control": "wlfe-6-48000-0-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "wlfe-6-48000-0-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "wlfe-6-48000-0-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "LFE"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            2,
+            1,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "mp4": "wlfe-6-48000-0.mp4"
+    },
+    {
+      "name": "wlfe-6-48000-1",
+      "rate": 48000,
+      "blocks": 6,
+      "maximum": 2,
+      "lfe_case": true,
+      "transient": true,
+      "components": [
+        {
+          "control": "wlfe-6-48000-1-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "wlfe-6-48000-1-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "wlfe-6-48000-1-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "LFE"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            2,
+            1,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "mp4": "wlfe-6-48000-1.mp4"
+    },
+    {
+      "name": "wlfe-6-44100-0",
+      "rate": 44100,
+      "blocks": 6,
+      "maximum": 2,
+      "lfe_case": true,
+      "transient": false,
+      "components": [
+        {
+          "control": "wlfe-6-44100-0-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "wlfe-6-44100-0-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "wlfe-6-44100-0-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "LFE"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            2,
+            1,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "mp4": "wlfe-6-44100-0.mp4"
+    },
+    {
+      "name": "wlfe-6-44100-1",
+      "rate": 44100,
+      "blocks": 6,
+      "maximum": 2,
+      "lfe_case": true,
+      "transient": true,
+      "components": [
+        {
+          "control": "wlfe-6-44100-1-stream0-control.mkv",
+          "roles": [
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ],
+            [
+              "L",
+              "C",
+              "R",
+              "Ls",
+              "Rs",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            6,
+            6,
+            6
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "wlfe-6-44100-1-stream1-control.mkv",
+          "roles": [
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ],
+            [
+              "Lrs",
+              "Rrs"
+            ]
+          ],
+          "widths": [
+            2,
+            2,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "wlfe-6-44100-1-stream2-control.mkv",
+          "roles": [
+            [
+              "L",
+              "LFE"
+            ],
+            [
+              "L"
+            ],
+            [
+              "L",
+              "LFE"
+            ]
+          ],
+          "widths": [
+            2,
+            1,
+            2
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            null
+          ]
+        }
+      ],
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "mp4": "wlfe-6-44100-1.mp4"
+    }
+  ]
+}

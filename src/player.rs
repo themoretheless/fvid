@@ -13,6 +13,7 @@ use crate::color::{
     Log, Lut, MasteringDisplay, MatrixCoeff, Primaries, Settings, ToneMap, Transfer,
 };
 use crate::container::FileTags;
+use crate::codec::ac3_decoder::CompressionMode;
 use crate::subtitles::{self, Cue};
 use crate::{
     playback_native::{NativeReader, Planar8},
@@ -220,6 +221,7 @@ struct PlayArgs {
     no_subtitles: bool,
     embedded_subtitle: Option<usize>,
     audio_device: Option<String>,
+    dolby_compression: CompressionMode,
     list_audio_devices: bool,
     fullscreen: bool,
     on_top: bool,
@@ -292,6 +294,7 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
     let mut quit_at_end = false;
     let mut snapshot_dir = None;
     let mut audio_device = None;
+    let mut dolby_compression = CompressionMode::Line;
     let mut list_audio_devices = false;
     let mut no_subtitles = false;
     let mut no_audio = false;
@@ -319,6 +322,13 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         index += 1;
         match flag {
             "--no-subtitles" => { no_value(inline, flag)?; no_subtitles = true; }
+            "--dolby-compression" => {
+                dolby_compression = match option_value(args, &mut index, flag, inline)?.as_str() {
+                    "line" => CompressionMode::Line,
+                    "rf" => CompressionMode::Rf,
+                    _ => return Err(crate::invalid("--dolby-compression requires line or rf")),
+                };
+            }
             "--audio-device" => {
                 let name = option_value(args, &mut index, flag, inline)?;
                 if name.trim().is_empty() { return Err(crate::invalid("--audio-device requires a nonempty name")); }
@@ -542,6 +552,7 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         no_subtitles,
         embedded_subtitle: None,
         audio_device,
+        dolby_compression,
         list_audio_devices,
         fullscreen,
         on_top,
@@ -1052,7 +1063,7 @@ fn parse_media_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         } else {
             native.push(arg.clone());
             if inline.is_none() && matches!(flag,
-                "--hdr-tonemap" | "--hdr-mastering" | "--hdr-nits" | "--hdr-maxcll" | "--spherical-stereo" | "--spherical-projection" | "--yaw" | "--pitch" | "--roll" | "--fov" | "--play-stereo3d" | "--audio-device" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
+                "--hdr-tonemap" | "--hdr-mastering" | "--hdr-nits" | "--hdr-maxcll" | "--spherical-stereo" | "--spherical-projection" | "--yaw" | "--pitch" | "--roll" | "--fov" | "--play-stereo3d" | "--audio-device" | "--dolby-compression" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
                 | "--backend" | "--device" | "--shader" | "--skin" | "--start-time" | "--stop-time"
                 | "--rate" | "--audio-delay" | "--subtitle-delay" | "--volume" | "--zoom"
                 | "--crop" | "--aspect" | "--brightness" | "--gamma" | "--saturation" | "--contrast"
@@ -1079,6 +1090,7 @@ fn run_parsed(parsed: PlayArgs) -> Result<(), Box<dyn std::error::Error>> {
         subtitle_shown: !parsed.no_subtitles,
         preferred_embedded_subtitle: parsed.embedded_subtitle,
         preferred_output: parsed.audio_device,
+        dolby_compression: parsed.dolby_compression,
         queue: expand_inputs(&parsed.paths),
         bounds: PlayBounds {
             start: parsed.start,
@@ -1826,6 +1838,7 @@ struct Player {
     stereo3d: fvid_media::PlayStereo3D,
     preferred_embedded_subtitle: Option<usize>,
     preferred_output: Option<String>,
+    dolby_compression: CompressionMode,
     quit_at_end: bool,
     snapshot_dir: Option<PathBuf>,
     next_file: Option<NextFile>,
@@ -2055,6 +2068,7 @@ impl Default for Player {
             stereo3d: fvid_media::PlayStereo3D::Off,
             preferred_embedded_subtitle: None,
             preferred_output: None,
+            dolby_compression: CompressionMode::Line,
             quit_at_end: false,
             snapshot_dir: None,
             skin: player_skin::Skin::default(),
@@ -2451,7 +2465,7 @@ impl Player {
         self.sound_codec = sound_codec(stream.codec());
         self.audio_track = selected.unwrap_or_else(||stream.audio_track_index());
         let output = self.preferred_output.clone();
-        self.audio = Some(crate::audio_thread::AudioPlayback::start(stream, move || {
+        self.audio = Some(crate::audio_thread::AudioPlayback::start_with_compression(stream, self.dolby_compression, move || {
             Box::new(crate::audio::PlatformBackend::with_output_device(output))
         }));
         true
@@ -3210,6 +3224,7 @@ impl Player {
         self.network_cancel = Some(network_cancel.clone());
         let preferred_embedded_subtitle = self.preferred_embedded_subtitle;
         let preferred_output = self.preferred_output.clone();
+        let dolby_compression = self.dolby_compression;
         let prepared_source = self.prepared_source.take();
         let (send, receive) = std::sync::mpsc::channel();
         let (
@@ -3294,6 +3309,7 @@ impl Player {
                 network_cancel: Some(network_cancel),
                 preferred_embedded_subtitle,
                 preferred_output,
+                dolby_compression,
                 grading,
                 bounds,
                 no_audio,
@@ -6807,6 +6823,20 @@ mod tests {
         assert_eq!(player.subtitle_line(Duration::from_millis(700)), Some("plain first"));
         drop(player);
         std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn dolby_compression_cli_is_session_scoped_and_validated() {
+        use crate::codec::ac3_decoder::CompressionMode;
+        assert_eq!(play_args(&["clip.y4m"]).unwrap().dolby_compression, CompressionMode::Line);
+        for words in [vec!["--dolby-compression=rf", "clip.y4m"],vec!["--dolby-compression", "rf", "clip.y4m"]] {
+            assert_eq!(play_args(&words).unwrap().dolby_compression,CompressionMode::Rf);
+            let args=words.iter().map(|s|s.to_string()).collect::<Vec<_>>();
+            assert_eq!(super::parse_media_play_args(&args).unwrap().dolby_compression,CompressionMode::Rf);
+        }
+        for words in [vec!["--dolby-compression"],vec!["--dolby-compression=off","clip.y4m"],vec!["--dolby-compression=","clip.y4m"]] {
+            assert!(play_args(&words).is_err());
+        }
     }
 
     #[test]

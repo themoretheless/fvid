@@ -1,0 +1,9445 @@
+{
+  "accepted": true,
+  "cases": [
+    {
+      "name": "51-lr-48000-3-0-0",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-48000-3-0-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-3-0-0-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-3-0-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lr-48000-3-0-0-switch",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-48000-3-0-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-3-0-0-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-3-0-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lr-48000-3-0-1",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-48000-3-0-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-3-0-1-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-3-0-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lr-48000-3-0-1-switch",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-48000-3-0-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-3-0-1-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-3-0-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lr-48000-3-1-0",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-48000-3-1-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-3-1-0-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lr-48000-3-1-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lr-48000-3-1-0-switch",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-48000-3-1-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-3-1-0-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lr-48000-3-1-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lr-48000-3-1-1",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-48000-3-1-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-3-1-1-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lr-48000-3-1-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lr-48000-3-1-1-switch",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-48000-3-1-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-3-1-1-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lr-48000-3-1-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lr-48000-6-0-0",
+      "rate": 48000,
+      "blocks": 6,
+      "transient": false,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-48000-6-0-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-6-0-0-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-6-0-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.25,
+          2.0,
+          2.0,
+          2.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lr-48000-6-0-0.mp4"
+    },
+    {
+      "name": "51-lr-48000-6-0-0-switch",
+      "rate": 48000,
+      "blocks": 6,
+      "transient": false,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-48000-6-0-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-6-0-0-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-6-0-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.25,
+          2.0,
+          2.0,
+          2.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lr-48000-6-0-0-switch.mp4"
+    },
+    {
+      "name": "51-lr-48000-6-0-1",
+      "rate": 48000,
+      "blocks": 6,
+      "transient": false,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-48000-6-0-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-6-0-1-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-6-0-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0,
+          8.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lr-48000-6-0-1.mp4"
+    },
+    {
+      "name": "51-lr-48000-6-0-1-switch",
+      "rate": 48000,
+      "blocks": 6,
+      "transient": false,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-48000-6-0-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-6-0-1-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-6-0-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0,
+          8.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lr-48000-6-0-1-switch.mp4"
+    },
+    {
+      "name": "51-lr-48000-6-1-0",
+      "rate": 48000,
+      "blocks": 6,
+      "transient": true,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-48000-6-1-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-6-1-0-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lr-48000-6-1-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.25,
+          2.0,
+          2.0,
+          2.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lr-48000-6-1-0.mp4"
+    },
+    {
+      "name": "51-lr-48000-6-1-0-switch",
+      "rate": 48000,
+      "blocks": 6,
+      "transient": true,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-48000-6-1-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-6-1-0-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lr-48000-6-1-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.25,
+          2.0,
+          2.0,
+          2.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lr-48000-6-1-0-switch.mp4"
+    },
+    {
+      "name": "51-lr-48000-6-1-1",
+      "rate": 48000,
+      "blocks": 6,
+      "transient": true,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-48000-6-1-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-6-1-1-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lr-48000-6-1-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0,
+          8.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lr-48000-6-1-1.mp4"
+    },
+    {
+      "name": "51-lr-48000-6-1-1-switch",
+      "rate": 48000,
+      "blocks": 6,
+      "transient": true,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-48000-6-1-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-48000-6-1-1-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lr-48000-6-1-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0,
+          8.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lr-48000-6-1-1-switch.mp4"
+    },
+    {
+      "name": "51-lr-44100-3-0-0",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": false,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-44100-3-0-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-3-0-0-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-3-0-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lr-44100-3-0-0-switch",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": false,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-44100-3-0-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-3-0-0-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-3-0-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lr-44100-3-0-1",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": false,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-44100-3-0-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-3-0-1-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-3-0-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lr-44100-3-0-1-switch",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": false,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-44100-3-0-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-3-0-1-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-3-0-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lr-44100-3-1-0",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": true,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-44100-3-1-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-3-1-0-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lr-44100-3-1-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lr-44100-3-1-0-switch",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": true,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-44100-3-1-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-3-1-0-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lr-44100-3-1-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lr-44100-3-1-1",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": true,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-44100-3-1-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-3-1-1-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lr-44100-3-1-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lr-44100-3-1-1-switch",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": true,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-44100-3-1-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-3-1-1-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lr-44100-3-1-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lr-44100-6-0-0",
+      "rate": 44100,
+      "blocks": 6,
+      "transient": false,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-44100-6-0-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-6-0-0-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-6-0-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.25,
+          2.0,
+          2.0,
+          2.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lr-44100-6-0-0.mp4"
+    },
+    {
+      "name": "51-lr-44100-6-0-0-switch",
+      "rate": 44100,
+      "blocks": 6,
+      "transient": false,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-44100-6-0-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-6-0-0-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-6-0-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.25,
+          2.0,
+          2.0,
+          2.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lr-44100-6-0-0-switch.mp4"
+    },
+    {
+      "name": "51-lr-44100-6-0-1",
+      "rate": 44100,
+      "blocks": 6,
+      "transient": false,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-44100-6-0-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-6-0-1-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-6-0-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0,
+          8.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lr-44100-6-0-1.mp4"
+    },
+    {
+      "name": "51-lr-44100-6-0-1-switch",
+      "rate": 44100,
+      "blocks": 6,
+      "transient": false,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-44100-6-0-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-6-0-1-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-6-0-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0,
+          8.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lr-44100-6-0-1-switch.mp4"
+    },
+    {
+      "name": "51-lr-44100-6-1-0",
+      "rate": 44100,
+      "blocks": 6,
+      "transient": true,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-44100-6-1-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-6-1-0-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lr-44100-6-1-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.25,
+          2.0,
+          2.0,
+          2.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lr-44100-6-1-0.mp4"
+    },
+    {
+      "name": "51-lr-44100-6-1-0-switch",
+      "rate": 44100,
+      "blocks": 6,
+      "transient": true,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-44100-6-1-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-6-1-0-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lr-44100-6-1-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.25,
+          2.0,
+          2.0,
+          2.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lr-44100-6-1-0-switch.mp4"
+    },
+    {
+      "name": "51-lr-44100-6-1-1",
+      "rate": 44100,
+      "blocks": 6,
+      "transient": true,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-44100-6-1-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-6-1-1-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lr-44100-6-1-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0,
+          8.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lr-44100-6-1-1.mp4"
+    },
+    {
+      "name": "51-lr-44100-6-1-1-switch",
+      "rate": 44100,
+      "blocks": 6,
+      "transient": true,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lr-44100-6-1-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lr-44100-6-1-1-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lr-44100-6-1-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0,
+          8.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lr-44100-6-1-1-switch.mp4"
+    },
+    {
+      "name": "51-lc-48000-3-0-0",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-48000-3-0-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-3-0-0-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-3-0-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lc-48000-3-0-0-switch",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-48000-3-0-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-3-0-0-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-3-0-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lc-48000-3-0-1",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-48000-3-0-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-3-0-1-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-3-0-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lc-48000-3-0-1-switch",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-48000-3-0-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-3-0-1-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-3-0-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lc-48000-3-1-0",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-48000-3-1-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-3-1-0-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lc-48000-3-1-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lc-48000-3-1-0-switch",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-48000-3-1-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-3-1-0-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lc-48000-3-1-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lc-48000-3-1-1",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-48000-3-1-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-3-1-1-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lc-48000-3-1-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lc-48000-3-1-1-switch",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-48000-3-1-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-3-1-1-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lc-48000-3-1-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lc-48000-6-0-0",
+      "rate": 48000,
+      "blocks": 6,
+      "transient": false,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-48000-6-0-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-6-0-0-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-6-0-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.25,
+          2.0,
+          2.0,
+          2.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lc-48000-6-0-0.mp4"
+    },
+    {
+      "name": "51-lc-48000-6-0-0-switch",
+      "rate": 48000,
+      "blocks": 6,
+      "transient": false,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-48000-6-0-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-6-0-0-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-6-0-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.25,
+          2.0,
+          2.0,
+          2.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lc-48000-6-0-0-switch.mp4"
+    },
+    {
+      "name": "51-lc-48000-6-0-1",
+      "rate": 48000,
+      "blocks": 6,
+      "transient": false,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-48000-6-0-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-6-0-1-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-6-0-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0,
+          8.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lc-48000-6-0-1.mp4"
+    },
+    {
+      "name": "51-lc-48000-6-0-1-switch",
+      "rate": 48000,
+      "blocks": 6,
+      "transient": false,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-48000-6-0-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-6-0-1-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-6-0-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0,
+          8.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lc-48000-6-0-1-switch.mp4"
+    },
+    {
+      "name": "51-lc-48000-6-1-0",
+      "rate": 48000,
+      "blocks": 6,
+      "transient": true,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-48000-6-1-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-6-1-0-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lc-48000-6-1-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.25,
+          2.0,
+          2.0,
+          2.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lc-48000-6-1-0.mp4"
+    },
+    {
+      "name": "51-lc-48000-6-1-0-switch",
+      "rate": 48000,
+      "blocks": 6,
+      "transient": true,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-48000-6-1-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-6-1-0-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lc-48000-6-1-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.25,
+          2.0,
+          2.0,
+          2.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lc-48000-6-1-0-switch.mp4"
+    },
+    {
+      "name": "51-lc-48000-6-1-1",
+      "rate": 48000,
+      "blocks": 6,
+      "transient": true,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-48000-6-1-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-6-1-1-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lc-48000-6-1-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0,
+          8.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lc-48000-6-1-1.mp4"
+    },
+    {
+      "name": "51-lc-48000-6-1-1-switch",
+      "rate": 48000,
+      "blocks": 6,
+      "transient": true,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-48000-6-1-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-48000-6-1-1-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lc-48000-6-1-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0,
+          8.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lc-48000-6-1-1-switch.mp4"
+    },
+    {
+      "name": "51-lc-44100-3-0-0",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": false,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-44100-3-0-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-3-0-0-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-3-0-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lc-44100-3-0-0-switch",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": false,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-44100-3-0-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-3-0-0-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-3-0-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lc-44100-3-0-1",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": false,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-44100-3-0-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-3-0-1-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-3-0-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lc-44100-3-0-1-switch",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": false,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-44100-3-0-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-3-0-1-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-3-0-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lc-44100-3-1-0",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": true,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-44100-3-1-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-3-1-0-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lc-44100-3-1-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lc-44100-3-1-0-switch",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": true,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-44100-3-1-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-3-1-0-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lc-44100-3-1-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lc-44100-3-1-1",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": true,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-44100-3-1-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-3-1-1-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lc-44100-3-1-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lc-44100-3-1-1-switch",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": true,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-44100-3-1-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-3-1-1-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lc-44100-3-1-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "51-lc-44100-6-0-0",
+      "rate": 44100,
+      "blocks": 6,
+      "transient": false,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-44100-6-0-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-6-0-0-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-6-0-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.25,
+          2.0,
+          2.0,
+          2.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lc-44100-6-0-0.mp4"
+    },
+    {
+      "name": "51-lc-44100-6-0-0-switch",
+      "rate": 44100,
+      "blocks": 6,
+      "transient": false,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-44100-6-0-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-6-0-0-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-6-0-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.25,
+          2.0,
+          2.0,
+          2.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lc-44100-6-0-0-switch.mp4"
+    },
+    {
+      "name": "51-lc-44100-6-0-1",
+      "rate": 44100,
+      "blocks": 6,
+      "transient": false,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-44100-6-0-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-6-0-1-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-6-0-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0,
+          8.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lc-44100-6-0-1.mp4"
+    },
+    {
+      "name": "51-lc-44100-6-0-1-switch",
+      "rate": 44100,
+      "blocks": 6,
+      "transient": false,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-44100-6-0-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-6-0-1-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-6-0-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0,
+          8.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lc-44100-6-0-1-switch.mp4"
+    },
+    {
+      "name": "51-lc-44100-6-1-0",
+      "rate": 44100,
+      "blocks": 6,
+      "transient": true,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-44100-6-1-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-6-1-0-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lc-44100-6-1-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.25,
+          2.0,
+          2.0,
+          2.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lc-44100-6-1-0.mp4"
+    },
+    {
+      "name": "51-lc-44100-6-1-0-switch",
+      "rate": 44100,
+      "blocks": 6,
+      "transient": true,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-44100-6-1-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-6-1-0-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lc-44100-6-1-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.25,
+          2.0,
+          2.0,
+          2.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lc-44100-6-1-0-switch.mp4"
+    },
+    {
+      "name": "51-lc-44100-6-1-1",
+      "rate": 44100,
+      "blocks": 6,
+      "transient": true,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-44100-6-1-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-6-1-1-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lc-44100-6-1-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0,
+          8.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lc-44100-6-1-1.mp4"
+    },
+    {
+      "name": "51-lc-44100-6-1-1-switch",
+      "rate": 44100,
+      "blocks": 6,
+      "transient": true,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 8,
+      "mask": 1599,
+      "components": [
+        {
+          "control": "51-lc-44100-6-1-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "51-lc-44100-6-1-1-switch-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        },
+        {
+          "control": "51-lc-44100-6-1-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5,
+          0.5,
+          2.0,
+          2.0
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0,
+          8.0,
+          0.5,
+          0.5
+        ]
+      ],
+      "mp4": "51-lc-44100-6-1-1-switch.mp4"
+    },
+    {
+      "name": "dual-lc-48000-3-0-0",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 7,
+      "mask": 1591,
+      "components": [
+        {
+          "control": "dual-lc-48000-3-0-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-48000-3-0-0-stream1-control.mkv",
+          "roles": [
+            "C",
+            "Ls",
+            "Rs",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-48000-3-0-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "dual-lc-48000-3-0-0-switch",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 7,
+      "mask": 1591,
+      "components": [
+        {
+          "control": "dual-lc-48000-3-0-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-48000-3-0-0-switch-stream1-control.mkv",
+          "roles": [
+            "C",
+            "Ls",
+            "Rs",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-48000-3-0-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "dual-lc-48000-3-0-1",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 7,
+      "mask": 1591,
+      "components": [
+        {
+          "control": "dual-lc-48000-3-0-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-48000-3-0-1-stream1-control.mkv",
+          "roles": [
+            "C",
+            "Ls",
+            "Rs",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-48000-3-0-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "dual-lc-48000-3-0-1-switch",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 7,
+      "mask": 1591,
+      "components": [
+        {
+          "control": "dual-lc-48000-3-0-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-48000-3-0-1-switch-stream1-control.mkv",
+          "roles": [
+            "C",
+            "Ls",
+            "Rs",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-48000-3-0-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "dual-lc-48000-3-1-0",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 7,
+      "mask": 1591,
+      "components": [
+        {
+          "control": "dual-lc-48000-3-1-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-48000-3-1-0-stream1-control.mkv",
+          "roles": [
+            "C",
+            "Ls",
+            "Rs",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-48000-3-1-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "dual-lc-48000-3-1-0-switch",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 7,
+      "mask": 1591,
+      "components": [
+        {
+          "control": "dual-lc-48000-3-1-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-48000-3-1-0-switch-stream1-control.mkv",
+          "roles": [
+            "C",
+            "Ls",
+            "Rs",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-48000-3-1-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "dual-lc-48000-3-1-1",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 7,
+      "mask": 1591,
+      "components": [
+        {
+          "control": "dual-lc-48000-3-1-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-48000-3-1-1-stream1-control.mkv",
+          "roles": [
+            "C",
+            "Ls",
+            "Rs",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-48000-3-1-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "dual-lc-48000-3-1-1-switch",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 7,
+      "mask": 1591,
+      "components": [
+        {
+          "control": "dual-lc-48000-3-1-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-48000-3-1-1-switch-stream1-control.mkv",
+          "roles": [
+            "C",
+            "Ls",
+            "Rs",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-48000-3-1-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "dual-lc-44100-3-0-0",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": false,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 7,
+      "mask": 1591,
+      "components": [
+        {
+          "control": "dual-lc-44100-3-0-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-44100-3-0-0-stream1-control.mkv",
+          "roles": [
+            "C",
+            "Ls",
+            "Rs",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-44100-3-0-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "dual-lc-44100-3-0-0-switch",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": false,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 7,
+      "mask": 1591,
+      "components": [
+        {
+          "control": "dual-lc-44100-3-0-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-44100-3-0-0-switch-stream1-control.mkv",
+          "roles": [
+            "C",
+            "Ls",
+            "Rs",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-44100-3-0-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "dual-lc-44100-3-0-1",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": false,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 7,
+      "mask": 1591,
+      "components": [
+        {
+          "control": "dual-lc-44100-3-0-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-44100-3-0-1-stream1-control.mkv",
+          "roles": [
+            "C",
+            "Ls",
+            "Rs",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-44100-3-0-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "dual-lc-44100-3-0-1-switch",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": false,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 7,
+      "mask": 1591,
+      "components": [
+        {
+          "control": "dual-lc-44100-3-0-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-44100-3-0-1-switch-stream1-control.mkv",
+          "roles": [
+            "C",
+            "Ls",
+            "Rs",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-44100-3-0-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "dual-lc-44100-3-1-0",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": true,
+      "clip": false,
+      "switching": false,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 7,
+      "mask": 1591,
+      "components": [
+        {
+          "control": "dual-lc-44100-3-1-0-stream0-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-44100-3-1-0-stream1-control.mkv",
+          "roles": [
+            "C",
+            "Ls",
+            "Rs",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-44100-3-1-0-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "dual-lc-44100-3-1-0-switch",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": true,
+      "clip": false,
+      "switching": true,
+      "scale": 1,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 7,
+      "mask": 1591,
+      "components": [
+        {
+          "control": "dual-lc-44100-3-1-0-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-44100-3-1-0-switch-stream1-control.mkv",
+          "roles": [
+            "C",
+            "Ls",
+            "Rs",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-44100-3-1-0-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          4.0,
+          4.0,
+          0.5
+        ],
+        [
+          0.25,
+          2.0,
+          2.0
+        ]
+      ]
+    },
+    {
+      "name": "dual-lc-44100-3-1-1",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": true,
+      "clip": true,
+      "switching": false,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 7,
+      "mask": 1591,
+      "components": [
+        {
+          "control": "dual-lc-44100-3-1-1-stream0-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-44100-3-1-1-stream1-control.mkv",
+          "roles": [
+            "C",
+            "Ls",
+            "Rs",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-44100-3-1-1-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    },
+    {
+      "name": "dual-lc-44100-3-1-1-switch",
+      "rate": 44100,
+      "blocks": 3,
+      "transient": true,
+      "clip": true,
+      "switching": true,
+      "scale": 1024,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "channels": 7,
+      "mask": 1591,
+      "components": [
+        {
+          "control": "dual-lc-44100-3-1-1-switch-stream0-control.mkv",
+          "roles": [
+            "L",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            true,
+            true
+          ],
+          "windows": [
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-44100-3-1-1-switch-stream1-control.mkv",
+          "roles": [
+            "C",
+            "Ls",
+            "Rs",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            3,
+            4
+          ],
+          "dual": false,
+          "dual_frames": [
+            false,
+            false,
+            false
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "control": "dual-lc-44100-3-1-1-switch-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "dual": true,
+          "dual_frames": [
+            true,
+            false,
+            true
+          ],
+          "windows": [
+            {
+              "location": 0,
+              "length": 255
+            },
+            {
+              "location": 960,
+              "length": 127
+            }
+          ]
+        }
+      ],
+      "gains": [
+        [
+          15.75,
+          15.75,
+          0.5
+        ],
+        [
+          0.984375,
+          0.984375,
+          8.0
+        ]
+      ]
+    }
+  ]
+}

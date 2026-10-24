@@ -4512,3 +4512,95 @@ and offline;ordinary tests use saved bytes without FFmpeg or network access.
   six-programme control oracles. Eighteen cases cover active transient PCM/PTS,
   EOF, rewind and worker seek in MP4; the changing-count and 16-role cases are
   explicitly outside this MP4 subset.
+
+- `eac3-lfe-downmix`: 272 accepted owned E-AC-3 cases, all eight acmod
+  layouts, all 32 LFE mixing levels, disabled mixing and per-frame changes.
+  Explicit mono/stereo decoder output is compared with separately decoded
+  native-channel controls; native Matroska PCM retains its separate LFE.
+  Reset replays exactly. Includes the single-surround folding regression,
+  which previously omitted S from right stereo and halved its mono weight.
+  Generate separately with `scripts/generate_eac3_lfe_downmix.py` without
+  external codecs/network. These fixtures qualify the explicit codec API,
+  not automatic physical-device downmix negotiation in the player.
+
+- `eac3-changing-roles`: accepted changing custom speaker maps in dependent
+  substreams, with a fixed rendered 7.1 layout. Two stereo dependents exchange
+  front/rear roles and return, preserving their coded transform histories.
+  Eight cases cover 48/44.1 kHz, three/six blocks and optional backward/future
+  transient correction. Raw and split Matroska acceptance includes exact PCM,
+  reset, rewind, PTS and worker seek. Four six-block cases also exercise MP4
+  with the same continuous-history oracle and a seek after the map change.
+  Generate separately with `scripts/generate_eac3_changing_roles.py`; 45 owned
+  artifacts, no external codecs/network. Six-block base 5.1 planes deliberately
+  use zero allocation to fit the coded frame budget; active dependent planes
+  carry distinct PCM. Changes to rendered layout or coded channel count are
+  outside this acceptance set.
+
+- `eac3-changing-widths`: 32 accepted expanded E-AC-3 cases with a dependent
+  stream shrinking to one coded channel and returning to two/five full-band
+  channels or mono+LFE, while rendered output remains 7.1. Fixed-width native
+  controls encode zero coefficients during absent-plane intervals; the oracle
+  excludes their absent PCM and applies scalar transient correction before
+  programme-role placement. This distinguishes resetting continuing channels
+  from replaying stale overlap when another channel returns. Includes 48/44.1
+  kHz, three/six blocks, optional transient correction, raw/split Matroska,
+  reset/rewind, exact PTS, mask and worker seek. Twelve six-block cases also
+  cover MP4 and seek after the width transition. Six-block base 5.1 uses zero
+  allocation; active dependents carry the PCM witnesses. Generate separately
+  with `scripts/generate_eac3_changing_widths.py` (173 owned artifacts).
+  The final rendered layout stays fixed; device layout renegotiation is not
+  claimed. Ordinary tests require no generator, FFmpeg or network.
+
+- `eac3-expanded-dual-drc`: 80 accepted unequal normal-DRC witnesses with a
+  dual-mono final dependent. Includes 7/8-channel output, Left/Right versus
+  Left/Centre replacement, dual-mono independent/non-final components, block
+  updates/hold, active final clipping, transient correction and dual/stereo
+  transitions. Quiet native-component controls preserve headroom until role
+  assembly and the last dependent's DRC pair are applied; second-programme
+  ownership follows coded Ch2, not an assumed right-speaker index. Raw/reset,
+  split Matroska/rewind/PTS/worker seek and 32 six-block MP4 variants are checked.
+  Generate separately with `scripts/generate_eac3_expanded_dual_drc.py`, without
+  external codecs/network. Six-block base 5.1 uses zero allocation while active
+  dependents provide PCM; other cases carry active base audio. These are finite
+  normal-DRC/PCM qualifications, not RF-compression or physical-device proof.
+
+- `eac3-rf-compression`: 632 native E-AC-3 compression witnesses. All 256
+  `compr`/`compr2` words are exercised in dual-mono/stereo; representative words
+  cover all eight acmod values with/without LFE. Three-frame sequences contain
+  present/absent/different words, independent dual fallback, normal-DRC updates
+  and hold, plus active transient/clipping variants. Exact raw/reset and explicit
+  container RF API PCM/PTS are compared with quiet native controls; default Line
+  PCM remains unchanged. Includes mono folding of unequal dual gains and explicit
+  C+LFE -> stereo RF folding with LFE injection disabled. Generator
+  `scripts/generate_eac3_rf_compression.py`: 1285 artifacts / 24,286,843 bytes.
+- `eac3-rf-expanded`: 80 expanded RF cases / 32 MP4 variants. Final-dependent
+  RF words change across frames and the absent second word falls back to normal
+  DRC. Includes dual/stereo transitions, replacement ownership, transient
+  correction, active final clipping and 7/8-channel layouts. Direct raw/reset,
+  explicit RF Matroska/MP4 construction, PTS, rewind and direct stream seek are
+  tested. Compatibility output instead uses independent RF words; explicit Line
+  output ignores the RF words. These tests do not configure a physical device
+  or add a player RF selector. Generator `scripts/generate_eac3_rf_expanded.py`:
+  433 artifacts / 14,949,960 bytes. Both generators are owned/offline; tests use
+  fixture bytes without external encoders, FFmpeg, network or generation.
+
+- `ac3-rf-compression`: 659 accepted AC-3 RF compression witnesses. Owned D45
+  dual-mono/mono/stereo spectra cover 32/44.1/48 kHz, LFE, all 256 RF words in
+  dual-mono/stereo and representative words elsewhere. Existing repository-owned
+  coupled stereo and 5.1 tones are repacked with BSI words/frame padding; their
+  raw Line PCM must remain byte-identical after the same priming removal.
+  Both AC-3 CRC regions are independently repaired and verified by the generator.
+  Present/absent/different compression words, channel-independent fallback,
+  normal block updates/hold, native output, reset and clipping-after-mono-fold
+  are compared with quiet controls. 163 MP4 variants also exercise placeholder
+  geometry resolution, exact PTS, rewind and direct RF stream seek in MP4 and
+  Matroska. Explicit typed RF construction is tested; a player RF control is not
+  implied. `scripts/generate_ac3_rf_compression.py`: 1507 artifacts / 24,779,358
+  bytes, regenerated without encoder, process or network access.
+
+
+`dolby-player-compression` qualifies session Line/RF propagation through the
+real audio worker, reset/replacement, seek and rewind for owned AC-3/E-AC-3
+MP4/Matroska samples. Neutral PCM verifies that the Dolby setting is ignored.
+Regenerate offline with `python3 scripts/generate_dolby_player_compression.py`;
+ordinary tests consume checked-in bytes and require neither FFmpeg nor network.

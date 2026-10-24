@@ -12,6 +12,8 @@ pub mod mp1_decoder;
 
 pub mod aac_decoder;
 #[cfg(feature = "player")]
+mod dolby_compression;
+#[cfg(feature = "player")]
 pub mod ac3_decoder;
 #[cfg(feature = "player")]
 pub mod eac3_decoder;

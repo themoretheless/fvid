@@ -10,14 +10,17 @@ COUNTS=[2,1,2,3,3,4,4,5]
 SLOTS=[[0,1],[2],[0,1],[0,2,1],[0,1,4],[0,2,1,4],[0,1,4,5],[0,2,1,4,5]]
 MAPS=[0xa000,0x4000,0xa000,0xe000,0xa100,0xe100,0xb800,0xf800]
 
-def packet(layout,lfe,identity,mask,basis,channel_map,dependent,*,last=True,blocks_override=None,gains=None,divisor=1,exponent=10,rate_code=0,allocated=True,block_allocation=None,transient_windows=None,lfe_mix_code=None,mixing_metadata=False):
+def packet(layout,lfe,identity,mask,basis,channel_map,dependent,*,last=True,blocks_override=None,gains=None,divisor=1,exponent=10,rate_code=0,allocated=True,block_allocation=None,transient_windows=None,lfe_mix_code=None,mixing_metadata=False,silent_planes=(),gains_second=None,compression=None,compression_second=None):
  nf=COUNTS[layout];blocks=blocks_override or (6 if nf<=2 else 3)
  if block_allocation is not None:
   assert len(block_allocation)==blocks and not mask, 'block SNR witnesses require conventional planes'
  w=BitWriter().put(0x0b77,16).put(int(dependent),2).put(identity if dependent else 0,3).put(2047,11)
- w.put(rate_code,2).put(3 if blocks==6 else 2,2).put(layout,3).put(int(lfe),1).put(16,5).put(31,5).put(int(dependent and last),1)
- if dependent and last:w.put(0,8)
- if layout==0:w.put(31,5).put(0,1)
+ present=(dependent and last) or compression is not None
+ w.put(rate_code,2).put(3 if blocks==6 else 2,2).put(layout,3).put(int(lfe),1).put(16,5).put(31,5).put(int(present),1)
+ if present:w.put(0 if compression is None else compression,8)
+ if layout==0:
+  w.put(31,5).put(int(compression_second is not None),1)
+  if compression_second is not None:w.put(compression_second,8)
  if dependent:
   w.put(int(channel_map is not None),1)
   if channel_map is not None:w.put(channel_map,16)
@@ -61,9 +64,10 @@ def packet(layout,lfe,identity,mask,basis,channel_map,dependent,*,last=True,bloc
  for b in range(blocks):
   if not allocated or block_allocation is not None:w.zeros(nf)
   code=None if gains is None else gains[b]
-  for _ in range(2 if layout==0 else 1):
-   w.put(int(code is not None),1)
-   if code is not None:w.put(code,8)
+  for programme in range(2 if layout==0 else 1):
+   word=gains_second[b] if programme==1 and gains_second is not None else code
+   w.put(int(word is not None),1)
+   if word is not None:w.put(word,8)
   w.put(0,1) # SPX
   if b==0:
    if layout==2:w.zeros(4)
@@ -85,6 +89,7 @@ def packet(layout,lfe,identity,mask,basis,channel_map,dependent,*,last=True,bloc
     w.put(0,2)
    for i in range(7 if ch==nf else 73):
     values=[round(v/divisor)for v in spectrum(i,ch,basis)]
+    if ch in silent_planes:values=[0]*6
     active_allocation=block_allocation[b] if block_allocation is not None else allocated
     if active_allocation:
      if aht:

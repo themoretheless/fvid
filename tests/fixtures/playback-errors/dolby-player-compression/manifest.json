@@ -1,0 +1,46 @@
+{
+  "accepted": true,
+  "cases": [
+    {
+      "file": "ac3-dual.mkv",
+      "mask": 11,
+      "seek_ms": 40
+    },
+    {
+      "file": "ac3-dual.mp4",
+      "mask": 11,
+      "seek_ms": 40
+    },
+    {
+      "file": "ac3-coupled.mkv",
+      "mask": 3,
+      "seek_ms": 40
+    },
+    {
+      "file": "ac3-coupled.mp4",
+      "mask": 3,
+      "seek_ms": 40
+    },
+    {
+      "file": "eac3-dual.mkv",
+      "mask": 11,
+      "seek_ms": 40
+    },
+    {
+      "file": "eac3-expanded.mkv",
+      "mask": 1599,
+      "seek_ms": 40
+    },
+    {
+      "file": "eac3-expanded.mp4",
+      "mask": 1599,
+      "seek_ms": 40
+    },
+    {
+      "file": "pcm.mkv",
+      "mask": null,
+      "seek_ms": 40,
+      "dolby": false
+    }
+  ]
+}

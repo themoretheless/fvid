@@ -16989,3 +16989,360 @@ passed in the main tree. Other merges continued concurrently afterwards, so this
 is not a claim that the final merged repository or full feature matrix has been
 requalified. The temporary verification checkout was archived recoverably; inputs
 also remain preserved at `/tmp/fvid-eac3-mp4-inputs-lpgeazcy` and in this repository.
+
+
+### Explicit E-AC-3 LFE downmix acceptance (2026-10-24)
+
+Qualified the existing owned parser/folding implementation and enabled the
+acceptance manifest/test for all eight acmod layouts, all 32 `lfemixlevcod`
+values, absent/disabled LFE injection and changing levels across frames.
+The 272-case matrix checks actual mono/stereo PCM against native-channel
+controls, exact native Matroska PCM retention and reset/replay. The explicit
+`Eac3Decoder::new_stereo` constructor distinguishes conventional L/R output from
+two-channel native C+LFE; ordinary native-first constructors retain C+LFE.
+
+The earlier intended-output red was `l1-c0` mono LFE error 0.00005793254
+(`/tmp/fvid-lfe-downmix-before.log`). The expanded matrix independently exposed
+single-surround omission from right stereo and half-weight mono, with disabled
+LFE (`l4-cNone`, error 0.000057396872,
+`/tmp/fvid-lfe-downmix-all-modes-before.log`). Shared AC-3/E-AC-3 folding now feeds
+the single surround into both sides; its native-channel path stays unchanged.
+The scalar unit test and synthetic video matrix both exercise this behavior.
+
+Coefficient basis: ETSI TS 102 366 V1.4.1, E.1.3.1.10/11, E.2.9 and 6.8.2,
+[official specification](https://www.etsi.org/deliver/etsi_ts/102300_102399/102366/01.04.01_60/ts_102366v010401p.pdf).
+Enabled LFE contributes to each stereo side at (5.5-code) dB; mono combines
+that stereo result with -6 dB per side. Unsignalled mixing does not inject LFE.
+
+Current-tree gates:
+
+- **11 integration tests passed**, zero failed/ignored: `eac3_lfe_downmix`,
+  `eac3_lfe_zero`, `ac3_mp4_channels`, `eac3_transient_presentation`.
+  `/tmp/fvid-lfe-20261024-integrations.log`.
+- **1030 player-feature library tests passed**, zero failed, 26 ignored.
+  `/tmp/fvid-lfe-20261024-library-after.log`. The first attempt stopped before
+  tests at a stale MP4 concat test constructor missing the recently added
+  `trimmed_audio_sample_frames` field; its synthetic TrackPlan now initializes
+  the counter to zero. This is a test-build repair, not a new media decode fix.
+- Generator: **561 artifacts / 10,437,404 bytes**, byte-identical regeneration
+  with subprocess/socket creation denied. Test execution consumes committed
+  fixtures and requires no FFmpeg/network.
+
+This acceptance covers the explicit codec downmix API and native container PCM.
+Physical-device automatic downmix still needs codec metadata/output negotiation;
+it is not certified here. Dual-programme expanded-output DRC, changing speaker
+assignments, extended hardware mappings and other codec/profile tools remain
+open. These finite gates do not establish the goal of gap-free codec support.
+
+
+### Changing dependent speaker maps with a fixed rendered layout (2026-10-24)
+
+Removed the unconditional refusal of a dependent substream whose custom speaker
+assignment changes while its coded channel count and the rendered layout remain
+fixed. A stream now retains coded width and transform/transient history rather
+than treating its initial speaker labels as permanent decoder geometry. Each
+queued programme already owns its role map; that snapshot stays authoritative
+when a later frame's transient metadata corrects earlier PCM.
+
+Owned generator `scripts/generate_eac3_changing_roles.py` produces eight short
+cases: 48/44.1 kHz, three/six blocks and optional backward/future transient
+correction. Two stereo dependents swap front/rear assignments in the middle
+programme and swap back; their coded histories continue across the transition.
+The rendered layout stays 7.1 throughout. Six-block base 5.1 planes use zero
+allocation to remain inside the frame budget, while the distinct dependent
+signals exercise both extension and replacement. Three-block controls include
+active base planes. No private source media or parameter sets are copied.
+
+The acceptance test first failed specifically at
+`Unsupported("changing E-AC-3 substream speaker assignment")` in
+`/tmp/fvid-changing-roles-red.log`; the earlier compile-only attempt is not a
+media reproduction. Current direct/root raw output and split Matroska match
+native-component continuous-history PCM, including whole-buffer transient
+correction before applying each programme's current role map. Non-noop assertions
+distinguish stale maps and omitted transient correction. Reset/rewind, exact
+sample-clock PTS, 7.1 device-mask transport and audio-worker 20ms seek pass.
+Four six-block cases additionally pass real MP4 transport with exact PCM/PTS,
+rewind and worker 40ms seek after the assignment change.
+
+Current-source gates:
+
+- `/tmp/fvid-changing-roles-final-matrix.log`: ten passing tests across changing
+  maps (one test before the MP4 addition), LFE downmix, ordinary expanded
+  presentation and active transient presentation. The final changing-map target
+  `/tmp/fvid-changing-roles-mp4-final.log` passes both tests including MP4;
+  together these cover eleven distinct integration tests, zero failed/ignored.
+- `/tmp/fvid-changing-roles-final-library.log`: parallel library run had
+  1029 passed, one failed, 26 ignored. The failure was the five-second seek wait
+  in existing `seeking_after_audio_failure_keeps_video_playing`, not E-AC-3 PCM.
+  Its isolated rerun passed (`/tmp/fvid-changing-roles-audio-failure-isolated.log`).
+  Full sequential rerun `/tmp/fvid-changing-roles-library-serial.log` passed
+  **1030 tests, zero failed, 26 ignored**. No timeout or expectation was relaxed;
+  the parallel failure remains recorded and is not represented as a green run.
+- **45 artifacts / 1,539,920 bytes**, byte-identical regeneration with subprocess
+  and socket creation denied. Ordinary tests consume committed bytes only.
+
+This qualifies role changes with fixed coded geometry/output layout in the
+witnesses, not arbitrary layout renegotiation or every header transition. A
+changing rendered speaker layout or coded substream channel count is still
+explicitly refused. Unequal dual-programme expanded DRC and physical-device
+metadata-aware downmix remain open, as do other codec/profile gaps.
+
+
+### Changing dependent coded width with continuous active channels (2026-10-24)
+
+Expanded presentation decoding now accepts varying coded channel counts inside
+a dependent substream while the final rendered speaker layout remains fixed.
+The component decoder's width follows each validated frame. Delayed NativeBlocks
+already retain their own folding width/source identity, and queued programmes
+retain their own role vectors, so older output still uses its original geometry.
+
+Simply removing the count guard was insufficient. The owned control first
+reproduced the explicit refusal (`/tmp/fvid-changing-widths-red.log`), then a
+separate accepted-syntax PCM mismatch after removing it
+(`/tmp/fvid-changing-widths-overlap-red.log`): `w2-3-48000-0` first differed at
+float 10242, the centre slot in the very first sample after that coded plane
+returned. The core had retained an overlap tail across a whole absent frame.
+E-AC-3 now discards inactive full-band/LFE overlap at frame boundaries while
+retaining continuing planes. Transient clocks continue with zero inactive PCM;
+only the absent transform tail is discarded, not the entire stream history.
+
+`scripts/generate_eac3_changing_widths.py` authors 32 short witnesses, with two
+through five full-band coded channels shrinking to one and returning, plus
+mono+LFE shrinking to mono and returning. The final layout stays 7.1; a fixed
+rear extension and varying front replacements independently expose lost/reused
+roles. Cases cover 48/44.1 kHz, three/six blocks and optional backward transient
+correction. For six-block witnesses the base 5.1 uses zero allocation to fit the
+coded frame budget, while the dependent signals remain active.
+
+The oracle decodes fixed-width native controls: absent planes have explicitly
+zero-coded coefficients, so their old tails drain normally before their return.
+Their PCM is excluded during absent intervals, then scalar transient correction
+and each programme's current role assignment are applied. Exact comparisons
+therefore distinguish discarding inactive overlap from incorrectly resetting
+continuing channels. Direct raw dispatch/reset, split Matroska, exact PTS,
+rewind, 7.1 mask transport and worker seek pass. Twelve six-block cases also
+qualify MP4 with a seek after the coded-width change.
+
+Current integration gate `/tmp/fvid-changing-widths-matrix.log`: **22 tests passed,
+zero failed/ignored**, across `ac3_mp4_channels`, `eac3_changing_roles`,
+`eac3_changing_widths`, `eac3_dependent`, `eac3_lfe_downmix`, `eac3_lfe_zero`,
+`eac3_presentation`, and `eac3_transient_presentation`.
+
+Generator output: **173 artifacts / 5,934,652 bytes**, byte-identical regeneration
+with subprocess/socket creation denied. The new `silent_planes` authoring option
+has no effect unless explicitly requested; previous changing-role and LFE
+fixture sets remain byte-identical. Ordinary tests only consume fixture bytes;
+no FFmpeg or network is required.
+
+This closes the witnessed dynamic coded-width transition in expanded output,
+not arbitrary device/layout renegotiation. Changing the rendered speaker layout
+still requires a different output contract. Unequal dual-programme expanded DRC,
+physical-device metadata-aware downmix and other codec/profile gaps remain open.
+
+Full current player-feature library, sequential gate
+`/tmp/fvid-changing-widths-library.log`: **1030 passed, zero failed, 26 ignored**.
+This includes the previously unstable audio-failure seek test without changing
+its timeout. Ignored hardware cases are not represented as passed.
+
+
+### Unequal dual-mono normal DRC in expanded presentations (2026-10-24)
+
+The expanded assembler no longer refuses a final dual-mono dependent whose two
+normal-DRC fields differ. It snapshots each component's dual-mono identity with
+its original programme work. Replacement now also determines DRC ownership:
+ordinary coded channels select the first coefficient, and a dual-mono component's
+coded Ch2 selects the second. Both coefficients come from the final dependent;
+independent compression metadata remains excluded. For a non-dual final
+dependent, its single coefficient is used for both selectors. Correction and
+role assembly precede this gain, and clipping remains the final operation.
+
+This interpretation combines the channel association in ETSI TS 102 366 V1.4.1
+6.7.2.2 with the final-dependent metadata rule in E.2.8.5
+([official specification](https://www.etsi.org/deliver/etsi_ts/102300_102399/102366/01.04.01_60/ts_102366v010401p.pdf)).
+The fixture oracle independently assembles quiet native-component controls,
+selects per-channel gains and then clips; it is not an independently certified
+whole-decoder conformance oracle or a qualification of every programme-mixing
+interpretation.
+
+`scripts/generate_eac3_expanded_dual_drc.py` authors 80 short cases: 7/8-channel
+output, Left/Right and Left/Centre replacement, ordinary 5.1 and dual-mono bases,
+a second non-final dual-mono component, 48/44.1 kHz, three/six blocks,
+independent coefficient updates/hold, active clipping and transient correction.
+Half change the final component dual-mono -> stereo -> dual-mono while keeping
+coded width and speaker roles fixed, exercising delayed DRC-identity snapshots
+and single-word coefficient mirroring. Non-noop checks reject applying just the
+first coefficient to every output or omitting correction. Quiet controls retain
+headroom until final scaling/DRC; clip cases require actual saturated samples.
+Six-block base 5.1 uses zero allocation to fit the frame budget; active dependent
+signals remain present. Three-block cases carry active independent base PCM.
+
+The initial acceptance run failed at the exact intended refusal,
+`Unsupported("dual-programme E-AC-3 expanded-output DRC")`, in both direct raw and
+MP4 paths (`/tmp/fvid-expanded-dual-drc-red.log`). Current raw output/reset,
+split Matroska/rewind, exact sample PTS, mask transport and worker seek match
+assembled PCM. Thirty-two six-block MP4 variants additionally pass PCM/PTS,
+rewind and a 40ms worker seek. All generated video/audio is owned synthetic data.
+
+Current integration gate `/tmp/fvid-expanded-dual-drc-matrix.log`: **24 passed,
+zero failed/ignored**, across the new target plus `ac3_mp4_channels`,
+`eac3_changing_roles`, `eac3_changing_widths`, `eac3_dependent`,
+`eac3_lfe_downmix`, `eac3_lfe_zero`, `eac3_presentation`, and
+`eac3_transient_presentation`.
+
+Generator: **433 artifacts / 14,937,400 bytes**, byte-identical regeneration
+with process/socket creation denied. New optional `gains_second` authors unequal
+words without changing the default paired-word behavior; previous width/role/LFE
+fixture sets remain byte-identical. Ordinary tests consume fixtures without
+FFmpeg, network or running any generator.
+
+This is finite normal-DRC acceptance. It does not qualify RF compression, all
+programme-mixing metadata, changing physical output layouts or metadata-aware
+device downmix. The overall goal of gap-free codec support remains unproven.
+
+Full current player-feature library, sequential gate
+`/tmp/fvid-expanded-dual-drc-library.log`: **1030 passed, zero failed, 26 ignored**.
+No hardware-only ignored test is counted as passed, and no timeout/acceptance
+expectation was relaxed for this gate.
+
+
+### Explicit E-AC-3 RF compression metadata mode (2026-10-24)
+
+The parser now retains `compr`/`compr2` in `Frame::compression` rather than
+skipping their values; dependent end-of-programme detection still uses the
+first word's presence, including an explicitly present zero. Public
+`CompressionMode::{Line,Rf}` and `Eac3Decoder::with_compression` select the gain
+policy, with Line as the unchanged default. The public
+`for_container_with_compression` constructor uses the existing container priming
+contract. Raw and explicit stereo constructors can use the same builder. Reset
+retains the choice; buffered PCM retains the gain captured when it was decoded.
+
+RF selection uses each present BSI word for its channel and falls back to the
+current normal DRC when absent. The scalar gain is
+`2^signed_upper_nibble * (16 + lower_nibble) / 16`. This follows ETSI TS 102 366
+V1.4.1 6.7.3 ([official specification](https://www.etsi.org/deliver/etsi_ts/102300_102399/102366/01.04.01_60/ts_102366v010401p.pdf)).
+Effective gains are kept apart from normal dynrng hold/reuse state and captured
+before delayed output. They are applied after transient correction, then folded
+and clipped. Expanded output copies the selected mode to each component and uses
+the final dependent's effective pair with the original programme's DRC ownership.
+Compatibility output continues to skip dependents and use independent metadata.
+
+With API/parser staged but RF gain not yet applied, the new witness failed at
+`l0-0-c0: RF PCM mismatch` (`/tmp/fvid-rf-compression-red.log`), after successfully
+checking the parsed words. This is a selected-output PCM red, not an unrelated
+parse refusal. The fixed native matrix has 632 short cases, all 256 word values
+for both dual channels/stereo, all acmods with/without LFE at representative
+values, present -> absent -> different words, independent fallback, normal block
+updates/hold, and active transient/clipping cases. Quiet independent native
+controls retain headroom until the whole-buffer correction/gain oracle. Default
+Line output is checked separately and remains bit-identical. Reset, explicit
+container RF PCM/PTS, mono folding of unequal gains and explicit C+LFE stereo
+folding pass (`/tmp/fvid-rf-fold-final.log`).
+
+Expanded RF adds 80 cases, 32 MP4 variants: different final-dependent words in
+each frame, missing second-word fallback, dual/stereo transitions, Left/Right
+versus Left/Centre replacement, active clipping and transient correction. Raw
+reset, Matroska/MP4 PCM/PTS/rewind and direct stream seek pass. Separate checks
+show that normal Line ignores the RF values, and a <=5.1 compatibility output
+uses independent compression even when full expanded output uses deliberately
+different dependent metadata. RF direct stream seek is not represented as a
+physical-device or configured player-worker test.
+
+Current integration gate `/tmp/fvid-rf-final-matrix.log`: **28 passed, zero
+failed/ignored**, across both RF targets and the previous nine-target AC-3/E-AC-3
+matrix. The native target was then requalified with additional fold assertions
+in `/tmp/fvid-rf-fold-final.log` (one test passed, no failures).
+
+Both generators reproduce byte-identically with process/socket creation denied:
+`generate_eac3_rf_compression.py` emits **1285 artifacts / 24,286,843 bytes**;
+`generate_eac3_rf_expanded.py` emits **433 artifacts / 14,949,960 bytes**.
+The existing normal expanded-DRC, role, width and LFE fixture sets also remain
+byte-identical after the optional compression-word authoring parameters were
+added. Ordinary tests consume committed owned fixture bytes only.
+
+This is explicit E-AC-3 compression-gain selection. It does not add device or
+RF-modulator level calibration, dialogue normalization, a player RF selector,
+ordinary AC-3 RF policy, complete programme-mixing metadata handling or output
+layout renegotiation. Those boundaries and other codec/profile gaps remain;
+complete gap-free codec support is not established by these finite tests.
+
+Full current player-feature library, sequential gate `/tmp/fvid-rf-library.log`:
+**1030 passed, zero failed, 26 ignored**. This includes the new header metadata
+in the existing frame-geometry expectations. No ignored hardware test is counted
+as passed and no timeout/acceptance expectation was relaxed.
+
+
+### Explicit ordinary AC-3 RF compression (2026-10-24)
+
+AC-3 now retains the two BSI heavy-compression words and offers
+`Ac3Decoder::with_compression` and `for_container_with_compression`. The shared
+Line/RF scalar policy lives in `src/codec/dolby_compression.rs`, re-exported by
+both AC-3 and E-AC-3 at their decoder module paths. Existing E-AC-3 API paths and
+math remain unchanged. Line stays the default; reset preserves the selection.
+The selected RF gain is applied before channel folding/final clipping, without
+replacing normal dynrng's block hold/reuse state. Missing words fall back per
+channel/per frame, using the same metadata rule as the E-AC-3 implementation.
+This is compression-gain selection under ETSI TS 102 366 V1.4.1 6.7.3,
+[official specification](https://www.etsi.org/deliver/etsi_ts/102300_102399/102366/01.04.01_60/ts_102366v010401p.pdf),
+not RF-modulator level calibration or dialogue normalization.
+
+New synthetic authoring implements AC-3 BSI, uncoupled D45 audio blocks and
+explicit high allocation at three rates. Header compression words and padding
+are also changed in existing repository-authored coupled/5.1 tone frames. Both
+CRC regions are repaired separately, including inverse-prefix CRC1 calculation;
+each region and the full-frame remainder must independently be zero. No private
+input, external encoder or new FFmpeg/network dependency is involved. Repacked
+Line PCM is compared byte-for-byte with the original tone after equal raw trim,
+so a coupled/5.1 RF comparison cannot hide a waveform change in its own control.
+
+With the shared API/parser staged but gain selection not yet connected, the
+acceptance failed specifically at `l0-0-r0-c0: RF PCM mismatch`
+(`/tmp/fvid-ac3-rf-red.log`). Before this failure the test already checked valid
+CRC, nonzero quiet-control PCM and exact intended Line output; it was not a
+syntax failure/silence-concealment reproduction.
+
+The accepted matrix has 659 cases: dual-mono/mono/stereo with/without LFE,
+32/44.1/48 kHz, all 256 word values for both dual channels/stereo and
+representative boundary codes for other shapes, frame absence/different values,
+normal block updates/hold, native output/reset and real clipping. The mono
+clipping witness folds the unbounded per-channel RF values before clamping,
+distinguishing the intended order from folding already-clipped native output.
+Coupled and 5.1 cases preserve their original coded audio. 163 MP4 variants also
+qualify native geometry despite channelcount placeholders, exact sample PTS,
+rewind, and direct MP4/Matroska RF seek with preroll.
+
+Current gates:
+
+- `/tmp/fvid-ac3-rf-matrix.log`: **21 passed, zero failed/ignored**, across
+  `ac3_container_priming`, `ac3_crc`, `ac3_exact_seek`, `ac3_mp4_channels`,
+  `ac3_presentation_delay`, `ac3_rate_geometry`, `ac3_rf_compression`,
+  `ac3_truncated_eof`, `eac3_expanded_dual_drc`, `eac3_rf_compression`,
+  `eac3_rf_expanded`, and `eac3_transient_presentation`.
+- `/tmp/fvid-ac3-rf-final.log`: both current AC-3 RF tests passed after the
+  additional original/repacked waveform assertion; no failures or ignores.
+- `/tmp/fvid-ac3-rf-library.log`: full sequential player-feature library,
+  **1030 passed, zero failed, 26 ignored**. No ignored hardware case is counted
+  as passed; no timeout or PCM expectation was relaxed.
+- `generate_ac3_rf_compression.py`: **1507 artifacts / 24,779,358 bytes**,
+  byte-identical regeneration with process/socket creation denied. Existing
+  E-AC-3 RF and expanded dual-DRC fixture sets also remain byte-identical after
+  the policy move. Ordinary tests only consume fixture bytes.
+
+These finite codec/transport gates do not configure a physical device, add a
+player RF selector, complete programme-mixing metadata or renegotiate rendered
+output layouts. Full codec/profile coverage remains open.
+
+
+### Dolby compression in the player session
+
+`--dolby-compression line|rf` selects AC-3/E-AC-3 policy at startup; Line
+remains the default. The session carries the choice through background file
+preparation, audio-worker creation, decoder reset/replacement, seek, rewind
+and preroll checkpoint restoration. Other audio codecs ignore this policy.
+There is no live in-session toggle or physical RF device qualification.
+
+The owned `dolby-player-compression` matrix contains eight short synthetic
+MP4/Matroska movies, including neutral PCM. The staged worker regression first
+failed on equal-length but incorrect RF PCM; the implementation now compares
+exact PCM and timestamps against independently configured decoder references
+for startup, rewind and seek, including reader-created replacement decoders.
+This finite gate does not close the remaining codec/profile/mixing gaps.

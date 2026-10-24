@@ -1,4 +1,5 @@
 use fvid::audio::AudioStream;
+use fvid::codec::ac3_decoder::CompressionMode;
 use std::time::Duration;
 
 struct Capture {
@@ -67,7 +68,7 @@ pub fn worker_check_with_seek(
     expected: &[(Duration, Vec<u8>)],
     seek: Option<Duration>,
 ) {
-    worker_check_impl(audio, expected, seek, None, None);
+    worker_check_impl(audio, expected, seek, None, None, CompressionMode::Line);
 }
 #[allow(dead_code)]
 pub fn worker_check_with_seek_expected(
@@ -76,7 +77,14 @@ pub fn worker_check_with_seek_expected(
     seek: Duration,
     expected_seek: &[(Duration, Vec<u8>)],
 ) {
-    worker_check_impl(audio, expected, Some(seek), Some(expected_seek), None);
+    worker_check_impl(
+        audio,
+        expected,
+        Some(seek),
+        Some(expected_seek),
+        None,
+        CompressionMode::Line,
+    );
 }
 #[allow(dead_code)]
 pub fn worker_check_with_layout_and_seek_expected(
@@ -86,7 +94,32 @@ pub fn worker_check_with_layout_and_seek_expected(
     expected_seek: &[(Duration, Vec<u8>)],
     mask: u32,
 ) {
-    worker_check_impl(audio, expected, Some(seek), Some(expected_seek), Some(mask));
+    worker_check_impl(
+        audio,
+        expected,
+        Some(seek),
+        Some(expected_seek),
+        Some(mask),
+        CompressionMode::Line,
+    );
+}
+#[allow(dead_code)]
+pub fn worker_check_with_compression(
+    audio: Box<dyn AudioStream>,
+    expected: &[(Duration, Vec<u8>)],
+    seek: Duration,
+    expected_seek: &[(Duration, Vec<u8>)],
+    mask: Option<u32>,
+    compression: CompressionMode,
+) {
+    worker_check_impl(
+        audio,
+        expected,
+        Some(seek),
+        Some(expected_seek),
+        mask,
+        compression,
+    );
 }
 fn worker_check_impl(
     audio: Box<dyn AudioStream>,
@@ -94,18 +127,20 @@ fn worker_check_impl(
     seek: Option<Duration>,
     expected_seek: Option<&[(Duration, Vec<u8>)]>,
     wanted_mask: Option<u32>,
+    compression: CompressionMode,
 ) {
     let spec = (audio.sample_rate(), audio.channels());
     let captured = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
     let sink = captured.clone();
-    let mut playback = fvid::audio_thread::AudioPlayback::start(audio, move || {
-        Box::new(Capture {
-            packets: sink,
-            spec: None,
-            at: Duration::ZERO,
-            wanted_mask,
-        })
-    });
+    let mut playback =
+        fvid::audio_thread::AudioPlayback::start_with_compression(audio, compression, move || {
+            Box::new(Capture {
+                packets: sink,
+                spec: None,
+                at: Duration::ZERO,
+                wanted_mask,
+            })
+        });
     for generation in 0..if seek.is_some() { 3 } else { 2 } {
         if generation == 1 {
             playback.rewind();

@@ -28,7 +28,7 @@
 //! Output is the track's own channel count: native order when the container and
 //! the stream agree, LoRo or mono when the container states two or one channel,
 //! which are the cases Section 7.8.2 spells out. Dynamic range compression is
-//! applied as the per-block gain of Section 7.7.1.2; heavy compression is not.
+//! applied as the per-block gain; an explicit RF mode prefers BSI heavy compression.
 //! Dither for zero-bit mantissas is applied as Section 7.3.4 asks, from the decoder's
 //! own fixed sequence, and the coupling plane's unallocated bins are dithered after
 //! decoupling so each channel's noise stays uncorrelated with the other's.
@@ -37,6 +37,7 @@
 
 use crate::audio::{AudioDecode, AudioPacket, AudioSpec, SampleFormat};
 use crate::{Result, invalid};
+pub use super::dolby_compression::CompressionMode;
 
 /// Transform coefficients, mantissas and exponents per block and per plane.
 pub(crate) const BINS: usize = 256;
@@ -466,6 +467,7 @@ pub(crate) struct Header {
     pub(crate) lfeon: bool,
     pub(crate) clev: f32,
     pub(crate) slev: f32,
+    pub(crate) compression: [Option<u8>;2],
 }
 
 impl Header {
@@ -504,9 +506,8 @@ impl Header {
         }
         let lfeon = bits.flag();
         let _dialnorm = bits.take(5);
-        if bits.flag() {
-            let _compr = bits.take(8);
-        }
+        let mut compression=[None;2];
+        if bits.flag() {compression[0]=Some(bits.take(8) as u8);}
         if bits.flag() {
             let _langcod = bits.take(8);
         }
@@ -516,9 +517,7 @@ impl Header {
         }
         if acmod == 0 {
             let _dialnorm2 = bits.take(5);
-            if bits.flag() {
-                let _compr2 = bits.take(8);
-            }
+            if bits.flag() {compression[1]=Some(bits.take(8) as u8);}
             if bits.flag() {
                 let _langcod2 = bits.take(8);
             }
@@ -550,6 +549,7 @@ impl Header {
             lfeon,
             clev,
             slev,
+            compression,
         })
     }
 
@@ -573,6 +573,7 @@ impl Header {
             lfeon,
             clev: centre,
             slev: surround,
+            compression: [None;2],
         }
     }
 
@@ -1518,6 +1519,7 @@ pub struct Ac3Decoder {
     /// The channel count the container stated, which fixes what the folding below
     /// has to produce.
     channels: usize,
+    compression_mode: CompressionMode,
     core: Core,
     /// Samples still owed to `ENCODER_DELAY`, which the stream's first blocks pay off.
     lead: usize,
@@ -1545,6 +1547,7 @@ impl Ac3Decoder {
         Ok(Self {
             sample_rate,
             channels: usize::from(channels),
+            compression_mode: CompressionMode::Line,
             core: Core::new(),
             lead: ENCODER_DELAY,
             initial_lead: ENCODER_DELAY,
@@ -1557,6 +1560,17 @@ impl Ac3Decoder {
         decoder.lead = 0;
         decoder.initial_lead = 0;
         Ok(decoder)
+    }
+
+    /// Select compression gain for subsequent frames; reset retains this choice.
+    /// Device/RF output calibration is not part of this gain policy.
+    pub fn with_compression(mut self, mode: CompressionMode) -> Self {
+        self.compression_mode=mode;
+        self
+    }
+    /// Container presentation metadata supplies trimming, so raw priming is disabled.
+    pub fn for_container_with_compression(configuration:&[u8],sample_rate:u32,channels:u16,mode:CompressionMode)->Result<Self> {
+        Ok(Self::for_container(configuration,sample_rate,channels)?.with_compression(mode))
     }
 
     /// Current audio specification: the rate and channel count the track states,
@@ -1758,7 +1772,10 @@ impl Ac3Decoder {
         self.core.mantissas(header, bits);
         self.core.decouple(header);
         self.core.rematrix_restore(header);
+        let line_gain = self.core.strategy.gain;
+        self.core.strategy.gain = self.compression_mode.gains(header.compression, line_gain);
         self.core.spectrum_to_sound(header, folding, out);
+        self.core.strategy.gain = line_gain;
         true
     }
 }
@@ -1810,6 +1827,18 @@ impl Core {
     /// continuous stream of blocks.
     pub(crate) fn begin_frame(&mut self) {
         self.strategy = Strategy::default();
+    }
+
+    /// Inactive coded planes have no predecessor block at the next activation.
+    /// Keep the overlap of continuing planes, but never replay a tail from before
+    /// a gap when E-AC-3 changes its coded channel count or LFE presence.
+    pub(crate) fn discard_inactive_overlap(&mut self, header: Header) {
+        for delay in &mut self.delay[header.nfchans..FBW] {
+            delay.fill(0.0);
+        }
+        if !header.lfeon {
+            self.delay[LFE].fill(0.0);
+        }
     }
 
     /// Bit allocation for every plane the frame carries, in the standard's own order:
@@ -2421,6 +2450,10 @@ pub(crate) fn frame_crc_valid(frame: &[u8]) -> bool {
 }
 
 impl AudioDecode for Ac3Decoder {
+    fn set_dolby_compression(&mut self, mode: CompressionMode) {
+        self.compression_mode=mode;
+    }
+
     /// Decode every syncframe of the packet. A packet is normally one frame or a few,
     /// and each contributes its 1536 samples per channel.
     fn decode_encoded(

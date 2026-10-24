@@ -37,6 +37,7 @@ fn native_video(n: &str) -> Vec<u8> {
 #[test]
 fn all_lfe_codes_mix_only_when_requested_and_preserve_native_pcm() {
     let m: serde_json::Value = serde_json::from_slice(&read("manifest.json")).unwrap();
+    assert_eq!(m["lfe_downmix_accepted"], true);
     assert_eq!(m["cases"].as_array().unwrap().len(), 272);
     let controls: Vec<_> = (0..8)
         .into_iter()

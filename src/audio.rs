@@ -714,6 +714,10 @@ pub struct DecodedAudio {
     pub source_duration: u64,
 }
 pub trait AudioDecode: Send {
+    /// Session policy for Dolby decoders. Other codecs intentionally ignore it.
+    #[cfg(feature = "player")]
+    fn set_dolby_compression(&mut self, _mode: crate::codec::ac3_decoder::CompressionMode) {}
+
     /// Decode with signed source timing. Immediate codecs inherit the input
     /// window; delayed codecs must return the original window with their PCM.
     fn decode_packet(&mut self, data: &[u8], pts: i64, duration: u64) -> crate::Result<Option<DecodedAudio>> {

@@ -23,7 +23,7 @@ def generate():
   files[name+'.ec3']=b''.join(packets)
   files[name+'.mkv']=movie(packets,blocks=3,channels=channels)
   cases.append(dict(name=name,layout=layout,channels=channels,codes=[0,31,None]))
- files['manifest.json']=(json.dumps(dict(cases=cases,lfe_downmix_accepted=False),indent=2)+'\n').encode()
+ files['manifest.json']=(json.dumps(dict(cases=cases,lfe_downmix_accepted=True),indent=2)+'\n').encode()
  return files
 if __name__=='__main__':
  OUT.mkdir(parents=True,exist_ok=True)
