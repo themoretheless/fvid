@@ -118,6 +118,7 @@ pub struct AdpcmDecoder {
     channels: u16,
     block_bytes: usize,
     block_frames: u64,
+    duration_timescale: u32,
 }
 
 impl AdpcmDecoder {
@@ -167,6 +168,7 @@ impl AdpcmDecoder {
             channels,
             block_bytes: block_bytes as usize,
             block_frames: frames,
+            duration_timescale: sample_rate,
         })
     }
 
@@ -181,6 +183,14 @@ impl AdpcmDecoder {
 }
 
 impl AudioDecode for AdpcmDecoder {
+    fn set_source_timescale(&mut self, timescale: u32) -> Result<()> {
+        if timescale == 0 {
+            return Err(invalid("zero ADPCM duration timescale"));
+        }
+        self.duration_timescale = timescale;
+        Ok(())
+    }
+
     /// Decode every whole block the packet's bytes hold, up to the frames the
     /// container declared for the packet. A tail too short for a block is left
     /// out rather than read past, which is what the reference decoder does with a
@@ -196,7 +206,18 @@ impl AudioDecode for AdpcmDecoder {
         if blocks == 0 {
             return Ok(None);
         }
-        let keep = frames_to_keep(duration, blocks as u64 * self.block_frames);
+        let held = blocks as u64 * self.block_frames;
+        if self.duration_timescale == 0 {
+            return Err(invalid("zero ADPCM duration timescale"));
+        }
+        let native_duration = if duration == 0 {
+            0
+        } else {
+            (u128::from(duration) * u128::from(self.sample_rate))
+                .div_ceil(u128::from(self.duration_timescale))
+                .min(u128::from(held)) as u64
+        };
+        let keep = frames_to_keep(native_duration, held);
         // The blocks the kept frames need, which stops short of the padded tail
         // rather than decoding samples the file then throws away.
         let wanted = keep.div_ceil(self.block_frames) as usize;
@@ -319,5 +340,41 @@ mod tests {
         assert_eq!(decoder.spec().sample_rate, 8000);
         assert_eq!(decoder.block_frames, 64);
         assert_eq!(decoder.block_bytes, 34);
+    }
+    #[test]
+    fn source_duration_clock_rounds_forward_without_exceeding_held_pcm() {
+        use crate::audio::AudioDecode;
+        let mut decoder =
+            AdpcmDecoder::new("ADPCM IMA QT", CODEC_ID_ADPCM_IMA_QT, &[], 8000, 1).unwrap();
+        let mut block = vec![0, 0];
+        block.extend([0x11; 32]);
+        decoder.set_source_timescale(3000).unwrap();
+        let pcm = decoder.decode_encoded(&block, 0, 1).unwrap().unwrap();
+        let expected: Vec<u8> = [1f32, 2., 3.]
+            .into_iter()
+            .flat_map(|n| (n / 32768.).to_le_bytes())
+            .collect();
+        assert_eq!(pcm.data, expected);
+        assert!(decoder.set_source_timescale(0).is_err());
+        assert_eq!(
+            decoder
+                .decode_encoded(&block, 0, 1)
+                .unwrap()
+                .unwrap()
+                .data
+                .len(),
+            12
+        );
+        for duration in [0, u64::MAX] {
+            assert_eq!(
+                decoder
+                    .decode_encoded(&block, 0, duration)
+                    .unwrap()
+                    .unwrap()
+                    .data
+                    .len(),
+                64 * 4
+            );
+        }
     }
 }

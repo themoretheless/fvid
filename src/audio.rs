@@ -738,6 +738,11 @@ pub struct DecodedAudio {
     pub source_duration: u64,
 }
 pub trait AudioDecode: Send {
+    /// Duration units of encoded input packets. Duration-sensitive codecs use
+    /// this to translate container ticks into native PCM frames. The default
+    /// preserves codecs whose reconstruction does not depend on that window.
+    fn set_source_timescale(&mut self, _timescale: u32) -> crate::Result<()> { Ok(()) }
+
     /// Session policy for Dolby decoders. Other codecs intentionally ignore it.
     #[cfg(feature = "player")]
     fn set_dolby_compression(&mut self, _mode: crate::codec::ac3_decoder::CompressionMode) {}

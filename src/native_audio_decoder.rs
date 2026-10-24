@@ -6,6 +6,9 @@ pub(crate) enum NativeAudioCheckpoint {
 }
 pub(crate) enum PacketPcmDecoder {
     Pcm(crate::codec::pcm_decoder::PcmDecoder),
+    Ima4(fvid_media::owned_ima4::Ima4Decoder),
+    ImaWav(fvid_media::owned_ima_wav::ImaWavDecoder),
+    MsAdpcm(fvid_media::owned_ms_adpcm::MsAdpcmDecoder),
     Aac(crate::codec::aac_native::NativeAacDecoder),
     Ps(Box<crate::codec::aac_ps_native::NativePsAacDecoder>),
     Alac {
@@ -72,6 +75,26 @@ impl PacketPcmDecoder {
                     track.channels,
                 )?))
             }
+            b"ima4" => Ok(Self::Ima4(
+                fvid_media::owned_ima4::Ima4Decoder::new(track.sample_rate, track.channels)
+                    .map_err(|e| invalid(&e.to_string()))?,
+            )),
+            b"ms\x00\x11" => Ok(Self::ImaWav(
+                fvid_media::owned_ima_wav::ImaWavDecoder::new(
+                    &track.configuration,
+                    track.sample_rate,
+                    track.channels,
+                )
+                .map_err(|e| invalid(&e.to_string()))?,
+            )),
+            b"ms\x00\x02" => Ok(Self::MsAdpcm(
+                fvid_media::owned_ms_adpcm::MsAdpcmDecoder::new(
+                    &track.configuration,
+                    track.sample_rate,
+                    track.channels,
+                )
+                .map_err(|e| invalid(&e.to_string()))?,
+            )),
             b"alac" => Self::alac(&track.configuration, track.sample_rate, track.channels),
             b"sowt" | b"twos" | b"fl32" | b"fl64" | b"in24" | b"in32" => {
                 if !(1..=64).contains(&track.channels) {
@@ -159,6 +182,9 @@ impl PacketPcmDecoder {
     pub(crate) fn sample_rate(&self) -> u32 {
         match self {
             Self::Pcm(d) => d.spec().sample_rate,
+            Self::Ima4(d)=>d.sample_rate(),
+            Self::ImaWav(d)=>d.sample_rate(),
+            Self::MsAdpcm(d)=>d.sample_rate(),
             Self::Aac(d) => d.sample_rate(),
             Self::Ps(d) => d.sample_rate(),
             Self::Alac { rate, .. } => *rate,
@@ -167,6 +193,9 @@ impl PacketPcmDecoder {
     pub(crate) fn channels(&self) -> u16 {
         match self {
             Self::Pcm(d) => d.spec().channels,
+            Self::Ima4(d)=>d.channels(),
+            Self::ImaWav(d)=>d.channels(),
+            Self::MsAdpcm(d)=>d.channels(),
             Self::Aac(d) => u16::from(d.channels()),
             Self::Ps(d) => u16::from(d.channels()),
             Self::Alac { channels, .. } => *channels,
@@ -213,6 +242,9 @@ impl PacketPcmDecoder {
     pub(crate) fn decode(&mut self, packet: &[u8]) -> Result<Vec<f32>> {
         match self {
             Self::Pcm(d) => d.decode_pcm(packet),
+            Self::Ima4(d)=>d.decode_pcm(packet).map_err(|e|invalid(&e.to_string())),
+            Self::ImaWav(d)=>d.decode_pcm(packet).map_err(|e|invalid(&e.to_string())),
+            Self::MsAdpcm(d)=>d.decode_pcm(packet).map_err(|e|invalid(&e.to_string())),
             Self::Aac(d) => d.decode(packet),
             Self::Ps(_) => Err(invalid("PS PCM requires delayed decode and EOF drain")),
             Self::Alac { decoder, .. } => decoder.decode_pcm(packet),

@@ -813,7 +813,7 @@ pub(crate) fn mp4_audio_index<R: std::io::Read + std::io::Seek>(
             .map(|(i, t)| t.handler == *b"soun" && (selected.is_some() || automatic.contains(&i))),
         selected,
     )?;
-    if !matches!(&reader.tracks()[index].codec, b"mp4a" | b"alac" | b"sowt" | b"twos" | b"fl32" | b"fl64" | b"in24" | b"in32" | b"raw ") {
+    if !matches!(&reader.tracks()[index].codec, b"mp4a" | b"alac" | b"sowt" | b"twos" | b"fl32" | b"fl64" | b"in24" | b"in32" | b"raw " | b"ima4" | b"ms\x00\x11" | b"ms\x00\x02") {
         return Err(invalid("selected MP4 audio codec is not supported by the owned export"));
     }
     Ok(index)
@@ -879,6 +879,9 @@ pub fn audio_source_info_selected(
             channels: decoder.channels(),
             codec: match (&track.codec, track.configuration.first() == Some(&1)) {
                 (b"alac", _) => "alac",
+                (b"ima4", _) => "adpcm_ima_qt",
+                (b"ms\x00\x11", _) => "adpcm_ima_wav",
+                (b"ms\x00\x02", _) => "adpcm_ms",
                 (b"raw ", _) => "pcm_u8",
                 (b"sowt", _) => "pcm_s16le",
                 (b"twos", _) => "pcm_s16be",

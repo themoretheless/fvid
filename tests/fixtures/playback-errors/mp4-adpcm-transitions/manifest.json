@@ -1,0 +1,2918 @@
+{
+  "cases": [
+    {
+      "name": "regular-2000",
+      "scale": 2000,
+      "parts": [
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            1,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            3,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-1.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 144,
+          "pts": [
+            73,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-1-2.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            91,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            1,
+            20
+          ]
+        },
+        {
+          "oracle": "pcm-2-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            109,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            127,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            17,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            19,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            23,
+            250
+          ]
+        }
+      ],
+      "duration": [
+        1,
+        10
+      ]
+    },
+    {
+      "name": "fragmented-2000",
+      "scale": 2000,
+      "parts": [
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            1,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            3,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-1.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 144,
+          "pts": [
+            73,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-1-2.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            91,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            1,
+            20
+          ]
+        },
+        {
+          "oracle": "pcm-2-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            109,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            127,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            17,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            19,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            23,
+            250
+          ]
+        }
+      ],
+      "duration": [
+        1,
+        10
+      ]
+    },
+    {
+      "name": "trim-2000",
+      "scale": 2000,
+      "parts": [
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            1,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 48,
+          "pts": [
+            3,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            3,
+            100
+          ]
+        },
+        {
+          "oracle": "pcm-1-1.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 144,
+          "pts": [
+            69,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-1-2.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            87,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            6,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-2-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            21,
+            400
+          ]
+        },
+        {
+          "oracle": "pcm-2-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            123,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            33,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            37,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 48,
+          "pts": [
+            9,
+            100
+          ]
+        }
+      ],
+      "duration": [
+        12,
+        125
+      ]
+    },
+    {
+      "name": "third-2000",
+      "scale": 2000,
+      "parts": [
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            1,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            3,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-1.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 144,
+          "pts": [
+            73,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-1-2.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            91,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            1,
+            20
+          ]
+        },
+        {
+          "oracle": "pcm-2-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            109,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            127,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            17,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            19,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            23,
+            250
+          ]
+        }
+      ],
+      "duration": [
+        1,
+        10
+      ]
+    },
+    {
+      "name": "regular-48000",
+      "scale": 48000,
+      "parts": [
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            1,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            3,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-1.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 144,
+          "pts": [
+            73,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-1-2.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            91,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            1,
+            20
+          ]
+        },
+        {
+          "oracle": "pcm-2-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            109,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            127,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            17,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            19,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            23,
+            250
+          ]
+        }
+      ],
+      "duration": [
+        1,
+        10
+      ]
+    },
+    {
+      "name": "fragmented-48000",
+      "scale": 48000,
+      "parts": [
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            1,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            3,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-1.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 144,
+          "pts": [
+            73,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-1-2.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            91,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            1,
+            20
+          ]
+        },
+        {
+          "oracle": "pcm-2-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            109,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            127,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            17,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            19,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            23,
+            250
+          ]
+        }
+      ],
+      "duration": [
+        1,
+        10
+      ]
+    },
+    {
+      "name": "trim-48000",
+      "scale": 48000,
+      "parts": [
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            1,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 48,
+          "pts": [
+            3,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            3,
+            100
+          ]
+        },
+        {
+          "oracle": "pcm-1-1.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 144,
+          "pts": [
+            69,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-1-2.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            87,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            6,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-2-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            21,
+            400
+          ]
+        },
+        {
+          "oracle": "pcm-2-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            123,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            33,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            37,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 48,
+          "pts": [
+            9,
+            100
+          ]
+        }
+      ],
+      "duration": [
+        12,
+        125
+      ]
+    },
+    {
+      "name": "third-48000",
+      "scale": 48000,
+      "parts": [
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            1,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            3,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-1.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 144,
+          "pts": [
+            73,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-1-2.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            91,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            1,
+            20
+          ]
+        },
+        {
+          "oracle": "pcm-2-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            109,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            127,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            17,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            19,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            23,
+            250
+          ]
+        }
+      ],
+      "duration": [
+        1,
+        10
+      ]
+    },
+    {
+      "name": "regular-96000",
+      "scale": 96000,
+      "parts": [
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            1,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            3,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-1.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 144,
+          "pts": [
+            73,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-1-2.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            91,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            1,
+            20
+          ]
+        },
+        {
+          "oracle": "pcm-2-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            109,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            127,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            17,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            19,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            23,
+            250
+          ]
+        }
+      ],
+      "duration": [
+        1,
+        10
+      ]
+    },
+    {
+      "name": "fragmented-96000",
+      "scale": 96000,
+      "parts": [
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            1,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            3,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-1.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 144,
+          "pts": [
+            73,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-1-2.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            91,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            1,
+            20
+          ]
+        },
+        {
+          "oracle": "pcm-2-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            109,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            127,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            17,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            19,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            23,
+            250
+          ]
+        }
+      ],
+      "duration": [
+        1,
+        10
+      ]
+    },
+    {
+      "name": "trim-96000",
+      "scale": 96000,
+      "parts": [
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            1,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 48,
+          "pts": [
+            3,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            3,
+            100
+          ]
+        },
+        {
+          "oracle": "pcm-1-1.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 144,
+          "pts": [
+            69,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-1-2.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            87,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            6,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-2-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            21,
+            400
+          ]
+        },
+        {
+          "oracle": "pcm-2-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            123,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            33,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            37,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 48,
+          "pts": [
+            9,
+            100
+          ]
+        }
+      ],
+      "duration": [
+        12,
+        125
+      ]
+    },
+    {
+      "name": "third-96000",
+      "scale": 96000,
+      "parts": [
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            1,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            3,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-1-1.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 144,
+          "pts": [
+            73,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-1-2.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            91,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            1,
+            20
+          ]
+        },
+        {
+          "oracle": "pcm-2-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            109,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            127,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            17,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            19,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            23,
+            250
+          ]
+        }
+      ],
+      "duration": [
+        1,
+        10
+      ]
+    },
+    {
+      "name": "control-0",
+      "scale": 2000,
+      "parts": [
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            1,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            3,
+            125
+          ]
+        }
+      ],
+      "duration": [
+        4,
+        125
+      ]
+    },
+    {
+      "name": "control-1",
+      "scale": 2000,
+      "parts": [
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-1-1.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 144,
+          "pts": [
+            9,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-1-2.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            27,
+            2000
+          ]
+        }
+      ],
+      "duration": [
+        9,
+        500
+      ]
+    },
+    {
+      "name": "control-2",
+      "scale": 2000,
+      "parts": [
+        {
+          "oracle": "pcm-2-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-2-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 72,
+          "pts": [
+            9,
+            2000
+          ]
+        },
+        {
+          "oracle": "pcm-2-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 36,
+          "pts": [
+            27,
+            2000
+          ]
+        }
+      ],
+      "duration": [
+        9,
+        500
+      ]
+    },
+    {
+      "name": "regular-2000-edits",
+      "scale": 2000,
+      "parts": [
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 16,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            1,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            3,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            3,
+            100
+          ]
+        },
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 24,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            7,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            39,
+            1000
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            63,
+            1000
+          ]
+        }
+      ],
+      "duration": [
+        65,
+        1000
+      ]
+    },
+    {
+      "name": "fragmented-2000-edits",
+      "scale": 2000,
+      "parts": [
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 16,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            1,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            3,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            3,
+            100
+          ]
+        },
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 24,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            7,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            39,
+            1000
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            63,
+            1000
+          ]
+        }
+      ],
+      "duration": [
+        65,
+        1000
+      ]
+    },
+    {
+      "name": "third-2000-edits",
+      "scale": 2000,
+      "parts": [
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 16,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            1,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            3,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            3,
+            100
+          ]
+        },
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 24,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            7,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            39,
+            1000
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            63,
+            1000
+          ]
+        }
+      ],
+      "duration": [
+        65,
+        1000
+      ]
+    },
+    {
+      "name": "regular-48000-edits",
+      "scale": 48000,
+      "parts": [
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 16,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            1,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            3,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            3,
+            100
+          ]
+        },
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 24,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            7,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            39,
+            1000
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            63,
+            1000
+          ]
+        }
+      ],
+      "duration": [
+        65,
+        1000
+      ]
+    },
+    {
+      "name": "fragmented-48000-edits",
+      "scale": 48000,
+      "parts": [
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 16,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            1,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            3,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            3,
+            100
+          ]
+        },
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 24,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            7,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            39,
+            1000
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            63,
+            1000
+          ]
+        }
+      ],
+      "duration": [
+        65,
+        1000
+      ]
+    },
+    {
+      "name": "third-48000-edits",
+      "scale": 48000,
+      "parts": [
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 16,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            1,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            3,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            3,
+            100
+          ]
+        },
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 24,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            7,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            39,
+            1000
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            63,
+            1000
+          ]
+        }
+      ],
+      "duration": [
+        65,
+        1000
+      ]
+    },
+    {
+      "name": "regular-96000-edits",
+      "scale": 96000,
+      "parts": [
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 16,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            1,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            3,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            3,
+            100
+          ]
+        },
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 24,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            7,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            39,
+            1000
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            63,
+            1000
+          ]
+        }
+      ],
+      "duration": [
+        65,
+        1000
+      ]
+    },
+    {
+      "name": "fragmented-96000-edits",
+      "scale": 96000,
+      "parts": [
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 16,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            1,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            3,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            3,
+            100
+          ]
+        },
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 24,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            7,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            39,
+            1000
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            63,
+            1000
+          ]
+        }
+      ],
+      "duration": [
+        65,
+        1000
+      ]
+    },
+    {
+      "name": "third-96000-edits",
+      "scale": 96000,
+      "parts": [
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 16,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            1,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            3,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            500
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            3,
+            100
+          ]
+        },
+        {
+          "oracle": null,
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 24,
+          "pts": [
+            4,
+            125
+          ]
+        },
+        {
+          "oracle": "pcm-0-0.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 32,
+          "last": 64,
+          "pts": [
+            7,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-0-1.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 128,
+          "pts": [
+            39,
+            1000
+          ]
+        },
+        {
+          "oracle": "pcm-0-2.f32le",
+          "rate": 8000,
+          "channels": 1,
+          "first": 0,
+          "last": 64,
+          "pts": [
+            11,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-1-0.f32le",
+          "rate": 16000,
+          "channels": 2,
+          "first": 0,
+          "last": 32,
+          "pts": [
+            63,
+            1000
+          ]
+        }
+      ],
+      "duration": [
+        65,
+        1000
+      ]
+    }
+  ],
+  "provenance": "Owned IMA4 monotonic ramp; IMA WAV stereo signed predictor plateaus; MS ADPCM mono predictor plateaus. Grouped blocks, rate/channels/coding changes, three duration clocks, intentional final-block trim, neutral VP9. No private media, external codec, FFmpeg or network."
+}

@@ -17994,3 +17994,43 @@ nine selected integration targets 54 passed; all test targets checked; both
 `fvid` and `fvid-player` built. Existing warnings remain. These results are
 finite headless acceptance, not a full runtime integration suite, a physical
 device continuity measurement or universal AAC profile/tool qualification.
+
+
+### 2026-10-24: ADPCM source duration clocks and setup changes
+
+An owned MP4 witness reproduced a real PCM loss: IMA4 at 8 kHz inside a
+2000-tick track decoded 16 rather than 64 frames because container duration
+was interpreted as native PCM frames. AudioDecode now offers an optional
+source-timescale hook; MP4 configures it for each created/reconfigured decoder.
+The owned ADPCM adapter converts duration to a forward-rounded native frame
+window, bounded by actual complete blocks. Default construction retains native
+PCM duration units, zero duration retains held samples, and zero timescale is
+refused without replacing the valid state. A unit test covers fractional
+rounding, zero duration, invalid timescale and u64::MAX window bounds.
+
+Owned IMA4 ramps, IMA WAV signed stereo plateaus and MS ADPCM mono plateaus
+provide independent exact PCM for grouped blocks, coding/rate/channel changes,
+2000/48000/96000 track clocks and intentional last-block trims. Constant,
+regular/reordered/fragmented input, repeated edits with silence, direct and
+actual worker seek/rewind match exact suffixes. Every case retains exact owned
+VP9 video planes and clocks. The generator remains separate from ordinary tests;
+34 artifacts / 717743 bytes regenerate byte-exactly with process/socket creation
+denied. No private media, FFmpeg or network is used.
+
+This qualifies the described ADPCM player paths, not every codec geometry or
+container/export workflow. Broader codec/profile/tool combinations, arbitrary
+clock quantization and physical-device continuity remain unqualified.
+
+The added general-export check then reproduced a separate admission gap:
+`selected MP4 audio codec is not supported by the owned export`. The root
+PacketPcmDecoder/admission path now includes the already-owned IMA4, IMA WAV
+and MS ADPCM decoders and reports their proper codec names. Constant-control
+exports, including the 3--14 ms interval, compare byte-exact analytic PCM and
+frame counts with a 2000-tick source clock. This extends root export admission;
+changing-configuration export and other container variants remain unqualified.
+
+Final frozen-source offline player qualification: library 1037 passed /
+26 ignored; 17 selected playback/export integration targets 80 passed; all test
+targets checked; both `fvid` and `fvid-player` built. Existing compiler warnings
+remain. Tests run without FFmpeg or network and do not generate fixtures. This
+is finite acceptance, not the full runtime suite or universal codec coverage.

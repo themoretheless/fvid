@@ -4782,3 +4782,22 @@ preserving history across equivalent entries. Generate separately with
 `python3 scripts/generate_mp4_aac_transitions.py`; run `mp4_aac_transitions`
 offline. These pulse streams do not exercise every Main predictor, HE/SBR/PS,
 LTP, SSR, ER or multichannel transition combination.
+
+`mp4-adpcm-transitions` authors analytic IMA4 ramps, IMA WAV opposite-channel
+predictor plateaus and MS ADPCM predictor plateaus beside neutral VP9. Packets
+contain one or multiple blocks; coding, channels and sample frequency change
+and return. MP4 track clocks 2000/48000/96000 differ from native PCM clocks.
+Low-clock input previously truncated a 64-frame packet to 16 frames; intentional
+final-block trims also require conversion in high clocks. Constant controls,
+regular/reordered/fragmented tracks, silence/repeated edits, seek/rewind and
+actual audio workers compare exact independent PCM. Video planes and clocks
+are checked for every case. Generate separately with
+`python3 scripts/generate_mp4_adpcm_transitions.py`; run `mp4_adpcm_transitions`
+offline. Decoder default duration units remain native PCM frames for callers
+that do not set a source timescale; zero duration retains the available block.
+This matrix does not qualify every ADPCM container, geometry or mixed codec.
+
+ADPCM constant controls also test general owned-export admission, actual codec
+names and byte-exact full/3--14 ms interval PCM export. Before the fix the root
+export API refused ADPCM despite the existing owned lower-level decoders.
+Changing-configuration export remains outside this finite acceptance matrix.
