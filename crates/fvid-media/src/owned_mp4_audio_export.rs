@@ -67,7 +67,32 @@ pub(crate) fn descriptor(
         crate::owned_mp4_audio::mp4_audio_index(&reader, selected).map_err(|e| e.to_string())?;
     crate::owned_mp4_audio::admit_audio_reader(&reader, index, options)
         .map_err(|e| e.to_string())?;
-    let in_band_ps = crate::owned_mp4_audio::negotiate_mp4_ps(&mut reader,index,||Ok(())).map_err(|e|e.to_string())?;
+    if options.max_packet_bytes < crate::owned_mp4::Limits::default().packet_bytes {
+        let track = &reader.tracks()[index];
+        let max_samples = if track.edits.is_empty() {
+            options
+                .max_packets
+                .map(|m| usize::try_from(m).unwrap_or(usize::MAX))
+                .unwrap_or(usize::MAX)
+        } else {
+            usize::MAX
+        };
+        let exceeds = match &track.samples {
+            crate::owned_mp4::SampleIndex::Expanded(samples) => samples
+                .iter()
+                .take(max_samples)
+                .any(|s| (s.size as usize) > options.max_packet_bytes),
+            crate::owned_mp4::SampleIndex::Uniform(uniform) => {
+                uniform.count > 0
+                    && max_samples > 0
+                    && (uniform.bytes_per_frame as usize) > options.max_packet_bytes
+            }
+        };
+        if exceeds {
+            return Err("MP4 packet exceeds budget".into());
+        }
+    }
+    let in_band_ps = crate::owned_mp4_audio::negotiate_mp4_ps(&mut reader,index,options.max_packets,||Ok(())).map_err(|e|e.to_string())?;
     let source_track = &reader.tracks()[index];
     let first = source_track.samples.get(0).ok_or("MP4 audio has no samples")?;
     let setup = source_track.decoder_setup(first.description_index).map_err(|e| e.to_string())?;
@@ -113,7 +138,16 @@ fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, bool
     let reader = open(source, options)?;
     let index = crate::owned_mp4_audio::mp4_audio_index(&reader, options.streams.first().copied()).map_err(|e|e.to_string())?;
     let track = &reader.tracks()[index];
-    let all_pcm = (0..track.samples.len()).all(|n| track.description_for_sample(n).is_some_and(|d| matches!(&d.codec,b"raw "|b"sowt"|b"twos"|b"in24"|b"in32"|b"fl32"|b"fl64")));
+    let active_samples = if track.edits.is_empty() {
+        options
+            .max_packets
+            .map(|m| usize::try_from(m).unwrap_or(usize::MAX))
+            .unwrap_or(track.samples.len())
+            .min(track.samples.len())
+    } else {
+        track.samples.len()
+    };
+    let all_pcm = (0..active_samples).all(|n| track.description_for_sample(n).is_some_and(|d| matches!(&d.codec,b"raw "|b"sowt"|b"twos"|b"in24"|b"in32"|b"fl32"|b"fl64")));
     Ok((rate, channels, mask, codec.starts_with("pcm_") && all_pcm))
 }
 pub(crate) fn normalization_target(source:&Path,transform:AudioDecodeTransform,options:&CopyOptions,rate:u32,channels:u16,mask:u32)->Result<Option<(u32,u16,u32)>> {
@@ -126,7 +160,7 @@ pub(crate) fn normalization_target(source:&Path,transform:AudioDecodeTransform,o
         let projection=transform.channels.is_some_and(|c|c!=i32::from(channels)&&(mask==0||(channels>2&&c>2)));
         if !projection {return Ok(None);}
     }else if mask==0&&transform.channels.is_none() {
-        if crate::owned_mp4_audio::mp4_normalized_geometry(&mut reader,index).map_err(|e|e.to_string())?.is_some() {
+        if crate::owned_mp4_audio::mp4_normalized_geometry(&mut reader,index,options.max_packets).map_err(|e|e.to_string())?.is_some() {
             return Err("MP4 normalization requires an explicit destination speaker layout".into());
         }
         return Ok(None);

@@ -796,6 +796,28 @@ impl Program {
             .get(self.packet)
             .map(|p| self.ogg.chains()[p.chain].packets[p.packet].data.len())
     }
+    pub(crate) fn max_packet_size_in_prefix(
+        &self,
+        until: Option<u64>,
+        max_packets: Option<u64>,
+    ) -> usize {
+        let mut maximum = 0;
+        for (packets, p) in self.packets.iter().enumerate() {
+            if max_packets.is_some_and(|limit| packets as u64 >= limit) {
+                break;
+            }
+            if until.is_some_and(|end| {
+                !self.rate_changes && {
+                    let start = p.pts.max(p.start);
+                    start >= 0 && start as u64 >= end
+                }
+            }) {
+                break;
+            }
+            maximum = maximum.max(self.ogg.chains()[p.chain].packets[p.packet].data.len());
+        }
+        maximum
+    }
     pub(crate) fn next_presentation_start(&self) -> Option<i64> {
         self.packets.get(self.packet).map(|p| p.pts.max(p.start))
     }

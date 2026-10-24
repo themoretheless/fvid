@@ -187,7 +187,7 @@ pub(crate) fn mp4_source_info(
         reader.tags(),
         &track.name,
         &track.language,
-        None,
+        Some(reader.encoder()),
         &BTreeMap::new(),
     )
 }

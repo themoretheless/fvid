@@ -52,8 +52,23 @@ pub fn open_with_packet_limit(
     cancel: Option<&CancelFlag>,
     max_packet_bytes: usize,
 ) -> Result<Option<Vec<Segment<BufReader<File>>>>> {
+    let mut options = fvid_media::CopyOptions::default();
+    options.cancel = cancel.cloned();
+    options.max_packet_bytes = max_packet_bytes;
+    open_with_options(sources, &options)
+}
+
+pub fn open_with_options(
+    sources: &[PathBuf],
+    options: &fvid_media::CopyOptions,
+) -> Result<Option<Vec<Segment<BufReader<File>>>>> {
+    let cancel = options.cancel.as_ref();
+    let max_packet_bytes = options.max_packet_bytes;
     if max_packet_bytes == 0 {
         return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("Matroska output requires at least one packet"));
     }
     if !(2..=256).contains(&sources.len()) {
         return Err(invalid("concat requires 2..=256 inputs"));
@@ -142,6 +157,35 @@ pub fn open_with_packet_limit(
         });
         offset = next;
     }
+    let selected = mp4_matroska::selection(segments[0].reader.tracks().len(), &options.streams)?;
+    let mut packets = 0u64;
+    'segments: for segment in &segments {
+        let mut queue = BinaryHeap::new();
+        for (pos, &source_track) in selected.iter().enumerate() {
+            if let Some(packet) = segment.plans[source_track].packets.first() {
+                queue.push(Reverse((packet.dts, pos, source_track, 0usize)));
+            }
+        }
+        while let Some(Reverse((_, pos, source_track, index))) = queue.pop() {
+            check(cancel)?;
+            if options.max_packets.is_some_and(|limit| packets >= limit) {
+                break 'segments;
+            }
+            let sample = segment.reader.tracks()[source_track]
+                .samples
+                .get(index)
+                .ok_or_else(|| invalid("missing MP4 sample"))?;
+            if (sample.size as usize) > max_packet_bytes {
+                return Err(invalid("MP4 packet exceeds budget"));
+            }
+            packets = packets
+                .checked_add(1)
+                .ok_or_else(|| invalid("concat packet count overflow"))?;
+            if let Some(packet) = segment.plans[source_track].packets.get(index + 1) {
+                queue.push(Reverse((packet.dts, pos, source_track, index + 1)));
+            }
+        }
+    }
     Ok(Some(segments))
 }
 fn transport_priming(
@@ -206,6 +250,9 @@ pub fn write_with_options<R: Read + Seek, W: Write + Seek>(
     let cancel = options.cancel.as_ref();
     let progress = options.progress.as_ref();
     let max_packets = options.max_packets;
+    if max_packets == Some(0) {
+        return Err(invalid("Matroska output requires at least one packet"));
+    }
     check(cancel)?;
     let first = segments
         .first()
@@ -219,6 +266,10 @@ pub fn write_with_options<R: Read + Seek, W: Write + Seek>(
     }
     let mut metadata = FileMetadata::from_mp4(&first.reader);
     let mut text = std::collections::BTreeMap::new();
+    let encoder = first.reader.encoder().trim();
+    if !encoder.is_empty() && encoder.len() <= 1024 && !encoder.contains('\0') {
+        text.insert("ENCODER".into(), encoder.to_owned());
+    }
     for (key, value) in &options.metadata_set {
         let key = key.trim();
         if key.is_empty()

@@ -284,11 +284,20 @@ pub(crate) fn admit_audio_reader_targeted<R: Read + Seek>(
         .tracks()
         .get(index)
         .ok_or_else(|| invalid("selected audio stream is absent"))?;
+    let active_samples = if track.edits.is_empty() {
+        options
+            .max_packets
+            .map(|m| usize::try_from(m).unwrap_or(usize::MAX))
+            .unwrap_or(track.samples.len())
+            .min(track.samples.len())
+    } else {
+        track.samples.len()
+    };
     let mut decoder = 0usize;
     let mut checkpoint = 0usize;
     let mut configuration = 0usize;
     for i in 0..track.sample_descriptions.len() {
-        if !(0..track.samples.len()).any(|n| track.samples.get(n).is_some_and(|s| s.description_index as usize == i+1)) { continue; }
+        if !(0..active_samples).any(|n| track.samples.get(n).is_some_and(|s| s.description_index as usize == i+1)) { continue; }
         let setup = track.decoder_setup((i+1) as u32)?;
         let state = mp4_decoder_admission(&setup)?;
         decoder = decoder.max(state);
@@ -359,11 +368,14 @@ pub(crate) fn admit_audio_reader_targeted<R: Read + Seek>(
         ),
     };
     add(records.checked_mul(width).ok_or_else(overflow)?)?;
-    let largest_packet = (0..track.samples.len())
+    let largest_packet = (0..active_samples)
         .filter_map(|i| track.samples.get(i))
         .map(|s| s.size as usize)
         .max()
         .unwrap_or(0);
+    if largest_packet > options.max_packet_bytes {
+        return Err(invalid("MP4 packet exceeds budget"));
+    }
     // The reusable packet Vec may grow geometrically while reading larger packets.
     let expansion = track.sample_descriptions.iter().map(|d| match &d.codec {
         b"MAC3" | b"MAC6" => 64,
@@ -445,7 +457,6 @@ mod mp4_export_clock {
     include!("owned_mp4_edit_clock_impl.rs");
 }
 include!("owned_mp4_audio_timeline_impl.rs");
-
 
 #[cfg(test)]
 mod admission_tests {

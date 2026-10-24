@@ -351,10 +351,13 @@ pub fn try_plan_with_controls(
             (0usize, "subrip", stats.cues)
         }
     } else {
+        let mut limits = webm::Limits::default();
+        limits.packet_bytes = limits.packet_bytes.min(max_packet_bytes);
         let mut reader = webm::WebmReader::open(
             std::io::BufReader::new(File::open(source)?),
-            Default::default(),
+            limits,
         )?;
+        reader.restrict_packet_bytes(max_packet_bytes);
         reader.scan_all()?;
         let idx = match streams {
             [] => reader
@@ -646,10 +649,13 @@ fn try_convert_matroska_inner(
     check_controls: &impl Fn() -> Result<()>,
     dry_run: bool,
 ) -> Result<Option<SubtitleStats>> {
+    let mut limits = webm::Limits::default();
+    limits.packet_bytes = limits.packet_bytes.min(max_packet_bytes);
     let mut reader = webm::WebmReader::open(
         std::io::BufReader::new(File::open(source)?),
-        Default::default(),
+        limits,
     )?;
+    reader.restrict_packet_bytes(max_packet_bytes);
     reader.scan_all()?;
     if !reader.chapters.is_empty() {
         return Err(invalid("convert-subtitles with chapters is not qualified"));
@@ -814,6 +820,9 @@ fn try_convert_matroska_inner(
         };
         if text.is_empty() {
             return Err(invalid("empty subtitle cue"));
+        }
+        if format!("{},0,Default,,0,0,0,,{text}", cues.len()).len() > max_packet_bytes {
+            return Err(invalid("subtitle packet exceeds packet byte limit"));
         }
         cues.push((start, end, text));
     }
@@ -1059,6 +1068,9 @@ fn try_convert_srt_inner(
         let Some(body) = ass_text(&body) else {
             return Ok(None);
         };
+        if format!("{},0,Default,,0,0,0,,{body}", cues.len()).len() > max_packet_bytes {
+            return Err(invalid("subtitle packet exceeds packet byte limit"));
+        }
         cues.push((start, end, body));
     }
     if cues.is_empty() {
