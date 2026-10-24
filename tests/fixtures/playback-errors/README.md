@@ -4735,3 +4735,12 @@ PCM then fail for missing source extent. Regenerate separately with
 `mp4_variable_rate_edits` offline. The generator uses no FFmpeg or network.
 This finite PCM/E-AC-3 matrix does not qualify every compressed codec/edit pair
 or prove acoustic continuity during physical output-device reconfiguration.
+
+The variable-rate edit matrix also includes ALAC raw and first-order Rice
+configurations at 48 kHz stereo 16-bit, 32 kHz mono 16-bit, and 44.1 kHz stereo
+24-bit. Eight ALAC movies preserve the analytic PCM oracle across repeated,
+disjoint, fractional and negative-PTS schedules. Their MP4 offsets and cookies
+are authored by `generate_mp4_alac_transitions.py`, invoked only by the fixture
+generator. Every matrix movie additionally decodes its exact neutral VP9
+companion. This qualifies these ALAC transitions, not every predictor/profile
+or mixed-codec transition.

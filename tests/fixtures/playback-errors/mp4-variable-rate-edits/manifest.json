@@ -292,6 +292,200 @@
       ]
     },
     {
+      "name": "repeat-alac",
+      "parts": [
+        {
+          "oracle": null,
+          "first": 0,
+          "last": 240,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0.f32le",
+          "first": 720,
+          "last": 960,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-1.f32le",
+          "first": 0,
+          "last": 640,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            1,
+            100
+          ]
+        },
+        {
+          "oracle": "pcm-2.f32le",
+          "first": 0,
+          "last": 441,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            3,
+            100
+          ]
+        },
+        {
+          "oracle": null,
+          "first": 0,
+          "last": 336,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            25
+          ]
+        },
+        {
+          "oracle": "pcm-0.f32le",
+          "first": 720,
+          "last": 960,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            47,
+            1000
+          ]
+        },
+        {
+          "oracle": "pcm-1.f32le",
+          "first": 0,
+          "last": 640,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            13,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-2.f32le",
+          "first": 0,
+          "last": 441,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            9,
+            125
+          ]
+        }
+      ],
+      "duration": [
+        82,
+        1000
+      ]
+    },
+    {
+      "name": "repeat-alac-rice",
+      "parts": [
+        {
+          "oracle": null,
+          "first": 0,
+          "last": 240,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0.f32le",
+          "first": 720,
+          "last": 960,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-1.f32le",
+          "first": 0,
+          "last": 640,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            1,
+            100
+          ]
+        },
+        {
+          "oracle": "pcm-2.f32le",
+          "first": 0,
+          "last": 441,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            3,
+            100
+          ]
+        },
+        {
+          "oracle": null,
+          "first": 0,
+          "last": 336,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            25
+          ]
+        },
+        {
+          "oracle": "pcm-0.f32le",
+          "first": 720,
+          "last": 960,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            47,
+            1000
+          ]
+        },
+        {
+          "oracle": "pcm-1.f32le",
+          "first": 0,
+          "last": 640,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            13,
+            250
+          ]
+        },
+        {
+          "oracle": "pcm-2.f32le",
+          "first": 0,
+          "last": 441,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            9,
+            125
+          ]
+        }
+      ],
+      "duration": [
+        82,
+        1000
+      ]
+    },
+    {
       "name": "disjoint",
       "parts": [
         {
@@ -676,7 +870,435 @@
         192,
         1000
       ]
+    },
+    {
+      "name": "disjoint-alac",
+      "parts": [
+        {
+          "oracle": "pcm-1.f32le",
+          "first": 160,
+          "last": 480,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0.f32le",
+          "first": 0,
+          "last": 480,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            100
+          ]
+        },
+        {
+          "oracle": null,
+          "first": 0,
+          "last": 480,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            50
+          ]
+        }
+      ],
+      "duration": [
+        30,
+        1000
+      ]
+    },
+    {
+      "name": "disjoint-alac-rice",
+      "parts": [
+        {
+          "oracle": "pcm-1.f32le",
+          "first": 160,
+          "last": 480,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0.f32le",
+          "first": 0,
+          "last": 480,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            100
+          ]
+        },
+        {
+          "oracle": null,
+          "first": 0,
+          "last": 480,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            50
+          ]
+        }
+      ],
+      "duration": [
+        30,
+        1000
+      ]
+    },
+    {
+      "name": "fractional-alac",
+      "parts": [
+        {
+          "oracle": null,
+          "first": 0,
+          "last": 16,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0.f32le",
+          "first": 720,
+          "last": 960,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            3000
+          ]
+        },
+        {
+          "oracle": "pcm-1.f32le",
+          "first": 0,
+          "last": 640,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            2,
+            375
+          ]
+        },
+        {
+          "oracle": "pcm-2.f32le",
+          "first": 0,
+          "last": 74,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            19,
+            750
+          ]
+        },
+        {
+          "oracle": null,
+          "first": 0,
+          "last": 31,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1297,
+            48000
+          ]
+        },
+        {
+          "oracle": "pcm-0.f32le",
+          "first": 720,
+          "last": 960,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            83,
+            3000
+          ]
+        },
+        {
+          "oracle": "pcm-1.f32le",
+          "first": 0,
+          "last": 640,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            49,
+            1500
+          ]
+        },
+        {
+          "oracle": "pcm-2.f32le",
+          "first": 0,
+          "last": 74,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            79,
+            1500
+          ]
+        }
+      ],
+      "duration": [
+        163,
+        3000
+      ]
+    },
+    {
+      "name": "fractional-alac-rice",
+      "parts": [
+        {
+          "oracle": null,
+          "first": 0,
+          "last": 16,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-0.f32le",
+          "first": 720,
+          "last": 960,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            3000
+          ]
+        },
+        {
+          "oracle": "pcm-1.f32le",
+          "first": 0,
+          "last": 640,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            2,
+            375
+          ]
+        },
+        {
+          "oracle": "pcm-2.f32le",
+          "first": 0,
+          "last": 74,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            19,
+            750
+          ]
+        },
+        {
+          "oracle": null,
+          "first": 0,
+          "last": 31,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1297,
+            48000
+          ]
+        },
+        {
+          "oracle": "pcm-0.f32le",
+          "first": 720,
+          "last": 960,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            83,
+            3000
+          ]
+        },
+        {
+          "oracle": "pcm-1.f32le",
+          "first": 0,
+          "last": 640,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            49,
+            1500
+          ]
+        },
+        {
+          "oracle": "pcm-2.f32le",
+          "first": 0,
+          "last": 74,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            79,
+            1500
+          ]
+        }
+      ],
+      "duration": [
+        163,
+        3000
+      ]
+    },
+    {
+      "name": "negative-alac",
+      "parts": [
+        {
+          "oracle": "pcm-0.f32le",
+          "first": 240,
+          "last": 960,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-1.f32le",
+          "first": 0,
+          "last": 640,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            3,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-2.f32le",
+          "first": 0,
+          "last": 882,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            7,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-3.f32le",
+          "first": 0,
+          "last": 960,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            11,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-4.f32le",
+          "first": 0,
+          "last": 640,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            3,
+            40
+          ]
+        },
+        {
+          "oracle": "pcm-5.f32le",
+          "first": 0,
+          "last": 221,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            19,
+            200
+          ]
+        }
+      ],
+      "duration": [
+        100,
+        1000
+      ]
+    },
+    {
+      "name": "negative-alac-rice",
+      "parts": [
+        {
+          "oracle": "pcm-0.f32le",
+          "first": 240,
+          "last": 960,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "oracle": "pcm-1.f32le",
+          "first": 0,
+          "last": 640,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            3,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-2.f32le",
+          "first": 0,
+          "last": 882,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            7,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-3.f32le",
+          "first": 0,
+          "last": 960,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            11,
+            200
+          ]
+        },
+        {
+          "oracle": "pcm-4.f32le",
+          "first": 0,
+          "last": 640,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            3,
+            40
+          ]
+        },
+        {
+          "oracle": "pcm-5.f32le",
+          "first": 0,
+          "last": 221,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            19,
+            200
+          ]
+        }
+      ],
+      "duration": [
+        100,
+        1000
+      ]
     }
   ],
-  "provenance": "Own PCM/EAC3/VP9 from companion generator. Explicit independent source-frame cuts and rational start times for repeats,disjoint windows,fractional boundaries,negative PTS and delayed EOF repeats. No external encoder,FFmpeg,network or private media."
+  "provenance": "Own PCM/EAC3/VP9 from companion generator; ALAC raw and first-order Rice encode those same analytic samples at 48k stereo16,32k mono16,44.1k stereo24. Explicit independent source-frame cuts and rational start times for repeats,disjoint windows,fractional boundaries,negative PTS and delayed EOF repeats. No external encoder,FFmpeg,network or private media."
 }

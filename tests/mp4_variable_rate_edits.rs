@@ -174,3 +174,25 @@ fn missing_source_extent_fails_after_the_available_pcm_instead_of_false_eof() {
     .unwrap();
     compare(&trace.lock().unwrap().packets, &collect(&mut source));
 }
+
+#[test]
+fn edited_audio_keeps_its_owned_video_companion_decodable() {
+    use fvid::playback_native::{NativeReader, RawFrame};
+    for case in document()["cases"].as_array().unwrap() {
+        let name = case["name"].as_str().unwrap();
+        let count = if name.starts_with("eac3") { 17 } else { 6 };
+        let mut video =
+            NativeReader::software(Cursor::new(bytes(&format!("{name}.mp4"))), 32 << 20).unwrap();
+        for i in 0..count {
+            match video.read_frame_raw().unwrap().unwrap() {
+                RawFrame::Planar(p) => {
+                    assert_eq!((p.depth, p.frame.width, p.frame.height), (8, 16, 16));
+                    assert!(p.frame.data == vec![128; 384], "{name}/{i}");
+                }
+                _ => panic!("owned VP9 must retain exact planes"),
+            }
+            assert_eq!(video.frame_interval(), Some((i, i + 1, 50)));
+        }
+        assert!(video.read_frame_raw().unwrap().is_none());
+    }
+}
