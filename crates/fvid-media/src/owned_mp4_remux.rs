@@ -177,6 +177,9 @@ pub fn remux(
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
+    if options.max_packets == Some(0) {
+        return Err("Matroska output requires at least one packet".into());
+    }
     crate::owned_budget::check_rss_budget(options)?;
     if !supports(source, destination, options) {
         return Err("request is not an owned MP4 Matroska remux".into());
@@ -207,6 +210,9 @@ pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<fvid_media_inf
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
+    if options.max_packets == Some(0) {
+        return Err("Matroska output requires at least one packet".into());
+    }
     crate::owned_budget::check_rss_budget(options)?;
     if !supports(source, Path::new("planned.mkv"), options) {
         return Err("request is not an owned MP4 Matroska remux".into());
@@ -232,6 +238,9 @@ pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<fvid_media_inf
         }
         if options.max_packets.is_some_and(|limit| packets >= limit) { break; }
         let sample = reader.tracks()[source_track].samples.get(index).ok_or("missing MP4 sample")?;
+        if (sample.size as usize) > options.max_packet_bytes {
+            return Err("MP4 packet exceeds budget".into());
+        }
         packets = packets.checked_add(1).ok_or("MP4 packet count overflow")?;
         payload = payload.checked_add(u64::from(sample.size)).ok_or("MP4 byte count overflow")?;
         if let Some(next) = plans[track].packets.get(index + 1) {

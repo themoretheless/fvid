@@ -101,6 +101,17 @@ pub fn open_with_packet_limit(
             .iter()
             .map(|t| mp4_matroska::plan(t, reader.movie_timescale(), cancel))
             .collect::<Result<Vec<_>>>()?;
+        for (track_index, plan) in plans.iter().enumerate() {
+            let samples = &reader.tracks()[track_index].samples;
+            for index in 0..plan.packets.len() {
+                let sample = samples
+                    .get(index)
+                    .ok_or_else(|| invalid("missing MP4 sample"))?;
+                if (sample.size as usize) > max_packet_bytes {
+                    return Err(invalid("MP4 packet exceeds budget"));
+                }
+            }
+        }
         let mut duration = 0;
         for p in &plans {
             for packet in &p.packets {
@@ -206,6 +217,9 @@ pub fn write_with_options<R: Read + Seek, W: Write + Seek>(
     let cancel = options.cancel.as_ref();
     let progress = options.progress.as_ref();
     let max_packets = options.max_packets;
+    if max_packets == Some(0) {
+        return Err(invalid("Matroska output requires at least one packet"));
+    }
     check(cancel)?;
     let first = segments
         .first()

@@ -67,6 +67,31 @@ pub(crate) fn descriptor(
         crate::owned_mp4_audio::mp4_audio_index(&reader, selected).map_err(|e| e.to_string())?;
     crate::owned_mp4_audio::admit_audio_reader(&reader, index, options)
         .map_err(|e| e.to_string())?;
+    if options.max_packet_bytes < crate::owned_mp4::Limits::default().packet_bytes {
+        let track = &reader.tracks()[index];
+        let max_samples = if track.edits.is_empty() {
+            options
+                .max_packets
+                .map(|m| usize::try_from(m).unwrap_or(usize::MAX))
+                .unwrap_or(usize::MAX)
+        } else {
+            usize::MAX
+        };
+        let exceeds = match &track.samples {
+            crate::owned_mp4::SampleIndex::Expanded(samples) => samples
+                .iter()
+                .take(max_samples)
+                .any(|s| (s.size as usize) > options.max_packet_bytes),
+            crate::owned_mp4::SampleIndex::Uniform(uniform) => {
+                uniform.count > 0
+                    && max_samples > 0
+                    && (uniform.bytes_per_frame as usize) > options.max_packet_bytes
+            }
+        };
+        if exceeds {
+            return Err("MP4 packet exceeds budget".into());
+        }
+    }
     let in_band_ps = crate::owned_mp4_audio::negotiate_mp4_ps(&mut reader,index,||Ok(())).map_err(|e|e.to_string())?;
     let source_track = &reader.tracks()[index];
     let first = source_track.samples.get(0).ok_or("MP4 audio has no samples")?;

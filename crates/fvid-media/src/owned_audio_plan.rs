@@ -19,7 +19,7 @@ pub(crate) fn matroska_descriptor(
     }
     let reader = crate::owned_webm::WebmReader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        Default::default(),
+        crate::owned_webm::Limits::default(),
     )
     .map_err(|e| e.to_string())?;
     let selected = options.streams.first().copied();
@@ -135,7 +135,11 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         (rate, channels, mask, codec.to_owned(), "float32".to_owned())
     } else if ogg {
         let (index, rate, channels, mask, codec) =
-            crate::owned_ogg_audio_export::descriptor(source, options)?;
+            crate::owned_ogg_audio_export::descriptor_for_decode(
+                source,
+                transform.copied(),
+                options,
+            )?;
         stream_index = index;
         (rate, channels, mask, codec.to_owned(), "float32".to_owned())
     } else if mp4 {
@@ -152,10 +156,12 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         stream_index = index;
         (rate, channels, mask, codec, precision)
     } else if raw_flac {
-        let (rate,channels,mask)=crate::owned_raw_flac::descriptor(source,options)?;
-        (rate,channels,mask,"flac".to_owned(),"float32".to_owned())
+        let (rate, channels, mask) =
+            crate::owned_raw_flac::descriptor_with_transform(source, transform.copied(), options)?;
+        (rate, channels, mask, "flac".to_owned(), "float32".to_owned())
     } else if raw_encoded_audio {
-        let (rate, channels, raw_codec) = crate::owned_raw_mp3::descriptor(source, options)?;
+        let (rate, channels, raw_codec) =
+            crate::owned_raw_mp3::descriptor_with_transform(source, transform.copied(), options)?;
         (rate, channels, crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
          raw_codec.to_owned(), "float32".to_owned())
     } else if adts {
@@ -188,15 +194,16 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         let mut file = File::open(source).map_err(|e| e.to_string())?;
         let info = crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref())
             .map_err(|e| e.to_string())?;
+        let frame_bytes = usize::from(info.block);
+        if frame_bytes == 0 {
+            return Err("PCM packet limit cannot hold one sample frame".into());
+        }
+        let capacity =
+            (4096 * frame_bytes).min(options.max_packet_bytes / frame_bytes * frame_bytes);
+        if capacity == 0 {
+            return Err("PCM packet limit cannot hold one sample frame".into());
+        }
         if let Some(max) = options.max_controlled_bytes {
-            let frame_bytes = usize::from(info.block);
-            if frame_bytes == 0 {
-                return Err("PCM packet limit cannot hold one sample frame".into());
-            }
-            let capacity = (4096 * frame_bytes).min(options.max_packet_bytes / frame_bytes * frame_bytes);
-            if capacity == 0 {
-                return Err("PCM packet limit cannot hold one sample frame".into());
-            }
             let full_size = usize::try_from(info.data_bytes)
                 .map_err(|_| "WAVE PCM payload exceeds address space")?;
             let limit = options
@@ -324,5 +331,31 @@ pub fn plan_decode_audio(
         });
     }
     steps.push(PlanStep{action:"write".into(),detail:format!("owned .wav writer; preserve {precision} precision; publish without overwriting; cleanup on failure")});
-    Ok(MediaPlan{command:"decode-audio".into(),input:source.into(),inputs:vec![source.into()],streams:vec![PlanStream{index:stream_index,media_type:"audio".into(),codec,disposition:"decode".into()}],steps,graph:None,notes:vec!["backend: owned fvid-media; no external demuxer, codec, resampler or muxer".into(),if adts {"read-only ADTS prefix negotiation checks the output clock and decoder admission without emitting progress; packet payloads and publication are revalidated during execution".into()} else {"read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution".into()},if adts || mp4 || is_matroska || raw_encoded_audio || ogg || g711_wave {"packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded".into()} else {"packet limits apply to frame-aligned WAVE I/O blocks of at most 4096 sample frames".into()}]})
+    let mut notes = vec![
+        "backend: owned fvid-media; no external demuxer, codec, resampler or muxer".into(),
+        if adts {
+            "read-only ADTS prefix negotiation checks the output clock and decoder admission without emitting progress; packet payloads and publication are revalidated during execution".into()
+        } else {
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution".into()
+        },
+        if adts || mp4 || is_matroska || raw_encoded_audio || ogg || g711_wave {
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded".into()
+        } else {
+            "packet limits apply to frame-aligned WAVE I/O blocks of at most 4096 sample frames".into()
+        },
+    ];
+    if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        || options.max_packets.is_some()
+        || options.max_controlled_bytes.is_some()
+        || options.max_rss_bytes.is_some()
+    {
+        notes.push(format!(
+            "encoded packet limit: {} bytes; packet work limit: {} packets; controlled memory limit: {} bytes; RSS limit: {} bytes",
+            options.max_packet_bytes,
+            options.max_packets.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options.max_controlled_bytes.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options.max_rss_bytes.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+        ));
+    }
+    Ok(MediaPlan{command:"decode-audio".into(),input:source.into(),inputs:vec![source.into()],streams:vec![PlanStream{index:stream_index,media_type:"audio".into(),codec,disposition:"decode".into()}],steps,graph:None,notes})
 }

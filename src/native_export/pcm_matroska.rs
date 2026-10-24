@@ -77,11 +77,30 @@ pub(crate) fn default_matroska_pcm_metadata() -> MatroskaPcmMetadata {
     )
 }
 
+#[allow(dead_code)]
 pub(crate) fn extract_source_pcm_metadata(
     source: &std::path::Path,
     selected: Option<usize>,
     allow_wave: bool,
     max_packet_bytes: Option<usize>,
+    cancel: Option<&crate::media_control::CancelFlag>,
+) -> Result<MatroskaPcmMetadata> {
+    extract_source_pcm_metadata_with_packet_limit(
+        source,
+        selected,
+        allow_wave,
+        max_packet_bytes,
+        None,
+        cancel,
+    )
+}
+
+pub(crate) fn extract_source_pcm_metadata_with_packet_limit(
+    source: &std::path::Path,
+    selected: Option<usize>,
+    allow_wave: bool,
+    max_packet_bytes: Option<usize>,
+    max_packets: Option<u64>,
     cancel: Option<&crate::media_control::CancelFlag>,
 ) -> Result<MatroskaPcmMetadata> {
     use std::io::{BufReader, Read, Seek, SeekFrom};
@@ -148,14 +167,23 @@ pub(crate) fn extract_source_pcm_metadata(
             base.1 = track.language.clone();
         }
         base.2.tags = reader.tags().clone();
+        if !reader.encoder().is_empty()
+            && !reader.encoder().contains('\0')
+            && reader.encoder().len() <= 1024
+        {
+            base.3.insert("ENCODER".into(), reader.encoder().to_owned());
+        }
         return Ok(base);
     }
     if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-        let mut reader = crate::container::webm::WebmReader::open(input, Default::default())?;
+        let mut reader = crate::container::webm::WebmReader::open(
+            input,
+            crate::container::webm::Limits::default(),
+        )?;
         if let Some(maximum) = max_packet_bytes {
             reader.restrict_packet_bytes(maximum);
         }
-        let _ = reader.scan_all();
+        reader.scan_all()?;
         let index = if allow_wave {
             let preferred = if selected.is_none() {
                 reader.preferred_track_numbers(
@@ -187,6 +215,21 @@ pub(crate) fn extract_source_pcm_metadata(
             crate::native_media::matroska_aac_index(&reader, selected)?
         };
         let track = &reader.tracks[index];
+        if let Some(maximum) = max_packet_bytes {
+            let track_number = track.number;
+            let mut track_packets = 0u64;
+            for (packet_index, packet) in reader.packets.iter().enumerate() {
+                if packet.track == track_number {
+                    if max_packets.is_some_and(|limit| track_packets >= limit) {
+                        break;
+                    }
+                    if reader.packet_payload_size(packet_index)? > maximum {
+                        return Err(invalid("WebM packet exceeds budget"));
+                    }
+                    track_packets += 1;
+                }
+            }
+        }
         let mut base = default_matroska_pcm_metadata();
         if !track.name.contains('\0') && track.name.len() <= 1024 {
             base.0 = track.name.clone();
@@ -314,11 +357,12 @@ pub(crate) fn extract_source_wave_info(
                 .map_err(|e| invalid(&e.to_string()));
         }
     }
-    let base = extract_source_pcm_metadata(
+    let base = extract_source_pcm_metadata_with_packet_limit(
         source,
         options.streams.first().copied(),
         true,
         Some(options.max_packet_bytes),
+        options.max_packets,
         cancel,
     )?;
     let mut extra = base.3.clone();

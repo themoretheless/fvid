@@ -99,7 +99,7 @@ pub fn decode_video_pipeline_overlay_step(
             let (start, _, scale) = reader.frame_interval().ok_or_else(|| invalid("overlay frame has no timing"))?;
             if scale == 0 {return Err(invalid("overlay clock is zero"));}
             let pts = u64::try_from(start.checked_mul(1_000_000_000).ok_or_else(|| invalid("overlay timestamp overflow"))? / u128::from(scale)).map_err(|_| invalid("overlay timestamp overflow"))?;
-            compositor.validate_main(&reader, pts)?;
+            compositor.validate_main_with_geometry(&reader, Some(&frame), geometry, pts)?;
             Some(pts)
         } else { None };
         if let Some((from, to)) = interval {
