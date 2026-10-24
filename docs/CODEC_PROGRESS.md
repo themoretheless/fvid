@@ -17933,3 +17933,30 @@ codec coverage are not complete.
 
 Final MACE delivery target: 5 passed, including the negative-PTS video
 companion. Both `fvid` and `fvid-player` built offline with the player feature.
+
+
+### 2026-10-24: fragmented/hybrid MACE and mixed sample-table units
+
+Empty fragment init tables now validate without assuming MACE sample-counted
+units; encoded fragment packets retain their own byte sizes and durations.
+Nonempty initial MACE tables in hybrid files construct an expanded block index
+so fragments can append. Ordinary initial tables resolve each selected chunk's
+unit independently: six decoded samples per MACE block, one entry per PCM frame
+or other packet. Byte bounds, timestamps, composition/sync mappings and index
+budget follow the resulting actual packet index. The prior constant uniform
+path remains for eligible tracks.
+
+Owned movies cover fragmented, reordered, hybrid, mixed MACE/PCM and repeated
+edits across these forms. Existing constant-setup controls establish exact PCM;
+workers check natural transitions, seek and rewind. Exact mixed indices contain
+400 packets from 1200 table units with the stated widths/durations. The old
+source replay fails specifically with the mixed-unit refusal, then source was
+restored byte-exactly. This is a selected source replay, not a full old-checkout
+qualification. No FFmpeg or network is used. The generator produces 23 files /
+635516 bytes, reproduced byte-exactly with process/socket creation denied.
+Broader AAC/ADPCM and compressed mixed-codec transition matrices remain open.
+
+Final frozen-source offline player checks: library 1036 passed / 26 ignored;
+eight selected integration targets 48 passed; all test targets checked; both
+`fvid` and `fvid-player` built. Existing compiler warnings remain. This is not
+a full integration-suite runtime or universal codec-coverage claim.

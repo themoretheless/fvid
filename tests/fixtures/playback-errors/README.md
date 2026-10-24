@@ -4755,5 +4755,16 @@ geometry, video companions, index budget and corrupt chunk/composition tables
 are covered. The pre-fix witness refused specifically for per-description MACE
 block indexing. Regenerate separately with
 `python3 scripts/generate_mp4_mace_transitions.py`; run `mp4_mace_transitions`
-offline. Mixed MACE/non-MACE sample units and fragmented MACE changes remain
-unsupported; this fixture matrix does not prove all MACE container variants.
+offline. Mixed MACE/PCM sample units and fragmented/hybrid changes are covered by the
+extension below; this fixture matrix does not prove all MACE container variants.
+
+The MACE matrix now also covers pure fragmented and hybrid initial-table plus
+fragment input, reordered configurations, mixed MACE/PCM units, and repeated
+edits on both packet-index forms. Fragment runs count encoded packets; initial
+QuickTime MACE tables count decoded samples. Each selected description determines
+its own table-to-packet unit. The independent controls check PCM/predictor
+continuity; real workers check seek suffixes and rewind. A mixed-table target
+checks 400 indexed packets from 1200 table units and exact per-span durations,
+widths and budget enforcement. The previous-source replay fails on the specific
+mixed-unit refusal before the acceptance fix. Broader AAC/ADPCM/other compressed
+mixed-codec matrices remain unqualified.

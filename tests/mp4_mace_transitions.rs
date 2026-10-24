@@ -14,10 +14,10 @@ fn bytes(name: &str) -> Vec<u8> {
 fn open(name: &str) -> Mp4AudioReader<Cursor<Vec<u8>>> {
     Mp4AudioReader::open(Cursor::new(bytes(name)), Default::default()).unwrap()
 }
-fn expected() -> Frames {
+fn sequence(selection: &[usize]) -> Frames {
     let mut out = Vec::new();
     let mut at = Duration::ZERO;
-    for i in [0, 1, 2, 0] {
+    for &i in selection {
         let frames = collect(&mut open(&format!("control-{i}")));
         for (rate, ch, time, data) in frames {
             out.push((rate, ch, at + time, data));
@@ -26,10 +26,19 @@ fn expected() -> Frames {
     }
     out
 }
+fn expected() -> Frames {
+    sequence(&[0, 1, 2, 0])
+}
 #[test]
 fn mace_description_changes_keep_block_geometry_and_predictor_state() {
     let wanted = expected();
-    for name in ["changes", "start-third"] {
+    for name in [
+        "changes",
+        "start-third",
+        "fragmented",
+        "fragmented-third",
+        "hybrid",
+    ] {
         let mut stream = open(name);
         compare(&collect(&mut stream), &wanted);
         stream.rewind();
@@ -59,8 +68,7 @@ fn suffix(frames: &Frames, target: Duration) -> Frames {
         })
         .collect()
 }
-fn edited() -> Frames {
-    let source = expected();
+fn edit_source(source: Frames) -> Frames {
     let mut out = Vec::new();
     for start in [0, 70] {
         out.push((8000, 1, Duration::from_millis(start), vec![0; 40 * 4]));
@@ -81,6 +89,9 @@ fn edited() -> Frames {
     }
     out
 }
+fn edited() -> Frames {
+    edit_source(expected())
+}
 #[test]
 fn mace_workers_and_seek_preserve_predictors_across_changes_and_repeated_edits() {
     use fvid::audio_thread::AudioPlayback;
@@ -88,8 +99,22 @@ fn mace_workers_and_seek_preserve_predictors_across_changes_and_repeated_edits()
     use transitions::{Capture, Trace, ended};
     for (name, wanted) in [
         ("changes", expected()),
+        ("mixed", sequence(&[0, 3, 1, 2, 0])),
+        ("mixed-fragmented", sequence(&[0, 3, 1, 2, 0])),
+        ("mixed-hybrid", sequence(&[0, 3, 1, 2, 0])),
+        (
+            "mixed-fragmented-edits",
+            edit_source(sequence(&[0, 3, 1, 2, 0])),
+        ),
+        ("mixed-third", sequence(&[0, 3, 1, 2, 0])),
+        ("mixed-edits", edit_source(sequence(&[0, 3, 1, 2, 0]))),
         ("start-third", expected()),
         ("edits", edited()),
+        ("fragmented", expected()),
+        ("fragmented-third", expected()),
+        ("hybrid", expected()),
+        ("fragmented-edits", edited()),
+        ("hybrid-edits", edited()),
         (
             "negative",
             expected()
@@ -188,6 +213,18 @@ fn mace_movies_retain_exact_owned_video_planes_and_clocks() {
         "control-1",
         "control-2",
         "negative",
+        "fragmented",
+        "fragmented-third",
+        "hybrid",
+        "fragmented-edits",
+        "hybrid-edits",
+        "mixed",
+        "mixed-third",
+        "mixed-edits",
+        "mixed-fragmented",
+        "mixed-hybrid",
+        "mixed-fragmented-edits",
+        "control-3",
     ] {
         let mut video = NativeReader::software(Cursor::new(bytes(name)), 32 << 20).unwrap();
         for i in 0..6 {
@@ -202,4 +239,41 @@ fn mace_movies_retain_exact_owned_video_planes_and_clocks() {
         }
         assert!(video.read_frame_raw().unwrap().is_none());
     }
+}
+
+#[test]
+fn mixed_mace_pcm_units_preserve_exact_samples_and_index_cost() {
+    use fvid::container::mp4::{Limits, Mp4Reader};
+    for name in ["mixed", "mixed-third", "mixed-fragmented", "mixed-hybrid"] {
+        compare(&collect(&mut open(name)), &sequence(&[0, 3, 1, 2, 0]));
+        let reader = Mp4Reader::open_indexed(Cursor::new(bytes(name)), Limits::default()).unwrap();
+        let track = reader
+            .tracks()
+            .iter()
+            .find(|t| t.handler == *b"soun")
+            .unwrap();
+        assert_eq!(track.samples.len(), 400);
+        assert_eq!(track.duration, 6480);
+        for (first, size, duration, dts) in [
+            (0, 2, 36, 0),
+            (40, 2, 6, 1440),
+            (280, 2, 18, 2880),
+            (320, 4, 36, 3600),
+            (360, 2, 36, 5040),
+        ] {
+            let s = track.samples.get(first).unwrap();
+            assert_eq!((s.size, s.duration, s.dts), (size, duration, dts));
+        }
+    }
+    let err = Mp4Reader::open_indexed(
+        Cursor::new(bytes("mixed")),
+        Limits {
+            samples: 399,
+            ..Default::default()
+        },
+    )
+    .err()
+    .unwrap()
+    .to_string();
+    assert!(err.contains("sample count exceeds budget"), "{err}");
 }

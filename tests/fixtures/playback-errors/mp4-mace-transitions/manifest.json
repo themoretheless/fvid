@@ -27,6 +27,13 @@
       "channels": 2,
       "block_bytes": 4,
       "sample_ticks": 6
+    },
+    {
+      "codec": "sowt",
+      "rate": 8000,
+      "channels": 1,
+      "block_bytes": 2,
+      "sample_ticks": 6
     }
   ]
 }
