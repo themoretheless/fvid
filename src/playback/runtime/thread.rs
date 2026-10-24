@@ -548,15 +548,20 @@ impl<R: BufRead + Seek> Worker<R> {
         );
         worker
     }
-    fn stage(&self, raw: RawFrame) -> Stage {
-        if self.reader.cache_packet_count() != self.indexed_count {
+    fn sync_cache_packets(&mut self) {
+        let current = self.reader.cache_packet_count();
+        if current != self.indexed_count {
             let snapshot: Arc<[(u64, u64, Duration, Duration)]> =
                 Arc::from(self.reader.cache_packets());
             *self
                 .cache_packets
                 .write()
                 .unwrap_or_else(|p| p.into_inner()) = snapshot;
+            self.indexed_count = current;
         }
+    }
+    fn stage(&mut self, raw: RawFrame) -> Stage {
+        self.sync_cache_packets();
         Stage::Raw {
             raw,
             dimensions: self.reader.dimensions(),
@@ -569,16 +574,14 @@ impl<R: BufRead + Seek> Worker<R> {
     }
     fn decode_next(&mut self) -> Stage {
         match self.reader.read_frame_raw() {
-            Ok(Some(raw)) => {
-                let stage = self.stage(raw);
-                self.indexed_count = self.reader.cache_packet_count();
-                stage
-            }
+            Ok(Some(raw)) => self.stage(raw),
             Ok(None) => {
+                self.sync_cache_packets();
                 self.ended = true;
                 Stage::Event(Event::Ended(self.generation))
             }
             Err(error) => {
+                self.sync_cache_packets();
                 self.ended = true;
                 Stage::Event(Event::Error(error.to_string()))
             }
@@ -625,15 +628,26 @@ impl<R: BufRead + Seek> Worker<R> {
             Some(DeferredNav::Rewind) => {
                 self.pending = Some(match self.reader.rewind() {
                     Ok(()) => self.decode_next(),
-                    Err(error) => Stage::Event(Event::Error(error.to_string())),
+                    Err(error) => {
+                        self.ended = true;
+                        Stage::Event(Event::Error(error.to_string()))
+                    }
                 });
             }
             Some(DeferredNav::Seek(target)) => {
                 // Preserve the normal GPU plane path for the target picture.
                 self.pending = Some(match self.reader.seek_raw(target) {
                     Ok(Some(raw)) => self.stage(raw),
-                    Ok(None) => Stage::Event(Event::Ended(self.generation)),
-                    Err(error) => Stage::Event(Event::Error(error.to_string())),
+                    Ok(None) => {
+                        self.sync_cache_packets();
+                        self.ended = true;
+                        Stage::Event(Event::Ended(self.generation))
+                    }
+                    Err(error) => {
+                        self.sync_cache_packets();
+                        self.ended = true;
+                        Stage::Event(Event::Error(error.to_string()))
+                    }
                 });
             }
             None => {}

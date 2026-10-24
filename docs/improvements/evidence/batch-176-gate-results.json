@@ -1,0 +1,135 @@
+{
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/container/mp4.rs": "827dcf2af62c48a76f43f54b5fc52d6a8206eefcd18133b4187eaeaf78a012e5",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_mfhd_trex.rs": "d0060cc4b110fc3ba1e15359a790f84d009d6151e5cc70c4bca77a8e61bbd46e",
+    "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_mp4_mfhd_trex_regressions.py": "6a8461c5c2194770d7fd2efb88f778af7172992342b4854adc3b5ec1025e048a",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/mp4-mfhd-trex/manifest.json": "f7d11902a476a966d84b75941be9acab3b589c322f45a8b8b289052408f245c7"
+  },
+  "checks": [
+    {
+      "name": "after",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--features",
+        "player",
+        "--test",
+        "mp4_mfhd_trex",
+        "--",
+        "--nocapture"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-176-after.log"
+    },
+    {
+      "name": "related-after",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--features",
+        "player",
+        "--test",
+        "mp4_multi_trun",
+        "--test",
+        "mp4_tfhd_defaults",
+        "--test",
+        "mp4_trun_flags",
+        "--test",
+        "mp4_signed_offset",
+        "--test",
+        "mp4_fragment_description",
+        "--test",
+        "mp4",
+        "--test",
+        "mp4_seek_io_regressions",
+        "--test",
+        "mp4_enabled_tracks",
+        "--test",
+        "hls_parser_regressions",
+        "--test",
+        "vp9_chroma",
+        "--test",
+        "mp4_audio_clocks",
+        "--test",
+        "mp4_pcm_choice"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-176-related-after.log"
+    },
+    {
+      "name": "mp4-units",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--features",
+        "player",
+        "--lib",
+        "container::mp4::tests"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-176-mp4-units.log"
+    },
+    {
+      "name": "core",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--test",
+        "mp4_mfhd_trex",
+        "--test",
+        "mp4_multi_trun",
+        "--test",
+        "mp4_tfhd_defaults",
+        "--test",
+        "mp4_trun_flags",
+        "--test",
+        "mp4_signed_offset",
+        "--test",
+        "mp4_fragment_description",
+        "--test",
+        "mp4",
+        "--test",
+        "mp4_seek_io_regressions"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-176-core.log"
+    },
+    {
+      "name": "player-build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-176-player-build.log"
+    },
+    {
+      "name": "fixtures-after",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts",
+        "-p",
+        "test_mp4_mfhd_trex_regressions.py"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-176-fixtures-after.log"
+    }
+  ]
+}

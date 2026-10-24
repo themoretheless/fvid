@@ -1,0 +1,56 @@
+{
+  "batch": 209,
+  "ids": ["FVID-0216"],
+  "title": "Enforce RSS and packet-byte budgets and metadata controls across owned lossless export, crop-lossless, overlay, xfade, burn-subtitles, and media_cli",
+  "scope": [
+    "crates/fvid-media/src/owned_lossless.rs",
+    "crates/fvid-media/src/owned_ffv1_export.rs",
+    "crates/fvid-media/src/owned_matroska.rs",
+    "crates/fvid-media/src/owned_mp4_video_decode.rs",
+    "crates/fvid-media/src/owned_mp4_video_bridge.rs",
+    "crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+    "crates/fvid-media/src/owned_webm_multitrack_export.rs",
+    "src/media_cli.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/video-export-controls-main.y4m",
+    "tests/fixtures/playback-errors/video-export-controls-overlay.y4m",
+    "tests/fixtures/playback-errors/video-export-controls.srt"
+  ],
+  "generators": [
+    "scripts/generate_video_export_controls_regressions.py",
+    "scripts/test_video_export_controls_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-209-pre-edit/crates/fvid-media/src/owned_lossless.rs",
+      "docs/improvements/snapshots/batch-209-pre-edit/crates/fvid-media/src/owned_ffv1_export.rs",
+      "docs/improvements/snapshots/batch-209-pre-edit/crates/fvid-media/src/owned_matroska.rs",
+      "docs/improvements/snapshots/batch-209-pre-edit/crates/fvid-media/src/owned_mp4_video_decode.rs",
+      "docs/improvements/snapshots/batch-209-pre-edit/crates/fvid-media/src/owned_mp4_video_bridge.rs",
+      "docs/improvements/snapshots/batch-209-pre-edit/crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+      "docs/improvements/snapshots/batch-209-pre-edit/crates/fvid-media/src/owned_webm_multitrack_export.rs",
+      "docs/improvements/snapshots/batch-209-pre-edit/src/media_cli.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-209-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-209-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-209-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --features player --test video_export_controls_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test -p fvid-media owned_lossless && cargo test -p fvid-media owned_xfade && cargo test -p fvid-media owned_subtitle_burn && cargo test --features player --test native_overlay --test native_xfade_cli --test native_subtitle_burn_cli --test native_lossless --test remux_concat_controls_regressions --test video_export_controls_regressions",
+      "passed": 53,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_video_export_controls_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

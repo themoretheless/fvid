@@ -88,8 +88,23 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
     }
     // Only the private single-track ADTS adapter uses this fixed-size rewrite.
     // Payload timestamps remain in nanoseconds, independent of output rate.
-    fn rewrite_adts_rate(&mut self, asc: &[u8], rate: u32, channels: u16) -> Result<()> {
-        let spec = TrackSpec { encoding: Encoding::Aac { configuration: asc, sample_rate: rate, channels }, name: "", language: "" };
+    fn rewrite_adts_rate(
+        &mut self,
+        asc: &[u8],
+        rate: u32,
+        channels: u16,
+        name: &str,
+        language: &str,
+    ) -> Result<()> {
+        let spec = TrackSpec {
+            encoding: Encoding::Aac {
+                configuration: asc,
+                sample_rate: rate,
+                channels,
+            },
+            name,
+            language,
+        };
         let tracks = element(0x1654ae6b, &track_entry(&spec, 1, None)?)?;
         if self.written.len() != 1 || tracks.len() != self.tracks_bytes {
             return Err(invalid("ADTS track rewrite changed header size"));

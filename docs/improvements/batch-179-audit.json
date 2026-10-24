@@ -1,0 +1,20 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0186",
+  "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+  "source_sha256": "cb341217af25daaf2921d20967d15d101270d96fe0d9845e2899ad105b7e55e7",
+  "before_snapshot": "evidence/batch-179-owned-mp4-impl-before.rs",
+  "problem": "fvid_media::owned_mp4::Mp4Reader (and downstream probe_mp4, decode_mp4_aac_pcm, decode_mp4_aac_pcm_interval, and owned_mp4_remux) silently skipped QuickTime version-1 mp4a audio sample entries (44-byte SoundDescription v1 header) and rejected QuickTime mp4a sample entries that nest esds inside a wave extension atom (with 'missing MP4 esds box'), even though src/container/mp4.rs already parsed both.",
+  "primary_reference": "https://developer.apple.com/documentation/quicktime-file-format/sound_sample_description_version_1",
+  "reference_provenance": "Apple QuickTime File Format Specification, Sound Sample Description (Version 1, 44-byte header with 16-byte compression ratio fields) and Sound Sample Description SiDecompressParam ('wave' atom containing 'frma', 'esds', and 4-byte zero terminator); ISO/IEC 14496-14:2020 MP4AudioSampleEntry ('mp4a' / 'esds').",
+  "fixtures": "tests/fixtures/playback-errors/mp4-aac-quicktime",
+  "scope": "Support QuickTime version-1 (44-byte header) mp4a SoundDescription entries and wave/esds nested Elementary Stream Descriptors in crates/fvid-media/src/owned_mp4_impl.rs while refusing truncated (< 44 byte) version-1 headers and entries missing esds.",
+  "requirements": [
+    "Reproduce pre-fix dropping of QuickTime v1 mp4a tracks and 'missing MP4 esds box' refusal on wave/esds mp4a tracks in fvid_media::owned_mp4::Mp4Reader, probe_mp4, decode_mp4_aac_pcm, and owned_mp4_remux before editing production code.",
+    "Update crates/fvid-media/src/owned_mp4_impl.rs to accept mp4a version 1 with a 44-byte header check and resolve esds inside wave when not directly in the sample entry child list.",
+    "Verify exact decoded float32 PCM samples against an independent analytical IMDCT + overlap-add reference (expected.f32le), probe_mp4 audio stream discovery, interval decoding, controlled memory budget admission, Matroska remuxing, and player AudioStream seek/rewind/EOF.",
+    "Run focused, related MP4/AAC/HLS/VP9, unit, minimal-configuration, fixture unittest, and player build gates."
+  ],
+  "implementation_plan": "Align the (b\"soun\", b\"mp4a\") version-1 arm and wave/esds lookup in crates/fvid-media/src/owned_mp4_impl.rs with src/container/mp4.rs.",
+  "counting": "One QuickTime mp4a version-1 and wave/esds sample description support fix in fvid_media::owned_mp4 (FVID-0186). No extra IDs for individual fixture variants or controls."
+}

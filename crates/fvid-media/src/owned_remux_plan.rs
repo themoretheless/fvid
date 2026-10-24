@@ -8,6 +8,7 @@ pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
         || crate::owned_matroska_remux::supports(source, Path::new("planned.mkv"), options)
 }
 pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<MediaPlan, String> {
+    crate::owned_budget::check_rss_budget(options)?;
     if crate::owned_mp4_remux::supports(source, Path::new("planned.mkv"), options) {
         return crate::owned_mp4_remux::plan_remux(source, options);
     }
@@ -32,7 +33,23 @@ pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<MediaPlan, Str
         sum.checked_add(*size as u64)
             .ok_or("Matroska payload count overflow")
     })?;
-    let info = crate::owned_webm_probe::probe_webm(source)?;
+    let info = crate::owned_webm_probe::probe_webm_with_packet_limit(
+        source,
+        options.max_packet_bytes,
+    )?;
+    let mut notes = vec![
+        "backend: owned Matroska; no external demuxer or muxer".into(),
+        "output must be .mkv or audio-only .mka; destination-specific validation and publication occur during execution".into(),
+        "identity request only: track/tag edits, packet-count caps and memory/RSS policies require further implementation".into(),
+    ];
+    if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        || options.max_rss_bytes.is_some()
+    {
+        notes.push(format!(
+            "encoded packet limit: {} bytes; RSS limit: {:?}",
+            options.max_packet_bytes, options.max_rss_bytes
+        ));
+    }
     Ok(MediaPlan {
         command: "remux".into(), input: source.into(), inputs: vec![source.into()],
         streams: info.streams.into_iter().map(|stream| PlanStream { index: stream.index, media_type: stream.media_type, codec: stream.codec, disposition: "copy".into() }).collect(),
@@ -41,6 +58,6 @@ pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<MediaPlan, Str
             PlanStep { action: "metadata".into(), detail: "retain all original metadata and attachments without reconstruction".into() },
             PlanStep { action: "publish".into(), detail: "publish completed output without overwriting; remove temporary file on error or cancellation".into() },
         ], graph: None,
-        notes: vec!["backend: owned Matroska; no external demuxer or muxer".into(), "output must be .mkv or audio-only .mka; destination-specific validation and publication occur during execution".into(), "identity request only: track/tag edits, packet-count caps and memory/RSS policies require further implementation".into()],
+        notes,
     })
 }

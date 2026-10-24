@@ -3,7 +3,7 @@ use std::path::Path;
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if args.len() == 2 && matches!(args[1].as_str(), "--help" | "-h") {
         println!(
-            "fvid media loudnorm INPUT OUTPUT.wav [--loudnorm-args I=-16:TP=-1.5:LRA=11] [--dual-pass] [--streams 0] [--quiet] [--progress] [--max-packet-bytes N] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N]"
+            "fvid media loudnorm INPUT OUTPUT.wav [--loudnorm-args I=-16:TP=-1.5:LRA=11] [--dual-pass] [--streams 0] [--metadata KEY=VALUE] [--metadata-delete KEY] [--quiet] [--progress] [--max-packet-bytes N] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N]"
         );
         return Ok(());
     }
@@ -20,7 +20,15 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     let mut seen = std::collections::HashSet::new();
     let mut flags = args[3..].iter();
     while let Some(flag) = flags.next() {
-        if !seen.insert(flag.as_str()) {
+        let key_flag = if flag == "-q" { "--quiet" } else { flag.as_str() };
+        if !matches!(
+            key_flag,
+            "--metadata"
+                | "--metadata-delete"
+                | "--stream-metadata"
+                | "--stream-metadata-delete"
+        ) && !seen.insert(key_flag)
+        {
             return Err(format!("duplicate loudnorm option: {flag}").into());
         }
         match flag.as_str() {
@@ -30,6 +38,54 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                     .split(',')
                     .map(str::parse)
                     .collect::<Result<_, _>>()?
+            }
+            "--metadata" => {
+                let raw = value(&mut flags, flag)?;
+                let (key, val) = raw
+                    .split_once('=')
+                    .ok_or("metadata assignment must be KEY=VALUE")?;
+                if key.is_empty() {
+                    return Err("metadata key must be non-empty".into());
+                }
+                options
+                    .metadata_set
+                    .push((key.to_owned(), val.to_owned()));
+            }
+            "--metadata-delete" => {
+                let key = value(&mut flags, flag)?;
+                if key.is_empty() {
+                    return Err("metadata key must be non-empty".into());
+                }
+                options.metadata_delete.push(key.to_owned());
+            }
+            "--stream-metadata" => {
+                let raw = value(&mut flags, flag)?;
+                let (index, rest) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata assignment must be INDEX:KEY=VALUE")?;
+                let (key, val) = rest
+                    .split_once('=')
+                    .ok_or("stream metadata assignment must be INDEX:KEY=VALUE")?;
+                if key.is_empty() {
+                    return Err("stream metadata key must be non-empty".into());
+                }
+                options.stream_metadata_set.push((
+                    index.parse()?,
+                    key.to_owned(),
+                    val.to_owned(),
+                ));
+            }
+            "--stream-metadata-delete" => {
+                let raw = value(&mut flags, flag)?;
+                let (index, key) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata delete must be INDEX:KEY")?;
+                if key.is_empty() {
+                    return Err("stream metadata key must be non-empty".into());
+                }
+                options
+                    .stream_metadata_delete
+                    .push((index.parse()?, key.to_owned()));
             }
             "--max-packet-bytes" => options.max_packet_bytes = value(&mut flags, flag)?.parse()?,
             "--max-packets" => options.max_packets = Some(value(&mut flags, flag)?.parse()?),
@@ -41,7 +97,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 options.max_rss_bytes =
                     Some(fvid_media::parse_max_rss_mib(value(&mut flags, flag)?)?)
             }
-            "--quiet" => quiet = true,
+            "--quiet" | "-q" => quiet = true,
             "--progress" => progress = true,
             "--dual-pass" => {
                 dual_pass = true;
@@ -93,28 +149,87 @@ fn value<'a>(flags: &mut std::slice::Iter<'a, String>, flag: &str) -> Result<&'a
 pub fn run_plan(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if args.len() == 2 && matches!(args[1].as_str(), "--help" | "-h") {
         println!(
-            "fvid media plan loudnorm INPUT [--loudnorm-args ARGS] [--dual-pass] [--streams INDEX] [--max-packet-bytes N] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N]"
+            "fvid media plan loudnorm INPUT [--loudnorm-args ARGS] [--dual-pass] [--streams INDEX] [--metadata KEY=VALUE] [--metadata-delete KEY] [--max-packet-bytes N] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N]"
         );
         return Ok(());
     }
     let source = Path::new(args.get(1).ok_or("plan loudnorm requires INPUT")?);
     let mut normalization = None;
     let mut dual_pass = false;
+    let mut quiet = false;
     let mut options = fvid_media::CopyOptions::default();
     let mut seen = std::collections::HashSet::new();
     let mut flags = args[2..].iter();
     while let Some(flag) = flags.next() {
-        if !seen.insert(flag.as_str()) {
+        let key_flag = if flag == "-q" { "--quiet" } else { flag.as_str() };
+        if !matches!(
+            key_flag,
+            "--metadata"
+                | "--metadata-delete"
+                | "--stream-metadata"
+                | "--stream-metadata-delete"
+        ) && !seen.insert(key_flag)
+        {
             return Err(format!("duplicate loudnorm option: {flag}").into());
         }
         match flag.as_str() {
             "--loudnorm-args" => normalization = Some(value(&mut flags, flag)?.as_str()),
             "--dual-pass" => dual_pass = true,
+            "--quiet" | "-q" => quiet = true,
+            "--progress" => {}
             "--streams" => {
                 options.streams = value(&mut flags, flag)?
                     .split(',')
                     .map(str::parse)
                     .collect::<Result<_, _>>()?
+            }
+            "--metadata" => {
+                let raw = value(&mut flags, flag)?;
+                let (key, val) = raw
+                    .split_once('=')
+                    .ok_or("metadata assignment must be KEY=VALUE")?;
+                if key.is_empty() {
+                    return Err("metadata key must be non-empty".into());
+                }
+                options
+                    .metadata_set
+                    .push((key.to_owned(), val.to_owned()));
+            }
+            "--metadata-delete" => {
+                let key = value(&mut flags, flag)?;
+                if key.is_empty() {
+                    return Err("metadata key must be non-empty".into());
+                }
+                options.metadata_delete.push(key.to_owned());
+            }
+            "--stream-metadata" => {
+                let raw = value(&mut flags, flag)?;
+                let (index, rest) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata assignment must be INDEX:KEY=VALUE")?;
+                let (key, val) = rest
+                    .split_once('=')
+                    .ok_or("stream metadata assignment must be INDEX:KEY=VALUE")?;
+                if key.is_empty() {
+                    return Err("stream metadata key must be non-empty".into());
+                }
+                options.stream_metadata_set.push((
+                    index.parse()?,
+                    key.to_owned(),
+                    val.to_owned(),
+                ));
+            }
+            "--stream-metadata-delete" => {
+                let raw = value(&mut flags, flag)?;
+                let (index, key) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata delete must be INDEX:KEY")?;
+                if key.is_empty() {
+                    return Err("stream metadata key must be non-empty".into());
+                }
+                options
+                    .stream_metadata_delete
+                    .push((index.parse()?, key.to_owned()));
             }
             "--max-packet-bytes" => options.max_packet_bytes = value(&mut flags, flag)?.parse()?,
             "--max-packets" => options.max_packets = Some(value(&mut flags, flag)?.parse()?),
@@ -142,6 +257,8 @@ pub fn run_plan(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             );
         }
     };
-    println!("{}", serde_json::to_string_pretty(&plan)?);
+    if !quiet {
+        println!("{}", serde_json::to_string_pretty(&plan)?);
+    }
     Ok(())
 }

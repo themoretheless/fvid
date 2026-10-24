@@ -1,0 +1,62 @@
+{
+  "batch": 208,
+  "ids": ["FVID-0215"],
+  "title": "Enforce packet, memory, and RSS budgets and metadata controls across remux, plan_remux, concat, plan_concat, and media_cli for WAVE, ADTS, MP4, Matroska, and sample-domain audio routes",
+  "scope": [
+    "src/container/mp4_concat.rs",
+    "src/container/mp4_write.rs",
+    "src/media.rs",
+    "src/media_cli.rs",
+    "src/native_audio_mix.rs",
+    "src/native_audio_mix/concat.rs",
+    "src/native_export.rs",
+    "src/native_plan.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/remux-concat-controls/video.mkv",
+    "tests/fixtures/playback-errors/remux-concat-controls/pcm-48k-a.wav",
+    "tests/fixtures/playback-errors/remux-concat-controls/pcm-48k-b.wav",
+    "tests/fixtures/playback-errors/remux-concat-controls/g711-alaw-48k.wav",
+    "tests/fixtures/playback-errors/remux-concat-controls/adts-mono-48k.aac",
+    "tests/fixtures/playback-errors/remux-concat-controls/ogg-opus-48k.ogg",
+    "tests/fixtures/playback-errors/remux-concat-controls/matroska-flac-48k.mka",
+    "tests/fixtures/playback-errors/remux-concat-controls/mp4-pcm-48k.m4a",
+    "tests/fixtures/playback-errors/remux-concat-controls/manifest.json"
+  ],
+  "generators": [
+    "scripts/generate_remux_concat_controls_regressions.py",
+    "scripts/test_remux_concat_controls_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-208-pre-edit/src/container/mp4_concat.rs",
+      "docs/improvements/snapshots/batch-208-pre-edit/src/container/mp4_write.rs",
+      "docs/improvements/snapshots/batch-208-pre-edit/src/media.rs",
+      "docs/improvements/snapshots/batch-208-pre-edit/src/media_cli.rs",
+      "docs/improvements/snapshots/batch-208-pre-edit/src/native_audio_mix.rs",
+      "docs/improvements/snapshots/batch-208-pre-edit/src/native_audio_mix/concat.rs",
+      "docs/improvements/snapshots/batch-208-pre-edit/src/native_export.rs",
+      "docs/improvements/snapshots/batch-208-pre-edit/src/native_plan.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-208-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-208-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-208-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --features player --test remux_concat_controls_regressions",
+      "passed": 4,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --features player --test native_remux_plan --test native_remux_api --test native_matroska_copy --test native_aac_remux --test native_aac_concat --test native_pcm_concat --test native_mp4_concat --test native_wave_route_regressions --test owned_mp4_metadata --test owned_mp4_packet_cap --test loudnorm_budget_mix_concat_regressions --test audio_budget_controls_regressions",
+      "passed": 44,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_remux_concat_controls_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

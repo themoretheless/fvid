@@ -1,0 +1,59 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0183"
+  ],
+  "checked_at": "2026-10-22T00:10:39+00:00",
+  "sources": [
+    "src/container/mp4.rs"
+  ],
+  "regressions": [
+    "tests/mp4_mfhd_trex.rs"
+  ],
+  "before": [
+    "evidence/batch-176-mp4-before.rs",
+    "evidence/batch-176-tests-before.rs",
+    "evidence/batch-176-before.log",
+    "evidence/batch-176-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-176-after.log",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-176-related-after.log",
+      "passed": 74
+    },
+    {
+      "log": "evidence/batch-176-mp4-units.log",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-176-core.log",
+      "passed": 35
+    },
+    {
+      "log": "evidence/batch-176-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-176-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/container/mp4.rs": "827dcf2af62c48a76f43f54b5fc52d6a8206eefcd18133b4187eaeaf78a012e5",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_mfhd_trex.rs": "d0060cc4b110fc3ba1e15359a790f84d009d6151e5cc70c4bca77a8e61bbd46e",
+    "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_mp4_mfhd_trex_regressions.py": "6a8461c5c2194770d7fd2efb88f778af7172992342b4854adc3b5ec1025e048a",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/mp4-mfhd-trex/manifest.json": "f7d11902a476a966d84b75941be9acab3b589c322f45a8b8b289052408f245c7"
+  },
+  "qualification": [
+    "Pre-fix index_fragments walked moof children only for traf boxes, completely ignoring mfhd (accepting missing mfhd, duplicate mfhd, overlong 12-byte mfhd, and zero sequence_number), while fragment_defaults accepted trex boxes with track_ID == 0 or duplicate track_ID entries (silently shadowing later trex defaults via find()). Pre-fix baseline passed 3/3 controls and both forced acceptance gates failed because all 6 malformed cases indexed and reached native VP9 playback.",
+    "Validating a mandatory singleton version-0 8-byte mfhd with non-zero sequence_number in every moof and non-zero unique track_ID values in mvex/trex refuses all 6 malformed cases as Error::Invalid before publishing samples or admitting native decoders.",
+    "All 4 healthy controls (regular MP4, single-fragment fMP4, three-fragment sequential fMP4, and distinct multi-track trex entries) retain exact coded packets, sync flags, 50 Hz clocks, sample/packet budgets, analytic 16x16 VP9 planes/RGB (128/130), 32 total public clamped seek targets, rewind, and repeated EOF.",
+    "4 focused tests, 74 related MP4/HLS/VP9 integration tests, 17 MP4 unit tests, 35 minimal-configuration (--no-default-features) tests, offline fixture generator unittest, and full player build pass.",
+    "ISO/IEC 14496-12:2015, 8.8.3, 8.8.4, and 8.8.5 specify unique non-zero trex track IDs and a mandatory singleton mfhd box per moof with a positive 1-based sequence_number. All fixtures are pure synthetic offline VP9/fMP4 files requiring neither FFmpeg nor network access."
+  ],
+  "counting": "One fragmented MP4 mfhd header and trex track-ID integrity fix (FVID-0183). No extra IDs for individual mfhd/trex variants, controls, or fixture generator."
+}

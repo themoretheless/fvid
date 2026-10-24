@@ -104,8 +104,19 @@ impl RotateAngle {
 
     /// Output canvas size matching FFmpeg `rotw(a)` / `roth(a)` (trunc toward zero).
     pub fn size(self, width: u32, height: u32) -> (u32, u32) {
-        let a = self.degrees.to_radians();
-        let (c, s) = (a.cos().abs(), a.sin().abs());
+        let angle = self.degrees.rem_euclid(360.0);
+        let (s, c) = if angle == 0.0 {
+            (0.0, 1.0)
+        } else if angle == 90.0 {
+            (1.0, 0.0)
+        } else if angle == 180.0 {
+            (0.0, -1.0)
+        } else if angle == 270.0 {
+            (-1.0, 0.0)
+        } else {
+            angle.to_radians().sin_cos()
+        };
+        let (c, s) = (c.abs(), s.abs());
         let ow = ((width as f64) * c + (height as f64) * s) as u32;
         let oh = ((width as f64) * s + (height as f64) * c) as u32;
         (ow.max(1), oh.max(1))

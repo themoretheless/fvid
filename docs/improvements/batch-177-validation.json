@@ -1,0 +1,59 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0184"
+  ],
+  "checked_at": "2026-10-22T00:27:14+00:00",
+  "sources": [
+    "src/container/mp4.rs"
+  ],
+  "regressions": [
+    "tests/mp4_hybrid_fragments.rs"
+  ],
+  "before": [
+    "evidence/batch-177-mp4-before.rs",
+    "evidence/batch-177-tests-before.rs",
+    "evidence/batch-177-before.log",
+    "evidence/batch-177-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-177-after.log",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-177-related-after.log",
+      "passed": 78
+    },
+    {
+      "log": "evidence/batch-177-mp4-units.log",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-177-core.log",
+      "passed": 37
+    },
+    {
+      "log": "evidence/batch-177-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-177-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/container/mp4.rs": "756ae9d0643cc32fcc6b59255ebd17b3ebee111dc89f91337830aecd36527ed8",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_hybrid_fragments.rs": "3e10d39a76509fe7ee62a89971d7414d06e338337383f54752120e5b07695a12",
+    "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_mp4_hybrid_fragments_regressions.py": "3c7af038bd708715c637cf241ad5905f661c2773ecf02b2bb60b8bc6d5a369cd",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/mp4-hybrid-fragments/manifest.json": "fd9c9be907159d51877fd77c1596ad02e9fcdd5649d1c87cbec64745e7b2a51b"
+  },
+  "qualification": [
+    "Pre-fix parse_track skipped sample_index(&stbl, ...) whenever fragmented was true, dropping any initial samples in moov/stbl and ignoring corrupt stbl tables, while index_fragments only updated track.duration when track.duration == 0. Pre-fix baseline reproduced all three defects and all 4 forced acceptance tests failed.",
+    "Validating and indexing moov/stbl in fragmented tracks (using expanded_index so moof/traf samples append directly to the initial sample table) and extending track.duration = track.duration.max(stated.unwrap_or(0)) preserves all initial + fragment samples, implicit tfdt continuation from stbl, and refuses corrupt init stbl tables as Error::Invalid before native decoder admission.",
+    "All 4 healthy controls (regular MP4, empty-init 3-fragment fMP4, 1-in-stbl + 2-explicit-tfdt-fragments, and 2-in-stbl + 1-implicit-tfdt-fragment) retain exact coded packets, sync flags, 50 Hz clocks, sample/packet budgets, analytic 16x16 VP9 planes/RGB (128/130), 32 total public clamped seek targets, rewind, and repeated EOF.",
+    "4 focused tests, 78 related MP4/HLS/VP9 integration tests, 17 MP4 unit tests, 37 minimal-configuration (--no-default-features) tests, offline fixture generator unittest, and full player build pass.",
+    "ISO/IEC 14496-12:2015, 8.8.4 and 8.8.8 specify that movie fragments extend tracks defined in moov after any initial samples in moov/stbl. All fixtures are pure synthetic offline VP9/fMP4 files requiring neither FFmpeg nor network access."
+  ],
+  "counting": "One fragmented MP4 hybrid moov/stbl + moof/traf indexing and validation fix (FVID-0184). No extra IDs for individual hybrid/corrupt variants, controls, or fixture generator."
+}

@@ -263,7 +263,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         } else if avc {
             VideoDecoder::Avc(Box::new(AvcDecoder::new(&private, queue_budget)?))
         } else if hevc {
-            let mut d = HevcDecoder::from_configuration(&private, queue_budget)?;
+            let mut d = HevcDecoder::from_inband_configuration(&private, queue_budget)?;
             if let Some(index) = demux.packets.iter().position(|p| p.track == track) {
                 if let Ok(packet) = demux.read_packet(index) {
                     d.observe_packet(&packet);
@@ -491,10 +491,8 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 })
                 .unwrap_or_default(),
             VideoDecoder::Hevc(d) => d
-                .parameters()
-                .0
-                .vui
-                .as_ref()
+                .try_parameters()
+                .and_then(|(s, _)| s.vui.as_ref())
                 .and_then(|v| v.signal.as_ref())
                 .map(|v| {
                     let [primaries, transfer, matrix] = v.colour.unwrap_or([0; 3]);
@@ -697,7 +695,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             if packet.track != self.track || !packet.keyframe || packet.pts_ns > target {
                 continue;
             }
-            if chosen.is_none_or(|(_, at)| packet.pts_ns >= at) {
+            if chosen.is_none_or(|(_, at)| packet.pts_ns > at) {
                 chosen = Some((index, packet.pts_ns));
             }
         }
@@ -706,7 +704,13 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 .demux
                 .packets
                 .iter()
-                .position(|p| p.track == self.track)?;
+                .position(|p| p.track == self.track && p.keyframe)
+                .or_else(|| {
+                    self.demux
+                        .packets
+                        .iter()
+                        .position(|p| p.track == self.track)
+                })?;
             Some((index, self.demux.packets[index].pts_ns))
         });
         let Some((index, pts)) = chosen else {
@@ -853,7 +857,32 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                             .checked_add(p.y.len() + p.cb.len() + p.cr.len())
                             .ok_or_else(|| invalid("Matroska reorder storage overflow"))?;
                     }
-                    _ => {}
+                    Picture::Packed(p) => {
+                        bytes = bytes
+                            .checked_add(p.frame.data.len())
+                            .and_then(|n| n.checked_add(p.alpha.as_ref().map_or(0, Vec::len)))
+                            .ok_or_else(|| invalid("Matroska reorder storage overflow"))?;
+                    }
+                    Picture::Vp9(d) => {
+                        for plane in &d.picture.planes {
+                            bytes = plane
+                                .samples
+                                .len()
+                                .checked_mul(2)
+                                .and_then(|n| bytes.checked_add(n))
+                                .ok_or_else(|| invalid("Matroska reorder storage overflow"))?;
+                        }
+                    }
+                    Picture::Av1(d) => {
+                        for plane in &d.picture.planes {
+                            bytes = plane
+                                .samples
+                                .len()
+                                .checked_mul(2)
+                                .and_then(|n| bytes.checked_add(n))
+                                .ok_or_else(|| invalid("Matroska reorder storage overflow"))?;
+                        }
+                    }
                 }
             }
             if bytes > self.queue_budget {
@@ -1146,7 +1175,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 p.depth,
                 p.colour.full,
                 0,
-                matches!(&self.decoder, VideoDecoder::Hevc(d) if d.parameters().0.chroma_format==0),
+                matches!(&self.decoder, VideoDecoder::Hevc(d) if d.try_parameters().is_some_and(|(s, _)| s.chroma_format == 0)),
             ),
             Picture::Vp9(d) => (
                 d.picture.size,

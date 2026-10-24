@@ -81,12 +81,18 @@ fn prepare_selected(
     {
         return Ok(None);
     }
-    if options.is_some_and(|o| o.max_controlled_bytes.is_some() || o.max_rss_bytes.is_some()) {
+    if options.is_some_and(|o| o.max_controlled_bytes.is_some()) {
         return Ok(None);
+    }
+    if let Some(options) = options {
+        crate::owned_budget::check_rss_budget(options)?;
     }
     let reader = match crate::owned_mp4::Mp4Reader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        Default::default(),
+        crate::owned_mp4::Limits {
+            packet_bytes: options.map_or(32 << 20, |o| o.max_packet_bytes),
+            ..Default::default()
+        },
     ) {
         Ok(value) => value,
         Err(e) if e.is_unsupported() => return Ok(None),
@@ -101,7 +107,7 @@ fn prepare_selected(
         return Ok(None);
     };
     let track = &reader.tracks()[index];
-    if track.rotation != 0 {
+    if !matches!(track.rotation, 0 | 90 | 180 | 270) {
         return Ok(None);
     }
     let aspect = track.pixel_aspect;
@@ -118,7 +124,7 @@ fn prepare_selected(
         } else {
             track.language.clone()
         },
-        disposition: 1,
+        disposition: i32::from(crate::owned_mp4_matroska::effective_track_default(&reader, index)),
     };
     drop(reader);
     let mut temporary = Temporary::new()?;
@@ -132,6 +138,9 @@ fn prepare_selected(
                 .is_some_and(fvid_control::CancelFlag::is_cancelled)
             {
                 return Err("media operation cancelled".into());
+            }
+            if let Some(options) = options {
+                crate::owned_budget::check_rss_budget(options)?;
             }
             let current = (
                 frame.size,

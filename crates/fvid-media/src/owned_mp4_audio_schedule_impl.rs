@@ -42,6 +42,9 @@ impl AudioTimeline {
             });
         } else {
             for edit in edits {
+                if edit.duration == 0 {
+                    return Err(invalid("empty MP4 audio edit"));
+                }
                 movie_ticks = movie_ticks
                     .checked_add(u128::from(edit.duration))
                     .ok_or_else(|| invalid("audio timeline overflow"))?;

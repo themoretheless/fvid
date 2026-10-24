@@ -1,0 +1,44 @@
+{
+  "batch": 213,
+  "ids": ["FVID-0220"],
+  "title": "Route WAVE INFO metadata mutations across decode-audio and trim and expose controlled mix/merge audio in fvid::media and media_cli",
+  "scope": [
+    "src/media.rs",
+    "src/media_cli.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/audio-wave-metadata-mix-controls/tagged-48k.wav",
+    "tests/fixtures/playback-errors/audio-wave-metadata-mix-controls/adts-48k.aac",
+    "tests/fixtures/playback-errors/audio-wave-metadata-mix-controls/flac-48k.flac"
+  ],
+  "generators": [
+    "scripts/generate_audio_wave_metadata_mix_controls_regressions.py",
+    "scripts/test_audio_wave_metadata_mix_controls_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-213-pre-edit/src/media.rs",
+      "docs/improvements/snapshots/batch-213-pre-edit/src/media_cli.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-213-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-213-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-213-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --features player --test audio_wave_metadata_mix_controls_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --features player --test native_audio_api --test native_audio_plan --test native_audio_trim --test native_audio_mix --test native_wave_audio --test native_wave_probe_info --test native_wave_route_regressions --test mix_merge_subtitle_controls_regressions --test loudnorm_budget_mix_concat_regressions --test audio_wave_metadata_mix_controls_regressions",
+      "passed": 44,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 -m unittest scripts/test_audio_wave_metadata_mix_controls_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

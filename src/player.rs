@@ -1007,8 +1007,16 @@ fn parse_tone_map(text: &str) -> crate::Result<ToneMap> {
 /// in every message about it. The five table formats — `.cube`, `.3dl`, `.dat`,
 /// `.spi1d`, `.spi3d` — are told apart by their content, not their suffix.
 fn read_lut(path: &str) -> crate::Result<Lut> {
-    let text = std::fs::read_to_string(path)
+    const MAX_LUT_BYTES: usize = 16 * 1024 * 1024;
+    let file = File::open(path)
         .map_err(|error| crate::invalid(&format!("cannot read --lut {path:?}: {error}")))?;
+    let mut text = String::new();
+    file.take((MAX_LUT_BYTES + 1) as u64)
+        .read_to_string(&mut text)
+        .map_err(|error| crate::invalid(&format!("cannot read --lut {path:?}: {error}")))?;
+    if text.len() > MAX_LUT_BYTES {
+        return Err(crate::invalid(&format!("bad --lut {path:?}: LUT file is too large")));
+    }
     Lut::from_text(&text).map_err(|error| crate::invalid(&format!("bad --lut {path:?}: {error}")))
 }
 
@@ -1434,6 +1442,9 @@ fn shown_size(coded: Vec2, pixel_aspect: (u32, u32), aspect: Aspect, frame: Vec2
 /// filled — so a fitted picture keeps the letterbox the fitting left it with,
 /// and a magnified one keeps the frame covered.
 fn video_rect(frame: Rect, size: Vec2, zoom_milli: u32, pan: Vec2) -> Rect {
+    if size.x <= 0.0 || size.y <= 0.0 || frame.width() <= 0.0 || frame.height() <= 0.0 {
+        return Rect::from_center_size(frame.center(), Vec2::ZERO);
+    }
     let fit = (frame.width() / size.x)
         .min(frame.height() / size.y)
         .max(0.0);
@@ -2847,7 +2858,7 @@ impl Player {
         let shifted = if self.subtitle_delay_ms >= 0 {
             at.checked_sub(shift)?
         } else {
-            at + shift
+            at.checked_add(shift)?
         };
         subtitles::active(&self.cues, shifted, Duration::ZERO).map(|cue| cue.text.as_str())
     }
@@ -3432,17 +3443,17 @@ impl Player {
         let dialog = match what {
             Pick::Item => dialog
                 .add_filter("Playlists", &["m3u", "m3u8", "pls"])
-                .add_filter("Media", &["y4m", "mp4", "mov", "m4a", "webm", "mkv", "mka"])
+                .add_filter("Media", &["y4m", "mp4", "mov", "m4v", "m4a", "webm", "mkv", "mka", "avi"])
                 .add_filter(
                     "Audio",
                     &[
                         "mp3", "mp2", "mp1", "flac", "aac", "ac3", "wav", "aif", "aiff", "au", "snd",
-                        "ogg", "mid", "xm",
+                        "ogg", "wv", "wvc", "mid", "xm",
                     ],
                 ),
             Pick::Folder => dialog,
             Pick::Subtitles => {
-                dialog.add_filter("Subtitles", &["srt", "vtt", "ass", "ssa", "smi", "smil"])
+                dialog.add_filter("Subtitles", &["srt", "vtt", "ass", "ssa", "smi", "sami", "smil"])
             }
         };
         self.dialog = Some((what, if what == Pick::Folder {
@@ -4966,12 +4977,13 @@ fn playlist_osd(index: usize, len: usize) -> String {
 /// why rather than leaving the window blank.
 fn playable_path(path: &Path) -> bool {
     matches!(path.extension().and_then(|ext| ext.to_str()).map(str::to_ascii_lowercase).as_deref(),
-        Some("y4m" | "mp4" | "mov" | "m4v" | "m4a" | "webm" | "mkv" | "mka" |
+        Some("y4m" | "mp4" | "mov" | "m4v" | "m4a" | "webm" | "mkv" | "mka" | "avi" |
             "mp3" | "mp2" | "mp1" | "flac" | "aac" | "ac3" | "wav" | "aif" | "aiff" |
-            "au" | "snd" | "ogg" | "mid" | "xm"))
+            "au" | "snd" | "ogg" | "wv" | "wvc" | "mid" | "xm"))
 }
 
 fn expand_inputs(inputs: &[PathBuf]) -> Vec<PathBuf> {
+    const MAX_PLAYLIST_BYTES: usize = 4 * 1024 * 1024;
     let mut out = Vec::with_capacity(inputs.len());
     for input in inputs {
         // Known media paths need no synchronous filesystem query on the UI
@@ -4995,9 +5007,17 @@ fn expand_inputs(inputs: &[PathBuf]) -> Vec<PathBuf> {
         );
         match listing {
             true => {
-                if let Ok(text) = std::fs::read_to_string(input) {
-                    let base = input.parent().unwrap_or(Path::new(""));
-                    out.extend(parse_playlist(&text, base));
+                if let Ok(file) = File::open(input) {
+                    let mut text = String::new();
+                    if file
+                        .take((MAX_PLAYLIST_BYTES + 1) as u64)
+                        .read_to_string(&mut text)
+                        .is_ok()
+                        && text.len() <= MAX_PLAYLIST_BYTES
+                    {
+                        let base = input.parent().unwrap_or(Path::new(""));
+                        out.extend(parse_playlist(&text, base));
+                    }
                 }
             }
             false => out.push(input.clone()),
@@ -5031,13 +5051,22 @@ fn parse_playlist(text: &str, base: &Path) -> Vec<PathBuf> {
                 }
             }
             None => {
-                if line.is_empty() || line.starts_with(['#', ';']) {
+                if line.is_empty()
+                    || line.starts_with(['#', ';'])
+                    || (line.starts_with('[') && line.ends_with(']'))
+                {
                     continue;
                 }
                 line
             }
         };
         let entry = entry.trim();
+        let entry = entry
+            .strip_prefix('"')
+            .and_then(|s| s.strip_suffix('"'))
+            .or_else(|| entry.strip_prefix('\'').and_then(|s| s.strip_suffix('\'')))
+            .unwrap_or(entry)
+            .trim();
         if entry.is_empty() || entry.contains("://") {
             continue;
         }
@@ -12440,3 +12469,96 @@ mod native_wavpack_file_factory_regressions {
         result.unwrap();
     }
 }
+
+#[cfg(test)]
+mod player_queue_and_geometry_regressions {
+    use super::*;
+
+    #[test]
+    fn folder_expansion_and_playlists_admit_avi_and_wavpack_and_ignore_ini_headers_and_quotes() {
+        let fixture_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/player-queue");
+        let temp = std::env::temp_dir().join(format!("fvid-player-queue-reg-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&temp);
+        std::fs::create_dir_all(&temp).unwrap();
+        for name in ["queue.pls", "queue.m3u", "clip.avi", "clip.wv", "companion.wvc"] {
+            std::fs::copy(fixture_dir.join(name), temp.join(name)).unwrap();
+        }
+        // Also place a stray file literally named "[playlist]" in the directory
+        // to prove PLS section headers are never resolved as relative paths.
+        std::fs::write(temp.join("[playlist]"), b"not media").unwrap();
+
+        let expanded_dir = expand_inputs(&[temp.clone()]);
+        assert_eq!(
+            expanded_dir,
+            vec![
+                temp.join("clip.avi"),
+                temp.join("clip.wv"),
+                temp.join("companion.wvc"),
+            ]
+        );
+
+        let expanded_pls = expand_inputs(&[temp.join("queue.pls")]);
+        assert_eq!(
+            expanded_pls,
+            vec![temp.join("clip.avi"), temp.join("clip.wv")]
+        );
+
+        let expanded_m3u = expand_inputs(&[temp.join("queue.m3u")]);
+        assert_eq!(
+            expanded_m3u,
+            vec![temp.join("clip.avi"), temp.join("clip.wv")]
+        );
+
+        std::fs::remove_dir_all(&temp).unwrap();
+    }
+
+    #[test]
+    fn subtitle_negative_delay_and_zero_sized_video_rect_do_not_overflow_or_produce_nan() {
+        let mut player = Player {
+            subtitle_shown: true,
+            subtitle_delay_ms: -5_000,
+            cues: vec![Cue {
+                start: Duration::from_secs(1),
+                end: Duration::from_secs(2),
+                text: "caption".into(),
+            }],
+            ..Default::default()
+        };
+        assert_eq!(player.subtitle_line(Duration::MAX), None);
+        player.subtitle_delay_ms = 5_000;
+        assert_eq!(player.subtitle_line(Duration::from_secs(1)), None);
+
+        let frame = Rect::from_min_size(Pos2::ZERO, Vec2::new(640.0, 360.0));
+        let rect = video_rect(frame, Vec2::ZERO, 1_000, Vec2::new(10.0, -10.0));
+        assert!(rect.min.x.is_finite() && rect.min.y.is_finite());
+        assert!(rect.max.x.is_finite() && rect.max.y.is_finite());
+        assert_eq!(rect.size(), Vec2::ZERO);
+    }
+
+    #[test]
+    fn oversized_lut_and_skin_files_are_refused_by_bounded_readers() {
+        let temp = std::env::temp_dir().join(format!("fvid-player-bounds-reg-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&temp);
+        std::fs::create_dir_all(&temp).unwrap();
+
+        let huge_skin = temp.join("huge-skin.json");
+        std::fs::write(&huge_skin, vec![b' '; 64 * 1024 + 2]).unwrap();
+        let skin_err = player_skin::Skin::load(huge_skin.to_str().unwrap()).unwrap_err();
+        assert!(
+            skin_err.to_string().contains("too large"),
+            "unexpected skin error: {skin_err}"
+        );
+
+        let huge_lut = temp.join("huge.cube");
+        std::fs::write(&huge_lut, vec![b'#'; 16 * 1024 * 1024 + 2]).unwrap();
+        let lut_err = read_lut(huge_lut.to_str().unwrap()).unwrap_err();
+        assert!(
+            lut_err.to_string().contains("too large"),
+            "unexpected lut error: {lut_err}"
+        );
+
+        std::fs::remove_dir_all(&temp).unwrap();
+    }
+}
+

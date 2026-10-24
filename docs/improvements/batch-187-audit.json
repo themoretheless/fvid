@@ -1,0 +1,27 @@
+{
+  "batch": 187,
+  "improvement_id": "FVID-0194",
+  "scope": [
+    "crates/fvid-media/src/owned_flac.rs",
+    "crates/fvid-media/src/owned_flac_decoder.rs",
+    "src/codec/flac_decoder.rs",
+    "src/playback/audio/webm_audio.rs"
+  ],
+  "findings": [
+    {
+      "file": "crates/fvid-media/src/owned_flac.rs",
+      "function": "Head::read",
+      "issue": "Head::read did not require the first metadata block at byte 4 to be STREAMINFO (type 0), accepted duplicate STREAMINFO blocks, accepted STREAMINFO blocks with len > 34, accepted reserved metadata block types (7..=127) in the leading metadata loop, and omitted RFC 9639 §8.2 block-size bounds validation (min_block >= 16, max_block >= 16, min_block <= max_block)."
+    },
+    {
+      "file": "crates/fvid-media/src/owned_flac.rs",
+      "function": "Flac::parse_owned_controlled",
+      "issue": "Flac::parse_owned_controlled only checked head.max_frame == largest when head.min_frame != 0, and did not verify channel_mask.count_ones() <= channels for explicit Vorbis-comment speaker masks."
+    },
+    {
+      "file": "crates/fvid-media/src/owned_flac_decoder.rs",
+      "function": "FlacDecoder::from_matroska",
+      "issue": "Matroska FLAC setup omitted STREAMINFO block-size bounds validation (min_block >= 16, max_block >= 16, min_block <= max_block) and accepted Vorbis-comment speaker masks whose popcount exceeded channels (matched in src/codec/flac_decoder.rs and src/playback/audio/webm_audio.rs)."
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0199"
+  ],
+  "checked_at": "2026-10-22T07:38:00+00:00",
+  "sources": [
+    "src/playback/video/webm.rs",
+    "src/playback/video/native.rs"
+  ],
+  "regressions": [
+    "tests/video_reader_regressions.rs"
+  ],
+  "before": [
+    "evidence/batch-192-webm-before.rs",
+    "evidence/batch-192-native-before.rs",
+    "evidence/batch-192-tests-before.rs",
+    "evidence/batch-192-before.log",
+    "evidence/batch-192-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-192-after.log",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-192-related-after.log",
+      "passed": 13
+    },
+    {
+      "log": "evidence/batch-192-playback-units.log",
+      "passed": 44
+    },
+    {
+      "log": "evidence/batch-192-core.log",
+      "passed": 359
+    },
+    {
+      "log": "evidence/batch-192-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-192-fixtures-after.log",
+      "passed": 2
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/playback/video/webm.rs": "52f142f3926b7f937334a329e5c8d4d3b43a9d65f6e1e8dd6648b8501285b0d1",
+    "/Users/themoretheless/Documents/Sources/fvid/src/playback/video/native.rs": "acf739615951cc8174111f321900c31062d670311142f8417ee445ad9d57b453",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/video_reader_regressions.rs": "8784a138d594c4a7aa101010170cf4b4fd7df0c40bcf6c461168def7393a8b73",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/video-readers/manifest.json": "785b869c7d91f74c1059d390f6a4555d8296dbd385305338e56b1095ae7c9c4a"
+  },
+  "qualification": [
+    "Pre-fix WebmVideoReader::next_decoded matched Picture::Packed, Picture::Vp9, and Picture::Av1 with `_ => {}`, charging 0 bytes for packed/planar reordered frames in the Matroska reorder queue (allowing reordered AVC 4:4:4/4:2:2/monochrome/GBR and software HEVC frames to bypass queue_budget); WebmVideoReader::open_with_hardware used HevcDecoder::from_configuration and called d.parameters() in bitstream_colour() and advance(), rejecting or panicking on Matroska HEVC tracks with incomplete/empty hvcC records whose VPS/SPS/PPS arrive in-band after packet 0; and NativeReader::current_pts returned Some((0, timescale)) on NativeReader::Avc before any frame was read or after rewind().",
+    "Updating src/playback/video/webm.rs and src/playback/video/native.rs charges exact Picture::Packed (frame.data + alpha), Picture::Vp9, and Picture::Av1 plane bytes in WebmVideoReader::next_decoded, opens Matroska HEVC with HevcDecoder::from_inband_configuration and queries d.try_parameters() in bitstream_colour() and advance(), and returns None from NativeReader::current_pts on NativeReader::Avc when *frames == 0.",
+    "Synthetic fixtures in tests/fixtures/playback-errors/video-readers/ verify PackedPlanar reorder queue budget rejection and full-budget playback, deferred in-band SPS HEVC Matroska open and colour query, and MP4 NativeReader::current_pts before frame 1 and after rewind().",
+    "2 focused integration tests, 13 related Matroska/AVC/HEVC integration tests, 44 playback unit tests, 359 minimal-configuration (--no-default-features) tests, offline fixture unittest (2 tests), and full player binary build pass.",
+    "ISO/IEC 14496-15 hev1/in-band HEVC parameter set delivery and Matroska V_MPEGH/ISO/HEVC / V_MPEG4/ISO/AVC reorder queue memory bounds govern these checks. All fixtures are pure synthetic offline files requiring neither FFmpeg nor network access."
+  ],
+  "counting": "One playback video reader reorder-queue memory accounting, deferred in-band Matroska HEVC parameter handling, and pre-first-frame MP4 PTS reporting fix across src/playback/video/webm.rs and src/playback/video/native.rs (FVID-0199). No extra IDs for individual fixture cases."
+}

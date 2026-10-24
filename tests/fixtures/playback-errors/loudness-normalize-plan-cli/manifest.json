@@ -1,0 +1,14 @@
+{
+  "batch_id": "FVID-0238",
+  "description": "Synthetic WAVE and Matroska PCM audio fixtures for loudness/normalize-loudness plan CLI and API parity regressions.",
+  "files": {
+    "stereo-pcm.mka": {
+      "bytes": 96313,
+      "sha256": "eca6111b36b517d33cf6a256556bc918de55dae53f68c2a6d8ae05dc989fb4b6"
+    },
+    "stereo.wav": {
+      "bytes": 96102,
+      "sha256": "01f57f4a9cbc4e87a1e691f001d060743794862455d18ee5ef1b4fd6b72aaf32"
+    }
+  }
+}

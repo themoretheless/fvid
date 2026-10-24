@@ -1,0 +1,20 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0185",
+  "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+  "source_sha256": "8ea92de55f8f36e1ada7eff86e376e71fc231f859fed9f37cc99daac320c9795",
+  "before_snapshot": "evidence/batch-178-owned-mp4-impl-before.rs",
+  "problem": "The library-owned MP4 demuxer fvid_media::owned_mp4::Mp4Reader (used by probe_mp4, decode_video, owned_mp4_audio, and owned_mp4_remux) lagged behind src/container/mp4.rs on fragmented MP4 parsing: it panicked with arithmetic negation overflow on trun.data_offset == i32::MIN, silently accepted effective sample description index 0, contradictory trun flags (0x00_0004 + 0x00_0400), overlong trex/tfhd/tfdt boxes, missing/invalid mfhd headers, and zero/duplicate trex track IDs, failed on valid empty-leading-run per-traf trun continuity, and dropped initial moov/stbl samples while ignoring corrupt init stbl tables in hybrid fragmented files.",
+  "primary_reference": "https://b.goeswhere.com/ISO_IEC_14496-12_2015a.pdf",
+  "reference_provenance": "ISO/IEC 14496-12:2015, 8.8.3 (TrackExtendsBox), 8.8.4 (MovieFragmentBox), 8.8.5 (MovieFragmentHeaderBox), 8.8.7 (TrackFragmentHeaderBox), 8.8.8 (TrackRunBox), and 8.8.12 (TrackFragmentBaseMediaDecodeTimeBox).",
+  "fixtures": "tests/fixtures/playback-errors/mp4-hybrid-fragments",
+  "scope": "Bring fvid_media::owned_mp4::Mp4Reader, probe_mp4, and decode_video into full fragmented MP4 compliance across all 6 synthetic fMP4 fixture suites (mp4-signed-offset, mp4-fragment-description, mp4-trun-flags, mp4-tfhd-defaults, mp4-multi-trun, mp4-mfhd-trex, and mp4-hybrid-fragments).",
+  "requirements": [
+    "Reproduce pre-fix i32::MIN panic, silent acceptance of malformed fMP4 headers/flags/init-stbl, cross-traf cursor bug, and dropped hybrid moov/stbl samples in fvid_media::owned_mp4::Mp4Reader before editing production code.",
+    "Update crates/fvid-media/src/owned_mp4_impl.rs to validate and index moov/stbl in fragmented tracks, enforce mfhd/trex/tfhd/tfdt/trun invariants, resolve negative trun.data_offset via unsigned_abs(), and track a per-traf data cursor.",
+    "Verify exact packets, timestamps, sync flags, virtual 2 GiB sparse reads, probe_mp4 stream/duration metadata, and decode_video frame counts across all healthy controls and refusal cases.",
+    "Run focused, related MP4/HLS/VP9, unit, minimal-configuration, fixture unittest, and player build gates."
+  ],
+  "implementation_plan": "Propagate the fragmented MP4 validation and hybrid moov/stbl + moof/traf indexing logic from src/container/mp4.rs to crates/fvid-media/src/owned_mp4_impl.rs.",
+  "counting": "One owned_mp4 fragmented MP4 validation and hybrid indexing parity fix (FVID-0185). No extra IDs for individual fixture suites or controls."
+}

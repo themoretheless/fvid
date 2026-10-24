@@ -102,7 +102,7 @@ impl Read for CheckedRead<'_> {
         self.input.read(bytes)
     }
 }
-fn open(source: &Path, options: &CopyOptions) -> Result<Program> {
+pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<Program> {
     let selected = match options.streams.as_slice() {
         [] => None,
         [index] => Some(*index),
@@ -297,6 +297,26 @@ pub(crate) fn append_info(path: &Path, info: &[u8]) -> Result<()> {
     file.write_all(&riff.to_le_bytes())
         .map_err(|e| e.to_string())?;
     file.flush().map_err(|e| e.to_string())
+}
+pub(crate) fn decode_to_wave(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<crate::owned_adts_export::DecodedSpool> {
+    check(options)?;
+    let mut program = open(source, options)?;
+    let channels = program.channels();
+    let mask = program.output_channel_mask().unwrap_or(0);
+    let info = source_info(&program)?;
+    let spool = crate::owned_adts_export::spool_decoded(
+        48000,
+        channels,
+        mask,
+        options,
+        move |writer, options| decode(&mut program, writer, None, options),
+    )?;
+    check(options)?;
+    append_info(&spool.wave, &info)?;
+    Ok(spool)
 }
 pub(crate) fn apply(
     source: &Path,

@@ -62,7 +62,6 @@ pub(crate) fn supports(
         transform.channels.is_none_or(|channels| {
             channels == i32::from(stats.channels)
                 || (stats.channels <= 2 && (1..=8).contains(&channels))
-                || (stats.channels <= 8 && matches!(channels, 1 | 2))
         })
     })
 }
@@ -80,10 +79,16 @@ pub(crate) fn apply(
     }
     crate::owned_budget::check_rss_budget(options)?;
     let (rate, channels) = geometry(source, options)?;
+    let mask = if channels <= 2 {
+        crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32
+    } else {
+        0
+    };
+    let info = crate::owned_wave_metadata::matroska_source_info(source, options)?;
     let spool = crate::owned_adts_export::spool_decoded_with_precision(
         rate,
         channels,
-        crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
+        mask,
         64,
         options,
         |writer, options| {
@@ -96,6 +101,7 @@ pub(crate) fn apply(
             .map_err(|e| e.to_string())
         },
     )?;
+    crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
     crate::owned_adts_export::export_spool(spool, destination, transform, options)
 }
 

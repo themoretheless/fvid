@@ -305,13 +305,32 @@ impl Head {
                     bytes.len() - body
                 )));
             }
-            if flag & 0x7f == 0 {
-                if len < STREAM_INFO {
+            let kind = flag & 0x7f;
+            if kind > 6 {
+                return Err(invalid(&format!(
+                    "reserved FLAC metadata block type {kind} at byte {pos}"
+                )));
+            }
+            if pos == 4 && kind != 0 {
+                return Err(invalid("first FLAC metadata block must be STREAMINFO"));
+            }
+            if kind == 0 {
+                if head.is_some() {
+                    return Err(invalid("duplicate STREAMINFO metadata block"));
+                }
+                if len != STREAM_INFO {
                     return Err(invalid(&format!(
                         "STREAMINFO holds {len} bytes, not the 34 it is defined by"
                     )));
                 }
                 let at = &bytes[body..body + STREAM_INFO];
+                let min_block = be16(&at[0..2]);
+                let max_block = be16(&at[2..4]);
+                if min_block < 16 || max_block < 16 || min_block > max_block {
+                    return Err(invalid(&format!(
+                        "STREAMINFO states invalid block size bounds {min_block}..{max_block}"
+                    )));
+                }
                 let rest = u64::from_be_bytes(at[10..18].try_into().unwrap_or([0; 8]));
                 let mut stream_info = [0u8; STREAM_INFO];
                 stream_info.copy_from_slice(at);
@@ -521,19 +540,25 @@ impl Flac {
         }
         let smallest = frames.iter().map(|at| at.size as u32).min().unwrap_or(0);
         let largest = frames.iter().map(|at| at.size as u32).max().unwrap_or(0);
-        if head.min_frame != 0 && (head.min_frame != smallest || head.max_frame != largest) {
+        if (head.min_frame != 0 && head.min_frame != smallest)
+            || (head.max_frame != 0 && head.max_frame != largest)
+        {
             return Err(invalid(&format!(
                 "STREAMINFO states frame sizes {}..{}, the frames are {smallest}..{largest}",
                 head.min_frame, head.max_frame
             )));
+        }
+        let channel_mask = crate::owned_flac_layout::channel_mask(&bytes[..head.data_start])?
+            .unwrap_or_else(|| crate::owned_flac_decoder::channel_mask(head.channels));
+        if channel_mask.count_ones() > u32::from(head.channels) {
+            return Err(invalid("FLAC channel mask exceeds stream channel count"));
         }
         Ok(Self {
             tag: TAG,
             sample_rate: head.sample_rate,
             channels: head.channels,
             bits_per_sample: head.bits_per_sample,
-            channel_mask: crate::owned_flac_layout::channel_mask(&bytes[..head.data_start])?
-                .unwrap_or_else(|| crate::owned_flac_decoder::channel_mask(head.channels)),
+            channel_mask,
             frames,
             stream_info: head.stream_info.to_vec(),
             data_start: head.data_start,
@@ -552,6 +577,11 @@ impl Flac {
     pub fn packet(&self, index: usize) -> &[u8] {
         let at = self.frames[index.min(self.frames.len() - 1)];
         &self.data[at.start..at.start + at.size]
+    }
+
+    /// Leading `fLaC` marker and metadata blocks preceding the first audio frame.
+    pub fn metadata_blocks(&self) -> &[u8] {
+        &self.data[..self.data_start]
     }
 
     /// Samples the stream runs to, counted off the frames themselves.

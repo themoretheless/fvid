@@ -1,0 +1,58 @@
+{
+  "batch": 237,
+  "ids": ["FVID-0244"],
+  "title": "Enforce set-then-delete container and stream metadata precedence, case-insensitive tag removal, and uppercase Matroska custom tag normalization across MP4/ADTS/PCM Matroska remux, concat, and WAVE INFO editing",
+  "scope": [
+    "crates/fvid-media/src/owned_mp4_remux.rs",
+    "src/container/mp4_concat.rs",
+    "src/native_plan.rs",
+    "crates/fvid-media/src/owned_matroska_adts_impl.rs",
+    "src/native_export/pcm_matroska.rs",
+    "crates/fvid-media/src/owned_wave_metadata.rs",
+    "crates/fvid-media/src/owned_audio_export.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/remux-concat-wave-metadata-precedence/adts-mono-a.aac",
+    "tests/fixtures/playback-errors/remux-concat-wave-metadata-precedence/adts-mono-b.aac",
+    "tests/fixtures/playback-errors/remux-concat-wave-metadata-precedence/avc-aac-segment.mp4",
+    "tests/fixtures/playback-errors/remux-concat-wave-metadata-precedence/tone-info-a.wav",
+    "tests/fixtures/playback-errors/remux-concat-wave-metadata-precedence/tone-info-b.wav",
+    "tests/fixtures/playback-errors/remux-concat-wave-metadata-precedence/manifest.json"
+  ],
+  "generators": [
+    "scripts/generate_remux_concat_wave_metadata_regressions.py",
+    "scripts/test_remux_concat_wave_metadata_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-237-pre-edit/crates/fvid-media/src/owned_mp4_remux.rs",
+      "docs/improvements/snapshots/batch-237-pre-edit/src/container/mp4_concat.rs",
+      "docs/improvements/snapshots/batch-237-pre-edit/src/native_plan.rs",
+      "docs/improvements/snapshots/batch-237-pre-edit/crates/fvid-media/src/owned_matroska_adts_impl.rs",
+      "docs/improvements/snapshots/batch-237-pre-edit/src/native_export/pcm_matroska.rs",
+      "docs/improvements/snapshots/batch-237-pre-edit/crates/fvid-media/src/owned_wave_metadata.rs",
+      "docs/improvements/snapshots/batch-237-pre-edit/crates/fvid-media/src/owned_audio_export.rs",
+      "docs/improvements/snapshots/batch-237-pre-edit/owned_mp4_metadata.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-237-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-237-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-237-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test remux_concat_wave_metadata_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test owned_mp4_metadata --test audio_mix_merge_concat_metadata_regressions --test adts_matroska_audio_metadata_regressions --test audio_matroska_pcm_metadata_preservation_regressions",
+      "passed": 6,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 -m unittest scripts/test_remux_concat_wave_metadata_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

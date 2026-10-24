@@ -1,0 +1,27 @@
+{
+  "batch": 188,
+  "improvement_id": "FVID-0195",
+  "scope": [
+    "src/container/smf.rs",
+    "src/playback/audio/smf.rs",
+    "src/container/xm.rs",
+    "src/playback/audio/xm.rs"
+  ],
+  "findings": [
+    {
+      "file": "src/container/smf.rs",
+      "function": "parse_track",
+      "issue": "parse_track returned Ok(tick) when the while at < data.len() loop reached the end of an MTrk chunk without ever encountering a mandatory End-of-Track (FF 2F) meta event."
+    },
+    {
+      "file": "src/container/xm.rs",
+      "function": "parse_patterns / read_cell / parse_instruments",
+      "issue": "read_cell returned unpacked cells (flag & 0x80 == 0) without clamping out-of-range notes > NOTE_KEY_OFF (97) to 0, violating the packed/unpacked cell equivalence invariant; parse_patterns passed the full file slice to read_cell and only checked cursor > end after reading a cell; and parse_instruments accepted 16-bit samples (SAMPLE_FLAG_16_BIT) with odd data_bytes, silently dropping the trailing byte in decode_delta_16."
+    },
+    {
+      "file": "src/playback/audio/smf.rs",
+      "function": "SmfAudioReader::present_decoded / XmAudioReader::present_decoded",
+      "issue": "SmfAudioReader::present_decoded and XmAudioReader::present_decoded did not reject negative source_pts or unaligned PCM frame payloads (packet.data.len() % (CHANNELS * 4) != 0)."
+    }
+  ]
+}

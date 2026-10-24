@@ -1,0 +1,59 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0180"
+  ],
+  "checked_at": "2026-10-21T23:22:16+00:00",
+  "sources": [
+    "src/container/mp4.rs"
+  ],
+  "regressions": [
+    "tests/mp4_trun_flags.rs"
+  ],
+  "before": [
+    "evidence/batch-173-mp4-before.rs",
+    "evidence/batch-173-tests-before.rs",
+    "evidence/batch-173-before.log",
+    "evidence/batch-173-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-173-after.log",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-173-related-after.log",
+      "passed": 62
+    },
+    {
+      "log": "evidence/batch-173-mp4-units.log",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-173-core.log",
+      "passed": 29
+    },
+    {
+      "log": "evidence/batch-173-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-173-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/container/mp4.rs": "f50da4557c864deaeb06200cf92892accba5fdea3694f609ee5d3ea4c2ae636e",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_trun_flags.rs": "f407b7455155b304d03af4fa3cf0b2534102ec56a350e7f1ef6cfe8155e15d08",
+    "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_mp4_trun_flag_exclusivity_regressions.py": "932a0d2d05cbdc43506740710820fbdfa2ca93e1dacbf18e23b839c8d79a4f19",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/mp4-trun-flags/manifest.json": "213b0fd2cb24e19b6fd695979eec176724a288a60e2edecf73db7dc6f4897822"
+  },
+  "qualification": [
+    "Pre-fix trun parsing accepted 0x00_0004 (first-sample-flags-present) and 0x00_0400 (sample-flags-present) simultaneously, reading both fields from the box payload and silently discarding first_sample_flags in favor of row[0]'s sample_flags. Pre-fix baseline passed 3/3 controls and both forced acceptance gates failed specifically because 0x00_0405 runs indexed and reached native VP9 playback.",
+    "Validating that flags & 0x00_0004 != 0 and flags & 0x00_0400 != 0 are never combined refuses all 4 malformed cases (both populated sync/non-sync contradictions, late third-fragment contradiction, and empty-run contradiction) as Error::Invalid ('MP4 track-run states both first-sample flags and per-sample flags') before publishing samples or admitting native decoders.",
+    "All 5 healthy controls (regular MP4, default tfhd/trex flags, first-sample-only, per-sample-only, and first-sample-lead-sync) retain exact coded packets, sync flags, 50 Hz clocks, sample/packet budgets, analytic 16x16 VP9 planes/RGB (128/130), 40 total public clamped seek targets, rewind, and repeated EOF.",
+    "4 focused tests, 62 related MP4/HLS/VP9 integration tests, 17 MP4 unit tests, 29 minimal-configuration (--no-default-features) tests, offline fixture generator unittest, and full player build pass.",
+    "ISO/IEC 14496-12:2015, 8.8.8 specifies that sample-flags-present shall not be set when first-sample-flags-present is set. All fixtures are pure synthetic offline VP9/fMP4 files requiring neither FFmpeg nor network access."
+  ],
+  "counting": "One trun flag mutual-exclusion fix (FVID-0180). No extra IDs for fixture variants, controls, or generator."
+}

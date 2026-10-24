@@ -9,20 +9,34 @@ type Result<T> = std::result::Result<T, String>;
 fn policies(options: &CopyOptions) -> bool {
     options.max_packet_bytes > 0
         && options.max_controlled_bytes.is_none()
-        && options.max_rss_bytes.is_none()
-        && options.stream_metadata_set.iter().all(|(_, key, value)| track_key(key) && !value.contains('\0'))
+        && crate::owned_budget::check_rss_budget(options).is_ok()
+        && options.stream_metadata_set.iter().all(|(_, key, value)| {
+            track_key(key)
+                && !value.contains('\0')
+                && value.len() <= 1024
+                && (!key.eq_ignore_ascii_case("language") || value.len() <= 128)
+        })
         && options.stream_metadata_delete.iter().all(|(_, key)| track_key(key))
         && options.metadata_set.len().saturating_add(options.metadata_delete.len()) <= 64
         && options.metadata_set.iter().all(|(key, value)| {
-            !key.contains('\0') && !value.contains('\0')
-                && crate::owned_file_tags::FileTags::supports_key(key)
+            !key.is_empty()
+                && key.len() <= 128
+                && !key.contains('\0')
+                && !value.contains('\0')
+                && (crate::owned_file_tags::FileTags::supports_key(key) || value.len() <= 1024)
         })
         && options.metadata_delete.iter().all(|key| {
-            !key.contains('\0') && crate::owned_file_tags::FileTags::supports_key(key)
+            !key.is_empty() && key.len() <= 128 && !key.contains('\0')
         })
 }
 fn track_key(key: &str) -> bool {
-    key.eq_ignore_ascii_case("title") || key.eq_ignore_ascii_case("language")
+    !key.is_empty()
+        && key.len() <= 128
+        && !key.contains('\0')
+        && !matches!(
+            key.to_ascii_lowercase().as_str(),
+            "rotate" | "stereo_mode" | "alpha_mode"
+        )
 }
 fn track_policy(options: &CopyOptions, selected: &[usize]) -> bool {
     options.stream_metadata_set.iter().all(|(index, _, _)| selected.contains(index))
@@ -32,25 +46,73 @@ fn track_policy(options: &CopyOptions, selected: &[usize]) -> bool {
                 .saturating_add(options.stream_metadata_delete.iter().filter(|(i, _)| i == index).count()) <= 64
         })
 }
-fn track_metadata<'a>(options: &'a CopyOptions, selected: &[usize]) -> Vec<crate::owned_mp4_matroska::TrackMetadataOverride<'a>> {
-    selected.iter().filter_map(|&index| {
-        let mut edit = crate::owned_mp4_matroska::TrackMetadataOverride { index, name: None, language: None };
-        for (_, key) in options.stream_metadata_delete.iter().filter(|(i, _)| *i == index) {
-            if key.eq_ignore_ascii_case("title") { edit.name = Some(""); } else { edit.language = Some(""); }
-        }
+fn track_metadata<'a>(
+    options: &'a CopyOptions,
+    selected: &[usize],
+) -> (
+    Vec<crate::owned_mp4_matroska::TrackMetadataOverride<'a>>,
+    std::collections::BTreeMap<usize, std::collections::BTreeMap<String, String>>,
+) {
+    let mut overrides = Vec::new();
+    let mut scoped: std::collections::BTreeMap<usize, std::collections::BTreeMap<String, String>> =
+        std::collections::BTreeMap::new();
+    for (output_index, &index) in selected.iter().enumerate() {
+        let mut edit = crate::owned_mp4_matroska::TrackMetadataOverride {
+            index,
+            name: None,
+            language: None,
+        };
+        let mut tags = std::collections::BTreeMap::<String, String>::new();
         for (_, key, value) in options.stream_metadata_set.iter().filter(|(i, _, _)| *i == index) {
-            if key.eq_ignore_ascii_case("title") { edit.name = Some(value); } else { edit.language = Some(value); }
+            if key.eq_ignore_ascii_case("title") {
+                edit.name = Some(value);
+            } else if key.eq_ignore_ascii_case("language") {
+                edit.language = Some(value);
+            } else {
+                tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
+                if !value.is_empty() {
+                    tags.insert(key.to_ascii_uppercase(), value.clone());
+                }
+            }
         }
-        (edit.name.is_some() || edit.language.is_some()).then_some(edit)
-    }).collect()
+        for (_, key) in options.stream_metadata_delete.iter().filter(|(i, _)| *i == index) {
+            if key.eq_ignore_ascii_case("title") {
+                edit.name = Some("");
+            } else if key.eq_ignore_ascii_case("language") {
+                edit.language = Some("");
+            } else {
+                tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
+            }
+        }
+        if edit.name.is_some() || edit.language.is_some() {
+            overrides.push(edit);
+        }
+        if !tags.is_empty() {
+            scoped.insert(output_index, tags);
+        }
+    }
+    (overrides, scoped)
 }
 fn metadata<R: std::io::Read + std::io::Seek>(
-    reader: &crate::owned_mp4::Mp4Reader<R>, options: &CopyOptions,
-) -> crate::owned_matroska::FileMetadata {
+    reader: &crate::owned_mp4::Mp4Reader<R>,
+    options: &CopyOptions,
+) -> (
+    crate::owned_matroska::FileMetadata,
+    std::collections::BTreeMap<String, String>,
+) {
     let mut metadata = crate::owned_matroska::FileMetadata::from_mp4(reader);
-    for key in &options.metadata_delete { metadata.tags.set(key, ""); }
-    for (key, value) in &options.metadata_set { metadata.tags.set(key, value); }
-    metadata
+    let mut text = std::collections::BTreeMap::<String, String>::new();
+    for (key, value) in &options.metadata_set {
+        text.retain(|name, _| !name.eq_ignore_ascii_case(key));
+        if !metadata.tags.set(key, value) && !value.is_empty() {
+            text.insert(key.to_ascii_uppercase(), value.clone());
+        }
+    }
+    for key in &options.metadata_delete {
+        metadata.tags.set(key, "");
+        text.retain(|name, _| !name.eq_ignore_ascii_case(key));
+    }
+    (metadata, text)
 }
 fn open(
     source: &Path,
@@ -115,15 +177,16 @@ pub fn remux(
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
+    crate::owned_budget::check_rss_budget(options)?;
     if !supports(source, destination, options) {
         return Err("request is not an owned MP4 Matroska remux".into());
     }
     let mut reader = open(source, options)?;
-    let metadata = metadata(&reader, options);
+    let (metadata, text) = metadata(&reader, options);
     let selected = crate::owned_mp4_matroska::selection(reader.tracks().len(), &options.streams).map_err(|e| e.to_string())?;
-    let tracks = track_metadata(options, &selected);
+    let (tracks, scoped) = track_metadata(options, &selected);
     crate::owned_matroska_remux::publish(destination, options, |output| {
-        crate::owned_mp4_matroska::write_selected_with_metadata_overrides(
+        crate::owned_mp4_matroska::write_selected_with_text_metadata_overrides(
             &mut reader,
             output,
             options.cancel.as_ref(),
@@ -131,6 +194,8 @@ pub fn remux(
             options.max_packets,
             &options.streams,
             crate::owned_mp4_matroska::RemuxMetadata { file: &metadata, tracks: &tracks },
+            &text,
+            &scoped,
         )
         .map_err(|e| e.to_string())
     })
@@ -142,6 +207,7 @@ pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<fvid_media_inf
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
+    crate::owned_budget::check_rss_budget(options)?;
     if !supports(source, Path::new("planned.mkv"), options) {
         return Err("request is not an owned MP4 Matroska remux".into());
     }

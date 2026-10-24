@@ -1,0 +1,6 @@
+test_generated_y4m_fixtures_are_deterministic_and_match_repo (__main__.LosslessPlanCliRoutingFixtureTest.test_generated_y4m_fixtures_are_deterministic_and_match_repo) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.002s
+
+OK

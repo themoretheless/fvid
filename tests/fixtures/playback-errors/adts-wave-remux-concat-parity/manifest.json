@@ -1,0 +1,26 @@
+{
+  "batch": 239,
+  "id": "FVID-0246",
+  "fixtures": [
+    {
+      "name": "adts-seg-a.aac",
+      "bytes": 33,
+      "sha256": "f5fde04b21dcbee2e8906362ade9d849974ccff90ede07dad2cab013fde9f269"
+    },
+    {
+      "name": "adts-seg-b.aac",
+      "bytes": 33,
+      "sha256": "f5fde04b21dcbee2e8906362ade9d849974ccff90ede07dad2cab013fde9f269"
+    },
+    {
+      "name": "wave-seg-a.wav",
+      "bytes": 2052,
+      "sha256": "dee90fc779c008ad025e4d0ea6183ccf4f4c4b6983cfbb1d1f68ebec202cea02"
+    },
+    {
+      "name": "wave-seg-b.wav",
+      "bytes": 2052,
+      "sha256": "dee90fc779c008ad025e4d0ea6183ccf4f4c4b6983cfbb1d1f68ebec202cea02"
+    }
+  ]
+}

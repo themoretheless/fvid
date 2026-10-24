@@ -1,0 +1,8 @@
+{
+  "batch_id": "FVID-0234",
+  "sha256": {
+    "matroska-mka-preserve.mka": "e92a6cb99656e821adfd1eec3e4fcb5501d7de10f39864fd974cf500d9ed21fc",
+    "mp4-mka-preserve.m4a": "f426484e8e64782129df127eea05683d35eaad8ee6d84c9ea121a95371e72cd5",
+    "wave-mka-preserve.wav": "5eb63575486422dabdcb1e31d619ab7ad6e4cdb233c763c4ec9e84e2cb9b79cd"
+  }
+}

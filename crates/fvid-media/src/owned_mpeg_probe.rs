@@ -3,12 +3,13 @@
 //! encoded payload or decode PCM, except bounded free-format framing probes.
 use crate::owned_mpeg_audio::{LAYER_I, LAYER_II};
 use fvid_media_info::{MediaInfo, StreamInfo};
-use std::{collections::BTreeMap, path::Path};
-pub(crate) fn probe_mpeg(path: &Path) -> Result<MediaInfo, String> {
+use std::path::Path;
+pub fn probe_mpeg(path: &Path) -> Result<MediaInfo, String> {
     if !crate::owned_raw_mp3::recognizes(path)? {
         return Err("input does not have a bare MPEG audio signature".into());
     }
     let source = crate::owned_raw_mp3::open(path, &Default::default())?;
+    let (metadata, stream_metadata) = source.probe_metadata();
     let rate = source.sample_rate;
     let audible = source.presentation_samples();
     let coded = source.samples();
@@ -39,7 +40,7 @@ pub(crate) fn probe_mpeg(path: &Path) -> Result<MediaInfo, String> {
         start_us: Some(0),
         duration_us: Some(duration_us),
         bit_rate: average(file_bytes, audible),
-        metadata: BTreeMap::new(),
+        metadata,
         chapters: Vec::new(),
         streams: vec![StreamInfo {
             index: 0,
@@ -53,7 +54,7 @@ pub(crate) fn probe_mpeg(path: &Path) -> Result<MediaInfo, String> {
             profile: None,
             level: None,
             disposition: 0,
-            metadata: BTreeMap::new(),
+            metadata: stream_metadata,
             width: 0,
             height: 0,
             pixel_format: -1,

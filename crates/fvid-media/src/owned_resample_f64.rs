@@ -148,6 +148,9 @@ impl<W: Write> Write for Resampler<W> {
                         self.first = self.frame;
                     }
                     self.last = self.frame;
+                    self.queue
+                        .try_reserve(1)
+                        .map_err(|_| io::Error::other("cannot allocate resampler history"))?;
                     self.queue.push_back(self.frame);
                 }
                 self.count += 1;

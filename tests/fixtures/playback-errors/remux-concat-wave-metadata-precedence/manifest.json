@@ -1,0 +1,26 @@
+{
+  "batch_id": "FVID-0244",
+  "files": {
+    "adts-mono-a.aac": {
+      "bytes": 22,
+      "sha256": "23eabaaeb6dc005fd1df75e251cabca6943b3cd3a2a92a60a537b6145d95668d"
+    },
+    "adts-mono-b.aac": {
+      "bytes": 22,
+      "sha256": "23eabaaeb6dc005fd1df75e251cabca6943b3cd3a2a92a60a537b6145d95668d"
+    },
+    "avc-aac-segment.mp4": {
+      "bytes": 2716,
+      "sha256": "fc0636345080673553d371643dfad826d88aad76fc46b8c57ca5c4247b4cfeb6"
+    },
+    "tone-info-a.wav": {
+      "bytes": 2058,
+      "sha256": "246593c1c9c9d5141a7ada9aa9406074d4f0dae38b5c0698bb67a466b05f6212"
+    },
+    "tone-info-b.wav": {
+      "bytes": 2030,
+      "sha256": "47aa4740b10696175adc394e4c9042df8a5ce47a692cbea267a2438582ef9564"
+    }
+  },
+  "generator": "scripts/generate_remux_concat_wave_metadata_precedence_regressions.py"
+}

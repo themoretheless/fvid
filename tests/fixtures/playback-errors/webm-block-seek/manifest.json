@@ -1,0 +1,49 @@
+{
+  "issue": "Matroska/WebM BlockGroup cardinality, Block/SimpleBlock reserved header flag bits, and equal-PTS/pre-origin seek indexing",
+  "controls": [
+    {
+      "file": "valid-equal-pts-vp9-seek.webm",
+      "mode": "equal-pts-invisible-keyframe-before-show-existing",
+      "size": 4360,
+      "sha256": "a224878da432f2f5eda02fa949549eabc6326e632e728f9412e8810b518b4594"
+    },
+    {
+      "file": "valid-blockgroup.mkv",
+      "mode": "single-block-in-blockgroup",
+      "size": 4287,
+      "sha256": "dd4259057322a5feeee5bc4b609ae4b5e5317af012f31a59c00765939db68cd1"
+    },
+    {
+      "file": "valid-multitrack-audio-seek.mkv",
+      "mode": "multitrack-delayed-audio-origin-and-equal-pts",
+      "size": 4390,
+      "sha256": "06b5df486062414cf05f97f2045c0d28f4a2458e1e5db0bc519581f01c750a46"
+    }
+  ],
+  "cases": [
+    {
+      "file": "blockgroup-missing-block.mkv",
+      "expected_error": "Matroska BlockGroup lacks Block",
+      "size": 136,
+      "sha256": "85a2d95c66b97c4d04cc0516c84f12beb8503e0950d47e6132fcf942d3576d0d"
+    },
+    {
+      "file": "blockgroup-duplicate-block.mkv",
+      "expected_error": "duplicate Matroska Block in BlockGroup",
+      "size": 8432,
+      "sha256": "ab98b824b6d8aa58e8b9fe7c1ab714467d95d22f6df10b0802eb9539bce26cfa"
+    },
+    {
+      "file": "simpleblock-reserved-flags.webm",
+      "expected_error": "invalid Matroska block flags",
+      "size": 4272,
+      "sha256": "49bc4d3022e3a7769bab1eb9dc80c594428e27022c497708c6aa83cac7d429ac"
+    },
+    {
+      "file": "blockgroup-block-discardable-bit.mkv",
+      "expected_error": "invalid Matroska block flags",
+      "size": 4281,
+      "sha256": "977cbec41d302bc07a91dd5d7035abbe9df86d3e9102b6962e2491398c2ad17c"
+    }
+  ]
+}

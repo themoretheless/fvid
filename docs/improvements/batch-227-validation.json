@@ -1,0 +1,48 @@
+{
+  "batch": 227,
+  "ids": ["FVID-0234"],
+  "title": "Preserve and selectively edit source WAVE, MP4/MOV/M4A, Matroska/WebM/MKA, ADTS/FLAC/Ogg/MP3 container and stream 0 metadata across Matroska PCM audio exports, trim, loudnorm, and normalize-loudness",
+  "scope": [
+    "src/native_export/pcm_matroska.rs",
+    "src/native_export.rs",
+    "src/media.rs",
+    "src/native_loudnorm.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/audio-matroska-pcm-metadata-preservation/wave-mka-preserve.wav",
+    "tests/fixtures/playback-errors/audio-matroska-pcm-metadata-preservation/mp4-mka-preserve.m4a",
+    "tests/fixtures/playback-errors/audio-matroska-pcm-metadata-preservation/matroska-mka-preserve.mka"
+  ],
+  "generators": [
+    "scripts/generate_audio_matroska_pcm_metadata_preservation_regressions.py",
+    "scripts/test_audio_matroska_pcm_metadata_preservation_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-227-pre-edit/src/native_export/pcm_matroska.rs",
+      "docs/improvements/snapshots/batch-227-pre-edit/src/native_export.rs",
+      "docs/improvements/snapshots/batch-227-pre-edit/src/media.rs",
+      "docs/improvements/snapshots/batch-227-pre-edit/src/native_loudnorm.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-227-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-227-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-227-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test audio_matroska_pcm_metadata_preservation_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test audio_wave_info_preservation_regressions --test audio_sample_concat_wave_metadata_regressions --test loudnorm_matroska_metadata_regressions --test subtitle_normalize_metadata_regressions --test adts_matroska_audio_metadata_regressions",
+      "passed": 5,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_audio_matroska_pcm_metadata_preservation_regressions.py -v",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

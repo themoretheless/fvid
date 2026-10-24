@@ -1,0 +1,53 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0200"
+  ],
+  "checked_at": "2026-10-22T08:06:30+00:00",
+  "sources": [
+    "src/subtitles.rs",
+    "src/playback/runtime/spool.rs"
+  ],
+  "regressions": [
+    "tests/subtitle_spool_regressions.rs"
+  ],
+  "before": [
+    "evidence/batch-193-subtitles-before.rs",
+    "evidence/batch-193-spool-before.rs",
+    "evidence/batch-193-tests-before.rs",
+    "evidence/batch-193-before.log",
+    "evidence/batch-193-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-193-after.log",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-193-subtitles-units.log",
+      "passed": 33
+    },
+    {
+      "log": "evidence/batch-193-spool-units.log",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-193-fixtures-after.log",
+      "passed": 2
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/subtitles.rs": "611bf9f7dfa74276930181b0f01b68f5005f49bc371e18a7acfea772b581bf84",
+    "/Users/themoretheless/Documents/Sources/fvid/src/playback/runtime/spool.rs": "cb3e98210747cc48861427e1c1938dd0bc4d86232116292dd7e640506b104c83",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/subtitle_spool_regressions.rs": "550da69271e208379945069f6695fef27029354c1eb98b4f17ca856f1ab3ced6",
+    "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_subtitle_spool_regressions.py": "aca446e5112ff6c78286c81623f532992fb0d67db6d43dbdb86b888ad5412b41"
+  },
+  "qualification": [
+    "Pre-fix subtitles::parse_webvtt delegated directly to cues_by_range without skipping NOTE, STYLE, and REGION paragraphs, turning CSS comments or commented-out cues containing `-->` inside NOTE/STYLE blocks into active visible cues; subtitles::parse_sami replaced only lowercase `&nbsp;` with U+00A0, so uppercase `&NBSP;` or mixed-case `&Nbsp;` in `<Sync>` caption-clearing paragraphs rendered literal `&NBSP;` text on screen instead of clearing the caption; subtitles::parse_ass scanned every `Dialogue:` prefix across the whole file without checking `[Events]` section boundaries; and playback_spool::Spool::seek clamped negative seek targets to 0 via saturating_sub instead of returning io::ErrorKind::InvalidInput per std::io::Seek and Backing::Ram::seek.",
+    "Updating src/subtitles.rs and src/playback/runtime/spool.rs skips multi-line NOTE, STYLE, and REGION paragraphs in parse_webvtt, folds ASCII case-insensitively on `&nbsp;` in line_breaks for SAMI, restricts parse_ass `Dialogue:` scanning to the `[Events]` section, and computes Spool::seek offsets in i128 with u64::try_from returning ErrorKind::InvalidInput on negative target positions.",
+    "Synthetic fixtures in tests/fixtures/playback-errors/subtitles/ verify WebVTT NOTE/STYLE block skipping, SAMI uppercase/mixed-case `&NBSP;` caption clearing, ASS `[Events]` section scoping, and Spool::seek negative-offset rejection.",
+    "4 focused integration tests, 33 subtitle unit tests, 5 spool unit tests, and offline fixture unittest (2 tests) pass.",
+    "W3C WebVTT NOTE/STYLE/REGION block syntax, Microsoft SAMI 1.0 `&nbsp;` sync clearing, ASS v4+ `[Events]` section scoping, and Rust std::io::Seek negative-offset semantics govern these checks. All fixtures are pure synthetic offline files requiring neither FFmpeg nor network access."
+  ],
+  "counting": "One sidecar subtitle parser (WebVTT NOTE/STYLE/REGION block skipping, SAMI case-insensitive &nbsp; clearing, ASS [Events] scoping) and playback Spool negative-seek validation fix across src/subtitles.rs and src/playback/runtime/spool.rs (FVID-0200). No extra IDs for individual fixture cases."
+}

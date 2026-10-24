@@ -1,0 +1,58 @@
+{
+  "batch": 217,
+  "ids": ["FVID-0224"],
+  "title": "Support Matroska container and stream metadata mutations across ADTS remux and concat and across Matroska PCM audio decode-audio and trim",
+  "scope": [
+    "crates/fvid-media/src/owned_matroska_packet_impl.rs",
+    "crates/fvid-media/src/owned_matroska_adts_impl.rs",
+    "crates/fvid-media/src/owned_adts_remux.rs",
+    "crates/fvid-media/src/owned_concat.rs",
+    "src/native_export/pcm_matroska.rs",
+    "src/native_export.rs",
+    "src/native_plan.rs",
+    "src/media.rs",
+    "src/media_cli.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/adts-matroska-audio-metadata/adts-seg-a-48k.aac",
+    "tests/fixtures/playback-errors/adts-matroska-audio-metadata/adts-seg-b-48k.aac",
+    "tests/fixtures/playback-errors/adts-matroska-audio-metadata/pcm-source-48k.wav"
+  ],
+  "generators": [
+    "scripts/generate_adts_matroska_audio_metadata_regressions.py",
+    "scripts/test_adts_matroska_audio_metadata_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-217-pre-edit/crates/fvid-media/src/owned_matroska_packet_impl.rs",
+      "docs/improvements/snapshots/batch-217-pre-edit/crates/fvid-media/src/owned_matroska_adts_impl.rs",
+      "docs/improvements/snapshots/batch-217-pre-edit/crates/fvid-media/src/owned_adts_remux.rs",
+      "docs/improvements/snapshots/batch-217-pre-edit/crates/fvid-media/src/owned_concat.rs",
+      "docs/improvements/snapshots/batch-217-pre-edit/src/native_export/pcm_matroska.rs",
+      "docs/improvements/snapshots/batch-217-pre-edit/src/native_export.rs",
+      "docs/improvements/snapshots/batch-217-pre-edit/src/native_plan.rs",
+      "docs/improvements/snapshots/batch-217-pre-edit/src/media.rs",
+      "docs/improvements/snapshots/batch-217-pre-edit/src/media_cli.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-217-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-217-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-217-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test adts_matroska_audio_metadata_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test audio_mix_merge_concat_metadata_regressions --test audio_wave_metadata_mix_controls_regressions --test loudnorm_budget_mix_concat_regressions --test mp4_matroska_remux_rss_regressions",
+      "passed": 6,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_adts_matroska_audio_metadata_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

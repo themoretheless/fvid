@@ -116,7 +116,7 @@ impl Input {
                 let version = u32le(&footer, 8);
                 let size = u64::from(u32le(&footer, 12));
                 let flags = u32le(&footer, 20);
-                if !matches!(version, 1000 | 2000) || size < 32 || flags & 0x20000000 != 0 {
+                if !matches!(version, 1000 | 2000) || size < 32 || flags & 0x60000000 != 0 {
                     return Err(invalid("invalid WavPack APE footer"));
                 }
                 let mut start = tag_end
@@ -130,7 +130,7 @@ impl Input {
                     exact(&mut *self.reader, start, &mut header)?;
                     if &header[..8] != b"APETAGEX"
                         || header[8..20] != footer[8..20]
-                        || u32le(&header, 20) & 0x20000000 == 0
+                        || u32le(&header, 20) != (flags | 0x20000000)
                     {
                         return Err(invalid("WavPack APE header/footer mismatch"));
                     }

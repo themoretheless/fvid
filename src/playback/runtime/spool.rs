@@ -817,17 +817,12 @@ impl Read for Spool {
 
 impl Seek for Spool {
     fn seek(&mut self, from: SeekFrom) -> io::Result<u64> {
-        let base = match from {
-            SeekFrom::Start(at) => at,
-            SeekFrom::End(back) => self.size.saturating_sub(back.unsigned_abs()),
-            SeekFrom::Current(back) => {
-                if back < 0 {
-                    self.position.saturating_sub(back.unsigned_abs())
-                } else {
-                    self.position.saturating_add(back as u64)
-                }
-            }
+        let next = match from {
+            SeekFrom::Start(at) => i128::from(at),
+            SeekFrom::End(delta) => i128::from(self.size) + i128::from(delta),
+            SeekFrom::Current(delta) => i128::from(self.position) + i128::from(delta),
         };
+        let base = u64::try_from(next).map_err(|_| io::ErrorKind::InvalidInput)?;
         self.position = base;
         self.shared.finished.store(
             self.shared.terminated.load(Ordering::Acquire),

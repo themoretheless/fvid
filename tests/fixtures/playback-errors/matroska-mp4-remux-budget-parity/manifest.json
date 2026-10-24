@@ -1,0 +1,21 @@
+{
+  "batch": 240,
+  "id": "FVID-0247",
+  "fixtures": [
+    {
+      "name": "matroska-aac-48k.mka",
+      "bytes": 384,
+      "sha256": "1ba3ad61ed2efb10535dd96c7eab9fdacbe86c2530462c296151010125e650d2"
+    },
+    {
+      "name": "mp4-aac-48k.m4a",
+      "bytes": 559,
+      "sha256": "d7f5dbfc91d1f5ea9fefc9250acf533bb44d09cf5b972c953a7c55958d0f4d22"
+    },
+    {
+      "name": "mp4-pcm-48k.m4a",
+      "bytes": 8198,
+      "sha256": "64aba9f1eafab4e48b90f73892ae1516c69d0cf2b6e6b73ce9ced76b32537796"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "generator": "scripts/generate_probe_loudness_audio_regressions.py",
+  "batch_id": "FVID-0209",
+  "provenance": "100% synthetic G.711 WAVE, Ogg Opus/Vorbis/Joint, bare FLAC, and bare MP3 fixtures; no FFmpeg, network, or private media.",
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "g711-alaw-48k.wav": "1b80ef71faa9bf9c9b67cc7fa57b2a5faca83d9cb90bb784505b949a5693492f",
+    "g711-mulaw-48k.wav": "7efef2f679ccb0405a98841535cb9de28b6594f9ca2cbc75c1005329685acf11",
+    "ogg-opus-48k.ogg": "fae812e498dd59f8191e3f438c6834494eefd6e79ed8c8c1cc40f561b4750f23",
+    "ogg-vorbis-48k.ogg": "f72bd7dbc0a70dccd2bb19c28faf238a6a131cd74c587f3a2cc5524fcbebfa8c",
+    "ogg-joint-48k.ogg": "768a129c7b77659a1524f26f2bcd3954fe84cbd8ea2c9e9771c009eb2597dd83",
+    "raw-flac-48k.flac": "44b92174d958b42097dc478b807bb0f9392d9f444712810434be2e0664bcb9b3",
+    "raw-mp3-48k.mp3": "672d4487643cd2c5325b1f64ffbcf669c108d10254b9ef640bb23b91034d8c81",
+    "raw-mp3-empty-trimmed.mp3": "d151c15464a20695bb7de02f1b9a4a9bb477c1e3551c114a6e2721506eca907c"
+  }
+}

@@ -1,0 +1,15 @@
+WEBVTT
+
+STYLE
+::cue {
+  /* comment: 00:00:00.100 --> 00:00:00.900 */
+  color: yellow;
+}
+
+NOTE multi-line comment
+00:00:00.200 --> 00:00:00.800
+hidden note line
+
+1
+00:00:01.000 --> 00:00:02.500
+Visible WebVTT line

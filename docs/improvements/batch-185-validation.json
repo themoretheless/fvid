@@ -1,0 +1,45 @@
+{
+  "batch": 185,
+  "accepted": [
+    "FVID-0192"
+  ],
+  "regression_test": "tests/ogg_framing_track.rs",
+  "fixture_generator": "scripts/generate_ogg_framing_track_regressions.py",
+  "fixture_unittest": "scripts/test_ogg_framing_track_regressions.py",
+  "fixture_directory": "tests/fixtures/playback-errors/ogg-framing-track",
+  "pre_fix_evidence": {
+    "reproduction_log": "/Users/themoretheless/.gemini/antigravity/brain/c1982554-571b-4788-9044-f7522d05528e/scratch/snapshots/batch-185/pre-fix-reproduction.log",
+    "acceptance_failure_log": "/Users/themoretheless/.gemini/antigravity/brain/c1982554-571b-4788-9044-f7522d05528e/scratch/snapshots/batch-185/pre-fix-acceptance.log"
+  },
+  "gates": {
+    "focused_regression": {
+      "command": "cargo test --features player --test ogg_framing_track -- --nocapture",
+      "passed": 2,
+      "failed": 0
+    },
+    "offline_fixture_unittest": {
+      "command": "python3 scripts/test_ogg_framing_track_regressions.py",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_integration_tests": {
+      "command": "cargo test --features player --test ogg_continuation_boundary --test ogg_page_sequence --test ogg_stream_identity --test ogg_codec_chains --test vorbis_timestamps -- --nocapture && cargo test -p fvid-media --test vorbis_program --test ogg_audio_catalog --test ogg_codec_chains -- --nocapture",
+      "passed": 43,
+      "failed": 0
+    },
+    "unit_tests": {
+      "command": "cargo test --lib --features player owned_ogg -- --nocapture && cargo test --lib --features player ogg_audio -- --nocapture && cargo test --lib --features player ogg_opus -- --nocapture",
+      "passed": 8,
+      "failed": 0
+    },
+    "minimal_core_build_and_tests": {
+      "command": "cargo test --lib --no-default-features -- --nocapture",
+      "passed": 359,
+      "failed": 0
+    },
+    "binary_build": {
+      "command": "cargo build --bin fvid",
+      "status": "ok"
+    }
+  }
+}

@@ -1,6 +1,6 @@
 //! Own AAC-LC/HE-AAC decoding followed by the existing streaming PCM loudness meter.
 use fvid_control::{CopyOptions, ProgressEvent};
-use fvid_media_info::{LoudnessStats, MediaPlan, PlanStep};
+use fvid_media_info::{LoudnessStats, MediaPlan, PlanStep, PlanStream};
 use std::{fs::File, io::BufReader, path::Path};
 type Result<T> = std::result::Result<T, String>;
 fn policies(options: &CopyOptions) -> bool {
@@ -41,9 +41,7 @@ pub(crate) fn validate_configuration(source: &Path, options: &CopyOptions) -> Re
 }
 pub(crate) fn supports_plan(source: &Path, options: &CopyOptions) -> bool {
     match validate_configuration(source, options) {
-        Ok(_) => {
-            crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options).is_ok()
-        }
+        Ok(_) => true,
         Err(error) => error.starts_with("controlled memory budget exceeded:"),
     }
 }
@@ -76,14 +74,34 @@ pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<Loudness
 }
 pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
     validate_configuration(source, options)?;
-    let mut plan =
-        crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options)?;
-    plan.command = "loudness".into();
-    plan.streams[0].disposition = "analyze".into();
-    plan.steps.retain(|s| s.action != "write");
-    plan.steps.push(PlanStep{action:"analyze".into(),detail:"owned streaming K-weighting, integrated loudness gates, LRA and true-peak FIR; no published output".into()});
-    plan.notes.push("private decoded WAVE is removed on success or failure; measurement completion is emitted once after analysis".into());
-    Ok(plan)
+    Ok(MediaPlan {
+        command: "loudness".into(),
+        input: source.into(),
+        inputs: vec![source.into()],
+        streams: vec![PlanStream {
+            index: 0,
+            media_type: "audio".into(),
+            codec: "aac".into(),
+            disposition: "analyze".into(),
+        }],
+        steps: vec![
+            PlanStep {
+                action: "decode".into(),
+                detail: "owned AAC-LC/HE-AAC decoder; negotiate implicit SBR output clock; retain ADTS priming and preroll; private float32 WAVE disk spool".into(),
+            },
+            PlanStep {
+                action: "analyze".into(),
+                detail: "owned streaming K-weighting, integrated loudness gates, LRA and true-peak FIR; no published output".into(),
+            },
+        ],
+        graph: None,
+        notes: vec![
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer".into(),
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution".into(),
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded".into(),
+            "private decoded WAVE is removed on success or failure; measurement completion is emitted once after analysis".into(),
+        ],
+    })
 }
 
 #[cfg(test)]

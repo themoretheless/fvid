@@ -11,7 +11,7 @@ use std::{
     path::Path,
 };
 type Result<T> = std::result::Result<T, String>;
-fn open(path: &Path, options: &CopyOptions) -> Result<(Program, Vec<u8>)> {
+pub(crate) fn open(path: &Path, options: &CopyOptions) -> Result<(Program, Vec<u8>)> {
     check(options)?;
     let mut file = File::open(path).map_err(|e| e.to_string())?;
     let (limits, index) = preflight(&mut file, options)?;
@@ -74,12 +74,14 @@ pub(crate) fn supports(
         Ok((p, _)) => {
             let target = transform.channels.unwrap_or(i32::from(p.channels()));
             target == i32::from(p.channels())
-                || ((target == 1 || target == 2)
-                    && crate::owned_pcm_channels::rematrix_layout_supported(
-                        p.channels(),
-                        p.output_channel_mask(),
-                    ))
-                || (p.channels() <= 2 && (1..=8).contains(&target))
+                || (((p.channels() <= 8 && matches!(target, 1 | 2))
+                    || (p.channels() <= 2 && (1..=8).contains(&target)))
+                    && ((p.channels() <= 2 && p.output_channel_mask() == 0)
+                        || (p.output_channel_mask() != 0
+                            && crate::owned_pcm_channels::rematrix_layout_supported(
+                                p.channels(),
+                                p.output_channel_mask(),
+                            ))))
         }
         Err(e) => e.starts_with("controlled memory budget exceeded:"),
     }
@@ -120,13 +122,33 @@ fn decode(
         channels: program.channels(),
     })
 }
+pub(crate) fn decode_to_wave(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<crate::owned_adts_export::DecodedSpool> {
+    check(options)?;
+    let (mut program, info) = open(source, options)?;
+    let rate = program.sample_rate();
+    let channels = program.channels();
+    let mask = program.output_channel_mask();
+    let spool = crate::owned_adts_export::spool_decoded(
+        rate,
+        channels,
+        mask,
+        options,
+        move |writer, options| decode(&mut program, writer, None, options),
+    )?;
+    check(options)?;
+    crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
+    Ok(spool)
+}
 pub(crate) fn apply(
     source: &Path,
     destination: &Path,
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
-    if destination.exists() {
+    if destination.symlink_metadata().is_ok() {
         return Err("destination already exists".into());
     }
     let (mut program, info) = open(source, options)?;

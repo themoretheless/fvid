@@ -375,7 +375,7 @@ fn parse_track(
             0xFF => match parse_meta(data, &mut at, tick, tempos, names)? {
                 // An end of track is the end of the track's own data, however
                 // much padding a writer left after it.
-                Meta::End => break,
+                Meta::End => return Ok(tick),
                 Meta::None => {}
             },
             // System common. A dump bounds itself by a length, and nothing in
@@ -417,7 +417,9 @@ fn parse_track(
             }
         }
     }
-    Ok(tick)
+    Err(invalid(
+        "SMF track ends without an end-of-track meta event",
+    ))
 }
 
 /// What a meta event turned out to be: the two that matter to the timeline are

@@ -1,0 +1,48 @@
+{
+  "batch": 233,
+  "ids": ["FVID-0240"],
+  "title": "Support multitrack Matroska V_MPEG4/ISO/AVC and IETF track languages in owned lossless video export and enforce set-then-delete metadata precedence across owned_webm_multitrack_export, owned_mp4_multitrack_export, and owned_ffv1_export",
+  "scope": [
+    "crates/fvid-media/src/owned_webm_multitrack_export.rs",
+    "crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+    "crates/fvid-media/src/owned_ffv1_export.rs",
+    "src/native_lossless_y4m.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/multitrack-avc-mp4-stream-metadata/avc-opus-multitrack.mkv",
+    "tests/fixtures/playback-errors/multitrack-avc-mp4-stream-metadata/avc-dual-aac-tracks.mp4",
+    "tests/fixtures/playback-errors/multitrack-avc-mp4-stream-metadata/manifest.json"
+  ],
+  "generators": [
+    "scripts/generate_multitrack_avc_mp4_stream_metadata_regressions.py",
+    "scripts/test_multitrack_avc_mp4_stream_metadata_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-233-pre-edit/crates/fvid-media/src/owned_webm_multitrack_export.rs",
+      "docs/improvements/snapshots/batch-233-pre-edit/crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+      "docs/improvements/snapshots/batch-233-pre-edit/crates/fvid-media/src/owned_ffv1_export.rs",
+      "docs/improvements/snapshots/batch-233-pre-edit/native_lossless_y4m.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-233-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-233-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-233-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test multitrack_avc_mp4_stream_metadata_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test native_webm_multitrack --test native_mp4_multitrack --test video_export_controls_regressions",
+      "passed": 9,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 -m unittest scripts/test_multitrack_avc_mp4_stream_metadata_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

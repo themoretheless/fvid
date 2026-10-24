@@ -1,0 +1,57 @@
+{
+  "batch": 236,
+  "ids": ["FVID-0243"],
+  "title": "Support single-track MP4, monochrome FFV1, and RGB FFV1 sources in owned subtitle burn-in and enforce set-then-delete container and stream metadata precedence across subtitle burn, cross-fade, Y4M lossless export, and subtitle conversion",
+  "scope": [
+    "crates/fvid-media/src/owned_subtitle_burn.rs",
+    "crates/fvid-media/src/owned_text_raster.rs",
+    "crates/fvid-media/src/owned_ffv1_export.rs",
+    "crates/fvid-media/src/owned_xfade.rs",
+    "crates/fvid-media/src/owned_subtitle_impl.rs",
+    "crates/fvid-media/src/owned_lossless.rs",
+    "crates/fvid-media/src/owned_matroska.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/subtitle-burn-xfade-metadata/avc-single-rotated-burn.mp4",
+    "tests/fixtures/playback-errors/subtitle-burn-xfade-metadata/burn-source.y4m",
+    "tests/fixtures/playback-errors/subtitle-burn-xfade-metadata/cues.srt",
+    "tests/fixtures/playback-errors/subtitle-burn-xfade-metadata/xfade-main.y4m",
+    "tests/fixtures/playback-errors/subtitle-burn-xfade-metadata/xfade-other.y4m",
+    "tests/fixtures/playback-errors/subtitle-burn-xfade-metadata/manifest.json"
+  ],
+  "generators": [
+    "scripts/generate_subtitle_burn_xfade_metadata_regressions.py",
+    "scripts/test_subtitle_burn_xfade_metadata_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-236-pre-edit/crates/fvid-media/src/owned_subtitle_burn.rs",
+      "docs/improvements/snapshots/batch-236-pre-edit/crates/fvid-media/src/owned_text_raster.rs",
+      "docs/improvements/snapshots/batch-236-pre-edit/crates/fvid-media/src/owned_ffv1_export.rs",
+      "docs/improvements/snapshots/batch-236-pre-edit/crates/fvid-media/src/owned_xfade.rs",
+      "docs/improvements/snapshots/batch-236-pre-edit/crates/fvid-media/src/owned_subtitle_impl.rs",
+      "docs/improvements/snapshots/batch-236-pre-edit/crates/fvid-media/src/owned_lossless.rs",
+      "docs/improvements/snapshots/batch-236-pre-edit/crates/fvid-media/src/owned_matroska.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-236-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-236-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-236-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test subtitle_burn_xfade_metadata_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test rotated_mp4_decode_export_probe_regressions --test multitrack_avc_mp4_stream_metadata_regressions --test scheduled_overlay_depth_cli_filter_regressions",
+      "passed": 3,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 -m unittest scripts/test_subtitle_burn_xfade_metadata_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

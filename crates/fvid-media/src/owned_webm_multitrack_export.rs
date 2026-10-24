@@ -39,7 +39,7 @@ fn check(o: &CopyOptions) -> Result<()> {
     {
         return Err("media operation cancelled".into());
     }
-    Ok(())
+    crate::owned_budget::check_rss_budget(o)
 }
 fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option<Input>> {
     let mut prefix = [0; 4];
@@ -88,7 +88,10 @@ fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option
     let track = &reader.tracks[video];
     // The shared video pipeline bakes stored crop/rotation before filtering;
     // companion audio retains its original timestamps independently.
-    if !matches!(track.codec.as_str(), "V_FFV1" | "V_VP9" | "V_AV1" | "V_MPEGH/ISO/HEVC") {
+    if !matches!(
+        track.codec.as_str(),
+        "V_FFV1" | "V_VP9" | "V_AV1" | "V_MPEGH/ISO/HEVC" | "V_MPEG4/ISO/AVC"
+    ) {
         return Ok(None);
     }
     let selected = crate::owned_mp4_matroska::selection(reader.tracks.len(), &o.streams)
@@ -112,13 +115,8 @@ fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option
         if reader
             .track_dispositions
             .get(&track.number)
-            .is_some_and(|&d| d != 1)
+            .is_some_and(|&d| d & !1 != 0)
         {
-            return Ok(None);
-        }
-        let current = reader.track_languages.get(&track.number);
-        let legacy = reader.track_legacy_languages.get(&track.number);
-        if current.zip(legacy).is_some_and(|(a, b)| a != b) {
             return Ok(None);
         }
         let mut previous = None;
@@ -190,6 +188,30 @@ fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option
         video_origin,
     }))
 }
+pub(crate) fn plan_selection(
+    source: &Path,
+    t: &LosslessTransform,
+    o: &CopyOptions,
+) -> Result<Option<(usize, Vec<usize>)>> {
+    let Some(input) = qualify(source, t, o)? else {
+        return Ok(None);
+    };
+    let Some(request) = crate::owned_lossless::request(t) else {
+        return Ok(None);
+    };
+    if matches!(
+        crate::owned_video_decode::try_webm(source, &request),
+        Ok(None)
+    ) {
+        return Ok(None);
+    }
+    let mut stage = o.clone();
+    stage.streams.clear();
+    stage.stream_metadata_set.clear();
+    stage.stream_metadata_delete.clear();
+    crate::owned_video_decode::decode_webm(source, &request, None, Some(&stage))?;
+    Ok(Some((input.video, input.selected)))
+}
 pub(crate) fn supports(source: &Path, t: &LosslessTransform, o: &CopyOptions) -> bool {
     match qualify(source, t, o) {
         Ok(Some(_)) => !matches!(
@@ -246,7 +268,15 @@ pub(crate) fn try_export(
     let (decoded, _, consumed) =
         crate::owned_ffv1_export::export(source, &video_path, &request, &stage)?;
     let mut video = open(&video_path, o)?;
-    let vt = video.tracks[0].clone();
+    let mut vt = video.tracks[0].clone();
+    if vt.language.is_empty() {
+        vt.language = video
+            .track_languages
+            .get(&vt.number)
+            .or_else(|| video.track_legacy_languages.get(&vt.number))
+            .cloned()
+            .unwrap_or_else(|| "eng".into());
+    }
     let mut pcm_readers=BTreeMap::new();
     if let Some(window)=t.interval {
         for &index in &input.pcm_windows {
@@ -301,24 +331,35 @@ pub(crate) fn try_export(
         if let Some(specific) = source_tags {
             tags.extend(specific.clone());
         }
+        tags.retain(|k, v| {
+            !k.is_empty()
+                && k.len() <= 128
+                && v.len() <= 1024
+                && !k.contains('\0')
+                && !v.contains('\0')
+        });
 
         if index != input.video {
+            for (_, key, value) in o.stream_metadata_set.iter().filter(|(i, _, _)| *i == index) {
+                tags.retain(|k, _| !k.eq_ignore_ascii_case(key));
+                if key.eq_ignore_ascii_case("title") {
+                    tracks[index].name = value.clone();
+                } else if key.eq_ignore_ascii_case("language") {
+                    tracks[index].language = if value.is_empty() {
+                        "und".into()
+                    } else {
+                        value.clone()
+                    };
+                } else if !value.is_empty() {
+                    tags.insert(key.to_ascii_uppercase(), value.clone());
+                }
+            }
             for (_, key) in o.stream_metadata_delete.iter().filter(|(i, _)| *i == index) {
                 tags.retain(|k, _| !k.eq_ignore_ascii_case(key));
                 if key.eq_ignore_ascii_case("title") {
                     tracks[index].name.clear();
                 } else if key.eq_ignore_ascii_case("language") {
                     tracks[index].language = "und".into();
-                }
-            }
-            for (_, key, value) in o.stream_metadata_set.iter().filter(|(i, _, _)| *i == index) {
-                tags.retain(|k, _| !k.eq_ignore_ascii_case(key));
-                if key.eq_ignore_ascii_case("title") {
-                    tracks[index].name = value.clone();
-                } else if key.eq_ignore_ascii_case("language") {
-                    tracks[index].language = value.clone();
-                } else if !value.is_empty() {
-                    tags.insert(key.to_ascii_uppercase(), value.clone());
                 }
             }
         }
@@ -416,13 +457,34 @@ pub(crate) fn try_export(
             tags: video.tags.clone(),
             chapters: video.chapters.clone(),
         };
-        let mut writer = mkv::PacketWriter::new_with_text_metadata(
+        let enabled: Vec<_> = input
+            .selected
+            .iter()
+            .map(|&idx| input.reader.track_enabled(tracks[idx].number))
+            .collect();
+        let defaults: Vec<_> = input
+            .selected
+            .iter()
+            .map(|&idx| {
+                input
+                    .reader
+                    .track_dispositions
+                    .get(&tracks[idx].number)
+                    .copied()
+                    .unwrap_or(1)
+                    & 1
+                    != 0
+            })
+            .collect();
+        let mut writer = mkv::PacketWriter::new_with_track_preferences(
             output,
             &specs,
             &options,
             &metadata,
             &video.metadata,
             &scoped,
+            &enabled,
+            &defaults,
         )
         .map_err(|e| e.to_string())?;
         for &(_, mapped, index) in &schedule {

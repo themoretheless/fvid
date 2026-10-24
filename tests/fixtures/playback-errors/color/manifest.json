@@ -1,0 +1,20 @@
+{
+  "nan_node.3dl": {
+    "size": 58
+  },
+  "inverted_domain.cube": {
+    "size": 108
+  },
+  "inverted_from.spi1d": {
+    "size": 61
+  },
+  "spike_between_probes_1d.cube": {
+    "size": 906
+  },
+  "zero_placeholder.mdcv": {
+    "size": 24
+  },
+  "collinear_primaries.mdcv": {
+    "size": 24
+  }
+}

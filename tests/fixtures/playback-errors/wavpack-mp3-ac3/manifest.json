@@ -1,0 +1,28 @@
+{
+  "generator": "scripts/generate_wavpack_mp3_ac3_regressions.py",
+  "cases": [
+    {
+      "id": "valid-wavpack-ape",
+      "file": "valid.wv",
+      "expect": "accept"
+    },
+    {
+      "id": "ape-header-no-flag",
+      "file": "ape-header-no-flag.wv",
+      "expect": "refuse",
+      "reason": "APEv2 header disagrees with footer flags"
+    },
+    {
+      "id": "ape-footer-no-footer-flag",
+      "file": "ape-footer-no-footer-flag.wv",
+      "expect": "refuse",
+      "reason": "APEv2 footer sets no-footer bit (bit 30)"
+    },
+    {
+      "id": "trailing-subblock-byte",
+      "file": "trailing-subblock-byte.wv",
+      "expect": "refuse",
+      "reason": "WavPack block has trailing byte after metadata items"
+    }
+  ]
+}

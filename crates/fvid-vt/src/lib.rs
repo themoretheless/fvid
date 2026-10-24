@@ -1280,6 +1280,59 @@ mod retained_surface_tests {
             }
         }
     }
+    #[test]
+    #[cfg(feature = "metal")]
+    #[ignore = "requires a physical Metal GPU"]
+    fn uma_shared_buffer_zero_copy_roundtrip() {
+        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+            backends: wgpu::Backends::METAL,
+            ..wgpu::InstanceDescriptor::new_without_display_handle()
+        });
+        let adapter = pollster::block_on(instance.request_adapter(&Default::default())).unwrap();
+        assert_ne!(adapter.get_info().device_type, wgpu::DeviceType::Cpu);
+        let (device, queue) =
+            pollster::block_on(adapter.request_device(&Default::default())).unwrap();
+        let len = 4096usize;
+        let input_uma = UmaSharedBuffer::new(
+            &device,
+            len,
+            wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
+            Some("test UMA input"),
+        )
+        .unwrap();
+        let output_uma = UmaSharedBuffer::new(
+            &device,
+            len,
+            wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+            Some("test UMA output"),
+        )
+        .unwrap();
+        assert_eq!(input_uma.aligned_capacity(), METAL_UMA_PAGE_BYTES);
+        assert_eq!(input_uma.len(), len);
+        assert!(UmaSharedBuffer::new(&device, 0, wgpu::BufferUsages::STORAGE, None).is_err());
+
+        let src: Vec<u8> = (0..len).map(|i| (i * 13 + 7) as u8).collect();
+        input_uma.write_slice(&src).unwrap();
+
+        let mut encoder = device.create_command_encoder(&Default::default());
+        encoder.copy_buffer_to_buffer(
+            input_uma.wgpu_buffer(),
+            0,
+            output_uma.wgpu_buffer(),
+            0,
+            len as u64,
+        );
+        let sub = queue.submit([encoder.finish()]);
+        device
+            .poll(wgpu::PollType::Wait {
+                submission_index: Some(sub),
+                timeout: Some(std::time::Duration::from_secs(10)),
+            })
+            .unwrap();
+        let mut dst = vec![0u8; len];
+        output_uma.read_slice(&mut dst).unwrap();
+        assert_eq!(dst, src);
+    }
     #[cfg(feature = "metal")]
     fn read_plane(
         device: &wgpu::Device,
@@ -1332,4 +1385,4 @@ mod retained_surface_tests {
 #[cfg(feature = "metal")]
 mod metal;
 #[cfg(feature = "metal")]
-pub use metal::MetalPlanes;
+pub use metal::{METAL_UMA_PAGE_BYTES, MetalPlanes, UmaSharedBuffer};

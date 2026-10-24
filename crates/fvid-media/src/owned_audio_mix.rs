@@ -60,10 +60,17 @@ fn audio_plan(
     let mut geometry = None;
     for source in sources {
         let info = crate::owned_audio_plan::source_descriptor(source, &Default::default())?;
-        if crate::owned_wave_inspect::is_wave(source).map_err(|e| e.to_string())? {
+        if crate::owned_g711_wave_export::recognizes(source, &Default::default())? {
+            if crate::owned_g711_wave_export::descriptor(source, &Default::default())?.4 == 0 {
+                return Err("audio mix/merge requires nonempty owned audio inputs".into());
+            }
+        } else if crate::owned_wave_inspect::is_wave(source).map_err(|e| e.to_string())? {
             let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
             if crate::owned_wave_inspect::inspect(&mut file, None)
-                .map_err(|e| e.to_string())?.sample_frames == 0 {
+                .map_err(|e| e.to_string())?
+                .sample_frames
+                == 0
+            {
                 return Err("audio mix/merge requires nonempty owned audio inputs".into());
             }
         }
@@ -248,6 +255,16 @@ where
             })
         {
             return Err("non-finite PCM sample".into());
+        }
+        if !info.float && info.valid_bits < info.bits_per_sample {
+            let padding_mask = (1u32 << (info.bits_per_sample - info.valid_bits)) - 1;
+            if bytes.chunks_exact(width).any(|sample| {
+                let mut packed = [0u8; 4];
+                packed[..width].copy_from_slice(sample);
+                u32::from_le_bytes(packed) & padding_mask != 0
+            }) {
+                return Err("nonzero PCM padding bits".into());
+            }
         }
         blocks += 1;
         block(bytes.len())?;

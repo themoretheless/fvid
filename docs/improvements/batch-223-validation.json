@@ -1,0 +1,47 @@
+{
+  "batch": 223,
+  "ids": ["FVID-0230"],
+  "title": "Expose ID3v2/ID3v1 metadata in bare MPEG audio probes and preserve/edit source ID3 tags during bare MP3 WAVE exports and loudnorm",
+  "scope": [
+    "crates/fvid-media/src/owned_mpeg_audio.rs",
+    "crates/fvid-media/src/owned_mpeg_probe.rs",
+    "crates/fvid-media/src/owned_raw_mp3.rs",
+    "crates/fvid-media/src/owned_container_loudness.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/mp3-id3-metadata/tagged-id3v24.mp3",
+    "tests/fixtures/playback-errors/mp3-id3-metadata/tagged-id3v1.mp3"
+  ],
+  "generators": [
+    "scripts/generate_mp3_id3_metadata_regressions.py",
+    "scripts/test_mp3_id3_metadata_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-223-pre-edit/crates/fvid-media/src/owned_mpeg_audio.rs",
+      "docs/improvements/snapshots/batch-223-pre-edit/crates/fvid-media/src/owned_mpeg_probe.rs",
+      "docs/improvements/snapshots/batch-223-pre-edit/crates/fvid-media/src/owned_raw_mp3.rs",
+      "docs/improvements/snapshots/batch-223-pre-edit/crates/fvid-media/src/owned_container_loudness.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-223-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-223-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-223-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test mp3_id3_metadata_regressions",
+      "passed": 2,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test flac_ogg_metadata_regressions --test probe_loudness_audio_regressions --test loudnorm_wave_metadata_routing_regressions",
+      "passed": 6,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_mp3_id3_metadata_regressions.py -v",
+      "passed": 2,
+      "failed": 0
+    }
+  }
+}

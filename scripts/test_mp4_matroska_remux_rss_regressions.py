@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+"""Offline unit test for generate_mp4_matroska_remux_rss_regressions.py (FVID-0219)."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+import sys
+import unittest
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from generate_mp4_matroska_remux_rss_regressions import OUT, generate
+
+
+class TestMp4MatroskaRemuxRssFixtures(unittest.TestCase):
+    def test_fixtures_are_deterministic_and_match_disk(self) -> None:
+        generated = generate()
+        manifest = json.loads(generated["manifest.json"].decode("utf-8"))
+        self.assertEqual(manifest["batch_id"], "FVID-0219")
+        for name, data in generated.items():
+            path = OUT / name
+            self.assertTrue(path.is_file(), f"missing fixture {name}")
+            self.assertEqual(path.read_bytes(), data, f"fixture mismatch for {name}")
+
+
+if __name__ == "__main__":
+    unittest.main()

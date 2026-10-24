@@ -1,0 +1,77 @@
+{
+  "generator": "scripts/generate_mp4_chunk_bounds_regressions.py",
+  "controls": [
+    {
+      "file": "valid-multi-chunk-stco.mp4",
+      "mode": "three-contiguous-stco-chunks"
+    },
+    {
+      "file": "valid-multi-chunk-co64.mp4",
+      "mode": "two-contiguous-co64-chunks"
+    }
+  ],
+  "cases": [
+    {
+      "file": "overlapping-stco.mp4",
+      "expected_error": "overlapping or non-increasing MP4 chunk offsets"
+    },
+    {
+      "file": "backward-co64.mp4",
+      "expected_error": "overlapping or non-increasing MP4 chunk offsets"
+    },
+    {
+      "file": "zero-sample-size-stsz.mp4",
+      "expected_error": "zero MP4 sample size"
+    },
+    {
+      "file": "zero-sample-size-trun.mp4",
+      "expected_error": "zero MP4 fragment sample size"
+    },
+    {
+      "file": "empty-nonfragmented-track.mp4",
+      "expected_error": "empty MP4 sample table"
+    },
+    {
+      "file": "empty-fragmented-track.mp4",
+      "expected_error": "MP4 track states no samples"
+    }
+  ],
+  "files": {
+    "backward-co64.mp4": {
+      "bytes": 13096,
+      "sha256": "3ae7f46dfb4a8ed211599a076234057411ed520986b2a31d4582fe57e9b99658"
+    },
+    "empty-fragmented-track.mp4": {
+      "bytes": 4864,
+      "sha256": "32597938b255b9dd8ecc46062b9d73270f4f95c40bf6083fe46ba74b7ce94df4"
+    },
+    "empty-nonfragmented-track.mp4": {
+      "bytes": 13024,
+      "sha256": "f730a7a67a5078cb1a0f365e67cbef6bea2d37932f440a8b2b76769c6a358f5f"
+    },
+    "frame.vp9": {
+      "bytes": 4142,
+      "sha256": "217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c"
+    },
+    "overlapping-stco.mp4": {
+      "bytes": 13088,
+      "sha256": "225f0e352aa1d1fb3eeafb4c3015c126dbaabdd685f56a9c3f1a5e4126ab1ad7"
+    },
+    "valid-multi-chunk-co64.mp4": {
+      "bytes": 13096,
+      "sha256": "e5a12a2494e918734ea0d27a1a60d0e1e432dd553e7820e3a3edd10209beff5a"
+    },
+    "valid-multi-chunk-stco.mp4": {
+      "bytes": 13080,
+      "sha256": "3a409bae32c023faf633de7ea707800fe0d70930d3897c73a924e0a59fa0ac7e"
+    },
+    "zero-sample-size-stsz.mp4": {
+      "bytes": 13072,
+      "sha256": "cb664f797c12b84cc25a18e0656db6ad2bab457b7c49f34406154a099693d2c8"
+    },
+    "zero-sample-size-trun.mp4": {
+      "bytes": 9014,
+      "sha256": "61b06eb1b11486b597e6f6335f56fac934c4ce2a3d5e3644b626450edc2c6a3e"
+    }
+  }
+}

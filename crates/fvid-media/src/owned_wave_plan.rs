@@ -38,6 +38,18 @@ pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
     plan(&[source], "remux", None, options)
 }
 pub fn plan_trim(source: &Path, from: i64, to: i64, options: &CopyOptions) -> Result<MediaPlan> {
+    if supports(source, options) {
+        return plan(&[source], "trim", Some((from, to)), options);
+    }
+    let transform = fvid_media_info::AudioDecodeTransform {
+        interval: Some((from, to)),
+        ..Default::default()
+    };
+    if crate::owned_audio_plan::supports(source, &transform, options) {
+        let mut planned = crate::owned_audio_plan::plan_decode_audio(source, &transform, options)?;
+        planned.command = "trim".into();
+        return Ok(planned);
+    }
     plan(&[source], "trim", Some((from, to)), options)
 }
 pub fn plan_trim_pcm(

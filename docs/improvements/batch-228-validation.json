@@ -1,0 +1,49 @@
+{
+  "batch": 228,
+  "ids": ["FVID-0235"],
+  "title": "Preserve and selectively edit first-segment source WAVE, MP4/MOV/M4A, Matroska/WebM/MKA, and FLAC/Ogg/MP3 metadata and enforce WAVE controlled memory budgets across sample-domain audio concat and plan concat",
+  "scope": [
+    "src/native_audio_mix/concat.rs",
+    "src/native_export/pcm_matroska.rs",
+    "src/media.rs",
+    "crates/fvid-media/src/owned_audio_plan.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/audio-sample-concat-metadata-preservation/wave-seg1-16bit.wav",
+    "tests/fixtures/playback-errors/audio-sample-concat-metadata-preservation/wave-seg2-24bit.wav",
+    "tests/fixtures/playback-errors/audio-sample-concat-metadata-preservation/mp4-seg1.m4a",
+    "tests/fixtures/playback-errors/audio-sample-concat-metadata-preservation/matroska-seg1.mka"
+  ],
+  "generators": [
+    "scripts/generate_audio_sample_concat_metadata_preservation_regressions.py",
+    "scripts/test_audio_sample_concat_metadata_preservation_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-228-pre-edit/src/native_audio_mix/concat.rs",
+      "docs/improvements/snapshots/batch-228-pre-edit/src/native_export/pcm_matroska.rs",
+      "docs/improvements/snapshots/batch-228-pre-edit/src/media.rs",
+      "docs/improvements/snapshots/batch-228-pre-edit/crates/fvid-media/src/owned_audio_plan.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-228-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-228-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-228-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test audio_sample_concat_metadata_preservation_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test audio_sample_concat_wave_metadata_regressions --test native_pcm_concat --test audio_matroska_pcm_metadata_preservation_regressions --test audio_wave_info_preservation_regressions --test audio_mix_merge_concat_metadata_regressions --test remux_concat_controls_regressions",
+      "passed": 11,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_audio_sample_concat_metadata_preservation_regressions.py -v",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

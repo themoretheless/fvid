@@ -1,0 +1,22 @@
+{
+  "batch": 240,
+  "id": "FVID-0247",
+  "title": "Align Matroska identity remux planning and MP4 remux/relocation packet/RSS budgets and backend attribution across top-level and owned paths",
+  "status": "accepted",
+  "pre_edit_snapshot": "docs/improvements/snapshots/batch-240-pre-edit",
+  "fixtures": {
+    "generator": "scripts/generate_matroska_mp4_remux_budget_parity_regressions.py",
+    "unit_test": "scripts/test_matroska_mp4_remux_budget_parity_regressions.py",
+    "manifest": "tests/fixtures/playback-errors/matroska-mp4-remux-budget-parity/manifest.json"
+  },
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-240-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-240-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-240-related-after.txt"
+  },
+  "commands": [
+    "python3 -m unittest scripts/test_matroska_mp4_remux_budget_parity_regressions.py",
+    "cargo test --test matroska_mp4_remux_budget_parity_regressions",
+    "cargo test --test adts_wave_remux_concat_parity_regressions --test native_mp4_relocate"
+  ]
+}

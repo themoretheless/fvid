@@ -1,0 +1,18 @@
+{
+  "batch_id": "FVID-0220",
+  "fixtures": {
+    "adts-48k.aac": {
+      "bytes": 33,
+      "sha256": "f5fde04b21dcbee2e8906362ade9d849974ccff90ede07dad2cab013fde9f269"
+    },
+    "flac-48k.flac": {
+      "bytes": 68,
+      "sha256": "409da29595a5982fd4a83f0496ed3361cc0a24e9104a223b391b0ce46388eec7"
+    },
+    "tagged-48k.wav": {
+      "bytes": 2052,
+      "sha256": "dee90fc779c008ad025e4d0ea6183ccf4f4c4b6983cfbb1d1f68ebec202cea02"
+    }
+  },
+  "generator": "scripts/generate_audio_wave_metadata_mix_controls_regressions.py"
+}

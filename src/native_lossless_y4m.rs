@@ -237,6 +237,15 @@ pub fn write_selected<W: Write + Seek>(
             .iter()
             .enumerate()
             .map(|(index, track)| -> Result<_> {
+                let language = if !track.language.is_empty() {
+                    track.language.as_str()
+                } else {
+                    input
+                        .track_languages
+                        .get(&track.number)
+                        .or_else(|| input.track_legacy_languages.get(&track.number))
+                        .map_or("eng", String::as_str)
+                };
                 Ok(TrackSpec {
                     encoding: if index == video_index {
                         encoding
@@ -254,7 +263,7 @@ pub fn write_selected<W: Write + Seek>(
                         }
                     },
                     name: &track.name,
-                    language: &track.language,
+                    language,
                 })
             })
             .collect::<Result<Vec<_>>>()?
@@ -347,7 +356,72 @@ pub fn write_selected<W: Write + Seek>(
             chapters: r.chapters.clone(),
         })
         .unwrap_or_default();
-    let mut writer = PacketWriter::new_with_metadata(output, &specs, &options, &metadata)?;
+    let mut text_tags = std::collections::BTreeMap::new();
+    let mut scoped_tags = std::collections::BTreeMap::new();
+    if let Some(input) = webm.as_ref() {
+        for (k, v) in &input.metadata {
+            if !k.is_empty()
+                && k.len() <= 128
+                && v.len() <= 1024
+                && !k.contains('\0')
+                && !v.contains('\0')
+            {
+                text_tags.insert(k.clone(), v.clone());
+            }
+        }
+        if !input.writing_app.is_empty()
+            && input.writing_app != "FVid"
+            && !input.writing_app.contains('\0')
+            && input.writing_app.len() <= 1024
+            && !text_tags.keys().any(|k| k.eq_ignore_ascii_case("encoder"))
+        {
+            text_tags.insert("ENCODER".into(), input.writing_app.clone());
+        }
+        for (index, track) in input.tracks.iter().enumerate() {
+            let mut tags = input.track_metadata.get(&0).cloned().unwrap_or_default();
+            if let Some(uid) = input.track_uids.get(&track.number)
+                && let Some(scoped) = input.track_metadata.get(uid)
+            {
+                tags.extend(scoped.clone());
+            }
+            tags.retain(|k, v| {
+                !k.is_empty()
+                    && k.len() <= 128
+                    && v.len() <= 1024
+                    && !k.contains('\0')
+                    && !v.contains('\0')
+            });
+            if !tags.is_empty() {
+                scoped_tags.insert(index, tags);
+            }
+        }
+    }
+    let (enabled, defaults) = if let Some(input) = webm.as_ref() {
+        (
+            input
+                .tracks
+                .iter()
+                .map(|t| input.track_enabled(t.number))
+                .collect::<Vec<_>>(),
+            input
+                .tracks
+                .iter()
+                .map(|t| input.track_dispositions.get(&t.number).copied().unwrap_or(1) & 1 != 0)
+                .collect::<Vec<_>>(),
+        )
+    } else {
+        (Vec::new(), Vec::new())
+    };
+    let mut writer = PacketWriter::new_with_track_preferences(
+        output,
+        &specs,
+        &options,
+        &metadata,
+        &text_tags,
+        &scoped_tags,
+        &enabled,
+        &defaults,
+    )?;
     let mut stats = crate::media_info::LosslessStats {
         backend: "fvid",
         video_frames: 0,

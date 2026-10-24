@@ -1,0 +1,51 @@
+{
+  "batch": 211,
+  "ids": ["FVID-0218"],
+  "title": "Enforce packet, memory, and RSS budgets, cancellation, and progress controls across native_audio_mix, native_subtitle, owned_subtitle, and media_cli",
+  "scope": [
+    "src/native_audio_mix.rs",
+    "src/native_subtitle.rs",
+    "crates/fvid-media/src/owned_subtitle.rs",
+    "crates/fvid-media/src/owned_subtitle_impl.rs",
+    "src/media_cli.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/mix-merge-controls-a.wav",
+    "tests/fixtures/playback-errors/mix-merge-controls-b.wav",
+    "tests/fixtures/playback-errors/mix-merge-controls-video.y4m",
+    "tests/fixtures/playback-errors/mix-merge-controls.srt"
+  ],
+  "generators": [
+    "scripts/generate_mix_merge_subtitle_controls_regressions.py",
+    "scripts/test_mix_merge_subtitle_controls_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-211-pre-edit/src/native_audio_mix.rs",
+      "docs/improvements/snapshots/batch-211-pre-edit/src/native_subtitle.rs",
+      "docs/improvements/snapshots/batch-211-pre-edit/crates/fvid-media/src/owned_subtitle.rs",
+      "docs/improvements/snapshots/batch-211-pre-edit/crates/fvid-media/src/owned_subtitle_impl.rs",
+      "docs/improvements/snapshots/batch-211-pre-edit/src/media_cli.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-211-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-211-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-211-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --features player --test mix_merge_subtitle_controls_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --features player --test native_audio_mix --test native_subtitle_convert --test owned_subtitle --test loudnorm_budget_mix_concat_regressions --test mix_merge_subtitle_controls_regressions",
+      "passed": 19,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_mix_merge_subtitle_controls_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

@@ -187,7 +187,9 @@ pub struct Decoder {
 }
 impl Decoder {
     pub fn new(sample_rate: u32, channels: u16) -> Result<Self> {
-        if sample_rate == 0 || !(1..=2).contains(&channels) {
+        if ![8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000].contains(&sample_rate)
+            || !(1..=2).contains(&channels)
+        {
             return Err(invalid("invalid MP2 output geometry"));
         }
         Ok(Self {
@@ -342,7 +344,11 @@ impl Decoder {
             }
             for sample in 0..32 {
                 for channel in pcm.iter().take(channels) {
-                    output.push(channel[sample] as f32);
+                    let value = channel[sample] as f32;
+                    if !value.is_finite() {
+                        return Err(invalid("MP2 PCM overflow"));
+                    }
+                    output.push(value);
                 }
             }
         }

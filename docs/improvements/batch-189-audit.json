@@ -1,0 +1,32 @@
+{
+  "batch": 189,
+  "improvement_id": "FVID-0196",
+  "scope": [
+    "src/playback/audio/wavpack.rs",
+    "src/codec/wavpack_decoder.rs",
+    "src/playback/audio/mp3.rs",
+    "src/playback/audio/ac3.rs"
+  ],
+  "findings": [
+    {
+      "file": "src/playback/audio/wavpack.rs",
+      "function": "Input::tags",
+      "issue": "Input::tags checked only (flags & 0x20000000 != 0) on the APEv2 footer, allowing footers with no_footer (bit 30, 0x40000000) set, and when an APEv2 header was present (flags & 0x80000000 != 0), did not verify that the header flags word at offset 20 equaled (flags | 0x20000000)."
+    },
+    {
+      "file": "src/codec/wavpack_decoder.rs",
+      "function": "Block::parse",
+      "issue": "Block::parse used while at + 2 <= length and broke out of the loop when a long metadata subblock header (id & IDF_LONG != 0) had at + 4 > length, silently ignoring 1, 2, or 3 trailing bytes inside a WavPack block instead of rejecting the truncated metadata item header."
+    },
+    {
+      "file": "src/playback/audio/mp3.rs",
+      "function": "Mp3AudioReader::present_decoded",
+      "issue": "Mp3AudioReader::present_decoded returned Ok(Some(packet)) immediately when self.presentation_floor.is_none() && self.mp3.gapless.is_none(), bypassing negative source_pts rejection, channel-frame stride alignment checks, and packet.pts/timebase stamping."
+    },
+    {
+      "file": "src/playback/audio/ac3.rs",
+      "function": "Ac3AudioReader::open_mode",
+      "issue": "Ac3AudioReader::open_mode relied solely on Ac3::parse_mode for file_bytes enforcement; adding an explicit bytes.len() > limits.file_bytes check in open_mode rejects oversized streams before parsing."
+    }
+  ]
+}

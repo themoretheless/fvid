@@ -1,0 +1,16 @@
+{
+  "batch": 191,
+  "improvement_id": "FVID-0198",
+  "status": "accepted",
+  "fixtures_dir": "tests/fixtures/playback-errors/video-decoders",
+  "generator": "scripts/generate_video_decoder_regressions.py",
+  "fixture_unittest": "scripts/test_video_decoder_regressions.py",
+  "regression_test": "tests/video_decoder_regressions.rs",
+  "gates": {
+    "focused_regression": "cargo test --test video_decoder_regressions -- --nocapture (2 passed)",
+    "fixture_unittest": "python3 -m unittest discover -s scripts -p test_video_decoder_regressions.py (2 passed)",
+    "related_integrations": "cargo test -p fvid-media owned_ffv1 && cargo test -p fvid-codecs av1_grain (17 passed)",
+    "minimal_core": "cargo test --no-default-features --test video_decoder_regressions (2 passed)",
+    "binary_build": "cargo build --bin fvid (ok)"
+  }
+}

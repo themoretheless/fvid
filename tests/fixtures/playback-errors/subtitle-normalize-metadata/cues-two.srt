@@ -1,0 +1,7 @@
+1
+00:00:00,100 --> 00:00:01,100
+<b>First</b> subtitle cue
+
+2
+00:00:01,200 --> 00:00:02,200
+<i>Second</i> subtitle cue with extra text to exceed small packet byte limits

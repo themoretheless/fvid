@@ -1,0 +1,65 @@
+{
+  "batch": 204,
+  "ids": ["FVID-0211"],
+  "title": "Extend owned and top-level trim, plan_trim, loudness, and constant-gain normalize_loudness across G.711 WAVE, Ogg Opus/Vorbis/Joint, bare FLAC/MP3, and secondary Matroska/MP4 audio tracks, and dispatch them in media_cli without legacy features",
+  "scope": [
+    "crates/fvid-media/src/owned_wave_remux.rs",
+    "crates/fvid-media/src/owned_wave_plan.rs",
+    "crates/fvid-media/src/owned_audio_plan.rs",
+    "crates/fvid-media/src/owned_adts_export.rs",
+    "crates/fvid-media/src/owned_container_loudness.rs",
+    "src/native_pcm/loudness.rs",
+    "src/native_pcm/normalize.rs",
+    "src/native_plan.rs",
+    "src/media.rs",
+    "src/media_cli.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/media-trim-loudness/g711-alaw-48k-450ms.wav",
+    "tests/fixtures/playback-errors/media-trim-loudness/g711-mulaw-48k-450ms.wav",
+    "tests/fixtures/playback-errors/media-trim-loudness/ogg-opus-mono-48k.ogg",
+    "tests/fixtures/playback-errors/media-trim-loudness/raw-flac-48k-440ms.flac",
+    "tests/fixtures/playback-errors/media-trim-loudness/multitrack-pcm-flac.mka",
+    "tests/fixtures/playback-errors/media-trim-loudness/multitrack-pcm-ima4.mov",
+    "tests/fixtures/playback-errors/media-trim-loudness/video.mkv",
+    "tests/fixtures/playback-errors/media-trim-loudness/manifest.json"
+  ],
+  "generators": [
+    "scripts/generate_media_trim_loudness_regressions.py",
+    "scripts/test_media_trim_loudness_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-204-pre-edit/owned_wave_remux.rs",
+      "docs/improvements/snapshots/batch-204-pre-edit/owned_wave_plan.rs",
+      "docs/improvements/snapshots/batch-204-pre-edit/owned_audio_plan.rs",
+      "docs/improvements/snapshots/batch-204-pre-edit/owned_adts_export.rs",
+      "docs/improvements/snapshots/batch-204-pre-edit/owned_container_loudness.rs",
+      "docs/improvements/snapshots/batch-204-pre-edit/loudness.rs",
+      "docs/improvements/snapshots/batch-204-pre-edit/normalize.rs",
+      "docs/improvements/snapshots/batch-204-pre-edit/native_plan.rs",
+      "docs/improvements/snapshots/batch-204-pre-edit/media.rs",
+      "docs/improvements/snapshots/batch-204-pre-edit/media_cli.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-204-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-204-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-204-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test media_trim_loudness_regressions",
+      "passed": 3,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test media_audio_routing_regressions --test native_audio_trim --test native_pcm_trim --test native_aac_trim --test native_loudness_cli --test native_loudnorm_cli --test probe_loudness_audio_regressions --test wave_ogg_flac_plan_regressions --test container_loudness_plan_regressions",
+      "passed": 35,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 -m unittest scripts/test_media_trim_loudness_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

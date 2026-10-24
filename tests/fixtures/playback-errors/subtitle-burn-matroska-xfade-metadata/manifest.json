@@ -1,0 +1,26 @@
+{
+  "batch_id": "FVID-0239",
+  "files": {
+    "burn-cues.srt": {
+      "bytes": 37,
+      "sha256": "9a5356ad9415658e410c4120b90dd97698f55e9749977d4541631f85ce2bdf1e"
+    },
+    "vp9-burn-source.webm": {
+      "bytes": 12786,
+      "sha256": "16768ca51003dec90c5eaaa31314f53277deb5be5582d0a9a314a344b5ff375a"
+    },
+    "vp9-rotated-cropped-burn.mkv": {
+      "bytes": 8535,
+      "sha256": "1a487818403337ec5aa1fb80a5d9034ae1d18d1eb1f80f61d192b47443266282"
+    },
+    "xfade-main-4x4.y4m": {
+      "bytes": 124,
+      "sha256": "af4951b68122ab5a07bacc29bce69a7e11386e6a5e3f255bd032228c9f3ad2d8"
+    },
+    "xfade-other-4x4.y4m": {
+      "bytes": 124,
+      "sha256": "1b4987d05d33a388e58338803624842e581b73f5bb09fec7b62cabb6fded2ac7"
+    }
+  },
+  "generator": "scripts/generate_subtitle_burn_matroska_xfade_metadata_regressions.py"
+}

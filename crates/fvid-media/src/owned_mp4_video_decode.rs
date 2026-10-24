@@ -48,10 +48,11 @@ pub(crate) fn decode_presented(
     if !matches!(
         &track.codec,
         b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"av01" | b"vp09"
-    ) || track.rotation != 0
+    ) || !matches!(track.rotation, 0 | 90 | 180 | 270)
     {
         return Ok(None);
     }
+    let rotation = track.rotation;
     let edits = match crate::owned_video_timeline::map_edits(
         track
             .edits
@@ -154,20 +155,22 @@ pub(crate) fn decode_presented(
                 } else {
                     picture.bit_depth.max(picture.chroma_bit_depth)
                 };
+                let mut size = [
+                    u32::try_from(width).map_err(|_| "AVC width overflow")?,
+                    u32::try_from(height).map_err(|_| "AVC height overflow")?,
+                ];
+                let mut sub = sub;
                 if let Some(spool) = spool.as_mut() {
-                    let current = (
-                        [width as u32, height as u32],
-                        output_depth,
-                        sub,
-                        chroma == 0,
-                        rgb,
-                    );
+                    pixels = pack_avc_format(&picture, rgb)?;
+                    rotate_packed(&mut size, &mut sub, output_depth, chroma == 0, rgb, rotation, Some(&mut pixels))?;
+                    let current = (size, output_depth, sub, chroma == 0, rgb);
                     if storage_format.is_some_and(|previous| previous != current) {
                         return Ok(None);
                     }
                     storage_format = Some(current);
-                    pixels = pack_avc_format(&picture, rgb)?;
                     spool.push(&pixels, 0, 0)?;
+                } else {
+                    rotate_packed(&mut size, &mut sub, output_depth, chroma == 0, rgb, rotation, None)?;
                 }
                 let mut colour = container_colour;
                 if let Some((_, full, codes)) = vui.and_then(|v| v.video_signal) {
@@ -185,10 +188,7 @@ pub(crate) fn decode_presented(
                     pts: timing.pts,
                     duration: i64::from(timing.duration),
                     sample: output_sample,
-                    size: [
-                        u32::try_from(width).map_err(|_| "AVC width overflow")?,
-                        u32::try_from(height).map_err(|_| "AVC height overflow")?,
-                    ],
+                    size,
                     depth: output_depth,
                     sub,
                     mono: chroma == 0,
@@ -226,20 +226,19 @@ pub(crate) fn decode_presented(
             let Some(decoded) = decoded else { continue };
             let picture = &decoded.picture;
             let rgb = decoded.color.matrix == 0 && !decoded.color.monochrome;
+            let mut size = picture.size;
+            let mut sub = decoded.color.subsampling;
             if let Some(spool) = spool.as_mut() {
-                let current = (
-                    picture.size,
-                    picture.depth,
-                    decoded.color.subsampling,
-                    decoded.color.monochrome,
-                    rgb,
-                );
+                pixels = crate::owned_webm_codec::pack_av1(&decoded)?.frame.data;
+                rotate_packed(&mut size, &mut sub, picture.depth, decoded.color.monochrome, rgb, rotation, Some(&mut pixels))?;
+                let current = (size, picture.depth, sub, decoded.color.monochrome, rgb);
                 if storage_format.is_some_and(|previous| previous != current) {
                     return Ok(None);
                 }
                 storage_format = Some(current);
-                pixels = crate::owned_webm_codec::pack_av1(&decoded)?.frame.data;
                 spool.push(&pixels, 0, 0)?;
+            } else {
+                rotate_packed(&mut size, &mut sub, picture.depth, decoded.color.monochrome, rgb, rotation, None)?;
             }
             // AV1 code 2 is unspecified: an explicit nclx signal fills it.
             let named = |sequence: u8, container: u8| {
@@ -270,9 +269,9 @@ pub(crate) fn decode_presented(
                 pts: timing.pts,
                 duration: i64::from(timing.duration),
                 sample,
-                size: picture.size,
+                size,
                 depth: picture.depth,
-                sub: decoded.color.subsampling,
+                sub,
                 mono: decoded.color.monochrome,
                 rgb,
             });
@@ -307,20 +306,25 @@ pub(crate) fn decode_presented(
                 }
                 let p = &decoded.picture;
                 let rgb = format.color_space == 7;
+                let mut size = p.size;
+                let mut sub = p.subsampling;
                 if let Some(spool) = spool.as_mut() {
-                    let current = (p.size, p.depth, p.subsampling, false, rgb);
-                    if storage_format.is_some_and(|previous| previous != current) { return Ok(None); }
-                    storage_format = Some(current);
                     let planes = p.planes.each_ref().map(|p| (p.width, p.height, p.samples.as_slice()));
                     pixels = if rgb { crate::owned_frame::pack_gbr(p.size, p.depth, planes)?.data }
                         else { crate::owned_webm_codec::pack(p.size, p.depth, planes, p.subsampling, false)?.frame.data };
+                    rotate_packed(&mut size, &mut sub, p.depth, false, rgb, rotation, Some(&mut pixels))?;
+                    let current = (size, p.depth, sub, false, rgb);
+                    if storage_format.is_some_and(|previous| previous != current) { return Ok(None); }
+                    storage_format = Some(current);
                     spool.push(&pixels, 0, 0)?;
+                } else {
+                    rotate_packed(&mut size, &mut sub, p.depth, false, rgb, rotation, None)?;
                 }
                 let mut colour = container_colour;
                 colour.full_range = format.full_range;
                 if rgb { colour.matrix = 0; colour.primaries = 1; colour.transfer = 13; }
                 frames.push(FrameMetadata { colour, hdr: container_hdr, slot: spool_count, pts, duration,
-                    sample, size: p.size, depth: p.depth, sub: p.subsampling, mono: false, rgb });
+                    sample, size, depth: p.depth, sub, mono: false, rgb });
                 spool_count += 1;
             }
         }
@@ -346,7 +350,7 @@ pub(crate) fn decode_presented(
             };
             if let Some(decoded) = decoded.filter(|value| value.output) {
                 let picture = &decoded.picture;
-                let size = [
+                let mut size = [
                     picture.dimensions[0]
                         .checked_sub(picture.crop[0])
                         .and_then(|v| v.checked_sub(picture.crop[1]))
@@ -362,7 +366,7 @@ pub(crate) fn decode_presented(
                     .is_some_and(|c| c[2] == 0);
                 if rgb && chroma != 3 { return Err("HEVC identity RGB requires 4:4:4".into()); }
 
-                let sub = match chroma {
+                let mut sub = match chroma {
                     0 | 3 => [false, false],
                     1 => [true, true],
                     2 => [true, false],
@@ -374,13 +378,16 @@ pub(crate) fn decode_presented(
                     picture.depth[0].max(picture.depth[1])
                 };
                 if let Some(spool) = spool.as_mut() {
+                    pixels = pack_hevc(picture, sub, chroma == 0, rgb)?;
+                    rotate_packed(&mut size, &mut sub, output_depth, chroma == 0, rgb, rotation, Some(&mut pixels))?;
                     let current = (size, output_depth, sub, chroma == 0, rgb);
                     if storage_format.is_some_and(|previous| previous != current) {
                         return Ok(None);
                     }
                     storage_format = Some(current);
-                    pixels = pack_hevc(picture, sub, chroma == 0, rgb)?;
                     spool.push(&pixels, 0, 0)?;
+                } else {
+                    rotate_packed(&mut size, &mut sub, output_depth, chroma == 0, rgb, rotation, None)?;
                 }
                 let mut colour = container_colour;
                 if let Some(signal) = decoder.parameters().0.vui.as_ref().and_then(|v| v.signal) {
@@ -1066,11 +1073,88 @@ fn check_options(options: Option<&fvid_control::CopyOptions>, sample: usize) -> 
     {
         return Err("media operation cancelled".into());
     }
+    if let Some(options) = options {
+        crate::owned_budget::check_rss_budget(options)?;
+    }
     if options
         .and_then(|o| o.max_packets)
         .is_some_and(|n| sample as u64 >= n)
     {
         return Err("MP4 input packet count exceeds limit".into());
+    }
+    Ok(())
+}
+fn rotate_packed(
+    size: &mut [u32; 2],
+    sub: &mut [bool; 2],
+    depth: u8,
+    mono: bool,
+    rgb: bool,
+    rotation: u16,
+    pixels: Option<&mut Vec<u8>>,
+) -> Result<()> {
+    if rotation == 0 {
+        return Ok(());
+    }
+    let quarter = matches!(rotation, 90 | 270);
+    if quarter {
+        *size = [size[1], size[0]];
+    }
+    let subsampling = if rgb {
+        None
+    } else if mono {
+        Some([1, 1])
+    } else {
+        Some(sub.map(|v| if v { 2 } else { 1 }))
+    };
+    if let Some([sx, sy]) = subsampling {
+        let out_sub = if quarter { [sy, sx] } else { [sx, sy] };
+        let named = matches!(out_sub, [1, 1] | [2, 1] | [2, 2]);
+        let [ox, oy] = if named { out_sub } else { [1, 1] };
+        if !mono {
+            *sub = [ox == 2, oy == 2];
+        }
+    }
+    if let Some(pixels) = pixels {
+        let [w, h] = if quarter {
+            [size[1] as usize, size[0] as usize]
+        } else {
+            [size[0] as usize, size[1] as usize]
+        };
+        let frame = crate::owned_frame::GeometryFrame {
+            width: w,
+            height: h,
+            subsampling,
+            data: std::mem::take(pixels),
+        };
+        let (mut rotated, _) =
+            crate::owned_display_geometry::apply(&frame, None, depth, [0; 4], rotation)?;
+        if let Some([sx, sy]) = rotated.subsampling {
+            if !mono {
+                if !matches!([sx, sy], [1, 1] | [2, 1] | [2, 2]) {
+                    let bytes = if depth == 8 { 1 } else { 2 };
+                    let (rw, rh) = (rotated.width, rotated.height);
+                    let count = rw.checked_mul(rh).ok_or("stored display size overflow")?;
+                    let (pw, ph) = (rw.div_ceil(sx), rh.div_ceil(sy));
+                    let c_len = pw * ph * bytes;
+                    let mut promoted = crate::owned_frame::buffer(count * 3 * bytes)?;
+                    promoted[..count * bytes].copy_from_slice(&rotated.data[..count * bytes]);
+                    for comp in 0..2 {
+                        let src = &rotated.data[count * bytes + comp * c_len..count * bytes + (comp + 1) * c_len];
+                        let dst = &mut promoted[(comp + 1) * count * bytes..(comp + 2) * count * bytes];
+                        for y in 0..rh {
+                            for x in 0..rw {
+                                let from = ((y / sy) * pw + x / sx) * bytes;
+                                let to = (y * rw + x) * bytes;
+                                dst[to..to + bytes].copy_from_slice(&src[from..from + bytes]);
+                            }
+                        }
+                    }
+                    rotated.data = promoted;
+                }
+            }
+        }
+        *pixels = rotated.data;
     }
     Ok(())
 }

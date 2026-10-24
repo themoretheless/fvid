@@ -1,0 +1,68 @@
+{
+  "batch": 214,
+  "ids": ["FVID-0221"],
+  "title": "Preserve and mutate WAVE INFO metadata across loudnorm and normalize-loudness and route fvid::media::{plan_loudnorm, apply_loudnorm, apply_loudnorm_dual} through native_loudnorm",
+  "scope": [
+    "crates/fvid-media/src/owned_loudnorm.rs",
+    "crates/fvid-media/src/owned_loudnorm/report.rs",
+    "crates/fvid-media/src/owned_adts_loudnorm.rs",
+    "crates/fvid-media/src/owned_container_loudnorm.rs",
+    "crates/fvid-media/src/owned_ogg_opus_export.rs",
+    "crates/fvid-media/src/owned_ogg_vorbis_export.rs",
+    "crates/fvid-media/src/owned_ogg_joint_export.rs",
+    "crates/fvid-media/src/owned_g711_wave_export.rs",
+    "src/native_loudnorm.rs",
+    "src/owned_loudnorm_cli.rs",
+    "src/native_pcm/normalize.rs",
+    "src/native_plan.rs",
+    "src/media.rs",
+    "src/media_cli.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/loudnorm-wave-metadata-routing/tagged-48k-450ms.wav",
+    "tests/fixtures/playback-errors/loudnorm-wave-metadata-routing/tagged-opus-48k.ogg",
+    "tests/fixtures/playback-errors/loudnorm-wave-metadata-routing/multitrack-pcm-flac.mka"
+  ],
+  "generators": [
+    "scripts/generate_loudnorm_wave_metadata_routing_regressions.py",
+    "scripts/test_loudnorm_wave_metadata_routing_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-214-pre-edit/crates/fvid-media/src/owned_loudnorm.rs",
+      "docs/improvements/snapshots/batch-214-pre-edit/crates/fvid-media/src/owned_loudnorm/report.rs",
+      "docs/improvements/snapshots/batch-214-pre-edit/crates/fvid-media/src/owned_adts_loudnorm.rs",
+      "docs/improvements/snapshots/batch-214-pre-edit/crates/fvid-media/src/owned_container_loudnorm.rs",
+      "docs/improvements/snapshots/batch-214-pre-edit/crates/fvid-media/src/owned_ogg_opus_export.rs",
+      "docs/improvements/snapshots/batch-214-pre-edit/crates/fvid-media/src/owned_ogg_vorbis_export.rs",
+      "docs/improvements/snapshots/batch-214-pre-edit/crates/fvid-media/src/owned_ogg_joint_export.rs",
+      "docs/improvements/snapshots/batch-214-pre-edit/crates/fvid-media/src/owned_g711_wave_export.rs",
+      "docs/improvements/snapshots/batch-214-pre-edit/src/native_loudnorm.rs",
+      "docs/improvements/snapshots/batch-214-pre-edit/src/owned_loudnorm_cli.rs",
+      "docs/improvements/snapshots/batch-214-pre-edit/src/native_pcm/normalize.rs",
+      "docs/improvements/snapshots/batch-214-pre-edit/src/native_plan.rs",
+      "docs/improvements/snapshots/batch-214-pre-edit/src/media.rs",
+      "docs/improvements/snapshots/batch-214-pre-edit/src/media_cli.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-214-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-214-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-214-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test loudnorm_wave_metadata_routing_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test native_loudnorm_cli --test owned_container_loudnorm --test native_adts_library_loudnorm --test native_loudness_cli --test audio_wave_metadata_mix_controls_regressions --test media_audio_routing_regressions --test loudnorm_budget_mix_concat_regressions",
+      "passed": 21,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_loudnorm_wave_metadata_routing_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

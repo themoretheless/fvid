@@ -1,0 +1,6792 @@
+#[cfg(feature = "media")]
+use std::path::PathBuf;
+
+pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    #[cfg(feature = "player")]
+    if args.first().map(String::as_str) == Some("play") {
+        return fvid::player::run_media(args[1..].to_vec());
+    }
+    // Preserve the adapter's full-resolution negotiation for coupled subsampled input.
+    #[cfg(feature = "media")]
+    {
+        let command = usize::from(args.first().map(String::as_str) == Some("plan"));
+        if matches!(args.get(command).map(String::as_str), Some("decode" | "transcode" | "transcode-lossless")) {
+            if let (Some(source), Some(value)) = (
+                args.get(command + 1),
+                args.windows(2).find(|pair| pair[0] == "--deband").map(|pair| pair[1].as_str()),
+            ) {
+                if !fvid::native_media::supports_deband_source(std::path::Path::new(source), Some(value))? {
+                    return run_native(args);
+                }
+            }
+        }
+    }
+    if owned_subtitle_burn_command(args)? { return Ok(()); }
+    if owned_xfade_command(args)? { return Ok(()); }
+    if owned_lossless_command(args)? { return Ok(()); }
+    if args.first().map(String::as_str) == Some("transcode") && args.len() >= 3 {
+        let mut owned = vec!["transcode-lossless".to_owned(), args[1].clone(), args[2].clone()];
+        let mut encoder = None;
+        let mut encoder_options = Vec::new();
+        let mut options = args[3..].iter();
+        while let Some(option) = options.next() {
+            if option == "--encoder" {
+                if encoder.is_some() { return Err("duplicate encoder".into()); }
+                encoder = Some(options.next().ok_or("missing encoder name")?.as_str());
+            } else if option == "--encoder-option" {
+                let (key, value) = options.next().ok_or("missing encoder option")?
+                    .split_once('=').ok_or("encoder option requires KEY=VALUE")?;
+                encoder_options.push((key.to_owned(), value.to_owned()));
+            } else {
+                owned.push(option.clone());
+                // Keep parameter values together, including strings resembling flags.
+                if !matches!(option.as_str(), "--hflip" | "--vflip" | "--quiet" | "-q" | "--progress" | "--seek")
+                    && let Some(value) = options.next() { owned.push(value.clone()); }
+            }
+        }
+        if let Some(name) = encoder {
+            let settings = fvid::media_info::EncoderSettings { name: name.to_owned(), options: encoder_options };
+            if fvid_media::owned_lossless::supports_encoder(&settings) {
+                return run(&owned);
+            }
+        }
+    }
+    if args.first().map(String::as_str) == Some("plan")
+        && args.get(1).map(String::as_str) == Some("loudnorm")
+    {
+        return crate::owned_loudnorm_cli::run_plan(&args[1..]);
+    }
+    if args.first().map(String::as_str) == Some("loudnorm") {
+        return crate::owned_loudnorm_cli::run(args);
+    }
+    if args.first().map(String::as_str) == Some("capabilities") {
+        if args.len() != 1 {
+            return Err("capabilities accepts no arguments".into());
+        }
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&fvid::native_capabilities::inventory())?
+        );
+        return Ok(());
+    }
+    let normalization_plan = args.first().map(String::as_str) == Some("plan")
+        && args.get(1).map(String::as_str) == Some("normalize-loudness");
+    let args = if normalization_plan { &args[1..] } else { args };
+    if args.first().map(String::as_str) == Some("plan")
+        && args.get(1).map(String::as_str) == Some("loudness")
+    {
+        let source = std::path::Path::new(args.get(2).ok_or("plan loudness requires INPUT")?);
+        let (mut selected, mut weights) = (None, None);
+        let mut quiet = false;
+        let mut limits = fvid::media::CopyOptions::default();
+        let mut limit_flags = std::collections::BTreeSet::new();
+        let mut options = args[3..].iter();
+        while let Some(option) = options.next() {
+            match option.as_str() {
+                "-q" | "--quiet" => quiet = true,
+                "--max-packets" | "--max-packet-bytes" | "--max-memory-mib" | "--max-rss-mib" => {
+                    if !limit_flags.insert(option.as_str()) {
+                        return Err("duplicate audio limit".into());
+                    }
+                    parse_native_audio_limit(
+                        option,
+                        options.next().ok_or("missing audio limit")?,
+                        &mut limits,
+                    )?;
+                }
+                "--streams" => {
+                    if selected.is_some() {
+                        return Err("duplicate stream index".into());
+                    }
+                    selected = Some(
+                        options
+                            .next()
+                            .ok_or("missing stream index")?
+                            .parse::<usize>()?,
+                    );
+                }
+                "--channel-weights" => {
+                    if weights.is_some() {
+                        return Err("duplicate channel weights".into());
+                    }
+                    weights = Some(
+                        options
+                            .next()
+                            .ok_or("missing channel weights")?
+                            .split(',')
+                            .map(str::parse)
+                            .collect::<Result<Vec<f64>, _>>()?,
+                    );
+                }
+                _ => return Err(format!("unsupported owned loudness plan option: {option}").into()),
+            }
+        }
+        limits.streams = selected.into_iter().collect();
+        let plan = fvid::native_plan::loudness_with_options(
+            source,
+            &limits,
+            weights.as_deref(),
+        )?;
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&plan)?);
+        }
+        return Ok(());
+    }
+    if args.first().map(String::as_str) == Some("normalize-loudness") {
+        if args.len() == 2 && matches!(args[1].as_str(), "--help" | "-h") {
+            println!(
+                "fvid media normalize-loudness INPUT OUTPUT.wav [--target-lufs -16] [--sample-peak-dbfs -1.5] [--streams INDEX] [--channel-weights W,...] [--quiet] [--progress]\nConstant gain preserves dynamics; the ceiling is sample peak, not true peak."
+            );
+            return Ok(());
+        }
+        let source = std::path::Path::new(
+            args.get(1)
+                .ok_or("normalize-loudness requires INPUT OUTPUT.wav")?,
+        );
+        let destination = std::path::Path::new(
+            args.get(2)
+                .ok_or("normalize-loudness requires OUTPUT.wav")?,
+        );
+        let (mut selected, mut weights, mut target_lufs, mut ceiling) = (None, None, None, None);
+        let mut limits = fvid::media::CopyOptions::default();
+        let mut limit_flags = std::collections::BTreeSet::new();
+        let mut quiet = false;
+        let mut progress = false;
+        let mut options = args[3..].iter();
+        while let Some(option) = options.next() {
+            match option.as_str() {
+                "--max-packets" | "--max-packet-bytes" | "--max-memory-mib" | "--max-rss-mib" => {
+                    if !limit_flags.insert(option.as_str()) {
+                        return Err("duplicate audio limit".into());
+                    }
+                    parse_native_audio_limit(
+                        option,
+                        options.next().ok_or("missing audio limit")?,
+                        &mut limits,
+                    )?;
+                }
+                "--streams" => {
+                    if selected.is_some() {
+                        return Err("duplicate stream index".into());
+                    }
+                    selected = Some(
+                        options
+                            .next()
+                            .ok_or("missing stream index")?
+                            .parse::<usize>()?,
+                    );
+                }
+                "--channel-weights" => {
+                    if weights.is_some() {
+                        return Err("duplicate channel weights".into());
+                    }
+                    weights = Some(
+                        options
+                            .next()
+                            .ok_or("missing channel weights")?
+                            .split(',')
+                            .map(str::parse)
+                            .collect::<Result<Vec<f64>, _>>()?,
+                    );
+                }
+                "--target-lufs" | "--sample-peak-dbfs" => {
+                    let slot = if option == "--target-lufs" {
+                        &mut target_lufs
+                    } else {
+                        &mut ceiling
+                    };
+                    if slot.is_some() {
+                        return Err(format!("duplicate option: {option}").into());
+                    }
+                    *slot = Some(
+                        options
+                            .next()
+                            .ok_or("missing normalization target")?
+                            .parse::<f64>()?,
+                    );
+                }
+                "-q" | "--quiet" => quiet = true,
+                "--progress" => progress = true,
+                "--metadata" => {
+                    let raw = options.next().ok_or("missing metadata assignment")?;
+                    let (key, val) = raw
+                        .split_once('=')
+                        .ok_or("metadata assignment must be KEY=VALUE")?;
+                    if key.is_empty() {
+                        return Err("metadata key must be non-empty".into());
+                    }
+                    limits.metadata_set.push((key.to_owned(), val.to_owned()));
+                }
+                "--metadata-delete" => {
+                    let key = options.next().ok_or("missing metadata key")?;
+                    if key.is_empty() {
+                        return Err("metadata key must be non-empty".into());
+                    }
+                    limits.metadata_delete.push(key.to_owned());
+                }
+                "--stream-metadata" => {
+                    let raw = options.next().ok_or("missing stream metadata assignment")?;
+                    let (stream_str, rest) = raw
+                        .split_once(':')
+                        .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                    let index = stream_str.parse::<usize>()?;
+                    let (key, val) = rest
+                        .split_once('=')
+                        .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                    if key.is_empty() {
+                        return Err("stream metadata key must be non-empty".into());
+                    }
+                    limits
+                        .stream_metadata_set
+                        .push((index, key.to_owned(), val.to_owned()));
+                }
+                "--stream-metadata-delete" => {
+                    let raw = options.next().ok_or("missing stream metadata key")?;
+                    let (stream_str, key) = raw
+                        .split_once(':')
+                        .ok_or("stream metadata delete must be INDEX:KEY")?;
+                    let index = stream_str.parse::<usize>()?;
+                    if key.is_empty() {
+                        return Err("stream metadata key must be non-empty".into());
+                    }
+                    limits.stream_metadata_delete.push((index, key.to_owned()));
+                }
+                _ => return Err(format!("unsupported normalization option: {option}").into()),
+            }
+        }
+        let dest_ext = destination.extension().and_then(|s| s.to_str());
+        if !matches!(dest_ext, Some("wav" | "mka" | "mkv")) {
+            return Err("normalization requires OUTPUT.wav, OUTPUT.mka or OUTPUT.mkv".into());
+        }
+        if dest_ext == Some("wav") {
+            if !limits.stream_metadata_set.is_empty() || !limits.stream_metadata_delete.is_empty() {
+                return Err("normalize-loudness to .wav does not support stream metadata mutations".into());
+            }
+            fvid_media::owned_wave_metadata::edit_info_chunks(
+                &[],
+                &limits.metadata_delete,
+                &limits.metadata_set,
+            )?;
+        }
+        limits.streams = selected.into_iter().collect();
+        let weights = owned_loudness_weights(source, selected, weights)?;
+        let defaults = fvid::native_pcm::NormalizeTarget::default();
+        let target = fvid::native_pcm::NormalizeTarget {
+            integrated_lufs: target_lufs.unwrap_or(defaults.integrated_lufs),
+            sample_peak_dbfs: ceiling.unwrap_or(defaults.sample_peak_dbfs),
+        };
+        if normalization_plan {
+            let plan = fvid::native_plan::normalize_loudness_with_options(
+                source,
+                &limits,
+                Some(&weights),
+                target,
+            )?;
+            if !quiet {
+                println!("{}", serde_json::to_string_pretty(&plan)?);
+            }
+            return Ok(());
+        }
+        let hook=progress.then(||fvid::native_pcm::NormalizationProgressHook::new(|event| {
+            eprintln!("{}",serde_json::json!({"phase":event.phase.as_str(),"packets":event.packets,"payload_bytes":event.payload_bytes,"phase_complete":event.phase_complete,"done":event.done}));
+        }));
+        let report = fvid::native_pcm::normalize_loudness_file_with_options(
+            source,
+            destination,
+            &weights,
+            target,
+            &limits,
+            hook.as_ref(),
+        )?;
+        if !quiet {
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&serde_json::json!({
+                    "backend":"fvid", "sample_frames":report.sample_frames, "gain_db":report.gain_db,
+                    "peak_limited":report.peak_limited, "source_integrated_lufs":report.source.integrated_lufs,
+                    "target_lufs":target.integrated_lufs,"sample_peak_ceiling_dbfs":target.sample_peak_dbfs
+                }))?
+            );
+        }
+        return Ok(());
+    }
+    if args.first().map(String::as_str) == Some("loudness") {
+        let source = std::path::Path::new(args.get(1).ok_or("loudness requires INPUT")?);
+        let mut selected = None;
+        let mut weights = None;
+        let mut limits = fvid::media::CopyOptions::default();
+        let mut limit_flags = std::collections::BTreeSet::new();
+        let mut quiet = false;
+        let mut progress = false;
+        let mut options = args[2..].iter();
+        while let Some(option) = options.next() {
+            match option.as_str() {
+                "--max-packets" | "--max-packet-bytes" | "--max-memory-mib" | "--max-rss-mib" => {
+                    if !limit_flags.insert(option.as_str()) {
+                        return Err("duplicate audio limit".into());
+                    }
+                    parse_native_audio_limit(
+                        option,
+                        options.next().ok_or("missing audio limit")?,
+                        &mut limits,
+                    )?;
+                }
+                "--streams" => {
+                    if selected.is_some() {
+                        return Err("duplicate streams option".into());
+                    }
+                    selected = Some(
+                        options
+                            .next()
+                            .ok_or("missing audio stream index")?
+                            .parse::<usize>()?,
+                    );
+                }
+                "--channel-weights" => {
+                    if weights.is_some() {
+                        return Err("duplicate channel weights".into());
+                    }
+                    weights = Some(
+                        options
+                            .next()
+                            .ok_or("missing channel weights")?
+                            .split(',')
+                            .map(str::parse)
+                            .collect::<Result<Vec<f64>, _>>()?,
+                    );
+                }
+                "-q" | "--quiet" => quiet = true,
+                "--progress" => progress = true,
+                _ => return Err(format!("unsupported owned loudness option: {option}").into()),
+            }
+        }
+        let weights = owned_loudness_weights(source, selected, weights)?;
+        let hook=progress.then(||fvid::media_control::ProgressHook::new(|event| {
+            eprintln!("{}",serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
+        }));
+        limits.streams = selected.into_iter().collect();
+        limits.progress = hook;
+        let stats = fvid::native_pcm::measure_loudness_file_with_options(
+            source,
+            &weights,
+            &limits,
+        )?;
+        if !quiet {
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&serde_json::json!({
+                    "backend":"fvid", "sample_frames":stats.sample_frames,
+                    "measured_blocks":stats.measured_blocks, "integrated_lufs":stats.integrated_lufs,
+                    "channel_weights":weights, "sample_peak_dbfs":stats.sample_peak_dbfs, "range_lu":stats.range_lu
+                }))?
+            );
+        }
+        return Ok(());
+    }
+    if args.first().map(String::as_str) == Some("convert-subtitles") && args.len() >= 3 {
+        let mut streams = Vec::new();
+        let mut quiet = false;
+        let mut progress = false;
+        let mut supported = true;
+        let mut limits = fvid::media::CopyOptions::default();
+        let mut limit_flags = std::collections::BTreeSet::new();
+        let mut options = args[3..].iter();
+        while let Some(option) = options.next() {
+            match option.as_str() {
+                "-q" | "--quiet" => quiet = true,
+                "--progress" => progress = true,
+                "--max-packets" | "--max-packet-bytes" | "--max-rss-mib" => {
+                    if !limit_flags.insert(option.as_str()) {
+                        return Err("duplicate subtitle limit".into());
+                    }
+                    parse_native_audio_limit(
+                        option,
+                        options.next().ok_or("missing subtitle limit")?,
+                        &mut limits,
+                    )?;
+                }
+                "--codec" => {
+                    if options.next().map(String::as_str) != Some("ass") {
+                        supported = false;
+                    }
+                }
+                "--streams" => {
+                    streams = options
+                        .next()
+                        .ok_or("missing subtitle stream")?
+                        .split(',')
+                        .map(str::parse)
+                        .collect::<std::result::Result<Vec<usize>, _>>()?;
+                }
+                "--metadata" => {
+                    let raw = options.next().ok_or("missing metadata assignment")?;
+                    let (key, val) = raw
+                        .split_once('=')
+                        .ok_or("metadata assignment must be KEY=VALUE")?;
+                    if key.is_empty() {
+                        return Err("metadata key must be non-empty".into());
+                    }
+                    limits.metadata_set.push((key.to_owned(), val.to_owned()));
+                }
+                "--metadata-delete" => {
+                    let key = options.next().ok_or("missing metadata key")?;
+                    if key.is_empty() {
+                        return Err("metadata key must be non-empty".into());
+                    }
+                    limits.metadata_delete.push(key.to_owned());
+                }
+                "--stream-metadata" => {
+                    let raw = options.next().ok_or("missing stream metadata assignment")?;
+                    let (stream_str, rest) = raw
+                        .split_once(':')
+                        .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                    let index = stream_str.parse::<usize>()?;
+                    let (key, val) = rest
+                        .split_once('=')
+                        .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                    if key.is_empty() {
+                        return Err("stream metadata key must be non-empty".into());
+                    }
+                    limits
+                        .stream_metadata_set
+                        .push((index, key.to_owned(), val.to_owned()));
+                }
+                "--stream-metadata-delete" => {
+                    let raw = options.next().ok_or("missing stream metadata key")?;
+                    let (stream_str, key) = raw
+                        .split_once(':')
+                        .ok_or("stream metadata delete must be INDEX:KEY")?;
+                    let index = stream_str.parse::<usize>()?;
+                    if key.is_empty() {
+                        return Err("stream metadata key must be non-empty".into());
+                    }
+                    limits.stream_metadata_delete.push((index, key.to_owned()));
+                }
+                _ => supported = false,
+            }
+        }
+        let hook = progress.then(|| {
+            fvid::media_control::ProgressHook::new(|event| {
+                eprintln!(
+                    "{}",
+                    serde_json::json!({
+                        "packets": event.packets,
+                        "payload_bytes": event.payload_bytes,
+                        "done": event.done
+                    })
+                );
+            })
+        });
+        limits.streams = streams.clone();
+        limits.progress = hook;
+        if supported
+            && let Some(stats) = fvid::native_subtitle::try_convert_with_controls(
+                std::path::Path::new(&args[1]),
+                std::path::Path::new(&args[2]),
+                &fvid::media_info::SubtitleConvertOptions {
+                    streams,
+                    codec: fvid::media_info::SubtitleCodec::Ass,
+                },
+                &limits,
+            )? {
+                if !quiet {
+                    println!("{}", serde_json::to_string_pretty(&stats)?);
+                }
+                return Ok(());
+            }
+    }
+    if native_mix(args)? || native_merge(args)? {
+        return Ok(());
+    }
+    if matches!(args.first().map(String::as_str), Some("transcode-lossless" | "crop-lossless"))
+        && args.len() >= 3
+    {
+        let mut owned = args.to_vec();
+        owned[0] = "decode".into();
+        let (pixel_args, filters) = pixel_decode_args(&owned)?;
+        let (remaining, geometry) = geometry_decode_args(&pixel_args)?;
+        if args[0] == "crop-lossless" {
+            if geometry.crop.is_none() {
+                return Err("--crop required".into());
+            }
+            for (present, option) in [
+                (geometry.scale.is_some(), "--scale"),
+                (geometry.transpose.is_some(), "--transpose"),
+                (geometry.pad.is_some(), "--pad"),
+            ] {
+                if present {
+                    return Err(format!("crop-lossless does not take {option}; use transcode-lossless").into());
+                }
+            }
+            if !filters.is_empty() {
+                return Err("crop-lossless does not take pixel filters; use transcode-lossless".into());
+            }
+        }
+        if remaining.len() >= 3
+            && remaining[3..]
+                .iter()
+                .all(|s| matches!(s.as_str(), "--quiet" | "-q" | "--progress"))
+            && fvid::native_lossless::eligible(std::path::Path::new(&remaining[1]))?
+        {
+            let hook=remaining[3..].iter().any(|s|s=="--progress").then(||fvid::media_control::ProgressHook::new(|event| {
+                eprintln!("{}",serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
+            }));
+            let stats = fvid::native_export::transcode_ffv1_transformed(
+                std::path::Path::new(&remaining[1]),
+                std::path::Path::new(&remaining[2]),
+                &geometry,
+                &filters,
+                None,
+                hook.as_ref(),
+            )?;
+            if !remaining[3..].iter().any(|s| matches!(s.as_str(), "--quiet" | "-q")) {
+                println!("{}", serde_json::to_string(&stats)?);
+            }
+            return Ok(());
+        }
+    }
+
+    if args.first().map(String::as_str) == Some("plan")
+        && args.get(1).map(String::as_str) == Some("remux")
+        && args.len() >= 3
+    {
+        let source = std::path::Path::new(&args[2]);
+        if args[3..].iter().all(|s| matches!(s.as_str(), "--quiet" | "-q"))
+            && let Some(plan) = fvid::native_plan::remux(source)?
+        {
+            if !args[3..].iter().any(|s| matches!(s.as_str(), "--quiet" | "-q")) {
+                println!("{}", serde_json::to_string_pretty(&plan)?);
+            }
+            return Ok(());
+        }
+        let mut options = fvid::media::CopyOptions::default();
+        let mut limit_flags = std::collections::BTreeSet::new();
+        let mut quiet = false;
+        let mut items = args[3..].iter();
+        while let Some(arg) = items.next() {
+            match arg.as_str() {
+                "--quiet" | "-q" => quiet = true,
+                "--max-packets" | "--max-packet-bytes" | "--max-memory-mib" | "--max-rss-mib" => {
+                    if !limit_flags.insert(arg.as_str()) {
+                        return Err("duplicate remux limit".into());
+                    }
+                    parse_native_audio_limit(
+                        arg,
+                        items.next().ok_or("missing remux limit")?,
+                        &mut options,
+                    )?;
+                }
+                "--streams" => {
+                    options.streams = items
+                        .next()
+                        .ok_or("missing stream indices")?
+                        .split(',')
+                        .map(str::parse)
+                        .collect::<Result<_, _>>()?;
+                }
+                "--metadata" => {
+                    let (key, value) = items
+                        .next()
+                        .ok_or("missing metadata")?
+                        .split_once('=')
+                        .ok_or("metadata must be KEY=VALUE")?;
+                    options
+                        .metadata_set
+                        .push((key.to_owned(), value.to_owned()));
+                }
+                "--metadata-delete" => {
+                    options
+                        .metadata_delete
+                        .push(items.next().ok_or("missing metadata key")?.clone());
+                }
+                "--stream-metadata" => {
+                    let raw = items.next().ok_or("missing stream metadata")?;
+                    let (index, rest) = raw
+                        .split_once(':')
+                        .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                    let (key, value) = rest
+                        .split_once('=')
+                        .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                    options.stream_metadata_set.push((
+                        index.parse()?,
+                        key.to_owned(),
+                        value.to_owned(),
+                    ));
+                }
+                "--stream-metadata-delete" => {
+                    let raw = items.next().ok_or("missing stream metadata key")?;
+                    let (index, key) = raw
+                        .split_once(':')
+                        .ok_or("stream metadata delete must be INDEX:KEY")?;
+                    options
+                        .stream_metadata_delete
+                        .push((index.parse()?, key.to_owned()));
+                }
+                _ => {
+                    return Err(format!("unsupported remux plan option: {arg}").into());
+                }
+            }
+        }
+        let plan = fvid::media::plan_remux(source, &options)?;
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&plan)?);
+        }
+        return Ok(());
+    }
+
+    if args.first().map(String::as_str) == Some("plan")
+        && args.get(1).map(String::as_str) == Some("decode-audio")
+        && args.len() >= 3
+    {
+        let mut transform = fvid::native_plan::AudioDecodeTransform::default();
+        let mut selected = None;
+        let mut quiet = false;
+        let mut limits = fvid::media::CopyOptions::default();
+        let mut limit_flags = std::collections::BTreeSet::new();
+        let (mut from, mut to) = (None, None);
+        let mut options = args[3..].iter();
+        while let Some(option) = options.next() {
+            match option.as_str() {
+                "-q" | "--quiet" => quiet = true,
+                "--max-packets" | "--max-packet-bytes" | "--max-memory-mib" | "--max-rss-mib" => {
+                    if !limit_flags.insert(option.as_str()) { return Err("duplicate audio limit".into()); }
+                    parse_native_audio_limit(option, options.next().ok_or("missing audio limit")?, &mut limits)?;
+                }
+                "--streams" => {
+                    if selected.is_some() {
+                        return Err("duplicate streams option".into());
+                    }
+                    selected = Some(
+                        options
+                            .next()
+                            .ok_or("missing stream index")?
+                            .parse::<usize>()?,
+                    );
+                }
+                "--from" | "--to" => {
+                    let slot = if option == "--from" {
+                        &mut from
+                    } else {
+                        &mut to
+                    };
+                    if slot.is_some() {
+                        return Err("duplicate interval boundary".into());
+                    }
+                    let time = decode_time(options.next().ok_or("missing interval boundary")?)?;
+                    if time.subsec_nanos() % 1000 != 0 {
+                        return Err(
+                            "audio plan boundary must be representable in microseconds".into()
+                        );
+                    }
+                    *slot = Some(
+                        i64::try_from(time.as_micros())
+                            .map_err(|_| "interval exceeds microsecond range")?,
+                    );
+                }
+                "--rate" | "--sample-rate" => {
+                    if transform.sample_rate.is_some() {
+                        return Err("duplicate sample-rate option".into());
+                    }
+                    transform.sample_rate =
+                        Some(options.next().ok_or("missing sample rate")?.parse()?);
+                }
+                "--channels" => {
+                    if transform.channels.is_some() {
+                        return Err("duplicate channels option".into());
+                    }
+                    transform.channels = Some(options.next().ok_or("missing channels")?.parse()?);
+                }
+                "--volume" => {
+                    if transform.volume.is_some() {
+                        return Err("duplicate volume option".into());
+                    }
+                    transform.volume = Some(options.next().ok_or("missing volume")?.parse()?);
+                }
+                "--metadata" => {
+                    let (key, value) = options
+                        .next()
+                        .ok_or("missing metadata")?
+                        .split_once('=')
+                        .ok_or("metadata must be KEY=VALUE")?;
+                    limits
+                        .metadata_set
+                        .push((key.to_owned(), value.to_owned()));
+                }
+                "--metadata-delete" => {
+                    limits
+                        .metadata_delete
+                        .push(options.next().ok_or("missing metadata key")?.clone());
+                }
+                "--stream-metadata" => {
+                    let raw = options.next().ok_or("missing stream metadata")?;
+                    let (index, rest) = raw
+                        .split_once(':')
+                        .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                    let (key, value) = rest
+                        .split_once('=')
+                        .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                    limits.stream_metadata_set.push((
+                        index.parse()?,
+                        key.to_owned(),
+                        value.to_owned(),
+                    ));
+                }
+                "--stream-metadata-delete" => {
+                    let raw = options.next().ok_or("missing stream metadata key")?;
+                    let (index, key) = raw
+                        .split_once(':')
+                        .ok_or("stream metadata delete must be INDEX:KEY")?;
+                    limits
+                        .stream_metadata_delete
+                        .push((index.parse()?, key.to_owned()));
+                }
+                _ => return Err(format!("unsupported native audio plan option: {option}").into()),
+            }
+        }
+        transform.interval = match (from, to) {
+            (None, None) => None,
+            (Some(from), Some(to)) => Some((from, to)),
+            _ => return Err("plan interval requires both --from and --to".into()),
+        };
+        limits.streams = selected.into_iter().collect();
+        let plan = fvid::media::plan_decode_audio(
+            std::path::Path::new(&args[2]),
+            &transform,
+            &limits,
+        )?;
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&plan)?);
+        }
+        return Ok(());
+    }
+    if args.first().map(String::as_str) == Some("probe") {
+        let hint = match args.len() {
+            2 => None,
+            4 if args[2] == "--input-format" => Some(args[3].as_str()),
+            _ => return Err("usage: fvid media probe INPUT [--input-format FORMAT]".into()),
+        };
+        if let Some(info) = fvid::native_probe::try_probe_as(std::path::Path::new(&args[1]), hint)?
+        {
+            println!("{}", serde_json::to_string_pretty(&info)?);
+            return Ok(());
+        }
+        #[cfg(not(feature = "media"))]
+        return Err("native probe does not yet support this container".into());
+    }
+    if args.first().map(String::as_str) == Some("remux")
+        && (args.len() == 3 || (args.len() == 4 && args[3] == "--progress"))
+        && matches!(
+            std::path::Path::new(&args[2])
+                .extension()
+                .and_then(|s| s.to_str()),
+            Some("mp4" | "m4a" | "mka" | "mkv")
+        )
+    {
+        use std::io::Read;
+        let mut prefix = [0; 8];
+        let mut source = std::fs::File::open(&args[1])?;
+        source.read_exact(&mut prefix)?;
+        let progress = (args.len() == 4).then(|| {
+            fvid::media_control::ProgressHook::new(|event| {
+                eprintln!(
+                    "{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",
+                    event.packets, event.payload_bytes, event.done
+                );
+            })
+        });
+        if prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3]
+            && matches!(
+                std::path::Path::new(&args[2])
+                    .extension()
+                    .and_then(|s| s.to_str()),
+                Some("mkv" | "mka")
+            )
+        {
+            let stats = fvid::native_export::remux_matroska(
+                std::path::Path::new(&args[1]),
+                std::path::Path::new(&args[2]),
+                None,
+                progress.as_ref(),
+            )?;
+            println!(
+                "{}",
+                serde_json::json!({"backend":"fvid","packets":stats.packets,"payload_bytes":stats.payload_bytes,"remux":"matroska-preserve"})
+            );
+            return Ok(());
+        }
+        if fvid::container::adts::header(&prefix).is_some() {
+            let packets = fvid::native_export::remux_adts_aac_controlled(
+                std::path::Path::new(&args[1]),
+                std::path::Path::new(&args[2]),
+                None,
+                progress.as_ref(),
+            )?;
+            println!("{{\"backend\":\"fvid\",\"audio_packets\":{packets}}}");
+            return Ok(());
+        }
+        if fvid::container::mp4::recognizes_prefix(&prefix)
+            && matches!(
+                std::path::Path::new(&args[2])
+                    .extension()
+                    .and_then(|s| s.to_str()),
+                Some("mka" | "mkv")
+            )
+            && fvid::native_export::is_single_track_mp4_aac(std::path::Path::new(&args[1]))?
+        {
+            let stats = fvid::native_export::remux_mp4_aac_matroska(
+                std::path::Path::new(&args[1]),
+                std::path::Path::new(&args[2]),
+                None,
+                progress.as_ref(),
+            )?;
+            println!(
+                "{{\"backend\":\"fvid\",\"audio_packets\":{}}}",
+                stats.packets
+            );
+            return Ok(());
+        }
+        if fvid::container::mp4::recognizes_prefix(&prefix)
+            && matches!(
+                std::path::Path::new(&args[2])
+                    .extension()
+                    .and_then(|s| s.to_str()),
+                Some("mka" | "mkv")
+            )
+            && fvid::native_export::is_native_mp4_matroska(std::path::Path::new(&args[1]))?
+        {
+            let stats = fvid::native_export::remux_mp4_matroska(
+                std::path::Path::new(&args[1]),
+                std::path::Path::new(&args[2]),
+                None,
+                progress.as_ref(),
+            )?;
+            println!("{{\"backend\":\"fvid\",\"packets\":{}}}", stats.packets);
+            return Ok(());
+        }
+        if fvid::container::mp4::recognizes_prefix(&prefix)
+            && matches!(
+                std::path::Path::new(&args[2])
+                    .extension()
+                    .and_then(|s| s.to_str()),
+                Some("mp4" | "m4a")
+            )
+        {
+            fvid::native_export::remux_mp4_controlled(
+                std::path::Path::new(&args[1]),
+                std::path::Path::new(&args[2]),
+                None,
+                progress.as_ref(),
+            )?;
+            println!("{{\"backend\":\"fvid\",\"remux\":\"mp4-faststart\"}}");
+            return Ok(());
+        }
+    }
+    if args.first().map(String::as_str) == Some("remux")
+        && args.len() >= 3
+        && matches!(
+            std::path::Path::new(&args[2])
+                .extension()
+                .and_then(|s| s.to_str()),
+            Some("mp4" | "m4a" | "mka" | "mkv" | "wav")
+        )
+    {
+        let mut options = fvid::media::CopyOptions::default();
+        let mut limit_flags = std::collections::BTreeSet::new();
+        let mut quiet = false;
+        let mut report_progress = false;
+        let mut items = args[3..].iter();
+        while let Some(arg) = items.next() {
+            match arg.as_str() {
+                "--quiet" | "-q" => quiet = true,
+                "--progress" => report_progress = true,
+                "--max-packets" | "--max-packet-bytes" | "--max-memory-mib" | "--max-rss-mib" => {
+                    if !limit_flags.insert(arg.as_str()) {
+                        return Err("duplicate remux limit".into());
+                    }
+                    parse_native_audio_limit(
+                        arg,
+                        items.next().ok_or("missing remux limit")?,
+                        &mut options,
+                    )?;
+                }
+                "--streams" => {
+                    options.streams = items
+                        .next()
+                        .ok_or("missing stream indices")?
+                        .split(',')
+                        .map(str::parse)
+                        .collect::<Result<_, _>>()?;
+                }
+                "--metadata" => {
+                    let (key, value) = items
+                        .next()
+                        .ok_or("missing metadata")?
+                        .split_once('=')
+                        .ok_or("metadata must be KEY=VALUE")?;
+                    options
+                        .metadata_set
+                        .push((key.to_owned(), value.to_owned()));
+                }
+                "--metadata-delete" => {
+                    options
+                        .metadata_delete
+                        .push(items.next().ok_or("missing metadata key")?.clone());
+                }
+                "--stream-metadata" => {
+                    let raw = items.next().ok_or("missing stream metadata")?;
+                    let (index, rest) = raw
+                        .split_once(':')
+                        .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                    let (key, value) = rest
+                        .split_once('=')
+                        .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                    options.stream_metadata_set.push((
+                        index.parse()?,
+                        key.to_owned(),
+                        value.to_owned(),
+                    ));
+                }
+                "--stream-metadata-delete" => {
+                    let raw = items.next().ok_or("missing stream metadata key")?;
+                    let (index, key) = raw
+                        .split_once(':')
+                        .ok_or("stream metadata delete must be INDEX:KEY")?;
+                    options
+                        .stream_metadata_delete
+                        .push((index.parse()?, key.to_owned()));
+                }
+                _ => {
+                    return Err(format!("unsupported remux option: {arg}").into());
+                }
+            }
+        }
+        options.progress = report_progress.then(|| {
+            fvid::media_control::ProgressHook::new(|event| {
+                eprintln!(
+                    "{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",
+                    event.packets, event.payload_bytes, event.done
+                );
+            })
+        });
+        let stats = fvid::media::remux(
+            std::path::Path::new(&args[1]),
+            std::path::Path::new(&args[2]),
+            &options,
+        )?;
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&stats)?);
+        }
+        return Ok(());
+    }
+    if args.first().map(String::as_str) == Some("decode-audio")
+        && args.len() >= 3
+        && matches!(
+            std::path::Path::new(&args[2])
+                .extension()
+                .and_then(|s| s.to_str()),
+            Some("f32le" | "wav" | "mka" | "mkv")
+        )
+        && args[3..].iter().all(|arg| {
+            !arg.starts_with('-')
+                || matches!(
+                    arg.as_str(),
+                    "--max-packets"
+                        | "--max-packet-bytes"
+                        | "--max-memory-mib"
+                        | "--max-rss-mib"
+                        | "--from"
+                        | "--to"
+                        | "--quiet"
+                        | "-q"
+                        | "--progress"
+                        | "--streams"
+                        | "--volume"
+                        | "--channels"
+                        | "--sample-rate"
+                        | "--rate"
+                        | "--metadata"
+                        | "--metadata-delete"
+                        | "--stream-metadata"
+                        | "--stream-metadata-delete"
+                )
+        })
+        && (fvid::native_media::is_owned_audio_trim_source(std::path::Path::new(&args[1]))?
+            || fvid::native_pcm::is_wave(std::path::Path::new(&args[1]))?
+            || fvid_media::owned_container_loudness::recognizes_standalone_audio(std::path::Path::new(&args[1]))?
+            || {
+                let mut head = [0u8; 8];
+                std::fs::File::open(&args[1])
+                    .and_then(|mut f| std::io::Read::read_exact(&mut f, &mut head))
+                    .is_ok_and(|()| {
+                        head.starts_with(&[0x1a, 0x45, 0xdf, 0xa3])
+                            || fvid::container::mp4::recognizes_prefix(&head)
+                    })
+            }
+            || std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()) == Some("wav"))
+    {
+        let mut parse_args = vec!["decode".to_owned(), args[1].clone()];
+        let mut volume = None;
+        let mut channels = None;
+        let mut sample_rate = None;
+        let mut report_progress = false;
+        let mut selected = None;
+        let mut limits = fvid::media::CopyOptions::default();
+        let mut limit_flags = std::collections::BTreeSet::new();
+        let mut options = args[3..].iter();
+        while let Some(option) = options.next() {
+            if matches!(
+                option.as_str(),
+                "--max-packets" | "--max-packet-bytes" | "--max-memory-mib" | "--max-rss-mib"
+            ) {
+                if !limit_flags.insert(option.as_str()) { return Err("duplicate audio limit".into()); }
+                parse_native_audio_limit(option, options.next().ok_or("missing audio limit")?, &mut limits)?;
+            } else if option == "--streams" {
+                if selected.is_some() {
+                    return Err("duplicate streams option".into());
+                }
+                selected = Some(
+                    options
+                        .next()
+                        .ok_or("missing stream index")?
+                        .parse::<usize>()?,
+                );
+            } else if option == "--progress" {
+                report_progress = true;
+            } else if option == "--volume" {
+                if volume.is_some() {
+                    return Err("duplicate volume option".into());
+                }
+                volume = Some(options.next().ok_or("missing volume")?.parse::<f64>()?);
+            } else if option == "--channels" {
+                if channels.is_some() {
+                    return Err("duplicate channels option".into());
+                }
+                channels = Some(options.next().ok_or("missing channels")?.parse::<u16>()?);
+            } else if option == "--sample-rate" || option == "--rate" {
+                if sample_rate.is_some() {
+                    return Err("duplicate sample-rate option".into());
+                }
+                sample_rate = Some(
+                    options
+                        .next()
+                        .ok_or("missing sample-rate")?
+                        .parse::<u32>()?,
+                );
+            } else if option == "--metadata" {
+                let (key, value) = options
+                    .next()
+                    .ok_or("missing metadata")?
+                    .split_once('=')
+                    .ok_or("metadata must be KEY=VALUE")?;
+                limits
+                    .metadata_set
+                    .push((key.to_owned(), value.to_owned()));
+            } else if option == "--metadata-delete" {
+                limits
+                    .metadata_delete
+                    .push(options.next().ok_or("missing metadata key")?.clone());
+            } else if option == "--stream-metadata" {
+                let raw = options.next().ok_or("missing stream metadata")?;
+                let (index, rest) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                let (key, value) = rest
+                    .split_once('=')
+                    .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                limits.stream_metadata_set.push((
+                    index.parse()?,
+                    key.to_owned(),
+                    value.to_owned(),
+                ));
+            } else if option == "--stream-metadata-delete" {
+                let raw = options.next().ok_or("missing stream metadata key")?;
+                let (index, key) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata delete must be INDEX:KEY")?;
+                limits
+                    .stream_metadata_delete
+                    .push((index.parse()?, key.to_owned()));
+            } else {
+                parse_args.push(option.clone());
+            }
+        }
+        let (_, quiet, interval) =
+            plain_decode(&parse_args)?.ok_or("invalid native audio arguments")?;
+        let progress = report_progress.then(|| {
+            fvid::media_control::ProgressHook::new(|event| {
+                eprintln!(
+                    "{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",
+                    event.packets, event.payload_bytes, event.done
+                );
+            })
+        });
+        limits.streams = selected.into_iter().collect();
+        limits.progress = progress;
+        let source_path = std::path::Path::new(&args[1]);
+        let dest_path = std::path::Path::new(&args[2]);
+        let use_native_export = limits.max_controlled_bytes.is_none()
+            && limits.metadata_set.is_empty()
+            && limits.metadata_delete.is_empty()
+            && limits.stream_metadata_set.is_empty()
+            && limits.stream_metadata_delete.is_empty()
+            && (fvid::native_pcm::is_wave(source_path)?
+                || (fvid::native_media::is_owned_audio_trim_source(source_path)?
+                    && selected.is_none_or(|idx| {
+                        fvid::native_media::audio_source_info_selected(source_path, Some(idx))
+                            .is_ok()
+                    })));
+        if use_native_export {
+            let stats = fvid::native_export::export_audio_pcm_transformed_with_controls(
+                source_path,
+                dest_path,
+                interval,
+                volume.unwrap_or(1.0),
+                channels,
+                sample_rate,
+                &limits,
+            )?;
+            if !quiet {
+                println!(
+                    "{{\"backend\":\"fvid\",\"sample_frames\":{},\"decoded_frames\":{},\"sample_rate\":{},\"channels\":{},\"sample_format\":\"f32le\",\"decode_errors\":0}}",
+                    stats.sample_frames, stats.decoded_frames, stats.sample_rate, stats.channels
+                );
+            }
+        } else {
+            let transform = fvid::media::AudioDecodeTransform {
+                interval: interval.map(|(from, to)| {
+                    (
+                        i64::try_from(from.as_micros()).unwrap_or(i64::MAX),
+                        i64::try_from(to.as_micros()).unwrap_or(i64::MAX),
+                    )
+                }),
+                volume,
+                channels: channels.map(i32::from),
+                sample_rate: sample_rate.map(|r| r as i32),
+            };
+            let stats =
+                fvid::media::decode_audio_transformed(source_path, dest_path, transform, &limits)?;
+            if !quiet {
+                println!(
+                    "{{\"backend\":\"fvid\",\"sample_frames\":{},\"decoded_frames\":{},\"sample_rate\":{},\"channels\":{},\"sample_format\":\"f32le\",\"decode_errors\":{}}}",
+                    stats.sample_frames, stats.decoded_frames, stats.sample_rate, stats.channels, stats.decode_errors
+                );
+            }
+        }
+        return Ok(());
+    }
+    if try_owned_overlay(args)? {return Ok(());}
+    if try_video_trim(args)? {
+        return Ok(());
+    }
+    if try_mp4_matroska_concat(args)? {
+        return Ok(());
+    }
+    if try_video_concat(args)? {
+        return Ok(());
+    }
+    if try_native_audio_concat(args)? {
+        return Ok(());
+    }
+    if try_native_audio_trim(args)? {
+        return Ok(());
+    }
+    if args.first().map(String::as_str) == Some("export-y4m") {
+        if args.len() < 3 {
+            return Err("usage: fvid media export-y4m INPUT OUTPUT.y4m [--crop X:Y:W:H] [--hflip] [--vflip] [--transpose MODE] [--pad W:H:X:Y] [--scale W:H] [--from SECONDS --to SECONDS]".into());
+        }
+        let mut geometry_args = vec!["decode".to_owned(), args[1].clone()];
+        geometry_args.extend_from_slice(&args[3..]);
+        let (geometry_args, mut filters) = pixel_decode_args(&geometry_args)?;
+        filters.canonicalize_option_order();
+        let (geometry_args, geometry) = geometry_decode_args(&geometry_args)?;
+        let (mut from, mut to) = (None, None);
+        let mut quiet = false;
+        let mut report = false;
+        let mut copy_options = fvid::media::CopyOptions::default();
+        let mut limit_flags = std::collections::BTreeSet::new();
+        let mut options = geometry_args[2..].iter();
+        while let Some(option) = options.next() {
+            match option.as_str() {
+                "--from" | "--to" => {
+                    let slot = if option == "--from" { &mut from } else { &mut to };
+                    if slot.is_some() {
+                        return Err("duplicate export boundary".into());
+                    }
+                    *slot = Some(decode_time(
+                        options.next().ok_or("missing export boundary")?,
+                    )?);
+                }
+                "--quiet" | "-q" => quiet = true,
+                "--progress" => report = true,
+                "--max-packets" | "--max-packet-bytes" | "--max-rss-mib" => {
+                    if !limit_flags.insert(option.as_str()) {
+                        return Err("duplicate export limit".into());
+                    }
+                    parse_native_audio_limit(
+                        option,
+                        options.next().ok_or("missing export limit")?,
+                        &mut copy_options,
+                    )?;
+                }
+                _ => return Err(format!("unknown export option: {option}").into()),
+            }
+        }
+        let interval = match (from, to) {
+            (None, None) => None,
+            (Some(from), Some(to)) if from < to => Some((from, to)),
+            _ => return Err("export interval requires both --from and --to with from < to".into()),
+        };
+        copy_options.progress = report.then(|| {
+            fvid::media_control::ProgressHook::new(|e| {
+                eprintln!(
+                    "{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",
+                    e.packets, e.payload_bytes, e.done
+                )
+            })
+        });
+        let event = fvid::native_export::export_y4m_pipeline_with_options(
+            std::path::Path::new(&args[1]),
+            std::path::Path::new(&args[2]),
+            interval,
+            &geometry,
+            &filters,
+            &copy_options,
+        )?;
+        if !quiet {
+            println!("{{\"backend\":\"fvid\",\"video_frames\":{}}}", event.packets);
+        }
+        return Ok(());
+    }
+    let (step_args, step) = framestep_decode_args(args)?;
+    let (pixel_args, filters) = pixel_decode_args(&step_args)?;
+    let (decode_args, geometry) = geometry_decode_args(&pixel_args)?;
+    if let Some((path, quiet, interval)) = plain_decode(&decode_args)? {
+        let stats = fvid::native_media::decode_video_pipeline_overlay_step(
+            std::path::Path::new(path), interval, &geometry, &filters, None, step,
+        )?;
+        if !quiet {
+            // These strings are internal backend/pixel-format names; paths and
+            // other user input are never interpolated into this JSON document.
+            println!(
+                "{{\"backend\":\"{}\",\"video_frames\":{},\"width\":{},\"height\":{},\"pixel_format\":\"{}\",\"decode_errors\":{}}}",
+                stats.backend,
+                stats.video_frames,
+                stats.width,
+                stats.height,
+                stats.pixel_format,
+                stats.decode_errors
+            );
+        }
+        return Ok(());
+    }
+    #[cfg(feature = "media")]
+    {
+        run_native(args)
+    }
+    #[cfg(not(feature = "media"))]
+    {
+        let _ = args;
+        Err("this media operation requires cargo build --release --features media; plain media decode INPUT is available without that feature".into())
+    }
+}
+
+/// Shared native CLI routing for PCM trim and its read-only plan.
+fn try_native_audio_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    let plan = args.first().map(String::as_str) == Some("plan");
+    let command_index = usize::from(plan);
+    let Some(command) = args.get(command_index).map(String::as_str) else {
+        return Ok(false);
+    };
+    if !matches!(command, "trim" | "trim-pcm") {
+        return Ok(false);
+    }
+    let source_index = command_index + 1;
+    let option_start = source_index + if plan { 1 } else { 2 };
+    if args.len() < option_start {
+        return Ok(false);
+    }
+    let source_path = std::path::Path::new(&args[source_index]);
+    let container_audio = {
+        let mut head = [0u8; 8];
+        std::fs::File::open(source_path)
+            .and_then(|mut f| std::io::Read::read_exact(&mut f, &mut head))
+            .is_ok_and(|()| {
+                head.starts_with(&[0x1a, 0x45, 0xdf, 0xa3])
+                    || fvid::container::mp4::recognizes_prefix(&head)
+            })
+    };
+    let owned_audio = command == "trim"
+        && (fvid::native_media::is_owned_audio_trim_source(source_path)? || container_audio)
+        && (plan
+            || matches!(std::path::Path::new(&args[source_index + 1])
+                .extension()
+                .and_then(|s| s.to_str()), Some("wav" | "f32le" | "mka" | "mkv")));
+    let wave = fvid::native_pcm::is_wave(source_path)?;
+    let standalone_audio = command == "trim"
+        && fvid_media::owned_container_loudness::recognizes_standalone_audio(source_path)?;
+    if !owned_audio && !wave && !standalone_audio {
+        return Ok(false);
+    }
+    let (mut from, mut to, mut selected) = (None, None, None);
+    let (mut quiet, mut report) = (false, false);
+    let mut limits = fvid::media::CopyOptions::default();
+    let mut limit_flags = std::collections::BTreeSet::new();
+    let mut args_iter = args[option_start..].iter();
+    while let Some(arg) = args_iter.next() {
+        match arg.as_str() {
+            "--max-packets" | "--max-packet-bytes" | "--max-memory-mib" | "--max-rss-mib" => {
+                if !limit_flags.insert(arg.as_str()) {
+                    return Err("duplicate audio limit".into());
+                }
+                parse_native_audio_limit(
+                    arg,
+                    args_iter.next().ok_or("missing audio limit")?,
+                    &mut limits,
+                )?;
+            }
+            "--from" | "--to" => {
+                let slot = if arg == "--from" { &mut from } else { &mut to };
+                if slot.is_some() {
+                    return Err("duplicate PCM interval boundary".into());
+                }
+                let time = decode_time(args_iter.next().ok_or("missing PCM interval boundary")?)?;
+                if time.subsec_nanos() % 1000 != 0 {
+                    return Err("PCM boundary must be representable in microseconds".into());
+                }
+                *slot = Some(i64::try_from(time.as_micros()).map_err(|_| "PCM interval overflow")?);
+            }
+            "--streams" => {
+                if selected.is_some() {
+                    return Err("duplicate streams option".into());
+                }
+                selected = Some(
+                    args_iter
+                        .next()
+                        .ok_or("missing stream index")?
+                        .parse::<usize>()?,
+                );
+            }
+            "--quiet" | "-q" => quiet = true,
+            "--progress" => report = true,
+            "--metadata" => {
+                let (key, value) = args_iter
+                    .next()
+                    .ok_or("missing metadata")?
+                    .split_once('=')
+                    .ok_or("metadata must be KEY=VALUE")?;
+                limits
+                    .metadata_set
+                    .push((key.to_owned(), value.to_owned()));
+            }
+            "--metadata-delete" => {
+                limits
+                    .metadata_delete
+                    .push(args_iter.next().ok_or("missing metadata key")?.clone());
+            }
+            "--stream-metadata" => {
+                let raw = args_iter.next().ok_or("missing stream metadata")?;
+                let (index, rest) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                let (key, value) = rest
+                    .split_once('=')
+                    .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                limits.stream_metadata_set.push((
+                    index.parse()?,
+                    key.to_owned(),
+                    value.to_owned(),
+                ));
+            }
+            "--stream-metadata-delete" => {
+                let raw = args_iter.next().ok_or("missing stream metadata key")?;
+                let (index, key) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata delete must be INDEX:KEY")?;
+                limits
+                    .stream_metadata_delete
+                    .push((index.parse()?, key.to_owned()));
+            }
+            _ => return Err(format!("unsupported native PCM trim option: {arg}").into()),
+        }
+    }
+    if !owned_audio && !standalone_audio && selected.is_some_and(|n| n != 0) {
+        return Err("audio input has only stream 0".into());
+    }
+    let (from, to) = (from.ok_or("--from required")?, to.ok_or("--to required")?);
+    let custom_limits = limits.max_packet_bytes != fvid::media::CopyOptions::default().max_packet_bytes
+        || limits.max_packets.is_some()
+        || limits.max_controlled_bytes.is_some()
+        || limits.max_rss_bytes.is_some()
+        || !limits.metadata_set.is_empty()
+        || !limits.metadata_delete.is_empty()
+        || !limits.stream_metadata_set.is_empty()
+        || !limits.stream_metadata_delete.is_empty();
+    limits.streams = selected.into_iter().collect();
+    let native_trim_track = owned_audio
+        && limits.max_controlled_bytes.is_none()
+        && limits.metadata_set.is_empty()
+        && limits.metadata_delete.is_empty()
+        && limits.stream_metadata_set.is_empty()
+        && limits.stream_metadata_delete.is_empty()
+        && fvid::native_media::is_owned_audio_trim_source(source_path)?
+        && selected.is_none_or(|idx| {
+            fvid::native_media::audio_source_info_selected(source_path, Some(idx)).is_ok()
+        });
+    if plan {
+        if report {
+            return Err("progress applies to PCM trim execution, not planning".into());
+        }
+        let mut result = if command == "trim-pcm" {
+            fvid::media::plan_trim_pcm(source_path, from, to, &limits)?
+        } else {
+            fvid::media::plan_trim(source_path, from, to, &limits)?
+        };
+        result.command = command.to_owned();
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&result)?);
+        }
+        return Ok(true);
+    }
+    let progress = report.then(|| {
+        fvid::media_control::ProgressHook::new(|e| {
+            eprintln!(
+                "{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",
+                e.packets, e.payload_bytes, e.done
+            );
+        })
+    });
+    limits.progress = progress.clone();
+    if native_trim_track {
+        let stats = fvid::native_export::trim_audio_pcm_with_controls(
+            source_path,
+            std::path::Path::new(&args[source_index + 1]),
+            from,
+            to,
+            &limits,
+        )?;
+        if !quiet {
+            println!(
+                "{}",
+                serde_json::json!({"packets":stats.decoded_frames,"sample_frames":stats.sample_frames,"payload_bytes":stats.sample_frames*u64::from(stats.channels)*4,"segments":1,"backend":"fvid","fvid_payload_copies":0})
+            );
+        }
+        return Ok(true);
+    }
+    if !wave {
+        let stats = fvid::media::trim(
+            source_path,
+            std::path::Path::new(&args[source_index + 1]),
+            from,
+            to,
+            &limits,
+        )?;
+        if !quiet {
+            println!(
+                "{}",
+                serde_json::json!({"packets":stats.packets,"payload_bytes":stats.payload_bytes,"segments":stats.segments,"backend":stats.backend,"fvid_payload_copies":stats.fvid_payload_copies})
+            );
+        }
+        return Ok(true);
+    }
+    let stats = if custom_limits {
+        if command == "trim"
+            && matches!(
+                std::path::Path::new(&args[source_index + 1])
+                    .extension()
+                    .and_then(|s| s.to_str()),
+                Some("mka" | "mkv")
+            )
+        {
+            let copy = fvid::media::trim(
+                std::path::Path::new(&args[source_index]),
+                std::path::Path::new(&args[source_index + 1]),
+                from,
+                to,
+                &limits,
+            )?;
+            if !quiet {
+                println!(
+                    "{}",
+                    serde_json::json!({"packets":copy.packets,"payload_bytes":copy.payload_bytes,"segments":1,"backend":"fvid","fvid_payload_copies":copy.fvid_payload_copies})
+                );
+            }
+            return Ok(true);
+        }
+        fvid::media::trim_pcm(
+            std::path::Path::new(&args[source_index]),
+            std::path::Path::new(&args[source_index + 1]),
+            from,
+            to,
+            &limits,
+        )?
+    } else {
+        fvid::native_pcm::trim_wave(
+            std::path::Path::new(&args[source_index]),
+            std::path::Path::new(&args[source_index + 1]),
+            from,
+            to,
+            None,
+            progress.as_ref(),
+        )?
+    };
+    if !quiet {
+        if command == "trim" {
+            println!(
+                "{}",
+                serde_json::json!({"packets":stats.packets,"payload_bytes":stats.payload_bytes,"segments":1,"backend":"fvid","fvid_payload_copies":stats.fvid_payload_copies})
+            );
+        } else {
+            println!(
+                "{}",
+                serde_json::json!({"packets":stats.packets,"sample_frames":stats.sample_frames,"payload_bytes":stats.payload_bytes,"fvid_payload_copies":stats.fvid_payload_copies})
+            );
+        }
+    }
+    Ok(true)
+}
+
+fn pixel_decode_args(
+    args: &[String],
+) -> Result<(Vec<String>, fvid::native_pixels::PixelFilters), Box<dyn std::error::Error>> {
+    use fvid::native_pixels::{Gradient, GradientKind, Negate, PixelFilters};
+    let mut filters = PixelFilters::default();
+    if args.first().map(String::as_str) != Some("decode") {
+        return Ok((args.to_vec(), filters));
+    }
+    let mut result = vec![args[0].clone()];
+    let mut args = args[1..].iter();
+    let mut seen = std::collections::BTreeSet::new();
+    let mut seen_morphology = std::collections::BTreeSet::new();
+    while let Some(arg) = args.next() {
+        if arg == "--" {
+            result.push(arg.clone());
+            result.extend(args.cloned());
+            break;
+        }
+        if arg == "--grayworld" {
+            if filters.grayworld.is_some() {return Err("duplicate grayworld".into());}
+            let value=args.next().ok_or("missing grayworld args")?;
+            match fvid_media::owned_timeline::Timeline::grayworld(value) {
+                Ok(filter)=>filters.grayworld=Some(filter),
+                Err(_)=>{result.push(arg.clone());result.push(value.clone());}
+            }
+            continue;
+        }
+        if arg == "--cas" {
+            if filters.cas.is_some() {return Err("duplicate cas".into());}
+            filters.cas=Some(fvid_media::owned_cas::Cas::parse(args.next().ok_or("missing cas args")?)?);
+            continue;
+        }
+        if arg == "--colorcorrect" {
+            if filters.colorcorrect.is_some() {return Err("duplicate colorcorrect".into());}
+            filters.colorcorrect=Some(fvid_media::owned_colorcorrect::ColorCorrect::parse(args.next().ok_or("missing colorcorrect args")?)?);
+            continue;
+        }
+        if arg == "--colorbalance" {
+            if filters.colorbalance.is_some() {return Err("duplicate colorbalance".into());}
+            filters.colorbalance=Some(fvid_media::owned_colorbalance::ColorBalance::parse(args.next().ok_or("missing colorbalance args")?)?);
+            continue;
+        }
+        if arg == "--exposure" {
+            if filters.exposure.is_some() {return Err("duplicate exposure".into());}
+            filters.exposure=Some(fvid_media::owned_exposure::Exposure::parse(args.next().ok_or("missing exposure args")?)?);
+            continue;
+        }
+        if arg == "--colorchannelmixer" {
+            if filters.colorchannelmixer.is_some() {return Err("duplicate colorchannelmixer".into());}
+            filters.colorchannelmixer=Some(fvid_media::owned_colorchannelmixer::ColorChannelMixer::parse(args.next().ok_or("missing colorchannelmixer args")?)?);
+            continue;
+        }
+        if arg == "--colorlevels" {
+            if filters.colorlevels.is_some() {return Err("duplicate colorlevels".into());}
+            filters.colorlevels=Some(fvid_media::owned_colorlevels::ColorLevels::parse(args.next().ok_or("missing colorlevels args")?)?);
+            continue;
+        }
+        if arg == "--vibrance" {
+            if filters.vibrance.is_some() {return Err("duplicate vibrance".into());}
+            filters.vibrance=Some(fvid_media::owned_vibrance::Vibrance::parse(args.next().ok_or("missing vibrance args")?)?);
+            continue;
+        }
+        if arg == "--colorcontrast" {
+            if filters.colorcontrast.is_some() {return Err("duplicate colorcontrast".into());}
+            filters.colorcontrast=Some(fvid_media::owned_colorcontrast::ColorContrast::parse(args.next().ok_or("missing colorcontrast args")?)?);
+            continue;
+        }
+        if arg == "--fade" {
+            if filters.fade.is_some() {return Err("duplicate fade".into());}
+            let value=args.next().ok_or("missing fade args")?;
+            match fvid_media::owned_fade::Fade::parse(value) {
+                Ok(filter)=>filters.fade=Some(filter),
+                Err(_)=>{result.push(arg.clone());result.push(value.clone());}
+            }
+            continue;
+        }
+        if arg == "--colorhold" {
+            if filters.colorhold.is_some() {return Err("duplicate colorhold".into());}
+            filters.colorhold=Some(fvid_media::owned_colorhold::ColorHold::parse(args.next().ok_or("missing colorhold args")?)?);
+            continue;
+        }
+        if arg == "--lutyuv" {
+            if filters.lutyuv.is_some() {return Err("duplicate lutyuv".into());}
+            filters.lutyuv=Some(fvid_media::owned_lutyuv::LutYuv::parse(args.next().ok_or("missing lutyuv args")?)?);
+            continue;
+        }
+        if arg == "--shuffleplanes" {
+            if filters.shuffleplanes.is_some() {return Err("duplicate shuffleplanes".into());}
+            filters.shuffleplanes=Some(fvid::native_shuffleplanes::ShufflePlanes::parse(args.next().ok_or("missing shuffleplanes args")?)?);
+            continue;
+        }
+        if arg == "--boxblur" {
+            let value = args.next().ok_or("missing boxblur args")?;
+            let eligible = match result.get(1) {
+                Some(path) => fvid::native_lossless::eligible(std::path::Path::new(path))?,
+                None => false,
+            };
+            if eligible {
+                if filters.boxblur.is_some() {
+                    return Err("duplicate boxblur".into());
+                }
+                if let Ok(filter) = fvid::native_boxblur::BoxBlurProgram::parse(value) {
+                    filters.boxblur = Some(filter);
+                    continue;
+                }
+            }
+            result.push(arg.clone());
+            result.push(value.clone());
+            continue;
+        }
+        if arg == "--pixelize" {
+            let value = args.next().ok_or("missing pixelize args")?;
+            let eligible = match result.get(1) {
+                Some(path) => fvid::native_lossless::eligible(std::path::Path::new(path))?,
+                None => false,
+            };
+            if eligible {
+                if filters.pixelize.is_some() {
+                    return Err("duplicate pixelize".into());
+                }
+                if let Ok(filter) = fvid::native_pixelize::Pixelize::parse(value) {
+                    filters.pixelize = Some(filter);
+                    continue;
+                }
+            }
+            result.push(arg.clone());
+            result.push(value.clone());
+            continue;
+        }
+        if arg == "--bilateral" {
+            let value = args.next().ok_or("missing bilateral args")?;
+            let eligible = match result.get(1) {
+                Some(path) => fvid::native_lossless::eligible(std::path::Path::new(path))?,
+                None => false,
+            };
+            if eligible {
+                if filters.bilateral.is_some() { return Err("duplicate bilateral".into()); }
+                filters.bilateral = Some(fvid_media::owned_bilateral::Bilateral::parse(value)?);
+                continue;
+            }
+            result.push(arg.clone()); result.push(value.clone());
+            continue;
+        }
+        if arg == "--gblur" {
+            let value = args.next().ok_or("missing gblur args")?;
+            let eligible = match result.get(1) {
+                Some(path) => fvid::native_lossless::eligible(std::path::Path::new(path))?,
+                None => false,
+            };
+            if eligible {
+                if filters.gblur.is_some() { return Err("duplicate gblur".into()); }
+                filters.gblur = Some(fvid_media::owned_gblur::GaussianBlur::parse(value)?);
+                continue;
+            }
+            result.push(arg.clone()); result.push(value.clone());
+            continue;
+        }
+        if arg == "--avgblur" {
+            let value = args.next().ok_or("missing avgblur args")?;
+            let eligible = match result.get(1) {
+                Some(path) => fvid::native_lossless::eligible(std::path::Path::new(path))?,
+                None => false,
+            };
+            if eligible {
+                if filters.avgblur.is_some() {
+                    return Err("duplicate avgblur".into());
+                }
+                if let Ok(filter) = fvid::native_avgblur::AverageBlur::parse(value) {
+                    filters.avgblur = Some(filter);
+                    continue;
+                }
+            }
+            result.push(arg.clone());
+            result.push(value.clone());
+            continue;
+        }
+        if arg == "--chromashift" {
+            let value = args.next().ok_or("missing chromashift args")?;
+            // Only admit the already-owned Y4M and AVC/HEVC routes here. Other input
+            // formats retain the full parser and adapter until their migration.
+            let eligible = match result.get(1) {
+                Some(path) => fvid::native_lossless::eligible(std::path::Path::new(path))?,
+                None => false,
+            };
+            if eligible {
+                if filters.chromashift.is_some() {
+                    return Err("duplicate chromashift".into());
+                }
+                if let Ok(filter) = fvid::native_chromashift::ChromaShift::parse(value) {
+                    filters.chromashift = Some(filter);
+                    continue;
+                }
+            }
+            result.push(arg.clone());
+            result.push(value.clone());
+            continue;
+        }
+        if arg == "--unsharp" {
+            let value = args.next().ok_or("missing unsharp args")?;
+            if filters.unsharp.is_some() {return Err("duplicate unsharp".into());}
+            if let Ok(filter) = fvid_media::owned_unsharp::Unsharp::parse(value) {
+                filters.unsharp = Some(filter);
+            } else {
+                result.push(arg.clone()); result.push(value.clone());
+            }
+            continue;
+        }
+        if arg == "--eq" {
+            let value = args.next().ok_or("missing eq args")?;
+            if filters.eq.is_some() {return Err("duplicate eq".into());}
+            if let Ok(filter) = fvid_media::owned_eq::EqualizerProgram::parse(value) {
+                filters.eq = Some(filter);
+            } else {
+                result.push(arg.clone()); result.push(value.clone());
+            }
+            continue;
+        }
+        if arg == "--monochrome" {
+            let value = args.next().ok_or("missing monochrome args")?;
+            if filters.monochrome.is_some() { return Err("duplicate monochrome".into()); }
+            if let Ok(filter) = fvid_media::owned_monochrome::Monochrome::parse(value) { filters.monochrome = Some(filter); }
+            else { result.push(arg.clone()); result.push(value.clone()); }
+            continue;
+        }
+        if arg == "--colorize" {
+            let value = args.next().ok_or("missing colorize args")?;
+            if filters.colorize.is_some() { return Err("duplicate colorize".into()); }
+            if let Ok(filter) = fvid_media::owned_colorize::Colorize::parse(value) { filters.colorize = Some(filter); }
+            else { result.push(arg.clone()); result.push(value.clone()); }
+            continue;
+        }
+        if arg == "--sab" {
+            let value=args.next().ok_or("missing sab options")?;
+            if filters.sab.is_some() {return Err("duplicate sab".into());}
+            if let Ok(filter)=fvid_media::owned_sab::Sab::parse(value) {filters.sab=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--bitplanenoise" {
+            let value=args.next().ok_or("missing bitplanenoise options")?;
+            if filters.bitplanenoise.is_some() {return Err("duplicate bitplanenoise".into());}
+            if let Ok(filter)=fvid_media::owned_bitplanenoise::BitPlaneNoise::parse(value) {filters.bitplanenoise=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--deband" {
+            let value=args.next().ok_or("missing deband options")?;
+            if filters.deband.is_some() {return Err("duplicate deband".into());}
+            if let Ok(filter)=fvid_media::owned_deband::Deband::parse(value) {filters.deband=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--perspective" {
+            let value=args.next().ok_or("missing perspective options")?;
+            if filters.perspective.is_some() {return Err("duplicate perspective".into());}
+            if let Ok(filter)=fvid_media::owned_perspective::Perspective::parse(value) {filters.perspective=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--gradfun" {
+            let value=args.next().ok_or("missing gradfun options")?;
+            if filters.gradfun.is_some() {return Err("duplicate gradfun".into());}
+            if let Ok(filter)=fvid_media::owned_gradfun::GradFun::parse(value) {filters.gradfun=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--lenscorrection" {
+            let value=args.next().ok_or("missing lenscorrection options")?;
+            if filters.lenscorrection.is_some() {return Err("duplicate lenscorrection".into());}
+            if let Ok(filter)=fvid_media::owned_lenscorrection::LensCorrection::parse(value) {filters.lenscorrection=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--drawbox" {
+            let value=args.next().ok_or("missing drawbox options")?;
+            if filters.drawbox.is_some() {return Err("duplicate drawbox".into());}
+            if let Ok(filter)=fvid_media::owned_draw::Draw::box_filter(value) {filters.drawbox=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--drawgrid" {
+            let value=args.next().ok_or("missing drawgrid options")?;
+            if filters.drawgrid.is_some() {return Err("duplicate drawgrid".into());}
+            if let Ok(filter)=fvid_media::owned_draw::Draw::grid_filter(value) {filters.drawgrid=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--removegrain" {
+            let value=args.next().ok_or("missing removegrain options")?;
+            if filters.removegrain.is_some() {return Err("duplicate removegrain".into());}
+            if let Ok(filter)=fvid_media::owned_removegrain::RemoveGrain::parse(value) {filters.removegrain=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--yaepblur" {
+            let value=args.next().ok_or("missing yaepblur options")?;
+            if filters.yaepblur.is_some() {return Err("duplicate yaepblur".into());}
+            if let Ok(filter)=fvid_media::owned_yaepblur::YaepBlur::parse(value) {filters.yaepblur=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--smartblur" {
+            let value=args.next().ok_or("missing smartblur options")?;
+            if filters.smartblur.is_some() {return Err("duplicate smartblur".into());}
+            if let Ok(filter)=fvid_media::owned_smartblur::SmartBlur::parse(value) {filters.smartblur=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--vignette" {
+            let value=args.next().ok_or("missing vignette options")?;
+            if filters.vignette.is_some() {return Err("duplicate vignette".into());}
+            if let Ok(filter)=fvid_media::owned_vignette::Vignette::parse(value) {filters.vignette=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--curves" {
+            let value=args.next().ok_or("missing curves options")?;
+            if filters.curves.is_some() {return Err("duplicate curves".into());}
+            if let Ok(filter)=fvid_media::owned_curves::Curves::parse(value) {filters.curves=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--hqdn3d" {
+            let value=args.next().ok_or("missing hqdn3d options")?;
+            if filters.hqdn3d.is_some() {return Err("duplicate hqdn3d".into());}
+            if let Ok(filter)=fvid_media::owned_hqdn3d::HqDn3d::parse(value) {filters.hqdn3d=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--tmix" {
+            let value=args.next().ok_or("missing tmix options")?;
+            if filters.tmix.is_some() {return Err("duplicate tmix".into());}
+            if let Ok(filter)=fvid_media::owned_tmix::TemporalMix::parse(value) {filters.tmix=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--lagfun" {
+            let value = args.next().ok_or("missing lagfun options")?;
+            if filters.lagfun.is_some() {return Err("duplicate lagfun".into());}
+            if let Ok(filter)=fvid_media::owned_lagfun::LagFun::parse(value) {filters.lagfun=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--hue" {
+            let value = args.next().ok_or("missing hue args")?;
+            if filters.hue.is_some() {
+                return Err("duplicate hue".into());
+            }
+            if let Ok(filter) = fvid_media::owned_hue::HueProgram::parse(value) {
+                filters.hue = Some(filter);
+            } else {
+                result.push(arg.clone());
+                result.push(value.clone());
+            }
+            continue;
+        }
+        if arg == "--negate" {
+            if filters.negate.is_some() {
+                return Err("duplicate negate".into());
+            }
+            filters.negate = Some(Negate::parse(args.next().ok_or("missing negate args")?)?);
+            continue;
+        }
+        if matches!(arg.as_str(), "--dilation" | "--erosion") {
+            use fvid::native_morphology::{Morphology, MorphologyKind};
+            let kind = if arg == "--dilation" {
+                MorphologyKind::Dilation
+            } else {
+                MorphologyKind::Erosion
+            };
+            if !seen_morphology.insert(kind) {
+                return Err(format!("duplicate {}", kind.name()).into());
+            }
+            let value = args
+                .next()
+                .ok_or_else(|| format!("missing {} args", kind.name()))?;
+            match Morphology::parse(kind, value) {
+                Ok(filter) => filters.morphology.push(filter),
+                Err(error) => {
+                    #[cfg(feature = "media")]
+                    {
+                        let _ = error;
+                        result.push(arg.clone());
+                        result.push(value.clone());
+                    }
+                    #[cfg(not(feature = "media"))]
+                    {
+                        return Err(error.into());
+                    }
+                }
+            }
+            continue;
+        }
+        let kind = match arg.as_str() {
+            "--sobel" => GradientKind::Sobel,
+            "--prewitt" => GradientKind::Prewitt,
+            "--roberts" => GradientKind::Roberts,
+            "--kirsch" => GradientKind::Kirsch,
+            "--scharr" => GradientKind::Scharr,
+            _ => {
+                result.push(arg.clone());
+                continue;
+            }
+        };
+        if !seen.insert(kind) {
+            return Err(format!("duplicate {}", kind.name()).into());
+        }
+        let value = args
+            .next()
+            .ok_or_else(|| format!("missing {} args", kind.name()))?;
+        match Gradient::parse(kind, value) {
+            Ok(filter) => filters.gradients.push(filter),
+            Err(error) => {
+                // Preserve the existing adapter's expression syntax until it
+                // has an owned evaluator. Original args reach the full parser.
+                #[cfg(feature = "media")]
+                {
+                    let _ = error;
+                    result.push(arg.clone());
+                    result.push(value.clone());
+                }
+                #[cfg(not(feature = "media"))]
+                {
+                    return Err(error.into());
+                }
+            }
+        }
+    }
+    filters.gradients.sort_by_key(|filter| filter.kind());
+    filters.morphology.sort_by_key(|filter| filter.kind());
+    Ok((result, filters))
+}
+
+// Strip only the native geometry options. The remaining parser still rejects
+// extra paths and returns unknown filters to the existing full media parser.
+fn geometry_decode_args(
+    args: &[String],
+) -> Result<(Vec<String>, fvid::native_geometry::VideoGeometry), Box<dyn std::error::Error>> {
+    let mut geometry = fvid::native_geometry::VideoGeometry::default();
+    if args.first().map(String::as_str) != Some("decode") {
+        return Ok((args.to_vec(), geometry));
+    }
+    let mut result = vec![args[0].clone()];
+    let mut args = args[1..].iter();
+    while let Some(arg) = args.next() {
+        match arg.as_str() {
+            "--" => {
+                result.push(arg.clone());
+                result.extend(args.cloned());
+                break;
+            }
+            "--hflip" => {
+                if geometry.horizontal_flip {
+                    return Err("duplicate hflip".into());
+                }
+                geometry.horizontal_flip = true;
+            }
+            "--vflip" => {
+                if geometry.vertical_flip {
+                    return Err("duplicate vflip".into());
+                }
+                geometry.vertical_flip = true;
+            }
+            "--rotate" => {
+                if geometry.rotate.is_some() { return Err("duplicate rotate".into()); }
+                geometry.rotate = Some(fvid::media_info::RotateAngle::parse(args.next().ok_or("missing rotate degrees")?)?);
+            }
+            "--transpose" => {
+                if geometry.transpose.is_some() {
+                    return Err("duplicate transpose".into());
+                }
+                geometry.transpose = Some(fvid::native_geometry::Transpose::parse(
+                    args.next().ok_or("missing transpose mode")?,
+                )?);
+            }
+            "--crop" | "--scale" | "--pad" => {
+                let fields = args
+                    .next()
+                    .ok_or("missing geometry value")?
+                    .split(':')
+                    .map(str::parse::<usize>)
+                    .collect::<Result<Vec<_>, _>>()?;
+                if arg == "--pad" {
+                    if geometry.pad.is_some() {
+                        return Err("duplicate pad".into());
+                    }
+                    geometry.pad = Some(
+                        fields
+                            .try_into()
+                            .map_err(|_| "pad requires WIDTH:HEIGHT:X:Y")?,
+                    );
+                } else if arg == "--crop" {
+                    if geometry.crop.is_some() {
+                        return Err("duplicate crop".into());
+                    }
+                    geometry.crop = Some(
+                        fields
+                            .try_into()
+                            .map_err(|_| "crop requires X:Y:WIDTH:HEIGHT")?,
+                    );
+                } else {
+                    if geometry.scale.is_some() {
+                        return Err("duplicate scale".into());
+                    }
+                    geometry.scale = Some(
+                        fields
+                            .try_into()
+                            .map_err(|_| "scale requires WIDTH:HEIGHT")?,
+                    );
+                }
+            }
+            _ => result.push(arg.clone()),
+        }
+    }
+    Ok((result, geometry))
+}
+type DecodeRequest<'a> = (
+    &'a str,
+    bool,
+    Option<(std::time::Duration, std::time::Duration)>,
+);
+// Unknown transformation options belong to the full parser, never ignore them.
+fn plain_decode(args: &[String]) -> Result<Option<DecodeRequest<'_>>, Box<dyn std::error::Error>> {
+    if args.first().map(String::as_str) != Some("decode") {
+        return Ok(None);
+    }
+    let (mut path, mut quiet, mut positional) = (None, false, false);
+    let (mut from, mut to) = (None, None);
+    let mut args = args[1..].iter();
+    while let Some(arg) = args.next() {
+        if !positional && arg == "--" {
+            positional = true;
+        } else if !positional && matches!(arg.as_str(), "--quiet" | "-q") {
+            quiet = true;
+        } else if !positional && (arg == "--from" || arg == "--to") {
+            let value = args.next().ok_or("missing decode interval boundary")?;
+            let time = decode_time(value)?;
+            if arg == "--from" {
+                from = Some(time);
+            } else {
+                to = Some(time);
+            }
+        } else if (!positional && arg.starts_with('-')) || path.replace(arg.as_str()).is_some() {
+            return Ok(None);
+        }
+    }
+    let interval = match (from, to) {
+        (None, None) => None,
+        (Some(a), Some(b)) if a < b => Some((a, b)),
+        _ => return Err("decode interval requires both --from and --to with from < to".into()),
+    };
+    Ok(path.map(|path| (path, quiet, interval)))
+}
+fn decode_time(text: &str) -> Result<std::time::Duration, Box<dyn std::error::Error>> {
+    let micros = fvid::media_info::parse_time(text)?;
+    Ok(std::time::Duration::from_micros(micros as u64))
+}
+
+#[cfg(feature = "media")]
+fn emit_json(quiet: bool, json: String) {
+    if !quiet {
+        println!("{json}");
+    }
+}
+
+#[cfg(all(feature = "media", feature = "player"))]
+fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    fvid::player::run_media(args.to_vec())
+}
+
+#[cfg(feature = "media")]
+fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    let help = "fvid media play INPUT... [--no-audio] [--mute] [--fullscreen] [--rate N] [--audio-track N] [--subtitle-track N] [--no-subtitles] [--subtitles FILE] [--audio-device NAME] [--list-audio-devices] (local file or http/https/rtsp/rtmp/udp URL) | probe INPUT [--input-format NAME] | capabilities | plan [remux|transcode-lossless|trim|trim-pcm|concat|overlay|xfade|burn-subtitles|loudness|loudnorm|mix-audio|merge-audio|decode-audio] INPUT... [flags] | remux INPUT OUTPUT [--streams 0,1] [--metadata KEY=VALUE] [--metadata-delete KEY] [--stream-metadata INDEX:KEY=VALUE] [--stream-metadata-delete INDEX:KEY] [--progress] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N] | convert-subtitles INPUT OUTPUT.mkv [--codec ass] [--streams INDEX] | burn-subtitles INPUT OUTPUT.mkv --subs FILE.srt | overlay MAIN OVERLAY OUTPUT.mkv [--overlay-x N] [--overlay-y N] | xfade MAIN OTHER OUTPUT.mkv --xfade-duration SECONDS [--transition NAME] [--xfade-offset SECONDS] | decode INPUT [--input-format NAME] [--crop X:Y:WIDTH:HEIGHT] [--hflip] [--vflip] [--transpose MODE] [--rotate DEGREES] [--pad WIDTH:HEIGHT:X:Y] [--scale WIDTH:HEIGHT] [--epx ARGS] [--pix-fmt NAME] [--colorspace ARGS] [--zscale ARGS] [--tonemap ARGS] [--yadif ARGS] [--bwdif ARGS] [--w3fdif ARGS] [--tblend ARGS] [--tmix ARGS] [--hqdn3d ARGS] [--gblur ARGS] [--eq ARGS] [--unsharp ARGS] [--hue ARGS] [--avgblur ARGS] [--boxblur ARGS] [--negate 0|1] [--edgedetect ARGS] [--sobel ARGS] [--prewitt ARGS] [--roberts ARGS] [--kirsch ARGS] [--scharr ARGS] [--atadenoise ARGS] [--owdenoise ARGS] [--vaguedenoiser ARGS] [--nlmeans ARGS] [--bm3d ARGS] [--dctdnoiz ARGS] [--fftdnoiz ARGS] [--smartblur ARGS] [--sab ARGS] [--bilateral ARGS] [--cas ARGS] [--vignette ARGS] [--curves ARGS] [--colorbalance ARGS] [--colorlevels ARGS] [--colorchannelmixer ARGS] [--deflicker ARGS] [--photosensitivity ARGS] [--monochrome ARGS] [--grayworld 0|ARGS] [--drawbox ARGS] [--drawgrid ARGS] [--lagfun ARGS] [--amplify ARGS] [--bitplanenoise ARGS] [--deband ARGS] [--gradfun ARGS] [--lenscorrection ARGS] [--pixelize ARGS] [--removegrain ARGS] [--yaepblur ARGS] [--vibrance ARGS] [--dilation ARGS] [--erosion ARGS] [--colorize ARGS] [--exposure ARGS] [--chromashift ARGS] [--colorcontrast ARGS] [--colorcorrect ARGS] [--histeq ARGS] [--shuffleplanes ARGS] [--lutyuv ARGS] [--colorhold ARGS] [--fade ARGS] [--perspective ARGS] [--lumakey ARGS] [--chromakey ARGS] [--colorkey ARGS] [--despill ARGS] [--selectivecolor ARGS] [--stereo3d ARGS] [--field ARGS] [--hqx ARGS] [--xbr ARGS] [--il ARGS] [--super2xsai ARGS] [--kerndeint ARGS] [--phase ARGS] [--estdif ARGS] [--tinterlace ARGS] [--separatefields ARGS] [--weave ARGS] [--doubleweave ARGS] [--framepack ARGS] [--telecine ARGS] [--pullup ARGS] [--decimate ARGS] [--mpdecimate ARGS] [--framestep ARGS] [--tile ARGS] [--untile ARGS] [--shuffleframes ARGS] [--reverse ARGS] [--loop ARGS] [--thumbnail ARGS] [--freezedetect ARGS] [--setpts ARGS] [--pseudocolor ARGS] [--minterpolate ARGS] [--fps RATE] [--subs FILE.srt] [--from SECONDS --to SECONDS] [--device N] | loudness INPUT [--streams INDEX] | loudnorm INPUT OUTPUT.wav [--loudnorm-args ARGS] [--dual-pass] [--streams INDEX] | decode-audio INPUT OUTPUT.wav [--streams INDEX] [--rate HZ] [--channels N] [--volume GAIN] [--from SECONDS --to SECONDS] [--max-packet-bytes N] [--max-packets N] [--max-rss-mib N] | trim-pcm INPUT OUTPUT --from SECONDS --to SECONDS [--streams 0] | trim INPUT OUTPUT --from SECONDS --to SECONDS [--streams 0] [--progress] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N] | mix-audio OUTPUT a.m4a b.m4a [c.m4a...] [--weights W,...] [--duration shortest] [--normalize|--no-normalize] | merge-audio OUTPUT a.m4a b.m4a | concat OUTPUT INPUT INPUT... [--streams 0] [--progress] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N] | transcode INPUT OUTPUT --encoder NAME [--encoder-option KEY=VALUE] [--from SECONDS --to SECONDS [--seek]] | transcode-lossless INPUT OUTPUT.mkv [--crop X:Y:WIDTH:HEIGHT] [--hflip] [--vflip] [--transpose MODE] [--rotate DEGREES] [--pad WIDTH:HEIGHT:X:Y] [--scale WIDTH:HEIGHT] [--epx ARGS] [--pix-fmt NAME] [--colorspace ARGS] [--zscale ARGS] [--tonemap ARGS] [--yadif ARGS] [--bwdif ARGS] [--w3fdif ARGS] [--tblend ARGS] [--tmix ARGS] [--hqdn3d ARGS] [--gblur ARGS] [--eq ARGS] [--unsharp ARGS] [--hue ARGS] [--avgblur ARGS] [--boxblur ARGS] [--negate 0|1] [--edgedetect ARGS] [--sobel ARGS] [--prewitt ARGS] [--roberts ARGS] [--kirsch ARGS] [--scharr ARGS] [--atadenoise ARGS] [--owdenoise ARGS] [--vaguedenoiser ARGS] [--nlmeans ARGS] [--bm3d ARGS] [--dctdnoiz ARGS] [--fftdnoiz ARGS] [--smartblur ARGS] [--sab ARGS] [--bilateral ARGS] [--cas ARGS] [--vignette ARGS] [--curves ARGS] [--colorbalance ARGS] [--colorlevels ARGS] [--colorchannelmixer ARGS] [--deflicker ARGS] [--photosensitivity ARGS] [--monochrome ARGS] [--grayworld 0|ARGS] [--drawbox ARGS] [--drawgrid ARGS] [--lagfun ARGS] [--amplify ARGS] [--bitplanenoise ARGS] [--deband ARGS] [--gradfun ARGS] [--lenscorrection ARGS] [--pixelize ARGS] [--removegrain ARGS] [--yaepblur ARGS] [--vibrance ARGS] [--dilation ARGS] [--erosion ARGS] [--colorize ARGS] [--exposure ARGS] [--chromashift ARGS] [--colorcontrast ARGS] [--colorcorrect ARGS] [--histeq ARGS] [--shuffleplanes ARGS] [--lutyuv ARGS] [--colorhold ARGS] [--fade ARGS] [--perspective ARGS] [--lumakey ARGS] [--chromakey ARGS] [--colorkey ARGS] [--despill ARGS] [--selectivecolor ARGS] [--stereo3d ARGS] [--field ARGS] [--hqx ARGS] [--xbr ARGS] [--il ARGS] [--super2xsai ARGS] [--kerndeint ARGS] [--phase ARGS] [--estdif ARGS] [--tinterlace ARGS] [--separatefields ARGS] [--weave ARGS] [--doubleweave ARGS] [--framepack ARGS] [--telecine ARGS] [--pullup ARGS] [--decimate ARGS] [--mpdecimate ARGS] [--framestep ARGS] [--tile ARGS] [--untile ARGS] [--shuffleframes ARGS] [--reverse ARGS] [--loop ARGS] [--thumbnail ARGS] [--freezedetect ARGS] [--setpts ARGS] [--pseudocolor ARGS] [--minterpolate ARGS] [--fps RATE] [--from SECONDS --to SECONDS [--seek]] [--streams 0,1] [--progress] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N] | crop-lossless INPUT OUTPUT.mkv --crop X:Y:WIDTH:HEIGHT [--streams 0,1] | hw-filter INPUT OUTPUT.mp4 [--crop X:Y:WIDTH:HEIGHT] [--hflip] [--vflip] [--from SECONDS --to SECONDS] [--device N]";
+    let Some(command) = args.first() else {
+        return Err(help.into());
+    };
+    if command == "--help" || command == "-h" {
+        println!("{help}");
+        return Ok(());
+    }
+    if command == "play" {
+        #[cfg(feature = "player")]
+        {
+            return play_command(&args[1..]);
+        }
+        #[cfg(not(feature = "player"))]
+        {
+            return Err("play requires cargo build --features media,player".into());
+        }
+    }
+    if command == "probe" {
+        // A file whose bytes carry no signature names no demuxer, so the caller has to: the
+        // second form states the demuxer, as ffmpeg's -f does.
+        let hint = match args.len() {
+            2 => None,
+            4 if args[2] == "--input-format" => Some(args[3].as_str()),
+            _ => return Err(help.into()),
+        };
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&fvid::media::probe_as(&PathBuf::from(&args[1]), hint)?)?
+        );
+        return Ok(());
+    }
+    if command == "plan" {
+        // Reuse the shared option parse below by falling through with a rewritten
+        // command tag after collecting paths/flags — handled after the parse loop.
+    }
+    let mut paths = Vec::new();
+    let mut input_format: Option<String> = None;
+    let mut from = None;
+    let mut to = None;
+    let mut crop = None;
+    let mut scale = None;
+    let mut transpose = None;
+    let mut rotate = None;
+    let mut pad = None;
+    let mut burn_subs = None;
+    let mut overlay = None;
+    let mut overlay_x = 0i32;
+    let mut overlay_y = 0i32;
+    let mut pix_fmt = None;
+    let mut colorspace = None;
+    let mut zscale = None;
+    let mut tonemap = None;
+    let mut yadif = None;
+    let mut bwdif = None;
+    let mut w3fdif = None;
+    let mut tblend = None;
+    let mut tmix = None;
+    let mut hqdn3d = None;
+    let mut gblur = None;
+    let mut eq = None;
+    let mut unsharp = None;
+    let mut hue = None;
+    let mut avgblur = None;
+    let mut boxblur = None;
+    let mut negate = None;
+    let mut edgedetect = None;
+    let mut sobel = None;
+    let mut prewitt = None;
+    let mut roberts = None;
+    let mut kirsch = None;
+    let mut scharr = None;
+    let mut atadenoise = None;
+    let mut owdenoise = None;
+    let mut vaguedenoiser = None;
+    let mut nlmeans = None;
+    let mut bm3d = None;
+    let mut dctdnoiz = None;
+    let mut fftdnoiz = None;
+    let mut smartblur = None;
+    let mut sab = None;
+    let mut bilateral = None;
+    let mut cas = None;
+    let mut epx = None;
+    let mut vignette = None;
+    let mut curves = None;
+    let mut colorbalance = None;
+    let mut colorlevels = None;
+    let mut colorchannelmixer = None;
+    let mut deflicker = None;
+    let mut photosensitivity = None;
+    let mut monochrome = None;
+    let mut grayworld = None;
+    let mut drawbox = None;
+    let mut drawgrid = None;
+    let mut lagfun = None;
+    let mut amplify = None;
+    let mut bitplanenoise = None;
+    let mut deband = None;
+    let mut gradfun = None;
+    let mut lenscorrection = None;
+    let mut pixelize = None;
+    let mut removegrain = None;
+    let mut yaepblur = None;
+    let mut vibrance = None;
+    let mut dilation = None;
+    let mut erosion = None;
+    let mut colorize = None;
+    let mut exposure = None;
+    let mut chromashift = None;
+    let mut colorcontrast = None;
+    let mut colorcorrect = None;
+    let mut histeq = None;
+    let mut shuffleplanes = None;
+    let mut lutyuv = None;
+    let mut colorhold = None;
+    let mut fade = None;
+    let mut perspective = None;
+    let mut lumakey = None;
+    let mut chromakey = None;
+    let mut colorkey = None;
+    let mut despill = None;
+    let mut selectivecolor = None;
+    let mut stereo3d = None;
+    let mut field = None;
+    let mut hqx = None;
+    let mut xbr = None;
+    let mut il = None;
+    let mut super2xsai = None;
+    let mut kerndeint = None;
+    let mut phase = None;
+    let mut estdif = None;
+    let mut tinterlace = None;
+    let mut separatefields = None;
+    let mut weave = None;
+    let mut doubleweave = None;
+    let mut framepack = None;
+    let mut telecine = None;
+    let mut pullup = None;
+    let mut decimate = None;
+    let mut mpdecimate = None;
+    let mut framestep = None;
+    let mut tile = None;
+    let mut untile = None;
+    let mut shuffleframes = None;
+    let mut reverse = None;
+    let mut vloop = None;
+    let mut thumbnail = None;
+    let mut freezedetect = None;
+    let mut setpts = None;
+    let mut select = None;
+    let mut pseudocolor = None;
+    let mut minterpolate = None;
+    let mut fps = None;
+    let mut xfade_transition = None;
+    let mut xfade_duration = None;
+    let mut xfade_offset = None;
+    let mut loudnorm_args = None;
+    let mut loudnorm_dual = false;
+    let mut mix_duration = fvid_media::MixDuration::Shortest;
+    let mut mix_normalize = true;
+    let mut mix_weights = Vec::new();
+    let mut sample_rate = None;
+    let mut channels = None;
+    let mut volume = None;
+    let mut vertical_flip = false;
+    let mut horizontal_flip = false;
+    let mut seek = false;
+    let mut encoder = None;
+    let mut encoder_options = Vec::new();
+    let mut subtitle_codec = fvid_media::SubtitleCodec::Ass;
+    let mut device = 0usize;
+    let mut cuda_shader = None;
+    #[cfg(feature = "media-cuda")]
+    let mut cuda_shader_sampling = false;
+    let mut device_set = false;
+    let mut quiet = false;
+    let mut progress = false;
+    let mut options = fvid_media::CopyOptions::default();
+    let mut i = 1;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--quiet" | "-q" => quiet = true,
+            "--progress" => progress = true,
+            "--input-format" => {
+                i += 1;
+                input_format = Some(args.get(i).ok_or("missing input format name")?.clone());
+            }
+            "--encoder" => {
+                i += 1;
+                encoder = Some(args.get(i).ok_or("missing encoder name")?.clone());
+            }
+            "--codec" => {
+                i += 1;
+                subtitle_codec =
+                    fvid_media::SubtitleCodec::parse(args.get(i).ok_or("missing subtitle codec")?)?;
+            }
+            "--encoder-option" => {
+                i += 1;
+                let (key, value) = args
+                    .get(i)
+                    .ok_or("missing encoder option")?
+                    .split_once('=')
+                    .ok_or("encoder option must be KEY=VALUE")?;
+                encoder_options.push((key.to_owned(), value.to_owned()));
+            }
+            "--device" => {
+                i += 1;
+                device = args.get(i).ok_or("missing device")?.parse()?;
+                device_set = true;
+            }
+            "--seek" => seek = true,
+            "--cuda-shader" | "--cuda-sampling-shader" => {
+                #[cfg(feature = "media-cuda")]
+                {
+                    cuda_shader_sampling = args[i] == "--cuda-sampling-shader";
+                }
+                if command != "hw-filter" {
+                    return Err("--cuda-shader requires hw-filter".into());
+                }
+                if cuda_shader.is_some() {
+                    return Err("one CUDA shader per hw-filter invocation".into());
+                }
+                i += 1;
+                let path = args.get(i).ok_or("missing CUDA shader path")?;
+                use std::io::Read;
+                let mut source = String::new();
+                std::fs::File::open(path)?
+                    .take(65537)
+                    .read_to_string(&mut source)?;
+                if source.trim().is_empty() || source.len() > 65536 || source.contains('\0') {
+                    return Err("CUDA shader must contain 1..=65536 bytes without NUL".into());
+                }
+                cuda_shader = Some(std::sync::Arc::<str>::from(source));
+            }
+            "--hflip" => horizontal_flip = true,
+            "--vflip" => vertical_flip = true,
+            "--crop" => {
+                i += 1;
+                let values = args
+                    .get(i)
+                    .ok_or("missing crop")?
+                    .split(':')
+                    .map(str::parse)
+                    .collect::<Result<Vec<usize>, _>>()?;
+                if values.len() != 4 {
+                    return Err("crop must be X:Y:WIDTH:HEIGHT".into());
+                }
+                crop = Some(fvid_media::CropRect {
+                    x: values[0],
+                    y: values[1],
+                    width: values[2],
+                    height: values[3],
+                });
+            }
+            "--scale" => {
+                i += 1;
+                let values = args
+                    .get(i)
+                    .ok_or("missing scale")?
+                    .split(':')
+                    .map(str::parse)
+                    .collect::<Result<Vec<u32>, _>>()?;
+                if values.len() != 2 {
+                    return Err("scale must be WIDTH:HEIGHT".into());
+                }
+                scale = Some(fvid_media::ScaleSize {
+                    width: values[0],
+                    height: values[1],
+                });
+            }
+            "--transpose" => {
+                i += 1;
+                transpose = Some(fvid_media::TransposeMode::parse(
+                    args.get(i).ok_or("missing transpose mode")?,
+                )?);
+            }
+            "--rotate" => {
+                i += 1;
+                rotate = Some(fvid_media::RotateAngle::parse(
+                    args.get(i).ok_or("missing rotate degrees")?,
+                )?);
+            }
+            "--pad" => {
+                i += 1;
+                let values = args
+                    .get(i)
+                    .ok_or("missing pad")?
+                    .split(':')
+                    .map(str::parse)
+                    .collect::<Result<Vec<u32>, _>>()?;
+                if values.len() != 4 {
+                    return Err("pad must be WIDTH:HEIGHT:X:Y".into());
+                }
+                pad = Some(fvid_media::PadRect {
+                    width: values[0],
+                    height: values[1],
+                    x: values[2],
+                    y: values[3],
+                });
+            }
+            "--subs" => {
+                i += 1;
+                burn_subs = Some(std::path::PathBuf::from(
+                    args.get(i).ok_or("missing subtitle file")?,
+                ));
+            }
+            "--overlay" => {
+                i += 1;
+                overlay = Some(std::path::PathBuf::from(
+                    args.get(i).ok_or("missing overlay video")?,
+                ));
+            }
+            "--overlay-x" => {
+                i += 1;
+                overlay_x = args
+                    .get(i)
+                    .ok_or("missing overlay-x")?
+                    .parse()
+                    .map_err(|_| "overlay-x must be an integer")?;
+            }
+            "--overlay-y" => {
+                i += 1;
+                overlay_y = args
+                    .get(i)
+                    .ok_or("missing overlay-y")?
+                    .parse()
+                    .map_err(|_| "overlay-y must be an integer")?;
+            }
+            "--pix-fmt" => {
+                i += 1;
+                pix_fmt = Some(args.get(i).ok_or("missing pixel format")?.clone());
+            }
+            "--colorspace" => {
+                i += 1;
+                colorspace = Some(args.get(i).ok_or("missing colorspace args")?.clone());
+            }
+            "--zscale" => {
+                i += 1;
+                zscale = Some(args.get(i).ok_or("missing zscale args")?.clone());
+            }
+            "--tonemap" => {
+                i += 1;
+                tonemap = Some(args.get(i).ok_or("missing tonemap args")?.clone());
+            }
+            "--yadif" => {
+                i += 1;
+                yadif = Some(args.get(i).ok_or("missing yadif args")?.clone());
+            }
+            "--bwdif" => {
+                i += 1;
+                bwdif = Some(args.get(i).ok_or("missing bwdif args")?.clone());
+            }
+            "--w3fdif" => {
+                i += 1;
+                w3fdif = Some(args.get(i).ok_or("missing w3fdif args")?.clone());
+            }
+            "--tblend" => {
+                i += 1;
+                tblend = Some(args.get(i).ok_or("missing tblend args")?.clone());
+            }
+            "--tmix" => {
+                i += 1;
+                tmix = Some(args.get(i).ok_or("missing tmix args")?.clone());
+            }
+            "--hqdn3d" => {
+                i += 1;
+                hqdn3d = Some(args.get(i).ok_or("missing hqdn3d args")?.clone());
+            }
+            "--gblur" => {
+                i += 1;
+                gblur = Some(args.get(i).ok_or("missing gblur args")?.clone());
+            }
+            "--eq" => {
+                i += 1;
+                eq = Some(args.get(i).ok_or("missing eq args")?.clone());
+            }
+            "--unsharp" => {
+                i += 1;
+                unsharp = Some(args.get(i).ok_or("missing unsharp args")?.clone());
+            }
+            "--hue" => {
+                i += 1;
+                hue = Some(args.get(i).ok_or("missing hue args")?.clone());
+            }
+            "--avgblur" => {
+                i += 1;
+                avgblur = Some(args.get(i).ok_or("missing avgblur args")?.clone());
+            }
+            "--boxblur" => {
+                i += 1;
+                boxblur = Some(args.get(i).ok_or("missing boxblur args")?.clone());
+            }
+            "--negate" => {
+                i += 1;
+                negate = Some(args.get(i).ok_or("missing negate args (0|1)")?.clone());
+            }
+            "--edgedetect" => {
+                i += 1;
+                edgedetect = Some(args.get(i).ok_or("missing edgedetect args")?.clone());
+            }
+            "--sobel" => {
+                i += 1;
+                sobel = Some(args.get(i).ok_or("missing sobel args")?.clone());
+            }
+            "--prewitt" => {
+                i += 1;
+                prewitt = Some(args.get(i).ok_or("missing prewitt args")?.clone());
+            }
+            "--roberts" => {
+                i += 1;
+                roberts = Some(args.get(i).ok_or("missing roberts args")?.clone());
+            }
+            "--kirsch" => {
+                i += 1;
+                kirsch = Some(args.get(i).ok_or("missing kirsch args")?.clone());
+            }
+            "--scharr" => {
+                i += 1;
+                scharr = Some(args.get(i).ok_or("missing scharr args")?.clone());
+            }
+            "--atadenoise" => {
+                i += 1;
+                atadenoise = Some(args.get(i).ok_or("missing atadenoise args")?.clone());
+            }
+            "--owdenoise" => {
+                i += 1;
+                owdenoise = Some(args.get(i).ok_or("missing owdenoise args")?.clone());
+            }
+            "--vaguedenoiser" => {
+                i += 1;
+                vaguedenoiser = Some(args.get(i).ok_or("missing vaguedenoiser args")?.clone());
+            }
+            "--nlmeans" => {
+                i += 1;
+                nlmeans = Some(args.get(i).ok_or("missing nlmeans args")?.clone());
+            }
+            "--bm3d" => {
+                i += 1;
+                bm3d = Some(args.get(i).ok_or("missing bm3d args")?.clone());
+            }
+            "--dctdnoiz" => {
+                i += 1;
+                dctdnoiz = Some(args.get(i).ok_or("missing dctdnoiz args")?.clone());
+            }
+            "--fftdnoiz" => {
+                i += 1;
+                fftdnoiz = Some(args.get(i).ok_or("missing fftdnoiz args")?.clone());
+            }
+            "--smartblur" => {
+                i += 1;
+                smartblur = Some(args.get(i).ok_or("missing smartblur args")?.clone());
+            }
+            "--sab" => {
+                i += 1;
+                sab = Some(args.get(i).ok_or("missing sab args")?.clone());
+            }
+            "--bilateral" => {
+                i += 1;
+                bilateral = Some(args.get(i).ok_or("missing bilateral args")?.clone());
+            }
+            "--cas" => {
+                i += 1;
+                cas = Some(args.get(i).ok_or("missing cas args")?.clone());
+            }
+            "--epx" => {
+                i += 1;
+                epx = Some(args.get(i).ok_or("missing epx args")?.clone());
+            }
+            "--vignette" => {
+                i += 1;
+                vignette = Some(args.get(i).ok_or("missing vignette args")?.clone());
+            }
+            "--curves" => {
+                i += 1;
+                curves = Some(args.get(i).ok_or("missing curves args")?.clone());
+            }
+            "--colorbalance" => {
+                i += 1;
+                colorbalance = Some(args.get(i).ok_or("missing colorbalance args")?.clone());
+            }
+            "--colorlevels" => {
+                i += 1;
+                colorlevels = Some(args.get(i).ok_or("missing colorlevels args")?.clone());
+            }
+            "--colorchannelmixer" => {
+                i += 1;
+                colorchannelmixer =
+                    Some(args.get(i).ok_or("missing colorchannelmixer args")?.clone());
+            }
+            "--deflicker" => {
+                i += 1;
+                deflicker = Some(args.get(i).ok_or("missing deflicker args")?.clone());
+            }
+            "--photosensitivity" => {
+                i += 1;
+                photosensitivity =
+                    Some(args.get(i).ok_or("missing photosensitivity args")?.clone());
+            }
+            "--monochrome" => {
+                i += 1;
+                monochrome = Some(args.get(i).ok_or("missing monochrome args")?.clone());
+            }
+            "--grayworld" => {
+                i += 1;
+                grayworld = Some(
+                    args.get(i)
+                        .ok_or("missing grayworld args (0 for defaults)")?
+                        .clone(),
+                );
+            }
+            "--drawbox" => {
+                i += 1;
+                drawbox = Some(args.get(i).ok_or("missing drawbox args")?.clone());
+            }
+            "--drawgrid" => {
+                i += 1;
+                drawgrid = Some(args.get(i).ok_or("missing drawgrid args")?.clone());
+            }
+            "--lagfun" => {
+                i += 1;
+                lagfun = Some(args.get(i).ok_or("missing lagfun args")?.clone());
+            }
+            "--amplify" => {
+                i += 1;
+                amplify = Some(args.get(i).ok_or("missing amplify args")?.clone());
+            }
+            "--bitplanenoise" => {
+                i += 1;
+                bitplanenoise = Some(args.get(i).ok_or("missing bitplanenoise args")?.clone());
+            }
+            "--deband" => {
+                i += 1;
+                deband = Some(args.get(i).ok_or("missing deband args")?.clone());
+            }
+            "--gradfun" => {
+                i += 1;
+                gradfun = Some(args.get(i).ok_or("missing gradfun args")?.clone());
+            }
+            "--lenscorrection" => {
+                i += 1;
+                lenscorrection = Some(args.get(i).ok_or("missing lenscorrection args")?.clone());
+            }
+            "--pixelize" => {
+                i += 1;
+                pixelize = Some(args.get(i).ok_or("missing pixelize args")?.clone());
+            }
+            "--removegrain" => {
+                i += 1;
+                removegrain = Some(args.get(i).ok_or("missing removegrain args")?.clone());
+            }
+            "--yaepblur" => {
+                i += 1;
+                yaepblur = Some(args.get(i).ok_or("missing yaepblur args")?.clone());
+            }
+            "--vibrance" => {
+                i += 1;
+                vibrance = Some(args.get(i).ok_or("missing vibrance args")?.clone());
+            }
+            "--dilation" => {
+                i += 1;
+                dilation = Some(args.get(i).ok_or("missing dilation args")?.clone());
+            }
+            "--erosion" => {
+                i += 1;
+                erosion = Some(args.get(i).ok_or("missing erosion args")?.clone());
+            }
+            "--colorize" => {
+                i += 1;
+                colorize = Some(args.get(i).ok_or("missing colorize args")?.clone());
+            }
+            "--exposure" => {
+                i += 1;
+                exposure = Some(args.get(i).ok_or("missing exposure args")?.clone());
+            }
+            "--chromashift" => {
+                i += 1;
+                chromashift = Some(args.get(i).ok_or("missing chromashift args")?.clone());
+            }
+            "--colorcontrast" => {
+                i += 1;
+                colorcontrast = Some(args.get(i).ok_or("missing colorcontrast args")?.clone());
+            }
+            "--colorcorrect" => {
+                i += 1;
+                colorcorrect = Some(args.get(i).ok_or("missing colorcorrect args")?.clone());
+            }
+            "--histeq" => {
+                i += 1;
+                histeq = Some(args.get(i).ok_or("missing histeq args")?.clone());
+            }
+            "--shuffleplanes" => {
+                i += 1;
+                shuffleplanes = Some(args.get(i).ok_or("missing shuffleplanes args")?.clone());
+            }
+            "--lutyuv" => {
+                i += 1;
+                lutyuv = Some(args.get(i).ok_or("missing lutyuv args")?.clone());
+            }
+            "--colorhold" => {
+                i += 1;
+                colorhold = Some(args.get(i).ok_or("missing colorhold args")?.clone());
+            }
+            "--fade" => {
+                i += 1;
+                fade = Some(args.get(i).ok_or("missing fade args")?.clone());
+            }
+            "--perspective" => {
+                i += 1;
+                perspective = Some(args.get(i).ok_or("missing perspective args")?.clone());
+            }
+            "--lumakey" => {
+                i += 1;
+                lumakey = Some(args.get(i).ok_or("missing lumakey args")?.clone());
+            }
+            "--chromakey" => {
+                i += 1;
+                chromakey = Some(args.get(i).ok_or("missing chromakey args")?.clone());
+            }
+            "--colorkey" => {
+                i += 1;
+                colorkey = Some(args.get(i).ok_or("missing colorkey args")?.clone());
+            }
+            "--despill" => {
+                i += 1;
+                despill = Some(args.get(i).ok_or("missing despill args")?.clone());
+            }
+            "--selectivecolor" => {
+                i += 1;
+                selectivecolor = Some(args.get(i).ok_or("missing selectivecolor args")?.clone());
+            }
+            "--stereo3d" => {
+                i += 1;
+                stereo3d = Some(args.get(i).ok_or("missing stereo3d args")?.clone());
+            }
+            "--field" => {
+                i += 1;
+                field = Some(args.get(i).ok_or("missing field args")?.clone());
+            }
+            "--hqx" => {
+                i += 1;
+                hqx = Some(args.get(i).ok_or("missing hqx args")?.clone());
+            }
+            "--xbr" => {
+                i += 1;
+                xbr = Some(args.get(i).ok_or("missing xbr args")?.clone());
+            }
+            "--il" => {
+                i += 1;
+                il = Some(args.get(i).ok_or("missing il args")?.clone());
+            }
+            "--super2xsai" => {
+                i += 1;
+                super2xsai = Some(args.get(i).ok_or("missing super2xsai args")?.clone());
+            }
+            "--kerndeint" => {
+                i += 1;
+                kerndeint = Some(args.get(i).ok_or("missing kerndeint args")?.clone());
+            }
+            "--phase" => {
+                i += 1;
+                phase = Some(args.get(i).ok_or("missing phase args")?.clone());
+            }
+            "--estdif" => {
+                i += 1;
+                estdif = Some(args.get(i).ok_or("missing estdif args")?.clone());
+            }
+            "--tinterlace" => {
+                i += 1;
+                tinterlace = Some(args.get(i).ok_or("missing tinterlace args")?.clone());
+            }
+            "--separatefields" => {
+                i += 1;
+                separatefields = Some(args.get(i).ok_or("missing separatefields args")?.clone());
+            }
+            "--weave" => {
+                i += 1;
+                weave = Some(args.get(i).ok_or("missing weave args")?.clone());
+            }
+            "--doubleweave" => {
+                i += 1;
+                doubleweave = Some(args.get(i).ok_or("missing doubleweave args")?.clone());
+            }
+            "--framepack" => {
+                i += 1;
+                framepack = Some(args.get(i).ok_or("missing framepack args")?.clone());
+            }
+            "--telecine" => {
+                i += 1;
+                telecine = Some(args.get(i).ok_or("missing telecine args")?.clone());
+            }
+            "--pullup" => {
+                i += 1;
+                pullup = Some(args.get(i).ok_or("missing pullup args")?.clone());
+            }
+            "--decimate" => {
+                i += 1;
+                decimate = Some(args.get(i).ok_or("missing decimate args")?.clone());
+            }
+            "--mpdecimate" => {
+                i += 1;
+                mpdecimate = Some(args.get(i).ok_or("missing mpdecimate args")?.clone());
+            }
+            "--framestep" => {
+                i += 1;
+                framestep = Some(args.get(i).ok_or("missing framestep args")?.clone());
+            }
+            "--tile" => {
+                i += 1;
+                tile = Some(args.get(i).ok_or("missing tile args")?.clone());
+            }
+            "--untile" => {
+                i += 1;
+                untile = Some(args.get(i).ok_or("missing untile args")?.clone());
+            }
+            "--shuffleframes" => {
+                i += 1;
+                shuffleframes = Some(args.get(i).ok_or("missing shuffleframes args")?.clone());
+            }
+            "--reverse" => {
+                i += 1;
+                reverse = Some(args.get(i).ok_or("missing reverse args")?.clone());
+            }
+            "--loop" => {
+                i += 1;
+                vloop = Some(args.get(i).ok_or("missing loop args")?.clone());
+            }
+            "--thumbnail" => {
+                i += 1;
+                thumbnail = Some(args.get(i).ok_or("missing thumbnail args")?.clone());
+            }
+            "--freezedetect" => {
+                i += 1;
+                freezedetect = Some(args.get(i).ok_or("missing freezedetect args")?.clone());
+            }
+            "--setpts" => {
+                i += 1;
+                setpts = Some(args.get(i).ok_or("missing setpts args")?.clone());
+            }
+            "--select" => {
+                i += 1;
+                select = Some(args.get(i).ok_or("missing select args")?.clone());
+            }
+            "--pseudocolor" => {
+                i += 1;
+                pseudocolor = Some(args.get(i).ok_or("missing pseudocolor args")?.clone());
+            }
+            "--minterpolate" => {
+                i += 1;
+                minterpolate = Some(args.get(i).ok_or("missing minterpolate args")?.clone());
+            }
+            "--fps" => {
+                i += 1;
+                fps = Some(args.get(i).ok_or("missing fps rate")?.clone());
+            }
+            "--transition" => {
+                i += 1;
+                xfade_transition = Some(args.get(i).ok_or("missing xfade transition")?.clone());
+            }
+            "--xfade-duration" => {
+                i += 1;
+                xfade_duration = Some(fvid::media_info::parse_time(
+                    args.get(i).ok_or("missing xfade duration")?,
+                )?);
+            }
+            "--xfade-offset" => {
+                i += 1;
+                xfade_offset = Some(fvid::media_info::parse_time(
+                    args.get(i).ok_or("missing xfade offset")?,
+                )?);
+            }
+            "--loudnorm-args" => {
+                i += 1;
+                loudnorm_args = Some(args.get(i).ok_or("missing loudnorm args")?.clone());
+            }
+            "--dual-pass" => loudnorm_dual = true,
+            "--duration" => {
+                i += 1;
+                mix_duration =
+                    fvid_media::MixDuration::parse(args.get(i).ok_or("missing mix duration")?)?;
+            }
+            "--normalize" => mix_normalize = true,
+            "--no-normalize" => mix_normalize = false,
+            "--weights" => {
+                i += 1;
+                mix_weights = args
+                    .get(i)
+                    .ok_or("missing mix weights")?
+                    .split(|c| c == ',' || c == ' ')
+                    .filter(|part| !part.is_empty())
+                    .map(|part| {
+                        part.parse::<f32>()
+                            .map_err(|_| "mix weight must be a number")
+                    })
+                    .collect::<Result<Vec<_>, _>>()?;
+                if mix_weights.is_empty() {
+                    return Err("mix weights must not be empty".into());
+                }
+            }
+            "--rate" => {
+                i += 1;
+                sample_rate = Some(
+                    args.get(i)
+                        .ok_or("missing sample rate")?
+                        .parse::<i32>()
+                        .map_err(|_| "sample rate must be an integer")?,
+                );
+            }
+            "--channels" => {
+                i += 1;
+                channels = Some(
+                    args.get(i)
+                        .ok_or("missing channel count")?
+                        .parse::<i32>()
+                        .map_err(|_| "channels must be an integer")?,
+                );
+            }
+            "--volume" => {
+                i += 1;
+                volume = Some(
+                    args.get(i)
+                        .ok_or("missing volume")?
+                        .parse::<f64>()
+                        .map_err(|_| "volume must be a linear gain number")?,
+                );
+            }
+            "--streams" => {
+                i += 1;
+                options.streams = args
+                    .get(i)
+                    .ok_or("missing stream indices")?
+                    .split(',')
+                    .map(str::parse)
+                    .collect::<Result<_, _>>()?;
+            }
+            "--max-packets" => {
+                i += 1;
+                options.max_packets = Some(
+                    args.get(i)
+                        .ok_or("missing max-packets")?
+                        .parse()
+                        .map_err(|_| "invalid max-packets")?,
+                );
+            }
+            "--max-packet-bytes" => {
+                i += 1;
+                options.max_packet_bytes = args
+                    .get(i)
+                    .ok_or("missing max-packet-bytes")?
+                    .parse()
+                    .map_err(|_| "invalid max-packet-bytes")?;
+            }
+            "--max-memory-mib" => {
+                i += 1;
+                options.max_controlled_bytes = Some(fvid_media::parse_max_memory_mib(
+                    args.get(i).ok_or("missing max-memory-mib")?,
+                )?);
+            }
+            "--max-rss-mib" => {
+                i += 1;
+                options.max_rss_bytes = Some(fvid_media::parse_max_rss_mib(
+                    args.get(i).ok_or("missing max-rss-mib")?,
+                )?);
+            }
+            "--metadata" => {
+                i += 1;
+                let (key, value) = args
+                    .get(i)
+                    .ok_or("missing metadata")?
+                    .split_once('=')
+                    .ok_or("metadata must be KEY=VALUE")?;
+                options
+                    .metadata_set
+                    .push((key.to_owned(), value.to_owned()));
+            }
+            "--metadata-delete" => {
+                i += 1;
+                options
+                    .metadata_delete
+                    .push(args.get(i).ok_or("missing metadata key")?.clone());
+            }
+            "--stream-metadata" => {
+                i += 1;
+                let raw = args.get(i).ok_or("missing stream metadata")?;
+                let (index, rest) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                let (key, value) = rest
+                    .split_once('=')
+                    .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                options.stream_metadata_set.push((
+                    index.parse()?,
+                    key.to_owned(),
+                    value.to_owned(),
+                ));
+            }
+            "--stream-metadata-delete" => {
+                i += 1;
+                let raw = args.get(i).ok_or("missing stream metadata key")?;
+                let (index, key) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata delete must be INDEX:KEY")?;
+                options
+                    .stream_metadata_delete
+                    .push((index.parse()?, key.to_owned()));
+            }
+            "--from" => {
+                i += 1;
+                from = Some(fvid::media_info::parse_time(
+                    args.get(i).ok_or("missing start")?,
+                )?);
+            }
+            "--to" => {
+                i += 1;
+                to = Some(fvid::media_info::parse_time(
+                    args.get(i).ok_or("missing end")?,
+                )?);
+            }
+            value if value.starts_with("--") => {
+                return Err(format!("unknown media option: {value}").into());
+            }
+            value => paths.push(PathBuf::from(value)),
+        }
+        i += 1;
+    }
+    if progress {
+        options.progress = Some(fvid_media::ProgressHook::new(|event| {
+            eprintln!(
+                "{}",
+                serde_json::json!({
+                    "packets": event.packets,
+                    "payload_bytes": event.payload_bytes,
+                    "done": event.done,
+                })
+            );
+        }));
+    }
+    let metadata_mutation = !options.metadata_set.is_empty()
+        || !options.metadata_delete.is_empty()
+        || !options.stream_metadata_set.is_empty()
+        || !options.stream_metadata_delete.is_empty();
+    // A demuxer named by the caller is only ever read from, so the commands that write a file
+    // refuse the option rather than accept and ignore it.
+    if input_format.is_some() && command != "decode" {
+        return Err(format!("{command} does not take --input-format").into());
+    }
+    if command == "plan" {
+        if encoder.is_some() || !encoder_options.is_empty() {
+            return Err("plan does not take metadata mutation or encoder selection".into());
+        }
+        let mut plan_paths = paths;
+        let sub = if plan_paths
+            .first()
+            .and_then(|p| p.to_str())
+            .is_some_and(|s| {
+                matches!(
+                    s,
+                    "trim"
+                        | "trim-pcm"
+                        | "concat"
+                        | "remux"
+                        | "transcode-lossless"
+                        | "overlay"
+                        | "xfade"
+                        | "burn-subtitles"
+                        | "loudness"
+                        | "loudnorm"
+                        | "mix-audio"
+                        | "merge-audio"
+                        | "decode-audio"
+                )
+            }) {
+            Some(plan_paths.remove(0))
+        } else {
+            None
+        };
+        if metadata_mutation
+            && !matches!(
+                sub.as_deref().and_then(|s| s.to_str()),
+                Some(
+                    "mix-audio"
+                        | "merge-audio"
+                        | "concat"
+                        | "remux"
+                        | "transcode-lossless"
+                        | "overlay"
+                        | "xfade"
+                        | "burn-subtitles"
+                        | "loudnorm"
+                        | "decode-audio"
+                        | "trim"
+                        | "trim-pcm"
+                )
+            )
+        {
+            return Err("plan does not take metadata mutation or encoder selection".into());
+        }
+        let transform = fvid_media::LosslessTransform {
+            crop,
+            vertical_flip,
+            horizontal_flip,
+            scale,
+            epx: epx.clone(),
+            transpose,
+            rotate,
+            pad,
+            burn_subs,
+            overlay: overlay.map(|path| fvid_media::OverlaySpec {
+                path,
+                x: overlay_x,
+                y: overlay_y,
+            }),
+            xfade: None,
+            yadif: yadif.clone(),
+            bwdif: bwdif.clone(),
+            w3fdif: w3fdif.clone(),
+            tblend: tblend.clone(),
+            tmix: tmix.clone(),
+            hqdn3d: hqdn3d.clone(),
+            gblur: gblur.clone(),
+            eq: eq.clone(),
+            unsharp: unsharp.clone(),
+            hue: hue.clone(),
+            avgblur: avgblur.clone(),
+            boxblur: boxblur.clone(),
+            negate: negate.clone(),
+            edgedetect: edgedetect.clone(),
+            sobel: sobel.clone(),
+            prewitt: prewitt.clone(),
+            roberts: roberts.clone(),
+            kirsch: kirsch.clone(),
+            scharr: scharr.clone(),
+            atadenoise: atadenoise.clone(),
+            owdenoise: owdenoise.clone(),
+            vaguedenoiser: vaguedenoiser.clone(),
+            nlmeans: nlmeans.clone(),
+            bm3d: bm3d.clone(),
+            dctdnoiz: dctdnoiz.clone(),
+            fftdnoiz: fftdnoiz.clone(),
+            smartblur: smartblur.clone(),
+            sab: sab.clone(),
+            bilateral: bilateral.clone(),
+            cas: cas.clone(),
+            vignette: vignette.clone(),
+            curves: curves.clone(),
+            colorbalance: colorbalance.clone(),
+            colorlevels: colorlevels.clone(),
+            colorchannelmixer: colorchannelmixer.clone(),
+            deflicker: deflicker.clone(),
+            photosensitivity: photosensitivity.clone(),
+            monochrome: monochrome.clone(),
+            grayworld: grayworld.clone(),
+            drawbox: drawbox.clone(),
+            drawgrid: drawgrid.clone(),
+            lagfun: lagfun.clone(),
+            amplify: amplify.clone(),
+            bitplanenoise: bitplanenoise.clone(),
+            deband: deband.clone(),
+            gradfun: gradfun.clone(),
+            lenscorrection: lenscorrection.clone(),
+            pixelize: pixelize.clone(),
+            removegrain: removegrain.clone(),
+            yaepblur: yaepblur.clone(),
+            vibrance: vibrance.clone(),
+            dilation: dilation.clone(),
+            erosion: erosion.clone(),
+            colorize: colorize.clone(),
+            exposure: exposure.clone(),
+            chromashift: chromashift.clone(),
+            colorcontrast: colorcontrast.clone(),
+            colorcorrect: colorcorrect.clone(),
+            histeq: histeq.clone(),
+            shuffleplanes: shuffleplanes.clone(),
+            lutyuv: lutyuv.clone(),
+            colorhold: colorhold.clone(),
+            fade: fade.clone(),
+            perspective: perspective.clone(),
+            lumakey: lumakey.clone(),
+            chromakey: chromakey.clone(),
+            colorkey: colorkey.clone(),
+            despill: despill.clone(),
+            selectivecolor: selectivecolor.clone(),
+            stereo3d: stereo3d.clone(),
+            field: field.clone(),
+            hqx: hqx.clone(),
+            xbr: xbr.clone(),
+            il: il.clone(),
+            super2xsai: super2xsai.clone(),
+            kerndeint: kerndeint.clone(),
+            phase: phase.clone(),
+            estdif: estdif.clone(),
+            tinterlace: tinterlace.clone(),
+            separatefields: separatefields.clone(),
+            weave: weave.clone(),
+            doubleweave: doubleweave.clone(),
+            framepack: framepack.clone(),
+            telecine: telecine.clone(),
+            pullup: pullup.clone(),
+            decimate: decimate.clone(),
+            mpdecimate: mpdecimate.clone(),
+            framestep: framestep.clone(),
+            tile: tile.clone(),
+            untile: untile.clone(),
+            shuffleframes: shuffleframes.clone(),
+            reverse: reverse.clone(),
+            r#loop: vloop.clone(),
+            thumbnail: thumbnail.clone(),
+            freezedetect: freezedetect.clone(),
+            pseudocolor: pseudocolor.clone(),
+            minterpolate: minterpolate.clone(),
+            fps: fps.clone(),
+            colorspace: colorspace.clone(),
+            zscale: zscale.clone(),
+            tonemap: tonemap.clone(),
+            pix_fmt: pix_fmt.clone(),
+            interval: match (from, to) {
+                (None, None) => None,
+                (Some(start), Some(end)) => Some((start, end)),
+                _ => return Err("plan interval requires both --from and --to".into()),
+            },
+            seek,
+        };
+        let geometry = transform.crop.is_some()
+            || transform.vertical_flip
+            || transform.horizontal_flip
+            || transform.scale.is_some()
+            || transform.transpose.is_some()
+            || transform.rotate.is_some()
+            || transform.pad.is_some()
+            || transform.burn_subs.is_some()
+            || transform.overlay.is_some()
+            || transform.yadif.is_some()
+            || transform.bwdif.is_some()
+            || transform.w3fdif.is_some()
+            || transform.tblend.is_some()
+            || transform.tmix.is_some()
+            || transform.hqdn3d.is_some()
+            || transform.gblur.is_some()
+            || transform.eq.is_some()
+            || transform.unsharp.is_some()
+            || transform.hue.is_some()
+            || transform.avgblur.is_some()
+            || transform.boxblur.is_some()
+            || transform.negate.is_some()
+            || transform.edgedetect.is_some()
+            || transform.sobel.is_some()
+            || transform.prewitt.is_some()
+            || transform.roberts.is_some()
+            || transform.kirsch.is_some()
+            || transform.scharr.is_some()
+            || transform.atadenoise.is_some()
+            || transform.owdenoise.is_some()
+            || transform.vaguedenoiser.is_some()
+            || transform.nlmeans.is_some()
+            || transform.bm3d.is_some()
+            || transform.dctdnoiz.is_some()
+            || transform.fftdnoiz.is_some()
+            || transform.smartblur.is_some()
+            || transform.sab.is_some()
+            || transform.bilateral.is_some()
+            || transform.cas.is_some()
+            || transform.epx.is_some()
+            || transform.vignette.is_some()
+            || transform.curves.is_some()
+            || transform.colorbalance.is_some()
+            || transform.colorlevels.is_some()
+            || transform.colorchannelmixer.is_some()
+            || transform.deflicker.is_some()
+            || transform.photosensitivity.is_some()
+            || transform.monochrome.is_some()
+            || transform.grayworld.is_some()
+            || transform.drawbox.is_some()
+            || transform.drawgrid.is_some()
+            || transform.lagfun.is_some()
+            || transform.amplify.is_some()
+            || transform.bitplanenoise.is_some()
+            || transform.deband.is_some()
+            || transform.gradfun.is_some()
+            || transform.lenscorrection.is_some()
+            || transform.pixelize.is_some()
+            || transform.removegrain.is_some()
+            || transform.yaepblur.is_some()
+            || transform.vibrance.is_some()
+            || transform.dilation.is_some()
+            || transform.erosion.is_some()
+            || transform.colorize.is_some()
+            || transform.exposure.is_some()
+            || transform.chromashift.is_some()
+            || transform.colorcontrast.is_some()
+            || transform.colorcorrect.is_some()
+            || transform.histeq.is_some()
+            || transform.shuffleplanes.is_some()
+            || transform.lutyuv.is_some()
+            || transform.colorhold.is_some()
+            || transform.fade.is_some()
+            || transform.perspective.is_some()
+            || transform.lumakey.is_some()
+            || transform.chromakey.is_some()
+            || transform.colorkey.is_some()
+            || transform.despill.is_some()
+            || transform.selectivecolor.is_some()
+            || transform.stereo3d.is_some()
+            || transform.field.is_some()
+            || transform.hqx.is_some()
+            || transform.xbr.is_some()
+            || transform.il.is_some()
+            || transform.super2xsai.is_some()
+            || transform.kerndeint.is_some()
+            || transform.phase.is_some()
+            || transform.estdif.is_some()
+            || transform.tinterlace.is_some()
+            || transform.separatefields.is_some()
+            || transform.weave.is_some()
+            || transform.doubleweave.is_some()
+            || transform.framepack.is_some()
+            || transform.telecine.is_some()
+            || transform.pullup.is_some()
+            || transform.decimate.is_some()
+            || transform.mpdecimate.is_some()
+            || transform.framestep.is_some()
+            || transform.tile.is_some()
+            || transform.untile.is_some()
+            || transform.shuffleframes.is_some()
+            || transform.reverse.is_some()
+            || transform.r#loop.is_some()
+            || transform.thumbnail.is_some()
+            || transform.freezedetect.is_some()
+            || setpts.is_some()
+            || select.is_some()
+            || transform.pseudocolor.is_some()
+            || transform.minterpolate.is_some()
+            || transform.fps.is_some()
+            || transform.colorspace.is_some()
+            || transform.zscale.is_some()
+            || transform.tonemap.is_some()
+            || transform.pix_fmt.is_some()
+            || transform.seek;
+        let plan = match sub.as_ref().and_then(|p| p.to_str()) {
+            Some("trim") => {
+                if plan_paths.len() != 1 || geometry {
+                    return Err(
+                        "plan trim requires INPUT --from SECONDS --to SECONDS without geometry flags"
+                            .into(),
+                    );
+                }
+                let (start, end) = match (from, to) {
+                    (Some(start), Some(end)) => (start, end),
+                    _ => return Err("plan trim requires both --from and --to".into()),
+                };
+                fvid::media::plan_trim(&plan_paths[0], start, end, &options)?
+            }
+            Some("trim-pcm") => {
+                if plan_paths.len() != 1 || geometry {
+                    return Err(
+                        "plan trim-pcm requires INPUT --from SECONDS --to SECONDS [--streams INDEX] without geometry flags"
+                            .into(),
+                    );
+                }
+                let (start, end) = match (from, to) {
+                    (Some(start), Some(end)) => (start, end),
+                    _ => return Err("plan trim-pcm requires both --from and --to".into()),
+                };
+                fvid::media::plan_trim_pcm(&plan_paths[0], start, end, &options)?
+            }
+            Some("concat") => {
+                if plan_paths.len() < 2 || from.is_some() || to.is_some() || geometry {
+                    return Err(
+                        "plan concat requires INPUT INPUT... without --from/--to/geometry flags"
+                            .into(),
+                    );
+                }
+                fvid::media::plan_concat(&plan_paths, &options)?
+            }
+            Some("remux") => {
+                if plan_paths.len() != 1 || from.is_some() || to.is_some() || geometry {
+                    return Err("plan remux requires a single INPUT without transform flags".into());
+                }
+                fvid::media::plan_remux(&plan_paths[0], &options)?
+            }
+            Some("transcode-lossless") => {
+                if plan_paths.len() != 1 {
+                    return Err("plan transcode-lossless requires a single INPUT".into());
+                }
+                fvid::media::plan_transcode_lossless(&plan_paths[0], &transform, &options, None)?
+            }
+            Some("overlay") => {
+                if plan_paths.len() != 1 || transform.overlay.is_none() {
+                    return Err(
+                        "plan overlay requires MAIN --overlay FILE [--overlay-x N] [--overlay-y N]"
+                            .into(),
+                    );
+                }
+                let spec = transform.overlay.as_ref().unwrap();
+                fvid_media::plan_overlay(&plan_paths[0], &spec.path, spec.x, spec.y, &options)?
+            }
+            Some("xfade") => {
+                if plan_paths.len() != 2 {
+                    return Err(
+                        "plan xfade requires MAIN OTHER --xfade-duration SECONDS [--transition NAME] [--xfade-offset SECONDS]"
+                            .into(),
+                    );
+                }
+                let duration = xfade_duration.ok_or("plan xfade requires --xfade-duration")?;
+                let transition = xfade_transition.as_deref().unwrap_or("fade");
+                let offset = xfade_offset.unwrap_or(0);
+                fvid_media::plan_xfade(
+                    &plan_paths[0],
+                    &plan_paths[1],
+                    transition,
+                    duration,
+                    offset,
+                    &options,
+                )?
+            }
+            Some("burn-subtitles") => {
+                if plan_paths.len() != 1 || transform.burn_subs.is_none() {
+                    return Err("plan burn-subtitles requires INPUT --subs FILE.srt".into());
+                }
+                fvid_media::plan_burn_subtitles(
+                    &plan_paths[0],
+                    transform.burn_subs.as_ref().unwrap(),
+                    &options,
+                )?
+            }
+            Some("loudness") => {
+                if plan_paths.len() != 1 || geometry {
+                    return Err("plan loudness requires INPUT without video transform flags".into());
+                }
+                fvid::media::plan_loudness(&plan_paths[0], &options)?
+            }
+            Some("loudnorm") => {
+                if plan_paths.len() != 1 || geometry {
+                    return Err(
+                        "plan loudnorm requires INPUT [--loudnorm-args ARGS] [--dual-pass] without video transform flags"
+                            .into(),
+                    );
+                }
+                fvid_media::plan_loudnorm(
+                    &plan_paths[0],
+                    loudnorm_args.as_deref(),
+                    loudnorm_dual,
+                    &options,
+                )?
+            }
+            Some("mix-audio") => {
+                if plan_paths.len() < 2 || geometry {
+                    return Err(
+                        "plan mix-audio requires INPUT INPUT... [--weights W,...] [--duration shortest] [--normalize|--no-normalize]"
+                            .into(),
+                    );
+                }
+                fvid::media::plan_mix_audio_with_controls(
+                    &plan_paths,
+                    &fvid_media::MixAudioOptions {
+                        duration: mix_duration,
+                        normalize: mix_normalize,
+                        weights: mix_weights,
+                    },
+                    &options,
+                )?
+            }
+            Some("merge-audio") => {
+                if plan_paths.len() != 2 || geometry {
+                    return Err("plan merge-audio requires INPUT INPUT".into());
+                }
+                fvid::media::plan_merge_audio_with_controls(&plan_paths, &options)?
+            }
+            Some("decode-audio") => {
+                if plan_paths.len() != 1 || geometry {
+                    return Err(
+                        "plan decode-audio requires INPUT [--rate HZ] [--channels N] [--volume GAIN] [--from SECONDS --to SECONDS] [--streams INDEX] without video transform flags"
+                            .into(),
+                    );
+                }
+                let interval = match (from, to) {
+                    (None, None) => None,
+                    (Some(start), Some(end)) => Some((start, end)),
+                    _ => {
+                        return Err(
+                            "plan decode-audio interval requires both --from and --to".into()
+                        );
+                    }
+                };
+                fvid::media::plan_decode_audio(
+                    &plan_paths[0],
+                    &fvid_media::AudioDecodeTransform {
+                        interval,
+                        sample_rate,
+                        channels,
+                        volume,
+                    },
+                    &options,
+                )?
+            }
+            None => {
+                if plan_paths.len() != 1 {
+                    return Err(
+                        "plan requires INPUT, or: plan trim|trim-pcm|concat|remux|transcode-lossless|overlay|xfade|burn-subtitles|loudness|loudnorm|mix-audio|merge-audio|decode-audio ..."
+                            .into(),
+                    );
+                }
+                let idle = !geometry && transform.interval.is_none();
+                if idle {
+                    fvid::media::plan_remux(&plan_paths[0], &options)?
+                } else {
+                    fvid::media::plan_transcode_lossless(
+                        &plan_paths[0],
+                        &transform,
+                        &options,
+                        None,
+                    )?
+                }
+            }
+            Some(_) => unreachable!(),
+        };
+        emit_json(quiet, serde_json::to_string_pretty(&plan)?);
+        return Ok(());
+    }
+    if metadata_mutation
+        && !matches!(
+            command.as_str(),
+            "remux"
+                | "mix-audio"
+                | "merge-audio"
+                | "concat"
+                | "transcode-lossless"
+                | "crop-lossless"
+                | "transcode"
+                | "overlay"
+                | "xfade"
+                | "burn-subtitles"
+                | "loudnorm"
+                | "normalize-loudness"
+                | "decode-audio"
+                | "trim"
+                | "trim-pcm"
+        )
+    {
+        return Err("metadata mutation requires remux".into());
+    }
+    if command != "transcode" && (encoder.is_some() || !encoder_options.is_empty()) {
+        return Err("encoder selection requires explicit transcode command".into());
+    }
+    if command == "hw-filter" && paths.len() == 2 {
+        #[cfg(feature = "media-cuda")]
+        {
+            let interval = match (from, to) {
+                (None, None) => None,
+                (Some(start), Some(end)) => Some((start, end)),
+                _ => return Err("hw-filter interval requires both --from and --to".into()),
+            };
+            let stats = fvid_media::hw_filter(
+                &paths[0],
+                &paths[1],
+                &fvid_media::HwFilterOptions {
+                    shader: cuda_shader,
+                    shader_sampling: cuda_shader_sampling,
+                    crop,
+                    horizontal_flip,
+                    vertical_flip,
+                    device,
+                    host_bounce: false,
+                    interval,
+                    ..Default::default()
+                },
+            )?;
+            emit_json(quiet, serde_json::to_string_pretty(&stats)?);
+            return Ok(());
+        }
+        #[cfg(not(feature = "media-cuda"))]
+        {
+            let _ = device;
+            return Err(
+                "hw-filter requires cargo build --release --features media-cuda (CUDA NVDEC/NVENC)"
+                    .into(),
+            );
+        }
+    }
+    if command == "decode" && paths.len() == 1 {
+        if device_set
+            && (crop.is_some()
+                || scale.is_some()
+                || transpose.is_some()
+                || rotate.is_some()
+                || pad.is_some()
+                || burn_subs.is_some()
+                || pix_fmt.is_some()
+                || horizontal_flip
+                || vertical_flip
+                || from.is_some())
+        {
+            return Err(
+                "decode --device does not take --crop/--hflip/--vflip/--transpose/--rotate/--pad/--scale/--subs/--pix-fmt/--from yet".into(),
+            );
+        }
+        if device_set && input_format.is_some() {
+            return Err("decode --device does not take --input-format yet".into());
+        }
+        let interval = match (from, to) {
+            (None, None) => None,
+            (Some(start), Some(end)) => Some((start, end)),
+            _ => return Err("decode interval requires both --from and --to".into()),
+        };
+        let stats = if device_set {
+            #[cfg(feature = "media-cuda")]
+            {
+                fvid_media::decode_video_cuda(&paths[0], device)?
+            }
+            #[cfg(not(feature = "media-cuda"))]
+            {
+                let _ = device;
+                return Err("decode --device requires cargo build --features media-cuda".into());
+            }
+        } else {
+            fvid::media::decode_video_transformed(
+                &paths[0],
+                fvid_media::DecodeTransform {
+                    input_format,
+                    crop,
+                    vertical_flip,
+                    horizontal_flip,
+                    scale,
+                    epx: epx.clone(),
+                    transpose,
+                    rotate,
+                    pad,
+                    burn_subs: burn_subs.clone(),
+                    overlay: overlay.map(|path| fvid_media::OverlaySpec {
+                        path,
+                        x: overlay_x,
+                        y: overlay_y,
+                    }),
+                    yadif: yadif.clone(),
+                    bwdif: bwdif.clone(),
+                    w3fdif: w3fdif.clone(),
+                    tblend: tblend.clone(),
+                    tmix: tmix.clone(),
+                    hqdn3d: hqdn3d.clone(),
+                    gblur: gblur.clone(),
+                    eq: eq.clone(),
+                    unsharp: unsharp.clone(),
+                    hue: hue.clone(),
+                    avgblur: avgblur.clone(),
+                    boxblur: boxblur.clone(),
+                    negate: negate.clone(),
+                    edgedetect: edgedetect.clone(),
+                    sobel: sobel.clone(),
+                    prewitt: prewitt.clone(),
+                    roberts: roberts.clone(),
+                    kirsch: kirsch.clone(),
+                    scharr: scharr.clone(),
+                    atadenoise: atadenoise.clone(),
+                    owdenoise: owdenoise.clone(),
+                    vaguedenoiser: vaguedenoiser.clone(),
+                    nlmeans: nlmeans.clone(),
+                    bm3d: bm3d.clone(),
+                    dctdnoiz: dctdnoiz.clone(),
+                    fftdnoiz: fftdnoiz.clone(),
+                    smartblur: smartblur.clone(),
+                    sab: sab.clone(),
+                    bilateral: bilateral.clone(),
+                    cas: cas.clone(),
+                    vignette: vignette.clone(),
+                    curves: curves.clone(),
+                    colorbalance: colorbalance.clone(),
+                    colorlevels: colorlevels.clone(),
+                    colorchannelmixer: colorchannelmixer.clone(),
+                    deflicker: deflicker.clone(),
+                    photosensitivity: photosensitivity.clone(),
+                    monochrome: monochrome.clone(),
+                    grayworld: grayworld.clone(),
+                    drawbox: drawbox.clone(),
+                    drawgrid: drawgrid.clone(),
+                    lagfun: lagfun.clone(),
+                    amplify: amplify.clone(),
+                    bitplanenoise: bitplanenoise.clone(),
+                    deband: deband.clone(),
+                    gradfun: gradfun.clone(),
+                    lenscorrection: lenscorrection.clone(),
+                    pixelize: pixelize.clone(),
+                    removegrain: removegrain.clone(),
+                    yaepblur: yaepblur.clone(),
+                    vibrance: vibrance.clone(),
+                    dilation: dilation.clone(),
+                    erosion: erosion.clone(),
+                    colorize: colorize.clone(),
+                    exposure: exposure.clone(),
+                    chromashift: chromashift.clone(),
+                    colorcontrast: colorcontrast.clone(),
+                    colorcorrect: colorcorrect.clone(),
+                    histeq: histeq.clone(),
+                    shuffleplanes: shuffleplanes.clone(),
+                    lutyuv: lutyuv.clone(),
+                    colorhold: colorhold.clone(),
+                    fade: fade.clone(),
+                    perspective: perspective.clone(),
+                    lumakey: lumakey.clone(),
+                    chromakey: chromakey.clone(),
+                    colorkey: colorkey.clone(),
+                    despill: despill.clone(),
+                    selectivecolor: selectivecolor.clone(),
+                    stereo3d: stereo3d.clone(),
+                    field: field.clone(),
+                    hqx: hqx.clone(),
+                    xbr: xbr.clone(),
+                    il: il.clone(),
+                    super2xsai: super2xsai.clone(),
+                    kerndeint: kerndeint.clone(),
+                    phase: phase.clone(),
+                    estdif: estdif.clone(),
+                    tinterlace: tinterlace.clone(),
+                    separatefields: separatefields.clone(),
+                    weave: weave.clone(),
+                    doubleweave: doubleweave.clone(),
+                    framepack: framepack.clone(),
+                    telecine: telecine.clone(),
+                    pullup: pullup.clone(),
+                    decimate: decimate.clone(),
+                    mpdecimate: mpdecimate.clone(),
+                    framestep: framestep.clone(),
+                    tile: tile.clone(),
+                    untile: untile.clone(),
+                    shuffleframes: shuffleframes.clone(),
+                    reverse: reverse.clone(),
+                    r#loop: vloop.clone(),
+                    thumbnail: thumbnail.clone(),
+                    freezedetect: freezedetect.clone(),
+                    pseudocolor: pseudocolor.clone(),
+                    minterpolate: minterpolate.clone(),
+                    fps: fps.clone(),
+                    colorspace: colorspace.clone(),
+                    zscale: zscale.clone(),
+                    tonemap: tonemap.clone(),
+                    pix_fmt: pix_fmt.clone(),
+                    interval,
+                },
+            )?
+        };
+        emit_json(quiet, serde_json::to_string_pretty(&stats)?);
+        return Ok(());
+    }
+    if (command == "crop-lossless" || command == "transcode-lossless" || command == "transcode")
+        && paths.len() == 2
+    {
+        if command == "crop-lossless" && crop.is_none() {
+            return Err("--crop required".into());
+        }
+        if command == "crop-lossless" && scale.is_some() {
+            return Err("crop-lossless does not take --scale; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && transpose.is_some() {
+            return Err("crop-lossless does not take --transpose; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && rotate.is_some() {
+            return Err("crop-lossless does not take --rotate; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && pad.is_some() {
+            return Err("crop-lossless does not take --pad; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && pix_fmt.is_some() {
+            return Err("crop-lossless does not take --pix-fmt; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && colorspace.is_some() {
+            return Err("crop-lossless does not take --colorspace; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && zscale.is_some() {
+            return Err("crop-lossless does not take --zscale; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && tonemap.is_some() {
+            return Err("crop-lossless does not take --tonemap; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && yadif.is_some() {
+            return Err("crop-lossless does not take --yadif; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && bwdif.is_some() {
+            return Err("crop-lossless does not take --bwdif; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && w3fdif.is_some() {
+            return Err("crop-lossless does not take --w3fdif; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && tblend.is_some() {
+            return Err("crop-lossless does not take --tblend; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && tmix.is_some() {
+            return Err("crop-lossless does not take --tmix; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && hqdn3d.is_some() {
+            return Err("crop-lossless does not take --hqdn3d; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && fps.is_some() {
+            return Err("crop-lossless does not take --fps; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && gblur.is_some() {
+            return Err("crop-lossless does not take --gblur; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && eq.is_some() {
+            return Err("crop-lossless does not take --eq; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && unsharp.is_some() {
+            return Err("crop-lossless does not take --unsharp; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && hue.is_some() {
+            return Err("crop-lossless does not take --hue; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && avgblur.is_some() {
+            return Err("crop-lossless does not take --avgblur; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && boxblur.is_some() {
+            return Err("crop-lossless does not take --boxblur; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && negate.is_some() {
+            return Err("crop-lossless does not take --negate; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && edgedetect.is_some() {
+            return Err("crop-lossless does not take --edgedetect; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && sobel.is_some() {
+            return Err("crop-lossless does not take --sobel; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && prewitt.is_some() {
+            return Err("crop-lossless does not take --prewitt; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && roberts.is_some() {
+            return Err("crop-lossless does not take --roberts; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && kirsch.is_some() {
+            return Err("crop-lossless does not take --kirsch; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && scharr.is_some() {
+            return Err("crop-lossless does not take --scharr; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && atadenoise.is_some() {
+            return Err("crop-lossless does not take --atadenoise; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && owdenoise.is_some() {
+            return Err("crop-lossless does not take --owdenoise; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && vaguedenoiser.is_some() {
+            return Err(
+                "crop-lossless does not take --vaguedenoiser; use transcode-lossless".into(),
+            );
+        }
+        if command == "crop-lossless" && nlmeans.is_some() {
+            return Err("crop-lossless does not take --nlmeans; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && bm3d.is_some() {
+            return Err("crop-lossless does not take --bm3d; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && dctdnoiz.is_some() {
+            return Err("crop-lossless does not take --dctdnoiz; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && fftdnoiz.is_some() {
+            return Err("crop-lossless does not take --fftdnoiz; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && smartblur.is_some() {
+            return Err("crop-lossless does not take --smartblur; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && sab.is_some() {
+            return Err("crop-lossless does not take --sab; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && bilateral.is_some() {
+            return Err("crop-lossless does not take --bilateral; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && cas.is_some() {
+            return Err("crop-lossless does not take --cas; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && epx.is_some() {
+            return Err("crop-lossless does not take --epx; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && vignette.is_some() {
+            return Err("crop-lossless does not take --vignette; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && curves.is_some() {
+            return Err("crop-lossless does not take --curves; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && colorbalance.is_some() {
+            return Err(
+                "crop-lossless does not take --colorbalance; use transcode-lossless".into(),
+            );
+        }
+        if command == "crop-lossless" && colorlevels.is_some() {
+            return Err("crop-lossless does not take --colorlevels; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && colorchannelmixer.is_some() {
+            return Err(
+                "crop-lossless does not take --colorchannelmixer; use transcode-lossless".into(),
+            );
+        }
+        if command == "crop-lossless" && deflicker.is_some() {
+            return Err("crop-lossless does not take --deflicker; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && photosensitivity.is_some() {
+            return Err(
+                "crop-lossless does not take --photosensitivity; use transcode-lossless".into(),
+            );
+        }
+        if command == "crop-lossless" && monochrome.is_some() {
+            return Err("crop-lossless does not take --monochrome; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && grayworld.is_some() {
+            return Err("crop-lossless does not take --grayworld; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && drawbox.is_some() {
+            return Err("crop-lossless does not take --drawbox; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && drawgrid.is_some() {
+            return Err("crop-lossless does not take --drawgrid; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && lagfun.is_some() {
+            return Err("crop-lossless does not take --lagfun; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && amplify.is_some() {
+            return Err("crop-lossless does not take --amplify; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && bitplanenoise.is_some() {
+            return Err(
+                "crop-lossless does not take --bitplanenoise; use transcode-lossless".into(),
+            );
+        }
+        if command == "crop-lossless" && deband.is_some() {
+            return Err("crop-lossless does not take --deband; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && gradfun.is_some() {
+            return Err("crop-lossless does not take --gradfun; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && lenscorrection.is_some() {
+            return Err(
+                "crop-lossless does not take --lenscorrection; use transcode-lossless".into(),
+            );
+        }
+        if command == "crop-lossless" && pixelize.is_some() {
+            return Err("crop-lossless does not take --pixelize; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && removegrain.is_some() {
+            return Err("crop-lossless does not take --removegrain; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && yaepblur.is_some() {
+            return Err("crop-lossless does not take --yaepblur; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && vibrance.is_some() {
+            return Err("crop-lossless does not take --vibrance; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && dilation.is_some() {
+            return Err("crop-lossless does not take --dilation; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && erosion.is_some() {
+            return Err("crop-lossless does not take --erosion; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && colorize.is_some() {
+            return Err("crop-lossless does not take --colorize; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && exposure.is_some() {
+            return Err("crop-lossless does not take --exposure; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && chromashift.is_some() {
+            return Err("crop-lossless does not take --chromashift; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && colorcontrast.is_some() {
+            return Err(
+                "crop-lossless does not take --colorcontrast; use transcode-lossless".into(),
+            );
+        }
+        if command == "crop-lossless" && colorcorrect.is_some() {
+            return Err(
+                "crop-lossless does not take --colorcorrect; use transcode-lossless".into(),
+            );
+        }
+        if command == "crop-lossless" && histeq.is_some() {
+            return Err("crop-lossless does not take --histeq; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && shuffleplanes.is_some() {
+            return Err(
+                "crop-lossless does not take --shuffleplanes; use transcode-lossless".into(),
+            );
+        }
+        if command == "crop-lossless" && lutyuv.is_some() {
+            return Err("crop-lossless does not take --lutyuv; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && colorhold.is_some() {
+            return Err("crop-lossless does not take --colorhold; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && fade.is_some() {
+            return Err("crop-lossless does not take --fade; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && perspective.is_some() {
+            return Err("crop-lossless does not take --perspective; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && lumakey.is_some() {
+            return Err("crop-lossless does not take --lumakey; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && chromakey.is_some() {
+            return Err("crop-lossless does not take --chromakey; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && colorkey.is_some() {
+            return Err("crop-lossless does not take --colorkey; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && despill.is_some() {
+            return Err("crop-lossless does not take --despill; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && selectivecolor.is_some() {
+            return Err(
+                "crop-lossless does not take --selectivecolor; use transcode-lossless".into(),
+            );
+        }
+        if command == "crop-lossless" && stereo3d.is_some() {
+            return Err("crop-lossless does not take --stereo3d; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && field.is_some() {
+            return Err("crop-lossless does not take --field; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && hqx.is_some() {
+            return Err("crop-lossless does not take --hqx; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && xbr.is_some() {
+            return Err("crop-lossless does not take --xbr; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && il.is_some() {
+            return Err("crop-lossless does not take --il; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && super2xsai.is_some() {
+            return Err("crop-lossless does not take --super2xsai; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && kerndeint.is_some() {
+            return Err("crop-lossless does not take --kerndeint; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && phase.is_some() {
+            return Err("crop-lossless does not take --phase; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && estdif.is_some() {
+            return Err("crop-lossless does not take --estdif; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && tinterlace.is_some() {
+            return Err("crop-lossless does not take --tinterlace; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && separatefields.is_some() {
+            return Err(
+                "crop-lossless does not take --separatefields; use transcode-lossless".into(),
+            );
+        }
+        if command == "crop-lossless" && weave.is_some() {
+            return Err("crop-lossless does not take --weave; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && doubleweave.is_some() {
+            return Err("crop-lossless does not take --doubleweave; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && framepack.is_some() {
+            return Err("crop-lossless does not take --framepack; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && telecine.is_some() {
+            return Err("crop-lossless does not take --telecine; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && pullup.is_some() {
+            return Err("crop-lossless does not take --pullup; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && decimate.is_some() {
+            return Err("crop-lossless does not take --decimate; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && mpdecimate.is_some() {
+            return Err("crop-lossless does not take --mpdecimate; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && framestep.is_some() {
+            return Err("crop-lossless does not take --framestep; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && tile.is_some() {
+            return Err("crop-lossless does not take --tile; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && untile.is_some() {
+            return Err("crop-lossless does not take --untile; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && shuffleframes.is_some() {
+            return Err(
+                "crop-lossless does not take --shuffleframes; use transcode-lossless".into(),
+            );
+        }
+        if command == "crop-lossless" && reverse.is_some() {
+            return Err("crop-lossless does not take --reverse; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && vloop.is_some() {
+            return Err("crop-lossless does not take --loop; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && thumbnail.is_some() {
+            return Err("crop-lossless does not take --thumbnail; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && freezedetect.is_some() {
+            return Err(
+                "crop-lossless does not take --freezedetect; use transcode-lossless".into(),
+            );
+        }
+        if command == "crop-lossless" && setpts.is_some() {
+            return Err("crop-lossless does not take --setpts; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && select.is_some() {
+            return Err("crop-lossless does not take --select; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && pseudocolor.is_some() {
+            return Err("crop-lossless does not take --pseudocolor; use transcode-lossless".into());
+        }
+        if command == "crop-lossless" && minterpolate.is_some() {
+            return Err(
+                "crop-lossless does not take --minterpolate; use transcode-lossless".into(),
+            );
+        }
+        if command == "crop-lossless" && overlay.is_some() {
+            return Err(
+                "crop-lossless does not take --overlay; use overlay or transcode-lossless".into(),
+            );
+        }
+        let interval = match (from, to) {
+            (None, None) => None,
+            (Some(start), Some(end)) => Some((start, end)),
+            _ => return Err("lossless interval requires both --from and --to".into()),
+        };
+        let transform = fvid_media::LosslessTransform {
+            crop,
+            vertical_flip,
+            horizontal_flip,
+            scale,
+            epx,
+            transpose,
+            rotate,
+            pad,
+            burn_subs: None,
+            overlay: overlay.map(|path| fvid_media::OverlaySpec {
+                path,
+                x: overlay_x,
+                y: overlay_y,
+            }),
+            xfade: None,
+            yadif,
+            bwdif,
+            w3fdif,
+            tblend,
+            tmix,
+            hqdn3d,
+            gblur,
+            eq,
+            unsharp,
+            hue,
+            avgblur,
+            boxblur,
+            negate,
+            edgedetect,
+            sobel,
+            prewitt,
+            roberts,
+            kirsch,
+            scharr,
+            atadenoise,
+            owdenoise,
+            vaguedenoiser,
+            nlmeans,
+            bm3d,
+            dctdnoiz,
+            fftdnoiz,
+            smartblur,
+            sab,
+            bilateral,
+            cas,
+            vignette,
+            curves,
+            colorbalance,
+            colorlevels,
+            colorchannelmixer,
+            deflicker,
+            photosensitivity,
+            monochrome,
+            grayworld,
+            drawbox,
+            drawgrid,
+            lagfun,
+            amplify,
+            bitplanenoise,
+            deband,
+            gradfun,
+            lenscorrection,
+            pixelize,
+            removegrain,
+            yaepblur,
+            vibrance,
+            dilation,
+            erosion,
+            colorize,
+            exposure,
+            chromashift,
+            colorcontrast,
+            colorcorrect,
+            histeq,
+            shuffleplanes,
+            lutyuv,
+            colorhold,
+            fade,
+            perspective,
+            lumakey,
+            chromakey,
+            colorkey,
+            despill,
+            selectivecolor,
+            stereo3d,
+            field,
+            hqx,
+            xbr,
+            il,
+            super2xsai,
+            kerndeint,
+            phase,
+            estdif,
+            tinterlace,
+            separatefields,
+            weave,
+            doubleweave,
+            framepack,
+            telecine,
+            pullup,
+            decimate,
+            mpdecimate,
+            framestep,
+            tile,
+            untile,
+            shuffleframes,
+            reverse,
+            r#loop: vloop,
+            thumbnail,
+            freezedetect,
+            pseudocolor,
+            minterpolate,
+            fps,
+            colorspace,
+            zscale,
+            tonemap,
+            pix_fmt,
+            interval,
+            seek,
+        };
+        let stats = if command == "transcode" {
+            fvid::media::transcode(
+                &paths[0],
+                &paths[1],
+                transform,
+                &options,
+                &fvid_media::EncoderSettings {
+                    name: encoder
+                        .ok_or("transcode requires --encoder; quality is defined by its options")?,
+                    options: encoder_options,
+                },
+            )?
+        } else {
+            fvid::media::transcode_lossless(&paths[0], &paths[1], transform, &options)?
+        };
+        emit_json(quiet, serde_json::to_string_pretty(&stats)?);
+        return Ok(());
+    }
+    if crop.is_some()
+        || scale.is_some()
+        || transpose.is_some()
+        || rotate.is_some()
+        || pad.is_some()
+        || pix_fmt.is_some()
+        || colorspace.is_some()
+        || zscale.is_some()
+        || tonemap.is_some()
+        || yadif.is_some()
+        || bwdif.is_some()
+        || w3fdif.is_some()
+        || tblend.is_some()
+        || tmix.is_some()
+        || hqdn3d.is_some()
+        || gblur.is_some()
+        || eq.is_some()
+        || unsharp.is_some()
+        || hue.is_some()
+        || avgblur.is_some()
+        || boxblur.is_some()
+        || negate.is_some()
+        || edgedetect.is_some()
+        || sobel.is_some()
+        || prewitt.is_some()
+        || roberts.is_some()
+        || kirsch.is_some()
+        || scharr.is_some()
+        || atadenoise.is_some()
+        || owdenoise.is_some()
+        || vaguedenoiser.is_some()
+        || nlmeans.is_some()
+        || bm3d.is_some()
+        || dctdnoiz.is_some()
+        || fftdnoiz.is_some()
+        || smartblur.is_some()
+        || sab.is_some()
+        || bilateral.is_some()
+        || cas.is_some()
+        || epx.is_some()
+        || vignette.is_some()
+        || curves.is_some()
+        || colorbalance.is_some()
+        || colorlevels.is_some()
+        || colorchannelmixer.is_some()
+        || deflicker.is_some()
+        || photosensitivity.is_some()
+        || monochrome.is_some()
+        || grayworld.is_some()
+        || drawbox.is_some()
+        || drawgrid.is_some()
+        || lagfun.is_some()
+        || amplify.is_some()
+        || bitplanenoise.is_some()
+        || deband.is_some()
+        || gradfun.is_some()
+        || lenscorrection.is_some()
+        || pixelize.is_some()
+        || removegrain.is_some()
+        || yaepblur.is_some()
+        || vibrance.is_some()
+        || dilation.is_some()
+        || erosion.is_some()
+        || colorize.is_some()
+        || exposure.is_some()
+        || chromashift.is_some()
+        || colorcontrast.is_some()
+        || colorcorrect.is_some()
+        || histeq.is_some()
+        || shuffleplanes.is_some()
+        || lutyuv.is_some()
+        || colorhold.is_some()
+        || fade.is_some()
+        || perspective.is_some()
+        || lumakey.is_some()
+        || chromakey.is_some()
+        || colorkey.is_some()
+        || despill.is_some()
+        || selectivecolor.is_some()
+        || stereo3d.is_some()
+        || field.is_some()
+        || hqx.is_some()
+        || xbr.is_some()
+        || il.is_some()
+        || super2xsai.is_some()
+        || kerndeint.is_some()
+        || phase.is_some()
+        || estdif.is_some()
+        || tinterlace.is_some()
+        || separatefields.is_some()
+        || weave.is_some()
+        || doubleweave.is_some()
+        || framepack.is_some()
+        || telecine.is_some()
+        || pullup.is_some()
+        || decimate.is_some()
+        || mpdecimate.is_some()
+        || framestep.is_some()
+        || tile.is_some()
+        || untile.is_some()
+        || shuffleframes.is_some()
+        || reverse.is_some()
+        || vloop.is_some()
+        || thumbnail.is_some()
+        || freezedetect.is_some()
+        || setpts.is_some()
+        || select.is_some()
+        || pseudocolor.is_some()
+        || minterpolate.is_some()
+        || fps.is_some()
+        || vertical_flip
+        || horizontal_flip
+        || seek
+    {
+        return Err(
+            "--crop/--hflip/--vflip/--transpose/--rotate/--pad/--scale/--epx/--pix-fmt/--colorspace/--zscale/--tonemap/--yadif/--bwdif/--w3fdif/--tblend/--tmix/--hqdn3d/--gblur/--eq/--unsharp/--hue/--avgblur/--boxblur/--negate/--edgedetect/--sobel/--prewitt/--roberts/--kirsch/--scharr/--atadenoise/--owdenoise/--vaguedenoiser/--nlmeans/--bm3d/--dctdnoiz/--fftdnoiz/--smartblur/--sab/--bilateral/--cas/--vignette/--curves/--colorbalance/--colorlevels/--colorchannelmixer/--deflicker/--photosensitivity/--monochrome/--grayworld/--drawbox/--drawgrid/--lagfun/--amplify/--bitplanenoise/--deband/--gradfun/--lenscorrection/--pixelize/--removegrain/--yaepblur/--vibrance/--dilation/--erosion/--colorize/--exposure/--chromashift/--colorcontrast/--colorcorrect/--histeq/--shuffleplanes/--lutyuv/--colorhold/--fade/--perspective/--lumakey/--chromakey/--colorkey/--despill/--selectivecolor/--stereo3d/--field/--hqx/--xbr/--il/--super2xsai/--kerndeint/--phase/--estdif/--tinterlace/--separatefields/--weave/--doubleweave/--framepack/--telecine/--pullup/--decimate/--mpdecimate/--framestep/--shuffleframes/--reverse/--loop/--thumbnail/--freezedetect/--setpts/--pseudocolor/--minterpolate/--fps/--seek require decode, crop-lossless, transcode-lossless, transcode, or hw-filter"
+                .into(),
+        );
+    }
+    if command == "decode-audio" && paths.len() == 2 {
+        let interval = match (from, to) {
+            (None, None) => None,
+            (Some(start), Some(end)) => Some((start, end)),
+            _ => return Err("decode-audio interval requires both --from and --to".into()),
+        };
+        let stats = fvid::media::decode_audio_transformed(
+            &paths[0],
+            &paths[1],
+            fvid_media::AudioDecodeTransform {
+                interval,
+                sample_rate,
+                channels,
+                volume,
+            },
+            &options,
+        )?;
+        emit_json(quiet, serde_json::to_string_pretty(&stats)?);
+        return Ok(());
+    }
+    if sample_rate.is_some() || channels.is_some() || volume.is_some() {
+        return Err("--rate/--channels/--volume require decode-audio".into());
+    }
+    if command == "loudness" && paths.len() == 1 {
+        let stats = fvid::media::measure_loudness(&paths[0], &options)?;
+        emit_json(quiet, serde_json::to_string_pretty(&stats)?);
+        return Ok(());
+    }
+    if command == "loudnorm" && paths.len() == 2 {
+        if crop.is_some()
+            || scale.is_some()
+            || transpose.is_some()
+            || rotate.is_some()
+            || pad.is_some()
+            || burn_subs.is_some()
+            || overlay.is_some()
+            || colorspace.is_some()
+            || zscale.is_some()
+            || tonemap.is_some()
+            || yadif.is_some()
+            || bwdif.is_some()
+            || w3fdif.is_some()
+            || tblend.is_some()
+            || tmix.is_some()
+            || hqdn3d.is_some()
+            || gblur.is_some()
+            || eq.is_some()
+            || unsharp.is_some()
+            || hue.is_some()
+            || avgblur.is_some()
+            || boxblur.is_some()
+            || negate.is_some()
+            || edgedetect.is_some()
+            || sobel.is_some()
+            || prewitt.is_some()
+            || roberts.is_some()
+            || kirsch.is_some()
+            || scharr.is_some()
+            || atadenoise.is_some()
+            || owdenoise.is_some()
+            || vaguedenoiser.is_some()
+            || nlmeans.is_some()
+            || bm3d.is_some()
+            || dctdnoiz.is_some()
+            || fftdnoiz.is_some()
+            || smartblur.is_some()
+            || sab.is_some()
+            || bilateral.is_some()
+            || cas.is_some()
+            || epx.is_some()
+            || vignette.is_some()
+            || curves.is_some()
+            || colorbalance.is_some()
+            || colorlevels.is_some()
+            || colorchannelmixer.is_some()
+            || deflicker.is_some()
+            || photosensitivity.is_some()
+            || monochrome.is_some()
+            || grayworld.is_some()
+            || drawbox.is_some()
+            || drawgrid.is_some()
+            || lagfun.is_some()
+            || amplify.is_some()
+            || bitplanenoise.is_some()
+            || deband.is_some()
+            || gradfun.is_some()
+            || lenscorrection.is_some()
+            || pixelize.is_some()
+            || removegrain.is_some()
+            || yaepblur.is_some()
+            || vibrance.is_some()
+            || dilation.is_some()
+            || erosion.is_some()
+            || colorize.is_some()
+            || exposure.is_some()
+            || chromashift.is_some()
+            || colorcontrast.is_some()
+            || colorcorrect.is_some()
+            || histeq.is_some()
+            || shuffleplanes.is_some()
+            || lutyuv.is_some()
+            || colorhold.is_some()
+            || fade.is_some()
+            || perspective.is_some()
+            || lumakey.is_some()
+            || chromakey.is_some()
+            || colorkey.is_some()
+            || despill.is_some()
+            || selectivecolor.is_some()
+            || stereo3d.is_some()
+            || field.is_some()
+            || hqx.is_some()
+            || xbr.is_some()
+            || il.is_some()
+            || super2xsai.is_some()
+            || kerndeint.is_some()
+            || phase.is_some()
+            || estdif.is_some()
+            || tinterlace.is_some()
+            || pseudocolor.is_some()
+            || minterpolate.is_some()
+            || fps.is_some()
+            || pix_fmt.is_some()
+            || from.is_some()
+            || to.is_some()
+            || volume.is_some()
+            || sample_rate.is_some()
+            || channels.is_some()
+        {
+            return Err(
+                "loudnorm takes INPUT OUTPUT [--loudnorm-args ARGS] [--dual-pass] [--streams INDEX] only".into(),
+            );
+        }
+        let stats = if loudnorm_dual {
+            fvid_media::apply_loudnorm_dual(
+                &paths[0],
+                &paths[1],
+                loudnorm_args.as_deref(),
+                &options,
+            )?
+        } else {
+            fvid_media::apply_loudnorm(&paths[0], &paths[1], loudnorm_args.as_deref(), &options)?
+        };
+        emit_json(quiet, serde_json::to_string_pretty(&stats)?);
+        return Ok(());
+    }
+    if loudnorm_args.is_some() || loudnorm_dual {
+        return Err("--loudnorm-args/--dual-pass require loudnorm".into());
+    }
+    if command == "convert-subtitles" && paths.len() == 2 {
+        let stats = fvid::media::convert_subtitles_with_controls(
+            &paths[0],
+            &paths[1],
+            &fvid_media::SubtitleConvertOptions {
+                streams: options.streams.clone(),
+                codec: subtitle_codec,
+            },
+            &options,
+        )?;
+        emit_json(quiet, serde_json::to_string_pretty(&stats)?);
+        return Ok(());
+    }
+    if command == "burn-subtitles" && paths.len() == 2 {
+        let subs = burn_subs
+            .as_deref()
+            .ok_or("burn-subtitles requires --subs FILE")?;
+        let stats = fvid_media::burn_subtitles(&paths[0], &paths[1], subs, &options)?;
+        emit_json(quiet, serde_json::to_string_pretty(&stats)?);
+        return Ok(());
+    }
+    if command == "xfade" && paths.len() == 3 {
+        let transition = xfade_transition.as_deref().unwrap_or("fade");
+        let duration = xfade_duration.ok_or("--xfade-duration required")?;
+        let offset = xfade_offset.unwrap_or(0);
+        let stats = fvid_media::xfade_video(
+            &paths[0], &paths[1], &paths[2], transition, duration, offset, &options,
+        )?;
+        emit_json(quiet, serde_json::to_string_pretty(&stats)?);
+        return Ok(());
+    }
+    if command == "xfade" {
+        return Err("xfade requires MAIN OTHER OUTPUT.mkv --xfade-duration SECONDS".into());
+    }
+
+    if xfade_transition.is_some() || xfade_duration.is_some() || xfade_offset.is_some() {
+        return Err("--transition/--xfade-duration/--xfade-offset require xfade".into());
+    }
+    if command == "overlay" && paths.len() == 3 {
+        let stats = fvid_media::overlay_video(
+            &paths[0], &paths[1], &paths[2], overlay_x, overlay_y, &options,
+        )?;
+        emit_json(quiet, serde_json::to_string_pretty(&stats)?);
+        return Ok(());
+    }
+    if burn_subs.is_some() {
+        return Err("--subs requires decode or burn-subtitles".into());
+    }
+    if overlay.is_some() {
+        return Err("--overlay requires decode, overlay, transcode-lossless, or transcode".into());
+    }
+    if command == "trim-pcm" && paths.len() == 2 {
+        let stats = fvid::media::trim_pcm(
+            &paths[0],
+            &paths[1],
+            from.ok_or("--from required")?,
+            to.ok_or("--to required")?,
+            &options,
+        )?;
+        emit_json(quiet, serde_json::to_string_pretty(&stats)?);
+        return Ok(());
+    }
+    if command == "mix-audio" && paths.len() >= 3 {
+        let stats = fvid::media::mix_audio_with_controls(
+            &paths[1..],
+            &paths[0],
+            &fvid_media::MixAudioOptions {
+                duration: mix_duration,
+                normalize: mix_normalize,
+                weights: mix_weights,
+            },
+            &options,
+        )?;
+        emit_json(quiet, serde_json::to_string_pretty(&stats)?);
+        return Ok(());
+    }
+    if command == "merge-audio" && paths.len() == 3 {
+        let stats = fvid::media::merge_audio_with_controls(&paths[1..], &paths[0], &options)?;
+        emit_json(quiet, serde_json::to_string_pretty(&stats)?);
+        return Ok(());
+    }
+    let stats = match command.as_str() {
+        "remux" if paths.len() == 2 && from.is_none() && to.is_none() => {
+            fvid::media::remux(&paths[0], &paths[1], &options)?
+        }
+        "trim" if paths.len() == 2 => fvid::media::trim(
+            &paths[0],
+            &paths[1],
+            from.ok_or("--from required")?,
+            to.ok_or("--to required")?,
+            &options,
+        )?,
+        "concat" if paths.len() >= 3 && from.is_none() && to.is_none() => {
+            fvid::media::concat(&paths[1..], &paths[0], &options)?
+        }
+        _ => return Err(help.into()),
+    };
+    emit_json(quiet, serde_json::to_string_pretty(&stats)?);
+    Ok(())
+}
+
+fn try_native_audio_concat(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    let plan = args.first().map(String::as_str) == Some("plan");
+    let start = usize::from(plan);
+    if args.get(start).map(String::as_str) != Some("concat") {
+        return Ok(false);
+    }
+    let first = start + if plan { 1 } else { 2 };
+    let Some(source) = args.get(first) else {
+        return Ok(false);
+    };
+    let adts = fvid::native_export::is_adts_source(std::path::Path::new(source))?;
+    if !adts && !fvid::native_pcm::is_wave(std::path::Path::new(source))? {
+        return Ok(false);
+    }
+    let mut paths = Vec::new();
+    let mut quiet = false;
+    let mut progress = false;
+    let mut copy_options = fvid::media::CopyOptions::default();
+    let mut limit_flags = std::collections::BTreeSet::new();
+    let mut custom_options = false;
+    let mut options = args[first..].iter();
+    while let Some(arg) = options.next() {
+        match arg.as_str() {
+            "--quiet" | "-q" => quiet = true,
+            "--progress" if !plan => progress = true,
+            "--streams" => {
+                if options.next().map(String::as_str) != Some("0") {
+                    return Err("audio input has only stream 0".into());
+                }
+                copy_options.streams = vec![0];
+            }
+            "--max-packets" | "--max-packet-bytes" | "--max-memory-mib" | "--max-rss-mib" => {
+                if !limit_flags.insert(arg.as_str()) {
+                    return Err("duplicate audio limit".into());
+                }
+                parse_native_audio_limit(
+                    arg,
+                    options.next().ok_or("missing audio limit")?,
+                    &mut copy_options,
+                )?;
+                custom_options = true;
+            }
+            "--metadata" => {
+                let (key, value) = options
+                    .next()
+                    .ok_or("missing metadata")?
+                    .split_once('=')
+                    .ok_or("metadata must be KEY=VALUE")?;
+                copy_options
+                    .metadata_set
+                    .push((key.to_owned(), value.to_owned()));
+                custom_options = true;
+            }
+            "--metadata-delete" => {
+                copy_options
+                    .metadata_delete
+                    .push(options.next().ok_or("missing metadata key")?.clone());
+                custom_options = true;
+            }
+            "--stream-metadata" => {
+                let raw = options.next().ok_or("missing stream metadata")?;
+                let (index, rest) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                let (key, value) = rest
+                    .split_once('=')
+                    .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                copy_options.stream_metadata_set.push((
+                    index.parse()?,
+                    key.to_owned(),
+                    value.to_owned(),
+                ));
+                custom_options = true;
+            }
+            "--stream-metadata-delete" => {
+                let raw = options.next().ok_or("missing stream metadata key")?;
+                let (index, key) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata delete must be INDEX:KEY")?;
+                copy_options
+                    .stream_metadata_delete
+                    .push((index.parse()?, key.to_owned()));
+                custom_options = true;
+            }
+            _ if arg.starts_with('-') => {
+                return Err(format!("unsupported native audio concat option: {arg}").into());
+            }
+            _ => paths.push(std::path::PathBuf::from(arg)),
+        }
+    }
+    if plan {
+        let plan = if custom_options {
+            fvid::media::plan_concat(&paths, &copy_options)?
+        } else if adts {
+            fvid::native_plan::concat_adts(&paths)?
+        } else {
+            fvid::native_plan::concat_wave(&paths)?
+        };
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&plan)?);
+        }
+    } else {
+        let hook = progress.then(|| {
+            fvid::media_control::ProgressHook::new(|event| {
+                eprintln!(
+                    "{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",
+                    event.packets, event.payload_bytes, event.done
+                );
+            })
+        });
+        copy_options.progress = hook.clone();
+        if custom_options {
+            let stats = fvid::media::concat(
+                &paths,
+                std::path::Path::new(&args[start + 1]),
+                &copy_options,
+            )?;
+            if !quiet {
+                println!(
+                    "{{\"packets\":{},\"payload_bytes\":{},\"segments\":{},\"backend\":\"fvid\",\"fvid_payload_copies\":{}}}",
+                    stats.packets, stats.payload_bytes, stats.segments, stats.fvid_payload_copies
+                );
+            }
+            return Ok(true);
+        }
+        if adts {
+            let stats = fvid::native_export::concat_adts_aac(
+                &paths,
+                std::path::Path::new(&args[start + 1]),
+                None,
+                hook.as_ref(),
+            )?;
+            if !quiet {
+                println!(
+                    "{{\"packets\":{},\"payload_bytes\":{},\"segments\":{},\"backend\":\"fvid\",\"fvid_payload_copies\":0}}",
+                    stats.packets,
+                    stats.payload_bytes,
+                    paths.len()
+                );
+            }
+            return Ok(true);
+        }
+        let stats = fvid::native_pcm::concat_wave(
+            &paths,
+            std::path::Path::new(&args[start + 1]),
+            None,
+            hook.as_ref(),
+        )?;
+        if !quiet {
+            println!(
+                "{{\"packets\":{},\"sample_frames\":{},\"payload_bytes\":{},\"segments\":{},\"backend\":\"fvid\",\"fvid_payload_copies\":0}}",
+                stats.packets,
+                stats.sample_frames,
+                stats.payload_bytes,
+                paths.len()
+            );
+        }
+    }
+    Ok(true)
+}
+
+fn try_video_concat(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    let plan = args.first().map(String::as_str) == Some("plan");
+    let command = usize::from(plan);
+    if args.get(command).map(String::as_str) != Some("concat") {
+        return Ok(false);
+    }
+    let matches = if plan {
+        args.windows(2)
+            .any(|s| s[0] == "--output-format" && s[1] == "y4m")
+    } else {
+        args.get(command + 1).is_some_and(|p| {
+            std::path::Path::new(p).extension().and_then(|s| s.to_str()) == Some("y4m")
+        })
+    };
+    if !matches {
+        return Ok(false);
+    }
+    let mut paths = Vec::new();
+    let mut selected = None;
+    let mut quiet = false;
+    let mut report = false;
+    let mut copy_options = fvid::media::CopyOptions::default();
+    let mut limit_flags = std::collections::BTreeSet::new();
+    let mut items = args[command + if plan { 1 } else { 2 }..].iter();
+    while let Some(arg) = items.next() {
+        match arg.as_str() {
+            "--output-format" if plan => {
+                if items.next().map(String::as_str) != Some("y4m") {
+                    return Err("expected y4m output format".into());
+                }
+            }
+            "--streams" => {
+                if selected.is_some() {
+                    return Err("duplicate streams option".into());
+                }
+                selected = Some(items.next().ok_or("missing stream")?.parse::<usize>()?);
+            }
+            "--max-packets" | "--max-packet-bytes" | "--max-rss-mib" => {
+                if !limit_flags.insert(arg.as_str()) {
+                    return Err("duplicate concat limit".into());
+                }
+                parse_native_audio_limit(
+                    arg,
+                    items.next().ok_or("missing concat limit")?,
+                    &mut copy_options,
+                )?;
+            }
+            "--quiet" | "-q" => quiet = true,
+            "--progress" => {
+                if !plan {
+                    report = true;
+                }
+            }
+            _ if arg.starts_with('-') => {
+                return Err(format!("unsupported native video concat option: {arg}").into());
+            }
+            _ => paths.push(std::path::PathBuf::from(arg)),
+        }
+    }
+    copy_options.streams = selected.into_iter().collect();
+    if plan {
+        let plan = fvid::native_plan::concat_y4m_with_options(&paths, &copy_options)?;
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&plan)?);
+        }
+    } else {
+        let hook = report.then(|| {
+            fvid::media_control::ProgressHook::new(|e| {
+                eprintln!(
+                    "{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",
+                    e.packets, e.payload_bytes, e.done
+                )
+            })
+        });
+        copy_options.progress = hook;
+        let stats = fvid::native_export::concat_y4m_with_options(
+            &paths,
+            std::path::Path::new(&args[command + 1]),
+            &copy_options,
+        )?;
+        if !quiet {
+            println!(
+                "{}",
+                serde_json::json!({"packets":stats.packets,"payload_bytes":stats.payload_bytes,"segments":paths.len(),"backend":"fvid","fvid_payload_copies":0})
+            );
+        }
+    }
+    Ok(true)
+}
+
+fn try_video_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    let plan = args.first().map(String::as_str) == Some("plan");
+    let command = usize::from(plan);
+    if args.get(command).map(String::as_str) != Some("trim") {
+        return Ok(false);
+    }
+    let matches = if plan {
+        args.windows(2)
+            .any(|s| s[0] == "--output-format" && s[1] == "y4m")
+    } else {
+        args.get(command + 2).is_some_and(|p| {
+            std::path::Path::new(p).extension().and_then(|s| s.to_str()) == Some("y4m")
+        })
+    };
+    if !matches {
+        return Ok(false);
+    }
+    let source = args.get(command + 1).ok_or("missing input")?;
+    let (mut from, mut to, mut selected) = (None, None, None);
+    let mut quiet = false;
+    let mut report = false;
+    let mut copy_options = fvid::media::CopyOptions::default();
+    let mut limit_flags = std::collections::BTreeSet::new();
+    let mut items = args[command + if plan { 2 } else { 3 }..].iter();
+    while let Some(arg) = items.next() {
+        match arg.as_str() {
+            "--output-format" if plan => {
+                if items.next().map(String::as_str) != Some("y4m") {
+                    return Err("expected y4m output format".into());
+                }
+            }
+            "--from" | "--to" => {
+                let slot = if arg == "--from" { &mut from } else { &mut to };
+                if slot.is_some() {
+                    return Err("duplicate trim boundary".into());
+                }
+                let value = decode_time(items.next().ok_or("missing trim boundary")?)?;
+                if value.subsec_nanos() % 1000 != 0 {
+                    return Err("trim boundary must be representable in microseconds".into());
+                }
+                *slot =
+                    Some(i64::try_from(value.as_micros()).map_err(|_| "trim boundary overflow")?);
+            }
+            "--streams" => {
+                if selected.is_some() {
+                    return Err("duplicate streams option".into());
+                }
+                selected = Some(items.next().ok_or("missing stream")?.parse::<usize>()?);
+            }
+            "--max-packets" | "--max-packet-bytes" | "--max-rss-mib" => {
+                if !limit_flags.insert(arg.as_str()) {
+                    return Err("duplicate trim limit".into());
+                }
+                parse_native_audio_limit(
+                    arg,
+                    items.next().ok_or("missing trim limit")?,
+                    &mut copy_options,
+                )?;
+            }
+            "--quiet" | "-q" => quiet = true,
+            "--progress" => {
+                if !plan {
+                    report = true;
+                }
+            }
+            _ => return Err(format!("unsupported native video trim option: {arg}").into()),
+        }
+    }
+    copy_options.streams = selected.into_iter().collect();
+    let (from, to) = (from.ok_or("--from required")?, to.ok_or("--to required")?);
+    if plan {
+        let plan = fvid::native_plan::trim_y4m_with_options(
+            std::path::Path::new(source),
+            from,
+            to,
+            &copy_options,
+        )?;
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&plan)?);
+        }
+    } else {
+        let hook = report.then(|| {
+            fvid::media_control::ProgressHook::new(|e| {
+                eprintln!(
+                    "{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",
+                    e.packets, e.payload_bytes, e.done
+                )
+            })
+        });
+        copy_options.progress = hook;
+        let stats = fvid::native_export::trim_y4m_with_options(
+            std::path::Path::new(source),
+            std::path::Path::new(&args[command + 2]),
+            from,
+            to,
+            &copy_options,
+        )?;
+        if !quiet {
+            println!(
+                "{}",
+                serde_json::json!({"packets":stats.packets,"payload_bytes":stats.payload_bytes,"segments":1,"backend":"fvid","fvid_payload_copies":0})
+            );
+        }
+    }
+    Ok(true)
+}
+
+fn native_mix(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    let planning = args.first().map(String::as_str) == Some("plan");
+    let command = usize::from(planning);
+    if args.get(command).map(String::as_str) != Some("mix-audio") {
+        return Ok(false);
+    }
+    let mut paths = Vec::<std::path::PathBuf>::new();
+    let mut options = fvid::media_info::MixAudioOptions::default();
+    let mut limits = fvid::media::CopyOptions::default();
+    let mut limit_flags = std::collections::BTreeSet::new();
+    let mut quiet = false;
+    let mut progress = false;
+    let mut iter = args[command + 1..].iter();
+    while let Some(arg) = iter.next() {
+        match arg.as_str() {
+            "-q" | "--quiet" => quiet = true,
+            "--progress" if !planning => progress = true,
+            "--max-packets" | "--max-packet-bytes" | "--max-memory-mib" | "--max-rss-mib" => {
+                if !limit_flags.insert(arg.as_str()) {
+                    return Err("duplicate audio limit".into());
+                }
+                parse_native_audio_limit(
+                    arg,
+                    iter.next().ok_or("missing audio limit")?,
+                    &mut limits,
+                )?;
+            }
+            "--streams" => {
+                if !limit_flags.insert("--streams") {
+                    return Err("duplicate streams option".into());
+                }
+                limits.streams = iter
+                    .next()
+                    .ok_or("missing stream indices")?
+                    .split(',')
+                    .map(str::parse)
+                    .collect::<Result<_, _>>()?;
+            }
+            "--metadata" => {
+                let (key, value) = iter
+                    .next()
+                    .ok_or("missing metadata")?
+                    .split_once('=')
+                    .ok_or("metadata must be KEY=VALUE")?;
+                limits.metadata_set.push((key.to_owned(), value.to_owned()));
+            }
+            "--metadata-delete" => {
+                limits
+                    .metadata_delete
+                    .push(iter.next().ok_or("missing metadata key")?.clone());
+            }
+            "--stream-metadata" => {
+                let raw = iter.next().ok_or("missing stream metadata")?;
+                let (index, rest) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                let (key, value) = rest
+                    .split_once('=')
+                    .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                limits.stream_metadata_set.push((
+                    index.parse()?,
+                    key.to_owned(),
+                    value.to_owned(),
+                ));
+            }
+            "--stream-metadata-delete" => {
+                let raw = iter.next().ok_or("missing stream metadata key")?;
+                let (index, key) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata delete must be INDEX:KEY")?;
+                limits
+                    .stream_metadata_delete
+                    .push((index.parse()?, key.to_owned()));
+            }
+            "--normalize" => options.normalize = true,
+            "--no-normalize" => options.normalize = false,
+            "--duration" => {
+                options.duration = fvid::media_info::MixDuration::parse(
+                    iter.next().ok_or("missing mix duration")?,
+                )?
+            }
+            "--weights" => {
+                options.weights = iter
+                    .next()
+                    .ok_or("missing mix weights")?
+                    .split([',', ' '])
+                    .filter(|s| !s.is_empty())
+                    .map(str::parse::<f32>)
+                    .collect::<Result<Vec<_>, _>>()?;
+                if options.weights.is_empty() {
+                    return Err("mix weights must not be empty".into());
+                }
+            }
+            "--" => {
+                paths.extend(iter.map(std::path::PathBuf::from));
+                break;
+            }
+            s if s.starts_with('-') => return Ok(false),
+            _ => paths.push(arg.into()),
+        }
+    }
+    let start = usize::from(!planning);
+    if paths.len() < start + 2 {
+        return Err("mix-audio requires at least two inputs".into());
+    }
+    limits.progress = progress.then(|| {
+        fvid::media_control::ProgressHook::new(|event| {
+            eprintln!(
+                "{}",
+                serde_json::json!({
+                    "packets": event.packets,
+                    "payload_bytes": event.payload_bytes,
+                    "done": event.done
+                })
+            );
+        })
+    });
+    let sources = &paths[start..];
+    let native_eligible = fvid::native_audio_mix::eligible_with_options(sources, &limits)?;
+    if !native_eligible && !planning && paths[0].extension().and_then(|s| s.to_str()) != Some("wav") {
+        return Ok(false);
+    }
+    if planning {
+        let plan = fvid::media::plan_mix_audio_with_controls(sources, &options, &limits)?;
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&plan)?);
+        }
+    } else {
+        let stats = fvid::media::mix_audio_with_controls(sources, &paths[0], &options, &limits)?;
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&stats)?);
+        }
+    }
+    Ok(true)
+}
+
+fn native_merge(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    let planning = args.first().map(String::as_str) == Some("plan");
+    let at = usize::from(planning);
+    if args.get(at).map(String::as_str) != Some("merge-audio") {
+        return Ok(false);
+    }
+    let mut paths = Vec::<std::path::PathBuf>::new();
+    let mut limits = fvid::media::CopyOptions::default();
+    let mut limit_flags = std::collections::BTreeSet::new();
+    let mut quiet = false;
+    let mut progress = false;
+    let mut iter = args[at + 1..].iter();
+    while let Some(arg) = iter.next() {
+        match arg.as_str() {
+            "-q" | "--quiet" => quiet = true,
+            "--progress" if !planning => progress = true,
+            "--max-packets" | "--max-packet-bytes" | "--max-memory-mib" | "--max-rss-mib" => {
+                if !limit_flags.insert(arg.as_str()) {
+                    return Err("duplicate audio limit".into());
+                }
+                parse_native_audio_limit(
+                    arg,
+                    iter.next().ok_or("missing audio limit")?,
+                    &mut limits,
+                )?;
+            }
+            "--streams" => {
+                if !limit_flags.insert("--streams") {
+                    return Err("duplicate streams option".into());
+                }
+                limits.streams = iter
+                    .next()
+                    .ok_or("missing stream indices")?
+                    .split(',')
+                    .map(str::parse)
+                    .collect::<Result<_, _>>()?;
+            }
+            "--metadata" => {
+                let (key, value) = iter
+                    .next()
+                    .ok_or("missing metadata")?
+                    .split_once('=')
+                    .ok_or("metadata must be KEY=VALUE")?;
+                limits.metadata_set.push((key.to_owned(), value.to_owned()));
+            }
+            "--metadata-delete" => {
+                limits
+                    .metadata_delete
+                    .push(iter.next().ok_or("missing metadata key")?.clone());
+            }
+            "--stream-metadata" => {
+                let raw = iter.next().ok_or("missing stream metadata")?;
+                let (index, rest) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                let (key, value) = rest
+                    .split_once('=')
+                    .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                limits.stream_metadata_set.push((
+                    index.parse()?,
+                    key.to_owned(),
+                    value.to_owned(),
+                ));
+            }
+            "--stream-metadata-delete" => {
+                let raw = iter.next().ok_or("missing stream metadata key")?;
+                let (index, key) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata delete must be INDEX:KEY")?;
+                limits
+                    .stream_metadata_delete
+                    .push((index.parse()?, key.to_owned()));
+            }
+            "--" => {
+                paths.extend(iter.map(std::path::PathBuf::from));
+                break;
+            }
+            s if s.starts_with('-') => return Ok(false),
+            _ => paths.push(arg.into()),
+        }
+    }
+    let start = usize::from(!planning);
+    if paths.len() != start + 2 {
+        return Err("merge-audio requires exactly two inputs".into());
+    }
+    limits.progress = progress.then(|| {
+        fvid::media_control::ProgressHook::new(|event| {
+            eprintln!(
+                "{}",
+                serde_json::json!({
+                    "packets": event.packets,
+                    "payload_bytes": event.payload_bytes,
+                    "done": event.done
+                })
+            );
+        })
+    });
+    let sources = &paths[start..];
+    let native_eligible = fvid::native_audio_mix::eligible_with_options(sources, &limits)?;
+    if !native_eligible && !planning && paths[0].extension().and_then(|s| s.to_str()) != Some("wav") {
+        return Ok(false);
+    }
+    if planning {
+        let plan = fvid::media::plan_merge_audio_with_controls(sources, &limits)?;
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&plan)?);
+        }
+    } else {
+        let stats = fvid::media::merge_audio_with_controls(sources, &paths[0], &limits)?;
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&stats)?);
+        }
+    }
+    Ok(true)
+}
+
+fn owned_loudness_weights(
+    source: &std::path::Path,
+    selected: Option<usize>,
+    weights: Option<Vec<f64>>,
+) -> Result<Vec<f64>, Box<dyn std::error::Error>> {
+    match weights {
+        Some(weights) => Ok(weights),
+        None => Ok(fvid::native_pcm::loudness_channel_weights(
+            source, selected,
+        )?),
+    }
+}
+
+fn try_mp4_matroska_concat(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    let plan = args.first().map(String::as_str) == Some("plan");
+    let command = usize::from(plan);
+    if args.get(command).map(String::as_str) != Some("concat") {
+        return Ok(false);
+    }
+    let first = command + if plan { 1 } else { 2 };
+    if args.len() < first + 2 {
+        return Ok(false);
+    }
+    if !plan
+        && !args.get(command + 1).is_some_and(|p| {
+            matches!(
+                std::path::Path::new(p).extension().and_then(|s| s.to_str()),
+                Some("mkv" | "mka")
+            )
+        })
+    {
+        return Ok(false);
+    }
+    let mut paths = Vec::new();
+    let mut quiet = false;
+    let mut progress = false;
+    let mut output_format = "mkv";
+    let mut explicit_output_format = false;
+    let mut copy_options = fvid::media::CopyOptions::default();
+    let mut limit_flags = std::collections::BTreeSet::new();
+    let mut items = args[first..].iter();
+    while let Some(arg) = items.next() {
+        match arg.as_str() {
+            "--quiet" | "-q" => quiet = true,
+            "--progress" if !plan => progress = true,
+            "--output-format" if plan => {
+                explicit_output_format = true;
+                output_format=items.next().map(String::as_str).ok_or("missing concat output format")?;
+                if !matches!(
+                    Some(output_format),
+                    Some("matroska" | "mkv" | "mka")
+                ) {
+                    return Ok(false);
+                }
+            }
+            "--max-packets" | "--max-packet-bytes" | "--max-memory-mib" | "--max-rss-mib" => {
+                if !limit_flags.insert(arg.as_str()) {
+                    return Err("duplicate concat limit".into());
+                }
+                parse_native_audio_limit(
+                    arg,
+                    items.next().ok_or("missing concat limit")?,
+                    &mut copy_options,
+                )?;
+            }
+            "--streams" => {
+                if !limit_flags.insert("--streams") {
+                    return Err("duplicate streams option".into());
+                }
+                copy_options.streams = items
+                    .next()
+                    .ok_or("missing stream indices")?
+                    .split(',')
+                    .map(str::parse)
+                    .collect::<Result<_, _>>()?;
+            }
+            "--metadata" => {
+                let (key, value) = items
+                    .next()
+                    .ok_or("missing metadata")?
+                    .split_once('=')
+                    .ok_or("metadata must be KEY=VALUE")?;
+                copy_options
+                    .metadata_set
+                    .push((key.to_owned(), value.to_owned()));
+            }
+            "--metadata-delete" => {
+                copy_options
+                    .metadata_delete
+                    .push(items.next().ok_or("missing metadata key")?.clone());
+            }
+            "--stream-metadata" => {
+                let raw = items.next().ok_or("missing stream metadata")?;
+                let (index, rest) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                let (key, value) = rest
+                    .split_once('=')
+                    .ok_or("stream metadata must be INDEX:KEY=VALUE")?;
+                copy_options.stream_metadata_set.push((
+                    index.parse()?,
+                    key.to_owned(),
+                    value.to_owned(),
+                ));
+            }
+            "--stream-metadata-delete" => {
+                let raw = items.next().ok_or("missing stream metadata key")?;
+                let (index, key) = raw
+                    .split_once(':')
+                    .ok_or("stream metadata delete must be INDEX:KEY")?;
+                copy_options
+                    .stream_metadata_delete
+                    .push((index.parse()?, key.to_owned()));
+            }
+            _ if arg.starts_with('-') => return Ok(false),
+            _ => paths.push(std::path::PathBuf::from(arg)),
+        }
+    }
+    if paths.len() < 2 {
+        return Ok(false);
+    }
+    if plan && !explicit_output_format {
+        let mut all_wave = true;
+        let mut all_adts = true;
+        for source in &paths {
+            all_wave &= fvid::native_pcm::is_wave(source)?;
+            all_adts &= fvid::native_export::is_adts_source(source)?;
+        }
+        if all_wave || all_adts {
+            // Let homogeneous WAVE/ADTS use the same copy plan as their
+            // default execution route rather than a decoded PCM plan.
+            return Ok(false);
+        }
+    }
+    if plan {
+        let Some(result) = fvid::native_plan::concat_matroska_to_with_options(
+            &paths,
+            std::path::Path::new(if output_format=="mka" {"output.mka"} else {"output.mkv"}),
+            &copy_options,
+        )? else {
+            return Ok(false);
+        };
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&result)?);
+        }
+    } else {
+        let hook = progress.then(||fvid::media_control::ProgressHook::new(|event| {
+            eprintln!("{}",serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
+        }));
+        copy_options.progress = hook;
+        let Some(stats) = fvid::native_export::try_concat_mp4_matroska_with_options(
+            &paths,
+            std::path::Path::new(&args[command + 1]),
+            &copy_options,
+        )?
+        else {
+            return Ok(false);
+        };
+        if !quiet {
+            println!(
+                "{}",
+                serde_json::json!({"packets":stats.packets,"payload_bytes":stats.payload_bytes,"segments":paths.len(),"backend":"fvid","fvid_payload_copies":0})
+            );
+        }
+    }
+    Ok(true)
+}
+
+fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
+    let planning=args.first().map(String::as_str)==Some("plan");
+    let command=usize::from(planning);
+    let operation=args.get(command).map(String::as_str);
+    if !matches!(operation,Some("overlay"|"transcode-lossless"|"transcode"|"decode")) {return Ok(false);}
+    let (mut from,mut to)=(None,None);
+    let mut paths=Vec::<std::path::PathBuf>::new();let mut foreground=None;
+    let (mut x,mut y)=(0i64,0i64);let (mut quiet,mut report)=(false,false);
+    let mut processing=Vec::<String>::new();
+    let mut copy_options=fvid::media::CopyOptions::default();
+    let mut custom_policy=false;
+    let mut limit_flags=std::collections::BTreeSet::new();
+    let mut items=args[command+1..].iter();
+    while let Some(item)=items.next() {
+        match item.as_str() {
+            "--overlay-x"=>x=items.next().ok_or("missing overlay-x")?.parse()?,
+            "--overlay-y"=>y=items.next().ok_or("missing overlay-y")?.parse()?,
+            "--overlay"=>foreground=Some(std::path::PathBuf::from(items.next().ok_or("missing overlay path")?)),
+            "--encoder" if operation==Some("transcode")=> {
+                if items.next().map(String::as_str)!=Some("ffv1") {return Ok(false);}
+            },
+            "--hflip"|"--vflip"=>processing.push(item.clone()),
+            "--crop"|"--scale"|"--pad"|"--transpose"|"--unsharp"|"--eq"|"--hue"|"--colorize"|"--monochrome"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"|"--lutyuv"|"--colorhold"|"--colorcontrast"|"--vibrance"|"--colorlevels"|"--colorchannelmixer"|"--fade"|"--exposure"|"--colorbalance"|"--colorcorrect"|"--cas"|"--grayworld"=> {
+                processing.push(item.clone());processing.push(items.next().ok_or("missing overlay processing value")?.clone());
+            },
+            "--from"|"--to" if operation==Some("decode")=> {
+                let slot=if item=="--from" {&mut from} else {&mut to};
+                if slot.is_some() {return Err("duplicate decode boundary".into());}
+                *slot=Some(decode_time(items.next().ok_or("missing decode boundary")?)?);
+            },
+            "--max-packets"|"--max-packet-bytes"|"--max-rss-mib" if operation!=Some("decode")=> {
+                if !limit_flags.insert(item.as_str()) {return Err("duplicate overlay limit".into());}
+                parse_native_audio_limit(item,items.next().ok_or("missing overlay limit")?,&mut copy_options)?;
+                custom_policy=true;
+            },
+            "--streams" if operation!=Some("decode")=> {
+                if !limit_flags.insert(item.as_str()) {return Err("duplicate streams option".into());}
+                copy_options.streams=items.next().ok_or("missing stream selection")?.split(',').map(str::parse::<usize>).collect::<Result<Vec<_>,_>>()?;
+                custom_policy=true;
+            },
+            "--metadata" if operation!=Some("decode")=> {
+                let (key,value)=items.next().ok_or("missing metadata")?.split_once('=').ok_or("metadata requires KEY=VALUE")?;
+                copy_options.metadata_set.push((key.to_owned(),value.to_owned()));
+                custom_policy=true;
+            },
+            "--metadata-delete" if operation!=Some("decode")=> {
+                copy_options.metadata_delete.push(items.next().ok_or("missing metadata key")?.clone());
+                custom_policy=true;
+            },
+            "--stream-metadata"|"--stream-metadata-delete" if operation!=Some("decode")=> {
+                let (index,text)=items.next().ok_or("missing stream metadata")?.split_once(':').ok_or("stream metadata requires INDEX:KEY")?;
+                let index=index.parse()?;
+                if item=="--stream-metadata" {
+                    let (key,value)=text.split_once('=').ok_or("stream metadata requires INDEX:KEY=VALUE")?;
+                    copy_options.stream_metadata_set.push((index,key.to_owned(),value.to_owned()));
+                } else {
+                    copy_options.stream_metadata_delete.push((index,text.to_owned()));
+                }
+                custom_policy=true;
+            },
+            "--quiet"|"-q"=>quiet=true,
+            "--progress"=>{if !planning {report=true;}},
+            "--"=>{paths.extend(items.map(std::path::PathBuf::from));break;},
+            _ if item.starts_with('-')=>return Ok(false),
+            _=>paths.push(item.into()),
+        }
+    }
+    if operation!=Some("overlay") && foreground.is_none() {return Ok(false);}
+    if operation==Some("decode") {
+        if report {return Ok(false);}
+        let ([source],Some(overlay))=(paths.as_slice(),foreground.as_deref()) else {return Err("decode overlay requires MAIN --overlay FOREGROUND".into());};
+        let mut filter_args=vec!["decode".to_owned(),source.to_string_lossy().into_owned()];filter_args.extend(processing);
+        let (filter_args,geometry)=geometry_decode_args(&filter_args)?;
+        let (remaining,mut filters)=pixel_decode_args(&filter_args)?;
+        filters.canonicalize_option_order();
+        if remaining.len()!=2 {return Ok(false);}
+        let interval=match (from,to) {
+            (None,None)=>None,
+            (Some(from),Some(to)) if from<to=>Some((from,to)),
+            _=>return Err("decode interval requires both --from and --to with from < to".into()),
+        };
+        let spec=fvid::media_info::OverlaySpec {path:overlay.to_owned(),x:i32::try_from(x)?,y:i32::try_from(y)?};
+        if planning {
+            let mut plan=fvid::native_plan::decode_overlay(source,overlay,x,y)?;
+            let mut index=1;
+            if !geometry.is_identity() {
+                plan.steps.insert(index,fvid::media_info::PlanStep {action:"geometry".into(),detail:format!("main crop {:?}, hflip {}, vflip {}, transpose {:?}, pad {:?}, scale {:?}",geometry.crop,geometry.horizontal_flip,geometry.vertical_flip,geometry.transpose,geometry.pad,geometry.scale)});index+=1;
+            }
+            if !filters.is_empty() {plan.steps.insert(index+1,fvid::media_info::PlanStep {action:"filter".into(),detail:"owned pixel filters in media option order after compositing".into()});}
+            if let Some((from,to))=interval {plan.notes.push(format!("count presentation starts in [{from:?}, {to:?}); origins remain file-relative"));}
+            if !quiet {println!("{}",serde_json::to_string_pretty(&plan)?);}
+        } else {
+            let stats=fvid::native_media::decode_video_pipeline_overlay(source,interval,&geometry,&filters,Some(&spec))?;
+            if !quiet {println!("{}",serde_json::to_string_pretty(&stats)?);}
+        }
+        return Ok(true);
+    }
+    let (source,overlay,destination)=if planning {
+        match (paths.as_slice(),foreground.as_deref()) {
+            ([source,overlay],None)=>(source.as_path(),overlay.as_path(),None),
+            ([source],Some(overlay))=>(source.as_path(),overlay,None),
+            _=>return Err("plan overlay requires MAIN FOREGROUND or MAIN --overlay FOREGROUND".into()),
+        }
+    } else {
+        match (paths.as_slice(),foreground.as_deref()) {
+            ([source,overlay,destination],None)=>(source.as_path(),overlay.as_path(),Some(destination.as_path())),
+            ([source,destination],Some(overlay))=>(source.as_path(),overlay,Some(destination.as_path())),
+            _=>return Err("overlay requires MAIN FOREGROUND OUTPUT.mkv".into()),
+        }
+    };
+    if custom_policy {
+        let hook=report.then(||fvid::media_control::ProgressHook::new(|event|{
+            eprintln!("{}",serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
+        }));
+        copy_options.progress=hook;
+        let x32=i32::try_from(x)?;
+        let y32=i32::try_from(y)?;
+        if !processing.is_empty() {
+            let mut lossless_args = if planning {
+                vec![
+                    "plan".to_owned(),
+                    "transcode-lossless".to_owned(),
+                    source.to_string_lossy().into_owned(),
+                ]
+            } else {
+                vec![
+                    "transcode-lossless".to_owned(),
+                    source.to_string_lossy().into_owned(),
+                    destination.unwrap().to_string_lossy().into_owned(),
+                ]
+            };
+            lossless_args.push("--overlay".to_owned());
+            lossless_args.push(overlay.to_string_lossy().into_owned());
+            lossless_args.push("--overlay-x".to_owned());
+            lossless_args.push(x32.to_string());
+            lossless_args.push("--overlay-y".to_owned());
+            lossless_args.push(y32.to_string());
+            lossless_args.extend(processing);
+            if !copy_options.streams.is_empty() {
+                lossless_args.push("--streams".to_owned());
+                lossless_args.push(
+                    copy_options
+                        .streams
+                        .iter()
+                        .map(usize::to_string)
+                        .collect::<Vec<_>>()
+                        .join(","),
+                );
+            }
+            if let Some(limit) = copy_options.max_packets {
+                lossless_args.push("--max-packets".to_owned());
+                lossless_args.push(limit.to_string());
+            }
+            if copy_options.max_packet_bytes != fvid::media::CopyOptions::default().max_packet_bytes {
+                lossless_args.push("--max-packet-bytes".to_owned());
+                lossless_args.push(copy_options.max_packet_bytes.to_string());
+            }
+            if let Some(rss) = copy_options.max_rss_bytes {
+                lossless_args.push("--max-rss-mib".to_owned());
+                lossless_args.push((rss >> 20).max(1).to_string());
+            }
+            for (k, v) in &copy_options.metadata_set {
+                lossless_args.push("--metadata".to_owned());
+                lossless_args.push(format!("{k}={v}"));
+            }
+            for k in &copy_options.metadata_delete {
+                lossless_args.push("--metadata-delete".to_owned());
+                lossless_args.push(k.clone());
+            }
+            for (idx, k, v) in &copy_options.stream_metadata_set {
+                lossless_args.push("--stream-metadata".to_owned());
+                lossless_args.push(format!("{idx}:{k}={v}"));
+            }
+            for (idx, k) in &copy_options.stream_metadata_delete {
+                lossless_args.push("--stream-metadata-delete".to_owned());
+                lossless_args.push(format!("{idx}:{k}"));
+            }
+            if quiet {
+                lossless_args.push("--quiet".to_owned());
+            }
+            if report && !planning {
+                lossless_args.push("--progress".to_owned());
+            }
+            return owned_lossless_command_with_name(&lossless_args, operation == Some("overlay"));
+        }
+        if planning {
+            let mut plan=fvid::media::plan_overlay(source,overlay,x32,y32,&copy_options)?;
+            if operation!=Some("overlay") {plan.command="transcode-lossless".into();}
+            if !quiet {println!("{}",serde_json::to_string_pretty(&plan)?);}
+        } else {
+            let stats=fvid::media::overlay_video(source,overlay,destination.unwrap(),x32,y32,&copy_options)?;
+            if !quiet {println!("{}",serde_json::to_string_pretty(&stats)?);}
+        }
+        return Ok(true);
+    }
+    if !fvid::native_export::overlay_eligible(source)? {return Ok(false);}
+    let mut filter_args=vec!["decode".to_owned(),source.to_string_lossy().into_owned()];filter_args.extend(processing.clone());
+    let (filter_args,geometry)=geometry_decode_args(&filter_args)?;
+    let (remaining,mut filters)=pixel_decode_args(&filter_args)?;
+    filters.canonicalize_option_order();
+    if remaining.len()!=2 {return Ok(false);}
+    if planning {
+        let mut plan=fvid::native_plan::overlay(source,overlay,x,y)?;
+        let mut index=1;
+        if !geometry.is_identity() {
+            plan.steps.insert(index,fvid::media_info::PlanStep {action:"geometry".into(),detail:format!("main crop {:?}, hflip {}, vflip {}, transpose {:?}, pad {:?}, scale {:?}",geometry.crop,geometry.horizontal_flip,geometry.vertical_flip,geometry.transpose,geometry.pad,geometry.scale)});index+=1;
+        }
+        if !filters.is_empty() {plan.steps.insert(index+1,fvid::media_info::PlanStep {action:"filter".into(),detail:format!("owned pixel filters in media option order after compositing; request {}",processing.join(" "))});}
+        if operation!=Some("overlay") {plan.command="transcode-lossless".into();}
+        if !quiet {println!("{}",serde_json::to_string_pretty(&plan)?);}
+    } else {
+        let hook=report.then(||fvid::media_control::ProgressHook::new(|event|{
+            eprintln!("{}",serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
+        }));
+        let stats=fvid::native_export::overlay_video_transformed(source,overlay,destination.unwrap(),x,y,None,hook.as_ref(),&geometry,&filters)?;
+        if !quiet {println!("{}",serde_json::to_string_pretty(&stats)?);}
+    }
+    Ok(true)
+}
+
+
+fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    owned_lossless_command_with_name(args, false)
+}
+
+fn owned_lossless_command_with_name(
+    args: &[String],
+    force_overlay_command: bool,
+) -> Result<bool, Box<dyn std::error::Error>> {
+    let planning = args.first().map(String::as_str) == Some("plan");
+    let command = usize::from(planning);
+    let op = args.get(command).map(String::as_str);
+    let valid_op = matches!(op, Some("transcode-lossless" | "crop-lossless"));
+    if !valid_op || args.len() < 3 {
+        return Ok(false);
+    }
+    let is_crop_lossless = op == Some("crop-lossless");
+    let mut quiet = false;
+    let mut report = false;
+    let mut policy = fvid::media_control::CopyOptions::default();
+    let mut custom_policy = false;
+    let (mut from, mut to) = (None, None);
+    let mut transform = fvid::media_info::LosslessTransform::default();
+    let mut overlay_path = None;
+    let (mut overlay_x, mut overlay_y) = (0i32, 0i32);
+    let mut options = args[3..].iter();
+    let mut seen = std::collections::BTreeSet::new();
+    while let Some(option) = options.next() {
+        let key_option = if option == "-q" { "--quiet" } else { option.as_str() };
+        if !matches!(
+            key_option,
+            "--metadata" | "--metadata-delete" | "--stream-metadata" | "--stream-metadata-delete"
+        ) && !seen.insert(key_option)
+        {
+            return Err(format!("duplicate option: {option}").into());
+        }
+        match option.as_str() {
+            "--stream-metadata" | "--stream-metadata-delete" => {
+                let (index, text) = options
+                    .next()
+                    .ok_or("missing stream metadata")?
+                    .split_once(':')
+                    .ok_or("stream metadata requires INDEX:KEY")?;
+                let index = index.parse()?;
+                if option == "--stream-metadata" {
+                    let (key, value) = text
+                        .split_once('=')
+                        .ok_or("stream metadata requires INDEX:KEY=VALUE")?;
+                    policy
+                        .stream_metadata_set
+                        .push((index, key.to_owned(), value.to_owned()));
+                } else {
+                    policy.stream_metadata_delete.push((index, text.to_owned()));
+                }
+                custom_policy = true;
+                continue;
+            }
+            "--metadata" => {
+                let (key, value) = options
+                    .next()
+                    .ok_or("missing metadata")?
+                    .split_once('=')
+                    .ok_or("metadata requires KEY=VALUE")?;
+                policy.metadata_set.push((key.to_owned(), value.to_owned()));
+                custom_policy = true;
+                continue;
+            }
+            "--metadata-delete" => {
+                policy
+                    .metadata_delete
+                    .push(options.next().ok_or("missing metadata key")?.clone());
+                custom_policy = true;
+                continue;
+            }
+            "--streams" => {
+                policy.streams = options
+                    .next()
+                    .ok_or("missing stream selection")?
+                    .split(',')
+                    .map(str::parse::<usize>)
+                    .collect::<Result<Vec<_>, _>>()?;
+                custom_policy = true;
+                continue;
+            }
+            "--max-packets" => {
+                policy.max_packets = Some(options.next().ok_or("missing packet limit")?.parse()?);
+                custom_policy = true;
+                continue;
+            }
+            "--max-packet-bytes" => {
+                let limit = options.next().ok_or("missing packet byte limit")?.parse()?;
+                if limit == 0 {
+                    return Err("packet byte limit must be positive".into());
+                }
+                policy.max_packet_bytes = limit;
+                custom_policy = true;
+                continue;
+            }
+            "--max-rss-mib" => {
+                policy.max_rss_bytes = Some(fvid_media::parse_max_rss_mib(
+                    options.next().ok_or("missing RSS limit")?,
+                )?);
+                custom_policy = true;
+                continue;
+            }
+            "--overlay" => {
+                if is_crop_lossless {
+                    return Err("crop-lossless does not take --overlay; use overlay or transcode-lossless".into());
+                }
+                overlay_path = Some(std::path::PathBuf::from(
+                    options.next().ok_or("missing overlay path")?,
+                ));
+                continue;
+            }
+            "--overlay-x" => {
+                overlay_x = options.next().ok_or("missing overlay-x")?.parse()?;
+                continue;
+            }
+            "--overlay-y" => {
+                overlay_y = options.next().ok_or("missing overlay-y")?.parse()?;
+                continue;
+            }
+            "--from" | "--to" => {
+                let value = fvid::media_info::parse_time(
+                    options.next().ok_or("missing interval boundary")?,
+                )?;
+                if option == "--from" {
+                    from = Some(value);
+                } else {
+                    to = Some(value);
+                }
+                continue;
+            }
+            "--quiet" | "-q" => {
+                quiet = true;
+                continue;
+            }
+            "--progress" => {
+                if !planning {
+                    report = true;
+                }
+                continue;
+            }
+            "--hflip" => {
+                transform.horizontal_flip = true;
+                continue;
+            }
+            "--vflip" => {
+                transform.vertical_flip = true;
+                continue;
+            }
+            "--rotate" => {
+                if is_crop_lossless {
+                    return Err("crop-lossless does not take --rotate; use transcode-lossless".into());
+                }
+                if transform.rotate.is_some() { return Err("duplicate rotate".into()); }
+                transform.rotate = Some(fvid::media_info::RotateAngle::parse(options.next().ok_or("missing rotate degrees")?)?);
+                continue;
+            }
+            "--transpose" => {
+                if is_crop_lossless {
+                    return Err("crop-lossless does not take --transpose; use transcode-lossless".into());
+                }
+                transform.transpose = Some(fvid::media_info::TransposeMode::parse(
+                    options.next().ok_or("missing transpose mode")?,
+                )?);
+                continue;
+            }
+            "--crop" | "--scale" | "--pad" => {
+                if is_crop_lossless && option != "--crop" {
+                    return Err(format!("crop-lossless does not take {option}; use transcode-lossless").into());
+                }
+                let fields = options
+                    .next()
+                    .ok_or("missing geometry value")?
+                    .split(':')
+                    .map(str::parse::<usize>)
+                    .collect::<Result<Vec<_>, _>>()?;
+                match option.as_str() {
+                    "--crop" => {
+                        let [x, y, width, height]: [usize; 4] = fields
+                            .try_into()
+                            .map_err(|_| "crop requires X:Y:WIDTH:HEIGHT")?;
+                        transform.crop = Some(fvid::media_info::CropRect {
+                            x,
+                            y,
+                            width,
+                            height,
+                        });
+                    }
+                    "--scale" => {
+                        let [width, height]: [usize; 2] = fields
+                            .try_into()
+                            .map_err(|_| "scale requires WIDTH:HEIGHT")?;
+                        transform.scale = Some(fvid::media_info::ScaleSize {
+                            width: width.try_into()?,
+                            height: height.try_into()?,
+                        });
+                    }
+                    _ => {
+                        let [width, height, x, y]: [usize; 4] = fields
+                            .try_into()
+                            .map_err(|_| "pad requires WIDTH:HEIGHT:X:Y")?;
+                        transform.pad = Some(fvid::media_info::PadRect {
+                            width: width.try_into()?,
+                            height: height.try_into()?,
+                            x: x.try_into()?,
+                            y: y.try_into()?,
+                        });
+                    }
+                }
+                continue;
+            }
+            _ => {}
+        }
+        if is_crop_lossless {
+            return Err("crop-lossless does not take pixel filters; use transcode-lossless".into());
+        }
+        let slot = match option.as_str() {
+            "--framestep" => &mut transform.framestep,
+            "--reverse" => &mut transform.reverse,
+            "--shuffleframes" => &mut transform.shuffleframes,
+            "--eq" => &mut transform.eq,
+            "--unsharp" => &mut transform.unsharp,
+            "--hue" => &mut transform.hue,
+            "--colorize" => &mut transform.colorize,
+            "--monochrome" => &mut transform.monochrome,
+            "--lutyuv" => &mut transform.lutyuv,
+            "--colorhold" => &mut transform.colorhold,
+            "--colorcontrast" => &mut transform.colorcontrast,
+            "--vibrance" => &mut transform.vibrance,
+            "--colorlevels" => &mut transform.colorlevels,
+            "--colorchannelmixer" => &mut transform.colorchannelmixer,
+            "--exposure" => &mut transform.exposure,
+            "--sab" => {
+                if transform.sab.is_some() {return Err("duplicate sab".into());}
+                &mut transform.sab
+            },
+            "--bitplanenoise" => {
+                if transform.bitplanenoise.is_some() {return Err("duplicate bitplanenoise".into());}
+                &mut transform.bitplanenoise
+            },
+            "--deband" => {
+                if transform.deband.is_some() {return Err("duplicate deband".into());}
+                &mut transform.deband
+            },
+            "--perspective" => {
+                if transform.perspective.is_some() {return Err("duplicate perspective".into());}
+                &mut transform.perspective
+            },
+            "--gradfun" => {
+                if transform.gradfun.is_some() {return Err("duplicate gradfun".into());}
+                &mut transform.gradfun
+            },
+            "--lenscorrection" => {
+                if transform.lenscorrection.is_some() {return Err("duplicate lenscorrection".into());}
+                &mut transform.lenscorrection
+            },
+            "--drawbox" => {
+                if transform.drawbox.is_some() {return Err("duplicate drawbox".into());}
+                &mut transform.drawbox
+            },
+            "--drawgrid" => {
+                if transform.drawgrid.is_some() {return Err("duplicate drawgrid".into());}
+                &mut transform.drawgrid
+            },
+            "--removegrain" => {
+                if transform.removegrain.is_some() {return Err("duplicate removegrain".into());}
+                &mut transform.removegrain
+            },
+            "--yaepblur" => {
+                if transform.yaepblur.is_some() {return Err("duplicate yaepblur".into());}
+                &mut transform.yaepblur
+            },
+            "--smartblur" => {
+                if transform.smartblur.is_some() {return Err("duplicate smartblur".into());}
+                &mut transform.smartblur
+            },
+            "--vignette" => {
+                if transform.vignette.is_some() {return Err("duplicate vignette".into());}
+                &mut transform.vignette
+            },
+            "--colorbalance" => &mut transform.colorbalance,
+            "--colorcorrect" => &mut transform.colorcorrect,
+            "--cas" => &mut transform.cas,
+            "--grayworld" => &mut transform.grayworld,
+            "--gblur" => &mut transform.gblur,
+            "--bilateral" => &mut transform.bilateral,
+            "--avgblur" => &mut transform.avgblur,
+            "--boxblur" => &mut transform.boxblur,
+            "--negate" => &mut transform.negate,
+            "--sobel" => &mut transform.sobel,
+            "--prewitt" => &mut transform.prewitt,
+            "--roberts" => &mut transform.roberts,
+            "--kirsch" => &mut transform.kirsch,
+            "--scharr" => &mut transform.scharr,
+            "--pixelize" => &mut transform.pixelize,
+            "--dilation" => &mut transform.dilation,
+            "--erosion" => &mut transform.erosion,
+            "--chromashift" => &mut transform.chromashift,
+            "--shuffleplanes" => &mut transform.shuffleplanes,
+            _ => return Ok(false),
+        };
+        *slot = Some(options.next().ok_or("missing filter parameters")?.clone());
+    }
+    if is_crop_lossless && transform.crop.is_none() {
+        return Err("--crop required".into());
+    }
+    transform.overlay = overlay_path.map(|path| fvid::media_info::OverlaySpec {
+        path,
+        x: overlay_x,
+        y: overlay_y,
+    });
+    transform.interval = match (from, to) {
+        (None, None) => None,
+        (Some(from), Some(to)) if from >= 0 && from < to => Some((from, to)),
+        _ => {
+            return Err(
+                "lossless interval requires both --from and --to with 0 <= from < to".into(),
+            )
+        }
+    };
+    let source = std::path::Path::new(&args[command + 1]);
+    if !custom_policy
+        && fvid::native_lossless::supports(&transform)
+        && fvid::native_lossless::eligible(source)?
+    {
+        if !planning {
+            return Ok(false);
+        } // The controlled native exporter below owns this path.
+        let mut plan = fvid::native_plan::transcode_lossless(source, &transform)?;
+        if is_crop_lossless {
+            plan.command = "crop-lossless".into();
+        } else if force_overlay_command {
+            plan.command = "overlay".into();
+        }
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&plan)?);
+        }
+        return Ok(true);
+    }
+    let mut options = policy;
+    if report {
+        options.progress = Some(fvid::media_control::ProgressHook::new(|event| {
+            eprintln!(
+                "{}",
+                serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done})
+            );
+        }));
+    }
+    if !custom_policy && fvid::native_lossless::supports_framestep(&transform)
+        && fvid::native_lossless::eligible(source)? {
+        if planning {
+            let mut plan=fvid::media::plan_transcode_lossless(source,&transform,&options,None)?;
+            if is_crop_lossless {
+                plan.command = "crop-lossless".into();
+            } else if force_overlay_command {
+                plan.command = "overlay".into();
+            }
+            if !quiet { println!("{}",serde_json::to_string_pretty(&plan)?); }
+        } else {
+            let stats=fvid::media::transcode_lossless(source,std::path::Path::new(&args[command+2]),transform,&options)?;
+            if !quiet { println!("{}",serde_json::to_string_pretty(&stats)?); }
+        }
+        return Ok(true);
+    }
+    if !fvid_media::owned_lossless::supports(source, &transform, &options) {
+        return Ok(false);
+    }
+    if planning {
+        let mut plan = fvid_media::owned_lossless::plan_transcode_lossless(
+            source, &transform, &options, None,
+        )?;
+        if is_crop_lossless {
+            plan.command = "crop-lossless".into();
+        } else if force_overlay_command {
+            plan.command = "overlay".into();
+        }
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&plan)?);
+        }
+    } else {
+        let stats = fvid_media::owned_lossless::transcode_lossless(
+            source,
+            std::path::Path::new(&args[2]),
+            transform,
+            &options,
+        )?;
+        if !quiet {
+            println!("{}", serde_json::to_string(&stats)?);
+        }
+    }
+    Ok(true)
+}
+
+fn owned_xfade_command(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    let planning = args.first().map(String::as_str) == Some("plan");
+    let args = if planning { &args[1..] } else { args };
+    let required = if planning { 3 } else { 4 };
+    if args.first().map(String::as_str) != Some("xfade") || args.len() < required { return Ok(false); }
+    let mut options = fvid::media_control::CopyOptions::default();
+    let mut duration = None;
+    let mut offset = 0;
+    let mut transition = "fade";
+    let mut quiet = false;
+    let mut seen = std::collections::BTreeSet::new();
+    let mut values = args[required..].iter();
+    while let Some(flag) = values.next() {
+        let key_flag = if flag == "-q" { "--quiet" } else { flag.as_str() };
+        if !matches!(
+            key_flag,
+            "--metadata" | "--metadata-delete" | "--stream-metadata" | "--stream-metadata-delete"
+        ) && !seen.insert(key_flag)
+        {
+            return Err(format!("duplicate option: {flag}").into());
+        }
+        match flag.as_str() {
+            "-q" | "--quiet" => quiet = true,
+            "--progress" => {
+                if !planning {
+                    options.progress = Some(fvid::media_control::ProgressHook::new(|event| {
+                        eprintln!("{}", serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
+                    }));
+                }
+            }
+            "--transition" => transition = values.next().ok_or("missing transition")?,
+            "--xfade-duration" => duration = Some(fvid::media_info::parse_time(values.next().ok_or("missing xfade duration")?)?),
+            "--xfade-offset" => offset = fvid::media_info::parse_time(values.next().ok_or("missing xfade offset")?)?,
+            "--max-packets" => options.max_packets = Some(values.next().ok_or("missing max packets")?.parse()?),
+            "--max-packet-bytes" => {
+                let limit = values.next().ok_or("missing packet byte limit")?.parse()?;
+                if limit == 0 {
+                    return Err("packet byte limit must be positive".into());
+                }
+                options.max_packet_bytes = limit;
+            }
+            "--metadata" => {
+                let (key, value) = values.next().ok_or("missing metadata")?.split_once('=').ok_or("metadata requires KEY=VALUE")?;
+                options.metadata_set.push((key.into(), value.into()));
+            }
+            "--metadata-delete" => options.metadata_delete.push(values.next().ok_or("missing metadata key")?.clone()),
+            "--max-rss-mib" => options.max_rss_bytes = Some(fvid_media::parse_max_rss_mib(values.next().ok_or("missing RSS limit")?)?),
+            "--streams" => options.streams = values.next().ok_or("missing streams")?.split(',').map(str::parse).collect::<Result<_,_>>()?,
+            "--stream-metadata" | "--stream-metadata-delete" => {
+                let (index, text) = values.next().ok_or("missing stream metadata")?.split_once(':').ok_or("stream metadata requires INDEX:KEY")?;
+                let index = index.parse()?;
+                if flag == "--stream-metadata" {
+                    let (key, value) = text.split_once('=').ok_or("stream metadata requires INDEX:KEY=VALUE")?;
+                    options.stream_metadata_set.push((index, key.into(), value.into()));
+                } else { options.stream_metadata_delete.push((index, text.into())); }
+            }
+            _ => return Ok(false),
+        }
+    }
+    let duration = duration.ok_or("xfade requires --xfade-duration")?;
+    if planning {
+        let Some(plan) = fvid_media::owned_xfade::try_plan_xfade(
+            std::path::Path::new(&args[1]), std::path::Path::new(&args[2]),
+            transition, duration, offset, &options,
+        )? else { return Ok(false); };
+        if !quiet { println!("{}", serde_json::to_string_pretty(&plan)?); }
+        return Ok(true);
+    }
+    let stats = fvid_media::owned_xfade::try_xfade_video(
+        std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), std::path::Path::new(&args[3]),
+        transition, duration, offset, &options,
+    )?;
+    let Some(stats) = stats else { return Ok(false); };
+    if !quiet { println!("{}", serde_json::to_string_pretty(&stats)?); }
+    Ok(true)
+}
+
+fn owned_subtitle_burn_command(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    let planning = args.first().map(String::as_str) == Some("plan");
+    let args = if planning { &args[1..] } else { args };
+    let required = if planning { 2 } else { 3 };
+    if args.first().map(String::as_str) != Some("burn-subtitles") || args.len() < required { return Ok(false); }
+    let mut options = fvid::media_control::CopyOptions::default();
+    let mut subs = None;
+    let mut quiet = false;
+    let mut seen = std::collections::BTreeSet::new();
+    let mut values = args[required..].iter();
+    while let Some(flag) = values.next() {
+        let key_flag = if flag == "-q" { "--quiet" } else { flag.as_str() };
+        if !matches!(
+            key_flag,
+            "--metadata" | "--metadata-delete" | "--stream-metadata" | "--stream-metadata-delete"
+        ) && !seen.insert(key_flag)
+        {
+            return Err(format!("duplicate option: {flag}").into());
+        }
+        match flag.as_str() {
+            "--subs" => subs = Some(values.next().ok_or("missing subtitle path")?),
+            "-q" | "--quiet" => quiet = true,
+            "--max-packets" => options.max_packets = Some(values.next().ok_or("missing packet limit")?.parse()?),
+            "--max-packet-bytes" => {
+                let limit = values.next().ok_or("missing packet byte limit")?.parse()?;
+                if limit == 0 {
+                    return Err("packet byte limit must be positive".into());
+                }
+                options.max_packet_bytes = limit;
+            }
+            "--max-rss-mib" => options.max_rss_bytes = Some(fvid_media::parse_max_rss_mib(values.next().ok_or("missing RSS limit")?)?),
+            "--streams" => options.streams = values.next().ok_or("missing streams")?.split(',').map(str::parse).collect::<Result<_,_>>()?,
+            "--metadata" => {
+                let (key, value) = values.next().ok_or("missing metadata")?.split_once('=').ok_or("metadata requires KEY=VALUE")?;
+                options.metadata_set.push((key.into(), value.into()));
+            }
+            "--metadata-delete" => options.metadata_delete.push(values.next().ok_or("missing metadata key")?.clone()),
+            "--stream-metadata" | "--stream-metadata-delete" => {
+                let (index, text) = values.next().ok_or("missing stream metadata")?.split_once(':').ok_or("stream metadata requires INDEX:KEY")?;
+                let index = index.parse()?;
+                if flag == "--stream-metadata" {
+                    let (key, value) = text.split_once('=').ok_or("stream metadata requires INDEX:KEY=VALUE")?;
+                    options.stream_metadata_set.push((index, key.into(), value.into()));
+                } else { options.stream_metadata_delete.push((index, text.into())); }
+            }
+            "--progress" => {
+                if !planning {
+                    options.progress = Some(fvid::media_control::ProgressHook::new(|event| {
+                        eprintln!("{}", serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
+                    }));
+                }
+            }
+            _ => return Ok(false),
+        }
+    }
+    let subs = std::path::Path::new(subs.ok_or("burn-subtitles requires --subs FILE")?);
+    let source = std::path::Path::new(&args[1]);
+    if !fvid_media::owned_subtitle_burn::supports(source, subs, &options) { return Ok(false); }
+    let json = if planning {
+        serde_json::to_string_pretty(&fvid_media::owned_subtitle_burn::plan_burn_subtitles(source, subs, &options)?)?
+    } else {
+        serde_json::to_string_pretty(&fvid_media::owned_subtitle_burn::burn_subtitles(source, std::path::Path::new(&args[2]), subs, &options)?)?
+    };
+    if !quiet { println!("{json}"); }
+    Ok(true)
+}
+
+#[cfg(test)]
+mod colorize_cli_tests {
+    #[test]
+    fn owned_colorize_cli_decode_plan_and_export_need_no_legacy_feature() {
+        let directory =
+            std::env::temp_dir().join(format!("fvid-colorize-cli-{}", std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8, 12, 16] {
+            let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
+                "tests/fixtures/playback-errors/colorize-grid-{depth}.y4m"
+            ));
+            let output = directory.join(format!("colorized-{depth}.mkv"));
+            let source = source.to_str().unwrap();
+            let tint = "hue=120:saturation=0.5:lightness=0.5:mix=0.5";
+            for args in [
+                vec!["decode", source, "--colorize", tint, "--quiet"],
+                vec![
+                    "plan",
+                    "transcode-lossless",
+                    source,
+                    "--colorize",
+                    tint,
+                    "--quiet",
+                ],
+                vec![
+                    "transcode-lossless",
+                    source,
+                    output.to_str().unwrap(),
+                    "--colorize",
+                    tint,
+                    "--quiet",
+                ],
+            ] {
+                super::run(&args.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();
+            }
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames, 3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod monochrome_cli_tests {
+    #[test]
+    fn owned_monochrome_cli_decode_plan_and_export_need_no_legacy_feature() {
+        let directory =
+            std::env::temp_dir().join(format!("fvid-monochrome-cli-{}", std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8, 12, 16] {
+            let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
+                "tests/fixtures/playback-errors/monochrome-grid-{depth}.y4m"
+            ));
+            let output = directory.join(format!("monochromed-{depth}.mkv"));
+            let source = source.to_str().unwrap();
+            let tint = "cb=0.5:cr=-0.5:size=0.2:high=0.75";
+            for args in [
+                vec!["decode", source, "--monochrome", tint, "--quiet"],
+                vec![
+                    "plan",
+                    "transcode-lossless",
+                    source,
+                    "--monochrome",
+                    tint,
+                    "--quiet",
+                ],
+                vec![
+                    "transcode-lossless",
+                    source,
+                    output.to_str().unwrap(),
+                    "--monochrome",
+                    tint,
+                    "--quiet",
+                ],
+            ] {
+                super::run(&args.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();
+            }
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames, 3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod scalar_expression_tests {
+    #[test]
+    fn arithmetic_filter_parameters_decode_plan_and_export_without_legacy() {
+        let directory =
+            std::env::temp_dir().join(format!("fvid-scalar-expression-{}", std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8, 12, 16] {
+            let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
+                "tests/fixtures/playback-errors/colorize-grid-{depth}.y4m"
+            ));
+            let source = source.to_str().unwrap();
+            for (filter, expression, numeric) in [
+                (
+                    "--colorize",
+                    "hue=60*2:saturation=1/2:lightness=1/2:mix=1/2",
+                    "hue=120:saturation=0.5:lightness=0.5:mix=0.5",
+                ),
+                (
+                    "--monochrome",
+                    "cb=1/2:cr=-1/2:size=1/5:high=3/4",
+                    "cb=0.5:cr=-0.5:size=0.2:high=0.75",
+                ),
+                (
+                    "--eq",
+                    "gamma=sqrt(4):brightness=1/10",
+                    "gamma=2:brightness=0.1",
+                ),
+                ("--hue", "h=90*2:s=1/2", "h=180:s=0.5"),
+                ("--colorhold","color=#ff000080@0.5:similarity=0.2:blend=0.5","red:0.2:0.5"),
+                ("--lutyuv", "y=gammaval(2):u=clip(val):v=gammaval709(2)", "y=pow((clipval-minval)/(maxval-minval),2)*(maxval-minval)+minval:u=clipval:v=if(lt((clipval-minval)/(maxval-minval),0.018),4.5*(clipval-minval)/(maxval-minval),1.099*pow((clipval-minval)/(maxval-minval),0.5)-0.099)*(maxval-minval)+minval"),
+            ] {
+                for command in [
+                    vec!["decode", source, filter, expression, "--quiet"],
+                    vec![
+                        "plan",
+                        "transcode-lossless",
+                        source,
+                        filter,
+                        expression,
+                        "--quiet",
+                    ],
+                ] {
+                    super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>())
+                        .unwrap();
+                }
+                let mut outputs = Vec::new();
+                for (index, args) in [expression, numeric].into_iter().enumerate() {
+                    let output = directory.join(format!(
+                        "{}-{depth}-{index}.mkv",
+                        filter.trim_start_matches('-')
+                    ));
+                    super::run(
+                        &[
+                            "transcode-lossless",
+                            source,
+                            output.to_str().unwrap(),
+                            filter,
+                            args,
+                            "--quiet",
+                        ]
+                        .into_iter()
+                        .map(str::to_owned)
+                        .collect::<Vec<_>>(),
+                    )
+                    .unwrap();
+                    let mut reader = fvid::playback_native::NativeReader::software(
+                        std::io::BufReader::new(std::fs::File::open(&output).unwrap()),
+                        usize::MAX,
+                    )
+                    .unwrap();
+                    let mut frames = Vec::new();
+                    while let Some(raw) = reader.read_frame_raw().unwrap() {
+                        let frame = fvid::native_geometry::VideoGeometry::default()
+                            .apply(&raw, 3, 3)
+                            .unwrap();
+                        frames.push((frame.data, reader.frame_interval()));
+                    }
+                    assert_eq!(frames.len(), 3);
+                    outputs.push(frames);
+                }
+                assert_eq!(outputs[0], outputs[1], "filter={filter} depth={depth}");
+            }
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod lutyuv_cli_tests {
+    #[test]
+    fn owned_lutyuv_cli_decode_plan_and_export_need_no_legacy_feature() {
+        let directory =
+            std::env::temp_dir().join(format!("fvid-lutyuv-cli-{}", std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8, 12, 16] {
+            let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
+                "tests/fixtures/playback-errors/colorize-grid-{depth}.y4m"
+            ));
+            let output = directory.join(format!("lutyuvd-{depth}.mkv"));
+            let source = source.to_str().unwrap();
+            let tint = "y=minval:u=maxval:v=minval";
+            for args in [
+                vec!["decode", source, "--lutyuv", tint, "--quiet"],
+                vec![
+                    "plan",
+                    "transcode-lossless",
+                    source,
+                    "--lutyuv",
+                    tint,
+                    "--quiet",
+                ],
+                vec![
+                    "transcode-lossless",
+                    source,
+                    output.to_str().unwrap(),
+                    "--lutyuv",
+                    tint,
+                    "--quiet",
+                ],
+            ] {
+                super::run(&args.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();
+            }
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames, 3);
+            let mut reader = fvid::playback_native::NativeReader::software(
+                std::io::BufReader::new(std::fs::File::open(&output).unwrap()),
+                usize::MAX,
+            )
+            .unwrap();
+            while let Some(frame) = reader.read_frame_raw().unwrap() {
+                let pixels = fvid::native_geometry::VideoGeometry::default()
+                    .apply(&frame, 3, 3)
+                    .unwrap();
+                let samples: Vec<u16> = if depth == 8 {
+                    pixels.data.iter().map(|s| *s as u16).collect()
+                } else {
+                    pixels
+                        .data
+                        .as_chunks::<2>().0.iter()
+                        .map(|s| u16::from_le_bytes([s[0], s[1]]))
+                        .collect()
+                };
+                assert_eq!(&samples[..9], &[16u16 << (depth - 8); 9]);
+                assert_eq!(&samples[9..13], &[240u16 << (depth - 8); 4]);
+                assert_eq!(&samples[13..], &[16u16 << (depth - 8); 4]);
+            }
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod lutyuv_full_range_tests {
+    #[test]
+    fn full_range_y4m_lut_exports_keep_black_and_white() {
+        let directory = std::env::temp_dir().join(format!("fvid-lut-full-{}", std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/lutyuv-full-range.y4m");
+        for extension in ["mkv", "y4m"] {
+            let output = directory.join(format!("filtered.{extension}"));
+            let command = if extension == "mkv" {
+                "transcode-lossless"
+            } else {
+                "export-y4m"
+            };
+            let mut args = vec![
+                command,
+                source.to_str().unwrap(),
+                output.to_str().unwrap(),
+                "--lutyuv",
+                "y=minval:u=maxval:v=minval",
+            ];
+            if extension == "mkv" {
+                args.push("--quiet");
+            }
+            super::run(&args.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();
+            let mut reader = fvid::playback_native::NativeReader::software(
+                std::io::BufReader::new(std::fs::File::open(&output).unwrap()),
+                usize::MAX,
+            )
+            .unwrap();
+            assert!(reader.colour().full_range);
+            let mut count = 0;
+            while let Some(frame) = reader.read_frame_raw().unwrap() {
+                let pixels = fvid::native_geometry::VideoGeometry::default()
+                    .apply(&frame, 3, 3)
+                    .unwrap();
+                assert_eq!(&pixels.data[..9], &[0; 9]);
+                assert_eq!(&pixels.data[9..13], &[255; 4]);
+                assert_eq!(&pixels.data[13..], &[0; 4]);
+                count += 1;
+            }
+            assert_eq!(count, 3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod colorhold_cli_tests {
+    #[test]
+    fn owned_colorhold_cli_decode_plan_and_export_need_no_legacy_feature() {
+        let directory =
+            std::env::temp_dir().join(format!("fvid-colorhold-cli-{}", std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8, 12, 16] {
+            let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
+                "tests/fixtures/playback-errors/colorize-grid-{depth}.y4m"
+            ));
+            let output = directory.join(format!("colorholdd-{depth}.mkv"));
+            let y4m = directory.join(format!("colorhold-{depth}.y4m"));
+            let source = source.to_str().unwrap();
+            let tint = "black:0.00001";
+            for args in [
+                vec!["export-y4m",source,y4m.to_str().unwrap(),"--colorhold",tint],
+                vec!["decode", source, "--colorhold", tint, "--quiet"],
+                vec![
+                    "plan",
+                    "transcode-lossless",
+                    source,
+                    "--colorhold",
+                    tint,
+                    "--quiet",
+                ],
+                vec![
+                    "transcode-lossless",
+                    source,
+                    output.to_str().unwrap(),
+                    "--colorhold",
+                    tint,
+                    "--quiet",
+                ],
+            ] {
+                super::run(&args.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();
+            }
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames, 3);
+            assert_eq!(fvid_media::decode_video(&y4m).unwrap().video_frames, 3);
+            let mut reader = fvid::playback_native::NativeReader::software(
+                std::io::BufReader::new(std::fs::File::open(&output).unwrap()),
+                usize::MAX,
+            )
+            .unwrap();
+            let reference=if depth>8 {Some(std::fs::read(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/playback-errors/colorhold-black-reference-{depth}.raw"))).unwrap().as_chunks::<2>().0.iter().map(|b|u16::from_le_bytes([b[0],b[1]])).collect::<Vec<_>>())} else {None};
+            let mut index=0;
+            while let Some(frame) = reader.read_frame_raw().unwrap() {
+                let pixels = fvid::native_geometry::VideoGeometry::default()
+                    .apply(&frame, 3, 3)
+                    .unwrap();
+                let samples: Vec<u16> = if depth == 8 {
+                    pixels.data.iter().map(|s| *s as u16).collect()
+                } else {
+                    pixels
+                        .data
+                        .as_chunks::<2>().0.iter()
+                        .map(|s| u16::from_le_bytes([s[0], s[1]]))
+                        .collect()
+                };
+
+                if let Some(expected)=&reference {assert_eq!(&samples,&expected[index*17..index*17+17]);}
+                else {assert_eq!(&samples[9..],&[128;8]);}
+                index+=1;
+            }
+            assert_eq!(index,3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod colorcontrast_cli_tests {
+    #[test]
+    fn owned_colorcontrast_decode_and_export_without_legacy() {
+        let directory=std::env::temp_dir().join(format!("fvid-contrast-cli-{}",std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8,12,16] {
+            let source=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/playback-errors/colorize-grid-{depth}.y4m"));
+            let output=directory.join(format!("contrast-{depth}.mkv"));
+            let y4m=directory.join(format!("contrast-{depth}.y4m"));
+            let args="rc=1:rcw=1:pl=0.5";
+            for command in [
+                vec!["decode",source.to_str().unwrap(),"--colorcontrast",args,"--quiet"],
+                vec!["transcode-lossless",source.to_str().unwrap(),output.to_str().unwrap(),"--colorcontrast",args,"--quiet"],
+                vec!["export-y4m",source.to_str().unwrap(),y4m.to_str().unwrap(),"--colorcontrast",args],
+            ] {super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();}
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames,3);
+            assert_eq!(fvid_media::decode_video(&y4m).unwrap().video_frames,3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod vibrance_cli_tests {
+    #[test]
+    fn owned_vibrance_decode_and_export_without_legacy() {
+        let directory=std::env::temp_dir().join(format!("fvid-vibrance-cli-{}",std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8,12,16] {
+            let source=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/playback-errors/colorize-grid-{depth}.y4m"));
+            let output=directory.join(format!("contrast-{depth}.mkv"));
+            let y4m=directory.join(format!("contrast-{depth}.y4m"));
+            let args="intensity=1";
+            for command in [
+                vec!["decode",source.to_str().unwrap(),"--vibrance",args,"--quiet"],
+                vec!["transcode-lossless",source.to_str().unwrap(),output.to_str().unwrap(),"--vibrance",args,"--quiet"],
+                vec!["export-y4m",source.to_str().unwrap(),y4m.to_str().unwrap(),"--vibrance",args],
+            ] {super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();}
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames,3);
+            assert_eq!(fvid_media::decode_video(&y4m).unwrap().video_frames,3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod colorlevels_cli_tests {
+    #[test]
+    fn owned_colorlevels_decode_and_export_without_legacy() {
+        let directory=std::env::temp_dir().join(format!("fvid-colorlevels-cli-{}",std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8,12,16] {
+            let source=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/playback-errors/colorize-grid-{depth}.y4m"));
+            let output=directory.join(format!("contrast-{depth}.mkv"));
+            let y4m=directory.join(format!("contrast-{depth}.y4m"));
+            let args="romin=0.1:bomax=0.7";
+            for command in [
+                vec!["decode",source.to_str().unwrap(),"--colorlevels",args,"--quiet"],
+                vec!["transcode-lossless",source.to_str().unwrap(),output.to_str().unwrap(),"--colorlevels",args,"--quiet"],
+                vec!["export-y4m",source.to_str().unwrap(),y4m.to_str().unwrap(),"--colorlevels",args],
+            ] {super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();}
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames,3);
+            assert_eq!(fvid_media::decode_video(&y4m).unwrap().video_frames,3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod colorchannelmixer_cli_tests {
+    #[test]
+    fn owned_colorchannelmixer_decode_and_export_without_legacy() {
+        let directory=std::env::temp_dir().join(format!("fvid-colorchannelmixer-cli-{}",std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8,12,16] {
+            let source=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/playback-errors/colorize-grid-{depth}.y4m"));
+            let output=directory.join(format!("contrast-{depth}.mkv"));
+            let y4m=directory.join(format!("contrast-{depth}.y4m"));
+            let args="rr=0.5:rg=0.2:bb=0.7";
+            for command in [
+                vec!["decode",source.to_str().unwrap(),"--colorchannelmixer",args,"--quiet"],
+                vec!["transcode-lossless",source.to_str().unwrap(),output.to_str().unwrap(),"--colorchannelmixer",args,"--quiet"],
+                vec!["export-y4m",source.to_str().unwrap(),y4m.to_str().unwrap(),"--colorchannelmixer",args],
+            ] {super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();}
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames,3);
+            assert_eq!(fvid_media::decode_video(&y4m).unwrap().video_frames,3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod exposure_cli_tests {
+    #[test]
+    fn owned_exposure_decode_and_export_without_legacy() {
+        let directory=std::env::temp_dir().join(format!("fvid-exposure-cli-{}",std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8,12,16] {
+            let source=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/playback-errors/colorize-grid-{depth}.y4m"));
+            let output=directory.join(format!("contrast-{depth}.mkv"));
+            let y4m=directory.join(format!("contrast-{depth}.y4m"));
+            let args="exposure=1";
+            for command in [
+                vec!["decode",source.to_str().unwrap(),"--exposure",args,"--quiet"],
+                vec!["transcode-lossless",source.to_str().unwrap(),output.to_str().unwrap(),"--exposure",args,"--quiet"],
+                vec!["export-y4m",source.to_str().unwrap(),y4m.to_str().unwrap(),"--exposure",args],
+            ] {super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();}
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames,3);
+            assert_eq!(fvid_media::decode_video(&y4m).unwrap().video_frames,3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod colorbalance_cli_tests {
+    #[test]
+    fn owned_colorbalance_decode_and_export_without_legacy() {
+        let directory=std::env::temp_dir().join(format!("fvid-colorbalance-cli-{}",std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8,12,16] {
+            let source=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/playback-errors/colorize-grid-{depth}.y4m"));
+            let output=directory.join(format!("contrast-{depth}.mkv"));
+            let y4m=directory.join(format!("contrast-{depth}.y4m"));
+            let args="rs=0.2:gm=-0.1:bh=0.3:pl=1";
+            for command in [
+                vec!["decode",source.to_str().unwrap(),"--colorbalance",args,"--quiet"],
+                vec!["transcode-lossless",source.to_str().unwrap(),output.to_str().unwrap(),"--colorbalance",args,"--quiet"],
+                vec!["export-y4m",source.to_str().unwrap(),y4m.to_str().unwrap(),"--colorbalance",args],
+            ] {super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();}
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames,3);
+            assert_eq!(fvid_media::decode_video(&y4m).unwrap().video_frames,3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod colorcorrect_cli_tests {
+    #[test]
+    fn owned_colorcorrect_decode_and_export_without_legacy() {
+        let directory=std::env::temp_dir().join(format!("fvid-colorcorrect-cli-{}",std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8,12,16] {
+            let source=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/playback-errors/colorcorrect-grid-{depth}.y4m"));
+            let output=directory.join(format!("contrast-{depth}.mkv"));
+            let y4m=directory.join(format!("contrast-{depth}.y4m"));
+            let args="analyze=median:saturation=0.5";
+            for command in [
+                vec!["decode",source.to_str().unwrap(),"--colorcorrect",args,"--quiet"],
+                vec!["transcode-lossless",source.to_str().unwrap(),output.to_str().unwrap(),"--colorcorrect",args,"--quiet"],
+                vec!["export-y4m",source.to_str().unwrap(),y4m.to_str().unwrap(),"--colorcorrect",args],
+            ] {super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();}
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames,3);
+            assert_eq!(fvid_media::decode_video(&y4m).unwrap().video_frames,3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod cas_cli_tests {
+    #[test]
+    fn owned_cas_decode_and_export_without_legacy() {
+        let directory=std::env::temp_dir().join(format!("fvid-cas-cli-{}",std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8,12,16] {
+            let source=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/playback-errors/cas-grid-{depth}.y4m"));
+            let output=directory.join(format!("contrast-{depth}.mkv"));
+            let y4m=directory.join(format!("contrast-{depth}.y4m"));
+            let args="strength=0.8:planes=5";
+            for command in [
+                vec!["decode",source.to_str().unwrap(),"--cas",args,"--quiet"],
+                vec!["transcode-lossless",source.to_str().unwrap(),output.to_str().unwrap(),"--cas",args,"--quiet"],
+                vec!["export-y4m",source.to_str().unwrap(),y4m.to_str().unwrap(),"--cas",args],
+            ] {super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();}
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames,3);
+            assert_eq!(fvid_media::decode_video(&y4m).unwrap().video_frames,3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod grayworld_cli_tests {
+    #[test]
+    fn timeline_controls_decode_y4m_and_ffv1_export_without_legacy() {
+        let source=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/grayworld-gamut-8.y4m");
+        let read=|path:&std::path::Path| {
+            let input=std::fs::read(path).unwrap();let mut frames=Vec::new();
+            fvid_media::owned_y4m_decode::visit_reader_transformed(std::io::Cursor::new(input),&Default::default(),|_,frame,_,_|{frames.push(frame.to_vec());Ok(())}).unwrap();frames
+        };
+        let original=read(&source);
+        let directory=std::env::temp_dir().join(format!("fvid-grayworld-timeline-{}",std::process::id()));std::fs::create_dir_all(&directory).unwrap();
+        for (case,args,selected) in [(0,"enable=lt(n,1)",0),(1,"enable='gte(t,1)*eq(w,5)*eq(h,5)'",2)] {
+            let y4m=directory.join(format!("selected-{case}.y4m"));let mkv=directory.join(format!("selected-{case}.mkv"));let decoded=directory.join(format!("decoded-{case}.y4m"));
+            for command in [vec!["decode",source.to_str().unwrap(),"--grayworld",args,"--quiet"],vec!["export-y4m",source.to_str().unwrap(),y4m.to_str().unwrap(),"--grayworld",args],vec!["transcode-lossless",source.to_str().unwrap(),mkv.to_str().unwrap(),"--grayworld",args,"--quiet"],vec!["export-y4m",mkv.to_str().unwrap(),decoded.to_str().unwrap()]] {
+                super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();
+            }
+            for output in [&y4m,&decoded] {let actual=read(output);assert_eq!(actual.len(),3);for i in 0..3 {if i==selected{assert_ne!(actual[i],original[i]);}else{assert_eq!(actual[i],original[i]);}}}
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn native_timeline_options_are_admitted() {
+        let args=vec!["decode".into(),"synthetic.y4m".into(),"--grayworld".into(),"enable=between(n,1,2)".into()];
+        let (remaining,filters)=super::pixel_decode_args(&args).unwrap();
+        assert_eq!(remaining,vec!["decode".to_owned(),"synthetic.y4m".to_owned()]);assert!(!filters.is_empty());
+        let request=fvid::media_info::DecodeTransform{grayworld:Some("enable=between(n,1,2)".into()),..Default::default()};
+        assert!(fvid::native_pixels::PixelFilters::from_request(&request).is_ok());
+        let transform=fvid::media_info::LosslessTransform{grayworld:request.grayworld,..Default::default()};
+        assert!(fvid::native_lossless::supports(&transform));
+    }
+
+    #[test]
+    fn owned_grayworld_decode_and_export_without_legacy() {
+        let directory=std::env::temp_dir().join(format!("fvid-grayworld-cli-{}",std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8,12,16] {
+            let source=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/playback-errors/grayworld-gamut-{depth}.y4m"));
+            let output=directory.join(format!("contrast-{depth}.mkv"));
+            let y4m=directory.join(format!("contrast-{depth}.y4m"));
+            let args="0";
+            for command in [
+                vec!["decode",source.to_str().unwrap(),"--grayworld",args,"--quiet"],
+                vec!["transcode-lossless",source.to_str().unwrap(),output.to_str().unwrap(),"--grayworld",args,"--quiet"],
+                vec!["export-y4m",source.to_str().unwrap(),y4m.to_str().unwrap(),"--grayworld",args],
+            ] {super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();}
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames,3);
+            assert_eq!(fvid_media::decode_video(&y4m).unwrap().video_frames,3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+fn parse_native_audio_limit(option: &str, value: &str, options: &mut fvid::media::CopyOptions)
+    -> Result<(), Box<dyn std::error::Error>> {
+    match option {
+        "--max-packets" => options.max_packets = Some(value.parse()?),
+        "--max-packet-bytes" => options.max_packet_bytes = value.parse()?,
+        "--max-memory-mib" => options.max_controlled_bytes = Some(fvid_media::owned_budget::parse_max_memory_mib(value)?),
+        "--max-rss-mib" => options.max_rss_bytes = Some(value.parse::<u64>()?
+            .checked_mul(1024 * 1024).ok_or("RSS limit overflows")?),
+        _ => return Err("unknown audio limit".into()),
+    }
+    Ok(())
+}
+
+fn framestep_decode_args(args: &[String]) -> Result<(Vec<String>, fvid_media::owned_framestep::FrameStep), Box<dyn std::error::Error>> {
+    use fvid_media::owned_framestep::FrameStep;
+    let mut step = None;
+    if args.first().map(String::as_str) != Some("decode") { return Ok((args.to_vec(), FrameStep::parse("")?)); }
+    let mut output = vec![args[0].clone()];
+    let mut items = args[1..].iter();
+    while let Some(option) = items.next() {
+        if option == "--" { output.push(option.clone()); output.extend(items.cloned()); break; }
+        if option == "--framestep" {
+            if step.is_some() { return Err("duplicate framestep option".into()); }
+            step = Some(FrameStep::parse(items.next().ok_or("missing framestep options")?)?);
+        } else { output.push(option.clone()); }
+    }
+    Ok((output, step.unwrap_or(FrameStep::parse("")?)))
+}

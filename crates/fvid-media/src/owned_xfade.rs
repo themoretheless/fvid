@@ -4,32 +4,8 @@ use crate::{owned_frame::GeometryFrame, owned_overlay::validate_frame};
 use std::io::BufRead;
 
 fn default_policy(options: &fvid_control::CopyOptions) -> bool {
-    options.streams.is_empty()
-        && options.max_controlled_bytes.is_none()
-        && options.stream_metadata_set.len() + options.stream_metadata_delete.len() <= 64
-        && options
-            .stream_metadata_set
-            .iter()
-            .all(|(index, key, value)| {
-                *index == 0
-                    && valid_track_key(key)
-                    && !value.contains('\0')
-                    && value.len() <= 1024
-                    && (!key.eq_ignore_ascii_case("language") || value.len() <= 128)
-            })
-        && options
-            .stream_metadata_delete
-            .iter()
-            .all(|(index, key)| *index == 0 && valid_track_key(key))
-}
-fn valid_track_key(key: &str) -> bool {
-    !key.is_empty()
-        && key.len() <= 128
-        && !key.contains('\0')
-        && !matches!(
-            key.to_ascii_lowercase().as_str(),
-            "rotate" | "stereo_mode" | "alpha_mode"
-        )
+    crate::owned_lossless::policy(options, true)
+        && crate::owned_lossless::metadata(options).is_ok()
 }
 /// Admit the same inputs and policy as execution before building a native plan.
 pub fn try_plan_xfade(
@@ -63,10 +39,17 @@ pub fn plan_xfade(
     options: &fvid_control::CopyOptions,
 ) -> Result<fvid_media_info::MediaPlan, String> {
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
     if transition != "fade" || !default_policy(options) {
         return Err("cross-fade plan is not supported by the owned backend".into());
     }
-    FadeTimeline::new(offset_us, duration_us)?;
+    let timeline = FadeTimeline::new(offset_us, duration_us)?;
     let mut primary =
         std::io::BufReader::new(std::fs::File::open(main).map_err(|e| e.to_string())?);
     let mut bytes = Vec::new();
@@ -81,7 +64,86 @@ pub fn plan_xfade(
     if header.frame_rate()? != secondary.header.frame_rate()? {
         return Err("cross-fade inputs require matching frame rates".into());
     }
+    crate::owned_budget::check_rss_budget(options)?;
     crate::owned_lossless::metadata(options)?;
+    if options.max_packets.is_some()
+        || options.max_packet_bytes != fvid_control::CopyOptions::default().max_packet_bytes
+    {
+        if header.frame_len()? > options.max_packet_bytes {
+            return Err("Y4M frame byte length exceeds packet byte limit".into());
+        }
+        let main_reader =
+            std::io::BufReader::new(std::fs::File::open(main).map_err(|e| e.to_string())?);
+        let other_reader =
+            std::io::BufReader::new(std::fs::File::open(other).map_err(|e| e.to_string())?);
+        visit_y4m_counted(
+            main_reader,
+            other_reader,
+            &header,
+            timeline,
+            options.max_packets,
+            |frame, _, _| {
+                if options
+                    .cancel
+                    .as_ref()
+                    .is_some_and(fvid_control::CancelFlag::is_cancelled)
+                {
+                    return Err("media operation cancelled".into());
+                }
+                crate::owned_budget::check_rss_budget(options)?;
+                let packet = crate::owned_ffv1_encoder::encode(frame, header.depth())?;
+                if packet.len() > options.max_packet_bytes {
+                    return Err("encoded cross-fade packet exceeds byte limit".into());
+                }
+                Ok(())
+            },
+        )?;
+    }
+    let mut steps = vec![
+        PlanStep {
+            action: "decode".into(),
+            detail: "read two Y4M streams with owned parsers".into(),
+        },
+        PlanStep {
+            action: "materialize".into(),
+            detail: format!(
+                "owned fade offset_us={offset_us} duration_us={duration_us}, followed by secondary tail"
+            ),
+        },
+        PlanStep {
+            action: "encode".into(),
+            detail: "owned FFV1 version 1 and Matroska writer".into(),
+        },
+    ];
+    if !options.metadata_set.is_empty()
+        || !options.metadata_delete.is_empty()
+        || !options.stream_metadata_set.is_empty()
+        || !options.stream_metadata_delete.is_empty()
+    {
+        steps.push(PlanStep {
+            action: "metadata".into(),
+            detail: format!(
+                "container set={}, delete={}; stream set={}, delete={}",
+                options.metadata_set.len(),
+                options.metadata_delete.len(),
+                options.stream_metadata_set.len(),
+                options.stream_metadata_delete.len()
+            ),
+        });
+    }
+    let mut notes = vec![
+        "no FFmpeg or libav execution".into(),
+        "partial outputs are not published on failure".into(),
+    ];
+    if options.max_packet_bytes != fvid_control::CopyOptions::default().max_packet_bytes
+        || options.max_packets.is_some()
+        || options.max_rss_bytes.is_some()
+    {
+        notes.push(format!(
+            "encoded packet limit: {} bytes; packet work limit: {:?}; RSS limit: {:?} bytes",
+            options.max_packet_bytes, options.max_packets, options.max_rss_bytes
+        ));
+    }
     Ok(MediaPlan {
         command: "xfade".into(),
         input: main.into(),
@@ -92,27 +154,9 @@ pub fn plan_xfade(
             codec: "rawvideo".into(),
             disposition: "default".into(),
         }],
-        steps: vec![
-            PlanStep {
-                action: "decode".into(),
-                detail: "read two Y4M streams with owned parsers".into(),
-            },
-            PlanStep {
-                action: "materialize".into(),
-                detail: format!(
-                    "owned fade offset_us={offset_us} duration_us={duration_us}, followed by secondary tail"
-                ),
-            },
-            PlanStep {
-                action: "encode".into(),
-                detail: "owned FFV1 version 1 and Matroska writer".into(),
-            },
-        ],
+        steps,
         graph: None,
-        notes: vec![
-            "no FFmpeg or libav execution".into(),
-            "partial outputs are not published on failure".into(),
-        ],
+        notes,
     })
 }
 pub fn try_xfade_video(
@@ -429,6 +473,9 @@ fn write_y4m_ffv1_counted<W: std::io::Write + std::io::Seek>(
             text_tags.insert(key.to_ascii_uppercase(), value.clone());
         }
     }
+    for key in &options.metadata_delete {
+        text_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+    }
     let mut description = crate::owned_matroska::VideoTrackDescription {
         name: String::new(),
         language: "und".into(),
@@ -443,6 +490,10 @@ fn write_y4m_ffv1_counted<W: std::io::Write + std::io::Seek>(
         {
             track_tags.insert(key.to_ascii_uppercase(), value.clone());
         }
+    }
+    for (_, key) in &options.stream_metadata_delete {
+        track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+        crate::owned_ffv1_export::edit_track_description(&mut description, key, "");
     }
     let mut writer = PacketWriter::new_ffv1_with_track_description(
         output,

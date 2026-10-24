@@ -1,0 +1,83 @@
+{
+  "provenance": "Pure Python authored 16x16 neutral VP9 fMP4, 3 independent 20ms frames at 50Hz. Probes ISO/IEC 14496-12:2015 8.8.8 mutual exclusion between trun first-sample-flags-present (0x000004) and sample-flags-present (0x000400). No private codec parameters, encoder, FFmpeg, or network.",
+  "controls": [
+    {
+      "file": "default-flags.mp4",
+      "mode": "default",
+      "trun_flags": 1,
+      "sync": [
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "file": "first-sample-only.mp4",
+      "mode": "first-sample-only",
+      "trun_flags": 5,
+      "sync": [
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "file": "per-sample-only.mp4",
+      "mode": "per-sample-only",
+      "trun_flags": 1025,
+      "sync": [
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "file": "first-sample-lead-sync.mp4",
+      "mode": "first-sample-lead-sync",
+      "trun_flags": 5,
+      "sync": [
+        true,
+        false,
+        false
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "file": "both-populated-first-sync-row-nonsync.mp4",
+      "trun_flags": 1029,
+      "sample_count": 3,
+      "contradiction": "first_sample_flags=sync vs sample_flags[0]=non_sync"
+    },
+    {
+      "file": "both-populated-first-nonsync-row-sync.mp4",
+      "trun_flags": 1029,
+      "sample_count": 3,
+      "contradiction": "first_sample_flags=non_sync vs sample_flags[0]=sync"
+    },
+    {
+      "file": "both-late-fragment.mp4",
+      "trun_flags": 1029,
+      "sample_count": 3,
+      "contradiction": "third fragment combines 0x000004 and 0x000400"
+    },
+    {
+      "file": "both-empty-run.mp4",
+      "trun_flags": 1029,
+      "sample_count": 0,
+      "contradiction": "empty trun sets both 0x000004 and 0x000400"
+    }
+  ],
+  "sha256": {
+    "regular.mp4": "e98393bb08dedd0b6f34eb73546111d11686b6f2daffa7cb83828e9d62ff27cb",
+    "frame.vp9": "217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c",
+    "default-flags.mp4": "bdd2cf1d37cf31c47fa0e2bb1f16a9f695fea438e71fd2f228e3b7ca62aff94a",
+    "first-sample-only.mp4": "94b433bbe2efc832b880ee4b53213785ec3e390574f1bc4c82cace892acfbe11",
+    "per-sample-only.mp4": "ed629f39397f4be3b2021e850bcebe4033cbc95eb71d6e3dd4ec9da720f88792",
+    "first-sample-lead-sync.mp4": "0de3b2788b776a2a453863a06abfe192cd1d40836aa0f0798cba2be5a21268d2",
+    "both-populated-first-sync-row-nonsync.mp4": "dc2822a5c561e1bbe01591672f7363c82ec89a8fc974c6458c90d940b3c4ce14",
+    "both-populated-first-nonsync-row-sync.mp4": "7155c60f7578640ed8cbe0520498f2b76ba1f92461d9ba69762ae91415e6ed43",
+    "both-late-fragment.mp4": "0a9850ba4c0ff8fe270cdcd84069ccb42b7b0cbec16254da866034f97ebe935d",
+    "both-empty-run.mp4": "d3138703c0f89e888a0ab0ff481d6440aa98972094bf6288740bd18f62a257a1"
+  }
+}

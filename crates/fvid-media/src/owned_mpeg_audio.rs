@@ -630,6 +630,338 @@ impl Mp3 {
     pub fn presentation_samples(&self) -> u64 {
         self.presentation_window.end - self.presentation_window.start
     }
+    /// Extract canonical container and stream 0 metadata maps from ID3v2 and ID3v1 tags.
+    pub fn probe_metadata(
+        &self,
+    ) -> (
+        std::collections::BTreeMap<String, String>,
+        std::collections::BTreeMap<String, String>,
+    ) {
+        let mut container = std::collections::BTreeMap::new();
+        let mut stream = std::collections::BTreeMap::new();
+        parse_id3v2_into(&self.data[..self.tag_bytes.min(self.data.len())], &mut container);
+        if self.id3v1 && self.data.len() >= 128 {
+            parse_id3v1_into(&self.data[self.data.len() - 128..], &mut container);
+        }
+        for key in ["title", "language"] {
+            if let Some(value) = container.get(key) {
+                if !value.is_empty() {
+                    stream.insert(key.to_owned(), value.clone());
+                }
+            }
+        }
+        (container, stream)
+    }
+    /// Build RIFF WAVE INFO chunks from source ID3v2/ID3v1 tags for WAVE spooling.
+    pub fn wave_info(&self) -> std::result::Result<Vec<u8>, String> {
+        let (container, _) = self.probe_metadata();
+        let mut entries = Vec::new();
+        for (source, target) in [
+            ("title", "title"),
+            ("artist", "artist"),
+            ("comment", "comment"),
+            ("date", "date"),
+            ("album", "album"),
+            ("genre", "genre"),
+            ("copyright", "copyright"),
+            ("encoder", "encoder"),
+            ("track", "track"),
+            ("language", "ILNG"),
+        ] {
+            if let Some(value) = container.get(source) {
+                if !value.is_empty() && !value.contains('\0') {
+                    entries.push((target.to_string(), value.clone()));
+                }
+            }
+        }
+        crate::owned_wave_metadata::edit_info_chunks(&[], &[], &entries)
+    }
+}
+
+fn decode_id3_text(encoding: u8, bytes: &[u8]) -> Option<String> {
+    let text = match encoding {
+        0 => bytes
+            .iter()
+            .take_while(|&&b| b != 0)
+            .map(|&b| char::from(b))
+            .collect::<String>(),
+        1 => {
+            let (le, payload) = if let Some(rest) = bytes.strip_prefix(&[0xff, 0xfe]) {
+                (true, rest)
+            } else if let Some(rest) = bytes.strip_prefix(&[0xfe, 0xff]) {
+                (false, rest)
+            } else {
+                (true, bytes)
+            };
+            let units: Vec<u16> = payload
+                .chunks_exact(2)
+                .map(|pair| {
+                    if le {
+                        u16::from_le_bytes([pair[0], pair[1]])
+                    } else {
+                        u16::from_be_bytes([pair[0], pair[1]])
+                    }
+                })
+                .take_while(|&u| u != 0)
+                .collect();
+            String::from_utf16_lossy(&units)
+        }
+        2 => {
+            let units: Vec<u16> = bytes
+                .chunks_exact(2)
+                .map(|pair| u16::from_be_bytes([pair[0], pair[1]]))
+                .take_while(|&u| u != 0)
+                .collect();
+            String::from_utf16_lossy(&units)
+        }
+        3 => {
+            let slice = bytes
+                .iter()
+                .position(|&b| b == 0)
+                .map_or(bytes, |idx| &bytes[..idx]);
+            std::str::from_utf8(slice).ok()?.to_owned()
+        }
+        _ => return None,
+    };
+    let trimmed = text.trim_matches('\0').trim().to_owned();
+    (!trimmed.is_empty() && !trimmed.contains('\0')).then_some(trimmed)
+}
+
+fn split_id3_terminated(encoding: u8, bytes: &[u8]) -> Option<(&[u8], &[u8])> {
+    match encoding {
+        0 | 3 => {
+            let idx = bytes.iter().position(|&b| b == 0)?;
+            Some((&bytes[..idx], &bytes[idx + 1..]))
+        }
+        1 | 2 => {
+            for (i, pair) in bytes.chunks_exact(2).enumerate() {
+                if pair == [0, 0] {
+                    let at = i * 2;
+                    return Some((&bytes[..at], &bytes[at + 2..]));
+                }
+            }
+            None
+        }
+        _ => None,
+    }
+}
+
+fn parse_id3v2_into(
+    bytes: &[u8],
+    container: &mut std::collections::BTreeMap<String, String>,
+) {
+    let mut total = 0;
+    while let Some(head) = bytes.get(total..total + 10) {
+        if head[..3] != *b"ID3" || head[3] == 0xff || head[5] & 0x0f != 0 {
+            break;
+        }
+        let version = head[3];
+        let flags = head[5];
+        let [a, b, c, d]: [u8; 4] = head[6..10].try_into().unwrap();
+        if (a | b | c | d) & 0x80 != 0 {
+            break;
+        }
+        let tag_len = (usize::from(a) << 21)
+            | (usize::from(b) << 14)
+            | (usize::from(c) << 7)
+            | usize::from(d);
+        let Some(tag_end) = (total + 10).checked_add(tag_len) else {
+            break;
+        };
+        if tag_end > bytes.len() {
+            break;
+        }
+        if flags & 0x80 == 0 && matches!(version, 3 | 4) {
+            let mut cursor = total + 10;
+            if flags & 0x40 != 0 {
+                let Some(ext) = bytes.get(cursor..cursor + 4) else {
+                    total = tag_end;
+                    continue;
+                };
+                let ext_size = if version == 4 {
+                    if (ext[0] | ext[1] | ext[2] | ext[3]) & 0x80 != 0 {
+                        total = tag_end;
+                        continue;
+                    }
+                    ((usize::from(ext[0]) << 21)
+                        | (usize::from(ext[1]) << 14)
+                        | (usize::from(ext[2]) << 7)
+                        | usize::from(ext[3]))
+                    .max(4)
+                } else {
+                    4usize.saturating_add(u32::from_be_bytes(ext.try_into().unwrap()) as usize)
+                };
+                cursor = cursor.saturating_add(ext_size).min(tag_end);
+            }
+            while cursor + 10 <= tag_end {
+                let fhead = &bytes[cursor..cursor + 10];
+                if fhead[..4] == [0; 4]
+                    || !fhead[..4]
+                        .iter()
+                        .all(|b| b.is_ascii_uppercase() || b.is_ascii_digit())
+                {
+                    break;
+                }
+                let fsize = if version == 4 {
+                    let [fa, fb, fc, fd]: [u8; 4] = fhead[4..8].try_into().unwrap();
+                    if (fa | fb | fc | fd) & 0x80 != 0 {
+                        u32::from_be_bytes([fa, fb, fc, fd]) as usize
+                    } else {
+                        (usize::from(fa) << 21)
+                            | (usize::from(fb) << 14)
+                            | (usize::from(fc) << 7)
+                            | usize::from(fd)
+                    }
+                } else {
+                    u32::from_be_bytes(fhead[4..8].try_into().unwrap()) as usize
+                };
+                let Some(fend) = (cursor + 10).checked_add(fsize) else {
+                    break;
+                };
+                if fsize == 0 || fend > tag_end {
+                    break;
+                }
+                let fflags_low = fhead[9];
+                let compressed_or_encrypted = if version == 4 {
+                    fflags_low & 0x0f != 0
+                } else {
+                    fflags_low & 0xc0 != 0
+                };
+                if !compressed_or_encrypted {
+                    let body = &bytes[cursor + 10..fend];
+                    let id = std::str::from_utf8(&fhead[..4]).unwrap_or("");
+                    if id == "TXXX" {
+                        if let Some((&enc, rest)) = body.split_first() {
+                            if let Some((desc_raw, val_raw)) = split_id3_terminated(enc, rest) {
+                                if let (Some(desc), Some(val)) = (
+                                    decode_id3_text(enc, desc_raw),
+                                    decode_id3_text(enc, val_raw),
+                                ) {
+                                    let lower = desc.to_ascii_lowercase();
+                                    let canonical = match lower.as_str() {
+                                        "tracknumber" | "part_number" => "track",
+                                        "albumartist" => "album_artist",
+                                        "discnumber" => "disc",
+                                        other => other,
+                                    };
+                                    container
+                                        .entry(canonical.to_owned())
+                                        .or_insert(val);
+                                }
+                            }
+                        }
+                    } else if id == "COMM" {
+                        if body.len() > 4 {
+                            let enc = body[0];
+                            let rest = &body[4..];
+                            let val_raw = split_id3_terminated(enc, rest)
+                                .map(|(_, v)| v)
+                                .unwrap_or(rest);
+                            if let Some(val) = decode_id3_text(enc, val_raw) {
+                                container.entry("comment".into()).or_insert(val);
+                            }
+                        }
+                    } else if let Some(key) = match id {
+                        "TIT2" => Some("title"),
+                        "TPE1" => Some("artist"),
+                        "TALB" => Some("album"),
+                        "TDRC" | "TYER" => Some("date"),
+                        "TCON" => Some("genre"),
+                        "TCOP" => Some("copyright"),
+                        "TSSE" | "TENC" => Some("encoder"),
+                        "TRCK" => Some("track"),
+                        "TPE2" => Some("album_artist"),
+                        "TPOS" => Some("disc"),
+                        "TPUB" => Some("publisher"),
+                        "TIT3" => Some("description"),
+                        "TLAN" => Some("language"),
+                        _ => None,
+                    } {
+                        if let Some((&enc, rest)) = body.split_first() {
+                            if let Some(val) = decode_id3_text(enc, rest) {
+                                container.entry(key.into()).or_insert(val);
+                            }
+                        }
+                    }
+                }
+                cursor = fend;
+            }
+        }
+        total = tag_end;
+    }
+}
+
+fn parse_id3v1_into(
+    tag: &[u8],
+    container: &mut std::collections::BTreeMap<String, String>,
+) {
+    if tag.len() != 128 || &tag[..3] != b"TAG" {
+        return;
+    }
+    let clean = |slice: &[u8]| -> Option<String> {
+        let end = slice.iter().position(|&b| b == 0).unwrap_or(slice.len());
+        let text: String = slice[..end]
+            .iter()
+            .map(|&b| char::from(b))
+            .collect::<String>()
+            .trim()
+            .to_owned();
+        (!text.is_empty()).then_some(text)
+    };
+    if let Some(v) = clean(&tag[3..33]) {
+        container.entry("title".into()).or_insert(v);
+    }
+    if let Some(v) = clean(&tag[33..63]) {
+        container.entry("artist".into()).or_insert(v);
+    }
+    if let Some(v) = clean(&tag[63..93]) {
+        container.entry("album".into()).or_insert(v);
+    }
+    if let Some(v) = clean(&tag[93..97]) {
+        container.entry("date".into()).or_insert(v);
+    }
+    let comment_slice = if tag[125] == 0 && tag[126] != 0 {
+        container
+            .entry("track".into())
+            .or_insert_with(|| tag[126].to_string());
+        &tag[97..125]
+    } else {
+        &tag[97..127]
+    };
+    if let Some(v) = clean(comment_slice) {
+        container.entry("comment".into()).or_insert(v);
+    }
+    if let Some(genre) = id3v1_genre_name(tag[127]) {
+        container.entry("genre".into()).or_insert_with(|| genre.into());
+    }
+}
+
+fn id3v1_genre_name(code: u8) -> Option<&'static str> {
+    Some(match code {
+        0 => "Blues",
+        1 => "Classic Rock",
+        2 => "Country",
+        3 => "Dance",
+        4 => "Disco",
+        5 => "Funk",
+        6 => "Grunge",
+        7 => "Hip-Hop",
+        8 => "Jazz",
+        9 => "Metal",
+        10 => "New Age",
+        11 => "Oldies",
+        12 => "Other",
+        13 => "Pop",
+        14 => "R&B",
+        15 => "Rap",
+        16 => "Reggae",
+        17 => "Rock",
+        18 => "Techno",
+        24 => "Soundtrack",
+        32 => "Classical",
+        52 => "Electronic",
+        _ => return None,
+    })
 }
 
 /// Whether the frame at `start` is an `Info`/`Xing` header: its tag sits at a

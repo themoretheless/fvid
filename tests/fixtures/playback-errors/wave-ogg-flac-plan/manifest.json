@@ -1,0 +1,23 @@
+{
+  "generator": "scripts/generate_wave_ogg_flac_plan_regressions.py",
+  "batch_id": "FVID-0208",
+  "provenance": "100% synthetic RIFF/WAVE, Ogg Opus/Vorbis/Joint, bare FLAC, and bare MP3 fixtures; no FFmpeg, network, or private media.",
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "wave-24in32-valid.wav": "2c382a0fae6541d3a48a5252d75811f675cc09352bd32f9b43dc6c337ee6de06",
+    "wave-24in32-nonzero-padding.wav": "357e9cf19e57270ffab676ee1cada8a498c95070ff88105ac45886300b6c796d",
+    "g711-alaw-48k-mono.wav": "b8dedcf36fd7fb855fa378fa3fd2421146df5f21f01a59b7a1b75cc4e13692ac",
+    "g711-mulaw-48k-mono.wav": "82c3c70eb3362b0511b157ed462d858a05d6762f9569572d5272af051b5a101c",
+    "g711-alaw-empty.wav": "1470703f253ba39c5f1eb285bc67ea7ceef05d570dc7ab4b3123fa99bff6f86e",
+    "ogg-opus-stereo.ogg": "06c958af4ed260437be0b39420f4f7ec45ba5daf306be340ec9de99a198eae08",
+    "ogg-vorbis-stereo.ogg": "ba697b74455e9bcda09e7ce5f780b80742c17d43f6455807388ac933d9b1bc72",
+    "ogg-joint-vorbis-opus.ogg": "c6654b5ae957d9cb88a571c104f8a8392d57e2071551f4b1f6e5cfc579fcac11",
+    "ogg-vorbis-chained-5ch-0x37.ogg": "54a2c832c604fa56b5e7b4111017aa453d5410fb40838d536c56ad2b9eb25811",
+    "ogg-joint-chained-5ch-0x37.ogg": "590b1355943bac26bbb048bad196f0f205d664ec910bf5bc4147b703dad4e00e",
+    "ogg-vorbis-chained-8ch-0x73f.ogg": "eb09df99ddd80b44d6a84609d908802eb7ca7254c7e2808673ddf11d79d8c8be",
+    "ogg-joint-chained-8ch-0x73f.ogg": "b87513fb762e88b7176931d989ba08547a37f47efa65defa3016f1b416d6a9ff",
+    "flac-4ch-quad.flac": "44b92174d958b42097dc478b807bb0f9392d9f444712810434be2e0664bcb9b3",
+    "flac-4ch-unassigned.flac": "88940f0980628c810647ac671e39b9b3daaa9bd5e80a469bc399dbfc2b02c099",
+    "raw-stereo.mp3": "672d4487643cd2c5325b1f64ffbcf669c108d10254b9ef640bb23b91034d8c81"
+  }
+}

@@ -281,6 +281,11 @@ fn parse_comm(body: &[u8], aifc: bool, limits: &Limits) -> Result<(Pcm, usize)> 
     // `00 00 01 02 03`, and its own decode of those bytes is 0.0, 0.0, 1/128, 2/128,
     // 3/128 - a signed row, not the offset-by-half-scale row a Wave file of the same
     // width holds. `pcm_decoder` reads it that way already.
+    if matches!(coding, Coding::ALaw | Coding::MuLaw) && bits != 8 {
+        return Err(invalid(&format!(
+            "a G.711 table codes one byte per sample, this track states {bits}"
+        )));
+    }
     if !matches!(
         coding,
         Coding::Mace3 | Coding::Mace6 | Coding::Pcm(PcmFormat::Float { .. })

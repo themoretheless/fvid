@@ -1,0 +1,26 @@
+{
+  "batch_id": "FVID-0243",
+  "files": {
+    "avc-single-rotated-burn.mp4": {
+      "bytes": 6889,
+      "sha256": "612c1cd36d1fe80500fb59436e2b68777814e99831f1c795cd745e5c08f9d62d"
+    },
+    "burn-source.y4m": {
+      "bytes": 6192,
+      "sha256": "5e178c4311d591b7d42aa2630f22bcb4f2b3d1af3a019c0d6b008293e0f6c1be"
+    },
+    "cues.srt": {
+      "bytes": 37,
+      "sha256": "2a8433ff23005cb779423f6202e4f2dd0dc6d8180528f1214f3ba4c78a01bb84"
+    },
+    "xfade-main.y4m": {
+      "bytes": 94,
+      "sha256": "27ee17890b1ab3f55af3fb751fa12ef9b26295db3e44e1590ffb3c4175a27b91"
+    },
+    "xfade-other.y4m": {
+      "bytes": 94,
+      "sha256": "a3afd5470ff3896ab646d4fac06847e2ceafc203d38f0d52c12afb6d02538a5e"
+    }
+  },
+  "generator": "scripts/generate_subtitle_burn_xfade_metadata_regressions.py"
+}

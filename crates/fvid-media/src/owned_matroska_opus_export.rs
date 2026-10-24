@@ -35,10 +35,21 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    let (rate, _) = match geometry(source, options) {
+    let (rate, channels, mask) = match geometry_with_mask(source, options) {
         Ok(value) => value,
         Err(error) => return error.starts_with("controlled memory budget exceeded:"),
     };
+    let target_ok = transform.channels.is_none_or(|target| {
+        target == i32::from(channels)
+            || (((channels <= 2 && (1..=8).contains(&target))
+                || (channels <= 8 && matches!(target, 1 | 2)))
+                && ((channels <= 2 && mask == 0)
+                    || (mask != 0
+                        && crate::owned_pcm_channels::rematrix_layout_supported(channels, mask))))
+    });
+    if !target_ok {
+        return false;
+    }
     let mut probe = decode_options(options);
     probe.progress = None;
     let result = crate::owned_matroska_opus::decode_matroska_opus_pcm(
@@ -50,12 +61,10 @@ pub(crate) fn supports(
         prefix(transform, rate),
         &probe,
     );
-    result.is_err()
-        || result.is_ok_and(|stats| {
-            transform.channels.is_none_or(|channels| {
-                channels == i32::from(stats.channels) || (1..=8).contains(&channels)
-            })
-        })
+    result.is_ok()
+        || result
+            .err()
+            .is_some_and(|e| e.to_string().starts_with("controlled memory budget exceeded:"))
 }
 pub(crate) fn apply(
     source: &Path,
@@ -71,6 +80,7 @@ pub(crate) fn apply(
     }
     crate::owned_budget::check_rss_budget(options)?;
     let (rate, channels, mask) = geometry_with_mask(source, options)?;
+    let info = crate::owned_wave_metadata::matroska_source_info(source, options)?;
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,
@@ -86,6 +96,7 @@ pub(crate) fn apply(
             .map_err(|e| e.to_string())
         },
     )?;
+    crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
     crate::owned_adts_export::export_spool(spool, destination, transform, options)
 }
 
@@ -93,7 +104,7 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
     geometry_with_mask(source, options).map(|(rate, channels, _)| (rate, channels))
 }
 
-fn geometry_with_mask(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32)> {
+pub(crate) fn geometry_with_mask(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32)> {
     let mut reader = crate::owned_matroska_audio::open_audio_reader(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         options,

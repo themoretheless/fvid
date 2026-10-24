@@ -1,6 +1,6 @@
 # Verified improvements
 
-Accepted: **178 / 1000 independent, useful changes**. Only entries marked `accepted` in
+Accepted: **247 / 1000 independent, useful changes**. Only entries marked `accepted` in
 [`registry.json`](registry.json) count. Fixture variants, test cases, documentation
 and baseline integration repairs do not inflate the count.
 
@@ -809,5 +809,1172 @@ bytes and completes native VP9 playback, 8 clamped public seeks, rewind, and
 repeated EOF in 75,630 read bytes. 4 focused/58 related integrations, 17 units,
 27 core checks, fixture unittest and player build pass. See
 `batch-172-validation.json`.
+
+## Batch 173 — mutually exclusive fragmented MP4 `trun` sample flags
+
+FVID-0180 rejects `trun` boxes that set both `first-sample-flags-present`
+(`0x00_0004`) and `sample-flags-present` (`0x00_0400`) per ISO/IEC
+14496-12:2015, 8.8.8, instead of consuming both fields and silently discarding
+`first_sample_flags`. All 4 contradictory populated, late-fragment, and
+empty-run cases now refuse as `Error::Invalid`, while 5 healthy controls
+(regular MP4, default `tfhd`/`trex` flags, first-sample-only, per-sample-only,
+and first-sample-lead-sync) keep exact packets, sync flags, 50 Hz clocks,
+analytic VP9 planes/RGB, and 40 public clamped seek targets. 4 focused/62
+related integrations, 17 units, 29 core checks, fixture unittest and player
+build pass. See `batch-173-validation.json`.
+
+## Batch 174 — exact fragmented MP4 `trex`, `tfhd`, and `tfdt` box extents
+
+FVID-0181 enforces exact FullBox payload sizes for `trex` (24 bytes), `tfhd`
+(exact match with flag-selected fields, including `at += 4` for `0x00_0020`),
+and `tfdt` (8 bytes for version 0, 12 bytes for version 1) per ISO/IEC
+14496-12:2015, 8.8.3, 8.8.7, and 8.8.12. All 5 overlong `trex`, `tfhd`, and
+`tfdt` inputs now refuse as `Error::Invalid`, while 4 healthy controls (regular
+MP4, `tfhd` sync/non-sync overrides over `trex`, and 64-bit `tfdt` v1) retain
+exact packets, sync flags, 50 Hz clocks, analytic VP9 planes/RGB, and 32 public
+clamped seek targets. 4 focused/66 related integrations, 17 units, 31 core
+checks, fixture unittest and player build pass. See `batch-174-validation.json`.
+
+## Batch 175 — per-`traf` fragmented MP4 `trun` data-offset continuity
+
+FVID-0182 scopes implicit `trun` data-offset continuity (`flags & 0x00_0001 == 0`)
+to a per-`traf` cursor initialized to `base` and updated after every `trun`
+(including empty runs) per ISO/IEC 14496-12:2015, 8.8.8.2, instead of consulting
+the global track `list.last()`. Valid multi-`trun` fragments (including an empty
+leading `trun` that positions the cursor for a subsequent contiguous `trun`) now
+index and play with exact analytic VP9 planes/RGB, 50 Hz clocks, and 32 public
+clamped seek targets, while cross-`traf` and empty-reset runs whose `traf`
+cursor lands outside `mdat` refuse as `Error::Invalid`. 4 focused/70 related
+integrations, 17 units, 33 core checks, fixture unittest and player build pass.
+See `batch-175-validation.json`.
+
+## Batch 176 — mandatory fragmented MP4 `mfhd` and unique non-zero `trex` track IDs
+
+FVID-0183 validates that every `moof` box carries a singleton version-0 8-byte
+`mfhd` box with a non-zero `sequence_number` (ISO/IEC 14496-12:2015, 8.8.4 and
+8.8.5) and that `mvex/trex` boxes declare unique non-zero `track_ID` values
+(ISO/IEC 14496-12:2015, 8.8.3). All 6 malformed `mfhd` and `trex` inputs now
+refuse as `Error::Invalid`, while 4 healthy controls (regular MP4, single
+fragment, three sequential fragments, and distinct multi-track `trex` entries)
+keep exact packets, sync flags, 50 Hz clocks, analytic VP9 planes/RGB, and 32
+public clamped seek targets. 4 focused/74 related integrations, 17 units, 35
+core checks, fixture unittest and player build pass. See
+`batch-176-validation.json`.
+
+## Batch 177 — hybrid fragmented MP4 `moov/stbl` + `moof/traf` indexing and validation
+
+FVID-0184 indexes and validates the initial `moov/trak/mdia/minf/stbl` sample
+table even when a file carries `mvex` fragments (ISO/IEC 14496-12:2015, 8.8.4
+and 8.8.8), appending subsequent `moof/traf/trun` samples to those initial
+samples and extending `track.duration` across the combined sample timeline.
+Hybrid files with initial samples in `moov/stbl` followed by explicit or
+implicit-`tfdt` fragments now preserve all samples, 50 Hz clocks, analytic VP9
+planes/RGB, and 32 public clamped seek targets, while fragmented files with
+corrupt initial `stbl` tables (`stco` outside `mdat` or invalid `stsz`) refuse
+as `Error::Invalid` before decoder admission. 4 focused/78 related integrations,
+17 units, 37 core checks, fixture unittest and player build pass. See
+`batch-177-validation.json`.
+
+## Batch 178 — `fvid-media` `owned_mp4` fragmented MP4 validation and hybrid indexing parity
+
+FVID-0185 brings `fvid_media::owned_mp4::Mp4Reader`, `probe_mp4`, and
+`decode_video` (`crates/fvid-media/src/owned_mp4_impl.rs`) into full fragmented
+MP4 compliance with `src/container/mp4.rs`: resolving `trun.data_offset ==
+i32::MIN` without overflow panics, enforcing effective sample description
+selection, mutually exclusive `trun` flags (`0x00_0004` + `0x00_0400`), exact
+`trex`/`tfhd`/`tfdt`/`mfhd` payload extents, unique non-zero `trex` track IDs,
+per-`traf` `trun` data cursor continuity, and initial `moov/stbl` validation and
+indexing in hybrid fragmented files. 4 focused/82 related integrations, 15
+`owned_mp4` units, 41 core checks, fixture unittest and player build pass. See
+`batch-178-validation.json`.
+
+## Batch 179 — QuickTime version-1 and `wave/esds` `mp4a` audio sample descriptions in `fvid-media` `owned_mp4`
+
+FVID-0186 updates `fvid_media::owned_mp4::Mp4Reader`
+(`crates/fvid-media/src/owned_mp4_impl.rs`) to accept QuickTime version-1
+`mp4a` `SoundDescription` headers (44 bytes) and resolve `esds` nested inside a
+QuickTime `wave` extension atom, matching `src/container/mp4.rs`. All 6 healthy
+ISO/QuickTime v0/v1/v2 direct and `wave/esds` controls decode 3,072 mono 48 kHz
+float32 samples matching the independent analytical IMDCT + overlap-add
+reference within `1e-6`, expose identical audio metadata in `probe_mp4`, remux
+to Matroska, and pass player `AudioStream` seek/rewind/EOF, while 3 malformed
+inputs (truncated v1 header, `wave` without `esds`, direct without `esds`)
+refuse as `Error::Invalid`. 4 focused/99 related integrations, 15 `owned_mp4`
+units, 44 core checks, fixture unittest and player build pass. See
+`batch-179-validation.json`.
+
+## Batch 180 — MP4/MOV empty, zero-duration, and blank-only edit-list (`edts/elst`) validation
+
+FVID-0187 rejects empty `elst` boxes (`entry_count == 0`) and zero-duration v0/v1
+edit entries (`segment_duration == 0`) in both `src/container/mp4.rs` and
+`crates/fvid-media/src/owned_mp4_impl.rs`, rejects zero-duration audio edit
+segments in `AudioTimeline::new`
+(`crates/fvid-media/src/owned_mp4_audio_schedule_impl.rs`), and rejects
+blank-only video edit lists (`media_time == -1` with no picture edit) in
+`owned_video_timeline::map_edits` (`crates/fvid-media/src/owned_video_timeline.rs`)
+instead of returning an empty edit vector that caused `NativeReader` and
+`decode_video` to play unedited video frames. Two healthy v0/v1 edited controls
+preserve exact video frame counts, `probe_mp4` durations, seek/rewind, and
+analytical AAC-LC float32 PCM (`1e-7`), while four malformed inputs refuse as
+`Error::Invalid`. 4 focused/51 related integrations, 6 timeline units, 23 core
+checks, fixture unittest and player build pass. See `batch-180-validation.json`.
+
+## Batch 181 — automatic enabled/default audio track selection and in-band PS export geometry in `native_media` and `native_export`
+
+FVID-0188 updates `mp4_audio_index`, `mp4_aac_index`, `matroska_audio_index`, and
+`matroska_aac_index` in `src/native_media.rs` to filter automatic audio candidates
+through `Mp4Reader::automatic_track_indices(&[*b"soun"])` and
+`WebmReader::preferred_track_numbers(...)` when `selected.is_none()`, and updates
+`export_pcm_selected` in `src/native_export.rs` to negotiate in-band Parametric
+Stereo (`negotiate_mp4_ps` / `negotiate_matroska_ps`) before configuring output
+channels and WAV headers. Three synthetic MP4 controls, remuxed Matroska
+dual-audio controls, existing `audiovisual.mp4` fixtures, and implicit-PS WAV
+export match analytical float32 PCM (`1e-6`) and exact stereo WAV geometry
+(48 kHz, 2 channels, 9,600 frames), while ambiguous dual-enabled tracks continue
+to refuse automatic selection. 2 focused/25 related integrations, 14 MP4 units,
+359 core checks, fixture unittest and player build pass. See
+`batch-181-validation.json`.
+
+## Batch 182 — MP4/MOV chunk-span ordering, positive sample sizes, and non-empty track sample tables
+
+FVID-0189 enforces strictly increasing non-overlapping chunk spans (`offset >= prev_end`)
+in `chunk_runs`, positive coded sample sizes (`size > 0`) in `expanded_index` (`stsz`)
+and `index_fragments` (`trun`/`tfhd`), and non-empty sample tables (`count > 0` for
+non-fragmented tracks in `sample_index` and `track.samples.len() > 0` after fragment
+indexing in `index_fragments`) across both `src/container/mp4.rs` and
+`crates/fvid-media/src/owned_mp4_impl.rs`. Two multi-chunk `stco` and `co64` controls
+decode 3 exact 81-byte VP9 packets and 3 decoded 16x16 RGB frames across sequential
+playback, EOF, rewind, and seek, while six malformed inputs (overlapping `stco`,
+backward `co64`, zero-byte `stsz`, zero-byte `trun`, empty non-fragmented track, and
+empty fragmented track) refuse as `Error::Invalid`. 2 focused/46 related integrations,
+18 MP4 units, 359 core checks, fixture unittest and player build pass. See
+`batch-182-validation.json`.
+
+## Batch 183 — Matroska/WebM `BlockGroup` cardinality, reserved block flags, and deterministic equal-PTS/pre-origin seek
+
+FVID-0190 enforces that every Matroska `BlockGroup` (`0xa0`) contains exactly one
+`Block` (`0xa1`) child and rejects non-zero reserved flag bits in `SimpleBlock`
+(`0xa3`, mask `0x70`) and `Block` (`0xa1`, mask `0x71`) in
+`crates/fvid-media/src/owned_webm_reader_impl.rs`, while updating
+`WebmVideoReader::seek_to_sync` (`src/playback/video/webm.rs`) and
+`WebmAudioReader::seek` (`src/playback/audio/webm_audio.rs`) to select the first
+keyframe or packet at a shared timestamp (`>` instead of `>=`) and to advance to
+the first packet of `self.track_number` on pre-origin audio seeks. Three healthy
+controls (equal-PTS VP9 invisible setup keyframe + show-existing frame seek,
+valid `BlockGroup`, and multi-track delayed-origin + equal-PTS audio seek) preserve
+exact 16x16 VP9 planes, `BlockGroup` duration, and 16-bit PCM packets across
+sequential playback and seek, while four malformed inputs (`BlockGroup` missing
+`Block`, duplicate `Block`, `SimpleBlock` reserved flags, and `Block` discardable
+flag) refuse as `Error::Invalid`. 2 focused/7 related integrations, 10 `owned_webm`
+units, 359 core checks, fixture unittest and binary build pass. See
+`batch-183-validation.json`.
+
+## Batch 184 — AVI duplicate header/format rejection, `idx1` partial-entry validation, and delayed-start PCM/G.711 seek landing
+
+FVID-0191 rejects duplicate `avih` chunks in `hdrl`, duplicate `strh` and `strf`
+chunks in `LIST strl`, and non-16-byte-multiple `idx1` chunks in
+`src/container/avi.rs`, and clamps PCM/G.711 seek targets to `[start, end]` in
+`AviAudioReader::seek_to` (`src/playback/audio/avi_audio.rs`) so pre-start seeks
+on streams with `dwStart > 0` return the stream's first sample timestamp matching
+`next_packet()`. A delayed-start PCM control (`dwStart = 100`) lands at sample
+100 on pre-start seeks, slices exact 16-bit PCM frames on mid-record seeks
+(sample 106), and reaches EOF at sample 108, while four malformed inputs
+(duplicate `avih`, duplicate `strh`, duplicate `strf`, and unaligned `idx1`)
+refuse as `Error::Invalid`. 2 focused/3 related integrations, 34 AVI units,
+359 core checks, fixture unittest and binary build pass. See
+`batch-184-validation.json`.
+
+## Batch 185 — Ogg reserved page flags, spurious continuation rejection, Vorbis chain EOS enforcement, and multi-track Opus track-index reporting
+
+FVID-0192 rejects non-zero reserved bits in Ogg `header_type_flag`
+(`flags & !(CONTINUES | BEGINS | ENDS) != 0`), 0-segment pages with `CONTINUES`
+when no packet is open, and mid-stream pages with `CONTINUES` when no packet is
+open after completed audio packets in `crates/fvid-media/src/owned_ogg.rs`;
+requires each preceding link in a chained Vorbis program to have `ended == true`
+in `crates/fvid-media/src/owned_ogg_vorbis.rs`; and exposes `audio_track_index()`
+on `fvid_media::owned_ogg_opus::Program` (`crates/fvid-media/src/owned_ogg_opus.rs`)
+and `OggOpusAudioReader` (`src/playback/audio/ogg_opus.rs`). Three healthy
+controls (two-track parallel Opus, 0-segment continuation bridge page, and
+two-link chained Vorbis) preserve exact track indices (`0` and `1`), split-packet
+reassembly, float32 PCM, and worker seek/EOF navigation, while five malformed
+inputs (reserved BOS flag, reserved audio flag, spurious 0-segment continuation,
+spurious mid-stream continuation, and unended first Vorbis link) refuse as
+`Error::Invalid`. 2 focused/43 related integrations, 8 Ogg/Vorbis units,
+359 core checks, fixture unittest and binary build pass. See
+`batch-185-validation.json`.
+
+## Batch 186 — WAV extensible `cbSize`/channel-mask bounds, AIFC G.711 sample-width enforcement, and `AuAudioReader::present_decoded` parity
+
+FVID-0193 enforces `usize::from(cbSize) <= body.len() - 18` and
+`channel_mask == 0 || channel_mask.count_ones() <= u32::from(channels)` in
+`WAVE_FORMAT_EXTENSIBLE` (`src/playback/audio/wav.rs`), rejects non-8-bit
+`sampleSize` values on AIFC `alaw`/`ALAW`/`ulaw`/`ULAW` tracks
+(`src/playback/audio/aiff.rs`), and implements `present_decoded` and
+`presentation_floor` tracking in `AuAudioReader` (`src/playback/audio/au.rs`)
+matching `WavAudioReader` and `AiffAudioReader`. Three healthy controls
+(extensible WAV, 8-bit AIFC A-law, and 16-bit AU PCM with seek/floor trimming)
+preserve exact packets and decoded timestamps, while four malformed inputs
+(speaker-mask popcount overflow, oversized `cbSize`, 16-bit AIFC `alaw`, and
+24-bit AIFC `ulaw`) plus negative `source_pts` and unaligned decoded payloads
+refuse as `Error::Invalid`. 3 focused integrations, 56 WAV/AIFF/AU units,
+359 core checks, fixture unittest and binary build pass. See
+`batch-186-validation.json`.
+
+## Batch 187 — FLAC `STREAMINFO` ordering, exact length, block/frame bounds, reserved metadata rejection, and speaker-mask channel bounds
+
+FVID-0194 enforces RFC 9639 §8.1/§8.2 metadata and geometry invariants across
+bare FLAC (`crates/fvid-media/src/owned_flac.rs`) and Matroska FLAC
+(`crates/fvid-media/src/owned_flac_decoder.rs`, `src/codec/flac_decoder.rs`,
+and `src/playback/audio/webm_audio.rs`): requires the first metadata block at
+byte 4 to be `STREAMINFO` (type `0`, exact length `34`), rejects duplicate
+`STREAMINFO` blocks and reserved metadata block types (`7..=127`), validates
+`min_block >= 16`, `max_block >= 16`, and `min_block <= max_block`, checks
+non-zero `max_frame` against actual frame sizes even when `min_frame == 0`, and
+rejects `WAVEFORMATEXTENSIBLE_CHANNEL_MASK` values whose popcount exceeds the
+stream channel count (`channel_mask.count_ones() <= u32::from(channels)`). Two
+healthy bare/Matroska FLAC controls and ten malformed inputs pass; 2 focused/11
+related integrations, 24 FLAC units, fixture unittest and binary build pass.
+See `batch-187-validation.json`.
+
+## Batch 188 — SMF End-of-Track enforcement, XM unpacked note clamping & 16-bit sample/pattern bounds, and SMF/XM `present_decoded` validation
+
+FVID-0195 requires every SMF `MTrk` chunk to terminate with an End-of-Track
+meta-event (`FF 2F`) in `src/container/smf.rs`, clamps out-of-range notes
+(`> NOTE_KEY_OFF`) in unpacked XM pattern cells to `0` (`read_cell`), bounds
+XM pattern cell decoding strictly to `&bytes[data..end]` (`parse_patterns`),
+rejects odd `data_bytes` lengths on 16-bit XM samples (`parse_instruments` in
+`src/container/xm.rs`), and validates `source_pts >= 0` and stereo float32 frame
+alignment (`packet.data.len() % 8 == 0`) in `SmfAudioReader::present_decoded`
+(`src/playback/audio/smf.rs`) and `XmAudioReader::present_decoded`
+(`src/playback/audio/xm.rs`). Four healthy SMF/XM controls and three malformed
+inputs pass; 4 focused/6 related integrations, 38 SMF/XM units, fixture
+unittest and binary build pass. See `batch-188-validation.json`.
+
+## Batch 189 — WavPack APEv2 flag & subblock header validation, MP3 `present_decoded` baseline checks, and AC-3 `open_mode` file budget
+
+FVID-0196 rejects APEv2 footers with `flags & 0x60000000 != 0` (`is_header` or
+`no_footer` set) and requires APEv2 header flags `u32le(&header, 20) == (flags | 0x20000000)`
+in `Input::tags` (`src/playback/audio/wavpack.rs`), rejects 1..3-byte truncated
+metadata subblock headers at the end of a WavPack block in `Block::parse`
+(`src/codec/wavpack_decoder.rs`), validates `source_pts >= 0` and channel-frame
+stride alignment and stamps `pts`/`timebase` in `Mp3AudioReader::present_decoded`
+even when neither gapless metadata nor a seek floor is active
+(`src/playback/audio/mp3.rs`), and enforces `bytes.len() > limits.file_bytes`
+upfront in `Ac3AudioReader::open_mode` (`src/playback/audio/ac3.rs`). Healthy
+WavPack, MP3, and AC-3 controls and four malformed WavPack inputs pass; 2
+focused/3 related integrations, 19 unit tests, fixture unittest and binary
+build pass. See `batch-189-validation.json`.
+
+## Batch 190 — Audio decoder bounds and state resets (`FlacDecoder`, `mp2::Decoder`, `adpcm_decoder`, `XmDecoder`, `MidiDecoder`)
+
+FVID-0197 validates `min_frame <= max_frame` (when `max_frame != 0`) in
+`FlacDecoder::new` and enforces `frame.frames <= usize::from(self.max_block)` in
+`FlacDecoder::decode_encoded` (`src/codec/flac_decoder.rs`), restricts
+`fvid_codecs::mp2::Decoder::new` to the 9 standard MPEG Layer II sample rates
+and checks `value.is_finite()` when narrowing `f64` synthesis output to `f32`
+(`crates/fvid-codecs/src/mp2.rs`), requires 8-byte stereo payload alignment for
+`CODEC_ID_ADPCM_IMA_WAV` in `frames_of` (`src/codec/adpcm_decoder.rs`), requires
+`row.cells.len() == self.voices.len()` in `XmDecoder::decode_encoded` and resets
+`self.ignored = self.initial_ignored` in `XmDecoder::reset`
+(`src/codec/xm_decoder.rs`), and resets `self.rendered = 0` in
+`MidiDecoder::reset` (`src/codec/midi_decoder.rs`). Three focused integration
+tests, 3 MP2 integration tests, FLAC/ADPCM/XM/MIDI unit suites, fixture
+unittest and binary build pass. See `batch-190-validation.json`.
+
+## Batch 191 — FFV1 v3 non-keyframe range context initialization on quantizer-set growth and AV1 4:2:0 film-grain chroma point-count conformance
+
+FVID-0198 initializes expanded range context banks (`grow[i] == true`) from
+`self.sets[selected[i]].initial` instead of `[0; 32]` in
+`Configuration::change_quantizers`
+(`crates/fvid-media/src/owned_ffv1_v3_decoder_impl.rs`) so non-keyframe slices
+switching to a larger quantizer table set do not get stuck at zero probability,
+and enforces the symmetric AV1 6.8.20 4:2:0 chroma conformance check
+`(g.point_counts[1] == 0) != (g.point_counts[2] == 0)` in `Grain::parse`
+(`src/codec/av1_grain_params.rs`). Two focused integration tests, 17 FFV1/AV1
+unit tests, fixture unittest and binary build pass. See
+`batch-191-validation.json`.
+
+## Batch 192 — Matroska `Picture::Packed` reorder-queue budget accounting, deferred in-band HEVC parameter sets, and MP4 `NativeReader::current_pts` pre-frame state
+
+FVID-0199 accounts for `Picture::Packed` (`frame.data.len()` plus optional
+`alpha` bytes), `Picture::Vp9`, and `Picture::Av1` plane storage in
+`WebmVideoReader::next_decoded` (`src/playback/video/webm.rs`), opens Matroska
+`V_MPEGH/ISO/HEVC` tracks via `HevcDecoder::from_inband_configuration` and uses
+`d.try_parameters()` in `WebmVideoReader::bitstream_colour` and `advance`, and
+returns `None` from `NativeReader::current_pts` (`src/playback/video/native.rs`)
+on `NativeReader::Avc` when `*frames == 0` (before the first frame is read or
+immediately after `rewind()`). Two focused integration tests, 13 related
+Matroska/AVC/HEVC integration tests, 44 playback unit tests, fixture unittest
+and binary build pass. See `batch-192-validation.json`.
+
+## Batch 193 — WebVTT `NOTE`/`STYLE`/`REGION` block skipping, case-insensitive SAMI `&nbsp;` clearing, ASS `[Events]` scoping, and `Spool::seek` negative-offset rejection
+
+FVID-0200 skips multi-line `NOTE`, `STYLE`, and `REGION` blocks until the next
+blank line in `subtitles::parse_webvtt` (`src/subtitles.rs`) so commented-out
+timings or CSS comments containing `-->` are not rendered as cues, folds
+`&nbsp;` ASCII case-insensitively in `line_breaks` so uppercase `&NBSP;` and
+mixed-case `&Nbsp;` paragraphs clear SAMI captions as intended, scopes
+`subtitles::parse_ass` `Dialogue:` parsing to the `[Events]` section, and
+rejects negative target offsets in `playback_spool::Spool::seek`
+(`src/playback/runtime/spool.rs`) with `io::ErrorKind::InvalidInput` per the
+`std::io::Seek` contract. Four focused integration tests, 33 subtitle unit
+tests, 5 spool unit tests, and fixture unittest pass. See
+`batch-193-validation.json`.
+
+## Batch 194 — `.3dl` non-finite rejection, `.cube`/`.spi1d` domain validation, full-entry 1D `Lut::is_identity`, and non-degenerate `MasteringDisplay` validation
+
+FVID-0201 rejects non-finite (`NaN`/`inf`) node and mesh values in
+`Lut::from_3dl`, validates finite `min < max` input domains (`DOMAIN_MIN`,
+`DOMAIN_MAX`, `LUT_1D_INPUT_RANGE`, `LUT_3D_INPUT_RANGE`, and `.spi1d` `From`)
+in `Lut::from_cube` and `Lut::from_spi1d`, checks every entry across all three
+channels against its domain ramp in `Lut::is_identity` for `Lut::One`
+(`src/color/lut.rs`) so non-identity 1D LUTs with changes between the 17 coarse
+grey probes are not skipped by `Grade::apply`, and rejects zero/collinear CIE
+1931 primaries (`y == 0.0`, `x + y > 1.0`, or singular `rgb_to_xyz`/`xyz_to_rgb`
+matrices such as all-zero placeholder MDCV payloads) and invalid luminance
+bounds (`max_luminance <= 0.0` or `min_luminance > max_luminance`) in
+`MasteringDisplay::from_corners` (`src/color/hdr.rs`). Four focused integration
+tests, 69 root color unit tests, 68 `fvid-codecs` color unit tests, and 5
+offline fixture unit tests pass. See `batch-194-validation.json`.
+
+## Batch 195 — Playback worker seek/rewind terminal state & cache sync, ASS `-->` routing & `[Events]` scoping, and overflow-safe play controls
+
+FVID-0202 marks `self.ended = true` and synchronizes `cache_packets` /
+`indexed_count` when `reader.seek_raw` returns `Ok(None)` or `Err(error)` or
+when `reader.rewind` returns `Err(error)` in `Worker::drain_commands`
+(`src/playback/runtime/thread.rs`), preventing the playback worker from
+immediately invoking `decode_next()` in the same generation after emitting a
+terminal seek/rewind event; detects ASS headers (`[Script Info]`, `[Events]`,
+`Dialogue:`) before checking `-->` in `parse_subtitle_text` and scopes
+`parse_ass` `Dialogue:` lines to `[Events]` in
+`crates/fvid-media/src/owned_play_controls_impl.rs`; widens coordinates to
+`i64` with checked buffer bounds in `blit_bitmap_subtitle`; uses
+`usize::checked_mul` in `detect_letterbox_bars`, `waveform_column_fills`,
+`apply_box_denoise_pixel`, and `apply_unsharp_pixel`; and clamps
+`fit_window_to_video` and `locked_window_size` to `max_w` / `max_h`. Four
+focused integration tests, 5 `playback_thread` unit tests, and 3 offline fixture
+unit tests pass. See `batch-195-validation.json`.
+
+## Batch 196 — Native subtitle dot-decimal/coordinate/entity/ASS-key support, quote-aware `drawbox`/`drawgrid` with negative-thickness rejection, and fallible `f64` resampler history allocation
+
+FVID-0203 accepts both `,` and `.` millisecond separators in `timestamp`,
+strips optional trailing coordinate/style tokens (`X1:...`) after the end
+timestamp in `try_convert_srt`, folds HTML character entities (`&AMP;`, `&LT;`,
+`&GT;`, `&QUOT;`, `&APOS;`, `&NBSP;`) ASCII case-insensitively in `ass_text`,
+and supports 1..=3 fractional digits as well as spaced/case-insensitive
+`Format:` / `Dialogue:` keys and `[...]` section headers in `try_convert_ass`
+(`crates/fvid-media/src/owned_subtitle_impl.rs`); adds quote-aware option
+splitting and single/double-quote unquoting, rejects negative thickness `t < 0`
+at parse and evaluation time, and uses overflow-safe coordinate arithmetic in
+`Draw::selected` (`crates/fvid-media/src/owned_draw.rs`); and reserves history
+queue capacity via `try_reserve(1)` before `push_back` in
+`crates/fvid-media/src/owned_resample_f64.rs`. Four focused integration tests,
+4 unit tests, and 3 offline fixture unit tests pass. See
+`batch-196-validation.json`.
+
+## Batch 197 — Player folder/playlist AVI & WavPack admission, bounded LUT/playlist/skin reads, and overflow/NaN guards
+
+FVID-0204 adds `.avi`, `.wv`, and `.wvc` to `playable_path` and `pick_file`
+(along with `.m4v` and `.sami` in `pick_file`), skips `[...]` INI section
+headers and strips surrounding single/double quotes in `parse_playlist`, bounds
+file reads in `read_lut` (16 MiB), `expand_inputs` (4 MiB), and
+`player_skin::Skin::load` (64 KiB) via `File::open(...).take(...)`, uses
+`at.checked_add(shift)?` when `subtitle_delay_ms < 0` in `Player::subtitle_line`,
+and guards `video_rect` against non-positive frame or source dimensions in
+`src/player.rs` and `src/player_skin.rs`. One focused integration test, 4
+player/skin unit tests, and 3 offline fixture unit tests pass. See
+`batch-197-validation.json`.
+
+## Batch 198 — Lossless planner 48-filter & `framestep` step emission, `zscale` refusal, and post-rotation `transformed_aspect`
+
+FVID-0205 emits `filter` steps for all 48 pixel filters executed by
+`PixelFilters::apply_colour_clock` in canonical order as well as `framestep` in
+`native_plan::transcode_lossless` (`src/native_plan.rs`), requires
+`zscale: None` in `native_lossless::supports` (`src/native_lossless.rs`) so
+unimplemented `zscale` requests are not silently ignored in `configuration()`,
+updates `native_export::transformed_aspect` (`src/native_export.rs`) to apply
+`geometry.rotate` canvas dimensions and 90°/270° aspect swaps before `pad` and
+`scale`, and uses exact cardinal `sin`/`cos` at 0°/90°/180°/270° in
+`RotateAngle::size` (`crates/fvid-media-info/src/video.rs`) matching
+`owned_rotate::rotate_rgb_fill`. Three focused integration tests, 3
+`fvid-media-info` unit tests, and 2 offline fixture unit tests pass. See
+`batch-198-validation.json`.
+
+## Batch 199 — Matroska probe codec/metadata/disposition parity, container `PixelCrop*` insets on identity decode and Y4M export, and canonical PCM codec names in `audio_source_info_selected`
+
+FVID-0206 maps Matroska `A_PCM/INT/LIT`, `A_PCM/INT/BIG`, `A_PCM/FLOAT/IEEE`,
+`A_ALAC`, and `A_MPEG/L1` to canonical codec names (`pcm_u8`,
+`pcm_s{16,24,32}{le,be}`, `pcm_f{32,64}le`, `alac`, `mp1`) and preserves
+file-level custom `SimpleTag`s (`reader.metadata`), `WritingApp` (`encoder`
+fallback), track-scoped tags (`reader.track_metadata`), `LanguageIETF` / default
+track language (`reader.track_languages`), and `reader.track_dispositions` in
+`src/media_probe.rs`; applies container `PixelCrop*` insets (`reader.insets()`)
+and post-inset visible dimensions in `decode_video_pipeline_overlay_step`
+(`src/native_media.rs`), `export_y4m_sources` (`src/native_export.rs`), and
+`PixelFilters::configure_vignette_source` (`src/native_pixels.rs`); and returns
+canonical bit-depth-qualified PCM codec names (`pcm_s16le`..`pcm_f64le`) from
+`audio_source_info_selected` (`src/native_media.rs`). Three focused integration
+tests, 45 related integration tests, and 1 offline fixture unit test pass. See
+`batch-199-validation.json`.
+
+## Batch 200 — Matroska FLAC/MPEG container loudness dispatch, Opus/FLAC/ALAC/PCM speaker-mask rematrix admission, QuickTime 0-bit `sowt`/`twos` probe default, and `native_pcm::loudness` in-band PS negotiation
+
+FVID-0207 dispatches `flac` to `decode_matroska_flac_pcm` and `mp1`/`mp2`/`mp3`
+to `decode_matroska_mpeg_pcm` in `owned_container_loudness::decode_to_wave`
+(`crates/fvid-media/src/owned_container_loudness.rs`); uses
+`owned_matroska_opus_export::geometry_with_mask` (`OpusHead::wave_channel_mask()`)
+for Matroska Opus and `0` for >2ch Matroska PCM in
+`owned_audio_plan::matroska_descriptor` while requiring `mask != 0` on >2ch
+rematrixing across `owned_audio_plan`, `owned_audio_export`, and Matroska
+Opus/FLAC/ALAC/PCM exporters; defaults omitted QuickTime `sowt`/`twos` sample
+size (`bit_depth == 0`) to 16-bit in `owned_mp4_probe_impl.rs`; and negotiates
+implicit/in-band PS via `negotiate_mp4_ps`, `negotiate_matroska_ps`, and boxed
+`negotiate_adts_aac_reader` in `src/native_pcm/loudness.rs`. Four focused
+integration tests, 10 related integration tests, and 1 offline fixture unit test
+pass. See `batch-200-validation.json`.
+
+## Batch 201 — WAVE non-zero PCM padding bit rejection, G.711 WAVE and Ogg `plan_decode_audio`/`plan_mix_audio`/`plan_merge_audio` parity, and Ogg/FLAC/MP3 export `supports()` rematrix and budget admission
+
+FVID-0208 rejects non-zero low `bits_per_sample - valid_bits` padding bits in
+`read_wave_with_admission` (`crates/fvid-media/src/owned_audio_mix.rs`) and
+`measure_for_normalization` (`crates/fvid-media/src/owned_wave_loudness.rs`) to
+match `src/native_pcm.rs`; adds G.711 WAVE (`owned_g711_wave_export::descriptor`)
+and Ogg Opus/Vorbis/Joint (`owned_ogg_audio_export::descriptor`) support to
+`owned_audio_plan::source_descriptor_for_decode`, `plan_decode_audio`, and
+`owned_audio_mix::audio_plan`; enforces speaker-mask validation (`mask != 0 &&
+rematrix_layout_supported(...)`) on >2ch rematrixing and upfront dangling-symlink
+checks (`destination.symlink_metadata().is_ok()`) in `owned_ogg_vorbis_export`,
+`owned_ogg_joint_export`, and `owned_g711_wave_export`; and adds `supports()`
+with `controlled memory budget exceeded:` preservation and rematrix layout
+checks to `owned_raw_flac` and `owned_raw_mp3` (`owned_audio_export.rs`). Four
+focused integration tests, 9 related integration/unit tests, and 2 offline
+fixture unit tests pass. See `batch-201-validation.json`.
+
+## Batch 202 — Owned and native probe parity for G.711 WAVE, Ogg, bare FLAC, and bare MP1/MP2/MP3, owned loudness/loudnorm pipeline expansion, and 0-sample trimmed MPEG planning rejection
+
+FVID-0209 adds G.711 A-law (`pcm_alaw`) and mu-law (`pcm_mulaw`) inspection to
+`owned_wave_inspect::inspect` while preserving `validate_pcm_only()` for linear
+PCM WAVE callers; adds `owned_flac_probe`, `owned_mpeg_probe`, and Ogg
+Opus/Vorbis/Joint probing across `crates/fvid-media/src/owned_probe.rs` and
+`src/media_probe.rs` (preserving Vorbis comment tags and FLAC channel masks);
+extends `owned_container_loudness`, `owned_container_loudnorm`, and
+`src/native_loudnorm.rs` to plan, measure, and normalize G.711 WAVE, Ogg
+Opus/Vorbis/Joint, bare FLAC, and bare MP1/MP2/MP3 via private float32 WAVE
+spools; rejects 0-sample Lame-trimmed MPEG streams in `owned_raw_mp3::descriptor`;
+and keeps `owned_adts_loudness::supports_plan` and `plan_loudness` strictly
+configuration-only without scanning ADTS packets. Three focused integration
+tests, 40 related integration tests, and 2 offline fixture unit tests pass. See
+`batch-202-validation.json`.
+
+## Batch 203 — G.711 WAVE `native_pcm::is_wave` disambiguation, multitrack Matroska/MP4 secondary audio codec routing in `media` and `native_loudnorm`, and `media_cli` owned audio dispatch without legacy features
+
+FVID-0210 updates `native_pcm::is_wave` (`src/native_pcm.rs`) to return
+`Ok(false)` for valid RIFF WAVE files whose `fmt ` chunk uses G.711 A-law
+(`tag=6`) or mu-law (`tag=7`) companding so top-level `fvid::media`,
+`fvid::native_audio_mix`, and `fvid::native_loudnorm` delegate G.711 WAVE to
+`fvid_media` instead of failing in linear PCM inspection; adds
+`uses_native_audio_route` in `src/media.rs` and per-stream `audio_source_info_selected`
+checks in `src/native_loudnorm.rs` (`try_plan`, `try_apply`) so multitrack
+Matroska (`A_FLAC`, `A_OPUS`, `A_MPEG/*`) and MP4/QuickTime (`ima4` and other
+ADPCM) containers with `--streams` selecting a secondary track route to
+`fvid_media` and `owned_container_loudnorm`; and updates `src/media_cli.rs` to
+dispatch `plan decode-audio`, `.wav` `decode-audio`, `plan mix-audio`, `.wav`
+`mix-audio`, `plan merge-audio`, and `.wav` `merge-audio` through `fvid::media`
+when `native_export` / `native_audio_mix` do not handle the input format. Three
+focused integration tests, 43 related integration tests, and 1 offline fixture
+unit test pass. See `batch-203-validation.json`.
+
+## Batch 204 — Audio trim, loudness, and constant-gain normalization routing across owned audio formats and multitrack containers
+
+FVID-0211 delegates `owned_wave_remux::trim` and `owned_wave_plan::plan_trim` to
+`owned_audio_export::decode_audio_transformed` and
+`owned_audio_plan::plan_decode_audio` with `interval: Some((from, to))` whenever
+linear PCM WAVE remux does not apply (`!supports`), enabling `.wav`/`.mka`/`.mkv`
+trim and `plan_trim` for G.711 WAVE, Ogg Opus/Vorbis/Joint, bare FLAC/MP3, and
+Matroska/MP4 audio tracks; updates `media::trim` and `media::plan_trim` to verify
+`native_media::audio_source_info_selected` for single-stream `--streams`
+selections so secondary Matroska (`A_FLAC`, `A_OPUS`, `A_MPEG/*`) and MP4
+(`ima4`) tracks delegate to `fvid_media`; extends `native_pcm::loudness`,
+`native_pcm::normalize`, and `native_plan::loudness` (`normalize_loudness`) to
+handle G.711 WAVE, Ogg, bare FLAC/MP3, and secondary Matroska/MP4 tracks via
+`owned_container_loudness::decode_to_wave`, `fvid_media::decode_audio_transformed`,
+and `fvid_media::plan_decode_audio`; and routes `plan trim` and `trim` in
+`src/media_cli.rs` through `fvid::media` without requiring `--features media`.
+Three focused integration tests, 35 related integration tests, and 1 offline
+fixture unit test pass. See `batch-204-validation.json`.
+
+## Batch 205 — Controlled-memory loudnorm admission across ADTS/MP4/Matroska, Matroska audio mix/merge, and sample-domain audio concat across owned formats
+
+FVID-0212 updates `native_loudnorm::try_plan` and `native_loudnorm::try_apply`
+(`src/native_loudnorm.rs`) to delegate to `fvid_media::owned_adts_loudnorm` and
+`fvid_media::owned_container_loudnorm` when `options.max_controlled_bytes.is_some()`,
+enabling `fvid media plan loudnorm` and `fvid media loudnorm` with
+`--max-memory-mib` across ADTS, MP4, and Matroska inputs; adds
+`source_geometry_with_mask` (`crates/fvid-media/src/owned_audio_plan.rs`) and
+extends `src/native_audio_mix.rs` (`eligible`, `plan`, `mix_audio`, `plan_merge`,
+`merge_audio`) to validate and decode all single-stream `fvid_media` audio
+formats (G.711 WAVE, Ogg Opus/Vorbis/Joint, bare FLAC/MP3, Matroska
+FLAC/Opus/MPEG, MP4 ADPCM) for both `.wav` and `.mka`/`.mkv` outputs while
+keeping multi-audio containers without explicit stream selection ineligible; and
+extends `src/native_audio_mix/concat.rs`, `src/native_plan.rs`, and
+`src/native_export.rs` (`crate::media::probe`) so sample-domain audio
+concatenation to `.mka`/`.mkv` works across all single-stream owned audio
+formats. Three focused integration tests, 34 related integration tests, and 1
+offline fixture unit test pass. See `batch-205-validation.json`.
+
+## Batch 206 — `.f32le`, `.mka`, and `.mkv` audio export, trim, and loudness normalization across all owned `fvid_media` audio formats
+
+FVID-0213 adds `decode_fvid_media_audio_to_destination` (`src/media.rs`) so
+`fvid::media::decode_audio`, `fvid::media::decode_audio_interval`, and
+`fvid::media::decode_audio_transformed` decode `fvid_media` audio sources
+(G.711 A-law/mu-law WAVE, Ogg Opus/Vorbis/Joint, bare FLAC/MP3, and secondary
+Matroska FLAC/Opus/MPEG or MP4 ADPCM tracks) to a private temporary WAVE spool
+when the destination is `.f32le` (or `.mka`/`.mkv` for standalone formats) and
+publish the final `.f32le`, `.mka`, or `.mkv` output via
+`native_export::export_audio_pcm_transformed_with_controls`; extends
+`fvid::media::trim` (`src/media.rs`) to support `.f32le`, `.mka`, and `.mkv`
+outputs across all `fvid_media` audio sources once `fvid_media::plan_decode_audio`
+admits the interval; updates `fvid::native_pcm::normalize_loudness_file_controlled`
+(`src/native_pcm/normalize.rs`) to use `decode_fvid_media_audio_to_destination`
+so `.mka` and `.mkv` `normalize-loudness` outputs succeed on G.711 WAVE, Ogg,
+bare FLAC/MP3, and secondary Matroska/MP4 tracks; and extends `decode-audio`
+admission in `src/media_cli.rs` with
+`fvid_media::owned_container_loudness::recognizes_standalone_audio` so
+`fvid media decode-audio` supports `.f32le`, `.mka`, and `.mkv` outputs across
+all standalone owned audio formats without `--features media`. Three focused
+integration tests, 16 related integration tests, and 1 offline fixture unit test
+pass. See `batch-206-validation.json`.
+
+## Batch 207 — Packet, memory, and RSS budget enforcement across `decode_audio`, `trim`, `trim_pcm`, `loudness`, `normalize_loudness`, and `media_cli`
+
+FVID-0214 routes `fvid::media::uses_native_audio_route` (`src/media.rs`) to
+`fvid_media` when `options.max_controlled_bytes.is_some()`, enabling
+controlled-memory-budget admission and execution for `decode_audio`,
+`decode_audio_transformed`, and `plan_decode_audio` across PCM WAVE, ADTS, MP4,
+Matroska, G.711 WAVE, Ogg, and bare FLAC/MP3; delegates `fvid::media::trim_pcm`
+and `fvid::media::plan_trim_pcm` (`src/media.rs`) to `fvid_media::trim_pcm` and
+`fvid_media::plan_trim_pcm` whenever custom budgets or WAVE metadata edits are
+requested; adds `trim_audio_pcm_with_controls` (`src/native_export.rs`),
+`measure_loudness_file_with_options` (`src/native_pcm/loudness.rs`),
+`normalize_loudness_file_with_options` (`src/native_pcm/normalize.rs`),
+`loudness_with_options`, and `normalize_loudness_with_options`
+(`src/native_plan.rs`) so `fvid::media::trim`, `plan_trim`, `measure_loudness`,
+`plan_loudness`, `normalize_loudness`, and `plan_normalize_loudness` enforce
+`max_packets`, `max_packet_bytes`, `max_controlled_bytes`, and `max_rss_bytes`;
+and extends `src/media_cli.rs` (`parse_native_audio_limit`, `decode-audio`,
+`plan decode-audio`, `try_native_audio_trim`, `loudness`, `plan loudness`,
+`normalize-loudness`, and `plan normalize-loudness`) to accept `--max-packets`,
+`--max-packet-bytes`, `--max-memory-mib`, and `--max-rss-mib` across all owned
+audio formats without `--features media`. Three focused integration tests, 15
+related integration tests, and 1 offline fixture unit test pass. See
+`batch-207-validation.json`.
+
+## Batch 208 — Packet, memory, and RSS budget and metadata enforcement across `remux`, `plan_remux`, `concat`, `plan_concat`, and `media_cli`
+
+FVID-0215 delegates `fvid::media::remux`, `plan_remux`, `concat`, and
+`plan_concat` (`src/media.rs`) to `fvid_media` for linear PCM WAVE inputs
+whenever custom packet/memory/RSS budgets or WAVE INFO metadata edits are
+requested; adds `write_adts_aac_reader_limited` and
+`concat_adts_readers_limited` (`src/container/mp4_write.rs`),
+`open_with_packet_limit` and `write_limited` (`src/container/mp4_concat.rs`),
+`remux_adts_aac_with_options`, `concat_adts_aac_with_options`, and
+`try_concat_mp4_matroska_with_options` (`src/native_export.rs`),
+`concat_adts_with_options`, `concat_matroska_to_with_options`, and
+`concat_mp4_matroska_with_options` (`src/native_plan.rs`), and
+`eligible_with_options`, `decode_source_to_f32le_with_options`, and
+`concat_audio_with_options` (`src/native_audio_mix.rs`,
+`src/native_audio_mix/concat.rs`) so `max_packets`, `max_packet_bytes`,
+`max_controlled_bytes`, and `max_rss_bytes` are enforced across ADTS, MP4,
+Matroska, and sample-domain audio concatenation; and wires `--max-packet-bytes`,
+`--max-packets`, `--max-memory-mib`, `--max-rss-mib`, `--metadata`,
+`--metadata-delete`, `--stream-metadata`, `--stream-metadata-delete`, and
+`--quiet` into `remux`, `plan remux`, `concat`, and `plan concat` in
+`src/media_cli.rs` without requiring `--features media`. Four focused
+integration tests, 44 related integration tests, and 1 offline fixture unit test
+pass. See `batch-208-validation.json`.
+
+## Batch 209 — RSS and packet-byte budget and metadata enforcement across `transcode_lossless`, `crop-lossless`, `overlay`, `xfade`, `burn-subtitles`, and `media_cli`
+
+FVID-0216 allows `max_rss_bytes` in `owned_lossless::policy`
+(`crates/fvid-media/src/owned_lossless.rs`) and `owned_mp4_video_bridge::prepare`
+(`crates/fvid-media/src/owned_mp4_video_bridge.rs`) and enforces
+`owned_budget::check_rss_budget(options)` across `plan_transcode_lossless`,
+`transcode_lossless`, `owned_ffv1_export`
+(`crates/fvid-media/src/owned_ffv1_export.rs`),
+`owned_matroska::export_y4m_ffv1_policy`
+(`crates/fvid-media/src/owned_matroska.rs`), `owned_mp4_video_decode`
+(`crates/fvid-media/src/owned_mp4_video_decode.rs`),
+`owned_mp4_multitrack_export`
+(`crates/fvid-media/src/owned_mp4_multitrack_export.rs`), and
+`owned_webm_multitrack_export`
+(`crates/fvid-media/src/owned_webm_multitrack_export.rs`); extends
+`owned_lossless_command` (`src/media_cli.rs`) to handle `crop-lossless`
+(preserving `--crop` requirement and non-crop transform refusals),
+`--max-packet-bytes`, `--max-rss-mib`, and `--overlay`/`--overlay-x`/`--overlay-y`
+without `--features media`; extends `try_owned_overlay` (`src/media_cli.rs`) to
+accept `--max-packets`, `--max-packet-bytes`, `--max-rss-mib`, `--streams`, and
+metadata flags and delegate controlled `overlay` and `plan overlay` requests to
+`fvid::media::overlay_video` and `fvid::media::plan_overlay`; and wires
+`--max-packet-bytes` and `--max-rss-mib` into `owned_xfade_command` and
+`owned_subtitle_burn_command` (`src/media_cli.rs`). One focused integration test,
+53 related unit and integration tests, and 1 offline fixture unit test pass. See
+`batch-209-validation.json`.
+
+## Batch 210 — Budgets and metadata controls across Y4M export/concat/trim, `burn-subtitles`, `xfade`, and `media_cli`
+
+FVID-0217 adds `validate_y4m_options`, `export_y4m_pipeline_with_options`,
+`concat_y4m_with_options`, `trim_y4m_with_options`, and
+`export_y4m_sources_with_options` in `src/native_export.rs` alongside
+`concat_y4m_with_options` and `trim_y4m_with_options` in `src/native_plan.rs`,
+and wires `fvid::media::trim`, `plan_trim_y4m`, `concat`, and `plan_concat_y4m`
+(`src/media.rs`) to enforce `max_packets`, `max_packet_bytes`, and
+`max_rss_bytes` on Y4M exports, trims, and concatenations; extends
+`owned_subtitle_burn` (`crates/fvid-media/src/owned_subtitle_burn.rs`) to allow
+`metadata_set`, `metadata_delete`, `stream_metadata_set`, and
+`stream_metadata_delete`, enforce `max_packet_bytes != 0`, and write Matroska
+container and video-stream tags via
+`PacketWriter::new_ffv1_with_track_description`; extends `owned_xfade`
+(`crates/fvid-media/src/owned_xfade.rs`) to admit explicit `[0]` stream
+selection, require `max_packet_bytes != 0`, and enforce
+`owned_budget::check_rss_budget(options)` in `plan_xfade`; and extends
+`src/media_cli.rs` so `export-y4m`, `try_video_concat`, and `try_video_trim`
+accept `--max-packets`, `--max-packet-bytes`, `--max-rss-mib`, `--quiet`, and
+`--progress`, `owned_xfade_command` accepts `--streams`, and
+`owned_subtitle_burn_command` accepts `--metadata`, `--metadata-delete`,
+`--stream-metadata`, and `--stream-metadata-delete`. One focused integration
+test, 36 related unit and integration tests, and 1 offline fixture unit test
+pass. See `batch-210-validation.json`.
+
+## Batch 211 — Budgets, cancellation, and progress controls across `mix-audio`, `merge-audio`, `convert-subtitles`, and `media_cli`
+
+FVID-0218 adds `eligible_with_options`, `plan_with_controls`,
+`mix_audio_with_controls`, `plan_merge_with_controls`, and
+`merge_audio_with_controls` in `src/native_audio_mix.rs` to enforce
+`max_packets`, `max_packet_bytes`, `max_controlled_bytes`, `max_rss_bytes`,
+`cancel`, and `progress` across `mix-audio`, `plan mix-audio`, `merge-audio`,
+and `plan merge-audio`; adds `try_convert_controlled` in
+`crates/fvid-media/src/owned_subtitle_impl.rs` (shared by
+`crates/fvid-media/src/owned_subtitle.rs` and `src/native_subtitle.rs`) to
+enforce `max_packet_bytes`, `max_packets`, `max_rss_bytes`, `cancel`, and
+`progress` across SRT, ASS, and Matroska subtitle conversion; and wires
+`--max-packets`, `--max-packet-bytes`, `--max-memory-mib`, `--max-rss-mib`,
+`--progress`, and `-q`/`--quiet` into `native_mix`, `native_merge`, and
+`convert-subtitles` in `src/media_cli.rs`. One focused integration test, 19
+related integration tests, and 1 offline fixture unit test pass. See
+`batch-211-validation.json`.
+
+## Batch 212 — RSS budgets and metadata/stream controls across MP4, Matroska, and ADTS `remux`, `plan_remux`, `concat`, and `plan_concat`
+
+FVID-0219 replaces `options.max_rss_bytes.is_none()` in
+`owned_mp4_remux::policies` (`crates/fvid-media/src/owned_mp4_remux.rs`) and
+`owned_matroska_remux::unedited_policies`
+(`crates/fvid-media/src/owned_matroska_remux.rs`) with
+`crate::owned_budget::check_rss_budget(options).is_ok()` and enforces
+`check_rss_budget(options)` across `owned_mp4_remux::remux` and `plan_remux`,
+`owned_matroska_remux::remux` and `publish`, `owned_adts_remux::remux` and
+`concat`, `owned_concat::concat` and `plan_concat`, and
+`owned_remux_plan::plan_remux`; updates
+`fvid::media::validate_matroska_copy_options` (`src/media.rs`) to enforce
+`fvid_media::owned_budget::check_rss_budget(options)` and admit `max_rss_bytes`;
+and routes `fvid::media::plan_remux` to `fvid_media::plan_remux` for MP4 sources
+when custom packet/RSS budgets or container/stream metadata edits are requested.
+One focused integration test, 33 related integration tests, and 1 offline
+fixture unit test pass. See `batch-212-validation.json`.
+
+## Batch 213 — WAVE `INFO` metadata mutations across `decode-audio` and `trim` and controlled `mix-audio` / `merge-audio` in `fvid::media` and `media_cli`
+
+FVID-0220 updates `fvid::media::uses_native_audio_route`, `trim`, and
+`plan_trim` (`src/media.rs`) to delegate WAVE `INFO` container metadata
+mutations (`metadata_set`, `metadata_delete`) to
+`fvid_media::decode_audio_transformed`, `plan_decode_audio`, `trim`, and
+`plan_trim` (while keeping headerless `.f32le` and Matroska PCM decode targets
+rejected when metadata mutations are requested); adds public
+`fvid::media::mix_audio_with_controls`, `plan_mix_audio_with_controls`,
+`merge_audio_with_controls`, and `plan_merge_audio_with_controls`; and wires
+`--metadata` and `--metadata-delete` into `decode-audio`, `plan decode-audio`,
+and `try_native_audio_trim` (`trim`, `plan trim`, `trim-pcm`, `plan trim-pcm`)
+plus controlled `mix-audio`/`merge-audio` calls in `src/media_cli.rs`. One
+focused integration test, 44 related integration tests, and 1 offline fixture
+unit test pass. See `batch-213-validation.json`.
+
+## Batch 214 — WAVE `INFO` metadata preservation and mutations across `loudnorm` and `normalize-loudness` and `fvid::media::{plan_loudnorm, apply_loudnorm, apply_loudnorm_dual}` routing
+
+FVID-0221 preserves source `INFO` tags in `decode_to_wave` across
+`owned_ogg_opus_export.rs`, `owned_ogg_vorbis_export.rs`,
+`owned_ogg_joint_export.rs`, and `owned_g711_wave_export.rs`; admits and
+validates WAVE `INFO` metadata mutations (`metadata_set`, `metadata_delete`),
+emits a `metadata` plan step, strips metadata mutations during decode/loudness
+preflight, and writes edited WAVE `INFO` chunks via
+`owned_wave_metadata::edit_info_chunks` across `owned_loudnorm.rs`,
+`owned_loudnorm/report.rs`, `owned_adts_loudnorm.rs`,
+`owned_container_loudnorm.rs`, and `src/native_loudnorm.rs`; adds public
+`fvid::media::{plan_loudnorm, apply_loudnorm, apply_loudnorm_dual}` wrappers in
+`src/media.rs` routing through `native_loudnorm::{try_plan, try_apply}` before
+`fvid_media`; supports WAVE `INFO` metadata mutations in
+`native_pcm::normalize_file_with_options` (`src/native_pcm/normalize.rs`) and
+`native_plan::normalize_loudness_with_options` (`src/native_plan.rs`); and wires
+repeatable `--metadata KEY=VALUE` and `--metadata-delete KEY` into `loudnorm`,
+`plan loudnorm`, `normalize-loudness`, and `plan normalize-loudness` in
+`src/owned_loudnorm_cli.rs` and `src/media_cli.rs`. One focused integration
+test, 21 related integration tests, and 1 offline fixture unit test pass. See
+`batch-214-validation.json`.
+
+## Batch 215 — `CopyOptions` budgets, stream selection, and metadata mutations in `plan_transcode_lossless` and CLI routing for `plan crop-lossless` and filtered `overlay` with controls
+
+FVID-0222 adds `plan_selection` to `owned_mp4_multitrack_export.rs` and
+`owned_webm_multitrack_export.rs` (and returns an explicit error on
+out-of-range stream metadata indices in MP4 multitrack qualification); passes
+`options.max_packet_bytes` to `Mp4Reader::open` in
+`owned_mp4_video_bridge::prepare_selected`; enforces multitrack and
+single-stream MP4/WebM/Y4M `max_packets` and `max_packet_bytes` preflight,
+selected stream order and `primary_video`/`copy` dispositions, `metadata` plan
+steps, and budget notes in `owned_lossless::plan_transcode_lossless`; and routes
+CLI `plan crop-lossless` and filtered `overlay` / `plan overlay` with custom
+`CopyOptions` controls through `owned_lossless_command_with_name` in
+`src/media_cli.rs`. One focused integration test, 39 related integration tests,
+and 1 offline fixture unit test pass. See `batch-215-validation.json`.
+
+## Batch 216 — WAVE `INFO` and Matroska container/stream metadata mutations and stream selection across `mix-audio`, `merge-audio`, and Matroska `concat`
+
+FVID-0223 adds `publish_pcm_matroska_with_metadata` in
+`src/native_export/pcm_matroska.rs` and `write_wave_f32_with_info_options` in
+`src/native_audio_mix.rs`; admits and validates container/stream metadata
+mutations (`metadata_set`, `metadata_delete`, `stream_metadata_set`,
+`stream_metadata_delete`) and `--streams 0` across `mix-audio`, `merge-audio`,
+and PCM Matroska `concat` in `src/native_audio_mix.rs` and
+`src/native_audio_mix/concat.rs` (preserving and editing first-input WAVE `INFO`
+chunks on `.wav` outputs while rejecting stream metadata on `.wav` outputs);
+adds `container::mp4_concat::write_with_options` in
+`src/container/mp4_concat.rs` supporting stream selection/reordering and
+container/stream metadata mutations and updates
+`native_export::try_concat_mp4_matroska_with_options`,
+`native_plan::{concat_matroska_to_with_options, concat_mp4_matroska_with_options}`,
+and `fvid::media::validate_concat_matroska_options` (including admitting `.mka`
+output when `options.streams` selects only audio tracks from an A/V MP4); and
+wires `--streams`, `--metadata`, `--metadata-delete`, `--stream-metadata`, and
+`--stream-metadata-delete` into `native_mix`, `native_merge`,
+`try_mp4_matroska_concat`, and `run_native` in `src/media_cli.rs`. One focused
+integration test, 15 related integration tests, and 1 offline fixture unit test
+pass. See `batch-216-validation.json`.
+
+## Batch 217 — Matroska container and stream metadata mutations across ADTS `remux` and `concat` and across Matroska PCM audio `decode-audio` and `trim`
+
+FVID-0224 adds `write_adts_with_options`, `concat_adts_with_options`, and
+`extract_adts_matroska_metadata` in
+`crates/fvid-media/src/owned_matroska_adts_impl.rs` and preserves track
+`name`/`language` in `PacketWriter::rewrite_adts_rate`
+(`crates/fvid-media/src/owned_matroska_packet_impl.rs`); admits and validates
+Matroska container and stream metadata mutations (`metadata_set`,
+`metadata_delete`, `stream_metadata_set`, `stream_metadata_delete`) and emits a
+`metadata` plan step in `owned_adts_remux.rs`, `owned_concat.rs`,
+`native_export::{remux_adts_aac_with_options, concat_adts_aac_with_options}`,
+`native_plan::concat_adts_with_options`, and
+`fvid::media::{validate_adts_copy_options_with_metadata, plan_concat}`; wires
+`CopyOptions` into
+`native_export::pcm_matroska::{Output::new_with_options, Sink::new, validate_matroska_pcm_metadata}`,
+`native_export::PcmExportLimits`, and
+`fvid::media::{decode_fvid_media_audio_to_destination, validate_owned_audio_options_for_destination, plan_decode_audio, trim, plan_trim}`
+so `decode-audio` and `trim` to `.mkv`/`.mka` support container and stream
+metadata mutations while WAVE `.wav` and headerless `.f32le` destinations
+continue to reject unsupported metadata; and wires `--stream-metadata` and
+`--stream-metadata-delete` into `decode-audio`, `plan decode-audio`,
+`try_native_audio_trim`, and `try_native_audio_concat` in `src/media_cli.rs`.
+One focused integration test, 6 related integration tests, and 1 offline fixture
+unit test pass. See `batch-217-validation.json`.
+
+## Batch 218 — `CopyOptions` packet/byte budgets, stream metadata deletions, and metadata/stream plan steps across `burn-subtitles` and `xfade` in API and CLI
+
+FVID-0225 updates `owned_subtitle_burn::plan_burn_subtitles`
+(`crates/fvid-media/src/owned_subtitle_burn.rs`) to enforce cancellation,
+`max_packets`, and `max_packet_bytes` on both Y4M and FFV1 Matroska sources,
+populate `streams` with probed video stream `0` (`disposition: "primary_video"`),
+emit a `metadata` plan step when container or stream metadata mutations are
+requested, and record budget notes; updates `owned_xfade::plan_xfade`
+(`crates/fvid-media/src/owned_xfade.rs`) to enforce cancellation, `max_packets`,
+and `max_packet_bytes` (including FFV1 encoded packet size preflight via
+`visit_y4m_counted`), emit a `metadata` plan step, and record budget notes;
+applies `options.stream_metadata_delete` before `options.stream_metadata_set` in
+`owned_subtitle_burn::burn_subtitles` (Y4M path) and
+`owned_xfade::write_y4m_ffv1_counted`; and updates `owned_xfade_command` and
+`owned_subtitle_burn_command` in `src/media_cli.rs` to accept `-q`, reject
+duplicate non-metadata flags, and reject `--progress` during `plan`. One focused
+integration test, 2 related integration tests, and 1 offline fixture unit test
+pass. See `batch-218-validation.json`.
+
+## Batch 219 — Matroska container and stream metadata mutations and per-cue packet limits across `convert-subtitles` and `normalize-loudness` in API and CLI
+
+FVID-0226 adds `try_convert_with_controls`, `apply_subtitle_matroska_metadata`,
+and `publish_events_with_metadata` in
+`crates/fvid-media/src/owned_subtitle_impl.rs` (plus public
+`convert_subtitles_with_controls` in `crates/fvid-media/src/lib.rs` and
+`src/media.rs`), enforcing per-cue `max_packet_bytes` and pre-publication
+`max_packets`/cancellation/RSS checks across SRT, ASS, and Matroska subtitle
+conversions while preserving and mutating Matroska container and stream `0`
+metadata; updates `native_pcm::normalize_file_with_options`
+(`src/native_pcm/normalize.rs`) and `native_plan::normalize_loudness_with_options`
+(`src/native_plan.rs`) to validate and apply Matroska container and stream `0`
+metadata mutations on `.mka`/`.mkv` outputs while keeping WAVE `INFO` validation
+on `.wav` outputs; and wires `--metadata`, `--metadata-delete`,
+`--stream-metadata`, `--stream-metadata-delete`, and `-q` into
+`convert-subtitles`, `normalize-loudness`, and `plan normalize-loudness` in
+`src/media_cli.rs`. One focused integration test, 8 related integration tests,
+and 1 offline fixture unit test pass. See `batch-219-validation.json`.
+
+## Batch 220 — Custom container and stream text metadata tags across MP4-to-Matroska `remux` and `plan_remux` and stream metadata deletions in Y4M and multitrack MP4 lossless exports
+
+FVID-0227 updates `owned_mp4_remux::{policies, track_key, track_metadata, metadata, remux, plan_remux}`
+(`crates/fvid-media/src/owned_mp4_remux.rs`) and adds
+`write_selected_with_text_metadata_overrides` in
+`crates/fvid-media/src/owned_mp4_matroska_impl.rs` so MP4-to-Matroska `remux`
+and `plan_remux` admit and emit custom container `SimpleTag` entries (`<= 128`
+key bytes, `<= 1024` value bytes, NUL-free) and stream-scoped `SimpleTag`
+entries (excluding reserved `rotate`/`stereo_mode`/`alpha_mode`) mapped to the
+selected output track order; and applies `metadata_delete` and
+`stream_metadata_delete` in `owned_matroska::write_y4m_ffv1_policy`
+(`crates/fvid-media/src/owned_matroska.rs`) and companion audio stream tag
+deletions in `owned_mp4_multitrack_export::try_export`
+(`crates/fvid-media/src/owned_mp4_multitrack_export.rs`). One focused
+integration test, 4 related integration tests, and 1 offline fixture unit test
+pass. See `batch-220-validation.json`.
+
+## Batch 221 — Short `-q`/`--quiet` flag and `--progress`-during-`plan` parity across owned media CLI command and plan routes
+
+FVID-0228 updates `owned_loudnorm_cli::{run, run_plan}`
+(`src/owned_loudnorm_cli.rs`) and `src/media_cli.rs` (`plan loudness`,
+`loudness`, `plan decode-audio`, `decode-audio`, `plain_decode`,
+`try_native_audio_trim`, `try_owned_overlay`, `owned_lossless_command_with_name`,
+and the `transcode`, `transcode-lossless`, `crop-lossless`, and `plan remux`
+fast paths) to accept both `-q` and `--quiet` and normalize `-q` to `"--quiet"`
+in duplicate-option tracking, and accepts `--progress` as a no-op during `plan`
+in `try_owned_overlay`, `owned_lossless_command_with_name`,
+`owned_xfade_command`, `owned_subtitle_burn_command`, `try_video_concat`, and
+`try_video_trim`. One focused integration test, 3 related integration tests, and
+1 offline fixture unit test pass. See `batch-221-validation.json`.
+
+## Batch 222 — Vorbis comment metadata inspection and WAVE `INFO` preservation across bare FLAC (`probe`, `decode-audio`, `trim`, `loudnorm`) and Ogg (`probe`)
+
+FVID-0229 adds `vorbis_comments`, `probe_metadata_from_entries`, and
+`wave_info_from_extra` in `crates/fvid-media/src/owned_flac_layout.rs` and
+`Flac::metadata_blocks` in `crates/fvid-media/src/owned_flac.rs`; updates
+`owned_flac_probe::probe_flac` (`crates/fvid-media/src/owned_flac_probe.rs`)
+and `owned_probe::probe_ogg` (`crates/fvid-media/src/owned_probe.rs`) to expose
+canonical container and stream `0` Vorbis comment metadata (`title`, `artist`,
+`album`, `date`, `comment`, `genre`, `copyright`, `encoder`, `track`,
+`album_artist`, `disc`, `publisher`, `description`, `rating`, `language`, and
+custom tags, while excluding `waveformatextensible_channel_mask`); and appends
+source FLAC Vorbis comments as RIFF `INFO` chunks to the spooled WAVE file in
+`owned_raw_flac::apply` (`crates/fvid-media/src/owned_raw_flac.rs`) and
+`owned_container_loudness::decode_to_wave`
+(`crates/fvid-media/src/owned_container_loudness.rs`) so `decode-audio`,
+`trim`, and single/dual-pass `loudnorm` from `.flac` to `.wav` preserve and
+selectively edit/delete source FLAC tags. Two focused integration tests, 9
+related unit/integration tests, and 1 offline fixture unit test pass. See
+`batch-222-validation.json`.
+
+## Batch 223 — ID3v2/ID3v1 metadata inspection and WAVE `INFO` preservation across bare MPEG audio (`probe`, `decode-audio`, `trim`, `loudnorm`)
+
+FVID-0230 adds `Mp3::probe_metadata` and `Mp3::wave_info` (supporting ID3v2.3 and
+ID3v2.4 text, `COMM`, and `TXXX` frames across ISO-8859-1, UTF-16 with BOM,
+UTF-16BE, and UTF-8 encodings plus ID3v1/v1.1 fallback) in
+`crates/fvid-media/src/owned_mpeg_audio.rs`; updates
+`owned_mpeg_probe::probe_mpeg` (`crates/fvid-media/src/owned_mpeg_probe.rs`) to
+expose canonical container and stream `0` metadata (`title`, `artist`, `album`,
+`date`, `comment`, `genre`, `copyright`, `encoder`, `track`, `album_artist`,
+`disc`, `publisher`, `description`, `language`, and custom `TXXX` tags); and
+appends source ID3 tags as RIFF `INFO` chunks to the spooled WAVE file in
+`owned_raw_mp3::apply` (`crates/fvid-media/src/owned_raw_mp3.rs`) and
+`owned_container_loudness::decode_to_wave`
+(`crates/fvid-media/src/owned_container_loudness.rs`) so `decode-audio`, `trim`,
+and single/dual-pass `loudnorm` from `.mp3` to `.wav` preserve and selectively
+edit/delete source ID3 metadata. Two focused integration tests, 6 related
+integration tests, and 2 offline fixture unit tests pass. See
+`batch-223-validation.json`.
+
+## Batch 224 — Matroska (`.mka`/`.mkv`) output and container/stream metadata mutations across `loudnorm` and `plan loudnorm` in API and CLI
+
+FVID-0231 updates `native_loudnorm::try_plan` (`src/native_loudnorm.rs`) to
+validate Matroska container and stream `0` metadata via
+`validate_matroska_pcm_metadata` and insert a `metadata` plan step before
+`write` when custom container or stream metadata mutations are requested;
+updates `native_loudnorm::try_apply` (`src/native_loudnorm.rs`) to support
+`.mka` and `.mkv` destinations across WAVE, ADTS AAC, and container/standalone
+audio sources by normalizing to a private temporary WAVE spool and publishing
+float32 Matroska PCM with container and stream `0` metadata via
+`export_audio_pcm_transformed_with_controls` (while rejecting stream metadata
+mutations on `.wav` outputs); and adds `--stream-metadata` and
+`--stream-metadata-delete` to `owned_loudnorm_cli::{run, run_plan}` and
+`--progress` no-op handling during `plan loudnorm` in
+`src/owned_loudnorm_cli.rs`. One focused integration test, 7 related integration
+tests, and 2 offline fixture unit tests pass. See `batch-224-validation.json`.
+
+## Batch 225 — `.wav` output and WAVE `INFO` / Matroska metadata mutations across sample-domain audio `concat` and `plan concat` in API and CLI
+
+FVID-0232 updates `native_audio_mix::concat::{eligible_with_options, concat_audio_with_options}`
+(`src/native_audio_mix/concat.rs`) to accept `.wav`, `.mka`, and `.mkv`
+destinations, preserve shared speaker masks across segments, and emit float32
+WAVE headers with RIFF `INFO` metadata chunks while rejecting stream metadata
+mutations on `.wav` outputs; updates
+`native_export::try_concat_mp4_matroska_with_options` (`src/native_export.rs`)
+to route `.wav` destinations to sample-domain PCM concat whenever lossless
+byte-preserving PCM WAVE concat is not applicable (such as mixed compressed/PCM
+inputs, G.711 WAVE, or heterogeneous PCM bit depths like 16-bit + 24-bit WAVE);
+and updates `native_plan::concat_matroska_to_with_options`
+(`src/native_plan.rs`), `media::plan_concat` (`src/media.rs`), and
+`media_cli::try_mp4_matroska_concat` (`src/media_cli.rs`) to support `.wav`
+concat outputs, `--output-format wav` in `plan concat`, and automatic
+sample-domain fallback for heterogeneous-depth WAVE or Matroska-tagged WAVE
+plans while keeping lossless byte-preserving WAVE concat for compatible PCM WAVE
+inputs. One focused integration test, 10 related integration tests, and 1
+offline fixture unit test pass. See `batch-225-validation.json`.
+
+## Batch 226 — Preserve and selectively edit source RIFF `INFO`, MP4/MOV/M4A, and Matroska/WebM/MKA tags across WAVE audio exports, `trim`, `loudnorm`, and `normalize-loudness`
+
+FVID-0233 adds `info_for_file_tags`, `mp4_source_info`, and
+`matroska_source_info` in `crates/fvid-media/src/owned_wave_metadata.rs`;
+appends source MP4 and Matroska RIFF `INFO` chunks (including container tags,
+track fallback title, track language `ILNG`, segment `WritingApp` encoder, and
+4-CC container/track tags) to the decoded WAVE spool in
+`owned_mp4_audio_export::apply`,
+`owned_matroska_{aac,opus,flac,alac,mp3,pcm}_export::apply`, and
+`owned_container_loudness::decode_to_wave`, while preserving `info_chunks`
+across spatial AAC fold-down in `owned_aac_export_routing::export`; and updates
+`native_export::export_pcm_selected` (`src/native_export.rs`) to preserve and
+selectively edit source WAVE `LIST`/`INFO` chunks (including opaque 4-CC tags)
+and MP4/Matroska container/track tags on `.wav` outputs across `decode-audio`,
+`trim`, `loudnorm`, and `normalize-loudness`. One focused integration test, 7
+related integration tests, and 1 offline fixture unit test pass. See
+`batch-226-validation.json`.
+
+## Batch 227 — Preserve and selectively edit source WAVE, MP4/MOV/M4A, Matroska/WebM/MKA, and FLAC/Ogg/MP3 container and stream `0` metadata across Matroska PCM audio exports, `trim`, `loudnorm`, and `normalize-loudness`
+
+FVID-0234 adds `MatroskaPcmMetadata`, `default_matroska_pcm_metadata`,
+`extract_source_pcm_metadata`, `Output::new_with_source_metadata`, and
+`Sink::new_with_source_metadata` in `src/native_export/pcm_matroska.rs`, and
+updates `parse_matroska_pcm_metadata(base, options)` to apply container
+(`metadata_delete`, `metadata_set`) and stream `0` (`stream_metadata_delete`,
+`stream_metadata_set`) mutations (including case-insensitive custom tag
+deletion) on top of source metadata; adds
+`export_audio_pcm_transformed_with_source_metadata` and
+`source_matroska_metadata` in `src/native_export.rs`; and updates
+`media::decode_fvid_media_audio_to_destination` (`src/media.rs`) and
+`native_loudnorm::try_apply` (`src/native_loudnorm.rs`) to extract
+`source_matroska_metadata` from the original source before spooling to WAVE and
+publishing `.mka`/`.mkv`. One focused integration test, 5 related integration
+tests, and 1 offline fixture unit test pass. See `batch-227-validation.json`.
+
+## Batch 228 — Preserve and selectively edit first-segment source WAVE, MP4/MOV/M4A, Matroska/WebM/MKA, and FLAC/Ogg/MP3 metadata and enforce WAVE controlled memory budgets across sample-domain audio `concat` and `plan concat`
+
+FVID-0235 adds `extract_source_wave_info` in
+`src/native_export/pcm_matroska.rs` and updates
+`native_audio_mix::concat::concat_audio_with_options`
+(`src/native_audio_mix/concat.rs`) to preserve and selectively edit
+first-segment `source_info` chunks on `.wav` concat outputs and first-segment
+`source_matroska_metadata` on `.mka`/`.mkv` concat outputs; enforces
+`options.max_controlled_bytes` against `estimate_float_wave_export_bytes` for
+PCM WAVE inputs in `owned_audio_plan::source_descriptor_for_decode`
+(`crates/fvid-media/src/owned_audio_plan.rs`); and updates `media::plan_concat`
+(`src/media.rs`) to return `fvid_media::plan_concat` directly for compatible PCM
+WAVE inputs unless Matroska-only metadata mutations are requested. One focused
+integration test, 11 related integration tests, and 1 offline fixture unit test
+pass. See `batch-228-validation.json`.
+
+## Batch 229 — Preserve and selectively edit first-input source WAVE, MP4/MOV/M4A, Matroska/WebM/MKA, and FLAC/Ogg/MP3 metadata across `mix-audio` and `merge-audio` to `.wav`, `.mka`, and `.mkv`
+
+FVID-0236 updates `native_audio_mix::{mix_audio_with_controls, merge_audio_with_controls}`
+(`src/native_audio_mix.rs`) to extract and selectively edit first-input
+`source_info` chunks on `.wav` outputs via `extract_source_wave_info` and
+first-input `source_matroska_metadata` on `.mka`/`.mkv` outputs via
+`extract_source_pcm_metadata` and `Output::new_with_source_metadata`, and
+updates `owned_wave_metadata::info_for_file_tags`
+(`crates/fvid-media/src/owned_wave_metadata.rs`) to omit `ILNG` when
+`track_language` is `"und"`. One focused integration test, 14 related
+integration tests, and 1 offline fixture unit test pass. See
+`batch-229-validation.json`.
+
+## Batch 230 — Support `plan convert-subtitles` / `plan_convert_subtitles` across SRT, ASS, and Matroska subtitle sources and preserve source Matroska `WritingApp` (`encoder`) metadata during `convert-subtitles` in API and CLI
+
+FVID-0237 adds `try_plan_with_controls` and dry-run cue/metadata validation in
+`crates/fvid-media/src/owned_subtitle_impl.rs`; exposes
+`plan_convert_subtitles` and `plan_convert_subtitles_with_controls` in
+`crates/fvid-media/src/lib.rs` and `src/media.rs`; routes
+`fvid media plan convert-subtitles INPUT [OUTPUT.mkv]` (with `--progress` no-op
+and duplicate `--streams`/`--codec` checks) in `src/media_cli.rs`; and preserves
+non-default source `reader.writing_app` (`ENCODER`) in
+`try_convert_matroska_inner` so source `encoder` metadata is retained by default
+and can be overridden or deleted via `--metadata` / `--metadata-delete`. One
+focused integration test, 8 related integration tests, and 1 offline fixture
+unit test pass. See `batch-230-validation.json`.
+
+## Batch 231 — Support destination-optional `plan normalize-loudness` in CLI and ignore progress hooks in read-only `plan_loudness`, `plan_normalize_loudness`, and `plan decode-audio`
+
+FVID-0238 allows `options.progress` as a read-only no-op in
+`fvid::media::plan_loudness` and `fvid::media::plan_normalize_loudness`
+(`src/media.rs`); accepts `--progress` as a no-op in `fvid media plan loudness`
+and `fvid media plan decode-audio` (`src/media_cli.rs`); and updates
+`fvid media plan normalize-loudness INPUT [OUTPUT.wav|OUTPUT.mka|OUTPUT.mkv]`
+in both `run` and `run_native` (`src/media_cli.rs`) so the destination path is
+optional during planning while still enforcing destination-specific
+`.wav`/`.mka`/`.mkv` extension and metadata constraints when an explicit output
+path is supplied. One focused integration test, 10 related integration tests,
+and 1 offline fixture unit test pass. See `batch-231-validation.json`.
+
+## Batch 232 — Support compressed and rotated/cropped single-track Matroska video in owned subtitle burn, preserve source Matroska `WritingApp` (`encoder`) across FFV1 video exports, and enforce container metadata bounds in `owned_xfade` and `owned_lossless`
+
+FVID-0239 updates `owned_subtitle_burn::prepare`
+(`crates/fvid-media/src/owned_subtitle_burn.rs`) to admit all single-track
+Matroska video sources supported by `owned_ffv1_export::supports` and compute
+`width`/`height` from `track.visible()` with 90/270-degree rotation swap;
+preserves non-default source Matroska `WritingApp` as `ENCODER` in
+`owned_ffv1_export::export_processed`
+(`crates/fvid-media/src/owned_ffv1_export.rs`) and preserves custom
+container/track SimpleTags and `WritingApp` (`ENCODER`) in
+`native_lossless_y4m::write_selected` (`src/native_lossless_y4m.rs`); and aligns
+`owned_xfade::default_policy` (`crates/fvid-media/src/owned_xfade.rs`) and
+`owned_lossless::metadata` (`crates/fvid-media/src/owned_lossless.rs`) to
+enforce container metadata key/value bounds across planning and execution. One
+focused integration test, 6 related integration tests, and 1 offline fixture
+unit test pass. See `batch-232-validation.json`.
+
+## Batch 233 — Support multitrack Matroska `V_MPEG4/ISO/AVC` and IETF track languages in owned lossless video export and enforce set-then-delete metadata precedence across `owned_webm_multitrack_export`, `owned_mp4_multitrack_export`, and `owned_ffv1_export`
+
+FVID-0240 admits `"V_MPEG4/ISO/AVC"` and IETF track languages in
+`owned_webm_multitrack_export::qualify`
+(`crates/fvid-media/src/owned_webm_multitrack_export.rs`); populates
+`vt.language` from `video.track_languages` / `video.track_legacy_languages` in
+`owned_webm_multitrack_export::try_export` and
+`owned_mp4_multitrack_export::try_export`
+(`crates/fvid-media/src/owned_mp4_multitrack_export.rs`); preserves source
+Matroska track languages (`track_languages` / `track_legacy_languages`,
+defaulting to `"eng"`) in `native_lossless_y4m::write_selected`
+(`src/native_lossless_y4m.rs`); and applies `metadata_set` /
+`stream_metadata_set` before `metadata_delete` / `stream_metadata_delete` across
+`owned_ffv1_export`, `owned_webm_multitrack_export`, and
+`owned_mp4_multitrack_export`. One focused integration test, 9 related
+integration tests, and 1 offline fixture unit test pass. See
+`batch-233-validation.json`.
+
+## Batch 234 — Support `9..=16`-bit, mixed-precision, and non-4:2:0 scheduled Y4M overlays, post-geometry overlay validation, Matroska `DefaultDuration` overlay clocks, modern CLI overlay filters, and track `FlagEnabled`/`FlagDefault` preservation across lossless video exports
+
+FVID-0241 updates `owned_y4m_overlay::OverlayReader`
+(`crates/fvid-media/src/owned_y4m_overlay.rs`) to support `8..=16`-bit,
+mixed-precision (`owned_overlay::overlay_opaque_depth`), and non-`Yuv420`
+(`Yuv422`, `Yuv440`, `Yuv444`, `Yuv411`, `Yuv410`) scheduled Y4M overlays with
+subsampling-aware placement alignment; extracts `presented_header_after_geometry`
+in `owned_y4m_decode.rs` (`crates/fvid-media/src/owned_y4m_decode.rs`) and uses
+it in `overlay_supported`, `decode_reader_frames`, and
+`owned_video_decode::process_frame_with_overlay`
+(`crates/fvid-media/src/owned_video_decode.rs`) while stripping duplicate `F`
+tokens before setting the nanosecond Matroska overlay clock; admits modern
+geometry, pixel, and temporal filter flags and fixes `&args[command + 2]` in
+`src/media_cli.rs`; and preserves source track `FlagEnabled` and `FlagDefault`
+dispositions in `src/native_lossless.rs`, `src/native_lossless_y4m.rs`, and
+`crates/fvid-media/src/owned_webm_multitrack_export.rs`. One focused integration
+test, 9 related integration tests, and 1 offline fixture unit test pass. See
+`batch-234-validation.json`.
+
+## Batch 235 — Support rotated MP4 video tracks in owned video decode, bridge, and multitrack lossless export, account for trimmed AAC audio sample frames in MP4 multitrack interval export, and align `fvid::media::probe_as` format hints
+
+FVID-0242 updates `owned_mp4_video_decode::decode_presented`
+(`crates/fvid-media/src/owned_mp4_video_decode.rs`),
+`owned_mp4_video_bridge::prepare_selected`
+(`crates/fvid-media/src/owned_mp4_video_bridge.rs`), and
+`owned_mp4_multitrack_export::qualify`
+(`crates/fvid-media/src/owned_mp4_multitrack_export.rs`) to admit
+`track.rotation` in `0 | 90 | 180 | 270`, materialize quarter turns on decoded
+frames via `owned_display_geometry::apply` while preserving post-rotation
+`track.pixel_aspect` and `effective_track_default`; tracks `trimmed_samples` in
+`aac_packet_plan_window` (`crates/fvid-media/src/owned_mp4_aac_plan_impl.rs`)
+and `plan_window` (`crates/fvid-media/src/owned_mp4_matroska_impl.rs`) and
+reports `stats.trimmed_audio_sample_frames` in
+`owned_mp4_multitrack_export::try_export`; and aligns
+`src/media_probe.rs::try_probe_as` with `fvid_media::probe_as` format hints.
+One focused integration test, 3 related integration tests, and 1 offline fixture
+unit test pass. See `batch-235-validation.json`.
+
+## Batch 236 — Support single-track MP4, monochrome FFV1, and RGB FFV1 sources in owned subtitle burn-in and enforce set-then-delete container and stream metadata precedence across subtitle burn, cross-fade, Y4M lossless export, and subtitle conversion
+
+FVID-0243 updates `owned_subtitle_burn::{supports, prepare, plan_burn_subtitles, burn_subtitles}`
+(`crates/fvid-media/src/owned_subtitle_burn.rs`) to bridge single-track MP4 video
+via `owned_mp4_video_bridge::prepare`; supports `8..=16`-bit interleaved RGB
+frames in `owned_text_raster::composite_white`
+(`crates/fvid-media/src/owned_text_raster.rs`) and preserves true monochrome
+(`encode_gray` / `encode_gray_with_alpha`) when `view.monochrome && process.is_some()`
+in `owned_ffv1_export::export_processed`
+(`crates/fvid-media/src/owned_ffv1_export.rs`); and enforces set-then-delete
+container and stream metadata precedence (plus uppercase custom tag
+normalization) across `owned_lossless::metadata`
+(`crates/fvid-media/src/owned_lossless.rs`), `write_y4m_ffv1_policy`
+(`crates/fvid-media/src/owned_matroska.rs`), `owned_subtitle_burn::burn_subtitles`,
+`owned_xfade::write_y4m_ffv1_counted` (`crates/fvid-media/src/owned_xfade.rs`),
+and `owned_subtitle_impl::apply_subtitle_matroska_metadata`
+(`crates/fvid-media/src/owned_subtitle_impl.rs`). One focused integration test,
+3 related integration tests, and 1 offline fixture unit test pass. See
+`batch-236-validation.json`.
+
+## Batch 237 — Enforce set-then-delete container and stream metadata precedence, case-insensitive tag removal, and uppercase Matroska custom tag normalization across MP4/ADTS/PCM Matroska remux, concat, and WAVE INFO editing
+
+FVID-0244 updates `owned_mp4_remux::{track_metadata, metadata}`
+(`crates/fvid-media/src/owned_mp4_remux.rs`), `mp4_concat::write_with_options`
+(`src/container/mp4_concat.rs`), `extract_adts_matroska_metadata`
+(`crates/fvid-media/src/owned_matroska_adts_impl.rs`),
+`parse_matroska_pcm_metadata` (`src/native_export/pcm_matroska.rs`), and
+`owned_wave_metadata::edit_info_chunks`
+(`crates/fvid-media/src/owned_wave_metadata.rs`) to apply `metadata_set` and
+`stream_metadata_set` before `metadata_delete` and `stream_metadata_delete`,
+normalizes custom Matroska container and stream tags to uppercase with
+case-insensitive removal, and enforces stream metadata key/value bounds and
+forbidden key rejection (`rotate`, `stereo_mode`, `alpha_mode`) in
+`src/container/mp4_concat.rs` and `src/native_plan.rs`. One focused integration
+test, 6 related integration tests, and 1 offline fixture unit test pass. See
+`batch-237-validation.json`.
+
+## Batch 238 — Support 6.1/7.1 downmixing, `1|2 -> 3..=8` upmixing, and ALAC speaker masks across native audio export and planning, qualify Matroska Opus/MPEG channel layouts in `supports()`, and preserve bare MPEG ID3v2 language/custom tags in Matroska PCM export
+
+FVID-0245 updates `WaveInfo::validate_rematrix` (`src/native_pcm.rs`),
+`export_audio_pcm_transformed_with_source_metadata` (`src/native_export.rs`),
+`native_plan::decode_audio_selected` (`src/native_plan.rs`), and
+`PacketPcmDecoder::channel_mask` (`src/native_audio_decoder.rs`) to support
+`1..=8 -> 1 | 2` downmixing (including 6.1 and 7.1), `1 | 2 -> 1..=8` upmixing,
+explicit speaker masks via `PcmGain::with_mask` and `rematrix_layout_supported`,
+standard 6.1/7.1 WAVE output masks, and ALAC speaker masks; qualifies target
+channel conversion before decode and admits only `Ok(_)` or controlled-memory
+budget errors in `owned_matroska_opus_export::supports`
+(`crates/fvid-media/src/owned_matroska_opus_export.rs`) and
+`owned_matroska_mp3_export::supports`
+(`crates/fvid-media/src/owned_matroska_mp3_export.rs`); uses
+`pcm_decode_options` in `owned_raw_mp3::source_info`
+(`crates/fvid-media/src/owned_raw_mp3.rs`); and preserves container `language`
+(such as ID3v2 `TLAN`) and uppercase custom tags in
+`extract_source_pcm_metadata` (`src/native_export/pcm_matroska.rs`). Two focused
+integration tests, 7 related integration tests, and 1 offline fixture unit test
+pass. See `batch-238-validation.json`.
+
+## Batch 239 — Align ADTS `remux`, `plan_remux`, and `concat` stream-zero selection, packet/RSS budgets, and Matroska metadata routing across native MP4 and Matroska paths
+
+FVID-0246 adds `native_plan::remux_adts_with_options` (`src/native_plan.rs`) to
+validate and plan ADTS remux with packet/RSS budgets, `streams: [0]`, and
+Matroska metadata mutations; updates `fvid::media::remux`,
+`fvid::media::plan_remux`, and `fvid::media::concat` (`src/media.rs`) to
+validate ADTS options via `validate_adts_copy_options_with_metadata(options, true, matroska)`
+and enforce `"ADTS has only stream 0"` before invoking
+`remux_adts_aac_with_options`, `remux_adts_with_options`, and
+`concat_adts_aac_with_options` on the native `"fvid"` backend; and aligns
+`try_native_audio_concat` (`src/media_cli.rs`) stream validation with
+`"ADTS has only stream 0"` and `"WAVE has only stream 0"`. Two focused
+integration tests, 3 related integration tests, and 1 offline fixture unit test
+pass. See `batch-239-validation.json`.
+
+## Batch 240 — Align Matroska identity remux planning and MP4 remux/relocation packet/RSS budgets and backend attribution across top-level and owned paths
+
+FVID-0247 adds `probe_webm_with_packet_limit`
+(`crates/fvid-media/src/owned_webm_probe.rs`), `matroska_with_packet_limit`
+(`src/media_probe.rs`), `native_plan::remux_with_options` (`src/native_plan.rs`),
+and `validate_mp4_relocate_options` (`src/media.rs`); propagates
+`options.max_packet_bytes`, `options.max_rss_bytes`, and `options.cancel`
+through Matroska identity remux planning and MP4 fast-start relocation; and
+normalizes `backend: "fvid"` and `fvid_payload_copies: 0` when
+`fvid::media::remux` delegates MP4 -> Matroska remux with custom options to
+`fvid_media::remux`. Two focused integration tests, 6 related integration tests,
+and 1 offline fixture unit test pass. See `batch-240-validation.json`.
 
 Delivery verification uses a real 1 KiB BufReader and preserves the earlier raw telemetry in the evidence logs.

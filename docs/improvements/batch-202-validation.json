@@ -1,0 +1,76 @@
+{
+  "batch": 202,
+  "ids": ["FVID-0209"],
+  "title": "Add owned and native probe support for G.711 WAVE, Ogg Opus/Vorbis/Joint, and bare FLAC/MPEG audio, extend owned loudness and loudnorm pipelines to G.711 WAVE, Ogg, bare FLAC, and bare MP1/MP2/MP3, reject 0-sample trimmed MPEG streams in planning, and keep ADTS loudness/loudnorm planning configuration-only",
+  "scope": [
+    "crates/fvid-media/src/lib.rs",
+    "crates/fvid-media/src/owned_flac_probe.rs",
+    "crates/fvid-media/src/owned_mpeg_probe.rs",
+    "crates/fvid-media/src/owned_probe.rs",
+    "crates/fvid-media/src/owned_wave_inspect.rs",
+    "crates/fvid-media/src/owned_container_loudness.rs",
+    "crates/fvid-media/src/owned_adts_loudness.rs",
+    "crates/fvid-media/src/owned_raw_flac.rs",
+    "crates/fvid-media/src/owned_raw_mp3.rs",
+    "crates/fvid-media/src/owned_ogg_opus_export.rs",
+    "crates/fvid-media/src/owned_ogg_vorbis_export.rs",
+    "crates/fvid-media/src/owned_ogg_joint_export.rs",
+    "crates/fvid-media/src/owned_g711_wave_export.rs",
+    "crates/fvid-media/src/owned_audio_plan.rs",
+    "src/media_probe.rs",
+    "src/native_loudnorm.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/probe-loudness-audio/g711-alaw-48k.wav",
+    "tests/fixtures/playback-errors/probe-loudness-audio/g711-mulaw-48k.wav",
+    "tests/fixtures/playback-errors/probe-loudness-audio/ogg-opus-48k.ogg",
+    "tests/fixtures/playback-errors/probe-loudness-audio/ogg-vorbis-48k.ogg",
+    "tests/fixtures/playback-errors/probe-loudness-audio/ogg-joint-48k.ogg",
+    "tests/fixtures/playback-errors/probe-loudness-audio/raw-flac-48k.flac",
+    "tests/fixtures/playback-errors/probe-loudness-audio/raw-mp3-48k.mp3",
+    "tests/fixtures/playback-errors/probe-loudness-audio/raw-mp3-empty-trimmed.mp3",
+    "tests/fixtures/playback-errors/probe-loudness-audio/video.mkv",
+    "tests/fixtures/playback-errors/probe-loudness-audio/manifest.json"
+  ],
+  "generators": [
+    "scripts/generate_probe_loudness_audio_regressions.py",
+    "scripts/test_probe_loudness_audio_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/evidence/batch-202-owned-probe-before.rs",
+      "docs/improvements/evidence/batch-202-owned-wave-inspect-before.rs",
+      "docs/improvements/evidence/batch-202-media-probe-before.rs",
+      "docs/improvements/evidence/batch-202-owned-container-loudness-before.rs",
+      "docs/improvements/evidence/batch-202-owned-adts-loudness-before.rs",
+      "docs/improvements/evidence/batch-202-owned-raw-flac-before.rs",
+      "docs/improvements/evidence/batch-202-owned-raw-mp3-before.rs",
+      "docs/improvements/evidence/batch-202-owned-ogg-opus-export-before.rs",
+      "docs/improvements/evidence/batch-202-owned-ogg-vorbis-export-before.rs",
+      "docs/improvements/evidence/batch-202-owned-ogg-joint-export-before.rs",
+      "docs/improvements/evidence/batch-202-owned-g711-wave-export-before.rs",
+      "docs/improvements/evidence/batch-202-native-loudnorm-before.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-202-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-202-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-202-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test probe_loudness_audio_regressions",
+      "passed": 3,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test native_loudnorm_cli --test native_adts_library_loudness --test native_adts_library_loudnorm --test native_audio_library_plan --test probe_loudness_audio_regressions --test container_loudness_plan_regressions --test wave_ogg_flac_plan_regressions --test owned_container_loudness --test owned_container_loudnorm --test native_wave_probe_info --test native_wave_route_regressions --test native_probe_dispatch --test owned_mp4_probe --test native_matroska_probe",
+      "passed": 40,
+      "failed": 0
+    },
+    "fixture_generator_tests": {
+      "command": "python3 scripts/test_probe_loudness_audio_regressions.py",
+      "passed": 2,
+      "failed": 0
+    }
+  },
+  "status": "accepted"
+}

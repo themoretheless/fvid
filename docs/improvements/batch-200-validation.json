@@ -1,0 +1,64 @@
+{
+  "batch": 200,
+  "ids": ["FVID-0207"],
+  "title": "Dispatch Matroska FLAC and MPEG audio in owned_container_loudness, propagate explicit speaker masks for Matroska Opus/FLAC/ALAC/PCM plan and export rematrixing, default QuickTime 0-bit sowt/twos to 16-bit in owned_mp4_probe, and negotiate in-band PS in native_pcm::loudness",
+  "scope": [
+    "crates/fvid-media/src/owned_container_loudness.rs",
+    "crates/fvid-media/src/owned_audio_plan.rs",
+    "crates/fvid-media/src/owned_audio_export.rs",
+    "crates/fvid-media/src/owned_matroska_opus_export.rs",
+    "crates/fvid-media/src/owned_matroska_flac_export.rs",
+    "crates/fvid-media/src/owned_matroska_alac_export.rs",
+    "crates/fvid-media/src/owned_matroska_pcm_export.rs",
+    "crates/fvid-media/src/owned_mp4_probe_impl.rs",
+    "src/native_pcm/loudness.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/container-loudness-plan/flac-loudness.mka",
+    "tests/fixtures/playback-errors/container-loudness-plan/flac-unassigned-mask.mka",
+    "tests/fixtures/playback-errors/container-loudness-plan/mp1-loudness.mka",
+    "tests/fixtures/playback-errors/container-loudness-plan/opus-quad-family1.mka",
+    "tests/fixtures/playback-errors/container-loudness-plan/opus-discrete-family255-4ch.mka",
+    "tests/fixtures/playback-errors/container-loudness-plan/pcm-discrete-4ch.mka",
+    "tests/fixtures/playback-errors/container-loudness-plan/mov-sowt-zero-bits.mov",
+    "tests/fixtures/playback-errors/container-loudness-plan/manifest.json"
+  ],
+  "generators": [
+    "scripts/generate_container_loudness_plan_regressions.py",
+    "scripts/test_container_loudness_plan_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/evidence/batch-200-owned-container-loudness-before.rs",
+      "docs/improvements/evidence/batch-200-owned-audio-plan-before.rs",
+      "docs/improvements/evidence/batch-200-owned-audio-export-before.rs",
+      "docs/improvements/evidence/batch-200-owned-matroska-opus-export-before.rs",
+      "docs/improvements/evidence/batch-200-owned-matroska-flac-export-before.rs",
+      "docs/improvements/evidence/batch-200-owned-matroska-alac-export-before.rs",
+      "docs/improvements/evidence/batch-200-owned-matroska-pcm-export-before.rs",
+      "docs/improvements/evidence/batch-200-owned-mp4-probe-impl-before.rs",
+      "docs/improvements/evidence/batch-200-native-pcm-loudness-before.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-200-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-200-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-200-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --features player --test container_loudness_plan_regressions",
+      "passed": 4,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --features player --test owned_matroska_audio_plan --test matroska_probe_crop_export_regressions --test he_aac_ps_inband",
+      "passed": 10,
+      "failed": 0
+    },
+    "fixture_generator_tests": {
+      "command": "python3 -m unittest scripts/test_container_loudness_plan_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  },
+  "status": "accepted"
+}

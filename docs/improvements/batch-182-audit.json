@@ -1,0 +1,20 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0189",
+  "source": "src/container/mp4.rs",
+  "source_sha256": "ab38956d52752874a62cbb666a2cb7915a167f8440dbeb1aa65da8a3866f08e0",
+  "before_snapshot": "evidence/batch-182-mp4-before.rs",
+  "problem": "Both MP4 parsers (src/container/mp4.rs and crates/fvid-media/src/owned_mp4_impl.rs) accepted overlapping or backward-ordered chunk spans in stco/co64 (chunk_runs), zero-byte samples in stsz (expanded_index) and trun/tfhd (index_fragments), and 0-sample non-fragmented or fragmented tracks (sample_index and index_fragments), allowing corrupted sample tables to alias media bytes across chunks, emit empty coded packets to video/audio decoders, or expose tracks with zero samples.",
+  "primary_reference": "https://www.iso.org/standard/68960.html",
+  "reference_provenance": "ISO/IEC 14496-12:2015, 8.7.5 (ChunkOffsetBox 'stco' / 'co64' chunk offsets in increasing file order within track media data), 8.7.3.2 (SampleSizeBox 'stsz' positive coded sample sizes), and 8.8.8 (TrackRunBox 'trun' sample_size and non-empty track sample tables).",
+  "fixtures": "tests/fixtures/playback-errors/mp4-chunk-bounds",
+  "scope": "Enforce strictly increasing non-overlapping chunk spans in chunk_runs, positive coded sample sizes in expanded_index and index_fragments, and non-empty sample tables in sample_index and index_fragments across src/container/mp4.rs and crates/fvid-media/src/owned_mp4_impl.rs.",
+  "requirements": [
+    "Reproduce pre-fix acceptance of overlapping stco chunks, backward co64 chunks, zero-byte stsz samples, zero-byte trun samples, empty non-fragmented tracks, and empty fragmented tracks before editing production code.",
+    "Reject overlapping or non-increasing chunk spans (offset < prev_end) in chunk_runs in both src/container/mp4.rs and crates/fvid-media/src/owned_mp4_impl.rs.",
+    "Reject zero-byte coded samples in expanded_index (stsz) and index_fragments (trun/tfhd), and reject 0-sample tracks in sample_index (!fragmented && count == 0) and at the end of index_fragments (track.samples.len() == 0) in both parsers.",
+    "Verify multi-chunk stco and co64 healthy controls decode exact VP9 packets and 16x16 RGB frames across sequential playback, EOF, rewind, and seek, and run all 6 validation gates."
+  ],
+  "implementation_plan": "Add !fragmented && count == 0 check in sample_index, size == 0 check in expanded_index, bytes_of_sample == 0 and track.samples.len() == 0 checks in index_fragments, and offset < prev_end check in chunk_runs across src/container/mp4.rs and crates/fvid-media/src/owned_mp4_impl.rs.",
+  "counting": "One MP4 chunk-ordering, positive-sample-size, and non-empty-track invariant fix across src/container/mp4.rs and crates/fvid-media/src/owned_mp4_impl.rs (FVID-0189). No extra IDs for individual fixture variants or controls."
+}

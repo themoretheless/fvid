@@ -1,0 +1,36 @@
+{
+  "provenance": "Pure Python authored 16x16 neutral VP9 MP4/fMP4, 3 independent 20ms frames at 50Hz. Probes ISO/IEC 14496-12:2015 8.8.4/8.8.8 hybrid non-empty moov/trak/mdia/minf/stbl sample tables followed by moof/traf/trun fragments, plus refusal of malformed stbl tables in fragmented files. No private codec parameters, encoder, FFmpeg, or network.",
+  "controls": [
+    {
+      "file": "empty-init-three-fragments.mp4",
+      "mode": "0-in-stbl-plus-3-fragments"
+    },
+    {
+      "file": "hybrid-one-in-stbl-two-in-fragments.mp4",
+      "mode": "1-in-stbl-plus-2-explicit-tfdt-fragments"
+    },
+    {
+      "file": "hybrid-two-in-stbl-one-implicit-tfdt-fragment.mp4",
+      "mode": "2-in-stbl-plus-1-implicit-tfdt-fragment"
+    }
+  ],
+  "cases": [
+    {
+      "file": "corrupt-stco-outside-mdat-in-fragmented.mp4",
+      "expected_error": "sample chunk outside mdat"
+    },
+    {
+      "file": "corrupt-stsz-in-fragmented.mp4",
+      "expected_error": "invalid sample-size table"
+    }
+  ],
+  "sha256": {
+    "regular.mp4": "e98393bb08dedd0b6f34eb73546111d11686b6f2daffa7cb83828e9d62ff27cb",
+    "frame.vp9": "217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c",
+    "empty-init-three-fragments.mp4": "b311ad178ade0dac0bdec23536bba9e65a87301cf0c753ad249f4125c2e26040",
+    "hybrid-one-in-stbl-two-in-fragments.mp4": "ab1fe34061b795ed29e6f523a03110c09169b2485304cf1ab5fbb20a76b1ce5c",
+    "hybrid-two-in-stbl-one-implicit-tfdt-fragment.mp4": "f101b3895136ba9ed2041054957f9af8e55debf78d7444702e6facd95a364b7d",
+    "corrupt-stco-outside-mdat-in-fragmented.mp4": "adaa1afb82eadfc4a7bb0c3254e2f58bb54ebc9e9028b17e1522aaf8f2297dcc",
+    "corrupt-stsz-in-fragmented.mp4": "d8d8c7343953ab819be5ec119aa76517054c4b2b11720d6d295855e35ba3125b"
+  }
+}

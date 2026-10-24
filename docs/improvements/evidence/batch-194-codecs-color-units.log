@@ -1,0 +1,457 @@
+warning: unreachable pattern
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+492 | ...   _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |       ^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+482 | ...             merge_order::Selection::Initial(i)=>{
+    |                 ---------------------------------- matches some of the same values
+...
+486 | ...             merge_order::Selection::ViewSynthesis=>return Ok(Resolv...
+    |                 ------------------------------------- matches some of the same values
+487 | ...             merge_order::Selection::Texture=>return Ok(Resolved::Te...
+    |                 ------------------------------- matches some of the same values
+488 | ...             merge_order::Selection::InterView=>{selected_iv=1;(spec...
+    |                 --------------------------------- matches some of the same values
+...
+492 | ...             _=>return Err(invalid("unexpected HEVC depth IV merge s...
+    |                 ^ ...and 3 other patterns collectively make this unreachable
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `intra_plane` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/avc_deblock.rs:184:15
+    |
+184 | pub(super) fn intra_plane(
+    |               ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `read_inter_coefficients_422` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_inter_coefficients.rs:34:15
+   |
+34 | pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,patter...
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `candidates` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_mv.rs:78:4
+   |
+78 | fn candidates(n: Neighbours) -> Result<[Neighbour; 3]> {
+   |    ^^^^^^^^^^
+
+warning: function `inverse2` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:190:4
+    |
+190 | fn inverse2(input: &[i32], output: &mut [i32]) {
+    |    ^^^^^^^^
+
+warning: function `inverse4` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:218:15
+    |
+218 | inverse_size!(inverse4, inverse2, 4);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse8` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:219:15
+    |
+219 | inverse_size!(inverse8, inverse4, 8);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse16` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:220:15
+    |
+220 | inverse_size!(inverse16, inverse8, 16);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse32` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:221:15
+    |
+221 | inverse_size!(inverse32, inverse16, 32);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: enum `RunKind` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:420:17
+    |
+420 | pub(crate) enum RunKind {
+    |                 ^^^^^^^
+
+warning: struct `Run` is never constructed
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:425:19
+    |
+425 | pub(crate) struct Run {
+    |                   ^^^
+
+warning: function `expand_runs` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:431:15
+    |
+431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run])...
+    |               ^^^^^^^^^^^
+
+warning: `fvid-codecs` (lib) generated 12 warnings
+warning: variable does not need to be mutable
+   --> crates/fvid-media/src/owned_xfade.rs:325:5
+    |
+325 |     mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
+    |     ----^^^^^
+    |     |
+    |     help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `encode` is never used
+   --> crates/fvid-media/src/owned_y4m_impl.rs:212:8
+    |
+ 31 | impl Header {
+    | ----------- method in this implementation
+...
+212 |     fn encode(&self, width: usize, height: usize) -> String {
+    |        ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `apply_pixel_filters` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:502:15
+    |
+502 | pub(crate) fn apply_pixel_filters(
+    |               ^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:509:15
+    |
+509 | pub(crate) fn apply_pixel_filters_cached(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached_at` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:518:15
+    |
+518 | pub(crate) fn apply_pixel_filters_cached_at(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `esds_for_mp4` is never used
+   --> crates/fvid-media/src/owned_aac/adts_impl.rs:334:15
+    |
+334 | pub(crate) fn esds_for_mp4(asc: &[u8]) -> Option<Vec<u8>> {
+    |               ^^^^^^^^^^^^
+
+warning: method `read_short` is never used
+  --> crates/fvid-media/src/owned_aac/bits_impl.rs:42:19
+   |
+ 7 | impl<'a> BitReader<'a> {
+   | ---------------------- method in this implementation
+...
+42 |     pub(crate) fn read_short(&mut self, count: u8) -> Result<u16> {
+   |                   ^^^^^^^^^^
+
+warning: associated function `identifiers` is never used
+   --> crates/fvid-media/src/owned_avc_impl.rs:509:19
+    |
+495 | impl Pps {
+    | -------- associated function in this implementation
+...
+509 |     pub(crate) fn identifiers(nal: &[u8]) -> Result<(u32, u32)> {
+    |                   ^^^^^^^^^^^
+
+warning: function `try_mp4_as` is never used
+  --> crates/fvid-media/src/owned_probe.rs:61:15
+   |
+61 | pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Op...
+   |               ^^^^^^^^^^
+
+warning: function `try_webm_as` is never used
+  --> crates/fvid-media/src/owned_probe.rs:82:15
+   |
+82 | pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<O...
+   |               ^^^^^^^^^^^
+
+warning: function `try_adts_as` is never used
+   --> crates/fvid-media/src/owned_probe.rs:102:15
+    |
+102 | pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<...
+    |               ^^^^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_audio_export.rs:8:15
+  |
+8 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_audio_plan.rs:75:15
+   |
+75 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_export.rs:45:15
+   |
+45 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_wave_remux.rs:22:15
+   |
+22 | pub(crate) fn supports(source: &Path, destination: &Path, options: &Copy...
+   |               ^^^^^^^^
+
+warning: function `supports_concat` is never used
+  --> crates/fvid-media/src/owned_wave_remux.rs:72:15
+   |
+72 | pub(crate) fn supports_concat(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_wave_plan.rs:6:15
+  |
+6 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+  |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_loudness.rs:50:15
+   |
+50 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_adts_loudnorm.rs:6:15
+  |
+6 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: method `nul_name` is never used
+  --> crates/fvid-media/src/owned_pixel_format.rs:9:27
+   |
+ 6 |           impl PixelFormat {
+   |           ---------------- method in this implementation
+...
+ 9 |               pub(crate) fn nul_name(self) -> &'static [u8] { match self...
+   |                             ^^^^^^^^
+...
+16 | / formats! {
+17 | |     Yuv420p, "yuv420p", Some((1, 1)), 1;
+18 | |     Yuv422p, "yuv422p", Some((1, 0)), 1;
+19 | |     Yuv444p, "yuv444p", Some((0, 0)), 1;
+...  |
+58 | |     Gray16Be, "gray16be", None, 2;
+59 | | }
+   | |_- in this macro invocation
+   |
+   = note: this warning originates in the macro `formats` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `aac_packet_plan` is never used
+  --> crates/fvid-media/src/owned_mp4_aac_plan_impl.rs:34:15
+   |
+34 | pub(crate) fn aac_packet_plan(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_ogg_opus_export.rs:134:15
+    |
+134 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_opus_export.rs:33:15
+   |
+33 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `inspect` is never used
+ --> crates/fvid-media/src/owned_matroska_copy_impl.rs:8:15
+  |
+8 | pub(crate) fn inspect<R: Read + Seek>(
+  |               ^^^^^^^
+
+warning: function `geometry` is never used
+  --> crates/fvid-media/src/owned_raw_flac.rs:75:15
+   |
+75 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(...
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_flac_export.rs:45:15
+   |
+45 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_mp3_export.rs:45:15
+   |
+45 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_alac_export.rs:37:15
+   |
+37 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+  --> crates/fvid-media/src/owned_matroska_alac_export.rs:95:15
+   |
+95 | pub(crate) fn geometry(source:&Path,options:&CopyOptions)->Result<(u32,u...
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_aac_export.rs:37:15
+   |
+37 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: method `convert` is never used
+   --> crates/fvid-media/src/owned_pcm_decoder_impl.rs:139:8
+    |
+ 79 | impl PcmDecoder {
+    | --------------- method in this implementation
+...
+139 |     fn convert(&self, data: &[u8]) -> Result<Vec<u8>> {
+    |        ^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_pcm_export.rs:41:15
+   |
+41 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_mp4_audio_export.rs:109:15
+    |
+109 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_container_loudness.rs:59:15
+   |
+59 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_container_loudnorm.rs:6:15
+  |
+6 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: function `pack_bgra` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:8728:15
+     |
+8728 | pub(crate) fn pack_bgra(
+     |               ^^^^^^^^^
+
+warning: function `take_aligned` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:9440:15
+     |
+9440 | pub(crate) fn take_aligned(
+     |               ^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_ogg_vorbis_export.rs:104:15
+    |
+104 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_ogg_joint_export.rs:68:15
+   |
+68 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_g711_wave_export.rs:85:15
+   |
+85 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: `fvid-media` (lib) generated 40 warnings (run `cargo fix --lib -p fvid-media` to apply 1 suggestion)
+warning: function `read_inter_coefficients_422` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_inter_coefficients.rs:34:15
+   |
+34 | pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,patter...
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `fvid-codecs` (lib test) generated 8 warnings (7 duplicates)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.07s
+     Running unittests src/lib.rs (target/debug/deps/fvid_codecs-827a049feb7ee32b)
+
+running 68 tests
+test color::hdr::tests::a_mastering_volume_answers_for_a_peak_the_content_never_stated ... ok
+test color::hdr::tests::a_containers_box_owns_the_half_it_names ... ok
+test color::hdr::tests::a_read_garbage_order_volume_is_not_hdr10 ... ok
+test color::hdr::tests::a_statement_fills_only_the_codes_it_leaves_unspecified ... ok
+test color::hdr::tests::a_volume_outside_the_unit_square_is_refused ... ok
+test color::hdr::tests::clli_reads_maxcll_and_maxfall_in_candelas ... ok
+test color::hdr::tests::colour_description_resolves_h273_codes ... ok
+test color::hdr::tests::corners_and_payload_describe_the_same_volume ... ok
+test color::hdr::tests::empty_light_falls_back_to_the_assumed_peak ... ok
+test color::hdr::tests::mastering_display_feeds_the_tone_mapper_as_a_panel ... ok
+test color::hdr::tests::mdcv_payload_round_trips ... ok
+test color::hdr::tests::mdcv_reads_the_green_blue_red_order_the_standard_writes ... ok
+test color::hdr::tests::short_payloads_are_refused_not_panicked ... ok
+test color::log::tests::apple_log_hits_the_anchors_its_transcriptions_publish ... ok
+test color::log::tests::arri_log_c_is_normalised_to_grey_at_every_reference_point ... ok
+test color::log::tests::canon_log_codes_match_the_canon_tables ... ok
+test color::log::tests::code_mapping_scales_with_bit_depth ... ok
+test color::log::tests::every_profile_is_monotonic_and_greys_get_darker_downwards ... ok
+test color::log::tests::labels_round_trip ... ok
+test color::log::tests::every_profile_round_trips_over_its_own_domain ... ok
+test color::log::tests::log_c_4_unwraps_in_the_gamut_its_specification_names ... ok
+test color::log::tests::log_profiles_reach_far_above_diffuse_white ... ok
+test color::log::tests::panasonic_v_log_hits_the_varicam_table ... ok
+test color::log::tests::sony_s_log3_hits_sony_published_codes ... ok
+test color::log::tests::sony_s_log_codes_follow_the_legal_range_table ... ok
+test color::primaries::tests::arri_wide_gamut_4_reproduces_arri_s_published_xyz_matrix ... ok
+test color::primaries::tests::a_typed_gamut_name_survives_case_and_separators ... ok
+test color::primaries::tests::bt709_gamut_fits_inside_bt2020 ... ok
+test color::primaries::tests::bt709_matrix_rows_match_itu_rec_709 ... ok
+test color::primaries::tests::bt709_to_bt2020_is_identity_on_rec709_gamut ... ok
+test color::primaries::tests::camera_gamut_to_bt709_matches_the_published_matrices ... ok
+test color::primaries::tests::camera_gamuts_are_wider_than_bt709_and_mutually_distinct ... ok
+test color::primaries::tests::camera_gamuts_derive_the_published_luma_weights ... ok
+test color::primaries::tests::decode_matrix_matches_the_published_coefficients ... ok
+test color::primaries::tests::gamut_remap_is_identity_within_one_space ... ok
+test color::primaries::tests::every_named_gamut_resolves_from_its_own_label ... ok
+test color::primaries::tests::kr_kb_matches_published_luma_weights ... ok
+test color::primaries::tests::matrix_codes_round_trip ... ok
+test color::primaries::tests::primaries_codes_cover_h273 ... ok
+test color::primaries::tests::rgb_to_xyz_maps_white_to_the_illuminant ... ok
+test color::primaries::tests::studio_range_round_trips ... ok
+test color::primaries::tests::white_point_maps_to_itself ... ok
+test color::primaries::tests::vendor_and_recommendation_names_reach_the_same_triangle ... ok
+test color::tonemap::tests::bt2020_to_bt709_uses_an_accurate_matrix ... ok
+test color::tonemap::tests::clip_leaves_sdr_content_untouched ... ok
+test color::tonemap::tests::curve_labels_round_trip ... ok
+test color::tonemap::tests::curves_match_the_ffmpeg_tonemap_reference_values ... ok
+test color::tonemap::tests::gamut_compression_fixes_negative_legs_and_keeps_super_white ... ok
+test color::tonemap::tests::highlight_desaturation_kicks_in_above_paper_white ... ok
+test color::tonemap::tests::every_curve_is_monotonic_and_stays_in_range ... ok
+test color::log::tests::every_code_a_camera_writes_comes_back_to_itself ... ok
+test color::tonemap::tests::maxrgb_preserves_saturated_highlight_ratios ... ok
+test color::tonemap::tests::pq_code_maps_through_a_full_pipeline ... ok
+test color::tonemap::tests::tone_map_is_channel_uniform_for_greys ... ok
+test color::tonemap::tests::tone_map_preserves_hue_below_the_joint ... ok
+test color::tonemap::tests::tone_map_sends_the_content_peak_to_display_peak ... ok
+test color::transfer::tests::bt240_is_continuous_and_above_bt709 ... ok
+test color::transfer::tests::bt709_and_srgb_disagree_at_mid_grey ... ok
+test color::transfer::tests::bt709_carries_the_standard_s_own_breakpoint_step ... ok
+test color::transfer::tests::codes_and_labels_cover_h273 ... ok
+test color::transfer::tests::hdr_curves_round_trip_in_nits ... ok
+test color::transfer::tests::hlg_black_lift_matches_the_signal_domain_form ... ok
+test color::transfer::tests::hlg_curve_and_inverse_agree_with_bt_2100 ... ok
+test color::transfer::tests::hlg_low_segment_is_not_twelve_times_too_hot ... ok
+test color::transfer::tests::hlg_ootf_follows_bt_2100_2_form ... ok
+test color::transfer::tests::pq_anchors_match_st_2084 ... ok
+test color::transfer::tests::table_is_monotonic_and_bounded ... ok
+test color::transfer::tests::sdr_curves_round_trip ... ok
+
+test result: ok. 68 passed; 0 failed; 0 ignored; 0 measured; 703 filtered out; finished in 0.00s
+

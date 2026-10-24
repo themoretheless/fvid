@@ -59,13 +59,19 @@ impl AudioStream for Mp3AudioReader {
 
     fn present_decoded(&self, mut packet: crate::audio::AudioPacket, source_pts: i64)
         -> Result<Option<crate::audio::AudioPacket>> {
-        if self.presentation_floor.is_none() && self.mp3.gapless.is_none() { return Ok(Some(packet)); }
-        let window = self.mp3.presentation_window();
-        let floor = window.start + self.presentation_floor.unwrap_or(0);
         let stride = usize::from(self.channels()) * 4;
         if stride == 0 || !packet.data.len().is_multiple_of(stride) {
             return Err(invalid("invalid MP3 preroll PCM geometry"));
         }
+        if self.presentation_floor.is_none() && self.mp3.gapless.is_none() {
+            packet.pts = u64::try_from(source_pts)
+                .map_err(|_| invalid("negative MP3 presentation timestamp"))?;
+            packet.timebase_num = 1;
+            packet.timebase_den = self.sample_rate();
+            return Ok(Some(packet));
+        }
+        let window = self.mp3.presentation_window();
+        let floor = window.start + self.presentation_floor.unwrap_or(0);
         let frames = packet.data.len() / stride;
         let skip = (i128::from(floor) - i128::from(source_pts)).max(0)
             .min(frames as i128) as usize;

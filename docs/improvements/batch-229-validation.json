@@ -1,0 +1,47 @@
+{
+  "batch": 229,
+  "ids": ["FVID-0236"],
+  "title": "Preserve and selectively edit first-input source WAVE, MP4/MOV/M4A, Matroska/WebM/MKA, and FLAC/Ogg/MP3 metadata across mix-audio and merge-audio to .wav, .mka, and .mkv",
+  "scope": [
+    "src/native_audio_mix.rs",
+    "src/native_export/pcm_matroska.rs",
+    "crates/fvid-media/src/owned_wave_metadata.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/audio-mix-merge-metadata-preservation/wave-in1-16bit.wav",
+    "tests/fixtures/playback-errors/audio-mix-merge-metadata-preservation/wave-in2-24bit.wav",
+    "tests/fixtures/playback-errors/audio-mix-merge-metadata-preservation/mp4-in1.m4a",
+    "tests/fixtures/playback-errors/audio-mix-merge-metadata-preservation/matroska-in1.mka"
+  ],
+  "generators": [
+    "scripts/generate_audio_mix_merge_metadata_preservation_regressions.py",
+    "scripts/test_audio_mix_merge_metadata_preservation_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-229-pre-edit/src/native_audio_mix.rs",
+      "docs/improvements/snapshots/batch-229-pre-edit/src/native_export/pcm_matroska.rs",
+      "docs/improvements/snapshots/batch-229-pre-edit/crates/fvid-media/src/owned_wave_metadata.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-229-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-229-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-229-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test audio_mix_merge_metadata_preservation_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test audio_mix_merge_concat_metadata_regressions --test audio_sample_concat_metadata_preservation_regressions --test audio_matroska_pcm_metadata_preservation_regressions --test audio_wave_info_preservation_regressions --test native_audio_mix --test mix_merge_subtitle_controls_regressions",
+      "passed": 14,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_audio_mix_merge_metadata_preservation_regressions.py -v",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

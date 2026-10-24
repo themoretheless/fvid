@@ -176,6 +176,7 @@ impl PacketPcmDecoder {
         match self {
             Self::Aac(decoder) => Some(decoder.channel_mask()),
             Self::Ps(decoder) => Some(decoder.channel_mask()),
+            Self::Alac { decoder, .. } => Some(decoder.channel_mask()),
             _ => None,
         }
     }

@@ -439,8 +439,9 @@ impl AudioStream for AviAudioReader {
     fn seek_to(&mut self, pts: i64) -> i64 {
         let program = self.program();
         if let Some(samples)=&program.samples {
+            let start=samples.first().map_or(0,|&(at,_)|at);
             let end=samples.last().map_or(0,|&(at,n)|at+n);
-            let target=(pts.max(0)as u64).min(end);
+            let target=(pts.max(0)as u64).clamp(start,end);
             let packet=samples.iter().position(|&(at,n)|at+n>target).unwrap_or(samples.len());
             let skip=samples.get(packet).map_or(0,|&(at,_)|target.saturating_sub(at)as usize);
             self.packet=packet;self.frame_skip=skip;return target as i64;

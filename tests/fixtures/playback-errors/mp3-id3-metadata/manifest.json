@@ -1,0 +1,9 @@
+{
+  "generator": "scripts/generate_mp3_id3_metadata_regressions.py",
+  "batch_id": "FVID-0230",
+  "provenance": "100% synthetic bare MP3 fixtures with ID3v2.4 (UTF-8 and UTF-16LE text/COMM/TXXX frames) and ID3v1.1 tags; no FFmpeg, network, or private media.",
+  "sha256": {
+    "tagged-id3v24.mp3": "c94a09536ac0e7b8860031104b66f6bf36c58ba535347ce6bb777ad5a6048193",
+    "tagged-id3v1.mp3": "514fd5628da4bbe006aa88a511804d3d4bb4a6735804281ff7c707d7c371fc85"
+  }
+}

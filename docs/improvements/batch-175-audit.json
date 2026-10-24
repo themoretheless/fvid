@@ -1,0 +1,20 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0182",
+  "source": "src/container/mp4.rs",
+  "source_sha256": "6ef07675407d372806122c1c4cc7c7b3e975452bc970184e9a9c6d451338144e",
+  "before_snapshot": "evidence/batch-175-mp4-before.rs",
+  "problem": "Fragmented MP4 trun data-offset resolution uses the global track sample list tail (list.last()) instead of a per-traf data cursor initialized to base_data_offset. Consequently, a second traf whose first trun omits data-offset-present (0x00_0001) illegally inherits the previous traf's last sample end instead of the new traf's base, while an empty trun with an explicit data_offset fails to update the cursor for subsequent trun boxes in the same traf.",
+  "primary_reference": "https://b.goeswhere.com/ISO_IEC_14496-12_2015a.pdf",
+  "reference_provenance": "ISO/IEC 14496-12:2015, 8.8.8.2: if the data-offset is not present, the data for a run starts immediately after the data of the previous run in the same track fragment, or at the base-data-offset defined by the track fragment header if this is the first run in a track fragment.",
+  "fixtures": "tests/fixtures/playback-errors/mp4-multi-trun",
+  "scope": "Pure owned 3-frame 16x16 VP9 fMP4 at 50 Hz. Controls cover regular MP4, three contiguous trun boxes in one traf (only the first stating data_offset), an empty leading trun setting the data cursor for a second contiguous trun, and two explicit-offset trun boxes across two mdat boxes. Malformed cases cover a second traf omitting data_offset with default-base-is-moof (pointing to moof2 outside mdat) and an empty middle trun resetting the cursor to moof start (outside mdat) before a third trun without data_offset.",
+  "requirements": [
+    "Reproduce both the false rejection of empty-leading-run-then-contiguous.mp4 and the false acceptance of cross-traf/empty-reset outside-mdat inputs before editing production code.",
+    "Track a per-traf data cursor initialized to base and updated after each trun in src/container/mp4.rs.",
+    "Preserve exact packets, sync flags, clocks, budgets, analytic VP9 planes/RGB, 32 public clamped seek targets, rewind, and repeated EOF across all healthy controls.",
+    "Run focused, related MP4/HLS/VP9, unit, minimal-configuration, fixture unittest, and player build gates."
+  ],
+  "implementation_plan": "Maintain let mut traf_cursor = base per traf in index_fragments; when trun omits 0x00_0001, start at traf_cursor, and set traf_cursor = offset at the end of each trun.",
+  "counting": "One per-traf trun data-cursor continuity/reset fix (FVID-0182). No extra IDs for empty-run/cross-traf variants, controls, or fixture generator."
+}

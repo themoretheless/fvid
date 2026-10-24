@@ -1,0 +1,38 @@
+{
+  "provenance": "Pure Python authored 16x16 neutral VP9 fMP4, 3 independent 20ms frames at 50Hz. Probes ISO/IEC 14496-12:2015 8.8.8 per-traf data cursor continuity across multiple trun boxes and reset at each new traf. No private codec parameters, encoder, FFmpeg, or network.",
+  "controls": [
+    {
+      "file": "three-contiguous-runs.mp4",
+      "mode": "three-contiguous-runs-in-one-traf"
+    },
+    {
+      "file": "empty-leading-run-then-contiguous.mp4",
+      "mode": "empty-leading-run-sets-cursor-for-second-run"
+    },
+    {
+      "file": "two-explicit-offset-runs.mp4",
+      "mode": "two-explicit-offset-runs-across-two-mdats"
+    }
+  ],
+  "cases": [
+    {
+      "file": "second-traf-missing-data-offset.mp4",
+      "expected_error": "sample chunk outside mdat",
+      "description": "Second traf omits trun.data_offset with default-base-is-moof; base is moof2 (outside mdat1), not previous traf's last sample"
+    },
+    {
+      "file": "empty-reset-run-outside-mdat.mp4",
+      "expected_error": "sample chunk outside mdat",
+      "description": "Empty second trun resets traf data cursor to moof start (outside mdat); third trun without data_offset must inherit that cursor instead of trun 1's last sample"
+    }
+  ],
+  "sha256": {
+    "regular.mp4": "e98393bb08dedd0b6f34eb73546111d11686b6f2daffa7cb83828e9d62ff27cb",
+    "frame.vp9": "217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c",
+    "three-contiguous-runs.mp4": "28af1f77e09607e14f2abe5012933509300c85f4375e9eff7edb664ca6431c5a",
+    "empty-leading-run-then-contiguous.mp4": "a1b14852bf8608b91c43329f9266cc38dee48d8ebdbf1c998bc3d8aca15bccfb",
+    "two-explicit-offset-runs.mp4": "ed6983d423f2d45c01ec38783b8db911e437a5a83f57c2177ada827b9bb43682",
+    "second-traf-missing-data-offset.mp4": "39eeaffcc5d11d4de0745703a5bc7a6423524bd9d11900207e63a8a0782cc7f1",
+    "empty-reset-run-outside-mdat.mp4": "425c684562f343d7fb2145d439dadca8e52e1b387c2c6c1b8ceebeda7ed02c18"
+  }
+}

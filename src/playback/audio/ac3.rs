@@ -284,6 +284,12 @@ impl Ac3AudioReader {
         let mut bytes = Vec::new();
         let cap = u64::try_from(limits.file_bytes).unwrap_or(u64::MAX);
         reader.by_ref().take(cap.saturating_add(1)).read_to_end(&mut bytes)?;
+        if bytes.len() > limits.file_bytes {
+            return Err(invalid(&format!(
+                "file is over the {} byte limit",
+                limits.file_bytes
+            )));
+        }
         Ok(Self {
             ac3: Ac3::parse_mode(&bytes, &limits, expanded)?,
             packet: 0,

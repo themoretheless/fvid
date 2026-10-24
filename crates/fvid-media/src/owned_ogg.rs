@@ -204,6 +204,11 @@ impl Ogg {
                 )));
             }
             let (flags, counted) = (head[5], usize::from(head[26]));
+            if flags & !(CONTINUES | BEGINS | ENDS) != 0 {
+                return Err(invalid(&format!(
+                    "Ogg page {pages} at byte {at} has reserved header_type_flag {flags:#04x}"
+                )));
+            }
             let table = bytes.get(at + 27..at + 27 + counted).ok_or_else(|| {
                 invalid(&format!(
                     "Ogg page {pages} at byte {at} lists {counted} segments past the end of the file"
@@ -294,16 +299,27 @@ impl Ogg {
                 runs.push((start, length, true));
             }
             let at_open = &mut open[position];
+            let continues = flags & CONTINUES != 0;
             if counted != 0 {
-                let continues = flags & CONTINUES != 0;
                 if at_open.pending.is_open() && !continues {
-                    return Err(invalid("Ogg page is missing the continuation flag for an unfinished packet"));
+                    return Err(invalid(
+                        "Ogg page is missing the continuation flag for an unfinished packet",
+                    ));
                 }
                 if !at_open.pending.is_open() && continues {
+                    if chains[at_open.chain].packets.len() > 2 {
+                        return Err(invalid(
+                            "Ogg page has continuation flag without an unfinished packet",
+                        ));
+                    }
                     // A joined stream can begin with only the tail of a packet.
                     // Its bytes are not decodable without the missing prefix.
                     at_open.pending = PartialPacket::MissingPrefix;
                 }
+            } else if !at_open.pending.is_open() && continues {
+                return Err(invalid(
+                    "Ogg page has continuation flag without an unfinished packet",
+                ));
             }
             chains[at_open.chain].last_page = pages;
             // Only the last packet the page finishes carries its position: a page

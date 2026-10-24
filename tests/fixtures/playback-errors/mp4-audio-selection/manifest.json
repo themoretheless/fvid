@@ -1,0 +1,92 @@
+{
+  "generator": "scripts/generate_mp4_audio_selection_regressions.py",
+  "controls": [
+    {
+      "file": "disabled-first-aac.mp4",
+      "codec": "aac",
+      "flags": [
+        6,
+        3
+      ],
+      "selected_stream_index": 2,
+      "sample_rate": 48000,
+      "channels": 1,
+      "sample_frames": 3072,
+      "expected_pcm": "expected-aac.f32le"
+    },
+    {
+      "file": "enabled-nonmovie-first-aac.mp4",
+      "codec": "aac",
+      "flags": [
+        1,
+        3
+      ],
+      "selected_stream_index": 2,
+      "sample_rate": 48000,
+      "channels": 1,
+      "sample_frames": 3072,
+      "expected_pcm": "expected-aac.f32le"
+    },
+    {
+      "file": "disabled-first-sowt.mp4",
+      "codec": "pcm_s16le",
+      "flags": [
+        6,
+        3
+      ],
+      "selected_stream_index": 2,
+      "sample_rate": 8000,
+      "channels": 1,
+      "sample_frames": 480,
+      "expected_pcm": "expected-sowt.f32le"
+    }
+  ],
+  "ambiguous": [
+    {
+      "file": "both-enabled-aac.mp4",
+      "flags": [
+        3,
+        3
+      ],
+      "expected_error": "native audio export requires exactly one audio track or an explicit stream index"
+    }
+  ],
+  "files": {
+    "both-enabled-aac.mp4": {
+      "bytes": 13982,
+      "sha256": "e0118f6e800bbf416f7a4cb75669852d6ff3a7982af723b3bce623e780b14c11"
+    },
+    "disabled-first-aac.mp4": {
+      "bytes": 13982,
+      "sha256": "02c925c3695aa4a90205ec3b3a58b359545c79d5b532ae620104e7cbe5b595dc"
+    },
+    "disabled-first-audio-only.mp4": {
+      "bytes": 1058,
+      "sha256": "08953dd85d5a79bb5879cdb851231a047a4239494d6a78116941d335f87ee51f"
+    },
+    "disabled-first-sowt.mp4": {
+      "bytes": 15784,
+      "sha256": "dfc82c80bcd0392e89fd57a68048bdb364847aea2accfef80de37ef70d9ceca0"
+    },
+    "enabled-nonmovie-first-aac.mp4": {
+      "bytes": 13982,
+      "sha256": "1a34977910c9af45c38889da633a2926fe68f402c02a5e1cb831c087ab70ecda"
+    },
+    "expected-aac.f32le": {
+      "bytes": 12288,
+      "sha256": "0e7c1faf087653e91eefeddd232d3995fd80b06ef005ac5e433175ac0669e8f5"
+    },
+    "expected-silent-aac.f32le": {
+      "bytes": 12288,
+      "sha256": "f3cc103136423a57975750907ebc1d367e2985ac6338976d4d5a439f50323f4a"
+    },
+    "expected-sowt.f32le": {
+      "bytes": 1920,
+      "sha256": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189"
+    },
+    "frame.vp9": {
+      "bytes": 4142,
+      "sha256": "217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c"
+    }
+  }
+}

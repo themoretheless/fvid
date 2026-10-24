@@ -1,0 +1,59 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0181"
+  ],
+  "checked_at": "2026-10-21T23:38:26+00:00",
+  "sources": [
+    "src/container/mp4.rs"
+  ],
+  "regressions": [
+    "tests/mp4_tfhd_defaults.rs"
+  ],
+  "before": [
+    "evidence/batch-174-mp4-before.rs",
+    "evidence/batch-174-tests-before.rs",
+    "evidence/batch-174-before.log",
+    "evidence/batch-174-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-174-after.log",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-174-related-after.log",
+      "passed": 66
+    },
+    {
+      "log": "evidence/batch-174-mp4-units.log",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-174-core.log",
+      "passed": 31
+    },
+    {
+      "log": "evidence/batch-174-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-174-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/container/mp4.rs": "6ef07675407d372806122c1c4cc7c7b3e975452bc970184e9a9c6d451338144e",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_tfhd_defaults.rs": "40ea747efbfdc7d06e17fb038ab0a340e2ac6a5739c74ae876af924c3797fd66",
+    "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_mp4_tfhd_defaults_regressions.py": "2de5ef73c9b588e9b1c97bca8b482a15d5206e278b48ad9b4d8a9659338f2ad8",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/mp4-tfhd-defaults/manifest.json": "eaf70eb5c2adbf9ab4f45845ab3686d4dd974c9cfc51134c795d4fc78ff9218c"
+  },
+  "qualification": [
+    "Pre-fix trex, tfhd, and tfdt parsers did not check that the box payload ended at the last declared field: trex ignored bytes beyond 24, tfhd failed to advance at += 4 on 0x00_0020 and omitted an at == header.len() check, and tfdt ignored trailing bytes beyond 8 (v0) or 12 (v1). Pre-fix baseline passed 3/3 controls and both forced acceptance gates failed because all 5 overlong boxes indexed and reached native VP9 playback.",
+    "Enforcing exact payload sizes for trex (24 bytes), tfhd (exact match with flag-selected fields), and tfdt (8 bytes for v0, 12 bytes for v1) refuses all 5 malformed cases as Error::Invalid before publishing samples or admitting native decoders.",
+    "All 4 healthy controls (regular MP4, tfhd sync override over trex non-sync, tfhd non-sync override over trex sync with lead sync, and 64-bit tfdt v1 exact header) retain exact coded packets, sync flags, 50 Hz clocks, sample/packet budgets, analytic 16x16 VP9 planes/RGB (128/130), 32 total public clamped seek targets, rewind, and repeated EOF.",
+    "4 focused tests, 66 related MP4/HLS/VP9 integration tests, 17 MP4 unit tests, 31 minimal-configuration (--no-default-features) tests, offline fixture generator unittest, and full player build pass.",
+    "ISO/IEC 14496-12:2015, 8.8.3, 8.8.7, and 8.8.12 specify fixed/flag-conditioned FullBox layouts for trex, tfhd, and tfdt. All fixtures are pure synthetic offline VP9/fMP4 files requiring neither FFmpeg nor network access."
+  ],
+  "counting": "One fragmented MP4 trex/tfhd/tfdt box-extent validation fix (FVID-0181). No extra IDs for individual box variants, controls, or fixture generator."
+}

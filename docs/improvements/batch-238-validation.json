@@ -1,0 +1,59 @@
+{
+  "batch": 238,
+  "ids": ["FVID-0245"],
+  "title": "Support 6.1/7.1 downmixing, 1|2 -> 3..=8 upmixing, and ALAC speaker masks across native audio export and planning, qualify Matroska Opus/MPEG channel layouts in supports(), and preserve bare MPEG ID3v2 language/custom tags in Matroska PCM export",
+  "scope": [
+    "src/native_export.rs",
+    "src/native_pcm.rs",
+    "src/native_plan.rs",
+    "src/native_audio_decoder.rs",
+    "src/native_export/pcm_matroska.rs",
+    "crates/fvid-media/src/owned_matroska_opus_export.rs",
+    "crates/fvid-media/src/owned_matroska_mp3_export.rs",
+    "crates/fvid-media/src/owned_raw_mp3.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/audio-rematrix-opus-mp3-admission/wave-8ch-71.wav",
+    "tests/fixtures/playback-errors/audio-rematrix-opus-mp3-admission/wave-stereo.wav",
+    "tests/fixtures/playback-errors/audio-rematrix-opus-mp3-admission/opus-6ch-51.mka",
+    "tests/fixtures/playback-errors/audio-rematrix-opus-mp3-admission/mp2-stereo.mka",
+    "tests/fixtures/playback-errors/audio-rematrix-opus-mp3-admission/mp2-stereo-tagged.mp2",
+    "tests/fixtures/playback-errors/audio-rematrix-opus-mp3-admission/manifest.json"
+  ],
+  "generators": [
+    "scripts/generate_audio_rematrix_opus_mp3_admission_regressions.py",
+    "scripts/test_audio_rematrix_opus_mp3_admission_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-238-pre-edit/src/native_export.rs",
+      "docs/improvements/snapshots/batch-238-pre-edit/src/native_pcm.rs",
+      "docs/improvements/snapshots/batch-238-pre-edit/src/native_plan.rs",
+      "docs/improvements/snapshots/batch-238-pre-edit/src/native_audio_decoder.rs",
+      "docs/improvements/snapshots/batch-238-pre-edit/src/native_export/pcm_matroska.rs",
+      "docs/improvements/snapshots/batch-238-pre-edit/crates/fvid-media/src/owned_matroska_opus_export.rs",
+      "docs/improvements/snapshots/batch-238-pre-edit/crates/fvid-media/src/owned_matroska_mp3_export.rs",
+      "docs/improvements/snapshots/batch-238-pre-edit/crates/fvid-media/src/owned_raw_mp3.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-238-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-238-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-238-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test audio_rematrix_opus_mp3_admission_regressions",
+      "passed": 2,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test wave_ogg_flac_plan_regressions --test mp3_id3_metadata_regressions --test audio_mix_merge_concat_metadata_regressions",
+      "passed": 7,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 -m unittest scripts/test_audio_rematrix_opus_mp3_admission_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

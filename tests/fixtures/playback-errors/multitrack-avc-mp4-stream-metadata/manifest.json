@@ -1,0 +1,14 @@
+{
+  "batch_id": "FVID-0240",
+  "files": {
+    "avc-dual-aac-tracks.mp4": {
+      "bytes": 2372,
+      "sha256": "24f8937f43ee0a00fbd7639fe94c2f6adf24fcab44a478b099dda46045b69bc0"
+    },
+    "avc-opus-multitrack.mkv": {
+      "bytes": 1452,
+      "sha256": "b3d3f615212f43c46a7bd6ddf3b32e679bf9aba3e5603fbf865eaaedc84b032c"
+    }
+  },
+  "generator": "scripts/generate_multitrack_avc_mp4_stream_metadata_regressions.py"
+}

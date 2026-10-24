@@ -1,0 +1,51 @@
+{
+  "batch": 206,
+  "ids": ["FVID-0213"],
+  "title": "Extend decode_audio, decode_audio_transformed, trim, normalize_loudness, and media_cli to support .f32le, .mka, and .mkv destinations across all owned fvid_media audio formats",
+  "scope": [
+    "src/media.rs",
+    "src/media_cli.rs",
+    "src/native_pcm/normalize.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/owned-audio-f32le-matroska/video.mkv",
+    "tests/fixtures/playback-errors/owned-audio-f32le-matroska/g711-alaw-48k-450ms.wav",
+    "tests/fixtures/playback-errors/owned-audio-f32le-matroska/g711-mulaw-48k-450ms.wav",
+    "tests/fixtures/playback-errors/owned-audio-f32le-matroska/ogg-opus-mono-48k.ogg",
+    "tests/fixtures/playback-errors/owned-audio-f32le-matroska/raw-flac-48k-440ms.flac",
+    "tests/fixtures/playback-errors/owned-audio-f32le-matroska/multitrack-pcm-flac.mka",
+    "tests/fixtures/playback-errors/owned-audio-f32le-matroska/multitrack-pcm-ima4.mov",
+    "tests/fixtures/playback-errors/owned-audio-f32le-matroska/manifest.json"
+  ],
+  "generators": [
+    "scripts/generate_owned_audio_f32le_matroska_regressions.py",
+    "scripts/test_owned_audio_f32le_matroska_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-206-pre-edit/src/media.rs",
+      "docs/improvements/snapshots/batch-206-pre-edit/src/media_cli.rs",
+      "docs/improvements/snapshots/batch-206-pre-edit/src/native_pcm/normalize.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-206-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-206-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-206-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --features player --test owned_audio_f32le_matroska_regressions",
+      "passed": 3,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --features player --test media_audio_routing_regressions --test media_trim_loudness_regressions --test loudnorm_budget_mix_concat_regressions --test native_pcm_matroska --test native_audio_trim",
+      "passed": 16,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 -m unittest scripts/test_owned_audio_f32le_matroska_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "batch": 221,
+  "ids": ["FVID-0228"],
+  "title": "Unify short -q/--quiet flag and --progress-during-plan handling across owned media CLI command and plan routes",
+  "scope": [
+    "src/owned_loudnorm_cli.rs",
+    "src/media_cli.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/cli-quiet-flag/tone.wav",
+    "tests/fixtures/playback-errors/cli-quiet-flag/tiny.y4m",
+    "tests/fixtures/playback-errors/cli-quiet-flag/tiny.srt"
+  ],
+  "generators": [
+    "scripts/generate_cli_quiet_flag_regressions.py",
+    "scripts/test_cli_quiet_flag_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-221-pre-edit/src/owned_loudnorm_cli.rs",
+      "docs/improvements/snapshots/batch-221-pre-edit/src/media_cli.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-221-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-221-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-221-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test cli_quiet_flag_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test lossless_plan_cli_routing_regressions --test subtitle_normalize_metadata_regressions --test adts_matroska_audio_metadata_regressions",
+      "passed": 3,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_cli_quiet_flag_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

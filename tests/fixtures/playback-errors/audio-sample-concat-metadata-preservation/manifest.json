@@ -1,0 +1,9 @@
+{
+  "batch_id": "FVID-0235",
+  "sha256": {
+    "matroska-seg1.mka": "ac8ce9c79267b82ee11aed14df58bea343a068608f5e5f7fff19e6f5bbf361f7",
+    "mp4-seg1.m4a": "b223a3143ece7dbfa361aec7ab68a1c882edca503a6c6644ccc2f901ead91a15",
+    "wave-seg1-16bit.wav": "56604444f942c151563265a89a1a05b11b324fd8410e471e55b76f7d6ecc4bcb",
+    "wave-seg2-24bit.wav": "4e42bc6494cc044f76f7d7f4e5beb6f4fd430d9c1429e35766a8747e156aaaac"
+  }
+}

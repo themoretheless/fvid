@@ -225,7 +225,7 @@ pub(crate) fn export_spool(
     Ok(result)
 }
 
-pub(crate) struct DecodedSpool {
+pub struct DecodedSpool {
     _storage: Spool,
     pub wave: PathBuf,
     pub stats: crate::owned_aac::AdtsPcmStats,

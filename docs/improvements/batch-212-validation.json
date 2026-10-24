@@ -1,0 +1,52 @@
+{
+  "batch": 212,
+  "ids": ["FVID-0219"],
+  "title": "Enforce RSS budgets and metadata/stream controls across MP4, Matroska, and ADTS remux, plan_remux, concat, and plan_concat",
+  "scope": [
+    "crates/fvid-media/src/owned_mp4_remux.rs",
+    "crates/fvid-media/src/owned_matroska_remux.rs",
+    "crates/fvid-media/src/owned_adts_remux.rs",
+    "crates/fvid-media/src/owned_concat.rs",
+    "crates/fvid-media/src/owned_remux_plan.rs",
+    "src/media.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/mp4-matroska-remux-rss/two-track-avc.mp4",
+    "tests/fixtures/playback-errors/mp4-matroska-remux-rss/video.mkv",
+    "tests/fixtures/playback-errors/mp4-matroska-remux-rss/adts-48k.aac"
+  ],
+  "generators": [
+    "scripts/generate_mp4_matroska_remux_rss_regressions.py",
+    "scripts/test_mp4_matroska_remux_rss_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-212-pre-edit/crates/fvid-media/src/owned_mp4_remux.rs",
+      "docs/improvements/snapshots/batch-212-pre-edit/crates/fvid-media/src/owned_matroska_remux.rs",
+      "docs/improvements/snapshots/batch-212-pre-edit/crates/fvid-media/src/owned_adts_remux.rs",
+      "docs/improvements/snapshots/batch-212-pre-edit/crates/fvid-media/src/owned_concat.rs",
+      "docs/improvements/snapshots/batch-212-pre-edit/crates/fvid-media/src/owned_remux_plan.rs",
+      "docs/improvements/snapshots/batch-212-pre-edit/src/media.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-212-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-212-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-212-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --features player --test mp4_matroska_remux_rss_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --features player --test native_remux_api --test native_remux_plan --test native_matroska_copy --test owned_mp4_metadata --test owned_mp4_packet_cap --test mp4_matroska_usability --test remux_concat_controls_regressions --test mp4_matroska_remux_rss_regressions",
+      "passed": 33,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 -m unittest scripts/test_mp4_matroska_remux_rss_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

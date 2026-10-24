@@ -1,0 +1,55 @@
+{
+  "batch": 225,
+  "ids": ["FVID-0232"],
+  "title": "Support .wav output and WAVE INFO / Matroska metadata mutations across sample-domain audio concat and plan concat in API and CLI",
+  "scope": [
+    "src/native_audio_mix/concat.rs",
+    "src/native_export.rs",
+    "src/native_plan.rs",
+    "src/media.rs",
+    "src/media_cli.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/audio-sample-concat-wave-metadata/pcm16-tagged-48k.wav",
+    "tests/fixtures/playback-errors/audio-sample-concat-wave-metadata/pcm24-48k.wav",
+    "tests/fixtures/playback-errors/audio-sample-concat-wave-metadata/g711-alaw-48k.wav",
+    "tests/fixtures/playback-errors/audio-sample-concat-wave-metadata/raw-flac-48k.flac",
+    "tests/fixtures/playback-errors/audio-sample-concat-wave-metadata/ogg-opus-48k.ogg",
+    "tests/fixtures/playback-errors/audio-sample-concat-wave-metadata/tagged-48k.mp3",
+    "tests/fixtures/playback-errors/audio-sample-concat-wave-metadata/matroska-flac-48k.mka"
+  ],
+  "generators": [
+    "scripts/generate_audio_sample_concat_wave_metadata_regressions.py",
+    "scripts/test_audio_sample_concat_wave_metadata_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-225-pre-edit/src/native_audio_mix/concat.rs",
+      "docs/improvements/snapshots/batch-225-pre-edit/src/native_export.rs",
+      "docs/improvements/snapshots/batch-225-pre-edit/src/native_plan.rs",
+      "docs/improvements/snapshots/batch-225-pre-edit/src/media.rs",
+      "docs/improvements/snapshots/batch-225-pre-edit/src/media_cli.rs",
+      "docs/improvements/snapshots/batch-225-pre-edit/src/native_media.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-225-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-225-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-225-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test audio_sample_concat_wave_metadata_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test loudnorm_budget_mix_concat_regressions --test adts_matroska_audio_metadata_regressions --test mp3_id3_metadata_regressions --test wave_ogg_flac_plan_regressions",
+      "passed": 10,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_audio_sample_concat_wave_metadata_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

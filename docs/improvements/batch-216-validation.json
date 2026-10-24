@@ -1,0 +1,55 @@
+{
+  "batch": 216,
+  "ids": ["FVID-0223"],
+  "title": "Support WAVE INFO and Matroska container/stream metadata mutations and stream selection across mix-audio, merge-audio, and Matroska concat",
+  "scope": [
+    "src/container/mp4_concat.rs",
+    "src/native_export/pcm_matroska.rs",
+    "src/native_audio_mix.rs",
+    "src/native_audio_mix/concat.rs",
+    "src/native_export.rs",
+    "src/native_plan.rs",
+    "src/media.rs",
+    "src/media_cli.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/audio-mix-merge-concat-metadata/tone-a-48k-stereo.wav",
+    "tests/fixtures/playback-errors/audio-mix-merge-concat-metadata/tone-b-48k-stereo.wav"
+  ],
+  "generators": [
+    "scripts/generate_audio_mix_merge_concat_metadata_regressions.py",
+    "scripts/test_audio_mix_merge_concat_metadata_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-216-pre-edit/src/container/mp4_concat.rs",
+      "docs/improvements/snapshots/batch-216-pre-edit/src/native_export/pcm_matroska.rs",
+      "docs/improvements/snapshots/batch-216-pre-edit/src/native_audio_mix.rs",
+      "docs/improvements/snapshots/batch-216-pre-edit/src/native_audio_mix/concat.rs",
+      "docs/improvements/snapshots/batch-216-pre-edit/src/native_export.rs",
+      "docs/improvements/snapshots/batch-216-pre-edit/src/native_plan.rs",
+      "docs/improvements/snapshots/batch-216-pre-edit/src/media.rs",
+      "docs/improvements/snapshots/batch-216-pre-edit/src/media_cli.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-216-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-216-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-216-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test audio_mix_merge_concat_metadata_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test mix_merge_subtitle_controls_regressions --test audio_wave_metadata_mix_controls_regressions --test loudnorm_budget_mix_concat_regressions --test mp4_matroska_remux_rss_regressions --test native_mp4_concat --test native_pcm_concat",
+      "passed": 15,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_audio_mix_merge_concat_metadata_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

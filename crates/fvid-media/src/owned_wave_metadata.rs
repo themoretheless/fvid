@@ -21,7 +21,7 @@ pub fn tag_for_key(key: &str) -> Result<[u8; 4]> {
     };
     Ok(tag)
 }
-/// Deletions run first; the last assignment to a key wins.
+/// Assignments run first; deletions run after assignments and remove any matching key.
 pub fn edit_info_chunks(
     chunks: &[u8],
     deletes: &[String],
@@ -35,9 +35,6 @@ pub fn edit_info_chunks(
     }
     let mut changed = BTreeSet::new();
     let mut assigned = BTreeMap::new();
-    for key in deletes {
-        changed.insert(tag_for_key(key)?);
-    }
     for (key, value) in sets {
         if value.contains('\0') {
             return Err("embedded NUL in metadata value".into());
@@ -45,6 +42,11 @@ pub fn edit_info_chunks(
         let tag = tag_for_key(key)?;
         changed.insert(tag);
         assigned.insert(tag, value);
+    }
+    for key in deletes {
+        let tag = tag_for_key(key)?;
+        changed.insert(tag);
+        assigned.remove(&tag);
     }
     let mut entries = Vec::new();
     let mut at = 0usize;
@@ -121,6 +123,118 @@ pub fn edit_info_chunks(
     Ok(result)
 }
 
+/// Build RIFF `LIST`/`INFO` chunks from container `FileTags`, track title/language,
+/// optional writing application (`encoder`), and extra container/track tags.
+pub fn info_for_file_tags(
+    tags: &crate::owned_file_tags::FileTags,
+    track_name: &str,
+    track_language: &str,
+    encoder: Option<&str>,
+    extra: &BTreeMap<String, String>,
+) -> Result<Vec<u8>> {
+    let mut entries = Vec::new();
+    if let Some(enc) = encoder.filter(|s| !s.is_empty() && !s.contains('\0')) {
+        entries.push(("encoder".into(), enc.to_owned()));
+    }
+    for (key, value) in extra {
+        if !value.is_empty() && !value.contains('\0') && tag_for_key(key).is_ok() {
+            entries.push((key.clone(), value.clone()));
+        }
+    }
+    for (key, value) in [
+        ("title", &tags.title),
+        ("artist", &tags.artist),
+        ("comment", &tags.comment),
+        ("date", &tags.date),
+        ("album", &tags.album),
+        ("genre", &tags.genre),
+        ("copyright", &tags.copyright),
+        ("track", &tags.track),
+    ] {
+        if !value.is_empty() && !value.contains('\0') {
+            entries.push((key.into(), value.clone()));
+        }
+    }
+    if tags.title.is_empty() && !track_name.is_empty() && !track_name.contains('\0') {
+        entries.push(("title".into(), track_name.to_owned()));
+    }
+    if !track_language.is_empty()
+        && !track_language.eq_ignore_ascii_case("und")
+        && !track_language.contains('\0')
+    {
+        entries.push(("ILNG".into(), track_language.to_owned()));
+    }
+    edit_info_chunks(&[], &[], &entries)
+}
+
+pub(crate) fn mp4_source_info(
+    source: &std::path::Path,
+    options: &fvid_control::CopyOptions,
+) -> Result<Vec<u8>> {
+    let reader = crate::owned_mp4::Mp4Reader::open(
+        std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?),
+        crate::owned_mp4::Limits {
+            packet_bytes: options.max_packet_bytes,
+            ..Default::default()
+        },
+    )
+    .map_err(|e| e.to_string())?;
+    let selected = options.streams.first().copied();
+    let index =
+        crate::owned_mp4_audio::mp4_audio_index(&reader, selected).map_err(|e| e.to_string())?;
+    let track = &reader.tracks()[index];
+    info_for_file_tags(
+        reader.tags(),
+        &track.name,
+        &track.language,
+        None,
+        &BTreeMap::new(),
+    )
+}
+
+pub(crate) fn matroska_source_info(
+    source: &std::path::Path,
+    options: &fvid_control::CopyOptions,
+) -> Result<Vec<u8>> {
+    let mut reader = crate::owned_matroska_audio::open_audio_reader(
+        std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?),
+        options,
+        options.max_packet_bytes,
+    )
+    .map_err(|e| e.to_string())?;
+    let selected = options.streams.first().copied();
+    let index = crate::owned_matroska_audio::matroska_audio_index(&reader, selected)
+        .map_err(|e| e.to_string())?;
+    if options.max_controlled_bytes.is_some() {
+        crate::owned_matroska_audio::admit_audio_reader(&mut reader, index, options)
+            .map_err(|e| e.to_string())?;
+    } else {
+        let _ = reader.scan_all();
+    }
+    let track = &reader.tracks[index];
+    let mut extra = reader.metadata.clone();
+    if let Some(global_track_tags) = reader.track_metadata.get(&0) {
+        extra.extend(global_track_tags.clone());
+    }
+    if let Some(uid) = reader.track_uids.get(&track.number)
+        && let Some(scoped) = reader.track_metadata.get(uid)
+    {
+        extra.extend(scoped.clone());
+    }
+    let language = reader
+        .track_languages
+        .get(&track.number)
+        .map(String::as_str)
+        .unwrap_or(&track.language);
+    info_for_file_tags(
+        &reader.tags,
+        &track.name,
+        language,
+        Some(&reader.writing_app),
+        &extra,
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -137,7 +251,7 @@ mod tests {
         assert_eq!(edit_info_chunks(&source, &[], &[]).unwrap(), source);
         let edited = edit_info_chunks(
             &source,
-            &["TITLE".into()],
+            &[],
             &[
                 ("title".into(), "first".into()),
                 ("title".into(), "last".into()),
@@ -149,6 +263,15 @@ mod tests {
         assert!(edited.windows(5).any(|bytes| bytes == b"last\0"));
         assert!(!edited.windows(6).any(|bytes| bytes == b"title\0"));
         assert!(!edited.windows(6).any(|bytes| bytes == b"first\0"));
+        let set_then_deleted = edit_info_chunks(
+            &source,
+            &["TITLE".into()],
+            &[("title".into(), "transient".into())],
+        )
+        .unwrap();
+        assert!(set_then_deleted.windows(opaque.len()).any(|bytes| bytes == opaque));
+        assert!(!set_then_deleted.windows(6).any(|bytes| bytes == b"title\0"));
+        assert!(!set_then_deleted.windows(10).any(|bytes| bytes == b"transient\0"));
         assert!(
             edit_info_chunks(&source, &["title".into(), "QWER".into()], &[])
                 .unwrap()

@@ -1,0 +1,21 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0190",
+  "source": "crates/fvid-media/src/owned_webm_reader_impl.rs",
+  "source_sha256": "71dcbb7061c4fe28f2bf90469e3ba08cd1c120859d8a5a467548389c38fc3b94",
+  "before_snapshot": "evidence/batch-183-owned-webm-reader-before.rs",
+  "problem": "WebmReader (crates/fvid-media/src/owned_webm_reader_impl.rs) accepted BlockGroup (0xa0) elements with zero or multiple Block (0xa1) children as well as non-zero reserved flag bits in SimpleBlock (0xa3, bits 0x70) and Block (0xa1, bits 0x71). In addition, WebmVideoReader::seek_to_sync (src/playback/video/webm.rs) used >= when comparing candidate keyframe timestamps, skipping earlier invisible setup keyframes at the same PTS and causing VP9 show-existing frames to fail after a seek, while WebmAudioReader::seek (src/playback/audio/webm_audio.rs) used >= on equal-PTS packets and fell back to (0, 0) instead of scanning to the first packet of self.track_number when seeking before the audio track's origin.",
+  "primary_reference": "https://www.rfc-editor.org/rfc/rfc9559.html",
+  "reference_provenance": "RFC 9559 (Matroska Media Container Format Specification), Section 5.1.4.1.2 (BlockGroup element cardinality: exactly one Block 0xa1 child), Section 10.2 (Block header flags: bits 1-3 reserved 0, bit 7 unused in Block), and Section 10.3 (SimpleBlock header flags: bits 1-3 reserved 0).",
+  "fixtures": "tests/fixtures/playback-errors/webm-block-seek",
+  "scope": "Enforce singleton Block (0xa1) in BlockGroup (0xa0) and reserved flag bit masks (0x70 on SimpleBlock, 0x71 on Block) in crates/fvid-media/src/owned_webm_reader_impl.rs, and fix equal-PTS and pre-origin seek selection in src/playback/video/webm.rs and src/playback/audio/webm_audio.rs.",
+  "requirements": [
+    "Reproduce pre-fix acceptance of BlockGroup lacking Block, BlockGroup with duplicate Block, SimpleBlock reserved flag bits (0x70), and Block discardable/reserved flag bits (0x71), as well as VP9 equal-PTS seek failure and multi-track pre-origin/equal-PTS audio seek errors before editing production code.",
+    "Reject BlockGroup elements with zero or multiple Block (0xa1) children and reject non-zero reserved flag bits in SimpleBlock (h[2] & 0x70 != 0) and Block (h[2] & 0x71 != 0) in crates/fvid-media/src/owned_webm_reader_impl.rs.",
+    "Select the first keyframe at a shared timestamp (packet.pts_ns > at) in WebmVideoReader::seek_to_sync and prefer keyframe fallback before non-keyframe fallback.",
+    "Select the first packet at a shared timestamp (at > previous) and scan to the first packet of self.track_number on pre-origin seeks in WebmAudioReader::seek.",
+    "Verify all 3 healthy controls (equal-PTS VP9 invisible setup + show-existing seek, valid BlockGroup, and multi-track delayed-origin + equal-PTS audio seek) and run all 6 validation gates."
+  ],
+  "implementation_plan": "Track seen_block inside the 0xa0 handler and check h[2] & reserved_mask in read_block in crates/fvid-media/src/owned_webm_reader_impl.rs; change >= to > in WebmVideoReader::seek_to_sync and WebmAudioReader::seek, and scan to first_on_track in WebmAudioReader::seek when pts_ns precedes the track's first packet.",
+  "counting": "One Matroska/WebM BlockGroup/flag validation and equal-PTS/pre-origin seek fix across crates/fvid-media/src/owned_webm_reader_impl.rs, src/playback/video/webm.rs, and src/playback/audio/webm_audio.rs (FVID-0190). No extra IDs for individual fixture variants or controls."
+}

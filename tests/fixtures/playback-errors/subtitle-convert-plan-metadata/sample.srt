@@ -1,0 +1,7 @@
+1
+00:00:00,100 --> 00:00:01,100
+<b>First</b> SRT planned cue
+
+2
+00:00:01,250 --> 00:00:02,500
+<i>Second</i> SRT planned cue with longer text payload for byte budget checks

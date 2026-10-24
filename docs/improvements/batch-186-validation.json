@@ -1,0 +1,16 @@
+{
+  "batch": 186,
+  "improvement_id": "FVID-0193",
+  "status": "accepted",
+  "fixtures_dir": "tests/fixtures/playback-errors/wav-aiff-au",
+  "generator": "scripts/generate_wav_aiff_au_regressions.py",
+  "fixture_unittest": "scripts/test_wav_aiff_au_regressions.py",
+  "regression_test": "tests/wav_aiff_au_regressions.rs",
+  "gates": {
+    "focused_regression": "cargo test --features player --test wav_aiff_au_regressions -- --nocapture (3 passed)",
+    "fixture_unittest": "python3 scripts/test_wav_aiff_au_regressions.py (4 passed)",
+    "unit_tests": "cargo test --features player --lib playback_wav / playback_aiff / playback_au (33 + 14 + 9 passed)",
+    "minimal_core": "cargo test --lib --no-default-features -- --nocapture (359 passed)",
+    "binary_build": "cargo build --bin fvid (ok)"
+  }
+}

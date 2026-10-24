@@ -369,6 +369,9 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
         max_packets,
         |header, packet, pts, duration| {
             check(cancel).map_err(|e| e.to_string())?;
+            if let Some(options) = track_options {
+                crate::owned_budget::check_rss_budget(options)?;
+            }
             if packet.len() > max_packet_bytes {
                 return Err("encoded FFV1 packet exceeds byte limit".into());
             }
@@ -386,11 +389,18 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
                             text_tags.insert(key.to_ascii_uppercase(), value.clone());
                         }
                     }
+                    for key in &options.metadata_delete {
+                        text_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+                    }
                     for (_, key, value) in &options.stream_metadata_set {
                         track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
                         if !crate::owned_ffv1_export::edit_track_description(&mut description, key, value) && !value.is_empty() {
                             track_tags.insert(key.to_ascii_uppercase(), value.clone());
                         }
+                    }
+                    for (_, key) in &options.stream_metadata_delete {
+                        track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+                        crate::owned_ffv1_export::edit_track_description(&mut description, key, "");
                     }
                 }
                 writer = Some(
@@ -413,7 +423,12 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
                         file_metadata,
                         &text_tags,
                         &track_tags,
-                        track_options.filter(|options| !options.stream_metadata_set.is_empty()).map(|_| &description),
+                        track_options
+                            .filter(|options| {
+                                !options.stream_metadata_set.is_empty()
+                                    || !options.stream_metadata_delete.is_empty()
+                            })
+                            .map(|_| &description),
                     )
                     .map_err(|e| e.to_string())?,
                 );

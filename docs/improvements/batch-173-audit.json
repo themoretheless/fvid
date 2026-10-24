@@ -1,0 +1,20 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0180",
+  "source": "src/container/mp4.rs",
+  "source_sha256": "27543a3d0f6be31a77657db04a7cb1852107e0fd845f0f2f86f21aa889f01fc4",
+  "before_snapshot": "evidence/batch-173-mp4-before.rs",
+  "problem": "Fragmented MP4 trun parsing accepts first-sample-flags-present (0x00_0004) and sample-flags-present (0x00_0400) simultaneously, consuming both fields and silently discarding first_sample_flags in favor of row[0]'s sample_flags.",
+  "primary_reference": "https://b.goeswhere.com/ISO_IEC_14496-12_2015a.pdf",
+  "reference_provenance": "ISO/IEC 14496-12:2015, 8.8.8.1/8.8.8.2: when first-sample-flags-present (0x00_0004) is set, sample-flags-present (0x00_0400) shall not be set.",
+  "fixtures": "tests/fixtures/playback-errors/mp4-trun-flags",
+  "scope": "Pure owned 3-frame 16x16 VP9 fMP4 at 50 Hz. Controls cover default tfhd/trex flags (0x00_0001), first-sample-flags only (0x00_0005), per-sample flags only (0x00_0401), and lead-sync override (0x00_0005 with non-sync default). Malformed cases cover populated contradictory sync/non-sync combinations, late third-fragment contradiction, and empty-run contradiction.",
+  "requirements": [
+    "Reproduce pre-fix silent acceptance and discarded first_sample_flags on contradictory 0x00_0405 runs before editing production code.",
+    "Reject any trun box that sets both 0x00_0004 and 0x00_0400 as Error::Invalid before publishing samples or admitting native playback.",
+    "Preserve exact packets, sync flags, clocks, budgets, analytic VP9 planes/RGB, 8 public clamped seek targets, rewind, and repeated EOF on all valid exclusive modes.",
+    "Run focused, related MP4/HLS/VP9, unit, minimal-configuration, fixture unittest, and player build gates."
+  ],
+  "implementation_plan": "Check flags & 0x00_0004 != 0 && flags & 0x00_0400 != 0 immediately after TRUN_SUPPORTED validation in src/container/mp4.rs and return invalid(\"MP4 track-run states both first-sample flags and per-sample flags\").",
+  "counting": "One trun flag mutual-exclusion fix (FVID-0180). No extra IDs for empty-run/late-fragment variants, controls, or fixture generator."
+}

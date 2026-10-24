@@ -7,13 +7,36 @@ use std::{
     path::Path,
 };
 type Result<T> = std::result::Result<T, String>;
-pub(crate) fn recognizes(source: &Path) -> Result<bool> {
-    let mut prefix = [0; 8];
+pub fn recognizes_standalone_audio(source: &Path) -> Result<bool> {
+    let mut prefix = [0; 4];
     let mut file = File::open(source).map_err(|e| e.to_string())?;
     if file.read_exact(&mut prefix).is_err() {
         return Ok(false);
     }
-    Ok(prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3] || crate::owned_mp4::recognizes_prefix(&prefix))
+    if &prefix == b"OggS" || &prefix == b"fLaC" {
+        return Ok(true);
+    }
+    if matches!(&prefix, b"RIFF" | b"RIFX" | b"RF64") {
+        return crate::owned_g711_wave_export::recognizes(source, &Default::default());
+    }
+    if crate::owned_adts_export::recognizes(source)? {
+        return Ok(false);
+    }
+    crate::owned_raw_mp3::recognizes(source)
+}
+pub(crate) fn recognizes(source: &Path) -> Result<bool> {
+    let mut prefix = [0; 10];
+    let mut file = File::open(source).map_err(|e| e.to_string())?;
+    let count = file.read(&mut prefix).map_err(|e| e.to_string())?;
+    if count < 4 {
+        return Ok(false);
+    }
+    if prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3]
+        || (count >= 8 && crate::owned_mp4::recognizes_prefix(&prefix[..8]))
+    {
+        return Ok(true);
+    }
+    recognizes_standalone_audio(source)
 }
 fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, String)> {
     if options.streams.len() > 1
@@ -36,6 +59,26 @@ fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, Stri
     let (_, rate, channels, mask, codec) =
         if crate::owned_mp4_audio_export::recognizes(source, options)? {
             crate::owned_mp4_audio_export::descriptor(source, options)?
+        } else if crate::owned_g711_wave_export::recognizes(source, options)? {
+            let (rate, channels, mask, codec, _) =
+                crate::owned_g711_wave_export::descriptor(source, options)?;
+            (0, rate, channels, mask, codec.into())
+        } else if crate::owned_ogg_opus_export::recognizes(source)? {
+            let (index, rate, channels, mask, codec) =
+                crate::owned_ogg_audio_export::descriptor(source, options)?;
+            (index, rate, channels, mask, codec.into())
+        } else if crate::owned_raw_flac::recognizes(source)? {
+            let (rate, channels, mask) = crate::owned_raw_flac::descriptor(source, options)?;
+            let effective_mask = if mask == 0 && channels <= 2 {
+                crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32
+            } else {
+                mask
+            };
+            (0, rate, channels, effective_mask, "flac".into())
+        } else if crate::owned_raw_mp3::recognizes(source)? {
+            let (rate, channels, codec) = crate::owned_raw_mp3::descriptor(source, options)?;
+            let mask = crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32;
+            (0, rate, channels, mask, codec.into())
         } else {
             let (index, rate, channels, mask, codec, _) =
                 crate::owned_audio_plan::matroska_descriptor(source, options)?
@@ -67,12 +110,57 @@ pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
         Err(error) => error.starts_with("controlled memory budget exceeded:"),
     }
 }
-pub(crate) fn decode_to_wave(
+pub fn decode_to_wave(
     source: &Path,
     options: &CopyOptions,
 ) -> Result<crate::owned_adts_export::DecodedSpool> {
     let (rate, channels, mask, codec) = geometry(source, options)?;
+    if crate::owned_g711_wave_export::recognizes(source, options)? {
+        return crate::owned_g711_wave_export::decode_to_wave(source, options);
+    }
+    if crate::owned_ogg_opus_export::recognizes(source)? {
+        return match crate::owned_ogg_audio_export::coding(source, options)? {
+            crate::owned_ogg_audio_export::Backend::Opus => {
+                crate::owned_ogg_opus_export::decode_to_wave(source, options)
+            }
+            crate::owned_ogg_audio_export::Backend::Vorbis => {
+                crate::owned_ogg_vorbis_export::decode_to_wave(source, options)
+            }
+            crate::owned_ogg_audio_export::Backend::Joint => {
+                crate::owned_ogg_joint_export::decode_to_wave(source, options)
+            }
+        };
+    }
+    if crate::owned_raw_flac::recognizes(source)? {
+        let info = crate::owned_raw_flac::source_info(source, options)?;
+        let spool = crate::owned_adts_export::spool_decoded(
+            rate,
+            channels,
+            mask,
+            options,
+            |writer, options| crate::owned_raw_flac::decode_raw_flac_pcm(source, writer, None, options),
+        )?;
+        crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
+        return Ok(spool);
+    }
+    if crate::owned_raw_mp3::recognizes(source)? {
+        let info = crate::owned_raw_mp3::source_info(source, options)?;
+        let spool = crate::owned_adts_export::spool_decoded(
+            rate,
+            channels,
+            mask,
+            options,
+            |writer, options| crate::owned_raw_mp3::decode_raw_mpeg_pcm(source, writer, None, options),
+        )?;
+        crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
+        return Ok(spool);
+    }
     let mp4 = crate::owned_mp4_audio_export::recognizes(source, options)?;
+    let info = if mp4 {
+        crate::owned_wave_metadata::mp4_source_info(source, options)?
+    } else {
+        crate::owned_wave_metadata::matroska_source_info(source, options)?
+    };
     let precise = codec.starts_with("A_PCM/") || codec.starts_with("pcm_");
     let spool = crate::owned_adts_export::spool_decoded_with_precision(
         rate,
@@ -92,12 +180,17 @@ pub(crate) fn decode_to_wave(
                 crate::owned_matroska_opus::decode_matroska_opus_pcm(file, writer, None, options)
             } else if codec == "alac" {
                 crate::owned_matroska_alac::decode_matroska_alac_pcm(file, writer, None, options)
+            } else if codec == "flac" {
+                crate::owned_matroska_flac::decode_matroska_flac_pcm(file, writer, None, options)
+            } else if matches!(codec.as_str(), "mp1" | "mp2" | "mp3") {
+                crate::owned_matroska_mpeg::decode_matroska_mpeg_pcm(file, writer, None, options)
             } else {
                 crate::owned_matroska_pcm::decode_matroska_pcm_f64(file, writer, None, options)
             };
             result.map_err(|e| e.to_string())
         },
     )?;
+    crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
     Ok(spool)
 }
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {

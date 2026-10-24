@@ -1,0 +1,61 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0188"
+  ],
+  "checked_at": "2026-10-22T03:08:45+00:00",
+  "sources": [
+    "src/native_media.rs",
+    "src/native_export.rs"
+  ],
+  "regressions": [
+    "tests/mp4_audio_selection.rs"
+  ],
+  "before": [
+    "evidence/batch-181-native-media-before.rs",
+    "evidence/batch-181-native-export-before.rs",
+    "evidence/batch-181-tests-before.rs",
+    "evidence/batch-181-before.log",
+    "evidence/batch-181-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-181-after.log",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-181-related-after.log",
+      "passed": 25
+    },
+    {
+      "log": "evidence/batch-181-mp4-units.log",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-181-core.log",
+      "passed": 359
+    },
+    {
+      "log": "evidence/batch-181-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-181-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/native_media.rs": "489c2dc734ef1adcc91e856487b598d16debdb6d9b319c1c80e0581857e9561b",
+    "/Users/themoretheless/Documents/Sources/fvid/src/native_export.rs": "145dd9e0844c1e70ba4c3a3bc862ee01064c25e176a3e38afc48e52579c3c86d",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_audio_selection.rs": "075deadbac1c1e97a3041fc6e8ab7e83cba460e553c55e537d59ffba60b88ad3",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/mp4-audio-selection/manifest.json": "2235dfa300182294dda87874223bf0457eed82b3582b68809ae3280cbccdefaa"
+  },
+  "qualification": [
+    "Pre-fix mp4_audio_index, mp4_aac_index, matroska_audio_index, and matroska_aac_index in src/native_media.rs ignored Mp4Reader::automatic_track_indices and WebmReader::preferred_track_numbers when selected.is_none(), rejecting multi-audio MP4 and Matroska files with a single enabled movie/default audio track, and export_pcm_selected in src/native_export.rs omitted in-band PS negotiation so implicit-PS AAC streams exported with channels=1 and doubled sample_frames (19,200 instead of 9,600). Pre-fix baseline reproduced all defects and the forced acceptance test failed.",
+    "Updating src/native_media.rs and src/native_export.rs selects the sole enabled/preferred audio track when selected.is_none(), preserves explicit stream selection and ambiguous multi-enabled refusal, and negotiates in-band PS before configuring the export PCM pipeline and WAV header.",
+    "All 3 synthetic MP4 controls (disabled-first AAC, enabled-nonmovie-first AAC, disabled-first sowt PCM), remuxed Matroska dual-audio controls, existing audiovisual fixtures, and implicit-PS WAV export match analytical float32 PCM within 1e-6 and exact stereo WAV geometry (48,000 Hz, 2 channels, 9,600 frames).",
+    "2 focused tests, 25 related MP4/Matroska/PS integration tests, 14 MP4 unit tests, 359 minimal-configuration (--no-default-features) tests, offline fixture unittest, and full player build pass.",
+    "ISO/IEC 14496-12:2015, 8.3.2 (tkhd flags), RFC 9559 (Matroska FlagEnabled/FlagDefault), and ISO/IEC 14496-3:2009 (implicit PS signalling) govern automatic track selection and stereo output negotiation. All fixtures are pure synthetic offline files requiring neither FFmpeg nor network access."
+  ],
+  "counting": "One automatic audio track selection and in-band PS export geometry alignment fix across src/native_media.rs and src/native_export.rs (FVID-0188). No extra IDs for individual fixture variants or controls."
+}

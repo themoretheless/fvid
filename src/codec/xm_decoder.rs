@@ -353,6 +353,7 @@ pub struct XmDecoder {
     sample_rate: u32,
     output_channels: usize,
     voices: Vec<Voice>,
+    initial_ignored: Ignored,
     ignored: Ignored,
     global_volume: u8,
 }
@@ -388,6 +389,7 @@ impl XmDecoder {
             output_channels: usize::from(channels.clamp(1, 8)),
             voices,
             module,
+            initial_ignored: ignored,
             ignored,
             global_volume: MAX_VOLUME,
         })
@@ -1211,6 +1213,9 @@ impl AudioDecode for XmDecoder {
         duration: u64,
     ) -> Result<Option<AudioPacket>> {
         let row = xm::read_row(data)?;
+        if row.cells.len() != self.voices.len() {
+            return Err(invalid("XM row packet channel count disagrees with module"));
+        }
         let continuation = data[7] & xm::ROW_CONTINUATION_FLAG != 0;
         let sample_rate = self.sample_rate;
         let channels = self.output_channels;
@@ -1369,6 +1374,7 @@ impl AudioDecode for XmDecoder {
 
     fn reset(&mut self) {
         self.global_volume = MAX_VOLUME;
+        self.ignored = self.initial_ignored;
         for voice in &mut self.voices {
             *voice = Voice::default();
         }

@@ -329,7 +329,7 @@ impl Lut {
                 .or_else(|| upper.strip_prefix("LUT_3D_INPUT_RANGE"));
             if let Some(rest) = range {
                 let three = upper.starts_with("LUT_3D_INPUT_RANGE");
-                if let Some((lo, hi)) = parse_pair(rest) {
+                if let Some((lo, hi)) = parse_pair(rest, line_no)? {
                     if three {
                         three_min = Some(lo);
                         three_max = Some(hi);
@@ -384,6 +384,16 @@ impl Lut {
         if nan {
             return Err(invalid("a .cube value is not a number"));
         }
+        let check_domain = |lo: [f32; 3], hi: [f32; 3]| -> Result<()> {
+            if lo
+                .iter()
+                .zip(hi)
+                .any(|(a, b)| !a.is_finite() || !b.is_finite() || *a >= b)
+            {
+                return Err(invalid("a .cube input domain must have finite min < max"));
+            }
+            Ok(())
+        };
         if let Some(n) = three_size {
             // Both tables in one file is how a grading suite exports a cube that
             // expects a curve in front of it, and no document settles which way
@@ -410,10 +420,13 @@ impl Lut {
                 .as_chunks::<3>().0.iter()
                 .map(|c| [c[0], c[1], c[2]])
                 .collect();
+            let domain_min = three_min.unwrap_or(domain_min);
+            let domain_max = three_max.unwrap_or(domain_max);
+            check_domain(domain_min, domain_max)?;
             return Ok(Self::Three(Lut3d {
                 size: n,
-                domain_min: three_min.unwrap_or(domain_min),
-                domain_max: three_max.unwrap_or(domain_max),
+                domain_min,
+                domain_max,
                 data,
             }));
         }
@@ -442,10 +455,13 @@ impl Lut {
                     data[ch].push(if rows == 1 { chunk[0] } else { chunk[ch] });
                 }
             }
+            let domain_min = one_min.unwrap_or(domain_min);
+            let domain_max = one_max.unwrap_or(domain_max);
+            check_domain(domain_min, domain_max)?;
             return Ok(Self::One(Lut1d {
                 data,
-                domain_min: one_min.unwrap_or(domain_min),
-                domain_max: one_max.unwrap_or(domain_max),
+                domain_min,
+                domain_max,
             }));
         }
         Err(invalid("a .cube must declare LUT_1D_SIZE or LUT_3D_SIZE"))
@@ -501,7 +517,9 @@ impl Lut {
                 size = Some(n);
                 continue;
             }
-            let numeric = fields.iter().all(|f| f.parse::<f32>().is_ok());
+            let numeric = fields
+                .iter()
+                .all(|f| f.parse::<f32>().is_ok_and(f32::is_finite));
             if !numeric {
                 return Err(invalid(&format!("bad .3dl value on line {}", line_no + 1)));
             }
@@ -731,9 +749,13 @@ impl Lut {
                             })
                         })
                         .collect::<Result<_>>()?;
-                    if nums.len() != 2 {
+                    if nums.len() != 2
+                        || !nums[0].is_finite()
+                        || !nums[1].is_finite()
+                        || nums[0] >= nums[1]
+                    {
                         return Err(invalid(&format!(
-                            "From needs two numbers on line {}",
+                            "From needs two finite numbers with min < max on line {}",
                             line_no + 1
                         )));
                     }
@@ -1032,13 +1054,21 @@ impl Lut {
     /// the diagonal cannot see the change the whole picture is made of.
     pub fn is_identity(&self, tol: f32) -> bool {
         match self {
-            // Three per-channel curves hide nothing from a grey: one value fed
-            // to all three has to come back the same value three times.
-            Self::One(_) => (0..=16).all(|i| {
-                let v = i as f32 / 16.0;
-                let out = self.sample([v, v, v], Interpolation::Tetrahedral);
-                out.iter().zip([v, v, v]).all(|(a, b)| (a - b).abs() <= tol)
-            }),
+            Self::One(l) => {
+                let n = l.len();
+                if n < 2 {
+                    return true;
+                }
+                let step = 1.0 / (n - 1) as f32;
+                (0..3).all(|ch| {
+                    let lo = l.domain_min[ch];
+                    let span = l.domain_max[ch] - lo;
+                    l.data[ch]
+                        .iter()
+                        .enumerate()
+                        .all(|(i, &val)| (val - (lo + i as f32 * step * span)).abs() <= tol)
+                })
+            }
             Self::Three(l) => {
                 let s = l.size;
                 let step = 1.0 / (s - 1) as f32;
@@ -1133,7 +1163,7 @@ fn parse_size(rest: &str, line_no: usize, limit: usize) -> Result<usize> {
 fn parse3(rest: &str, line_no: usize) -> Result<[f32; 3]> {
     let nums: Vec<f32> = rest
         .split_whitespace()
-        .filter_map(|t| t.parse().ok())
+        .filter_map(|t| t.parse::<f32>().ok().filter(|v| v.is_finite()))
         .collect();
     if nums.len() != 3 {
         return Err(invalid(&format!(
@@ -1148,15 +1178,24 @@ fn parse3(rest: &str, line_no: usize) -> Result<[f32; 3]> {
 /// `LUT_3D_INPUT_RANGE` state the input domain: two numbers, the ends, applied to
 /// every channel. Any other count on that line is not the pair and is left alone,
 /// as OCIO leaves the six-number form of it alone.
-fn parse_pair(rest: &str) -> Option<([f32; 3], [f32; 3])> {
-    let nums: Vec<f32> = rest
-        .split_whitespace()
-        .filter_map(|t| t.parse().ok())
-        .collect();
-    if nums.len() != 2 {
-        return None;
+fn parse_pair(rest: &str, line_no: usize) -> Result<Option<([f32; 3], [f32; 3])>> {
+    let tokens: Vec<&str> = rest.split_whitespace().collect();
+    if tokens.len() != 2 {
+        return Ok(None);
     }
-    Some(([nums[0]; 3], [nums[1]; 3]))
+    let a: f32 = tokens[0]
+        .parse()
+        .map_err(|_| invalid(&format!("bad input range on line {}", line_no + 1)))?;
+    let b: f32 = tokens[1]
+        .parse()
+        .map_err(|_| invalid(&format!("bad input range on line {}", line_no + 1)))?;
+    if !a.is_finite() || !b.is_finite() || a >= b {
+        return Err(invalid(&format!(
+            "input range on line {} must have finite min < max",
+            line_no + 1
+        )));
+    }
+    Ok(Some(([a; 3], [b; 3])))
 }
 
 fn is_number_line(line: &str) -> bool {

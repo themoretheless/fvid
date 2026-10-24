@@ -1,0 +1,144 @@
+{
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media/src/owned_mp4_impl.rs": "cb341217af25daaf2921d20967d15d101270d96fe0d9845e2899ad105b7e55e7",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_owned_fragment_parity.rs": "8c892b1ab78b03c3bbd318fbfcab8e63e4f8ad6e24561ef2487f8a49518d1b39",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/mp4-hybrid-fragments/manifest.json": "fd9c9be907159d51877fd77c1596ad02e9fcdd5649d1c87cbec64745e7b2a51b"
+  },
+  "checks": [
+    {
+      "name": "after",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--features",
+        "player",
+        "--test",
+        "mp4_owned_fragment_parity",
+        "--",
+        "--nocapture"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-178-after.log"
+    },
+    {
+      "name": "related-after",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--features",
+        "player",
+        "--test",
+        "mp4_hybrid_fragments",
+        "--test",
+        "mp4_mfhd_trex",
+        "--test",
+        "mp4_multi_trun",
+        "--test",
+        "mp4_tfhd_defaults",
+        "--test",
+        "mp4_trun_flags",
+        "--test",
+        "mp4_signed_offset",
+        "--test",
+        "mp4_fragment_description",
+        "--test",
+        "mp4",
+        "--test",
+        "mp4_seek_io_regressions",
+        "--test",
+        "mp4_enabled_tracks",
+        "--test",
+        "hls_parser_regressions",
+        "--test",
+        "vp9_chroma",
+        "--test",
+        "mp4_audio_clocks",
+        "--test",
+        "mp4_pcm_choice"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-178-related-after.log"
+    },
+    {
+      "name": "mp4-units",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--features",
+        "player",
+        "-p",
+        "fvid-media",
+        "--lib",
+        "owned_mp4"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-178-mp4-units.log"
+    },
+    {
+      "name": "core",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--test",
+        "mp4_owned_fragment_parity",
+        "--test",
+        "mp4_hybrid_fragments",
+        "--test",
+        "mp4_mfhd_trex",
+        "--test",
+        "mp4_multi_trun",
+        "--test",
+        "mp4_tfhd_defaults",
+        "--test",
+        "mp4_trun_flags",
+        "--test",
+        "mp4_signed_offset",
+        "--test",
+        "mp4_fragment_description",
+        "--test",
+        "mp4",
+        "--test",
+        "mp4_seek_io_regressions"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-178-core.log"
+    },
+    {
+      "name": "player-build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-178-player-build.log"
+    },
+    {
+      "name": "fixtures-after",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts",
+        "-p",
+        "test_mp4_hybrid_fragments_regressions.py"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-178-fixtures-after.log"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "batch": 226,
+  "ids": ["FVID-0233"],
+  "title": "Preserve and selectively edit source RIFF INFO, MP4/MOV/M4A, and Matroska/WebM/MKA tags across WAVE audio exports, trim, loudnorm, and normalize-loudness",
+  "scope": [
+    "crates/fvid-media/src/owned_wave_metadata.rs",
+    "crates/fvid-media/src/owned_mp4_audio_export.rs",
+    "crates/fvid-media/src/owned_matroska_aac_export.rs",
+    "crates/fvid-media/src/owned_matroska_opus_export.rs",
+    "crates/fvid-media/src/owned_matroska_flac_export.rs",
+    "crates/fvid-media/src/owned_matroska_alac_export.rs",
+    "crates/fvid-media/src/owned_matroska_mp3_export.rs",
+    "crates/fvid-media/src/owned_matroska_pcm_export.rs",
+    "crates/fvid-media/src/owned_container_loudness.rs",
+    "crates/fvid-media/src/owned_aac_export_routing.rs",
+    "src/native_export.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/audio-wave-info-preservation/wave-info-preserve.wav",
+    "tests/fixtures/playback-errors/audio-wave-info-preservation/mp4-info-preserve.m4a",
+    "tests/fixtures/playback-errors/audio-wave-info-preservation/matroska-info-preserve.mka"
+  ],
+  "generators": [
+    "scripts/generate_audio_wave_info_preservation_regressions.py",
+    "scripts/test_audio_wave_info_preservation_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-226-pre-edit/crates/fvid-media/src/owned_wave_metadata.rs",
+      "docs/improvements/snapshots/batch-226-pre-edit/crates/fvid-media/src/owned_mp4_audio_export.rs",
+      "docs/improvements/snapshots/batch-226-pre-edit/crates/fvid-media/src/owned_matroska_aac_export.rs",
+      "docs/improvements/snapshots/batch-226-pre-edit/crates/fvid-media/src/owned_matroska_opus_export.rs",
+      "docs/improvements/snapshots/batch-226-pre-edit/crates/fvid-media/src/owned_matroska_flac_export.rs",
+      "docs/improvements/snapshots/batch-226-pre-edit/crates/fvid-media/src/owned_matroska_alac_export.rs",
+      "docs/improvements/snapshots/batch-226-pre-edit/crates/fvid-media/src/owned_matroska_mp3_export.rs",
+      "docs/improvements/snapshots/batch-226-pre-edit/crates/fvid-media/src/owned_matroska_pcm_export.rs",
+      "docs/improvements/snapshots/batch-226-pre-edit/crates/fvid-media/src/owned_container_loudness.rs",
+      "docs/improvements/snapshots/batch-226-pre-edit/crates/fvid-media/src/owned_aac_export_routing.rs",
+      "docs/improvements/snapshots/batch-226-pre-edit/src/native_export.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-226-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-226-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-226-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test audio_wave_info_preservation_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test audio_sample_concat_wave_metadata_regressions --test loudnorm_matroska_metadata_regressions --test mp3_id3_metadata_regressions --test adts_matroska_audio_metadata_regressions --test flac_ogg_metadata_regressions",
+      "passed": 7,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_audio_wave_info_preservation_regressions.py -v",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

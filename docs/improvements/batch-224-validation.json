@@ -1,0 +1,45 @@
+{
+  "batch": 224,
+  "ids": ["FVID-0231"],
+  "title": "Support Matroska (.mka/.mkv) output and container/stream metadata mutations across loudnorm and plan loudnorm in API and CLI",
+  "scope": [
+    "src/native_loudnorm.rs",
+    "src/owned_loudnorm_cli.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/loudnorm-matroska-metadata/tone-tagged-48k.wav",
+    "tests/fixtures/playback-errors/loudnorm-matroska-metadata/tone-48k.aac",
+    "tests/fixtures/playback-errors/loudnorm-matroska-metadata/tone-tagged-48k.mp3"
+  ],
+  "generators": [
+    "scripts/generate_loudnorm_matroska_metadata_regressions.py",
+    "scripts/test_loudnorm_matroska_metadata_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-224-pre-edit/src/native_loudnorm.rs",
+      "docs/improvements/snapshots/batch-224-pre-edit/src/owned_loudnorm_cli.rs",
+      "docs/improvements/snapshots/batch-224-pre-edit/src/media.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-224-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-224-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-224-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test loudnorm_matroska_metadata_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test subtitle_normalize_metadata_regressions --test adts_matroska_audio_metadata_regressions --test mp3_id3_metadata_regressions --test probe_loudness_audio_regressions",
+      "passed": 7,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 -m unittest scripts/test_loudnorm_matroska_metadata_regressions.py",
+      "passed": 2,
+      "failed": 0
+    }
+  }
+}
