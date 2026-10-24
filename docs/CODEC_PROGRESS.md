@@ -18223,3 +18223,9 @@ explicit destination instead of silently guessing source positions. Authored
 four-front-channel PCE controls qualify stereo at 48/32 kHz and seven-channel
 output; known mono is placed in the center, with no invented surround content.
 The planner, admission and publication use the same selected destination.
+
+Cold in-band PS export exposed a stack overflow in SBR synthesis QMF table
+initialization. Matrix rows are now built directly in heap storage rather than
+returning multiple full-array temporaries through OnceLock. A short owned video
+and a fresh-process, bounded-worker-stack regression cover cold initialization;
+existing direct-convolution QMF tests retain the waveform acceptance boundary.

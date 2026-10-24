@@ -1,0 +1,8 @@
+{
+  "source": "he-aac-ps-inband-export-lc-960-synthetic.mp4",
+  "sha256": "8cde696c95a0230b064215f9d32d660b77697df6d10811717d04d7cf0a297c5a",
+  "frames": 9600,
+  "rate": 48000,
+  "channels": 2,
+  "provenance": "Existing FVid-owned authored PS packets and neutral video; no private media or codec parameters."
+}
