@@ -316,7 +316,7 @@ pub fn decode_mp4_aac_pcm_interval(
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("audio interval requires from < to"));
     }
-    let reader = crate::container::mp4::Mp4Reader::open(
+    let reader = crate::container::mp4::Mp4Reader::open_indexed(
         std::io::Cursor::new(data), Default::default(),
     )?;
     decode_mp4_aac_reader(reader, output, interval)

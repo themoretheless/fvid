@@ -228,6 +228,23 @@ pub struct Track {
 }
 
 impl Track {
+    /// A decoder header for one table entry, without cloning the media index.
+    pub fn decoder_setup(&self, description_index: u32) -> Result<Self> {
+        let d = description_index.checked_sub(1)
+            .and_then(|i| self.sample_descriptions.get(i as usize))
+            .ok_or_else(|| invalid("MP4 decoder description index is out of range"))?;
+        Ok(Self {
+            sample_descriptions: Vec::new(), id: self.id, handler: self.handler,
+            codec: d.codec, name: String::new(), language: String::new(),
+            timescale: self.timescale, duration: self.duration,
+            width: d.width, height: d.height, channels: d.channels,
+            sample_rate: d.sample_rate, bit_depth: d.bit_depth,
+            configuration: d.configuration.clone(), edits: Vec::new(),
+            samples: SampleIndex::Expanded(Vec::new()), pixel_aspect: d.pixel_aspect,
+            rotation: self.rotation, colour: d.colour, hdr: d.hdr,
+        })
+    }
+
     /// The configuration selected by this indexed sample, rather than entry 1.
     pub fn description_for_sample(&self, index: usize) -> Option<&SampleDescription> {
         let selected = self.samples.get(index)?.description_index.checked_sub(1)? as usize;

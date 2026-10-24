@@ -11,7 +11,7 @@ fn open(
     source: &Path,
     options: &CopyOptions,
 ) -> Result<crate::owned_mp4::Mp4Reader<BufReader<File>>> {
-    crate::owned_mp4::Mp4Reader::open(
+    crate::owned_mp4::Mp4Reader::open_indexed(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         crate::owned_mp4::Limits {
             packet_bytes: options.max_packet_bytes,
@@ -68,7 +68,10 @@ pub(crate) fn descriptor(
     crate::owned_mp4_audio::admit_audio_reader(&reader, index, options)
         .map_err(|e| e.to_string())?;
     let in_band_ps = crate::owned_mp4_audio::negotiate_mp4_ps(&mut reader,index,||Ok(())).map_err(|e|e.to_string())?;
-    let track = &reader.tracks()[index];
+    let source_track = &reader.tracks()[index];
+    let first = source_track.samples.get(0).ok_or("MP4 audio has no samples")?;
+    let setup = source_track.decoder_setup(first.description_index).map_err(|e| e.to_string())?;
+    let track = &setup;
     let decoder = if in_band_ps {crate::owned_mp4_audio::Mp4TimelineDecoder::with_in_band_ps(track)} else {crate::owned_mp4_audio::Mp4TimelineDecoder::new(track)}.map_err(|e|e.to_string())?;
     if track.timescale == 0
         || track.sample_rate != decoder.sample_rate()
@@ -107,7 +110,11 @@ pub(crate) fn descriptor(
 }
 fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, bool)> {
     let (_, rate, channels, mask, codec) = descriptor(source, options)?;
-    Ok((rate, channels, mask, codec.starts_with("pcm_")))
+    let reader = open(source, options)?;
+    let index = crate::owned_mp4_audio::mp4_audio_index(&reader, options.streams.first().copied()).map_err(|e|e.to_string())?;
+    let track = &reader.tracks()[index];
+    let all_pcm = (0..track.samples.len()).all(|n| track.description_for_sample(n).is_some_and(|d| matches!(&d.codec,b"raw "|b"sowt"|b"twos"|b"in24"|b"in32"|b"fl32"|b"fl64")));
+    Ok((rate, channels, mask, codec.starts_with("pcm_") && all_pcm))
 }
 use crate::owned_adts_export::decoded_prefix as prefix;
 pub(crate) fn supports(

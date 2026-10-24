@@ -11,14 +11,39 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
     }
     let index = mp4_audio_index(&reader, selected)?;
     let track = reader.tracks()[index].clone();
-    let in_band_ps = negotiate_mp4_ps(&mut reader, index, || control.check())?;
-    let mut decoder = if in_band_ps { Mp4TimelineDecoder::with_in_band_ps(&track)? } else { Mp4TimelineDecoder::new(&track)? };
+    let initial_description = track.samples.get(0).ok_or_else(|| invalid("MP4 audio has no samples"))?.description_index;
+    let initial_setup = track.decoder_setup(initial_description)?;
+    let mut ps = vec![false; track.sample_descriptions.len()];
+    // Probe each used configuration independently; never feed packets from a
+    // different setup into an AAC entropy/history state.
+    for (i, flag) in ps.iter_mut().enumerate() {
+        if (0..track.samples.len()).any(|n| track.samples.get(n).is_some_and(|s| s.description_index as usize == i+1)) {
+            *flag = negotiate_mp4_description_ps(&mut reader, index, (i+1) as u32, || control.check())?;
+        }
+    }
+    let make_decoder = |id: u32| -> Result<Mp4TimelineDecoder> {
+        let setup = track.decoder_setup(id)?;
+        if ps[(id-1) as usize] { Mp4TimelineDecoder::with_in_band_ps(&setup) } else { Mp4TimelineDecoder::new(&setup) }
+    };
+    let mut decoder = make_decoder(initial_description)?;
     let rate = decoder.sample_rate();
     let channels = decoder.channels();
-    if track.timescale == 0 || track.sample_rate != rate || (!in_band_ps && track.channels != channels) {
-        return Err(invalid(
-            "MP4 audio export requires valid clock and matching audio geometry",
-        ));
+    if track.timescale == 0 || initial_setup.sample_rate != rate || (!ps[(initial_description-1) as usize] && initial_setup.channels != channels) {
+        return Err(invalid("MP4 audio export requires valid clock and matching audio geometry"));
+    }
+    // Validate every used setup before caller-owned output. Output normalization
+    // for a rate/channel change is a separate operation, never reinterpret PCM.
+    let mut checked = initial_description;
+    for i in 0..track.samples.len() {
+        control.check()?;
+        let id = track.samples.get(i).ok_or_else(|| invalid("missing audio sample"))?.description_index;
+        if track.sample_descriptions[(id - 1) as usize] != track.sample_descriptions[(checked - 1) as usize] {
+            let next = make_decoder(id)?;
+            if next.sample_rate() != rate || next.channels() != channels || next.channel_mask() != decoder.channel_mask() {
+                return Err(invalid("MP4 audio export configuration changes require output geometry normalization"));
+            }
+            checked = id;
+        }
     }
     let sample_position = |ticks: u64| -> Result<u64> {
         let numerator = u128::from(ticks) * u128::from(rate);
@@ -62,9 +87,10 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
     };
     let mut packet = Vec::new();
     // One source-boundary checkpoint bounds retained state regardless of the
-    // number of edits. The stream and configuration never change in this call.
+    // number of edits. Checkpoints also retain their active setup identity.
     let mut checkpoint: Option<(
         usize,
+        u32,
         u64,
         Option<u64>,
         Mp4AacCheckpoint,
@@ -104,17 +130,21 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
         let to = from
             .checked_add(length)
             .ok_or_else(|| invalid("audio source edit overflow"))?;
-        decoder.reset();
+        decoder = make_decoder(initial_description)?;
+        let mut active_description = initial_description;
         let mut first_sample = 0;
         let mut expected = None;
         let mut pending_window = std::collections::VecDeque::new();
-        if let Some((index, start, previous, state, pending)) = &checkpoint
+        if let Some((index, description, start, previous, state, pending)) = &checkpoint
             && *start <= from
-            && decoder.restore_checkpoint(state)?
         {
-            first_sample = *index;
-            expected = *previous;
-            pending_window = pending.clone();
+            decoder = make_decoder(*description)?;
+            if decoder.restore_checkpoint(state)? {
+                active_description = *description;
+                first_sample = *index;
+                expected = *previous;
+                pending_window = pending.clone();
+            }
         }
         let mut captured = false;
         let mut written = 0u64;
@@ -122,8 +152,13 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
         loop {
             control.check()?;
             let terminal = sample_index == track.samples.len() || control.packet_limit_reached();
-            let (start, duration, samples) = if terminal {
+            let changing = !terminal && {
+                let id = track.samples.get(sample_index).ok_or_else(|| invalid("missing audio sample"))?.description_index;
+                track.sample_descriptions[(id-1) as usize] != track.sample_descriptions[(active_description-1) as usize]
+            };
+            let (start, duration, samples) = if terminal || (changing && !pending_window.is_empty()) {
                 let Some(samples) = decoder.finish_delayed()? else {
+                    if !pending_window.is_empty() { return Err(invalid("delayed MP4 audio left an undrained source window")); }
                     break;
                 };
                 let (start, duration) = pending_window
@@ -135,6 +170,10 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
                     .samples
                     .get(sample_index)
                     .ok_or_else(|| invalid("missing audio sample"))?;
+                if changing {
+                    decoder = make_decoder(sample.description_index)?;
+                    active_description = sample.description_index;
+                }
                 let start = sample_position(
                     u64::try_from(sample.pts).map_err(|_| invalid("negative audio timestamp"))?,
                 )?;
@@ -154,7 +193,7 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
                         > from
                 {
                     if let Some(state) = decoder.checkpoint() {
-                        checkpoint = Some((sample_index, start, expected, state, pending_window.clone()));
+                        checkpoint = Some((sample_index, active_description, start, expected, state, pending_window.clone()));
                     }
                     captured = true;
                 }
@@ -221,15 +260,26 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
 }
 
 pub(crate) fn negotiate_mp4_ps<R: std::io::Read + std::io::Seek>(
-    reader: &mut Mp4TimelineReader<R>, index: usize, mut check: impl FnMut() -> Result<()>,
+    reader: &mut Mp4TimelineReader<R>, index: usize, check: impl FnMut() -> Result<()>,
 ) -> Result<bool> {
-    let track = reader.tracks()[index].clone();
-    if track.codec != *b"mp4a" { return Ok(false); }
-    let asc = mp4_probe_config(&track.configuration)?;
-    let Ok(mut probe) = InBandPsProbe::new(asc, track.sample_rate) else { return Ok(false); };
+    let Some(first) = reader.tracks()[index].samples.get(0) else { return Ok(false); };
+    negotiate_mp4_description_ps(reader, index, first.description_index, check)
+}
+
+fn negotiate_mp4_description_ps<R: std::io::Read + std::io::Seek>(
+    reader: &mut Mp4TimelineReader<R>, index: usize, description: u32, mut check: impl FnMut() -> Result<()>,
+) -> Result<bool> {
+    let setup = reader.tracks()[index].decoder_setup(description)?;
+    if setup.codec != *b"mp4a" { return Ok(false); }
+    let asc = mp4_probe_config(&setup.configuration)?;
+    let Ok(mut probe) = InBandPsProbe::new(asc, setup.sample_rate) else { return Ok(false); };
     let mut packet = Vec::new();
-    for sample in 0..track.samples.len() {
+    for sample in 0..reader.tracks()[index].samples.len() {
         check()?;
+        if reader.tracks()[index].description_for_sample(sample) != reader.tracks()[index].sample_descriptions.get((description-1) as usize) {
+            probe.reset();
+            continue;
+        }
         reader.read_packet(index, sample, &mut packet)?;
         if probe.read(&packet).is_err() { probe.reset(); continue; }
         if probe.ps_detected() { return Ok(true); }

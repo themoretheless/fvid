@@ -27,12 +27,13 @@ def oracle(n,frames):
         for i in range(n):
             for plane in planes:out+=struct.pack('<f',plane[i])
     return bytes(out)
-def generate():
-    shapes=[(48000,2,1024,2,3),(32000,1,960,1,5),(44100,2,1024,2,4)]
+def generate(shapes=None,controls=None):
+    shapes=shapes or [(48000,2,1024,2,3),(32000,1,960,1,5),(44100,2,1024,2,4)]
     entries=[];groups=[];files={}
     for index,(rate,ch,n,profile,rate_index) in enumerate(shapes):
         specs=[[(150+f*3+c,(f+c)%4,4+f+c) for c in range(ch)]for f in range(3)]
-        groups.append([packet(s) for s in specs]);files[f'control-{index}.f32le']=oracle(n,specs)
+        encoded,pcm=controls[index] if controls is not None else ([packet(s) for s in specs],oracle(n,specs))
+        groups.append(encoded);files[f'control-{index}.f32le']=pcm
         asc=pack_bits(f'{profile:05b}{rate_index:04b}{ch:04b}'+('1'if n==960 else'0')+'00')
         e=bytearray(28);e[6:8]=struct.pack('>H',1);e[16:20]=struct.pack('>HH',ch,16);e[24:28]=word(rate<<16)
         entries.append(atom(b'mp4a',e+atom(b'esds',build_esds(asc))))
