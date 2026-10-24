@@ -17960,3 +17960,37 @@ Final frozen-source offline player checks: library 1036 passed / 26 ignored;
 eight selected integration targets 48 passed; all test targets checked; both
 `fvid` and `fvid-player` built. Existing compiler warnings remain. This is not
 a full integration-suite runtime or universal codec-coverage claim.
+
+
+### 2026-10-24: AAC configuration/edit acceptance and bounded seek preroll
+
+Owned AAC pulse streams now cover LC/1024 stereo 48 kHz -> Main/960 mono
+32 kHz -> LC/1024 stereo 44.1 kHz -> the first setup, with scalar independent
+IMDCT/overlap PCM controls. Ordinary, reordered, fragmented and equivalent-entry
+forms cover exact natural PCM, silence/repeated/disjoint edits, fractional
+endpoints, seek suffixes and rewind in direct and actual audio-worker paths.
+Disjoint presentation opens inside Main/960 and must restore its preceding
+overlap before exposing the cut. Analytic controls require nonzero signal and
+1e-6 numerical agreement; transition/edit comparisons are byte-exact against
+those separately verified constant-setup controls. Video companions retain exact
+VP9 planes and clocks.
+
+The owned preroll witness first failed because seek to 94 ms read packet PTS 0
+instead of the actual Main/960 setup boundary (903168 in media ticks). Stateful
+changing-description seek now starts at the most recent unequal decoder setup,
+matching natural reset semantics; equivalent entries deliberately share history.
+This reduces unnecessary decoded history; it is not a measured latency/FPS
+claim. The same existing branch covers AAC/AC3/EAC3/MACE and is checked against
+their related regressions. Constant-configuration whole-file AAC preroll and
+broader predictor/HE/SBR/PS/LTP/SSR/ER/multichannel pairs remain to qualify.
+
+The separate offline generator reproduces 18 artifacts / 1050542 bytes
+byte-exactly with process/socket creation denied. No private media, FFmpeg,
+foreign codec or network is used. This finite transition matrix does not close
+all AAC profile/tool gaps.
+
+Frozen-source offline player qualification: library 1036 passed / 26 ignored;
+nine selected integration targets 54 passed; all test targets checked; both
+`fvid` and `fvid-player` built. Existing warnings remain. These results are
+finite headless acceptance, not a full runtime integration suite, a physical
+device continuity measurement or universal AAC profile/tool qualification.

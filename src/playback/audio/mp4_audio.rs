@@ -946,7 +946,12 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             let selected=self.track().samples.at_or_before(requested);
             let codec=self.track().description_for_sample(selected).unwrap().codec;
             if matches!(&codec,b"mp4a"|b"ac-3"|b"ec-3"|b"MAC3"|b"MAC6") {
-                self.rewind();self.presentation_floor=requested;return requested;
+                // A real setup change resets codec history during natural
+                // playback, so earlier setups cannot contribute to this span.
+                // Equivalent table entries still share that history.
+                let setup=self.track().description_for_sample(selected).unwrap();
+                let first=(0..selected).rev().find(|&i|self.track().description_for_sample(i)!=Some(setup)).map_or(0,|i|i+1);
+                self.rewind();self.sample_index=first;self.presentation_floor=requested;return requested;
             }
             self.seek(requested);self.presentation_floor=requested;return requested;
         }

@@ -4768,3 +4768,17 @@ checks 400 indexed packets from 1200 table units and exact per-span durations,
 widths and budget enforcement. The previous-source replay fails on the specific
 mixed-unit refusal before the acceptance fix. Broader AAC/ADPCM/other compressed
 mixed-codec matrices remain unqualified.
+
+`mp4-aac-transitions` authors AAC pulse spectra and independent scalar
+IMDCT/overlap PCM: LC/1024 stereo 48 kHz, Main/960 mono 32 kHz, LC/1024 stereo
+44.1 kHz, then the first configuration again. Ordinary/reordered/fragmented
+MP4, identical duplicate setup entries, repeats with silence, explicit fractional
+sample cuts and disjoint startup inside Main/960 check exact control PCM and
+seek suffixes through actual audio workers. Separate analytic control checks
+require nonzero output and numerical agreement. Every case retains exact owned
+VP9 planes/clocks. The preroll regression first reproduced reading PTS 0 for a
+seek into Main/960; acceptance requires the last actual setup boundary while
+preserving history across equivalent entries. Generate separately with
+`python3 scripts/generate_mp4_aac_transitions.py`; run `mp4_aac_transitions`
+offline. These pulse streams do not exercise every Main predictor, HE/SBR/PS,
+LTP, SSR, ER or multichannel transition combination.

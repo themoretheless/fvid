@@ -1,0 +1,1894 @@
+{
+  "cases": [
+    {
+      "name": "changes",
+      "parts": [
+        {
+          "control": 0,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            8,
+            375
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            16,
+            375
+          ]
+        },
+        {
+          "control": 1,
+          "index": 0,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            8,
+            125
+          ]
+        },
+        {
+          "control": 1,
+          "index": 1,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            47,
+            500
+          ]
+        },
+        {
+          "control": 1,
+          "index": 2,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            31,
+            250
+          ]
+        },
+        {
+          "control": 2,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            77,
+            500
+          ]
+        },
+        {
+          "control": 2,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            39077,
+            220500
+          ]
+        },
+        {
+          "control": 2,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            44197,
+            220500
+          ]
+        },
+        {
+          "control": 0,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            16439,
+            73500
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            18007,
+            73500
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            261,
+            980
+          ]
+        }
+      ],
+      "duration": [
+        21143,
+        73500
+      ]
+    },
+    {
+      "name": "changes-edits",
+      "parts": [
+        {
+          "control": null,
+          "first": 0,
+          "last": 240,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "control": 0,
+          "index": 0,
+          "first": 960,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            200
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            19,
+            3000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            83,
+            3000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 0,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            49,
+            1000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 1,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            79,
+            1000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 2,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            109,
+            1000
+          ]
+        },
+        {
+          "control": 2,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            139,
+            1000
+          ]
+        },
+        {
+          "control": 2,
+          "index": 1,
+          "first": 0,
+          "last": 123,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            71539,
+            441000
+          ]
+        },
+        {
+          "control": null,
+          "first": 0,
+          "last": 335,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            7921,
+            48000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 0,
+          "first": 960,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            43,
+            250
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            13,
+            75
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            73,
+            375
+          ]
+        },
+        {
+          "control": 1,
+          "index": 0,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            27,
+            125
+          ]
+        },
+        {
+          "control": 1,
+          "index": 1,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            123,
+            500
+          ]
+        },
+        {
+          "control": 1,
+          "index": 2,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            69,
+            250
+          ]
+        },
+        {
+          "control": 2,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            153,
+            500
+          ]
+        },
+        {
+          "control": 2,
+          "index": 1,
+          "first": 0,
+          "last": 123,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            72593,
+            220500
+          ]
+        }
+      ],
+      "duration": [
+        332,
+        1000
+      ]
+    },
+    {
+      "name": "changes-fractional",
+      "parts": [
+        {
+          "control": null,
+          "first": 0,
+          "last": 16,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "control": 0,
+          "index": 0,
+          "first": 960,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            3000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            600
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            23,
+            1000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 0,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            133,
+            3000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 1,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            223,
+            3000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 2,
+          "first": 0,
+          "last": 939,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            313,
+            3000
+          ]
+        },
+        {
+          "control": null,
+          "first": 0,
+          "last": 31,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            2139,
+            16000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 0,
+          "first": 960,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            403,
+            3000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            407,
+            3000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            157,
+            1000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 0,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            107,
+            600
+          ]
+        },
+        {
+          "control": 1,
+          "index": 1,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            5,
+            24
+          ]
+        },
+        {
+          "control": 1,
+          "index": 2,
+          "first": 0,
+          "last": 939,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            143,
+            600
+          ]
+        }
+      ],
+      "duration": [
+        803,
+        3000
+      ]
+    },
+    {
+      "name": "third",
+      "parts": [
+        {
+          "control": 0,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            8,
+            375
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            16,
+            375
+          ]
+        },
+        {
+          "control": 1,
+          "index": 0,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            8,
+            125
+          ]
+        },
+        {
+          "control": 1,
+          "index": 1,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            47,
+            500
+          ]
+        },
+        {
+          "control": 1,
+          "index": 2,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            31,
+            250
+          ]
+        },
+        {
+          "control": 2,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            77,
+            500
+          ]
+        },
+        {
+          "control": 2,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            39077,
+            220500
+          ]
+        },
+        {
+          "control": 2,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            44197,
+            220500
+          ]
+        },
+        {
+          "control": 0,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            16439,
+            73500
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            18007,
+            73500
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            261,
+            980
+          ]
+        }
+      ],
+      "duration": [
+        21143,
+        73500
+      ]
+    },
+    {
+      "name": "third-edits",
+      "parts": [
+        {
+          "control": null,
+          "first": 0,
+          "last": 240,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "control": 0,
+          "index": 0,
+          "first": 960,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            200
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            19,
+            3000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            83,
+            3000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 0,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            49,
+            1000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 1,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            79,
+            1000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 2,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            109,
+            1000
+          ]
+        },
+        {
+          "control": 2,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            139,
+            1000
+          ]
+        },
+        {
+          "control": 2,
+          "index": 1,
+          "first": 0,
+          "last": 123,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            71539,
+            441000
+          ]
+        },
+        {
+          "control": null,
+          "first": 0,
+          "last": 335,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            7921,
+            48000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 0,
+          "first": 960,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            43,
+            250
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            13,
+            75
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            73,
+            375
+          ]
+        },
+        {
+          "control": 1,
+          "index": 0,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            27,
+            125
+          ]
+        },
+        {
+          "control": 1,
+          "index": 1,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            123,
+            500
+          ]
+        },
+        {
+          "control": 1,
+          "index": 2,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            69,
+            250
+          ]
+        },
+        {
+          "control": 2,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            153,
+            500
+          ]
+        },
+        {
+          "control": 2,
+          "index": 1,
+          "first": 0,
+          "last": 123,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            72593,
+            220500
+          ]
+        }
+      ],
+      "duration": [
+        332,
+        1000
+      ]
+    },
+    {
+      "name": "third-fractional",
+      "parts": [
+        {
+          "control": null,
+          "first": 0,
+          "last": 16,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "control": 0,
+          "index": 0,
+          "first": 960,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            3000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            600
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            23,
+            1000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 0,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            133,
+            3000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 1,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            223,
+            3000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 2,
+          "first": 0,
+          "last": 939,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            313,
+            3000
+          ]
+        },
+        {
+          "control": null,
+          "first": 0,
+          "last": 31,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            2139,
+            16000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 0,
+          "first": 960,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            403,
+            3000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            407,
+            3000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            157,
+            1000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 0,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            107,
+            600
+          ]
+        },
+        {
+          "control": 1,
+          "index": 1,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            5,
+            24
+          ]
+        },
+        {
+          "control": 1,
+          "index": 2,
+          "first": 0,
+          "last": 939,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            143,
+            600
+          ]
+        }
+      ],
+      "duration": [
+        803,
+        3000
+      ]
+    },
+    {
+      "name": "fragmented",
+      "parts": [
+        {
+          "control": 0,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            8,
+            375
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            16,
+            375
+          ]
+        },
+        {
+          "control": 1,
+          "index": 0,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            8,
+            125
+          ]
+        },
+        {
+          "control": 1,
+          "index": 1,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            47,
+            500
+          ]
+        },
+        {
+          "control": 1,
+          "index": 2,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            31,
+            250
+          ]
+        },
+        {
+          "control": 2,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            77,
+            500
+          ]
+        },
+        {
+          "control": 2,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            39077,
+            220500
+          ]
+        },
+        {
+          "control": 2,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            44197,
+            220500
+          ]
+        },
+        {
+          "control": 0,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            16439,
+            73500
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            18007,
+            73500
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            261,
+            980
+          ]
+        }
+      ],
+      "duration": [
+        21143,
+        73500
+      ]
+    },
+    {
+      "name": "fragmented-edits",
+      "parts": [
+        {
+          "control": null,
+          "first": 0,
+          "last": 240,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "control": 0,
+          "index": 0,
+          "first": 960,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            200
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            19,
+            3000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            83,
+            3000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 0,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            49,
+            1000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 1,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            79,
+            1000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 2,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            109,
+            1000
+          ]
+        },
+        {
+          "control": 2,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            139,
+            1000
+          ]
+        },
+        {
+          "control": 2,
+          "index": 1,
+          "first": 0,
+          "last": 123,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            71539,
+            441000
+          ]
+        },
+        {
+          "control": null,
+          "first": 0,
+          "last": 335,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            7921,
+            48000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 0,
+          "first": 960,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            43,
+            250
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            13,
+            75
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            73,
+            375
+          ]
+        },
+        {
+          "control": 1,
+          "index": 0,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            27,
+            125
+          ]
+        },
+        {
+          "control": 1,
+          "index": 1,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            123,
+            500
+          ]
+        },
+        {
+          "control": 1,
+          "index": 2,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            69,
+            250
+          ]
+        },
+        {
+          "control": 2,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            153,
+            500
+          ]
+        },
+        {
+          "control": 2,
+          "index": 1,
+          "first": 0,
+          "last": 123,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            72593,
+            220500
+          ]
+        }
+      ],
+      "duration": [
+        332,
+        1000
+      ]
+    },
+    {
+      "name": "fragmented-fractional",
+      "parts": [
+        {
+          "control": null,
+          "first": 0,
+          "last": 16,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "control": 0,
+          "index": 0,
+          "first": 960,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            3000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            600
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            23,
+            1000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 0,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            133,
+            3000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 1,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            223,
+            3000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 2,
+          "first": 0,
+          "last": 939,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            313,
+            3000
+          ]
+        },
+        {
+          "control": null,
+          "first": 0,
+          "last": 31,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            2139,
+            16000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 0,
+          "first": 960,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            403,
+            3000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            407,
+            3000
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            157,
+            1000
+          ]
+        },
+        {
+          "control": 1,
+          "index": 0,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            107,
+            600
+          ]
+        },
+        {
+          "control": 1,
+          "index": 1,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            5,
+            24
+          ]
+        },
+        {
+          "control": 1,
+          "index": 2,
+          "first": 0,
+          "last": 939,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            143,
+            600
+          ]
+        }
+      ],
+      "duration": [
+        803,
+        3000
+      ]
+    },
+    {
+      "name": "equivalent",
+      "parts": [
+        {
+          "control": 0,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            8,
+            375
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            16,
+            375
+          ]
+        },
+        {
+          "control": 1,
+          "index": 0,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            8,
+            125
+          ]
+        },
+        {
+          "control": 1,
+          "index": 1,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            47,
+            500
+          ]
+        },
+        {
+          "control": 1,
+          "index": 2,
+          "first": 0,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            31,
+            250
+          ]
+        },
+        {
+          "control": 2,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            77,
+            500
+          ]
+        },
+        {
+          "control": 2,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            39077,
+            220500
+          ]
+        },
+        {
+          "control": 2,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 44100,
+          "channels": 2,
+          "pts": [
+            44197,
+            220500
+          ]
+        },
+        {
+          "control": 0,
+          "index": 0,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            16439,
+            73500
+          ]
+        },
+        {
+          "control": 0,
+          "index": 1,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            18007,
+            73500
+          ]
+        },
+        {
+          "control": 0,
+          "index": 2,
+          "first": 0,
+          "last": 1024,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            261,
+            980
+          ]
+        }
+      ],
+      "duration": [
+        21143,
+        73500
+      ]
+    },
+    {
+      "name": "disjoint",
+      "parts": [
+        {
+          "control": 1,
+          "index": 0,
+          "first": 512,
+          "last": 960,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            0,
+            1
+          ]
+        },
+        {
+          "control": 1,
+          "index": 1,
+          "first": 0,
+          "last": 192,
+          "rate": 32000,
+          "channels": 1,
+          "pts": [
+            7,
+            500
+          ]
+        },
+        {
+          "control": 0,
+          "index": 0,
+          "first": 0,
+          "last": 480,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            1,
+            50
+          ]
+        },
+        {
+          "control": null,
+          "first": 0,
+          "last": 144,
+          "rate": 48000,
+          "channels": 2,
+          "pts": [
+            3,
+            100
+          ]
+        }
+      ],
+      "duration": [
+        33,
+        1000
+      ]
+    }
+  ],
+  "scale": 14112000,
+  "shapes": [
+    {
+      "rate": 48000,
+      "channels": 2,
+      "frames": 1024,
+      "profile": 2
+    },
+    {
+      "rate": 32000,
+      "channels": 1,
+      "frames": 960,
+      "profile": 1
+    },
+    {
+      "rate": 44100,
+      "channels": 2,
+      "frames": 1024,
+      "profile": 2
+    }
+  ],
+  "selection": [
+    0,
+    1,
+    2,
+    0
+  ],
+  "provenance": "Owned AAC pulse spectra with analytic scalar IMDCT+overlap float PCM, LC1024 stereo48k/Main960 mono32k/LC1024 stereo44.1k, neutral VP9. No private media, external codec, FFmpeg or network."
+}
