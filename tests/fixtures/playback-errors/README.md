@@ -4691,8 +4691,8 @@ geometry change, independent one-entry decode controls, compact PCM chunks,
 invalid selected indices and an external second reference. The changing video
 is indexed through `open_indexed` and now plays through the native video
 reader with seek/rewind acceptance enabled. Single-configuration export/remux consumers retain their explicit
-reconfiguration refusal. Native audio now negotiates changing setups without
-edits; its variable-rate edit scheduler remains open. Regenerate with
+reconfiguration refusal. Native audio now negotiates changing setups including
+variable-rate edits; the finite PCM/E-AC-3 scheduler matrix is described below. Regenerate with
 `python3 scripts/generate_mp4_sample_descriptions.py`; ordinary offline tests
 run `mp4_sample_descriptions`. No external encoder or private media is used.
 
@@ -4720,7 +4720,18 @@ changes beside short owned VP9 video. PCM has analytic float32 oracles;
 compressed spans have independent constant-setup controls. Ordinary and iso5
 fragmented PCM, setup 3 at startup, exact worker PCM, delayed decoder tails,
 RF/dialogue policy, seek/rewind, output-drain cancellation and error recovery
-are tested. The variable-rate edit movie has a separate passing refusal and
-an explicitly ignored intended timeline acceptance. Regenerate with
+are tested. The leading-silence variable-rate edit acceptance is enabled. Regenerate with
 `python3 scripts/generate_mp4_audio_reconfiguration.py`; run
 `mp4_audio_reconfiguration` offline without FFmpeg/network.
+
+`mp4-variable-rate-edits` adds owned PCM/E-AC-3 edit schedules beside synthetic
+VP9: silence, repeated and disjoint source windows, ordinary/fragmented MP4,
+reordered description tables, fractional movie clocks, negative source PTS and
+repeated delayed E-AC-3 tails at source EOF. Explicit independent source-frame
+cuts and rational timestamps check exact PCM and seek suffixes, including real
+audio workers and rewind. A separate past-end witness must emit the available
+PCM then fail for missing source extent. Regenerate separately with
+`python3 scripts/generate_mp4_variable_rate_edits.py`; run
+`mp4_variable_rate_edits` offline. The generator uses no FFmpeg or network.
+This finite PCM/E-AC-3 matrix does not qualify every compressed codec/edit pair
+or prove acoustic continuity during physical output-device reconfiguration.

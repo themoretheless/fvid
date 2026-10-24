@@ -22,8 +22,14 @@ pub struct AudioPacket {
 
 #[derive(Clone, Copy, Default)]
 struct DescriptionState { rate: Option<u32>, channels: Option<u16>, mask: Option<u32>, in_band_ps: bool }
+#[path = "mp4_edit_clock.rs"]
+mod edit_clock;
+use edit_clock::{Time as EditTime, Timeline as VariableTimeline};
+enum EditAction { Encoded, Step(crate::audio::AudioStep), End }
 /// MP4 audio track reader. Extracts encoded packets for decoding.
 pub struct Mp4AudioReader<R> {
+    variable_edits: Option<VariableTimeline>,
+    opening_sample_index: usize,
     changing: bool,
     active_description: usize,
     configuration_pending: bool,
@@ -263,6 +269,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         // packets. Always re-seek the selected first packet on real playback.
         demuxer.invalidate_position();
         Ok(Self {
+            variable_edits: None, opening_sample_index: 0,
             changing: false, active_description: 0, configuration_pending: false, description_states: Vec::new(),
             dolby_mask,
             dolby_channels,
@@ -281,6 +288,8 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         })
     }
 
+    fn negotiated_rate(&self)->u32 {self.dolby_rate.unwrap_or(self.setup().sample_rate)}
+    fn negotiated_channels(&self)->u16 {if self.in_band_ps {2}else{self.dolby_channels.unwrap_or(self.setup().channels)}}
     fn setup(&self) -> &crate::container::mp4::SampleDescription {
         &self.track().sample_descriptions[self.active_description]
     }
@@ -299,11 +308,9 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 "selected MP4 track contains unsupported audio sample descriptions",
             ));
         }
-        if !track.edits.is_empty() {
-            return Err(unsupported(
-                "changing MP4 audio descriptions with edits require a variable-rate edit scheduler",
-            ));
-        }
+        let variable_edits = if track.edits.is_empty() {None} else {
+            Some(VariableTimeline::new(&track.edits,track.timescale,demuxer.movie_timescale())?)
+        };
         if programme.is_some()
             && !track
                 .sample_descriptions
@@ -325,6 +332,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         states.resize(track.sample_descriptions.len(), None);
         let tracks = demuxer.tracks().len();
         let mut source = Self {
+            variable_edits, opening_sample_index: 0,
             changing: true,
             active_description: first,
             configuration_pending: false,
@@ -345,6 +353,8 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             edit_segment: std::cell::Cell::new(None),
         };
         source.configure_description(first)?;
+        if source.variable_edits.is_some() {source.plan_edit_frontiers()?;let selected=source.variable_edits.as_ref().unwrap().locate();source.activate_edit(selected)?;}
+        source.opening_sample_index=source.sample_index;
         Ok(source)
     }
     fn configure_description(&mut self, selected: usize) -> Result<()> {
@@ -458,6 +468,125 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         self.demuxer.invalidate_position();
         Ok(())
     }
+    fn plan_edit_frontiers(&mut self) -> Result<()> {
+        let count=self.variable_edits.as_ref().unwrap().segments.len();
+        let mut starts=Vec::new();starts.try_reserve_exact(count).map_err(|_|invalid("MP4 edit frontier allocation failed"))?;
+        let mut cursor=EditTime::ZERO;
+        for index in 0..count {
+            let segment=self.variable_edits.as_ref().unwrap().segments[index];
+            let begin=cursor.max(segment.start);starts.push(begin);
+            if begin.cmp(segment.end)!=std::cmp::Ordering::Less {continue;}
+            if let Some(media)=segment.media {
+                let media_end=media.add(segment.end.sub(segment.start)?)?;
+                let floor=media_end.floor_ticks(self.track().timescale)?;
+                let exact=EditTime::new(floor,u128::from(self.track().timescale))?==media_end;
+                let tick=(floor-i128::from(exact)).clamp(i128::from(i64::MIN),i128::from(i64::MAX)) as i64;
+                let sample=self.track().samples.get(self.track().samples.at_or_before(tick)).ok_or_else(||invalid("missing MP4 edit frontier sample"))?;
+                self.configure_description(sample.description_index as usize-1)?;
+                let rate=self.negotiated_rate();
+                let native_frames=if matches!(&self.setup().codec,b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64") {
+                    let bits=usize::from(self.setup().bit_depth);let channels=usize::from(self.setup().channels);
+                    let stride=bits.div_ceil(8).checked_mul(channels).filter(|n|*n>0).ok_or_else(||invalid("invalid PCM edit frontier geometry"))?;
+                    if !(sample.size as usize).is_multiple_of(stride) {return Err(invalid("unaligned PCM edit frontier"));}
+                    i128::from(sample.size)/stride as i128
+                } else { i128::from(sample.duration)*i128::from(rate)/i128::from(self.track().timescale) };
+                let mapped=EditTime::signed_ticks(sample.pts,self.track().timescale)?.add(segment.start)?.sub(media)?;
+                let first=begin.sub(mapped)?.ceil_frames(rate)?.clamp(0,native_frames);
+                let last=segment.end.sub(mapped)?.ceil_frames(rate)?.clamp(0,native_frames);
+                if last>first {cursor=mapped.add(EditTime::new(last,u128::from(rate))?)?;}
+            } else {
+                let initial=self.track().samples.get(0).unwrap().description_index as usize-1;
+                self.configure_description(initial)?;let rate=self.negotiated_rate();
+                let first=begin.sub(segment.start)?.ceil_frames(rate)?;
+                let last=segment.end.sub(segment.start)?.ceil_frames(rate)?;
+                if last>first {cursor=segment.start.add(EditTime::new(last,u128::from(rate))?)?;}
+            }
+        }
+        self.variable_edits.as_mut().unwrap().minimum_starts=starts;
+        Ok(())
+    }
+    fn edit_source_index(&self, segment: edit_clock::Segment, cursor: EditTime) -> Result<usize> {
+        let Some(media)=segment.media else {return Ok(0);};
+        let wanted=media.add(cursor.max(segment.start).sub(segment.start)?)?;
+        let ticks=wanted.floor_ticks(self.track().timescale)?.clamp(0,i128::from(i64::MAX)) as i64;
+        let selected=self.track().samples.at_or_before(ticks);
+        let setup=self.track().description_for_sample(selected).ok_or_else(||invalid("missing MP4 edit source sample"))?;
+        if matches!(&setup.codec,b"mp4a"|b"ac-3"|b"ec-3"|b"MAC3"|b"MAC6") {
+            // Recover history from the last real setup boundary, including
+            // equivalent table entries that deliberately preserve the decoder.
+            Ok((0..selected).rev().find(|&i|self.track().description_for_sample(i)!=Some(setup)).map_or(0,|i|i+1))
+        } else {Ok(selected)}
+    }
+    fn activate_edit(&mut self, mut selected: Option<usize>) -> Result<()> {
+        while let Some(index)=selected {
+            let timeline=self.variable_edits.as_ref().unwrap();
+            timeline.cursor.set(timeline.cursor.get().max(timeline.minimum_starts[index]));
+            let resolved=timeline.locate();
+            if resolved==selected {break;}selected=resolved;
+        }
+        if let Some(index)=selected {
+            let timeline=self.variable_edits.as_ref().unwrap();let segment=timeline.segments[index];
+            let source=self.edit_source_index(segment,timeline.cursor.get())?;
+            self.sample_index=source;
+            let setup=self.track().samples.get(source).ok_or_else(||invalid("empty MP4 audio edit source"))?.description_index as usize-1;
+            self.configure_description(setup)?;
+        }
+        self.variable_edits.as_mut().unwrap().active=selected;
+        self.configuration_pending=false;
+        Ok(())
+    }
+    fn next_variable_step(&mut self) -> Result<EditAction> {
+        loop {
+            let timeline=self.variable_edits.as_ref().unwrap();
+            let Some(index)=timeline.locate() else {return Ok(EditAction::End);};
+            if timeline.active!=Some(index) {self.configuration_pending=true;return Ok(EditAction::Step(crate::audio::AudioStep::ReconfigureDecoder));}
+            let segment=timeline.segments[index];
+            if segment.media.is_none() {
+                let rate=self.negotiated_rate();if rate==0{return Err(invalid("zero MP4 silence rate"));}
+                let first=timeline.cursor.get().max(segment.start).sub(segment.start)?.ceil_frames(rate)?;
+                let start=segment.start.add(EditTime::new(first,u128::from(rate))?)?;
+                let frames=(segment.end.sub(segment.start)?.ceil_frames(rate)?-first).min(1024).max(0) as usize;
+                if frames==0 {timeline.cursor.set(segment.end);continue;}
+                let stride=usize::from(self.negotiated_channels()).checked_mul(4).filter(|n|*n>0).ok_or_else(||invalid("invalid MP4 silence geometry"))?;
+                let data=crate::buffer(frames.checked_mul(stride).ok_or_else(||invalid("MP4 silence allocation overflow"))?)?;
+                let (pts,den)=start.stamp()?;
+                timeline.cursor.set(start.add(EditTime::ticks(frames as u64,rate)?)?);
+                return Ok(EditAction::Step(crate::audio::AudioStep::Pcm(crate::audio::AudioPacket {data,pts,timebase_num:1,timebase_den:den})));
+            }
+            if self.sample_index==self.track().samples.len() {
+                // A delayed decoder may still complete this edit. Its tail must
+                // be clipped using this segment before deciding whether to repeat.
+                self.configuration_pending=true;
+                return Ok(EditAction::Step(crate::audio::AudioStep::ReconfigureDecoder));
+            }
+            return Ok(EditAction::Encoded);
+        }
+    }
+    fn present_variable_edit(&self, mut packet:crate::audio::AudioPacket, source_pts:i64) -> Result<Option<crate::audio::AudioPacket>> {
+        let timeline=self.variable_edits.as_ref().unwrap();
+        let Some(index)=timeline.active else {return Ok(None);};let segment=timeline.segments[index];
+        let Some(media)=segment.media else {return Ok(None);};
+        if timeline.cursor.get().cmp(segment.end)!=std::cmp::Ordering::Less {return Ok(None);}
+        let rate=self.negotiated_rate();let stride=usize::from(self.negotiated_channels()).checked_mul(4).filter(|n|*n>0).ok_or_else(||invalid("invalid MP4 edit PCM stride"))?;
+        if rate==0 || !packet.data.len().is_multiple_of(stride) {return Err(invalid("invalid MP4 edit PCM geometry"));}
+        let frames=packet.data.len()/stride;
+        let mapped=EditTime::signed_ticks(source_pts,self.track().timescale)?.add(segment.start)?.sub(media)?;
+        let first=timeline.cursor.get().max(segment.start).sub(mapped)?.ceil_frames(rate)?.clamp(0,frames as i128) as usize;
+        let last=segment.end.sub(mapped)?.ceil_frames(rate)?.clamp(0,frames as i128) as usize;
+        if first>=last {
+            let end=mapped.add(EditTime::ticks(last as u64,rate)?)?;
+            if mapped.cmp(segment.end)==std::cmp::Ordering::Less && end.cmp(segment.end)!=std::cmp::Ordering::Less {
+                timeline.cursor.set(timeline.cursor.get().max(end));
+            }
+            return Ok(None);
+        }
+        let start=mapped.add(EditTime::ticks(first as u64,rate)?)?;
+        let end=mapped.add(EditTime::ticks(last as u64,rate)?)?;
+        packet.data.copy_within(first*stride..last*stride,0);packet.data.truncate((last-first)*stride);
+        let (pts,den)=start.stamp()?;packet.pts=pts;packet.timebase_num=1;packet.timebase_den=den;
+        timeline.cursor.set(end);
+        Ok(Some(packet))
+    }
     /// Read the next audio packet. Returns None at end of track.
     /// Changing setups require `AudioStream::next_step` so the old decoder can
     /// drain before the source commits the next configuration.
@@ -497,10 +626,11 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
     /// Restart from the first sample.
     pub fn rewind(&mut self) {
         self.demuxer.invalidate_position();
-        self.sample_index = 0;
+        self.sample_index = if self.variable_edits.is_some(){self.opening_sample_index}else{0};
         self.configuration_pending = false;
+        if let Some(timeline)=&mut self.variable_edits {timeline.cursor.set(EditTime::ZERO);timeline.active=None;}
         if self.changing {
-            let initial=self.track().samples.get(0).unwrap().description_index as usize-1;
+            let initial=self.track().samples.get(self.sample_index).unwrap().description_index as usize-1;
             // The opening configuration was negotiated before exposing the reader.
             let state=self.description_states[initial].unwrap();self.active_description=initial;
             self.in_band_ps=state.in_band_ps;self.dolby_rate=state.rate;self.dolby_channels=state.channels;self.dolby_mask=state.mask;
@@ -591,6 +721,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         self.sample_index=index;true
     }
     fn duration(&self) -> Option<std::time::Duration> {
+        if let Some(timeline)=&self.variable_edits {return timeline.end.duration();}
         let track = self.track();
         if (track.codec == *b"mp4a" || self.timeline.is_some()) && !track.edits.is_empty() && self.demuxer.movie_timescale() != 0 {
             let ticks = track.edits.iter().try_fold(0u128, |sum, edit| sum.checked_add(u128::from(edit.duration)))?;
@@ -605,7 +736,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
 
     fn time_of(&self, pts: i64) -> std::time::Duration {
         let track = self.track();
-        let shift = if track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0 { track.edits[0].media_time } else { 0 };
+        let shift = if self.variable_edits.is_none() && track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0 { track.edits[0].media_time } else { 0 };
         if track.timescale == 0 { return std::time::Duration::ZERO; }
         let nanos = pts.saturating_sub(shift).max(0) as u128 * 1_000_000_000 / u128::from(track.timescale);
         std::time::Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX))
@@ -623,6 +754,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
 
     fn present_decoded(&self, mut packet: crate::audio::AudioPacket, source_pts: i64) -> Result<Option<crate::audio::AudioPacket>> {
+        if self.variable_edits.is_some() {return self.present_variable_edit(packet,source_pts);}
         let track = self.track();
         if let Some(timeline) = &self.timeline {
             let cursor=self.edit_cursor.get();
@@ -735,9 +867,11 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
 
     fn drain_decoded_at_eof(&self)->bool {
+        if self.variable_edits.is_some() {return false;}
         self.timeline.as_ref().is_none_or(|timeline| timeline.locate(self.edit_cursor.get()).is_some_and(|(_,source)|source.is_some()))
     }
     fn validate_eof(&self)->Result<()> {
+        if self.variable_edits.as_ref().is_some_and(|t|t.locate().is_some()) {return Err(invalid("MP4 audio edit extends beyond source packets"));}
         if self.timeline.as_ref().is_some_and(|timeline|timeline.locate(self.edit_cursor.get()).is_some()) {
             return Err(invalid("AAC edit extends beyond source packets"));
         }
@@ -745,11 +879,20 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
     fn advance_configuration(&mut self) -> Result<()> {
         if !self.changing || !self.configuration_pending {return Err(invalid("no pending MP4 audio configuration"));}
+        if let Some(timeline)=&self.variable_edits {
+            let selected=timeline.locate();
+            if selected!=timeline.active {return self.activate_edit(selected);}
+            if self.sample_index==self.track().samples.len() {return Err(invalid("MP4 audio edit extends beyond source packets"));}
+        }
         let selected=self.track().samples.get(self.sample_index).ok_or_else(||invalid("missing MP4 audio configuration sample"))?.description_index as usize-1;
         self.configure_description(selected)
     }
     fn reset_decoder(&mut self, decoder:&mut Box<dyn crate::audio::AudioDecode>) -> Result<()> {
         if self.changing {
+            if let Some(timeline)=&self.variable_edits {
+                let selected=timeline.locate();
+                if selected!=timeline.active || timeline.active.is_none() {self.activate_edit(selected)?;}
+            }
             let selected=self.track().samples.get(self.sample_index).or_else(||self.track().samples.get(0)).unwrap().description_index as usize-1;
             self.configure_description(selected)?;*decoder=self.make_decoder()?;
         } else {decoder.reset();}
@@ -757,6 +900,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
     fn next_step(&mut self)->Result<Option<crate::audio::AudioStep>> {
         use crate::audio::{AudioStep,AudioPacket};
+        if self.variable_edits.is_some() {match self.next_variable_step()? {EditAction::End=>return Ok(None),EditAction::Step(step)=>return Ok(Some(step)),EditAction::Encoded=>{}}}
         if self.changing && let Some(sample)=self.track().samples.get(self.sample_index) {
             let selected=sample.description_index as usize-1;
             if selected!=self.active_description {
@@ -787,6 +931,16 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
+        if self.variable_edits.is_some() {
+            self.rewind();
+            let position=EditTime::signed_ticks(pts.max(0),self.track().timescale).expect("validated media clock");
+            let timeline=self.variable_edits.as_mut().unwrap();
+            let position=if position.cmp(timeline.end)==std::cmp::Ordering::Greater {timeline.end}else{position};
+            timeline.cursor.set(position);
+            let position=timeline.locate().map_or(position,|i|position.max(timeline.minimum_starts[i]));
+            timeline.cursor.set(position);timeline.active=None;
+            return position.floor_ticks(self.track().timescale).unwrap_or(i128::from(i64::MAX)).min(i128::from(i64::MAX)) as i64;
+        }
         if self.changing {
             let requested=pts.max(0).min(self.track().duration.min(i64::MAX as u64)as i64);
             let selected=self.track().samples.at_or_before(requested);
@@ -803,7 +957,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             return ((u128::from(cursor)*scale/rate).min(i64::MAX as u128)) as i64;
         }
         let track = self.track();
-        let shift = if track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0 { track.edits[0].media_time } else { 0 };
+        let shift = if self.variable_edits.is_none() && track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0 { track.edits[0].media_time } else { 0 };
         let preroll = matches!(&track.codec, b"ac-3" | b"ec-3")
             || (track.codec == *b"mp4a" && (track.edits.is_empty() || (track.edits.len() == 1 && track.edits[0].media_time >= 0)));
         let source_end=if track.duration>0 {track.duration as u128}else{
