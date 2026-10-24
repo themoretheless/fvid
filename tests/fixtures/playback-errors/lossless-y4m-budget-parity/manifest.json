@@ -1,0 +1,8 @@
+{
+  "batch_id": "FVID-0259",
+  "sha256": {
+    "lossless-textured.y4m": "53a736210b9d48299edd6adf0ce71a4a248604b5a2343a5dbce3e619b9248197",
+    "single-video-avc.mp4": "2dbca44922d4c65fdb58cc52368b0f425a0ad7e745f33c380e6a74eebdb23589",
+    "single-video-ffv1.mkv": "a2cb9e8df3b2cb316ee893f886962a179d14c94afad2e8e8e272095d4d2d1257"
+  }
+}

@@ -38,7 +38,11 @@ pub fn eligible_with_options(
     if super::validate_output_controls(options, None).is_err() {
         return Ok(false);
     }
-    let clean_opts = super::strip_output_controls(options);
+    if options.max_packet_bytes == 0 || options.max_packets == Some(0) {
+        return Ok(false);
+    }
+    let mut clean_opts = super::strip_output_controls(options);
+    clean_opts.max_packets = None;
     let mut expected_geometry = None;
     for source in sources {
         if !super::eligible_with_options(std::slice::from_ref(source), &clean_opts)? {
@@ -89,6 +93,9 @@ pub fn concat_audio_with_options(
     if options.max_packet_bytes == 0 {
         return Err(invalid("packet byte limit must be positive"));
     }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
     fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
     super::validate_output_controls(options, Some(matroska))?;
     if !eligible_with_options(sources, options)? {
@@ -113,11 +120,12 @@ pub fn concat_audio_with_options(
     };
     let source_matroska_metadata = if matroska {
         Some(
-            crate::native_export::pcm_matroska::extract_source_pcm_metadata(
+            crate::native_export::pcm_matroska::extract_source_pcm_metadata_with_packet_limit(
                 &sources[0],
                 options.streams.first().copied(),
                 true,
                 Some(options.max_packet_bytes),
+                options.max_packets,
                 cancel,
             )?,
         )
@@ -128,10 +136,12 @@ pub fn concat_audio_with_options(
     let mask = if matroska {
         0
     } else {
+        let mut inspect_opts = options.clone();
+        inspect_opts.max_packets = None;
         let masks = sources
             .iter()
             .map(|source| {
-                super::validate_and_inspect_source_with_options(source, options)
+                super::validate_and_inspect_source_with_options(source, &inspect_opts)
                     .map(|(_, _, mask)| mask)
             })
             .collect::<Result<Vec<_>>>()?;

@@ -178,9 +178,18 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
     };
     // Validate routing before caller-owned output, including configurations reached
     // after the requested prefix. A failed file export never publishes a spool.
+    let active_samples = if track.edits.is_empty() {
+        control
+            .packet_limit()
+            .map(|m| usize::try_from(m).unwrap_or(usize::MAX))
+            .unwrap_or(track.samples.len())
+            .min(track.samples.len())
+    } else {
+        track.samples.len()
+    };
     for i in 0..track.sample_descriptions.len() {
         control.check()?;
-        if (0..track.samples.len()).any(|n| {
+        if (0..active_samples).any(|n| {
             track
                 .samples
                 .get(n)
