@@ -17346,3 +17346,10 @@ failed on equal-length but incorrect RF PCM; the implementation now compares
 exact PCM and timestamps against independently configured decoder references
 for startup, rewind and seek, including reader-created replacement decoders.
 This finite gate does not close the remaining codec/profile/mixing gaps.
+
+Publication gates (2026-10-24): offline player-feature sequential library
+**1031 passed, 0 failed, 26 ignored**; eight Dolby regression targets
+**14 passed, 0 failed/ignored**. Both `fvid` and `fvid-player` build;
+minimal no-default-features library check passes. The session fixture generator
+reproduces all **9 artifacts / 265,705 bytes** with process/socket creation
+denied. No physical audio-device qualification is claimed.
