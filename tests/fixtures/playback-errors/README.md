@@ -4838,3 +4838,17 @@ Its changing-configuration fixed-reader/remux test is a refusal safety test,
 not acceptance of changing-configuration export. Generate fixtures separately
 with scripts/generate_mp4_sample_descriptions.py; ordinary tests never invoke
 the generator, FFmpeg or network.
+
+
+`mp4-audio-export-transitions/` contains owned neutral VP9 videos with audio
+configuration changes at a common output rate/layout. Generate separately with
+`scripts/generate_mp4_audio_export_transitions.py`. AAC LC/Main switches between
+960/1024 samples; delayed SSR crosses long-start/short/long-stop boundaries
+before a codec-configuration switch and EOF. Scalar IMDCT/overlap and literal
+SSR convolution produce the independent PCM oracles. PCM switches 16-bit,
+float32 and 24-bit representations with arithmetic sample oracles. Regular,
+fragmented and first-used-entry-3 variants, repeated edits, interval export,
+float64 precision and WAVE publication run in `mp4_audio_export_transitions`.
+The fixtures regenerate byte-exactly without external processes or network
+(23 artifacts / 1605797 bytes). No private media or parameter sets are copied.
+Rate/channel-change refusal is a safety assertion, not normalization acceptance.

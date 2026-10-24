@@ -23,7 +23,7 @@ pub(crate) fn router(
         _ => return Err("select exactly one audio stream".into()),
     };
     let asc = if n >= 8 && crate::owned_mp4::recognizes_prefix(&prefix) {
-        let reader = crate::owned_mp4::Mp4Reader::open(
+        let reader = crate::owned_mp4::Mp4Reader::open_indexed(
             BufReader::new(File::open(source).map_err(|e| e.to_string())?),
             crate::owned_mp4::Limits {
                 packet_bytes: options.max_packet_bytes,
@@ -34,14 +34,23 @@ pub(crate) fn router(
         let index = crate::owned_mp4_audio::mp4_audio_index(&reader, selected)
             .map_err(|e| e.to_string())?;
         let track = &reader.tracks()[index];
-        if track.codec != *b"mp4a" {
-            return Ok(None);
+        let first = track.samples.get(0).ok_or("MP4 audio has no samples")?;
+        let setup = track.decoder_setup(first.description_index).map_err(|e|e.to_string())?;
+        if setup.codec != *b"mp4a" { return Ok(None); }
+        crate::owned_mp4_audio::admit_audio_reader(&reader, index, options).map_err(|e|e.to_string())?;
+        let mut router: Option<StereoRouter> = None;
+        for (i, description) in track.sample_descriptions.iter().enumerate() {
+            if !(0..track.samples.len()).any(|n| track.samples.get(n).is_some_and(|s| s.description_index as usize == i+1)) { continue; }
+            if description.codec != *b"mp4a" { return Err("mixed-codec MP4 speaker routing requires per-configuration routing".into()); }
+            let asc = crate::owned_codec_config::aac_specific_config(&description.configuration).map_err(|e|e.to_string())?;
+            let parsed = crate::owned_aac::config::AudioSpecificConfig::parse(asc).map_err(|e|e.to_string())?;
+            let next = crate::owned_aac::speaker_routing::stereo_router(asc, rate, channels, channels == 2 && parsed.core.channels == 1)?;
+            if router.as_ref().is_some_and(|previous| *previous != next) {
+                return Err("MP4 AAC speaker routing changes require per-configuration routing".into());
+            }
+            router = Some(next);
         }
-        crate::owned_mp4_audio::admit_audio_reader(&reader, index, options)
-            .map_err(|e| e.to_string())?;
-        crate::owned_codec_config::aac_specific_config(&track.configuration)
-            .map_err(|e| e.to_string())?
-            .to_vec()
+        return Ok(router);
     } else if n >= 4 && prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
         let mut reader = crate::owned_matroska_audio::open_aac_reader(
             BufReader::new(File::open(source).map_err(|e| e.to_string())?),

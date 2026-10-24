@@ -162,14 +162,6 @@ impl Mp4TimelineDecoder {
             Self::Alac(d) => d.channel_mask(),
         }
     }
-    fn reset(&mut self) {
-        match self {
-            Self::Aac(d) => d.reset(),
-            Self::Mace(d)=>d.reset(),
-            Self::Ps(d) => d.reset(),
-            _ => {}
-        }
-    }
     fn delayed(&self) -> bool {
         matches!(self, Self::Ps(_)) || matches!(self,Self::Aac(d) if d.delayed())
     }
@@ -209,30 +201,14 @@ pub(crate) fn mp4_audio_index<R: Read + Seek>(
         _ => Err(invalid("select exactly one audio stream")),
     }
 }
-/// Admit retained MP4 AAC/ALAC/PCM/ADPCM/MACE decode payload before cloning the track or creating
-/// decoder/checkpoint state. Container parsing has its own bounded limits;
-/// parser temporaries and caller-owned I/O are outside this retained estimate.
-pub(crate) fn admit_audio_reader<R: Read + Seek>(
-    reader: &Mp4TimelineReader<R>,
-    index: usize,
-    options: &CopyOptions,
-) -> Result<()> {
-    let Some(limit) = options.max_controlled_bytes else {
-        return Ok(());
-    };
-    let track = reader
-        .tracks()
-        .get(index)
-        .ok_or_else(|| invalid("selected audio stream is absent"))?;
-    let decoder = match &track.codec {
+fn mp4_decoder_admission(track: &crate::owned_mp4::Track) -> Result<usize> {
+    Ok(match &track.codec {
         b"mp4a" => {
-            // Decoder, checkpoint and restore scratch; includes SBR state and DSP.
+            // One decoder state, including SBR state and DSP.
             crate::owned_aac::stream::decode_config_admission_bytes(
                 crate::owned_codec_config::aac_specific_config(&track.configuration)?,
                 track.sample_rate,
             )?
-            .checked_mul(3)
-            .ok_or_else(|| invalid("MP4 audio memory estimate overflow"))?
         }
         b"alac" => crate::owned_alac::AlacDecoder::decode_admission_bytes(
             &track.configuration,
@@ -280,7 +256,38 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
                 "selected MP4 audio codec is not owned by this export path",
             ));
         }
+    })
+}
+/// Admit retained MP4 AAC/ALAC/PCM/ADPCM/MACE decode payload before cloning the track or creating
+/// decoder/checkpoint state. Container parsing has its own bounded limits;
+/// parser temporaries and caller-owned I/O are outside this retained estimate.
+pub(crate) fn admit_audio_reader<R: Read + Seek>(
+    reader: &Mp4TimelineReader<R>,
+    index: usize,
+    options: &CopyOptions,
+) -> Result<()> {
+    let Some(limit) = options.max_controlled_bytes else {
+        return Ok(());
     };
+    let track = reader
+        .tracks()
+        .get(index)
+        .ok_or_else(|| invalid("selected audio stream is absent"))?;
+    let mut decoder = 0usize;
+    let mut checkpoint = 0usize;
+    let mut configuration = 0usize;
+    for i in 0..track.sample_descriptions.len() {
+        if !(0..track.samples.len()).any(|n| track.samples.get(n).is_some_and(|s| s.description_index as usize == i+1)) { continue; }
+        let setup = track.decoder_setup((i+1) as u32)?;
+        let state = mp4_decoder_admission(&setup)?;
+        decoder = decoder.max(state);
+        if setup.codec == *b"mp4a" { checkpoint = checkpoint.max(state); }
+        configuration = configuration.max(setup.configuration.len());
+    }
+    // Active plus replacement/restore state and one retained AAC checkpoint.
+    // For constant AAC this remains the previous three-state admission bound.
+    let decoder = decoder.checked_mul(2).and_then(|n| n.checked_add(checkpoint))
+        .ok_or_else(|| invalid("MP4 audio memory estimate overflow"))?;
     let overflow = || invalid("MP4 audio memory estimate overflow");
     let mut estimated = reader.estimated_index_payload_bytes()?;
     let mut add = |bytes: usize| -> Result<()> {
@@ -288,6 +295,8 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
         Ok(())
     };
     add(decoder)?;
+    add(track.sample_descriptions.len())?; // per-description in-band PS flags
+    add(configuration.checked_mul(2).ok_or_else(overflow)?)?; // initial and replacement decoder headers
     for bytes in [
         track.name.len(),
         track.language.len(),
@@ -325,26 +334,12 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
         .max()
         .unwrap_or(0);
     // The reusable packet Vec may grow geometrically while reading larger packets.
-    let pcm = matches!(
-        &track.codec,
-        b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64"
-    );
-    // PCM widens each byte into at most one f64 sample. ADPCM expands
-    // each coded byte into at most two f32 samples. A factor of ten covers output together
-    // with geometric growth of the reusable encoded packet buffer.
-    add(largest_packet
-        .checked_mul(
-            if matches!(&track.codec,b"MAC3"|b"MAC6") {
-                // Six mono MACE6 samples per byte: two i16 planes plus float
-                // output and reusable encoded capacity need at most 50 bytes.
-                64
-            } else if pcm || matches!(&track.codec, b"ima4" | b"ms\x00\x11" | b"ms\x00\x02") {
-                10
-            } else {
-                2
-            },
-        )
-        .ok_or_else(overflow)?)?;
+    let expansion = track.sample_descriptions.iter().map(|d| match &d.codec {
+        b"MAC3" | b"MAC6" => 64,
+        b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64" | b"ima4" | b"ms\x00\x11" | b"ms\x00\x02" => 10,
+        _ => 2,
+    }).max().unwrap_or(2);
+    add(largest_packet.checked_mul(expansion).ok_or_else(overflow)?)?;
     if estimated > limit {
         return Err(invalid(&format!(
             "controlled memory budget exceeded: need {estimated} bytes, limit {limit}"
@@ -387,7 +382,7 @@ pub fn decode_mp4_audio_pcm<R: Read + Seek>(
         hook.emit(control.event);
     }
     control.check()?;
-    let reader = Mp4TimelineReader::open(
+    let reader = Mp4TimelineReader::open_indexed(
         source,
         crate::owned_mp4::Limits {
             packet_bytes: options.max_packet_bytes,
@@ -472,7 +467,9 @@ mod precise {
         fn channels(&self) -> u16 {
             self.0.channels()
         }
-        fn reset(&mut self) {}
+        fn channel_mask(&self) -> u32 {
+            crate::owned_pcm_channels::standard_mask(self.channels()).unwrap_or(0) as u32
+        }
         fn checkpoint(&self) -> Option<Mp4AacCheckpoint> {
             None
         }
@@ -523,7 +520,7 @@ mod precise {
             hook.emit(control.event);
         }
         control.check()?;
-        let reader = Mp4TimelineReader::open(
+        let reader = Mp4TimelineReader::open_indexed(
             source,
             crate::owned_mp4::Limits {
                 packet_bytes: options.max_packet_bytes,

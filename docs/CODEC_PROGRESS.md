@@ -18135,3 +18135,43 @@ and Matroska remux explicitly refuse it before output. Indexed packet parity
 proves routing and metadata, not decoding/export of every configuration change.
 Physical playback and Windows/NVIDIA were not requalified in this milestone;
 the full codec goal remains open.
+
+
+### MP4 audio export across decoder configurations at a common geometry
+
+Owned PCM and AAC exports now use indexed descriptions, construct the decoder
+for each real setup change and retain history across equivalent entries. The
+shared timeline drains delayed SSR/PS output before replacement, associates
+checkpoint state with its configuration, and recreates the correct decoder
+for repeated source edits. The root byte-slice AAC export also uses this path.
+Float64 PCM retains its precision across representation/depth changes.
+
+Owned file planning, WAVE metadata/spooling/publication and AAC mono folding
+accept configuration changes when the emitted rate/layout and speaker routing
+agree. PCM precision selection considers the stream's descriptions; mixed
+codec export cannot be assumed to be a float64 PCM stream. Admission includes
+the maximum decoder state across descriptions, replacement overlap, setup
+headers, PS flags and worst packet expansion across the coding types.
+
+A new owned video matrix verifies LC/Main 960/1024, delayed SSR, 16/24/float32
+PCM, regular/fragments, first-used-entry-3, repeated ranges, interval cuts,
+float64 output and WAVE publication against independent numeric oracles. The
+original strict-reader witness fails with the specific reconfiguration refusal.
+Removing transition drain triggers an undrained-source-window failure; the
+source was restored byte-exactly before final qualification. Generation is
+byte-exact with processes/sockets denied: 23 artifacts / 1605797 bytes. Both
+extended generators preserve every existing default artifact byte-for-byte.
+
+This does not yet normalize a change in source rate/channel count or speaker
+routing, nor qualify every codec's transitions. Such output geometry changes
+are rejected before PCM output. The fixed-setup container reader and Matroska
+remux guards remain strict. Full codec coverage and physical playback remain
+open; this milestone does not satisfy the entire codec goal.
+
+
+Frozen-source qualification (2d1c25e3d9e27c0f1539382a31b8952b43e2b9e4):
+530 fvid-media library tests passed / 1 ignored; 1037 core/player library tests
+passed / 26 ignored; seventeen MP4 integration targets passed 89 tests. All
+player test targets compile; both fvid and fvid-player build offline. Source
+hashes remained unchanged through the run. Existing 32 MiB AAC admission
+acceptance passes; the accounting change introduces no default memory cap.

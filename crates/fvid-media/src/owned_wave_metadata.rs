@@ -171,7 +171,7 @@ pub(crate) fn mp4_source_info(
     source: &std::path::Path,
     options: &fvid_control::CopyOptions,
 ) -> Result<Vec<u8>> {
-    let reader = crate::owned_mp4::Mp4Reader::open(
+    let reader = crate::owned_mp4::Mp4Reader::open_indexed(
         std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?),
         crate::owned_mp4::Limits {
             packet_bytes: options.max_packet_bytes,

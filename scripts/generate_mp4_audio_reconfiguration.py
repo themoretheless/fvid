@@ -4,8 +4,8 @@ from pathlib import Path
 from generate_vp9_chroma import frame,mp4,atom,word
 from generate_mp4_fragment_description_regressions import atoms
 OUT=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/mp4-audio-reconfiguration'
-def generate():
-    files={};ids=[1,2,3,1,2,3];shapes=[(b'sowt',48000,2,16),(b'fl32',32000,1,32),(b'in24',44100,2,24)];entries=[];packets=[];records=[]
+def generate(pcm_shapes=None,pcm_only=False):
+    files={};ids=[1,2,3,1,2,3];shapes=pcm_shapes or [(b'sowt',48000,2,16),(b'fl32',32000,1,32),(b'in24',44100,2,24)];entries=[];packets=[];records=[]
     for codec,rate,channels,depth in shapes:
         e=bytearray(28);e[6:8]=struct.pack('>H',1);e[16:20]=struct.pack('>HH',channels,depth);e[24:28]=word(rate<<16)
         entries.append(atom(codec,e+(atom(b'enda',b'\0\1')if codec!=b'sowt'else b'')))
@@ -57,6 +57,7 @@ def generate():
         return out
     files['pcm-start-third.mp4']=reversed_setups(files['pcm.mp4'])
     files['pcm-start-third-fragmented.mp4']=reversed_setups(files['pcm-fragmented.mp4'])
+    if pcm_only:return files
     from generate_eac3_dependent import packet
     from generate_eac3_mp4_programmes import config
     from generate_eac3_dialogue_normalization import level

@@ -217,14 +217,6 @@ impl PacketPcmDecoder {
             _ => None,
         }
     }
-    pub(crate) fn reset(&mut self) {
-        match self {
-            Self::Aac(d) => d.reset(),
-            Self::Mace(d)=>d.reset(),
-            Self::Ps(d) => d.reset(),
-            _ => {}
-        }
-    }
     pub(crate) fn delayed(&self) -> bool {
         matches!(self, Self::Ps(_)) || matches!(self,Self::Aac(d) if d.delayed())
     }
