@@ -2,9 +2,12 @@
 use super::{Result, aac_sbr_qmf::Complex, aac_sbr_qmf_window::WINDOW, invalid};
 use std::sync::OnceLock;
 fn matrix() -> &'static [[Complex; 64]; 128] {
-    static MATRIX: OnceLock<[[Complex; 64]; 128]> = OnceLock::new();
+    // Build one row at a time on the heap. Returning the full array through
+    // OnceLock/from_fn creates several 128 KiB stack temporaries in debug
+    // builds, exhausting ordinary audio worker stacks during cold PS decode.
+    static MATRIX: OnceLock<Box<[[Complex; 64]]>> = OnceLock::new();
     MATRIX.get_or_init(|| {
-        std::array::from_fn(|n| {
+        (0..128).map(|n| {
             std::array::from_fn(|k| {
                 let phase =
                     std::f64::consts::PI * (k as f64 + 0.5) * (2.0 * n as f64 - 255.0) / 128.0;
@@ -14,8 +17,8 @@ fn matrix() -> &'static [[Complex; 64]; 128] {
                     im: im / 64.0,
                 }
             })
-        })
-    })
+        }).collect::<Vec<_>>().into_boxed_slice()
+    }).as_ref().try_into().expect("fixed synthesis matrix dimensions")
 }
 #[derive(Clone, Debug, PartialEq)]
 pub struct Synthesis {

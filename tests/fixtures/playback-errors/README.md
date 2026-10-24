@@ -4884,3 +4884,11 @@ and seven-channel output with independent waveform oracles. The normalization
 set contains 47 artifacts / 3432322 bytes; lossless/ADPCM contains 17 artifacts /
 449807 bytes. Regeneration is byte-exact with network and subprocess creation
 disabled. No private media or parameter sets are copied.
+
+`aac-ps-cold-stack/late-ps.mp4` reuses the short owned neutral-video/in-band PS
+export witness. Regenerate separately with `scripts/generate_aac_ps_cold_stack.py`.
+`aac_ps_cold_stack` starts a fresh Rust test process and a 2 MiB worker, retaining
+128 KiB caller headroom so the cold QMF initialization remains covered instead
+of being masked by a previously warmed global cache. The original selection
+regression and this witness both overflowed before the heap-row matrix fix;
+the test also verifies exact output geometry, silence ranges and nonzero PCM.
