@@ -155,18 +155,17 @@ mod playback {
         }
     }
     #[test]
-    fn preindexed_tracks_cannot_bypass_decoder_reconfiguration_checks() {
+    fn preindexed_video_reconfigures_while_audio_changes_remain_explicit() {
         let indexed =
             Mp4Reader::open_indexed(Cursor::new(bytes("changing")), Default::default()).unwrap();
-        let error = fvid::playback_mp4::Mp4VideoReader::from_demuxer(indexed, 0, 32 << 20)
-            .err()
-            .expect("video constructor must validate indexed setup changes");
-        assert!(
-            error
-                .to_string()
-                .contains("sample description changes require decoder reconfiguration"),
-            "{error}"
-        );
+        let mut video =
+            fvid::playback_mp4::Mp4VideoReader::from_demuxer(indexed, 0, 32 << 20).unwrap();
+        for width in [16, 32, 16] {
+            assert_eq!(
+                video.read_frame().unwrap().unwrap().picture.dimensions(),
+                (width, 16)
+            );
+        }
         let indexed =
             Mp4Reader::open_indexed(Cursor::new(bytes("compact-pcm")), Default::default()).unwrap();
         let error = fvid::playback_mp4_audio::Mp4AudioReader::from_demuxer(indexed, 0)
@@ -180,21 +179,6 @@ mod playback {
         );
     }
     #[test]
-    fn changing_descriptions_refuse_instead_of_silently_using_first_entry() {
-        for name in ["changing", "changing-fragmented"] {
-            let error = NativeReader::software(Cursor::new(bytes(name)), 32 << 20)
-                .err()
-                .expect("decoder reconfiguration remains open");
-            assert!(
-                error
-                    .to_string()
-                    .contains("sample description changes require decoder reconfiguration"),
-                "{error}"
-            );
-        }
-    }
-    #[test]
-    #[ignore = "Decoder reconfiguration for changing descriptions is not implemented; refusal is not playback acceptance"]
     fn changing_descriptions_present_each_coded_geometry() {
         for name in ["changing", "changing-fragmented"] {
             let mut reader = NativeReader::software(Cursor::new(bytes(name)), 32 << 20).unwrap();
@@ -202,6 +186,18 @@ mod playback {
                 check(reader.read_frame_raw().unwrap().unwrap(), width);
             }
             assert!(reader.read_frame_raw().unwrap().is_none());
+            reader.rewind().unwrap();
+            check(reader.read_frame_raw().unwrap().unwrap(), 16);
+            for ms in [0, 20, 40, 21, 59, 1] {
+                check(
+                    reader.seek_raw(Duration::from_millis(ms)).unwrap().unwrap(),
+                    if (20..40).contains(&ms) { 32 } else { 16 },
+                );
+                assert_eq!(
+                    reader.frame_interval(),
+                    Some((u128::from(ms / 20), u128::from(ms / 20 + 1), 50))
+                );
+            }
         }
     }
 }

@@ -77,7 +77,7 @@ fn codec_name(codec: &[u8; 4]) -> Option<&'static str> {
 impl<R: Read + Seek> Mp4AudioReader<R> {
     /// Prefer enabled movie audio; explicit track lists retain container order.
     pub fn open(reader: R, limits: Limits) -> Result<Self> {
-        let demuxer = Mp4Reader::open(reader, limits)?;
+        let demuxer = Mp4Reader::open_indexed(reader, limits)?;
         let candidates = Self::supported(&demuxer);
         let usable: Vec<_> = candidates.iter().copied()
             .filter(|&index| Self::automatic_pcm_usable(&demuxer.tracks()[index])).collect();
@@ -100,7 +100,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
     /// order. Which one the player wants is the player's choice; the container
     /// only reports the ones a decoder exists for.
     pub fn open_at(reader: R, limits: Limits, nth: usize) -> Result<Self> {
-        let demuxer = Mp4Reader::open(reader, limits)?;
+        let demuxer = Mp4Reader::open_indexed(reader, limits)?;
         let index = match Self::supported(&demuxer).get(nth).copied() {
             Some(index) => index,
             // An audio track the container listed says what it is coded as, so a
@@ -122,7 +122,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
     /// Open encoded E-AC-3 programme 0..7 inside a zero-based physical audio track.
     pub fn open_programme(reader:R,limits:Limits,nth:usize,programme:u8)->Result<Self>{
         if programme>7{return Err(invalid("E-AC-3 programme ID exceeds 7"));}
-        let demuxer=Mp4Reader::open(reader,limits)?;
+        let demuxer=Mp4Reader::open_indexed(reader,limits)?;
         let index=Self::supported(&demuxer).get(nth).copied().ok_or_else(||invalid("MP4 has no such audio track"))?;
         Self::from_programme(demuxer,index,Some(programme))
     }

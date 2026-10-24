@@ -254,7 +254,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
         match self {
             Self::Y4m(reader) => reader.pixel_aspect(),
             Self::Webm(r) => r.pixel_aspect(),
-            Self::Avc { source, .. } => source.track().pixel_aspect,
+            Self::Avc { source, .. } => source.container_description().pixel_aspect,
         }
     }
     /// The borders the container asks to be kept off screen, as pixel insets
@@ -298,7 +298,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
             },
             Self::Webm(r) => r.colour().filled_with(r.bitstream_colour()),
             Self::Avc { source, .. } => {
-                source.track().colour.filled_with(source.bitstream_colour())
+                source.container_description().colour.filled_with(source.bitstream_colour())
             }
         }
     }
@@ -315,7 +315,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
         match self {
             Self::Y4m(_) => HdrMetadata::default(),
             Self::Webm(r) => r.hdr().filled_with(r.bitstream_hdr()),
-            Self::Avc { source, .. } => source.track().hdr.filled_with(source.bitstream_hdr()),
+            Self::Avc { source, .. } => source.container_description().hdr.filled_with(source.bitstream_hdr()),
         }
     }
     /// The cap this reader sizes a packed RGB picture by, so a caller that

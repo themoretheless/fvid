@@ -4689,8 +4689,26 @@ already queued. Ordinary tests use the checked-in movie offline.
 VP9 playback in ordinary/fragmented MP4. It also contains a real 16→32→16
 geometry change, independent one-entry decode controls, compact PCM chunks,
 invalid selected indices and an external second reference. The changing video
-is indexed through `open_indexed`; ordinary consumers explicitly refuse it
-until decoder reconfiguration is implemented. Its playback acceptance stays
-ignored, separate from the active refusal. Regenerate with
+is indexed through `open_indexed` and now plays through the native video
+reader with seek/rewind acceptance enabled. Single-configuration consumers
+(including audio/export paths) retain their explicit reconfiguration refusal. Regenerate with
 `python3 scripts/generate_mp4_sample_descriptions.py`; ordinary offline tests
 run `mp4_sample_descriptions`. No external encoder or private media is used.
+
+
+`mp4-video-reconfiguration` exercises actual reused-ID AVC setup changes,
+AVC/VP9 coding switches, source precision, description 2 at startup, display
+reordering and per-picture pasp/colour/HDR. Independent one-entry controls have
+analytic constant-plane oracles. A constant-setup movie isolates the reordered
+seek interval failure, and a shortened terminal configuration isolates stale
+metadata immediately after rewind. Invalid late configuration tests error
+latching and rewind recovery. Regenerate offline with
+`python3 scripts/generate_mp4_video_reconfiguration.py`; run integration target
+`mp4_video_reconfiguration`. The generator invokes no encoder/FFmpeg/network
+and uses only owned bitstream writers and parameter sets.
+
+The video-reconfiguration matrix also includes constant stereo PCM beside the
+changing video. A real captured audio worker must preserve exact float PCM and
+rewind, independently of the video description changes. An unchanged selected
+audio track is accepted; a changing selected audio track keeps its separate
+explicit refusal.

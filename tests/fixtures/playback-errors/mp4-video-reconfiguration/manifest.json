@@ -1,0 +1,191 @@
+{
+  "cases": [
+    {
+      "name": "avc",
+      "frames": [
+        {
+          "depth": 8,
+          "values": [
+            128,
+            129,
+            130
+          ],
+          "description": 1,
+          "pts": 0
+        },
+        {
+          "depth": 8,
+          "values": [
+            131,
+            132,
+            133
+          ],
+          "description": 1,
+          "pts": 3
+        },
+        {
+          "depth": 10,
+          "values": [
+            518,
+            519,
+            520
+          ],
+          "description": 2,
+          "pts": 1
+        },
+        {
+          "depth": 10,
+          "values": [
+            521,
+            522,
+            523
+          ],
+          "description": 2,
+          "pts": 2
+        },
+        {
+          "depth": 8,
+          "values": [
+            140,
+            141,
+            142
+          ],
+          "description": 1,
+          "pts": 4
+        }
+      ],
+      "display_order": [
+        0,
+        2,
+        3,
+        1,
+        4
+      ]
+    },
+    {
+      "name": "codec-switch",
+      "frames": [
+        {
+          "depth": 8,
+          "values": [
+            128,
+            129,
+            130
+          ],
+          "description": 1,
+          "pts": 0
+        },
+        {
+          "depth": 8,
+          "values": [
+            131,
+            132,
+            133
+          ],
+          "description": 1,
+          "pts": 3
+        },
+        {
+          "depth": 10,
+          "values": [
+            512,
+            512,
+            512
+          ],
+          "description": 2,
+          "pts": 1
+        },
+        {
+          "depth": 10,
+          "values": [
+            512,
+            512,
+            512
+          ],
+          "description": 2,
+          "pts": 2
+        },
+        {
+          "depth": 8,
+          "values": [
+            140,
+            141,
+            142
+          ],
+          "description": 1,
+          "pts": 4
+        }
+      ],
+      "display_order": [
+        0,
+        2,
+        3,
+        1,
+        4
+      ]
+    },
+    {
+      "name": "constant",
+      "frames": [
+        {
+          "depth": 8,
+          "values": [
+            128,
+            129,
+            130
+          ],
+          "description": 1,
+          "pts": 0
+        },
+        {
+          "depth": 8,
+          "values": [
+            131,
+            132,
+            133
+          ],
+          "description": 1,
+          "pts": 3
+        },
+        {
+          "depth": 8,
+          "values": [
+            134,
+            135,
+            136
+          ],
+          "description": 1,
+          "pts": 1
+        },
+        {
+          "depth": 8,
+          "values": [
+            137,
+            138,
+            139
+          ],
+          "description": 1,
+          "pts": 2
+        },
+        {
+          "depth": 8,
+          "values": [
+            140,
+            141,
+            142
+          ],
+          "description": 1,
+          "pts": 4
+        }
+      ],
+      "display_order": [
+        0,
+        2,
+        3,
+        1,
+        4
+      ]
+    }
+  ],
+  "provenance": "Owned I_PCM AVC with repeated SPS/PPS IDs but changed depth, own VP9 10-bit 444 keyframes, independent exact constant-plane oracles, reordered PTS, alternating pasp/nclx/ccll metadata. No private media, encoder, FFmpeg or network."
+}

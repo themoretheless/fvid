@@ -17725,3 +17725,73 @@ final result is seven passed / one ignored
 one-entry restriction against the repaired valid fixture produces that exact
 refusal (`/tmp/fvid-mp4-descriptions-legacy-restriction.log`); this was a
 restriction replay, not a complete historical-checkout qualification.
+
+
+### MP4 video decoder reconfiguration and reordered seek coverage
+
+The single-layer video path now consumes `open_indexed` and selects the setup
+for the actual next sample, including a first sample naming description 2.
+A changed coding/configuration/geometry recreates the owned decoder after
+releasing its old reference storage; already decoded display pictures remain
+queued. Equivalent setup and presentation-only metadata changes preserve the
+decoder. The factory covers the existing AVC/HEVC/VP9/AV1 branches. Changing
+tracks use owned software decoding; constant tracks keep hardware eligibility.
+Layered HEVC retains its explicit constant-description contract.
+
+The queue carries each picture's description, bitstream colour, conversion
+colour and HDR. `container_description` describes the returned picture rather
+than decode lookahead, and NativeReader uses it for pixel aspect/colour/HDR.
+Lazy rewind restores the captured initial metadata before the next frame;
+a not-yet-restored nonzero seek target exposes no stale bitstream signal.
+In-band parameter recovery starts within the selected configuration span.
+
+Acceptance now enables the formerly ignored 16→32→16 VP9 movie. A new owned
+AVC I_PCM matrix changes 8→10→8-bit setups while reusing SPS/PPS IDs, switches
+AVC→VP9→AVC, and includes a constant-setup reordered clock control. Regular
+and fragmented movies alternate descriptions, reverse their table order so
+playback starts at entry 2, and carry distinct pasp/nclx/ccll and AVC VUI.
+Independent single-entry controls match analytic constant-plane oracles. A
+forced-first-setup negative control cannot reproduce those same planes.
+Default and forced-software routes, exact reordered PCM-free picture bytes,
+PTS intervals, HDR/colour, seek, rewind, EOF and late initialization failure
+recovery are exercised. The two new/updated targets pass eight and seven tests respectively,
+with no ignored acceptance tests.
+
+Newly discovered failures have owned witnesses: seeking into reordered sync
+samples skipped a prior decode-order packet needed for future display and
+produced interval 2→4 rather than 2→3; the start-point search now preserves
+that future coverage. The constant-configuration control also exercises it.
+Rewind after a terminal different decoder reported primaries 9 instead of the
+initial 1 before decode; an initial metadata seed fixes that red/green case.
+Logs retain the original failures in
+`/tmp/fvid-video-description-configurations.log` and
+`/tmp/fvid-video-transition-rewind-metadata-red.log`. The previous frozen test
+executable also reproduced the old geometry-change refusal in
+`/tmp/fvid-video-description-baseline-red.log`.
+
+Scope remains finite: new changing-setup acceptance is AVC/VP9, not proof of
+all HEVC/AV1 transitions, cross-description reference dependencies, split field
+pairs, layered topology changes, audio reconfiguration or muxer configuration
+changes. Those, remaining codec tools/profiles and the full no-gap objective
+remain open. No FFmpeg/libav fallback was added.
+
+A combined owned video/PCM fixture additionally reproduced an admission bug:
+the audio reader's old whole-file constant-description check rejected unchanged
+audio when only the video setup changed. Audio constructors now index all
+entries and apply their existing refusal to the selected audio track. Exact
+48 kHz stereo PCM and real audio-worker replay/rewind match an independent
+integer-to-float oracle alongside the changing video. The specific old refusal
+is retained in `/tmp/fvid-video-transition-audio-red.log`; the acceptance passes
+in `/tmp/fvid-video-transition-audio-green.log`. Audio setup transitions
+themselves remain explicitly unsupported. Container-only player facts still
+use the legacy whole-file admission path, so complete tag/chapter probing of
+changing-description movies remains open alongside export/remux support.
+
+Final offline verification for video reconfiguration: library 1034 passed /
+0 failed / 26 ignored (`/tmp/fvid-video-reconfiguration-library-final.log`).
+19 related integration targets: 137 passed / 0 failed /
+0 ignored (`/tmp/fvid-video-reconfiguration-regressions-final.log`).
+Both player binaries build (`/tmp/fvid-video-reconfiguration-build-final.log`).
+The final owned generator reproduces 49 artifacts / 292,744 bytes exactly with
+subprocess/socket creation denied. This is finite headless acceptance, not
+physical display, universal codec conformance or a 60 fps performance claim.

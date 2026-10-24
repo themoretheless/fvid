@@ -227,7 +227,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
         Self::open_inner(reader, limits, budget, false)
     }
     fn open_inner(reader: R, limits: Limits, budget: usize, hardware: bool) -> Result<Self> {
-        let demuxer = Mp4Reader::open(reader, limits)?;
+        let demuxer = Mp4Reader::open_indexed(reader, limits)?;
         let index = demuxer
             .automatic_track_indices(&[*b"vide"])
             .into_iter()
@@ -253,8 +253,8 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             .tracks()
             .get(index)
             .ok_or_else(|| invalid("MP4 track index out of range"))?;
-        track.ensure_constant_description()?;
-        if matches!(&track.codec, b"hvc1" | b"hev1") {
+
+        if track.ensure_constant_description().is_ok() && matches!(&track.codec, b"hvc1" | b"hev1") {
             let nal = first_active_hevc_vps(&mut demuxer, index, budget)?;
             if let Some(nal) = nal {
                 // Inspect topology without relaxing the base decoder's guard.
@@ -337,6 +337,14 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
         match &self.source {
             Source::Single(s) => s.track(),
             Source::Layered(s) => s.source.track(),
+        }
+    }
+    /// Container setup belonging to the last displayed frame, or the initial
+    /// setup before presentation. Decode lookahead can use a later description.
+    pub fn container_description(&self) -> &crate::container::mp4::SampleDescription {
+        match &self.source {
+            Source::Single(s) => s.container_description(),
+            Source::Layered(s) => &s.source.track().sample_descriptions[0],
         }
     }
     pub fn movie_timescale(&self) -> u32 {
