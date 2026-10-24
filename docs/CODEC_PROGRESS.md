@@ -18109,3 +18109,29 @@ this finite parity milestone does not complete the full codec goal.
 
 Both `fvid` and `fvid-player` build offline from the final source with player
 enabled. The owned-library API tests run separately with player disabled.
+
+
+### Shared MP4 indexing in fvid-media
+
+Root FVid and fvid-media now include one MP4 parser/indexer. Equivalent sample
+descriptions are accepted by the fixed-setup reader; indexed readers preserve
+per-packet description IDs for real configuration changes. Descriptor storage
+and cloned configuration payloads are included in audio admission estimates.
+
+Owned synthetic PCM and AAC videos exercise equivalent descriptions 1/2/1.
+Decoded waveforms match independently authored PCM and scalar AAC oracles.
+The generator splits PCM chunks consistently with the sample table; all 29
+artifacts (322333 bytes) regenerate byte-exactly with sockets and subprocesses
+disabled. Replaying the old admission guard on the corrected witness reproduces
+the specific multiple-description refusal.
+
+Offline qualification: fvid-media library 530 passed / 1 ignored; root player
+library 1037 passed / 26 ignored; sixteen selected integration targets 81 passed.
+All player test targets compile; fvid and fvid-player build. No FFmpeg or network
+is required by these tests.
+
+Actual changing-configuration export remains unsupported. Fixed-setup readers
+and Matroska remux explicitly refuse it before output. Indexed packet parity
+proves routing and metadata, not decoding/export of every configuration change.
+Physical playback and Windows/NVIDIA were not requalified in this milestone;
+the full codec goal remains open.

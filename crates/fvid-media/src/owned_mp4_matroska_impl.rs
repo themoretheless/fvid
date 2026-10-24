@@ -7,7 +7,7 @@ pub fn eligible<R: Read + Seek>(input: &Mp4Reader<R>) -> bool {
             matches!(
                 (&t.handler, &t.codec),
                 (b"vide", b"avc1" | b"avc3" | b"hvc1" | b"hev1") | (b"soun", b"mp4a")
-            ) && (t.edits.is_empty() || (t.edits.len() == 1 && t.edits[0].media_time >= 0))
+            ) && t.ensure_constant_description().is_ok() && (t.edits.is_empty() || (t.edits.len() == 1 && t.edits[0].media_time >= 0))
         })
 }
 /// Preserve effective usability without disabling historical all-disabled groups
@@ -63,6 +63,7 @@ pub(crate) fn plan(track: &Track, movie_scale: u32, cancel: Option<&CancelFlag>)
 pub(crate) fn plan_window(
     track: &Track, movie_scale: u32, interval: Option<(i64, i64)>, cancel: Option<&CancelFlag>,
 ) -> Result<TrackPlan> {
+    track.ensure_constant_description().map_err(|e|invalid(&e.to_string()))?;
     let mut packets = Vec::new();
     packets
         .try_reserve_exact(track.samples.len())
@@ -346,12 +347,15 @@ pub(crate) fn write_selected_with_text_metadata_overrides<R: Read + Seek, W: Wri
     scoped: &std::collections::BTreeMap<usize, std::collections::BTreeMap<String, String>>,
 ) -> Result<ProgressEvent> {
     check(cancel)?;
+    let selected = selection(input.tracks().len(), requested)?;
+    for &index in &selected {
+        input.tracks()[index].ensure_constant_description().map_err(|e|invalid(&e.to_string()))?;
+    }
     if !eligible(input) {
         return Err(invalid(
             "MP4 Matroska remux requires AVC/HEVC/AAC tracks with contiguous media edits",
         ));
     }
-    let selected = selection(input.tracks().len(), requested)?;
     for (position, edit) in metadata.tracks.iter().enumerate() {
         if !selected.contains(&edit.index)
             || metadata.tracks[..position].iter().any(|previous| previous.index == edit.index)

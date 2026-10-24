@@ -1,3 +1,4 @@
+// Shared indexed MP4 parser. Wrapper modules provide errors, allocation and metadata types.
 /// Recognize an ISO BMFF/QuickTime opening atom. Older MOV files need no `ftyp`.
 /// This only selects the parser; box extents and track contents are validated
 /// by `Mp4Reader`, including malformed recognized inputs.
@@ -25,6 +26,8 @@ impl Default for Limits {
 }
 #[derive(Clone, Debug)]
 pub struct Sample {
+    /// One-based index into the track's sample descriptions.
+    pub description_index: u32,
     pub offset: u64,
     pub size: u32,
     pub dts: u64,
@@ -36,6 +39,7 @@ pub struct Sample {
 /// starting at `offset` and numbered from `first`.
 #[derive(Clone, Copy, Debug)]
 pub struct FrameRun {
+    pub description_index: u32,
     pub first: usize,
     pub offset: u64,
     pub frames: usize,
@@ -99,6 +103,7 @@ impl SampleIndex {
                     .ok()?
                     .checked_mul(u64::from(uniform.duration))?;
                 Some(Sample {
+                    description_index: run.description_index,
                     offset: run.offset.checked_add(bytes)?,
                     size: uniform.bytes_per_frame,
                     dts: ticks,
@@ -144,8 +149,40 @@ pub struct Edit {
     /// Track ticks; -1 represents an empty edit.
     pub media_time: i64,
 }
+/// Decoder setup and presentation geometry belonging to one `stsd` entry.
+/// Samples reference these entries with a one-based `description_index`.
+#[derive(Clone, Debug, PartialEq)]
+pub struct SampleDescription {
+    pub codec: [u8; 4],
+    pub width: u16,
+    pub height: u16,
+    pub channels: u16,
+    pub sample_rate: u32,
+    pub bit_depth: u16,
+    pub configuration: Vec<u8>,
+    pub pixel_aspect: (u32, u32),
+    pub colour: ColourDescription,
+    pub hdr: HdrMetadata,
+}
+impl SampleDescription {
+    fn from_track(track: &Track) -> Self {
+        Self {
+            codec: track.codec,
+            width: track.width,
+            height: track.height,
+            channels: track.channels,
+            sample_rate: track.sample_rate,
+            bit_depth: track.bit_depth,
+            configuration: track.configuration.clone(),
+            pixel_aspect: track.pixel_aspect,
+            colour: track.colour,
+            hdr: track.hdr,
+        }
+    }
+}
 #[derive(Clone, Debug)]
 pub struct Track {
+    pub sample_descriptions: Vec<SampleDescription>,
     pub id: u32,
     pub handler: [u8; 4],
     pub codec: [u8; 4],
@@ -188,6 +225,27 @@ pub struct Track {
     /// Mastering display and light level from `mdcv` and `ccll`, which a tone
     /// map needs and no bitstream field carries.
     pub hdr: HdrMetadata,
+}
+
+impl Track {
+    /// The configuration selected by this indexed sample, rather than entry 1.
+    pub fn description_for_sample(&self, index: usize) -> Option<&SampleDescription> {
+        let selected = self.samples.get(index)?.description_index.checked_sub(1)? as usize;
+        self.sample_descriptions.get(selected)
+    }
+
+    /// Playback paths that have not yet implemented decoder reconfiguration
+    /// must never decode a changed entry using the initial configuration.
+    pub fn ensure_constant_description(&self) -> Result<()> {
+        if self.sample_descriptions.len() <= 1 {
+            return Ok(());
+        }
+        let first = &self.sample_descriptions[0];
+        if (0..self.samples.len()).any(|i| self.description_for_sample(i) != Some(first)) {
+            return Err(unsupported("MP4 sample description changes require decoder reconfiguration"));
+        }
+        Ok(())
+    }
 }
 
 /// Read a `colr` atom's payload.
@@ -392,7 +450,21 @@ fn track_name(trak: &[Atom<'_>]) -> Option<String> {
 }
 
 impl<R: Read + Seek> Mp4Reader<R> {
-    pub fn open(mut reader: R, limits: Limits) -> Result<Self> {
+    /// Open for consumers that use a single decoder setup per track.
+    /// Equivalent entries are accepted; changing configurations require the
+    /// explicit indexed API until that consumer handles reconfiguration.
+    pub fn open(reader: R, limits: Limits) -> Result<Self> {
+        let indexed = Self::open_indexed(reader, limits)?;
+        for track in indexed.tracks() {
+            track.ensure_constant_description()?;
+        }
+        Ok(indexed)
+    }
+
+    /// Index every sample description, including configuration changes.
+    /// Callers must consult `Track::description_for_sample` for each packet.
+    /// Reading raw packets does not implement decoder/muxer reconfiguration.
+    pub fn open_indexed(mut reader: R, limits: Limits) -> Result<Self> {
         let end = reader.seek(SeekFrom::End(0))?;
         let mut at = 0u64;
         let mut moov = None;
@@ -625,6 +697,9 @@ impl<R: Read + Seek> Mp4Reader<R> {
             add(&mut total, track.name.capacity(), 1)?;
             add(&mut total, track.language.capacity(), 1)?;
             add(&mut total, track.configuration.capacity(), 1)?;
+            add(&mut total,track.sample_descriptions.capacity(),std::mem::size_of::<SampleDescription>())?;
+            for description in &track.sample_descriptions {add(&mut total,description.configuration.capacity(),1)?;}
+
             add(
                 &mut total,
                 track.edits.capacity(),
@@ -1095,23 +1170,13 @@ fn parse_track(
     let stbl = atoms(required(&minf, b"stbl")?)?;
     let stsd = required(&stbl, b"stsd")?;
     version(stsd, 0)?;
-    if u32be(stsd, 4)? != 1 {
-        return Err(invalid(
-            "multiple sample descriptions are not yet supported",
-        ));
-    }
-    let entries = atoms(
-        stsd.get(8..)
-            .ok_or_else(|| invalid("truncated sample description"))?,
-    )?;
-    if entries.len() != 1 {
+    let entries = atoms(stsd.get(8..).ok_or_else(|| invalid("truncated sample description"))?)?;
+    if entries.is_empty() || entries.len() != u32be(stsd, 4)? as usize {
         return Err(invalid("invalid sample description count"));
     }
     let entry = entries[0];
-    if u16be(entry.data, 6)? != 1 {
-        return Err(invalid("invalid sample data reference"));
-    }
     let mut result = Track {
+        sample_descriptions: Vec::new(),
         id,
         handler,
         codec: entry.kind,
@@ -1132,6 +1197,63 @@ fn parse_track(
         colour: ColourDescription::default(),
         hdr: HdrMetadata::default(),
     };
+    let name = std::mem::take(&mut result.name);
+    let language = std::mem::take(&mut result.language);
+    let template = result.clone();
+    let mut descriptions = Vec::new();
+    for entry in entries {
+        let Some(parsed) = parse_sample_entry(entry, template.clone(), refused, drawn, rotation)? else { return Ok(None); };
+        descriptions.push(SampleDescription::from_track(&parsed));
+        if descriptions.len() == 1 { result = parsed; }
+    }
+    result.name = name;
+    result.language = language;
+    result.sample_descriptions = descriptions;
+    // A fragmented track may still carry initial samples in `moov/stbl` before
+    // `moof` fragments append to the same track (ISO/IEC 14496-12:2015, 8.8.4),
+    // and even an empty init `stbl` must pass structural validation.
+    let Some(index) = sample_index(&stbl, &result.codec, result.channels, &result.sample_descriptions, mdats, limit, fragmented)? else {
+        return Ok(None);
+    };
+    result.samples = index;
+    if let Some(edts) = optional(&track, b"edts")? {
+        let children = atoms(edts)?;
+        let elst = required(&children, b"elst")?;
+        let v = version(elst, 1)?;
+        let stride = if v == 0 { 12 } else { 20 };
+        let count = table(elst, stride, 1024)?;
+        if count == 0 {
+            return Err(invalid("empty MP4 elst box"));
+        }
+        for i in 0..count {
+            let at = 8 + i * stride;
+            let (duration, media_time, rate_at) = if v == 0 {
+                (
+                    u64::from(u32be(elst, at)?),
+                    i64::from(u32be(elst, at + 4)? as i32),
+                    at + 8,
+                )
+            } else {
+                (u64be(elst, at)?, u64be(elst, at + 8)? as i64, at + 16)
+            };
+            if duration == 0 || media_time < -1 || u32be(elst, rate_at)? != 0x0001_0000 {
+                return Err(invalid("unsupported MP4 edit rate, duration or media time"));
+            }
+            result.edits.push(Edit {
+                duration,
+                media_time,
+            });
+        }
+    }
+    Ok(Some((result, flags)))
+}
+
+fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<SkippedTrack>, drawn: (u32, u32), rotation: u16) -> Result<Option<Track>> {
+    if u16be(entry.data, 6)? != 1 {
+        return Err(invalid("invalid sample data reference"));
+    }
+    let handler = result.handler;
+    result.codec = entry.kind;
     // The byte offset the entry's child atoms start at, and which of them holds
     // the codec configuration; PCM has none, its entry is the whole description.
     let (config_at, config_kind) = match (&handler, &entry.kind) {
@@ -1160,9 +1282,7 @@ fn parse_track(
                 }
                 1 => {
                     audio_entry(entry.data, &mut result)?;
-                    if entry.data.len() < 44 {
-                        return Err(invalid("truncated AAC version-1 sample description"));
-                    }
+                    if entry.data.len() < 44 { return Err(invalid("truncated AAC version-1 sample description")); }
                     (44, Some(b"esds"))
                 }
                 2 => {
@@ -1287,30 +1407,20 @@ fn parse_track(
         let atom = if kind == b"esds" && optional(&configs, kind)?.is_none() {
             nested = atoms(required(&configs, b"wave")?)?;
             required(&nested, kind)?
-        } else {
-            required(&configs, kind)?
-        };
+        } else { required(&configs, kind)? };
         // An ALAC cookie opens with four bytes of its own version, which a Matroska
         // track leaves out; past them both spell the same fields.
         let at = usize::from(kind == b"alac") * 4;
         result.configuration = atom.get(at..).unwrap_or_default().to_vec();
-        // ASC defines decoded geometry; sample entries may retain LC-core
-        // clocks/channels. Keep the source media timescale and sample table.
+        // The AAC bitstream config defines decoded geometry. QuickTime/ISO
+        // sample entries may retain a generic stereo declaration for mono AAC.
         if result.codec == *b"mp4a"
-            && let Ok(asc) = crate::owned_codec_config::aac_specific_config(&result.configuration)
-            && let Ok(config) = crate::owned_aac::config::AudioSpecificConfig::parse(asc) {
-                result.sample_rate = config.resolve_output_rate(result.sample_rate).unwrap_or_else(|_| config.output_sample_rate());
-                result.channels = u16::from(config.output_channels());
-            }
-
+            && let Ok(asc) = mp4_aac_specific_config(&result.configuration)
+                && let Ok(config) = Mp4AudioSpecificConfig::parse(asc) {
+                    result.sample_rate = config.resolve_output_rate(result.sample_rate).unwrap_or_else(|_| config.output_sample_rate());
+                    result.channels = u16::from(config.output_channels());
+                }
     }
-    // A fragmented track may still carry initial samples in `moov/stbl` before
-    // `moof` fragments append to the same track (ISO/IEC 14496-12:2015, 8.8.4),
-    // and even an empty init `stbl` must pass structural validation.
-    let Some(index) = sample_index(&stbl, &result.codec, result.channels, mdats, limit, fragmented)? else {
-        return Ok(None);
-    };
-    result.samples = index;
     let spacing =
         optional(&configs, b"pasp")?.and_then(|p| Some((u32be(p, 0).ok()?, u32be(p, 4).ok()?)));
     if let Some(colr) = optional(&configs, b"colr")?
@@ -1340,36 +1450,7 @@ fn parse_track(
         rotation,
         (u32::from(result.width), u32::from(result.height)),
     );
-    if let Some(edts) = optional(&track, b"edts")? {
-        let children = atoms(edts)?;
-        let elst = required(&children, b"elst")?;
-        let v = version(elst, 1)?;
-        let stride = if v == 0 { 12 } else { 20 };
-        let count = table(elst, stride, 1024)?;
-        if count == 0 {
-            return Err(invalid("empty MP4 elst box"));
-        }
-        for i in 0..count {
-            let at = 8 + i * stride;
-            let (duration, media_time, rate_at) = if v == 0 {
-                (
-                    u64::from(u32be(elst, at)?),
-                    i64::from(u32be(elst, at + 4)? as i32),
-                    at + 8,
-                )
-            } else {
-                (u64be(elst, at)?, u64be(elst, at + 8)? as i64, at + 16)
-            };
-            if duration == 0 || media_time < -1 || u32be(elst, rate_at)? != 0x0001_0000 {
-                return Err(invalid("unsupported MP4 edit rate, duration or media time"));
-            }
-            result.edits.push(Edit {
-                duration,
-                media_time,
-            });
-        }
-    }
-    Ok(Some((result, flags)))
+    Ok(Some(result))
 }
 
 /// The sample tables of one track collapsed into an index, or `None` when the
@@ -1390,6 +1471,7 @@ fn sample_index(
     stbl: &[Atom<'_>],
     codec: &[u8; 4],
     channels: u16,
+    descriptions: &[SampleDescription],
     mdats: &[Range<u64>],
     limit: usize,
     fragmented: bool,
@@ -1437,6 +1519,12 @@ fn sample_index(
     if timed != count {
         return Err(invalid("decode-time count differs from sample count"));
     }
+    if count != 0 && descriptions.iter().any(|d| is_mace(&d.codec))
+        && (descriptions.iter().any(|d| d.codec != *codec || d.channels != channels)
+            || fragmented || timing.len() != 1 || optional(stbl,b"ctts")?.is_some() || optional(stbl,b"stss")?.is_some())
+    {
+        return changing_mace_index(stbl, descriptions, count, timing, mdats, limit, size_at).map(Some);
+    }
     // Everything the compact form would have to guess is a table it refuses to
     // read alongside it: varying sizes, a second frame length, a composition
     // shift, or a subset of frames worth restarting from.
@@ -1463,14 +1551,14 @@ fn sample_index(
     if timing.len() == 1 && optional(stbl, b"ctts")?.is_none() && optional(stbl, b"stss")?.is_none()
     {
         let units = match count.checked_div(samples_per_unit) {
-            Some(units) if count % samples_per_unit == 0 => units,
+            Some(units) if count.is_multiple_of(samples_per_unit) => units,
             _ => return Err(invalid("sample count is not a whole number of blocks")),
         };
         let ticks = u64::from(timing[0].1)
             .checked_mul(u64::try_from(samples_per_unit).unwrap_or(u64::MAX))
             .and_then(|n| u32::try_from(n).ok())
             .ok_or_else(|| invalid("block duration overflow"))?;
-        let chunk_bytes = |_: usize, units: usize| {
+        let chunk_bytes = |_: usize, units: usize, _: u32| {
             u64::try_from(units)
                 .ok()
                 .and_then(|n| n.checked_mul(u64::try_from(bytes_per_unit).unwrap_or(u64::MAX)))
@@ -1490,6 +1578,157 @@ fn sample_index(
         return Ok(Some(index));
     }
     expanded_index(stbl, codec, count, timing, limit, size_at, mdats)
+}
+
+/// QuickTime MACE counts six decoded samples per encoded block; other entries
+/// count packets or PCM frames. Resolve that unit and byte size per chunk.
+fn changing_mace_index(
+    stbl: &[Atom<'_>],
+    descriptions: &[SampleDescription],
+    count: usize,
+    timing: Vec<(usize, u32)>,
+    mdats: &[Range<u64>],
+    limit: usize,
+    size_at: impl Fn(usize) -> Result<u32>,
+) -> Result<SampleIndex> {
+    let geometry = |d: u32| {
+        mace_block(
+            &descriptions[d as usize - 1].codec,
+            descriptions[d as usize - 1].channels,
+        )
+    };
+    let units = |d: u32| geometry(d).map_or(1, |g| g.0);
+    let size = |d: u32, raw: usize| -> Result<u32> {
+        let bytes = if let Some((_, bytes)) = geometry(d) {
+            u32::try_from(bytes).map_err(|_| invalid("MACE block size overflow"))?
+        } else {
+            size_at(raw)?
+        };
+        if bytes == 0 {
+            return Err(invalid("zero MP4 sample size"));
+        }
+        Ok(bytes)
+    };
+    let runs = chunk_runs_with_units(stbl, count, mdats, units, |_, raw, n, d| {
+        if geometry(d).is_some() {
+            (n as u64)
+                .checked_mul(u64::from(size(d, raw)?))
+                .ok_or_else(|| invalid("MACE chunk size overflow"))
+        } else {
+            (raw..raw + n).try_fold(0u64, |total, i| {
+                total
+                    .checked_add(u64::from(size(d, i)?))
+                    .ok_or_else(|| invalid("chunk size overflow"))
+            })
+        }
+    })?;
+    let blocks = runs.last().map_or(0, |r| r.first + r.frames);
+    if blocks > limit {
+        return Err(invalid("MP4 sample count exceeds budget"));
+    }
+    let mut samples = Vec::new();
+    samples
+        .try_reserve_exact(blocks)
+        .map_err(|_| invalid("MACE index allocation failed"))?;
+    let mut timing = timing.into_iter();
+    let (mut remaining, mut delta) = timing.next().unwrap_or((0, 0));
+    let mut dts = 0u64;
+    let mut raw = 0usize;
+    for run in runs {
+        let unit = units(run.description_index);
+        let mut offset = run.offset;
+        for _ in 0..run.frames {
+            let bytes = size(run.description_index, raw)?;
+            let mut duration = 0u32;
+            for _ in 0..unit {
+                if remaining == 0 {
+                    (remaining, delta) = timing
+                        .next()
+                        .ok_or_else(|| invalid("missing MACE sample timing"))?;
+                }
+                duration = duration
+                    .checked_add(delta)
+                    .ok_or_else(|| invalid("MACE block duration overflow"))?;
+                remaining -= 1;
+            }
+            samples.push(Sample {
+                description_index: run.description_index,
+                offset,
+                size: bytes,
+                dts,
+                pts: i64::try_from(dts).map_err(|_| invalid("MACE timestamp overflow"))?,
+                duration,
+                sync: true,
+            });
+            raw += unit;
+            offset = offset
+                .checked_add(u64::from(bytes))
+                .ok_or_else(|| invalid("MACE block offset overflow"))?;
+            dts = dts
+                .checked_add(u64::from(duration))
+                .ok_or_else(|| invalid("MACE timestamp overflow"))?;
+        }
+    }
+    if let Some(ctts) = optional(stbl, b"ctts")? {
+        let v = version(ctts, 1)?;
+        let mut at = 0usize;
+        let mut raw = 0usize;
+        for i in 0..table(ctts, 8, count)? {
+            let n = u32be(ctts, 8 + i * 8)? as usize;
+            if n == 0 || n > count - raw {
+                return Err(invalid("MACE composition run must cover whole blocks"));
+            }
+            let end = raw + n;
+            let value = u32be(ctts, 12 + i * 8)?;
+            let shift = if v == 1 {
+                i64::from(value as i32)
+            } else {
+                i64::from(value)
+            };
+            while raw < end {
+                let sample = samples
+                    .get_mut(at)
+                    .ok_or_else(|| invalid("MACE composition count differs from sample count"))?;
+                raw += units(sample.description_index);
+                if raw > end {
+                    return Err(invalid("MACE composition run must cover whole blocks"));
+                }
+                sample.pts = sample
+                    .pts
+                    .checked_add(shift)
+                    .ok_or_else(|| invalid("MACE composition timestamp overflow"))?;
+                at += 1;
+            }
+        }
+        if raw != count {
+            return Err(invalid("MACE composition count differs from sample count"));
+        }
+    }
+    if let Some(stss) = optional(stbl, b"stss")? {
+        version(stss, 0)?;
+        for sample in &mut samples {
+            sample.sync = false;
+        }
+        let mut previous = 0usize;
+        let mut raw = 0usize;
+        let mut at = 0usize;
+        for i in 0..table(stss, 4, count)? {
+            let n = u32be(stss, 8 + i * 4)? as usize;
+            if n <= previous || n > count {
+                return Err(invalid("MACE sync index must select a block start"));
+            }
+            while raw < n - 1 {
+                raw += units(samples[at].description_index);
+                at += 1;
+            }
+            if raw != n - 1 {
+                return Err(invalid("MACE sync index must select a block start"));
+            }
+            samples[at].sync = true;
+            previous = n;
+        }
+    }
+    Ok(SampleIndex::Expanded(samples))
 }
 
 /// The per-sample form: one record for every entry the sample tables count,
@@ -1525,6 +1764,7 @@ fn expanded_index(
             return Err(invalid("zero MP4 sample size"));
         }
         samples.push(Sample {
+            description_index: 1,
             offset: 0,
             size,
             dts: 0,
@@ -1587,7 +1827,7 @@ fn expanded_index(
             last = index;
         }
     }
-    let chunk_bytes = |first: usize, frames: usize| {
+    let chunk_bytes = |first: usize, frames: usize, _: u32| {
         samples[first..first + frames]
             .iter()
             .try_fold(0u64, |sum, s| sum.checked_add(u64::from(s.size)))
@@ -1597,6 +1837,7 @@ fn expanded_index(
     for run in runs {
         let mut offset = run.offset;
         for s in &mut samples[run.first..run.first + run.frames] {
+            s.description_index = run.description_index;
             s.offset = offset;
             offset += u64::from(s.size);
         }
@@ -1632,8 +1873,7 @@ struct TrackExtends {
 
 /// The `tfhd` flag bits this reader acts on: the two ways of naming where a
 /// fragment's bytes begin, the three defaults a run may leave out, and which
-/// sample description the track uses - one, always, because a fragmented entry
-/// list this reader describes holds exactly that.
+/// sample description selected for the fragment, overriding the `trex` default.
 const TFHD_SUPPORTED: u32 = 0x00_0001 | 0x00_0002 | 0x00_0008 | 0x00_0010 | 0x00_0020 | 0x02_0000;
 /// The `trun` bits likewise: where the media starts, the flags of the run's first
 /// sample, and the four per-sample fields, which the box always states in the
@@ -1659,9 +1899,6 @@ fn fragment_defaults(moov: &[Atom<'_>]) -> Result<Vec<TrackExtends>> {
             return Err(invalid("duplicate MP4 track-extends track ID"));
         }
         let description = u32be(trex.data, 8)?;
-        if description > 1 {
-            return Err(invalid("MP4 fragment sample description index"));
-        }
         let flags = u32be(trex.data, 20)?;
         out.push(TrackExtends {
             track,
@@ -1731,9 +1968,6 @@ fn index_fragments(
             let mut description = None;
             if flags & 0x00_0002 != 0 {
                 let value = u32be(header, at)?;
-                if value > 1 {
-                    return Err(invalid("MP4 fragment sample description index"));
-                }
                 description = Some(value);
                 at += 4;
             }
@@ -1784,6 +2018,7 @@ fn index_fragments(
             let size = size.or_else(|| extends.and_then(|e| (e.size != 0).then_some(e.size)));
             let header_flags = header_flags.or_else(|| extends.and_then(|e| e.flags));
             let track = &mut tracks[position];
+            let descriptions = track.sample_descriptions.len();
             let SampleIndex::Expanded(list) = &mut track.samples else {
                 // Only a track whose own sample tables were read can hold the
                 // compact form, and the fragment pass never reads them.
@@ -1864,6 +2099,9 @@ fn index_fragments(
                 if count != 0 && description == 0 {
                     return Err(unsupported("MP4 fragment sample description zero is not supported"));
                 }
+                if count != 0 && description as usize > descriptions {
+                    return Err(invalid("MP4 fragment sample description index"));
+                }
                 for index in 0..count {
                     if *limit == 0 {
                         return Err(invalid("MP4 sample count exceeds budget"));
@@ -1920,6 +2158,7 @@ fn index_fragments(
                         .checked_add(shift)
                         .ok_or_else(|| invalid("MP4 PTS overflow"))?;
                     list.push(Sample {
+                        description_index: description,
                         offset,
                         size: bytes_of_sample,
                         dts,
@@ -1967,7 +2206,26 @@ fn chunk_runs(
     count: usize,
     mdats: &[Range<u64>],
     samples_per_unit: usize,
-    chunk_bytes: impl Fn(usize, usize) -> Result<u64>,
+    chunk_bytes: impl Fn(usize, usize, u32) -> Result<u64>,
+) -> Result<Vec<FrameRun>> {
+    let raw_count = count
+        .checked_mul(samples_per_unit)
+        .ok_or_else(|| invalid("MP4 sample count overflow"))?;
+    chunk_runs_with_units(
+        stbl,
+        raw_count,
+        mdats,
+        |_| samples_per_unit,
+        |first, _, n, d| chunk_bytes(first, n, d),
+    )
+}
+
+fn chunk_runs_with_units(
+    stbl: &[Atom<'_>],
+    count: usize,
+    mdats: &[Range<u64>],
+    samples_per_unit: impl Fn(u32) -> usize,
+    chunk_bytes: impl Fn(usize, usize, usize, u32) -> Result<u64>,
 ) -> Result<Vec<FrameRun>> {
     let stco = optional(stbl, b"stco")?;
     let co64 = optional(stbl, b"co64")?;
@@ -1981,20 +2239,29 @@ fn chunk_runs(
     let stsc = required(stbl, b"stsc")?;
     version(stsc, 0)?;
     let runs = table(stsc, 12, chunks)?;
+    let descriptions = u32be(required(stbl, b"stsd")?, 4)?;
     let mut mapping = Vec::new();
     for i in 0..runs {
         let first = u32be(stsc, 8 + i * 12)? as usize;
         let per_chunk = u32be(stsc, 12 + i * 12)? as usize;
+        let description = u32be(stsc, 16 + i * 12)?;
+        let unit = if description > 0 && description <= descriptions {
+            samples_per_unit(description)
+        } else {
+            1
+        };
         if first == 0
             || first > chunks
             || per_chunk == 0
-            || u32be(stsc, 16 + i * 12)? != 1
-            || per_chunk % samples_per_unit != 0
-            || mapping.last().is_some_and(|&(prev, _)| first <= prev)
+            || description == 0
+            || description > descriptions
+            || unit == 0
+            || !per_chunk.is_multiple_of(unit)
+            || mapping.last().is_some_and(|&(prev, _, _)| first <= prev)
         {
             return Err(invalid("invalid sample-to-chunk mapping"));
         }
-        mapping.push((first, per_chunk / samples_per_unit));
+        mapping.push((first, per_chunk, description));
     }
     if count > 0 && mapping.first().map(|p| p.0) != Some(1) {
         return Err(invalid("chunk mapping must start at one"));
@@ -2004,19 +2271,21 @@ fn chunk_runs(
         .try_reserve_exact(chunks)
         .map_err(|_| invalid("chunk index allocation failed"))?;
     let mut first = 0usize;
+    let mut raw_first = 0usize;
     let mut run = 0usize;
     let mut prev_end = 0u64;
     for chunk in 1..=chunks {
         while run + 1 < runs && chunk >= mapping[run + 1].0 {
             run += 1;
         }
-        let frames = mapping
+        let raw_frames = mapping
             .get(run)
             .ok_or_else(|| invalid("missing chunk mapping"))?
             .1;
-        if frames > count - first {
+        if raw_frames > count - raw_first {
             return Err(invalid("chunk mapping exceeds sample count"));
         }
+        let frames = raw_frames / samples_per_unit(mapping[run].2);
         let offset = if stride == 4 {
             u64::from(u32be(offsets, 8 + (chunk - 1) * 4)?)
         } else {
@@ -2026,7 +2295,7 @@ fn chunk_runs(
             return Err(invalid("overlapping or non-increasing MP4 chunk offsets"));
         }
         let end = offset
-            .checked_add(chunk_bytes(first, frames)?)
+            .checked_add(chunk_bytes(first, raw_first, frames, mapping[run].2)?)
             .ok_or_else(|| invalid("chunk offset overflow"))?;
         let containing = mdats.partition_point(|range| range.start <= offset);
         if containing == 0 || end > mdats[containing - 1].end {
@@ -2034,13 +2303,15 @@ fn chunk_runs(
         }
         prev_end = end;
         walked.push(FrameRun {
+            description_index: mapping[run].2,
             first,
             offset,
             frames,
         });
         first += frames;
+        raw_first += raw_frames;
     }
-    if first != count {
+    if raw_first != count {
         return Err(invalid("chunk mapping omits samples"));
     }
     Ok(walked)

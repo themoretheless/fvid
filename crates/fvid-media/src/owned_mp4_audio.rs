@@ -295,6 +295,8 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
     ] {
         add(bytes)?;
     }
+    add(track.sample_descriptions.len().checked_mul(std::mem::size_of::<crate::owned_mp4::SampleDescription>()).ok_or_else(overflow)?)?;
+    for description in &track.sample_descriptions {add(description.configuration.len())?;}
     add(track
         .edits
         .len()

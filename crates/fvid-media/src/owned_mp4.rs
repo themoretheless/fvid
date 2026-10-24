@@ -69,6 +69,8 @@ pub(crate) fn reduce_ratio(numerator: u64, denominator: u64) -> (u32, u32) {
     }
 }
 
+use crate::owned_codec_config::aac_specific_config as mp4_aac_specific_config;
+use crate::owned_aac::config::AudioSpecificConfig as Mp4AudioSpecificConfig;
 include!("owned_mp4_impl.rs");
 
 #[cfg(test)]
@@ -83,6 +85,15 @@ mod admission_tests {
             Limits::default(),
         )
         .unwrap();
+        let before=reader.estimated_index_payload_bytes().unwrap();
+        let capacity=reader.tracks[0].sample_descriptions.capacity();
+        reader.tracks[0].sample_descriptions.reserve_exact(7);
+        let growth=(reader.tracks[0].sample_descriptions.capacity()-capacity)*std::mem::size_of::<SampleDescription>();
+        assert_eq!(reader.estimated_index_payload_bytes().unwrap(),before+growth);
+        let before=reader.estimated_index_payload_bytes().unwrap();
+        let capacity=reader.tracks[0].sample_descriptions[0].configuration.capacity();
+        reader.tracks[0].sample_descriptions[0].configuration.reserve_exact(128);
+        assert_eq!(reader.estimated_index_payload_bytes().unwrap(),before+reader.tracks[0].sample_descriptions[0].configuration.capacity()-capacity);
         let before = reader.estimated_index_payload_bytes().unwrap();
         let old = reader.tracks[0].configuration.capacity();
         reader.tracks[0].configuration.reserve_exact(16384);

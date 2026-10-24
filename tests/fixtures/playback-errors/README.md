@@ -4827,3 +4827,14 @@ packet cuts and malformed-block transactions. Predictor tables/reconstruction
 now share one Rust implementation between FVid and fvid-media. Existing static
 codebook references also run inside fvid-media; no FFmpeg is invoked by tests.
 Changing-description export remains unqualified.
+
+
+The MP4 sample-description generator also writes equivalent-pcm.mp4 and
+equivalent-aac.mp4 with equivalent audio entries selected 1/2/1, plus independent
+f32le waveform oracles. The PCM witness splits three chunks using packet sizes.
+`mp4_media_sample_descriptions` accepts their owned decode, checks indexed
+packet routing across native codecs and rejects malformed description indices.
+Its changing-configuration fixed-reader/remux test is a refusal safety test,
+not acceptance of changing-configuration export. Generate fixtures separately
+with scripts/generate_mp4_sample_descriptions.py; ordinary tests never invoke
+the generator, FFmpeg or network.

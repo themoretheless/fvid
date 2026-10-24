@@ -73,6 +73,27 @@ def generate():
             out+=atom(k,b)
         return out
     files['compact-pcm.mp4']=atom(b'ftyp',base[b'ftyp'])+atom(b'mdat',bytes(range(24)))+atom(b'moov',pcm(base[b'moov']))
+    def equivalent_audio(data,audio=False):
+        tables=dict(atoms(data)) if audio else {}
+        out=b''
+        for k,b in atoms(data):
+            if k==b'trak':b=equivalent_audio(b,b'soun' in b)
+            elif k in [b'moov',b'mdia',b'minf',b'stbl']:b=equivalent_audio(b,audio)
+            elif audio and k==b'stsd':b=word(0,2)+b[8:]+b[8:]
+            elif audio and k==b'stsc':b=word(0,3,1,1,1,2,1,2,3,1,1)
+            elif audio and k==b'stco' and struct.unpack_from('>I',b,4)[0]==1:
+                start=struct.unpack_from('>I',b,8)[0]
+                sizes=struct.unpack_from('>3I',tables[b'stsz'],12)
+                b=word(0,3,start,start+sizes[0],start+sizes[0]+sizes[1])
+            out+=atom(k,b)
+        return out
+    from generate_mp4_audio_clock_regressions import generate as clock_sources
+    from generate_mp4_aac_transitions import generate as aac_sources
+    owned_clock=clock_sources();owned_aac=aac_sources()
+    files['equivalent-pcm.mp4']=equivalent_audio(owned_clock['pcm-48000.mp4'])
+    files['equivalent-pcm.f32le']=owned_clock['expected.f32le']
+    files['equivalent-aac.mp4']=equivalent_audio(owned_aac['control-0.mp4'])
+    files['equivalent-aac.f32le']=owned_aac['control-0.f32le']
     return files
 
 if __name__=='__main__':
