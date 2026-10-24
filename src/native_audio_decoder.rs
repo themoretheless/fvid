@@ -1,11 +1,13 @@
 //! Owned packet-to-PCM codecs used by the owned container audio timelines.
 use crate::{Result, container::mp4::Track, invalid};
+use crate::{audio::AudioDecode, codec::mace_decoder::{MaceCoding, MaceDecoder}};
 pub(crate) enum NativeAudioCheckpoint {
     Aac(crate::codec::aac_native::AacCheckpoint),
     Ps(crate::codec::aac_ps_native::Checkpoint),
 }
 pub(crate) enum PacketPcmDecoder {
     Pcm(crate::codec::pcm_decoder::PcmDecoder),
+    Mace(MaceDecoder),
     Ima4(fvid_media::owned_ima4::Ima4Decoder),
     ImaWav(fvid_media::owned_ima_wav::ImaWavDecoder),
     MsAdpcm(fvid_media::owned_ms_adpcm::MsAdpcmDecoder),
@@ -75,6 +77,10 @@ impl PacketPcmDecoder {
                     track.channels,
                 )?))
             }
+            b"MAC3" | b"MAC6" => Ok(Self::Mace(MaceDecoder::new(
+                if track.codec == *b"MAC3" { MaceCoding::ThreeToOne } else { MaceCoding::SixToOne },
+                track.sample_rate, track.channels,
+            )?)),
             b"ima4" => Ok(Self::Ima4(
                 fvid_media::owned_ima4::Ima4Decoder::new(track.sample_rate, track.channels)
                     .map_err(|e| invalid(&e.to_string()))?,
@@ -182,6 +188,7 @@ impl PacketPcmDecoder {
     pub(crate) fn sample_rate(&self) -> u32 {
         match self {
             Self::Pcm(d) => d.spec().sample_rate,
+            Self::Mace(d)=>d.spec().sample_rate,
             Self::Ima4(d)=>d.sample_rate(),
             Self::ImaWav(d)=>d.sample_rate(),
             Self::MsAdpcm(d)=>d.sample_rate(),
@@ -193,6 +200,7 @@ impl PacketPcmDecoder {
     pub(crate) fn channels(&self) -> u16 {
         match self {
             Self::Pcm(d) => d.spec().channels,
+            Self::Mace(d)=>d.spec().channels,
             Self::Ima4(d)=>d.channels(),
             Self::ImaWav(d)=>d.channels(),
             Self::MsAdpcm(d)=>d.channels(),
@@ -212,6 +220,7 @@ impl PacketPcmDecoder {
     pub(crate) fn reset(&mut self) {
         match self {
             Self::Aac(d) => d.reset(),
+            Self::Mace(d)=>d.reset(),
             Self::Ps(d) => d.reset(),
             _ => {}
         }
@@ -242,6 +251,7 @@ impl PacketPcmDecoder {
     pub(crate) fn decode(&mut self, packet: &[u8]) -> Result<Vec<f32>> {
         match self {
             Self::Pcm(d) => d.decode_pcm(packet),
+            Self::Mace(d)=>d.decode_pcm(packet),
             Self::Ima4(d)=>d.decode_pcm(packet).map_err(|e|invalid(&e.to_string())),
             Self::ImaWav(d)=>d.decode_pcm(packet).map_err(|e|invalid(&e.to_string())),
             Self::MsAdpcm(d)=>d.decode_pcm(packet).map_err(|e|invalid(&e.to_string())),

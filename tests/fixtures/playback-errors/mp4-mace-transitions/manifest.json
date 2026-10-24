@@ -34,6 +34,13 @@
       "channels": 1,
       "block_bytes": 2,
       "sample_ticks": 6
+    },
+    {
+      "codec": "MAC6",
+      "rate": 8000,
+      "channels": 1,
+      "block_bytes": 1,
+      "sample_ticks": 6
     }
   ]
 }

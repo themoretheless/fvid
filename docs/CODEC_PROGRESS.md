@@ -18034,3 +18034,37 @@ Final frozen-source offline player qualification: library 1037 passed /
 targets checked; both `fvid` and `fvid-player` built. Existing compiler warnings
 remain. Tests run without FFmpeg or network and do not generate fixtures. This
 is finite acceptance, not the full runtime suite or universal codec coverage.
+
+
+### 2026-10-24: headless MACE export and constant-setup presentation history
+
+Owned short MACE/VP9 witnesses reproduced three distinct failures: root export
+refused MACE; plain constant MAC3 seek to 1 ms exposed PCM from a fresh predictor
+instead of restoring history; constant edits reported 30 ms source instead of
+21 ms presentation and ignored the silence/repeat schedule. MAC6 mono joins the
+existing MAC3 mono/stereo and MAC6 stereo arithmetic inputs. No private media or
+parameter sets were copied.
+
+Root PacketPcmDecoder/admission now uses the FVid MACE engine and reports mace3/6
+metadata. The engine is available without player; shared planar reconstruction
+feeds byte PCM for playback and float PCM for export without an intermediate
+byte-PCM allocation in the export route. Predictor math/tables remain unchanged
+and retain their pre-existing reference tests. Root timeline reset clears MACE
+predictors between repeated windows. Constant MACE player seek now prerolls
+from the start for history and constant edit lists use the existing source
+replay/silence scheduler.
+
+Acceptance checks full and interval export, fresh streaming reference PCM, seek
+suffixes, edit duration, real-worker packet timestamps/PCM, rewind and exact VP9
+planes/clocks. Offline generator reproduction is byte-exact with process/socket
+creation denied: 28 artifacts / 770579 bytes. Ordinary tests do not regenerate
+fixtures or require FFmpeg/network.
+
+Qualification: player library 1037 passed / 26 ignored; ten selected integration
+targets 46 passed; the final MACE target after adding video checks has five
+passed (overlaps four earlier tests). Without player, 14 MACE numeric/reference
+tests and the headless export integration test pass. All player test targets
+check and both binaries build. Existing warnings remain. Separate fvid-media
+MP4 MACE demux/decode acceptance, changing-configuration exports, fractional
+clock combinations and physical output continuity remain unqualified. This
+milestone does not establish universal codec coverage.

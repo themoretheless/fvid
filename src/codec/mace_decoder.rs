@@ -343,17 +343,7 @@ impl MaceDecoder {
             format: SampleFormat::F32,
         }
     }
-}
-
-impl AudioDecode for MaceDecoder {
-    /// Every block yields six samples per channel, so a packet comes back a packet and
-    /// the timestamps stay the caller's.
-    fn decode_encoded(
-        &mut self,
-        data: &[u8],
-        pts: u64,
-        _duration: u64,
-    ) -> crate::Result<Option<AudioPacket>> {
+    fn decode_planar(&mut self, data: &[u8]) -> Result<[Vec<i16>; 2]> {
         let block = self.coding.block_bytes(self.channels);
         if data.len() % block != 0 {
             // The reference drops the standing-over bytes and reports the packet as
@@ -392,9 +382,37 @@ impl AudioDecode for MaceDecoder {
                 }
             }
         }
-        let mut out =
-            Vec::with_capacity(blocks * SAMPLES_PER_BLOCK * usize::from(self.channels) * 4);
-        for frame in 0..blocks * SAMPLES_PER_BLOCK {
+        Ok(planar)
+    }
+
+    /// Owned float PCM for container exports, with the same persistent
+    /// predictors as playback and without allocating an intermediate byte PCM.
+    pub(crate) fn decode_pcm(&mut self, data: &[u8]) -> Result<Vec<f32>> {
+        let planar = self.decode_planar(data)?;
+        let frames = planar[0].len();
+        let mut output = Vec::with_capacity(frames * usize::from(self.channels));
+        for frame in 0..frames {
+            for channel in 0..usize::from(self.channels) {
+                output.push(f32::from(planar[channel][frame]) / 32768.0);
+            }
+        }
+        Ok(output)
+    }
+}
+
+impl AudioDecode for MaceDecoder {
+    /// Every block yields six samples per channel, so a packet comes back a packet and
+    /// the timestamps stay the caller's.
+    fn decode_encoded(
+        &mut self,
+        data: &[u8],
+        pts: u64,
+        _duration: u64,
+    ) -> crate::Result<Option<AudioPacket>> {
+        let planar = self.decode_planar(data)?;
+        let frames = planar[0].len();
+        let mut out = Vec::with_capacity(frames * usize::from(self.channels) * 4);
+        for frame in 0..frames {
             for channel in 0..usize::from(self.channels) {
                 let sample = f32::from(planar[channel][frame]) / 32_768.0;
                 out.extend_from_slice(&sample.to_le_bytes());
@@ -421,9 +439,14 @@ mod tests {
         Channel, LEVEL_NARROW, LEVEL_WIDE, MaceCoding, MaceDecoder, NARROW, SAMPLES_PER_BLOCK,
         STEP_NARROW, STEP_WIDE, WIDE, clip_int16, codes, quantize, slot_tables,
     };
-    use crate::audio::{AudioDecode, AudioStream};
+    use crate::audio::AudioDecode;
+    #[cfg(feature = "player")]
+    use crate::audio::AudioStream;
+    #[cfg(feature = "player")]
     use crate::container::mp4::Limits as Mp4Limits;
+    #[cfg(feature = "player")]
     use crate::playback_mp4_audio::Mp4AudioReader;
+    #[cfg(feature = "player")]
     use std::io::Cursor;
 
     /// The coded runs the decoder is proved against, and the samples this build's reference reads
@@ -888,6 +911,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "player")]
     fn a_mac_take_is_indexed_in_blocks_and_read_one_a_packet() {
         // `stsz` counts this track's samples, not its packets: the file states 17 856 of them at
         // one byte each where the coding packs six samples into each byte. So the reader's grain

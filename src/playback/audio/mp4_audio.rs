@@ -231,7 +231,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         }
         let owned_adpcm = matches!(&track.codec, b"ima4" | b"ms\x00\x02" | b"ms\x00\x11");
         let timeline = if (track.codec == *b"mp4a" && (track.edits.len()>1 || track.edits.first().is_some_and(|e|e.media_time<0)))
-            || ((owned_adpcm || matches!(&track.codec, b"ac-3" | b"ec-3")) && !track.edits.is_empty()) {
+            || ((owned_adpcm || matches!(&track.codec, b"ac-3" | b"ec-3" | b"MAC3" | b"MAC6")) && !track.edits.is_empty()) {
             Some(crate::container::audio_timeline::AudioTimeline::new(&track.edits,track.duration,track.timescale,demuxer.movie_timescale(),selected_geometry.map_or(track.sample_rate,|g|g.0))?)
         } else {None};
         // Probe with the owned parser, rather than guessing from the sample
@@ -965,7 +965,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         }
         let track = self.track();
         let shift = if self.variable_edits.is_none() && track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0 { track.edits[0].media_time } else { 0 };
-        let preroll = matches!(&track.codec, b"ac-3" | b"ec-3")
+        let preroll = matches!(&track.codec, b"ac-3" | b"ec-3" | b"MAC3" | b"MAC6")
             || (track.codec == *b"mp4a" && (track.edits.is_empty() || (track.edits.len() == 1 && track.edits[0].media_time >= 0)));
         let source_end=if track.duration>0 {track.duration as u128}else{
             track.samples.get(track.samples.len().saturating_sub(1)).map_or(0,|sample|sample.pts.max(0)as u128+u128::from(sample.duration))

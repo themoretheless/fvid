@@ -4801,3 +4801,18 @@ ADPCM constant controls also test general owned-export admission, actual codec
 names and byte-exact full/3--14 ms interval PCM export. Before the fix the root
 export API refused ADPCM despite the existing owned lower-level decoders.
 Changing-configuration export remains outside this finite acceptance matrix.
+
+`mp4_mace_export` extends the owned MACE witnesses with MAC6 mono and constant
+MAC3/MAC6 mono/stereo edit lists: 3 ms silence, source 4--12 ms, 2 ms silence,
+then the same source window. General FVid export previously refused MACE; plain
+constant-setup player seeks lost predictor history and constant edit lists were
+ignored (30 ms source instead of 21 ms presentation). Acceptance checks full and
+5--14 ms interval exports, codec admission/labels, direct seek suffixes, real
+worker packet PCM/times, rewind, and exact owned VP9 companions. A fresh streaming
+byte-PCM decoder provides presentation/state references; the existing static
+MACE numeric/reference suite independently guards the unchanged predictor math.
+Regenerate with `python3 scripts/generate_mp4_mace_transitions.py`; run
+`mp4_mace_export` with player for all checks or without player for headless
+export acceptance. Fixture generation stays separate and invokes no FFmpeg or
+network. Changing-configuration and separate lower-level media-export acceptance
+remain outside this finite matrix.

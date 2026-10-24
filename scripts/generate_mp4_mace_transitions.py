@@ -10,8 +10,10 @@ def generate():
     header = atom(b'ftyp', video[b'ftyp'])
     shapes = [(b'MAC3', 8000, 1, 2, 6), (b'MAC6', 16000, 2, 2, 3), (b'MAC3', 8000, 2, 4, 6)]
     shapes.append((b'sowt',8000,1,2,6))
+    shapes.append((b'MAC6',8000,1,1,6))
     packets = [bytes((j * 13 + i * 41 + 7) % 256 for j in range(40 * shape[3])) for i, shape in enumerate(shapes[:3])]
     packets.append(b''.join(struct.pack('<h',((j*89)%20000)-10000) for j in range(240)))
+    packets.append(bytes((j*29+17)%256 for j in range(40)))
     entries = []
     for codec, rate, channels, _, _ in shapes:
         e = bytearray(28); e[6:8] = struct.pack('>H', 1)
@@ -85,6 +87,9 @@ def generate():
             return out
         files[f'control-{i}.mp4'] = single(data)
     from generate_mp4_variable_rate_edits import edit_movie
+    files['control-6mono.mp4']=movie([4],[4])
+    for name in ['control-0','control-1','control-2','control-6mono']:
+        files[name+'-edits.mp4']=edit_movie(files[name+'.mp4'],[(3,-1),(8,192),(2,-1),(8,192)])
     files['fragmented-edits.mp4']=edit_movie(files['fragmented.mp4'],[(5,-1),(65,480),(5,-1),(65,480)])
     files['hybrid-edits.mp4']=edit_movie(files['hybrid.mp4'],[(5,-1),(65,480),(5,-1),(65,480)])
     files['mixed-fragmented-edits.mp4']=edit_movie(files['mixed-fragmented.mp4'],[(5,-1),(65,480),(5,-1),(65,480)])

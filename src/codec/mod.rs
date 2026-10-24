@@ -28,7 +28,6 @@ pub mod g722_decoder;
 pub mod g726_decoder;
 #[cfg(feature = "player")]
 pub mod gsm_decoder;
-#[cfg(feature = "player")]
 pub mod mace_decoder;
 #[cfg(feature = "player")]
 pub mod midi_decoder;
