@@ -87,7 +87,7 @@ fn ogg_vorbis_channel_changes_keep_backend_geometry_through_seek_and_rewind() {
         let (_tx, commands) = sync_channel(1);
         let (events, _) = sync_channel(8);
         let mut worker = Worker {
-            duration: Arc::new(Mutex::new(None)), checkpoints: Vec::new(), compression: crate::codec::ac3_decoder::CompressionMode::Line,
+            duration: Arc::new(Mutex::new(None)), checkpoints: Vec::new(), dolby_policy: crate::audio_thread::DolbyPlaybackPolicy::default(),
             stream: Box::new(stream),
             decoder,
             backend: Box::new(backend),
@@ -163,7 +163,7 @@ fn ogg_vorbis_rate_changes_keep_backend_clock_through_seek_and_rewind() {
         let (_tx, commands) = sync_channel(1);
         let (events, _) = sync_channel(8);
         let mut worker = Worker {
-            duration: Arc::new(Mutex::new(None)), checkpoints: Vec::new(), compression: crate::codec::ac3_decoder::CompressionMode::Line,
+            duration: Arc::new(Mutex::new(None)), checkpoints: Vec::new(), dolby_policy: crate::audio_thread::DolbyPlaybackPolicy::default(),
             stream: Box::new(stream),
             decoder,
             backend: Box::new(backend),
@@ -236,7 +236,7 @@ fn ogg_codec_changes_keep_backend_pcm_clock_through_navigation() {
         let (_tx, commands) = sync_channel(1);
         let (events, _) = sync_channel(8);
         let mut worker = Worker {
-            duration: Arc::new(Mutex::new(None)), checkpoints: Vec::new(), compression: crate::codec::ac3_decoder::CompressionMode::Line,
+            duration: Arc::new(Mutex::new(None)), checkpoints: Vec::new(), dolby_policy: crate::audio_thread::DolbyPlaybackPolicy::default(),
             stream: Box::new(stream),
             decoder,
             backend: Box::new(backend),

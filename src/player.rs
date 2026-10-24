@@ -13,7 +13,7 @@ use crate::color::{
     Log, Lut, MasteringDisplay, MatrixCoeff, Primaries, Settings, ToneMap, Transfer,
 };
 use crate::container::FileTags;
-use crate::codec::ac3_decoder::CompressionMode;
+use crate::{codec::ac3_decoder::CompressionMode,audio_thread::DolbyPlaybackPolicy};
 use crate::subtitles::{self, Cue};
 use crate::{
     playback_native::{NativeReader, Planar8},
@@ -222,6 +222,7 @@ struct PlayArgs {
     embedded_subtitle: Option<usize>,
     audio_device: Option<String>,
     dolby_compression: CompressionMode,
+    dolby_dialogue_normalization: bool,
     list_audio_devices: bool,
     fullscreen: bool,
     on_top: bool,
@@ -295,6 +296,7 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
     let mut snapshot_dir = None;
     let mut audio_device = None;
     let mut dolby_compression = CompressionMode::Line;
+    let mut dolby_dialogue_normalization = false;
     let mut list_audio_devices = false;
     let mut no_subtitles = false;
     let mut no_audio = false;
@@ -322,6 +324,12 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         index += 1;
         match flag {
             "--no-subtitles" => { no_value(inline, flag)?; no_subtitles = true; }
+            "--dolby-dialogue-normalization" => {
+                dolby_dialogue_normalization=match option_value(args,&mut index,flag,inline)?.as_str() {
+                    "on"=>true,"off"=>false,
+                    _=>return Err(crate::invalid("--dolby-dialogue-normalization requires on or off")),
+                };
+            }
             "--dolby-compression" => {
                 dolby_compression = match option_value(args, &mut index, flag, inline)?.as_str() {
                     "line" => CompressionMode::Line,
@@ -553,6 +561,7 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         embedded_subtitle: None,
         audio_device,
         dolby_compression,
+        dolby_dialogue_normalization,
         list_audio_devices,
         fullscreen,
         on_top,
@@ -1063,7 +1072,7 @@ fn parse_media_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         } else {
             native.push(arg.clone());
             if inline.is_none() && matches!(flag,
-                "--hdr-tonemap" | "--hdr-mastering" | "--hdr-nits" | "--hdr-maxcll" | "--spherical-stereo" | "--spherical-projection" | "--yaw" | "--pitch" | "--roll" | "--fov" | "--play-stereo3d" | "--audio-device" | "--dolby-compression" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
+                "--hdr-tonemap" | "--hdr-mastering" | "--hdr-nits" | "--hdr-maxcll" | "--spherical-stereo" | "--spherical-projection" | "--yaw" | "--pitch" | "--roll" | "--fov" | "--play-stereo3d" | "--audio-device" | "--dolby-compression" | "--dolby-dialogue-normalization" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
                 | "--backend" | "--device" | "--shader" | "--skin" | "--start-time" | "--stop-time"
                 | "--rate" | "--audio-delay" | "--subtitle-delay" | "--volume" | "--zoom"
                 | "--crop" | "--aspect" | "--brightness" | "--gamma" | "--saturation" | "--contrast"
@@ -1090,7 +1099,7 @@ fn run_parsed(parsed: PlayArgs) -> Result<(), Box<dyn std::error::Error>> {
         subtitle_shown: !parsed.no_subtitles,
         preferred_embedded_subtitle: parsed.embedded_subtitle,
         preferred_output: parsed.audio_device,
-        dolby_compression: parsed.dolby_compression,
+        dolby_policy: DolbyPlaybackPolicy {compression:parsed.dolby_compression,normalize_dialogue:parsed.dolby_dialogue_normalization},
         queue: expand_inputs(&parsed.paths),
         bounds: PlayBounds {
             start: parsed.start,
@@ -1838,7 +1847,7 @@ struct Player {
     stereo3d: fvid_media::PlayStereo3D,
     preferred_embedded_subtitle: Option<usize>,
     preferred_output: Option<String>,
-    dolby_compression: CompressionMode,
+    dolby_policy: DolbyPlaybackPolicy,
     quit_at_end: bool,
     snapshot_dir: Option<PathBuf>,
     next_file: Option<NextFile>,
@@ -2068,7 +2077,7 @@ impl Default for Player {
             stereo3d: fvid_media::PlayStereo3D::Off,
             preferred_embedded_subtitle: None,
             preferred_output: None,
-            dolby_compression: CompressionMode::Line,
+            dolby_policy: DolbyPlaybackPolicy::default(),
             quit_at_end: false,
             snapshot_dir: None,
             skin: player_skin::Skin::default(),
@@ -2465,7 +2474,7 @@ impl Player {
         self.sound_codec = sound_codec(stream.codec());
         self.audio_track = selected.unwrap_or_else(||stream.audio_track_index());
         let output = self.preferred_output.clone();
-        self.audio = Some(crate::audio_thread::AudioPlayback::start_with_compression(stream, self.dolby_compression, move || {
+        self.audio = Some(crate::audio_thread::AudioPlayback::start_with_dolby_policy(stream, self.dolby_policy, move || {
             Box::new(crate::audio::PlatformBackend::with_output_device(output))
         }));
         true
@@ -3224,7 +3233,7 @@ impl Player {
         self.network_cancel = Some(network_cancel.clone());
         let preferred_embedded_subtitle = self.preferred_embedded_subtitle;
         let preferred_output = self.preferred_output.clone();
-        let dolby_compression = self.dolby_compression;
+        let dolby_policy = self.dolby_policy;
         let prepared_source = self.prepared_source.take();
         let (send, receive) = std::sync::mpsc::channel();
         let (
@@ -3309,7 +3318,7 @@ impl Player {
                 network_cancel: Some(network_cancel),
                 preferred_embedded_subtitle,
                 preferred_output,
-                dolby_compression,
+                dolby_policy,
                 grading,
                 bounds,
                 no_audio,
@@ -4599,13 +4608,11 @@ fn mp3_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Aud
 /// offered alongside the MPEG one and only takes a file whose whole run of
 /// frame lengths is measured out of Table 5.18.
 fn ac3_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
-    if nth > 0 {
-        return None;
-    }
     let file = crate::playback_spool::open_shared(path).ok()?;
-    crate::playback_ac3::Ac3AudioReader::open::<std::io::BufReader<crate::playback_spool::SharedFile>>(
+    crate::playback_ac3::Ac3AudioReader::open_track::<std::io::BufReader<crate::playback_spool::SharedFile>>(
         BufReader::new(file),
         crate::playback_ac3::Limits::default(),
+        nth,
     )
     .ok()
     .map(boxed_stream)
@@ -6835,6 +6842,20 @@ mod tests {
             assert_eq!(super::parse_media_play_args(&args).unwrap().dolby_compression,CompressionMode::Rf);
         }
         for words in [vec!["--dolby-compression"],vec!["--dolby-compression=off","clip.y4m"],vec!["--dolby-compression=","clip.y4m"]] {
+            assert!(play_args(&words).is_err());
+        }
+    }
+
+    #[test]
+    fn dolby_dialogue_normalization_cli_is_session_scoped_and_validated() {
+        assert!(!play_args(&["clip.y4m"]).unwrap().dolby_dialogue_normalization);
+        for (value,wanted) in [("on",true),("off",false)] {
+            for words in [vec![format!("--dolby-dialogue-normalization={value}"),"clip.y4m".into()],vec!["--dolby-dialogue-normalization".into(),value.into(),"clip.y4m".into()]] {
+                let parsed=super::parse_play_args(&words).unwrap();assert_eq!(parsed.dolby_dialogue_normalization,wanted);
+                assert_eq!(super::parse_media_play_args(&words).unwrap().dolby_dialogue_normalization,wanted);
+            }
+        }
+        for words in [vec!["--dolby-dialogue-normalization"],vec!["--dolby-dialogue-normalization=rf","clip.y4m"],vec!["--dolby-dialogue-normalization=","clip.y4m"]] {
             assert!(play_args(&words).is_err());
         }
     }
@@ -9960,6 +9981,36 @@ mod tests {
     }
 
     #[test]
+    fn ready_seek_picture_does_not_wait_for_future_spool_lead_after_audio_failure(){
+        struct BrokenAudio;
+        impl crate::audio::AudioStream for BrokenAudio {
+            fn codec(&self)->&str{"mp4a"}fn timescale(&self)->u32{44100}fn sample_rate(&self)->u32{44100}fn channels(&self)->u16{2}
+            fn extra_data(&self)->&[u8]{&[]}fn audio_tracks(&self)->Vec<crate::audio::AudioTrack>{Vec::new()}
+            fn next_packet(&mut self)->crate::Result<Option<crate::audio::EncodedPacket>>{Ok(None)}fn rewind(&mut self){}fn seek_to(&mut self,pts:i64)->i64{pts}
+        }
+        let directory=scratch("fvid-ready-seek-spool",&[]);let path=directory.join("clip.mkv");
+        std::fs::write(&path,include_bytes!("../tests/fixtures/playback-errors/seek-ready-pending-spool.mkv")).unwrap();
+        let mut player=Player{queue:vec![path],no_audio:true,..Default::default()};player.play_index(0);assert!(player.error.is_none(),"{:?}",player.error);
+        assert_eq!(player.duration,Some(Duration::from_millis(320)));
+        player.audio=Some(crate::audio_thread::AudioPlayback::start(Box::new(BrokenAudio),||Box::new(crate::audio::NullBackend::default())));
+        let until=Instant::now()+Duration::from_secs(2);
+        while !player.audio_ended{assert!(Instant::now()<until,"audio failure missing");player.poll_audio();std::thread::sleep(Duration::from_millis(1));}
+        assert!(player.audio.is_none());
+        player.spool=Some(player.spool.as_ref().unwrap().pending_lead_for_test());player.spool_wait=Some(Instant::now());assert!(!player.spool_primed());
+        let ctx=eframe::egui::Context::default();
+        for target in [Duration::from_millis(120),Duration::from_millis(200)]{
+            player.seek_time(target);let generation=player.playback.as_ref().unwrap().generation();let until=Instant::now()+Duration::from_secs(2);
+            while player.seek_preview {
+                assert!(Instant::now()<until,"ready seek picture held by future spool lead: queued={:?}",player.queued.as_ref().map(|f|(f.generation,f.pts)));
+                let mut output=ctx.run_ui(Default::default(),|ui|player.present(ui.ctx()));output.textures_delta.clear();std::thread::sleep(Duration::from_millis(1));
+            }
+            assert!(!player.spool_primed(),"future copy must remain pending throughout this witness");assert!(!player.buffering);assert!(!player.paused);assert!(!player.ended);
+            assert_eq!(player.presented.as_ref().unwrap().generation,generation);assert!(player.timeline().0.unwrap()>=target);
+        }
+        drop(player);std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
     fn seeking_after_audio_failure_keeps_video_playing() {
         struct BrokenAudio;
         impl crate::audio::AudioStream for BrokenAudio {
@@ -10023,7 +10074,7 @@ mod tests {
             let generation = player.playback.as_ref().unwrap().generation();
             let until = Instant::now() + Duration::from_secs(5);
             while player.seek_preview {
-                assert!(Instant::now() < until, "seek stalled after audio failure");
+                assert!(Instant::now() < until, "seek stalled after audio failure: target={target:?} generation={generation} queued={:?} buffering={} paused={} ended={} audio={} audio_ended={} deadline_delta={:?} spool_primed={}",player.queued.as_ref().map(|f|(f.generation,f.pts,f.period)),player.buffering,player.paused,player.ended,player.audio.is_some(),player.audio_ended,Instant::now().checked_duration_since(player.deadline),player.spool_primed());
                 assert!(player.error.is_none(), "{:?}", player.error);
                 let mut output = ctx.run_ui(Default::default(), |ui| player.present(ui.ctx()));
                 output.textures_delta.clear();
@@ -12592,3 +12643,40 @@ mod player_queue_and_geometry_regressions {
     }
 }
 
+
+#[cfg(test)]
+mod elementary_programme_factory_regressions {
+    use super::*;
+    use crate::audio::{AudioStep,AudioStream};
+    fn pcm(stream:&mut dyn AudioStream)->Vec<(Duration,Vec<u8>)>{
+        let mut decoder=stream.make_decoder().unwrap();let mut out=Vec::new();
+        while let Some(step)=stream.next_step().unwrap(){
+            if let AudioStep::Encoded(p)=step {
+                if let Some(p)=decoder.decode_packet(&p.data,p.pts,p.duration as u64).unwrap(){
+                    if let Some(p)=stream.present_decoded(p.packet,p.source_pts).unwrap(){out.push((p.presentation_time(),p.data));}
+                }
+            }
+        }
+        while let Some(p)=decoder.finish_packet().unwrap(){if let Some(p)=stream.present_decoded(p.packet,p.source_pts).unwrap(){out.push((p.presentation_time(),p.data));}}
+        stream.validate_eof().unwrap();out
+    }
+    #[test]
+    fn player_factory_exposes_independent_programmes_with_their_own_geometry_and_pcm(){
+        let directory=std::env::temp_dir().join(format!("fvid-eac3-programme-factory-{}-{}",std::process::id(),std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
+        std::fs::create_dir(&directory).unwrap();
+        let source=Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/eac3-programme-reader");
+        let path=directory.join("multiplexed.ec3");std::fs::copy(source.join("heterogeneous.ec3"),&path).unwrap();
+        let preferred=AUDIO_READERS.iter().find_map(|attempt|attempt.open(&path,None)).unwrap();assert_eq!(preferred.audio_track_index(),0);assert_eq!(preferred.audio_tracks().len(),8);drop(preferred);
+        for nth in 0..8 {
+            let mut expected=crate::playback_ac3::Ac3AudioReader::open(std::io::Cursor::new(std::fs::read(source.join(format!("heterogeneous-p{nth}-control.ec3"))).unwrap()),Default::default()).unwrap();
+            let words=vec![format!("--audio-track={}",nth+1),path.to_string_lossy().into_owned()];
+            let parsed=super::parse_play_args(&words).unwrap();assert_eq!(parsed.audio_track,Some(nth));
+            let mut chosen=AUDIO_READERS.iter().find_map(|attempt|attempt.open(&path,parsed.audio_track)).unwrap();
+            assert_eq!(chosen.audio_track_index(),nth);assert_eq!(chosen.audio_tracks().len(),8);
+            assert_eq!((chosen.sample_rate(),chosen.channels(),chosen.speaker_mask().unwrap()),(expected.sample_rate(),expected.channels(),expected.speaker_mask().unwrap()));
+            assert!(pcm(&mut *chosen)==pcm(&mut expected),"programme{nth}: player factory PCM differs");
+        }
+        assert!(AUDIO_READERS.iter().find_map(|attempt|attempt.open(&path,Some(8))).is_none());
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}

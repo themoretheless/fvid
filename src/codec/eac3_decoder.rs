@@ -31,11 +31,11 @@
 //! does not have yet is a missing feature and not a broken file, and the caller
 //! cannot tell them apart unless the decoder can:
 //!
-//! * reserved stream types are refused. Base-programme playback decodes native or
-//!   converted independent substream 0 and skips other programmes and dependent
-//!   streams, as Annex E.2.8 requires for output up to 5.1. Expanded output uses
-//!   owned presentation assembly and explicit speaker identities; programme
-//!   selection and some extended device maps remain unimplemented;
+//! * reserved stream types are refused. Default playback chooses independent
+//!   substream 0. `with_programme` explicitly chooses ID 0..7 for native or expanded
+//!   output, preserving constituent history and skipping unselected payloads.
+//!   Expanded output uses owned presentation assembly and explicit speaker
+//!   identities; programme mixing and some extended device maps remain open;
 //! * `bsid` outside 11 through 16: AC-3/reserved identifiers below that range
 //!   do not name this syntax; greater values require a later decoder revision;
 //! Adaptive hybrid transform planes use owned high-efficiency allocation,
@@ -136,6 +136,8 @@ pub struct Frame {
     pub downmix: Option<Downmix>,
     /// BSI heavy-compression words for Ch1/Ch2; missing words use normal DRC.
     pub compression: [Option<u8>; 2],
+    /// Raw BSI dialogue levels; reserved zero denotes -31 dB.
+    pub dialogue: [u8; 2],
     /// The exponent strategy codes of the frame, in whichever of the two forms
     /// `expstre` writes them.
     pub exponents: Exponents,
@@ -460,14 +462,14 @@ pub fn frame(bytes: &[u8]) -> Option<Frame> {
 /// Length of an unselected programme/dependent syncframe. Annex E.2.8 requires
 /// base-programme output to skip these without decoding their channel syntax.
 /// This validates the envelope, not the skipped stream's audio payload.
-pub(crate) fn skipped_substream_bytes(bytes: &[u8]) -> Result<Option<usize>> {
+pub(crate) fn skipped_programme_bytes(bytes:&[u8], programme:u8)->Result<Option<usize>> {
     if bytes.len()<6 || bytes[..2]!=[0x0b,0x77] || !(11..=16).contains(&(bytes[5]>>3)) {
         return Ok(None);
     }
     let kind=bytes[2]>>6;
     let id=(bytes[2]>>3)&7;
     if kind==3 {return Err(unsupported("E-AC-3 reserved stream type 3"));}
-    if kind!=1 && id==0 {return Ok(None);}
+    if kind!=1 && id==programme {return Ok(None);}
     let size=(usize::from(bytes[2]&7)*256+usize::from(bytes[3])+1)*2;
     if size<6 || size>bytes.len() {return Err(invalid("truncated skipped E-AC-3 substream"));}
     Ok(Some(size))
@@ -480,6 +482,39 @@ pub fn checked_frame(bytes: &[u8]) -> Option<Frame> {
     let header=frame(bytes)?;
     let complete=bytes.get(..header.frame_bytes)?;
     crate::codec::ac3_decoder::frame_crc_valid(complete).then_some(header)
+}
+
+/// Syntax probe of exactly this independent programme frame (no CRC guarantee).
+pub fn programme_frame(bytes:&[u8],programme:u8)->Option<Frame> {
+    if programme>7{return None;}
+    let (frame,id,_,_)=read_substream_header(&mut BitReader::new(bytes),true).ok()?;
+    (frame.stream_type!=1 && id==programme).then_some(frame)
+}
+
+/// Probe the first selected independent frame in a packet; require complete CRC.
+/// Unselected audio is skipped by envelope without parsing its channel syntax.
+pub fn checked_programme_frame(mut bytes:&[u8], programme:u8)->Option<Frame> {
+    if programme>7{return None;}
+    while !bytes.is_empty() {
+        if let Some(size)=skipped_programme_bytes(bytes,programme).ok()? {
+            bytes=&bytes[size..];continue;
+        }
+        let (frame,id,_,_)=read_substream_header(&mut BitReader::new(bytes),true).ok()?;
+        if frame.stream_type==1 || id!=programme{return None;}
+        let complete=bytes.get(..frame.frame_bytes)?;
+        return crate::codec::ac3_decoder::frame_crc_valid(complete).then_some(frame);
+    }
+    None
+}
+
+/// Speaker assignment for an explicitly selected independent programme.
+pub fn speaker_mask_for_programme(data:&[u8],channels:u16,programme:u8)->Result<u32> {
+    if programme>7{return Err(invalid("E-AC-3 programme ID exceeds 7"));}
+    if channels>6 {
+        return presentation::packet_speakers_for_programme(data,channels,programme)?.wave_mask().ok_or_else(||unsupported("E-AC-3 speaker locations need an extended speaker mask"));
+    }
+    let h=checked_programme_frame(data,programme).ok_or_else(||invalid("missing or corrupt selected E-AC-3 independent programme"))?;
+    crate::codec::ac3_decoder::decoded_speaker_mask(usize::from(h.layout),h.low_frequency,channels)
 }
 
 /// Speaker assignment follows decoded Folding order, including native LFE.
@@ -552,7 +587,7 @@ fn read_substream_header(bits:&mut BitReader<'_>,extensions:bool)->Result<(Frame
         )));
     }
     let mut channel_map=None;
-    let (downmix,compression) = bsi(bits, acmod, lfeon, blocks, reduced_rate, strmtyp,&mut channel_map)?;
+    let (downmix,compression,dialogue) = bsi(bits, acmod, lfeon, blocks, reduced_rate, strmtyp,&mut channel_map)?;
     if let Some(map)=channel_map {
         // Table E.1.4: six location bits name pairs, all other bits singletons.
         let pairs=0x0400u16|0x0200|0x0040|0x0020|0x0010|0x0004;
@@ -580,6 +615,7 @@ fn read_substream_header(bits:&mut BitReader<'_>,extensions:bool)->Result<(Frame
         coupling_stated: audio.coupling_stated,
         downmix,
         compression,
+        dialogue,
         exponents: audio.exponents,
         low_frequency_strategies: audio.low_frequency_strategies,
         converter_strategies: audio.converter_strategies,
@@ -823,13 +859,13 @@ fn bsi(
     reduced_rate: bool,
     stream_type: u32,
     channel_map: &mut Option<u16>,
-) -> Result<(Option<Downmix>,[Option<u8>;2])> {
-    bits.skip(5)?; // dialnorm
+) -> Result<(Option<Downmix>,[Option<u8>;2],[u8;2])> {
+    let mut dialogue=[bits.read(5)? as u8;2];
     let mut compression=[None;2];
     if bits.bit()? {compression[0]=Some(bits.read(8)? as u8);}
     if acmod == 0 {
         // 1+1 mode gives some of the metadata a second value of its own.
-        bits.skip(5)?; // dialnorm2
+        dialogue[1]=bits.read(5)? as u8;
         if bits.bit()? {
             compression[1]=Some(bits.read(8)? as u8); // compr2
         }
@@ -856,7 +892,7 @@ fn bsi(
         let length = bits.read(6)? as usize;
         bits.skip((length + 1) * 8)?; // addbsi
     }
-    Ok((downmix,compression))
+    Ok((downmix,compression,dialogue))
 }
 
 /// Step over the mixing metadata of Table E1.2, and take the two Lo/Ro coefficients a
@@ -1269,6 +1305,8 @@ pub struct Eac3Decoder {
     channels: usize,
     force_stereo: bool,
     compression_mode: CompressionMode,
+    programme_id: u8,
+    dialogue_normalization: bool,
     core: Core,
     /// Samples still owed to [`ENCODER_DELAY`], which the stream's first blocks pay off.
     lead: usize,
@@ -1314,6 +1352,8 @@ impl Eac3Decoder {
             channels: usize::from(channels),
             force_stereo:false,
             compression_mode:CompressionMode::Line,
+            programme_id:0,
+            dialogue_normalization:false,
             core: Core::new(),
             lead: ENCODER_DELAY,
             initial_lead: ENCODER_DELAY,
@@ -1330,11 +1370,31 @@ impl Eac3Decoder {
         })
     }
 
+    /// Select independent programme ID 0..7 (zero by default).
+    /// Changing the choice clears transform/lookahead history; reset retains it.
+    /// Callers configure rate/output geometry for the selected programme.
+    pub fn with_programme(mut self, programme:u8)->Result<Self> {
+        if programme>7{return Err(invalid("E-AC-3 programme ID exceeds 7"));}
+        if self.programme_id!=programme {
+            self.reset();self.programme_id=programme;
+            if let Some(p)=self.presentation.as_mut(){p.select_programme(programme)?;}
+        }
+        Ok(self)
+    }
+
     /// Choose compression for subsequently decoded frames. Buffered PCM retains
     /// its captured gain; reset preserves this selection. No calibration gain is added.
     pub fn with_compression(mut self, mode: CompressionMode) -> Self {
         self.compression_mode=mode;
         if let Some(p)=self.presentation.as_mut(){p.set_compression(mode);}
+        self
+    }
+
+    /// Normalize BSI dialogue levels to -31 dB before folding and clipping.
+    /// Disabled by default for external system gain control. Reset retains it.
+    pub fn with_dialogue_normalization(mut self, enabled: bool) -> Self {
+        self.dialogue_normalization=enabled;
+        if let Some(p)=self.presentation.as_mut(){p.set_dialogue_normalization(enabled);}
         self
     }
 
@@ -1401,7 +1461,7 @@ impl Eac3Decoder {
         let mut skipped = 0usize;
         while offset < data.len() {
             let raw = &data[offset..];
-            if dependent.is_none() && let Some(size)=skipped_substream_bytes(raw)? {
+            if dependent.is_none() && let Some(size)=skipped_programme_bytes(raw,self.programme_id)? {
                 offset+=size;
                 skipped+=1;
                 continue;
@@ -1412,7 +1472,12 @@ impl Eac3Decoder {
                     return Err(invalid("E-AC-3 dependent substream ID or coded channel count changed"));
                 }
                 Ok(h.frame)
-            }else{header(&mut BitReader::new(raw))};
+            }else{
+                read_substream_header(&mut BitReader::new(raw),true).and_then(|(frame,id,_,_)|{
+                    if frame.stream_type==1 || id!=self.programme_id {return Err(invalid("wrong selected E-AC-3 independent programme"));}
+                    Ok(frame)
+                })
+            };
             let frame = match parsed {
                 Ok(frame) => frame,
                 Err(reason @ Error::Unsupported(_)) => return Err(reason),
@@ -1899,9 +1964,14 @@ impl Eac3Decoder {
         // Compression is an output gain. Never feed the selected RF value back
         // into dynrng's within-frame hold/reuse state.
         let line_gain = self.core.strategy.gain;
-        self.core.strategy.gain = self.frame_gains[blk];
+        self.core.strategy.gain = if self.assembly_mode {[1.0;2]}else{self.frame_gains[blk]};
+        if self.dialogue_normalization {
+            for (gain,code) in self.core.strategy.gain.iter_mut().zip(frame.dialogue) {
+                *gain *= super::dolby_compression::dialogue_gain(code);
+            }
+        }
         if let Some(capture)=self.native_capture.as_mut() {
-            let gains=if self.assembly_mode {[1.0;PLANES]}else{self.core.output_gains(header)};
+            let gains=self.core.output_gains(header);
             let reconstructed=self.core.inverse_planes(header);
             let mut pcm=[[0.0;SAMPLES];PLANES];
             pcm[..header.nfchans].copy_from_slice(&reconstructed[..header.nfchans]);
@@ -1910,10 +1980,7 @@ impl Eac3Decoder {
             folding.write_pcm(&pcm,&gains,out,!self.assembly_mode);
             capture.push(transient::NativeBlock {pcm,windows,mixing:*folding,gains,clip:!self.assembly_mode});
         } else if self.assembly_mode {
-            let gains=self.core.strategy.gain;
-            self.core.strategy.gain=[1.0;2];
             self.core.spectrum_to_sound_unclipped(header,folding,out);
-            self.core.strategy.gain=gains;
         }else{self.core.spectrum_to_sound(header, folding, out);}
         self.core.strategy.gain = line_gain;
         Ok(true)
@@ -2081,6 +2148,10 @@ impl Eac3Decoder {
 }
 
 impl AudioDecode for Eac3Decoder {
+    fn set_dolby_dialogue_normalization(&mut self, enabled: bool) {
+        self.dialogue_normalization=enabled;
+        if let Some(p)=self.presentation.as_mut(){p.set_dialogue_normalization(enabled);}
+    }
     fn set_dolby_compression(&mut self, mode: CompressionMode) {
         self.compression_mode=mode;
         if let Some(p)=self.presentation.as_mut(){p.set_compression(mode);}
@@ -2460,6 +2531,7 @@ mod tests {
                 coupling_stated: [true, false, false, false, false, false],
                 downmix: None,
                 compression: [None;2],
+                dialogue: [31;2],
                 exponents: Exponents::PerFrame {
                     coupling: Some(16),
                     channels: [16, 16, 0, 0, 0],
@@ -2509,6 +2581,7 @@ mod tests {
                 coupling_stated: [true, false, false, false, false, false],
                 downmix: None,
                 compression: [None;2],
+                dialogue: [31;2],
                 exponents: Exponents::PerFrame {
                     coupling: Some(22),
                     channels: [16, 16, 16, 16, 16],
@@ -3232,7 +3305,7 @@ mod spx_notch_regressions {
             decoder.spx.signal[0][..3].fill(1.0);
             decoder.spx.noise[0][..3].fill(0.0);
             decoder.core.coefficients(0).fill(1.0);
-            let header = Header {rate:0,frame_bytes:1024,acmod:2,nfchans:2,lfeon:false,clev:1.0,slev:1.0,compression:[None;2]};
+            let header = Header {rate:0,frame_bytes:1024,acmod:2,nfchans:2,lfeon:false,clev:1.0,slev:1.0,compression:[None;2],dialogue:[31;2]};
             let mut attenuation = [None; CHANS];
             attenuation[0] = Some(code);
             decoder.synthesise(header, &attenuation);
@@ -3407,7 +3480,7 @@ mod substream_routing_regressions {
                     independent+=1;
                     dependent=0;
                 }
-                assert_eq!(skipped_substream_bytes(bytes).unwrap(),Some(4096));
+                assert_eq!(skipped_programme_bytes(bytes,0).unwrap(),Some(4096));
                 assert!(crate::codec::ac3_decoder::frame_crc_valid(bytes));
                 // The reconstruction parser still refuses extension syntax;
                 // base-programme playback must take the envelope route instead.

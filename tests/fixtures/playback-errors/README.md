@@ -4604,3 +4604,65 @@ real audio worker, reset/replacement, seek and rewind for owned AC-3/E-AC-3
 MP4/Matroska samples. Neutral PCM verifies that the Dolby setting is ignored.
 Regenerate offline with `python3 scripts/generate_dolby_player_compression.py`;
 ordinary tests consume checked-in bytes and require neither FFmpeg nor network.
+
+
+`ac3-dialogue-normalization` covers explicit AC-3 decoder dialogue-level
+normalization: all 32 codes, independent dual programmes, mono/stereo/LFE,
+three rates, frame metadata changes, reset/rewind, MP4/Matroska and Line/RF.
+Loud RF cases require scaling before clipping/folding, using quiet controls
+with identical mantissas. Regenerate with
+`python3 scripts/generate_ac3_dialogue_normalization.py`; no external encoder,
+FFmpeg, private source media or network is used. The acceptance test is
+`tests/ac3_dialogue_normalization.rs`.
+
+
+`eac3-dialogue-normalization` qualifies native BSI dialogue normalization
+against quiet unclipped controls: all 32 values, independent dual programmes,
+all ordinary channel layouts/LFE, frame updates, DRC/RF, transient correction,
+clipping, same-decoder reset and exact seek. `eac3-dialogue-expanded` adds
+7/8-channel replacement and role changes, common final-dependent DRC, direct
+presentation API, independent compatibility output and Matroska/MP4 seek.
+Regenerate with `scripts/generate_eac3_dialogue_normalization.py` and
+`scripts/generate_eac3_dialogue_expanded.py`; authoring is offline, using only
+owned synthetic repository media. Their respective integration test targets
+are `eac3_dialogue_normalization` and `eac3_dialogue_expanded`.
+
+
+`dolby-player-normalization` verifies session dialogue-normalization policy
+with the real audio worker: AC-3/E-AC-3, dual-mono/LFE, loud/expanded samples,
+Matroska/MP4, both Line/RF choices, startup/reset/replacement/rewind/seek and
+neutral PCM. Exact references use typed decoder builders independently of
+the worker's trait hooks. Regenerate offline using
+`python3 scripts/generate_dolby_player_normalization.py`; run the
+`dolby_player_normalization` integration target against checked-in bytes.
+
+
+`eac3-programme-selection` qualifies explicit decoder selection of all eight
+independent programme IDs, with distinct waveform controls, native layouts/LFE,
+32/44.1/48 kHz, expanded dependent assembly, dual/stereo transitions, transient
+history, Line/RF, exact PCM/PTS, reset/rewind and switching after EOF. It also
+verifies that unselected-only input and damaged unselected payloads do not
+affect selected history. This is decoder API acceptance, not simultaneous
+programme mixing or player/elementary-reader selection integration.
+Regenerate offline with `python3 scripts/generate_eac3_programme_selection.py`;
+ordinary tests run `eac3_programme_selection` against checked-in bytes.
+
+
+`eac3-programme-reader` qualifies elementary-reader/player-factory routing of
+independent programmes. It contains eight short owned multiplexed movies,
+standalone controls, heterogeneous geometry and authored negative inputs for
+damaged unselected BSI, missing IDs and truncated tails. Tests compare selected
+geometry, speaker masks, PCM/PTS, catalogue positions, packet ownership, seek,
+rewind and worker output. Regenerate offline with
+`python3 scripts/generate_eac3_programme_reader.py`; run integration target
+`eac3_programme_reader` and the headless player factory regression.
+
+
+`eac3-matroska-programmes` qualifies explicit Matroska reader selection of
+all eight encoded independent programmes, including heterogeneous geometry,
+expanded/transient assembly, individual syncframe blocks and placeholder
+container rate. It compares exact PCM/PTS, masks, duration, seek, rewind and
+worker capture to standalone controls, with separate missing/corrupt/wrong
+selection tests. The API's physical-track index stays zero-based. Regenerate
+with `python3 scripts/generate_eac3_matroska_programmes.py`; ordinary tests
+run `eac3_matroska_programmes` against checked-in bytes offline.

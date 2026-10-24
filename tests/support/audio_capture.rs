@@ -1,5 +1,5 @@
-use fvid::audio::AudioStream;
 use fvid::codec::ac3_decoder::CompressionMode;
+use fvid::{audio::AudioStream, audio_thread::DolbyPlaybackPolicy};
 use std::time::Duration;
 
 struct Capture {
@@ -68,7 +68,14 @@ pub fn worker_check_with_seek(
     expected: &[(Duration, Vec<u8>)],
     seek: Option<Duration>,
 ) {
-    worker_check_impl(audio, expected, seek, None, None, CompressionMode::Line);
+    worker_check_impl(
+        audio,
+        expected,
+        seek,
+        None,
+        None,
+        CompressionMode::Line.into(),
+    );
 }
 #[allow(dead_code)]
 pub fn worker_check_with_seek_expected(
@@ -83,7 +90,7 @@ pub fn worker_check_with_seek_expected(
         Some(seek),
         Some(expected_seek),
         None,
-        CompressionMode::Line,
+        CompressionMode::Line.into(),
     );
 }
 #[allow(dead_code)]
@@ -100,7 +107,7 @@ pub fn worker_check_with_layout_and_seek_expected(
         Some(seek),
         Some(expected_seek),
         Some(mask),
-        CompressionMode::Line,
+        CompressionMode::Line.into(),
     );
 }
 #[allow(dead_code)]
@@ -118,7 +125,25 @@ pub fn worker_check_with_compression(
         Some(seek),
         Some(expected_seek),
         mask,
-        compression,
+        compression.into(),
+    );
+}
+#[allow(dead_code)]
+pub fn worker_check_with_dolby_policy(
+    audio: Box<dyn AudioStream>,
+    expected: &[(Duration, Vec<u8>)],
+    seek: Duration,
+    expected_seek: &[(Duration, Vec<u8>)],
+    mask: Option<u32>,
+    policy: DolbyPlaybackPolicy,
+) {
+    worker_check_impl(
+        audio,
+        expected,
+        Some(seek),
+        Some(expected_seek),
+        mask,
+        policy,
     );
 }
 fn worker_check_impl(
@@ -127,13 +152,13 @@ fn worker_check_impl(
     seek: Option<Duration>,
     expected_seek: Option<&[(Duration, Vec<u8>)]>,
     wanted_mask: Option<u32>,
-    compression: CompressionMode,
+    policy: DolbyPlaybackPolicy,
 ) {
     let spec = (audio.sample_rate(), audio.channels());
     let captured = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
     let sink = captured.clone();
     let mut playback =
-        fvid::audio_thread::AudioPlayback::start_with_compression(audio, compression, move || {
+        fvid::audio_thread::AudioPlayback::start_with_dolby_policy(audio, policy, move || {
             Box::new(Capture {
                 packets: sink,
                 spec: None,

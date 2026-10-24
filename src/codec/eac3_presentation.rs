@@ -132,23 +132,73 @@ fn layout(descriptors: &[Descriptor], width: u16) -> Result<SpeakerLayout> {
     }
     Ok(SpeakerLayout(speakers))
 }
+/// Bounded-setup callers can accumulate complete substream frames until this
+/// selected programme closes. Native-only programmes need the following
+/// independent frame or EOF to distinguish a missing dependent from no extension.
+pub(crate) fn probe_programme(data:&[u8],selected:u8,eof:bool)->Result<Option<(Frame,SpeakerLayout)>> {
+    if selected>7{return Err(invalid("E-AC-3 programme ID exceeds 7"));}
+    fn complete(frames:&[Descriptor])->Result<(Frame,SpeakerLayout)> {
+        let base=frames[0].frame;
+        let count=frames.iter().flat_map(locations).collect::<BTreeSet<_>>().len();
+        let speakers=if count>6 {layout(frames,count as u16)?}else{layout(&frames[..1],base.channels)?};
+        Ok((base,speakers))
+    }
+    let mut offset=0;let mut frames:Vec<Descriptor>=Vec::new();
+    while offset<data.len() {
+        let remaining=&data[offset..];
+        if remaining.len()<6 {
+            return if eof {Err(invalid("truncated E-AC-3 programme setup"))}else{Ok(None)};
+        }
+        let size=(usize::from(remaining[2]&7)*256+usize::from(remaining[3])+1)*2;
+        if size>remaining.len(){return if eof{Err(invalid("truncated E-AC-3 programme setup"))}else{Ok(None)};}
+        let(kind,id,size)=envelope(remaining)?;let raw=&remaining[..size];offset+=size;
+        if frames.is_empty(){
+            if kind==1 || id!=selected {continue;}
+        }else if kind!=1 {
+            return if frames.len()==1{complete(&frames).map(Some)}else{Err(invalid("missing final selected E-AC-3 dependent substream"))};
+        }
+        if !crate::codec::ac3_decoder::frame_crc_valid(raw){return Err(invalid("corrupt selected E-AC-3 programme setup"));}
+        let d=descriptor(raw)?;
+        if !frames.is_empty(){
+            if usize::from(id)!=frames.len()-1 || frames.len()>=9{return Err(invalid("non-sequential E-AC-3 dependent ID"));}
+            let base=&frames[0].frame;
+            if (d.frame.sample_rate,d.frame.blocks)!=(base.sample_rate,base.blocks){return Err(invalid("E-AC-3 dependent timing disagrees with independent stream"));}
+        }
+        let done=kind==1&&d.last;frames.push(d);
+        if done{return complete(&frames).map(Some);}
+    }
+    if eof && frames.len()==1{return complete(&frames).map(Some);}
+    if eof && frames.len()>1{return Err(invalid("incomplete selected E-AC-3 programme setup"));}
+    Ok(None)
+}
+
 /// Inspect a complete first programme for container/device speaker assignment.
 pub fn packet_speakers(data: &[u8], width: u16) -> Result<SpeakerLayout> {
     try_packet_speakers(data, width)?
         .ok_or_else(|| invalid("incomplete E-AC-3 dependent presentation"))
 }
+/// Speaker assignment of a complete explicitly selected programme.
+pub fn packet_speakers_for_programme(data:&[u8],width:u16,programme:u8)->Result<SpeakerLayout> {
+    if programme>7{return Err(invalid("E-AC-3 programme ID exceeds 7"));}
+    if !(7..=16).contains(&width){return Err(invalid("expanded E-AC-3 output requires 7..16 channels"));}
+    first_programme(data,false,programme)?.map(|(_,frames)|layout(&frames,width)).transpose()?.ok_or_else(||invalid("incomplete selected E-AC-3 dependent presentation"))
+}
 pub(crate) fn try_packet_speakers(data: &[u8], width: u16) -> Result<Option<SpeakerLayout>> {
     if !(7..=16).contains(&width) {
         return Err(invalid("expanded E-AC-3 output requires 7..16 channels"));
     }
-    first_programme(data, false)?
+    first_programme(data, false, 0)?
         .map(|(_, frames)| layout(&frames, width))
         .transpose()
 }
 /// A complete native programme prefix for an elementary-file packet index.
 /// None means that the independent stream has no associated dependent frame.
 pub(crate) fn raw_programme(data: &[u8]) -> Result<Option<(usize, SpeakerLayout)>> {
-    first_programme(data, true)?
+    raw_programme_for_programme(data,0)
+}
+pub(crate) fn raw_programme_for_programme(data:&[u8],programme:u8)->Result<Option<(usize,SpeakerLayout)>> {
+    if programme>7{return Err(invalid("E-AC-3 programme ID exceeds 7"));}
+    first_programme(data, true, programme)?
         .map(|(size, frames)| {
             let count = frames
                 .iter()
@@ -159,7 +209,7 @@ pub(crate) fn raw_programme(data: &[u8]) -> Result<Option<(usize, SpeakerLayout)
         })
         .transpose()
 }
-fn first_programme(data: &[u8], base_only: bool) -> Result<Option<(usize, Vec<Descriptor>)>> {
+fn first_programme(data: &[u8], base_only: bool, selected:u8) -> Result<Option<(usize, Vec<Descriptor>)>> {
     let mut offset = 0;
     let mut frames = vec![];
     while offset < data.len() {
@@ -167,7 +217,8 @@ fn first_programme(data: &[u8], base_only: bool) -> Result<Option<(usize, Vec<De
         let raw = &data[offset..offset + size];
         offset += size;
         if frames.is_empty() {
-            if kind == 1 || id != 0 {
+            if kind == 1 || id != selected {
+                if selected!=0 {continue;}
                 return Err(invalid(
                     "E-AC-3 presentation must start with independent programme 0",
                 ));
@@ -239,6 +290,8 @@ pub struct PresentationDecoder {
     rate: u32,
     width: u16,
     compression_mode: CompressionMode,
+    selected_programme:u8,
+    dialogue_normalization: bool,
     lead: usize,
     initial_lead: usize,
     serial: u64,
@@ -260,6 +313,8 @@ impl PresentationDecoder {
             rate,
             width,
             compression_mode: CompressionMode::Line,
+            selected_programme:0,
+            dialogue_normalization: false,
             lead: ENCODER_DELAY,
             initial_lead: ENCODER_DELAY,
             serial: 0,
@@ -278,8 +333,27 @@ impl PresentationDecoder {
         s.set_priming(0);
         Ok(s)
     }
+    /// Select independent programme ID 0..7 (zero by default).
+    /// Changing the choice clears pending PCM and history; reset retains it.
+    pub fn with_programme(mut self, programme:u8)->Result<Self> {
+        self.select_programme(programme)?;Ok(self)
+    }
+    pub(super) fn select_programme(&mut self,programme:u8)->Result<()> {
+        if programme>7{return Err(invalid("E-AC-3 programme ID exceeds 7"));}
+        if self.selected_programme!=programme {self.reset();self.selected_programme=programme;}
+        Ok(())
+    }
+
     pub(super) fn set_compression(&mut self, mode: CompressionMode) {
         self.compression_mode=mode;
+    }
+    /// Enable decoder-side BSI dialogue normalization; reset preserves the choice.
+    pub fn with_dialogue_normalization(mut self, enabled: bool) -> Self {
+        self.set_dialogue_normalization(enabled);
+        self
+    }
+    pub(super) fn set_dialogue_normalization(&mut self, enabled: bool) {
+        self.dialogue_normalization=enabled;
     }
     pub(super) fn set_priming(&mut self, n: usize) {
         self.lead = n;
@@ -322,6 +396,7 @@ impl PresentationDecoder {
             let child = &mut stream.decoder;
             child.channels = roles.len();
             child.compression_mode = self.compression_mode;
+            child.dialogue_normalization = self.dialogue_normalization;
             let mut decoded = Vec::new();
             let mut bits = Bits::at(bytes, d.frame.audio_bit);
             child.native_capture = Some(Vec::new());
@@ -522,7 +597,7 @@ impl PresentationDecoder {
                     return Err(invalid("missing final E-AC-3 dependent substream"));
                 }
                 self.programme = Some(id);
-                if id != 0 {
+                if id != self.selected_programme {
                     continue;
                 }
                 let d = descriptor(raw)?;
@@ -530,7 +605,7 @@ impl PresentationDecoder {
                     origin,
                     frames: vec![(d, raw.to_vec())],
                 });
-            } else if self.programme == Some(0) {
+            } else if self.programme == Some(self.selected_programme) {
                 let pending = self
                     .pending
                     .as_mut()
@@ -559,6 +634,9 @@ impl PresentationDecoder {
     }
 }
 impl AudioDecode for PresentationDecoder {
+    fn set_dolby_dialogue_normalization(&mut self, enabled: bool) {
+        self.set_dialogue_normalization(enabled);
+    }
     fn set_dolby_compression(&mut self, mode: CompressionMode) {
         self.set_compression(mode);
     }

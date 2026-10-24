@@ -1,0 +1,785 @@
+{
+  "accepted": true,
+  "cases": [
+    {
+      "name": "dual-48000",
+      "rate": 48000,
+      "controls": [
+        {
+          "name": "dual-48000-p0-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-48000-p1-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-48000-p2-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-48000-p3-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-48000-p4-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-48000-p5-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-48000-p6-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-48000-p7-control",
+          "channels": 3
+        }
+      ]
+    },
+    {
+      "name": "stereo-48000",
+      "rate": 48000,
+      "controls": [
+        {
+          "name": "stereo-48000-p0-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-48000-p1-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-48000-p2-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-48000-p3-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-48000-p4-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-48000-p5-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-48000-p6-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-48000-p7-control",
+          "channels": 2
+        }
+      ]
+    },
+    {
+      "name": "heterogeneous-48000",
+      "rate": 48000,
+      "controls": [
+        {
+          "name": "heterogeneous-48000-p0-control",
+          "channels": 2
+        },
+        {
+          "name": "heterogeneous-48000-p1-control",
+          "channels": 2
+        },
+        {
+          "name": "heterogeneous-48000-p2-control",
+          "channels": 2
+        },
+        {
+          "name": "heterogeneous-48000-p3-control",
+          "channels": 4
+        },
+        {
+          "name": "heterogeneous-48000-p4-control",
+          "channels": 3
+        },
+        {
+          "name": "heterogeneous-48000-p5-control",
+          "channels": 5
+        },
+        {
+          "name": "heterogeneous-48000-p6-control",
+          "channels": 4
+        },
+        {
+          "name": "heterogeneous-48000-p7-control",
+          "channels": 6
+        }
+      ]
+    },
+    {
+      "name": "expanded-48000-b3",
+      "rate": 48000,
+      "controls": [
+        {
+          "name": "expanded-48000-b3-p0-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-48000-b3-p1-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-48000-b3-p2-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-48000-b3-p3-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-48000-b3-p4-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-48000-b3-p5-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-48000-b3-p6-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-48000-b3-p7-control",
+          "channels": 8
+        }
+      ]
+    },
+    {
+      "name": "expanded-48000-b6",
+      "rate": 48000,
+      "controls": [
+        {
+          "name": "expanded-48000-b6-p0-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-48000-b6-p1-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-48000-b6-p2-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-48000-b6-p3-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-48000-b6-p4-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-48000-b6-p5-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-48000-b6-p6-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-48000-b6-p7-control",
+          "channels": 8
+        }
+      ]
+    },
+    {
+      "name": "dual-44100",
+      "rate": 44100,
+      "controls": [
+        {
+          "name": "dual-44100-p0-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-44100-p1-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-44100-p2-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-44100-p3-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-44100-p4-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-44100-p5-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-44100-p6-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-44100-p7-control",
+          "channels": 3
+        }
+      ]
+    },
+    {
+      "name": "stereo-44100",
+      "rate": 44100,
+      "controls": [
+        {
+          "name": "stereo-44100-p0-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-44100-p1-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-44100-p2-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-44100-p3-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-44100-p4-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-44100-p5-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-44100-p6-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-44100-p7-control",
+          "channels": 2
+        }
+      ]
+    },
+    {
+      "name": "heterogeneous-44100",
+      "rate": 44100,
+      "controls": [
+        {
+          "name": "heterogeneous-44100-p0-control",
+          "channels": 2
+        },
+        {
+          "name": "heterogeneous-44100-p1-control",
+          "channels": 2
+        },
+        {
+          "name": "heterogeneous-44100-p2-control",
+          "channels": 2
+        },
+        {
+          "name": "heterogeneous-44100-p3-control",
+          "channels": 4
+        },
+        {
+          "name": "heterogeneous-44100-p4-control",
+          "channels": 3
+        },
+        {
+          "name": "heterogeneous-44100-p5-control",
+          "channels": 5
+        },
+        {
+          "name": "heterogeneous-44100-p6-control",
+          "channels": 4
+        },
+        {
+          "name": "heterogeneous-44100-p7-control",
+          "channels": 6
+        }
+      ]
+    },
+    {
+      "name": "expanded-44100-b3",
+      "rate": 44100,
+      "controls": [
+        {
+          "name": "expanded-44100-b3-p0-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-44100-b3-p1-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-44100-b3-p2-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-44100-b3-p3-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-44100-b3-p4-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-44100-b3-p5-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-44100-b3-p6-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-44100-b3-p7-control",
+          "channels": 8
+        }
+      ]
+    },
+    {
+      "name": "expanded-44100-b6",
+      "rate": 44100,
+      "controls": [
+        {
+          "name": "expanded-44100-b6-p0-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-44100-b6-p1-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-44100-b6-p2-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-44100-b6-p3-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-44100-b6-p4-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-44100-b6-p5-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-44100-b6-p6-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-44100-b6-p7-control",
+          "channels": 8
+        }
+      ]
+    },
+    {
+      "name": "dual-32000",
+      "rate": 32000,
+      "controls": [
+        {
+          "name": "dual-32000-p0-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-32000-p1-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-32000-p2-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-32000-p3-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-32000-p4-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-32000-p5-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-32000-p6-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-32000-p7-control",
+          "channels": 3
+        }
+      ]
+    },
+    {
+      "name": "stereo-32000",
+      "rate": 32000,
+      "controls": [
+        {
+          "name": "stereo-32000-p0-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-32000-p1-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-32000-p2-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-32000-p3-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-32000-p4-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-32000-p5-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-32000-p6-control",
+          "channels": 2
+        },
+        {
+          "name": "stereo-32000-p7-control",
+          "channels": 2
+        }
+      ]
+    },
+    {
+      "name": "heterogeneous-32000",
+      "rate": 32000,
+      "controls": [
+        {
+          "name": "heterogeneous-32000-p0-control",
+          "channels": 2
+        },
+        {
+          "name": "heterogeneous-32000-p1-control",
+          "channels": 2
+        },
+        {
+          "name": "heterogeneous-32000-p2-control",
+          "channels": 2
+        },
+        {
+          "name": "heterogeneous-32000-p3-control",
+          "channels": 4
+        },
+        {
+          "name": "heterogeneous-32000-p4-control",
+          "channels": 3
+        },
+        {
+          "name": "heterogeneous-32000-p5-control",
+          "channels": 5
+        },
+        {
+          "name": "heterogeneous-32000-p6-control",
+          "channels": 4
+        },
+        {
+          "name": "heterogeneous-32000-p7-control",
+          "channels": 6
+        }
+      ]
+    },
+    {
+      "name": "expanded-32000-b3",
+      "rate": 32000,
+      "controls": [
+        {
+          "name": "expanded-32000-b3-p0-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-32000-b3-p1-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-32000-b3-p2-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-32000-b3-p3-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-32000-b3-p4-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-32000-b3-p5-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-32000-b3-p6-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-32000-b3-p7-control",
+          "channels": 8
+        }
+      ]
+    },
+    {
+      "name": "expanded-32000-b6",
+      "rate": 32000,
+      "controls": [
+        {
+          "name": "expanded-32000-b6-p0-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-32000-b6-p1-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-32000-b6-p2-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-32000-b6-p3-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-32000-b6-p4-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-32000-b6-p5-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-32000-b6-p6-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-32000-b6-p7-control",
+          "channels": 8
+        }
+      ]
+    },
+    {
+      "name": "51-32000",
+      "rate": 32000,
+      "controls": [
+        {
+          "name": "51-32000-p0-control",
+          "channels": 6
+        },
+        {
+          "name": "51-32000-p1-control",
+          "channels": 6
+        },
+        {
+          "name": "51-32000-p2-control",
+          "channels": 6
+        },
+        {
+          "name": "51-32000-p3-control",
+          "channels": 6
+        },
+        {
+          "name": "51-32000-p4-control",
+          "channels": 6
+        },
+        {
+          "name": "51-32000-p5-control",
+          "channels": 6
+        },
+        {
+          "name": "51-32000-p6-control",
+          "channels": 6
+        },
+        {
+          "name": "51-32000-p7-control",
+          "channels": 6
+        }
+      ]
+    },
+    {
+      "name": "expanded-policy-44100-b6",
+      "rate": 44100,
+      "controls": [
+        {
+          "name": "expanded-policy-44100-b6-p0-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-policy-44100-b6-p1-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-policy-44100-b6-p2-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-policy-44100-b6-p3-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-policy-44100-b6-p4-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-policy-44100-b6-p5-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-policy-44100-b6-p6-control",
+          "channels": 8
+        },
+        {
+          "name": "expanded-policy-44100-b6-p7-control",
+          "channels": 8
+        }
+      ]
+    },
+    {
+      "name": "stereo-48000-edits",
+      "rate": 48000,
+      "controls": [
+        {
+          "name": "stereo-48000-p0-control-edits",
+          "channels": 2,
+          "plain": "stereo-48000-p0-control"
+        },
+        {
+          "name": "stereo-48000-p1-control-edits",
+          "channels": 2,
+          "plain": "stereo-48000-p1-control"
+        },
+        {
+          "name": "stereo-48000-p2-control-edits",
+          "channels": 2,
+          "plain": "stereo-48000-p2-control"
+        },
+        {
+          "name": "stereo-48000-p3-control-edits",
+          "channels": 2,
+          "plain": "stereo-48000-p3-control"
+        },
+        {
+          "name": "stereo-48000-p4-control-edits",
+          "channels": 2,
+          "plain": "stereo-48000-p4-control"
+        },
+        {
+          "name": "stereo-48000-p5-control-edits",
+          "channels": 2,
+          "plain": "stereo-48000-p5-control"
+        },
+        {
+          "name": "stereo-48000-p6-control-edits",
+          "channels": 2,
+          "plain": "stereo-48000-p6-control"
+        },
+        {
+          "name": "stereo-48000-p7-control-edits",
+          "channels": 2,
+          "plain": "stereo-48000-p7-control"
+        }
+      ],
+      "edits": true
+    },
+    {
+      "name": "dual-48000-clock",
+      "rate": 48000,
+      "controls": [
+        {
+          "name": "dual-48000-p0-control-clock",
+          "channels": 3,
+          "plain": "dual-48000-p0-control"
+        },
+        {
+          "name": "dual-48000-p1-control-clock",
+          "channels": 3,
+          "plain": "dual-48000-p1-control"
+        },
+        {
+          "name": "dual-48000-p2-control-clock",
+          "channels": 3,
+          "plain": "dual-48000-p2-control"
+        },
+        {
+          "name": "dual-48000-p3-control-clock",
+          "channels": 3,
+          "plain": "dual-48000-p3-control"
+        },
+        {
+          "name": "dual-48000-p4-control-clock",
+          "channels": 3,
+          "plain": "dual-48000-p4-control"
+        },
+        {
+          "name": "dual-48000-p5-control-clock",
+          "channels": 3,
+          "plain": "dual-48000-p5-control"
+        },
+        {
+          "name": "dual-48000-p6-control-clock",
+          "channels": 3,
+          "plain": "dual-48000-p6-control"
+        },
+        {
+          "name": "dual-48000-p7-control-clock",
+          "channels": 3,
+          "plain": "dual-48000-p7-control"
+        }
+      ],
+      "edits": false
+    },
+    {
+      "name": "placeholder-rate",
+      "rate": 44100,
+      "controls": [
+        {
+          "name": "dual-44100-p0-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-44100-p1-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-44100-p2-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-44100-p3-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-44100-p4-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-44100-p5-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-44100-p6-control",
+          "channels": 3
+        },
+        {
+          "name": "dual-44100-p7-control",
+          "channels": 3
+        }
+      ]
+    }
+  ],
+  "multiple_control": "stereo-48000",
+  "multiple_descriptions_accepted": false
+}

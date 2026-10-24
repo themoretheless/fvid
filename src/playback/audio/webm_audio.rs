@@ -383,6 +383,8 @@ pub struct WebmAudioReader<R> {
     wavpack_mask: Option<u32>,
     dolby_mask: Option<u32>,
     dolby_channels: Option<u16>,
+    dolby_rate: Option<u32>,
+    eac3_programme: u8,
     wavpack_dsd: bool,
     flac_end_ns: Option<u64>,
     flac_duration_complete: bool,
@@ -416,6 +418,29 @@ pub struct WebmAudioReader<R> {
 }
 
 impl<R: Read + Seek> WebmAudioReader<R> {
+    fn probe_eac3_programme(&mut self)->Result<()> {
+        // Two complete programme cycles cover a packet boundary that starts
+        // part-way through a multiplex. Each cycle has at most 8*(1+8) frames.
+        const FRAMES:usize=2*8*9;
+        const BYTES:usize=FRAMES*4096;
+        let mut data=Vec::new();
+        for _ in 0..=FRAMES {
+            let packet=self.read_packet()?;let eof=packet.is_none();
+            if let Some(packet)=packet {
+                let available=BYTES.saturating_sub(data.len());
+                data.extend_from_slice(&packet.data[..packet.data.len().min(available)]);
+            }
+            if let Some((frame,layout))=crate::codec::eac3_decoder::presentation::probe_programme(&data,self.eac3_programme,eof)? {
+                self.dolby_rate=Some(frame.sample_rate);
+                self.dolby_channels=Some(layout.0.len()as u16);
+                self.dolby_mask=Some(layout.wave_mask().ok_or_else(||unsupported("E-AC-3 speaker locations need an extended speaker mask"))?);
+                return Ok(());
+            }
+            if eof || data.len()==BYTES{break;}
+        }
+        Err(invalid("selected E-AC-3 programme is missing or incomplete in setup"))
+    }
+
     fn eac3_speaker_mask(&mut self,first:&[u8])->Result<Option<u32>> {
         let channels=self.track().channels as u16;
         if channels<=6 {return Ok(Some(crate::codec::eac3_decoder::speaker_mask(first,channels)?));}
@@ -485,6 +510,16 @@ impl<R: Read + Seek> WebmAudioReader<R> {
         Self::from_track(demuxer, number)
     }
 
+    /// Open an encoded E-AC-3 programme inside the zero-based physical audio track.
+    /// Probe the chosen programme's geometry before creating a decoder. Rewind
+    /// and seek retain this choice independently of the container's default track.
+    pub fn open_programme(reader:R,limits:Limits,nth:usize,programme:u8)->Result<Self>{
+        if programme>7{return Err(invalid("E-AC-3 programme ID exceeds 7"));}
+        let demuxer=WebmReader::open(reader,limits)?;
+        let number=Self::supported(&demuxer).get(nth).copied().ok_or_else(||invalid("WebM has no such audio track"))?;
+        Self::from_programme(demuxer,number,Some(programme))
+    }
+
     fn automatic_setup_usable(track: &Track) -> bool {
         let (Ok(rate), Ok(channels)) = (u32::try_from(track.sample_rate), u16::try_from(track.channels))
             else { return false; };
@@ -534,7 +569,8 @@ impl<R: Read + Seek> WebmAudioReader<R> {
     }
 
     /// Open a track the demuxer already listed.
-    fn from_track(mut demuxer: WebmReader<R>, track_number: u64) -> Result<Self> {
+    fn from_track(demuxer:WebmReader<R>,track_number:u64)->Result<Self>{Self::from_programme(demuxer,track_number,None)}
+    fn from_programme(mut demuxer: WebmReader<R>, track_number: u64,programme:Option<u8>) -> Result<Self> {
         let track = demuxer
             .tracks
             .iter()
@@ -546,10 +582,11 @@ impl<R: Read + Seek> WebmAudioReader<R> {
         } else {
             track.codec.clone()
         };
-        if track.sample_rate == 0 || track.sample_rate > u64::from(u32::MAX) {
+        if programme.is_some() && codec_tag!="A_EAC3"{return Err(unsupported("programme selection requires an E-AC-3 track"));}
+        if programme.is_none() && (track.sample_rate == 0 || track.sample_rate > u64::from(u32::MAX)) {
             return Err(invalid("WebM audio track has no usable sample rate"));
         }
-        if track.channels == 0 || track.channels > u64::from(u16::MAX) {
+        if programme.is_none() && (track.channels == 0 || track.channels > u64::from(u16::MAX)) {
             return Err(invalid("WebM audio track has no usable channel count"));
         }
         let vorbis = if codec_tag == "A_VORBIS" {
@@ -621,6 +658,8 @@ impl<R: Read + Seek> WebmAudioReader<R> {
             wavpack_mask: None,
             dolby_mask: None,
             dolby_channels: None,
+            dolby_rate:None,
+            eac3_programme:programme.unwrap_or(0),
             wavpack_dsd: false,
             flac_end_ns: None,
             flac_duration_complete: false,
@@ -647,7 +686,10 @@ impl<R: Read + Seek> WebmAudioReader<R> {
             vorbis,
             vorbis_end_ns: None,
         };
-        if matches!(source.codec_tag.as_str(),"A_AC3"|"A_EAC3") {
+        if programme.is_some(){
+            source.probe_eac3_programme()?;
+            source.rewind();
+        }else if matches!(source.codec_tag.as_str(),"A_AC3"|"A_EAC3") {
             if let Some(packet)=source.read_packet()? {
                 // An unreadable first header retains the decoder's existing late
                 // refusal/concealment behavior; never invent a mask from width.
@@ -1473,7 +1515,7 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
             return Ok(Box::new(crate::codec::ac3_decoder::Ac3Decoder::for_container(self.extra_data(),self.sample_rate(),self.channels())?));
         }
         if self.codec_tag == "A_EAC3" {
-            return Ok(Box::new(crate::codec::eac3_decoder::Eac3Decoder::for_container(self.extra_data(),self.sample_rate(),self.channels())?));
+            return Ok(Box::new(crate::codec::eac3_decoder::Eac3Decoder::for_container(self.extra_data(),self.sample_rate(),self.channels())?.with_programme(self.eac3_programme)?));
         }
         if self.in_band_ps {
             Ok(Box::new(
@@ -1557,7 +1599,7 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
         if self.codec_tag == "A_OPUS" {
             48000
         } else {
-            self.track().sample_rate as u32
+            self.dolby_rate.unwrap_or(self.track().sample_rate as u32)
         }
     }
 
@@ -1712,7 +1754,7 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
                     .find(|t| t.number == number)
                     .expect("supported lists existing tracks");
                 crate::audio::AudioTrack {
-                    sample_rate: if track.codec == "A_OPUS" {
+                    sample_rate: if number==self.track_number{self.sample_rate()}else if track.codec == "A_OPUS" {
                         48000
                     } else {
                         track.sample_rate as u32
@@ -1816,11 +1858,11 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
         } else if self.codec_tag == "A_EAC3" {
             let mut offset=0usize;let mut frames=0usize;
             while offset<p.data.len() {
-                if let Some(size)=crate::codec::eac3_decoder::skipped_substream_bytes(&p.data[offset..])? {
+                if let Some(size)=crate::codec::eac3_decoder::skipped_programme_bytes(&p.data[offset..],self.eac3_programme)? {
                     offset+=size;
                     continue;
                 }
-                let header=crate::codec::eac3_decoder::frame(&p.data[offset..]).ok_or_else(||invalid("E-AC-3 packet holds no syncframe"))?;
+                let header=crate::codec::eac3_decoder::programme_frame(&p.data[offset..],self.eac3_programme).ok_or_else(||invalid("E-AC-3 packet holds no syncframe"))?;
                 frames=frames.checked_add(header.blocks * 256).ok_or_else(||invalid("E-AC-3 packet sample count overflow"))?;
                 offset=offset.checked_add(header.frame_bytes).ok_or_else(||invalid("E-AC-3 frame size overflow"))?;
             }

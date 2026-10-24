@@ -468,6 +468,7 @@ pub(crate) struct Header {
     pub(crate) clev: f32,
     pub(crate) slev: f32,
     pub(crate) compression: [Option<u8>;2],
+    pub(crate) dialogue: [u8;2],
 }
 
 impl Header {
@@ -505,7 +506,7 @@ impl Header {
             let _dsurmod = bits.take(2);
         }
         let lfeon = bits.flag();
-        let _dialnorm = bits.take(5);
+        let mut dialogue = [bits.take(5) as u8;2];
         let mut compression=[None;2];
         if bits.flag() {compression[0]=Some(bits.take(8) as u8);}
         if bits.flag() {
@@ -516,7 +517,7 @@ impl Header {
             let _roomtyp = bits.take(2);
         }
         if acmod == 0 {
-            let _dialnorm2 = bits.take(5);
+            dialogue[1] = bits.take(5) as u8;
             if bits.flag() {compression[1]=Some(bits.take(8) as u8);}
             if bits.flag() {
                 let _langcod2 = bits.take(8);
@@ -550,6 +551,7 @@ impl Header {
             clev,
             slev,
             compression,
+            dialogue,
         })
     }
 
@@ -574,6 +576,7 @@ impl Header {
             clev: centre,
             slev: surround,
             compression: [None;2],
+            dialogue: [31;2],
         }
     }
 
@@ -1520,6 +1523,7 @@ pub struct Ac3Decoder {
     /// has to produce.
     channels: usize,
     compression_mode: CompressionMode,
+    dialogue_normalization: bool,
     core: Core,
     /// Samples still owed to `ENCODER_DELAY`, which the stream's first blocks pay off.
     lead: usize,
@@ -1548,6 +1552,7 @@ impl Ac3Decoder {
             sample_rate,
             channels: usize::from(channels),
             compression_mode: CompressionMode::Line,
+            dialogue_normalization: false,
             core: Core::new(),
             lead: ENCODER_DELAY,
             initial_lead: ENCODER_DELAY,
@@ -1568,6 +1573,14 @@ impl Ac3Decoder {
         self.compression_mode=mode;
         self
     }
+    /// Apply BSI dialogue-level normalization to a -31 dB reference. Disabled by
+    /// default for callers that apply the metadata in their system volume control.
+    /// Reset retains this choice.
+    pub fn with_dialogue_normalization(mut self, enabled: bool) -> Self {
+        self.dialogue_normalization = enabled;
+        self
+    }
+
     /// Container presentation metadata supplies trimming, so raw priming is disabled.
     pub fn for_container_with_compression(configuration:&[u8],sample_rate:u32,channels:u16,mode:CompressionMode)->Result<Self> {
         Ok(Self::for_container(configuration,sample_rate,channels)?.with_compression(mode))
@@ -1774,6 +1787,11 @@ impl Ac3Decoder {
         self.core.rematrix_restore(header);
         let line_gain = self.core.strategy.gain;
         self.core.strategy.gain = self.compression_mode.gains(header.compression, line_gain);
+        if self.dialogue_normalization {
+            for (gain, code) in self.core.strategy.gain.iter_mut().zip(header.dialogue) {
+                *gain *= super::dolby_compression::dialogue_gain(code);
+            }
+        }
         self.core.spectrum_to_sound(header, folding, out);
         self.core.strategy.gain = line_gain;
         true
@@ -2450,6 +2468,9 @@ pub(crate) fn frame_crc_valid(frame: &[u8]) -> bool {
 }
 
 impl AudioDecode for Ac3Decoder {
+    fn set_dolby_dialogue_normalization(&mut self, enabled: bool) {
+        self.dialogue_normalization=enabled;
+    }
     fn set_dolby_compression(&mut self, mode: CompressionMode) {
         self.compression_mode=mode;
     }

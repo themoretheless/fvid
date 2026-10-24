@@ -10,7 +10,7 @@ COUNTS=[2,1,2,3,3,4,4,5]
 SLOTS=[[0,1],[2],[0,1],[0,2,1],[0,1,4],[0,2,1,4],[0,1,4,5],[0,2,1,4,5]]
 MAPS=[0xa000,0x4000,0xa000,0xe000,0xa100,0xe100,0xb800,0xf800]
 
-def packet(layout,lfe,identity,mask,basis,channel_map,dependent,*,last=True,blocks_override=None,gains=None,divisor=1,exponent=10,rate_code=0,allocated=True,block_allocation=None,transient_windows=None,lfe_mix_code=None,mixing_metadata=False,silent_planes=(),gains_second=None,compression=None,compression_second=None):
+def packet(layout,lfe,identity,mask,basis,channel_map,dependent,*,last=True,blocks_override=None,gains=None,divisor=1,exponent=10,rate_code=0,allocated=True,block_allocation=None,transient_windows=None,lfe_mix_code=None,mixing_metadata=False,silent_planes=(),gains_second=None,compression=None,compression_second=None,compact=False):
  nf=COUNTS[layout];blocks=blocks_override or (6 if nf<=2 else 3)
  if block_allocation is not None:
   assert len(block_allocation)==blocks and not mask, 'block SNR witnesses require conventional planes'
@@ -95,6 +95,12 @@ def packet(layout,lfe,identity,mask,basis,channel_map,dependent,*,last=True,bloc
      if aht:
       for q in values:w.put(q&65535,16)
      else:w.put(round(conventional(values,b))&65535,16)
+ if compact:
+  size=((len(w.bits)+64+15)//16)*2
+  assert size<=4096
+  raw=bytearray(w.to_bytes(size));words=size//2-1
+  raw[2]=(raw[2]&0xf8)|(words>>8);raw[3]=words&255
+  return patch_crc(raw),blocks
  return patch_crc(w.to_bytes(4096)),blocks
 
 def generate():

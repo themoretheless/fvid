@@ -718,6 +718,10 @@ pub trait AudioDecode: Send {
     #[cfg(feature = "player")]
     fn set_dolby_compression(&mut self, _mode: crate::codec::ac3_decoder::CompressionMode) {}
 
+    /// Decoder-side dialogue normalization for Dolby audio; other codecs ignore it.
+    #[cfg(feature = "player")]
+    fn set_dolby_dialogue_normalization(&mut self, _enabled: bool) {}
+
     /// Decode with signed source timing. Immediate codecs inherit the input
     /// window; delayed codecs must return the original window with their PCM.
     fn decode_packet(&mut self, data: &[u8], pts: i64, duration: u64) -> crate::Result<Option<DecodedAudio>> {

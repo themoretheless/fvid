@@ -18,8 +18,8 @@
 //! The decoder is the work of [`crate::codec::ac3_decoder`], written from the
 //! public ATSC A/52:2012 text; this file lists AC-3 and E-AC-3 frames through
 //! their respective probes. They share the syncword but have different headers.
-//! For multiplexed E-AC-3, only independent substream 0 contributes packets and
-//! sample time; dependent streams and other programmes are skipped by envelope.
+//! Multiplexed E-AC-3 exposes independent programmes as audio tracks. Only the
+//! selected programme contributes sample time; other payloads are skipped by envelope.
 
 use crate::audio::{AudioStream, AudioTrack, EncodedPacket};
 use crate::codec::ac3_decoder::syncframe;
@@ -66,8 +66,9 @@ struct SyncHeader {
     samples: u32,
 }
 
-fn probe_syncframe(bytes: &[u8]) -> Option<SyncHeader> {
-    if let Some(at) = syncframe(bytes) {
+fn probe_syncframe(bytes: &[u8]) -> Option<SyncHeader> {probe_programme_syncframe(bytes,0)}
+fn probe_programme_syncframe(bytes:&[u8],programme:u8)->Option<SyncHeader> {
+    if programme==0 && let Some(at) = syncframe(bytes) {
         return Some(SyncHeader {
             speaker_mask: crate::codec::ac3_decoder::speaker_mask(bytes,at.channels).ok()?,
             codec: TAG,
@@ -77,9 +78,9 @@ fn probe_syncframe(bytes: &[u8]) -> Option<SyncHeader> {
             samples: SAMPLES_PER_FRAME,
         });
     }
-    if let Some(at) = crate::codec::eac3_decoder::frame(bytes) {
+    if let Some(at) = crate::codec::eac3_decoder::programme_frame(bytes,programme) {
         return Some(SyncHeader {
-            speaker_mask: crate::codec::eac3_decoder::speaker_mask(bytes,at.channels).ok()?,
+            speaker_mask: crate::codec::ac3_decoder::decoded_speaker_mask(usize::from(at.layout),at.low_frequency,at.channels).ok()?,
             codec: EAC3_TAG,
             sample_rate: at.sample_rate,
             channels: at.channels,
@@ -88,6 +89,43 @@ fn probe_syncframe(bytes: &[u8]) -> Option<SyncHeader> {
         });
     }
     None
+}
+
+fn eac3_envelope(bytes:&[u8])->Option<(u8,u8,usize)> {
+    if bytes.len()<6 || bytes[..2]!=[0x0b,0x77] || !(11..=16).contains(&(bytes[5]>>3)){return None;}
+    let kind=bytes[2]>>6;let id=(bytes[2]>>3)&7;
+    let size=((usize::from(bytes[2])&7)*256+usize::from(bytes[3])+1)*2;
+    (kind!=3 && size>=6 && size<=bytes.len()).then_some((kind,id,size))
+}
+fn first_sync_start(bytes:&[u8],opaque_eac3:bool)->(usize,Option<&'static str>){
+    let mut at=0;
+    while at+2<=bytes.len(){
+        if let Some(h)=probe_syncframe(&bytes[at..]){return(at,Some(h.codec));}
+        if opaque_eac3 && let Some((kind,0,_))=eac3_envelope(&bytes[at..]) && kind!=1{return(at,Some(EAC3_TAG));}
+        at+=1;
+    }
+    (at,None)
+}
+
+// Best-effort catalogue: malformed/unrenderable unselected metadata must not
+// invalidate a selected stream. Full validation belongs to the selected index.
+fn programme_catalogue(mut bytes:&[u8],expanded:bool)->Vec<(u8,AudioTrack)> {
+    let mut tracks:[Option<AudioTrack>;8]=std::array::from_fn(|_|None);
+    while let Some((kind,id,size))=eac3_envelope(bytes) {
+        if kind!=1 && tracks[usize::from(id)].is_none() && let Some(header)=probe_programme_syncframe(bytes,id) {
+            let channels=if expanded {
+                match crate::codec::eac3_decoder::presentation::raw_programme_for_programme(bytes,id) {
+                    Ok(Some((_,layout))) if layout.0.len()>6 && layout.wave_mask().is_some()=>Some(layout.0.len()as u16),
+                    Ok(None)=>Some(header.channels),
+                    Ok(Some((_,layout))) if layout.0.len()<=6=>Some(header.channels),
+                    _=>None,
+                }
+            }else{Some(header.channels)};
+            if let Some(channels)=channels {tracks[usize::from(id)]=Some(AudioTrack{sample_rate:header.sample_rate,channels,name:String::new(),language:String::new()});}
+        }
+        bytes=&bytes[size..];
+    }
+    tracks.into_iter().enumerate().filter_map(|(id,track)|track.map(|t|(id as u8,t))).collect()
 }
 
 /// One frame of the stream: where it sits in the file, how long it is, and the
@@ -108,6 +146,8 @@ pub struct Frame {
 #[derive(Clone, Debug)]
 pub struct Ac3 {
     speaker_mask: u32,
+    programme:u8,
+    tracks:Vec<(u8,AudioTrack)>,
     pub codec: &'static str,
     pub sample_rate: u32,
     pub channels: u16,
@@ -119,10 +159,15 @@ pub struct Ac3 {
 impl Ac3 {
     /// Read a whole file: the run of frames, from wherever the first syncframe
     /// starts to wherever the last one ends.
-    pub fn parse(bytes:&[u8],limits:&Limits)->Result<Self>{Self::parse_mode(bytes,limits,true)}
+    pub fn parse(bytes:&[u8],limits:&Limits)->Result<Self>{Self::parse_mode(bytes,limits,true,0)}
     /// Compatibility output decodes only independent programme 0, up to 5.1.
-    pub fn parse_compatible(bytes:&[u8],limits:&Limits)->Result<Self>{Self::parse_mode(bytes,limits,false)}
-    fn parse_mode(bytes: &[u8], limits: &Limits, expanded:bool) -> Result<Self> {
+    pub fn parse_compatible(bytes:&[u8],limits:&Limits)->Result<Self>{Self::parse_mode(bytes,limits,false,0)}
+    /// Index only the chosen independent E-AC-3 programme and its extensions.
+    pub fn parse_programme(bytes:&[u8],limits:&Limits,programme:u8)->Result<Self>{Self::parse_mode(bytes,limits,true,programme)}
+    pub fn parse_compatible_programme(bytes:&[u8],limits:&Limits,programme:u8)->Result<Self>{Self::parse_mode(bytes,limits,false,programme)}
+    pub fn programme(&self)->u8{self.programme}
+    fn parse_mode(bytes: &[u8], limits: &Limits, expanded:bool,programme:u8) -> Result<Self> {
+        if programme>7{return Err(invalid("E-AC-3 programme ID exceeds 7"));}
         if bytes.len() > limits.file_bytes {
             return Err(invalid(&format!(
                 "file is over the {} byte limit",
@@ -137,17 +182,15 @@ impl Ac3 {
         // two bytes resembling a syncword does not.
         let mut found: Vec<SyncHeader> = Vec::new();
         let mut starts: Vec<usize> = Vec::new();
-        let mut pos = 0usize;
-        while pos + 2 <= bytes.len() && probe_syncframe(&bytes[pos..]).is_none() {
-            pos += 1;
-        }
-        let first_start = pos;
+        let (mut pos,first_codec)=first_sync_start(bytes,programme!=0);
+        let first_start=pos;
+        if programme!=0 && first_codec!=Some(EAC3_TAG){return Err(invalid("selected E-AC-3 programme is not present"));}
         let mut truncated_final_frame = false;
         let mut truncated_skipped_tail = false;
         loop {
             let remaining=bytes.get(pos..).unwrap_or_default();
-            if found.first().is_some_and(|first|first.codec==EAC3_TAG) {
-                match crate::codec::eac3_decoder::skipped_substream_bytes(remaining) {
+            if first_codec==Some(EAC3_TAG) {
+                match crate::codec::eac3_decoder::skipped_programme_bytes(remaining,programme) {
                     Ok(Some(size))=>{pos+=size;continue;},
                     Err(crate::Error::Invalid(_))=>{
                         truncated_final_frame=true;
@@ -158,7 +201,7 @@ impl Ac3 {
                     Ok(None)=>{},
                 }
             }
-            let Some(at)=probe_syncframe(remaining) else {break;};
+            let Some(at)=probe_programme_syncframe(remaining,programme) else {break;};
             if let Some(first) = found.first()
                 && at.codec != first.codec
             {
@@ -180,6 +223,7 @@ impl Ac3 {
             pos += at.frame_bytes;
         }
         if found.is_empty() {
+            if programme!=0{return Err(invalid("selected E-AC-3 programme is not present"));}
             return Err(invalid("no AC-3 syncframes in the file"));
         }
         // A run that stops well short of the end of the file was never the file: a
@@ -196,7 +240,7 @@ impl Ac3 {
         }
         let first = found[0];
         let native=if expanded && first.codec==EAC3_TAG {
-            crate::codec::eac3_decoder::presentation::raw_programme(&bytes[first_start..])?
+            crate::codec::eac3_decoder::presentation::raw_programme_for_programme(&bytes[starts[0]..],programme)?
                 .map(|(_,layout)|layout).filter(|layout|layout.0.len()>6)
         }else{None};
         let output_channels=native.as_ref().map_or(first.channels,|layout|layout.0.len() as u16);
@@ -217,7 +261,7 @@ impl Ac3 {
                 )));
             }
             let size=if let Some(expected)=&native {
-                let programme=crate::codec::eac3_decoder::presentation::raw_programme(&bytes[*start..]);
+                let programme=crate::codec::eac3_decoder::presentation::raw_programme_for_programme(&bytes[*start..],programme);
                 match programme {
                     Ok(Some((size,layout))) if &layout==expected=>size,
                     Err(_) if truncated_final_frame && Some(start)==starts.last()=>break,
@@ -235,7 +279,13 @@ impl Ac3 {
             });
             pts += u64::from(at.samples);
         }
+        let own=AudioTrack{sample_rate:first.sample_rate,channels:output_channels,name:String::new(),language:String::new()};
+        let mut tracks=if first.codec==EAC3_TAG{programme_catalogue(&bytes[first_start..],expanded)}else{Vec::new()};
+        if let Some((_,track))=tracks.iter_mut().find(|(id,_)|*id==programme){*track=own;}else{tracks.push((programme,own));}
+        tracks.sort_by_key(|(id,_)|*id);
+        if tracks.len()>1 {for(id,track)in &mut tracks{track.name=format!("E-AC-3 programme {id}");}}
         Ok(Self {
+            programme,tracks,
             speaker_mask: output_mask,
             codec: first.codec,
             sample_rate: first.sample_rate,
@@ -278,24 +328,43 @@ pub struct Ac3AudioReader {
 impl Ac3AudioReader {
     /// Read a whole file. The frames lie at lengths only their own headers state,
     /// so all of them are walked before the first one plays.
-    pub fn open<R:Read>(reader:R,limits:Limits)->Result<Self>{Self::open_mode(reader,limits,true)}
-    pub fn open_compatible<R:Read>(reader:R,limits:Limits)->Result<Self>{Self::open_mode(reader,limits,false)}
-    fn open_mode<R: Read>(mut reader: R, limits: Limits, expanded:bool) -> Result<Self> {
-        let mut bytes = Vec::new();
-        let cap = u64::try_from(limits.file_bytes).unwrap_or(u64::MAX);
+    pub fn open<R:Read>(reader:R,limits:Limits)->Result<Self>{Self::open_mode(reader,limits,true,0)}
+    pub fn open_compatible<R:Read>(reader:R,limits:Limits)->Result<Self>{Self::open_mode(reader,limits,false,0)}
+    /// Open encoded independent programme ID 0..7, retaining native extensions.
+    pub fn open_programme<R:Read>(reader:R,limits:Limits,programme:u8)->Result<Self>{
+        if programme>7{return Err(invalid("E-AC-3 programme ID exceeds 7"));}
+        Self::open_mode(reader,limits,true,programme)
+    }
+    /// Open one encoded programme with independent-only output up to 5.1.
+    pub fn open_compatible_programme<R:Read>(reader:R,limits:Limits,programme:u8)->Result<Self>{
+        if programme>7{return Err(invalid("E-AC-3 programme ID exceeds 7"));}
+        Self::open_mode(reader,limits,false,programme)
+    }
+    /// Zero-based track positions follow the catalogue of decodable programmes.
+    /// Unlike encoded IDs, positions omit unrenderable programme metadata.
+    pub fn open_track<R:Read>(reader:R,limits:Limits,nth:usize)->Result<Self>{
+        if nth>=8{return Err(invalid("AC-3 audio track index is out of range"));}
+        if nth==0{return Self::open(reader,limits);}
+        let bytes=Self::read_limited(reader,limits)?;
+        let(start,codec)=first_sync_start(&bytes,true);
+        if codec!=Some(EAC3_TAG){return Err(invalid("AC-3 audio track index is out of range"));}
+        let tracks=programme_catalogue(&bytes[start..],true);
+        let programme=tracks.get(nth).ok_or_else(||invalid("AC-3 audio track index is out of range"))?.0;
+        Self::from_bytes(&bytes,limits,true,programme)
+    }
+    fn read_limited<R:Read>(mut reader:R,limits:Limits)->Result<Vec<u8>> {
+        let mut bytes=Vec::new();
+        let cap=u64::try_from(limits.file_bytes).unwrap_or(u64::MAX);
         reader.by_ref().take(cap.saturating_add(1)).read_to_end(&mut bytes)?;
-        if bytes.len() > limits.file_bytes {
-            return Err(invalid(&format!(
-                "file is over the {} byte limit",
-                limits.file_bytes
-            )));
-        }
-        Ok(Self {
-            ac3: Ac3::parse_mode(&bytes, &limits, expanded)?,
-            packet: 0,
-            presentation_trim: Cell::new(0),
-            presentation_floor: None,
-        })
+        if bytes.len()>limits.file_bytes{return Err(invalid(&format!("file is over the {} byte limit",limits.file_bytes)));}
+        Ok(bytes)
+    }
+    fn from_bytes(bytes:&[u8],limits:Limits,expanded:bool,programme:u8)->Result<Self>{
+        Ok(Self{ac3:Ac3::parse_mode(bytes,&limits,expanded,programme)?,packet:0,presentation_trim:Cell::new(0),presentation_floor:None})
+    }
+    fn open_mode<R:Read>(reader:R,limits:Limits,expanded:bool,programme:u8)->Result<Self>{
+        let bytes=Self::read_limited(reader,limits)?;
+        Self::from_bytes(&bytes,limits,expanded,programme)
     }
 
     /// The file's own shape, for a caller that wants to say what it opened.
@@ -309,6 +378,13 @@ impl Ac3AudioReader {
 }
 
 impl AudioStream for Ac3AudioReader {
+    fn make_decoder(&self)->Result<Box<dyn crate::audio::AudioDecode>> {
+        if self.codec()==EAC3_TAG {
+            Ok(Box::new(crate::codec::eac3_decoder::Eac3Decoder::new(self.extra_data(),self.sample_rate(),self.channels())?.with_programme(self.ac3.programme)?))
+        }else{crate::codec::make_audio_decoder(self.codec(),self.extra_data(),self.sample_rate(),self.channels(),self.bits_per_sample())}
+    }
+    fn audio_track_index(&self)->usize {self.ac3.tracks.iter().position(|(id,_)|*id==self.ac3.programme).unwrap_or(0)}
+
     fn speaker_mask(&self) -> Result<Option<u32>> {Ok(Some(self.ac3.speaker_mask))}
 
     fn codec(&self) -> &str {
@@ -381,14 +457,7 @@ impl AudioStream for Ac3AudioReader {
         &[]
     }
 
-    fn audio_tracks(&self) -> Vec<AudioTrack> {
-        vec![AudioTrack {
-            sample_rate: self.ac3.sample_rate,
-            channels: self.ac3.channels,
-            name: String::new(),
-            language: String::new(),
-        }]
-    }
+    fn audio_tracks(&self) -> Vec<AudioTrack> {self.ac3.tracks.iter().map(|(_,track)|track.clone()).collect()}
 
     fn next_packet(&mut self) -> Result<Option<EncodedPacket>> {
         let Some(at) = self.ac3.frames.get(self.packet) else {

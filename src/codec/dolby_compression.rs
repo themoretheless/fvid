@@ -21,3 +21,9 @@ impl CompressionMode {
         })
     }
 }
+
+/// TS 102 366 4.4.2.8 and 6.6: reserved zero denotes the -31 dB reference.
+pub(crate) fn dialogue_gain(code: u8) -> f32 {
+    let level = if code == 0 { 31 } else { code };
+    10.0f64.powf((f64::from(level) - 31.0) / 20.0) as f32
+}

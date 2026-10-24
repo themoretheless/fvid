@@ -1,0 +1,6845 @@
+{
+  "accepted": true,
+  "cases": [
+    {
+      "name": "l0-0-c127-d0",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d1",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d2",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          2,
+          29
+        ],
+        [
+          29,
+          2
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d3",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          3,
+          28
+        ],
+        [
+          28,
+          3
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d4",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          4,
+          27
+        ],
+        [
+          27,
+          4
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d5",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          5,
+          26
+        ],
+        [
+          26,
+          5
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d6",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          6,
+          25
+        ],
+        [
+          25,
+          6
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d7",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          7,
+          24
+        ],
+        [
+          24,
+          7
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d8",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          8,
+          23
+        ],
+        [
+          23,
+          8
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d9",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          9,
+          22
+        ],
+        [
+          22,
+          9
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d10",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          10,
+          21
+        ],
+        [
+          21,
+          10
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d11",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          11,
+          20
+        ],
+        [
+          20,
+          11
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d12",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          12,
+          19
+        ],
+        [
+          19,
+          12
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d13",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          13,
+          18
+        ],
+        [
+          18,
+          13
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d14",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          14,
+          17
+        ],
+        [
+          17,
+          14
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d15",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          15,
+          16
+        ],
+        [
+          16,
+          15
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d16",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          16,
+          15
+        ],
+        [
+          15,
+          16
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d17",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          17,
+          14
+        ],
+        [
+          14,
+          17
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d18",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          18,
+          13
+        ],
+        [
+          13,
+          18
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d19",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          19,
+          12
+        ],
+        [
+          12,
+          19
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d20",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          20,
+          11
+        ],
+        [
+          11,
+          20
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d21",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          21,
+          10
+        ],
+        [
+          10,
+          21
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d22",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          22,
+          9
+        ],
+        [
+          9,
+          22
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d23",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          23,
+          8
+        ],
+        [
+          8,
+          23
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d24",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          24,
+          7
+        ],
+        [
+          7,
+          24
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d25",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          25,
+          6
+        ],
+        [
+          6,
+          25
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d26",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          26,
+          5
+        ],
+        [
+          5,
+          26
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d27",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d28",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          28,
+          3
+        ],
+        [
+          3,
+          28
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d29",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          29,
+          2
+        ],
+        [
+          2,
+          29
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d30",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          30,
+          1
+        ],
+        [
+          1,
+          30
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-0-c127-d31",
+      "layout": 0,
+      "lfe": false,
+      "channels": 2,
+      "control": "l0-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-1-c127-d0",
+      "layout": 0,
+      "lfe": true,
+      "channels": 3,
+      "control": "l0-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-1-c127-d1",
+      "layout": 0,
+      "lfe": true,
+      "channels": 3,
+      "control": "l0-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-1-c127-d27",
+      "layout": 0,
+      "lfe": true,
+      "channels": 3,
+      "control": "l0-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-1-c127-d31",
+      "layout": 0,
+      "lfe": true,
+      "channels": 3,
+      "control": "l0-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l1-0-c127-d0",
+      "layout": 1,
+      "lfe": false,
+      "channels": 1,
+      "control": "l1-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0
+      ],
+      "windows": [
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l1-0-c127-d1",
+      "layout": 1,
+      "lfe": false,
+      "channels": 1,
+      "control": "l1-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0
+      ],
+      "windows": [
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l1-0-c127-d27",
+      "layout": 1,
+      "lfe": false,
+      "channels": 1,
+      "control": "l1-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0
+      ],
+      "windows": [
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l1-0-c127-d31",
+      "layout": 1,
+      "lfe": false,
+      "channels": 1,
+      "control": "l1-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0
+      ],
+      "windows": [
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l1-1-c127-d0",
+      "layout": 1,
+      "lfe": true,
+      "channels": 2,
+      "control": "l1-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l1-1-c127-d1",
+      "layout": 1,
+      "lfe": true,
+      "channels": 2,
+      "control": "l1-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l1-1-c127-d27",
+      "layout": 1,
+      "lfe": true,
+      "channels": 2,
+      "control": "l1-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l1-1-c127-d31",
+      "layout": 1,
+      "lfe": true,
+      "channels": 2,
+      "control": "l1-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d0",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d1",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d2",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          2,
+          29
+        ],
+        [
+          29,
+          2
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d3",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          3,
+          28
+        ],
+        [
+          28,
+          3
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d4",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          4,
+          27
+        ],
+        [
+          27,
+          4
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d5",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          5,
+          26
+        ],
+        [
+          26,
+          5
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d6",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          6,
+          25
+        ],
+        [
+          25,
+          6
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d7",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          7,
+          24
+        ],
+        [
+          24,
+          7
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d8",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          8,
+          23
+        ],
+        [
+          23,
+          8
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d9",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          9,
+          22
+        ],
+        [
+          22,
+          9
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d10",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          10,
+          21
+        ],
+        [
+          21,
+          10
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d11",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          11,
+          20
+        ],
+        [
+          20,
+          11
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d12",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          12,
+          19
+        ],
+        [
+          19,
+          12
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d13",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          13,
+          18
+        ],
+        [
+          18,
+          13
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d14",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          14,
+          17
+        ],
+        [
+          17,
+          14
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d15",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          15,
+          16
+        ],
+        [
+          16,
+          15
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d16",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          16,
+          15
+        ],
+        [
+          15,
+          16
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d17",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          17,
+          14
+        ],
+        [
+          14,
+          17
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d18",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          18,
+          13
+        ],
+        [
+          13,
+          18
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d19",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          19,
+          12
+        ],
+        [
+          12,
+          19
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d20",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          20,
+          11
+        ],
+        [
+          11,
+          20
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d21",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          21,
+          10
+        ],
+        [
+          10,
+          21
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d22",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          22,
+          9
+        ],
+        [
+          9,
+          22
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d23",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          23,
+          8
+        ],
+        [
+          8,
+          23
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d24",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          24,
+          7
+        ],
+        [
+          7,
+          24
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d25",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          25,
+          6
+        ],
+        [
+          6,
+          25
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d26",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          26,
+          5
+        ],
+        [
+          5,
+          26
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d27",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d28",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          28,
+          3
+        ],
+        [
+          3,
+          28
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d29",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          29,
+          2
+        ],
+        [
+          2,
+          29
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d30",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          30,
+          1
+        ],
+        [
+          1,
+          30
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-0-c127-d31",
+      "layout": 2,
+      "lfe": false,
+      "channels": 2,
+      "control": "l2-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        null,
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-1-c127-d0",
+      "layout": 2,
+      "lfe": true,
+      "channels": 3,
+      "control": "l2-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-1-c127-d1",
+      "layout": 2,
+      "lfe": true,
+      "channels": 3,
+      "control": "l2-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-1-c127-d27",
+      "layout": 2,
+      "lfe": true,
+      "channels": 3,
+      "control": "l2-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-1-c127-d31",
+      "layout": 2,
+      "lfe": true,
+      "channels": 3,
+      "control": "l2-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l3-0-c127-d0",
+      "layout": 3,
+      "lfe": false,
+      "channels": 3,
+      "control": "l3-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1
+      ],
+      "windows": [
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l3-0-c127-d1",
+      "layout": 3,
+      "lfe": false,
+      "channels": 3,
+      "control": "l3-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1
+      ],
+      "windows": [
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l3-0-c127-d27",
+      "layout": 3,
+      "lfe": false,
+      "channels": 3,
+      "control": "l3-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1
+      ],
+      "windows": [
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l3-0-c127-d31",
+      "layout": 3,
+      "lfe": false,
+      "channels": 3,
+      "control": "l3-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1
+      ],
+      "windows": [
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l3-1-c127-d0",
+      "layout": 3,
+      "lfe": true,
+      "channels": 4,
+      "control": "l3-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l3-1-c127-d1",
+      "layout": 3,
+      "lfe": true,
+      "channels": 4,
+      "control": "l3-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l3-1-c127-d27",
+      "layout": 3,
+      "lfe": true,
+      "channels": 4,
+      "control": "l3-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l3-1-c127-d31",
+      "layout": 3,
+      "lfe": true,
+      "channels": 4,
+      "control": "l3-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l4-0-c127-d0",
+      "layout": 4,
+      "lfe": false,
+      "channels": 3,
+      "control": "l4-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l4-0-c127-d1",
+      "layout": 4,
+      "lfe": false,
+      "channels": 3,
+      "control": "l4-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l4-0-c127-d27",
+      "layout": 4,
+      "lfe": false,
+      "channels": 3,
+      "control": "l4-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l4-0-c127-d31",
+      "layout": 4,
+      "lfe": false,
+      "channels": 3,
+      "control": "l4-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l4-1-c127-d0",
+      "layout": 4,
+      "lfe": true,
+      "channels": 4,
+      "control": "l4-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        3,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l4-1-c127-d1",
+      "layout": 4,
+      "lfe": true,
+      "channels": 4,
+      "control": "l4-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        3,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l4-1-c127-d27",
+      "layout": 4,
+      "lfe": true,
+      "channels": 4,
+      "control": "l4-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        3,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l4-1-c127-d31",
+      "layout": 4,
+      "lfe": true,
+      "channels": 4,
+      "control": "l4-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        3,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l5-0-c127-d0",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "control": "l5-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l5-0-c127-d1",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "control": "l5-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l5-0-c127-d27",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "control": "l5-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l5-0-c127-d31",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "control": "l5-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l5-1-c127-d0",
+      "layout": 5,
+      "lfe": true,
+      "channels": 5,
+      "control": "l5-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        4,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l5-1-c127-d1",
+      "layout": 5,
+      "lfe": true,
+      "channels": 5,
+      "control": "l5-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        4,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l5-1-c127-d27",
+      "layout": 5,
+      "lfe": true,
+      "channels": 5,
+      "control": "l5-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        4,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l5-1-c127-d31",
+      "layout": 5,
+      "lfe": true,
+      "channels": 5,
+      "control": "l5-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        4,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l6-0-c127-d0",
+      "layout": 6,
+      "lfe": false,
+      "channels": 4,
+      "control": "l6-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l6-0-c127-d1",
+      "layout": 6,
+      "lfe": false,
+      "channels": 4,
+      "control": "l6-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l6-0-c127-d27",
+      "layout": 6,
+      "lfe": false,
+      "channels": 4,
+      "control": "l6-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l6-0-c127-d31",
+      "layout": 6,
+      "lfe": false,
+      "channels": 4,
+      "control": "l6-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l6-1-c127-d0",
+      "layout": 6,
+      "lfe": true,
+      "channels": 5,
+      "control": "l6-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        3,
+        4,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l6-1-c127-d1",
+      "layout": 6,
+      "lfe": true,
+      "channels": 5,
+      "control": "l6-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        3,
+        4,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l6-1-c127-d27",
+      "layout": 6,
+      "lfe": true,
+      "channels": 5,
+      "control": "l6-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        3,
+        4,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l6-1-c127-d31",
+      "layout": 6,
+      "lfe": true,
+      "channels": 5,
+      "control": "l6-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        1,
+        3,
+        4,
+        2
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l7-0-c127-d0",
+      "layout": 7,
+      "lfe": false,
+      "channels": 5,
+      "control": "l7-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        3,
+        4
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l7-0-c127-d1",
+      "layout": 7,
+      "lfe": false,
+      "channels": 5,
+      "control": "l7-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        3,
+        4
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l7-0-c127-d27",
+      "layout": 7,
+      "lfe": false,
+      "channels": 5,
+      "control": "l7-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        3,
+        4
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l7-0-c127-d31",
+      "layout": 7,
+      "lfe": false,
+      "channels": 5,
+      "control": "l7-0-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        3,
+        4
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l7-1-c127-d0",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "control": "l7-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        4,
+        5,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l7-1-c127-d1",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "control": "l7-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        4,
+        5,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l7-1-c127-d27",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "control": "l7-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        4,
+        5,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l7-1-c127-d31",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "control": "l7-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": false,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        4,
+        5,
+        3
+      ],
+      "windows": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-1-c127-transient-d0",
+      "layout": 0,
+      "lfe": true,
+      "channels": 3,
+      "control": "l0-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-1-c127-transient-d1",
+      "layout": 0,
+      "lfe": true,
+      "channels": 3,
+      "control": "l0-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-1-c127-transient-d27",
+      "layout": 0,
+      "lfe": true,
+      "channels": 3,
+      "control": "l0-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-1-c127-transient-d31",
+      "layout": 0,
+      "lfe": true,
+      "channels": 3,
+      "control": "l0-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-1-c127-transient-clip-d0",
+      "layout": 0,
+      "lfe": true,
+      "channels": 3,
+      "control": "l0-1-d1-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1024,
+      "clip": true,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-1-c127-transient-clip-d1",
+      "layout": 0,
+      "lfe": true,
+      "channels": 3,
+      "control": "l0-1-d1-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1024,
+      "clip": true,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-1-c127-transient-clip-d27",
+      "layout": 0,
+      "lfe": true,
+      "channels": 3,
+      "control": "l0-1-d1-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1024,
+      "clip": true,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l0-1-c127-transient-clip-d31",
+      "layout": 0,
+      "lfe": true,
+      "channels": 3,
+      "control": "l0-1-d1-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        128,
+        16,
+        null
+      ],
+      "scale": 1024,
+      "clip": true,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l1-1-c127-transient-d0",
+      "layout": 1,
+      "lfe": true,
+      "channels": 2,
+      "control": "l1-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l1-1-c127-transient-d1",
+      "layout": 1,
+      "lfe": true,
+      "channels": 2,
+      "control": "l1-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l1-1-c127-transient-d27",
+      "layout": 1,
+      "lfe": true,
+      "channels": 2,
+      "control": "l1-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l1-1-c127-transient-d31",
+      "layout": 1,
+      "lfe": true,
+      "channels": 2,
+      "control": "l1-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l1-1-c127-transient-clip-d0",
+      "layout": 1,
+      "lfe": true,
+      "channels": 2,
+      "control": "l1-1-d1-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1024,
+      "clip": true,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l1-1-c127-transient-clip-d1",
+      "layout": 1,
+      "lfe": true,
+      "channels": 2,
+      "control": "l1-1-d1-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1024,
+      "clip": true,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l1-1-c127-transient-clip-d27",
+      "layout": 1,
+      "lfe": true,
+      "channels": 2,
+      "control": "l1-1-d1-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1024,
+      "clip": true,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l1-1-c127-transient-clip-d31",
+      "layout": 1,
+      "lfe": true,
+      "channels": 2,
+      "control": "l1-1-d1-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1024,
+      "clip": true,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-1-c127-transient-d0",
+      "layout": 2,
+      "lfe": true,
+      "channels": 3,
+      "control": "l2-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-1-c127-transient-d1",
+      "layout": 2,
+      "lfe": true,
+      "channels": 3,
+      "control": "l2-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-1-c127-transient-d27",
+      "layout": 2,
+      "lfe": true,
+      "channels": 3,
+      "control": "l2-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-1-c127-transient-d31",
+      "layout": 2,
+      "lfe": true,
+      "channels": 3,
+      "control": "l2-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-1-c127-transient-clip-d0",
+      "layout": 2,
+      "lfe": true,
+      "channels": 3,
+      "control": "l2-1-d1-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1024,
+      "clip": true,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-1-c127-transient-clip-d1",
+      "layout": 2,
+      "lfe": true,
+      "channels": 3,
+      "control": "l2-1-d1-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1024,
+      "clip": true,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-1-c127-transient-clip-d27",
+      "layout": 2,
+      "lfe": true,
+      "channels": 3,
+      "control": "l2-1-d1-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1024,
+      "clip": true,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l2-1-c127-transient-clip-d31",
+      "layout": 2,
+      "lfe": true,
+      "channels": 3,
+      "control": "l2-1-d1-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1024,
+      "clip": true,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        1,
+        2
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l7-1-c127-transient-d0",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "control": "l7-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        4,
+        5,
+        3
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        null,
+        null,
+        null,
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l7-1-c127-transient-d1",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "control": "l7-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        4,
+        5,
+        3
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        null,
+        null,
+        null,
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l7-1-c127-transient-d27",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "control": "l7-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        4,
+        5,
+        3
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        null,
+        null,
+        null,
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l7-1-c127-transient-d31",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "control": "l7-1-d16-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1,
+      "clip": false,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        4,
+        5,
+        3
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        null,
+        null,
+        null,
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l7-1-c127-transient-clip-d0",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "control": "l7-1-d1-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1024,
+      "clip": true,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        4,
+        5,
+        3
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        null,
+        null,
+        null,
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          0,
+          31
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l7-1-c127-transient-clip-d1",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "control": "l7-1-d1-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1024,
+      "clip": true,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        4,
+        5,
+        3
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        null,
+        null,
+        null,
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          1,
+          30
+        ],
+        [
+          30,
+          1
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l7-1-c127-transient-clip-d27",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "control": "l7-1-d1-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1024,
+      "clip": true,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        4,
+        5,
+        3
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        null,
+        null,
+        null,
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          27,
+          4
+        ],
+        [
+          4,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    },
+    {
+      "name": "l7-1-c127-transient-clip-d31",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "control": "l7-1-d1-control.mkv",
+      "words": [
+        127,
+        null,
+        255
+      ],
+      "words2": [
+        null,
+        null,
+        null
+      ],
+      "scale": 1024,
+      "clip": true,
+      "transient": true,
+      "coded_to_native": [
+        0,
+        2,
+        1,
+        4,
+        5,
+        3
+      ],
+      "windows": [
+        {
+          "location": 0,
+          "length": 255
+        },
+        null,
+        null,
+        null,
+        {
+          "location": 960,
+          "length": 127
+        },
+        null
+      ],
+      "levels": [
+        [
+          31,
+          0
+        ],
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          31
+        ]
+      ]
+    }
+  ]
+}

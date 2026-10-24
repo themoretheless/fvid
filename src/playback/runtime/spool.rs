@@ -450,6 +450,11 @@ pub struct SpoolHandle {
 }
 
 impl SpoolHandle {
+    #[cfg(test)]
+    pub(crate) fn pending_lead_for_test(&self)->Self {
+        Self{slack:Arc::new(AtomicU64::new(0)),finished:Arc::new(AtomicBool::new(false)),..self.clone()}
+    }
+
     pub fn is_memory(&self) -> bool { self.memory }
 
     /// Bytes of the item the spool holds locally, in a window around wherever

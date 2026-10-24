@@ -1,0 +1,1331 @@
+{
+  "accepted": true,
+  "cases": [
+    {
+      "name": "native-l0-0-r0-b3",
+      "controls": [
+        "native-l0-0-r0-b3-p0-control",
+        "native-l0-0-r0-b3-p1-control",
+        "native-l0-0-r0-b3-p2-control",
+        "native-l0-0-r0-b3-p3-control",
+        "native-l0-0-r0-b3-p4-control",
+        "native-l0-0-r0-b3-p5-control",
+        "native-l0-0-r0-b3-p6-control",
+        "native-l0-0-r0-b3-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l0-0-r0-b6",
+      "controls": [
+        "native-l0-0-r0-b6-p0-control",
+        "native-l0-0-r0-b6-p1-control",
+        "native-l0-0-r0-b6-p2-control",
+        "native-l0-0-r0-b6-p3-control",
+        "native-l0-0-r0-b6-p4-control",
+        "native-l0-0-r0-b6-p5-control",
+        "native-l0-0-r0-b6-p6-control",
+        "native-l0-0-r0-b6-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 6,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l0-0-r1-b3",
+      "controls": [
+        "native-l0-0-r1-b3-p0-control",
+        "native-l0-0-r1-b3-p1-control",
+        "native-l0-0-r1-b3-p2-control",
+        "native-l0-0-r1-b3-p3-control",
+        "native-l0-0-r1-b3-p4-control",
+        "native-l0-0-r1-b3-p5-control",
+        "native-l0-0-r1-b3-p6-control",
+        "native-l0-0-r1-b3-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l0-0-r1-b6",
+      "controls": [
+        "native-l0-0-r1-b6-p0-control",
+        "native-l0-0-r1-b6-p1-control",
+        "native-l0-0-r1-b6-p2-control",
+        "native-l0-0-r1-b6-p3-control",
+        "native-l0-0-r1-b6-p4-control",
+        "native-l0-0-r1-b6-p5-control",
+        "native-l0-0-r1-b6-p6-control",
+        "native-l0-0-r1-b6-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 6,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l0-0-r2-b3",
+      "controls": [
+        "native-l0-0-r2-b3-p0-control",
+        "native-l0-0-r2-b3-p1-control",
+        "native-l0-0-r2-b3-p2-control",
+        "native-l0-0-r2-b3-p3-control",
+        "native-l0-0-r2-b3-p4-control",
+        "native-l0-0-r2-b3-p5-control",
+        "native-l0-0-r2-b3-p6-control",
+        "native-l0-0-r2-b3-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l0-0-r2-b6",
+      "controls": [
+        "native-l0-0-r2-b6-p0-control",
+        "native-l0-0-r2-b6-p1-control",
+        "native-l0-0-r2-b6-p2-control",
+        "native-l0-0-r2-b6-p3-control",
+        "native-l0-0-r2-b6-p4-control",
+        "native-l0-0-r2-b6-p5-control",
+        "native-l0-0-r2-b6-p6-control",
+        "native-l0-0-r2-b6-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 6,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l0-1-r0-b3",
+      "controls": [
+        "native-l0-1-r0-b3-p0-control",
+        "native-l0-1-r0-b3-p1-control",
+        "native-l0-1-r0-b3-p2-control",
+        "native-l0-1-r0-b3-p3-control",
+        "native-l0-1-r0-b3-p4-control",
+        "native-l0-1-r0-b3-p5-control",
+        "native-l0-1-r0-b3-p6-control",
+        "native-l0-1-r0-b3-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l0-1-r0-b6",
+      "controls": [
+        "native-l0-1-r0-b6-p0-control",
+        "native-l0-1-r0-b6-p1-control",
+        "native-l0-1-r0-b6-p2-control",
+        "native-l0-1-r0-b6-p3-control",
+        "native-l0-1-r0-b6-p4-control",
+        "native-l0-1-r0-b6-p5-control",
+        "native-l0-1-r0-b6-p6-control",
+        "native-l0-1-r0-b6-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 6,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l0-1-r1-b3",
+      "controls": [
+        "native-l0-1-r1-b3-p0-control",
+        "native-l0-1-r1-b3-p1-control",
+        "native-l0-1-r1-b3-p2-control",
+        "native-l0-1-r1-b3-p3-control",
+        "native-l0-1-r1-b3-p4-control",
+        "native-l0-1-r1-b3-p5-control",
+        "native-l0-1-r1-b3-p6-control",
+        "native-l0-1-r1-b3-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l0-1-r1-b6",
+      "controls": [
+        "native-l0-1-r1-b6-p0-control",
+        "native-l0-1-r1-b6-p1-control",
+        "native-l0-1-r1-b6-p2-control",
+        "native-l0-1-r1-b6-p3-control",
+        "native-l0-1-r1-b6-p4-control",
+        "native-l0-1-r1-b6-p5-control",
+        "native-l0-1-r1-b6-p6-control",
+        "native-l0-1-r1-b6-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 6,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l0-1-r2-b3",
+      "controls": [
+        "native-l0-1-r2-b3-p0-control",
+        "native-l0-1-r2-b3-p1-control",
+        "native-l0-1-r2-b3-p2-control",
+        "native-l0-1-r2-b3-p3-control",
+        "native-l0-1-r2-b3-p4-control",
+        "native-l0-1-r2-b3-p5-control",
+        "native-l0-1-r2-b3-p6-control",
+        "native-l0-1-r2-b3-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l0-1-r2-b6",
+      "controls": [
+        "native-l0-1-r2-b6-p0-control",
+        "native-l0-1-r2-b6-p1-control",
+        "native-l0-1-r2-b6-p2-control",
+        "native-l0-1-r2-b6-p3-control",
+        "native-l0-1-r2-b6-p4-control",
+        "native-l0-1-r2-b6-p5-control",
+        "native-l0-1-r2-b6-p6-control",
+        "native-l0-1-r2-b6-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 6,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l1-0-r0-b3",
+      "controls": [
+        "native-l1-0-r0-b3-p0-control",
+        "native-l1-0-r0-b3-p1-control",
+        "native-l1-0-r0-b3-p2-control",
+        "native-l1-0-r0-b3-p3-control",
+        "native-l1-0-r0-b3-p4-control",
+        "native-l1-0-r0-b3-p5-control",
+        "native-l1-0-r0-b3-p6-control",
+        "native-l1-0-r0-b3-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 1,
+      "expanded": false
+    },
+    {
+      "name": "native-l1-0-r0-b6",
+      "controls": [
+        "native-l1-0-r0-b6-p0-control",
+        "native-l1-0-r0-b6-p1-control",
+        "native-l1-0-r0-b6-p2-control",
+        "native-l1-0-r0-b6-p3-control",
+        "native-l1-0-r0-b6-p4-control",
+        "native-l1-0-r0-b6-p5-control",
+        "native-l1-0-r0-b6-p6-control",
+        "native-l1-0-r0-b6-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 6,
+      "channels": 1,
+      "expanded": false
+    },
+    {
+      "name": "native-l1-0-r1-b3",
+      "controls": [
+        "native-l1-0-r1-b3-p0-control",
+        "native-l1-0-r1-b3-p1-control",
+        "native-l1-0-r1-b3-p2-control",
+        "native-l1-0-r1-b3-p3-control",
+        "native-l1-0-r1-b3-p4-control",
+        "native-l1-0-r1-b3-p5-control",
+        "native-l1-0-r1-b3-p6-control",
+        "native-l1-0-r1-b3-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 1,
+      "expanded": false
+    },
+    {
+      "name": "native-l1-0-r1-b6",
+      "controls": [
+        "native-l1-0-r1-b6-p0-control",
+        "native-l1-0-r1-b6-p1-control",
+        "native-l1-0-r1-b6-p2-control",
+        "native-l1-0-r1-b6-p3-control",
+        "native-l1-0-r1-b6-p4-control",
+        "native-l1-0-r1-b6-p5-control",
+        "native-l1-0-r1-b6-p6-control",
+        "native-l1-0-r1-b6-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 6,
+      "channels": 1,
+      "expanded": false
+    },
+    {
+      "name": "native-l1-0-r2-b3",
+      "controls": [
+        "native-l1-0-r2-b3-p0-control",
+        "native-l1-0-r2-b3-p1-control",
+        "native-l1-0-r2-b3-p2-control",
+        "native-l1-0-r2-b3-p3-control",
+        "native-l1-0-r2-b3-p4-control",
+        "native-l1-0-r2-b3-p5-control",
+        "native-l1-0-r2-b3-p6-control",
+        "native-l1-0-r2-b3-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 1,
+      "expanded": false
+    },
+    {
+      "name": "native-l1-0-r2-b6",
+      "controls": [
+        "native-l1-0-r2-b6-p0-control",
+        "native-l1-0-r2-b6-p1-control",
+        "native-l1-0-r2-b6-p2-control",
+        "native-l1-0-r2-b6-p3-control",
+        "native-l1-0-r2-b6-p4-control",
+        "native-l1-0-r2-b6-p5-control",
+        "native-l1-0-r2-b6-p6-control",
+        "native-l1-0-r2-b6-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 6,
+      "channels": 1,
+      "expanded": false
+    },
+    {
+      "name": "native-l1-1-r0-b3",
+      "controls": [
+        "native-l1-1-r0-b3-p0-control",
+        "native-l1-1-r0-b3-p1-control",
+        "native-l1-1-r0-b3-p2-control",
+        "native-l1-1-r0-b3-p3-control",
+        "native-l1-1-r0-b3-p4-control",
+        "native-l1-1-r0-b3-p5-control",
+        "native-l1-1-r0-b3-p6-control",
+        "native-l1-1-r0-b3-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l1-1-r0-b6",
+      "controls": [
+        "native-l1-1-r0-b6-p0-control",
+        "native-l1-1-r0-b6-p1-control",
+        "native-l1-1-r0-b6-p2-control",
+        "native-l1-1-r0-b6-p3-control",
+        "native-l1-1-r0-b6-p4-control",
+        "native-l1-1-r0-b6-p5-control",
+        "native-l1-1-r0-b6-p6-control",
+        "native-l1-1-r0-b6-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 6,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l1-1-r1-b3",
+      "controls": [
+        "native-l1-1-r1-b3-p0-control",
+        "native-l1-1-r1-b3-p1-control",
+        "native-l1-1-r1-b3-p2-control",
+        "native-l1-1-r1-b3-p3-control",
+        "native-l1-1-r1-b3-p4-control",
+        "native-l1-1-r1-b3-p5-control",
+        "native-l1-1-r1-b3-p6-control",
+        "native-l1-1-r1-b3-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l1-1-r1-b6",
+      "controls": [
+        "native-l1-1-r1-b6-p0-control",
+        "native-l1-1-r1-b6-p1-control",
+        "native-l1-1-r1-b6-p2-control",
+        "native-l1-1-r1-b6-p3-control",
+        "native-l1-1-r1-b6-p4-control",
+        "native-l1-1-r1-b6-p5-control",
+        "native-l1-1-r1-b6-p6-control",
+        "native-l1-1-r1-b6-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 6,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l1-1-r2-b3",
+      "controls": [
+        "native-l1-1-r2-b3-p0-control",
+        "native-l1-1-r2-b3-p1-control",
+        "native-l1-1-r2-b3-p2-control",
+        "native-l1-1-r2-b3-p3-control",
+        "native-l1-1-r2-b3-p4-control",
+        "native-l1-1-r2-b3-p5-control",
+        "native-l1-1-r2-b3-p6-control",
+        "native-l1-1-r2-b3-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l1-1-r2-b6",
+      "controls": [
+        "native-l1-1-r2-b6-p0-control",
+        "native-l1-1-r2-b6-p1-control",
+        "native-l1-1-r2-b6-p2-control",
+        "native-l1-1-r2-b6-p3-control",
+        "native-l1-1-r2-b6-p4-control",
+        "native-l1-1-r2-b6-p5-control",
+        "native-l1-1-r2-b6-p6-control",
+        "native-l1-1-r2-b6-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 6,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l2-0-r0-b3",
+      "controls": [
+        "native-l2-0-r0-b3-p0-control",
+        "native-l2-0-r0-b3-p1-control",
+        "native-l2-0-r0-b3-p2-control",
+        "native-l2-0-r0-b3-p3-control",
+        "native-l2-0-r0-b3-p4-control",
+        "native-l2-0-r0-b3-p5-control",
+        "native-l2-0-r0-b3-p6-control",
+        "native-l2-0-r0-b3-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l2-0-r0-b6",
+      "controls": [
+        "native-l2-0-r0-b6-p0-control",
+        "native-l2-0-r0-b6-p1-control",
+        "native-l2-0-r0-b6-p2-control",
+        "native-l2-0-r0-b6-p3-control",
+        "native-l2-0-r0-b6-p4-control",
+        "native-l2-0-r0-b6-p5-control",
+        "native-l2-0-r0-b6-p6-control",
+        "native-l2-0-r0-b6-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 6,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l2-0-r1-b3",
+      "controls": [
+        "native-l2-0-r1-b3-p0-control",
+        "native-l2-0-r1-b3-p1-control",
+        "native-l2-0-r1-b3-p2-control",
+        "native-l2-0-r1-b3-p3-control",
+        "native-l2-0-r1-b3-p4-control",
+        "native-l2-0-r1-b3-p5-control",
+        "native-l2-0-r1-b3-p6-control",
+        "native-l2-0-r1-b3-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l2-0-r1-b6",
+      "controls": [
+        "native-l2-0-r1-b6-p0-control",
+        "native-l2-0-r1-b6-p1-control",
+        "native-l2-0-r1-b6-p2-control",
+        "native-l2-0-r1-b6-p3-control",
+        "native-l2-0-r1-b6-p4-control",
+        "native-l2-0-r1-b6-p5-control",
+        "native-l2-0-r1-b6-p6-control",
+        "native-l2-0-r1-b6-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 6,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l2-0-r2-b3",
+      "controls": [
+        "native-l2-0-r2-b3-p0-control",
+        "native-l2-0-r2-b3-p1-control",
+        "native-l2-0-r2-b3-p2-control",
+        "native-l2-0-r2-b3-p3-control",
+        "native-l2-0-r2-b3-p4-control",
+        "native-l2-0-r2-b3-p5-control",
+        "native-l2-0-r2-b3-p6-control",
+        "native-l2-0-r2-b3-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l2-0-r2-b6",
+      "controls": [
+        "native-l2-0-r2-b6-p0-control",
+        "native-l2-0-r2-b6-p1-control",
+        "native-l2-0-r2-b6-p2-control",
+        "native-l2-0-r2-b6-p3-control",
+        "native-l2-0-r2-b6-p4-control",
+        "native-l2-0-r2-b6-p5-control",
+        "native-l2-0-r2-b6-p6-control",
+        "native-l2-0-r2-b6-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 6,
+      "channels": 2,
+      "expanded": false
+    },
+    {
+      "name": "native-l2-1-r0-b3",
+      "controls": [
+        "native-l2-1-r0-b3-p0-control",
+        "native-l2-1-r0-b3-p1-control",
+        "native-l2-1-r0-b3-p2-control",
+        "native-l2-1-r0-b3-p3-control",
+        "native-l2-1-r0-b3-p4-control",
+        "native-l2-1-r0-b3-p5-control",
+        "native-l2-1-r0-b3-p6-control",
+        "native-l2-1-r0-b3-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l2-1-r0-b6",
+      "controls": [
+        "native-l2-1-r0-b6-p0-control",
+        "native-l2-1-r0-b6-p1-control",
+        "native-l2-1-r0-b6-p2-control",
+        "native-l2-1-r0-b6-p3-control",
+        "native-l2-1-r0-b6-p4-control",
+        "native-l2-1-r0-b6-p5-control",
+        "native-l2-1-r0-b6-p6-control",
+        "native-l2-1-r0-b6-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 6,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l2-1-r1-b3",
+      "controls": [
+        "native-l2-1-r1-b3-p0-control",
+        "native-l2-1-r1-b3-p1-control",
+        "native-l2-1-r1-b3-p2-control",
+        "native-l2-1-r1-b3-p3-control",
+        "native-l2-1-r1-b3-p4-control",
+        "native-l2-1-r1-b3-p5-control",
+        "native-l2-1-r1-b3-p6-control",
+        "native-l2-1-r1-b3-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l2-1-r1-b6",
+      "controls": [
+        "native-l2-1-r1-b6-p0-control",
+        "native-l2-1-r1-b6-p1-control",
+        "native-l2-1-r1-b6-p2-control",
+        "native-l2-1-r1-b6-p3-control",
+        "native-l2-1-r1-b6-p4-control",
+        "native-l2-1-r1-b6-p5-control",
+        "native-l2-1-r1-b6-p6-control",
+        "native-l2-1-r1-b6-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 6,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l2-1-r2-b3",
+      "controls": [
+        "native-l2-1-r2-b3-p0-control",
+        "native-l2-1-r2-b3-p1-control",
+        "native-l2-1-r2-b3-p2-control",
+        "native-l2-1-r2-b3-p3-control",
+        "native-l2-1-r2-b3-p4-control",
+        "native-l2-1-r2-b3-p5-control",
+        "native-l2-1-r2-b3-p6-control",
+        "native-l2-1-r2-b3-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l2-1-r2-b6",
+      "controls": [
+        "native-l2-1-r2-b6-p0-control",
+        "native-l2-1-r2-b6-p1-control",
+        "native-l2-1-r2-b6-p2-control",
+        "native-l2-1-r2-b6-p3-control",
+        "native-l2-1-r2-b6-p4-control",
+        "native-l2-1-r2-b6-p5-control",
+        "native-l2-1-r2-b6-p6-control",
+        "native-l2-1-r2-b6-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 6,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l3-0-r0-b3",
+      "controls": [
+        "native-l3-0-r0-b3-p0-control",
+        "native-l3-0-r0-b3-p1-control",
+        "native-l3-0-r0-b3-p2-control",
+        "native-l3-0-r0-b3-p3-control",
+        "native-l3-0-r0-b3-p4-control",
+        "native-l3-0-r0-b3-p5-control",
+        "native-l3-0-r0-b3-p6-control",
+        "native-l3-0-r0-b3-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l3-0-r1-b3",
+      "controls": [
+        "native-l3-0-r1-b3-p0-control",
+        "native-l3-0-r1-b3-p1-control",
+        "native-l3-0-r1-b3-p2-control",
+        "native-l3-0-r1-b3-p3-control",
+        "native-l3-0-r1-b3-p4-control",
+        "native-l3-0-r1-b3-p5-control",
+        "native-l3-0-r1-b3-p6-control",
+        "native-l3-0-r1-b3-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l3-0-r2-b3",
+      "controls": [
+        "native-l3-0-r2-b3-p0-control",
+        "native-l3-0-r2-b3-p1-control",
+        "native-l3-0-r2-b3-p2-control",
+        "native-l3-0-r2-b3-p3-control",
+        "native-l3-0-r2-b3-p4-control",
+        "native-l3-0-r2-b3-p5-control",
+        "native-l3-0-r2-b3-p6-control",
+        "native-l3-0-r2-b3-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l3-1-r0-b3",
+      "controls": [
+        "native-l3-1-r0-b3-p0-control",
+        "native-l3-1-r0-b3-p1-control",
+        "native-l3-1-r0-b3-p2-control",
+        "native-l3-1-r0-b3-p3-control",
+        "native-l3-1-r0-b3-p4-control",
+        "native-l3-1-r0-b3-p5-control",
+        "native-l3-1-r0-b3-p6-control",
+        "native-l3-1-r0-b3-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 4,
+      "expanded": false
+    },
+    {
+      "name": "native-l3-1-r1-b3",
+      "controls": [
+        "native-l3-1-r1-b3-p0-control",
+        "native-l3-1-r1-b3-p1-control",
+        "native-l3-1-r1-b3-p2-control",
+        "native-l3-1-r1-b3-p3-control",
+        "native-l3-1-r1-b3-p4-control",
+        "native-l3-1-r1-b3-p5-control",
+        "native-l3-1-r1-b3-p6-control",
+        "native-l3-1-r1-b3-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 4,
+      "expanded": false
+    },
+    {
+      "name": "native-l3-1-r2-b3",
+      "controls": [
+        "native-l3-1-r2-b3-p0-control",
+        "native-l3-1-r2-b3-p1-control",
+        "native-l3-1-r2-b3-p2-control",
+        "native-l3-1-r2-b3-p3-control",
+        "native-l3-1-r2-b3-p4-control",
+        "native-l3-1-r2-b3-p5-control",
+        "native-l3-1-r2-b3-p6-control",
+        "native-l3-1-r2-b3-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 4,
+      "expanded": false
+    },
+    {
+      "name": "native-l4-0-r0-b3",
+      "controls": [
+        "native-l4-0-r0-b3-p0-control",
+        "native-l4-0-r0-b3-p1-control",
+        "native-l4-0-r0-b3-p2-control",
+        "native-l4-0-r0-b3-p3-control",
+        "native-l4-0-r0-b3-p4-control",
+        "native-l4-0-r0-b3-p5-control",
+        "native-l4-0-r0-b3-p6-control",
+        "native-l4-0-r0-b3-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l4-0-r1-b3",
+      "controls": [
+        "native-l4-0-r1-b3-p0-control",
+        "native-l4-0-r1-b3-p1-control",
+        "native-l4-0-r1-b3-p2-control",
+        "native-l4-0-r1-b3-p3-control",
+        "native-l4-0-r1-b3-p4-control",
+        "native-l4-0-r1-b3-p5-control",
+        "native-l4-0-r1-b3-p6-control",
+        "native-l4-0-r1-b3-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l4-0-r2-b3",
+      "controls": [
+        "native-l4-0-r2-b3-p0-control",
+        "native-l4-0-r2-b3-p1-control",
+        "native-l4-0-r2-b3-p2-control",
+        "native-l4-0-r2-b3-p3-control",
+        "native-l4-0-r2-b3-p4-control",
+        "native-l4-0-r2-b3-p5-control",
+        "native-l4-0-r2-b3-p6-control",
+        "native-l4-0-r2-b3-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 3,
+      "expanded": false
+    },
+    {
+      "name": "native-l4-1-r0-b3",
+      "controls": [
+        "native-l4-1-r0-b3-p0-control",
+        "native-l4-1-r0-b3-p1-control",
+        "native-l4-1-r0-b3-p2-control",
+        "native-l4-1-r0-b3-p3-control",
+        "native-l4-1-r0-b3-p4-control",
+        "native-l4-1-r0-b3-p5-control",
+        "native-l4-1-r0-b3-p6-control",
+        "native-l4-1-r0-b3-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 4,
+      "expanded": false
+    },
+    {
+      "name": "native-l4-1-r1-b3",
+      "controls": [
+        "native-l4-1-r1-b3-p0-control",
+        "native-l4-1-r1-b3-p1-control",
+        "native-l4-1-r1-b3-p2-control",
+        "native-l4-1-r1-b3-p3-control",
+        "native-l4-1-r1-b3-p4-control",
+        "native-l4-1-r1-b3-p5-control",
+        "native-l4-1-r1-b3-p6-control",
+        "native-l4-1-r1-b3-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 4,
+      "expanded": false
+    },
+    {
+      "name": "native-l4-1-r2-b3",
+      "controls": [
+        "native-l4-1-r2-b3-p0-control",
+        "native-l4-1-r2-b3-p1-control",
+        "native-l4-1-r2-b3-p2-control",
+        "native-l4-1-r2-b3-p3-control",
+        "native-l4-1-r2-b3-p4-control",
+        "native-l4-1-r2-b3-p5-control",
+        "native-l4-1-r2-b3-p6-control",
+        "native-l4-1-r2-b3-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 4,
+      "expanded": false
+    },
+    {
+      "name": "native-l5-0-r0-b3",
+      "controls": [
+        "native-l5-0-r0-b3-p0-control",
+        "native-l5-0-r0-b3-p1-control",
+        "native-l5-0-r0-b3-p2-control",
+        "native-l5-0-r0-b3-p3-control",
+        "native-l5-0-r0-b3-p4-control",
+        "native-l5-0-r0-b3-p5-control",
+        "native-l5-0-r0-b3-p6-control",
+        "native-l5-0-r0-b3-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 4,
+      "expanded": false
+    },
+    {
+      "name": "native-l5-0-r1-b3",
+      "controls": [
+        "native-l5-0-r1-b3-p0-control",
+        "native-l5-0-r1-b3-p1-control",
+        "native-l5-0-r1-b3-p2-control",
+        "native-l5-0-r1-b3-p3-control",
+        "native-l5-0-r1-b3-p4-control",
+        "native-l5-0-r1-b3-p5-control",
+        "native-l5-0-r1-b3-p6-control",
+        "native-l5-0-r1-b3-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 4,
+      "expanded": false
+    },
+    {
+      "name": "native-l5-0-r2-b3",
+      "controls": [
+        "native-l5-0-r2-b3-p0-control",
+        "native-l5-0-r2-b3-p1-control",
+        "native-l5-0-r2-b3-p2-control",
+        "native-l5-0-r2-b3-p3-control",
+        "native-l5-0-r2-b3-p4-control",
+        "native-l5-0-r2-b3-p5-control",
+        "native-l5-0-r2-b3-p6-control",
+        "native-l5-0-r2-b3-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 4,
+      "expanded": false
+    },
+    {
+      "name": "native-l5-1-r0-b3",
+      "controls": [
+        "native-l5-1-r0-b3-p0-control",
+        "native-l5-1-r0-b3-p1-control",
+        "native-l5-1-r0-b3-p2-control",
+        "native-l5-1-r0-b3-p3-control",
+        "native-l5-1-r0-b3-p4-control",
+        "native-l5-1-r0-b3-p5-control",
+        "native-l5-1-r0-b3-p6-control",
+        "native-l5-1-r0-b3-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 5,
+      "expanded": false
+    },
+    {
+      "name": "native-l5-1-r1-b3",
+      "controls": [
+        "native-l5-1-r1-b3-p0-control",
+        "native-l5-1-r1-b3-p1-control",
+        "native-l5-1-r1-b3-p2-control",
+        "native-l5-1-r1-b3-p3-control",
+        "native-l5-1-r1-b3-p4-control",
+        "native-l5-1-r1-b3-p5-control",
+        "native-l5-1-r1-b3-p6-control",
+        "native-l5-1-r1-b3-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 5,
+      "expanded": false
+    },
+    {
+      "name": "native-l5-1-r2-b3",
+      "controls": [
+        "native-l5-1-r2-b3-p0-control",
+        "native-l5-1-r2-b3-p1-control",
+        "native-l5-1-r2-b3-p2-control",
+        "native-l5-1-r2-b3-p3-control",
+        "native-l5-1-r2-b3-p4-control",
+        "native-l5-1-r2-b3-p5-control",
+        "native-l5-1-r2-b3-p6-control",
+        "native-l5-1-r2-b3-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 5,
+      "expanded": false
+    },
+    {
+      "name": "native-l6-0-r0-b3",
+      "controls": [
+        "native-l6-0-r0-b3-p0-control",
+        "native-l6-0-r0-b3-p1-control",
+        "native-l6-0-r0-b3-p2-control",
+        "native-l6-0-r0-b3-p3-control",
+        "native-l6-0-r0-b3-p4-control",
+        "native-l6-0-r0-b3-p5-control",
+        "native-l6-0-r0-b3-p6-control",
+        "native-l6-0-r0-b3-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 4,
+      "expanded": false
+    },
+    {
+      "name": "native-l6-0-r1-b3",
+      "controls": [
+        "native-l6-0-r1-b3-p0-control",
+        "native-l6-0-r1-b3-p1-control",
+        "native-l6-0-r1-b3-p2-control",
+        "native-l6-0-r1-b3-p3-control",
+        "native-l6-0-r1-b3-p4-control",
+        "native-l6-0-r1-b3-p5-control",
+        "native-l6-0-r1-b3-p6-control",
+        "native-l6-0-r1-b3-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 4,
+      "expanded": false
+    },
+    {
+      "name": "native-l6-0-r2-b3",
+      "controls": [
+        "native-l6-0-r2-b3-p0-control",
+        "native-l6-0-r2-b3-p1-control",
+        "native-l6-0-r2-b3-p2-control",
+        "native-l6-0-r2-b3-p3-control",
+        "native-l6-0-r2-b3-p4-control",
+        "native-l6-0-r2-b3-p5-control",
+        "native-l6-0-r2-b3-p6-control",
+        "native-l6-0-r2-b3-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 4,
+      "expanded": false
+    },
+    {
+      "name": "native-l6-1-r0-b3",
+      "controls": [
+        "native-l6-1-r0-b3-p0-control",
+        "native-l6-1-r0-b3-p1-control",
+        "native-l6-1-r0-b3-p2-control",
+        "native-l6-1-r0-b3-p3-control",
+        "native-l6-1-r0-b3-p4-control",
+        "native-l6-1-r0-b3-p5-control",
+        "native-l6-1-r0-b3-p6-control",
+        "native-l6-1-r0-b3-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 5,
+      "expanded": false
+    },
+    {
+      "name": "native-l6-1-r1-b3",
+      "controls": [
+        "native-l6-1-r1-b3-p0-control",
+        "native-l6-1-r1-b3-p1-control",
+        "native-l6-1-r1-b3-p2-control",
+        "native-l6-1-r1-b3-p3-control",
+        "native-l6-1-r1-b3-p4-control",
+        "native-l6-1-r1-b3-p5-control",
+        "native-l6-1-r1-b3-p6-control",
+        "native-l6-1-r1-b3-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 5,
+      "expanded": false
+    },
+    {
+      "name": "native-l6-1-r2-b3",
+      "controls": [
+        "native-l6-1-r2-b3-p0-control",
+        "native-l6-1-r2-b3-p1-control",
+        "native-l6-1-r2-b3-p2-control",
+        "native-l6-1-r2-b3-p3-control",
+        "native-l6-1-r2-b3-p4-control",
+        "native-l6-1-r2-b3-p5-control",
+        "native-l6-1-r2-b3-p6-control",
+        "native-l6-1-r2-b3-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 5,
+      "expanded": false
+    },
+    {
+      "name": "native-l7-0-r0-b3",
+      "controls": [
+        "native-l7-0-r0-b3-p0-control",
+        "native-l7-0-r0-b3-p1-control",
+        "native-l7-0-r0-b3-p2-control",
+        "native-l7-0-r0-b3-p3-control",
+        "native-l7-0-r0-b3-p4-control",
+        "native-l7-0-r0-b3-p5-control",
+        "native-l7-0-r0-b3-p6-control",
+        "native-l7-0-r0-b3-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 5,
+      "expanded": false
+    },
+    {
+      "name": "native-l7-0-r1-b3",
+      "controls": [
+        "native-l7-0-r1-b3-p0-control",
+        "native-l7-0-r1-b3-p1-control",
+        "native-l7-0-r1-b3-p2-control",
+        "native-l7-0-r1-b3-p3-control",
+        "native-l7-0-r1-b3-p4-control",
+        "native-l7-0-r1-b3-p5-control",
+        "native-l7-0-r1-b3-p6-control",
+        "native-l7-0-r1-b3-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 5,
+      "expanded": false
+    },
+    {
+      "name": "native-l7-0-r2-b3",
+      "controls": [
+        "native-l7-0-r2-b3-p0-control",
+        "native-l7-0-r2-b3-p1-control",
+        "native-l7-0-r2-b3-p2-control",
+        "native-l7-0-r2-b3-p3-control",
+        "native-l7-0-r2-b3-p4-control",
+        "native-l7-0-r2-b3-p5-control",
+        "native-l7-0-r2-b3-p6-control",
+        "native-l7-0-r2-b3-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 5,
+      "expanded": false
+    },
+    {
+      "name": "native-l7-1-r0-b3",
+      "controls": [
+        "native-l7-1-r0-b3-p0-control",
+        "native-l7-1-r0-b3-p1-control",
+        "native-l7-1-r0-b3-p2-control",
+        "native-l7-1-r0-b3-p3-control",
+        "native-l7-1-r0-b3-p4-control",
+        "native-l7-1-r0-b3-p5-control",
+        "native-l7-1-r0-b3-p6-control",
+        "native-l7-1-r0-b3-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 6,
+      "expanded": false
+    },
+    {
+      "name": "native-l7-1-r1-b3",
+      "controls": [
+        "native-l7-1-r1-b3-p0-control",
+        "native-l7-1-r1-b3-p1-control",
+        "native-l7-1-r1-b3-p2-control",
+        "native-l7-1-r1-b3-p3-control",
+        "native-l7-1-r1-b3-p4-control",
+        "native-l7-1-r1-b3-p5-control",
+        "native-l7-1-r1-b3-p6-control",
+        "native-l7-1-r1-b3-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 6,
+      "expanded": false
+    },
+    {
+      "name": "native-l7-1-r2-b3",
+      "controls": [
+        "native-l7-1-r2-b3-p0-control",
+        "native-l7-1-r2-b3-p1-control",
+        "native-l7-1-r2-b3-p2-control",
+        "native-l7-1-r2-b3-p3-control",
+        "native-l7-1-r2-b3-p4-control",
+        "native-l7-1-r2-b3-p5-control",
+        "native-l7-1-r2-b3-p6-control",
+        "native-l7-1-r2-b3-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 6,
+      "expanded": false
+    },
+    {
+      "name": "expanded-r0-b3-t0",
+      "controls": [
+        "expanded-r0-b3-t0-p0-control",
+        "expanded-r0-b3-t0-p1-control",
+        "expanded-r0-b3-t0-p2-control",
+        "expanded-r0-b3-t0-p3-control",
+        "expanded-r0-b3-t0-p4-control",
+        "expanded-r0-b3-t0-p5-control",
+        "expanded-r0-b3-t0-p6-control",
+        "expanded-r0-b3-t0-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 8,
+      "expanded": true
+    },
+    {
+      "name": "expanded-r0-b3-t1",
+      "controls": [
+        "expanded-r0-b3-t1-p0-control",
+        "expanded-r0-b3-t1-p1-control",
+        "expanded-r0-b3-t1-p2-control",
+        "expanded-r0-b3-t1-p3-control",
+        "expanded-r0-b3-t1-p4-control",
+        "expanded-r0-b3-t1-p5-control",
+        "expanded-r0-b3-t1-p6-control",
+        "expanded-r0-b3-t1-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 8,
+      "expanded": true
+    },
+    {
+      "name": "expanded-r0-b6-t0",
+      "controls": [
+        "expanded-r0-b6-t0-p0-control",
+        "expanded-r0-b6-t0-p1-control",
+        "expanded-r0-b6-t0-p2-control",
+        "expanded-r0-b6-t0-p3-control",
+        "expanded-r0-b6-t0-p4-control",
+        "expanded-r0-b6-t0-p5-control",
+        "expanded-r0-b6-t0-p6-control",
+        "expanded-r0-b6-t0-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 6,
+      "channels": 8,
+      "expanded": true
+    },
+    {
+      "name": "expanded-r0-b6-t1",
+      "controls": [
+        "expanded-r0-b6-t1-p0-control",
+        "expanded-r0-b6-t1-p1-control",
+        "expanded-r0-b6-t1-p2-control",
+        "expanded-r0-b6-t1-p3-control",
+        "expanded-r0-b6-t1-p4-control",
+        "expanded-r0-b6-t1-p5-control",
+        "expanded-r0-b6-t1-p6-control",
+        "expanded-r0-b6-t1-p7-control"
+      ],
+      "rate": 48000,
+      "blocks": 6,
+      "channels": 8,
+      "expanded": true
+    },
+    {
+      "name": "expanded-r1-b3-t0",
+      "controls": [
+        "expanded-r1-b3-t0-p0-control",
+        "expanded-r1-b3-t0-p1-control",
+        "expanded-r1-b3-t0-p2-control",
+        "expanded-r1-b3-t0-p3-control",
+        "expanded-r1-b3-t0-p4-control",
+        "expanded-r1-b3-t0-p5-control",
+        "expanded-r1-b3-t0-p6-control",
+        "expanded-r1-b3-t0-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 8,
+      "expanded": true
+    },
+    {
+      "name": "expanded-r1-b3-t1",
+      "controls": [
+        "expanded-r1-b3-t1-p0-control",
+        "expanded-r1-b3-t1-p1-control",
+        "expanded-r1-b3-t1-p2-control",
+        "expanded-r1-b3-t1-p3-control",
+        "expanded-r1-b3-t1-p4-control",
+        "expanded-r1-b3-t1-p5-control",
+        "expanded-r1-b3-t1-p6-control",
+        "expanded-r1-b3-t1-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 8,
+      "expanded": true
+    },
+    {
+      "name": "expanded-r1-b6-t0",
+      "controls": [
+        "expanded-r1-b6-t0-p0-control",
+        "expanded-r1-b6-t0-p1-control",
+        "expanded-r1-b6-t0-p2-control",
+        "expanded-r1-b6-t0-p3-control",
+        "expanded-r1-b6-t0-p4-control",
+        "expanded-r1-b6-t0-p5-control",
+        "expanded-r1-b6-t0-p6-control",
+        "expanded-r1-b6-t0-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 6,
+      "channels": 8,
+      "expanded": true
+    },
+    {
+      "name": "expanded-r1-b6-t1",
+      "controls": [
+        "expanded-r1-b6-t1-p0-control",
+        "expanded-r1-b6-t1-p1-control",
+        "expanded-r1-b6-t1-p2-control",
+        "expanded-r1-b6-t1-p3-control",
+        "expanded-r1-b6-t1-p4-control",
+        "expanded-r1-b6-t1-p5-control",
+        "expanded-r1-b6-t1-p6-control",
+        "expanded-r1-b6-t1-p7-control"
+      ],
+      "rate": 44100,
+      "blocks": 6,
+      "channels": 8,
+      "expanded": true
+    },
+    {
+      "name": "expanded-r2-b3-t0",
+      "controls": [
+        "expanded-r2-b3-t0-p0-control",
+        "expanded-r2-b3-t0-p1-control",
+        "expanded-r2-b3-t0-p2-control",
+        "expanded-r2-b3-t0-p3-control",
+        "expanded-r2-b3-t0-p4-control",
+        "expanded-r2-b3-t0-p5-control",
+        "expanded-r2-b3-t0-p6-control",
+        "expanded-r2-b3-t0-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 8,
+      "expanded": true
+    },
+    {
+      "name": "expanded-r2-b3-t1",
+      "controls": [
+        "expanded-r2-b3-t1-p0-control",
+        "expanded-r2-b3-t1-p1-control",
+        "expanded-r2-b3-t1-p2-control",
+        "expanded-r2-b3-t1-p3-control",
+        "expanded-r2-b3-t1-p4-control",
+        "expanded-r2-b3-t1-p5-control",
+        "expanded-r2-b3-t1-p6-control",
+        "expanded-r2-b3-t1-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 3,
+      "channels": 8,
+      "expanded": true
+    },
+    {
+      "name": "expanded-r2-b6-t0",
+      "controls": [
+        "expanded-r2-b6-t0-p0-control",
+        "expanded-r2-b6-t0-p1-control",
+        "expanded-r2-b6-t0-p2-control",
+        "expanded-r2-b6-t0-p3-control",
+        "expanded-r2-b6-t0-p4-control",
+        "expanded-r2-b6-t0-p5-control",
+        "expanded-r2-b6-t0-p6-control",
+        "expanded-r2-b6-t0-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 6,
+      "channels": 8,
+      "expanded": true
+    },
+    {
+      "name": "expanded-r2-b6-t1",
+      "controls": [
+        "expanded-r2-b6-t1-p0-control",
+        "expanded-r2-b6-t1-p1-control",
+        "expanded-r2-b6-t1-p2-control",
+        "expanded-r2-b6-t1-p3-control",
+        "expanded-r2-b6-t1-p4-control",
+        "expanded-r2-b6-t1-p5-control",
+        "expanded-r2-b6-t1-p6-control",
+        "expanded-r2-b6-t1-p7-control"
+      ],
+      "rate": 32000,
+      "blocks": 6,
+      "channels": 8,
+      "expanded": true
+    }
+  ]
+}

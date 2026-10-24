@@ -17353,3 +17353,281 @@ Publication gates (2026-10-24): offline player-feature sequential library
 minimal no-default-features library check passes. The session fixture generator
 reproduces all **9 artifacts / 265,705 bytes** with process/socket creation
 denied. No physical audio-device qualification is claimed.
+
+
+### Explicit AC-3 dialogue normalization (2026-10-24)
+
+AC-3 now retains `dialnorm` and `dialnorm2` and offers
+`Ac3Decoder::with_dialogue_normalization(true)`. The optional decoder-side
+policy normalizes to -31 dB using `10^((level-31)/20)`; reserved zero means
+31. Dual-mono programme levels are independent, LFE follows programme one,
+and scaling precedes channel folding/final clipping without changing dynrng
+hold state. Reset retains the choice. Existing default output is unchanged.
+This implements the explicit decoder path permitted by TS 102 366 4.4.2.8
+and 6.6; no physical output calibration is claimed.
+
+Before applying the retained fields, the acceptance failed on valid
+`l0-0-r0-d1.mkv` PCM (actual 0.00000021444474, expected
+0.0000000067813377). The owned offline generator covers 216 cases: all
+32 field values, frame-to-frame changes, both dual programmes, mono/stereo,
+LFE, three rates, MP4/Matroska, Line/RF, rewind and same-decoder reset.
+Loud RF cases compare against unclipped quiet controls, with identical
+mantissas and independently derived exponent scaling, to distinguish gain
+application before clipping. Fixture authoring required correcting its loud
+control scaling; this was a test-authoring error, not an additional decoder bug.
+
+The generator reproduces 300 artifacts / 6,965,813 bytes with subprocess and
+socket creation denied. Ordinary tests only consume checked-in fixture bytes.
+Full sequential player-feature library: 1031 passed, 0 failed, 26 ignored
+(`/tmp/fvid-ac3-dialogue-library.log`). E-AC-3 dialogue normalization, player
+session selection for this new policy and remaining codec/profile/mixing
+capabilities remain open.
+Focused final gate `/tmp/fvid-ac3-dialogue-final.log`: 4 passed, 0 failed
+or ignored across AC-3 dialogue normalization, AC-3 RF and Dolby worker policy.
+
+
+### Explicit E-AC-3 dialogue normalization (2026-10-24)
+
+E-AC-3 `Frame` now exposes both raw BSI dialogue levels.
+`Eac3Decoder::with_dialogue_normalization(true)` and the matching
+`PresentationDecoder` builder apply -31 dB reference normalization. The scalar
+function is shared with AC-3; zero has the reserved-value fallback to 31.
+The selection survives reset and is copied into expanded constituent decoders.
+It remains opt-in; no existing default volume or device calibration changes.
+
+Native output captures the combined normalization/compression gain with its
+delayed transient block, without modifying dynrng hold/reuse state. Expanded
+output captures only each component's normalization with that component's
+PCM, applies it after transient correction and before channel replacement,
+then applies the final dependent's common compression gain after assembly.
+This keeps the two gain policies distinct; compatibility output continues to
+use the independent stream's own compression and dialogue fields.
+Reference: ETSI TS 102 366 V1.4.1 clauses 4.4.2.8, 6.6 and E.2.8.5.
+
+The staged native acceptance failed specifically at valid
+`l0-0-c127-d1: normalized native PCM`, after its unchanged-waveform control
+had passed (`/tmp/fvid-eac3-dialogue-red.log`). Owned synthetic fixtures cover
+152 native cases (all 32 values, both dual programmes, every ordinary acmod
+with/without LFE, frame updates, RF/Line, clipping and transient correction)
+and 80 expanded cases (7/8 speakers, 44.1/48 kHz, 3/6 blocks, replacement
+roles, dual/stereo switches, clipping and delayed transient history).
+Native exact seek is checked at 20 ms; expanded Matroska/MP4 seek at 40 ms.
+Tests also cover same-decoder reset, rewind, direct presentation API, raw
+priming, default output preservation and independent compatibility output.
+
+`eac3-dialogue-normalization`: 325 artifacts / 6,251,276 bytes.
+`eac3-dialogue-expanded`: 433 artifacts / 14,963,320 bytes. Both regenerate
+byte-identically with subprocess/socket creation denied. Tests consume only
+checked-in bytes; no FFmpeg, network or private source material is required.
+
+Full sequential offline player-feature library: 1031 passed, 0 failed,
+26 ignored (`/tmp/fvid-eac3-dialogue-library.log`). Related six-target gate:
+8 passed, 0 failed/ignored (`/tmp/fvid-eac3-dialogue-final.log`), plus the
+new independent-compatibility check passed separately. Player session
+selection for dialogue normalization and remaining codec/profile/mixing
+capabilities are still open.
+Final accepted-manifest gate: 3 passed, 0 failed/ignored
+(`/tmp/fvid-eac3-dialogue-acceptance.log`). Both `fvid` and `fvid-player`
+build offline with the player feature (`/tmp/fvid-eac3-dialogue-build.log`).
+
+
+### Player session dialogue normalization (2026-10-24)
+
+`fvid play --dolby-dialogue-normalization on|off` now selects decoder-side
+AC-3/E-AC-3 dialogue normalization. Off remains the default; inline and
+separate values work through native and media argument parsers. Missing,
+empty and invalid values are rejected. The same startup policy carries the
+existing `--dolby-compression line|rf` choice.
+
+`AudioPlayback::start_with_dolby_policy` owns both choices independently of
+decoder lifetime. It respects the reader's decoder factory, reapplies both
+settings after reader reset/replacement and checkpoint restoration, and
+keeps the old start/compression APIs with their previous defaults. The player
+copies this policy into background file preparation and every audio worker,
+including workers opened for another audio track. Dolby decoder trait hooks
+cover AC-3, E-AC-3 and direct presentation factories. Other codecs ignore them.
+
+The staged worker acceptance failed on generation 0 packet 0: correct
+18,432-byte PCM length but incorrect normalized contents
+(`/tmp/fvid-dolby-normalization-worker-red.log`). The new owned ten-movie
+MP4/Matroska matrix compares exact PCM/PTS with independently configured
+typed decoder references for both normalization choices, Line/RF, rewind,
+40 ms seek, initial ResetDecoder and reader-forced replacement. It includes
+dual-mono/LFE, loud clipping witnesses, expanded transient/role switches,
+direct presentation factories and neutral PCM proving the Dolby-only scope.
+No physical audio output or live in-session mode switching is claimed.
+
+`dolby-player-normalization` reproduces 11 artifacts / 374,037 bytes with
+subprocess/socket creation denied; normal tests use checked-in bytes only.
+Final offline gates: 1032 library tests passed, 0 failed, 26 ignored
+(`/tmp/fvid-dolby-normalization-library.log`); five focused integration
+targets passed 6 tests, 0 failed/ignored
+(`/tmp/fvid-dolby-normalization-regressions.log`). Both player binaries build.
+CLI help and invalid-value rejection were also checked using the built binary.
+Remaining codec/profile/programme-mixing capability gaps remain open.
+
+
+### Explicit E-AC-3 independent programme selection (2026-10-24)
+
+The mixing audit found a prerequisite gap: both decoders could only render
+independent programme 0. `Eac3Decoder::with_programme(id)` and the matching
+`PresentationDecoder` builder now select IDs 0..7 for native and expanded
+output. Values above 7 are rejected. The default remains zero. Reset retains
+the selection; changing it clears finished, transform, overlap and delayed
+PCM state while retaining compression/normalization choices. Callers provide
+the selected programme's rate/output geometry.
+
+Native routing validates skipped envelopes without parsing unselected channel
+syntax or touching their PCM/RNG state. Expanded routing associates dependent
+IDs with the selected independent ID and keeps component history separate.
+`checked_programme_frame`, `speaker_mask_for_programme` and
+`presentation::packet_speakers_for_programme` expose selected metadata/layout
+inspection. Legacy base-only probes and reader setup retain their zero default.
+The rules follow ETSI TS 102 366 E.2.8.3/E.2.8.4 programme selection; this does
+not implement simultaneous programme mixing.
+
+With the API staged but selection ignored, acceptance failed specifically on
+`native-l0-0-r0-b3: programme1 raw PCM differs`, after programme-zero and
+nonzero/choice-distinguishing controls had passed
+(`/tmp/fvid-eac3-programme-red.log`). The owned synthetic matrix contains
+78 multiplexed short videos: 66 native shapes across all ordinary acmod/LFE,
+32/44.1/48 kHz and 3/6 blocks where authored; 12 expanded eight-speaker cases
+with dual/stereo dependent switches, transient lookahead and 3/6 blocks. Every
+case carries all eight sequential independent IDs with distinct waveforms and
+separate programme-zero control movies for each choice.
+
+Acceptance compares exact raw PCM with raw priming, Matroska PCM/PTS, rewind,
+reset, direct presentation output and a switch after EOF. It checks speaker
+assignment, invalid IDs and unselected-only input followed by valid input.
+Additional witnesses damage every unselected payload without repairing CRC,
+while preserving envelopes: selected PCM must remain byte-identical. These
+are API tests; no player programme selector or physical output is claimed.
+Raw elementary-reader indexing currently retains only programme zero; exposing
+selection in those readers/container factories remains separate integration.
+Programme mixing metadata/application and other codec/profile gaps remain open.
+
+The generator reproduces 1,405 artifacts / 44,278,270 bytes byte-identically
+with subprocess/socket creation denied. No private source material, FFmpeg or
+network is used. Ordinary tests only read checked-in bytes.
+
+Offline gates: full sequential player-feature library, 1032 passed, 0 failed,
+26 ignored (`/tmp/fvid-eac3-programme-library.log`); four related integration
+targets, 13 passed, 0 failed/ignored (`/tmp/fvid-eac3-programme-final.log`).
+The final accepted-manifest selection target passed all 3 tests again
+(`/tmp/fvid-eac3-programme-acceptance.log`). Both player binaries build
+(`/tmp/fvid-eac3-programme-build.log`).
+
+
+### Elementary E-AC-3 programme reader and player tracks (2026-10-24)
+
+`Ac3::parse_programme` / `parse_compatible_programme` and
+`Ac3AudioReader::open_programme` / `open_compatible_programme` index encoded
+independent IDs 0..7. The selected programme alone supplies sample time,
+geometry, speaker mask, packet bytes and raw priming. Expanded packets retain
+only that programme's associated dependents; compatibility packets retain
+only its independent frame. Decoder factories preserve the selection across
+worker reset, rewind and seek. Missing IDs fail rather than falling back to zero.
+
+The reader now exposes a bounded programme catalogue through `audio_tracks`
+and `audio_track_index`, and `open_track` accepts zero-based catalogue positions.
+The player factory uses this API, so existing track selection and A/Shift+A
+can select elementary .ec3 programmes. Native CLI `--audio-track` remains
+one-based: for a healthy 0..7 catalogue, track 2 selects encoded programme 1.
+No container MP4/Matroska programme catalogue or simultaneous mixing is added.
+
+Catalogue discovery is best-effort metadata inspection; failures in unselected
+channel syntax do not invalidate the selected index. Nonzero programme opens
+can recognize an opaque independent-zero envelope without requiring its BSI
+to parse. The selected index is validated separately, including byte/packet
+limits and truncated-tail reporting. Track opens do not first fully parse
+programme zero, avoiding a dependency on unselected geometry. Default AC-3
+and programme-zero entry points retain their previous choice.
+
+With the reader API staged but still opening zero, the regression failed on
+`native-l0-1-r1-b3: programme1 PCM` after matching duration/geometry and
+programme-zero controls (`/tmp/fvid-eac3-programme-reader-red.log`). Eight
+owned short multiplexed movies cover all eight IDs, expanded/native and
+independent compatibility output, 32/44.1/48 kHz, transient history and a new
+heterogeneous programme set (all ordinary acmod, alternating LFE). Acceptance
+compares exact PCM/PTS, catalogue geometry/masks, selected packet envelopes,
+rewind, exact 40 ms seek and real audio-worker capture with standalone
+programme-zero control streams. Negative fixtures cover damaged unselected BSI,
+missing programme 7, truncated unselected tails and bounded indexing.
+
+A headless player-factory test exercises the actual native `--audio-track`
+parser and `AUDIO_READERS` table for every heterogeneous programme, comparing
+geometry, masks and PCM to independent control files. No physical audio
+backend or live window was opened.
+
+The generator reproduces 152 artifacts / 5,944,333 bytes byte-identically
+with subprocess/socket creation denied. Normal tests consume checked-in bytes
+only, requiring neither FFmpeg nor network nor private source media.
+Six related integration targets passed 18 tests, 0 failed/ignored
+(`/tmp/fvid-eac3-programme-reader-regressions.log`). Both binaries build;
+the built help exposes the elementary programme/track behavior.
+
+The first full sequential library gate had 1032 passing tests, 26 ignored
+and one failure in `seeking_after_audio_failure_keeps_video_playing`. A first
+correctly filtered isolated run also failed; a short-name --exact invocation
+ran zero tests and is not counted. Diagnostic-only failure-state reporting
+was added without changing the timeout or expectations. The next isolated
+run and three frozen-binary repetitions passed, but this does not establish
+a fix for the intermittent seek failure. The initial failures are retained
+in `/tmp/fvid-eac3-programme-reader-library.log` and
+`/tmp/fvid-eac3-reader-seek-failure-isolated.log`.
+The subsequent full frozen-binary sequential repeat passed 1033 tests,
+0 failed, 26 ignored (`/tmp/fvid-eac3-programme-reader-library-repeat.log`).
+The intermittent seek issue remains unproven fixed despite this green repeat.
+
+
+### Explicit Matroska E-AC-3 programme reader (2026-10-24)
+
+`WebmAudioReader::open_programme(reader, limits, nth, programme)` now selects
+encoded programme 0..7 within a zero-based physical E-AC-3 audio track. The
+explicit path probes the selected frame rate, native/expanded channels and
+speaker mask before creating its decoder. It can therefore use the encoded
+rate when the container has a placeholder rate, and uses a selected stream's
+geometry when independent programmes have different layouts. The decoder
+factory, rewind and seek retain the programme choice. Legacy `open`/`open_at`
+keep programme-zero admission/metadata behavior.
+
+A shared presentation probe waits for the selected programme's own dependent
+group to close; a native independent-only programme closes at the next
+independent frame or EOF. Its prefix storage/packet bound is derived from two
+8-programme cycles, at most eight dependents each and 4096 bytes per syncframe.
+Selected setup CRC/syntax/timing is checked. Unselected BSI and CRC are not
+parsed. Speaker roles requiring an extended device map remain an explicit
+refusal. This probe is setup inspection, not a claim that damaged selected
+media is accepted.
+
+Sample-clock accumulation now counts only the selected independent frames.
+Unselected and dependent packets do not add samples or replace the selected
+frame's delayed presentation metadata. This supports individual syncframe
+blocks as well as grouped encoded packets. The individual-frame mapping was
+checked against [Matroska codec mappings](https://www.matroska.org/technical/codec_specs.html).
+
+The staged acceptance failed specifically at
+`native-l0-1-r1-b3: programme1 PCM/PTS`, after programme zero and geometry
+checks passed (`/tmp/fvid-eac3-matroska-programmes-red.log`). The accepted
+owned matrix has 11 movies and all eight choices each, with standalone
+programme-zero controls: heterogeneous native layouts/LFE, 32/44.1/48 kHz,
+3/6 blocks, eight-channel dependent assembly/transient processing, split
+substream blocks and placeholder-rate metadata. Exact PCM/PTS, speaker masks,
+physical-track metadata, duration, rewind, 40 ms seek and real worker capture
+are compared to the controls. Further tests accept damaged unselected BSI
+and separately reject absent IDs, damaged selected setup, wrong physical
+track/non-E-AC-3 input and IDs above seven without fallback.
+
+The generator reproduces 80 artifacts / 3,866,967 bytes byte-identically with
+subprocess/socket creation denied. Ordinary tests only consume checked-in
+bytes; no FFmpeg, network or private source media is involved.
+Offline sequential library: 1033 passed, 0 failed, 26 ignored
+(`/tmp/fvid-eac3-matroska-programmes-library.log`). Six related integration
+targets: 26 passed, 0 failed/ignored
+(`/tmp/fvid-eac3-matroska-programmes-regressions.log`). Both player binaries
+build. The known intermittent failed-audio seek scenario passed this run;
+its underlying issue is not claimed fixed.
+
+This is explicit reader API acceptance. Physical container track indices are
+unchanged; MP4 programme selection, common player selection across containers
+and simultaneous programme mixing remain open along with other codec gaps.

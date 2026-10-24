@@ -1,0 +1,429 @@
+{
+  "accepted": true,
+  "cases": [
+    {
+      "name": "native-l0-1-r1-b3",
+      "controls": [
+        {
+          "name": "native-l0-1-r1-b3-p0-control",
+          "channels": 3,
+          "blocks": 3,
+          "rate": 44100
+        },
+        {
+          "name": "native-l0-1-r1-b3-p1-control",
+          "channels": 3,
+          "blocks": 3,
+          "rate": 44100
+        },
+        {
+          "name": "native-l0-1-r1-b3-p2-control",
+          "channels": 3,
+          "blocks": 3,
+          "rate": 44100
+        },
+        {
+          "name": "native-l0-1-r1-b3-p3-control",
+          "channels": 3,
+          "blocks": 3,
+          "rate": 44100
+        },
+        {
+          "name": "native-l0-1-r1-b3-p4-control",
+          "channels": 3,
+          "blocks": 3,
+          "rate": 44100
+        },
+        {
+          "name": "native-l0-1-r1-b3-p5-control",
+          "channels": 3,
+          "blocks": 3,
+          "rate": 44100
+        },
+        {
+          "name": "native-l0-1-r1-b3-p6-control",
+          "channels": 3,
+          "blocks": 3,
+          "rate": 44100
+        },
+        {
+          "name": "native-l0-1-r1-b3-p7-control",
+          "channels": 3,
+          "blocks": 3,
+          "rate": 44100
+        }
+      ]
+    },
+    {
+      "name": "native-l1-1-r0-b6",
+      "controls": [
+        {
+          "name": "native-l1-1-r0-b6-p0-control",
+          "channels": 2,
+          "blocks": 6,
+          "rate": 48000
+        },
+        {
+          "name": "native-l1-1-r0-b6-p1-control",
+          "channels": 2,
+          "blocks": 6,
+          "rate": 48000
+        },
+        {
+          "name": "native-l1-1-r0-b6-p2-control",
+          "channels": 2,
+          "blocks": 6,
+          "rate": 48000
+        },
+        {
+          "name": "native-l1-1-r0-b6-p3-control",
+          "channels": 2,
+          "blocks": 6,
+          "rate": 48000
+        },
+        {
+          "name": "native-l1-1-r0-b6-p4-control",
+          "channels": 2,
+          "blocks": 6,
+          "rate": 48000
+        },
+        {
+          "name": "native-l1-1-r0-b6-p5-control",
+          "channels": 2,
+          "blocks": 6,
+          "rate": 48000
+        },
+        {
+          "name": "native-l1-1-r0-b6-p6-control",
+          "channels": 2,
+          "blocks": 6,
+          "rate": 48000
+        },
+        {
+          "name": "native-l1-1-r0-b6-p7-control",
+          "channels": 2,
+          "blocks": 6,
+          "rate": 48000
+        }
+      ]
+    },
+    {
+      "name": "native-l2-0-r2-b3",
+      "controls": [
+        {
+          "name": "native-l2-0-r2-b3-p0-control",
+          "channels": 2,
+          "blocks": 3,
+          "rate": 32000
+        },
+        {
+          "name": "native-l2-0-r2-b3-p1-control",
+          "channels": 2,
+          "blocks": 3,
+          "rate": 32000
+        },
+        {
+          "name": "native-l2-0-r2-b3-p2-control",
+          "channels": 2,
+          "blocks": 3,
+          "rate": 32000
+        },
+        {
+          "name": "native-l2-0-r2-b3-p3-control",
+          "channels": 2,
+          "blocks": 3,
+          "rate": 32000
+        },
+        {
+          "name": "native-l2-0-r2-b3-p4-control",
+          "channels": 2,
+          "blocks": 3,
+          "rate": 32000
+        },
+        {
+          "name": "native-l2-0-r2-b3-p5-control",
+          "channels": 2,
+          "blocks": 3,
+          "rate": 32000
+        },
+        {
+          "name": "native-l2-0-r2-b3-p6-control",
+          "channels": 2,
+          "blocks": 3,
+          "rate": 32000
+        },
+        {
+          "name": "native-l2-0-r2-b3-p7-control",
+          "channels": 2,
+          "blocks": 3,
+          "rate": 32000
+        }
+      ]
+    },
+    {
+      "name": "native-l7-1-r0-b3",
+      "controls": [
+        {
+          "name": "native-l7-1-r0-b3-p0-control",
+          "channels": 6,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "native-l7-1-r0-b3-p1-control",
+          "channels": 6,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "native-l7-1-r0-b3-p2-control",
+          "channels": 6,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "native-l7-1-r0-b3-p3-control",
+          "channels": 6,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "native-l7-1-r0-b3-p4-control",
+          "channels": 6,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "native-l7-1-r0-b3-p5-control",
+          "channels": 6,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "native-l7-1-r0-b3-p6-control",
+          "channels": 6,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "native-l7-1-r0-b3-p7-control",
+          "channels": 6,
+          "blocks": 3,
+          "rate": 48000
+        }
+      ]
+    },
+    {
+      "name": "expanded-r0-b3-t0",
+      "controls": [
+        {
+          "name": "expanded-r0-b3-t0-p0-control",
+          "channels": 8,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "expanded-r0-b3-t0-p1-control",
+          "channels": 8,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "expanded-r0-b3-t0-p2-control",
+          "channels": 8,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "expanded-r0-b3-t0-p3-control",
+          "channels": 8,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "expanded-r0-b3-t0-p4-control",
+          "channels": 8,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "expanded-r0-b3-t0-p5-control",
+          "channels": 8,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "expanded-r0-b3-t0-p6-control",
+          "channels": 8,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "expanded-r0-b3-t0-p7-control",
+          "channels": 8,
+          "blocks": 3,
+          "rate": 48000
+        }
+      ]
+    },
+    {
+      "name": "expanded-r1-b6-t1",
+      "controls": [
+        {
+          "name": "expanded-r1-b6-t1-p0-control",
+          "channels": 8,
+          "blocks": 6,
+          "rate": 44100
+        },
+        {
+          "name": "expanded-r1-b6-t1-p1-control",
+          "channels": 8,
+          "blocks": 6,
+          "rate": 44100
+        },
+        {
+          "name": "expanded-r1-b6-t1-p2-control",
+          "channels": 8,
+          "blocks": 6,
+          "rate": 44100
+        },
+        {
+          "name": "expanded-r1-b6-t1-p3-control",
+          "channels": 8,
+          "blocks": 6,
+          "rate": 44100
+        },
+        {
+          "name": "expanded-r1-b6-t1-p4-control",
+          "channels": 8,
+          "blocks": 6,
+          "rate": 44100
+        },
+        {
+          "name": "expanded-r1-b6-t1-p5-control",
+          "channels": 8,
+          "blocks": 6,
+          "rate": 44100
+        },
+        {
+          "name": "expanded-r1-b6-t1-p6-control",
+          "channels": 8,
+          "blocks": 6,
+          "rate": 44100
+        },
+        {
+          "name": "expanded-r1-b6-t1-p7-control",
+          "channels": 8,
+          "blocks": 6,
+          "rate": 44100
+        }
+      ]
+    },
+    {
+      "name": "expanded-r2-b3-t1",
+      "controls": [
+        {
+          "name": "expanded-r2-b3-t1-p0-control",
+          "channels": 8,
+          "blocks": 3,
+          "rate": 32000
+        },
+        {
+          "name": "expanded-r2-b3-t1-p1-control",
+          "channels": 8,
+          "blocks": 3,
+          "rate": 32000
+        },
+        {
+          "name": "expanded-r2-b3-t1-p2-control",
+          "channels": 8,
+          "blocks": 3,
+          "rate": 32000
+        },
+        {
+          "name": "expanded-r2-b3-t1-p3-control",
+          "channels": 8,
+          "blocks": 3,
+          "rate": 32000
+        },
+        {
+          "name": "expanded-r2-b3-t1-p4-control",
+          "channels": 8,
+          "blocks": 3,
+          "rate": 32000
+        },
+        {
+          "name": "expanded-r2-b3-t1-p5-control",
+          "channels": 8,
+          "blocks": 3,
+          "rate": 32000
+        },
+        {
+          "name": "expanded-r2-b3-t1-p6-control",
+          "channels": 8,
+          "blocks": 3,
+          "rate": 32000
+        },
+        {
+          "name": "expanded-r2-b3-t1-p7-control",
+          "channels": 8,
+          "blocks": 3,
+          "rate": 32000
+        }
+      ]
+    },
+    {
+      "name": "heterogeneous",
+      "controls": [
+        {
+          "name": "heterogeneous-p0-control",
+          "channels": 2,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "heterogeneous-p1-control",
+          "channels": 2,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "heterogeneous-p2-control",
+          "channels": 2,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "heterogeneous-p3-control",
+          "channels": 4,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "heterogeneous-p4-control",
+          "channels": 3,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "heterogeneous-p5-control",
+          "channels": 5,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "heterogeneous-p6-control",
+          "channels": 4,
+          "blocks": 3,
+          "rate": 48000
+        },
+        {
+          "name": "heterogeneous-p7-control",
+          "channels": 6,
+          "blocks": 3,
+          "rate": 48000
+        }
+      ]
+    }
+  ]
+}
