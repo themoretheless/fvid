@@ -43,7 +43,7 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
     }
     // Detect the need for normalization before caller-owned output.
     let mut checked = initial_description;
-    let mut normalize = target.is_some();
+    let mut normalize = target.is_some() || track.timescale % rate != 0;
     for i in 0..track.samples.len() {
         control.check()?;
         let id = track.samples.get(i).ok_or_else(|| invalid("missing audio sample"))?.description_index;

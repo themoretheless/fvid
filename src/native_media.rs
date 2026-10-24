@@ -1,5 +1,7 @@
 //! Media operations implemented by FVid's own container and codec pipeline.
 //! This module is available without the legacy `media` feature or FFmpeg.
+use fvid_media::owned_mp4_audio_packet_frames::frames as mp4_coded_packet_frames;
+use fvid_media::owned_mp4_audio_normalization::opaque_positions as mp4_opaque_positions;
 use crate::playback_native::{NativeReader, RawFrame};
 use crate::{Result, invalid};
 use fvid_media::owned_matroska_sample_clock::quantized_sample_matches as aac_quantized_sample_matches;
@@ -228,6 +230,7 @@ impl<'a> DecodeProgress<'a> {
         }
         Ok(())
     }
+    pub(crate) fn packet_limit(&self) -> Option<u64> { self.max_packets }
     pub(crate) fn packet_limit_reached(&self) -> bool {
         self.max_packets.is_some_and(|maximum| self.event.packets >= maximum)
     }

@@ -4901,3 +4901,16 @@ preserving four opaque positions; its scalar oracle retains overlap history
 across equivalent entries. Both the fixed-reader refusal and false destination
 layout refusal were reproduced before enabling acceptance. Generation remains
 separate; no FFmpeg, network or private media are required.
+
+`mp4-quantized-audio-clock/` contains 108 artifacts / 6360202 bytes. Generate
+separately with `scripts/generate_mp4_quantized_audio_clock.py` (owned media only,
+no external process/network/FFmpeg). Ninety floor/ceil/nearest variants quantize
+cumulative packet endpoints at 900/1000 Hz; duration rounding is never performed
+independently per packet. Existing independent arithmetic PCM and scalar AAC/
+SSR/PS references remain the waveform oracles. Regular/fragments, native rate
+and layout changes, ALAC raw/Rice, IMA4/IMA-WAV/MS-ADPCM, stable opaque PCE,
+repeated edits and sub-float32 precision run in `mp4_quantized_audio_clock`.
+The test also checks native/library WAVE, nanosecond intervals, packet prefixes
+and refusal of a whole tick added to an already exact coded endpoint. Parent
+production rejects the valid clock-only witness before the fix; acceptance now
+compares complete PCM. These export tests do not qualify live playback.

@@ -1,4 +1,6 @@
 //! Owned MP4 AAC/ALAC/PCM/ADPCM/MACE presentation decoding, including silence and repeated edits.
+use crate::owned_mp4_audio_packet_frames::frames as mp4_coded_packet_frames;
+use crate::owned_mp4_audio_normalization::opaque_positions as mp4_opaque_positions;
 use crate::owned_aac::aac_ps_native::InBandPsProbe;
 use crate::owned_codec_config::aac_specific_config as mp4_probe_config;
 pub(crate) enum Mp4AacCheckpoint {
@@ -306,7 +308,7 @@ pub(crate) fn admit_audio_reader_targeted<R: Read + Seek>(
     add(decoder)?;
     add(track.sample_descriptions.len())?; // per-description in-band PS flags
     add(configuration.checked_mul(2).ok_or_else(overflow)?)?; // initial and replacement decoder headers
-    if target.is_some() || (0..track.samples.len()).any(|n|track.description_for_sample(n)!=track.description_for_sample(0)) {
+    if target.is_some() || track.description_for_sample(0).is_some_and(|d| d.sample_rate>0 && track.timescale%d.sample_rate!=0) || (0..track.samples.len()).any(|n|track.description_for_sample(n)!=track.description_for_sample(0)) {
         let first=track.description_for_sample(0).ok_or_else(||invalid("MP4 audio has no samples"))?;
         let output_rate=target.map_or(first.sample_rate,|t|t.0);
         let output_channels=usize::from(target.map_or(first.channels.max(2),|t|t.1));
@@ -322,6 +324,8 @@ pub(crate) fn admit_audio_reader_targeted<R: Read + Seek>(
             normalization=normalization.max(ring.checked_add(buffers).ok_or_else(overflow)?);
         }
         add(normalization)?;
+        // Two geometric capacities of rational per-configuration clock records.
+        add(track.samples.len().max(4).checked_mul(256).ok_or_else(overflow)?)?;
     }
 
     for bytes in [

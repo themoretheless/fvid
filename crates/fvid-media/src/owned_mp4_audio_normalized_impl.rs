@@ -142,7 +142,20 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
             "unsupported MP4 normalization destination geometry",
         ));
     }
-    if destination == 0 {
+    let mut opaque_identity=false;
+    if destination==0 && target.is_none() {
+        let first=track.decoder_setup(initial_description)?;
+        if first.codec==*b"mp4a" {
+            let positions=mp4_opaque_positions(&first.configuration).map_err(|e|invalid(&e))?;
+            opaque_identity=positions.as_ref().is_some_and(|p|p.len()==usize::from(channels));
+            for i in 0..track.sample_descriptions.len() {
+                if !(0..track.samples.len()).any(|n|track.samples.get(n).is_some_and(|s|s.description_index as usize==i+1)) {continue;}
+                let setup=track.decoder_setup((i+1)as u32)?;
+                if setup.codec!=*b"mp4a" || setup.channels!=channels || mp4_opaque_positions(&setup.configuration).map_err(|e|invalid(&e))?!=positions {opaque_identity=false;break;}
+            }
+        }
+    }
+    if destination == 0 && !opaque_identity {
         return Err(invalid(
             "MP4 normalization requires an explicit destination speaker layout",
         ));
@@ -163,6 +176,9 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
             return Err(invalid(
                 "MP4 container and normalization decoder geometry disagree",
             ));
+        }
+        if opaque_identity {
+            return Ok((0..usize::from(channels)).map(|i|(0..usize::from(channels)).map(|j|if i==j {1.}else{0.}).collect()).collect());
         }
         mp4_normalization_coefficients(
             setup.codec,
@@ -189,10 +205,16 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
             matrix_for((i + 1) as u32, &make_decoder((i + 1) as u32)?)?;
         }
     }
+    let packet_clocks=mp4_packet_clock_runs(&mut reader,index,control)?;
     let mut timeline =
         Mp4ExportTimeline::new(&track.edits, track.timescale, reader.movie_timescale())?;
     if track.edits.is_empty() {
-        let end = Mp4ExportTime::ticks(track.duration, track.timescale)?;
+        let mut end = Mp4ExportTime::ticks(track.duration, track.timescale)?;
+        if track.samples.get(0).is_some_and(|s|s.pts==0) {
+            if let Some(last)=packet_clocks.last() {
+                if last.last==track.samples.len() && last.quantized && mp4_tick_matches(last.end,i128::from(track.duration),track.timescale)? {end=last.end;}
+            }
+        }
         timeline.segments.push(mp4_export_clock::Segment {
             start: Mp4ExportTime::ZERO,
             end,
@@ -262,6 +284,7 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
         let mut native_cursor = 0u64;
         let mut pending = std::collections::VecDeque::new();
         let mut sample_index = 0usize;
+        let mut clock_index=0usize;
         let mut expected: Option<Mp4ExportTime> = None;
         let mut run: Option<Mp4NormalizationRun> = None;
         loop {
@@ -310,21 +333,22 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
                     active = sample.description_index;
                     native_cursor = 0;
                 }
-                let start = Mp4ExportTime::signed_ticks(sample.pts, track.timescale)?;
-                let duration = Mp4ExportTime::ticks(u64::from(sample.duration), track.timescale)?;
-                if expected.is_some_and(|at| at != start) {
-                    return Err(invalid("non-contiguous MP4 audio timeline"));
-                }
-                expected = Some(start.add(duration)?);
-                let frames = duration.ceil_frames(decoder.sample_rate())?;
-                if frames <= 0
-                    || Mp4ExportTime::new(frames, u128::from(decoder.sample_rate()))? != duration
-                {
-                    return Err(invalid("MP4 audio packet clock is not sample aligned"));
-                }
-                let frames = u64::try_from(frames)
-                    .map_err(|_| invalid("MP4 native frame count overflow"))?;
+                let declared_start = Mp4ExportTime::signed_ticks(sample.pts, track.timescale)?;
+                let declared_duration = Mp4ExportTime::ticks(u64::from(sample.duration), track.timescale)?;
+                if expected.is_some_and(|at| at != declared_start) {return Err(invalid("non-contiguous MP4 audio timeline"));}
+                expected=Some(declared_start.add(declared_duration)?);
                 reader.read_packet(index, sample_index, &mut packet)?;
+                while packet_clocks.get(clock_index).is_some_and(|r|sample_index>=r.last) {clock_index+=1;}
+                let clock=packet_clocks.get(clock_index).filter(|r|sample_index>=r.first).ok_or_else(||invalid("missing MP4 packet clock run"))?;
+                let (start,duration,frames)=if clock.quantized {
+                    let setup=track.description_for_sample(sample_index).ok_or_else(||invalid("missing MP4 clock description"))?;
+                    let frames=mp4_coded_packet_frames(&setup.codec,&setup.configuration,decoder.sample_rate(),setup.channels,setup.bit_depth,packet.len(),Some(&packet)).map_err(|e|invalid(&e))?;
+                    (clock.origin.add(Mp4ExportTime::new(i128::from(native_cursor),u128::from(decoder.sample_rate()))?)?,Mp4ExportTime::new(i128::from(frames),u128::from(decoder.sample_rate()))?,frames)
+                } else {
+                    let frames=declared_duration.ceil_frames(decoder.sample_rate())?;
+                    if frames<=0 || Mp4ExportTime::new(frames,u128::from(decoder.sample_rate()))?!=declared_duration {return Err(invalid("MP4 audio packet clock is not sample aligned"));}
+                    (declared_start,declared_duration,u64::try_from(frames).map_err(|_|invalid("MP4 native frame count overflow"))?)
+                };
                 let samples = decoder.decode_timed(&packet, native_cursor, frames)?;
                 native_cursor = native_cursor
                     .checked_add(frames)
@@ -396,4 +420,64 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
         return Err(invalid("MP4 audio edit contains no samples"));
     }
     Ok(stats)
+}
+
+struct Mp4PacketClockRun {
+    first: usize,
+    last: usize,
+    origin: Mp4ExportTime,
+    end: Mp4ExportTime,
+    quantized: bool,
+}
+fn mp4_tick_matches(point: Mp4ExportTime, ticks: i128, scale: u32) -> Result<bool> {
+    let lower = point.floor_ticks(scale)?;
+    let upper = lower + i128::from(Mp4ExportTime::new(lower,u128::from(scale))? != point);
+    Ok(ticks == lower || ticks == upper)
+}
+fn mp4_packet_clock_runs<R: std::io::Read + std::io::Seek>(
+    reader: &mut Mp4TimelineReader<R>, index: usize, control: &DecodeProgress<'_>,
+) -> Result<Vec<Mp4PacketClockRun>> {
+    let count=reader.tracks()[index].samples.len();
+    let count=control.packet_limit().map(|n|usize::try_from(n).unwrap_or(usize::MAX).min(count)).unwrap_or(count);
+    let mut result:Vec<Mp4PacketClockRun>=Vec::new();
+    let mut first=0;let mut packet=Vec::new();let mut declared_end=None;
+    while first<count {
+        control.check()?;
+        let source=&reader.tracks()[index];
+        let sample=source.samples.get(first).ok_or_else(||invalid("missing MP4 clock sample"))?;
+        let setup=source.decoder_setup(sample.description_index)?;
+        let scale=source.timescale;let rate=setup.sample_rate;
+        if scale==0 || rate==0 {return Err(invalid("zero MP4 packet clock"));}
+        let mut last=first+1;
+        while last<count && source.description_for_sample(last)==source.description_for_sample(first) {last+=1;}
+        let declared_origin=Mp4ExportTime::signed_ticks(sample.pts,scale)?;
+        let mut origin=declared_origin;
+        if let Some(previous)=result.last() {
+            if mp4_tick_matches(previous.end,i128::from(sample.pts),scale)? {origin=previous.end;}
+        }
+        let mut quantized=scale%rate!=0;
+        let mut native=0u64;
+        for i in first..last {
+            control.check()?;
+            let sample=reader.tracks()[index].samples.get(i).ok_or_else(||invalid("missing MP4 clock sample"))?;
+            let begin=i128::from(sample.pts);let end=begin+i128::from(sample.duration);
+            if declared_end.is_some_and(|expected|expected!=begin) {return Err(invalid("non-contiguous MP4 audio timeline"));}
+            declared_end=Some(end);
+            if quantized {
+                let payload=if setup.codec==*b"alac" {reader.read_packet(index,i,&mut packet)?;Some(packet.as_slice())}else{None};
+                let frames=mp4_coded_packet_frames(&setup.codec,&setup.configuration,rate,setup.channels,setup.bit_depth,sample.size as usize,payload).map_err(|e|invalid(&e))?;
+                let start=origin.add(Mp4ExportTime::new(i128::from(native),u128::from(rate))?)?;
+                native=native.checked_add(frames).ok_or_else(||invalid("MP4 coded clock overflow"))?;
+                let finish=origin.add(Mp4ExportTime::new(i128::from(native),u128::from(rate))?)?;
+                if !mp4_tick_matches(start,begin,scale)? || !mp4_tick_matches(finish,end,scale)? {quantized=false;}
+            }
+        }
+        let end=if quantized {origin.add(Mp4ExportTime::new(i128::from(native),u128::from(rate))?)?}else{
+            origin=declared_origin;
+            Mp4ExportTime::new(declared_end.ok_or_else(||invalid("empty MP4 clock run"))?,u128::from(scale))?
+        };
+        result.try_reserve(1).map_err(|_|invalid("MP4 packet clock allocation failed"))?;
+        result.push(Mp4PacketClockRun {first,last,origin,end,quantized});first=last;
+    }
+    Ok(result)
 }
