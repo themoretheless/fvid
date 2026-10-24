@@ -70,6 +70,9 @@ pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<Mp3> {
 }
 pub(crate) fn descriptor(source: &Path, options: &CopyOptions) -> Result<(u32, u16, &'static str)> {
     let parsed = open(source, options)?;
+    if parsed.presentation_samples() == 0 {
+        return Err("MPEG audio stream contains no audible samples".into());
+    }
     Ok((
         parsed.sample_rate,
         parsed.channels,
@@ -118,7 +121,35 @@ impl MpegDecoder {
 }
 pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
     let parsed = open(source, options)?;
+    if parsed.presentation_samples() == 0 {
+        return Err("MPEG audio stream contains no audible samples".into());
+    }
     Ok((parsed.sample_rate, parsed.channels))
+}
+pub(crate) fn source_info(source: &Path, options: &CopyOptions) -> Result<Vec<u8>> {
+    let parsed = open(source, &crate::owned_adts_export::pcm_decode_options(options))?;
+    parsed.wave_info()
+}
+pub(crate) fn supports(
+    source: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> bool {
+    match geometry(source, options) {
+        Ok((_rate, channels)) => {
+            let target = transform.channels.unwrap_or(i32::from(channels));
+            let mask = crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32;
+            target == i32::from(channels)
+                || (((channels <= 8 && matches!(target, 1 | 2))
+                    || (channels <= 2 && (1..=8).contains(&target)))
+                    && ((channels <= 2 && mask == 0)
+                        || (mask != 0
+                            && crate::owned_pcm_channels::rematrix_layout_supported(
+                                channels, mask,
+                            ))))
+        }
+        Err(error) => error.starts_with("controlled memory budget exceeded:"),
+    }
 }
 /// Decode an audible sample window. Every preceding encoded frame is retained
 /// for reservoir/overlap history; packet limits include the Info prefix.
@@ -251,6 +282,7 @@ pub(crate) fn apply(
     }
     check(options)?;
     let (rate, channels) = geometry(source, options)?;
+    let info = source_info(source, options)?;
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,
@@ -265,5 +297,7 @@ pub(crate) fn apply(
             )
         },
     )?;
+    check(options)?;
+    crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
     crate::owned_adts_export::export_spool(spool, destination, transform, options)
 }

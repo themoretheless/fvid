@@ -1,0 +1,46 @@
+{
+  "batch": 197,
+  "ids": ["FVID-0204"],
+  "title": "Admit AVI and WavPack in player folder expansion and file dialogs, strip playlist quotes and INI headers, bound LUT/playlist/skin file reads, and guard negative subtitle delay and zero-size video_rect",
+  "scope": [
+    "src/player.rs",
+    "src/player_skin.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/player-queue/queue.pls",
+    "tests/fixtures/playback-errors/player-queue/queue.m3u",
+    "tests/fixtures/playback-errors/player-queue/clip.avi",
+    "tests/fixtures/playback-errors/player-queue/clip.wv",
+    "tests/fixtures/playback-errors/player-queue/companion.wvc"
+  ],
+  "generators": [
+    "scripts/generate_player_queue_regressions.py",
+    "scripts/test_player_queue_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/evidence/batch-197-player-before.rs",
+      "docs/improvements/evidence/batch-197-player-skin-before.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-197-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-197-acceptance-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --features player --test player_queue_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "unit_tests": {
+      "command": "cargo test --features player --lib player_queue_and_geometry_regressions && cargo test --features player --lib player_skin::tests",
+      "passed": 4,
+      "failed": 0
+    },
+    "fixture_generator_tests": {
+      "command": "python3 -m unittest discover -s scripts -p 'test_player_queue_regressions.py' -v",
+      "passed": 3,
+      "failed": 0
+    }
+  },
+  "status": "accepted"
+}

@@ -15,6 +15,7 @@ pub(crate) struct AacPacketPlan {
     padding: i64,
     frame: u64,
     pub rate: u32,
+    pub trimmed_samples: u64,
 }
 impl AacPacketPlan {
     pub fn packet(&self, index: usize) -> Result<(u64, u64, i64)> {
@@ -89,6 +90,7 @@ pub(crate) fn aac_packet_plan_window(
     if start >= end || end > media_end {
         return Err(invalid("AAC edit exceeds media samples"));
     }
+    let edited_samples = end - start;
     if let Some((from, to)) = interval {
         if from < 0 || from >= to {
             return Err(invalid("audio interval requires 0 <= from < to"));
@@ -160,5 +162,6 @@ pub(crate) fn aac_packet_plan_window(
         padding,
         frame,
         rate: output_rate,
+        trimmed_samples: edited_samples.saturating_sub(end.saturating_sub(start)),
     })
 }

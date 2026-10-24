@@ -179,14 +179,25 @@ pub fn write_adts_aac_reader<R: std::io::Read, W: Write + std::io::Seek>(
 /// progress has `done=false`: publishing/syncing the destination is the caller's
 /// responsibility. A hook is called at start, every 256 packets and after muxing.
 pub fn write_adts_aac_reader_controlled<R: std::io::Read, W: Write + std::io::Seek>(
-    mut reader: super::adts::StreamReader<R>,
+    reader: super::adts::StreamReader<R>,
     output: &mut W,
     cancel: Option<&fvid_control::CancelFlag>,
     progress: Option<&fvid_control::ProgressHook>,
 ) -> Result<fvid_control::ProgressEvent> {
+    write_adts_aac_reader_limited(reader, output, cancel, progress, None)
+}
+
+/// Copy at most `max_packets` ADTS packets into MP4 without reading past the cap.
+pub fn write_adts_aac_reader_limited<R: std::io::Read, W: Write + std::io::Seek>(
+    mut reader: super::adts::StreamReader<R>,
+    output: &mut W,
+    cancel: Option<&fvid_control::CancelFlag>,
+    progress: Option<&fvid_control::ProgressHook>,
+    max_packets: Option<u64>,
+) -> Result<fvid_control::ProgressEvent> {
     let config = reader.configuration();
     let asc = reader.audio_specific_config().to_vec();
-    write_aac_packets(config, &asc, || reader.next_packet(), output, cancel, progress)
+    write_aac_packets(config, &asc, || reader.next_packet(), output, cancel, progress, max_packets)
 }
 
 /// Concatenate independently framed ADTS streams; a truncated input cannot
@@ -195,9 +206,18 @@ pub fn concat_adts_readers<R: std::io::Read, W: Write + std::io::Seek>(
     readers: Vec<super::adts::StreamReader<R>>, output: &mut W,
     cancel: Option<&fvid_control::CancelFlag>, progress: Option<&fvid_control::ProgressHook>,
 ) -> Result<fvid_control::ProgressEvent> {
+    concat_adts_readers_limited(readers, output, cancel, progress, None)
+}
+
+/// Concatenate independently framed ADTS streams with a global packet cap.
+pub fn concat_adts_readers_limited<R: std::io::Read, W: Write + std::io::Seek>(
+    readers: Vec<super::adts::StreamReader<R>>, output: &mut W,
+    cancel: Option<&fvid_control::CancelFlag>, progress: Option<&fvid_control::ProgressHook>,
+    max_packets: Option<u64>,
+) -> Result<fvid_control::ProgressEvent> {
     let mut sequence=super::adts::SequenceReader::new(readers)?;
     let asc = sequence.audio_specific_config().to_vec();
-    write_aac_packets(sequence.configuration(), &asc, || sequence.next_packet(), output, cancel, progress)
+    write_aac_packets(sequence.configuration(), &asc, || sequence.next_packet(), output, cancel, progress, max_packets)
 }
 
 fn write_aac_packets<W: Write + std::io::Seek>(
@@ -205,6 +225,7 @@ fn write_aac_packets<W: Write + std::io::Seek>(
     asc: &[u8],
     mut next_packet: impl FnMut() -> Result<Option<Vec<u8>>>, output: &mut W,
     cancel: Option<&fvid_control::CancelFlag>, progress: Option<&fvid_control::ProgressHook>,
+    max_packets: Option<u64>,
 ) -> Result<fvid_control::ProgressEvent> {
     let check = || -> Result<()> {
         if cancel.is_some_and(|flag| flag.is_cancelled()) {
@@ -240,6 +261,9 @@ fn write_aac_packets<W: Write + std::io::Seek>(
     let mut sizes = Vec::new();
     loop {
         check()?;
+        if max_packets.is_some_and(|limit| event.packets >= limit) {
+            break;
+        }
         let Some(packet) = next_packet()? else {
             break;
         };

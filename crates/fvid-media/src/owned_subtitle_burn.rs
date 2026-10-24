@@ -6,7 +6,13 @@ type Result<T> = std::result::Result<T, String>;
 fn prepare(
     source: &Path,
     subs: &Path,
-) -> Result<(y4m::Header, Vec<crate::owned_play_controls::SubtitleCue>)> {
+    options: &CopyOptions,
+) -> Result<(
+    y4m::Header,
+    Vec<crate::owned_play_controls::SubtitleCue>,
+    Option<crate::owned_mp4_video_bridge::Temporary>,
+)> {
+    let mut bridge = None;
     let header = if crate::owned_y4m_decode::supports(source) {
         let mut reader = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
         let mut line = Vec::new();
@@ -17,8 +23,12 @@ fn prepare(
         header.frame_rate()?;
         header
     } else {
+        if crate::owned_mp4_video_bridge::recognizes(source) {
+            bridge = crate::owned_mp4_video_bridge::prepare(source, Some(options))?;
+        }
+        let container_source = bridge.as_ref().map_or(source, |t| t.path.as_path());
         let reader = crate::owned_webm::WebmReader::open(
-            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+            BufReader::new(File::open(container_source).map_err(|e| e.to_string())?),
             Default::default(),
         )
         .map_err(|e| e.to_string())?;
@@ -26,13 +36,23 @@ fn prepare(
             .tracks
             .first()
             .ok_or("subtitle burn source has no video")?;
-        if track.codec != "V_FFV1" || reader.tracks.len() != 1 {
-            return Err("owned subtitle burn requires Y4M or single-track FFV1".into());
+        if reader.tracks.len() != 1
+            || track.kind != 1
+            || !crate::owned_ffv1_export::supports(container_source, &Default::default())
+        {
+            return Err(
+                "owned subtitle burn requires Y4M or supported single-track Matroska/MP4 video"
+                    .into(),
+            );
+        }
+        let (mut width, mut height) = track.visible();
+        if matches!(track.rotation, 90 | 270) {
+            std::mem::swap(&mut width, &mut height);
         }
         y4m::Header::parse(
             format!(
                 "YUV4MPEG2 W{} H{} F25:1 Ip C420\n",
-                track.width, track.height
+                width, height
             )
             .as_bytes(),
         )?
@@ -45,26 +65,32 @@ fn prepare(
         return Err("owned burn-in currently requires plain SRT".into());
     }
     let cues = crate::owned_play_controls::parse_subtitle_text(&text)?;
-    Ok((header, cues))
+    Ok((header, cues, bridge))
 }
 fn policy(options: &CopyOptions) -> Result<()> {
-    if !(options.streams.is_empty() || options.streams == [0])
-        || options.max_controlled_bytes.is_some()
-        || !options.metadata_set.is_empty()
-        || !options.metadata_delete.is_empty()
-        || !options.stream_metadata_set.is_empty()
-        || !options.stream_metadata_delete.is_empty()
-    {
+    if !crate::owned_lossless::policy(options, true) {
         return Err(
             "owned subtitle burn-in does not implement requested metadata/memory policy".into(),
         );
     }
+    crate::owned_lossless::metadata(options)?;
     crate::owned_budget::check_rss_budget(options)
 }
 pub fn supports(source: &Path, subs: &Path, options: &CopyOptions) -> bool {
-    policy(options).is_ok()
+    (options.streams.is_empty() || options.streams == [0])
+        && options.max_packet_bytes != 0
+        && options.max_controlled_bytes.is_none()
+        && crate::owned_lossless::policy(options, true)
+        && crate::owned_lossless::metadata(options).is_ok()
         && (crate::owned_y4m_decode::supports(source)
-            || crate::owned_ffv1_export::supports(source, &Default::default()))
+            || crate::owned_ffv1_export::supports(source, &Default::default())
+            || match crate::owned_mp4_video_bridge::prepare(source, Some(options)) {
+                Ok(Some(temporary)) => {
+                    crate::owned_ffv1_export::supports(&temporary.path, &Default::default())
+                }
+                Err(_) if crate::owned_mp4_video_bridge::recognizes(source) => true,
+                _ => false,
+            })
         && subs
             .extension()
             .is_some_and(|ext| ext.eq_ignore_ascii_case("srt"))
@@ -74,20 +100,125 @@ pub fn plan_burn_subtitles(
     subs: &Path,
     options: &CopyOptions,
 ) -> Result<fvid_media_info::MediaPlan> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
     policy(options)?;
-    let (header, cues) = prepare(source, subs)?;
+    let (header, cues, bridge) = prepare(source, subs, options)?;
     let font_size = (header.height as f32 / 18.0).clamp(12.0, 64.0);
     // Qualify font coverage in the same renderer that execution uses.
     for cue in &cues {
         crate::owned_text_raster::rasterize(&cue.text, header.width, header.height, font_size)?;
     }
-    use fvid_media_info::{MediaPlan, PlanStep};
-    Ok(MediaPlan { command: "burn-subtitles".into(), input: source.into(), inputs: vec![source.into(), subs.into()],
-        streams: Vec::new(), graph: None, steps: vec![
-            PlanStep { action: "decode".into(), detail: "owned Y4M frames and SRT cues".into() },
-            PlanStep { action: "burn".into(), detail: "bundled Ubuntu plain-text mask, native YUV composition".into() },
-            PlanStep { action: "encode".into(), detail: "owned FFV1 and Matroska".into() },
-        ], notes: vec!["no FFmpeg or libav execution; ASS styling and shaping are not implemented by this path".into()] })
+    if crate::owned_y4m_decode::supports(source) {
+        if options.max_packets.is_some()
+            || options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        {
+            let mut reader = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
+            let mut visit = |h: &y4m::Header, _: &[u8], _: u64, _: u64| {
+                if options
+                    .cancel
+                    .as_ref()
+                    .is_some_and(fvid_control::CancelFlag::is_cancelled)
+                {
+                    return Err("media operation cancelled".into());
+                }
+                crate::owned_budget::check_rss_budget(options)?;
+                if h.frame_len()? > options.max_packet_bytes {
+                    return Err("Y4M frame byte length exceeds packet byte limit".into());
+                }
+                Ok(())
+            };
+            crate::owned_y4m_decode::visit_reader_transformed_counted(
+                &mut reader,
+                &Default::default(),
+                options.max_packets,
+                &mut visit,
+            )?;
+        }
+    } else if options.max_packets.is_some()
+        || options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+    {
+        let container_source = bridge.as_ref().map_or(source, |t| t.path.as_path());
+        let mut stage = options.clone();
+        stage.streams.clear();
+        stage.stream_metadata_set.clear();
+        stage.stream_metadata_delete.clear();
+        crate::owned_video_decode::decode_webm(
+            container_source,
+            &Default::default(),
+            None,
+            Some(&stage),
+        )?;
+    }
+    let info = crate::owned_probe::probe(source)?;
+    use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
+    let streams = info
+        .streams
+        .into_iter()
+        .map(|stream| PlanStream {
+            index: stream.index,
+            media_type: stream.media_type,
+            codec: stream.codec,
+            disposition: "primary_video".into(),
+        })
+        .collect();
+    let mut steps = vec![
+        PlanStep {
+            action: "decode".into(),
+            detail: "owned Y4M frames and SRT cues".into(),
+        },
+        PlanStep {
+            action: "burn".into(),
+            detail: "bundled Ubuntu plain-text mask, native YUV composition".into(),
+        },
+        PlanStep {
+            action: "encode".into(),
+            detail: "owned FFV1 and Matroska".into(),
+        },
+    ];
+    if !options.metadata_set.is_empty()
+        || !options.metadata_delete.is_empty()
+        || !options.stream_metadata_set.is_empty()
+        || !options.stream_metadata_delete.is_empty()
+    {
+        steps.push(PlanStep {
+            action: "metadata".into(),
+            detail: format!(
+                "container set={}, delete={}; stream set={}, delete={}",
+                options.metadata_set.len(),
+                options.metadata_delete.len(),
+                options.stream_metadata_set.len(),
+                options.stream_metadata_delete.len()
+            ),
+        });
+    }
+    let mut notes = vec![
+        "no FFmpeg or libav execution; ASS styling and shaping are not implemented by this path"
+            .into(),
+    ];
+    if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        || options.max_packets.is_some()
+        || options.max_rss_bytes.is_some()
+    {
+        notes.push(format!(
+            "encoded packet limit: {} bytes; packet work limit: {:?}; RSS limit: {:?} bytes",
+            options.max_packet_bytes, options.max_packets, options.max_rss_bytes
+        ));
+    }
+    Ok(MediaPlan {
+        command: "burn-subtitles".into(),
+        input: source.into(),
+        inputs: vec![source.into(), subs.into()],
+        streams,
+        graph: None,
+        steps,
+        notes,
+    })
 }
 pub fn burn_subtitles(
     source: &Path,
@@ -96,9 +227,10 @@ pub fn burn_subtitles(
     options: &CopyOptions,
 ) -> Result<fvid_media_info::LosslessStats> {
     policy(options)?;
-    let (header, cues) = prepare(source, subs)?;
+    let (header, cues, bridge) = prepare(source, subs, options)?;
     let font_size = (header.height as f32 / 18.0).clamp(12.0, 64.0);
     if !crate::owned_y4m_decode::supports(source) {
+        let container_source = bridge.as_ref().map_or(source, |t| t.path.as_path());
         let mut process =
             |frame: &mut crate::owned_frame::GeometryFrame, depth, pts, full_range| -> Result<()> {
                 let text = active_text(&cues, pts);
@@ -114,7 +246,7 @@ pub fn burn_subtitles(
                 Ok(())
             };
         let (stats, event, consumed) = crate::owned_ffv1_export::export_processed(
-            source,
+            container_source,
             destination,
             &Default::default(),
             options,
@@ -135,33 +267,63 @@ pub fn burn_subtitles(
             horizontal_flip: false,
         });
     }
+    let file_metadata = crate::owned_lossless::metadata(options)?;
+    let mut text_tags = std::collections::BTreeMap::new();
+    for (key, value) in &options.metadata_set {
+        text_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+        if !crate::owned_file_tags::FileTags::supports_key(key) && !value.is_empty() {
+            text_tags.insert(key.to_ascii_uppercase(), value.clone());
+        }
+    }
+    for key in &options.metadata_delete {
+        text_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+    }
+    let mut description = mkv::VideoTrackDescription {
+        name: String::new(),
+        language: "und".into(),
+        legacy_language: "und".into(),
+        disposition: 1,
+    };
+    let mut track_tags = std::collections::BTreeMap::new();
+    for (_, key, value) in &options.stream_metadata_set {
+        track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+        if !crate::owned_ffv1_export::edit_track_description(&mut description, key, value)
+            && !value.is_empty()
+        {
+            track_tags.insert(key.to_ascii_uppercase(), value.clone());
+        }
+    }
+    for (_, key) in &options.stream_metadata_delete {
+        track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+        crate::owned_ffv1_export::edit_track_description(&mut description, key, "");
+    }
     let input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
     let (stats, event, consumed) = mkv::export_atomic(
         destination,
         options.cancel.as_ref(),
         options.progress.as_ref(),
         |file| {
-            let track = mkv::TrackSpec {
-                encoding: mkv::Encoding::Ffv1V1 {
-                    width: header.width as u32,
-                    height: header.height as u32,
-                },
-                name: "",
-                language: "und",
-            };
-            let metadata = mkv::TrackOptions {
-                video: Some(mkv::VideoMetadata {
-                    pixel_aspect: header.pixel_aspect().map_err(mkv::Error)?,
-                    colour: Some(mkv::ColourDescription {
-                        matrix: 6,
-                        full_range: header.full_range().map_err(mkv::Error)?,
-                        ..Default::default()
-                    }),
+            let video_metadata = mkv::VideoMetadata {
+                pixel_aspect: header.pixel_aspect().map_err(mkv::Error)?,
+                colour: Some(mkv::ColourDescription {
+                    matrix: 6,
+                    full_range: header.full_range().map_err(mkv::Error)?,
                     ..Default::default()
                 }),
                 ..Default::default()
             };
-            let mut writer = mkv::PacketWriter::new_with_options(file, &[track], &[metadata])?;
+            let mut writer = mkv::PacketWriter::new_ffv1_with_track_description(
+                file,
+                header.width as u32,
+                header.height as u32,
+                Some(&video_metadata),
+                0,
+                0,
+                &file_metadata,
+                &text_tags,
+                &track_tags,
+                &description,
+            )?;
             let mut event = fvid_control::ProgressEvent {
                 packets: 0,
                 payload_bytes: 0,

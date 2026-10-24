@@ -42,7 +42,7 @@ impl Draw {
         let mut replace = false;
         let mut enable = Default::default();
         let mut position = 0;
-        for entry in args.split(':').filter(|_| !args.is_empty()) {
+        for entry in split_options(args)? {
             let (key, value) = if let Some(pair) = entry.split_once('=') {
                 pair
             } else {
@@ -52,7 +52,7 @@ impl Draw {
                 position += 1;
                 (key, entry)
             };
-            let value = value.trim().trim_matches('\'');
+            let value = unquote(value)?;
             match key.trim() {
                 "x" => values[0] = value.into(),
                 "y" => values[1] = value.into(),
@@ -99,6 +99,7 @@ impl Draw {
         for expr in &out.expressions {
             expr.evaluate(&vars)?;
         }
+        out.region(16, 12, [2, 2], 1.)?;
         Ok(out)
     }
     fn variables(w: usize, h: usize, sub: [usize; 2], sar: f64) -> [(&'static str, f64); 14] {
@@ -153,6 +154,9 @@ impl Draw {
                 );
             }
         }
+        if result[4] < 0 {
+            return Err("drawing thickness must be nonnegative".into());
+        }
         if result[2] <= 0 {
             result[2] = w as i64;
         }
@@ -169,11 +173,17 @@ impl Draw {
             Kind::Box => {
                 x >= left
                     && y >= top
-                    && x < left + w
-                    && y < top + h
-                    && (x - left < t || left + w - 1 - x < t || y - top < t || top + h - 1 - y < t)
+                    && x.saturating_sub(left) < w
+                    && y.saturating_sub(top) < h
+                    && (x.saturating_sub(left) < t
+                        || w - 1 - x.saturating_sub(left) < t
+                        || y.saturating_sub(top) < t
+                        || h - 1 - y.saturating_sub(top) < t)
             }
-            Kind::Grid => (x - left).rem_euclid(w) < t || (y - top).rem_euclid(h) < t,
+            Kind::Grid => {
+                (i128::from(x) - i128::from(left)).rem_euclid(i128::from(w)) < i128::from(t)
+                    || (i128::from(y) - i128::from(top)).rem_euclid(i128::from(h)) < i128::from(t)
+            }
         }
     }
     pub fn apply(
@@ -428,5 +438,40 @@ impl Draw {
                 }
             }
         }
+    }
+}
+
+fn split_options(args: &str) -> Result<Vec<&str>> {
+    let mut result = Vec::new();
+    let mut start = 0;
+    let mut quote = None;
+    for (offset, character) in args.char_indices() {
+        match (quote, character) {
+            (Some(open), close) if open == close => quote = None,
+            (None, '\'' | '"') => quote = Some(character),
+            (None, ':') => {
+                result.push(&args[start..offset]);
+                start = offset + 1;
+            }
+            _ => {}
+        }
+    }
+    if quote.is_some() {
+        return Err("unclosed drawing quote".into());
+    }
+    if !args.is_empty() {
+        result.push(&args[start..]);
+    }
+    Ok(result)
+}
+
+fn unquote(text: &str) -> Result<&str> {
+    let text = text.trim();
+    if let Some(mark) = text.chars().next().filter(|c| matches!(c, '\'' | '"')) {
+        text.strip_prefix(mark)
+            .and_then(|t| t.strip_suffix(mark))
+            .ok_or_else(|| "unclosed drawing quote".into())
+    } else {
+        Ok(text)
     }
 }

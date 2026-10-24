@@ -107,11 +107,12 @@ fn parse(args: &str) -> Result<Parameters> {
 }
 
 fn policies(options: &CopyOptions) -> bool {
-    (options.streams.is_empty() || options.streams == [0])
-        && options.metadata_set.is_empty()
-        && options.metadata_delete.is_empty()
-        && options.stream_metadata_set.is_empty()
-        && options.stream_metadata_delete.is_empty()
+    crate::owned_audio_export::simple_options(options)
+        && options.metadata_set.len() + options.metadata_delete.len() <= 64
+        && !options
+            .metadata_set
+            .iter()
+            .any(|(_, value)| value.contains('\0'))
 }
 pub(crate) fn supports(
     source: &Path,
@@ -122,7 +123,8 @@ pub(crate) fn supports(
     policies(options)
         && destination.extension().and_then(|s| s.to_str()) == Some("wav")
         && parse(args).is_ok_and(|params| {
-            (params.print == Print::None || crate::owned_wave_loudness::supports(source, options))
+            let pcm_options = crate::owned_adts_export::pcm_decode_options(options);
+            (params.print == Print::None || crate::owned_wave_loudness::supports(source, &pcm_options))
                 && std::fs::File::open(source).is_ok_and(|mut file| {
                     crate::owned_wave_inspect::inspect(&mut file, None)
                         .is_ok_and(|info| params.gain.is_some() || dynamic_input(&info))
@@ -202,6 +204,12 @@ pub fn plan_loudnorm(
     steps.push(PlanStep { action: "filter".into(), detail: format!("owned loudnorm targets {resolved}; eligible measured linear gain, otherwise owned dynamic controller and linked true-peak limiter") });
     if report {
         steps.push(PlanStep { action: "analyze-output".into(), detail: "owned output loudness/true-peak measurement before publication; print JSON/summary after successful publication".into() });
+    }
+    if !options.metadata_set.is_empty() || !options.metadata_delete.is_empty() {
+        steps.push(PlanStep {
+            action: "metadata".into(),
+            detail: "apply owned RIFF INFO container tag edits to final WAVE".into(),
+        });
     }
     steps.push(PlanStep { action: "write".into(), detail: "float32 WAVE; linear retains source clock, dynamic uses 192 kHz; atomic publication without overwrite; report/completion only after publication".into() });
     let mut notes = vec![
@@ -304,9 +312,13 @@ pub(crate) fn supports_dual(
     args: &str,
     options: &CopyOptions,
 ) -> bool {
-    destination.extension().and_then(|s| s.to_str()) == Some("wav")
+    policies(options)
+        && destination.extension().and_then(|s| s.to_str()) == Some("wav")
         && parse(args).is_ok()
-        && crate::owned_wave_loudness::supports(source, options)
+        && crate::owned_wave_loudness::supports(
+            source,
+            &crate::owned_adts_export::pcm_decode_options(options),
+        )
 }
 fn apply_resolved(
     source: &Path,
@@ -415,6 +427,20 @@ fn apply_resolved(
         }
     }
     drop(bytes);
+    let mut source_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    let source_info = crate::owned_wave_inspect::inspect(&mut source_file, options.cancel.as_ref())
+        .map_err(|e| e.to_string())?;
+    let info_chunks = crate::owned_wave_inspect::info_chunks(
+        &mut source_file,
+        &source_info,
+        options.cancel.as_ref(),
+    )
+    .map_err(|e| e.to_string())?;
+    let info_chunks = crate::owned_wave_metadata::edit_info_chunks(
+        &info_chunks,
+        &options.metadata_delete,
+        &options.metadata_set,
+    )?;
     let report = output_report(
         &output,
         input.sample_rate as u32,
@@ -428,7 +454,7 @@ fn apply_resolved(
         input.channels,
         &output,
         mask,
-        &[],
+        &info_chunks,
         check,
     )?;
     if let Some(report) = report {
@@ -640,6 +666,20 @@ fn apply_dynamic(
         output
     };
     drop(data);
+    let mut source_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    let source_info = crate::owned_wave_inspect::inspect(&mut source_file, options.cancel.as_ref())
+        .map_err(|e| e.to_string())?;
+    let info_chunks = crate::owned_wave_inspect::info_chunks(
+        &mut source_file,
+        &source_info,
+        options.cancel.as_ref(),
+    )
+    .map_err(|e| e.to_string())?;
+    let info_chunks = crate::owned_wave_metadata::edit_info_chunks(
+        &info_chunks,
+        &options.metadata_delete,
+        &options.metadata_set,
+    )?;
     let report = output_report(&output, 192000, &params, measurement, &check)?;
     crate::owned_wav_file::write_wav_f32le_with_side_data_checked(
         destination,
@@ -647,7 +687,7 @@ fn apply_dynamic(
         input.channels,
         &output,
         mask,
-        &[],
+        &info_chunks,
         check,
     )?;
     if let Some(report) = report {

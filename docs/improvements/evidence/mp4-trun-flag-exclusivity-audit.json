@@ -1,5 +1,5 @@
 {
-  "status": "audit-only-unaccepted",
+  "status": "accepted-in-batch-173",
   "source": "src/container/mp4.rs",
   "finding": "trun supports first_sample_flags and sample_flags simultaneously without validating their mutual exclusion. The row parser consumes both but chooses per-sample flags,discarding the first-sample statement. No production change/accepted ID yet.",
   "primary_reference": "https://b.goeswhere.com/ISO_IEC_14496-12_2015a.pdf",

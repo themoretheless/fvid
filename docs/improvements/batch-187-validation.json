@@ -1,0 +1,17 @@
+{
+  "batch": 187,
+  "improvement_id": "FVID-0194",
+  "status": "accepted",
+  "fixtures_dir": "tests/fixtures/playback-errors/flac-streaminfo",
+  "generator": "scripts/generate_flac_streaminfo_regressions.py",
+  "fixture_unittest": "scripts/test_flac_streaminfo_regressions.py",
+  "regression_test": "tests/flac_streaminfo_regressions.rs",
+  "gates": {
+    "focused_regression": "cargo test --features player --test flac_streaminfo_regressions -- --nocapture (2 passed)",
+    "fixture_unittest": "python3 scripts/test_flac_streaminfo_regressions.py (3 passed)",
+    "related_integrations": "cargo test --features player --test flac_frame_layout --test flac_number_timeline --test flac_block_codes --test flac_coded_numbers && cargo test -p fvid-media --test flac_layout --test flac_matroska (11 passed)",
+    "unit_tests": "cargo test -p fvid-media --lib owned_flac && cargo test --lib playback::audio::flac::tests (5 + 19 passed)",
+    "minimal_core": "cargo test --lib --no-default-features playback::audio::flac::tests (19 passed)",
+    "binary_build": "cargo build --bin fvid (ok)"
+  }
+}

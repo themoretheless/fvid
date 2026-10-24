@@ -1,0 +1,58 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0186"
+  ],
+  "checked_at": "2026-10-22T01:48:12+00:00",
+  "sources": [
+    "crates/fvid-media/src/owned_mp4_impl.rs"
+  ],
+  "regressions": [
+    "tests/mp4_aac_quicktime.rs"
+  ],
+  "before": [
+    "evidence/batch-179-owned-mp4-impl-before.rs",
+    "evidence/batch-179-tests-before.rs",
+    "evidence/batch-179-before.log",
+    "evidence/batch-179-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-179-after.log",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-179-related-after.log",
+      "passed": 99
+    },
+    {
+      "log": "evidence/batch-179-mp4-units.log",
+      "passed": 15
+    },
+    {
+      "log": "evidence/batch-179-core.log",
+      "passed": 44
+    },
+    {
+      "log": "evidence/batch-179-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-179-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media/src/owned_mp4_impl.rs": "6c4709f9955bac545ad601449eb7e9798aed439d9d0c5ef7b99474855596b9c5",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_aac_quicktime.rs": "8443cbc24f8c38699118f1e82d55e0e528dbef67eca668bcf0ddc463af58ceae",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/mp4-aac-quicktime/manifest.json": "f5e7abee3c02edad78fafbbc5780fbed95aacb9eb1caccde001955b8e54b5e6c"
+  },
+  "qualification": [
+    "Pre-fix fvid_media::owned_mp4::Mp4Reader silently skipped QuickTime version-1 mp4a audio tracks (44-byte SoundDescription v1 header), causing audio-only QuickTime v1 MOV files to fail with 'MP4 has no track in a codec this reader plays', muxed video+audio QuickTime v1 MOV files to lose their audio stream in probe_mp4, decode_mp4_aac_pcm, and owned_mp4_remux, and QuickTime v0/v2 MOV files nesting esds inside wave to fail with 'missing MP4 esds box'. Pre-fix baseline reproduced all defects and the forced acceptance test failed.",
+    "Updating crates/fvid-media/src/owned_mp4_impl.rs admits mp4a version 1 with a 44-byte header check and resolves esds inside wave when not directly in the sample entry child list.",
+    "All 6 healthy ISO/QuickTime v0/v1/v2 direct and wave/esds controls decode 3,072 mono 48 kHz float32 samples matching the independent analytical IMDCT + overlap-add reference within 1e-6, expose identical audio metadata in probe_mp4, support interval decoding ([1024..2048]), memory budget admission, Matroska remuxing, and player AudioStream seek/rewind/EOF, while all 3 malformed inputs (truncated 40-byte v1 header, wave without esds, direct without esds) refuse cleanly as Error::Invalid.",
+    "4 focused tests, 99 related MP4/AAC/HLS/VP9 integration tests, 15 fvid-media owned_mp4 unit tests, 44 minimal-configuration (--no-default-features) tests, offline fixture unittest, and full player build pass.",
+    "Apple QuickTime File Format Sound Sample Description v1 and wave/esds extensions and ISO/IEC 14496-14 govern mp4a sample entries. All fixtures are pure synthetic offline AAC-LC/VP9 MP4/MOV files requiring neither FFmpeg nor network access."
+  ],
+  "counting": "One QuickTime mp4a version-1 and wave/esds sample description support fix in fvid_media::owned_mp4 (FVID-0186). No extra IDs for individual fixture variants or controls."
+}

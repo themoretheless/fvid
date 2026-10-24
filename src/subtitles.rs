@@ -127,9 +127,38 @@ pub fn parse_srt(text: &str) -> Vec<Cue> {
 }
 
 /// WebVTT shares SubRip's block layout; the header and the `NOTE`, `STYLE` and
-/// `REGION` blocks carry no timing, so the range test skips them.
+/// `REGION` blocks carry no timing, so their entire paragraphs are skipped.
 pub fn parse_webvtt(text: &str) -> Vec<Cue> {
-    cues_by_range(text.lines())
+    let lines: Vec<&str> = text.lines().collect();
+    let mut cues = Vec::new();
+    let mut index = 0;
+    while index < lines.len() {
+        let line = lines[index].trim();
+        index += 1;
+        if line == "NOTE"
+            || line.starts_with("NOTE ")
+            || line.starts_with("NOTE\t")
+            || line == "STYLE"
+            || line.starts_with("STYLE ")
+            || line.starts_with("STYLE\t")
+            || line == "REGION"
+            || line.starts_with("REGION ")
+            || line.starts_with("REGION\t")
+        {
+            while index < lines.len() && !lines[index].trim().is_empty() {
+                index += 1;
+            }
+            continue;
+        }
+        let Some((start, end)) = range(line) else {
+            continue;
+        };
+        let text = body(&lines, &mut index);
+        if !text.is_empty() {
+            cues.push(Cue { start, end, text });
+        }
+    }
+    cues
 }
 
 fn cues_by_range<'a, I: Iterator<Item = &'a str>>(lines: I) -> Vec<Cue> {
@@ -155,8 +184,17 @@ fn cues_by_range<'a, I: Iterator<Item = &'a str>>(lines: I) -> Vec<Cue> {
 /// Only the timing and the text are read.
 pub fn parse_ass(text: &str) -> Vec<Cue> {
     let mut cues = Vec::new();
+    let mut in_events = false;
     for line in text.lines() {
-        let Some(rest) = line.trim().strip_prefix("Dialogue:") else {
+        let trimmed = line.trim();
+        if trimmed.starts_with('[') && trimmed.ends_with(']') {
+            in_events = trimmed.eq_ignore_ascii_case("[events]");
+            continue;
+        }
+        if !in_events {
+            continue;
+        }
+        let Some(rest) = trimmed.strip_prefix("Dialogue:") else {
             continue;
         };
         // The text field may itself contain commas, so it keeps the remainder.
@@ -524,6 +562,11 @@ fn line_breaks(text: &str) -> String {
             out.push_str(&text[from..at]);
             out.push('\n');
             at = tag_closed_at(bytes, at);
+            from = at;
+        } else if bytes.get(at..at + 6).is_some_and(|slice| slice.eq_ignore_ascii_case(b"&nbsp;")) {
+            out.push_str(&text[from..at]);
+            out.push('\u{a0}');
+            at += 6;
             from = at;
         } else {
             at += 1;

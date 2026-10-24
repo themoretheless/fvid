@@ -72,21 +72,38 @@ impl MasteringDisplay {
         min_luminance: f32,
     ) -> Option<Self> {
         let point = |(x, y): (f64, f64)| {
-            (x.is_finite() && y.is_finite() && (0.0..=1.0).contains(&x) && (0.0..=1.0).contains(&y))
+            (x.is_finite()
+                && y.is_finite()
+                && (0.0..=1.0).contains(&x)
+                && y > 0.0
+                && y <= 1.0
+                && x + y <= 1.0)
                 .then_some(Chromaticity { x, y })
         };
-        let display = Some(Self {
+        let display = Self {
             red: point(red)?,
             green: point(green)?,
             blue: point(blue)?,
             white: point(white)?,
             max_luminance,
             min_luminance,
-        })?;
-        (display.max_luminance.is_finite()
-            && display.min_luminance.is_finite()
-            && display.max_luminance >= 0.0
-            && display.min_luminance >= 0.0)
+        };
+        if !display.max_luminance.is_finite()
+            || !display.min_luminance.is_finite()
+            || display.max_luminance <= 0.0
+            || display.min_luminance < 0.0
+            || display.min_luminance > display.max_luminance
+        {
+            return None;
+        }
+        let area2 = (display.green.x - display.red.x) * (display.blue.y - display.red.y)
+            - (display.green.y - display.red.y) * (display.blue.x - display.red.x);
+        if !area2.is_finite() || area2.abs() <= 1e-6 {
+            return None;
+        }
+        let m = display.primaries().rgb_to_xyz();
+        let inv = display.primaries().xyz_to_rgb();
+        (m.iter().flatten().all(|v| v.is_finite()) && inv.iter().flatten().all(|v| v.is_finite()))
             .then_some(display)
     }
 

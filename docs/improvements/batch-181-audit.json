@@ -1,0 +1,20 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0188",
+  "source": "src/native_media.rs",
+  "source_sha256": "b9ee92848081f8fb953753f27cafcc8d66fb0c088f826fbb3477dbd873330793",
+  "before_snapshot": "evidence/batch-181-native-media-before.rs",
+  "problem": "Automatic audio track selection in src/native_media.rs (mp4_audio_index, mp4_aac_index, matroska_audio_index, and matroska_aac_index) matched all handler == 'soun' or kind == 2 tracks without consulting Mp4Reader::automatic_track_indices or WebmReader::preferred_track_numbers, causing audio_source_info_selected, aac_source_info, decode_mp4_aac_pcm, decode_matroska_aac_pcm_interval, native_plan::decode_audio, and native_export::export_audio_pcm_selected to fail on files with a single enabled movie/default audio track alongside disabled or non-movie audio tracks (disagreeing with fvid_media::owned_mp4_audio and Mp4AudioReader). Additionally, export_pcm_selected in src/native_export.rs constructed PacketPcmDecoder without negotiating in-band Parametric Stereo (negotiate_mp4_ps / negotiate_matroska_ps), configuring a 1-channel mono WAV/PCM sink for implicit-PS stereo AAC streams and doubling sample_frames while writing stereo samples into a mono header.",
+  "primary_reference": "https://www.iso.org/standard/68960.html",
+  "reference_provenance": "ISO/IEC 14496-12:2015, 8.3.2 (TrackHeaderBox 'tkhd' flags Track_enabled 0x000001 and Track_in_movie 0x000002), RFC 9559 (Matroska FlagEnabled / FlagDefault track selection), and ISO/IEC 14496-3:2009, 4.5.2.8 / 8.6.4 (HE-AAC v2 implicit in-band Parametric Stereo signalling in SBR extension data).",
+  "fixtures": "tests/fixtures/playback-errors/mp4-audio-selection",
+  "scope": "Align automatic MP4/MOV and Matroska audio track selection in src/native_media.rs with Mp4Reader::automatic_track_indices and WebmReader::preferred_track_numbers when no explicit stream index is requested, and negotiate in-band Parametric Stereo in src/native_export.rs before initializing export channel layout and WAV/PCM sink geometry.",
+  "requirements": [
+    "Reproduce pre-fix failure of automatic audio selection on MP4 and Matroska files with disabled/non-movie companion audio tracks and pre-fix channel/frame mismatch on implicit-PS AAC export in export_audio_pcm_selected before editing production code.",
+    "Update mp4_audio_index, mp4_aac_index, matroska_audio_index, and matroska_aac_index in src/native_media.rs to filter by automatic_track_indices / preferred_track_numbers when selected.is_none(), while keeping explicit stream index selection and ambiguous dual-enabled refusal.",
+    "Negotiate in-band PS via negotiate_mp4_ps / negotiate_matroska_ps in src/native_export.rs before constructing the geometry probe decoder so implicit-PS streams export as 2-channel stereo with exact sample frame counts.",
+    "Run focused, related MP4/Matroska/PS, unit, minimal-configuration, fixture unittest, and player build gates."
+  ],
+  "implementation_plan": "Filter automatic audio track candidates in src/native_media.rs using reader.automatic_track_indices(&[*b\"soun\"]) for MP4 and reader.preferred_track_numbers(...) for Matroska when selected.is_none(), and add probe_mp4_audio_geometry and probe_matroska_audio_geometry in src/native_export.rs that negotiate in-band PS before reading input_rate, input_channels, and native_mask.",
+  "counting": "One automatic audio track selection and in-band PS export geometry alignment fix across src/native_media.rs and src/native_export.rs (FVID-0188). No extra IDs for individual fixture variants or controls."
+}

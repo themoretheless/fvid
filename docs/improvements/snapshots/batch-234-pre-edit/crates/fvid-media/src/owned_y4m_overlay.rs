@@ -1,0 +1,421 @@
+//! Streaming Y4M overlay scheduling on the primary presentation clock.
+use crate::{
+    owned_frame::GeometryFrame,
+    owned_y4m::{Header, PixelFormat, line},
+};
+use fvid_media_info::OverlaySpec;
+use std::{
+    fs::File,
+    io::{BufReader, Read},
+};
+type Result<T> = std::result::Result<T, String>;
+
+// Keep the established overlay comparison-clock contract without a backend.
+// Exact common ticks are used below the denominator cap; otherwise use microseconds.
+fn comparison_clock(main: [i32; 2], secondary: [i32; 2]) -> [u64; 2] {
+    fn gcd(mut a: u64, mut b: u64) -> u64 {
+        while b != 0 {
+            (a, b) = (b, a % b);
+        }
+        a
+    }
+    let denominator =
+        main[0] as u64 / gcd(main[0] as u64, secondary[0] as u64) * secondary[0] as u64;
+    if denominator < 500_000 {
+        [gcd(main[1] as u64, secondary[1] as u64), denominator]
+    } else {
+        [1, 1_000_000]
+    }
+}
+fn comparison_pts(index: u64, rate: [i32; 2], clock: [u64; 2]) -> Result<u128> {
+    let numerator = u128::from(index)
+        .checked_mul(rate[1] as u128)
+        .and_then(|n| n.checked_mul(u128::from(clock[1])))
+        .ok_or("overlay comparison timestamp overflow")?;
+    let denominator = rate[0] as u128 * u128::from(clock[0]);
+    Ok(numerator / denominator + u128::from(numerator % denominator >= denominator.div_ceil(2)))
+}
+
+pub(crate) struct OverlayReader {
+    input: BufReader<File>,
+    header: Header,
+    frame: GeometryFrame,
+    next: u64,
+    eof: bool,
+    main_rate: [i32; 2],
+    secondary_rate: [i32; 2],
+    clock: [u64; 2],
+    x: i32,
+    y: i32,
+}
+impl OverlayReader {
+    pub(crate) fn open(main: &Header, spec: &OverlaySpec) -> Result<Self> {
+        let mut input = BufReader::new(File::open(&spec.path).map_err(|e| e.to_string())?);
+        let mut bytes = Vec::new();
+        if !line(&mut input, &mut bytes)? {
+            return Err("empty Y4M overlay source".into());
+        }
+        let header = Header::parse(&bytes)?;
+        // Legacy overlay defaults to 8-bit 4:2:0; other output colour conversions
+        // remain outside this route until implemented by the owned pipeline.
+        for h in [main, &header] {
+            if h.format != PixelFormat::Yuv420
+                || h.depth() != 8
+                || h.tokens
+                    .iter()
+                    .any(|t| matches!(t.as_str(), "C420mpeg2" | "C420paldv"))
+            {
+                return Err("owned scheduled overlay requires 8-bit JPEG-sited YUV420".into());
+            }
+        }
+        if main.full_range()? != header.full_range()? {
+            return Err("overlay requires matching colour range".into());
+        }
+        let main_rate = main.frame_rate()?;
+        let secondary_rate = header.frame_rate()?;
+        let clock = comparison_clock(main_rate, secondary_rate);
+        Ok(Self {
+            frame: GeometryFrame {
+                width: header.width,
+                height: header.height,
+                subsampling: Some([2, 2]),
+                data: Vec::new(),
+            },
+            main_rate,
+            secondary_rate,
+            clock,
+            input,
+            header,
+            next: 0,
+            eof: false,
+            // The public scheduled overlay rounds placement down to chroma
+            // boundaries. Keep the low-level compositor's alignment contract.
+            x: spec.x & !1,
+            y: spec.y & !1,
+        })
+    }
+    pub(crate) fn apply(&mut self, output: &Header, frame: &mut Vec<u8>, index: u64) -> Result<()> {
+        let primary_pts = comparison_pts(index, self.main_rate, self.clock)?;
+        let mut marker = Vec::new();
+        while !self.eof {
+            let secondary_pts = comparison_pts(self.next, self.secondary_rate, self.clock)?;
+            if secondary_pts > primary_pts {
+                break;
+            }
+            if !line(&mut self.input, &mut marker)? {
+                self.eof = true;
+                break;
+            }
+            if marker != b"FRAME\n" && !marker.starts_with(b"FRAME ") {
+                return Err("expected overlay Y4M FRAME marker".into());
+            }
+            let size = self.header.frame_len()?;
+            if self.frame.data.is_empty() {
+                self.frame
+                    .data
+                    .try_reserve_exact(size)
+                    .map_err(|e| e.to_string())?;
+                self.frame.data.resize(size, 0);
+            }
+            self.input
+                .read_exact(&mut self.frame.data)
+                .map_err(|e| format!("overlay frame payload: {e}"))?;
+            self.next = self
+                .next
+                .checked_add(1)
+                .ok_or("overlay frame count overflow")?;
+            // Consume one equal-timestamp event, rather than all future events
+            // which happen to round to the same tick.
+            if secondary_pts == primary_pts {
+                break;
+            }
+        }
+        // EOF before the first secondary frame leaves the primary unchanged.
+        // After at least one frame, the existing repeat-last behavior applies.
+        if self.next == 0 {
+            return Ok(());
+        }
+        let (sx, sy) = output.format.subsampling();
+        let mut destination = GeometryFrame {
+            width: output.width,
+            height: output.height,
+            subsampling: Some([sx, sy]),
+            data: std::mem::take(frame),
+        };
+        let result = crate::owned_overlay::overlay_opaque(
+            &mut destination,
+            &self.frame,
+            output.depth(),
+            i64::from(self.x),
+            i64::from(self.y),
+        );
+        *frame = destination.data;
+        result
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use fvid_media_info::{DecodeTransform, LosslessTransform};
+    use std::{io::Cursor, path::Path};
+    fn fixtures() -> std::path::PathBuf {
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/playback-errors")
+    }
+    fn transform() -> DecodeTransform {
+        DecodeTransform {
+            overlay: Some(OverlaySpec {
+                path: fixtures().join("overlay-secondary-clock.y4m"),
+                x: 2,
+                y: 2,
+            }),
+            ..Default::default()
+        }
+    }
+    #[test]
+    fn synchronizes_rates_repeats_last_frame_and_preserves_interval_clock() {
+        let primary =
+            include_bytes!("../../../tests/fixtures/playback-errors/overlay-primary-clock.y4m");
+        for interval in [None, Some((500_000, 1_250_000))] {
+            let mut transform = transform();
+            transform.interval = interval;
+            let mut indices = Vec::new();
+            let stats = crate::owned_y4m_decode::visit_reader_transformed(
+                Cursor::new(primary),
+                &transform,
+                |header, pixels, pts, duration| {
+                    assert_eq!((header.width, header.height), (4, 4));
+                    assert_eq!(duration, 250_000_000);
+                    let index = (pts / duration) as u8;
+                    indices.push(index);
+                    let overlay = if index < 2 {
+                        (50, 80, 160)
+                    } else {
+                        (100, 90, 170)
+                    };
+                    let mut expected = vec![10 + index; 16];
+                    for at in [10, 11, 14, 15] {
+                        expected[at] = overlay.0;
+                    }
+                    expected
+                        .extend_from_slice(&[128, 128, 128, overlay.1, 128, 128, 128, overlay.2]);
+                    assert_eq!(pixels, expected);
+                    Ok(())
+                },
+            )
+            .unwrap();
+            assert_eq!(
+                indices,
+                if interval.is_some() {
+                    vec![2, 3, 4]
+                } else {
+                    vec![0, 1, 2, 3, 4, 5]
+                }
+            );
+            assert_eq!(stats.video_frames, indices.len() as u64);
+        }
+    }
+    #[test]
+    fn exports_overlay_through_owned_public_api() {
+        let source = fixtures().join("overlay-primary-clock.y4m");
+        let transform = LosslessTransform {
+            overlay: transform().overlay,
+            ..Default::default()
+        };
+        let options = crate::CopyOptions::default();
+        assert!(crate::owned_lossless::supports(
+            &source, &transform, &options
+        ));
+        let output =
+            std::env::temp_dir().join(format!("fvid-scheduled-overlay-{}.mkv", std::process::id()));
+        let spec = transform.overlay.as_ref().unwrap();
+        let plan = crate::plan_overlay(&source, &spec.path, spec.x, spec.y, &options).unwrap();
+        assert_eq!(plan.command, "overlay");
+        assert_eq!(plan.inputs, [source.clone(), spec.path.clone()]);
+        assert!(plan.notes[0].starts_with("backend: owned"));
+        let stats =
+            crate::overlay_video(&source, &spec.path, &output, spec.x, spec.y, &options).unwrap();
+        assert_eq!(stats.video_frames, 6);
+        assert_eq!(stats.backend, "fvid");
+        assert_eq!(stats.encoder, "ffv1");
+        let info = crate::owned_webm_probe::probe_webm(&output).unwrap();
+        assert_eq!(info.streams[0].codec, "ffv1");
+        std::fs::remove_file(output).unwrap();
+    }
+    #[test]
+    fn empty_overlay_passes_primary_frames_and_exports_without_fallback() {
+        let mut request = transform();
+        request.overlay.as_mut().unwrap().path = fixtures().join("overlay-secondary-empty.y4m");
+        let expected = |index: u8| [vec![10 + index; 16], vec![128; 8]].concat();
+        for interval in [None, Some((500_000, 1_250_000))] {
+            request.interval = interval;
+            let mut indices = Vec::new();
+            let stats = crate::owned_y4m_decode::visit_reader_transformed(
+                Cursor::new(include_bytes!(
+                    "../../../tests/fixtures/playback-errors/overlay-primary-clock.y4m"
+                )),
+                &request,
+                |_, pixels, pts, duration| {
+                    let index = (pts / duration) as u8;
+                    assert_eq!(pixels, expected(index));
+                    indices.push(index);
+                    Ok(())
+                },
+            )
+            .unwrap();
+            assert_eq!(
+                indices,
+                if interval.is_some() {
+                    vec![2, 3, 4]
+                } else {
+                    vec![0, 1, 2, 3, 4, 5]
+                }
+            );
+            assert_eq!(stats.video_frames, indices.len() as u64);
+        }
+        let source = fixtures().join("overlay-primary-clock.y4m");
+        let spec = request.overlay.as_ref().unwrap();
+        let output =
+            std::env::temp_dir().join(format!("fvid-empty-overlay-{}.mkv", std::process::id()));
+        let options = crate::CopyOptions::default();
+        let plan = crate::plan_overlay(&source, &spec.path, spec.x, spec.y, &options).unwrap();
+        assert!(plan.notes[0].starts_with("backend: owned"));
+        let stats =
+            crate::overlay_video(&source, &spec.path, &output, spec.x, spec.y, &options).unwrap();
+        assert_eq!(stats.backend, "fvid");
+        assert_eq!(stats.video_frames, 6);
+        let mut reader = crate::owned_webm::WebmReader::open(
+            std::io::BufReader::new(File::open(&output).unwrap()),
+            Default::default(),
+        )
+        .unwrap();
+        reader.scan_all().unwrap();
+        assert_eq!(reader.packets.len(), 6);
+        let mut decoder = crate::owned_ffv1_decoder::Decoder::new(4, 4, 1 << 20).unwrap();
+        for index in 0..6 {
+            assert_eq!(reader.packets[index].pts_ns, index as i64 * 250_000_000);
+            let packet = reader.read_packet(index).unwrap();
+            assert_eq!(
+                decoder.decode(&packet).unwrap().frame.data,
+                expected(index as u8)
+            );
+        }
+        drop(reader);
+        std::fs::remove_file(output).unwrap();
+    }
+    #[test]
+    fn nearly_equal_rates_choose_frames_on_the_shared_comparison_clock() {
+        for (primary, secondary) in [
+            (
+                "overlay-near-clock-primary.y4m",
+                "overlay-near-clock-secondary.y4m",
+            ),
+            (
+                "overlay-tied-clock-primary.y4m",
+                "overlay-tied-clock-secondary.y4m",
+            ),
+        ] {
+            let request = DecodeTransform {
+                overlay: Some(OverlaySpec {
+                    path: fixtures().join(secondary),
+                    x: 2,
+                    y: 2,
+                }),
+                ..Default::default()
+            };
+            let mut seen = Vec::new();
+            let stats = crate::owned_y4m_decode::visit_reader_transformed(
+                Cursor::new(std::fs::read(fixtures().join(primary)).unwrap()),
+                &request,
+                |_, pixels, _, _| {
+                    let index = pixels[0] - 10;
+                    let mut expected = vec![10 + index; 16];
+                    for position in [10, 11, 14, 15] {
+                        expected[position] = 100 + index;
+                    }
+                    expected.extend([128; 8]);
+                    assert_eq!(pixels, expected, "comparison clock: {primary}");
+                    seen.push(index);
+                    Ok(())
+                },
+            )
+            .unwrap();
+            assert_eq!(seen, [0, 1, 2, 3, 4, 5]);
+            assert_eq!(stats.video_frames, 6);
+        }
+    }
+
+    #[test]
+    fn unaligned_placement_rounds_down_and_clips_without_fallback() {
+        let source = fixtures().join("overlay-unaligned-primary.y4m");
+        let secondary = fixtures().join("overlay-unaligned-secondary.y4m");
+        for (x, y, positions, chroma) in [
+            (1, 1, vec![0, 1, 4, 5], Some(0)),
+            (3, 1, vec![2, 3, 6, 7], Some(1)),
+            (1, 3, vec![8, 9, 12, 13], Some(2)),
+            (3, 3, vec![10, 11, 14, 15], Some(3)),
+            (-1, -1, vec![], None),
+            (-3, 1, vec![], None),
+            (i32::MAX, 1, vec![], None),
+            (i32::MIN, 1, vec![], None),
+        ] {
+            let transform = DecodeTransform {
+                overlay: Some(OverlaySpec {
+                    path: secondary.clone(),
+                    x,
+                    y,
+                }),
+                ..Default::default()
+            };
+            assert!(crate::owned_y4m_decode::supports_transformed(
+                &source, &transform
+            ));
+            let mut count = 0;
+            let stats = crate::owned_y4m_decode::visit_reader_transformed(
+                Cursor::new(std::fs::read(&source).unwrap()),
+                &transform,
+                |_, pixels, pts, duration| {
+                    assert_eq!(duration, 250_000_000);
+                    assert_eq!(pts, count * duration);
+                    let mut expected = vec![10 + count as u8; 16];
+                    expected.extend([128; 8]);
+                    let (luma, u, v) = if count < 2 {
+                        (50, 80, 160)
+                    } else {
+                        (100, 90, 170)
+                    };
+                    for &position in &positions {
+                        expected[position] = luma;
+                    }
+                    if let Some(position) = chroma {
+                        expected[16 + position] = u;
+                        expected[20 + position] = v;
+                    }
+                    assert_eq!(pixels, expected, "placement {x},{y}, frame {count}");
+                    count += 1;
+                    Ok(())
+                },
+            )
+            .unwrap();
+            assert_eq!(stats.video_frames, 6);
+            assert_eq!(count, 6);
+        }
+        let options = crate::CopyOptions::default();
+        let plan = crate::plan_overlay(&source, &secondary, 1, 1, &options).unwrap();
+        assert!(plan.notes[0].starts_with("backend: owned"));
+        let output =
+            std::env::temp_dir().join(format!("fvid-unaligned-overlay-{}.mkv", std::process::id()));
+        let stats = crate::overlay_video(&source, &secondary, &output, 1, 1, &options).unwrap();
+        assert_eq!((stats.backend, stats.video_frames), ("fvid", 6));
+        std::fs::remove_file(output).unwrap();
+    }
+    #[test]
+    fn unsupported_colour_conversion_keeps_legacy_route() {
+        let source = fixtures().join("overlay-primary-clock.y4m");
+        let mut transform = transform();
+        transform.overlay.as_mut().unwrap().path = fixtures().join("shuffleplanes-444-8.y4m");
+        assert!(!crate::owned_y4m_decode::supports_transformed(
+            &source, &transform
+        ));
+    }
+}

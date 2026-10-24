@@ -1,0 +1,20 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0184",
+  "source": "src/container/mp4.rs",
+  "source_sha256": "827dcf2af62c48a76f43f54b5fc52d6a8206eefcd18133b4187eaeaf78a012e5",
+  "before_snapshot": "evidence/batch-177-mp4-before.rs",
+  "problem": "When parsing a fragmented MP4 (one with mvex), parse_track skips sample_index(&stbl, ...) entirely and replaces the moov/trak/mdia/minf/stbl sample table with an empty SampleIndex::Expanded(Vec::new()), while index_fragments only updates track.duration when track.duration == 0. Consequently, initial samples stored in moov/stbl before moof fragments are dropped, track durations stated in mdhd for only the initial samples are never extended to the end of the appended fragments, and corrupt stbl tables inside fragmented files are silently ignored.",
+  "primary_reference": "https://b.goeswhere.com/ISO_IEC_14496-12_2015a.pdf",
+  "reference_provenance": "ISO/IEC 14496-12:2015, 8.8.4 (MovieFragmentBox: movie fragments extend tracks defined in moov and append samples after any samples already described in the moov sample table) and 8.8.8 (TrackRunBox).",
+  "fixtures": "tests/fixtures/playback-errors/mp4-hybrid-fragments",
+  "scope": "Pure owned 3-frame 16x16 VP9 MP4/fMP4 at 50 Hz. Controls cover regular MP4, empty-init fMP4 (0 in stbl + 3 in fragments), hybrid 1-in-stbl + 2 explicit-tfdt fragments, and hybrid 2-in-stbl + 1 implicit-tfdt fragment. Malformed cases cover corrupt stco pointing outside mdat in a fragmented file and corrupt stsz entry count in a fragmented file.",
+  "requirements": [
+    "Reproduce pre-fix dropping of initial moov/stbl samples, truncated track duration, and silent acceptance of corrupt stbl tables in fragmented MP4s before editing production code.",
+    "Always validate and index moov/stbl via sample_index (producing SampleIndex::Expanded when fragmented) and extend track.duration across appended moof fragments in src/container/mp4.rs.",
+    "Preserve exact packets, sync flags, clocks, budgets, analytic VP9 planes/RGB, 32 public clamped seek targets, rewind, and repeated EOF across all healthy controls.",
+    "Run focused, related MP4/HLS/VP9, unit, minimal-configuration, fixture unittest, and player build gates."
+  ],
+  "implementation_plan": "Call sample_index(&stbl, &result.codec, result.channels, mdats, limit, fragmented) in parse_track (forcing expanded_index when fragmented is true so fragments can append to SampleIndex::Expanded) and update track.duration = track.duration.max(stated.unwrap_or(0)) in index_fragments.",
+  "counting": "One fragmented MP4 hybrid moov/stbl + moof/traf indexing and validation fix (FVID-0184). No extra IDs for individual hybrid/corrupt variants, controls, or fixture generator."
+}

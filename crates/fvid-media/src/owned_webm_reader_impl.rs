@@ -838,8 +838,13 @@ impl<R: Read + Seek> WebmReader<R> {
                                     }
                                 }
                                 let first = packets.len();
+                                let mut seen_block = false;
                                 for block in fs {
                                     if block.id == 0xa1 {
+                                        if seen_block {
+                                            return Err(invalid("duplicate Matroska Block in BlockGroup"));
+                                        }
+                                        seen_block = true;
                                         read_block(
                                             &mut *reader,
                                             block,
@@ -852,6 +857,9 @@ impl<R: Read + Seek> WebmReader<R> {
                                             &mut block_timings,
                                         )?;
                                     }
+                                }
+                                if !seen_block {
+                                    return Err(invalid("Matroska BlockGroup lacks Block"));
                                 }
                                 for packet in &mut packets[first..] {
                                     packet.duration_ns = duration;
@@ -1467,6 +1475,13 @@ fn read_block<R: Read + Seek>(
     }
     let mut h = [0; 3];
     r.read_exact(&mut h)?;
+    let reserved_mask = match kind {
+        BlockKind::Simple => 0x70,
+        BlockKind::Group { .. } => 0x71,
+    };
+    if h[2] & reserved_mask != 0 {
+        return Err(invalid("invalid Matroska block flags"));
+    }
     let mode = h[2] & 6;
     let mut count = 1usize;
     let mut sizes = [0u64; 256];

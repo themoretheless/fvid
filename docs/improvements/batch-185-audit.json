@@ -1,0 +1,33 @@
+{
+  "batch": 185,
+  "id": "FVID-0192",
+  "scope": "Ogg framing (`owned_ogg`), Vorbis chain EOS (`owned_ogg_vorbis`), and multi-track Opus track-index reporting (`owned_ogg_opus` / `OggOpusAudioReader`)",
+  "snapshots": {
+    "directory": "/Users/themoretheless/.gemini/antigravity/brain/c1982554-571b-4788-9044-f7522d05528e/scratch/snapshots/batch-185",
+    "sha256_before": {
+      "crates/fvid-media/src/owned_ogg.rs": "93c8cb470526887d9ace0a1f0687438bcd3287b7ad402d548f57bc61e2f99165",
+      "crates/fvid-media/src/owned_ogg_opus.rs": "a206f7aea848d5c3c39501e05925e3c7919d3576b15df50cbcc57d523f4ea923",
+      "crates/fvid-media/src/owned_ogg_vorbis.rs": "8636bc2d1d102252e658d844ca514ad5fb81731ff4bcf29f25634acdda2ecfca",
+      "src/playback/audio/ogg_opus.rs": "53614b889b79c02768a0ab416e96d3df465018a74a5a1b4e827877cc627c6b9c",
+      "docs/improvements/registry.json": "86bbac99cf3e8b36b097eb8879a6ce1e74a266728d839d24e6e67d150b774273",
+      "docs/improvements/README.md": "42ceb126feda73e6c6dda4d194f9491b6a472ac75fcbade488a41d2e55b93185"
+    }
+  },
+  "findings": [
+    {
+      "component": "crates/fvid-media/src/owned_ogg.rs",
+      "issue": "Ogg::parse ignores non-zero reserved bits in header_type_flag (flags & !0x07 != 0), ignores CONTINUES (0x01) on 0-segment pages when no packet is open, and enters MissingPrefix instead of refusing when CONTINUES is set on a mid-stream page after audio packets have already completed cleanly.",
+      "fix": "Reject pages with flags & !(CONTINUES | BEGINS | ENDS) != 0, reject 0-segment pages with CONTINUES when !at_open.pending.is_open(), and reject mid-stream pages with CONTINUES when !at_open.pending.is_open() and chains[at_open.chain].packets.len() > 2 while preserving joined-stream initial fragment handling and valid 0-segment continuation bridge pages."
+    },
+    {
+      "component": "crates/fvid-media/src/owned_ogg_vorbis.rs",
+      "issue": "owned_ogg_vorbis::Program::from_ogg does not verify that each non-final chain in a chained Vorbis program has ended == true before the next chain begins, unlike owned_ogg_opus::Program and owned_ogg_audio_program::Program.",
+      "fix": "Enforce playable.windows(2) -> ogg.chains()[pair[0]].ended in owned_ogg_vorbis::Program::from_ogg."
+    },
+    {
+      "component": "crates/fvid-media/src/owned_ogg_opus.rs & src/playback/audio/ogg_opus.rs",
+      "issue": "owned_ogg_opus::Program does not store selected_track or expose audio_track_index(), and OggOpusAudioReader does not implement AudioStream::audio_track_index(), returning the default 0 even when track 1 is opened via open_track(..., 1).",
+      "fix": "Store selected_track: nth in owned_ogg_opus::Program, expose Program::audio_track_index(&self) -> usize, and forward AudioStream::audio_track_index(&self) -> usize in OggOpusAudioReader."
+    }
+  ]
+}

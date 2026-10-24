@@ -1,0 +1,49 @@
+{
+  "batch": 230,
+  "ids": ["FVID-0237"],
+  "title": "Support plan convert-subtitles / plan_convert_subtitles across SRT, ASS, and Matroska subtitle sources and preserve source Matroska WritingApp (encoder) metadata during convert-subtitles in API and CLI",
+  "scope": [
+    "crates/fvid-media/src/owned_subtitle_impl.rs",
+    "crates/fvid-media/src/lib.rs",
+    "src/media.rs",
+    "src/media_cli.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/subtitle-convert-plan-metadata/sample.srt",
+    "tests/fixtures/playback-errors/subtitle-convert-plan-metadata/sample.ass",
+    "tests/fixtures/playback-errors/subtitle-convert-plan-metadata/subrip-source.mkv",
+    "tests/fixtures/playback-errors/subtitle-convert-plan-metadata/ass-source.mkv"
+  ],
+  "generators": [
+    "scripts/generate_subtitle_convert_plan_metadata_regressions.py",
+    "scripts/test_subtitle_convert_plan_metadata_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-230-pre-edit/crates/fvid-media/src/owned_subtitle_impl.rs",
+      "docs/improvements/snapshots/batch-230-pre-edit/crates/fvid-media/src/lib.rs",
+      "docs/improvements/snapshots/batch-230-pre-edit/src/media.rs",
+      "docs/improvements/snapshots/batch-230-pre-edit/src/media_cli.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-230-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-230-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-230-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test subtitle_convert_plan_metadata_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test native_subtitle_convert --test owned_subtitle --test subtitle_normalize_metadata_regressions --test mix_merge_subtitle_controls_regressions",
+      "passed": 8,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 -m unittest scripts/test_subtitle_convert_plan_metadata_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

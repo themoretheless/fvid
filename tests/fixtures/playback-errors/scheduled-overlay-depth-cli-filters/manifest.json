@@ -1,0 +1,34 @@
+{
+  "batch_id": "FVID-0241",
+  "files": {
+    "avc-default-duration-disabled-opus.mkv": {
+      "bytes": 1283,
+      "sha256": "d831af66c9f64ce7ebae266478e29dbc599e750dd5f9f9ed2a272057ac76dc19"
+    },
+    "avc-disabled-aac.mp4": {
+      "bytes": 2370,
+      "sha256": "d5c0bf54deb6477849d630844d10df349d22c678d05bf7c3eeeb532a3747e000"
+    },
+    "main-420p10.y4m": {
+      "bytes": 219,
+      "sha256": "984410da4d5a1d9656fc294561aad793ad3b846e9e6a1ad3ca2e36f0c8aa3ec6"
+    },
+    "main-422-aspect.y4m": {
+      "bytes": 98,
+      "sha256": "2679377013164948f835dd0dff395e695ad8066b4dfec4853feb6a193defc1d4"
+    },
+    "overlay-420p8.y4m": {
+      "bytes": 78,
+      "sha256": "ee864f5613b668e98d8663cac5677780d70e5093d0b227977b367a8bb665fa4a"
+    },
+    "overlay-440-transposed.y4m": {
+      "bytes": 82,
+      "sha256": "08a58e5d92355297d5382b7dc73c14fadf48dba91f3fe556138d119b18adcc95"
+    },
+    "overlay-4x4-5fps.y4m": {
+      "bytes": 144,
+      "sha256": "422b35ec93387fa61de61cf10b27fc4c091a00319d75a07c4ef1a355f5ee654e"
+    }
+  },
+  "generator": "scripts/generate_scheduled_overlay_depth_cli_filter_regressions.py"
+}

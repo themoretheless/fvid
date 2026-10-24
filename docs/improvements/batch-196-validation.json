@@ -1,0 +1,45 @@
+{
+  "batch": 196,
+  "ids": ["FVID-0203"],
+  "title": "Native subtitle dot-timestamp/coordinate/entity/ASS-key support, drawbox/drawgrid quote-aware parsing & negative-thickness rejection, and fallible f64 resampler history allocation",
+  "scope": [
+    "crates/fvid-media/src/owned_subtitle_impl.rs",
+    "crates/fvid-media/src/owned_draw.rs",
+    "crates/fvid-media/src/owned_resample_f64.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/filter-subtitle/uppercase-entity-coords.srt",
+    "tests/fixtures/playback-errors/filter-subtitle/spaced-format-millis.ass"
+  ],
+  "generators": [
+    "scripts/generate_filter_subtitle_regressions.py",
+    "scripts/test_filter_subtitle_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/evidence/batch-196-owned-subtitle-impl-before.rs",
+      "docs/improvements/evidence/batch-196-owned-draw-before.rs",
+      "docs/improvements/evidence/batch-196-owned-resample-f64-before.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-196-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-196-acceptance-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --features player --test filter_subtitle_regressions",
+      "passed": 4,
+      "failed": 0
+    },
+    "unit_tests": {
+      "command": "cargo test -p fvid-media --lib owned_resample_f64 && cargo test --features player --lib native_subtitle::tests",
+      "passed": 4,
+      "failed": 0
+    },
+    "fixture_generator_tests": {
+      "command": "python3 -m unittest discover -s scripts -p 'test_filter_subtitle_regressions.py' -v",
+      "passed": 3,
+      "failed": 0
+    }
+  },
+  "status": "accepted"
+}

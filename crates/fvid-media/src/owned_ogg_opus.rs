@@ -62,6 +62,7 @@ pub struct Program {
     end: i64,
     target: i64,
     tracks: Vec<AudioTrack>,
+    selected_track: usize,
 }
 impl Program {
     /// Negotiated speaker positions; `None` preserves discrete channel indices.
@@ -305,6 +306,7 @@ impl Program {
             end,
             target: 0,
             tracks,
+            selected_track: nth,
         })
     }
 }
@@ -422,6 +424,9 @@ impl Program {
     }
     pub fn audio_tracks(&self) -> Vec<AudioTrack> {
         self.tracks.clone()
+    }
+    pub fn audio_track_index(&self) -> usize {
+        self.selected_track
     }
     /// Next encoded packet; use `next_step` to handle chained decoder resets.
     pub fn next_packet(&mut self) -> Result<Option<EncodedPacket>> {

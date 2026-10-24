@@ -1,7 +1,7 @@
 //! Streaming Y4M overlay scheduling on the primary presentation clock.
 use crate::{
     owned_frame::GeometryFrame,
-    owned_y4m::{Header, PixelFormat, line},
+    owned_y4m::{Header, line},
 };
 use fvid_media_info::OverlaySpec;
 use std::{
@@ -56,29 +56,33 @@ impl OverlayReader {
             return Err("empty Y4M overlay source".into());
         }
         let header = Header::parse(&bytes)?;
-        // Legacy overlay defaults to 8-bit 4:2:0; other output colour conversions
-        // remain outside this route until implemented by the owned pipeline.
         for h in [main, &header] {
-            if h.format != PixelFormat::Yuv420
-                || h.depth() != 8
+            if !(8..=16).contains(&h.depth())
                 || h.tokens
                     .iter()
                     .any(|t| matches!(t.as_str(), "C420mpeg2" | "C420paldv"))
             {
-                return Err("owned scheduled overlay requires 8-bit JPEG-sited YUV420".into());
+                return Err("owned scheduled overlay does not support MPEG-2/PAL-DV chroma siting".into());
             }
+        }
+        if main.format != header.format {
+            return Err("overlay requires matching chroma sampling".into());
         }
         if main.full_range()? != header.full_range()? {
             return Err("overlay requires matching colour range".into());
         }
+        if main.pixel_aspect()? != header.pixel_aspect()? {
+            return Err("overlay requires matching pixel aspect".into());
+        }
         let main_rate = main.frame_rate()?;
         let secondary_rate = header.frame_rate()?;
         let clock = comparison_clock(main_rate, secondary_rate);
+        let (sx, sy) = header.format.subsampling();
         Ok(Self {
             frame: GeometryFrame {
                 width: header.width,
                 height: header.height,
-                subsampling: Some([2, 2]),
+                subsampling: Some([sx, sy]),
                 data: Vec::new(),
             },
             main_rate,
@@ -90,8 +94,8 @@ impl OverlayReader {
             eof: false,
             // The public scheduled overlay rounds placement down to chroma
             // boundaries. Keep the low-level compositor's alignment contract.
-            x: spec.x & !1,
-            y: spec.y & !1,
+            x: spec.x & !(sx as i32 - 1),
+            y: spec.y & !(sy as i32 - 1),
         })
     }
     pub(crate) fn apply(&mut self, output: &Header, frame: &mut Vec<u8>, index: u64) -> Result<()> {
@@ -142,10 +146,12 @@ impl OverlayReader {
             subsampling: Some([sx, sy]),
             data: std::mem::take(frame),
         };
-        let result = crate::owned_overlay::overlay_opaque(
+        let result = crate::owned_overlay::overlay_opaque_depth(
             &mut destination,
             &self.frame,
             output.depth(),
+            self.header.depth(),
+            output.full_range()?,
             i64::from(self.x),
             i64::from(self.y),
         );

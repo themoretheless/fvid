@@ -1,0 +1,63 @@
+{
+  "generator": "scripts/generate_mp4_aac_quicktime_regressions.py",
+  "spec": "https://developer.apple.com/documentation/quicktime-file-format/sound_sample_description_version_1",
+  "controls": [
+    {
+      "file": "iso-v0-direct.mp4",
+      "mode": "v0-direct-esds",
+      "has_video": true
+    },
+    {
+      "file": "qt-v1-wave.mov",
+      "mode": "v1-wave-esds-stale-stereo",
+      "has_video": true
+    },
+    {
+      "file": "qt-v1-direct.mov",
+      "mode": "v1-direct-esds",
+      "has_video": true
+    },
+    {
+      "file": "qt-v0-wave.mov",
+      "mode": "v0-wave-esds",
+      "has_video": true
+    },
+    {
+      "file": "qt-v2-wave.mov",
+      "mode": "v2-wave-esds",
+      "has_video": true
+    },
+    {
+      "file": "qt-v1-audio-only.mov",
+      "mode": "v1-wave-audio-only",
+      "has_video": false
+    }
+  ],
+  "cases": [
+    {
+      "file": "truncated-v1.mov",
+      "expected_error": "truncated AAC version-1 sample description"
+    },
+    {
+      "file": "wave-missing-esds.mov",
+      "expected_error": "missing MP4 esds box"
+    },
+    {
+      "file": "direct-missing-esds.mp4",
+      "expected_error": "missing MP4 wave box"
+    }
+  ],
+  "sha256": {
+    "direct-missing-esds.mp4": "42031221b427e65af89625c7ebfeb1327bbbbd966fd6a4fc3deccf2ae22a11b9",
+    "expected.f32le": "0e7c1faf087653e91eefeddd232d3995fd80b06ef005ac5e433175ac0669e8f5",
+    "frame.vp9": "217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c",
+    "iso-v0-direct.mp4": "40abaabaf72367bd231e6396a30286873920c90f4417fb72c46392fd2cf6cf23",
+    "qt-v0-wave.mov": "0727b6d2d799412b9aade9e5e6343e91b022240847e4cbdb8ba8b7793e950eee",
+    "qt-v1-audio-only.mov": "ed4e223eebc30226bae52aa10d142e36190c86e525d9e674dfbbbb536d75eab0",
+    "qt-v1-direct.mov": "3ce7f9517129ec1934528f00393b4d5823a43521e43f72d453737b66d70ecdf3",
+    "qt-v1-wave.mov": "6ff4cc60915ec22a769798b67aa76fba0f2fbf8fcfb7192058f5bc9a30e3a5f3",
+    "qt-v2-wave.mov": "7da655dbc597d68c4e5345d3e506dac070bf9e1e14a5addf2147f7fd117e09d4",
+    "truncated-v1.mov": "fe70ff324e22229c542707a7ce348711d2e867a4db67326aa8d36158af6d8996",
+    "wave-missing-esds.mov": "4ae8707fa835cdeda50a01d4a8dc2c37bd3598666987666510341c9bba20b364"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "batch_id": "FVID-0210",
+  "sha256": {
+    "g711-alaw-48k.wav": "1b80ef71faa9bf9c9b67cc7fa57b2a5faca83d9cb90bb784505b949a5693492f",
+    "g711-mulaw-48k.wav": "7efef2f679ccb0405a98841535cb9de28b6594f9ca2cbc75c1005329685acf11",
+    "multitrack-pcm-flac.mka": "68303aafa0e923e3d35e4cb9aa3af0a7bcb1c4c763ea11f33a2246b683a0ae60",
+    "multitrack-pcm-ima4.mov": "b95897139da64f79c10217fb6ffa42f9faf52516c85f1f2421fdc233c5a3974f",
+    "ogg-opus-mono-48k.ogg": "5b13ad4f6f2965d7d94dcbdf994e171c9d0d4d3cd6180428ce135230610eec29",
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601"
+  }
+}

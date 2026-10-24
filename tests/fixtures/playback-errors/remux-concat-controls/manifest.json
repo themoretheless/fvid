@@ -1,0 +1,13 @@
+{
+  "batch_id": "FVID-0215",
+  "sha256": {
+    "adts-mono-48k.aac": "f5fde04b21dcbee2e8906362ade9d849974ccff90ede07dad2cab013fde9f269",
+    "g711-alaw-48k.wav": "7db3cd14e3daabf5ea1fae6c6eebbf398ab91b47ebaab1a4f0487ed3358de3cb",
+    "matroska-flac-48k.mka": "e26049ecdcf9d42f67d17d379f6bf9bfb846870fdea816e8271455eb2b9dab8e",
+    "mp4-pcm-48k.m4a": "64aba9f1eafab4e48b90f73892ae1516c69d0cf2b6e6b73ce9ced76b32537796",
+    "ogg-opus-48k.ogg": "908f26aaef29b12291d3e7551778660b199ac75ded9b0d8bf03b4982afe93a16",
+    "pcm-48k-a.wav": "1738ddfa0f8c582f0597f5987cb318abf83d62241c17f05eb78f914c8e8c325e",
+    "pcm-48k-b.wav": "e1d85f11c041808f648b7051caa20f4bb341321c470637fe9ad8c126ec29eaa4",
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601"
+  }
+}

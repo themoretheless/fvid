@@ -1,0 +1,61 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0189"
+  ],
+  "checked_at": "2026-10-22T03:28:35+00:00",
+  "sources": [
+    "src/container/mp4.rs",
+    "crates/fvid-media/src/owned_mp4_impl.rs"
+  ],
+  "regressions": [
+    "tests/mp4_chunk_bounds.rs"
+  ],
+  "before": [
+    "evidence/batch-182-mp4-before.rs",
+    "evidence/batch-182-owned-mp4-impl-before.rs",
+    "evidence/batch-182-tests-before.rs",
+    "evidence/batch-182-before.log",
+    "evidence/batch-182-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-182-after.log",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-182-related-after.log",
+      "passed": 46
+    },
+    {
+      "log": "evidence/batch-182-mp4-units.log",
+      "passed": 18
+    },
+    {
+      "log": "evidence/batch-182-core.log",
+      "passed": 359
+    },
+    {
+      "log": "evidence/batch-182-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-182-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/container/mp4.rs": "48219a194bd321be61e9a265c047f73eab34fad8c996d4bf74e5a86372084734",
+    "/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media/src/owned_mp4_impl.rs": "194dcd5b455d432a3fc42c134582b843adb487f0a282431fb918a1357092f1f4",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_chunk_bounds.rs": "bf1e508c9695dcdc05a0bf180715fcc133fb14f55e3cecf20a02b1b9bc7ab1ca",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/mp4-chunk-bounds/manifest.json": "6f5f92211eed9e8da9f5a4ffd336afdb4cf5da66075bbc5c12b9bfb23ec90bf6"
+  },
+  "qualification": [
+    "Pre-fix src/container/mp4.rs and crates/fvid-media/src/owned_mp4_impl.rs accepted overlapping stco chunk spans, backward co64 chunk offsets, zero-byte stsz samples, zero-byte trun samples, empty non-fragmented tracks, and empty fragmented tracks. Pre-fix baseline reproduced all 6 defects and the forced acceptance test failed.",
+    "Updating sample_index, expanded_index, index_fragments, and chunk_runs in both MP4 parsers deterministically rejects all 6 malformed sample-table/chunk/fragment states while preserving valid multi-chunk stco and co64 files.",
+    "Both valid multi-chunk controls (stco and co64) yield 3 exact 81-byte VP9 packets and 3 decoded 16x16 RGB frames (all bytes 130) across sequential playback, EOF, rewind, and seek.",
+    "2 focused tests, 46 related MP4 integration tests, 18 MP4 unit tests, 359 minimal-configuration (--no-default-features) tests, offline fixture unittest, and full player build pass.",
+    "ISO/IEC 14496-12:2015, 8.7.3.2, 8.7.5, and 8.8.8 govern positive sample sizes, non-overlapping chunk spans, and non-empty track sample tables. All fixtures are pure synthetic offline files requiring neither FFmpeg nor network access."
+  ],
+  "counting": "One MP4 chunk-ordering, positive-sample-size, and non-empty-track invariant fix across src/container/mp4.rs and crates/fvid-media/src/owned_mp4_impl.rs (FVID-0189). No extra IDs for individual fixture variants or controls."
+}

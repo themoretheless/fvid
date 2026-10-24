@@ -121,12 +121,22 @@ pub(crate) fn try_mp4(path: &Path) -> Result<Option<MediaInfo>> {
             b"av01" => "av1".into(),
             b"text" => "bin_data".into(),
             b"raw " => "pcm_u8".into(),
+            b"alac" => "alac".into(),
             b"sowt" | b"twos" | b"in24" | b"in32" => {
                 let little = track.codec == *b"sowt"
                     || (track.codec != *b"twos" && track.configuration.first() == Some(&1));
+                let bits = if track.bit_depth == 0 {
+                    match &track.codec {
+                        b"in24" => 24,
+                        b"in32" => 32,
+                        _ => 16,
+                    }
+                } else {
+                    track.bit_depth
+                };
                 format!(
                     "pcm_s{}{}",
-                    track.bit_depth,
+                    bits,
                     if little { "le" } else { "be" }
                 )
             }

@@ -1,0 +1,70 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0187"
+  ],
+  "checked_at": "2026-10-22T02:36:30+00:00",
+  "sources": [
+    "src/container/mp4.rs",
+    "crates/fvid-media/src/owned_mp4_impl.rs",
+    "crates/fvid-media/src/owned_mp4_audio_schedule_impl.rs",
+    "crates/fvid-media/src/owned_video_timeline.rs",
+    "src/playback/video/native.rs"
+  ],
+  "regressions": [
+    "tests/mp4_elst_validation.rs"
+  ],
+  "before": [
+    "evidence/batch-180-mp4-before.rs",
+    "evidence/batch-180-owned-mp4-impl-before.rs",
+    "evidence/batch-180-owned-mp4-audio-schedule-impl-before.rs",
+    "evidence/batch-180-owned-video-timeline-before.rs",
+    "evidence/batch-180-native-before.rs",
+    "evidence/batch-180-tests-before.rs",
+    "evidence/batch-180-before.log",
+    "evidence/batch-180-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-180-after.log",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-180-related-after.log",
+      "passed": 51
+    },
+    {
+      "log": "evidence/batch-180-mp4-units.log",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-180-core.log",
+      "passed": 23
+    },
+    {
+      "log": "evidence/batch-180-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-180-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/container/mp4.rs": "ab38956d52752874a62cbb666a2cb7915a167f8440dbeb1aa65da8a3866f08e0",
+    "/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media/src/owned_mp4_impl.rs": "1dc5d8f6922c630b4ce3efc0f43c7c1fa97801dd651d14c087e1198a2eb7df76",
+    "/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media/src/owned_mp4_audio_schedule_impl.rs": "dbb65ad9e80babd95999e2bd6e6030f49f6e056a1fcf8d284866ec175cb50c76",
+    "/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media/src/owned_video_timeline.rs": "ace94c6d887b9b575345ede872a4efc6dba47ca868c304efa365ff49f32e63d4",
+    "/Users/themoretheless/Documents/Sources/fvid/src/playback/video/native.rs": "d90b62b8806b1db0ffcbc87f36744e8e7e5ba8ac6ba9e7f1c1dcb3d1ad599569",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_elst_validation.rs": "cb4b5c96c24fabbb0ac82f19cbfa409f96b12cbf0bc084870c4dee7b4e956c54",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/mp4-elst-validation/manifest.json": "fd74dfad59efc48bac96a445182252501bbffabdddfff1111e72aa486e643ea5"
+  },
+  "qualification": [
+    "Pre-fix RootMp4Reader and OwnedMp4Reader accepted empty elst boxes (entry_count == 0) and zero-duration elst entries (segment_duration == 0), AudioTimeline::new accepted zero-duration audio edits producing 0-sample schedules, and owned_video_timeline::map_edits skipped leading media_time < 0 edits and returned Ok(vec![]) on blank-only edit lists, causing NativeReader and decode_video to ignore the edit list and play all 3 unedited frames. Pre-fix baseline reproduced all defects and the forced acceptance test failed.",
+    "Updating src/container/mp4.rs, crates/fvid-media/src/owned_mp4_impl.rs, crates/fvid-media/src/owned_mp4_audio_schedule_impl.rs, and crates/fvid-media/src/owned_video_timeline.rs rejects empty elst boxes, zero-duration v0/v1 edit entries, zero-duration audio timeline segments, and blank-only video playback edit lists as Error::Invalid.",
+    "Both healthy edited controls (v0 leading empty delay + media edit and v1 single-segment trim) preserve exact video frame counts (2 frames), probe_mp4 durations, seek/rewind, and analytical AAC-LC float32 PCM (3,072 samples with 1,024 leading silence samples and 2,048 trimmed samples respectively) within 1e-7, while all 4 malformed edit-list fixtures refuse cleanly as Error::Invalid.",
+    "4 focused tests, 51 related MP4/AAC integration tests, 6 video/audio timeline unit tests, 23 minimal-configuration (--no-default-features) tests, offline fixture unittest, and full player build pass.",
+    "ISO/IEC 14496-12:2015, 8.6.5 (EditBox) and 8.6.6 (EditListBox) govern elst entry counts, segment durations, and empty-edit semantics. All fixtures are pure synthetic offline VP9/AAC-LC MP4 files requiring neither FFmpeg nor network access."
+  ],
+  "counting": "One MP4/MOV elst edit-list validation and blank-only edit refusal fix across container and timeline layers (FVID-0187). No extra IDs for individual fixture variants or controls."
+}

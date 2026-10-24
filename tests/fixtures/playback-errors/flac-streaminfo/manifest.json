@@ -1,0 +1,54 @@
+{
+  "batch": 187,
+  "id": "FVID-0194",
+  "fixtures": [
+    {
+      "name": "valid_baseline.flac",
+      "bytes": 116
+    },
+    {
+      "name": "padding_before_streaminfo.flac",
+      "bytes": 61
+    },
+    {
+      "name": "duplicate_streaminfo.flac",
+      "bytes": 91
+    },
+    {
+      "name": "overlong_streaminfo.flac",
+      "bytes": 55
+    },
+    {
+      "name": "reserved_metadata_type_7.flac",
+      "bytes": 61
+    },
+    {
+      "name": "reserved_metadata_type_127.flac",
+      "bytes": 61
+    },
+    {
+      "name": "min_block_below_16.flac",
+      "bytes": 53
+    },
+    {
+      "name": "min_block_exceeds_max_block.flac",
+      "bytes": 53
+    },
+    {
+      "name": "max_frame_mismatch_when_min_zero.flac",
+      "bytes": 53
+    },
+    {
+      "name": "channel_mask_popcount_overflow.flac",
+      "bytes": 116
+    },
+    {
+      "name": "matroska_flac_valid.mkv",
+      "bytes": 221
+    },
+    {
+      "name": "matroska_flac_mask_popcount_overflow.mkv",
+      "bytes": 221
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+running 1 test
+test burn_subtitles_and_xfade_plans_enforce_budgets_metadata_and_cli_controls ... FAILED
+
+failures:
+
+---- burn_subtitles_and_xfade_plans_enforce_budgets_metadata_and_cli_controls stdout ----
+
+thread 'burn_subtitles_and_xfade_plans_enforce_budgets_metadata_and_cli_controls' (40070203) panicked at tests/burn_xfade_plan_controls_regressions.rs:49:10:
+plan_burn_subtitles must reject max_packets=1 on 3-frame Y4M: MediaPlan { command: "burn-subtitles", input: "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/burn-xfade-plan-controls/burn-main-96x64.y4m", inputs: ["/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/burn-xfade-plan-controls/burn-main-96x64.y4m", "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/burn-xfade-plan-controls/burn-cues.srt"], streams: [], steps: [PlanStep { action: "decode", detail: "owned Y4M frames and SRT cues" }, PlanStep { action: "burn", detail: "bundled Ubuntu plain-text mask, native YUV composition" }, PlanStep { action: "encode", detail: "owned FFV1 and Matroska" }], graph: None, notes: ["no FFmpeg or libav execution; ASS styling and shaping are not implemented by this path"] }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    burn_subtitles_and_xfade_plans_enforce_budgets_metadata_and_cli_controls
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

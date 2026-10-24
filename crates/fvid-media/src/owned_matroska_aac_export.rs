@@ -79,6 +79,7 @@ pub(crate) fn apply(
     }
     crate::owned_budget::check_rss_budget(options)?;
     let (rate, channels, mask) = geometry(source, options)?;
+    let info = crate::owned_wave_metadata::matroska_source_info(source, options)?;
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,
@@ -94,6 +95,7 @@ pub(crate) fn apply(
             .map_err(|e| e.to_string())
         },
     )?;
+    crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
     crate::owned_aac_export_routing::export(source,spool,destination,transform,options)
 }
 

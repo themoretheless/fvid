@@ -189,6 +189,7 @@ pub struct AuAudioReader {
     au: Au,
     packet: usize,
     frame_skip: usize,
+    presentation_floor: u64,
 }
 
 impl AuAudioReader {
@@ -202,6 +203,7 @@ impl AuAudioReader {
             au: Au::parse(&bytes, &limits)?,
             packet: 0,
             frame_skip: 0,
+            presentation_floor: 0,
         })
     }
 
@@ -285,13 +287,44 @@ impl AudioStream for AuAudioReader {
         Ok(Some(packet))
     }
 
+    fn present_decoded(
+        &self,
+        mut packet: crate::audio::AudioPacket,
+        source_pts: i64,
+    ) -> Result<Option<crate::audio::AudioPacket>> {
+        let stride = usize::from(self.channels()) * 4;
+        if stride == 0 || !packet.data.len().is_multiple_of(stride) {
+            return Err(invalid("invalid decoded audio geometry"));
+        }
+        packet.pts = u64::try_from(source_pts)
+            .map_err(|_| invalid("decoded audio precedes its source timeline"))?;
+        packet.timebase_num = 1;
+        packet.timebase_den = self.sample_rate();
+        let frames = packet.data.len() / stride;
+        let skip = self
+            .presentation_floor
+            .saturating_sub(packet.pts)
+            .min(frames as u64) as usize;
+        if skip == frames {
+            return Ok(None);
+        }
+        if skip != 0 {
+            packet.data.copy_within(skip * stride.., 0);
+            packet.data.truncate((frames - skip) * stride);
+            packet.pts += skip as u64;
+        }
+        Ok(Some(packet))
+    }
+
     fn rewind(&mut self) {
         self.packet = 0;
         self.frame_skip = 0;
+        self.presentation_floor = 0;
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
         self.frame_skip = 0;
+        self.presentation_floor = (pts.max(0) as u64).min(self.au.frames as u64);
         if pts.max(0) as u64 >= self.au.frames as u64 {
             self.packet = self.au.packets();
             return self.au.frames as i64;

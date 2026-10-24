@@ -14,8 +14,10 @@ pub fn map_edits(
     track_scale: u32,
     movie_scale: u32,
 ) -> Result<Vec<PlaybackEdit>> {
-    map_movie_edits(
-        edits.into_iter().skip_while(|(_, start)| *start < 0),
+    let mut edits = edits.into_iter().peekable();
+    let had_edits = edits.peek().is_some();
+    let mapped = map_movie_edits(
+        edits.skip_while(|(_, start)| *start < 0),
         track_scale,
         movie_scale,
     )?
@@ -26,7 +28,11 @@ pub fn map_edits(
             "empty MP4 edit inside playback is not implemented",
         )),
     })
-    .collect()
+    .collect::<Result<Vec<_>>>()?;
+    if had_edits && mapped.is_empty() {
+        return Err(invalid("empty MP4 playback edit"));
+    }
+    Ok(mapped)
 }
 /// Export clock preserves every empty edit, including the leading delay.
 #[derive(Clone, Copy, Debug)]

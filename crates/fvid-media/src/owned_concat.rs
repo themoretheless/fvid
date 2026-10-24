@@ -17,6 +17,7 @@ pub fn concat(
     destination: &Path,
     options: &CopyOptions,
 ) -> Result<CopyStats, String> {
+    crate::owned_budget::check_rss_budget(options)?;
     if !supports(sources, destination, options) {
         return crate::owned_wave_remux::concat(sources, destination, options);
     }
@@ -25,12 +26,13 @@ pub fn concat(
     }
     let readers = open_readers(sources, options)?;
     let mut stats = crate::owned_matroska_remux::publish(destination, options, |output| {
-        crate::owned_matroska::concat_adts_limited(
+        crate::owned_matroska::concat_adts_with_options(
             readers,
             output,
             options.cancel.as_ref(),
             options.progress.as_ref(),
             options.max_packets,
+            Some(options),
         )
         .map_err(|e| e.to_string())
     })?;
@@ -68,6 +70,7 @@ pub fn plan_concat(
     options: &CopyOptions,
 ) -> Result<fvid_media_info::MediaPlan, String> {
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
+    crate::owned_budget::check_rss_budget(options)?;
     if !supports(sources, Path::new("planned.mka"), options) {
         return crate::owned_wave_plan::plan_concat(sources, options);
     }
@@ -83,6 +86,7 @@ pub fn plan_concat(
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             return Err("media operation cancelled".into());
         }
+        crate::owned_budget::check_rss_budget(options)?;
         if options.max_packets.is_some_and(|limit| packets >= limit) {
             break;
         }
@@ -94,14 +98,51 @@ pub fn plan_concat(
             .checked_add(packet.len() as u64)
             .ok_or("ADTS payload count overflow")?;
     }
+    let mut steps = vec![
+        PlanStep {
+            action: "concat".into(),
+            detail: format!(
+                "copy {packets} unchanged AAC packets, {bytes} payload bytes across {} segments; {} Hz, {} channels",
+                sources.len(),
+                config.sample_rate,
+                config.channels
+            ),
+        },
+        PlanStep {
+            action: "mux".into(),
+            detail: "write one Matroska AAC track with continuous nanosecond packet clock".into(),
+        },
+    ];
+    if !options.metadata_set.is_empty()
+        || !options.metadata_delete.is_empty()
+        || !options.stream_metadata_set.is_empty()
+        || !options.stream_metadata_delete.is_empty()
+    {
+        steps.push(PlanStep {
+            action: "metadata".into(),
+            detail: "apply Matroska container and stream 0 metadata mutations".into(),
+        });
+    }
+    steps.push(PlanStep {
+        action: "publish".into(),
+        detail: "publish completed output without overwriting; remove temporary output on failure or cancellation".into(),
+    });
     Ok(MediaPlan {
-        command: "concat".into(), input: sources[0].clone(), inputs: sources.to_vec(),
-        streams: vec![PlanStream { index: 0, media_type: "audio".into(), codec: "aac".into(), disposition: "copy".into() }],
-        steps: vec![
-            PlanStep { action: "concat".into(), detail: format!("copy {packets} unchanged AAC packets, {bytes} payload bytes across {} segments; {} Hz, {} channels", sources.len(), config.sample_rate, config.channels) },
-            PlanStep { action: "mux".into(), detail: "write one Matroska AAC track with continuous nanosecond packet clock".into() },
-            PlanStep { action: "publish".into(), detail: "publish completed output without overwriting; remove temporary output on failure or cancellation".into() },
-        ], graph: None,
-        notes: vec!["backend: owned ADTS/Matroska; no external demuxer or muxer".into(), "output must be .mkv or .mka; destination/publication checked during execution".into(), "identical AAC configurations required; packet byte limit excludes ADTS headers".into()],
+        command: "concat".into(),
+        input: sources[0].clone(),
+        inputs: sources.to_vec(),
+        streams: vec![PlanStream {
+            index: 0,
+            media_type: "audio".into(),
+            codec: "aac".into(),
+            disposition: "copy".into(),
+        }],
+        steps,
+        graph: None,
+        notes: vec![
+            "backend: owned ADTS/Matroska; no external demuxer or muxer".into(),
+            "output must be .mkv or .mka; destination/publication checked during execution".into(),
+            "identical AAC configurations required; packet byte limit excludes ADTS headers".into(),
+        ],
     })
 }

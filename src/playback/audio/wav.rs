@@ -446,8 +446,17 @@ fn parse_fmt(body: &[u8], limits: &Limits) -> Result<Pcm> {
         // WAVE_FORMAT_EXTENSIBLE repeats the geometry above and adds a GUID saying
         // what the samples actually are; the low half of the GUID's first word is
         // the plain format number.
-        if body.len() < 40 || u16_at(16) < 22 {
+        if body.len() < 40
+            || u16_at(16) < 22
+            || usize::from(u16_at(16)) > body.len() - 18
+        {
             return Err(invalid("extensible fmt chunk has no sub-format to read"));
+        }
+        let channel_mask = u32_at(20);
+        if channel_mask != 0 && channel_mask.count_ones() > u32::from(channels) {
+            return Err(invalid(
+                "extensible Wave channel mask names more speakers than channels",
+            ));
         }
         let guid = &body[24..40];
         let data_format = u32::from_le_bytes(guid[..4].try_into().expect("four bytes"));

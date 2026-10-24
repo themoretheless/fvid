@@ -1,0 +1,17 @@
+{
+  "batch": 188,
+  "improvement_id": "FVID-0195",
+  "status": "accepted",
+  "fixtures_dir": "tests/fixtures/playback-errors/smf-xm",
+  "generator": "scripts/generate_smf_xm_regressions.py",
+  "fixture_unittest": "scripts/test_smf_xm_regressions.py",
+  "regression_test": "tests/smf_xm_regressions.rs",
+  "gates": {
+    "focused_regression": "cargo test --features player --test smf_xm_regressions -- --nocapture (4 passed)",
+    "fixture_unittest": "python3 scripts/test_smf_xm_regressions.py (3 passed)",
+    "related_integrations": "cargo test --features player --test smf_meta_extensions --test smf_format_zero --test xm_sample_grid --test xm_empty_header -- --nocapture (6 passed)",
+    "unit_tests": "cargo test --lib --features player container::smf && cargo test --lib --features player container::xm && cargo test --lib --features player playback_smf && cargo test --lib --features player playback_xm (14 + 13 + 5 + 6 passed)",
+    "minimal_core": "cargo test --lib --no-default-features container::smf && cargo test --lib --no-default-features container::xm (14 + 13 passed)",
+    "binary_build": "cargo build --bin fvid (ok)"
+  }
+}

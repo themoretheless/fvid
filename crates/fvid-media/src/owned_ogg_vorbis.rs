@@ -341,6 +341,13 @@ impl Program {
             )));
         }
         let (playable, choices, selected_track) = select(&ogg, selection)?;
+        for pair in playable.windows(2) {
+            if !ogg.chains()[pair[0]].ended {
+                return Err(invalid(
+                    "Ogg Vorbis chain starts before the previous segment ended",
+                ));
+            }
+        }
         let mut tracks: Vec<AudioTrack> = choices
             .into_iter()
             .map(|i| {

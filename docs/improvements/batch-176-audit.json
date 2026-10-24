@@ -1,0 +1,20 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0183",
+  "source": "src/container/mp4.rs",
+  "source_sha256": "bc0b89fdf8bc2b4367ae78551c8bcf0c0d8341a48b088b093e75de5fcbb60c5c",
+  "before_snapshot": "evidence/batch-176-mp4-before.rs",
+  "problem": "Fragmented MP4 parsing never inspects mfhd inside moof (accepting moof boxes without mfhd, duplicate mfhd boxes, overlong mfhd payloads, and zero sequence_number) and accepts trex boxes with track_ID == 0 or duplicate track_ID entries in mvex (silently ignoring the second trex).",
+  "primary_reference": "https://b.goeswhere.com/ISO_IEC_14496-12_2015a.pdf",
+  "reference_provenance": "ISO/IEC 14496-12:2015, 8.8.3 (TrackExtendsBox: exactly one per track, non-zero track_ID) and 8.8.4/8.8.5 (MovieFragmentBox / MovieFragmentHeaderBox: mandatory singleton mfhd per moof, version 0, 8-byte payload, 1-based positive sequence_number).",
+  "fixtures": "tests/fixtures/playback-errors/mp4-mfhd-trex",
+  "scope": "Pure owned 3-frame 16x16 VP9 fMP4 at 50 Hz. Controls cover regular MP4, single-fragment fMP4, three-fragment sequential fMP4, and multi-track trex with distinct track IDs. Malformed cases cover missing mfhd, duplicate mfhd, zero mfhd sequence_number, overlong 12-byte mfhd, zero trex track_ID, and duplicate trex track_ID.",
+  "requirements": [
+    "Reproduce pre-fix silent acceptance of all 6 malformed mfhd and trex inputs before editing production code.",
+    "Require a singleton version-0 8-byte mfhd with non-zero sequence_number in every moof and non-zero unique track_ID values across mvex/trex in src/container/mp4.rs.",
+    "Preserve exact packets, sync flags, clocks, budgets, analytic VP9 planes/RGB, 32 public clamped seek targets, rewind, and repeated EOF across all healthy controls.",
+    "Run focused, related MP4/HLS/VP9, unit, minimal-configuration, fixture unittest, and player build gates."
+  ],
+  "implementation_plan": "Validate required(&moof_boxes, b\"mfhd\"), version 0, len == 8, and non-zero sequence_number in index_fragments; validate non-zero unique track_ID in fragment_defaults.",
+  "counting": "One fragmented MP4 mfhd header and trex track-ID integrity fix (FVID-0183). No extra IDs for individual mfhd/trex variants, controls, or fixture generator."
+}

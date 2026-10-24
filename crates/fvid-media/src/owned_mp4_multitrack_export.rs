@@ -65,7 +65,7 @@ fn qualify(
         return Err("lossless export requires at least one selected video stream".into());
     }
 
-    if tracks[video].rotation != 0
+    if !matches!(tracks[video].rotation, 0 | 90 | 180 | 270)
         || !matches!(&tracks[video].codec, b"avc1" | b"avc3" | b"hvc1" | b"hev1")
     {
         return Ok(None);
@@ -89,7 +89,7 @@ fn qualify(
             .iter()
             .any(|(i, _)| *i >= tracks.len())
     {
-        return Ok(None);
+        return Err("metadata refers to missing input track".into());
     }
     let count = selected.iter().try_fold(0u64, |n, &i| {
         let t = &tracks[i];
@@ -105,6 +105,28 @@ fn qualify(
         count,
         selected,
     }))
+}
+pub(crate) fn plan_selection(
+    source: &Path,
+    transform: &LosslessTransform,
+    options: &CopyOptions,
+) -> Result<Option<(usize, Vec<usize>)>> {
+    let Some(input) = qualify(source, transform, options)? else {
+        return Ok(None);
+    };
+    check(options)?;
+    let Some(bridge) =
+        crate::owned_mp4_video_bridge::prepare_video_controlled(source, Some(options))?
+    else {
+        return Ok(None);
+    };
+    let Some(request) = crate::owned_lossless::request(transform) else {
+        return Ok(None);
+    };
+    if !crate::owned_ffv1_export::supports(&bridge.path, &request) {
+        return Ok(None);
+    }
+    Ok(Some((input.video, input.selected)))
 }
 pub(crate) fn supports(
     source: &Path,
@@ -135,7 +157,7 @@ fn check(options: &CopyOptions) -> Result<()> {
     {
         return Err("media operation cancelled".into());
     }
-    Ok(())
+    crate::owned_budget::check_rss_budget(options)
 }
 pub(crate) fn try_export(
     source: &Path,
@@ -195,11 +217,19 @@ pub(crate) fn try_export(
     .map_err(|e| e.to_string())?;
     video.restrict_packet_bytes(options.max_packet_bytes);
     video.scan_all().map_err(|e| e.to_string())?;
-    let vt = video
+    let mut vt = video
         .tracks
         .first()
         .ok_or("filtered video has no track")?
         .clone();
+    if vt.language.is_empty() {
+        vt.language = video
+            .track_languages
+            .get(&vt.number)
+            .or_else(|| video.track_legacy_languages.get(&vt.number))
+            .cloned()
+            .unwrap_or_else(|| "und".into());
+    }
     let metadata = mkv::FileMetadata {
         tags: video.tags.clone(),
         chapters: video.chapters.clone(),
@@ -209,16 +239,6 @@ pub(crate) fn try_export(
     if let Some(uid) = video.track_uids.get(&vt.number) {
         if let Some(tags) = video.track_metadata.get(uid) {
             scoped.insert(input.video, tags.clone());
-        }
-    }
-    for (i, key) in &options.stream_metadata_delete {
-        if *i == input.video {
-            continue;
-        }
-        if key.eq_ignore_ascii_case("title") {
-            tracks[*i].name.clear();
-        } else if key.eq_ignore_ascii_case("language") {
-            tracks[*i].language = "und".into();
         }
     }
     for (i, key, value) in &options.stream_metadata_set {
@@ -233,16 +253,30 @@ pub(crate) fn try_export(
             } else {
                 value.clone()
             };
-        } else if !value.is_empty() {
-            scoped
-                .entry(*i)
-                .or_insert_with(BTreeMap::new)
-                .insert(key.to_ascii_uppercase(), value.clone());
+        } else {
+            let tags = scoped.entry(*i).or_insert_with(BTreeMap::new);
+            tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
+            if !value.is_empty() {
+                tags.insert(key.to_ascii_uppercase(), value.clone());
+            }
+        }
+    }
+    for (i, key) in &options.stream_metadata_delete {
+        if *i == input.video {
+            continue;
+        }
+        if key.eq_ignore_ascii_case("title") {
+            tracks[*i].name.clear();
+        } else if key.eq_ignore_ascii_case("language") {
+            tracks[*i].language = "und".into();
+        } else if let Some(tags) = scoped.get_mut(i) {
+            tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
         }
     }
     let mut plans = (0..tracks.len()).map(|_| None).collect::<Vec<_>>();
     let mut specs = Vec::new();
     let mut track_options = Vec::new();
+    let mut trimmed_audio_sample_frames = 0u64;
     for &i in &input.selected {
         let track = &tracks[i];
         if i == input.video {
@@ -272,6 +306,9 @@ pub(crate) fn try_export(
                 options.cancel.as_ref(),
             )
             .map_err(|e| e.to_string())?;
+            trimmed_audio_sample_frames = trimmed_audio_sample_frames
+                .checked_add(plan.trimmed_audio_sample_frames)
+                .ok_or("trimmed sample count overflow")?;
             track_options.push(plan.options);
             specs.push(crate::owned_mp4_matroska::spec(track).map_err(|e| e.to_string())?);
             plans[i] = Some(plan);
@@ -379,6 +416,7 @@ pub(crate) fn try_export(
     })?;
     stats.decoded_frames = input.reader.tracks()[input.video].samples.len() as u64;
     stats.copied_packets = copied;
+    stats.trimmed_audio_sample_frames = trimmed_audio_sample_frames;
     stats.video_packets = video.packets.len() as u64;
     std::hint::black_box(event);
     Ok(Some(stats))

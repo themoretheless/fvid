@@ -403,9 +403,10 @@ impl<R: BufRead + Seek> NativeReader<R> {
             Self::Avc {
                 source,
                 frame_start,
+                frames,
                 ..
             } => {
-                if source.track().timescale == 0 {
+                if *frames == 0 || source.track().timescale == 0 {
                     return None;
                 }
                 Some((*frame_start, source.track().timescale))
@@ -1501,7 +1502,7 @@ mod tests {
         assert!(playback_window(&track, 1000).is_err());
         track.edits[0].duration = 480;
         track.edits[0].media_time = -1;
-        assert_eq!(playback_window(&track, 1000).unwrap(), (0, None));
+        assert!(playback_window(&track, 1000).is_err());
         // A leading delay is skipped; contiguous edits join into one window.
         track.edits.push(Edit {
             duration: 240,

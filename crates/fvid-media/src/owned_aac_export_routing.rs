@@ -111,6 +111,12 @@ pub(crate) fn export(
         if !info.float || info.bits_per_sample != 32 || info.channels != router.input_channels() {
             return Err("AAC routing spool geometry mismatch".into());
         }
+        let source_info = crate::owned_wave_inspect::info_chunks(
+            &mut input,
+            &info,
+            options.cancel.as_ref(),
+        )
+        .map_err(|e| e.to_string())?;
         let chunk_frames = 256usize;
         let bytes = chunk_frames * usize::from(info.channels) * 4;
         let estimate =
@@ -158,6 +164,8 @@ pub(crate) fn export(
             remaining -= frames as u64;
         }
         output.flush().map_err(|e| e.to_string())?;
+        drop(output);
+        crate::owned_ogg_opus_export::append_info(&routed, &source_info)?;
         check(options)?;
         spool.wave = routed;
     }

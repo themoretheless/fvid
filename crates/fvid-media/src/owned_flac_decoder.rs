@@ -16,6 +16,11 @@ impl FlacDecoder {
             }
             &blocks[4..38]
         };
+        let min_block = u16::from_be_bytes([info[0], info[1]]);
+        let max_block = u16::from_be_bytes([info[2], info[3]]);
+        if min_block < 16 || max_block < 16 || min_block > max_block {
+            return Err(invalid("FLAC STREAMINFO states invalid block size bounds"));
+        }
         let geometry = u64::from_be_bytes(info[10..18].try_into().unwrap());
         let config = fvid_codecs::flac::Config {
             sample_rate: (geometry >> 44) as u32,
@@ -32,6 +37,9 @@ impl FlacDecoder {
         let mask = crate::owned_flac_layout::channel_mask(extra)
             .map_err(|e| invalid(&e.to_string()))?
             .unwrap_or_else(|| channel_mask(config.channels));
+        if mask.count_ones() > u32::from(config.channels) {
+            return Err(invalid("FLAC channel mask exceeds stream channel count"));
+        }
         Ok(Self { config, mask })
     }
     pub(crate) fn channel_mask(&self) -> u32 {

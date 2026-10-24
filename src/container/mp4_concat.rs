@@ -34,7 +34,7 @@ fn compatible(a: &Track, b: &Track) -> bool {
         && a.hdr == b.hdr
 }
 pub struct Segment<R> {
-    reader: Mp4Reader<R>,
+    pub(crate) reader: Mp4Reader<R>,
     plans: Vec<TrackPlan>,
     offset: u64,
     duration: u64,
@@ -44,6 +44,17 @@ pub fn open(
     sources: &[PathBuf],
     cancel: Option<&CancelFlag>,
 ) -> Result<Option<Vec<Segment<BufReader<File>>>>> {
+    open_with_packet_limit(sources, cancel, super::mp4::Limits::default().packet_bytes)
+}
+
+pub fn open_with_packet_limit(
+    sources: &[PathBuf],
+    cancel: Option<&CancelFlag>,
+    max_packet_bytes: usize,
+) -> Result<Option<Vec<Segment<BufReader<File>>>>> {
+    if max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
     if !(2..=256).contains(&sources.len()) {
         return Err(invalid("concat requires 2..=256 inputs"));
     }
@@ -62,7 +73,9 @@ pub fn open(
             return Ok(None);
         }
         file.rewind()?;
-        let reader = Mp4Reader::open(BufReader::new(file), Default::default())?;
+        let mut limits = super::mp4::Limits::default();
+        limits.packet_bytes = limits.packet_bytes.min(max_packet_bytes);
+        let reader = Mp4Reader::open(BufReader::new(file), limits)?;
         if !mp4_matroska::eligible(&reader) {
             return Ok(None);
         }
@@ -168,20 +181,134 @@ pub fn write<R: Read + Seek, W: Write + Seek>(
     cancel: Option<&CancelFlag>,
     progress: Option<&ProgressHook>,
 ) -> Result<ProgressEvent> {
+    write_limited(segments, output, cancel, progress, None)
+}
+
+pub fn write_limited<R: Read + Seek, W: Write + Seek>(
+    segments: &mut [Segment<R>],
+    output: &mut W,
+    cancel: Option<&CancelFlag>,
+    progress: Option<&ProgressHook>,
+    max_packets: Option<u64>,
+) -> Result<ProgressEvent> {
+    let mut options = fvid_media::CopyOptions::default();
+    options.cancel = cancel.cloned();
+    options.progress = progress.cloned();
+    options.max_packets = max_packets;
+    write_with_options(segments, output, &options)
+}
+
+pub fn write_with_options<R: Read + Seek, W: Write + Seek>(
+    segments: &mut [Segment<R>],
+    output: &mut W,
+    options: &fvid_media::CopyOptions,
+) -> Result<ProgressEvent> {
+    let cancel = options.cancel.as_ref();
+    let progress = options.progress.as_ref();
+    let max_packets = options.max_packets;
     check(cancel)?;
     let first = segments
         .first()
         .ok_or_else(|| invalid("concat requires input segments"))?;
-    let tracks = first.reader.tracks().to_vec();
+    let selected = mp4_matroska::selection(first.reader.tracks().len(), &options.streams)?;
+    if options.metadata_set.len() + options.metadata_delete.len() > 64 {
+        return Err(invalid("too many metadata mutations"));
+    }
+    if options.stream_metadata_set.len() + options.stream_metadata_delete.len() > 64 {
+        return Err(invalid("too many stream metadata mutations"));
+    }
+    let mut metadata = FileMetadata::from_mp4(&first.reader);
+    let mut text = std::collections::BTreeMap::new();
+    for (key, value) in &options.metadata_set {
+        let key = key.trim();
+        if key.is_empty()
+            || key.len() > 128
+            || value.len() > 1024
+            || key.contains('\0')
+            || value.contains('\0')
+        {
+            return Err(invalid("invalid metadata tag"));
+        }
+        text.retain(|k: &String, _| !k.eq_ignore_ascii_case(key));
+        if !metadata.tags.set(key, value) && !value.is_empty() {
+            text.insert(key.to_ascii_uppercase(), value.clone());
+        }
+    }
+    for key in &options.metadata_delete {
+        let key = key.trim();
+        if key.is_empty() || key.len() > 128 || key.contains('\0') {
+            return Err(invalid("invalid metadata key"));
+        }
+        metadata.tags.set(key, "");
+        text.retain(|k, _| !k.eq_ignore_ascii_case(key));
+    }
+    let mut tracks: Vec<_> = selected
+        .iter()
+        .map(|&index| first.reader.tracks()[index].clone())
+        .collect();
+    let mut scoped: std::collections::BTreeMap<usize, std::collections::BTreeMap<String, String>> =
+        std::collections::BTreeMap::new();
+    for (index, key, value) in &options.stream_metadata_set {
+        let Some(pos) = selected.iter().position(|&s| s == *index) else {
+            return Err(invalid("stream metadata index out of range"));
+        };
+        let key = key.trim();
+        if key.is_empty()
+            || key.len() > 128
+            || value.len() > 1024
+            || key.contains('\0')
+            || value.contains('\0')
+            || matches!(
+                key.to_ascii_lowercase().as_str(),
+                "rotate" | "stereo_mode" | "alpha_mode"
+            )
+            || (key.eq_ignore_ascii_case("language") && value.len() > 128)
+        {
+            return Err(invalid("invalid stream metadata tag"));
+        }
+        if key.eq_ignore_ascii_case("title") {
+            tracks[pos].name = value.clone();
+        } else if key.eq_ignore_ascii_case("language") {
+            tracks[pos].language = value.clone();
+        } else {
+            let map = scoped.entry(pos).or_default();
+            map.retain(|k: &String, _| !k.eq_ignore_ascii_case(key));
+            if !value.is_empty() {
+                map.insert(key.to_ascii_uppercase(), value.clone());
+            }
+        }
+    }
+    for (index, key) in &options.stream_metadata_delete {
+        let Some(pos) = selected.iter().position(|&s| s == *index) else {
+            return Err(invalid("stream metadata index out of range"));
+        };
+        let key = key.trim();
+        if key.is_empty()
+            || key.len() > 128
+            || key.contains('\0')
+            || matches!(
+                key.to_ascii_lowercase().as_str(),
+                "rotate" | "stereo_mode" | "alpha_mode"
+            )
+        {
+            return Err(invalid("invalid stream metadata key"));
+        }
+        if key.eq_ignore_ascii_case("title") {
+            tracks[pos].name.clear();
+        } else if key.eq_ignore_ascii_case("language") {
+            tracks[pos].language.clear();
+        } else if let Some(map) = scoped.get_mut(&pos) {
+            map.retain(|k, _| !k.eq_ignore_ascii_case(key));
+        }
+    }
     let specs = tracks
         .iter()
         .map(mp4_matroska::spec)
         .collect::<Result<Vec<_>>>()?;
-    let mut options: Vec<_> = first.plans.iter().map(|p| p.options).collect();
-    for option in &mut options {
+    let mut track_options: Vec<_> = selected.iter().map(|&i| first.plans[i].options).collect();
+    for option in &mut track_options {
         option.default_duration_ns = 0;
     }
-    let mut metadata = FileMetadata::from_mp4(&first.reader);
     metadata.chapters.clear();
     for segment in segments.iter() {
         for chapter in segment.reader.chapters() {
@@ -197,36 +324,46 @@ pub fn write<R: Read + Seek, W: Write + Seek>(
             }
         }
     }
-    let mut writer = PacketWriter::new_with_metadata(output, &specs, &options, &metadata)?;
+    let mut writer = PacketWriter::new_with_text_metadata(
+        output,
+        &specs,
+        &track_options,
+        &metadata,
+        &text,
+        &scoped,
+    )?;
     if let Some(hook) = progress {
         hook.emit(writer.event());
     }
     let mut payload = Vec::new();
-    for segment in segments {
+    'segments: for segment in segments {
         let mut queue = BinaryHeap::new();
-        for (track, plan) in segment.plans.iter().enumerate() {
-            if let Some(packet) = plan.packets.first() {
-                queue.push(Reverse((packet.dts, track, 0usize)));
+        for (pos, &source_track) in selected.iter().enumerate() {
+            if let Some(packet) = segment.plans[source_track].packets.first() {
+                queue.push(Reverse((packet.dts, pos, source_track, 0usize)));
             }
         }
-        while let Some(Reverse((_, track, index))) = queue.pop() {
+        while let Some(Reverse((_, pos, source_track, index))) = queue.pop() {
             check(cancel)?;
-            let packet = &segment.plans[track].packets[index];
-            segment.reader.read_packet(track, index, &mut payload)?;
+            if max_packets.is_some_and(|limit| writer.event().packets >= limit) {
+                break 'segments;
+            }
+            let packet = &segment.plans[source_track].packets[index];
+            segment.reader.read_packet(source_track, index, &mut payload)?;
             let pts = u64::try_from(
                 i128::from(segment.offset)
                     + i128::from(packet.pts)
-                    + i128::from(options[track].codec_delay_ns)
-                    - i128::from(segment.plans[track].options.codec_delay_ns),
+                    + i128::from(track_options[pos].codec_delay_ns)
+                    - i128::from(segment.plans[source_track].options.codec_delay_ns),
             )
             .map_err(|_| invalid("concat packet timestamp overflow"))?;
-            let sync = segment.reader.tracks()[track]
+            let sync = segment.reader.tracks()[source_track]
                 .samples
                 .get(index)
                 .ok_or_else(|| invalid("missing concat sample"))?
                 .sync;
             writer.write_packet_with_options(
-                track,
+                pos,
                 pts,
                 packet.duration,
                 sync,
@@ -236,13 +373,17 @@ pub fn write<R: Read + Seek, W: Write + Seek>(
             if let Some(hook) = progress {
                 hook.emit(writer.event());
             }
-            if let Some(packet) = segment.plans[track].packets.get(index + 1) {
-                queue.push(Reverse((packet.dts, track, index + 1)));
+            if let Some(packet) = segment.plans[source_track].packets.get(index + 1) {
+                queue.push(Reverse((packet.dts, pos, source_track, index + 1)));
             }
         }
     }
     check(cancel)?;
-    let event = writer.finish()?;
+    let event = if max_packets.is_some() {
+        writer.finish_prefix()?
+    } else {
+        writer.finish()?
+    };
     check(cancel)?;
     Ok(event)
 }

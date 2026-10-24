@@ -138,16 +138,26 @@ pub(crate) fn metadata(o: &CopyOptions) -> Result<crate::owned_matroska::FileMet
         return Err("at most 64 container metadata mutations".into());
     }
     let mut file = crate::owned_matroska::FileMetadata::default();
-    for key in &o.metadata_delete {
-        if key.contains('\0') { return Err("NUL in container metadata".into()); }
-        file.tags.set(key, "");
-    }
     for (key, value) in &o.metadata_set {
         if key.contains('\0') || value.contains('\0') {
             return Err("NUL in container metadata".into());
         }
+        if !crate::owned_file_tags::FileTags::supports_key(key)
+            && (key.is_empty() || key.len() > 128 || value.len() > 1024)
+        {
+            return Err("invalid container metadata key or value".into());
+        }
         // Nonstandard text tags are written alongside these standard fields.
         file.tags.set(key, value);
+    }
+    for key in &o.metadata_delete {
+        if key.contains('\0') { return Err("NUL in container metadata".into()); }
+        if !crate::owned_file_tags::FileTags::supports_key(key)
+            && (key.is_empty() || key.len() > 128)
+        {
+            return Err("invalid container metadata key".into());
+        }
+        file.tags.set(key, "");
     }
     Ok(file)
 }
@@ -164,7 +174,6 @@ pub(crate) fn policy(o: &CopyOptions, text_tags: bool) -> bool {
     (o.streams.is_empty() || o.streams == [0])
         && o.max_packet_bytes != 0
         && o.max_controlled_bytes.is_none()
-        && o.max_rss_bytes.is_none()
         && o.metadata_set.len() + o.metadata_delete.len() <= 64
         && o.metadata_set.iter().all(|(k, v)| {
             !k.contains('\0')
@@ -244,6 +253,7 @@ pub fn transcode_lossless(
     {
         return Err("media operation cancelled".into());
     }
+    crate::owned_budget::check_rss_budget(options)?;
     let request = request(&transform)
         .ok_or("owned Y4M lossless export does not yet implement requested transforms")?;
     if let Some(stats)=crate::owned_mp4_multitrack_export::try_export(source,destination,&transform,options)? {return Ok(stats);}
@@ -391,10 +401,59 @@ pub fn plan_transcode_lossless(
     encoder: Option<&str>,
 ) -> Result<fvid_media_info::MediaPlan, String> {
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
     if encoder.is_some_and(|name| name != "ffv1") || !supports(source, transform, options) {
         return Err("request has no owned lossless export plan".into());
     }
-    metadata(options)?;
+    crate::owned_budget::check_rss_budget(options)?;
+    let request = request(transform)
+        .ok_or("owned Y4M lossless export does not yet implement requested transforms")?;
+    let multitrack = if let Some(selection) =
+        crate::owned_mp4_multitrack_export::plan_selection(source, transform, options)?
+    {
+        Some(selection)
+    } else {
+        crate::owned_webm_multitrack_export::plan_selection(source, transform, options)?
+    };
+    if multitrack.is_none() {
+        metadata(options)?;
+        if !policy(options, true) {
+            return Err("owned Y4M lossless export does not yet implement requested policy".into());
+        }
+        if crate::owned_mp4_video_bridge::recognizes(source) {
+            if let Some(temporary) =
+                crate::owned_mp4_video_bridge::prepare(source, Some(options))?
+            {
+                let mut stage = options.clone();
+                stage.streams.clear();
+                stage.stream_metadata_set.clear();
+                stage.stream_metadata_delete.clear();
+                crate::owned_video_decode::decode_webm(
+                    &temporary.path,
+                    &request,
+                    None,
+                    Some(&stage),
+                )?;
+            } else {
+                return Err(
+                    "owned MP4 lossless export does not yet support this codec, format or transform"
+                        .into(),
+                );
+            }
+        } else if crate::owned_ffv1_export::supports(source, &request) {
+            let mut stage = options.clone();
+            stage.streams.clear();
+            stage.stream_metadata_set.clear();
+            stage.stream_metadata_delete.clear();
+            crate::owned_video_decode::decode_webm(source, &request, None, Some(&stage))?;
+        }
+    }
     let info = crate::owned_probe::probe(source)?;
     let mut steps = vec![PlanStep {
         action: "decode".into(),
@@ -404,7 +463,7 @@ pub fn plan_transcode_lossless(
         if from < 0 || to <= from {
             return Err("lossless interval requires 0 <= from < to".into());
         }
-        if crate::owned_y4m_decode::supports(source) {
+        if multitrack.is_none() && crate::owned_y4m_decode::supports(source) {
             let mut input =
                 std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
             let mut bytes = Vec::new();
@@ -423,6 +482,34 @@ pub fn plan_transcode_lossless(
             detail: format!("presentation window [{from},{to}) µs"),
         });
     }
+    if multitrack.is_none() && crate::owned_y4m_decode::supports(source) {
+        if options.max_packets.is_some()
+            || options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        {
+            let mut reader =
+                std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
+            let mut visit = |header: &crate::owned_y4m::Header, _: &[u8], _: u64, _: u64| {
+                if options
+                    .cancel
+                    .as_ref()
+                    .is_some_and(fvid_control::CancelFlag::is_cancelled)
+                {
+                    return Err("media operation cancelled".into());
+                }
+                crate::owned_budget::check_rss_budget(options)?;
+                if header.frame_len()? > options.max_packet_bytes {
+                    return Err("Y4M frame byte length exceeds packet byte limit".into());
+                }
+                Ok(())
+            };
+            crate::owned_y4m_decode::visit_reader_transformed_counted(
+                &mut reader,
+                &request,
+                options.max_packets,
+                &mut visit,
+            )?;
+        }
+    }
     if *transform != LosslessTransform::default() {
         steps.push(PlanStep {
             action: "filter".into(),
@@ -434,18 +521,78 @@ pub fn plan_transcode_lossless(
         action: "encode".into(),
         detail: "encode FFV1 with the owned encoder".into(),
     });
+    if !options.metadata_set.is_empty()
+        || !options.metadata_delete.is_empty()
+        || !options.stream_metadata_set.is_empty()
+        || !options.stream_metadata_delete.is_empty()
+    {
+        steps.push(PlanStep {
+            action: "metadata".into(),
+            detail: format!(
+                "container set={}, delete={}; stream set={}, delete={}",
+                options.metadata_set.len(),
+                options.metadata_delete.len(),
+                options.stream_metadata_set.len(),
+                options.stream_metadata_delete.len()
+            ),
+        });
+    }
     steps.push(PlanStep {
         action: "mux".into(),
         detail: "write Matroska with the owned muxer".into(),
     });
+    let streams = if let Some((video, selected)) = multitrack {
+        selected
+            .into_iter()
+            .filter_map(|index| {
+                let stream = info.streams.iter().find(|s| s.index == index)?;
+                Some(PlanStream {
+                    index: stream.index,
+                    media_type: stream.media_type.clone(),
+                    codec: stream.codec.clone(),
+                    disposition: if index == video {
+                        "primary_video"
+                    } else {
+                        "copy"
+                    }
+                    .into(),
+                })
+            })
+            .collect()
+    } else {
+        info.streams
+            .into_iter()
+            .map(|stream| PlanStream {
+                index: stream.index,
+                media_type: stream.media_type,
+                codec: stream.codec,
+                disposition: "primary_video".into(),
+            })
+            .collect()
+    };
+    let mut notes = vec![
+        "backend: owned video/FFV1/Matroska; no external demuxer, filter graph or encoder".into(),
+        "destination must support the owned Matroska export; packet, cancellation and publication checks also run during execution".into(),
+    ];
+    if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        || options.max_packets.is_some()
+        || options.max_rss_bytes.is_some()
+    {
+        notes.push(format!(
+            "encoded packet limit: {} bytes; packet work limit: {:?}; RSS limit: {:?} bytes",
+            options.max_packet_bytes, options.max_packets, options.max_rss_bytes
+        ));
+    }
     Ok(MediaPlan {
-        command: "transcode-lossless".into(), input: source.into(), inputs: std::iter::once(source.to_path_buf()).chain(transform.overlay.iter().map(|spec| spec.path.clone())).collect(),
-        streams: info.streams.into_iter().map(|stream| PlanStream {
-            index: stream.index, media_type: stream.media_type, codec: stream.codec, disposition: "primary_video".into(),
-        }).collect(),
-        steps, graph: None,
-        notes: vec!["backend: owned video/FFV1/Matroska; no external demuxer, filter graph or encoder".into(),
-            "destination must support the owned Matroska export; packet, cancellation and publication checks also run during execution".into()],
+        command: "transcode-lossless".into(),
+        input: source.into(),
+        inputs: std::iter::once(source.to_path_buf())
+            .chain(transform.overlay.iter().map(|spec| spec.path.clone()))
+            .collect(),
+        streams,
+        steps,
+        graph: None,
+        notes,
     })
 }
 

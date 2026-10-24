@@ -310,6 +310,9 @@ impl Avi {
         let mut groups: Vec<(Option<Chunk>, Option<Chunk>)> = Vec::new();
         for chunk in Chunks::list(bytes, &hdrl) {
             if chunk.id == *b"avih" {
+                if promised.is_some() {
+                    return Err(invalid("duplicate AVI main header"));
+                }
                 // The count must be in this chunk, not in bytes of the next one.
                 if chunk.end - chunk.start < MAIN_STREAMS + 4 {
                     return Err(invalid("AVI main header ends before its stream count"));
@@ -330,9 +333,15 @@ impl Avi {
             let mut strh = None;
             let mut strf = None;
             for inner in Chunks::list(bytes, &chunk) {
-                if inner.id == *b"strh" && strh.is_none() {
+                if inner.id == *b"strh" {
+                    if strh.is_some() {
+                        return Err(invalid("duplicate AVI stream header"));
+                    }
                     strh = Some(inner);
-                } else if inner.id == *b"strf" && strf.is_none() {
+                } else if inner.id == *b"strf" {
+                    if strf.is_some() {
+                        return Err(invalid("duplicate AVI stream format"));
+                    }
                     strf = Some(inner);
                 }
             }
@@ -530,6 +539,9 @@ fn check_index(
     audio: &[Audio],
     groups: usize,
 ) -> Result<()> {
+    if !(index.end - index.start).is_multiple_of(INDEX_ENTRY) {
+        return Err(invalid("AVI idx1 chunk has a partial entry"));
+    }
     let mut by_number: Vec<Option<usize>> = vec![None; groups];
     for (slot, stream) in audio.iter().enumerate() {
         by_number[stream.number] = Some(slot);

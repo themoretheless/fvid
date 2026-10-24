@@ -1,0 +1,344 @@
+use fvid::media::CopyOptions;
+use std::path::{Path, PathBuf};
+
+fn fixture(name: &str) -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/remux-concat-controls")
+        .join(name)
+}
+
+struct TempDir(PathBuf);
+impl TempDir {
+    fn new(tag: &str) -> Self {
+        let dir = std::env::temp_dir().join(format!(
+            "fvid-remux-concat-controls-{tag}-{}",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        Self(dir)
+    }
+}
+impl Drop for TempDir {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.0);
+    }
+}
+
+#[test]
+fn companion_video_fixture_decodes_cleanly() {
+    let stats = fvid::media::decode_video(&fixture("video.mkv")).unwrap();
+    assert_eq!(stats.video_frames, 1);
+}
+
+#[test]
+fn wave_concat_and_remux_support_budgets_and_metadata_in_public_api_and_cli() {
+    let dir = TempDir::new("wave");
+    let wav_a = fixture("pcm-48k-a.wav");
+    let wav_b = fixture("pcm-48k-b.wav");
+    let sources = vec![wav_a.clone(), wav_b.clone()];
+
+    // 1. Public API `plan_concat` & `concat` on WAVE with packet cap & metadata edits.
+    let options = CopyOptions {
+        max_packets: Some(2),
+        metadata_delete: vec!["title".into()],
+        metadata_set: vec![("artist".into(), "FVid Concat Artist".into())],
+        ..Default::default()
+    };
+    let plan = fvid::media::plan_concat(&sources, &options).unwrap();
+    assert_eq!(plan.command, "concat");
+    assert_eq!(plan.streams[0].codec, "pcm_s16le");
+    assert!(plan
+        .steps
+        .iter()
+        .any(|s| s.detail.contains("in 2 frame-aligned blocks")));
+
+    let out_concat = dir.0.join("concat-capped.wav");
+    let stats = fvid::media::concat(&sources, &out_concat, &options).unwrap();
+    assert_eq!(stats.packets, 2);
+    assert_eq!(stats.segments, 2);
+    let info = fvid::media::probe(&out_concat).unwrap();
+    assert_eq!(
+        info.metadata.get("artist").map(String::as_str),
+        Some("FVid Concat Artist")
+    );
+    assert!(!info.metadata.contains_key("title"));
+
+    // 2. Tight memory and RSS budgets reject WAVE concat and plan_concat cleanly.
+    let tight_mem = CopyOptions {
+        max_controlled_bytes: Some(16),
+        ..Default::default()
+    };
+    assert!(fvid::media::plan_concat(&sources, &tight_mem).is_err());
+    assert!(fvid::media::concat(&sources, &dir.0.join("never-mem.wav"), &tight_mem).is_err());
+
+    let tight_rss = CopyOptions {
+        max_rss_bytes: Some(1024 * 1024),
+        ..Default::default()
+    };
+    assert!(fvid::media::plan_concat(&sources, &tight_rss).is_err());
+    assert!(fvid::media::concat(&sources, &dir.0.join("never-rss.wav"), &tight_rss).is_err());
+
+    // 3. CLI `plan remux` and `remux` on WAVE with metadata and packet cap without `--features media`.
+    let cli_plan_remux = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", "remux"])
+        .arg(&wav_a)
+        .args([
+            "--max-packets",
+            "1",
+            "--metadata-delete",
+            "title",
+            "--metadata",
+            "title=Edited WAVE Title",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        cli_plan_remux.status.success(),
+        "{}",
+        String::from_utf8_lossy(&cli_plan_remux.stderr)
+    );
+    let remux_plan_json: serde_json::Value =
+        serde_json::from_slice(&cli_plan_remux.stdout).unwrap();
+    assert_eq!(remux_plan_json["command"], "remux");
+
+    let cli_remux_out = dir.0.join("cli-remux.wav");
+    let cli_remux = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "remux"])
+        .arg(&wav_a)
+        .arg(&cli_remux_out)
+        .args([
+            "--max-packets",
+            "1",
+            "--metadata-delete",
+            "title",
+            "--metadata",
+            "title=Edited WAVE Title",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        cli_remux.status.success(),
+        "{}",
+        String::from_utf8_lossy(&cli_remux.stderr)
+    );
+    let cli_remux_info = fvid::media::probe(&cli_remux_out).unwrap();
+    assert_eq!(
+        cli_remux_info.metadata.get("title").map(String::as_str),
+        Some("Edited WAVE Title")
+    );
+
+    // 4. CLI `plan concat` and `concat` on WAVE with packet cap and metadata edits.
+    let cli_plan_concat = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", "concat"])
+        .arg(&wav_a)
+        .arg(&wav_b)
+        .args([
+            "--max-packets",
+            "2",
+            "--metadata-delete",
+            "title",
+            "--metadata",
+            "artist=CLI Concat Artist",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        cli_plan_concat.status.success(),
+        "{}",
+        String::from_utf8_lossy(&cli_plan_concat.stderr)
+    );
+
+    let cli_concat_out = dir.0.join("cli-concat.wav");
+    let cli_concat = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "concat"])
+        .arg(&cli_concat_out)
+        .arg(&wav_a)
+        .arg(&wav_b)
+        .args([
+            "--max-packets",
+            "2",
+            "--metadata-delete",
+            "title",
+            "--metadata",
+            "artist=CLI Concat Artist",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        cli_concat.status.success(),
+        "{}",
+        String::from_utf8_lossy(&cli_concat.stderr)
+    );
+    let cli_concat_info = fvid::media::probe(&cli_concat_out).unwrap();
+    assert_eq!(
+        cli_concat_info.metadata.get("artist").map(String::as_str),
+        Some("CLI Concat Artist")
+    );
+}
+
+#[test]
+fn adts_remux_and_concat_enforce_packet_caps_and_byte_limits_in_api_and_cli() {
+    let dir = TempDir::new("adts");
+    let adts = fixture("adts-mono-48k.aac");
+    let sources = vec![adts.clone(), adts.clone()];
+
+    // 1. Public API `remux` on ADTS to `.mka` and `.m4a` with `max_packets: Some(2)`.
+    let cap_opts = CopyOptions {
+        max_packets: Some(2),
+        ..Default::default()
+    };
+    let plan_remux = fvid::media::plan_remux(&adts, &cap_opts).unwrap();
+    assert_eq!(plan_remux.command, "remux");
+
+    let out_mka = dir.0.join("remux-cap.mka");
+    let stats_mka = fvid::media::remux(&adts, &out_mka, &cap_opts).unwrap();
+    assert_eq!(stats_mka.packets, 2);
+
+    let out_m4a = dir.0.join("remux-cap.m4a");
+    let stats_m4a = fvid::media::remux(&adts, &out_m4a, &cap_opts).unwrap();
+    assert_eq!(stats_m4a.packets, 2);
+
+    // 2. Public API `plan_concat` & `concat` on ADTS with `max_packets: Some(4)`.
+    let concat_cap_opts = CopyOptions {
+        max_packets: Some(4),
+        ..Default::default()
+    };
+    let plan_concat = fvid::media::plan_concat(&sources, &concat_cap_opts).unwrap();
+    assert_eq!(plan_concat.command, "concat");
+
+    let concat_mka = dir.0.join("concat-cap.mka");
+    let concat_mka_stats = fvid::media::concat(&sources, &concat_mka, &concat_cap_opts).unwrap();
+    assert_eq!(concat_mka_stats.packets, 4);
+
+    let concat_m4a = dir.0.join("concat-cap.m4a");
+    let concat_m4a_stats = fvid::media::concat(&sources, &concat_m4a, &concat_cap_opts).unwrap();
+    assert_eq!(concat_m4a_stats.packets, 4);
+
+    // 3. Tight `max_packet_bytes: 1` rejects ADTS remux and concat in both plan and execution.
+    let tight_pkt = CopyOptions {
+        max_packet_bytes: 1,
+        ..Default::default()
+    };
+    assert!(fvid::media::plan_remux(&adts, &tight_pkt).is_err());
+    assert!(fvid::media::remux(&adts, &dir.0.join("never.mka"), &tight_pkt).is_err());
+    assert!(fvid::media::remux(&adts, &dir.0.join("never.m4a"), &tight_pkt).is_err());
+    assert!(fvid::media::plan_concat(&sources, &tight_pkt).is_err());
+    assert!(fvid::media::concat(&sources, &dir.0.join("never-c.mka"), &tight_pkt).is_err());
+    assert!(fvid::media::concat(&sources, &dir.0.join("never-c.m4a"), &tight_pkt).is_err());
+
+    // 4. CLI `remux`, `plan remux`, `concat`, `plan concat` with `--max-packets` and `--max-packet-bytes`.
+    let cli_remux_mka = dir.0.join("cli-adts.mka");
+    let run_remux = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "remux"])
+        .arg(&adts)
+        .arg(&cli_remux_mka)
+        .args(["--max-packets", "2"])
+        .output()
+        .unwrap();
+    assert!(
+        run_remux.status.success(),
+        "{}",
+        String::from_utf8_lossy(&run_remux.stderr)
+    );
+
+    let cli_concat_m4a = dir.0.join("cli-concat.m4a");
+    let run_concat = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "concat"])
+        .arg(&cli_concat_m4a)
+        .arg(&adts)
+        .arg(&adts)
+        .args(["--max-packets", "4"])
+        .output()
+        .unwrap();
+    assert!(
+        run_concat.status.success(),
+        "{}",
+        String::from_utf8_lossy(&run_concat.stderr)
+    );
+
+    let fail_concat = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "concat"])
+        .arg(dir.0.join("cli-fail.m4a"))
+        .arg(&adts)
+        .arg(&adts)
+        .args(["--max-packet-bytes", "1"])
+        .output()
+        .unwrap();
+    assert!(!fail_concat.status.success());
+}
+
+#[test]
+fn sample_domain_and_mp4_matroska_concat_enforce_budgets_in_api_and_cli() {
+    let dir = TempDir::new("sample-concat");
+    let g711 = fixture("g711-alaw-48k.wav");
+    let ogg = fixture("ogg-opus-48k.ogg");
+    let mkv_flac = fixture("matroska-flac-48k.mka");
+    let mp4_pcm = fixture("mp4-pcm-48k.m4a");
+    let mixed = vec![g711.clone(), ogg.clone(), mkv_flac.clone(), mp4_pcm.clone()];
+
+    // 1. Sample-domain concat enforces `max_packets`, `max_packet_bytes`, `max_controlled_bytes`, `max_rss_bytes`.
+    let tight_pkt = CopyOptions {
+        max_packet_bytes: 1,
+        ..Default::default()
+    };
+    assert!(fvid::media::plan_concat(&mixed, &tight_pkt).is_err());
+    assert!(fvid::media::concat(&mixed, &dir.0.join("never-pkt.mka"), &tight_pkt).is_err());
+
+    let tight_work = CopyOptions {
+        max_packets: Some(1),
+        ..Default::default()
+    };
+    assert!(fvid::media::concat(&mixed, &dir.0.join("never-work.mka"), &tight_work).is_err());
+
+    let tight_rss = CopyOptions {
+        max_rss_bytes: Some(1024 * 1024),
+        ..Default::default()
+    };
+    assert!(fvid::media::plan_concat(&mixed, &tight_rss).is_err());
+    assert!(fvid::media::concat(&mixed, &dir.0.join("never-rss.mka"), &tight_rss).is_err());
+
+    let tight_mem = CopyOptions {
+        max_controlled_bytes: Some(16 * 1024 * 1024),
+        ..Default::default()
+    };
+    assert!(fvid::media::plan_concat(&mixed, &tight_mem).is_err());
+    assert!(fvid::media::concat(&mixed, &dir.0.join("never-mem.mka"), &tight_mem).is_err());
+
+    let generous = CopyOptions {
+        max_packet_bytes: 65536,
+        max_packets: Some(64),
+        max_controlled_bytes: Some(64 * 1024 * 1024),
+        max_rss_bytes: Some(4096 * 1024 * 1024),
+        ..Default::default()
+    };
+    let plan = fvid::media::plan_concat(&mixed, &generous).unwrap();
+    assert_eq!(plan.command, "concat");
+    let out_mixed = dir.0.join("mixed-generous.mka");
+    let stats = fvid::media::concat(&mixed, &out_mixed, &generous).unwrap();
+    assert_eq!(stats.segments, 4);
+
+    // 2. CLI sample-domain concat and plan concat enforce budget flags.
+    let cli_fail = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "concat"])
+        .arg(dir.0.join("cli-never.mka"))
+        .args(&mixed)
+        .args(["--max-packet-bytes", "1"])
+        .output()
+        .unwrap();
+    assert!(!cli_fail.status.success());
+
+    let cli_ok_out = dir.0.join("cli-mixed.mka");
+    let cli_ok = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "concat"])
+        .arg(&cli_ok_out)
+        .args(&mixed)
+        .args(["--max-packet-bytes", "65536", "--max-packets", "64"])
+        .output()
+        .unwrap();
+    assert!(
+        cli_ok.status.success(),
+        "{}",
+        String::from_utf8_lossy(&cli_ok.stderr)
+    );
+}

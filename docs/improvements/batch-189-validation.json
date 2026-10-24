@@ -1,0 +1,17 @@
+{
+  "batch": 189,
+  "improvement_id": "FVID-0196",
+  "status": "accepted",
+  "fixtures_dir": "tests/fixtures/playback-errors/wavpack-mp3-ac3",
+  "generator": "scripts/generate_wavpack_mp3_ac3_regressions.py",
+  "fixture_unittest": "scripts/test_wavpack_mp3_ac3_regressions.py",
+  "regression_test": "tests/wavpack_mp3_ac3_regressions.rs",
+  "gates": {
+    "focused_regression": "cargo test --features player --test wavpack_mp3_ac3_regressions -- --nocapture (2 passed)",
+    "fixture_unittest": "python3 scripts/test_wavpack_mp3_ac3_regressions.py (2 passed)",
+    "related_integrations": "cargo test --features player --test wavpack_custom_rate --test audio_read_limit -- --nocapture (2 + 1 passed)",
+    "unit_tests": "cargo test --lib --features player playback_mp3::tests && cargo test --lib --features player playback_ac3::tests && cargo test --lib --features player codec::wavpack_decoder::tests (12 + 6 + 1 passed)",
+    "minimal_core": "cargo test --lib --no-default-features codec::wavpack_decoder::tests (1 passed, 359 filtered)",
+    "binary_build": "cargo build --bin fvid (ok)"
+  }
+}

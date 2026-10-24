@@ -17,7 +17,7 @@ pub(crate) fn unedited_policies(o: &CopyOptions) -> bool {
         && o.stream_metadata_set.is_empty()
         && o.stream_metadata_delete.is_empty()
         && o.max_controlled_bytes.is_none()
-        && o.max_rss_bytes.is_none()
+        && crate::owned_budget::check_rss_budget(o).is_ok()
         && o.max_packet_bytes > 0
 }
 pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
@@ -45,6 +45,7 @@ pub fn remux(
     destination: &Path,
     options: &CopyOptions,
 ) -> Result<CopyStats, String> {
+    crate::owned_budget::check_rss_budget(options)?;
     if !supports(source, destination, options) {
         return Err("request is not an owned Matroska identity remux".into());
     }
@@ -55,7 +56,7 @@ pub fn remux(
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             Err("media operation cancelled".to_string())
         } else {
-            Ok(())
+            crate::owned_budget::check_rss_budget(options)
         }
     };
     check()?;
@@ -95,7 +96,7 @@ pub(crate) fn publish(
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             Err("media operation cancelled".to_string())
         } else {
-            Ok(())
+            crate::owned_budget::check_rss_budget(options)
         }
     };
     check()?;

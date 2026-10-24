@@ -1158,6 +1158,13 @@ fn parse_track(
                     audio_entry(entry.data, &mut result)?;
                     (28, Some(b"esds"))
                 }
+                1 => {
+                    audio_entry(entry.data, &mut result)?;
+                    if entry.data.len() < 44 {
+                        return Err(invalid("truncated AAC version-1 sample description"));
+                    }
+                    (44, Some(b"esds"))
+                }
                 2 => {
                     if u32be(entry.data, 28)? != 72 || u32be(entry.data, 44)? != 0x7f000000 {
                         return Err(invalid("invalid AAC version-2 sample description"));
@@ -1276,7 +1283,13 @@ fn parse_track(
             .ok_or_else(|| invalid("truncated sample entry"))?,
     )?;
     if let Some(kind) = config_kind {
-        let atom = required(&configs, kind)?;
+        let nested;
+        let atom = if kind == b"esds" && optional(&configs, kind)?.is_none() {
+            nested = atoms(required(&configs, b"wave")?)?;
+            required(&nested, kind)?
+        } else {
+            required(&configs, kind)?
+        };
         // An ALAC cookie opens with four bytes of its own version, which a Matroska
         // track leaves out; past them both spell the same fields.
         let at = usize::from(kind == b"alac") * 4;
@@ -1291,17 +1304,11 @@ fn parse_track(
             }
 
     }
-    // A fragmented track describes its coding here and its samples nowhere: the
-    // tables beside this entry either are absent or hold one entry each at zero,
-    // and the `moof` boxes further along the file own the index. The empty list
-    // is what the fragment pass then fills.
-    let index = if fragmented {
-        SampleIndex::Expanded(Vec::new())
-    } else {
-        let Some(index) = sample_index(&stbl, &result.codec, result.channels, mdats, limit)? else {
-            return Ok(None);
-        };
-        index
+    // A fragmented track may still carry initial samples in `moov/stbl` before
+    // `moof` fragments append to the same track (ISO/IEC 14496-12:2015, 8.8.4),
+    // and even an empty init `stbl` must pass structural validation.
+    let Some(index) = sample_index(&stbl, &result.codec, result.channels, mdats, limit, fragmented)? else {
+        return Ok(None);
     };
     result.samples = index;
     let spacing =
@@ -1338,7 +1345,11 @@ fn parse_track(
         let elst = required(&children, b"elst")?;
         let v = version(elst, 1)?;
         let stride = if v == 0 { 12 } else { 20 };
-        for i in 0..table(elst, stride, 1024)? {
+        let count = table(elst, stride, 1024)?;
+        if count == 0 {
+            return Err(invalid("empty MP4 elst box"));
+        }
+        for i in 0..count {
             let at = 8 + i * stride;
             let (duration, media_time, rate_at) = if v == 0 {
                 (
@@ -1349,8 +1360,8 @@ fn parse_track(
             } else {
                 (u64be(elst, at)?, u64be(elst, at + 8)? as i64, at + 16)
             };
-            if media_time < -1 || u32be(elst, rate_at)? != 0x0001_0000 {
-                return Err(invalid("unsupported MP4 edit rate or media time"));
+            if duration == 0 || media_time < -1 || u32be(elst, rate_at)? != 0x0001_0000 {
+                return Err(invalid("unsupported MP4 edit rate, duration or media time"));
             }
             result.edits.push(Edit {
                 duration,
@@ -1381,11 +1392,15 @@ fn sample_index(
     channels: u16,
     mdats: &[Range<u64>],
     limit: usize,
+    fragmented: bool,
 ) -> Result<Option<SampleIndex>> {
     let stsz = required(stbl, b"stsz")?;
     version(stsz, 0)?;
     let fixed_size = u32be(stsz, 4)?;
     let count = u32be(stsz, 8)? as usize;
+    if !fragmented && count == 0 {
+        return Err(invalid("empty MP4 sample table"));
+    }
     let expected = if fixed_size == 0 {
         count.checked_mul(4).and_then(|n| n.checked_add(12))
     } else {
@@ -1435,7 +1450,9 @@ fn sample_index(
     // So the unit there is the block, sized and timed by the coding; the chunks
     // divide into it exactly in both takes, as they must for the reference's own
     // reading of the same tables.
-    let unit = if is_pcm(codec) && fixed_size != 0 {
+    let unit = if fragmented {
+        None
+    } else if is_pcm(codec) && fixed_size != 0 {
         Some((1, usize::try_from(fixed_size).unwrap_or(usize::MAX)))
     } else {
         mace_block(codec, channels)
@@ -1503,9 +1520,13 @@ fn expanded_index(
         .try_reserve_exact(count)
         .map_err(|_| invalid("sample index allocation failed"))?;
     for index in 0..count {
+        let size = size_at(index)?;
+        if size == 0 {
+            return Err(invalid("zero MP4 sample size"));
+        }
         samples.push(Sample {
             offset: 0,
-            size: size_at(index)?,
+            size,
             dts: 0,
             pts: 0,
             duration: 0,
@@ -1601,6 +1622,7 @@ struct Fragment {
 #[derive(Clone, Copy, Debug)]
 struct TrackExtends {
     track: u32,
+    description: u32,
     duration: u32,
     size: u32,
     /// `None` when the box states no flags at all, which leaves a sample's own
@@ -1626,12 +1648,24 @@ fn fragment_defaults(moov: &[Atom<'_>]) -> Result<Vec<TrackExtends>> {
     let mut out = Vec::new();
     for trex in children.iter().filter(|a| &a.kind == b"trex") {
         version(trex.data, 0)?;
-        if u32be(trex.data, 8)? > 1 {
+        if trex.data.len() != 24 {
+            return Err(invalid("MP4 track-extends box size does not match its fields"));
+        }
+        let track = u32be(trex.data, 4)?;
+        if track == 0 {
+            return Err(invalid("zero MP4 track-extends track ID"));
+        }
+        if out.iter().any(|entry: &TrackExtends| entry.track == track) {
+            return Err(invalid("duplicate MP4 track-extends track ID"));
+        }
+        let description = u32be(trex.data, 8)?;
+        if description > 1 {
             return Err(invalid("MP4 fragment sample description index"));
         }
         let flags = u32be(trex.data, 20)?;
         out.push(TrackExtends {
-            track: u32be(trex.data, 4)?,
+            track,
+            description,
             duration: u32be(trex.data, 12)?,
             size: u32be(trex.data, 16)?,
             flags: (flags != 0).then_some(flags),
@@ -1665,7 +1699,18 @@ fn index_fragments(
     limit: &mut usize,
 ) -> Result<()> {
     for fragment in fragments {
-        for traf in atoms(&fragment.data)?
+        let moof_boxes = atoms(&fragment.data)?;
+        let mfhd = required(&moof_boxes, b"mfhd")?;
+        version(mfhd, 0)?;
+        if mfhd.len() != 8 {
+            return Err(invalid(
+                "MP4 movie-fragment header size does not match its fields",
+            ));
+        }
+        if u32be(mfhd, 4)? == 0 {
+            return Err(invalid("zero MP4 movie-fragment sequence number"));
+        }
+        for traf in moof_boxes
             .iter()
             .filter(|atom| &atom.kind == b"traf")
         {
@@ -1683,10 +1728,13 @@ fn index_fragments(
                 stated_base = Some(u64be(header, at)?);
                 at += 8;
             }
+            let mut description = None;
             if flags & 0x00_0002 != 0 {
-                if u32be(header, at)? > 1 {
+                let value = u32be(header, at)?;
+                if value > 1 {
                     return Err(invalid("MP4 fragment sample description index"));
                 }
+                description = Some(value);
                 at += 4;
             }
             let mut duration = 0;
@@ -1702,6 +1750,12 @@ fn index_fragments(
             let mut header_flags = None;
             if flags & 0x00_0020 != 0 {
                 header_flags = Some(u32be(header, at)?);
+                at += 4;
+            }
+            if at != header.len() {
+                return Err(invalid(
+                    "MP4 track-fragment header size does not match its flags",
+                ));
             }
             let base = match (stated_base, flags & 0x02_0000) {
                 (Some(value), _) => value,
@@ -1719,6 +1773,9 @@ fn index_fragments(
                 continue;
             };
             let extends = defaults.iter().find(|entry| entry.track == id);
+            let description = description
+                .or_else(|| extends.map(|entry| entry.description))
+                .unwrap_or(1);
             let duration = if duration == 0 {
                 extends.map_or(0, |entry| entry.duration)
             } else {
@@ -1734,7 +1791,14 @@ fn index_fragments(
             };
             let mut dts = match optional(&boxes, b"tfdt")? {
                 Some(stamp) => {
-                    if version(stamp, 1)? == 0 {
+                    let v = version(stamp, 1)?;
+                    let expected = if v == 0 { 8 } else { 12 };
+                    if stamp.len() != expected {
+                        return Err(invalid(
+                            "MP4 track-fragment decode time size does not match its version",
+                        ));
+                    }
+                    if v == 0 {
                         u64::from(u32be(stamp, 4)?)
                     } else {
                         u64be(stamp, 4)?
@@ -1744,6 +1808,7 @@ fn index_fragments(
                     .last()
                     .map_or(0, |last| last.dts.saturating_add(u64::from(last.duration))),
             };
+            let mut traf_cursor = base;
             for run in boxes.iter().filter(|atom| &atom.kind == b"trun") {
                 let bytes = run.data;
                 let v = version(bytes, 1)?;
@@ -1751,30 +1816,30 @@ fn index_fragments(
                 if flags & !TRUN_SUPPORTED != 0 {
                     return Err(invalid("unsupported MP4 track-run flags"));
                 }
+                if flags & 0x00_0004 != 0 && flags & 0x00_0400 != 0 {
+                    return Err(invalid(
+                        "MP4 track-run states both first-sample flags and per-sample flags",
+                    ));
+                }
                 let count = u32be(bytes, 4)? as usize;
                 let mut at = 8usize;
                 // A run that says nothing about where it begins follows the last
-                // sample read for this track, which for the first run of the
-                // first fragment is the base itself.
-                let mut offset = match (flags & 0x00_0001 != 0, list.last()) {
-                    (true, _) => {
-                        let shift = u32be(bytes, at)? as i32;
-                        at += 4;
-                        if shift < 0 {
-                            base.checked_sub(u64::try_from(-shift).unwrap_or(u64::MAX))
-                                .ok_or_else(|| {
-                                    invalid("MP4 fragment data offset before its base")
-                                })?
-                        } else {
-                            base.checked_add(u64::try_from(shift).unwrap_or(u64::MAX))
-                                .ok_or_else(|| invalid("MP4 fragment data offset overflow"))?
-                        }
+                // byte positioned in this track fragment, which for the first run
+                // of the fragment is the fragment's own base.
+                let mut offset = if flags & 0x00_0001 != 0 {
+                    let shift = u32be(bytes, at)? as i32;
+                    at += 4;
+                    if shift < 0 {
+                        base.checked_sub(u64::from(shift.unsigned_abs()))
+                            .ok_or_else(|| {
+                                invalid("MP4 fragment data offset before its base")
+                            })?
+                    } else {
+                        base.checked_add(u64::try_from(shift).unwrap_or(u64::MAX))
+                            .ok_or_else(|| invalid("MP4 fragment data offset overflow"))?
                     }
-                    (false, Some(last)) => last
-                        .offset
-                        .checked_add(u64::from(last.size))
-                        .ok_or_else(|| invalid("MP4 fragment sample offset overflow"))?,
-                    (false, None) => base,
+                } else {
+                    traf_cursor
                 };
                 let leading = if flags & 0x00_0004 != 0 {
                     let value = u32be(bytes, at)?;
@@ -1793,6 +1858,11 @@ fn index_fragments(
                     != Some(bytes.len())
                 {
                     return Err(invalid("MP4 track-run size does not match its rows"));
+                }
+                // Only a populated run selects a description. A tfhd override
+                // may replace an unused zero trex default;empty runs use none.
+                if count != 0 && description == 0 {
+                    return Err(unsupported("MP4 fragment sample description zero is not supported"));
                 }
                 for index in 0..count {
                     if *limit == 0 {
@@ -1815,6 +1885,9 @@ fn index_fragments(
                             invalid("MP4 fragment sample states no size and none is defaulted")
                         })?
                     };
+                    if bytes_of_sample == 0 {
+                        return Err(invalid("zero MP4 fragment sample size"));
+                    }
                     let bits = if flags & 0x00_0400 != 0 {
                         let value = u32be(bytes, at)?;
                         at += 4;
@@ -1859,6 +1932,7 @@ fn index_fragments(
                         .checked_add(u64::from(step))
                         .ok_or_else(|| invalid("MP4 timestamp overflow"))?;
                 }
+                traf_cursor = offset;
             }
         }
     }
@@ -1867,14 +1941,15 @@ fn index_fragments(
     // total, so the end of the last sample says it - once, after every fragment
     // has been read, since a fragment is only ever part of the answer.
     for track in tracks {
+        if track.samples.len() == 0 {
+            return Err(invalid("MP4 track states no samples"));
+        }
         let stated = track
             .samples
             .expanded()
             .and_then(|list| list.last())
             .map(|last| last.dts.saturating_add(u64::from(last.duration)));
-        if track.duration == 0 {
-            track.duration = stated.unwrap_or(0);
-        }
+        track.duration = track.duration.max(stated.unwrap_or(0));
     }
     Ok(())
 }
@@ -1930,6 +2005,7 @@ fn chunk_runs(
         .map_err(|_| invalid("chunk index allocation failed"))?;
     let mut first = 0usize;
     let mut run = 0usize;
+    let mut prev_end = 0u64;
     for chunk in 1..=chunks {
         while run + 1 < runs && chunk >= mapping[run + 1].0 {
             run += 1;
@@ -1946,6 +2022,9 @@ fn chunk_runs(
         } else {
             u64be(offsets, 8 + (chunk - 1) * 8)?
         };
+        if offset < prev_end {
+            return Err(invalid("overlapping or non-increasing MP4 chunk offsets"));
+        }
         let end = offset
             .checked_add(chunk_bytes(first, frames)?)
             .ok_or_else(|| invalid("chunk offset overflow"))?;
@@ -1953,6 +2032,7 @@ fn chunk_runs(
         if containing == 0 || end > mdats[containing - 1].end {
             return Err(invalid("sample chunk outside mdat"));
         }
+        prev_end = end;
         walked.push(FrameRun {
             first,
             offset,

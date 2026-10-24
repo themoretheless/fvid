@@ -48,7 +48,15 @@ impl Skin {
             "diagram" => return Ok(Self::diagram()),
             _ => {}
         }
-        let data = std::fs::read_to_string(value)?;
+        use std::io::Read;
+        const MAX_SKIN_BYTES: usize = 64 * 1024;
+        let mut data = String::new();
+        std::fs::File::open(value)?
+            .take((MAX_SKIN_BYTES + 1) as u64)
+            .read_to_string(&mut data)?;
+        if data.len() > MAX_SKIN_BYTES {
+            return Err(crate::invalid("skin file is too large"));
+        }
         let json: serde_json::Value = serde_json::from_str(&data)
             .map_err(|e| crate::invalid(&format!("invalid skin: {e}")))?;
         let object = json

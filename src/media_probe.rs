@@ -47,9 +47,19 @@ fn mp4_unrepresented_error(error: &crate::Error) -> bool {
 include!("../crates/fvid-media/src/owned_mp4_probe_impl.rs");
 
 pub(crate) fn matroska(path: &Path) -> Result<MediaInfo> {
+    matroska_with_packet_limit(path, crate::container::webm::Limits::default().packet_bytes)
+}
+
+pub(crate) fn matroska_with_packet_limit(path: &Path, packet_bytes: usize) -> Result<MediaInfo> {
+    if packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
     let mut reader = crate::container::webm::WebmReader::open(
         BufReader::new(File::open(path).map_err(|e| e.to_string())?),
-        Default::default(),
+        crate::container::webm::Limits {
+            packet_bytes,
+            ..Default::default()
+        },
     )
     .map_err(|e| e.to_string())?;
     // Tags/chapters can follow clusters. Complete the bounded index before
@@ -61,6 +71,16 @@ pub(crate) fn matroska(path: &Path) -> Result<MediaInfo> {
             i64::try_from(ns / 1000).map_err(|_| "Matroska duration exceeds API range".to_owned())
         })
         .transpose()?;
+    let mut file_metadata = reader.metadata.clone();
+    let encoder = file_metadata
+        .iter()
+        .find(|(key, _)| key.eq_ignore_ascii_case("encoder"))
+        .map(|(_, value)| value.clone())
+        .or_else(|| (!reader.writing_app.is_empty()).then(|| reader.writing_app.clone()));
+    if let Some(encoder) = encoder {
+        file_metadata.entry("encoder".into()).or_insert(encoder);
+    }
+    file_metadata.extend(tags(&reader.tags));
     let mut start_ns = None::<i64>;
     let mut streams = Vec::with_capacity(reader.tracks.len());
     for (index, track) in reader.tracks.iter().enumerate() {
@@ -78,34 +98,51 @@ pub(crate) fn matroska(path: &Path) -> Result<MediaInfo> {
         if let Some(start) = start {
             start_ns = Some(start_ns.map_or(start, |old| old.min(start)));
         }
-        let mut metadata = BTreeMap::new();
+        let mut metadata = reader.track_metadata.get(&0).cloned().unwrap_or_default();
+        if let Some(uid) = reader.track_uids.get(&track.number) {
+            if let Some(scoped) = reader.track_metadata.get(uid) {
+                metadata.extend(scoped.clone());
+            }
+        }
         if !track.name.is_empty() {
             metadata.insert("title".into(), track.name.clone());
         }
-        if !track.language.is_empty() {
-            metadata.insert("language".into(), track.language.clone());
+        let language = reader
+            .track_languages
+            .get(&track.number)
+            .unwrap_or(&track.language);
+        if !language.is_empty() {
+            metadata.insert("language".into(), language.clone());
         }
-        let codec = match track.codec.as_str() {
-            "V_MPEG4/ISO/AVC" => "h264",
-            "V_MPEGH/ISO/HEVC" => "hevc",
-            "V_VP8" => "vp8",
-            "V_VP9" => "vp9",
-            "V_AV1" => "av1",
-            "V_FFV1" => "ffv1",
-            "A_AAC" => "aac",
-            "A_OPUS" => "opus",
-            "A_VORBIS" => "vorbis",
-            "A_FLAC" => "flac",
-            "A_AC3" => "ac3",
-            "A_EAC3" => "eac3",
-            "A_MPEG/L3" => "mp3",
-            "A_MPEG/L2" => "mp2",
-            "S_TEXT/UTF8" => "subrip",
-            "S_TEXT/ASS" => "ass",
-            "S_TEXT/SSA" => "ssa",
-            other => other,
-        }
-        .to_owned();
+        let codec = match (track.codec.as_str(), track.bit_depth) {
+            ("A_PCM/INT/LIT" | "A_PCM/INT/BIG", 8) => "pcm_u8".to_owned(),
+            ("A_PCM/INT/LIT", bits @ (16 | 24 | 32)) => format!("pcm_s{bits}le"),
+            ("A_PCM/INT/BIG", bits @ (16 | 24 | 32)) => format!("pcm_s{bits}be"),
+            ("A_PCM/FLOAT/IEEE", bits @ (32 | 64)) => format!("pcm_f{bits}le"),
+            (other, _) => match other {
+                "V_MPEG4/ISO/AVC" => "h264",
+                "V_MPEGH/ISO/HEVC" => "hevc",
+                "V_VP8" => "vp8",
+                "V_VP9" => "vp9",
+                "V_AV1" => "av1",
+                "V_FFV1" => "ffv1",
+                "A_AAC" => "aac",
+                "A_ALAC" => "alac",
+                "A_OPUS" => "opus",
+                "A_VORBIS" => "vorbis",
+                "A_FLAC" => "flac",
+                "A_AC3" => "ac3",
+                "A_EAC3" => "eac3",
+                "A_MPEG/L3" => "mp3",
+                "A_MPEG/L2" => "mp2",
+                "A_MPEG/L1" => "mp1",
+                "S_TEXT/UTF8" => "subrip",
+                "S_TEXT/ASS" => "ass",
+                "S_TEXT/SSA" => "ssa",
+                other => other,
+            }
+            .to_owned(),
+        };
         // DefaultDuration is a declared nominal cadence, not a measured average.
         // Leave average_frame_rate unknown instead of substituting that value.
         streams.push(StreamInfo {
@@ -125,7 +162,11 @@ pub(crate) fn matroska(path: &Path) -> Result<MediaInfo> {
             average_frame_rate: [0, 1],
             profile: None,
             level: None,
-            disposition: 0,
+            disposition: reader
+                .track_dispositions
+                .get(&track.number)
+                .copied()
+                .unwrap_or(1),
             metadata,
             width: i32::try_from(track.width).map_err(|_| "Matroska width exceeds API range")?,
             height: i32::try_from(track.height).map_err(|_| "Matroska height exceeds API range")?,
@@ -171,7 +212,7 @@ pub(crate) fn matroska(path: &Path) -> Result<MediaInfo> {
         start_us: start_ns.map(|ns| ns / 1000),
         duration_us,
         bit_rate: None,
-        metadata: tags(&reader.tags),
+        metadata: file_metadata,
         chapters,
         streams,
     })
@@ -198,9 +239,16 @@ pub fn probe_as(source: &Path, format: Option<&str>) -> Result<MediaInfo> {
 pub fn try_probe_as(source: &Path, format: Option<&str>) -> Result<Option<MediaInfo>> {
     use std::io::Read;
     match format {
-        Some("mov" | "mp4" | "m4a") => return mp4(source).map(Some),
-        Some("matroska" | "webm") => return matroska(source).map(Some),
+        Some("mov" | "mp4" | "m4a" | "3gp" | "3g2" | "mj2" | "mov,mp4,m4a,3gp,3g2,mj2") => {
+            return mp4(source).map(Some);
+        }
+        Some("matroska" | "webm" | "matroska,webm") => return matroska(source).map(Some),
         Some("wav") => return wave(source).map(Some),
+        Some("flac") => return fvid_media::owned_flac_probe::probe_flac(source).map(Some),
+        Some("mp1" | "mp2" | "mp3" | "mpeg_audio") => {
+            return fvid_media::owned_mpeg_probe::probe_mpeg(source).map(Some);
+        }
+        Some("ogg" | "opus") => return fvid_media::owned_probe::probe_ogg(source).map(Some),
         Some("yuv4mpegpipe" | "y4m") => return try_y4m(source),
         Some("aac") | None => {}
         Some(_) => return Ok(None),
@@ -229,9 +277,19 @@ pub fn try_probe_as(source: &Path, format: Option<&str>) -> Result<Option<MediaI
         if signature[..count].starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
             return matroska(source).map(Some);
         }
-        if crate::container::adts::header(&signature[..count]).is_none() {
-            return Ok(None);
+        if signature[..count].starts_with(b"fLaC") {
+            return fvid_media::owned_flac_probe::probe_flac(source).map(Some);
         }
+        if signature[..count].starts_with(b"OggS") {
+            return fvid_media::owned_probe::probe_ogg(source).map(Some);
+        }
+        if fvid_media::owned_aac::adts::header(&signature[..count]).is_some() {
+            return fvid_media::owned_probe::probe_adts(source).map(Some);
+        }
+        if fvid_media::owned_mpeg_audio::has_signature(&signature[..count]) {
+            return fvid_media::owned_mpeg_probe::probe_mpeg(source).map(Some);
+        }
+        return Ok(None);
     }
     fvid_media::owned_probe::probe_adts(source).map(Some)
 }

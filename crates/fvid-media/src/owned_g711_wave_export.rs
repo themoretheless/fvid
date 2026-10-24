@@ -30,6 +30,9 @@ pub(crate) fn recognizes(path: &Path, options: &CopyOptions) -> Result<bool> {
     .map_err(|e| e.to_string())
 }
 fn open(path: &Path, options: &CopyOptions) -> Result<(Input, Vec<u8>)> {
+    if !crate::owned_audio_export::simple_options(options) {
+        return Err("WAVE has only stream 0".into());
+    }
     check(options)?;
     admit(256 * 1024, options)?;
     let mut file = File::open(path).map_err(|e| e.to_string())?;
@@ -80,6 +83,28 @@ fn open(path: &Path, options: &CopyOptions) -> Result<(Input, Vec<u8>)> {
             mask,
         },
         info,
+    ))
+}
+pub(crate) fn descriptor(
+    path: &Path,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u32, &'static str, u64)> {
+    let (input, _) = open(path, options)?;
+    let mut file = File::open(path).map_err(|e| e.to_string())?;
+    let law = crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
+        .map_err(|e| e.to_string())?
+        .ok_or("WAVE does not contain G.711")?;
+    let codec = if law == fvid_codecs::g711::Law::ALaw {
+        "pcm_alaw"
+    } else {
+        "pcm_mulaw"
+    };
+    Ok((
+        input.shape.sample_rate,
+        input.shape.channels,
+        input.mask,
+        codec,
+        input.shape.sample_frames,
     ))
 }
 pub(crate) fn supports(
@@ -147,13 +172,33 @@ fn decode(
         channels: input.shape.channels,
     })
 }
+pub(crate) fn decode_to_wave(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<crate::owned_adts_export::DecodedSpool> {
+    check(options)?;
+    let (mut input, info) = open(source, options)?;
+    let rate = input.shape.sample_rate;
+    let channels = input.shape.channels;
+    let mask = input.mask;
+    let spool = crate::owned_adts_export::spool_decoded(
+        rate,
+        channels,
+        mask,
+        options,
+        move |writer, options| decode(&mut input, writer, None, options),
+    )?;
+    check(options)?;
+    crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
+    Ok(spool)
+}
 pub(crate) fn apply(
     source: &Path,
     destination: &Path,
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
-    if destination.exists() {
+    if destination.symlink_metadata().is_ok() {
         return Err("destination already exists".into());
     }
     let (mut input, info) = open(source, options)?;

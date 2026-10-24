@@ -1,0 +1,48 @@
+{
+  "batch": 239,
+  "ids": ["FVID-0246"],
+  "title": "Align ADTS remux, plan_remux, and concat stream-zero selection, packet/RSS budgets, and Matroska metadata routing across native MP4 and Matroska paths",
+  "scope": [
+    "src/media.rs",
+    "src/media_cli.rs",
+    "src/native_plan.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/adts-wave-remux-concat-parity/adts-seg-a.aac",
+    "tests/fixtures/playback-errors/adts-wave-remux-concat-parity/adts-seg-b.aac",
+    "tests/fixtures/playback-errors/adts-wave-remux-concat-parity/wave-seg-a.wav",
+    "tests/fixtures/playback-errors/adts-wave-remux-concat-parity/wave-seg-b.wav",
+    "tests/fixtures/playback-errors/adts-wave-remux-concat-parity/manifest.json"
+  ],
+  "generators": [
+    "scripts/generate_adts_wave_remux_concat_parity_regressions.py",
+    "scripts/test_adts_wave_remux_concat_parity_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-239-pre-edit/src/media.rs",
+      "docs/improvements/snapshots/batch-239-pre-edit/src/media_cli.rs",
+      "docs/improvements/snapshots/batch-239-pre-edit/src/native_plan.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-239-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-239-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-239-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test adts_wave_remux_concat_parity_regressions",
+      "passed": 2,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test adts_matroska_audio_metadata_regressions --test audio_rematrix_opus_mp3_admission_regressions",
+      "passed": 3,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_adts_wave_remux_concat_parity_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

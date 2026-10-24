@@ -1,0 +1,781 @@
+warning: unreachable pattern
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+492 | ...   _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |       ^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+482 | ...             merge_order::Selection::Initial(i)=>{
+    |                 ---------------------------------- matches some of the same values
+...
+486 | ...             merge_order::Selection::ViewSynthesis=>return Ok(Resolv...
+    |                 ------------------------------------- matches some of the same values
+487 | ...             merge_order::Selection::Texture=>return Ok(Resolved::Te...
+    |                 ------------------------------- matches some of the same values
+488 | ...             merge_order::Selection::InterView=>{selected_iv=1;(spec...
+    |                 --------------------------------- matches some of the same values
+...
+492 | ...             _=>return Err(invalid("unexpected HEVC depth IV merge s...
+    |                 ^ ...and 3 other patterns collectively make this unreachable
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `intra_plane` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/avc_deblock.rs:184:15
+    |
+184 | pub(super) fn intra_plane(
+    |               ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `read_inter_coefficients_422` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_inter_coefficients.rs:34:15
+   |
+34 | pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,patter...
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `candidates` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_mv.rs:78:4
+   |
+78 | fn candidates(n: Neighbours) -> Result<[Neighbour; 3]> {
+   |    ^^^^^^^^^^
+
+warning: function `inverse2` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:190:4
+    |
+190 | fn inverse2(input: &[i32], output: &mut [i32]) {
+    |    ^^^^^^^^
+
+warning: function `inverse4` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:218:15
+    |
+218 | inverse_size!(inverse4, inverse2, 4);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse8` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:219:15
+    |
+219 | inverse_size!(inverse8, inverse4, 8);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse16` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:220:15
+    |
+220 | inverse_size!(inverse16, inverse8, 16);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse32` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:221:15
+    |
+221 | inverse_size!(inverse32, inverse16, 32);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: enum `RunKind` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:420:17
+    |
+420 | pub(crate) enum RunKind {
+    |                 ^^^^^^^
+
+warning: struct `Run` is never constructed
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:425:19
+    |
+425 | pub(crate) struct Run {
+    |                   ^^^
+
+warning: function `expand_runs` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:431:15
+    |
+431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run])...
+    |               ^^^^^^^^^^^
+
+warning: `fvid-codecs` (lib) generated 12 warnings
+warning: variable does not need to be mutable
+   --> crates/fvid-media/src/owned_xfade.rs:325:5
+    |
+325 |     mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
+    |     ----^^^^^
+    |     |
+    |     help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `encode` is never used
+   --> crates/fvid-media/src/owned_y4m_impl.rs:212:8
+    |
+ 31 | impl Header {
+    | ----------- method in this implementation
+...
+212 |     fn encode(&self, width: usize, height: usize) -> String {
+    |        ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `apply_pixel_filters` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:502:15
+    |
+502 | pub(crate) fn apply_pixel_filters(
+    |               ^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:509:15
+    |
+509 | pub(crate) fn apply_pixel_filters_cached(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached_at` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:518:15
+    |
+518 | pub(crate) fn apply_pixel_filters_cached_at(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `esds_for_mp4` is never used
+   --> crates/fvid-media/src/owned_aac/adts_impl.rs:334:15
+    |
+334 | pub(crate) fn esds_for_mp4(asc: &[u8]) -> Option<Vec<u8>> {
+    |               ^^^^^^^^^^^^
+
+warning: method `read_short` is never used
+  --> crates/fvid-media/src/owned_aac/bits_impl.rs:42:19
+   |
+ 7 | impl<'a> BitReader<'a> {
+   | ---------------------- method in this implementation
+...
+42 |     pub(crate) fn read_short(&mut self, count: u8) -> Result<u16> {
+   |                   ^^^^^^^^^^
+
+warning: associated function `identifiers` is never used
+   --> crates/fvid-media/src/owned_avc_impl.rs:509:19
+    |
+495 | impl Pps {
+    | -------- associated function in this implementation
+...
+509 |     pub(crate) fn identifiers(nal: &[u8]) -> Result<(u32, u32)> {
+    |                   ^^^^^^^^^^^
+
+warning: function `try_mp4_as` is never used
+  --> crates/fvid-media/src/owned_probe.rs:61:15
+   |
+61 | pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Op...
+   |               ^^^^^^^^^^
+
+warning: function `try_webm_as` is never used
+  --> crates/fvid-media/src/owned_probe.rs:82:15
+   |
+82 | pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<O...
+   |               ^^^^^^^^^^^
+
+warning: function `try_adts_as` is never used
+   --> crates/fvid-media/src/owned_probe.rs:102:15
+    |
+102 | pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<...
+    |               ^^^^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_audio_export.rs:8:15
+  |
+8 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_audio_plan.rs:75:15
+   |
+75 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_export.rs:45:15
+   |
+45 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_wave_remux.rs:22:15
+   |
+22 | pub(crate) fn supports(source: &Path, destination: &Path, options: &Copy...
+   |               ^^^^^^^^
+
+warning: function `supports_concat` is never used
+  --> crates/fvid-media/src/owned_wave_remux.rs:72:15
+   |
+72 | pub(crate) fn supports_concat(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_wave_plan.rs:6:15
+  |
+6 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+  |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_loudness.rs:50:15
+   |
+50 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_adts_loudnorm.rs:6:15
+  |
+6 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: method `nul_name` is never used
+  --> crates/fvid-media/src/owned_pixel_format.rs:9:27
+   |
+ 6 |           impl PixelFormat {
+   |           ---------------- method in this implementation
+...
+ 9 |               pub(crate) fn nul_name(self) -> &'static [u8] { match self...
+   |                             ^^^^^^^^
+...
+16 | / formats! {
+17 | |     Yuv420p, "yuv420p", Some((1, 1)), 1;
+18 | |     Yuv422p, "yuv422p", Some((1, 0)), 1;
+19 | |     Yuv444p, "yuv444p", Some((0, 0)), 1;
+...  |
+58 | |     Gray16Be, "gray16be", None, 2;
+59 | | }
+   | |_- in this macro invocation
+   |
+   = note: this warning originates in the macro `formats` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `aac_packet_plan` is never used
+  --> crates/fvid-media/src/owned_mp4_aac_plan_impl.rs:34:15
+   |
+34 | pub(crate) fn aac_packet_plan(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_ogg_opus_export.rs:134:15
+    |
+134 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_opus_export.rs:33:15
+   |
+33 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `inspect` is never used
+ --> crates/fvid-media/src/owned_matroska_copy_impl.rs:8:15
+  |
+8 | pub(crate) fn inspect<R: Read + Seek>(
+  |               ^^^^^^^
+
+warning: function `geometry` is never used
+  --> crates/fvid-media/src/owned_raw_flac.rs:75:15
+   |
+75 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(...
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_flac_export.rs:45:15
+   |
+45 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_mp3_export.rs:45:15
+   |
+45 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_alac_export.rs:37:15
+   |
+37 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+  --> crates/fvid-media/src/owned_matroska_alac_export.rs:95:15
+   |
+95 | pub(crate) fn geometry(source:&Path,options:&CopyOptions)->Result<(u32,u...
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_aac_export.rs:37:15
+   |
+37 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: method `convert` is never used
+   --> crates/fvid-media/src/owned_pcm_decoder_impl.rs:139:8
+    |
+ 79 | impl PcmDecoder {
+    | --------------- method in this implementation
+...
+139 |     fn convert(&self, data: &[u8]) -> Result<Vec<u8>> {
+    |        ^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_pcm_export.rs:41:15
+   |
+41 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_mp4_audio_export.rs:109:15
+    |
+109 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_container_loudness.rs:59:15
+   |
+59 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_container_loudnorm.rs:6:15
+  |
+6 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: function `pack_bgra` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:8728:15
+     |
+8728 | pub(crate) fn pack_bgra(
+     |               ^^^^^^^^^
+
+warning: function `take_aligned` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:9440:15
+     |
+9440 | pub(crate) fn take_aligned(
+     |               ^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_ogg_vorbis_export.rs:104:15
+    |
+104 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_ogg_joint_export.rs:68:15
+   |
+68 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_g711_wave_export.rs:85:15
+   |
+85 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: `fvid-media` (lib) generated 40 warnings (run `cargo fix --lib -p fvid-media` to apply 1 suggestion)
+   Compiling fvid v0.1.0 (/Users/themoretheless/Documents/Sources/fvid)
+warning: methods `fill_final` and `has_pending_output` are never used
+   --> src/audio.rs:263:19
+    |
+201 | impl Stretch {
+    | ------------ methods in this implementation
+...
+263 |     pub(crate) fn fill_final(&mut self, base: usize, input: &[f32], end...
+    |                   ^^^^^^^^^^
+...
+266 |     pub(crate) fn has_pending_output(&self) -> bool { self.taken < STRE...
+    |                   ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `iter` is never used
+  --> src/codec/../../crates/fvid-media/src/owned_aac/aac_ssr_metadata_impl.rs:17:19
+   |
+16 | impl<T> PacketQueue<T> {
+   | ---------------------- method in this implementation
+17 |     pub(crate) fn iter(&self) -> impl Iterator<Item = &T> {
+   |                   ^^^^
+
+warning: method `playable` is never used
+   --> src/container/xm.rs:267:19
+    |
+265 | impl Envelope {
+    | ------------- method in this implementation
+266 |     /// Bound all metadata-driven point access before rendering.
+267 |     pub(crate) fn playable(&self) -> bool {
+    |                   ^^^^^^^^
+
+warning: method `plane_data` is never used
+   --> src/playback/video/packed.rs:146:19
+    |
+ 15 | impl PackedPlanar {
+    | ----------------- method in this implementation
+...
+146 |     pub(crate) fn plane_data(&self) -> Result<[&[u8]; 3]> {
+    |                   ^^^^^^^^^^
+
+warning: `fvid` (lib test) generated 4 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13.48s
+     Running unittests src/lib.rs (target/debug/deps/fvid-5e6728956190f248)
+
+running 359 tests
+test audio::tests::level_scales_linearly_below_full_scale ... ok
+test audio::tests::default_rate_consumes_one_frame_per_frame ... ok
+test audio::tests::muted_output_is_silent ... ok
+test audio::tests::non_finite_samples_stay_silent ... ok
+test audio::tests::a_full_scale_frame_is_left_alone ... ok
+test audio::tests::cutting_never_clips ... ok
+test audio::tests::boost_lifts_the_body_and_holds_the_peak ... ok
+test audio::tests::rate_consumes_the_exact_total_over_time ... ok
+test audio::tests::all_known_codecs_have_a_display_name ... ok
+test audio::sample_duration_tests::sample_duration_matches_packet_clock_through_u64_bounds ... ok
+test codec::aac_bands::tests::indexed_rates_have_standard_counts_and_complete_geometry ... ok
+test codec::aac_bands::tests::short_frame_geometry_covers_all_indexed_rates ... ok
+test codec::aac_bands::tests::explicit_rates_switch_at_the_geometry_boundaries ... ok
+test codec::aac_bands::tests::asc_drives_ics_band_limit ... ok
+test codec::aac_huffman::tests::escape_extremes_and_truncation_are_transactional ... ok
+test codec::aac_channel::tests::reconstruction_scales_each_short_group_and_band ... ok
+test codec::aac_channel::tests::noise_bands_reconstruct_per_window_and_rollback_on_late_error ... ok
+test codec::aac_channel::tests::unsupported_tools_do_not_consume_channel_header ... ok
+test codec::aac_ics::tests::bad_spectral_layout_preserves_output_and_empty_bands_zero_fill ... ok
+test codec::aac_ics::quantized_deinterleave_tests::quantized_mapping_matches_independent_window_coordinates ... ok
+test codec::aac_ics::tests::sections_expand_escape_lengths_and_reject_invalid_runs ... ok
+test codec::aac_ics::tests::long_syntax_and_errors_preserve_cursor ... ok
+test codec::aac_ics::tests::every_short_grouping_partitions_eight_windows ... ok
+test codec::aac_ics::tests::short_sections_keep_group_boundaries_and_special_codebooks ... ok
+test codec::aac_decoder::tests::container_and_aac_config_must_describe_the_same_pcm ... ok
+test codec::aac_decoder::tests::damaged_packet_is_an_error_and_requires_reset ... ok
+test codec::aac_channel::tests::channel_payload_reaches_owned_synthesis ... ok
+test codec::aac_decoder::tests::timestamp_overflow_does_not_wrap_or_poison_codec_state ... ok
+test codec::aac_native::he_aac_native_tests::extended_asc_keeps_core_rate_ps_and_unspecified_flags_distinct ... ok
+test audio::tests::a_short_window_and_a_late_rate_change_cost_nothing_extra ... ok
+test audio::tests::a_stretch_at_the_recorded_rate_hands_the_stream_back ... ok
+test codec::aac_ics::tests::deinterleave_restores_every_coefficient_for_all_groupings ... ok
+test codec::aac_huffman::tests::all_spectral_symbols_decode_with_signed_components ... ok
+test codec::aac_huffman::tests::every_scalefactor_code_decodes_and_tables_are_prefix_free ... ok
+test audio::tests::the_stretch_retires_what_the_rate_asked_for ... ok
+test codec::aac_native::tests::packet_tns_filters_spectrum_before_synthesis ... ok
+test codec::aac_native::tests::bad_packet_does_not_advance_noise_or_overlap ... ok
+test codec::aac_native::tests::mono_44100_matches_pcm_reference ... ok
+test codec::aac_native::tests::public_decoder_matches_saved_pcm_and_reset ... ok
+test codec::aac_noise::tests::cloning_correlates_shapes_and_reset_repeats_initial_band ... ok
+test codec::aac_noise::tests::errors_preserve_state_and_output ... ok
+test codec::aac_noise::tests::every_noise_energy_and_band_width_has_expected_norm ... ok
+test codec::aac_pair::tests::common_window_mask_modes_and_two_channel_payloads ... ok
+test codec::aac_pair::tests::mid_side_reconstructs_only_masked_bands_in_each_short_group ... ok
+test codec::aac_native::ltp_compat_dispatch_tests::root_ltp_long_short_transitions_match_scalar_pcm ... ok
+test codec::aac_pair::tests::reserved_mask_is_rejected_before_channels ... ok
+test codec::aac_pair::tests::stereo_noise_correlation_energy_and_error_rollback ... ok
+test codec::aac_pce::fill_tests::ancillary_fill_is_bounded_and_transactional_at_every_bit_offset ... ok
+test codec::aac_pce::fill_tests::dynamic_range_fill_is_bounded_at_every_bit_offset ... ok
+test codec::aac_pce::fill_tests::opaque_extensions_skip_only_the_declared_payload_at_every_offset ... ok
+test codec::aac_pulse::tests::invalid_offsets_and_truncation_preserve_cursor ... ok
+test codec::aac_pulse::tests::maximum_pulses_remain_reconstructible ... ok
+test codec::aac_pulse::tests::signed_zero_and_repeated_pulses_apply_before_quantization ... ok
+test codec::aac_quant::tests::cubes_reconstruct_exact_fourth_powers_and_octaves ... ok
+test codec::aac_native::tests::checkpoint_restores_exact_continuous_pcm_and_rejects_other_config ... ok
+test codec::aac_quant::tests::invalid_input_does_not_partially_write_band ... ok
+test codec::aac_quant::tests::entire_escape_range_matches_independent_power_evaluation ... ok
+test codec::aac_scalefactors::rvlc_tests::rvlc_forbidden_words_and_every_payload_truncation_preserve_cursor ... ok
+test codec::aac_scalefactors::rvlc_tests::rvlc_short_groups_keep_separate_spectral_noise_and_intensity_accumulators ... ok
+test codec::aac_scalefactors::tests::accumulators_remain_separate_and_cross_groups ... ok
+test codec::aac_scalefactors::tests::first_noise_is_absolute_even_after_group_boundary ... ok
+test codec::aac_scalefactors::tests::out_of_range_truncated_and_reserved_inputs_are_transactional ... ok
+test codec::aac_spectral::hcr_header_tests::reserved_hcr_lengths_adapt_and_header_truncation_is_transactional ... ok
+test codec::aac_spectral::tests::mixed_books_preserve_group_band_order_and_skip_special_bands ... ok
+test codec::aac_spectral::tests::truncation_and_tuple_misalignment_do_not_consume_input ... ok
+test codec::aac_spectral::tests::zero_bands_need_no_payload ... ok
+test codec::aac_ssr_metadata::tests::delayed_metadata_is_bounded_atomic_and_checkpointable ... ok
+test codec::aac_tns::tests::excessive_order_and_truncation_preserve_cursor ... ok
+test codec::aac_tns::tests::short_empty_windows_and_zero_order_do_not_read_coefficients ... ok
+test codec::aac_tns::tests::signed_compressed_coefficients_use_original_resolution ... ok
+test codec::config::tests::aac_lc_and_sbr_absent_extension ... ok
+test codec::config::tests::avc_config_and_every_truncation ... ok
+test codec::config::tests::esds_accepts_audio_with_a_cleared_reserved_bit ... ok
+test codec::config::tests::esds_extracts_only_nested_decoder_specific_data ... ok
+test codec::config::tests::hevc_arrays_and_reserved_bits ... ok
+test codec::aac_scalefactors::rvlc_tests::rvlc_all_signed_deltas_and_escape_words_preserve_adjacent_bits ... ok
+test codec::config::tests::nal_framing_terminates_on_error ... ok
+test codec::pcm_decoder::tests::a_24_bit_sample_keeps_its_value_across_the_wrap ... ok
+test codec::pcm_decoder::tests::a_missing_width_falls_back_to_the_containers_default ... ok
+test codec::pcm_decoder::tests::a_partial_frame_is_refused_before_publication ... ok
+test codec::pcm_decoder::tests::floats_pass_through_in_both_widths ... ok
+test codec::pcm_decoder::tests::integers_of_every_width_land_on_the_same_scale ... ok
+test codec::pcm_decoder::tests::interleaved_channels_stay_interleaved ... ok
+test codec::pcm_decoder::tests::sign_extension_reads_both_byte_orders ... ok
+test codec::pcm_decoder::tests::widths_with_no_definition_are_refused_at_open ... ok
+test codec::aac_native::ltp_compat_dispatch_tests::root_cce_prediction_metadata_matches_coupled_scalar_pcm ... ok
+test audio::tests::a_stretched_pair_keeps_each_channel_on_its_own ... ok
+test color::grade::tests::a_buffer_that_is_not_whole_pixels_is_not_read_past_its_end ... ok
+test color::grade::tests::a_camera_log_replaces_the_signal_the_file_states ... ok
+test codec::aac_pair::tests::real_adts_stereo_all_pairs_parse ... ok
+test codec::aac_native::tests::surround_pcm_matches_reference_channel_order ... ok
+test color::grade::tests::a_curve_only_conversion_runs_off_byte_tables_that_the_grid_agrees_with ... ok
+test audio::tests::a_stretched_stream_loses_length_and_keeps_its_pitch ... ok
+test color::grade::tests::a_curve_the_module_cannot_name_hands_its_codes_to_the_lut_as_they_came ... ok
+test color::grade::tests::a_camera_log_plan_gets_no_byte_tables ... ok
+test color::grade::tests::a_grading_lut_is_applied_after_the_derived_conversion ... ok
+test codec::aac_native::he_aac_native_tests::missing_sbr_fill_keeps_pcm_clock_noise_history_and_checkpoint_replay ... ok
+test color::grade::tests::a_frame_is_graded_the_same_whichever_worker_paints_it ... ok
+test color::grade::tests::a_gamut_the_caller_names_outranks_the_file_and_the_curve ... ok
+test color::grade::tests::a_small_frame_is_painted_by_the_thread_that_called_it ... ok
+test codec::aac_native::tests::real_tns_file_matches_pcm_reference ... ok
+test color::grade::tests::a_picture_on_the_panel_and_curve_it_states_is_left_alone ... ok
+test color::grade::tests::a_named_panel_is_what_an_hlg_code_means ... ok
+test color::grade::tests::a_grade_hands_the_shader_the_table_it_reads ... ok
+test color::grade::tests::a_told_grade_applies_the_log_then_the_tone_map_then_the_cube ... ok
+test color::grade::tests::an_hdr_destination_keeps_the_full_scale_and_runs_no_shoulder ... ok
+test color::grade::tests::hdr_is_compressed_for_an_sdr_panel_even_when_nobody_chose_a_curve ... ok
+test color::lut::tests::a_1d_domain_is_the_input_range_and_its_values_are_left_alone ... ok
+test color::lut::tests::a_1d_table_keeps_its_values_past_the_ends ... ok
+test color::lut::tests::a_3dl_can_declare_its_grid_by_a_mesh_line_behind_keywords ... ok
+test color::grade::tests::a_row_of_pixels_is_rewritten_in_place_and_a_identity_grade_skips_it ... ok
+test color::lut::tests::a_3dl_with_no_declaration_is_read_from_its_row_count ... ok
+test color::lut::tests::a_cube_that_is_not_a_lut_says_what_it_is ... ok
+test color::lut::tests::a_cube_with_both_tables_is_read_for_its_3d_grid ... ok
+test color::lut::tests::a_dat_keeps_its_nodes_unscaled_and_unclipped ... ok
+test color::lut::tests::a_dat_lists_its_grid_blue_fastest_like_a_3dl ... ok
+test color::lut::tests::a_dat_of_fractions_and_a_3dl_of_codes_do_not_change_places ... ok
+test color::lut::tests::a_dat_without_a_directive_is_read_from_its_row_count_past_comments ... ok
+test color::lut::tests::a_3dl_divides_by_the_depth_its_header_declares ... ok
+test color::grade::tests::a_log_curve_lends_its_gamut_where_the_file_names_none ... ok
+test color::lut::tests::a_node_outside_the_display_range_survives_the_parse ... ok
+test color::lut::tests::a_long_1d_table_is_read_while_a_grid_keeps_its_bound ... ok
+test color::lut::tests::a_pre_lut_section_is_read_past_and_leaves_the_grid_alone ... ok
+test color::grade::tests::a_stream_that_states_its_light_compresses_from_it ... ok
+test color::grade::tests::the_same_light_on_a_desktop_surface_is_re_encoded ... ok
+test color::lut::tests::a_spi1d_curve_is_read_with_its_from_pair_as_the_input_range ... ok
+test color::lut::tests::a_spi1d_spreads_one_two_or_three_values_per_row ... ok
+test color::lut::tests::a_spi3d_row_places_its_node_by_its_own_indices ... ok
+test color::lut::tests::a_spi3d_and_the_cube_of_the_same_numbers_agree ... ok
+test color::lut::tests::affine_lut_is_reproduced_everywhere_by_trilinear_and_tetrahedral ... ok
+test color::lut::tests::a_vendor_key_line_does_not_move_the_grid_or_close_the_file ... ok
+test color::lut::tests::an_input_range_pair_is_read_as_the_domain_of_its_own_table ... ok
+test color::grade::tests::shader_stages_borrow_original_domains_and_preserve_intermediate_headroom ... ok
+test color::lut::tests::bad_3dl_files_are_rejected ... ok
+test color::lut::tests::bad_dat_files_are_rejected ... ok
+test color::lut::tests::bad_spi_files_are_rejected ... ok
+test color::lut::tests::both_interpolators_converge_on_the_sampled_function ... ok
+test color::lut::tests::a_real_spi1d_is_the_srgb_curve_over_the_range_it_declares ... ok
+test color::lut::tests::a_grid_that_only_moves_the_triangle_is_not_an_identity ... ok
+test color::lut::tests::cube_1d_accepts_one_or_three_channels_per_row ... ok
+test color::lut::tests::cube_3d_parses_with_red_varying_fastest ... ok
+test color::lut::tests::cube_3dl_parses_12bit_rows ... ok
+test color::lut::tests::cube_round_trips_through_text ... ok
+test color::lut::tests::domain_is_applied_on_read_and_write ... ok
+test codec::aac_native::ltp_compat_dispatch_tests::root_syntax_metadata_reaches_owned_ltp_state_without_pcm_or_checkpoint_drift ... ok
+test color::lut::tests::a_plain_transfer_cube_keeps_the_light_its_codes_state ... ok
+test color::lut::tests::every_interpolator_hits_the_nodes_exactly ... ok
+test color::lut::tests::every_reading_has_a_label_that_reads_back ... ok
+test color::lut::tests::from_text_routes_each_format_to_its_own_reader ... ok
+test color::grade::tests::a_master_beyond_the_panels_reach_rolls_instead_of_burning ... ok
+test color::lut::tests::log_without_a_published_gamut_converts_in_the_destination_space ... ok
+test color::lut::tests::malformed_cubes_are_rejected ... ok
+test color::lut::tests::transfer_lut_is_the_curve_sampled_on_a_code_grid ... ok
+test container::adts::mp4_descriptor_tests::sl_configuration_is_inside_multibyte_es_descriptor ... ok
+test container::audio_timeline::tests::gap_repeat_seek_and_fractional_boundaries ... ok
+test container::avi::tests::a_chunk_that_overclaims_ends_where_the_run_does ... ok
+test container::avi::tests::a_file_that_is_not_an_avi_is_not_a_file_with_no_audio ... ok
+test container::avi::tests::a_file_without_an_index_is_read_by_its_records_alone ... ok
+test container::avi::tests::a_geometry_that_cannot_be_laid_out_is_refused ... ok
+test container::avi::tests::a_group_that_states_no_format_describes_no_stream_this_reader_reads ... ok
+test container::avi::tests::a_header_or_a_format_that_stops_short_is_refused ... ok
+test container::avi::tests::a_movi_boundary_cannot_publish_a_partial_audio_record ... ok
+test container::avi::tests::a_picture_stream_in_front_does_not_take_the_audios_number ... ok
+test container::avi::tests::a_record_with_no_bytes_in_it_is_refused ... ok
+test container::avi::tests::a_records_own_group_does_not_move_it_in_the_timeline ... ok
+test container::avi::tests::a_stream_holding_nothing_is_not_a_file_holding_nothing ... ok
+test container::avi::tests::an_id_that_claims_a_picture_stream_is_audio_is_a_disagreement ... ok
+test container::avi::tests::an_index_that_disagrees_with_the_records_is_refused ... ok
+test container::avi::tests::only_a_streams_own_id_names_its_records ... ok
+test container::avi::tests::the_headers_of_a_real_audio_stream_are_the_streams_own ... ok
+test container::avi::tests::the_main_header_and_the_stream_groups_have_to_agree ... ok
+test container::avi::tests::the_readers_own_budgets_are_its_to_set ... ok
+test container::mp4::tests::a_disc_and_the_albums_own_artist_read_from_their_boxes ... ok
+test container::mp4::tests::a_fragment_of_audio_is_indexed_as_its_own_run_states ... ok
+test container::mp4::tests::a_fragment_saying_something_no_reader_can_honour_is_refused ... ok
+test container::mp4::tests::a_fragment_that_leaves_out_its_decode_time_continues_the_track ... ok
+test container::mp4::tests::a_track_number_reads_from_its_binary_box_both_writers_spell_it ... ok
+test container::mp4::tests::colr_reads_both_writers_spellings_of_the_cicp_triple ... ok
+test container::mp4::tests::every_fragmented_sample_reads_the_bytes_its_index_points_at ... ok
+test container::mp4::tests::fragments_of_video_keep_the_decode_stamps_and_the_restart_points ... ok
+test container::mp4::tests::tags_this_reader_cannot_read_leave_the_file_unstated ... ok
+test container::mp4::tests::the_coding_s_block_is_two_or_one_bytes_a_channel_and_six_samples_whichever_it_is ... ok
+test container::mp4::tests::the_movie_tags_name_it_in_either_writers_spelling ... ok
+test color::lut::tests::an_unmapped_conversion_moves_between_curve_families ... ok
+test container::mp4::tests::the_rights_and_the_note_read_from_their_atoms_both_ways ... ok
+test container::mp4::tests::the_wave_record_sits_where_the_entry_version_puts_the_children ... ok
+test container::mp4_concat::tests::a_second_packet_trimmed_at_both_ends_retains_existing_routing ... ok
+test container::mp4_concat::tests::delay_spanning_multiple_packets_becomes_per_packet_head_padding ... ok
+test container::mp4_concat::tests::unrepresentable_negative_packet_time_is_not_admitted ... ok
+test container::mp4_matroska::tests::reordered_variable_cadence_uses_presentation_intervals ... ok
+test container::opus_packet::tests::all_toc_durations_and_frame_count_limits ... ok
+test container::opus_packet::tests::identification_and_preskip ... ok
+test color::lut::tests::graded_cube_maps_a_pq_range_onto_an_sdr_display ... ok
+test container::smf::tests::a_file_without_a_tempo_states_the_default_one ... ok
+test container::smf::tests::a_note_on_with_no_velocity_is_a_note_off ... ok
+test container::smf::tests::a_packet_ends_at_its_own_window ... ok
+test container::smf::tests::delta_times_span_the_variable_length_range ... ok
+test container::smf::tests::every_channel_and_meta_message_the_format_has_is_read_or_dropped ... ok
+test container::smf::tests::extension_chunks_do_not_replace_missing_declared_tracks ... ok
+test container::smf::tests::holds_to_its_own_bounds ... ok
+test container::smf::tests::packet_records_survive_the_round_trip ... ok
+test container::smf::tests::reads_a_single_track_file_and_its_events ... ok
+test container::smf::tests::refuses_a_data_byte_with_no_status_to_run ... ok
+test container::smf::tests::refuses_a_file_that_is_not_one ... ok
+test container::smf::tests::refuses_a_packet_that_is_not_whole_records ... ok
+test container::smf::tests::refuses_a_timeline_it_cannot_place ... ok
+test container::smf::tests::refuses_data_that_runs_past_the_file ... ok
+test container::smf::tests::running_status_carries_a_note_run_without_repeating_it ... ok
+test container::smf::tests::tempo_changes_move_later_ticks_without_moving_earlier_ones ... ok
+test container::smf::tests::tracks_of_a_format_one_file_share_the_timeline ... ok
+test container::opus_packet::tests::vbr_padding_and_short_packets_are_checked ... ok
+test container::webm::tests::a_chapter_list_that_cannot_be_walked_leaves_the_file_playable ... ok
+test container::webm::tests::a_colour_element_carries_the_triple_and_the_mastering_volume ... ok
+test container::webm::tests::a_colour_element_states_its_range_in_matroskas_own_numbers ... ok
+test container::webm::tests::a_file_with_no_stated_length_is_indexed_whole_at_open ... ok
+test container::webm::tests::a_file_keeps_every_tag_that_names_it_rather_than_one_track ... ok
+test container::webm::tests::a_real_file_names_itself_and_its_author_in_its_tags ... ok
+test container::webm::tests::a_real_file_lets_the_reader_name_its_tracks ... ok
+test container::webm::tests::a_real_file_names_itself_in_its_information_block ... ok
+test container::webm::tests::a_track_keeps_the_name_and_the_language_either_spelling_gives_it ... ok
+test container::webm::tests::a_tag_of_the_file_names_it_and_a_tag_of_one_track_does_not ... ok
+test container::webm::tests::a_track_number_arrives_under_whichever_name_its_writer_chose ... ok
+test container::webm::tests::a_video_track_display_size_becomes_the_shape_of_its_pixels ... ok
+test container::webm::tests::a_video_track_keeps_its_crop_borders_and_shows_only_what_survives_them ... ok
+test container::webm::tests::audio_track_reads_its_float_rate_and_codec_private ... ok
+test container::webm::tests::block_duration_scales_once_across_lazy_clusters_and_rejects_overflow ... ok
+test container::webm::tests::chapter_atoms_come_out_in_the_files_own_clock ... ok
+test container::webm::tests::chapter_times_are_nanoseconds_independent_of_segment_scale ... ok
+test container::webm::tests::delay_and_signed_discard_padding_keep_nanosecond_units ... ok
+test container::webm::tests::declared_duration_uses_final_scale_and_validates_float ... ok
+test container::webm::tests::malformed_vints_lacing_and_limits_fail ... ok
+test container::webm::tests::overflowing_crop_borders_keep_the_whole_picture ... ok
+test container::webm::tests::rectangular_projection_roll_has_clockwise_display_orientation ... ok
+test container::webm::tests::opening_a_timed_file_stops_at_the_first_cluster ... ok
+test container::webm::tests::the_album_artist_the_disc_and_the_publisher_keep_their_spellings ... ok
+test container::mp4::tests::the_picture_a_fragment_indexes_reaches_the_picture_route ... ok
+test container::webm::tests::unknown_segment_and_cluster_sizes_signed_timestamps_and_packet_reads ... ok
+test container::webm::tests::scanning_to_a_point_leaves_the_file_behind_it_unread ... ok
+test container::xm::tests::a_break_names_the_row_the_tracker_shows_it_in_decimal ... ok
+test container::xm::tests::a_keymap_points_a_note_at_a_sample_and_no_note_at_nothing ... ok
+test container::xm::tests::a_file_that_is_not_a_module_is_refused_before_anything_is_read ... ok
+test container::xm::tests::a_loop_counted_in_bytes_is_read_as_frames_and_clamped_to_what_there_is ... ok
+test container::xm::tests::a_module_reads_back_as_the_rows_and_shapes_it_states ... ok
+test container::xm::tests::a_module_that_jumps_back_is_one_pass_of_what_it_played ... ok
+test container::xm::tests::a_module_lying_about_its_own_sizes_is_refused_not_read_past_them ... ok
+test container::xm::tests::a_packet_index_lands_on_the_last_row_that_had_begun ... ok
+test container::xm::tests::a_row_plays_the_pattern_its_order_names ... ok
+test container::xm::tests::a_row_that_states_tempo_measures_the_rows_from_it_on ... ok
+test container::xm::tests::both_packed_forms_of_a_row_hold_the_same_cells ... ok
+test container::xm::tests::every_packet_reads_back_as_the_row_that_wrote_it ... ok
+test container::xm::tests::a_sample_in_a_form_this_reader_does_not_undo_is_named_as_one ... ok
+test container::xm::tests::the_committed_fixtures_are_the_bytes_the_builder_writes ... ok
+test container::xm::tests::the_layout_a_version_before_1_04_used_is_read_where_it_put_things ... ok
+test container::xm::tests::the_note_column_keeps_what_the_format_names_and_drops_what_it_does_not ... ok
+test container::xm::tests::the_samples_delta_coded_in_the_file_are_the_frames_in_memory ... ok
+test edit::tests::geometry_requires_decode ... ok
+test container::xm::tests::the_tempo_a_module_starts_at_falls_back_to_the_tracker_s_own_defaults ... ok
+test edit::tests::hybrid_plan_transcodes_video_and_copies_audio ... ok
+test native_pixels::colorhold_tests::native_colour_metadata_selects_matrix_and_preserves_selected_samples ... ok
+test native_export::overlay::tests::foreground_selection_uses_its_cadence_and_holds_eof ... ok
+test native_pixels::overlay::tests::invalid_foreground_or_alignment_leaves_destination_unchanged ... ok
+test native_pixels::overlay::tests::mixed_depth_clipping_and_invalid_source_are_atomic ... ok
+test native_pixels::overlay::tests::odd_yuv420_preserves_plane_borders_and_high_depth ... ok
+test native_pixels::overlay::tests::precision_conversion_preserves_range_endpoints_and_neutral_chroma ... ok
+test native_pixels::overlay::tests::rgb_negative_offsets_clip_exact_pixels ... ok
+test native_probe::average_rate_tests::average_uses_total_clock_and_exact_reduced_ratio ... ok
+test native_probe::average_rate_tests::unknown_or_unrepresentable_timing_is_not_guessed ... ok
+test native_probe::payload_rate_tests::unknown_clock_and_overflow_remain_unknown ... ok
+test native_probe::payload_rate_tests::uses_payload_bytes_and_total_source_clock ... ok
+test native_subtitle::tests::entities_are_literal_text_not_ass_or_html_commands ... ok
+test playback::tests::converts_chroma_planes_in_all_supported_layouts ... ok
+test playback::tests::decode_black_white_and_rewind ... ok
+test playback::tests::rejects_invalid_rate_budget_and_truncation ... ok
+test playback_mp4::tests::an_av1_metadata_obu_states_its_own_light ... ok
+test audio::tests::a_stretched_stream_keeps_its_wave_continuous ... ok
+test playback_mp4::tests::an_avc_parameter_set_in_the_record_states_its_signal_at_open ... ok
+test playback_mp4::tests::an_hevc_parameter_set_states_its_own_signal ... ok
+test playback_mp4::tests::media_time_preserves_fractional_and_negative_timestamps ... ok
+test playback_mp4::tests::presentation_intervals_follow_composition_order ... ok
+test playback_mp4::tests::an_hevc_sei_states_its_own_light ... ok
+test native_pixels::colorize_tests::colorize_native_decode_and_lossless_export_accept_high_depth_odd_frames ... ok
+test playback_native::tests::a_codings_own_statement_replaces_a_containers_silence ... ok
+test playback_native::tests::a_real_hdr10_files_light_reaches_the_caller_that_tone_maps_it ... ok
+test playback_native::tests::a_real_hlg_files_signal_reaches_the_caller_that_grades_it ... ok
+test playback_native::tests::a_real_hdr10_files_signal_reaches_the_caller_that_grades_it ... ok
+test playback_native::tests::a_turn_moves_every_pixel_to_its_place ... ok
+test native_pixels::monochrome_tests::monochrome_native_decode_and_lossless_export_accept_high_depth_odd_frames ... ok
+test playback_native::tests::a_y4m_stream_states_only_the_matrix_its_converter_uses ... ok
+test playback_native::tests::a_turned_item_is_shown_upright ... ok
+test playback_native::tests::edit_window_preserves_track_units_and_rounds_fractional_end_up ... ok
+test playback_native::tests::format_detection_handles_small_buffers_and_y4m_rewind ... ok
+test playback_native::tests::images_and_unknown_data_are_not_dispatched_as_mp4 ... ok
+test playback_native::tests::planes_turn_with_their_own_geometry ... ok
+test playback_native::tests::video_fourccs_read_as_the_names_a_viewer_shows ... ok
+test playback_native::tests::webm_signature_never_enters_mp4_parser ... ok
+test playback_native::tests::an_item_states_the_shape_of_its_pixels ... ok
+test playback_native::tests::a_volume_without_a_content_light_grades_against_its_own_peak ... ok
+test playback_spool::ram_tests::shared_source_avoids_reopen_and_keeps_independent_cursors ... ok
+test playback_spool::ram_tests::dropping_a_ram_ring_releases_the_shared_allocation ... ok
+test playback_spool::ram_tests::admitted_ram_cache_keeps_loaded_start_after_seek_until_item_is_dropped ... ok
+test codec::aac_native::he_aac_native_tests::implicit_sbr_with_container_output_clock_matches_independent_pcm ... ok
+test color::lut::tests::an_hlg_picture_is_scaled_to_the_panel_that_reads_it ... ok
+test playback_spool::ram_tests::single_worker_serves_uncached_tail_and_start_with_a_pinned_playhead ... ok
+test playback_thread::precision_tests::playback_keeps_source_precision_and_rotation_for_gpu ... ok
+test playback_thread::precision_tests::source_precision_queue_honours_byte_budget_even_at_large_frames ... ok
+test playback_webm::seek_cache::tests::eviction_respects_budget_and_never_restores_a_point_before_the_gop ... ok
+test playback_webm::seek_cache::tests::status_view_does_not_keep_a_closed_items_cache_alive ... ok
+test playback_webm::seek_cache::tests::zero_budget_keeps_no_decoder_or_picture_storage ... ok
+test playback_thread::precision_tests::decoded_main10_picture_reaches_gpu_without_narrowing ... ok
+test playback_webm::tests::a_cropped_webm_reaches_the_player_with_its_borders_and_full_frames ... ok
+test playback_webm::tests::a_track_that_writes_its_light_only_in_band_answers_at_open ... ok
+test playback_thread::precision_tests::identity_rgb_frames_use_rgb_presentation_without_yuv_shader ... ok
+test playback_spool::ram_tests::startup_storage_is_transferred_without_a_second_allocation ... ok
+test playback_webm::tests::cached_simpleblocks_follow_variable_presentation_intervals ... ok
+test color::lut::tests::camera_log_cube_delivers_the_destination_curve_at_the_vendor_anchor ... ok
+test playback_webm::tests::duration_and_progress_use_video_origin_and_index_fallback ... ok
+test playback_webm::tests::seeking_before_the_first_frame_keeps_the_track_origin ... ok
+test subtitles::tests::a_cue_is_live_between_its_times ... ok
+test subtitles::tests::a_mark_at_the_head_of_a_file_names_its_encoding ... ok
+test subtitles::tests::a_sami_file_shows_the_language_it_captions_in ... ok
+test subtitles::tests::a_sami_line_inherits_the_time_it_was_given ... ok
+test subtitles::tests::a_sami_paragraph_carries_its_own_clock ... ok
+test subtitles::tests::a_script_line_of_another_field_list_shows_nothing ... ok
+test subtitles::tests::a_sidecar_in_a_legacy_encoding_loads_with_its_text ... ok
+test subtitles::tests::a_stated_length_outlines_the_line_it_states ... ok
+test playback_thread::precision_tests::alpha_converter_rotates_all_channels_and_counts_source_opacity_storage ... ok
+test subtitles::tests::a_windows_1251_file_reads_as_the_text_it_holds ... ok
+test subtitles::tests::an_end_before_the_start_is_not_a_cue ... ok
+test subtitles::tests::an_ass_block_gives_up_its_text_whichever_fields_it_keeps ... ok
+test subtitles::tests::an_old_sami_sync_names_a_clock ... ok
+test subtitles::tests::ass_events_keep_text_after_the_tenth_field ... ok
+test playback_webm::tests::native_detection_timing_rgb_eof_and_rewind ... ok
+test subtitles::tests::clocks_accept_both_separators_and_the_short_form ... ok
+test subtitles::tests::delay_shifts_the_whole_file ... ok
+test subtitles::tests::subrip_cues_keep_their_counter_and_blank_lines ... ok
+test subtitles::tests::sniffing_picks_the_format_by_its_header ... ok
+test subtitles::tests::webvtt_skips_its_header_notes_and_cue_settings ... ok
+test playback_webm::tests::a_seek_lands_on_the_frame_continuous_playback_shows ... ok
+test virtual_camera::crop_tests::crop_copies_exact_rgb_pixels_without_a_second_frame_buffer ... ok
+test virtual_camera::fit_tests::letterbox_preserves_aspect_pixels_and_opaque_borders ... ok
+test virtual_camera::loop_tests::loops_at_eof_and_preserves_original_camera_clock ... ok
+test virtual_camera::native_source_tests::fractional_frame_boundary_seek_and_eof_are_exact ... ok
+test virtual_camera::source_tests::file_to_camera_pixels_seek_and_eof ... ok
+test virtual_camera::tests::rational_rate_does_not_accumulate_rounding_error_or_backlog ... ok
+test virtual_camera::tests::seek_pause_and_loop_preserve_camera_time ... ok
+test subtitles::tests::sidecars_sort_exact_names_before_loose_ones ... ok
+test virtual_camera::frame_tests::latest_frame_replaces_stale_frames_and_holds_on_disconnect ... ok
+test color::lut::tests::every_log_profile_produces_a_usable_rec709_cube ... ok
+test playback_webm::tests::av1_video_uses_native_reader_and_rewinds ... ok
+test codec::aac_native::he_aac_native_tests::sbr_discovery_changes_clock_atomically_and_restores_undetected_checkpoints ... ok
+test color::lut::tests::camera_cube_converts_through_the_vendor_gamut_when_one_is_published ... ok
+test playback_webm::tests::seeking_a_single_cluster_av1_file_replays_the_same_pictures ... ok
+test codec::aac_native::he_aac_native_tests::crc_failure_preserves_aac_and_sbr_histories_and_rejects_mismatched_checkpoints ... ok
+test playback_native::tests::a_frame_split_between_workers_matches_its_own_strips ... ok
+test color::lut::tests::every_camera_log_cube_can_stop_at_linear_light ... ok
+test codec::aac_native::he_aac_native_tests::complete_authored_lc_plus_sbr_blocks_match_independent_pcm_and_clock ... ok
+test color::grade::tests::a_chained_grade_is_not_a_single_lookup ... ok
+test codec::aac_native::he_aac_native_tests::complete_stereo_cpe_sbr_matches_both_independent_mono_oracles_and_crc_rollback ... ok
+test color::grade::tests::only_a_conversion_that_keeps_the_channels_apart_gets_tables ... ok
+
+test result: ok. 359 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.30s
+

@@ -1,0 +1,49 @@
+{
+  "batch": 215,
+  "ids": ["FVID-0222"],
+  "title": "Enforce CopyOptions budgets, stream selection, and metadata mutations in plan_transcode_lossless and multitrack/single-stream lossless plans and route CLI plan crop-lossless and filtered overlay with controls through the owned pipeline",
+  "scope": [
+    "crates/fvid-media/src/owned_lossless.rs",
+    "crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+    "crates/fvid-media/src/owned_webm_multitrack_export.rs",
+    "crates/fvid-media/src/owned_mp4_video_bridge.rs",
+    "src/media_cli.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/lossless-plan-routing-main.y4m",
+    "tests/fixtures/playback-errors/lossless-plan-routing-overlay.y4m"
+  ],
+  "generators": [
+    "scripts/generate_lossless_plan_cli_routing_regressions.py",
+    "scripts/test_lossless_plan_cli_routing_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-215-pre-edit/crates/fvid-media/src/owned_lossless.rs",
+      "docs/improvements/snapshots/batch-215-pre-edit/crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+      "docs/improvements/snapshots/batch-215-pre-edit/crates/fvid-media/src/owned_webm_multitrack_export.rs",
+      "docs/improvements/snapshots/batch-215-pre-edit/crates/fvid-media/src/owned_mp4_video_bridge.rs",
+      "docs/improvements/snapshots/batch-215-pre-edit/src/media_cli.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-215-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-215-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-215-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test lossless_plan_cli_routing_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test lossless_plan_regressions --test native_mp4_multitrack --test native_webm_multitrack --test native_lossless --test native_webm_lossless --test native_ffv1 --test video_export_controls_regressions --test y4m_burn_xfade_controls_regressions",
+      "passed": 39,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_lossless_plan_cli_routing_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

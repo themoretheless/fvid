@@ -6,9 +6,15 @@ use std::{
     io::{BufReader, Read},
     path::Path,
 };
+pub(crate) fn adts_matroska_policies(options: &CopyOptions) -> bool {
+    options.max_controlled_bytes.is_none()
+        && crate::owned_budget::check_rss_budget(options).is_ok()
+        && options.max_packet_bytes > 0
+        && crate::owned_matroska::extract_adts_matroska_metadata(Some(options)).is_ok()
+}
 pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
     if !(options.streams.is_empty() || options.streams == [0])
-        || !crate::owned_matroska_remux::unedited_policies(options)
+        || !adts_matroska_policies(options)
         || !matches!(
             destination.extension().and_then(|s| s.to_str()),
             Some("mkv" | "mka")
@@ -26,6 +32,7 @@ pub fn remux(
     destination: &Path,
     options: &CopyOptions,
 ) -> Result<CopyStats, String> {
+    crate::owned_budget::check_rss_budget(options)?;
     if !supports(source, destination, options) {
         return Err("request is not an owned ADTS Matroska remux".into());
     }
@@ -45,12 +52,13 @@ pub fn remux(
     )
     .map_err(|e| e.to_string())?;
     crate::owned_matroska_remux::publish(destination, options, |output| {
-        crate::owned_matroska::write_adts_limited(
+        crate::owned_matroska::write_adts_with_options(
             reader,
             output,
             options.cancel.as_ref(),
             options.progress.as_ref(),
             options.max_packets,
+            Some(options),
         )
         .map_err(|e| e.to_string())
     })
@@ -61,6 +69,7 @@ pub fn plan_remux(
     options: &CopyOptions,
 ) -> Result<fvid_media_info::MediaPlan, String> {
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
+    crate::owned_budget::check_rss_budget(options)?;
     if !supports(source, Path::new("planned.mka"), options) {
         return Err("request is not an owned ADTS Matroska remux".into());
     }
@@ -71,7 +80,7 @@ pub fn plan_remux(
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             Err("media operation cancelled".to_string())
         } else {
-            Ok(())
+            crate::owned_budget::check_rss_budget(options)
         }
     };
     check()?;
@@ -101,14 +110,49 @@ pub fn plan_remux(
             .ok_or("ADTS payload count overflow")?;
     }
     check()?;
+    let mut steps = vec![
+        PlanStep {
+            action: "copy".into(),
+            detail: format!(
+                "copy {packets} unchanged AAC packets, {bytes} payload bytes; {} Hz, {} channels",
+                config.sample_rate, config.channels
+            ),
+        },
+        PlanStep {
+            action: "mux".into(),
+            detail: "write Matroska AAC track with AudioSpecificConfig and nanosecond packet timestamps".into(),
+        },
+    ];
+    if !options.metadata_set.is_empty()
+        || !options.metadata_delete.is_empty()
+        || !options.stream_metadata_set.is_empty()
+        || !options.stream_metadata_delete.is_empty()
+    {
+        steps.push(PlanStep {
+            action: "metadata".into(),
+            detail: "apply Matroska container and stream 0 metadata mutations".into(),
+        });
+    }
+    steps.push(PlanStep {
+        action: "publish".into(),
+        detail: "publish completed output without overwriting; remove temporary file on error or cancellation".into(),
+    });
     Ok(MediaPlan {
-        command: "remux".into(), input: source.into(), inputs: vec![source.into()],
-        streams: vec![PlanStream { index: 0, media_type: "audio".into(), codec: "aac".into(), disposition: "copy".into() }],
-        steps: vec![
-            PlanStep { action: "copy".into(), detail: format!("copy {packets} unchanged AAC packets, {bytes} payload bytes; {} Hz, {} channels", config.sample_rate, config.channels) },
-            PlanStep { action: "mux".into(), detail: "write Matroska AAC track with AudioSpecificConfig and nanosecond packet timestamps".into() },
-            PlanStep { action: "publish".into(), detail: "publish completed output without overwriting; remove temporary file on error or cancellation".into() },
-        ], graph: None,
-        notes: vec!["backend: owned ADTS/Matroska; no external demuxer or muxer".into(), "output must be .mkv or .mka; destination and publication checked during execution".into(), "unedited all-track request; packet byte limit counts AAC payload, excluding ADTS headers".into()],
+        command: "remux".into(),
+        input: source.into(),
+        inputs: vec![source.into()],
+        streams: vec![PlanStream {
+            index: 0,
+            media_type: "audio".into(),
+            codec: "aac".into(),
+            disposition: "copy".into(),
+        }],
+        steps,
+        graph: None,
+        notes: vec![
+            "backend: owned ADTS/Matroska; no external demuxer or muxer".into(),
+            "output must be .mkv or .mka; destination and publication checked during execution".into(),
+            "unedited all-track request; packet byte limit counts AAC payload, excluding ADTS headers".into(),
+        ],
     })
 }

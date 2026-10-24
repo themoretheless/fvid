@@ -51,6 +51,10 @@ pub(crate) fn supports(
         Ok(value) => value,
         Err(error) => return error.starts_with("controlled memory budget exceeded:"),
     };
+    let mask = match channel_mask(source, options) {
+        Ok(value) => value,
+        Err(error) => return error.starts_with("controlled memory budget exceeded:"),
+    };
     let mut probe = decode_options(options);
     probe.progress = None;
     let result = crate::owned_matroska_flac::decode_matroska_flac_pcm(
@@ -64,7 +68,15 @@ pub(crate) fn supports(
     );
     result.is_ok_and(|stats| {
         transform.channels.is_none_or(|channels| {
-            channels == i32::from(stats.channels) || (1..=8).contains(&channels)
+            channels == i32::from(stats.channels)
+                || (((stats.channels <= 2 && (1..=8).contains(&channels))
+                    || (stats.channels <= 8 && matches!(channels, 1 | 2)))
+                    && ((stats.channels <= 2 && mask == 0)
+                        || (mask != 0
+                            && crate::owned_pcm_channels::rematrix_layout_supported(
+                                stats.channels,
+                                mask,
+                            ))))
         })
     })
 }
@@ -83,6 +95,7 @@ pub(crate) fn apply(
     crate::owned_budget::check_rss_budget(options)?;
     let (rate, channels) = geometry(source, options)?;
     let mask = channel_mask(source, options)?;
+    let info = crate::owned_wave_metadata::matroska_source_info(source, options)?;
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,
@@ -98,6 +111,7 @@ pub(crate) fn apply(
             .map_err(|e| e.to_string())
         },
     )?;
+    crate::owned_ogg_opus_export::append_info(&spool.wave, &info)?;
     crate::owned_adts_export::export_spool(spool, destination, transform, options)
 }
 

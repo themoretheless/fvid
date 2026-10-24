@@ -609,7 +609,7 @@ fn process_frame_with_overlay(
         format!("{base}{}le", depth)
     };
     let pixels = if let Some(spec) = spec {
-        if pts_ns < 0 || format != PixelFormat::Yuv420 || depth != 8 {
+        if pts_ns < 0 || monochrome || transform.shuffleplanes.is_some() {
             return Ok(None);
         }
         let mut pixels = crate::owned_y4m_decode::transform_frame_geometry_requested(
@@ -617,10 +617,10 @@ fn process_frame_with_overlay(
             &frame.data,
             transform,
         )?;
-        let mut presented = header.clone();
-        presented.width = width;
-        presented.height = height;
+        let mut presented =
+            crate::owned_y4m_decode::presented_header_after_geometry(&header, transform)?;
         // The scheduler's index represents nanoseconds, rather than frame ordinals.
+        presented.tokens.retain(|t| !t.starts_with('F'));
         presented.tokens.push("F1000000000:1".into());
         if overlay.is_none() {
             *overlay = match crate::owned_y4m_overlay::OverlayReader::open(&presented, spec) {

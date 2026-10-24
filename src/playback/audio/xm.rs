@@ -124,6 +124,13 @@ impl AudioStream for XmAudioReader {
     }
 
     fn present_decoded(&self, packet: crate::audio::AudioPacket, source_pts: i64) -> Result<Option<crate::audio::AudioPacket>> {
+        if source_pts < 0 {
+            return Err(invalid("negative XM decoded packet timestamp"));
+        }
+        let stride = usize::from(CHANNELS) * 4;
+        if !packet.data.len().is_multiple_of(stride) {
+            return Err(invalid("XM decoded packet has incomplete channel frame"));
+        }
         // Compare source ticks, not XM's rounded PCM sample timestamps.
         Ok((source_pts >= self.presentation_floor).then_some(packet))
     }

@@ -208,6 +208,15 @@ pub(crate) fn measure_for_normalization(
                     f64::from_le_bytes(sample.try_into().unwrap())
                 }
             } else {
+                if input.info.valid_bits < input.info.bits_per_sample {
+                    let mut packed = [0u8; 4];
+                    packed[..width].copy_from_slice(sample);
+                    let padding_mask =
+                        (1u32 << (input.info.bits_per_sample - input.info.valid_bits)) - 1;
+                    if u32::from_le_bytes(packed) & padding_mask != 0 {
+                        return Err("nonzero PCM padding bits".into());
+                    }
+                }
                 use crate::owned_pcm_integer::Format;
                 match width {
                     1 => Format::U8.decode(sample)?,

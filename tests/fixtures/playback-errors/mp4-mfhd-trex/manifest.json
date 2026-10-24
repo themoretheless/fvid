@@ -1,0 +1,56 @@
+{
+  "provenance": "Pure Python authored 16x16 neutral VP9 fMP4, 3 independent 20ms frames at 50Hz. Probes ISO/IEC 14496-12:2015 8.8.3 (trex track_ID > 0 and uniqueness per track) and 8.8.4/8.8.5 (mandatory singleton mfhd in moof with 8-byte payload and non-zero sequence_number). No private codec parameters, encoder, FFmpeg, or network.",
+  "controls": [
+    {
+      "file": "valid-single-fragment.mp4",
+      "mode": "single-trex-single-mfhd"
+    },
+    {
+      "file": "valid-three-fragments.mp4",
+      "mode": "three-sequential-mfhd-fragments"
+    },
+    {
+      "file": "valid-multi-track-trex.mp4",
+      "mode": "distinct-track-trex-entries"
+    }
+  ],
+  "cases": [
+    {
+      "file": "missing-mfhd.mp4",
+      "expected_error": "missing MP4 mfhd box"
+    },
+    {
+      "file": "duplicate-mfhd.mp4",
+      "expected_error": "duplicate MP4 singleton box"
+    },
+    {
+      "file": "mfhd-zero-sequence.mp4",
+      "expected_error": "zero MP4 movie-fragment sequence number"
+    },
+    {
+      "file": "mfhd-trailing-bytes.mp4",
+      "expected_error": "MP4 movie-fragment header size does not match its fields"
+    },
+    {
+      "file": "trex-zero-track-id.mp4",
+      "expected_error": "zero MP4 track-extends track ID"
+    },
+    {
+      "file": "duplicate-trex-track-id.mp4",
+      "expected_error": "duplicate MP4 track-extends track ID"
+    }
+  ],
+  "sha256": {
+    "regular.mp4": "e98393bb08dedd0b6f34eb73546111d11686b6f2daffa7cb83828e9d62ff27cb",
+    "frame.vp9": "217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c",
+    "valid-single-fragment.mp4": "bdd2cf1d37cf31c47fa0e2bb1f16a9f695fea438e71fd2f228e3b7ca62aff94a",
+    "valid-three-fragments.mp4": "b311ad178ade0dac0bdec23536bba9e65a87301cf0c753ad249f4125c2e26040",
+    "valid-multi-track-trex.mp4": "3ce80b8dd3afdc4b640c637d72a6b490163828671b8f855d41a91d38ee6a27f8",
+    "missing-mfhd.mp4": "bbc62052b361e3cfbf2ec60ddabf3366fae5089497c83402e9e7a453903e1f9d",
+    "duplicate-mfhd.mp4": "ed75a79cd66d1152f9c5227db5b63412a1baf30a99fd72fdb93d94ac2b827dca",
+    "mfhd-zero-sequence.mp4": "46d379dc788a37c84df893435af91b97d10618d3107d1595fd2035c7fbf090a8",
+    "mfhd-trailing-bytes.mp4": "6036c5afa8bb90d3d03545029131b9d722ef11f86f7594cbb3caf3263ada272c",
+    "trex-zero-track-id.mp4": "55b1428e28a9de1b708d49e09b4de72792fe914fba7a60b04e1ecdee261ef840",
+    "duplicate-trex-track-id.mp4": "1200e0d8c8eb0d7d5be8a50911960a0756909a4c5005bba28a0677cf9d084e24"
+  }
+}

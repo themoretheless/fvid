@@ -1,0 +1,46 @@
+{
+  "batch": 198,
+  "ids": ["FVID-0205"],
+  "title": "Emit filter steps for all 48 supported lossless pixel filters and framestep, reject unimplemented zscale in native_lossless::supports, and account for geometry.rotate in transformed_aspect and RotateAngle::size",
+  "scope": [
+    "src/native_plan.rs",
+    "src/native_lossless.rs",
+    "src/native_export.rs",
+    "crates/fvid-media-info/src/video.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/lossless-plan/source-8x4.y4m"
+  ],
+  "generators": [
+    "scripts/generate_lossless_plan_regressions.py",
+    "scripts/test_lossless_plan_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/evidence/batch-198-native-plan-before.rs",
+      "docs/improvements/evidence/batch-198-native-lossless-before.rs",
+      "docs/improvements/evidence/batch-198-native-export-before.rs",
+      "docs/improvements/evidence/batch-198-video-before.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-198-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-198-acceptance-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --features player --test lossless_plan_regressions",
+      "passed": 3,
+      "failed": 0
+    },
+    "unit_tests": {
+      "command": "cargo test -p fvid-media-info --lib",
+      "passed": 3,
+      "failed": 0
+    },
+    "fixture_generator_tests": {
+      "command": "python3 -m unittest discover -s scripts -p 'test_lossless_plan_regressions.py' -v",
+      "passed": 2,
+      "failed": 0
+    }
+  },
+  "status": "accepted"
+}

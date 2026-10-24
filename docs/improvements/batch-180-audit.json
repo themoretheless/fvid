@@ -1,0 +1,20 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0187",
+  "source": "src/container/mp4.rs",
+  "source_sha256": "756ae9d0643cc32fcc6b59255ebd17b3ebee111dc89f91337830aecd36527ed8",
+  "before_snapshot": "evidence/batch-180-mp4-before.rs",
+  "problem": "MP4/MOV edit list (edts/elst) parsing in src/container/mp4.rs and crates/fvid-media/src/owned_mp4_impl.rs silently accepted empty elst boxes (entry_count == 0) and zero-duration edit entries (segment_duration == 0), AudioTimeline::new in crates/fvid-media/src/owned_mp4_audio_schedule_impl.rs accepted zero-duration audio edits producing degenerate 0-sample timelines, and map_edits in crates/fvid-media/src/owned_video_timeline.rs skipped leading empty edits (media_time == -1) without checking whether any media edit remained, returning Ok(vec![]) on blank-only edit lists so NativeReader and decode_video silently ignored the edit list and played the entire unedited video track.",
+  "primary_reference": "https://www.iso.org/standard/68960.html",
+  "reference_provenance": "ISO/IEC 14496-12:2015, 8.6.5 (EditBox 'edts') and 8.6.6 (EditListBox 'elst': non-empty entry table when elst is present, positive segment_duration entries, and media_time == -1 empty-edit semantics).",
+  "fixtures": "tests/fixtures/playback-errors/mp4-elst-validation",
+  "scope": "Reject empty elst boxes (entry_count == 0) and zero-duration elst entries (segment_duration == 0) in both MP4 parsers, reject zero-duration audio edits in AudioTimeline::new, and reject blank-only video edit lists in owned_video_timeline::map_edits while preserving valid leading-delay and single/multi-segment v0/v1 edit lists.",
+  "requirements": [
+    "Reproduce pre-fix acceptance of empty elst boxes, zero-duration elst entries, zero-duration AudioTimeline edits, and blank-only video edit lists playing unedited frames before editing production code.",
+    "Reject entry_count == 0 and duration == 0 in parse_track across src/container/mp4.rs and crates/fvid-media/src/owned_mp4_impl.rs, reject edit.duration == 0 in AudioTimeline::new, and reject blank-only edit lists in owned_video_timeline::map_edits.",
+    "Verify that valid v0 and v1 edit lists (including leading empty delay + media edit and single-segment trim) preserve exact video frame counts, probe_mp4 durations, seek/rewind, and analytical AAC-LC float32 PCM.",
+    "Run focused, related MP4/AAC, unit, minimal-configuration, fixture unittest, and player build gates."
+  ],
+  "implementation_plan": "Validate count > 0 and duration > 0 in elst parsing in src/container/mp4.rs and crates/fvid-media/src/owned_mp4_impl.rs, check edit.duration > 0 in crates/fvid-media/src/owned_mp4_audio_schedule_impl.rs, and reject had_edits && mapped.is_empty() in crates/fvid-media/src/owned_video_timeline.rs.",
+  "counting": "One MP4/MOV elst edit-list validation and blank-only edit refusal fix across container and timeline layers (FVID-0187). No extra IDs for individual fixture variants or controls."
+}

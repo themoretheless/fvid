@@ -1,0 +1,75 @@
+{
+  "batch": 201,
+  "ids": ["FVID-0208"],
+  "title": "Enforce WAVE non-zero PCM padding bit rejection across owned audio export, loudness, and loudnorm, add G.711 WAVE and Ogg Opus/Vorbis/Joint support to owned_audio_plan and owned_audio_mix, and enforce rematrix speaker-mask and controlled-budget admission in Ogg Vorbis/Joint and bare FLAC/MP3 exporters",
+  "scope": [
+    "crates/fvid-media/src/owned_audio_mix.rs",
+    "crates/fvid-media/src/owned_wave_loudness.rs",
+    "crates/fvid-media/src/owned_audio_plan.rs",
+    "crates/fvid-media/src/owned_g711_wave_export.rs",
+    "crates/fvid-media/src/owned_ogg_audio_export.rs",
+    "crates/fvid-media/src/owned_ogg_vorbis_export.rs",
+    "crates/fvid-media/src/owned_ogg_joint_export.rs",
+    "crates/fvid-media/src/owned_ogg_opus_export.rs",
+    "crates/fvid-media/src/owned_raw_flac.rs",
+    "crates/fvid-media/src/owned_raw_mp3.rs",
+    "crates/fvid-media/src/owned_audio_export.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/wave-ogg-flac-plan/wave-24in32-valid.wav",
+    "tests/fixtures/playback-errors/wave-ogg-flac-plan/wave-24in32-nonzero-padding.wav",
+    "tests/fixtures/playback-errors/wave-ogg-flac-plan/g711-alaw-48k-mono.wav",
+    "tests/fixtures/playback-errors/wave-ogg-flac-plan/g711-mulaw-48k-mono.wav",
+    "tests/fixtures/playback-errors/wave-ogg-flac-plan/g711-alaw-empty.wav",
+    "tests/fixtures/playback-errors/wave-ogg-flac-plan/ogg-opus-stereo.ogg",
+    "tests/fixtures/playback-errors/wave-ogg-flac-plan/ogg-vorbis-stereo.ogg",
+    "tests/fixtures/playback-errors/wave-ogg-flac-plan/ogg-joint-vorbis-opus.ogg",
+    "tests/fixtures/playback-errors/wave-ogg-flac-plan/ogg-vorbis-chained-5ch-0x37.ogg",
+    "tests/fixtures/playback-errors/wave-ogg-flac-plan/ogg-joint-chained-5ch-0x37.ogg",
+    "tests/fixtures/playback-errors/wave-ogg-flac-plan/ogg-vorbis-chained-8ch-0x73f.ogg",
+    "tests/fixtures/playback-errors/wave-ogg-flac-plan/ogg-joint-chained-8ch-0x73f.ogg",
+    "tests/fixtures/playback-errors/wave-ogg-flac-plan/flac-4ch-quad.flac",
+    "tests/fixtures/playback-errors/wave-ogg-flac-plan/flac-4ch-unassigned.flac",
+    "tests/fixtures/playback-errors/wave-ogg-flac-plan/raw-stereo.mp3",
+    "tests/fixtures/playback-errors/wave-ogg-flac-plan/video.mkv",
+    "tests/fixtures/playback-errors/wave-ogg-flac-plan/manifest.json"
+  ],
+  "generators": [
+    "scripts/generate_wave_ogg_flac_plan_regressions.py",
+    "scripts/test_wave_ogg_flac_plan_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/evidence/batch-201-owned-audio-export-before.rs",
+      "docs/improvements/evidence/batch-201-owned-audio-mix-before.rs",
+      "docs/improvements/evidence/batch-201-owned-audio-plan-before.rs",
+      "docs/improvements/evidence/batch-201-owned-wave-loudness-before.rs",
+      "docs/improvements/evidence/batch-201-owned-ogg-vorbis-export-before.rs",
+      "docs/improvements/evidence/batch-201-owned-ogg-joint-export-before.rs",
+      "docs/improvements/evidence/batch-201-owned-g711-wave-export-before.rs",
+      "docs/improvements/evidence/batch-201-owned-raw-flac-before.rs",
+      "docs/improvements/evidence/batch-201-owned-raw-mp3-before.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-201-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-201-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-201-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test wave_ogg_flac_plan_regressions",
+      "passed": 4,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test -p fvid-media integer_tests::raw_flac_mp3_and_ogg_supports_validate_budget_and_rematrix_layouts && cargo test --features player --test ogg_codec_chains --test flac_streaminfo_regressions --test container_loudness_plan_regressions",
+      "passed": 9,
+      "failed": 0
+    },
+    "fixture_generator_tests": {
+      "command": "python3 scripts/test_wave_ogg_flac_plan_regressions.py",
+      "passed": 2,
+      "failed": 0
+    }
+  },
+  "status": "accepted"
+}

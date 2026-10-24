@@ -1,0 +1,53 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0201"
+  ],
+  "checked_at": "2026-10-22T08:43:30+00:00",
+  "sources": [
+    "src/color/lut.rs",
+    "src/color/hdr.rs"
+  ],
+  "regressions": [
+    "tests/color_lut_regressions.rs"
+  ],
+  "before": [
+    "evidence/batch-194-lut-before.rs",
+    "evidence/batch-194-hdr-before.rs",
+    "evidence/batch-194-tests-before.rs",
+    "evidence/batch-194-before.log",
+    "evidence/batch-194-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-194-after.log",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-194-color-lib-units.log",
+      "passed": 69
+    },
+    {
+      "log": "evidence/batch-194-codecs-color-units.log",
+      "passed": 68
+    },
+    {
+      "log": "evidence/batch-194-fixtures-after.log",
+      "passed": 5
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/color/lut.rs": "f7598e5d7efe21b6fffaac3be28557868c87b3d8df39ad801fc2cec1f90bcadd",
+    "/Users/themoretheless/Documents/Sources/fvid/src/color/hdr.rs": "1963fc3b01f3bb2c46c8cafcd4ee73d35c696332a6d47436378be71811042022",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/color_lut_regressions.rs": "4d2874efcfec6b3de98ea00cb4035aba5f2d5d585711f3cca226a4c9d2ee1872",
+    "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_color_lut_regressions.py": "dc34a5207f7a1ead32762f0d96df753e8eb3e5ba382058e51ff2a7e9a17e8daf"
+  },
+  "qualification": [
+    "Pre-fix Lut::from_3dl accepted non-finite (`NaN`/`inf`) node and mesh values because `f32::NAN.clamp(0.0, 1.0)` returns `NaN`; Lut::from_cube and Lut::from_spi1d accepted non-finite or inverted/degenerate input domains (`DOMAIN_MIN >= DOMAIN_MAX`, `LUT_1D/3D_INPUT_RANGE`, `From`); Lut::is_identity for Lut::One probed only 17 grey steps instead of checking every 1D table entry against its domain, causing Grade::is_identity and Grade::apply to skip 1D LUTs with changes between the 17 probe points; and MasteringDisplay::from_corners / from_payload accepted zero or collinear chromaticity coordinates (`y == 0.0`, `x + y > 1.0`, or collinear R/G/B corners such as an all-zero 24-byte placeholder MDCV payload) and `max_luminance == 0.0` or `min_luminance > max_luminance`, poisoning Primaries::rgb_to_xyz and Grade::new with NaN.",
+    "Updating src/color/lut.rs and src/color/hdr.rs requires finite `.3dl` node/mesh values, enforces finite `min < max` input domains in `.cube` and `.spi1d`, checks every entry of all three channels in `Lut::is_identity` for `Lut::One`, and validates positive CIE `y`, `x + y <= 1.0`, non-collinear primaries (`rgb_to_xyz`/`xyz_to_rgb` finite), and `0.0 <= min_luminance <= max_luminance` (`max_luminance > 0.0`) in `MasteringDisplay::from_corners`.",
+    "Synthetic fixtures in tests/fixtures/playback-errors/color/ verify `.3dl` NaN rejection, `.cube` and `.spi1d` inverted/NaN domain rejection, 1D LUT full-entry identity checking in `Grade::apply`, and placeholder/collinear MDCV rejection with clean HDR10 Grade fallback.",
+    "4 focused integration tests, 69 root color unit tests, 68 fvid-codecs color unit tests, and 5 offline Python fixture unit tests pass.",
+    "Adobe/Resolve `.cube`, Autodesk `.3dl`, Sony Pictures Imageworks `.spi1d`, and SMPTE ST 2086 / CIE 1931 chromaticity domain invariants govern these checks. All fixtures are pure synthetic offline files requiring neither FFmpeg nor network access."
+  ],
+  "counting": "One colour LUT & HDR mastering display validation fix across src/color/lut.rs and src/color/hdr.rs (FVID-0201). No extra IDs for individual fixture cases."
+}

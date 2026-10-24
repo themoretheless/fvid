@@ -1,0 +1,21 @@
+     Running tests/audio_mix_merge_concat_metadata_regressions.rs
+running 1 test
+test mix_merge_and_matroska_concat_support_container_and_stream_metadata_and_stream_selection ... ok
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+     Running tests/audio_wave_metadata_mix_controls_regressions.rs
+running 1 test
+test audio_decode_trim_metadata_edits_and_mix_merge_controls_work_in_api_and_cli ... ok
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+     Running tests/loudnorm_budget_mix_concat_regressions.rs
+running 3 tests
+test sample_domain_audio_concat_supports_owned_audio_formats_to_matroska ... ok
+test mix_and_merge_audio_support_matroska_and_wave_outputs_across_owned_formats ... ok
+test native_loudnorm_and_cli_honor_max_controlled_bytes_across_adts_mp4_and_matroska ... ok
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.44s
+
+     Running tests/mp4_matroska_remux_rss_regressions.rs
+running 1 test
+test mp4_matroska_and_adts_remux_support_metadata_streams_and_rss_budgets_in_api_and_cli ... ok
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s

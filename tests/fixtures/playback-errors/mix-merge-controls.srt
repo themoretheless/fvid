@@ -1,0 +1,7 @@
+1
+00:00:00,000 --> 00:00:00,500
+First synthetic subtitle cue
+
+2
+00:00:00,500 --> 00:00:01,000
+Second synthetic subtitle cue

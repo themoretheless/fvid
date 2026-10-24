@@ -1,0 +1,20 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0181",
+  "source": "src/container/mp4.rs",
+  "source_sha256": "f50da4557c864deaeb06200cf92892accba5fdea3694f609ee5d3ea4c2ae636e",
+  "before_snapshot": "evidence/batch-174-mp4-before.rs",
+  "problem": "Fragmented MP4 trex, tfhd, and tfdt parsers do not verify that their box payload length matches the exact fields declared by their version/flags (unlike trun), silently ignoring undeclared trailing fields in trex (>24 bytes), tfhd (missing at += 4 after 0x00_0020 and no at == header.len() check), and tfdt (v0 != 8 bytes or v1 != 12 bytes).",
+  "primary_reference": "https://b.goeswhere.com/ISO_IEC_14496-12_2015a.pdf",
+  "reference_provenance": "ISO/IEC 14496-12:2015, 8.8.3 (TrackExtendsBox), 8.8.7 (TrackFragmentHeaderBox), and 8.8.12 (TrackFragmentBaseMediaDecodeTimeBox) define fixed/flag-conditioned FullBox payloads with no extensible trailing fields.",
+  "fixtures": "tests/fixtures/playback-errors/mp4-tfhd-defaults",
+  "scope": "Pure owned 3-frame 16x16 VP9 fMP4 at 50 Hz. Controls cover regular MP4, tfhd sync override over trex non-sync, tfhd non-sync override over trex sync with first_sample_flags lead sync, and 64-bit tfdt v1 exact header. Malformed cases cover overlong trex (28 bytes), overlong tfhd with/without 0x00_0020, and overlong tfdt v0 (12 bytes) / v1 (16 bytes).",
+  "requirements": [
+    "Reproduce pre-fix silent acceptance of overlong trex, tfhd, and tfdt boxes before editing production code.",
+    "Require exact payload lengths for trex (24 bytes), tfhd (exact match with flag-selected fields), and tfdt (8 bytes for v0, 12 bytes for v1), refusing mismatches as Error::Invalid.",
+    "Preserve exact packets, sync flags, clocks, budgets, analytic VP9 planes/RGB, 32 public clamped seek targets, rewind, and repeated EOF across all healthy controls.",
+    "Run focused, related MP4/HLS/VP9, unit, minimal-configuration, fixture unittest, and player build gates."
+  ],
+  "implementation_plan": "Enforce trex.data.len() == 24 in fragment_defaults, advance at += 4 on tfhd flag 0x00_0020 and require at == header.len(), and require stamp.len() == 8 (v0) or 12 (v1) in tfdt.",
+  "counting": "One fragmented MP4 trex/tfhd/tfdt box-extent validation fix (FVID-0181). No extra IDs for individual box variants, controls, or fixture generator."
+}

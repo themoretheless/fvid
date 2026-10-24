@@ -924,15 +924,28 @@ impl<R: Read + Seek> WebmAudioReader<R> {
             .clamp(i128::from(i64::MIN), i128::from(i64::MAX)) as i64;
         let _ = self.demuxer.scan_until(source_target);
         let mut best: Option<(usize, i64)> = None;
-        for (i, packet) in self.demuxer.packets.iter().enumerate() {
-            if packet.track != self.track_number { continue; }
-            let Ok(at) = i64::try_from(i128::from(packet.pts_ns) - i128::from(delay)) else { continue; };
-            if at > pts_ns { continue; }
-            if best.is_none_or(|(_, previous)| at >= previous) {
-                best = Some((i, at));
+        let mut first_on_track: Option<(usize, i64)> = None;
+        loop {
+            for (i, packet) in self.demuxer.packets.iter().enumerate() {
+                if packet.track != self.track_number { continue; }
+                let Ok(at) = i64::try_from(i128::from(packet.pts_ns) - i128::from(delay)) else { continue; };
+                if first_on_track.is_none() {
+                    first_on_track = Some((i, at));
+                }
+                if at > pts_ns { continue; }
+                if best.is_none_or(|(_, previous)| at > previous) {
+                    best = Some((i, at));
+                }
+            }
+            if best.is_some() || first_on_track.is_some() {
+                break;
+            }
+            let Ok(more) = self.demuxer.scan_more() else { break; };
+            if !more {
+                break;
             }
         }
-        let (index, landed) = best.unwrap_or((0, 0));
+        let (index, landed) = best.or(first_on_track).unwrap_or((0, 0));
         self.packet_index = index;
         landed
     }
@@ -1528,7 +1541,9 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
         if self.codec_tag!="A_FLAC" {return Ok(None);}
         let track=self.demuxer.tracks.iter().find(|t|t.number==self.track_number).ok_or_else(||invalid("selected FLAC track is absent"))?;
         let mask=fvid_media::owned_flac_layout::channel_mask(&track.codec_private).map_err(|e|invalid(&e.to_string()))?;
-        Ok(Some(mask.unwrap_or_else(||fvid_media::owned_flac_layout::default_channel_mask(self.channels()))))
+        let mask=mask.unwrap_or_else(||fvid_media::owned_flac_layout::default_channel_mask(self.channels()));
+        if mask.count_ones()>u32::from(self.channels()) {return Err(invalid("FLAC channel mask exceeds stream channel count"));}
+        Ok(Some(mask))
     }
     fn codec(&self) -> &str {
         &self.codec_tag

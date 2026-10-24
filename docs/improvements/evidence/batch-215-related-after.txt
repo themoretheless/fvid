@@ -1,0 +1,465 @@
+warning: unreachable pattern
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+492 | ...   _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |       ^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+482 | ...             merge_order::Selection::Initial(i)=>{
+    |                 ---------------------------------- matches some of the same values
+...
+486 | ...             merge_order::Selection::ViewSynthesis=>return Ok(Resolv...
+    |                 ------------------------------------- matches some of the same values
+487 | ...             merge_order::Selection::Texture=>return Ok(Resolved::Te...
+    |                 ------------------------------- matches some of the same values
+488 | ...             merge_order::Selection::InterView=>{selected_iv=1;(spec...
+    |                 --------------------------------- matches some of the same values
+...
+492 | ...             _=>return Err(invalid("unexpected HEVC depth IV merge s...
+    |                 ^ ...and 3 other patterns collectively make this unreachable
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `intra_plane` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/avc_deblock.rs:184:15
+    |
+184 | pub(super) fn intra_plane(
+    |               ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `read_inter_coefficients_422` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_inter_coefficients.rs:34:15
+   |
+34 | pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,patter...
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `candidates` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_mv.rs:78:4
+   |
+78 | fn candidates(n: Neighbours) -> Result<[Neighbour; 3]> {
+   |    ^^^^^^^^^^
+
+warning: function `inverse2` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:190:4
+    |
+190 | fn inverse2(input: &[i32], output: &mut [i32]) {
+    |    ^^^^^^^^
+
+warning: function `inverse4` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:218:15
+    |
+218 | inverse_size!(inverse4, inverse2, 4);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse8` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:219:15
+    |
+219 | inverse_size!(inverse8, inverse4, 8);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse16` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:220:15
+    |
+220 | inverse_size!(inverse16, inverse8, 16);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse32` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:221:15
+    |
+221 | inverse_size!(inverse32, inverse16, 32);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: enum `RunKind` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:420:17
+    |
+420 | pub(crate) enum RunKind {
+    |                 ^^^^^^^
+
+warning: struct `Run` is never constructed
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:425:19
+    |
+425 | pub(crate) struct Run {
+    |                   ^^^
+
+warning: function `expand_runs` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:431:15
+    |
+431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run])...
+    |               ^^^^^^^^^^^
+
+warning: associated function `new` is never used
+  --> crates/fvid-cuda/src/nvenc_session.rs:63:19
+   |
+62 | impl FunctionTable {
+   | ------------------ associated function in this implementation
+63 |     pub(crate) fn new() -> Self {
+   |                   ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `validate_surface` is never used
+   --> crates/fvid-cuda/src/nvenc_session.rs:950:4
+    |
+950 | fn validate_surface(
+    |    ^^^^^^^^^^^^^^^^
+
+warning: associated function `unpack` is never used
+ --> crates/fvid-cuda/src/nvenc.rs:9:8
+  |
+8 | impl NvencVersion {
+  | ----------------- associated function in this implementation
+9 |     fn unpack(value: u32) -> Result<Self, String> {
+  |        ^^^^^^
+
+warning: function `query_result` is never used
+   --> crates/fvid-cuda/src/nvenc.rs:116:4
+    |
+116 | fn query_result(status: i32, packed: u32) -> Result<NvencVersion, String> {
+    |    ^^^^^^^^^^^^
+
+warning: field `sample_bytes` is never read
+  --> crates/fvid-cuda/src/nv12_buffer.rs:36:5
+   |
+31 | pub struct Nv12Buffer {
+   |            ---------- field in this struct
+...
+36 |     sample_bytes: u32,
+   |     ^^^^^^^^^^^^
+
+warning: function `layout` is never used
+   --> crates/fvid-cuda/src/nv12_buffer.rs:299:4
+    |
+299 | fn layout(width: u32, height: u32) -> Result<(u32, usize), String> {
+    |    ^^^^^^
+
+warning: function `make_view` is never used
+   --> crates/fvid-cuda/src/nv12_buffer.rs:323:4
+    |
+323 | fn make_view(pointer: u64, width: u32, height: u32, pitch: u32) -> Result<Nv12View, String> {
+    |    ^^^^^^^^^
+
+warning: function `make_view_format` is never used
+   --> crates/fvid-cuda/src/nv12_buffer.rs:326:4
+    |
+326 | fn make_view_format(
+    |    ^^^^^^^^^^^^^^^^
+
+warning: `fvid-codecs` (lib) generated 12 warnings
+warning: `fvid-cuda` (lib) generated 8 warnings
+warning: variable does not need to be mutable
+   --> crates/fvid-media/src/owned_xfade.rs:327:5
+    |
+327 |     mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
+    |     ----^^^^^
+    |     |
+    |     help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `encode` is never used
+   --> crates/fvid-media/src/owned_y4m_impl.rs:212:8
+    |
+ 31 | impl Header {
+    | ----------- method in this implementation
+...
+212 |     fn encode(&self, width: usize, height: usize) -> String {
+    |        ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `apply_pixel_filters` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:502:15
+    |
+502 | pub(crate) fn apply_pixel_filters(
+    |               ^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:509:15
+    |
+509 | pub(crate) fn apply_pixel_filters_cached(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached_at` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:518:15
+    |
+518 | pub(crate) fn apply_pixel_filters_cached_at(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `esds_for_mp4` is never used
+   --> crates/fvid-media/src/owned_aac/adts_impl.rs:334:15
+    |
+334 | pub(crate) fn esds_for_mp4(asc: &[u8]) -> Option<Vec<u8>> {
+    |               ^^^^^^^^^^^^
+
+warning: method `read_short` is never used
+  --> crates/fvid-media/src/owned_aac/bits_impl.rs:42:19
+   |
+ 7 | impl<'a> BitReader<'a> {
+   | ---------------------- method in this implementation
+...
+42 |     pub(crate) fn read_short(&mut self, count: u8) -> Result<u16> {
+   |                   ^^^^^^^^^^
+
+warning: associated function `identifiers` is never used
+   --> crates/fvid-media/src/owned_avc_impl.rs:509:19
+    |
+495 | impl Pps {
+    | -------- associated function in this implementation
+...
+509 |     pub(crate) fn identifiers(nal: &[u8]) -> Result<(u32, u32)> {
+    |                   ^^^^^^^^^^^
+
+warning: function `try_mp4_as` is never used
+  --> crates/fvid-media/src/owned_probe.rs:65:15
+   |
+65 | pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Op...
+   |               ^^^^^^^^^^
+
+warning: function `try_webm_as` is never used
+  --> crates/fvid-media/src/owned_probe.rs:86:15
+   |
+86 | pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<O...
+   |               ^^^^^^^^^^^
+
+warning: function `try_adts_as` is never used
+   --> crates/fvid-media/src/owned_probe.rs:106:15
+    |
+106 | pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<...
+    |               ^^^^^^^^^^^
+
+warning: function `supports_concat` is never used
+  --> crates/fvid-media/src/owned_wave_remux.rs:97:15
+   |
+97 | pub(crate) fn supports_concat(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_loudness.rs:48:15
+   |
+48 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_loudnorm.rs:14:15
+   |
+14 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: method `nul_name` is never used
+  --> crates/fvid-media/src/owned_pixel_format.rs:9:27
+   |
+ 6 |           impl PixelFormat {
+   |           ---------------- method in this implementation
+...
+ 9 |               pub(crate) fn nul_name(self) -> &'static [u8] { match self...
+   |                             ^^^^^^^^
+...
+16 | / formats! {
+17 | |     Yuv420p, "yuv420p", Some((1, 1)), 1;
+18 | |     Yuv422p, "yuv422p", Some((1, 0)), 1;
+19 | |     Yuv444p, "yuv444p", Some((0, 0)), 1;
+...  |
+58 | |     Gray16Be, "gray16be", None, 2;
+59 | | }
+   | |_- in this macro invocation
+   |
+   = note: this warning originates in the macro `formats` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `aac_packet_plan` is never used
+  --> crates/fvid-media/src/owned_mp4_aac_plan_impl.rs:34:15
+   |
+34 | pub(crate) fn aac_packet_plan(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `inspect` is never used
+ --> crates/fvid-media/src/owned_matroska_copy_impl.rs:8:15
+  |
+8 | pub(crate) fn inspect<R: Read + Seek>(
+  |               ^^^^^^^
+
+warning: function `geometry` is never used
+  --> crates/fvid-media/src/owned_raw_flac.rs:78:15
+   |
+78 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(...
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_alac_export.rs:103:15
+    |
+103 | pub(crate) fn geometry(source:&Path,options:&CopyOptions)->Result<(u32,...
+    |               ^^^^^^^^
+
+warning: method `convert` is never used
+   --> crates/fvid-media/src/owned_pcm_decoder_impl.rs:139:8
+    |
+ 79 | impl PcmDecoder {
+    | --------------- method in this implementation
+...
+139 |     fn convert(&self, data: &[u8]) -> Result<Vec<u8>> {
+    |        ^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_container_loudness.rs:102:15
+    |
+102 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_container_loudnorm.rs:14:15
+   |
+14 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `pack_bgra` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:8786:15
+     |
+8786 | pub(crate) fn pack_bgra(
+     |               ^^^^^^^^^
+
+warning: function `take_aligned` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:9498:15
+     |
+9498 | pub(crate) fn take_aligned(
+     |               ^^^^^^^^^^^^
+
+warning: `fvid-media` (lib) generated 24 warnings (run `cargo fix --lib -p fvid-media` to apply 1 suggestion)
+warning: methods `fill_final` and `has_pending_output` are never used
+   --> src/audio.rs:263:19
+    |
+201 | impl Stretch {
+    | ------------ methods in this implementation
+...
+263 |     pub(crate) fn fill_final(&mut self, base: usize, input: &[f32], end...
+    |                   ^^^^^^^^^^
+...
+266 |     pub(crate) fn has_pending_output(&self) -> bool { self.taken < STRE...
+    |                   ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `iter` is never used
+  --> src/codec/../../crates/fvid-media/src/owned_aac/aac_ssr_metadata_impl.rs:17:19
+   |
+16 | impl<T> PacketQueue<T> {
+   | ---------------------- method in this implementation
+17 |     pub(crate) fn iter(&self) -> impl Iterator<Item = &T> {
+   |                   ^^^^
+
+warning: method `playable` is never used
+   --> src/container/xm.rs:267:19
+    |
+265 | impl Envelope {
+    | ------------- method in this implementation
+266 |     /// Bound all metadata-driven point access before rendering.
+267 |     pub(crate) fn playable(&self) -> bool {
+    |                   ^^^^^^^^
+
+warning: method `plane_data` is never used
+   --> src/playback/video/packed.rs:146:19
+    |
+ 15 | impl PackedPlanar {
+    | ----------------- method in this implementation
+...
+146 |     pub(crate) fn plane_data(&self) -> Result<[&[u8]; 3]> {
+    |                   ^^^^^^^^^^
+
+warning: `fvid` (lib) generated 4 warnings
+   Compiling fvid v0.1.0 (/Users/themoretheless/Documents/Sources/fvid)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.57s
+     Running tests/lossless_plan_regressions.rs (target/debug/deps/lossless_plan_regressions-e3ba2fc74f006735)
+
+running 3 tests
+test lossless_supports_rejects_nonempty_zscale_and_planner_records_framestep ... ok
+test lossless_planner_emits_filter_steps_for_all_supported_pixel_filters ... ok
+test rotated_and_scaled_y4m_export_computes_pixel_aspect_from_post_rotation_canvas ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/native_ffv1.rs (target/debug/deps/native_ffv1-7f348605ff4ac88c)
+
+running 7 tests
+test packed_conversion_uses_actual_chroma_axes_and_source_precision ... ok
+test packed_geometry_transforms_high_depth_without_narrowing ... ok
+test threaded_playback_and_seek_render_identical_rotated_frames ... ok
+test monochrome_fixture_playback_preserves_luma_depth_timing_and_seek ... ok
+test container_colour_rotation_and_raw_orientation_agree ... ok
+test container_raw_preserves_every_supported_depth_layout_and_odd_size ... ok
+test media_api_and_y4m_export_keep_ffv1_samples ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.34s
+
+     Running tests/native_lossless.rs (target/debug/deps/native_lossless-90ac9c07bd3fd9c8)
+
+running 14 tests
+test owned_cli_export_writes_multiple_container_tags ... ok
+test owned_temporal_cli_enforces_input_packet_limit_and_stream_selection ... ok
+test owned_temporal_cli_interval_matches_api_and_rejects_incomplete_ranges ... ok
+test temporal_cli_export_preserves_expected_frame_order_without_legacy ... ok
+test rotation_aspect_hdr_and_completion_publication_are_preserved ... ok
+test crop_lossless_cli_uses_owned_export_and_keeps_command_constraints ... ok
+test explicit_ffv1_transcode_cli_uses_owned_encoder ... ok
+test explicit_ffv1_level_one_uses_owned_source_decoders ... ok
+test edited_hevc_window_encodes_only_presented_pictures ... ok
+test cli_api_cancel_and_atomic_publication ... ok
+test spatial_export_cli_api_metadata_and_failures ... ok
+test crop_convenience_api_uses_owned_codec_and_exact_planes ... ok
+test packets_timing_metadata_and_audio_survive_transcode ... ok
+test owned_lossless_plans_show_filter_order_and_y4m_without_audio ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.37s
+
+     Running tests/native_mp4_multitrack.rs (target/debug/deps/native_mp4_multitrack-b3632753bd018362)
+
+running 6 tests
+test multitrack_source_limits_and_cancellation_never_publish_partial_output ... ok
+test invalid_mp4_track_selection_is_owned_and_never_publishes ... ok
+test copied_aac_has_identical_decoded_samples_after_video_filtering ... ok
+test interval_filter_export_preserves_sample_exact_aac_preroll_and_padding ... ok
+test owned_filter_export_keeps_every_aac_track_packet_clock_and_metadata ... ok
+test selected_mp4_tracks_keep_requested_order_audio_bytes_and_scoped_metadata ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.43s
+
+     Running tests/native_webm_lossless.rs (target/debug/deps/native_webm_lossless-97855dcc770e09b1)
+
+running 5 tests
+test admission_keeps_unsupported_audio_on_existing_path ... ok
+test stored_crop_then_rotation_then_filter_preserves_ten_bit_samples ... ok
+test rotated_source_geometry_and_filter_bake_orientation_once ... ok
+test ffv1_transcode_preserves_all_encoder_plane_layouts ... ok
+test vp9_av1_frames_and_clock_survive_owned_ffv1_export ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
+
+     Running tests/native_webm_multitrack.rs (target/debug/deps/native_webm_multitrack-e78d4110fa094529)
+
+running 2 tests
+test webm_companion_limits_cancel_and_invalid_selection_do_not_publish ... ok
+test compressed_webm_filters_copy_aac_and_opus_without_changing_their_timeline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.12s
+
+     Running tests/video_export_controls_regressions.rs (target/debug/deps/video_export_controls_regressions-12e5deb2d2070c97)
+
+running 1 test
+test reproduction_lossless_export_and_cli_controls_enforce_rss_and_packet_budgets ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/y4m_burn_xfade_controls_regressions.rs (target/debug/deps/y4m_burn_xfade_controls_regressions-2666cb899cd5e6e3)
+
+running 1 test
+test y4m_concat_trim_export_and_burn_xfade_honor_budgets_and_metadata_controls ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+

@@ -55,10 +55,10 @@ pub(crate) fn supports(
         return crate::owned_matroska_alac_export::supports(source, transform, options);
     }
     if crate::owned_raw_flac::recognizes(source).unwrap_or(false) {
-        return crate::owned_raw_flac::geometry(source,options).is_ok();
+        return crate::owned_raw_flac::supports(source, transform, options);
     }
     if crate::owned_raw_mp3::recognizes(source).unwrap_or(false) {
-        return crate::owned_raw_mp3::geometry(source, options).is_ok();
+        return crate::owned_raw_mp3::supports(source, transform, options);
     }
     if crate::owned_adts_export::recognizes(source).unwrap_or(false) {
         return simple_options(options)
@@ -77,10 +77,12 @@ pub(crate) fn supports(
             || (info.channels <= 8 && matches!(channels, 1 | 2))
             || (matches!(info.channels, 1 | 2) && (1..=8).contains(&channels));
         let layout = !changes_channels
-            || crate::owned_pcm_channels::rematrix_layout_supported(
-                info.channels,
-                info.channel_mask,
-            );
+            || (info.channels <= 2 && info.channel_mask == 0)
+            || (info.channel_mask != 0
+                && crate::owned_pcm_channels::rematrix_layout_supported(
+                    info.channels,
+                    info.channel_mask,
+                ));
         conversion && layout
     })
 }
@@ -294,7 +296,13 @@ pub fn decode_audio_transformed(
         let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
         let info =
             crate::owned_wave_inspect::inspect(&mut file, None).map_err(|e| e.to_string())?;
-        if !crate::owned_pcm_channels::rematrix_layout_supported(info.channels, info.channel_mask) {
+        if !(info.channels <= 2 && info.channel_mask == 0)
+            && !(info.channel_mask != 0
+                && crate::owned_pcm_channels::rematrix_layout_supported(
+                    info.channels,
+                    info.channel_mask,
+                ))
+        {
             return Err("owned rematrix requires a standard explicit speaker layout".into());
         }
     }
@@ -878,10 +886,11 @@ mod metadata_tests {
                 .unwrap();
             }
             let options = CopyOptions {
-                metadata_delete: vec!["artist".into(), "title".into()],
+                metadata_delete: vec!["artist".into()],
                 metadata_set: vec![
                     ("title".into(), "Новый".into()),
                     ("comment".into(), "comment".into()),
+                    ("artist".into(), "transient".into()),
                 ],
                 ..Default::default()
             };
@@ -1222,5 +1231,72 @@ mod integer_tests {
             assert_eq!(i16::from_le_bytes(sample.try_into().unwrap()), 16384);
         }
         std::fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
+    fn raw_flac_mp3_and_ogg_supports_validate_budget_and_rematrix_layouts() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/wave-ogg-flac-plan");
+        let dst = std::path::Path::new("out.wav");
+        let flac_quad = root.join("flac-4ch-quad.flac");
+        let flac_unassigned = root.join("flac-4ch-unassigned.flac");
+        let mp3 = root.join("raw-stereo.mp3");
+        let vorbis_5ch = root.join("ogg-vorbis-chained-5ch-0x37.ogg");
+        let joint_5ch = root.join("ogg-joint-chained-5ch-0x37.ogg");
+        let vorbis_discrete = root.join("ogg-vorbis-chained-8ch-0x73f.ogg");
+        let joint_discrete = root.join("ogg-joint-chained-8ch-0x73f.ogg");
+
+        let tight = CopyOptions {
+            max_controlled_bytes: Some(1),
+            ..Default::default()
+        };
+        for src in [
+            &flac_quad,
+            &flac_unassigned,
+            &mp3,
+            &vorbis_5ch,
+            &joint_5ch,
+            &vorbis_discrete,
+            &joint_discrete,
+        ] {
+            assert!(
+                supports(src, dst, Default::default(), &tight),
+                "tight budget must remain owned for {}",
+                src.display()
+            );
+        }
+
+        let downmix = AudioDecodeTransform {
+            channels: Some(2),
+            ..Default::default()
+        };
+        assert!(supports(&flac_quad, dst, downmix, &CopyOptions::default()));
+        assert!(supports(&vorbis_5ch, dst, downmix, &CopyOptions::default()));
+        assert!(supports(&joint_5ch, dst, downmix, &CopyOptions::default()));
+        assert!(!supports(
+            &flac_unassigned,
+            dst,
+            downmix,
+            &CopyOptions::default()
+        ));
+        assert!(!supports(
+            &vorbis_discrete,
+            dst,
+            downmix,
+            &CopyOptions::default()
+        ));
+        assert!(!supports(
+            &joint_discrete,
+            dst,
+            downmix,
+            &CopyOptions::default()
+        ));
+
+        let upmix_6 = AudioDecodeTransform {
+            channels: Some(6),
+            ..Default::default()
+        };
+        assert!(!supports(&flac_quad, dst, upmix_6, &CopyOptions::default()));
+        assert!(supports(&mp3, dst, upmix_6, &CopyOptions::default()));
     }
 }

@@ -1,0 +1,14 @@
+{
+  "batch_id": "FVID-0242",
+  "files": {
+    "avc-rotated-90-anamorphic.mp4": {
+      "bytes": 2273,
+      "sha256": "a990d341850ee995966163a73caafdec1e87f559673a3bb082f6a87066d134ab"
+    },
+    "avc-rotated-90-multitrack-aac.mp4": {
+      "bytes": 3159,
+      "sha256": "efea93787d91537e7f6c795dd17431860d8f1417e8b9b383f4dffc1fff94f168"
+    }
+  },
+  "generator": "scripts/generate_rotated_mp4_decode_export_probe_regressions.py"
+}

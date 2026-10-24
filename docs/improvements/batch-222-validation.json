@@ -1,0 +1,52 @@
+{
+  "batch": 222,
+  "ids": ["FVID-0229"],
+  "title": "Expose Vorbis comment metadata in bare FLAC and Ogg probes and preserve/edit source Vorbis comments during bare FLAC WAVE exports and loudnorm",
+  "scope": [
+    "crates/fvid-media/src/owned_flac_layout.rs",
+    "crates/fvid-media/src/owned_flac.rs",
+    "crates/fvid-media/src/owned_flac_probe.rs",
+    "crates/fvid-media/src/owned_raw_flac.rs",
+    "crates/fvid-media/src/owned_container_loudness.rs",
+    "crates/fvid-media/src/owned_probe.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/flac-ogg-metadata/tagged.flac",
+    "tests/fixtures/playback-errors/flac-ogg-metadata/tagged-opus.ogg",
+    "tests/fixtures/playback-errors/flac-ogg-metadata/tagged-vorbis.ogg"
+  ],
+  "generators": [
+    "scripts/generate_flac_ogg_metadata_regressions.py",
+    "scripts/test_flac_ogg_metadata_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-222-pre-edit/crates/fvid-media/src/owned_flac_layout.rs",
+      "docs/improvements/snapshots/batch-222-pre-edit/crates/fvid-media/src/owned_flac.rs",
+      "docs/improvements/snapshots/batch-222-pre-edit/crates/fvid-media/src/owned_flac_probe.rs",
+      "docs/improvements/snapshots/batch-222-pre-edit/crates/fvid-media/src/owned_raw_flac.rs",
+      "docs/improvements/snapshots/batch-222-pre-edit/crates/fvid-media/src/owned_container_loudness.rs",
+      "docs/improvements/snapshots/batch-222-pre-edit/crates/fvid-media/src/owned_probe.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-222-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-222-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-222-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test flac_ogg_metadata_regressions",
+      "passed": 2,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test -p fvid-media owned_flac && cargo test --test wave_ogg_flac_plan_regressions",
+      "passed": 9,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 -m unittest scripts/test_flac_ogg_metadata_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

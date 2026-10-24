@@ -1,0 +1,14 @@
+{
+  "batch_id": "FVID-0231",
+  "description": "Synthetic WAVE, ADTS AAC, and bare MP3 fixtures for loudnorm Matroska (.mka/.mkv) output and container/stream metadata mutations",
+  "files": [
+    "tone-tagged-48k.wav",
+    "tone-48k.aac",
+    "tone-tagged-48k.mp3"
+  ],
+  "sha256": {
+    "tone-tagged-48k.wav": "91f51a1ab4fb8e761d4d24549e742b01a2b971181886107d17a730d90781219a",
+    "tone-48k.aac": "95a113e78b0139e844777460c21f110c339299ad47b57471081a56e7033279f3",
+    "tone-tagged-48k.mp3": "c94a09536ac0e7b8860031104b66f6bf36c58ba535347ce6bb777ad5a6048193"
+  }
+}

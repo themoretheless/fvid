@@ -70,6 +70,9 @@ impl AudioStream for OggOpusAudioReader {
     fn duration(&self) -> Option<Duration> {
         self.program.duration()
     }
+    fn audio_track_index(&self) -> usize {
+        self.program.audio_track_index()
+    }
     fn audio_tracks(&self) -> Vec<AudioTrack> {
         self.program
             .audio_tracks()

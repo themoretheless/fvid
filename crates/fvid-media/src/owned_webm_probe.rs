@@ -5,11 +5,24 @@ use std::{collections::BTreeMap, fs::File, io::BufReader, path::Path};
 pub fn probe_webm(path: &Path) -> Result<MediaInfo, String> {
     try_probe_webm(path)?.ok_or_else(|| "Matroska probe requires supported content encoding and block lacing".into())
 }
+pub fn probe_webm_with_packet_limit(path: &Path, packet_bytes: usize) -> Result<MediaInfo, String> {
+    try_probe_webm_with_packet_limit(path, packet_bytes)?.ok_or_else(|| "Matroska probe requires supported content encoding and block lacing".into())
+}
 /// None marks content encodings or block lacing that need parser support; malformed
 /// container data stays an error and cannot request a fallback.
 pub fn try_probe_webm(path: &Path) -> Result<Option<MediaInfo>, String> {
+    try_probe_webm_with_packet_limit(path, Limits::default().packet_bytes)
+}
+pub fn try_probe_webm_with_packet_limit(path: &Path, packet_bytes: usize) -> Result<Option<MediaInfo>, String> {
+    if packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
     let mut reader = match WebmReader::open(
-        BufReader::new(File::open(path).map_err(|e| e.to_string())?), Limits::default(),
+        BufReader::new(File::open(path).map_err(|e| e.to_string())?),
+        Limits {
+            packet_bytes,
+            ..Limits::default()
+        },
     ) {
         Ok(reader) => reader,
         Err(error) if error.is_unsupported() => return Ok(None),

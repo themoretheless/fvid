@@ -1,0 +1,17 @@
+{
+  "batch": 190,
+  "improvement_id": "FVID-0197",
+  "status": "accepted",
+  "fixtures_dir": "tests/fixtures/playback-errors/audio-decoders",
+  "generator": "scripts/generate_audio_decoder_regressions.py",
+  "fixture_unittest": "scripts/test_audio_decoder_regressions.py",
+  "regression_test": "tests/audio_decoder_regressions.rs",
+  "gates": {
+    "focused_regression": "cargo test --features player --test audio_decoder_regressions -- --nocapture (3 passed)",
+    "fixture_unittest": "python3 -m unittest scripts/test_audio_decoder_regressions.py (2 passed)",
+    "related_integrations": "cargo test -p fvid-codecs mp2 (3 passed across mp2_free and mp2_native)",
+    "unit_tests": "cargo test --features player --lib codec::flac_decoder && cargo test --features player --lib codec::adpcm_decoder && cargo test --features player --lib codec::xm_decoder && cargo test --features player --lib codec::midi_decoder",
+    "minimal_core": "cargo test --lib --no-default-features codec::adpcm_decoder (ok, 359 filtered)",
+    "binary_build": "cargo build --bin fvid (ok)"
+  }
+}

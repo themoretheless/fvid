@@ -1,0 +1,8 @@
+test_ass_fixture_has_arrow_and_events_section (test_play_controls_regressions.TestPlayControlsRegressions.test_ass_fixture_has_arrow_and_events_section) ... ok
+test_generate_matches_checked_in_fixtures (test_play_controls_regressions.TestPlayControlsRegressions.test_generate_matches_checked_in_fixtures) ... ok
+test_two_frame_y4m_structure (test_play_controls_regressions.TestPlayControlsRegressions.test_two_frame_y4m_structure) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.002s
+
+OK

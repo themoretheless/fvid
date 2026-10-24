@@ -40,6 +40,7 @@ pub(crate) struct PacketTime {
 pub(crate) struct TrackPlan {
     pub(crate) options: TrackOptions,
     pub(crate) packets: Vec<PacketTime>,
+    pub(crate) trimmed_audio_sample_frames: u64,
 }
 fn nanoseconds(ticks: i128, scale: u32) -> Result<i128> {
     if scale == 0 {
@@ -87,6 +88,7 @@ pub(crate) fn plan_window(
                 ..Default::default()
             },
             packets,
+            trimmed_audio_sample_frames: audio.trimmed_samples,
         });
     }
     if interval.is_some() { return Err(invalid("video interval belongs to the presentation bridge")); }
@@ -208,6 +210,7 @@ pub(crate) fn plan_window(
             }),
             ..Default::default()
         },
+        trimmed_audio_sample_frames: 0,
     })
 }
 
@@ -321,6 +324,27 @@ pub fn write_selected_with_metadata_overrides<R: Read + Seek, W: Write + Seek>(
     cancel: Option<&CancelFlag>, progress: Option<&ProgressHook>,
     max_packets: Option<u64>, requested: &[usize], metadata: RemuxMetadata<'_>,
 ) -> Result<ProgressEvent> {
+    write_selected_with_text_metadata_overrides(
+        input,
+        output,
+        cancel,
+        progress,
+        max_packets,
+        requested,
+        metadata,
+        &Default::default(),
+        &Default::default(),
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn write_selected_with_text_metadata_overrides<R: Read + Seek, W: Write + Seek>(
+    input: &mut Mp4Reader<R>, output: &mut W,
+    cancel: Option<&CancelFlag>, progress: Option<&ProgressHook>,
+    max_packets: Option<u64>, requested: &[usize], metadata: RemuxMetadata<'_>,
+    text: &std::collections::BTreeMap<String, String>,
+    scoped: &std::collections::BTreeMap<usize, std::collections::BTreeMap<String, String>>,
+) -> Result<ProgressEvent> {
     check(cancel)?;
     if !eligible(input) {
         return Err(invalid(
@@ -354,7 +378,7 @@ pub fn write_selected_with_metadata_overrides<R: Read + Seek, W: Write + Seek>(
     let enabled: Vec<_> = selected.iter().map(|&index|effective_track_enabled(input,index)).collect();
     let defaults: Vec<_> = selected.iter().map(|&index|effective_track_default(input,index)).collect();
     let mut writer = PacketWriter::new_with_track_preferences(
-        output,&specs,&options,metadata.file,&Default::default(),&Default::default(),&enabled,&defaults)?;
+        output,&specs,&options,metadata.file,text,scoped,&enabled,&defaults)?;
     if let Some(hook) = progress {
         hook.emit(writer.event());
     }

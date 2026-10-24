@@ -1,8 +1,8 @@
 //! Owned streaming RIFF/WAVE PCM inspection, sample slicing and float conversion.
 mod normalize;
-pub use normalize::{NormalizationPhase, NormalizationProgress, NormalizationProgressHook, normalize_file_controlled as normalize_loudness_file_controlled, NormalizeTarget, NormalizeReport, normalize_file as normalize_loudness_file};
+pub use normalize::{NormalizationPhase, NormalizationProgress, NormalizationProgressHook, normalize_file_controlled as normalize_loudness_file_controlled, normalize_file_with_options as normalize_loudness_file_with_options, NormalizeTarget, NormalizeReport, normalize_file as normalize_loudness_file};
 mod loudness;
-pub use loudness::{IntegratedLoudness, LoudnessMeter, default_weights as loudness_channel_weights, measure_file_controlled as measure_loudness_file_controlled, measure_file as measure_loudness_file};
+pub use loudness::{IntegratedLoudness, LoudnessMeter, default_weights as loudness_channel_weights, measure_file_controlled as measure_loudness_file_controlled, measure_file_with_options as measure_loudness_file_with_options, measure_file as measure_loudness_file};
 pub use fvid_media::owned_k_weight::KWeighting;
 use crate::{
     Result, invalid,
@@ -60,12 +60,55 @@ impl WaveInfo {
     }
 }
 
+fn is_g711_riff_wave<R: Read + Seek>(input: &mut R, head: &[u8; 12]) -> bool {
+    if &head[..4] != b"RIFF" || &head[8..] != b"WAVE" {
+        return false;
+    }
+    let Ok(length) = input.seek(SeekFrom::End(0)) else {
+        return false;
+    };
+    let end = u64::from(u32::from_le_bytes(head[4..8].try_into().unwrap())) + 8;
+    if end != length {
+        return false;
+    }
+    let mut at = 12;
+    while at < end {
+        let Ok((tag, size, next)) = chunk(input, at, end) else {
+            return false;
+        };
+        if &tag == b"fmt " {
+            if !matches!(size, 16 | 18 | 40) {
+                return false;
+            }
+            let mut bytes = [0u8; 40];
+            if input.read_exact(&mut bytes[..size as usize]).is_err() {
+                return false;
+            }
+            let raw_tag = u16::from_le_bytes(bytes[..2].try_into().unwrap());
+            let fmt_tag = if raw_tag == 0xfffe && size == 40 {
+                u32::from_le_bytes(bytes[24..28].try_into().unwrap())
+            } else {
+                u32::from(raw_tag)
+            };
+            return matches!(fmt_tag, 6 | 7);
+        }
+        at = next;
+    }
+    false
+}
+
 pub fn is_wave(path: &Path) -> std::io::Result<bool> {
     let mut file = File::open(path)?;
     let mut prefix = [0; 12];
     match file.read_exact(&mut prefix) {
         Ok(()) => {
-            Ok(matches!(&prefix[..4], b"RIFF" | b"RIFX" | b"RF64") && &prefix[8..] == b"WAVE")
+            if !matches!(&prefix[..4], b"RIFF" | b"RIFX" | b"RF64") || &prefix[8..] != b"WAVE" {
+                return Ok(false);
+            }
+            if is_g711_riff_wave(&mut file, &prefix) {
+                return Ok(false);
+            }
+            Ok(true)
         }
         Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => Ok(false),
         Err(e) => Err(e),
@@ -311,20 +354,18 @@ impl WaveInfo {
     }
     pub(crate) fn validate_rematrix(&self) -> Result<()> {
         self.validate_decode()?;
-        let expected = match self.channels {
-            1 => 4,
-            2 => 3,
-            3 => 7,
-            4 => 0x107,
-            5 => 0x37,
-            6 => 0x3f,
-            _ => {
-                return Err(invalid(
-                    "native PCM rematrixing supports 1..=6 input channels",
-                ));
-            }
-        };
-        if !(self.channel_mask == expected || (self.channels <= 2 && self.channel_mask == 0)) {
+        if !(1..=8).contains(&self.channels) {
+            return Err(invalid(
+                "native PCM rematrixing supports 1..=8 input channels",
+            ));
+        }
+        if !((self.channels <= 2 && self.channel_mask == 0)
+            || (self.channel_mask != 0
+                && fvid_media::owned_pcm_channels::rematrix_layout_supported(
+                    self.channels,
+                    self.channel_mask,
+                )))
+        {
             return Err(invalid(
                 "native PCM rematrixing requires a supported explicit channel layout",
             ));

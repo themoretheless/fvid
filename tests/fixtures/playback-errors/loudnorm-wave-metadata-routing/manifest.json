@@ -1,0 +1,18 @@
+{
+  "batch_id": "FVID-0221",
+  "fixtures": {
+    "multitrack-pcm-flac.mka": {
+      "bytes": 42852,
+      "sha256": "68303aafa0e923e3d35e4cb9aa3af0a7bcb1c4c763ea11f33a2246b683a0ae60"
+    },
+    "tagged-48k-450ms.wav": {
+      "bytes": 43342,
+      "sha256": "4adb75075f81c728bd76bee61fc2f0181d3c5be3568c64d3cec38d92d0a21f3a"
+    },
+    "tagged-opus-48k.ogg": {
+      "bytes": 247,
+      "sha256": "cd0af4cf4dc6bf6348902f37dc5f9f35d0033b8605420d7452be029e62590e3b"
+    }
+  },
+  "generator": "scripts/generate_loudnorm_wave_metadata_routing_regressions.py"
+}

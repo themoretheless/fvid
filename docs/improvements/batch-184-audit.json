@@ -1,0 +1,20 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0191",
+  "source": "src/container/avi.rs",
+  "source_sha256": "77e13397a8b74e7fca28323c8a17cfbc31be60a95d70bac4b36fd9dbbd5b0214",
+  "before_snapshot": "evidence/batch-184-avi-before.rs",
+  "problem": "Avi::parse (src/container/avi.rs) silently overwritten promised on duplicate avih chunks in hdrl, silently ignored duplicate strh or strf chunks inside LIST strl, and check_index silently ignored trailing partial index entries when (index.end - index.start) % 16 != 0. In addition, AviAudioReader::seek_to (src/playback/audio/avi_audio.rs) did not clamp seek targets below the first sample timestamp (dwStart) on PCM/G.711 streams, returning target (e.g. 0) while the next emitted packet carried pts = start (e.g. 100).",
+  "primary_reference": "https://learn.microsoft.com/en-us/windows/win32/directshow/avi-riff-file-reference",
+  "reference_provenance": "Microsoft AVI RIFF File Reference: 'hdrl' list singleton MainAVIHeader ('avih'), 'strl' list singleton AVIStreamHeader ('strh') and stream format ('strf'), and 'idx1' (AVIOLDINDEX) array of 16-byte index entries.",
+  "fixtures": "tests/fixtures/playback-errors/avi-headers-seek",
+  "scope": "Reject duplicate avih, strh, and strf chunks and partial idx1 entries in src/container/avi.rs, and clamp PCM/G.711 seek targets to [start, end] in src/playback/audio/avi_audio.rs.",
+  "requirements": [
+    "Reproduce pre-fix acceptance of duplicate avih, duplicate strh, duplicate strf, and partial idx1 entries, as well as pre-start seek landing mismatch on delayed-start AVI PCM streams before editing production code.",
+    "Reject duplicate avih in hdrl, duplicate strh/strf in strl, and non-16-byte-multiple idx1 chunks in src/container/avi.rs.",
+    "Clamp PCM/G.711 seek targets to [start, end] in AviAudioReader::seek_to so pre-start seeks return the stream's first sample timestamp matching next_packet().",
+    "Verify the delayed-start PCM control across pre-start seek, mid-record seek, and EOF seek, and run all 6 validation gates."
+  ],
+  "implementation_plan": "Check promised.is_some(), strh.is_some(), and strf.is_some() in Avi::parse and !(index.end - index.start).is_multiple_of(INDEX_ENTRY) in check_index in src/container/avi.rs; clamp target to [start, end] in AviAudioReader::seek_to in src/playback/audio/avi_audio.rs.",
+  "counting": "One AVI header/index validation and delayed-start PCM/G.711 seek landing fix across src/container/avi.rs and src/playback/audio/avi_audio.rs (FVID-0191). No extra IDs for individual fixture variants or controls."
+}

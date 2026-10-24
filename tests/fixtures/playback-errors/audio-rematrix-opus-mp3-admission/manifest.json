@@ -1,0 +1,26 @@
+{
+  "batch_id": "FVID-0245",
+  "files": {
+    "mp2-stereo-tagged.mp2": {
+      "bytes": 473,
+      "sha256": "582c414ae1e7344b2f0b05e106f7085815cce439d15c695c05edbfefe36282d2"
+    },
+    "mp2-stereo.mka": {
+      "bytes": 620,
+      "sha256": "e010c6bdd580fe7ef1ffb9d3d8e7543ca6b8c215167a7a50ea6352a9ca0a7219"
+    },
+    "opus-6ch-51.mka": {
+      "bytes": 306,
+      "sha256": "0b25fe191ed4a24e5b576573bb932bc54c834de6378987c68f1de2fd01e4f1e7"
+    },
+    "wave-8ch-71.wav": {
+      "bytes": 2128,
+      "sha256": "d2b0b1ef3534895305163b4496ab1ce437e27ea303a279d7d18de31d0c2f7f5d"
+    },
+    "wave-stereo.wav": {
+      "bytes": 592,
+      "sha256": "fcb190e578deb95e72ed7f4d6947cdecae4d4934403b68b027d1425d4a0edda6"
+    }
+  },
+  "generator": "scripts/generate_audio_rematrix_opus_mp3_admission_regressions.py"
+}

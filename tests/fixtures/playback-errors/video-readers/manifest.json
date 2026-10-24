@@ -1,0 +1,20 @@
+{
+  "generator": "scripts/generate_video_reader_regressions.py",
+  "fixtures": [
+    {
+      "file": "avc-reordered-packed-budget.mkv",
+      "size": 9490,
+      "sha256": "b50dee416cf8a5b8d7ff847e1f779e54ffe1ed1e529a0f817014a80dc3cd9927"
+    },
+    {
+      "file": "hevc-inband-deferred-sps.mkv",
+      "size": 6370,
+      "sha256": "003c62fe3b020d757781999a7adf021c0ca37048b4197266065c9995e4126e20"
+    },
+    {
+      "file": "hevc-minimal-pts.mp4",
+      "size": 6935,
+      "sha256": "d3380ad926fac40119e5303a60915a8780ec3c65869885f83bb2fb8ab76bc287"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "batch": 186,
+  "improvement_id": "FVID-0193",
+  "scope": [
+    "src/playback/audio/wav.rs",
+    "src/playback/audio/aiff.rs",
+    "src/playback/audio/au.rs"
+  ],
+  "findings": [
+    {
+      "file": "src/playback/audio/wav.rs",
+      "function": "parse_fmt",
+      "issue": "WAVE_FORMAT_EXTENSIBLE only checked body.len() >= 40 && cbSize >= 22 without verifying usize::from(cbSize) <= body.len() - 18 or checking that dwChannelMask.count_ones() <= channels."
+    },
+    {
+      "file": "src/playback/audio/aiff.rs",
+      "function": "parse_comm",
+      "issue": "AIFC alaw/ALAW and ulaw/ULAW accepted sampleSize values 16, 24, and 32 instead of enforcing 8 bits per sample for G.711."
+    },
+    {
+      "file": "src/playback/audio/au.rs",
+      "function": "AuAudioReader::present_decoded",
+      "issue": "AuAudioReader omitted present_decoded and presentation_floor, falling back to the trait default and failing to reject negative source_pts or unaligned decoded payloads, stamp sample-rate timebase, or trim frames prior to presentation_floor."
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "batch": 207,
+  "ids": ["FVID-0214"],
+  "title": "Enforce packet, memory, and RSS budgets across decode_audio, trim, trim_pcm, loudness, normalize_loudness, and media_cli for all owned audio formats",
+  "scope": [
+    "src/media.rs",
+    "src/media_cli.rs",
+    "src/native_export.rs",
+    "src/native_pcm.rs",
+    "src/native_pcm/loudness.rs",
+    "src/native_pcm/normalize.rs",
+    "src/native_plan.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/audio-budget-controls/video.mkv",
+    "tests/fixtures/playback-errors/audio-budget-controls/pcm-s16le-48k-450ms.wav",
+    "tests/fixtures/playback-errors/audio-budget-controls/aac-lc-48k.adts",
+    "tests/fixtures/playback-errors/audio-budget-controls/g711-alaw-48k-450ms.wav",
+    "tests/fixtures/playback-errors/audio-budget-controls/raw-flac-48k-440ms.flac",
+    "tests/fixtures/playback-errors/audio-budget-controls/matroska-flac-48k-440ms.mka",
+    "tests/fixtures/playback-errors/audio-budget-controls/mp4-pcm-48k-450ms.m4a",
+    "tests/fixtures/playback-errors/audio-budget-controls/manifest.json"
+  ],
+  "generators": [
+    "scripts/generate_audio_budget_controls_regressions.py",
+    "scripts/test_audio_budget_controls_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-207-pre-edit/src/media.rs",
+      "docs/improvements/snapshots/batch-207-pre-edit/src/media_cli.rs",
+      "docs/improvements/snapshots/batch-207-pre-edit/src/native_export.rs",
+      "docs/improvements/snapshots/batch-207-pre-edit/src/native_pcm.rs",
+      "docs/improvements/snapshots/batch-207-pre-edit/src/native_pcm/loudness.rs",
+      "docs/improvements/snapshots/batch-207-pre-edit/src/native_pcm/normalize.rs",
+      "docs/improvements/snapshots/batch-207-pre-edit/src/native_plan.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-207-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-207-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-207-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --features player --test audio_budget_controls_regressions",
+      "passed": 3,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --features player --test owned_audio_f32le_matroska_regressions --test loudnorm_budget_mix_concat_regressions --test media_trim_loudness_regressions --test media_audio_routing_regressions --test container_loudness_plan_regressions",
+      "passed": 15,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_audio_budget_controls_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

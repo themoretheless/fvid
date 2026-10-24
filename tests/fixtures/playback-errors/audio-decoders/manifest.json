@@ -1,0 +1,33 @@
+{
+  "generator": "scripts/generate_audio_decoder_regressions.py",
+  "cases": [
+    {
+      "id": "flac-valid-192",
+      "file": "flac_streaminfo_192.bin",
+      "expect": "accept"
+    },
+    {
+      "id": "flac-frame-exceeds-streaminfo-max-block",
+      "file": "flac_streaminfo_max_64.bin",
+      "expect": "refuse",
+      "reason": "FLAC frame block size 192 exceeds STREAMINFO max_block 64"
+    },
+    {
+      "id": "flac-min-frame-gt-max-frame",
+      "file": "flac_streaminfo_min_frame_gt_max_frame.bin",
+      "expect": "refuse",
+      "reason": "FLAC STREAMINFO min_frame 20 exceeds non-zero max_frame 11"
+    },
+    {
+      "id": "xm-two-channel-valid-row",
+      "file": "xm_row_2ch_valid.bin",
+      "expect": "accept"
+    },
+    {
+      "id": "xm-row-channel-count-mismatch",
+      "file": "xm_row_1ch_mismatch.bin",
+      "expect": "refuse",
+      "reason": "XM row packet has 1 cell for a 2-channel module"
+    }
+  ]
+}

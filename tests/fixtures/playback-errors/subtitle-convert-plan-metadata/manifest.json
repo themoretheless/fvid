@@ -1,0 +1,9 @@
+{
+  "batch_id": "FVID-0237",
+  "sha256": {
+    "ass-source.mkv": "e7ceb084bb17adfafcbdd0a6a7a5439a592368caeb2a48d38e7db59e5f038fcb",
+    "sample.ass": "5452a95807aa5642a432178b9785668afaf3a4c120fb4766342cecdd4ea94ef5",
+    "sample.srt": "5709b42586bf704aa4f8b4fa50226d7df3b44b2e9a74ca87520b749a6e983877",
+    "subrip-source.mkv": "3911000ee66016ac1eecbb691913821360e96c9a6c17a415fcd06bd177a0de77"
+  }
+}

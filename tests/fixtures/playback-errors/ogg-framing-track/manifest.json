@@ -1,0 +1,67 @@
+{
+  "provenance": "Synthetic Ogg pages, Opus headers/DTX packets, and silent Vorbis links with valid CRCs and consecutive sequence numbers. No FFmpeg, private media, or network.",
+  "controls": [
+    {
+      "file": "parallel-opus.ogg",
+      "tracks": 2,
+      "frames": [
+        1920,
+        960
+      ]
+    },
+    {
+      "file": "continued-empty-bridge.ogg",
+      "tracks": 1,
+      "frames": [
+        960
+      ]
+    },
+    {
+      "file": "vorbis-chained-control.ogg",
+      "tracks": 1,
+      "frames": [
+        822
+      ]
+    }
+  ],
+  "malformed_ogg": [
+    {
+      "file": "reserved-bos-flag.ogg",
+      "error": "header_type_flag"
+    },
+    {
+      "file": "reserved-audio-flag.ogg",
+      "error": "header_type_flag"
+    },
+    {
+      "file": "spurious-empty-continue.ogg",
+      "error": "continuation"
+    },
+    {
+      "file": "spurious-midstream-continue.ogg",
+      "error": "continuation"
+    }
+  ],
+  "malformed_vorbis": [
+    {
+      "file": "vorbis-unended-first-link.ogg",
+      "error": "before the previous segment ended"
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "mono.head": "e61b2e422c979808500317ae6237303b880e8e4e7d9f37f692cd899cfe01237f",
+    "stereo.head": "ea7ad1c7a85ad9ba5e208cfaa26584419a0b1749632d0044f6adb8cf803cb75c",
+    "raw20.packet": "e472bbfc3250acf87bfacdc4b112e39e9c7d863b6e8806baca718f57d17a5bb6",
+    "raw10.packet": "aef28399b03fccce47376d0cf804331670643a6dd4376129105d243d3c59a93c",
+    "split20.packet": "8471e39e651a61f789355f1ab7c95852145390a3bf2960aa791a0f2f92bdb32c",
+    "parallel-opus.ogg": "8cb48b00fd970c089b24412a9aadb6b75f8c9c6302e42314d184a16637d73ff0",
+    "continued-empty-bridge.ogg": "5db07e0731c796e5d3607c95c98bf624b9f2d04a48566de26cee4c7d78ff84b2",
+    "vorbis-chained-control.ogg": "bbe7ba71338ce546bb0f4ca9e92da410f628057eb41fff6421e8a66f8707fc17",
+    "reserved-bos-flag.ogg": "0be0ed80572174bceeecb7d2cf159f6b2c7ec9b8349adadede040795c2993887",
+    "reserved-audio-flag.ogg": "55f2d4b6e8518e7dae0c2902cb89f750f8537865b4d5624033640d08fcf688ed",
+    "spurious-empty-continue.ogg": "cd5d13603e93cac759b47589928f3406034a2478ee132fbd6f2f355c35c7ab5e",
+    "spurious-midstream-continue.ogg": "b9968a7570b791f0dd41f545b4e6055b559a3268b70c1e76130ee6d9993a567b",
+    "vorbis-unended-first-link.ogg": "3ea7ddd1bbc7c22d108f795b01883890a9460fbbc4fa099895aa4ad187cafa64"
+  }
+}

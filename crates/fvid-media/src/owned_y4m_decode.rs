@@ -226,7 +226,83 @@ fn overlay_supported(source: &Path, transform: &DecodeTransform) -> bool {
     let Ok(header) = Header::parse(&bytes) else {
         return false;
     };
-    crate::owned_y4m_overlay::OverlayReader::open(&header, spec).is_ok()
+    let Ok(presented) = presented_header_after_geometry(&header, transform) else {
+        return false;
+    };
+    crate::owned_y4m_overlay::OverlayReader::open(&presented, spec).is_ok()
+}
+pub(crate) fn presented_header_after_geometry(
+    header: &Header,
+    transform: &DecodeTransform,
+) -> Result<Header> {
+    let (crop, _) = crop_geometry(header, transform.crop)?;
+    let (ow, oh, _) = requested_geometry(header, transform)?;
+    let promote = transform
+        .shuffleplanes
+        .as_deref()
+        .map(crate::owned_shuffleplanes::ShufflePlanes::parse)
+        .transpose()?
+        .is_some_and(|f| f.mapping[0] != 0 || f.mapping[1] == 0 || f.mapping[2] == 0);
+    let mut presented_header = header.clone();
+    presented_header.width = ow;
+    presented_header.height = oh;
+    presented_header.format = match header.format {
+        _ if promote => PixelFormat::Yuv444,
+        PixelFormat::Yuv422 if transform.transpose.is_some() => PixelFormat::Yuv440,
+        PixelFormat::Yuv440 if transform.transpose.is_some() => PixelFormat::Yuv422,
+        format => format,
+    };
+    header.full_range()?;
+    let (n, d) = header.pixel_aspect()?;
+    let (mut n, mut d) = (u64::from(n), u64::from(d));
+    let (mut w, mut h) = (crop.width as u64, crop.height as u64);
+    if transform.transpose.is_some() {
+        std::mem::swap(&mut n, &mut d);
+        std::mem::swap(&mut w, &mut h);
+    }
+    if let Some(angle) = transform.rotate {
+        let (rw, rh) = angle.size(
+            u32::try_from(w).map_err(|_| "rotation width overflow")?,
+            u32::try_from(h).map_err(|_| "rotation height overflow")?,
+        );
+        (w, h) = (u64::from(rw), u64::from(rh));
+    }
+    if let Some(pad) = transform.pad {
+        w = u64::from(pad.width);
+        h = u64::from(pad.height);
+    }
+    let gcd = |mut a: u64, mut b: u64| -> u64 {
+        while b != 0 {
+            (a, b) = (b, a % b);
+        }
+        a
+    };
+    let g0 = gcd(n, d);
+    n /= g0;
+    d /= g0;
+    if transform.scale.is_some() {
+        let g1 = gcd(w, h);
+        let (w, h) = (w / g1, h / g1);
+        let (mut oh, mut ow) = (oh as u64, ow as u64);
+        let g2 = gcd(oh, ow);
+        oh /= g2;
+        ow /= g2;
+        n = n.checked_mul(w).ok_or("pixel aspect overflow")?;
+        d = d.checked_mul(h).ok_or("pixel aspect overflow")?;
+        let g3 = gcd(n, d);
+        n = (n / g3).checked_mul(oh).ok_or("pixel aspect overflow")?;
+        d = (d / g3).checked_mul(ow).ok_or("pixel aspect overflow")?;
+    }
+    let a = gcd(n, d);
+    let aspect = (
+        u32::try_from(n / a).map_err(|_| "pixel aspect overflow")?,
+        u32::try_from(d / a).map_err(|_| "pixel aspect overflow")?,
+    );
+    presented_header.tokens.retain(|t| !t.starts_with('A'));
+    presented_header
+        .tokens
+        .push(format!("A{}:{}", aspect.0, aspect.1));
+    Ok(presented_header)
 }
 fn header_format(source: &Path) -> Option<PixelFormat> {
     let mut r = BufReader::new(File::open(source).ok()?);
@@ -984,81 +1060,11 @@ fn decode_reader_frames(
     }
     let header = Header::parse(&bytes)?;
     let [rate_n, rate_d] = header.frame_rate()?;
-    let (crop, _) = crop_geometry(&header, transform.crop)?;
     let (ow, oh, _) = requested_geometry(&header, transform)?;
     let width = u32::try_from(ow).map_err(|_| "Y4M width exceeds decode API range")?;
     let height = u32::try_from(oh).map_err(|_| "Y4M height exceeds decode API range")?;
-    let promote = transform
-        .shuffleplanes
-        .as_deref()
-        .map(crate::owned_shuffleplanes::ShufflePlanes::parse)
-        .transpose()?
-        .is_some_and(|f| f.mapping[0] != 0 || f.mapping[1] == 0 || f.mapping[2] == 0);
-    let mut presented_header = header.clone();
-    presented_header.width = ow;
-    presented_header.height = oh;
-    presented_header.format = match header.format {
-        _ if promote => PixelFormat::Yuv444,
-        PixelFormat::Yuv422 if transform.transpose.is_some() => PixelFormat::Yuv440,
-        PixelFormat::Yuv440 if transform.transpose.is_some() => PixelFormat::Yuv422,
-        format => format,
-    };
-    header.full_range()?;
-    let (n, d) = header.pixel_aspect()?;
-    let (mut n, mut d) = (u64::from(n), u64::from(d));
-    let (mut w, mut h) = (crop.width as u64, crop.height as u64);
-    if transform.transpose.is_some() {
-        std::mem::swap(&mut n, &mut d);
-        std::mem::swap(&mut w, &mut h);
-    }
-    if let Some(angle) = transform.rotate {
-        let (rw, rh) = angle.size(u32::try_from(w).map_err(|_| "rotation width overflow")?, u32::try_from(h).map_err(|_| "rotation height overflow")?,
-        );
-        (w, h) = (u64::from(rw), u64::from(rh));
-    }
-    if let Some(pad) = transform.pad {
-        w = u64::from(pad.width);
-        h = u64::from(pad.height);
-    }
-    let gcd = |mut a: u64, mut b: u64| -> u64 {
-        while b != 0 {
-            (a, b) = (b, a % b);
-        }
-        a
-    };
-    let g0 = gcd(n, d);
-    n /= g0;
-    d /= g0;
-    if transform.scale.is_some() {
-        let g1 = gcd(w, h);
-        let (w, h) = (w / g1, h / g1);
-        let (mut oh, mut ow) = (oh as u64, ow as u64);
-        let g2 = gcd(oh, ow);
-        oh /= g2;
-        ow /= g2;
-        n = n
-            .checked_mul(w)
-            .ok_or("pixel aspect overflow")?;
-        d = d
-            .checked_mul(h)
-            .ok_or("pixel aspect overflow")?;
-        let g3 = gcd(n, d);
-        n = (n / g3)
-            .checked_mul(oh)
-            .ok_or("pixel aspect overflow")?;
-        d = (d / g3)
-            .checked_mul(ow)
-            .ok_or("pixel aspect overflow")?;
-    }
-    let a = gcd(n, d);
-    let aspect = (
-        u32::try_from(n / a).map_err(|_| "pixel aspect overflow")?,
-        u32::try_from(d / a).map_err(|_| "pixel aspect overflow")?,
-    );
-    presented_header.tokens.retain(|t| !t.starts_with('A'));
-    presented_header
-        .tokens
-        .push(format!("A{}:{}", aspect.0, aspect.1));
+    let mut presented_header = presented_header_after_geometry(&header, transform)?;
+    let aspect = presented_header.pixel_aspect()?;
     let mut overlay = transform
         .overlay
         .as_ref()

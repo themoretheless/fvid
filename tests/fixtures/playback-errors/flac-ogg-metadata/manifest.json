@@ -1,0 +1,10 @@
+{
+  "generator": "scripts/generate_flac_ogg_metadata_regressions.py",
+  "batch_id": "FVID-0229",
+  "provenance": "100% synthetic bare FLAC and Ogg Opus/Vorbis fixtures with Vorbis comment metadata; no FFmpeg, network, or private media.",
+  "sha256": {
+    "tagged.flac": "cdc2da5512b8b20fbc987eb58d33899832068cd387f57bcf284179853d01d18e",
+    "tagged-opus.ogg": "fe82b73a19788386dbbd69e29ba1804867bcd026c6ad02f8da9a8b1b610e5350",
+    "tagged-vorbis.ogg": "259f4f80d496ba4ca15c2deee5776a1aa2df974f366198436aa397363943bf87"
+  }
+}

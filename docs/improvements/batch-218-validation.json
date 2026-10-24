@@ -1,0 +1,47 @@
+{
+  "batch": 218,
+  "ids": ["FVID-0225"],
+  "title": "Enforce CopyOptions packet/byte budgets, stream metadata deletions, and metadata/stream plan steps across burn-subtitles and xfade in API and CLI",
+  "scope": [
+    "crates/fvid-media/src/owned_subtitle_burn.rs",
+    "crates/fvid-media/src/owned_xfade.rs",
+    "src/media_cli.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/burn-xfade-plan-controls/burn-main-96x64.y4m",
+    "tests/fixtures/playback-errors/burn-xfade-plan-controls/burn-cues.srt",
+    "tests/fixtures/playback-errors/burn-xfade-plan-controls/xfade-main-4x4.y4m",
+    "tests/fixtures/playback-errors/burn-xfade-plan-controls/xfade-other-4x4.y4m"
+  ],
+  "generators": [
+    "scripts/generate_burn_xfade_plan_controls_regressions.py",
+    "scripts/test_burn_xfade_plan_controls_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-218-pre-edit/crates/fvid-media/src/owned_subtitle_burn.rs",
+      "docs/improvements/snapshots/batch-218-pre-edit/crates/fvid-media/src/owned_xfade.rs",
+      "docs/improvements/snapshots/batch-218-pre-edit/src/media_cli.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-218-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-218-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-218-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test burn_xfade_plan_controls_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test lossless_plan_cli_routing_regressions --test mix_merge_subtitle_controls_regressions",
+      "passed": 2,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_burn_xfade_plan_controls_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

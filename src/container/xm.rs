@@ -843,16 +843,16 @@ fn parse_patterns(
         // A pattern stating no packed data holds empty rows, which is how the
         // tracker writes one it never typed into.
         if packed_size != 0 {
-            let mut cursor = data;
+            let pattern_bytes = &bytes[data..end];
+            let mut cursor = 0usize;
             for cell in &mut cells {
-                let (read, next) = read_cell(bytes, cursor)?;
+                let (read, next) = read_cell(pattern_bytes, cursor).map_err(|_| {
+                    invalid(&format!(
+                        "pattern {index}'s rows run past the data its header states"
+                    ))
+                })?;
                 *cell = read;
                 cursor = next;
-            }
-            if cursor > end {
-                return Err(invalid(&format!(
-                    "pattern {index}'s rows run past the data its header states"
-                )));
             }
         }
         *at = end;
@@ -876,9 +876,10 @@ fn read_cell(bytes: &[u8], at: usize) -> Result<(Cell, usize)> {
         let five = bytes
             .get(at..at + CELL_BYTES)
             .ok_or_else(|| invalid("module's pattern data ends inside a cell"))?;
+        let note = if five[0] > NOTE_KEY_OFF { 0 } else { five[0] };
         return Ok((
             Cell {
-                note: five[0],
+                note,
                 instrument: five[1],
                 volume: five[2],
                 effect: five[3],
@@ -1057,6 +1058,13 @@ fn parse_instruments(
             } else {
                 1
             };
+            if width == 2 && !record.data_bytes.is_multiple_of(2) {
+                return Err(invalid(&format!(
+                    "instrument {index}'s 16-bit sample {} states an odd byte length of {}",
+                    records.len(),
+                    record.data_bytes
+                )));
+            }
             let end = cursor
                 .checked_add(record.data_bytes)
                 .ok_or_else(|| invalid("sample data size overflows the file"))?;

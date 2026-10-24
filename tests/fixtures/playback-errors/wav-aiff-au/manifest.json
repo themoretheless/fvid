@@ -1,0 +1,34 @@
+{
+  "suite": "wav-aiff-au",
+  "improvement_id": "FVID-0193",
+  "fixtures": [
+    {
+      "file": "aifc_alaw_16bit_invalid.aifc",
+      "bytes": 76
+    },
+    {
+      "file": "aifc_alaw_8bit_valid.aifc",
+      "bytes": 76
+    },
+    {
+      "file": "aifc_ulaw_24bit_invalid.aifc",
+      "bytes": 76
+    },
+    {
+      "file": "au_pcm16_valid.au",
+      "bytes": 36
+    },
+    {
+      "file": "wav_extensible_cbsize_overflow.wav",
+      "bytes": 76
+    },
+    {
+      "file": "wav_extensible_channel_mask_overflow.wav",
+      "bytes": 76
+    },
+    {
+      "file": "wav_extensible_valid.wav",
+      "bytes": 76
+    }
+  ]
+}

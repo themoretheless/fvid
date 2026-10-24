@@ -80,8 +80,8 @@ pub struct PixelFilters {
 impl PixelFilters {
     pub(crate) fn configure_vignette_source<R: std::io::BufRead + std::io::Seek>(&self, reader: &crate::playback_native::NativeReader<R>, geometry: &crate::native_geometry::VideoGeometry) -> Result<()> {
         if self.vignette.is_none() && self.drawbox.is_none() && self.drawgrid.is_none() {return Ok(());}
-        let [w,h]=reader.dimensions();
-        let aspect=crate::native_export::transformed_aspect(reader.pixel_aspect(),w,h,geometry)?;
+        let [w, h] = crate::virtual_camera::visible_dimensions(reader.dimensions(), reader.insets())?;
+        let aspect = crate::native_export::transformed_aspect(reader.pixel_aspect(), w, h, geometry)?;
         self.vignette_source.set(Some((aspect.0 as f64/aspect.1 as f64,reader.frame_period().as_secs_f64().recip())));
         Ok(())
     }

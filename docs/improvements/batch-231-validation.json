@@ -1,0 +1,44 @@
+{
+  "batch": 231,
+  "ids": ["FVID-0238"],
+  "title": "Support destination-optional plan normalize-loudness in CLI and ignore progress hooks in read-only plan_loudness, plan_normalize_loudness, and plan decode-audio",
+  "scope": [
+    "src/media.rs",
+    "src/media_cli.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/loudness-normalize-plan-cli/stereo.wav",
+    "tests/fixtures/playback-errors/loudness-normalize-plan-cli/stereo-pcm.mka"
+  ],
+  "generators": [
+    "scripts/generate_loudness_normalize_plan_cli_regressions.py",
+    "scripts/test_loudness_normalize_plan_cli_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-231-pre-edit/src/media.rs",
+      "docs/improvements/snapshots/batch-231-pre-edit/src/media_cli.rs",
+      "docs/improvements/snapshots/batch-231-pre-edit/src/native_plan.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-231-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-231-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-231-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test loudness_normalize_plan_cli_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test native_loudness_cli --test cli_quiet_flag_regressions --test subtitle_normalize_metadata_regressions --test loudnorm_wave_metadata_routing_regressions --test audio_budget_controls_regressions --test media_trim_loudness_regressions",
+      "passed": 10,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 -m unittest scripts/test_loudness_normalize_plan_cli_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

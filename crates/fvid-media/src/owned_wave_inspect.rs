@@ -147,7 +147,8 @@ pub fn inspect<R: Read + Seek>(input: &mut R, cancel: Option<&CancelFlag>) -> Re
 /// Read PCM geometry without copying or retiming opaque ancillary chunks.
 /// All chunk extents and audio geometry remain strictly validated.
 pub(crate) fn inspect_probe<R: Read + Seek>(input: &mut R) -> Result<WaveInfo> {
-    inspect_impl(input, None, false, None)
+    let law = g711_law(input, None)?;
+    inspect_impl(input, None, false, law)
 }
 fn inspect_impl<R: Read + Seek>(
     input: &mut R,

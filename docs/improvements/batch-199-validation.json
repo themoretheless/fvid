@@ -1,0 +1,50 @@
+{
+  "batch": 199,
+  "ids": ["FVID-0206"],
+  "title": "Unify Matroska probe codec/metadata/disposition parity, apply container PixelCrop* insets on identity decode and Y4M export, and report canonical bit-depth-qualified PCM codec names in audio_source_info_selected",
+  "scope": [
+    "src/media_probe.rs",
+    "src/native_media.rs",
+    "src/native_export.rs",
+    "src/native_pixels.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/matroska-probe-crop-export/matroska-probe-parity.mkv",
+    "tests/fixtures/playback-errors/matroska-probe-crop-export/matroska-pcm-s16le.mka",
+    "tests/fixtures/playback-errors/matroska-probe-crop-export/matroska-cropped-16x16-to-12x8.mkv",
+    "tests/fixtures/playback-errors/matroska-probe-crop-export/manifest.json"
+  ],
+  "generators": [
+    "scripts/generate_matroska_probe_crop_export_regressions.py",
+    "scripts/test_matroska_probe_crop_export_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/evidence/batch-199-media-probe-before.rs",
+      "docs/improvements/evidence/batch-199-native-media-before.rs",
+      "docs/improvements/evidence/batch-199-native-export-before.rs",
+      "docs/improvements/evidence/batch-199-native-pixels-before.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-199-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-199-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-199-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --features player --test matroska_probe_crop_export_regressions",
+      "passed": 3,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --features player --test native_matroska_probe --test native_matroska_metadata --test native_geometry --test native_export --test native_audio_trim --test mp4_audio_selection",
+      "passed": 45,
+      "failed": 0
+    },
+    "fixture_generator_tests": {
+      "command": "python3 -m unittest discover -s scripts -p 'test_matroska_probe_crop_export_regressions.py' -v",
+      "passed": 1,
+      "failed": 0
+    }
+  },
+  "status": "accepted"
+}

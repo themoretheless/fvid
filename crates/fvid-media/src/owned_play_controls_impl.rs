@@ -2056,17 +2056,17 @@ pub fn locked_window_size(
 ) -> (u32, u32) {
     let vw = video_w.max(1);
     let vh = video_h.max(1);
-    if !locked {
-        return (vw.min(max_w.max(1)), vh.min(max_h.max(1)));
-    }
     let max_w = max_w.max(1);
     let max_h = max_h.max(1);
+    if !locked {
+        return (vw.min(max_w), vh.min(max_h));
+    }
     let scale_w = max_w as f64 / vw as f64;
     let scale_h = max_h as f64 / vh as f64;
     let scale = scale_w.min(scale_h);
     (
-        ((vw as f64) * scale).round().max(1.0) as u32,
-        ((vh as f64) * scale).round().max(1.0) as u32,
+        (((vw as f64) * scale).round().max(1.0) as u32).min(max_w),
+        (((vh as f64) * scale).round().max(1.0) as u32).min(max_h),
     )
 }
 
@@ -4204,13 +4204,16 @@ pub fn detect_letterbox_bars(
     pixels: &[u32],
     luma_threshold: u8,
 ) -> (u32, u32, u32, u32) {
-    if width == 0 || height == 0 || pixels.len() < (width * height) as usize {
+    let Some(total_pixels) = (width as usize).checked_mul(height as usize) else {
+        return (0, 0, 0, 0);
+    };
+    if width == 0 || height == 0 || pixels.len() < total_pixels {
         return (0, 0, 0, 0);
     }
     let thr = u32::from(luma_threshold);
     let row_dark = |y: u32| -> bool {
         let mut sum = 0u64;
-        let row = (y * width) as usize;
+        let row = (y as usize) * (width as usize);
         for x in 0..width as usize {
             let p = pixels[row + x];
             let r = (p >> 16) & 0xff;
@@ -4308,7 +4311,10 @@ pub fn format_audio_duck_osd(enabled: bool, duck_milli: i32) -> String {
 pub fn waveform_column_fills(width: u32, height: u32, pixels: &[u32], columns: usize) -> Vec<i32> {
     let columns = columns.clamp(1, 256);
     let mut fills = vec![0i32; columns];
-    if width == 0 || height == 0 || pixels.len() < (width * height) as usize {
+    let Some(total_pixels) = (width as usize).checked_mul(height as usize) else {
+        return fills;
+    };
+    if width == 0 || height == 0 || pixels.len() < total_pixels {
         return fills;
     }
     let mut counts = vec![0u32; columns];
@@ -4476,8 +4482,19 @@ pub fn apply_box_denoise_pixel(
     strength_milli: i32,
 ) -> u32 {
     let strength = strength_milli.clamp(0, 1_000);
-    if strength == 0 || width == 0 || height == 0 || pixels.len() < (width * height) as usize {
-        let idx = (y * width + x) as usize;
+    let idx = (y as usize)
+        .saturating_mul(width as usize)
+        .saturating_add(x as usize);
+    let Some(total_pixels) = (width as usize).checked_mul(height as usize) else {
+        return pixels.get(idx).copied().unwrap_or(0);
+    };
+    if strength == 0
+        || width == 0
+        || height == 0
+        || x >= width
+        || y >= height
+        || pixels.len() < total_pixels
+    {
         return pixels.get(idx).copied().unwrap_or(0);
     }
     let mut r_sum = 0u32;
@@ -4486,9 +4503,9 @@ pub fn apply_box_denoise_pixel(
     let mut n = 0u32;
     for dy in -1i32..=1 {
         for dx in -1i32..=1 {
-            let xx = (x as i32 + dx).clamp(0, width as i32 - 1) as u32;
-            let yy = (y as i32 + dy).clamp(0, height as i32 - 1) as u32;
-            let p = pixels[(yy * width + xx) as usize];
+            let xx = (i64::from(x) + i64::from(dx)).clamp(0, i64::from(width) - 1) as usize;
+            let yy = (i64::from(y) + i64::from(dy)).clamp(0, i64::from(height) - 1) as usize;
+            let p = pixels[yy * (width as usize) + xx];
             r_sum += (p >> 16) & 0xff;
             g_sum += (p >> 8) & 0xff;
             b_sum += p & 0xff;
@@ -4498,7 +4515,7 @@ pub fn apply_box_denoise_pixel(
     let avg_r = r_sum / n.max(1);
     let avg_g = g_sum / n.max(1);
     let avg_b = b_sum / n.max(1);
-    let src = pixels[(y * width + x) as usize];
+    let src = pixels[idx];
     let sr = (src >> 16) & 0xff;
     let sg = (src >> 8) & 0xff;
     let sb = src & 0xff;
@@ -4686,10 +4703,22 @@ pub fn apply_unsharp_pixel(
     amount_milli: i32,
 ) -> u32 {
     let amount = amount_milli.clamp(-1_000, 1_000);
-    if amount == 0 || width == 0 || height == 0 || pixels.len() < (width * height) as usize {
-        return pixels.get((y * width + x) as usize).copied().unwrap_or(0);
+    let idx = (y as usize)
+        .saturating_mul(width as usize)
+        .saturating_add(x as usize);
+    let Some(total_pixels) = (width as usize).checked_mul(height as usize) else {
+        return pixels.get(idx).copied().unwrap_or(0);
+    };
+    if amount == 0
+        || width == 0
+        || height == 0
+        || x >= width
+        || y >= height
+        || pixels.len() < total_pixels
+    {
+        return pixels.get(idx).copied().unwrap_or(0);
     }
-    let src = pixels[(y * width + x) as usize];
+    let src = pixels[idx];
     let blur = apply_box_denoise_pixel(width, height, pixels, x, y, 1_000);
     let sharpen = |s: u32, b: u32| -> u32 {
         let s = s as i32;
@@ -7944,23 +7973,26 @@ pub fn blit_bitmap_subtitle(frame: &mut [u32], frame_w: u32, frame_h: u32, sub: 
     if frame_w == 0 || frame_h == 0 || sub.width == 0 || sub.height == 0 {
         return;
     }
-    let fw = frame_w as i32;
-    let fh = frame_h as i32;
-    let sw = sub.width as i32;
-    let sh = sub.height as i32;
-    if frame.len() < (frame_w as usize) * (frame_h as usize) {
+    let Some(frame_pixels) = (frame_w as usize).checked_mul(frame_h as usize) else {
+        return;
+    };
+    let Some(sub_pixels) = (sub.width as usize).checked_mul(sub.height as usize) else {
+        return;
+    };
+    if frame.len() < frame_pixels || sub.pixels.len() < sub_pixels {
         return;
     }
-    if sub.pixels.len() < (sub.width as usize) * (sub.height as usize) {
-        return;
-    }
+    let fw = i64::from(frame_w);
+    let fh = i64::from(frame_h);
+    let sw = i64::from(sub.width);
+    let sh = i64::from(sub.height);
     for sy in 0..sh {
-        let dy = sub.y + sy;
+        let dy = i64::from(sub.y) + sy;
         if dy < 0 || dy >= fh {
             continue;
         }
         for sx in 0..sw {
-            let dx = sub.x + sx;
+            let dx = i64::from(sub.x) + sx;
             if dx < 0 || dx >= fw {
                 continue;
             }
@@ -8156,9 +8188,22 @@ pub fn parse_srt(text: &str) -> Vec<SubtitleCue> {
 }
 
 fn parse_ass(text: &str) -> Vec<SubtitleCue> {
+    let has_sections = text.lines().any(|line| {
+        let trimmed = line.trim();
+        trimmed.eq_ignore_ascii_case("[Script Info]") || trimmed.eq_ignore_ascii_case("[Events]")
+    });
+    let mut in_events = !has_sections;
     let mut cues = Vec::new();
     for line in text.lines() {
-        let Some(rest) = line.trim().strip_prefix("Dialogue:") else {
+        let trimmed = line.trim();
+        if trimmed.starts_with('[') && trimmed.ends_with(']') {
+            in_events = trimmed.eq_ignore_ascii_case("[Events]");
+            continue;
+        }
+        if !in_events {
+            continue;
+        }
+        let Some(rest) = trimmed.strip_prefix("Dialogue:") else {
             continue;
         };
         let fields: Vec<&str> = rest.splitn(10, ',').map(str::trim).collect();
@@ -8184,10 +8229,23 @@ fn parse_ass(text: &str) -> Vec<SubtitleCue> {
     cues
 }
 
-/// Parse an SRT or ASS/SSA document. SRT wins when a cue arrow is present.
+/// Parse an SRT or ASS/SSA document.
 pub fn parse_subtitle_text(text: &str) -> Result<Vec<SubtitleCue>> {
     let text = text.strip_prefix('\u{feff}').unwrap_or(text);
-    let cues = if text.contains("-->") {
+    let is_ass = text.lines().any(|line| {
+        let trimmed = line.trim();
+        trimmed.eq_ignore_ascii_case("[Script Info]")
+            || trimmed.eq_ignore_ascii_case("[Events]")
+            || trimmed.starts_with("Dialogue:")
+    });
+    let cues = if is_ass {
+        let ass = parse_ass(text);
+        if ass.is_empty() && text.contains("-->") {
+            parse_srt(text)
+        } else {
+            ass
+        }
+    } else if text.contains("-->") {
         parse_srt(text)
     } else {
         parse_ass(text)
@@ -8578,10 +8636,10 @@ pub fn fit_window_to_video(video_w: u32, video_h: u32, max_w: u32, max_h: u32) -
     if video_w <= max_w && video_h <= max_h {
         return (video_w, video_h);
     }
-    let scale = (max_w as f32 / video_w as f32).min(max_h as f32 / video_h as f32);
+    let scale = (max_w as f64 / video_w as f64).min(max_h as f64 / video_h as f64);
     (
-        ((video_w as f32) * scale).round().max(1.0) as u32,
-        ((video_h as f32) * scale).round().max(1.0) as u32,
+        (((video_w as f64) * scale).round().max(1.0) as u32).min(max_w),
+        (((video_h as f64) * scale).round().max(1.0) as u32).min(max_h),
     )
 }
 

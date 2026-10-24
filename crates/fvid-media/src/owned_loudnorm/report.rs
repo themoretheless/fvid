@@ -17,7 +17,7 @@ pub(super) fn measure_phase(
 ) -> Result<(NormalizationMeasurement, CopyOptions)> {
     let packets = Arc::new(AtomicU64::new(0));
     let bytes = Arc::new(AtomicU64::new(0));
-    let mut measure_options = options.clone();
+    let mut measure_options = crate::owned_adts_export::pcm_decode_options(options);
     if let Some(hook) = &options.progress {
         let hook = hook.clone();
         let packets = packets.clone();

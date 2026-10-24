@@ -1,0 +1,17 @@
+{
+  "generator": "scripts/generate_matroska_probe_crop_export_regressions.py",
+  "files": {
+    "matroska-cropped-16x16-to-12x8.mkv": {
+      "bytes": 8469,
+      "sha256": "97732b18899829a6d7b8a025985349037fa508e54a6a7677eab3ecfbb8c5b8a6"
+    },
+    "matroska-pcm-s16le.mka": {
+      "bytes": 153,
+      "sha256": "bced94ac9da3fa45e50710cf1f140c7ec365ff56d29c30391ab536e0fbc7305a"
+    },
+    "matroska-probe-parity.mkv": {
+      "bytes": 738,
+      "sha256": "6fb0c536aa1673a37b17900ac3994c798f43cf2963b48ec7ef82af8db7683354"
+    }
+  }
+}

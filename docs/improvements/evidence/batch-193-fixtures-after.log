@@ -1,0 +1,7 @@
+test_main_writes_expected_files (test_subtitle_spool_regressions.SubtitleSpoolRegressionGeneratorTests.test_main_writes_expected_files) ... ok
+test_vtt_sami_and_ass_builders_are_deterministic (test_subtitle_spool_regressions.SubtitleSpoolRegressionGeneratorTests.test_vtt_sami_and_ass_builders_are_deterministic) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+OK

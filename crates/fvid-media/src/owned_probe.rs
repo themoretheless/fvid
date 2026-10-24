@@ -23,6 +23,7 @@ pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo, String> 
         Some("aac") => return probe_adts(path),
         Some("flac") => return crate::owned_flac_probe::probe_flac(path),
         Some("mp1" | "mp2" | "mp3" | "mpeg_audio") => return crate::owned_mpeg_probe::probe_mpeg(path),
+        Some("ogg" | "opus") => return probe_ogg(path),
         Some("y4m" | "yuv4mpegpipe") => return crate::owned_y4m_probe::probe_y4m(path),
         Some(_) => return Err("format has no owned media-library probe yet".into()),
         None => {}
@@ -40,6 +41,9 @@ pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo, String> 
         return crate::owned_webm_probe::probe_webm(path);
     }
     if signature.starts_with(b"fLaC") {return crate::owned_flac_probe::probe_flac(path);}
+    if signature.starts_with(b"OggS") {
+        return probe_ogg(path);
+    }
     if crate::owned_mpeg_audio::has_signature(&signature) {
         return crate::owned_mpeg_probe::probe_mpeg(path);
     }
@@ -166,9 +170,10 @@ pub fn probe_adts(path: &Path) -> Result<MediaInfo, String> {
     })
 }
 
-/// Inspect supported uncompressed RIFF/WAVE without loading its sample payload.
+/// Inspect supported uncompressed or G.711 RIFF/WAVE without loading its sample payload.
 pub fn probe_wave(path: &Path) -> std::io::Result<MediaInfo> {
     let mut file = File::open(path)?;
+    let law = crate::owned_wave_inspect::g711_law(&mut file, None)?;
     let wave = crate::owned_wave_inspect::inspect_probe(&mut file)?;
     let invalid = |message| std::io::Error::new(std::io::ErrorKind::InvalidData, message);
     let rate = i32::try_from(wave.sample_rate)
@@ -233,7 +238,11 @@ pub fn probe_wave(path: &Path) -> std::io::Result<MediaInfo> {
         }
         at += 8 + u64::from(size) + u64::from(size & 1);
     }
-    let codec = wave.codec();
+    let codec = match law {
+        Some(fvid_codecs::g711::Law::ALaw) => "pcm_alaw".into(),
+        Some(fvid_codecs::g711::Law::MuLaw) => "pcm_mulaw".into(),
+        None => wave.codec(),
+    };
     let bit_rate = i64::from(wave.sample_rate) * i64::from(wave.block) * 8;
     Ok(MediaInfo {
         path: path.into(),
@@ -264,6 +273,145 @@ pub fn probe_wave(path: &Path) -> std::io::Result<MediaInfo> {
             video_delay: 0,
             extradata_bytes: 0,
         }],
+    })
+}
+
+/// Inspect Ogg Opus, Vorbis, and chained Joint Vorbis/Opus bitstreams without decoding PCM.
+pub fn probe_ogg(path: &Path) -> Result<MediaInfo, String> {
+    if !crate::owned_ogg_opus_export::recognizes(path)? {
+        return Err("input does not have an Ogg signature".into());
+    }
+    let options = fvid_control::CopyOptions::default();
+    let mut file = File::open(path).map_err(|e| e.to_string())?;
+    let (limits, _) = crate::owned_ogg_opus_export::preflight(&mut file, &options)?;
+    let bytes = std::fs::read(path).map_err(|e| e.to_string())?;
+    let ogg = crate::owned_ogg::Ogg::parse(&bytes, &limits).map_err(|e| e.to_string())?;
+    let catalog = crate::owned_ogg_audio_catalog::from_ogg(&ogg).map_err(|e| e.to_string())?;
+    if catalog.is_empty() {
+        return Err("Ogg file has no supported audio streams".into());
+    }
+    let mut streams = Vec::with_capacity(catalog.len());
+    let mut max_duration_us = 0i64;
+    let mut file_metadata = BTreeMap::new();
+    for (nth, entry) in catalog.into_iter().enumerate() {
+        let joint = crate::owned_ogg_audio_catalog::needs_joint_program(&ogg, nth)
+            .map_err(|e| e.to_string())?;
+        let (codec, rate, channels, duration, extradata_bytes) = if joint {
+            let program = crate::owned_ogg_audio_program::Program::from_ogg(ogg.clone(), nth)
+                .map_err(|e| e.to_string())?;
+            (
+                "vorbis_opus",
+                program.sample_rate(),
+                program.channels(),
+                program.end_samples(),
+                0usize,
+            )
+        } else {
+            match entry.coding {
+                crate::owned_ogg::Coding::Opus => {
+                    let program = crate::owned_ogg_opus::Program::open_source_track(
+                        std::io::Cursor::new(&bytes),
+                        limits,
+                        Some(entry.source_index),
+                    )
+                    .map_err(|e| e.to_string())?;
+                    (
+                        "opus",
+                        48_000,
+                        program.channels(),
+                        program.end_samples(),
+                        program.extra_data().len(),
+                    )
+                }
+                crate::owned_ogg::Coding::Vorbis => {
+                    let program = crate::owned_ogg_vorbis::Program::open_source_track(
+                        std::io::Cursor::new(&bytes),
+                        limits,
+                        Some(entry.source_index),
+                    )
+                    .map_err(|e| e.to_string())?;
+                    (
+                        "vorbis",
+                        program.sample_rate(),
+                        program.channels(),
+                        program.end_samples(),
+                        program.extra_data().len(),
+                    )
+                }
+                _ => return Err("unsupported Ogg audio stream coding".into()),
+            }
+        };
+        let duration_us = i64::try_from(
+            u128::from(duration.max(0) as u64) * 1_000_000 / u128::from(rate),
+        )
+        .map_err(|_| "Ogg duration exceeds API range")?;
+        max_duration_us = max_duration_us.max(duration_us);
+        let tags = ogg
+            .chains()
+            .get(entry.source_index)
+            .and_then(|chain| {
+                let raw = &chain.packets.get(1)?.data;
+                let bytes = match chain.coding {
+                    crate::owned_ogg::Coding::Opus => raw.clone(),
+                    crate::owned_ogg::Coding::Vorbis => {
+                        let payload = raw.strip_prefix(b"\x03vorbis")?;
+                        let mut v = b"OpusTags".to_vec();
+                        v.extend_from_slice(payload);
+                        v
+                    }
+                    _ => return None,
+                };
+                fvid_opus::OpusTags::parse(&bytes).ok()
+            });
+        let (track_container_meta, mut stream_meta) = match tags.as_ref() {
+            Some(t) => crate::owned_flac_layout::probe_metadata_from_entries(
+                t.comments.iter().filter_map(|c| c.split_once('=')),
+            ),
+            None => (BTreeMap::new(), BTreeMap::new()),
+        };
+        if nth == 0 {
+            file_metadata = track_container_meta;
+        }
+        if !entry.audio.name.is_empty() {
+            stream_meta.insert("title".into(), entry.audio.name.clone());
+            if nth == 0 {
+                file_metadata.insert("title".into(), entry.audio.name);
+            }
+        }
+        if !entry.audio.language.is_empty() {
+            stream_meta.insert("language".into(), entry.audio.language);
+        }
+        streams.push(StreamInfo {
+            index: entry.source_index,
+            media_type: "audio".into(),
+            codec: codec.into(),
+            time_base: [1, rate as i32],
+            start: Some(0),
+            duration: Some(duration),
+            bit_rate: None,
+            average_frame_rate: [0, 1],
+            profile: None,
+            level: None,
+            disposition: 0,
+            metadata: stream_meta,
+            width: 0,
+            height: 0,
+            pixel_format: -1,
+            sample_rate: rate as i32,
+            channels: i32::from(channels),
+            video_delay: 0,
+            extradata_bytes,
+        });
+    }
+    Ok(MediaInfo {
+        path: path.into(),
+        format: "ogg".into(),
+        start_us: Some(0),
+        duration_us: Some(max_duration_us),
+        bit_rate: None,
+        metadata: file_metadata,
+        chapters: Vec::new(),
+        streams,
     })
 }
 

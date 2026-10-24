@@ -1,0 +1,49 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0202"
+  ],
+  "checked_at": "2026-10-22T09:01:00+00:00",
+  "sources": [
+    "src/playback/runtime/thread.rs",
+    "crates/fvid-media/src/owned_play_controls_impl.rs"
+  ],
+  "regressions": [
+    "tests/play_controls_regressions.rs"
+  ],
+  "before": [
+    "evidence/batch-195-thread-before.rs",
+    "evidence/batch-195-owned-play-controls-impl-before.rs",
+    "evidence/batch-195-tests-before.rs",
+    "evidence/batch-195-before.log",
+    "evidence/batch-195-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-195-after.log",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-195-playback-thread-units.log",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-195-fixtures-after.log",
+      "passed": 3
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/playback/runtime/thread.rs": "ea670e417ff016629739b9999771f2cf9313bcc7ee42f7c18ec58cf2acc736cb",
+    "/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media/src/owned_play_controls_impl.rs": "c1712a634964950631e81f38d48269b4b04464f4df094c01d9bf72434cda06ac",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/play_controls_regressions.rs": "3b10e32df49fa232a8ec3264f218ee69e3e3e357c2fb2811ec5acd955cef682b",
+    "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_play_controls_regressions.py": "b5eb522026013bf403ba2afc133d3a7661fb25ec0fb562097ae22a1bfd67d807"
+  },
+  "qualification": [
+    "Pre-fix Worker::drain_commands in src/playback/runtime/thread.rs cleared `self.ended = false` on Command::Seek and Command::Rewind but did not set `self.ended = true` when `reader.seek_raw` returned `Ok(None)` or `Err(error)` or when `reader.rewind` returned `Err(error)`, and did not update `self.indexed_count` inside `stage()`, causing the worker thread to immediately resume `decode_next()` in the same generation after emitting a terminal seek/rewind event; and crates/fvid-media/src/owned_play_controls_impl.rs misrouted ASS documents containing `-->` in comments or dialogue text to `parse_srt`, failed to scope ASS `Dialogue:` lines to `[Events]`, overflowed `i32` coordinates in `blit_bitmap_subtitle`, overflowed 32-bit `width * height` in `detect_letterbox_bars`, `waveform_column_fills`, `apply_box_denoise_pixel`, and `apply_unsharp_pixel`, and could exceed `max_w`/`max_h` in `fit_window_to_video` and `locked_window_size`.",
+    "Updating src/playback/runtime/thread.rs marks `self.ended = true` and synchronizes `cache_packets`/`indexed_count` on seek/rewind EOF or error; updating crates/fvid-media/src/owned_play_controls_impl.rs detects ASS headers before checking `-->`, scopes `Dialogue:` parsing to `[Events]`, widens coordinates to `i64` with checked buffer bounds in `blit_bitmap_subtitle`, uses `usize::checked_mul` in pixel/scope helpers, and clamps `fit_window_to_video` and `locked_window_size` to `max_w`/`max_h`.",
+    "Synthetic fixtures in tests/fixtures/playback-errors/play-controls/ verify single terminal event emission on seek error without continuing decode, ASS subtitle parsing with `-->` and `[Events]` scoping, overflow-safe bitmap subtitle blitting, and overflow-safe pixel/window helpers.",
+    "4 focused integration tests, 5 playback_thread unit tests, and 3 offline Python fixture unit tests pass.",
+    "Playback worker state-machine invariants and ASS v4.00+ / SRT subtitle parsing rules govern these checks. All fixtures are pure synthetic offline files requiring neither FFmpeg nor network access."
+  ],
+  "counting": "One playback runtime thread and play controls hardening fix across src/playback/runtime/thread.rs and crates/fvid-media/src/owned_play_controls_impl.rs (FVID-0202). No extra IDs for individual fixture cases."
+}

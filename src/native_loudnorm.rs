@@ -59,6 +59,36 @@ fn selected_audio(source: &Path, options: &CopyOptions) -> Result<usize> {
         .index)
 }
 
+fn has_metadata_mutations(options: &CopyOptions) -> bool {
+    !options.metadata_set.is_empty()
+        || !options.metadata_delete.is_empty()
+        || !options.stream_metadata_set.is_empty()
+        || !options.stream_metadata_delete.is_empty()
+}
+
+fn valid_wave_metadata_options(options: &CopyOptions) -> bool {
+    options.stream_metadata_set.is_empty()
+        && options.stream_metadata_delete.is_empty()
+        && options.metadata_set.len() + options.metadata_delete.len() <= 64
+        && options
+            .metadata_set
+            .iter()
+            .all(|(k, v)| !v.contains('\0') && fvid_media::owned_wave_metadata::tag_for_key(k).is_ok())
+        && options
+            .metadata_delete
+            .iter()
+            .all(|k| fvid_media::owned_wave_metadata::tag_for_key(k).is_ok())
+}
+
+fn strip_metadata_options(options: &CopyOptions) -> CopyOptions {
+    let mut clean = options.clone();
+    clean.metadata_set.clear();
+    clean.metadata_delete.clear();
+    clean.stream_metadata_set.clear();
+    clean.stream_metadata_delete.clear();
+    clean
+}
+
 /// Describe the owned route from container/configuration metadata. No loudness
 /// measurement, PCM decoding, output publication or codec reference process.
 pub fn try_plan(
@@ -69,12 +99,46 @@ pub fn try_plan(
 ) -> Result<Option<fvid_media_info::MediaPlan>> {
     use fvid_media_info::PlanStep;
     let resolved = fvid_media::owned_loudnorm::validate_request(args)?;
+    if !valid_wave_metadata_options(options) {
+        crate::native_export::pcm_matroska::validate_matroska_pcm_metadata(Some(options))?;
+        let clean = strip_metadata_options(options);
+        let Some(mut plan) = try_plan(source, args, dual_pass, &clean)? else {
+            return Ok(None);
+        };
+        let insert_idx = plan
+            .steps
+            .iter()
+            .position(|s| s.action == "write")
+            .unwrap_or(plan.steps.len());
+        plan.steps.insert(
+            insert_idx,
+            PlanStep {
+                action: "metadata".into(),
+                detail: "apply Matroska container and stream 0 metadata mutations".into(),
+            },
+        );
+        return Ok(Some(plan));
+    }
     if crate::native_export::is_adts_source(source)?
         && fvid_media::owned_adts_loudnorm::supports_plan(source, Some(&resolved), options)
     {
         return Ok(Some(fvid_media::owned_adts_loudnorm::plan_loudnorm(
             source, Some(&resolved), dual_pass, options,
         )?));
+    }
+    if fvid_media::owned_container_loudness::recognizes_standalone_audio(source)
+        .map_err(|e| crate::invalid(&e))?
+        && fvid_media::owned_container_loudnorm::supports_plan(source, Some(&resolved), options)
+    {
+        return Ok(Some(
+            fvid_media::owned_container_loudnorm::plan_loudnorm(
+                source,
+                Some(&resolved),
+                dual_pass,
+                options,
+            )
+            .map_err(|e| crate::invalid(&e))?,
+        ));
     }
     let wave = crate::native_pcm::is_wave(source)?;
     if wave {
@@ -93,26 +157,61 @@ pub fn try_plan(
             )
             .map_err(|e| crate::invalid(&e))?,
         ));
+    }
+    let index = if wave {
+        selected_audio(source, options)?
+    } else if options.max_controlled_bytes.is_some()
+        || !options.metadata_set.is_empty()
+        || !options.metadata_delete.is_empty()
+    {
+        if fvid_media::owned_container_loudnorm::supports_plan(
+            source,
+            Some(&resolved),
+            options,
+        ) {
+            return Ok(Some(
+                fvid_media::owned_container_loudnorm::plan_loudnorm(
+                    source,
+                    Some(&resolved),
+                    dual_pass,
+                    options,
+                )
+                .map_err(|e| crate::invalid(&e))?,
+            ));
+        }
+        return Ok(None);
     } else {
-        if options.max_controlled_bytes.is_some()
-            || !options.metadata_set.is_empty()
-            || !options.metadata_delete.is_empty()
-            || !options.stream_metadata_set.is_empty()
-            || !options.stream_metadata_delete.is_empty()
-        {
+        let native_stream = if crate::native_media::is_owned_audio_trim_source(source)? {
+            let idx = selected_audio(source, options)?;
+            crate::native_media::audio_source_info_selected(source, Some(idx))
+                .ok()
+                .map(|info| (idx, info))
+        } else {
+            None
+        };
+        if let Some((idx, info)) = native_stream {
+            if !fvid_media::owned_wave_loudness::qualified_rate(info.sample_rate) {
+                return Ok(None);
+            }
+            idx
+        } else if fvid_media::owned_container_loudnorm::supports_plan(
+            source,
+            Some(&resolved),
+            options,
+        ) {
+            return Ok(Some(
+                fvid_media::owned_container_loudnorm::plan_loudnorm(
+                    source,
+                    Some(&resolved),
+                    dual_pass,
+                    options,
+                )
+                .map_err(|e| crate::invalid(&e))?,
+            ));
+        } else {
             return Ok(None);
         }
-        if !crate::native_media::is_owned_audio_trim_source(source)? {
-            return Ok(None);
-        }
-    }
-    let index = selected_audio(source, options)?;
-    if !wave {
-        let info = crate::native_media::audio_source_info_selected(source, Some(index))?;
-        if !fvid_media::owned_wave_loudness::qualified_rate(info.sample_rate) {
-            return Ok(None);
-        }
-    }
+    };
     let mut plan =
         crate::native_plan::decode_audio_selected(source, &Default::default(), Some(index))
             .map_err(|e| crate::invalid(&e))?;
@@ -159,6 +258,66 @@ pub fn try_apply(
     dual_pass: bool,
     options: &CopyOptions,
 ) -> Result<Option<LoudnormStats>> {
+    let ext = destination.extension().and_then(|s| s.to_str());
+    let matroska_out = matches!(ext, Some("mka" | "mkv"));
+    if matroska_out {
+        crate::native_export::pcm_matroska::validate_matroska_pcm_metadata(Some(options))?;
+        if destination.symlink_metadata().is_ok() {
+            return Err("loudnorm destination already exists".into());
+        }
+        let spool = Spool::create()?;
+        let spool_wav = spool.0.join("normalized.wav");
+        let mut norm_options = strip_metadata_options(options);
+        norm_options.progress = options.progress.as_ref().map(|hook| {
+            let hook = hook.clone();
+            ProgressHook::new(move |mut event| {
+                event.done = false;
+                hook.emit(event);
+            })
+        });
+        let Some(stats) = try_apply(source, &spool_wav, args, dual_pass, &norm_options)? else {
+            return Ok(None);
+        };
+        let mut publish_options = CopyOptions::default();
+        publish_options.cancel = options.cancel.clone();
+        publish_options.max_rss_bytes = options.max_rss_bytes;
+        publish_options.progress = options.progress.clone();
+        publish_options.metadata_set = options.metadata_set.clone();
+        publish_options.metadata_delete = options.metadata_delete.clone();
+        publish_options.stream_metadata_set = options.stream_metadata_set.clone();
+        publish_options.stream_metadata_delete = options.stream_metadata_delete.clone();
+        let source_matroska_metadata = Some(
+            crate::native_export::pcm_matroska::extract_source_pcm_metadata(
+                source,
+                options.streams.first().copied(),
+                true,
+                Some(options.max_packet_bytes),
+                options.cancel.as_ref(),
+            )?,
+        );
+        crate::native_export::export_audio_pcm_transformed_with_source_metadata(
+            &spool_wav,
+            destination,
+            None,
+            1.0,
+            None,
+            None,
+            &publish_options,
+            source_matroska_metadata,
+        )?;
+        return Ok(Some(stats));
+    }
+    if ext == Some("wav") && has_metadata_mutations(options) && !valid_wave_metadata_options(options) {
+        if !options.stream_metadata_set.is_empty() || !options.stream_metadata_delete.is_empty() {
+            return Err("loudnorm to .wav does not support stream metadata mutations".into());
+        }
+        fvid_media::owned_wave_metadata::edit_info_chunks(
+            &[],
+            &options.metadata_delete,
+            &options.metadata_set,
+        )?;
+        return Err("invalid WAVE INFO metadata mutation".into());
+    }
     let normalize = |input: &Path, options: &CopyOptions| {
         if dual_pass {
             fvid_media::owned_loudnorm::apply_loudnorm_dual(input, destination, args, options)
@@ -166,6 +325,28 @@ pub fn try_apply(
             fvid_media::owned_loudnorm::apply_loudnorm(input, destination, args, options)
         }
     };
+    if !valid_wave_metadata_options(options) {
+        return Ok(None);
+    }
+    if fvid_media::owned_container_loudness::recognizes_standalone_audio(source)
+        .map_err(|e| crate::invalid(&e))?
+    {
+        if destination.extension().and_then(|s| s.to_str()) == Some("wav")
+            && fvid_media::owned_container_loudnorm::supports_plan(source, args, options)
+        {
+            return Ok(Some(
+                fvid_media::owned_container_loudnorm::apply(
+                    source,
+                    destination,
+                    args,
+                    dual_pass,
+                    options,
+                )
+                .map_err(|e| crate::invalid(&e))?,
+            ));
+        }
+        return Ok(None);
+    }
     if crate::native_pcm::is_wave(source)? {
         if fvid_media::owned_loudnorm::supports_request(
             source,
@@ -176,14 +357,6 @@ pub fn try_apply(
         ) {
             return Ok(Some(normalize(source, options)?));
         }
-        return Ok(None);
-    }
-    if options.max_controlled_bytes.is_some()
-        || !options.metadata_set.is_empty()
-        || !options.metadata_delete.is_empty()
-        || !options.stream_metadata_set.is_empty()
-        || !options.stream_metadata_delete.is_empty()
-    {
         return Ok(None);
     }
     // PCE bootstrap can read the first ADTS payload during metadata inspection.
@@ -206,7 +379,28 @@ pub fn try_apply(
             source, destination, args, dual_pass, options,
         )?));
     }
-    if !crate::native_media::is_owned_audio_trim_source(source)? {
+    let native_supported = options.max_controlled_bytes.is_none()
+        && options.metadata_set.is_empty()
+        && options.metadata_delete.is_empty()
+        && crate::native_media::is_owned_audio_trim_source(source)?
+        && selected_audio(source, options).is_ok_and(|idx| {
+            crate::native_media::audio_source_info_selected(source, Some(idx)).is_ok()
+        });
+    if !native_supported {
+        if destination.extension().and_then(|s| s.to_str()) == Some("wav")
+            && fvid_media::owned_container_loudnorm::supports_plan(source, args, options)
+        {
+            return Ok(Some(
+                fvid_media::owned_container_loudnorm::apply(
+                    source,
+                    destination,
+                    args,
+                    dual_pass,
+                    options,
+                )
+                .map_err(|e| crate::invalid(&e))?,
+            ));
+        }
         return Ok(None);
     }
     if options.streams.len() > 1 {

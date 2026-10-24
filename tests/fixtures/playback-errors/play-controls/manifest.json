@@ -1,0 +1,16 @@
+{
+  "generator": "scripts/generate_play_controls_regressions.py",
+  "improvement_id": "FVID-0202",
+  "fixtures": [
+    {
+      "file": "two-frame-420.y4m",
+      "size": 58,
+      "description": "Synthetic 2-frame 2x2 Y4M 4:2:0 stream at 10 fps for Playback thread seek-past-EOF single Ended event verification"
+    },
+    {
+      "file": "arrow-in-dialogue.ass",
+      "size": 525,
+      "description": "Synthetic ASS subtitle file containing '-->' in header/dialogue and non-Events Dialogue lines"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "batch": 235,
+  "ids": ["FVID-0242"],
+  "title": "Support rotated MP4 video tracks in owned video decode, bridge, and multitrack lossless export, account for trimmed AAC audio sample frames in MP4 multitrack interval export, and align fvid::media::probe_as format hints",
+  "scope": [
+    "crates/fvid-media/src/owned_mp4_video_decode.rs",
+    "crates/fvid-media/src/owned_mp4_video_bridge.rs",
+    "crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+    "crates/fvid-media/src/owned_mp4_aac_plan_impl.rs",
+    "crates/fvid-media/src/owned_mp4_matroska_impl.rs",
+    "src/media_probe.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/rotated-mp4-decode-export-probe/avc-rotated-90-anamorphic.mp4",
+    "tests/fixtures/playback-errors/rotated-mp4-decode-export-probe/avc-rotated-90-multitrack-aac.mp4",
+    "tests/fixtures/playback-errors/rotated-mp4-decode-export-probe/manifest.json"
+  ],
+  "generators": [
+    "scripts/generate_rotated_mp4_decode_export_probe_regressions.py",
+    "scripts/test_rotated_mp4_decode_export_probe_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-235-pre-edit/crates/fvid-media/src/owned_mp4_video_decode.rs",
+      "docs/improvements/snapshots/batch-235-pre-edit/crates/fvid-media/src/owned_mp4_video_bridge.rs",
+      "docs/improvements/snapshots/batch-235-pre-edit/crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+      "docs/improvements/snapshots/batch-235-pre-edit/crates/fvid-media/src/owned_mp4_aac_plan_impl.rs",
+      "docs/improvements/snapshots/batch-235-pre-edit/crates/fvid-media/src/owned_mp4_matroska_impl.rs",
+      "docs/improvements/snapshots/batch-235-pre-edit/src/media_probe.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-235-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-235-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-235-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test rotated_mp4_decode_export_probe_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test multitrack_avc_mp4_stream_metadata_regressions --test scheduled_overlay_depth_cli_filter_regressions --test lossless_plan_cli_routing_regressions",
+      "passed": 3,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 -m unittest scripts/test_rotated_mp4_decode_export_probe_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

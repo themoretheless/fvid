@@ -1,0 +1,47 @@
+{
+  "batch": 220,
+  "ids": ["FVID-0227"],
+  "title": "Support custom container and stream text metadata tags across MP4-to-Matroska remux and plan_remux and apply stream metadata deletions in Y4M and multitrack MP4 lossless exports",
+  "scope": [
+    "crates/fvid-media/src/owned_mp4_remux.rs",
+    "crates/fvid-media/src/owned_mp4_matroska_impl.rs",
+    "crates/fvid-media/src/owned_matroska.rs",
+    "crates/fvid-media/src/owned_mp4_multitrack_export.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/mp4-remux-custom-tags/two-track-avc.mp4",
+    "tests/fixtures/playback-errors/mp4-remux-custom-tags/tiny-two-frames.y4m"
+  ],
+  "generators": [
+    "scripts/generate_mp4_remux_custom_tags_regressions.py",
+    "scripts/test_mp4_remux_custom_tags_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-220-pre-edit/crates/fvid-media/src/owned_mp4_remux.rs",
+      "docs/improvements/snapshots/batch-220-pre-edit/crates/fvid-media/src/owned_mp4_matroska_impl.rs",
+      "docs/improvements/snapshots/batch-220-pre-edit/crates/fvid-media/src/owned_matroska.rs",
+      "docs/improvements/snapshots/batch-220-pre-edit/crates/fvid-media/src/owned_mp4_multitrack_export.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-220-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-220-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-220-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test mp4_remux_custom_tags_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test mp4_matroska_remux_rss_regressions --test adts_matroska_audio_metadata_regressions --test subtitle_normalize_metadata_regressions --test lossless_plan_cli_routing_regressions",
+      "passed": 4,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_mp4_remux_custom_tags_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

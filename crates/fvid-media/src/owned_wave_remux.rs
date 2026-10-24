@@ -53,6 +53,31 @@ pub fn trim(
     to: i64,
     options: &CopyOptions,
 ) -> Result<CopyStats> {
+    if supports(source, destination, options) {
+        return copy_wave(source, destination, Some((from, to)), options).map(|(stats, _)| stats);
+    }
+    let transform = fvid_media_info::AudioDecodeTransform {
+        interval: Some((from, to)),
+        ..Default::default()
+    };
+    if crate::owned_audio_export::supports(source, destination, transform, options) {
+        let stats = crate::owned_audio_export::decode_audio_transformed(
+            source,
+            destination,
+            transform,
+            options,
+        )?;
+        return Ok(CopyStats {
+            packets: stats.decoded_frames,
+            payload_bytes: stats
+                .sample_frames
+                .saturating_mul(u64::try_from(stats.channels).unwrap_or(0))
+                .saturating_mul(4),
+            segments: 1,
+            backend: "fvid",
+            fvid_payload_copies: 0,
+        });
+    }
     copy_wave(source, destination, Some((from, to)), options).map(|(stats, _)| stats)
 }
 /// Concatenate compatible PCM WAVE streams without decoding or seam rounding.

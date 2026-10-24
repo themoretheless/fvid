@@ -141,7 +141,7 @@ pub fn decode_video_pipeline_overlay_step(
             RawFrame::Planar8(p) => planar_format(p.width, p.height, p.chroma_width, p.chroma_height)?,
             RawFrame::Yuv { sx, sy, .. } => planar_format(width, height, width / sx, height / sy)?,
         };
-        if !geometry.is_identity() || !filters.is_empty() || compositor.is_some() {
+        if reader.insets() != [0; 4] || !geometry.is_identity() || !filters.is_empty() || compositor.is_some() {
             let mut output = geometry.apply_cropped_display(&frame, width, height, reader.rotation(), reader.insets())?;
             output_width = u32::try_from(output.width).map_err(|_| invalid("video width overflow"))?;
             output_height = u32::try_from(output.height).map_err(|_| invalid("video height overflow"))?;
@@ -441,7 +441,7 @@ pub fn is_aac_source(path: &std::path::Path) -> std::io::Result<bool> {
                 .map_err(std::io::Error::other)?;
             Ok(reader.tracks().iter().any(|track| track.handler == *b"soun" && track.codec == *b"mp4a"))
         }
-        Ok(()) => Ok(crate::container::adts::header(&prefix).is_some()),
+        Ok(()) => Ok(!prefix.starts_with(b"ID3") && crate::container::adts::header(&prefix).is_some()),
         Err(error) if error.kind() == std::io::ErrorKind::UnexpectedEof => Ok(false),
         Err(error) => Err(error),
     }
@@ -546,12 +546,14 @@ fn audio_index(kinds: impl Iterator<Item=bool>, selected: Option<usize>) -> Resu
 }
 pub(crate) fn mp4_aac_index<R: std::io::Read + std::io::Seek>(reader: &crate::container::mp4::Mp4Reader<R>, selected: Option<usize>) -> Result<usize> {
     if selected.is_some() && !reader.refused().is_empty() { return Err(invalid("cannot select an MP4 stream while some sample entries are unindexed")); }
-    let index = audio_index(reader.tracks().iter().map(|t| t.handler == *b"soun"),selected)?;
+    let automatic = if selected.is_none() { reader.automatic_track_indices(&[*b"soun"]) } else { Vec::new() };
+    let index = audio_index(reader.tracks().iter().enumerate().map(|(i, t)| t.handler == *b"soun" && (selected.is_some() || automatic.contains(&i))),selected)?;
     if reader.tracks()[index].codec != *b"mp4a" { return Err(invalid("selected MP4 audio stream is not AAC")); }
     Ok(index)
 }
 pub(crate) fn matroska_aac_index<R: std::io::Read + std::io::Seek>(reader: &crate::container::webm::WebmReader<R>, selected: Option<usize>) -> Result<usize> {
-    let index = audio_index(reader.tracks.iter().map(|t| t.kind == 2),selected)?;
+    let preferred = if selected.is_none() { reader.preferred_track_numbers(&reader.tracks.iter().filter(|t| t.kind == 2).map(|t| t.number).collect::<Vec<_>>()) } else { Vec::new() };
+    let index = audio_index(reader.tracks.iter().map(|t| t.kind == 2 && (selected.is_some() || preferred.contains(&t.number))),selected)?;
     if reader.tracks[index].codec != "A_AAC" { return Err(invalid("selected Matroska audio stream is not AAC")); }
     Ok(index)
 }
@@ -798,8 +800,17 @@ pub(crate) fn mp4_audio_index<R: std::io::Read + std::io::Seek>(
             "cannot select an MP4 stream while some sample entries are unindexed",
         ));
     }
+    let automatic = if selected.is_none() {
+        reader.automatic_track_indices(&[*b"soun"])
+    } else {
+        Vec::new()
+    };
     let index = audio_index(
-        reader.tracks().iter().map(|t| t.handler == *b"soun"),
+        reader
+            .tracks()
+            .iter()
+            .enumerate()
+            .map(|(i, t)| t.handler == *b"soun" && (selected.is_some() || automatic.contains(&i))),
         selected,
     )?;
     if !matches!(&reader.tracks()[index].codec, b"mp4a" | b"alac" | b"sowt" | b"twos" | b"fl32" | b"fl64" | b"in24" | b"in32" | b"raw ") {
@@ -830,7 +841,25 @@ pub fn audio_source_info_selected(
             let track=&reader.tracks[index];
             let decoder=if in_band_ps {MatroskaTimelineDecoder::with_in_band_ps(track)?.0} else {crate::native_audio_decoder::PacketPcmDecoder::from_matroska(track)?};
             if track.sample_rate!=u64::from(decoder.sample_rate()) || (!in_band_ps && track.channels!=u64::from(decoder.channels())) {return Err(invalid("Matroska audio geometry disagrees with configuration"));}
-            return Ok(AudioSourceInfo {channel_mask:decoder.channel_mask(),stream_index:index,sample_rate:decoder.sample_rate(),channels:decoder.channels(),codec:match track.codec.as_str() {"A_ALAC"=>"alac","A_PCM/INT/LIT"|"A_PCM/INT/BIG" if track.bit_depth==8=>"pcm_u8","A_PCM/INT/LIT"=>"pcm_sle","A_PCM/INT/BIG"=>"pcm_sbe","A_PCM/FLOAT/IEEE"=>"pcm_fle",_=>"aac"}});
+            return Ok(AudioSourceInfo {
+                channel_mask: decoder.channel_mask(),
+                stream_index: index,
+                sample_rate: decoder.sample_rate(),
+                channels: decoder.channels(),
+                codec: match (track.codec.as_str(), track.bit_depth) {
+                    ("A_ALAC", _) => "alac",
+                    ("A_PCM/INT/LIT" | "A_PCM/INT/BIG", 8) => "pcm_u8",
+                    ("A_PCM/INT/LIT", 16) => "pcm_s16le",
+                    ("A_PCM/INT/LIT", 24) => "pcm_s24le",
+                    ("A_PCM/INT/LIT", 32) => "pcm_s32le",
+                    ("A_PCM/INT/BIG", 16) => "pcm_s16be",
+                    ("A_PCM/INT/BIG", 24) => "pcm_s24be",
+                    ("A_PCM/INT/BIG", 32) => "pcm_s32be",
+                    ("A_PCM/FLOAT/IEEE", 32) => "pcm_f32le",
+                    ("A_PCM/FLOAT/IEEE", 64) => "pcm_f64le",
+                    _ => "aac",
+                },
+            });
         }
         let mut reader = crate::container::mp4::Mp4Reader::open(
             BufReader::new(File::open(source)?),
@@ -848,7 +877,21 @@ pub fn audio_source_info_selected(
             stream_index: index,
             sample_rate: decoder.sample_rate(),
             channels: decoder.channels(),
-            codec: match &track.codec { b"alac"=>"alac",b"raw "=>"pcm_u8",b"sowt"=>"pcm_sle",b"twos"=>"pcm_sbe",b"in24"|b"in32"=>if track.configuration.first()==Some(&1) {"pcm_sle"} else {"pcm_sbe"},b"fl32"|b"fl64"=>"pcm_fle",_=>"aac" },
+            codec: match (&track.codec, track.configuration.first() == Some(&1)) {
+                (b"alac", _) => "alac",
+                (b"raw ", _) => "pcm_u8",
+                (b"sowt", _) => "pcm_s16le",
+                (b"twos", _) => "pcm_s16be",
+                (b"in24", true) => "pcm_s24le",
+                (b"in24", false) => "pcm_s24be",
+                (b"in32", true) => "pcm_s32le",
+                (b"in32", false) => "pcm_s32be",
+                (b"fl32", false) => "pcm_f32be",
+                (b"fl32", true) => "pcm_f32le",
+                (b"fl64", false) => "pcm_f64be",
+                (b"fl64", true) => "pcm_f64le",
+                _ => "aac",
+            },
         })
     } else {
         let info = aac_source_info_selected(source, selected)?;
@@ -863,7 +906,8 @@ pub fn audio_source_info_selected(
 }
 
 pub(crate) fn matroska_audio_index<R:std::io::Read+std::io::Seek>(reader:&crate::container::webm::WebmReader<R>,selected:Option<usize>)->Result<usize> {
-    let index=audio_index(reader.tracks.iter().map(|t|t.kind==2),selected)?;
+    let preferred=if selected.is_none() {reader.preferred_track_numbers(&reader.tracks.iter().filter(|t|t.kind==2).map(|t|t.number).collect::<Vec<_>>())} else {Vec::new()};
+    let index=audio_index(reader.tracks.iter().map(|t|t.kind==2&&(selected.is_some()||preferred.contains(&t.number))),selected)?;
     if !matches!(reader.tracks[index].codec.as_str(),"A_AAC"|"A_ALAC"|"A_PCM/INT/LIT"|"A_PCM/INT/BIG"|"A_PCM/FLOAT/IEEE") {return Err(invalid("selected Matroska audio stream is not supported by the owned export"));}
     Ok(index)
 }

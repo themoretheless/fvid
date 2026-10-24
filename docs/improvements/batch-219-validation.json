@@ -1,0 +1,58 @@
+{
+  "batch": 219,
+  "ids": ["FVID-0226"],
+  "title": "Support Matroska container and stream metadata mutations and per-cue packet limits across convert-subtitles and normalize-loudness in API and CLI",
+  "scope": [
+    "crates/fvid-media/src/lib.rs",
+    "crates/fvid-media/src/owned_subtitle.rs",
+    "crates/fvid-media/src/owned_subtitle_impl.rs",
+    "src/native_subtitle.rs",
+    "src/native_pcm/normalize.rs",
+    "src/native_plan.rs",
+    "src/media.rs",
+    "src/media_cli.rs",
+    "tests/loudnorm_wave_metadata_routing_regressions.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/subtitle-normalize-metadata/cues-two.srt",
+    "tests/fixtures/playback-errors/subtitle-normalize-metadata/cues-two.ass",
+    "tests/fixtures/playback-errors/subtitle-normalize-metadata/tone-1s-48k.wav"
+  ],
+  "generators": [
+    "scripts/generate_subtitle_normalize_metadata_regressions.py",
+    "scripts/test_subtitle_normalize_metadata_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-219-pre-edit/crates/fvid-media/src/lib.rs",
+      "docs/improvements/snapshots/batch-219-pre-edit/crates/fvid-media/src/owned_subtitle.rs",
+      "docs/improvements/snapshots/batch-219-pre-edit/crates/fvid-media/src/owned_subtitle_impl.rs",
+      "docs/improvements/snapshots/batch-219-pre-edit/src/native_subtitle.rs",
+      "docs/improvements/snapshots/batch-219-pre-edit/src/native_pcm/normalize.rs",
+      "docs/improvements/snapshots/batch-219-pre-edit/src/native_plan.rs",
+      "docs/improvements/snapshots/batch-219-pre-edit/src/media.rs",
+      "docs/improvements/snapshots/batch-219-pre-edit/src/media_cli.rs",
+      "docs/improvements/snapshots/batch-219-pre-edit/tests/loudnorm_wave_metadata_routing_regressions.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-219-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-219-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-219-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test subtitle_normalize_metadata_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test native_subtitle_convert --test owned_subtitle --test loudnorm_wave_metadata_routing_regressions --test mix_merge_subtitle_controls_regressions",
+      "passed": 8,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_subtitle_normalize_metadata_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

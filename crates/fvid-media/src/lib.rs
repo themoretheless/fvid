@@ -223,10 +223,48 @@ pub mod owned_adts_remux;
 pub mod owned_concat;
 
 pub mod owned_subtitle;
-pub fn convert_subtitles(source: &std::path::Path, destination: &std::path::Path,
-    options: &fvid_media_info::SubtitleConvertOptions) -> std::result::Result<fvid_media_info::NativeSubtitleStats, String> {
-    owned_subtitle::try_convert_with_options(source, destination, options)
-        .map_err(|e| e.to_string())?.ok_or_else(|| "subtitle source is not supported by owned conversion".into())
+pub fn convert_subtitles(
+    source: &std::path::Path,
+    destination: &std::path::Path,
+    options: &fvid_media_info::SubtitleConvertOptions,
+) -> std::result::Result<fvid_media_info::NativeSubtitleStats, String> {
+    convert_subtitles_with_controls(source, destination, options, &Default::default())
+}
+
+pub fn convert_subtitles_with_controls(
+    source: &std::path::Path,
+    destination: &std::path::Path,
+    options: &fvid_media_info::SubtitleConvertOptions,
+    controls: &CopyOptions,
+) -> std::result::Result<fvid_media_info::NativeSubtitleStats, String> {
+    match options.codec {
+        fvid_media_info::SubtitleCodec::Ass => {
+            owned_subtitle::try_convert_with_controls(source, destination, options, controls)
+                .map_err(|e| e.to_string())?
+                .ok_or_else(|| "subtitle source is not supported by owned conversion".into())
+        }
+    }
+}
+
+pub fn plan_convert_subtitles(
+    source: &std::path::Path,
+    options: &fvid_media_info::SubtitleConvertOptions,
+) -> std::result::Result<fvid_media_info::MediaPlan, String> {
+    plan_convert_subtitles_with_controls(source, options, &Default::default())
+}
+
+pub fn plan_convert_subtitles_with_controls(
+    source: &std::path::Path,
+    options: &fvid_media_info::SubtitleConvertOptions,
+    controls: &CopyOptions,
+) -> std::result::Result<fvid_media_info::MediaPlan, String> {
+    match options.codec {
+        fvid_media_info::SubtitleCodec::Ass => {
+            owned_subtitle::try_plan_with_controls(source, None, options, controls)
+                .map_err(|e| e.to_string())?
+                .ok_or_else(|| "subtitle source is not supported by owned conversion".into())
+        }
+    }
 }
 
 pub mod owned_alac;
@@ -237,14 +275,14 @@ mod owned_flac_decoder;
 pub mod owned_flac;
 pub mod owned_flac_layout;
 pub mod owned_raw_flac;
-mod owned_flac_probe;
+pub mod owned_flac_probe;
 mod owned_matroska_flac_export;
 pub mod owned_matroska_mp3;
 pub mod owned_matroska_mpeg;
 pub mod owned_mpeg_audio;
 pub mod owned_raw_mp3;
 pub mod owned_raw_mpeg;
-mod owned_mpeg_probe;
+pub mod owned_mpeg_probe;
 mod owned_matroska_mp3_export;
 
 mod owned_matroska_alac_export;

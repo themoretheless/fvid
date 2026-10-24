@@ -1,0 +1,66 @@
+{
+  "provenance": "Pure Python authored 16x16 neutral VP9 fMP4, 3 independent 20ms frames at 50Hz. Probes ISO/IEC 14496-12:2015 8.8.3 (trex), 8.8.7 (tfhd), and 8.8.12 (tfdt) exact box-size validation and default flag resolution. No private codec parameters, encoder, FFmpeg, or network.",
+  "controls": [
+    {
+      "file": "tfhd-overrides-trex-nonsync.mp4",
+      "mode": "tfhd-sync-overrides-trex-nonsync",
+      "sync": [
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "file": "tfhd-nonsync-overrides-trex-sync-with-lead.mp4",
+      "mode": "tfhd-nonsync-overrides-trex-sync-with-lead",
+      "sync": [
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "file": "tfdt-v1-exact.mp4",
+      "mode": "tfdt-v1-exact-with-trex-zero-flags",
+      "sync": [
+        true,
+        true,
+        true
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "file": "tfhd-trailing-bytes.mp4",
+      "expected_error": "MP4 track-fragment header size does not match its flags"
+    },
+    {
+      "file": "tfhd-no-flags-trailing-bytes.mp4",
+      "expected_error": "MP4 track-fragment header size does not match its flags"
+    },
+    {
+      "file": "trex-trailing-bytes.mp4",
+      "expected_error": "MP4 track-extends box size does not match its fields"
+    },
+    {
+      "file": "tfdt-v0-trailing-bytes.mp4",
+      "expected_error": "MP4 track-fragment decode time size does not match its version"
+    },
+    {
+      "file": "tfdt-v1-trailing-bytes.mp4",
+      "expected_error": "MP4 track-fragment decode time size does not match its version"
+    }
+  ],
+  "sha256": {
+    "regular.mp4": "e98393bb08dedd0b6f34eb73546111d11686b6f2daffa7cb83828e9d62ff27cb",
+    "frame.vp9": "217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c",
+    "tfhd-overrides-trex-nonsync.mp4": "c8b67565e378ab0c1484714bdce93117ab0f429aa14882d5190339b2d03465d4",
+    "tfhd-nonsync-overrides-trex-sync-with-lead.mp4": "333c5412fd813fa062c0dd36e685b69252113365cca45d80357db1814751fbae",
+    "tfdt-v1-exact.mp4": "9efedd7260906856e19eedeaf052f650701e013098d1020d5d8bcc57d335dc67",
+    "tfhd-trailing-bytes.mp4": "983b9620958732ebed6d3a99a4ff3bbba6271ee493a33b7391e22fe292f8abfa",
+    "tfhd-no-flags-trailing-bytes.mp4": "7454cfdb4b2ebddd4c623f3b16f484da7f6c087e145c013a179e4185b1f8ba8b",
+    "trex-trailing-bytes.mp4": "2336eee8c288dc4c67518cedbaf1fe2c5d768260cf007bb67353ac94d41fdb81",
+    "tfdt-v0-trailing-bytes.mp4": "d6db68ae6ee749ff0f68747e41832098f7afb64cb95f76028358b4aed86dfd0b",
+    "tfdt-v1-trailing-bytes.mp4": "3a3d247b58bf675b180dd0c01225875a09f908ecfa503e02f0db3dff4ac25b6b"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "batch": 203,
+  "ids": ["FVID-0210"],
+  "title": "Distinguish G.711 A-law/mu-law WAVE from linear PCM in native_pcm::is_wave, route selected secondary Matroska/MP4 audio codecs (FLAC, Opus, MPEG, ADPCM) to owned fvid_media in media and native_loudnorm, and dispatch owned audio decode/plan/mix/merge in media_cli without legacy features",
+  "scope": [
+    "src/native_pcm.rs",
+    "src/media.rs",
+    "src/native_loudnorm.rs",
+    "src/media_cli.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/media-audio-routing/g711-alaw-48k.wav",
+    "tests/fixtures/playback-errors/media-audio-routing/g711-mulaw-48k.wav",
+    "tests/fixtures/playback-errors/media-audio-routing/ogg-opus-mono-48k.ogg",
+    "tests/fixtures/playback-errors/media-audio-routing/multitrack-pcm-flac.mka",
+    "tests/fixtures/playback-errors/media-audio-routing/multitrack-pcm-ima4.mov",
+    "tests/fixtures/playback-errors/media-audio-routing/video.mkv",
+    "tests/fixtures/playback-errors/media-audio-routing/manifest.json"
+  ],
+  "generators": [
+    "scripts/generate_media_audio_routing_regressions.py",
+    "scripts/test_media_audio_routing_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-203-pre-edit/native_pcm.rs",
+      "docs/improvements/snapshots/batch-203-pre-edit/media.rs",
+      "docs/improvements/snapshots/batch-203-pre-edit/native_loudnorm.rs",
+      "docs/improvements/snapshots/batch-203-pre-edit/media_cli.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-203-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-203-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-203-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --test media_audio_routing_regressions",
+      "passed": 3,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test --test native_audio_api --test native_audio_plan --test native_wave_audio --test native_loudnorm_cli --test owned_container_loudnorm --test owned_container_loudness --test wave_ogg_flac_plan_regressions --test probe_loudness_audio_regressions --test container_loudness_plan_regressions",
+      "passed": 43,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_media_audio_routing_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

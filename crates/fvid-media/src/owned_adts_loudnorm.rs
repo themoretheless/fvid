@@ -3,20 +3,36 @@ use fvid_control::{CopyOptions, ProgressHook};
 use fvid_media_info::{LoudnormStats, MediaPlan, PlanStep};
 use std::path::Path;
 type Result<T> = std::result::Result<T, String>;
+fn policies(options: &CopyOptions) -> bool {
+    crate::owned_audio_export::simple_options(options)
+        && options.metadata_set.len() + options.metadata_delete.len() <= 64
+        && !options
+            .metadata_set
+            .iter()
+            .any(|(_, value)| value.contains('\0'))
+}
 pub(crate) fn supports(
     source: &Path,
     destination: &Path,
     args: Option<&str>,
     options: &CopyOptions,
 ) -> bool {
-    destination.extension().and_then(|s| s.to_str()) == Some("wav")
+    policies(options)
+        && destination.extension().and_then(|s| s.to_str()) == Some("wav")
         && crate::owned_loudnorm::validate_request(args).is_ok()
-        && crate::owned_adts_loudness::supports(source, options)
+        && crate::owned_adts_loudness::supports(
+            source,
+            &crate::owned_adts_export::pcm_decode_options(options),
+        )
 }
 /// Metadata-only qualification for frontend dispatch; packet tools are checked during execution.
 pub fn supports_plan(source: &Path, args: Option<&str>, options: &CopyOptions) -> bool {
-    crate::owned_loudnorm::validate_request(args).is_ok()
-        && crate::owned_adts_loudness::supports_plan(source, options)
+    policies(options)
+        && crate::owned_loudnorm::validate_request(args).is_ok()
+        && crate::owned_adts_loudness::supports_plan(
+            source,
+            &crate::owned_adts_export::pcm_decode_options(options),
+        )
 }
 pub fn apply(
     source: &Path,
@@ -25,6 +41,9 @@ pub fn apply(
     dual_pass: bool,
     options: &CopyOptions,
 ) -> Result<LoudnormStats> {
+    if !policies(options) {
+        return Err("owned ADTS loudnorm requires stream 0 and valid WAVE INFO metadata edits".into());
+    }
     let resolved = crate::owned_loudnorm::validate_request(args)?;
     if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
         return Err("owned ADTS loudnorm requires .wav output".into());
@@ -32,10 +51,11 @@ pub fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
+    let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     // Read-only configuration/policy preflight; actual packet failures propagate
     // once execution starts, without retry through the legacy backend.
-    crate::owned_adts_loudness::validate_configuration(source, options)?;
-    let spool = crate::owned_adts_export::decode_to_wave(source, None, options)?;
+    crate::owned_adts_loudness::validate_configuration(source, &decode_options)?;
+    let spool = crate::owned_adts_export::decode_to_wave(source, None, &decode_options)?;
     let mut pcm_options = options.clone();
     pcm_options.max_packets = None;
     pcm_options.max_packet_bytes = CopyOptions::default().max_packet_bytes;
@@ -70,8 +90,12 @@ pub fn plan_loudnorm(
     dual_pass: bool,
     options: &CopyOptions,
 ) -> Result<MediaPlan> {
+    if !policies(options) {
+        return Err("owned ADTS loudnorm requires stream 0 and valid WAVE INFO metadata edits".into());
+    }
     let resolved = crate::owned_loudnorm::validate_request(args)?;
-    let mut plan = crate::owned_adts_loudness::plan_loudness(source, options)?;
+    let decode_options = crate::owned_adts_export::pcm_decode_options(options);
+    let mut plan = crate::owned_adts_loudness::plan_loudness(source, &decode_options)?;
     plan.command = "loudnorm".into();
     plan.notes
         .retain(|note| !note.contains("measurement completion"));
@@ -92,6 +116,12 @@ pub fn plan_loudnorm(
     });
     if crate::owned_loudnorm::report_requested(Some(&resolved))? {
         plan.steps.push(PlanStep{action:"analyze-output".into(),detail:"owned output loudness/true-peak measurement before publication; print JSON/summary after successful publication".into()});
+    }
+    if !options.metadata_set.is_empty() || !options.metadata_delete.is_empty() {
+        plan.steps.push(PlanStep {
+            action: "metadata".into(),
+            detail: "apply owned RIFF INFO container tag edits to final WAVE".into(),
+        });
     }
     plan.notes.push("normalization backend: fvid; owned AAC decode and WAVE normalization; dynamic PCM is not claimed equivalent to libavfilter".into());
     plan.steps.push(PlanStep{action:"write".into(),detail:"owned float32 .wav writer; no overwrite; completion after publication; remove private spool on every outcome".into()});

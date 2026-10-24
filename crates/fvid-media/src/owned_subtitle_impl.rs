@@ -14,9 +14,10 @@ impl Drop for Temporary {
     }
 }
 fn timestamp(value: &str) -> Result<u64> {
-    let (clock, fraction) = value
-        .trim()
+    let trimmed = value.trim();
+    let (clock, fraction) = trimmed
         .split_once(',')
+        .or_else(|| trimmed.split_once('.'))
         .ok_or_else(|| invalid("invalid SRT timestamp"))?;
     let fields: Vec<_> = clock.split(':').collect();
     if fields.len() != 3
@@ -163,24 +164,28 @@ fn ass_text(text: &str) -> Option<String> {
                 continue;
             };
             let entity = &rest[1..end];
-            let ch = match entity {
-                "amp" => '&',
-                "lt" => '<',
-                "gt" => '>',
-                "quot" => '"',
-                "apos" => '\'',
-                "nbsp" => '\u{a0}',
-                _ => {
-                    let number = if let Some(hex) = entity
-                        .strip_prefix("#x")
-                        .or_else(|| entity.strip_prefix("#X"))
-                    {
-                        u32::from_str_radix(hex, 16).ok()?
-                    } else {
-                        entity.strip_prefix('#')?.parse::<u32>().ok()?
-                    };
-                    char::from_u32(number)?
-                }
+            let ch = if entity.eq_ignore_ascii_case("amp") {
+                '&'
+            } else if entity.eq_ignore_ascii_case("lt") {
+                '<'
+            } else if entity.eq_ignore_ascii_case("gt") {
+                '>'
+            } else if entity.eq_ignore_ascii_case("quot") {
+                '"'
+            } else if entity.eq_ignore_ascii_case("apos") {
+                '\''
+            } else if entity.eq_ignore_ascii_case("nbsp") {
+                '\u{a0}'
+            } else {
+                let number = if let Some(hex) = entity
+                    .strip_prefix("#x")
+                    .or_else(|| entity.strip_prefix("#X"))
+                {
+                    u32::from_str_radix(hex, 16).ok()?
+                } else {
+                    entity.strip_prefix('#')?.parse::<u32>().ok()?
+                };
+                char::from_u32(number)?
             };
             if matches!(ch, '{' | '}' | '\\') || ch.is_control() {
                 return None;
@@ -233,12 +238,414 @@ pub fn try_convert(
     destination: &Path,
     streams: &[usize],
 ) -> Result<Option<SubtitleStats>> {
-    if !is_matroska_source(source)? {
-        if source.extension().and_then(|s|s.to_str()).is_some_and(|s|s.eq_ignore_ascii_case("ass")) {
-            return try_convert_ass(source,destination,streams);
-        }
-        return try_convert_srt(source, destination, streams);
+    try_convert_controlled(
+        source,
+        destination,
+        streams,
+        usize::MAX,
+        None,
+        None,
+        None,
+        None,
+    )
+}
+
+pub fn try_convert_controlled(
+    source: &Path,
+    destination: &Path,
+    streams: &[usize],
+    max_packet_bytes: usize,
+    max_packets: Option<u64>,
+    max_rss_bytes: Option<u64>,
+    cancel: Option<&media_control::CancelFlag>,
+    progress: Option<&media_control::ProgressHook>,
+) -> Result<Option<SubtitleStats>> {
+    let mut controls = media_control::CopyOptions::default();
+    controls.streams = streams.to_vec();
+    controls.max_packet_bytes = max_packet_bytes;
+    controls.max_packets = max_packets;
+    controls.max_rss_bytes = max_rss_bytes;
+    controls.cancel = cancel.cloned();
+    controls.progress = progress.cloned();
+    try_convert_with_controls(
+        source,
+        destination,
+        &media_info::SubtitleConvertOptions {
+            streams: streams.to_vec(),
+            codec: media_info::SubtitleCodec::Ass,
+        },
+        &controls,
+    )
+}
+
+pub fn try_plan_with_controls(
+    source: &Path,
+    destination: Option<&Path>,
+    options: &media_info::SubtitleConvertOptions,
+    controls: &media_control::CopyOptions,
+) -> Result<Option<media_info::MediaPlan>> {
+    if controls.max_controlled_bytes.is_some() {
+        return Err(invalid(
+            "convert-subtitles does not support controlled memory budgets",
+        ));
     }
+    let streams = if !options.streams.is_empty() {
+        options.streams.as_slice()
+    } else {
+        controls.streams.as_slice()
+    };
+    let max_packet_bytes = controls.max_packet_bytes;
+    let max_packets = controls.max_packets;
+    let max_rss_bytes = controls.max_rss_bytes;
+    let cancel = controls.cancel.as_ref();
+    let check_controls = || -> Result<()> {
+        if cancel.is_some_and(|c| c.is_cancelled()) {
+            return Err(invalid("media operation cancelled"));
+        }
+        if max_packet_bytes == 0 {
+            return Err(invalid("packet byte limit must be positive"));
+        }
+        if let Some(limit) = max_rss_bytes {
+            let mut opts = media_control::CopyOptions::default();
+            opts.max_rss_bytes = Some(limit);
+            owned_budget::check_rss_budget(&opts).map_err(|e| invalid(&e))?;
+        }
+        Ok(())
+    };
+    check_controls()?;
+    let planned_dest = destination.unwrap_or_else(|| Path::new("planned-subtitle.mkv"));
+    let (stream_index, source_codec, cues) = if !is_matroska_source(source)? {
+        if source
+            .extension()
+            .and_then(|s| s.to_str())
+            .is_some_and(|s| s.eq_ignore_ascii_case("ass"))
+        {
+            let Some(stats) = try_convert_ass_inner(
+                source,
+                planned_dest,
+                streams,
+                max_packet_bytes,
+                max_packets,
+                Some(controls),
+                &check_controls,
+                true,
+            )?
+            else {
+                return Ok(None);
+            };
+            (0usize, "ass", stats.cues)
+        } else {
+            let Some(stats) = try_convert_srt_inner(
+                source,
+                planned_dest,
+                streams,
+                max_packet_bytes,
+                max_packets,
+                Some(controls),
+                &check_controls,
+                true,
+            )?
+            else {
+                return Ok(None);
+            };
+            (0usize, "subrip", stats.cues)
+        }
+    } else {
+        let mut reader = webm::WebmReader::open(
+            std::io::BufReader::new(File::open(source)?),
+            Default::default(),
+        )?;
+        reader.scan_all()?;
+        let idx = match streams {
+            [] => reader
+                .tracks
+                .iter()
+                .position(|track| track.kind == 17)
+                .unwrap_or(0),
+            [idx] => *idx,
+            _ => 0,
+        };
+        let codec_name = match reader.tracks.get(idx).map(|t| t.codec.as_str()) {
+            Some("S_TEXT/ASS") => "ass",
+            _ => "subrip",
+        };
+        let Some(stats) = try_convert_matroska_inner(
+            source,
+            planned_dest,
+            streams,
+            max_packet_bytes,
+            max_packets,
+            Some(controls),
+            &check_controls,
+            true,
+        )?
+        else {
+            return Ok(None);
+        };
+        (idx, codec_name, stats.cues)
+    };
+    if max_packets.is_some_and(|limit| cues > limit) {
+        return Err(invalid("packet work limit exceeded"));
+    }
+    check_controls()?;
+    let mut steps = vec![media_info::PlanStep {
+        action: if source_codec == "ass" {
+            "copy".into()
+        } else {
+            "decode".into()
+        },
+        detail: format!("validate and convert {cues} {source_codec} subtitle cues to Matroska S_TEXT/ASS"),
+    }];
+    let has_meta = !controls.metadata_set.is_empty()
+        || !controls.metadata_delete.is_empty()
+        || !controls.stream_metadata_set.is_empty()
+        || !controls.stream_metadata_delete.is_empty();
+    if has_meta {
+        steps.push(media_info::PlanStep {
+            action: "metadata".into(),
+            detail: "apply Matroska container and stream 0 metadata mutations".into(),
+        });
+    }
+    steps.push(media_info::PlanStep {
+        action: "publish".into(),
+        detail: "write Matroska S_TEXT/ASS output atomically via temporary file".into(),
+    });
+    let mut notes = vec!["subtitle conversion preserves source cues and Matroska metadata".into()];
+    if max_packet_bytes != media_control::CopyOptions::default().max_packet_bytes
+        || max_packets.is_some()
+        || max_rss_bytes.is_some()
+    {
+        notes.push(format!(
+            "encoded packet limit: {} bytes; packet work limit: {:?}; RSS limit: {:?}",
+            max_packet_bytes, max_packets, max_rss_bytes
+        ));
+    }
+    Ok(Some(media_info::MediaPlan {
+        command: "convert-subtitles".into(),
+        input: source.into(),
+        inputs: vec![source.into()],
+        streams: vec![media_info::PlanStream {
+            index: stream_index,
+            media_type: "subtitle".into(),
+            codec: source_codec.into(),
+            disposition: "convert".into(),
+        }],
+        steps,
+        graph: None,
+        notes,
+    }))
+}
+
+pub fn try_convert_with_controls(
+    source: &Path,
+    destination: &Path,
+    options: &media_info::SubtitleConvertOptions,
+    controls: &media_control::CopyOptions,
+) -> Result<Option<SubtitleStats>> {
+    if controls.max_controlled_bytes.is_some() {
+        return Err(invalid(
+            "convert-subtitles does not support controlled memory budgets",
+        ));
+    }
+    let streams = if !options.streams.is_empty() {
+        options.streams.as_slice()
+    } else {
+        controls.streams.as_slice()
+    };
+    let max_packet_bytes = controls.max_packet_bytes;
+    let max_packets = controls.max_packets;
+    let max_rss_bytes = controls.max_rss_bytes;
+    let cancel = controls.cancel.as_ref();
+    let progress = controls.progress.as_ref();
+    let check_controls = || -> Result<()> {
+        if cancel.is_some_and(|c| c.is_cancelled()) {
+            return Err(invalid("media operation cancelled"));
+        }
+        if max_packet_bytes == 0 {
+            return Err(invalid("packet byte limit must be positive"));
+        }
+        if let Some(limit) = max_rss_bytes {
+            let mut opts = media_control::CopyOptions::default();
+            opts.max_rss_bytes = Some(limit);
+            owned_budget::check_rss_budget(&opts).map_err(|e| invalid(&e))?;
+        }
+        Ok(())
+    };
+    check_controls()?;
+    let stats = if !is_matroska_source(source)? {
+        if source
+            .extension()
+            .and_then(|s| s.to_str())
+            .is_some_and(|s| s.eq_ignore_ascii_case("ass"))
+        {
+            try_convert_ass_inner(
+                source,
+                destination,
+                streams,
+                max_packet_bytes,
+                max_packets,
+                Some(controls),
+                &check_controls,
+                false,
+            )?
+        } else {
+            try_convert_srt_inner(
+                source,
+                destination,
+                streams,
+                max_packet_bytes,
+                max_packets,
+                Some(controls),
+                &check_controls,
+                false,
+            )?
+        }
+    } else {
+        try_convert_matroska_inner(
+            source,
+            destination,
+            streams,
+            max_packet_bytes,
+            max_packets,
+            Some(controls),
+            &check_controls,
+            false,
+        )?
+    };
+    let Some(stats) = stats else {
+        return Ok(None);
+    };
+    if max_packets.is_some_and(|limit| stats.packets_out > limit) {
+        let _ = std::fs::remove_file(destination);
+        return Err(invalid("packet work limit exceeded"));
+    }
+    check_controls()?;
+    if let Some(hook) = progress {
+        hook.emit(media_control::ProgressEvent {
+            packets: stats.packets_out,
+            payload_bytes: stats.payload_bytes,
+            done: true,
+        });
+    }
+    Ok(Some(stats))
+}
+
+type SubtitleMatroskaMetadata = (
+    String,
+    String,
+    FileMetadata,
+    std::collections::BTreeMap<String, String>,
+    std::collections::BTreeMap<usize, std::collections::BTreeMap<String, String>>,
+);
+
+fn apply_subtitle_matroska_metadata(
+    default_name: &str,
+    default_language: &str,
+    base_file: Option<&FileMetadata>,
+    base_text: Option<&std::collections::BTreeMap<String, String>>,
+    base_track_tags: Option<&std::collections::BTreeMap<String, String>>,
+    options: Option<&media_control::CopyOptions>,
+) -> Result<SubtitleMatroskaMetadata> {
+    let mut name = default_name.to_owned();
+    let mut language = default_language.to_owned();
+    let mut metadata = base_file.cloned().unwrap_or_default();
+    let mut text = base_text.cloned().unwrap_or_default();
+    let mut scoped = std::collections::BTreeMap::<
+        usize,
+        std::collections::BTreeMap<String, String>,
+    >::new();
+    if let Some(tags) = base_track_tags.filter(|t| !t.is_empty()) {
+        scoped.insert(0, tags.clone());
+    }
+    if let Some(o) = options {
+        if o.metadata_set.len() + o.metadata_delete.len() > 64 {
+            return Err(invalid("at most 64 container metadata mutations"));
+        }
+        if o.stream_metadata_set.len() + o.stream_metadata_delete.len() > 64 {
+            return Err(invalid("at most 64 stream metadata mutations"));
+        }
+        for (key, value) in &o.metadata_set {
+            if key.is_empty()
+                || key.len() > 128
+                || value.len() > 1024
+                || key.contains('\0')
+                || value.contains('\0')
+            {
+                return Err(invalid("invalid Matroska container metadata"));
+            }
+            text.retain(|k, _| !k.eq_ignore_ascii_case(key));
+            if !metadata.tags.set(key, value) && !value.is_empty() {
+                text.insert(key.to_ascii_uppercase(), value.clone());
+            }
+        }
+        for key in &o.metadata_delete {
+            if key.is_empty() || key.len() > 128 || key.contains('\0') {
+                return Err(invalid("invalid Matroska container metadata key"));
+            }
+            metadata.tags.set(key, "");
+            text.retain(|k, _| !k.eq_ignore_ascii_case(key));
+        }
+        for (index, key, value) in &o.stream_metadata_set {
+            if *index != 0
+                || key.is_empty()
+                || key.len() > 128
+                || value.len() > 1024
+                || key.contains('\0')
+                || value.contains('\0')
+                || matches!(
+                    key.to_ascii_lowercase().as_str(),
+                    "rotate" | "stereo_mode" | "alpha_mode"
+                )
+                || (key.eq_ignore_ascii_case("language") && value.len() > 128)
+            {
+                return Err(invalid("invalid Matroska stream metadata"));
+            }
+            if key.eq_ignore_ascii_case("title") {
+                name.clone_from(value);
+            } else if key.eq_ignore_ascii_case("language") {
+                language.clone_from(value);
+            } else {
+                let entries = scoped.entry(0).or_default();
+                entries.retain(|k, _| !k.eq_ignore_ascii_case(key));
+                if !value.is_empty() {
+                    entries.insert(key.to_ascii_uppercase(), value.clone());
+                }
+            }
+        }
+        for (index, key) in &o.stream_metadata_delete {
+            if *index != 0
+                || key.is_empty()
+                || key.len() > 128
+                || key.contains('\0')
+                || matches!(
+                    key.to_ascii_lowercase().as_str(),
+                    "rotate" | "stereo_mode" | "alpha_mode"
+                )
+            {
+                return Err(invalid("invalid Matroska stream metadata deletion"));
+            }
+            if key.eq_ignore_ascii_case("title") {
+                name.clear();
+            } else if key.eq_ignore_ascii_case("language") {
+                language.clear();
+            } else if let Some(entries) = scoped.get_mut(&0) {
+                entries.retain(|k, _| !k.eq_ignore_ascii_case(key));
+            }
+        }
+    }
+    Ok((name, language, metadata, text, scoped))
+}
+
+fn try_convert_matroska_inner(
+    source: &Path,
+    destination: &Path,
+    streams: &[usize],
+    max_packet_bytes: usize,
+    max_packets: Option<u64>,
+    controls: Option<&media_control::CopyOptions>,
+    check_controls: &impl Fn() -> Result<()>,
+    dry_run: bool,
+) -> Result<Option<SubtitleStats>> {
     let mut reader = webm::WebmReader::open(
         std::io::BufReader::new(File::open(source)?),
         Default::default(),
@@ -267,22 +674,55 @@ pub fn try_convert(
     if track.kind != 17 {
         return Err(invalid("selected stream is not a subtitle"));
     }
+    let base_file = FileMetadata {
+        tags: reader.tags.clone(),
+        chapters: Vec::new(),
+    };
+    let mut base_text = reader.metadata.clone();
+    if !reader.writing_app.is_empty()
+        && reader.writing_app != "FVid"
+        && !base_text.keys().any(|k| k.eq_ignore_ascii_case("encoder"))
+    {
+        base_text.insert("ENCODER".into(), reader.writing_app.clone());
+    }
+    let mut base_track_tags = reader.track_metadata.get(&0).cloned().unwrap_or_default();
+    if let Some(uid) = reader.track_uids.get(&track.number)
+        && let Some(scoped) = reader.track_metadata.get(uid)
+    {
+        base_track_tags.extend(scoped.clone());
+    }
+    let source_language = reader
+        .track_languages
+        .get(&track.number)
+        .unwrap_or(&track.language)
+        .clone();
     if track.codec == "S_TEXT/ASS" {
         if destination.extension().and_then(|s| s.to_str()) != Some("mkv") {
             return Err(invalid("convert-subtitles requires Matroska (.mkv) output"));
         }
-        let (number, name, language, configuration) = (
+        let (number, name, configuration) = (
             track.number,
             track.name.clone(),
-            track.language.clone(),
             track.codec_private.clone(),
         );
+        let meta = apply_subtitle_matroska_metadata(
+            &name,
+            &source_language,
+            Some(&base_file),
+            Some(&base_text),
+            Some(&base_track_tags),
+            controls,
+        )?;
         let mut events = Vec::new();
         let mut bytes = 0usize;
         for i in 0..reader.packets.len() {
+            check_controls()?;
             let packet = &reader.packets[i];
             if packet.track != number {
                 continue;
+            }
+            if max_packets.is_some_and(|limit| events.len() as u64 >= limit) {
+                return Err(invalid("packet work limit exceeded"));
             }
             let start = u64::try_from(packet.pts_ns)
                 .map_err(|_| invalid("subtitle requires nonnegative timestamps"))?;
@@ -293,8 +733,12 @@ pub fn try_convert(
                 .checked_add(duration)
                 .filter(|end| *end <= i64::MAX as u64)
                 .ok_or_else(|| invalid("subtitle timestamp overflow"))?;
+            let packet_size = reader.packet_payload_size(i)?;
+            if packet_size > max_packet_bytes {
+                return Err(invalid("subtitle packet exceeds packet byte limit"));
+            }
             bytes = bytes
-                .checked_add(reader.packet_payload_size(i)?)
+                .checked_add(packet_size)
                 .filter(|n| *n <= 64 << 20)
                 .ok_or_else(|| invalid("subtitle metadata exceeds 64 MiB"))?;
             let payload = reader.read_packet(i)?;
@@ -308,7 +752,14 @@ pub fn try_convert(
         if events.is_empty() {
             return Err(invalid("selected subtitle stream has no cues"));
         }
-        return publish_events(events, destination, &name, &language, &configuration);
+        return publish_events_with_metadata(
+            events,
+            destination,
+            &configuration,
+            meta,
+            max_packet_bytes,
+            dry_run,
+        );
     }
     if track.codec != "S_TEXT/UTF8" {
         return Ok(None);
@@ -316,13 +767,25 @@ pub fn try_convert(
     if destination.extension().and_then(|s| s.to_str()) != Some("mkv") {
         return Err(invalid("convert-subtitles requires Matroska (.mkv) output"));
     }
-    let (number, name, language) = (track.number, track.name.clone(), track.language.clone());
+    let (number, name) = (track.number, track.name.clone());
+    let meta = apply_subtitle_matroska_metadata(
+        &name,
+        &source_language,
+        Some(&base_file),
+        Some(&base_text),
+        Some(&base_track_tags),
+        controls,
+    )?;
     let mut cues = Vec::new();
     let mut bytes = 0usize;
     for i in 0..reader.packets.len() {
+        check_controls()?;
         let packet = &reader.packets[i];
         if packet.track != number {
             continue;
+        }
+        if max_packets.is_some_and(|limit| cues.len() as u64 >= limit) {
+            return Err(invalid("packet work limit exceeded"));
         }
         let start = u64::try_from(packet.pts_ns)
             .map_err(|_| invalid("subtitle requires nonnegative timestamps"))?;
@@ -333,8 +796,12 @@ pub fn try_convert(
             .checked_add(duration)
             .filter(|end| *end <= i64::MAX as u64)
             .ok_or_else(|| invalid("subtitle timestamp overflow"))?;
+        let packet_size = reader.packet_payload_size(i)?;
+        if packet_size > max_packet_bytes {
+            return Err(invalid("subtitle packet exceeds packet byte limit"));
+        }
         bytes = bytes
-            .checked_add(reader.packet_payload_size(i)?)
+            .checked_add(packet_size)
             .ok_or_else(|| invalid("subtitle size overflow"))?;
         if bytes > 64 << 20 {
             return Err(invalid("subtitle metadata exceeds 64 MiB"));
@@ -353,7 +820,7 @@ pub fn try_convert(
     if cues.is_empty() {
         return Err(invalid("selected subtitle stream has no cues"));
     }
-    publish(cues, destination, &name, &language)
+    publish_with_metadata(cues, destination, meta, max_packet_bytes, dry_run)
 }
 /// `None` preserves the adapter for unsupported text encodings or markup.
 /// Recognized invalid timing never publishes a partial output.
@@ -364,12 +831,35 @@ pub fn try_convert_ass(
     destination: &Path,
     streams: &[usize],
 ) -> Result<Option<SubtitleStats>> {
+    try_convert_ass_inner(
+        source,
+        destination,
+        streams,
+        usize::MAX,
+        None,
+        None,
+        &|| Ok(()),
+        false,
+    )
+}
+
+fn try_convert_ass_inner(
+    source: &Path,
+    destination: &Path,
+    streams: &[usize],
+    max_packet_bytes: usize,
+    max_packets: Option<u64>,
+    controls: Option<&media_control::CopyOptions>,
+    check_controls: &impl Fn() -> Result<()>,
+    dry_run: bool,
+) -> Result<Option<SubtitleStats>> {
     if destination.extension().and_then(|s| s.to_str()) != Some("mkv") {
         return Err(invalid("ASS conversion requires Matroska (.mkv) output"));
     }
     if !streams.is_empty() && streams != [0] {
         return Err(invalid("ASS has only subtitle stream 0"));
     }
+    let meta = apply_subtitle_matroska_metadata("", "", None, None, None, controls)?;
     let mut bytes = Vec::new();
     File::open(source)?
         .take((64 << 20) + 1)
@@ -397,52 +887,65 @@ pub fn try_convert_ass(
             .trim()
             .rsplit_once('.')
             .ok_or_else(|| invalid("invalid ASS timestamp"))?;
-        if fraction.len() != 2 {
-            return Err(invalid("ASS timestamp requires centiseconds"));
+        if !(1..=3).contains(&fraction.len()) || !fraction.bytes().all(|b| b.is_ascii_digit()) {
+            return Err(invalid("ASS timestamp requires 1..=3 fractional digits"));
         }
-        timestamp(&format!("{clock},{fraction}0"))
+        let millis = match fraction.len() {
+            1 => format!("{fraction}00"),
+            2 => format!("{fraction}0"),
+            _ => fraction.to_owned(),
+        };
+        timestamp(&format!("{clock},{millis}"))
     };
     for line in normalized.lines() {
+        check_controls()?;
         let trimmed = line.trim();
-        if trimmed.starts_with('[') {
+        if trimmed.starts_with('[') && trimmed.ends_with(']') {
             in_events = trimmed.eq_ignore_ascii_case("[Events]");
             format = None;
         }
         if in_events {
-            if let Some(value) = trimmed.strip_prefix("Format:") {
-                let declared: Vec<_> = value.split(',').map(|s| s.trim().to_ascii_lowercase()).collect();
-                let names: Vec<_> = canonical.split(',').collect();
-                if declared.len()!=10 || declared.last().map(String::as_str)!=Some("text") { return Ok(None); }
-                let mut order = [0;10];
-                for (index,name) in names.iter().enumerate() {
-                    if declared.iter().filter(|s|s.as_str()==*name).count()!=1 { return Ok(None); }
-                    order[index] = declared.iter().position(|s|s==name).unwrap();
-                }
-                format = Some(order);
-                if order.iter().enumerate().any(|(i,at)|i!=*at) {
-                    configuration.push_str("Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n");
+            if let Some((key, value)) = trimmed.split_once(':') {
+                if key.trim().eq_ignore_ascii_case("Format") {
+                    let declared: Vec<_> = value.split(',').map(|s| s.trim().to_ascii_lowercase()).collect();
+                    let names: Vec<_> = canonical.split(',').collect();
+                    if declared.len()!=10 || declared.last().map(String::as_str)!=Some("text") { return Ok(None); }
+                    let mut order = [0;10];
+                    for (index,name) in names.iter().enumerate() {
+                        if declared.iter().filter(|s|s.as_str()==*name).count()!=1 { return Ok(None); }
+                        order[index] = declared.iter().position(|s|s==name).unwrap();
+                    }
+                    format = Some(order);
+                    if order.iter().enumerate().any(|(i,at)|i!=*at) {
+                        configuration.push_str("Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n");
+                        continue;
+                    }
+                } else if key.trim().eq_ignore_ascii_case("Dialogue") {
+                    if max_packets.is_some_and(|limit| events.len() as u64 >= limit) {
+                        return Err(invalid("packet work limit exceeded"));
+                    }
+                    let Some(order) = format else { return Ok(None); };
+                    let fields: Vec<_> = value.trim_start().splitn(10, ',').collect();
+                    if fields.len() != 10 {
+                        return Err(invalid("invalid ASS dialogue fields"));
+                    }
+                    let layer = fields[order[0]]
+                        .trim()
+                        .parse::<i32>()
+                        .map_err(|_| invalid("invalid ASS layer"))?;
+                    let start = ass_time(fields[order[1]])?;
+                    let end = ass_time(fields[order[2]])?;
+                    if start >= end {
+                        return Err(invalid("ASS dialogue requires start before end"));
+                    }
+                    let payload =
+                        format!("{},{layer},{}", events.len(), order[3..].iter().map(|at|fields[*at]).collect::<Vec<_>>().join(",")).into_bytes();
+                    if payload.len() > max_packet_bytes {
+                        return Err(invalid("subtitle packet exceeds packet byte limit"));
+                    }
+                    events.push((start, end, payload));
                     continue;
                 }
-            }
-            if let Some(value) = line.trim_start().strip_prefix("Dialogue:") {
-                let Some(order) = format else { return Ok(None); };
-                let fields: Vec<_> = value.trim_start().splitn(10, ',').collect();
-                if fields.len() != 10 {
-                    return Err(invalid("invalid ASS dialogue fields"));
-                }
-                let layer = fields[order[0]]
-                    .trim()
-                    .parse::<i32>()
-                    .map_err(|_| invalid("invalid ASS layer"))?;
-                let start = ass_time(fields[order[1]])?;
-                let end = ass_time(fields[order[2]])?;
-                if start >= end {
-                    return Err(invalid("ASS dialogue requires start before end"));
-                }
-                let payload =
-                    format!("{},{layer},{}", events.len(), order[3..].iter().map(|at|fields[*at]).collect::<Vec<_>>().join(",")).into_bytes();
-                events.push((start, end, payload));
-                continue;
             }
         }
         configuration.push_str(line);
@@ -452,13 +955,42 @@ pub fn try_convert_ass(
         return Err(invalid("ASS script has no dialogue cues"));
     }
     events.sort_by_key(|event| event.0);
-    publish_events(events, destination, "", "", configuration.as_bytes())
+    publish_events_with_metadata(
+        events,
+        destination,
+        configuration.as_bytes(),
+        meta,
+        max_packet_bytes,
+        dry_run,
+    )
 }
 
 pub fn try_convert_srt(
     source: &Path,
     destination: &Path,
     streams: &[usize],
+) -> Result<Option<SubtitleStats>> {
+    try_convert_srt_inner(
+        source,
+        destination,
+        streams,
+        usize::MAX,
+        None,
+        None,
+        &|| Ok(()),
+        false,
+    )
+}
+
+fn try_convert_srt_inner(
+    source: &Path,
+    destination: &Path,
+    streams: &[usize],
+    max_packet_bytes: usize,
+    max_packets: Option<u64>,
+    controls: Option<&media_control::CopyOptions>,
+    check_controls: &impl Fn() -> Result<()>,
+    dry_run: bool,
 ) -> Result<Option<SubtitleStats>> {
     if source
         .extension()
@@ -474,6 +1006,7 @@ pub fn try_convert_srt(
     if !streams.is_empty() && streams != [0] {
         return Err(invalid("SRT has only subtitle stream 0"));
     }
+    let meta = apply_subtitle_matroska_metadata("", "und", None, None, None, controls)?;
     let mut bytes = Vec::new();
     File::open(source)?
         .take((64 << 20) + 1)
@@ -495,6 +1028,10 @@ pub fn try_convert_srt(
         .join("\n");
     let mut cues = Vec::new();
     for block in text.split("\n\n").filter(|b| !b.trim().is_empty()) {
+        check_controls()?;
+        if max_packets.is_some_and(|limit| cues.len() as u64 >= limit) {
+            return Err(invalid("packet work limit exceeded"));
+        }
         let mut lines = block.trim_matches('\n').lines();
         let first = lines.next().ok_or_else(|| invalid("empty SRT cue"))?;
         let timing = if first.contains("-->") {
@@ -510,6 +1047,7 @@ pub fn try_convert_srt(
         let (start, end) = timing
             .split_once("-->")
             .ok_or_else(|| invalid("invalid SRT cue timing"))?;
+        let end = end.split_whitespace().next().unwrap_or("");
         let (start, end) = (timestamp(start)?, timestamp(end)?);
         if end <= start {
             return Err(invalid("SRT cue must end after its start"));
@@ -526,14 +1064,15 @@ pub fn try_convert_srt(
     if cues.is_empty() {
         return Err(invalid("SRT has no cues"));
     }
-    publish(cues, destination, "", "und")
+    publish_with_metadata(cues, destination, meta, max_packet_bytes, dry_run)
 }
 
-fn publish(
+fn publish_with_metadata(
     cues: Vec<(u64, u64, String)>,
     destination: &Path,
-    name: &str,
-    language: &str,
+    meta: SubtitleMatroskaMetadata,
+    max_packet_bytes: usize,
+    dry_run: bool,
 ) -> Result<Option<SubtitleStats>> {
     let events = cues
         .into_iter()
@@ -546,16 +1085,34 @@ fn publish(
             )
         })
         .collect();
-    publish_events(events, destination, name, language, HEADER)
+    publish_events_with_metadata(events, destination, HEADER, meta, max_packet_bytes, dry_run)
 }
 
-fn publish_events(
+fn publish_events_with_metadata(
     events: Vec<(u64, u64, Vec<u8>)>,
     destination: &Path,
-    name: &str,
-    language: &str,
     configuration: &[u8],
+    (name, language, metadata, text, scoped): SubtitleMatroskaMetadata,
+    max_packet_bytes: usize,
+    dry_run: bool,
 ) -> Result<Option<SubtitleStats>> {
+    let mut total_payload_bytes = 0u64;
+    for (_, _, payload) in &events {
+        if payload.len() > max_packet_bytes {
+            return Err(invalid("subtitle packet exceeds packet byte limit"));
+        }
+        total_payload_bytes = total_payload_bytes.saturating_add(payload.len() as u64);
+    }
+    if dry_run {
+        return Ok(Some(SubtitleStats {
+            backend: "fvid",
+            encoder: "ass".into(),
+            cues: events.len() as u64,
+            packets_in: events.len() as u64,
+            packets_out: events.len() as u64,
+            payload_bytes: total_payload_bytes,
+        }));
+    }
     let directory = destination
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
@@ -577,13 +1134,17 @@ fn publish_events(
             Err(e) => return Err(e.into()),
         }
     };
-    let mut writer = PacketWriter::new(
+    let mut writer = PacketWriter::new_with_text_metadata(
         &mut file,
         &[TrackSpec {
             encoding: Encoding::Ass { configuration },
-            name,
-            language,
+            name: &name,
+            language: &language,
         }],
+        &[],
+        &metadata,
+        &text,
+        &scoped,
     )?;
     for (start, end, payload) in &events {
         writer.write_packet(0, *start, end - start, true, payload)?;
@@ -610,7 +1171,9 @@ pub fn try_convert_with_options(
     options: &media_info::SubtitleConvertOptions,
 ) -> Result<Option<SubtitleStats>> {
     match options.codec {
-        media_info::SubtitleCodec::Ass => try_convert(source, destination, &options.streams),
+        media_info::SubtitleCodec::Ass => {
+            try_convert_with_controls(source, destination, options, &Default::default())
+        }
     }
 }
 

@@ -1,0 +1,59 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0182"
+  ],
+  "checked_at": "2026-10-21T23:56:16+00:00",
+  "sources": [
+    "src/container/mp4.rs"
+  ],
+  "regressions": [
+    "tests/mp4_multi_trun.rs"
+  ],
+  "before": [
+    "evidence/batch-175-mp4-before.rs",
+    "evidence/batch-175-tests-before.rs",
+    "evidence/batch-175-before.log",
+    "evidence/batch-175-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-175-after.log",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-175-related-after.log",
+      "passed": 70
+    },
+    {
+      "log": "evidence/batch-175-mp4-units.log",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-175-core.log",
+      "passed": 33
+    },
+    {
+      "log": "evidence/batch-175-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-175-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/container/mp4.rs": "bc0b89fdf8bc2b4367ae78551c8bcf0c0d8341a48b088b093e75de5fcbb60c5c",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_multi_trun.rs": "820c78e0fccd9bbe21b31b473602565920bf6d4a7406e815fc84cf8c3b7f0cd9",
+    "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_mp4_multi_trun_regressions.py": "e2e3713254967f1ac374b510adc3179803423e2c537ec05d03062e9c76ce0df5",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/mp4-multi-trun/manifest.json": "517acad0a96d2d1de6c1d9ba7629767cd44483895c446ee346a475c1d1219dbf"
+  },
+  "qualification": [
+    "Pre-fix trun offset resolution matched on (flags & 0x00_0001 != 0, list.last()), conflating the global track sample list with the current traf's data cursor. Valid empty-leading-run-then-contiguous.mp4 failed with 'sample chunk outside mdat' because list.last() was None after an empty trun with data_offset, while malformed second-traf-missing-data-offset.mp4 and empty-reset-run-outside-mdat.mp4 silently indexed and played by inheriting list.last() from earlier samples. All 4 forced acceptance tests failed pre-fix.",
+    "Tracking a per-traf cursor initialized to base and updated after every trun (including empty runs) admits empty-leading-run-then-contiguous.mp4 and refuses both cross-traf and empty-reset outside-mdat cases as Error::Invalid ('sample chunk outside mdat').",
+    "All 4 healthy controls (regular MP4, three contiguous runs in one traf, empty leading run setting the cursor for a second contiguous run, and two explicit-offset runs across two mdat boxes) retain exact coded packets, sync flags, 50 Hz clocks, sample/packet budgets, analytic 16x16 VP9 planes/RGB (128/130), 32 total public clamped seek targets, rewind, and repeated EOF.",
+    "4 focused tests, 70 related MP4/HLS/VP9 integration tests, 17 MP4 unit tests, 33 minimal-configuration (--no-default-features) tests, offline fixture generator unittest, and full player build pass.",
+    "ISO/IEC 14496-12:2015, 8.8.8.2 defines trun data continuity strictly within the enclosing track fragment (traf). All fixtures are pure synthetic offline VP9/fMP4 files requiring neither FFmpeg nor network access."
+  ],
+  "counting": "One per-traf trun data-cursor continuity/reset fix (FVID-0182). No extra IDs for empty-run/cross-traf variants, controls, or fixture generator."
+}

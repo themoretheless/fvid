@@ -1,11 +1,16 @@
 //! Canonical bare FLAC header/index inspection; no compressed PCM decoding.
 use fvid_media_info::{MediaInfo, StreamInfo};
-use std::{collections::BTreeMap, path::Path};
-pub(crate) fn probe_flac(path: &Path) -> Result<MediaInfo, String> {
+use std::path::Path;
+pub fn probe_flac(path: &Path) -> Result<MediaInfo, String> {
     if !crate::owned_raw_flac::recognizes(path)? {
         return Err("input does not have a bare FLAC audio signature".into());
     }
     let source = crate::owned_raw_flac::open(path, &Default::default())?;
+    let comments = crate::owned_flac_layout::vorbis_comments(source.metadata_blocks())
+        .map_err(|e| e.to_string())?;
+    let (metadata, stream_metadata) = crate::owned_flac_layout::probe_metadata_from_entries(
+        comments.iter().map(|(k, v)| (k.as_str(), v.as_str())),
+    );
     let rate = source.sample_rate;
     let audible = source.samples();
     let coded = source.samples();
@@ -32,7 +37,7 @@ pub(crate) fn probe_flac(path: &Path) -> Result<MediaInfo, String> {
         start_us: Some(0),
         duration_us: Some(duration_us),
         bit_rate: average(file_bytes, audible),
-        metadata: BTreeMap::new(),
+        metadata,
         chapters: Vec::new(),
         streams: vec![StreamInfo {
             index: 0,
@@ -46,7 +51,7 @@ pub(crate) fn probe_flac(path: &Path) -> Result<MediaInfo, String> {
             profile: None,
             level: None,
             disposition: 0,
-            metadata: BTreeMap::new(),
+            metadata: stream_metadata,
             width: 0,
             height: 0,
             pixel_format: -1,

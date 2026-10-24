@@ -1,0 +1,8 @@
+<SAMI>
+<BODY>
+<SYNC Start=1000><P Class=ENCC>First SAMI line</P>
+<SYNC Start=2200><P Class=ENCC>&NBSP;</P>
+<SYNC Start=3500><P Class=ENCC>Second SAMI line</P>
+<SYNC Start=4800><P Class=ENCC>&Nbsp;</P>
+</BODY>
+</SAMI>

@@ -1,0 +1,61 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0191"
+  ],
+  "checked_at": "2026-10-22T04:17:33+00:00",
+  "sources": [
+    "src/container/avi.rs",
+    "src/playback/audio/avi_audio.rs"
+  ],
+  "regressions": [
+    "tests/avi_headers_seek.rs"
+  ],
+  "before": [
+    "evidence/batch-184-avi-before.rs",
+    "evidence/batch-184-avi-audio-before.rs",
+    "evidence/batch-184-tests-before.rs",
+    "evidence/batch-184-before.log",
+    "evidence/batch-184-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-184-after.log",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-184-related-after.log",
+      "passed": 3
+    },
+    {
+      "log": "evidence/batch-184-avi-units.log",
+      "passed": 34
+    },
+    {
+      "log": "evidence/batch-184-core.log",
+      "passed": 359
+    },
+    {
+      "log": "evidence/batch-184-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-184-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/container/avi.rs": "aefb492a9ad2cad35d474d97b5fef13b9a8031bf7faf237d89b2020984d951d0",
+    "/Users/themoretheless/Documents/Sources/fvid/src/playback/audio/avi_audio.rs": "a20f88a89d7b8ec19d2c5069d35c4bbb01dccf91848aa46f3e78e45dc3b23261",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/avi_headers_seek.rs": "a2714afee6d45fe2e2f199e0c39bc9af40acd2555cfe335e10ac617c13e624bc",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/avi-headers-seek/manifest.json": "b6f1247a445bd5750e2b4116edecaeebd2a9c3dbe0a3a88d5c9d1af48e04677e"
+  },
+  "qualification": [
+    "Pre-fix Avi::parse accepted duplicate avih chunks in hdrl, duplicate strh/strf chunks in strl, and partial trailing entries in idx1, while AviAudioReader::seek_to returned 0 instead of dwStart (100) when seeking before the start of a delayed-start PCM stream.",
+    "Updating src/container/avi.rs and src/playback/audio/avi_audio.rs deterministically rejects all 4 malformed AVI header/index inputs while preserving delayed-start PCM seek and existing truncated-idx1 entry-count diagnostics.",
+    "The delayed-start PCM control lands on sample 100 on pre-start seeks, slices exact 16-bit PCM frames on mid-record seeks (sample 106), and reaches EOF at sample 108.",
+    "2 focused tests, 3 related container audio integration tests, 34 AVI unit tests, 359 minimal-configuration (--no-default-features) tests, offline fixture unittest, and full binary build pass.",
+    "Microsoft AVI RIFF File Reference governs singleton avih/strh/strf headers, 16-byte AVIOLDINDEX entries, and dwStart stream origin. All fixtures are pure synthetic offline files requiring neither FFmpeg nor network access."
+  ],
+  "counting": "One AVI header/index validation and delayed-start PCM/G.711 seek landing fix across src/container/avi.rs and src/playback/audio/avi_audio.rs (FVID-0191). No extra IDs for individual fixture variants or controls."
+}

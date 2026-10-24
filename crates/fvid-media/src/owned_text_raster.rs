@@ -69,7 +69,7 @@ pub fn rasterize(text: &str, width: usize, height: usize, size: f32) -> Result<M
         alpha,
     })
 }
-/// Blend white text into planar YUV while neutralizing covered chroma.
+/// Blend white text into planar YUV or interleaved RGB while neutralizing covered chroma.
 /// Chroma coverage is averaged over its actual luma footprint, including odd edges.
 pub fn composite_white(
     frame: &mut GeometryFrame,
@@ -77,7 +77,21 @@ pub fn composite_white(
     full_range: bool,
     mask: &Mask,
 ) -> Result<(), String> {
-    crate::owned_overlay::validate_frame(frame, depth)?;
+    if frame.subsampling.is_some() || depth == 8 {
+        crate::owned_overlay::validate_frame(frame, depth)?;
+    } else {
+        if frame.width == 0 || frame.height == 0 || !(8..=16).contains(&depth) {
+            return Err("invalid subtitle geometry or sample depth".into());
+        }
+        let expected = frame
+            .width
+            .checked_mul(frame.height)
+            .and_then(|n| n.checked_mul(6))
+            .ok_or("subtitle RGB storage size overflow")?;
+        if frame.data.len() != expected {
+            return Err("subtitle RGB storage disagrees with geometry".into());
+        }
+    }
     if mask.width != frame.width
         || mask.height != frame.height
         || mask.alpha.len()
@@ -88,19 +102,10 @@ pub fn composite_white(
     {
         return Err("subtitle mask geometry mismatch".into());
     }
-    let [sx, sy] = frame
-        .subsampling
-        .ok_or("subtitle compositor requires planar YUV")?;
     let width = frame.width;
     let height = frame.height;
     let bytes = if depth == 8 { 1 } else { 2 };
     let max = (1u32 << depth) - 1;
-    let white = if full_range {
-        max
-    } else {
-        235u32 << (depth - 8)
-    };
-    let neutral = 1u32 << (depth - 1);
     let blend = |data: &mut [u8], sample: usize, target: u32, alpha: u32| {
         let offset = sample * bytes;
         let old = if bytes == 1 {
@@ -115,6 +120,23 @@ pub fn composite_white(
             data[offset..offset + 2].copy_from_slice(&(value as u16).to_le_bytes());
         }
     };
+    let Some([sx, sy]) = frame.subsampling else {
+        for (index, &alpha) in mask.alpha.iter().enumerate() {
+            let a = u32::from(alpha);
+            if a != 0 {
+                for ch in 0..3 {
+                    blend(&mut frame.data, index * 3 + ch, max, a);
+                }
+            }
+        }
+        return Ok(());
+    };
+    let white = if full_range {
+        max
+    } else {
+        235u32 << (depth - 8)
+    };
+    let neutral = 1u32 << (depth - 1);
     for (index, &alpha) in mask.alpha.iter().enumerate() {
         blend(&mut frame.data, index, white, u32::from(alpha));
     }

@@ -1,0 +1,33 @@
+{
+  "generator": "scripts/generate_container_loudness_plan_regressions.py",
+  "files": {
+    "flac-loudness.mka": {
+      "bytes": 440,
+      "sha256": "49b7b013446b4b102368aecf69115f58708a6b979f71ee514b41320cd7a35754"
+    },
+    "flac-unassigned-mask.mka": {
+      "bytes": 1112,
+      "sha256": "0dd114dffee83fed765e54f567f27cf90cc8d5f300822643d43286d25313e8bc"
+    },
+    "mov-sowt-zero-bits.mov": {
+      "bytes": 1517,
+      "sha256": "4e721ff0af6596d503145088dc45335af00edd9a5d0a08fe3e401d71c688959f"
+    },
+    "mp1-loudness.mka": {
+      "bytes": 25834,
+      "sha256": "6befe066d700c4930e558a6c62b3c71a481721ef9ffcf5eabbca899e21be38b0"
+    },
+    "opus-discrete-family255-4ch.mka": {
+      "bytes": 238,
+      "sha256": "5d86d9478781a76a4c7029c60f8cd87a8f6f7a095340327f264590198908c21a"
+    },
+    "opus-quad-family1.mka": {
+      "bytes": 238,
+      "sha256": "f2163d46d4d12eac2ea725268603c88e6c67e5b903ef843950e255becdbaa5f5"
+    },
+    "pcm-discrete-4ch.mka": {
+      "bytes": 4006,
+      "sha256": "818da8cbad48fca2bbbf55bef2a34a00cc7d0776e6b56057eb375b314bf0dacd"
+    }
+  }
+}

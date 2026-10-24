@@ -1,0 +1,64 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0190"
+  ],
+  "checked_at": "2026-10-22T04:07:10+00:00",
+  "sources": [
+    "crates/fvid-media/src/owned_webm_reader_impl.rs",
+    "src/playback/video/webm.rs",
+    "src/playback/audio/webm_audio.rs"
+  ],
+  "regressions": [
+    "tests/webm_block_seek.rs"
+  ],
+  "before": [
+    "evidence/batch-183-owned-webm-reader-before.rs",
+    "evidence/batch-183-webm-video-before.rs",
+    "evidence/batch-183-webm-audio-before.rs",
+    "evidence/batch-183-tests-before.rs",
+    "evidence/batch-183-before.log",
+    "evidence/batch-183-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-183-after.log",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-183-related-after.log",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-183-webm-units.log",
+      "passed": 10
+    },
+    {
+      "log": "evidence/batch-183-core.log",
+      "passed": 359
+    },
+    {
+      "log": "evidence/batch-183-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-183-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media/src/owned_webm_reader_impl.rs": "9df217ee201b18ea35a481ff7344f08037b36663081c03309abbfc6826edeae9",
+    "/Users/themoretheless/Documents/Sources/fvid/src/playback/video/webm.rs": "a74b7387b14ec82e5fcc59d1b366a49f361071570c53d3c586aedade17db2ca8",
+    "/Users/themoretheless/Documents/Sources/fvid/src/playback/audio/webm_audio.rs": "b1c5f0683cc69918ca48975d1eafc3d5d6e4734dca5c578306609eccfc4a9439",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/webm_block_seek.rs": "e421c36d28884204b966e42d74b81fd520a48c51d97586ce2d93594a0e20efb2",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/webm-block-seek/manifest.json": "a21aa40f53580fa2ebec7250724c8e43ad3903a3bb3a672ad90d2d0de93de6c8"
+  },
+  "qualification": [
+    "Pre-fix WebmReader accepted BlockGroup (0xa0) elements with zero or multiple Block (0xa1) children as well as reserved header flag bits in SimpleBlock (0x70) and Block (0x71); WebmVideoReader::seek_to_sync skipped earlier equal-PTS invisible setup keyframes causing VP9 show-existing frames to fail with 'VP9 show-existing reference is unavailable'; and WebmAudioReader::seek returned (0, 0) on pre-origin seeks and skipped earlier equal-PTS audio packets.",
+    "Updating crates/fvid-media/src/owned_webm_reader_impl.rs, src/playback/video/webm.rs, and src/playback/audio/webm_audio.rs deterministically rejects all 4 malformed BlockGroup/flag states while preserving valid BlockGroups, equal-PTS VP9 setup+show-existing seek, and multi-track delayed-origin + equal-PTS audio seek.",
+    "All 3 valid controls decode exact 16x16 VP9 planes, exact BlockGroup duration (40 ms), and exact 16-bit PCM packets at 50 ms across sequential playback and seek.",
+    "2 focused tests, 7 related WebM integration tests, 10 owned_webm unit tests, 359 minimal-configuration (--no-default-features) tests, offline fixture unittest, and full binary build pass.",
+    "RFC 9559 Sections 5.1.4.1.2, 10.2, and 10.3 govern BlockGroup singleton Block cardinality and Block/SimpleBlock reserved header flag bits. All fixtures are pure synthetic offline files requiring neither FFmpeg nor network access."
+  ],
+  "counting": "One Matroska/WebM BlockGroup/flag validation and equal-PTS/pre-origin seek fix across crates/fvid-media/src/owned_webm_reader_impl.rs, src/playback/video/webm.rs, and src/playback/audio/webm_audio.rs (FVID-0190). No extra IDs for individual fixture variants or controls."
+}

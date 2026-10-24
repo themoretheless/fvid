@@ -43,7 +43,11 @@ fn frames_of(tag: AudioCodecId, block_bytes: u64, channels: u64, bits: u64) -> O
     }
     let (per_channel, leading) = preamble(tag)?;
     let header = per_channel * channels;
-    if block_bytes < header {
+    if block_bytes < header
+        || (tag == CODEC_ID_ADPCM_IMA_WAV
+            && channels == 2
+            && !(block_bytes - header).is_multiple_of(8))
+    {
         return None;
     }
     // What is left after the header is one 4-bit code per frame for every channel

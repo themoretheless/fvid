@@ -1,0 +1,73 @@
+{
+  "generator": "scripts/generate_mp4_elst_validation_regressions.py",
+  "controls": [
+    {
+      "file": "valid-leading-empty-v0.mp4",
+      "mode": "leading-empty-and-media-v0",
+      "expected_frames": 2,
+      "expected_samples": 3072
+    },
+    {
+      "file": "valid-single-trim-v1.mp4",
+      "mode": "single-trim-v1",
+      "expected_frames": 2,
+      "expected_samples": 2048
+    }
+  ],
+  "cases": [
+    {
+      "file": "empty-elst-v0.mp4",
+      "expected_error": "empty MP4 elst box"
+    },
+    {
+      "file": "zero-duration-v0.mp4",
+      "expected_error": "unsupported MP4 edit rate, duration or media time"
+    },
+    {
+      "file": "zero-duration-v1.mp4",
+      "expected_error": "unsupported MP4 edit rate, duration or media time"
+    },
+    {
+      "file": "blank-only-video.mp4",
+      "expected_error": "empty MP4 playback edit"
+    }
+  ],
+  "files": {
+    "blank-only-video.mp4": {
+      "bytes": 13120,
+      "sha256": "b4e04d9aad11501b8708b452683ac38113b87919d88fdceb8fda93dd3fb2cf1e"
+    },
+    "empty-elst-v0.mp4": {
+      "bytes": 13096,
+      "sha256": "7ae9eec9466abf8fcb00258108ec5fbcdaebb41de6d6ea9f5beabc3195c08abd"
+    },
+    "expected-trimmed.f32le": {
+      "bytes": 8192,
+      "sha256": "dd765f12c4fe2cdc34fdc2bc6085a09d4516dbb84b96358846d22dd2dc40dc92"
+    },
+    "expected.f32le": {
+      "bytes": 12288,
+      "sha256": "0e7c1faf087653e91eefeddd232d3995fd80b06ef005ac5e433175ac0669e8f5"
+    },
+    "frame.vp9": {
+      "bytes": 4142,
+      "sha256": "217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c"
+    },
+    "valid-leading-empty-v0.mp4": {
+      "bytes": 13625,
+      "sha256": "5c2a65cb4d893a9dfdf298638564031c8c7050f25ebc14dbd6806b4f0d5abe23"
+    },
+    "valid-single-trim-v1.mp4": {
+      "bytes": 13617,
+      "sha256": "f6b03e81d5e7c38fe78691064d898ea8a4ee9e53347e6156b9f0c7bac1df13c8"
+    },
+    "zero-duration-v0.mp4": {
+      "bytes": 13601,
+      "sha256": "218c40eac56906a5a2b768622b986fc4d049a3c6760cec9ffff5e98aea8cf306"
+    },
+    "zero-duration-v1.mp4": {
+      "bytes": 13136,
+      "sha256": "a8951500152431b387e36f90fef6ba65200863da1994ad830d25f74be45ef713"
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0185"
+  ],
+  "checked_at": "2026-10-22T01:00:14+00:00",
+  "sources": [
+    "crates/fvid-media/src/owned_mp4_impl.rs"
+  ],
+  "regressions": [
+    "tests/mp4_owned_fragment_parity.rs"
+  ],
+  "before": [
+    "evidence/batch-178-owned-mp4-impl-before.rs",
+    "evidence/batch-178-tests-before.rs",
+    "evidence/batch-178-before.log",
+    "evidence/batch-178-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-178-after.log",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-178-related-after.log",
+      "passed": 82
+    },
+    {
+      "log": "evidence/batch-178-mp4-units.log",
+      "passed": 15
+    },
+    {
+      "log": "evidence/batch-178-core.log",
+      "passed": 41
+    },
+    {
+      "log": "evidence/batch-178-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-178-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media/src/owned_mp4_impl.rs": "cb341217af25daaf2921d20967d15d101270d96fe0d9845e2899ad105b7e55e7",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_owned_fragment_parity.rs": "8c892b1ab78b03c3bbd318fbfcab8e63e4f8ad6e24561ef2487f8a49518d1b39",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/mp4-hybrid-fragments/manifest.json": "fd9c9be907159d51877fd77c1596ad02e9fcdd5649d1c87cbec64745e7b2a51b"
+  },
+  "qualification": [
+    "Pre-fix fvid_media::owned_mp4::Mp4Reader panicked with negation overflow on trun.data_offset == i32::MIN, silently accepted effective fragment sample description 0, contradictory trun flags (0x00_0004 + 0x00_0400), overlong trex/tfhd/tfdt boxes, missing/invalid mfhd headers, and zero/duplicate trex track IDs, failed on valid empty-leading-run per-traf continuity, and dropped initial moov/stbl samples while ignoring corrupt init stbl tables in hybrid fragmented files. Pre-fix baseline reproduced all defects and all 4 forced acceptance tests failed.",
+    "Updating crates/fvid-media/src/owned_mp4_impl.rs resolves negative trun.data_offset via unsigned_abs(), enforces effective description selection, mutually exclusive trun flags, exact trex/tfhd/tfdt/mfhd payload extents, unique non-zero trex track IDs, per-traf data cursor continuity, and initial moov/stbl validation and indexing across fvid_media::owned_mp4::Mp4Reader, probe_mp4, and decode_video.",
+    "All healthy controls across mp4-signed-offset (including 2 GiB virtual valid-min and valid-adjacent sparse fixtures), mp4-fragment-description, mp4-trun-flags, mp4-tfhd-defaults, mp4-multi-trun, mp4-mfhd-trex, and mp4-hybrid-fragments retain exact coded packets, sync flags, 50 Hz clocks, probe_mp4 metadata (duration=3 ticks / 60,000 us), and decode_video output (3 frames, 16x16, 0 errors), while all malformed/unsupported inputs refuse cleanly without panicking.",
+    "4 focused tests, 82 related MP4/HLS/VP9 integration tests, 15 fvid-media owned_mp4 unit tests, 41 minimal-configuration (--no-default-features) tests, offline fixture unittest, and full player build pass.",
+    "ISO/IEC 14496-12:2015, 8.8.3, 8.8.4, 8.8.5, 8.8.7, 8.8.8, and 8.8.12 govern fragmented MP4 headers, runs, and hybrid sample tables. All fixtures are pure synthetic offline VP9/fMP4 files requiring neither FFmpeg nor network access."
+  ],
+  "counting": "One owned_mp4 fragmented MP4 validation and hybrid indexing parity fix (FVID-0185). No extra IDs for individual fixture suites or controls."
+}

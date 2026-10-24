@@ -92,7 +92,7 @@ impl Configuration {
                     state.models[i]
                         .try_reserve_exact(sizes[i])
                         .map_err(|_| invalid("cannot allocate FFV1 changed range contexts"))?;
-                    state.models[i].resize(sizes[i], [0; 32]);
+                    state.models[i].extend_from_slice(&self.sets[selected[i]].initial);
                 }
             }
             state.tables[i] = self.sets[selected[i]].tables;

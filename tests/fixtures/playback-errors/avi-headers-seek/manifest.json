@@ -1,0 +1,37 @@
+{
+  "issue": "AVI duplicate avih/strh/strf rejection, idx1 partial-entry validation, and delayed-start PCM/G.711 seek landing",
+  "controls": [
+    {
+      "file": "valid-delayed-pcm.avi",
+      "mode": "delayed-start-pcm-seek-and-playback",
+      "size": 264,
+      "sha256": "97eb7a1fe8bb5ca402cb28017e75780d58032784beebc78cf1975b6c8131c0ec"
+    }
+  ],
+  "cases": [
+    {
+      "file": "duplicate-avih.avi",
+      "expected_error": "duplicate AVI main header",
+      "size": 328,
+      "sha256": "0c5f90c67e10b72c8b4a3cfc944e0ddf996a7de7f77939f176f9f931e123ddd3"
+    },
+    {
+      "file": "duplicate-strh.avi",
+      "expected_error": "duplicate AVI stream header",
+      "size": 320,
+      "sha256": "ec721a7343cfc4869495ac3c8f029c52599257df61d5c5b1fa771c234ded1b58"
+    },
+    {
+      "file": "duplicate-strf.avi",
+      "expected_error": "duplicate AVI stream format",
+      "size": 288,
+      "sha256": "966a95a52e60b53146ed697dc1d063c1fa38b31797fb82fa14ec0f12f8561fda"
+    },
+    {
+      "file": "unaligned-idx1.avi",
+      "expected_error": "AVI idx1 chunk has a partial entry",
+      "size": 270,
+      "sha256": "49448473581630a53f4c25b6fa956af51eeb0ba07b5f12d1a33690e951d916f6"
+    }
+  ]
+}

@@ -268,11 +268,14 @@ impl<'a> Block<'a> {
         };
         let mut custom_rate = None;
         let mut at = HEADER_BYTES;
-        while at + 2 <= length {
+        while at < length {
+            if at + 2 > length {
+                return Err(invalid("WavPack metadata item header is truncated"));
+            }
             let id = bytes[at];
             let (word_size, item_header) = if id & IDF_LONG != 0 {
                 if at + 4 > length {
-                    break;
+                    return Err(invalid("WavPack metadata item header is truncated"));
                 }
                 (
                     u32::from(bytes[at + 1])

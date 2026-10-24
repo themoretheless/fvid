@@ -537,6 +537,7 @@ impl AudioDecode for MidiDecoder {
     fn reset(&mut self) {
         self.voices.clear();
         self.state = [Channel::unset(); 16];
+        self.rendered = 0;
     }
 }
 
@@ -1036,7 +1037,9 @@ mod tests {
             100,
         );
         decoder.apply(Event::Control { channel: 0, number: 64, value: 127 });
+        assert!(decoder.rendered > 0);
         decoder.reset();
+        assert_eq!(decoder.rendered, 0);
         assert!(decoder.voices.is_empty());
         assert!(!decoder.state[0].sustain);
         assert_eq!(decoder.state[0].volume, 127);

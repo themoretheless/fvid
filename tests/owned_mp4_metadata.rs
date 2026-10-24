@@ -93,9 +93,9 @@ fn track_title_and_language_edits_use_original_indexes_after_reordering() {
         stream_metadata_delete: vec![
             (0, "TITLE".into()),
             (0, "language".into()),
-            (1, "title".into()),
         ],
         stream_metadata_set: vec![
+            (0, "title".into(), "Transient track 0 title".into()),
             (1, "title".into(), "Discarded title".into()),
             (1, "TITLE".into(), "Дорожка один".into()),
         ],
@@ -153,7 +153,6 @@ fn track_title_and_language_edits_use_original_indexes_after_reordering() {
     let language_options = fvid_media::CopyOptions {
         streams: vec![1],
         max_packets: Some(0),
-        stream_metadata_delete: vec![(1, "language".into())],
         stream_metadata_set: vec![(1, "LANGUAGE".into(), "rus".into())],
         ..Default::default()
     };
@@ -220,9 +219,10 @@ fn container_tag_edits_keep_selected_packet_prefix_and_source_metadata() {
         let options = fvid_media::CopyOptions {
             streams: vec![1],
             max_packets: Some(cap),
-            metadata_delete: vec!["TITLE".into(), "artist".into()],
+            metadata_delete: vec!["artist".into()],
             metadata_set: vec![
                 ("title".into(), "Synthetic replacement".into()),
+                ("artist".into(), "Transient artist".into()),
                 ("comment".into(), "Тест".into()),
             ],
             progress: Some(fvid_media::ProgressHook::new(move |event| {
@@ -301,7 +301,7 @@ fn container_tag_edits_keep_selected_packet_prefix_and_source_metadata() {
     }));
     for (case, options) in [
         fvid_media::CopyOptions {
-            metadata_set: vec![("unsupported-key".into(), "value".into())],
+            metadata_set: vec![("".into(), "value".into())],
             ..Default::default()
         },
         fvid_media::CopyOptions {
@@ -309,7 +309,7 @@ fn container_tag_edits_keep_selected_packet_prefix_and_source_metadata() {
             ..Default::default()
         },
         fvid_media::CopyOptions {
-            metadata_delete: vec!["unsupported-key".into()],
+            metadata_delete: vec!["bad\0key".into()],
             ..Default::default()
         },
         fvid_media::CopyOptions {
@@ -317,7 +317,7 @@ fn container_tag_edits_keep_selected_packet_prefix_and_source_metadata() {
             ..Default::default()
         },
         fvid_media::CopyOptions {
-            stream_metadata_set: vec![(1, "unsupported-key".into(), "value".into())],
+            stream_metadata_set: vec![(1, "rotate".into(), "value".into())],
             ..Default::default()
         },
     ]

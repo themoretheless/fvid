@@ -80,8 +80,7 @@ impl Grain {
             points(b, &mut g, 1)?;
             points(b, &mut g, 2)?;
             if s.color.subsampling == [true, true]
-                && g.point_counts[1] == 0
-                && g.point_counts[2] != 0
+                && (g.point_counts[1] == 0) != (g.point_counts[2] == 0)
             {
                 return Err(invalid("AV1 film grain 4:2:0 chroma point counts disagree"));
             }

@@ -1,0 +1,52 @@
+{
+  "batch": 210,
+  "ids": ["FVID-0217"],
+  "title": "Enforce budgets and metadata controls across Y4M export/concat/trim, burn-subtitles, xfade, and media_cli",
+  "scope": [
+    "crates/fvid-media/src/owned_subtitle_burn.rs",
+    "crates/fvid-media/src/owned_xfade.rs",
+    "src/native_export.rs",
+    "src/native_plan.rs",
+    "src/media.rs",
+    "src/media_cli.rs"
+  ],
+  "fixtures": [
+    "tests/fixtures/playback-errors/y4m-burn-xfade-primary.y4m",
+    "tests/fixtures/playback-errors/y4m-burn-xfade-secondary.y4m",
+    "tests/fixtures/playback-errors/y4m-burn-xfade.srt"
+  ],
+  "generators": [
+    "scripts/generate_y4m_burn_xfade_controls_regressions.py",
+    "scripts/test_y4m_burn_xfade_controls_regressions.py"
+  ],
+  "evidence": {
+    "snapshots": [
+      "docs/improvements/snapshots/batch-210-pre-edit/crates/fvid-media/src/owned_subtitle_burn.rs",
+      "docs/improvements/snapshots/batch-210-pre-edit/crates/fvid-media/src/owned_xfade.rs",
+      "docs/improvements/snapshots/batch-210-pre-edit/src/native_export.rs",
+      "docs/improvements/snapshots/batch-210-pre-edit/src/native_plan.rs",
+      "docs/improvements/snapshots/batch-210-pre-edit/src/media.rs",
+      "docs/improvements/snapshots/batch-210-pre-edit/src/media_cli.rs"
+    ],
+    "before_log": "docs/improvements/evidence/batch-210-acceptance-before.txt",
+    "after_log": "docs/improvements/evidence/batch-210-acceptance-after.txt",
+    "related_log": "docs/improvements/evidence/batch-210-related-after.txt"
+  },
+  "verification": {
+    "integration_tests": {
+      "command": "cargo test --features player --test y4m_burn_xfade_controls_regressions",
+      "passed": 1,
+      "failed": 0
+    },
+    "related_tests": {
+      "command": "cargo test -p fvid-media --lib owned_subtitle_burn && cargo test -p fvid-media --lib owned_xfade && cargo test --features player --test native_export --test native_video_concat --test native_subtitle_burn_cli --test native_xfade_cli --test video_export_controls_regressions --test y4m_burn_xfade_controls_regressions",
+      "passed": 36,
+      "failed": 0
+    },
+    "python_fixture_tests": {
+      "command": "python3 scripts/test_y4m_burn_xfade_controls_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  }
+}

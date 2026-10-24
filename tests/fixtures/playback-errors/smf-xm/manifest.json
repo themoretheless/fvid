@@ -1,0 +1,39 @@
+{
+  "generator": "scripts/generate_smf_xm_regressions.py",
+  "cases": [
+    {
+      "id": "valid-smf",
+      "file": "valid.mid",
+      "expect": "accept"
+    },
+    {
+      "id": "missing-eot-smf",
+      "file": "missing-eot.mid",
+      "expect": "refuse",
+      "reason": "SMF track ends without an end-of-track meta event"
+    },
+    {
+      "id": "unpacked-note-120-xm",
+      "file": "unpacked-note-120.xm",
+      "control": "packed-note-120.xm",
+      "expect": "accept-clamped-note-zero"
+    },
+    {
+      "id": "valid-16bit-xm",
+      "file": "valid-16bit.xm",
+      "expect": "accept"
+    },
+    {
+      "id": "odd-16bit-sample-xm",
+      "file": "odd-16bit-sample.xm",
+      "expect": "refuse",
+      "reason": "16-bit sample states an odd byte length"
+    },
+    {
+      "id": "pattern-overrun-into-instrument-xm",
+      "file": "pattern-overrun-into-instrument.xm",
+      "expect": "refuse",
+      "reason": "pattern rows run past the packed data stated in pattern header"
+    }
+  ]
+}

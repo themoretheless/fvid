@@ -195,8 +195,22 @@ pub fn write_mp4_selected<W: Write + Seek>(
             geometry,
         )?;
     }
-    let mut writer =
-        PacketWriter::new_with_metadata(output, &specs, &options, &FileMetadata::from_mp4(&input))?;
+    let enabled: Vec<_> = (0..tracks.len())
+        .map(|index| mp4_matroska::effective_track_enabled(&input, index))
+        .collect();
+    let defaults: Vec<_> = (0..tracks.len())
+        .map(|index| mp4_matroska::effective_track_default(&input, index))
+        .collect();
+    let mut writer = PacketWriter::new_with_track_preferences(
+        output,
+        &specs,
+        &options,
+        &FileMetadata::from_mp4(&input),
+        &Default::default(),
+        &Default::default(),
+        &enabled,
+        &defaults,
+    )?;
     if let Some(hook) = progress {
         hook.emit(writer.event());
     }
@@ -504,7 +518,7 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
             minterpolate: None,
             fps: None,
             colorspace: None,
-            zscale: _,
+            zscale: None,
             tonemap: None,
             pix_fmt: None,
             interval: None,

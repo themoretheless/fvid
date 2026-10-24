@@ -226,30 +226,52 @@ pub(crate) fn export_processed(
             track_tags.extend(scoped.clone());
         }
     }
-    for (_, key) in &options.stream_metadata_delete {
-        track_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
-        edit_track_description(&mut description, key, "");
-    }
     for (_, key, value) in &options.stream_metadata_set {
         track_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
         if !edit_track_description(&mut description, key, value) && !value.is_empty() {
             track_tags.insert(key.to_ascii_uppercase(), value.clone());
         }
     }
+    for (_, key) in &options.stream_metadata_delete {
+        track_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
+        edit_track_description(&mut description, key, "");
+    }
     let mut metadata = mkv::FileMetadata {
         tags: input.tags.clone(),
         chapters: Vec::new(),
     };
     let mut text_tags = input.metadata.clone();
-    for key in &options.metadata_delete {
-        metadata.tags.set(key, "");
-        text_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
+    if !input.writing_app.is_empty()
+        && input.writing_app != "FVid"
+        && !input.writing_app.contains('\0')
+        && input.writing_app.len() <= 1024
+        && !text_tags.keys().any(|k| k.eq_ignore_ascii_case("encoder"))
+    {
+        text_tags.insert("ENCODER".into(), input.writing_app.clone());
     }
+    text_tags.retain(|k, v| {
+        !k.is_empty()
+            && k.len() <= 128
+            && v.len() <= 1024
+            && !k.contains('\0')
+            && !v.contains('\0')
+    });
+    track_tags.retain(|k, v| {
+        !k.is_empty()
+            && k.len() <= 128
+            && v.len() <= 1024
+            && !k.contains('\0')
+            && !v.contains('\0')
+    });
     for (key, value) in &options.metadata_set {
         text_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
         if !metadata.tags.set(key, value) && !value.is_empty() {
             text_tags.insert(key.to_ascii_uppercase(), value.clone());
         }
+    }
+    for key in &options.metadata_delete {
+        metadata.tags.set(key, "");
+        text_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
     }
     mkv::export_atomic(
         destination,
@@ -259,6 +281,7 @@ pub(crate) fn export_processed(
             let mut output = Some(file);
             let mut writer = None;
             let mut visitor = |view: decode::FrameView<'_>| -> Result<()> {
+                crate::owned_budget::check_rss_budget(options)?;
                 let packet = if view.monochrome && process.is_none() {
                     let samples = (view.width as usize)
                         .checked_mul(view.height as usize)
@@ -287,9 +310,32 @@ pub(crate) fn export_processed(
                     if view.alpha.is_some() && (frame.width != view.width as usize || frame.height != view.height as usize) {
                         return Err("processed color geometry disagrees with alpha".into());
                     }
-                    match view.alpha {
-                        Some(alpha) => crate::owned_ffv1_encoder::encode_with_alpha(&frame, view.depth, alpha)?,
-                        None => crate::owned_ffv1_encoder::encode(&frame, view.depth)?,
+                    if view.monochrome {
+                        let samples = frame
+                            .width
+                            .checked_mul(frame.height)
+                            .and_then(|v| v.checked_mul(if view.depth == 8 { 1 } else { 2 }))
+                            .ok_or("FFV1 gray size overflow")?;
+                        match view.alpha {
+                            Some(alpha) => crate::owned_ffv1_encoder::encode_gray_with_alpha(
+                                frame.width,
+                                frame.height,
+                                &frame.data[..samples],
+                                alpha,
+                                view.depth,
+                            )?,
+                            None => crate::owned_ffv1_encoder::encode_gray(
+                                frame.width,
+                                frame.height,
+                                &frame.data[..samples],
+                                view.depth,
+                            )?,
+                        }
+                    } else {
+                        match view.alpha {
+                            Some(alpha) => crate::owned_ffv1_encoder::encode_with_alpha(&frame, view.depth, alpha)?,
+                            None => crate::owned_ffv1_encoder::encode(&frame, view.depth)?,
+                        }
                     }
                 };
                 if packet.len() > options.max_packet_bytes {
