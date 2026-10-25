@@ -204,6 +204,42 @@ pub fn header_speakers(data: &[u8]) -> Result<SpeakerLayout> {
     let mut roles=mapped_locations(mode,lfe,map); roles.sort(); roles.dedup();
     Ok(SpeakerLayout(roles))
 }
+/// Walk a selected programme's speaker-only headers across container packets.
+/// The visitor reads into Some(buffer), or skips without payload I/O for None.
+pub fn scan_stream_speakers(selected:u8,mut visit:impl FnMut(usize,Option<&mut [u8]>)->Result<usize>)->Result<Option<SpeakerLayout>> {
+    if selected>7 {return Err(invalid("E-AC-3 programme ID exceeds 7"));}
+        let mut parent=None;
+        let mut dependent=false;
+        let mut roles=std::collections::BTreeSet::new();
+        loop {
+            let mut prefix=[0u8;16];
+            let n=visit(6,Some(&mut prefix[..6]))?;
+            if n==0 {break;}
+            if n!=6 {return Err(invalid("truncated E-AC-3 layout scan header"));}
+            let h=crate::codec::ac3_decoder::dolby_prefix(&prefix[..6])
+                .filter(|h|h[..2]==[0x0b,0x77]).ok_or_else(||invalid("invalid E-AC-3 layout scan sync"))?;
+            let kind=h[2]>>6;
+            let id=(h[2]>>3)&7;
+            let size=(usize::from(h[2]&7)*256+usize::from(h[3])+1)*2;
+            if size<6 || kind==3 {return Err(invalid("invalid E-AC-3 layout scan envelope"));}
+            if kind!=1 {parent=Some(id);}
+            let selected=parent==Some(selected);
+            let header=if selected {size.min(16)}else{6};
+            if visit(header-6,Some(&mut prefix[6..header]))?!=header-6 {
+                return Err(invalid("truncated E-AC-3 layout scan BSI"));
+            }
+            if selected {
+                dependent |= kind==1;
+                roles.extend(crate::codec::eac3_decoder::presentation::header_speakers(&prefix[..header])?.0);
+            }
+            if visit(size-header,None)?!=size-header {
+                return Err(invalid("truncated E-AC-3 layout scan frame"));
+            }
+        }
+        if roles.len()<=6 && !dependent {return Ok(None);}
+        let layout=crate::codec::eac3_decoder::presentation::SpeakerLayout(roles.into_iter().collect());
+        layout.validate_output()?; Ok(Some(layout))
+}
 fn layout(descriptors: &[Descriptor], width: u16) -> Result<SpeakerLayout> {
     let speakers: Vec<_> = descriptors
         .iter()

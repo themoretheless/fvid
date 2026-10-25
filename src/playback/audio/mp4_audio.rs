@@ -187,6 +187,27 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             .collect()
     }
 
+    fn description_speakers(demuxer:&mut Mp4Reader<R>,track:usize,description:usize,programme:u8)
+        ->Result<Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>> {
+        let (mut sample,mut offset)=(0,0);
+        crate::codec::eac3_decoder::presentation::scan_stream_speakers(programme,|wanted,mut out| {
+            let mut done=0;
+            while done<wanted {
+                let Some(packet)=demuxer.tracks()[track].samples.get(sample) else {break;};
+                let size=packet.size as usize;
+                if packet.description_index as usize!=description+1 || offset>=size {sample+=1;offset=0;continue;}
+                let n=(wanted-done).min(size-offset);
+                if let Some(bytes)=out.as_deref_mut() {
+                    if demuxer.read_packet_range(track,sample,offset,&mut bytes[done..done+n])?!=n {
+                        return Err(invalid("incomplete E-AC-3 MP4 header range"));
+                    }
+                }
+                done+=n;offset+=n;
+            }
+            Ok(done)
+        })
+    }
+
     /// Probe Dolby packet geometry before exposing track descriptions. A sample
     /// entry can carry a placeholder channel count instead of decoded roles.
     fn dolby_geometry(demuxer: &mut Mp4Reader<R>, index: usize) -> Result<Option<(u16,Option<u32>,Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>)>> {
@@ -272,7 +293,13 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         let geometry=if let Some((_,channels,mask,layout))=&selected_geometry{Some((*channels,*mask,layout.clone()))}else{Self::dolby_geometry(&mut demuxer,index)?};
         let dolby_channels=geometry.as_ref().map(|(channels,_,_)|*channels);
         let dolby_mask=geometry.as_ref().and_then(|(_,mask,_)|*mask);
-        let eac3_packet_layout=geometry.and_then(|(_,_,layout)|layout);
+        let mut eac3_packet_layout=geometry.and_then(|(_,_,layout)|layout);
+        if demuxer.tracks()[index].codec==*b"ec-3" {
+            let description=demuxer.tracks()[index].samples.get(0).map_or(0,|s|s.description_index as usize-1);
+            if let Ok(Some(layout))=Self::description_speakers(&mut demuxer,index,description,programme.unwrap_or(0)) {
+                eac3_packet_layout=Some(layout);
+            }
+        }
         let mut dolby_track_channels=vec![None;demuxer.tracks().len()];
         dolby_track_channels[index]=dolby_channels;
         for other in Self::supported(&demuxer).into_iter().filter(|other|*other!=index) {
@@ -379,10 +406,17 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         if self.setup().codec != *b"ec-3" { return None; }
         // Optional invalid/unsupported metadata retains packet probing;
         // it must not make the separately negotiated stereo path unavailable.
-        self.eac3_output_layout.clone().or_else(||
-            crate::codec::eac3_decoder::presentation::configuration_speakers(
-                &self.setup().configuration, self.eac3_programme).ok().flatten())
-            .or_else(||self.eac3_packet_layout.clone())
+        if let Some(layout)=&self.eac3_output_layout {return Some(layout.clone());}
+        let declared=crate::codec::eac3_decoder::presentation::configuration_speakers(
+            &self.setup().configuration,self.eac3_programme).ok().flatten();
+        match (declared,self.eac3_packet_layout.as_ref()) {
+            (Some(mut layout),Some(observed))=>{
+                layout.0.extend_from_slice(&observed.0);layout.0.sort();layout.0.dedup();
+                if layout.validate_output().is_ok() {Some(layout)}else{Some(observed.clone())}
+            },
+            (Some(layout),None)=>Some(layout),
+            (None,observed)=>observed.cloned(),
+        }
     }
     fn negotiated_channels(&self)->u16 {if self.in_band_ps || (self.eac3_stereo_output && self.setup().codec==*b"ec-3") || (self.ac3_stereo_output && self.setup().codec==*b"ac-3") {2}else if self.setup().codec==*b"ec-3" && let Some(l)=self.native_eac3_layout() {l.0.len()as u16}else{self.dolby_channels.unwrap_or(self.setup().channels)}}
     fn setup(&self) -> &crate::container::mp4::SampleDescription {
@@ -563,6 +597,9 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 state.rate = Some(rate);
                 state.channels = Some(channels);
                 state.mask = mask;
+                if let Ok(Some(layout))=Self::description_speakers(&mut self.demuxer,self.track_index,selected,self.eac3_programme) {
+                    state.native_layout=Some(layout);
+                }
             }
             self.description_states[selected] = Some(state.clone());
             state
@@ -1573,5 +1610,32 @@ mod edit_seek_tests {
         assert_eq!(zero,1008);
         assert_eq!(stream.time_of(zero),std::time::Duration::ZERO);
         assert_eq!(stream.time_of(0),std::time::Duration::ZERO);
+    }
+}
+
+#[cfg(test)]
+mod eac3_header_scan_tests {
+    use super::*;
+    use std::{cell::Cell,rc::Rc,io::{Cursor,SeekFrom}};
+    struct Logged {data:Cursor<Vec<u8>>,bytes:Rc<Cell<usize>>}
+    impl Read for Logged {
+        fn read(&mut self,out:&mut[u8])->std::io::Result<usize> {
+            let n=self.data.read(out)?;self.bytes.set(self.bytes.get()+n);Ok(n)
+        }
+    }
+    impl Seek for Logged {
+        fn seek(&mut self,at:SeekFrom)->std::io::Result<u64>{self.data.seek(at)}
+    }
+    #[test]
+    fn selected_description_role_scan_reads_only_sixteen_byte_audio_headers() {
+        let file=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/eac3-output-layout/top-late-plain.mp4");
+        let bytes=Rc::new(Cell::new(0));
+        let mut reader=Mp4Reader::open_indexed(Logged{data:Cursor::new(std::fs::read(file).unwrap()),bytes:bytes.clone()},Default::default()).unwrap();
+        let track=reader.tracks().iter().position(|t|t.codec==*b"ec-3").unwrap();
+        assert_eq!(reader.tracks()[track].samples.len(),162);
+        bytes.set(0);
+        let layout=Mp4AudioReader::<Logged>::description_speakers(&mut reader,track,0,0).unwrap().unwrap();
+        assert_eq!(layout.0.len(),10);
+        assert_eq!(bytes.get(),162*2*16);
     }
 }
