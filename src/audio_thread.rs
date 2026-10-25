@@ -1809,7 +1809,10 @@ mod exact_seek_clock_regressions {
         ] {
             playback.seek(target);
             match received.try_recv().unwrap() {
-                Command::Seek(pts)=>assert_eq!(pts,expected,"target={target:?}"),
+                Command::SeekTime(received)=>{
+                    assert_eq!(received,target);
+                    assert_eq!(super::sample_seek_clock_regressions::Clock(source.timescale()).seek_time(received),expected,"target={target:?}");
+                },
                 _=>panic!("seek did not send a navigation command"),
             }
         }
@@ -1953,6 +1956,19 @@ mod duration_publication_guards {
 #[cfg(test)]
 mod sample_seek_clock_regressions {
     use super::*;
+    pub(super) struct Clock(pub u32);
+    impl AudioStream for Clock {
+        fn codec(&self)->&str {"A_PCM/FLOAT/IEEE"}
+        fn timescale(&self)->u32 {self.0}
+        fn sample_rate(&self)->u32 {self.0}
+        fn channels(&self)->u16 {1}
+        fn extra_data(&self)->&[u8] {&[]}
+        fn audio_tracks(&self)->Vec<crate::audio::AudioTrack> {Vec::new()}
+        fn next_packet(&mut self)->crate::Result<Option<crate::audio::EncodedPacket>> {Ok(None)}
+        fn rewind(&mut self) {}
+        fn seek_to(&mut self,pts:i64)->i64 {pts}
+    }
+
     #[test]
     fn inverse_seek_recovers_floored_sample_boundaries_and_keeps_other_targets_floored() {
         for scale in [8000u32,44100,48000,1_000_000_000] {
@@ -1960,10 +1976,10 @@ mod sample_seek_clock_regressions {
             let mut playback=AudioPlayback{commands,events,generation:0,thread:None,position:Arc::new(Mutex::new(Duration::ZERO)),timescale:scale,duration:Arc::new(Mutex::new(None))};
             for tick in [0u64,1,2,7,2816,12032,9_000_000_000_000_000_000,i64::MAX as u64] {
                 let rate=u64::from(scale);let target=Duration::new(tick/rate,((tick%rate)*1_000_000_000/rate) as u32);
-                playback.seek(target);match received.try_recv().unwrap(){Command::Seek(at)=>assert_eq!(at,tick as i64,"rate{scale} tick{tick}"),_=>panic!("seek command")}
+                playback.seek(target);match received.try_recv().unwrap(){Command::SeekTime(at)=>{assert_eq!(at,target);assert_eq!(Clock(scale).seek_time(at),tick as i64,"rate{scale} tick{tick}")},_=>panic!("seek command")}
             }
             if scale==48000 {for (ns,expected) in [(1,0),(20832,0),(20833,1),(20834,1),(41665,1),(41666,2)] {
-                playback.seek(Duration::from_nanos(ns));match received.try_recv().unwrap(){Command::Seek(at)=>assert_eq!(at,expected,"fractional target{ns}"),_=>panic!("seek command")}
+                playback.seek(Duration::from_nanos(ns));match received.try_recv().unwrap(){Command::SeekTime(at)=>{assert_eq!(at,Duration::from_nanos(ns));assert_eq!(Clock(scale).seek_time(at),expected,"fractional target{ns}")},_=>panic!("seek command")}
             }}
         }
     }

@@ -1,3 +1,5 @@
+#[path = "support/wave_chunks.rs"]
+mod wave_chunks;
 use std::path::{Path, PathBuf};
 struct Dir(PathBuf);
 impl Drop for Dir {
@@ -43,7 +45,7 @@ fn trim_keeps_decoder_preroll_and_matches_full_decode_sample_slice() {
             let bytes = std::fs::read(&dest).unwrap();
             let stride = usize::from(original.channels) * 4;
             assert_eq!(
-                &bytes[80..],
+                wave_chunks::data(&bytes),
                 &full[first as usize * stride..last as usize * stride]
             );
             let cli = d.0.join(format!("cli-{name}-{from}.wav"));
@@ -169,7 +171,7 @@ fn selected_container_audio_keeps_timing_and_rejects_implicit_track_loss() {
             fvid::native_export::trim_aac_wave(&source, &dest, 0, 40000, Some(stream), None, None)
                 .unwrap();
         let bytes = std::fs::read(&dest).unwrap();
-        let pcm = &bytes[80..];
+        let pcm = wave_chunks::data(&bytes);
         assert_eq!(pcm.len(), reference.len());
         let mut square = 0.0f64;
         let mut peak = 0.0f64;
@@ -267,7 +269,7 @@ fn single_container_track_can_be_trimmed_without_selection() {
         .unwrap();
         fvid::native_export::trim_aac_wave(&source, &dest, 10000, 30000, None, None, None).unwrap();
         assert_eq!(
-            &std::fs::read(dest).unwrap()[80..],
+            wave_chunks::data(&std::fs::read(dest).unwrap()),
             std::fs::read(baseline).unwrap()
         );
     }

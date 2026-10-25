@@ -227,3 +227,62 @@ fn seek_and_rewind_preserve_exact_native_suffixes_below_container_tick_precision
         );
     }
 }
+
+#[test]
+fn worker_seek_after_eof_and_rewind_keep_the_native_pcm_clock() {
+    let manifest: serde_json::Value = serde_json::from_slice(
+        &std::fs::read(root().join("mp4-quantized-playback/manifest.json")).unwrap(),
+    )
+    .unwrap();
+    for name in [
+        "constant-aac-900-floor",
+        "ssr-edits-1000-nearest",
+        "ps-edits-900-ceil",
+        "adpcm-1000-floor",
+        "pcm-900-nearest",
+        "aac-fragmented-1000-ceil",
+    ] {
+        eprintln!("worker navigation {name}");
+        let case = manifest["cases"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|c| c["name"] == name)
+            .unwrap();
+        let control = exact_packets(&mut open(
+            root()
+                .join("mp4-quantized-playback")
+                .join(case["exact"].as_str().unwrap()),
+        ));
+        let trace = Arc::new(Mutex::new(transitions::Trace::default()));
+        let shared = trace.clone();
+        let mut audio = AudioPlayback::start(
+            Box::new(open(
+                root()
+                    .join("mp4-quantized-audio-clock")
+                    .join(format!("{name}.mp4")),
+            )),
+            move || Box::new(transitions::Capture::new(shared)),
+        );
+        audio.play();
+        transitions::ended(&audio, 0);
+        transitions::compare(
+            &trace.lock().unwrap().packets,
+            &suffix(&control, std::time::Duration::ZERO),
+        );
+        for (generation, ns) in [22_001_001, 234_000_000].into_iter().enumerate() {
+            trace.lock().unwrap().packets.clear();
+            let target = std::time::Duration::from_nanos(ns);
+            audio.seek(target);
+            transitions::ended(&audio, generation as u64 + 1);
+            transitions::compare(&trace.lock().unwrap().packets, &suffix(&control, target));
+        }
+        trace.lock().unwrap().packets.clear();
+        audio.rewind();
+        transitions::ended(&audio, 3);
+        transitions::compare(
+            &trace.lock().unwrap().packets,
+            &suffix(&control, std::time::Duration::ZERO),
+        );
+    }
+}

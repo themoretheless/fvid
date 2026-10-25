@@ -1,3 +1,5 @@
+#[path = "support/wave_chunks.rs"]
+mod wave_chunks;
 use fvid::{container::adts::Limits, native_media::decode_aac_pcm};
 
 #[test]
@@ -94,7 +96,7 @@ fn float_wav_preserves_surround_samples_and_channel_layout() {
     let stats = decode_aac_pcm(input, &mut pcm, &Limits::default()).unwrap();
     assert_eq!(u64::from(read32(68)), stats.sample_frames);
     assert_eq!(read32(76) as usize, pcm.len());
-    assert_eq!(&wave[80..], pcm);
+    assert_eq!(wave_chunks::data(&wave), pcm);
     assert!(fvid::native_export::export_aac_pcm(&source, &output).is_err());
     assert_eq!(std::fs::read(&output).unwrap(), wave);
     let clip = dir.join("clip.wav");
@@ -106,7 +108,7 @@ fn float_wav_preserves_surround_samples_and_channel_layout() {
     assert!(run.stdout.is_empty());
     let clipped = std::fs::read(clip).unwrap();
     assert_eq!(u32::from_le_bytes(clipped[68..72].try_into().unwrap()), 1920);
-    assert_eq!(&clipped[80..], &pcm[1441*24..3361*24]);
+    assert_eq!(wave_chunks::data(&clipped), &pcm[1441*24..3361*24]);
     std::fs::remove_dir_all(dir).unwrap();
 }
 
@@ -306,8 +308,12 @@ fn matroska_delay_and_both_padding_directions_trim_exact_samples() {
         let mut actual = Vec::new();
         let stats = fvid::native_media::decode_matroska_aac_pcm_interval(&data, &mut actual, None).unwrap();
         let expected = if padding > 0 { whole[100*8..1998*8].to_vec() }
-            else { [&whole[100*8..1024*8], &whole[1074*8..2048*8]].concat() };
-        assert_eq!(stats.sample_frames, 1898);
+            else {
+                // Head padding removes coded samples without moving later
+                // samples earlier than their container presentation time.
+                [&whole[100*8..1024*8], &[0; 50*8], &whole[1074*8..2048*8]].concat()
+            };
+        assert_eq!(stats.sample_frames, if padding > 0 {1898} else {1948});
         assert_eq!(actual, expected);
     }
 }
@@ -331,7 +337,7 @@ fn native_volume_scales_all_aac_containers_without_clipping() {
             assert_eq!(u32::from_le_bytes(wave[68..72].try_into().unwrap()) as u64, baseline.sample_frames);
             let expected: Vec<_> = pcm.as_chunks::<4>().0.iter().flat_map(|bytes|
                 (f32::from_le_bytes(*bytes) * gain).to_le_bytes()).collect();
-            assert_eq!(&wave[80..], expected);
+            assert_eq!(wave_chunks::data(&wave), expected);
         }
         for gain in [-1.0, 65.0, f64::NAN, f64::INFINITY] {
             let output = dir.join("invalid.wav");
@@ -360,7 +366,7 @@ fn surround_to_stereo_and_mono_preserves_timing_and_wav_layout() {
         assert_eq!(u16::from_le_bytes(data[22..24].try_into().unwrap()), channels);
         assert_eq!(u32::from_le_bytes(data[40..44].try_into().unwrap()), if channels == 1 {4} else {3});
         assert_eq!(data.len()-80, stats.sample_frames as usize * channels as usize * 4);
-        for (input, actual) in original.as_chunks::<24>().0.iter().zip(data[80..].chunks_exact(channels as usize*4)) {
+        for (input, actual) in original.as_chunks::<24>().0.iter().zip(wave_chunks::data(&data).chunks_exact(channels as usize*4)) {
             let samples: Vec<_> = input.as_chunks::<4>().0.iter().map(|v| f32::from_le_bytes(*v) as f64).collect();
             let left = samples[0] + (samples[2]+samples[4])/2f64.sqrt();
             let right = samples[1] + (samples[2]+samples[5])/2f64.sqrt();
@@ -392,9 +398,9 @@ fn native_resample_cli_keeps_duration_and_sets_output_geometry() {
         assert_eq!(u32::from_le_bytes(bytes[28..32].try_into().unwrap()), rate*8);
         assert_eq!(u32::from_le_bytes(bytes[68..72].try_into().unwrap()), frames);
         assert_eq!(bytes.len(), 80+frames as usize*8);
-        for pair in bytes[80..].as_chunks::<8>().0.iter() { assert_eq!(&pair[..4], &pair[4..]); }
+        for pair in wave_chunks::data(&bytes).as_chunks::<8>().0.iter() { assert_eq!(&pair[..4], &pair[4..]); }
         // Mono source remains audible in both output channels.
-        assert!(bytes[80..].as_chunks::<4>().0.iter().any(|v| f32::from_le_bytes(*v).abs()>0.01));
+        assert!(wave_chunks::data(&bytes).as_chunks::<4>().0.iter().any(|v| f32::from_le_bytes(*v).abs()>0.01));
     }
     std::fs::remove_dir_all(dir).unwrap();
 }

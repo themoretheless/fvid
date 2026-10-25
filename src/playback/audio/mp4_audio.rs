@@ -326,12 +326,11 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
     fn seek_recovered(&mut self,wanted:EditTime)->Result<i64> {
         let (index,landed)=self.clock_landing(wanted)?;
         let mut first=index;
-        if let Some(sample)=self.track().samples.get(index) {
+        if self.track().samples.get(index).is_some() {
             let setup=self.track().description_for_sample(index).ok_or_else(||invalid("missing MP4 seek description"))?;
             if matches!(&setup.codec,b"mp4a"|b"MAC3"|b"MAC6") {
                 first=(0..index).rev().find(|&i|self.track().description_for_sample(i)!=Some(setup)).map_or(0,|i|i+1);
             }
-            let _=sample;
         }
         let returned=i64::try_from(landed.floor_ticks(self.track().timescale)?).map_err(|_|invalid("MP4 seek clock overflow"))?;
         self.rewind();self.sample_index=first;self.clock_floor.set(landed);self.presentation_floor=returned;self.clock_anchor.set(Some((returned,landed)));Ok(returned)
@@ -1076,13 +1075,12 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
                 let position=if position.cmp(timeline.end)==std::cmp::Ordering::Greater {timeline.end}else{position};
                 timeline.cursor.set(position);
                 let position=timeline.locate().map_or(position,|i|position.max(timeline.minimum_starts[i]));
-                let position=if self.clock.is_some(){self.align_variable_seek(position)?}else{position};
                 timeline.cursor.set(position);
                 let returned=i64::try_from(position.floor_ticks(self.track().timescale)?).map_err(|_|invalid("MP4 seek clock overflow"))?;
                 Ok((returned,position))
             })();
             self.variable_edits.as_mut().unwrap().active=None;
-            return match result {Ok((returned,position))=>{if self.clock.is_some(){self.clock_anchor.set(Some((returned,position)));}returned},Err(error)=>{self.navigation_error=Some(error);0}};
+            return match result {Ok((returned,_))=>returned,Err(error)=>{self.navigation_error=Some(error);0}};
         }
         if self.changing {
             let requested=pts.max(0).min(self.track().duration.min(i64::MAX as u64)as i64);

@@ -18281,7 +18281,41 @@ the valid pcm-900-floor witness with packet-duration/decoded-sample disagreement
 New export acceptance compares independent arithmetic/scalar DSP oracles.
 
 This is export qualification, not proof of universal timestamp semantics.
-Native real-time AAC playback still has its own strict packet_sample_limit
-clock check and is not qualified by this matrix. Remaining codec tools/profiles,
-other container clocks, sub-tick/ambiguous trim cases and physical-device paths
-remain part of the active codec-coverage goal.
+The playback qualification below extends this matrix to the native worker.
+Remaining codec tools/profiles, other container clocks, sub-tick/ambiguous trim
+cases and physical-device paths remain part of the active codec-coverage goal.
+
+
+### Native MP4 playback retains recovered rational sample coordinates
+
+The player now shares export's coded-frame clock-run classification. Original
+encoded packet PTS/duration and the demuxer index remain unchanged. A separate
+association stamp identifies the source packet through delayed decoder output;
+the source then clips PCM in rational native-sample coordinates. Constant-size
+runs retain a scalar frame count; variable-size runs allocate cumulative prefixes
+only when needed. The optional export allocation estimate includes these caches.
+No common u32 LCM, expanded per-sample timeline or new default memory cap is used.
+
+User seek commands preserve Duration until the source resolves the landing point.
+Ordinary source adapters retain tick-flooring and recovery of nanosecond-rounded
+native boundaries. Recovered MP4 streams select native samples before converting
+the public seek anchor or presentation timestamp. Decoder checkpoints retain
+packet identity and real configuration boundaries. Source-owned recovered ADPCM
+windows defer adapter trimming until full block decoding. Container AAC adapters
+explicitly select fixed SSR packet windows, including after reset; the standalone
+untimed native SSR API keeps its existing variable-window contract.
+
+The owned playback fixture directory adds 19 artifacts (1,015,641 bytes), including
+15 exact encoded controls and a short independent scalar-IPQF SSR witness.
+Generation is byte-exact with process/network access denied. A parent-adapter
+replay reproduces the SSR decoded-window failure; the fixed adapter's actual
+playback worker matches the independent scalar samples. All 90 coarse-clock
+variants match exact encoded controls for packet PCM/time, six seek targets and
+rewind. Worker acceptance also exercises EOF-to-seek-to-rewind for AAC, SSR, PS,
+PCM, ADPCM and fragmented AAC using a capturing audio backend. The test collector
+now re-enters source scheduling after each delayed EOF frame, matching the worker
+when a drained tail finishes one edit before a later repeated range.
+
+These checks qualify the named owned synthetic paths and worker scheduling;
+they do not prove physical-device timing, arbitrary MP4 clock semantics, Dolby
+coarse-clock recovery, every codec profile/tool or universal codec completion.
