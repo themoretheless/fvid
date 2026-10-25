@@ -12,7 +12,8 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
     reader.scan_all()?;
     let index = matroska_audio_index(&reader, selected)?;
     let track = reader.tracks[index].clone();
-    let in_band_ps = negotiate_matroska_ps(&mut reader, index, || control.check())?;
+    let max_packets = control.packet_limit();
+    let in_band_ps = negotiate_matroska_ps(&mut reader, index, max_packets, || control.check())?;
     let mut decoder = if in_band_ps { MatroskaTimelineDecoder::with_in_band_ps(&track)? } else { MatroskaTimelineDecoder::from_matroska(&track)? };
     let rate = decoder.sample_rate();
     let channels = decoder.channels();
@@ -218,16 +219,21 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
 }
 
 pub(crate) fn negotiate_matroska_ps<R: std::io::Read + std::io::Seek>(
-    reader: &mut MatroskaTimelineReader<R>, index: usize, mut check: impl FnMut() -> Result<()>,
+    reader: &mut MatroskaTimelineReader<R>, index: usize, max_packets: Option<u64>, mut check: impl FnMut() -> Result<()>,
 ) -> Result<bool> {
     let track = reader.tracks[index].clone();
     if track.codec != "A_AAC" { return Ok(false); }
     let Ok(rate) = u32::try_from(track.sample_rate) else { return Ok(false); };
     let Ok(mut probe) = InBandPsProbe::new(&track.codec_private, rate) else { return Ok(false); };
     reader.scan_all()?;
+    let mut track_packets = 0u64;
     for packet_index in 0..reader.packets.len() {
         check()?;
         if reader.packets[packet_index].track != track.number { continue; }
+        if max_packets.is_some_and(|limit| track_packets >= limit) {
+            break;
+        }
+        track_packets += 1;
         let packet = reader.read_packet(packet_index)?;
         if probe.read(&packet).is_err() { probe.reset(); continue; }
         if probe.ps_detected() { return Ok(true); }

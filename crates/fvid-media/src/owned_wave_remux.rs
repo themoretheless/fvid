@@ -60,7 +60,9 @@ pub fn trim(
         interval: Some((from, to)),
         ..Default::default()
     };
-    if crate::owned_audio_export::supports(source, destination, transform, options) {
+    if !crate::owned_wave_inspect::is_wave(source).unwrap_or(false)
+        || crate::owned_g711_wave_export::recognizes(source, &CopyOptions::default()).unwrap_or(false)
+    {
         let stats = crate::owned_audio_export::decode_audio_transformed(
             source,
             destination,
