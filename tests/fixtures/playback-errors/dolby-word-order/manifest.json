@@ -269,6 +269,126 @@
       "file": "eac3-coarse-mixed.mkv",
       "control": "eac3-coarse-be.mkv",
       "programme": 7
+    },
+    {
+      "file": "eac3-short-silent-p0-le.mp4",
+      "control": "eac3-short-silent-p0-be.mp4",
+      "programme": 0
+    },
+    {
+      "file": "eac3-short-silent-p0-le.raw",
+      "control": "eac3-short-silent-p0-be.raw",
+      "programme": 0
+    },
+    {
+      "file": "eac3-short-silent-p0-le.mkv",
+      "control": "eac3-short-silent-p0-be.mkv",
+      "programme": 0
+    },
+    {
+      "file": "eac3-short-silent-p0-mixed.mp4",
+      "control": "eac3-short-silent-p0-be.mp4",
+      "programme": 0
+    },
+    {
+      "file": "eac3-short-silent-p0-mixed.raw",
+      "control": "eac3-short-silent-p0-be.raw",
+      "programme": 0
+    },
+    {
+      "file": "eac3-short-silent-p0-mixed.mkv",
+      "control": "eac3-short-silent-p0-be.mkv",
+      "programme": 0
+    },
+    {
+      "file": "eac3-short-silent-p7-le.mp4",
+      "control": "eac3-short-silent-p7-be.mp4",
+      "programme": 7
+    },
+    {
+      "file": "eac3-short-silent-p7-le.raw",
+      "control": "eac3-short-silent-p7-be.raw",
+      "programme": 7
+    },
+    {
+      "file": "eac3-short-silent-p7-le.mkv",
+      "control": "eac3-short-silent-p7-be.mkv",
+      "programme": 7
+    },
+    {
+      "file": "eac3-short-silent-p7-mixed.mp4",
+      "control": "eac3-short-silent-p7-be.mp4",
+      "programme": 7
+    },
+    {
+      "file": "eac3-short-silent-p7-mixed.raw",
+      "control": "eac3-short-silent-p7-be.raw",
+      "programme": 7
+    },
+    {
+      "file": "eac3-short-silent-p7-mixed.mkv",
+      "control": "eac3-short-silent-p7-be.mkv",
+      "programme": 7
+    },
+    {
+      "file": "eac3-short-tone-p0-le.mp4",
+      "control": "eac3-short-tone-p0-be.mp4",
+      "programme": 0
+    },
+    {
+      "file": "eac3-short-tone-p0-le.raw",
+      "control": "eac3-short-tone-p0-be.raw",
+      "programme": 0
+    },
+    {
+      "file": "eac3-short-tone-p0-le.mkv",
+      "control": "eac3-short-tone-p0-be.mkv",
+      "programme": 0
+    },
+    {
+      "file": "eac3-short-tone-p0-mixed.mp4",
+      "control": "eac3-short-tone-p0-be.mp4",
+      "programme": 0
+    },
+    {
+      "file": "eac3-short-tone-p0-mixed.raw",
+      "control": "eac3-short-tone-p0-be.raw",
+      "programme": 0
+    },
+    {
+      "file": "eac3-short-tone-p0-mixed.mkv",
+      "control": "eac3-short-tone-p0-be.mkv",
+      "programme": 0
+    },
+    {
+      "file": "eac3-short-tone-p7-le.mp4",
+      "control": "eac3-short-tone-p7-be.mp4",
+      "programme": 7
+    },
+    {
+      "file": "eac3-short-tone-p7-le.raw",
+      "control": "eac3-short-tone-p7-be.raw",
+      "programme": 7
+    },
+    {
+      "file": "eac3-short-tone-p7-le.mkv",
+      "control": "eac3-short-tone-p7-be.mkv",
+      "programme": 7
+    },
+    {
+      "file": "eac3-short-tone-p7-mixed.mp4",
+      "control": "eac3-short-tone-p7-be.mp4",
+      "programme": 7
+    },
+    {
+      "file": "eac3-short-tone-p7-mixed.raw",
+      "control": "eac3-short-tone-p7-be.raw",
+      "programme": 7
+    },
+    {
+      "file": "eac3-short-tone-p7-mixed.mkv",
+      "control": "eac3-short-tone-p7-be.mkv",
+      "programme": 7
     }
   ],
   "provenance": "Owned neutral VP9, repository-authored AC-3 tone and authored E-AC-3 spectra. Swap 16-bit audio words only; MP4/video/PTS/CRC logical values unchanged. No private media, FFmpeg, subprocess or network."

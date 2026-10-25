@@ -286,7 +286,9 @@ pub(crate) fn probe_native_programme(data:&[u8],selected:u8,eof:bool)->Result<Op
         if remaining.len()<6 {
             return if eof {Err(invalid("truncated E-AC-3 programme setup"))}else{Ok(None)};
         }
-        let size=(usize::from(remaining[2]&7)*256+usize::from(remaining[3])+1)*2;
+        // frmsiz is a logical header field, including during incomplete setup.
+        let h=crate::codec::ac3_decoder::dolby_prefix(remaining).ok_or_else(||invalid("invalid E-AC-3 programme setup prefix"))?;
+        let size=(usize::from(h[2]&7)*256+usize::from(h[3])+1)*2;
         if size>remaining.len(){return if eof{Err(invalid("truncated E-AC-3 programme setup"))}else{Ok(None)};}
         let(kind,id,size)=envelope(remaining)?;let raw=&remaining[..size];offset+=size;
         if frames.is_empty(){
