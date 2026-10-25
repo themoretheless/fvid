@@ -16,6 +16,7 @@ pub(super) struct Preview {
     pub starts_clvs: u64,
     pub release: [u64; 63],
     pub output_prior: [(u64, bool); 63],
+    pub complete_target_idr: bool,
 }
 impl RandomAccess {
     pub fn preview(self, plan: &LayeredAccessUnit) -> Result<Preview> {
@@ -25,6 +26,7 @@ impl RandomAccess {
         let mut starts_clvs = 0u64;
         let mut release = [0u64; 63];
         let mut output_prior = [(0u64, false); 63];
+        let mut complete_target_idr = false;
         for p in plan.pictures() {
             let h = &p.slices[0];
             let id = h.nal.layer_id;
@@ -149,6 +151,7 @@ impl RandomAccess {
                     .covers_idr_target(first.binding.sps.output_layer_set, idr_layers)
             {
                 release[first.slices[0].nal.layer_id as usize] = (1u64 << 63) - 1;
+                complete_target_idr = true;
             }
         }
         Ok(Preview {
@@ -158,6 +161,7 @@ impl RandomAccess {
             starts_clvs,
             release,
             output_prior,
+            complete_target_idr,
         })
     }
     pub fn end(&mut self, end: LayeredEndMarkers, affected: u64) {

@@ -1,0 +1,90 @@
+{
+  "cases": [
+    {
+      "name": "pcm-dependent-flush",
+      "source": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "oracle": "hevc-pcm-reference-rext8.yuv",
+      "independent": false,
+      "discard": false
+    },
+    {
+      "name": "pcm-dependent-discard",
+      "source": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "oracle": "hevc-pcm-reference-rext8.yuv",
+      "independent": false,
+      "discard": true
+    },
+    {
+      "name": "pcm-independent-flush",
+      "source": "hevc-layered-reconstruct-pcm-independent.mp4",
+      "oracle": "hevc-pcm-reference-rext8.yuv",
+      "independent": true,
+      "discard": false
+    },
+    {
+      "name": "pcm-independent-discard",
+      "source": "hevc-layered-reconstruct-pcm-independent.mp4",
+      "oracle": "hevc-pcm-reference-rext8.yuv",
+      "independent": true,
+      "discard": true
+    },
+    {
+      "name": "multislice-dependent-flush",
+      "source": "hevc-layered-reconstruct-multislice-dependent.mp4",
+      "oracle": "hevc-pcm-dependent-rext8.yuv",
+      "independent": false,
+      "discard": false
+    },
+    {
+      "name": "multislice-dependent-discard",
+      "source": "hevc-layered-reconstruct-multislice-dependent.mp4",
+      "oracle": "hevc-pcm-dependent-rext8.yuv",
+      "independent": false,
+      "discard": true
+    },
+    {
+      "name": "multislice-independent-flush",
+      "source": "hevc-layered-reconstruct-multislice-independent.mp4",
+      "oracle": "hevc-pcm-dependent-rext8.yuv",
+      "independent": true,
+      "discard": false
+    },
+    {
+      "name": "multislice-independent-discard",
+      "source": "hevc-layered-reconstruct-multislice-independent.mp4",
+      "oracle": "hevc-pcm-dependent-rext8.yuv",
+      "independent": true,
+      "discard": true
+    },
+    {
+      "name": "colour-planes-dependent-flush",
+      "source": "hevc-layered-reconstruct-colour-planes-dependent.mp4",
+      "oracle": "hevc-separate-colour-planes-distinct-synthetic.yuv",
+      "independent": false,
+      "discard": false
+    },
+    {
+      "name": "colour-planes-dependent-discard",
+      "source": "hevc-layered-reconstruct-colour-planes-dependent.mp4",
+      "oracle": "hevc-separate-colour-planes-distinct-synthetic.yuv",
+      "independent": false,
+      "discard": true
+    },
+    {
+      "name": "colour-planes-independent-flush",
+      "source": "hevc-layered-reconstruct-colour-planes-independent.mp4",
+      "oracle": "hevc-separate-colour-planes-distinct-synthetic.yuv",
+      "independent": true,
+      "discard": false
+    },
+    {
+      "name": "colour-planes-independent-discard",
+      "source": "hevc-layered-reconstruct-colour-planes-independent.mp4",
+      "oracle": "hevc-separate-colour-planes-distinct-synthetic.yuv",
+      "independent": true,
+      "discard": true
+    }
+  ],
+  "refusal": "pcm-dependent-flush-truncated.mp4",
+  "provenance": "Three complete target IDR AUs, unchanged owned VPS and PCM entropy; only prior-output flags are authored. Own MP4/Matroska muxers; no private media, FFmpeg, external codec process or network."
+}

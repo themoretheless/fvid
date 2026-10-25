@@ -17,10 +17,29 @@ struct Pending {
 pub struct LayeredOutputQueue {
     pending: Vec<Pending>,
     last_poc: Option<i32>,
+    first_access_unit: u64,
     last_access_unit: Option<u64>,
     highest_tid: Option<u8>,
 }
 impl LayeredOutputQueue {
+    pub(super) fn begin_idr_epoch(&mut self, access_unit: u64) {
+        // A complete target IDR AU starts every selected layer's new CVS.
+        // Prior pictures still follow their individual sub-DPB output policy.
+        self.first_access_unit = access_unit;
+        self.last_poc = None;
+        self.highest_tid = None;
+    }
+    fn record_output(&mut self, pictures: &[LayeredDecoded]) {
+        // A dependent layer's old output can survive the base-layer discard.
+        // Emitting it must not establish the lower POC bound of the new CVSs.
+        if let Some(last) = pictures
+            .iter()
+            .rev()
+            .find(|p| p.access_unit >= self.first_access_unit)
+        {
+            self.last_poc = Some(last.poc);
+        }
+    }
     pub(crate) fn retained_bytes(&self) -> Result<usize> {
         let mut bytes = std::mem::size_of::<Self>().saturating_add(
             self.pending
@@ -85,16 +104,9 @@ impl LayeredOutputQueue {
             }) {
                 ready.extend(self.pending.remove(0).pictures);
             }
-            if let Some(last) = ready.last() {
-                self.last_poc = Some(last.poc);
-            }
+            self.record_output(&ready);
         }
-        // An ordinary base-only CLVS has just one sub-DPB. Its IRAP
-        // prior-output scope therefore completes the old output epoch even
-        // without an Annex F cross-layer reset covering all possible layers.
-        if scope == (1u64 << 63) - 1
-            || p.binding.vps.inferred_base_layer() && preview.starts_clvs & 1 != 0
-        {
+        if scope == (1u64 << 63) - 1 {
             self.last_poc = None;
             self.last_access_unit = None;
             self.highest_tid = None;
@@ -144,9 +156,15 @@ impl LayeredOutputQueue {
                 .flat_map(|au| &au.pictures)
                 .filter(|p| {
                     p.layer_id == layer
-                        && !references
-                            .iter()
-                            .any(|(id, r)| *id == layer && r.poc == p.poc)
+                        && !references.iter().any(|(id, r)| {
+                            // Complete target IDR has released every old
+                            // reference. Only current-epoch pending output can
+                            // share a slot with this reference, even if an old
+                            // CVS picture happens to have the same POC.
+                            p.access_unit >= self.first_access_unit
+                                && *id == layer
+                                && r.poc == p.poc
+                        })
                 })
                 .count();
             if reference_count.saturating_add(pending_only) < capacity
@@ -163,9 +181,7 @@ impl LayeredOutputQueue {
             self.pending.sort_by_key(|au| au.pictures[0].poc);
             ready.extend(self.pending.remove(0).pictures);
         }
-        if let Some(last) = ready.last() {
-            self.last_poc = Some(last.poc);
-        }
+        self.record_output(&ready);
         Ok(ready)
     }
     pub fn pending_access_units(&self) -> usize {
@@ -179,6 +195,7 @@ impl LayeredOutputQueue {
         self.pending.sort_by_key(|p| p.pictures[0].poc);
         let out = self.pending.drain(..).flat_map(|p| p.pictures).collect();
         self.last_poc = None;
+        self.first_access_unit = 0;
         self.last_access_unit = None;
         self.highest_tid = None;
         out
@@ -237,7 +254,7 @@ impl LayeredOutputQueue {
         for old in &self.pending {
             let p = &old.pictures[0];
             if p.access_unit >= first.access_unit
-                || p.poc == first.poc
+                || p.poc == first.poc && p.access_unit >= self.first_access_unit
                 || p.binding.vps != first.binding.vps
                 || p.binding.sps.output_layer_set != first.binding.sps.output_layer_set
             {
@@ -326,12 +343,105 @@ impl LayeredOutputQueue {
             }
             ready.extend(staged.remove(0).pictures);
         }
-        if let Some(last) = ready.last() {
-            self.last_poc = Some(last.poc);
-        }
+        self.record_output(&ready);
         self.pending = staged;
         self.last_access_unit = Some(access_unit);
         self.highest_tid = Some(highest_tid);
         Ok(ready)
+    }
+}
+
+#[cfg(test)]
+mod epoch_storage_tests {
+    use super::*;
+    use crate::codec::{
+        hevc_decoder::{LayeredAccessUnit, LayeredDecoder, LayeredParameters},
+        hevc_motion::Reference,
+    };
+    use std::sync::Arc;
+    const CONFIG: &[u8] =
+        include_bytes!("../../tests/fixtures/playback-errors/hevc-idr-output-epochs/identity.hvcc");
+    const IDR: &[u8] = include_bytes!(
+        "../../tests/fixtures/playback-errors/hevc-idr-output-epochs/identity-idr.au"
+    );
+    const INTER: &[u8] = include_bytes!(
+        "../../tests/fixtures/playback-errors/hevc-idr-output-epochs/identity-inter.au"
+    );
+    const BUDGET: usize = 64 << 20;
+    #[test]
+    fn equal_poc_in_different_cvss_does_not_alias_a_physical_dpb_slot() {
+        let mut decoder = LayeredDecoder::from_configuration(CONFIG, 1, BUDGET).unwrap();
+        let mut queue = LayeredOutputQueue::default();
+        for _ in 0..2 {
+            assert!(
+                decoder
+                    .decode_queued_packet(&mut queue, IDR, 1)
+                    .unwrap()
+                    .0
+                    .is_empty()
+            );
+        }
+        let pending = queue.clone().drain();
+        assert_eq!(
+            pending
+                .iter()
+                .map(|p| (p.access_unit, p.layer_id, p.poc))
+                .collect::<Vec<_>>(),
+            [(0, 3, 0), (1, 0, 0), (1, 3, 0)]
+        );
+        let old = &pending[0];
+        let current = &pending[2];
+        assert!(!Arc::ptr_eq(&old.picture, &current.picture));
+        let parameters = LayeredParameters::from_configuration(CONFIG, BUDGET).unwrap();
+        let plan =
+            LayeredAccessUnit::parse(&parameters, decoder.poc(), INTER, 4, 1, BUDGET).unwrap();
+        let mut picture = plan.into_parts().2.pop().unwrap();
+        let decoded = decoder.decode_packet(INTER).unwrap().0;
+        let inter = decoded.iter().find(|p| p.layer_id == 3).unwrap();
+        assert_eq!(inter.poc, 1);
+        // Isolate a conforming three-slot/two-reorder capacity at the bumping
+        // boundary. Two decoded current-CVS references occupy two slots; the
+        // retained prior-CVS output occupies the third, despite sharing POC0.
+        let ordering = &mut Arc::make_mut(&mut picture.binding).sps.output_ordering[1];
+        ordering.max_decoded_pictures = 3;
+        ordering.max_reorder_pictures = 2;
+        let mut references = [current, inter].map(|p| {
+            (
+                3,
+                Reference {
+                    layer_id: 3,
+                    long_term: false,
+                    poc: p.poc,
+                    picture: Some(p.picture.clone()),
+                },
+            )
+        });
+        let bumped = queue.bump_before(&picture, &references, 1).unwrap();
+        assert_eq!(
+            bumped
+                .iter()
+                .map(|p| (p.access_unit, p.layer_id))
+                .collect::<Vec<_>>(),
+            [(0, 3)]
+        );
+        assert!(Arc::ptr_eq(&bumped[0].picture, &old.picture));
+        assert_eq!(queue.pending_access_units(), 1);
+        // Conversely, copying current-CVS motion/POC metadata must not make
+        // the same coded picture consume a second logical sub-DPB slot.
+        let metadata_copy = Arc::new(
+            current
+                .picture
+                .translated_layer_pocs(&[0; 63], BUDGET)
+                .unwrap(),
+        );
+        assert!(!Arc::ptr_eq(&metadata_copy, &current.picture));
+        references[0].1.picture = Some(metadata_copy);
+        assert!(
+            queue
+                .bump_before(&picture, &references, 1)
+                .unwrap()
+                .is_empty()
+        );
+        assert_eq!(queue.pending_access_units(), 1);
     }
 }
