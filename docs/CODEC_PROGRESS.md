@@ -1,6 +1,46 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
 
+## HEVC additional layer sets (F.10.3), 2026-10-25
+
+Globally scanned OLS selection now admits additional layer sets. Export uses
+their complete layer list, retains VPS/SPS/PPS/EOS from layer zero, retains EOB,
+removes other excluded layers and higher temporal IDs, and sets
+`vps_base_layer_available_flag` to zero in each retained VPS. This bounded
+single-bit rewrite preserves EBSP escaping and NAL lengths for both internal
+and external base headers. Ordinary layer sets retain their F.10.1 policy.
+
+Owned decoding reconstructs only the selected OLS's necessary layers while
+keeping its original immutable source VPS namespace. Thus exporting a rewritten
+VPS does not weaken active-binding equality or make seek mix rewritten and
+original snapshots. `prime_selected_metadata` applies the same selection to
+skipped AUs, charges extraction storage, and commits its OLS/metadata atomically.
+It supports populated configuration and in-band parameter-only bootstrap in
+both native MP4 and Matroska.
+
+Automatic selection excludes OLSs requiring an unavailable base. For external
+bases, coded SPS validation ignores the VPS ordering placeholders as required
+by 7.4.3.1; selected OLS DPB rows still supply the actual output/storage limits.
+Additional sets whose independent roots do not require external base pictures
+can therefore be decoded without an external base provider.
+
+The owned fixture matrix has 28 short two-picture scenarios in MP4 and
+Matroska (56 files): PCM, multiple slices, separate colour planes, unnecessary
+independent layers, dependent layer closure, external bases, available/unavailable
+base flags, and populated/empty configuration. Independent F.10.3 byte controls
+exercise length widths 1/2/4, layer-zero metadata/terminal retention and whole-set
+export versus necessary-layer decoding. Checks compare saved synthetic pixels,
+source clocks, normalized Matroska seek, explicit OLS seek, rewind and actual
+selected layers. Corrupt selected entropy and a wrong activated VPS leave
+parameters, POC, queue and OLS unpublished and permit valid retry. All 87 saved
+files reproduce byte-for-byte with process/socket creation denied; ordinary
+tests never invoke their generator or an external codec.
+
+This is finite additional-set qualification. F.10.2 independent-layer renumbering,
+external base pictures needed by other operation points, arbitrary P/B/tool/profile
+combinations and universal codec coverage are not established by this matrix.
+
+
 ## Unreferenced MP4 video descriptions and presented codec, 2026-10-25
 
 Unknown video SampleEntry records no longer discard otherwise supported tracks.

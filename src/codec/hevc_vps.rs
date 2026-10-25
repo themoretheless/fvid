@@ -167,7 +167,9 @@ impl LayeredVps {
             .sets
             .iter()
             .enumerate()
-            .filter(|(_, s)| s.output != 0)
+            .filter(|(_, s)| {
+                s.output != 0 && (self.vps.layers.base_available || s.necessary & 1 == 0)
+            })
             .max_by_key(|(i, s)| {
                 (
                     63 - s.output.leading_zeros(),

@@ -1,24 +1,42 @@
-//! H.265 F.10.1 extraction of a complete length-prefixed NAL sequence.
+//! H.265 F.10.1/F.10.3 extraction of complete length-prefixed NAL sequences.
 //! The caller supplies a dependency-closed layer list from the active VPS.
-//! This does not rewrite additional layer sets (F.10.2/F.10.3).
+//! Independent non-base layer renumbering (F.10.2) is a separate operation.
 use crate::codec::{
     config::NalUnits,
     hevc_nal::{NalHeader, NalRbsp},
 };
 use crate::{Result, invalid};
 
+#[derive(Clone, Copy)]
+enum Extraction {
+    Ordinary { reduced: bool },
+    Additional { rewrite_vps: bool },
+}
 fn keep(
     nal: &[u8],
     h: NalHeader,
     layers: u64,
     temporal: u8,
-    reduced: bool,
+    policy: Extraction,
     budget: usize,
 ) -> Result<bool> {
+    if let Extraction::Additional { .. } = policy {
+        if h.temporal_id > temporal {
+            return Ok(false);
+        }
+        return Ok(match h.unit_type {
+            32..=34 | 36 => h.layer_id == 0 || layers & (1u64 << h.layer_id) != 0,
+            37 => true,
+            _ => layers & (1u64 << h.layer_id) != 0,
+        });
+    }
     if h.layer_id == 63 || layers & (1u64 << h.layer_id) == 0 || h.temporal_id > temporal {
         return Ok(false);
     }
-    if reduced && h.layer_id == 0 && matches!(h.unit_type, 39 | 40) {
+    if matches!(policy, Extraction::Ordinary { reduced: true })
+        && h.layer_id == 0
+        && matches!(h.unit_type, 39 | 40)
+    {
         let rbsp = NalRbsp::parse(nal, budget)?;
         let mut at = 0usize;
         let mut timing = false;
@@ -79,7 +97,14 @@ pub fn extract_layered_substream(
         let h = NalHeader::parse(nal)?;
         reduced |= layers & (1u64 << h.layer_id) == 0 || h.temporal_id > temporal;
     }
-    extract_with_policy(input, length_size, layers, temporal, reduced, budget)
+    extract_with_policy(
+        input,
+        length_size,
+        layers,
+        temporal,
+        Extraction::Ordinary { reduced },
+        budget,
+    )
 }
 
 fn extract_with_policy(
@@ -87,9 +112,10 @@ fn extract_with_policy(
     length_size: u8,
     layers: u64,
     temporal: u8,
-    reduced: bool,
+    policy: Extraction,
     budget: usize,
 ) -> Result<Vec<u8>> {
+    let reduced = matches!(policy, Extraction::Ordinary { reduced: true });
     let mut scratch = 0usize;
     for nal in NalUnits::new(input, length_size)? {
         let nal = nal?;
@@ -110,9 +136,15 @@ fn extract_with_policy(
             NalHeader::parse(nal)?,
             layers,
             temporal,
-            reduced,
+            policy,
             budget,
         )? {
+            if matches!(policy, Extraction::Additional { rewrite_vps: true })
+                && NalHeader::parse(nal)?.unit_type == 32
+                && (nal.len() < 4 || nal[2] & 8 == 0 && (nal[2] & 3) == 0 && nal[3] >> 4 == 0)
+            {
+                return Err(invalid("HEVC additional extraction VPS header is invalid"));
+            }
             size = size
                 .checked_add(length_size as usize)
                 .and_then(|s| s.checked_add(nal.len()))
@@ -138,11 +170,22 @@ fn extract_with_policy(
             NalHeader::parse(nal)?,
             layers,
             temporal,
-            reduced,
+            policy,
             budget - size - overhead,
         )? {
             output.extend_from_slice(&(nal.len() as u32).to_be_bytes()[4 - length_size as usize..]);
+            let start = output.len();
             output.extend_from_slice(nal);
+            if matches!(policy, Extraction::Additional { rewrite_vps: true })
+                && NalHeader::parse(nal)?.unit_type == 32
+            {
+                // F.10.3 changes only vps_base_layer_available_flag. Internal
+                // base makes this byte nonzero; external base requires a nonzero
+                // max_layers_minus1 spanning this byte and the next. Thus the
+                // first two RBSP bytes cannot both become zero, and EBSP
+                // escaping/NAL length cannot change when bit 2 is cleared.
+                output[start + 2] &= !4;
+            }
         }
     }
     Ok(output)
@@ -187,34 +230,74 @@ impl SubstreamScan {
         if temporal > 6 {
             return Err(invalid("invalid HEVC extraction target"));
         }
-        if !vps.vps.layers.base_internal || !vps.vps.layers.base_available {
-            return Err(invalid(
-                "HEVC extraction external or unavailable base requires rewriting",
-            ));
-        }
-        let layers = if let Some(extension) = &vps.extension {
+        let (layers, additional) = if let Some(extension) = &vps.extension {
             let set = extension
                 .output
                 .sets
                 .get(ols)
                 .ok_or_else(|| invalid("HEVC extraction output layer set is absent"))?;
-            if set.layer_set_index >= vps.vps.layers.sets.len() {
-                return Err(invalid(
-                    "HEVC extraction additional layer set requires rewriting",
-                ));
-            }
+            let additional = if set.layer_set_index >= vps.vps.layers.sets.len() {
+                let list = extension
+                    .layer_sets
+                    .layer_sets
+                    .get(set.layer_set_index)
+                    .ok_or_else(|| invalid("HEVC extraction additional layer set is absent"))?;
+                let mut mask = 0u64;
+                for &id in list {
+                    if id > 62 || mask & (1u64 << id) != 0 {
+                        return Err(invalid("invalid HEVC extraction additional layer list"));
+                    }
+                    mask |= 1u64 << id;
+                }
+                if mask == 0 || mask & 1 != 0 || set.necessary & !mask != 0 {
+                    return Err(invalid("invalid HEVC extraction additional layer list"));
+                }
+                Some(mask)
+            } else {
+                None
+            };
             let layers = set.necessary;
+            let mut known = 0u64;
             for (i, &layer) in extension.graph.layer_ids.iter().enumerate() {
-                if layers & (1u64 << layer) != 0 && extension.graph.transitive[i] & !layers != 0 {
+                if layer > 63 {
+                    return Err(invalid("invalid HEVC extraction dependency graph"));
+                }
+                known |= 1u64 << layer;
+                let references = *extension
+                    .graph
+                    .transitive
+                    .get(i)
+                    .ok_or_else(|| invalid("invalid HEVC extraction dependency graph"))?;
+                if layers & (1u64 << layer) != 0 && references & !layers != 0 {
                     return Err(invalid("HEVC extraction target omits a reference layer"));
                 }
+                if additional
+                    .is_some_and(|mask| mask & (1u64 << layer) != 0 && references & !mask != 0)
+                {
+                    return Err(invalid(
+                        "HEVC additional extraction omits a reference layer",
+                    ));
+                }
             }
-            layers
+            if layers & !known != 0 || additional.is_some_and(|mask| mask & !known != 0) {
+                return Err(invalid("HEVC extraction names an absent layer"));
+            }
+            (layers, additional)
         } else if ols == 0 {
-            1
+            (1, None)
         } else {
             return Err(invalid("HEVC extraction output layer set is absent"));
         };
+        if !vps.vps.layers.base_internal && additional.is_none() {
+            return Err(invalid(
+                "HEVC extraction external base requires an additional layer set",
+            ));
+        }
+        if !vps.vps.layers.base_available && additional.is_none() {
+            return Err(invalid(
+                "HEVC extraction unavailable base requires an additional layer set",
+            ));
+        }
         if layers == 0 || layers >> 63 != 0 {
             return Err(invalid("invalid HEVC extraction target"));
         }
@@ -222,6 +305,7 @@ impl SubstreamScan {
             vps,
             ols,
             layers,
+            additional,
             temporal,
             source: self,
             reduced: self.layers & !layers != 0
@@ -236,6 +320,7 @@ pub struct LayeredSubstream {
     pub(crate) vps: std::sync::Arc<crate::codec::hevc_vps::LayeredVps>,
     pub(crate) ols: usize,
     layers: u64,
+    additional: Option<u64>,
     temporal: u8,
     source: SubstreamScan,
     reduced: bool,
@@ -243,7 +328,8 @@ pub struct LayeredSubstream {
 impl LayeredSubstream {
     /// Retained selection and its immutable parsed VPS, for source budgeting.
     pub fn retained_bytes(&self) -> usize {
-        std::mem::size_of::<Self>().saturating_add(self.vps.storage_bytes())
+        std::mem::size_of::<Self>()
+            .saturating_add(self.vps.storage_bytes())
             .saturating_add(2 * std::mem::size_of::<usize>())
     }
     pub fn highest_temporal_id(&self) -> u8 {
@@ -255,7 +341,32 @@ impl LayeredSubstream {
     pub fn output_layer_set(&self) -> usize {
         self.ols
     }
+    /// F.10.3 exports the complete additional layer set, which may include
+    /// layers unnecessary for the selected OLS's native reconstruction.
+    pub fn extracted_layers(&self) -> u64 {
+        self.additional.unwrap_or(self.layers)
+    }
     pub fn extract_packet(&self, packet: &[u8], length_size: u8, budget: usize) -> Result<Vec<u8>> {
+        self.extract_checked(packet, length_size, budget, false)
+    }
+    /// The owned decoder keeps the original VPS namespace and immutable bindings.
+    /// Filter coded layers to the necessary OLS without rewriting that namespace;
+    /// exported sub-bitstreams separately apply the required F.10.3 VPS change.
+    pub(super) fn extract_for_decode(
+        &self,
+        packet: &[u8],
+        length_size: u8,
+        budget: usize,
+    ) -> Result<Vec<u8>> {
+        self.extract_checked(packet, length_size, budget, true)
+    }
+    fn extract_checked(
+        &self,
+        packet: &[u8],
+        length_size: u8,
+        budget: usize,
+        decoding: bool,
+    ) -> Result<Vec<u8>> {
         let mut seen = SubstreamScan::default();
         seen.observe(packet, length_size)?;
         if seen.layers & !self.source.layers != 0
@@ -266,9 +377,21 @@ impl LayeredSubstream {
         extract_with_policy(
             packet,
             length_size,
-            self.layers,
+            if decoding {
+                self.layers
+            } else {
+                self.extracted_layers()
+            },
             self.temporal,
-            self.reduced,
+            if self.additional.is_some() {
+                Extraction::Additional {
+                    rewrite_vps: !decoding,
+                }
+            } else {
+                Extraction::Ordinary {
+                    reduced: self.reduced,
+                }
+            },
             budget,
         )
     }

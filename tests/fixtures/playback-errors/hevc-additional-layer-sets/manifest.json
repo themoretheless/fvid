@@ -1,0 +1,285 @@
+{
+  "cases": [
+    {
+      "name": "pcm-available1-inline0",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 0,
+      "frames": 2,
+      "available": true,
+      "subset": false,
+      "dependent": false,
+      "external": false
+    },
+    {
+      "name": "pcm-available1-inline1",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 1,
+      "frames": 2,
+      "available": true,
+      "subset": false,
+      "dependent": false,
+      "external": false
+    },
+    {
+      "name": "pcm-available0-inline0",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 0,
+      "frames": 2,
+      "available": false,
+      "subset": false,
+      "dependent": false,
+      "external": false
+    },
+    {
+      "name": "pcm-available0-inline1",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 1,
+      "frames": 2,
+      "available": false,
+      "subset": false,
+      "dependent": false,
+      "external": false
+    },
+    {
+      "name": "multislice-available1-inline0",
+      "oracle": "../hevc-pcm-dependent-rext8.yuv",
+      "first": 0,
+      "frames": 2,
+      "available": true,
+      "subset": false,
+      "dependent": false,
+      "external": false
+    },
+    {
+      "name": "multislice-available1-inline1",
+      "oracle": "../hevc-pcm-dependent-rext8.yuv",
+      "first": 1,
+      "frames": 2,
+      "available": true,
+      "subset": false,
+      "dependent": false,
+      "external": false
+    },
+    {
+      "name": "multislice-available0-inline0",
+      "oracle": "../hevc-pcm-dependent-rext8.yuv",
+      "first": 0,
+      "frames": 2,
+      "available": false,
+      "subset": false,
+      "dependent": false,
+      "external": false
+    },
+    {
+      "name": "multislice-available0-inline1",
+      "oracle": "../hevc-pcm-dependent-rext8.yuv",
+      "first": 1,
+      "frames": 2,
+      "available": false,
+      "subset": false,
+      "dependent": false,
+      "external": false
+    },
+    {
+      "name": "colour-planes-available1-inline0",
+      "oracle": "../hevc-separate-colour-planes-distinct-synthetic.yuv",
+      "first": 0,
+      "frames": 2,
+      "available": true,
+      "subset": false,
+      "dependent": false,
+      "external": false
+    },
+    {
+      "name": "colour-planes-available1-inline1",
+      "oracle": "../hevc-separate-colour-planes-distinct-synthetic.yuv",
+      "first": 1,
+      "frames": 2,
+      "available": true,
+      "subset": false,
+      "dependent": false,
+      "external": false
+    },
+    {
+      "name": "colour-planes-available0-inline0",
+      "oracle": "../hevc-separate-colour-planes-distinct-synthetic.yuv",
+      "first": 0,
+      "frames": 2,
+      "available": false,
+      "subset": false,
+      "dependent": false,
+      "external": false
+    },
+    {
+      "name": "colour-planes-available0-inline1",
+      "oracle": "../hevc-separate-colour-planes-distinct-synthetic.yuv",
+      "first": 1,
+      "frames": 2,
+      "available": false,
+      "subset": false,
+      "dependent": false,
+      "external": false
+    },
+    {
+      "name": "subset-available1-inline0",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 0,
+      "frames": 2,
+      "available": true,
+      "subset": true,
+      "dependent": false,
+      "external": false
+    },
+    {
+      "name": "subset-available1-inline1",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 1,
+      "frames": 2,
+      "available": true,
+      "subset": true,
+      "dependent": false,
+      "external": false
+    },
+    {
+      "name": "subset-available0-inline0",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 0,
+      "frames": 2,
+      "available": false,
+      "subset": true,
+      "dependent": false,
+      "external": false
+    },
+    {
+      "name": "subset-available0-inline1",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 1,
+      "frames": 2,
+      "available": false,
+      "subset": true,
+      "dependent": false,
+      "external": false
+    },
+    {
+      "name": "dependent-available1-inline0",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 0,
+      "frames": 2,
+      "available": true,
+      "subset": false,
+      "dependent": true,
+      "external": false
+    },
+    {
+      "name": "dependent-available1-inline1",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 1,
+      "frames": 2,
+      "available": true,
+      "subset": false,
+      "dependent": true,
+      "external": false
+    },
+    {
+      "name": "dependent-available0-inline0",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 0,
+      "frames": 2,
+      "available": false,
+      "subset": false,
+      "dependent": true,
+      "external": false
+    },
+    {
+      "name": "dependent-available0-inline1",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 1,
+      "frames": 2,
+      "available": false,
+      "subset": false,
+      "dependent": true,
+      "external": false
+    },
+    {
+      "name": "external-available1-inline0",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 0,
+      "frames": 2,
+      "available": true,
+      "subset": false,
+      "dependent": false,
+      "external": true
+    },
+    {
+      "name": "external-available1-inline1",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 1,
+      "frames": 2,
+      "available": true,
+      "subset": false,
+      "dependent": false,
+      "external": true
+    },
+    {
+      "name": "external-available0-inline0",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 0,
+      "frames": 2,
+      "available": false,
+      "subset": false,
+      "dependent": false,
+      "external": true
+    },
+    {
+      "name": "external-available0-inline1",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 1,
+      "frames": 2,
+      "available": false,
+      "subset": false,
+      "dependent": false,
+      "external": true
+    },
+    {
+      "name": "external-dependent-available1-inline0",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 0,
+      "frames": 2,
+      "available": true,
+      "subset": false,
+      "dependent": true,
+      "external": true
+    },
+    {
+      "name": "external-dependent-available1-inline1",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 1,
+      "frames": 2,
+      "available": true,
+      "subset": false,
+      "dependent": true,
+      "external": true
+    },
+    {
+      "name": "external-dependent-available0-inline0",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 0,
+      "frames": 2,
+      "available": false,
+      "subset": false,
+      "dependent": true,
+      "external": true
+    },
+    {
+      "name": "external-dependent-available0-inline1",
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first": 1,
+      "frames": 2,
+      "available": false,
+      "subset": false,
+      "dependent": true,
+      "external": true
+    }
+  ],
+  "provenance": "Original additional-tree VPS syntax and F.10.3 byte oracle; saved owned PCM/multislice/separate-plane entropy; no private data, external codec, subprocess or network."
+}

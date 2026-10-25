@@ -703,27 +703,10 @@ impl LayeredPipeline {
                     self.ready_budget / 2,
                 )?;
                 let selection = self.selection_index(index);
-                let extracted = self.selections[selection].selection.extract_packet(
+                self.decoder.prime_selected_metadata(
+                    &self.selections[selection].selection,
                     &self.packet,
-                    self.length_size,
-                    self.ready_budget / 2,
                 )?;
-                if extracted.capacity().saturating_add(
-                    self.ready
-                        .capacity()
-                        .saturating_mul(std::mem::size_of::<LayeredDecoded>()),
-                ) > self.ready_budget
-                {
-                    return Err(invalid("HEVC seek priming exceeds memory budget"));
-                }
-                if self.automatic_selection {
-                    self.decoder.prime_reselected_metadata(
-                        &extracted,
-                        self.selections[selection].selection.output_layer_set(),
-                    )?;
-                } else {
-                    self.decoder.prime_metadata(&extracted)?;
-                }
             }
             self.decoder.finish_metadata_priming();
         }
