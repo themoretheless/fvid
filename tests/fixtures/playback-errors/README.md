@@ -4933,3 +4933,13 @@ aliases, coded PCM bounds, navigation, neutral VP9 video, CRC/rate refusals and
 the capturing scheduler. BSID 9/10 support is de facto compatibility, not ATSC
 conformance. The parent decoder's exact refusal is the unsupported reduced
 setup rate. No private video, audio, codec parameters, FFmpeg or network is used.
+
+`ac3-alternate-bsi/` contains 152 owned artifacts / 2212688 bytes, authored by
+`scripts/generate_ac3_alternate_bsi.py`. New BSI/CRC words surround unchanged
+repository-authored 5.1 tone payloads and owned mono/stereo/dual spectra. Neutral
+VP9 companions reproduce the exact missing Lo/Ro-level behavior. Tests compare
+64 coefficient pairs against a separate scalar mix of unchanged native PCM,
+check alternate metadata/CRC/LE/prefix boundaries, legacy timecodes, absent and
+reserved fields, container native PCM, rewind, video and the capturing worker.
+This qualifies selected Lo/Ro processing, not Lt/Rt/automatic-mode completion.
+Generation is byte-exact without subprocesses, FFmpeg, private data or network.

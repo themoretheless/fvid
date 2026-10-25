@@ -85,12 +85,12 @@ def repack(source,word):
  modified=modified.ljust(SIZE[rate]*8,'0')
  return crc_frame(bytes(int(modified[i:i+8],2)for i in range(0,len(modified),8)))
 
-def mp4_movie(packets,layout,lfe,rate):
+def mp4_movie(packets,layout,lfe,rate,*,bsid=8):
  from generate_eac3_aht_lfe import audiovisual
  from generate_eac3_mp4_presentation import rewrite
  from generate_mp4_enabled_track_regressions import boxes
  from generate_audio_resample_window_fixture import atom
- config=int(f'{rate:02b}{8:05b}{0:03b}{layout:03b}{int(lfe):01b}{18:05b}'+'00000',2).to_bytes(3,'big')
+ config=int(f'{rate:02b}{bsid:05b}{0:03b}{layout:03b}{int(lfe):01b}{18:05b}'+'00000',2).to_bytes(3,'big')
  data=rewrite(audiovisual(packets),config,RATE[rate])
  def convert(data):
   out=b''

@@ -453,6 +453,36 @@ impl<'a> Bits<'a> {
     }
 }
 
+/// Alternate syntax (BSID 6) stereo mixing metadata, retaining the signalled codes.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct AlternateDownmix {
+    pub preferred: u8,
+    pub ltrt_centre: u8,
+    pub ltrt_surround: u8,
+    pub loro_centre: u8,
+    pub loro_surround: u8,
+}
+/// Informational fields do not alter decoded PCM (Annex D.3.1.3).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct AlternateInformation {
+    pub surround_ex: u8,
+    pub headphone: u8,
+    pub ad_converter: bool,
+    pub reserved: u8,
+    pub encoder: bool,
+}
+/// Optional extra bitstream information in the BSID 6 syntax.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct AlternateBsi {
+    /// `acmod` determines which mixing/informational fields are meaningful.
+    pub coding_mode: u8,
+    pub lfe: bool,
+    pub downmix: Option<AlternateDownmix>,
+    pub information: Option<AlternateInformation>,
+}
+const ALTERNATE_CENTRE: [f32; 8] = [1.414,1.189,1.000,0.841,0.707,0.595,0.500,0.000];
+const ALTERNATE_SURROUND: [f32; 8] = [0.841,0.841,0.841,0.841,0.707,0.595,0.500,0.000];
+
 /// What a syncframe's fixed header says about it: `syncinfo` plus the parts of
 /// `bsi` that change how the audio is unpacked. The rest of `bsi` is stepped over
 /// field by field, since none of it is.
@@ -471,6 +501,7 @@ pub(crate) struct Header {
     pub(crate) slev: f32,
     pub(crate) compression: [Option<u8>;2],
     pub(crate) dialogue: [u8;2],
+    pub(crate) alternate: Option<AlternateBsi>,
 }
 
 impl Header {
@@ -497,12 +528,12 @@ impl Header {
         let rate_shift = (bsid - 8).max(0) as usize;
         let _bsmod = bits.take(3);
         let acmod = bits.take(3) as usize;
-        let clev = if (acmod & 1) != 0 && acmod != 1 {
+        let mut clev = if (acmod & 1) != 0 && acmod != 1 {
             CMIX[bits.take(2) as usize]
         } else {
             CMIX[0]
         };
-        let slev = if (acmod & 4) != 0 {
+        let mut slev = if (acmod & 4) != 0 {
             SMIX[bits.take(2) as usize]
         } else {
             SMIX[0]
@@ -534,12 +565,33 @@ impl Header {
         }
         let _copyright = bits.flag();
         let _original = bits.flag();
-        if bits.flag() {
-            let _timecod1 = bits.take(14);
-        }
-        if bits.flag() {
-            let _timecod2 = bits.take(14);
-        }
+        let alternate = if bsid == 6 {
+            let downmix = bits.flag().then(|| AlternateDownmix {
+                preferred: bits.take(2) as u8,
+                ltrt_centre: bits.take(3) as u8,
+                ltrt_surround: bits.take(3) as u8,
+                loro_centre: bits.take(3) as u8,
+                loro_surround: bits.take(3) as u8,
+            });
+            let information = bits.flag().then(|| AlternateInformation {
+                surround_ex: bits.take(2) as u8,
+                headphone: bits.take(2) as u8,
+                ad_converter: bits.flag(),
+                reserved: bits.take(8) as u8,
+                encoder: bits.flag(),
+            });
+            if let Some(mix) = downmix {
+                // The current renderer selects Lo/Ro. Reserved preferred modes
+                // do not mute, and absent speaker groups do not acquire gains.
+                if acmod > 2 && acmod & 1 != 0 { clev = ALTERNATE_CENTRE[mix.loro_centre as usize]; }
+                if acmod & 4 != 0 { slev = ALTERNATE_SURROUND[mix.loro_surround as usize]; }
+            }
+            Some(AlternateBsi {coding_mode: acmod as u8, lfe: lfeon, downmix, information})
+        } else {
+            if bits.flag() { bits.skip(14); }
+            if bits.flag() { bits.skip(14); }
+            None
+        };
         if bits.flag() {
             let addbsil = bits.take(6) as usize;
             bits.skip((addbsil + 1) * 8);
@@ -558,6 +610,7 @@ impl Header {
             slev,
             compression,
             dialogue,
+            alternate,
         })
     }
 
@@ -584,6 +637,7 @@ impl Header {
             slev: surround,
             compression: [None;2],
             dialogue: [31;2],
+            alternate: None,
         }
     }
 
@@ -665,6 +719,16 @@ pub fn checked_syncframe(bytes: &[u8]) -> Option<Syncframe> {
     let header=syncframe(bytes)?;
     let frame=bytes.get(..header.frame_bytes)?;
     frame_crc_valid(frame).then_some(header)
+}
+
+/// Read alternate BSI only from a complete CRC-checked BSID 6 syncframe.
+/// Timecode words in other BSIDs are never interpreted as alternate metadata.
+pub fn checked_alternate_bsi(bytes: &[u8]) -> Option<AlternateBsi> {
+    let canonical = dolby_frame(bytes).ok()?;
+    let header = Header::read(&mut Bits::new(canonical.as_ref()))?;
+    let frame = canonical.get(..header.frame_bytes)?;
+    if !frame_crc_valid(frame) { return None; }
+    header.alternate
 }
 
 /// WAVE speaker mask in the native PCM order used by Folding. Channel count

@@ -18471,3 +18471,33 @@ EOF/rewind and geometry. The coupling decay kernel also covers quarter rate.
 All 73 artifacts (1227781 bytes) regenerate byte-exact with subprocess and
 network creation forbidden. Complete profile/tool and physical-device timing
 coverage remains unproven; the overall no-gap goal remains active.
+
+### AC-3 alternate BSI and selected Lo/Ro levels (2026-10-25)
+
+Annex D BSID 6 replaces the two timecode words with alternate metadata. The
+legacy parser skipped these fields and therefore could not apply their Lo/Ro
+levels. The native parser now records both optional extra words, exposes them
+through `checked_alternate_bsi` only after complete-frame CRC validation, and
+uses the signalled Lo/Ro centre/surround levels for its existing Lo/Ro renderer.
+The three reserved surround coefficients fall back to 0.841. Codes without
+a corresponding coded speaker group do not alter the output. Other BSIDs
+retain their original timecode interpretation, and each new frame restores
+legacy coefficients when xbsi1 is absent. Native channel PCM stays unchanged.
+Primary source: https://www.atsc.org/wp-content/uploads/2021/04/A52-2018.pdf
+(Annex D, Tables D2.1--D2.9 and D.3).
+
+The owned witnesses retain repository-authored 5.1 tone payloads and authored
+mono/stereo/dual spectra, rewriting only BSI and both CRC regions. Parent code
+reproduces a 0.25911084 downmix error with unchanged native PCM. Acceptance
+checks all 64 centre/surround pairs against an independent scalar fold of
+native PCM, stereo and mono, metadata transitions/absence, reserved fallback,
+BSID 8 timecode controls, CRC refusal, LE metadata, truncated-prefix refusal,
+reserved fields in modes without those speakers, MP4/Matroska native PCM,
+rewind, real neutral VP9 video and a capturing native scheduler.
+All 152 artifacts (2212688 bytes) regenerate byte-exact with external process
+and network creation forbidden. Ordinary tests require no FFmpeg or network.
+
+This adds alternate-BSI parsing/access and the existing selected Lo/Ro path.
+It does not claim complete Annex D decoder processing: user-selectable Lt/Rt
+and automatic preferred-mode rendering remain open, as do other codec tools
+and profiles. The full no-gap objective remains active.
