@@ -39,13 +39,13 @@ use crate::audio::{AudioDecode, AudioPacket, AudioSpec, SampleFormat};
 use crate::{Result, invalid};
 pub use super::dolby_compression::CompressionMode;
 
-/// Two-channel AC-3 folding. Native layouts and mono output are unaffected.
+/// Two-channel Dolby folding. Native layouts and mono output are unaffected.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum StereoDownmixMode {
     #[default]
     LoRo,
     LtRt,
-    /// Follow BSID 6 `dmixmod`; absent, reserved or inapplicable metadata uses Lo/Ro.
+    /// Follow applicable preferred mixing metadata; absence/reserved codes use Lo/Ro.
     Automatic,
 }
 /// Downmix policy retained across decoder resets. Defaults preserve legacy Lo/Ro gain.
@@ -56,6 +56,14 @@ pub struct StereoDownmixPolicy {
     pub headroom: bool,
 }
 
+
+/// Selected stereo metadata shared by the AC-3 and Annex E folding paths.
+#[derive(Clone, Copy)]
+pub(crate) struct StereoMixLevels {
+    pub preferred: Option<u8>,
+    pub ltrt_centre: f32,
+    pub ltrt_surround: f32,
+}
 
 /// Transform coefficients, mantissas and exponents per block and per plane.
 pub(crate) const BINS: usize = 256;
@@ -1547,27 +1555,26 @@ impl Folding {
     pub(crate) fn new(header: Header, declared: usize) -> Option<Self> {
         Self::for_output(header,declared,true)
     }
-    fn ac3(mut header: Header, declared: usize, policy: StereoDownmixPolicy) -> Option<Self> {
-        if declared != 2 || declared == header.native_channels() {
-            return Self::new(header, declared);
+    fn normalize_stereo(&mut self) {
+        let total = self.weight[..2].iter()
+            .map(|row| row.iter().map(|v| v.abs()).sum::<f32>()).fold(1.0f32, f32::max);
+        for row in &mut self.weight[..2] { for weight in row { *weight /= total; } }
+    }
+    fn stereo_matrix(mut header: Header, declared: usize, allow_native: bool,
+        mode: StereoDownmixMode, mix: StereoMixLevels) -> Option<Self> {
+        if declared != 2 || (allow_native && declared == header.native_channels()) {
+            return if allow_native {Self::new(header,declared)}else{Self::for_output(header,declared,false)};
         }
-        let metadata = header.alternate.and_then(|a| a.downmix);
-        let ltrt = match policy.mode {
+        let ltrt = match mode {
             StereoDownmixMode::LoRo => false,
             StereoDownmixMode::LtRt => true,
-            StereoDownmixMode::Automatic => header.acmod > 2 && metadata.is_some_and(|m| m.preferred == 1),
+            StereoDownmixMode::Automatic => header.acmod > 2 && mix.preferred == Some(1),
         };
         if ltrt {
-            // The original-syntax Lt/Rt matrix uses fixed -3 dB centre/surround
-            // coefficients, independent of the original Lo/Ro cmixlev/surmixlev.
-            header.clev = 0.707;
-            header.slev = 0.707;
-            if let Some(mix) = metadata {
-                if header.acmod > 2 && header.acmod & 1 != 0 { header.clev = ALTERNATE_CENTRE[mix.ltrt_centre as usize]; }
-                if header.acmod & 4 != 0 { header.slev = ALTERNATE_SURROUND[mix.ltrt_surround as usize]; }
-            }
+            header.clev = if header.acmod > 2 && header.acmod & 1 != 0 {mix.ltrt_centre}else{0.707};
+            header.slev = if header.acmod & 4 != 0 {mix.ltrt_surround}else{0.707};
         }
-        let mut result = Self::new(header, declared)?;
+        let mut result = if allow_native {Self::new(header,declared)}else{Self::for_output(header,declared,false)}?;
         if ltrt && header.acmod & 4 != 0 {
             let count = if matches!(header.acmod,4|5) {1} else {2};
             for plane in header.nfchans-count..header.nfchans {
@@ -1575,22 +1582,33 @@ impl Folding {
                 result.weight[1][plane] = header.slev;
             }
         }
-        if policy.headroom {
-            let total = result.weight[..2].iter()
-                .map(|row| row.iter().map(|v| v.abs()).sum::<f32>()).fold(1.0f32, f32::max);
-            for row in &mut result.weight[..2] { for weight in row { *weight /= total; } }
-        }
         Some(result)
     }
-    /// Annex E.2.9: optional LFE injection belongs only to mono/stereo
-    /// output with no separate LFE. AC-3 and native/coded layouts stay distinct.
-    pub(crate) fn eac3(header:Header,declared:usize,lfe:Option<u8>,force_stereo:bool)->Option<Self> {
+    fn ac3(header: Header, declared: usize, policy: StereoDownmixPolicy) -> Option<Self> {
+        let metadata = header.alternate.and_then(|a| a.downmix);
+        let mix=StereoMixLevels {
+            preferred:metadata.map(|m|m.preferred),
+            ltrt_centre:metadata.map_or(0.707,|m|ALTERNATE_CENTRE[m.ltrt_centre as usize]),
+            ltrt_surround:metadata.map_or(0.707,|m|ALTERNATE_SURROUND[m.ltrt_surround as usize]),
+        };
+        let mut result=Self::stereo_matrix(header,declared,true,policy.mode,mix)?;
+        if policy.headroom && declared==2 && declared!=header.native_channels() {result.normalize_stereo();}
+        Some(result)
+    }
+    /// Annex E.3.9: optional LFE injection belongs only to mono/stereo
+    /// output with no separate LFE. Matrix headroom includes this injection.
+    pub(crate) fn eac3(header:Header,declared:usize,lfe:Option<u8>,force_stereo:bool,
+        policy:StereoDownmixPolicy,mix:StereoMixLevels)->Option<Self> {
         let native_selected=declared==header.native_channels() && !force_stereo;
         if !header.lfeon || native_selected || !matches!(declared,1|2) || lfe.is_none() {
-            return Self::for_output(header,declared,!force_stereo);
+            let mut output=Self::stereo_matrix(header,declared,!force_stereo,policy.mode,mix)?;
+            if policy.headroom && declared==2 && !native_selected {output.normalize_stereo();}
+            return Some(output);
         }
         let code=lfe.unwrap();
-        let mut stereo=Self::for_output(header,2,false)?;
+        // Mono retains its existing Lo/Ro-then-sum rule regardless of stereo policy.
+        let mode=if declared==1 {StereoDownmixMode::LoRo}else{policy.mode};
+        let mut stereo=Self::stereo_matrix(header,2,false,mode,mix)?;
         let gain=10.0f64.powf((5.5-f64::from(code))/20.0) as f32;
         stereo.weight[0][LFE]=gain;
         stereo.weight[1][LFE]=gain;
@@ -1600,7 +1618,7 @@ impl Folding {
                 stereo.weight[0][plane]=(stereo.weight[0][plane]+stereo.weight[1][plane])*mono;
             }
             stereo.width=1;
-        }
+        } else if policy.headroom {stereo.normalize_stereo();}
         Some(stereo)
     }
     fn for_output(header:Header,declared:usize,allow_native:bool)->Option<Self> {
@@ -2686,6 +2704,28 @@ impl AudioDecode for Ac3Decoder {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn eac3_stereo_headroom_includes_lfe_injection_before_normalization() {
+        for layout in 0..=7 {
+            let header=Header::annex_e(0,4096,layout,true,if layout==1 {0.707}else{1.414},0.841);
+            let mix=StereoMixLevels {preferred:Some(1),ltrt_centre:1.414,ltrt_surround:0.841};
+            for lfe in [None,Some(0),Some(15),Some(31)] {
+                for mode in [StereoDownmixMode::LoRo,StereoDownmixMode::LtRt,StereoDownmixMode::Automatic] {
+                    let fold=Folding::eac3(header,2,lfe,true,StereoDownmixPolicy {mode,headroom:true},mix).unwrap();
+                    let mut peak=0f32;
+                    for signs in 0..1<<PLANES {
+                        let pcm=std::array::from_fn(|plane|[if signs&(1<<plane)!=0 {1.0}else{-1.0};SAMPLES]);
+                        let mut out=Vec::new();fold.write_pcm(&pcm,&[1.;PLANES],&mut out,false);
+                        for sample in out {assert!(sample.abs()<=1.0000003,"mode={mode:?} layout={layout} LFE={lfe:?}: {sample}");peak=peak.max(sample.abs());}
+                    }
+                    let expected=if layout==1 {(0.707+lfe.map_or(0.,|code|10f64.powf((5.5-f64::from(code))/20.)as f32)).min(1.)}else{1.};
+                    assert!((peak-expected).abs()<4e-7,"matrix headroom changed its largest signed combination: {peak} expected {expected}");
+                }
+            }
+        }
+    }
+
 
     #[test]
     fn stereo_headroom_keeps_full_scale_sign_combinations_bounded_without_clipping() {
