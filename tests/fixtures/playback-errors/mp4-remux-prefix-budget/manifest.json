@@ -1,0 +1,10 @@
+{
+  "batch_id": "FVID-0274",
+  "generator": "scripts/generate_mp4_remux_prefix_budget.py",
+  "provenance": "100% synthetic mono AAC-LC 48 kHz MP4 fixtures (single-mixed.m4a has an 8-byte sample 0 and 48-byte sample 1; dual-track-mixed.m4a has two 8-byte samples on track 0 and two 48-byte samples on track 1; dynamic-stsd-mixed.m4a has two stsd entries with an 8-byte sample 0 and 48-byte sample 1); no FFmpeg, network, or private media.",
+  "sha256": {
+    "dual-track-mixed.m4a": "5c84efa7da7b02ac98c27a9dba488903245cfac45dbe6fe5522cba094d5d08b9",
+    "dynamic-stsd-mixed.m4a": "6f543f104923bcfce44bac3f3a3ffb7d49e4669306dc64f7b0b2c6a9e0d33bf7",
+    "single-mixed.m4a": "c5f7237c79d82d10ca6364c43bbb4408b90a820273b090cb1083126bbf9daa80"
+  }
+}

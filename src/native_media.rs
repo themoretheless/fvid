@@ -101,7 +101,7 @@ pub fn decode_video_pipeline_overlay_step(
             let (start, _, scale) = reader.frame_interval().ok_or_else(|| invalid("overlay frame has no timing"))?;
             if scale == 0 {return Err(invalid("overlay clock is zero"));}
             let pts = u64::try_from(start.checked_mul(1_000_000_000).ok_or_else(|| invalid("overlay timestamp overflow"))? / u128::from(scale)).map_err(|_| invalid("overlay timestamp overflow"))?;
-            compositor.validate_main(&reader, pts)?;
+            compositor.validate_main_with_geometry(&reader, Some(&frame), geometry, pts)?;
             Some(pts)
         } else { None };
         if let Some((from, to)) = interval {
@@ -230,7 +230,9 @@ impl<'a> DecodeProgress<'a> {
         }
         Ok(())
     }
-    pub(crate) fn packet_limit(&self) -> Option<u64> { self.max_packets }
+    pub(crate) fn packet_limit(&self) -> Option<u64> {
+        self.max_packets
+    }
     pub(crate) fn packet_limit_reached(&self) -> bool {
         self.max_packets.is_some_and(|maximum| self.event.packets >= maximum)
     }
@@ -489,7 +491,7 @@ pub fn aac_source_info_selected(source: &Path, selected: Option<usize>) -> Resul
     let (stream_index, asc, declared, in_band_ps) = if crate::container::mp4::recognizes_prefix(&prefix) {
         let mut reader = crate::container::mp4::Mp4Reader::open_indexed(input, Default::default())?;
         let index = mp4_aac_index(&reader, selected)?;
-        let in_band_ps = negotiate_mp4_ps(&mut reader, index, || Ok(()))?;
+        let in_band_ps = negotiate_mp4_ps(&mut reader, index, None, || Ok(()))?;
         let source_track = &reader.tracks()[index];
         let first = source_track.samples.get(0).ok_or_else(|| invalid("MP4 audio has no samples"))?;
         let setup = source_track.decoder_setup(first.description_index)?;
@@ -499,7 +501,7 @@ pub fn aac_source_info_selected(source: &Path, selected: Option<usize>) -> Resul
     } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
         let mut reader = crate::container::webm::WebmReader::open(input, Default::default())?;
         let index = matroska_aac_index(&reader, selected)?;
-        let in_band_ps = negotiate_matroska_ps(&mut reader, index, || Ok(()))?;
+        let in_band_ps = negotiate_matroska_ps(&mut reader, index, None, || Ok(()))?;
         let track = &reader.tracks[index];
         (index, track.codec_private.clone(), (track.sample_rate, track.channels), in_band_ps)
     } else {
@@ -854,7 +856,7 @@ pub fn audio_source_info_selected(
         if prefix==[0x1a,0x45,0xdf,0xa3] {
             let mut reader=crate::container::webm::WebmReader::open(BufReader::new(input),Default::default())?;
             let index=matroska_audio_index(&reader,selected)?;
-            let in_band_ps=negotiate_matroska_ps(&mut reader,index,||Ok(()))?;
+            let in_band_ps=negotiate_matroska_ps(&mut reader,index,None,||Ok(()))?;
             let track=&reader.tracks[index];
             let decoder=if in_band_ps {MatroskaTimelineDecoder::with_in_band_ps(track)?.0} else {crate::native_audio_decoder::PacketPcmDecoder::from_matroska(track)?};
             if track.sample_rate!=u64::from(decoder.sample_rate()) || (!in_band_ps && track.channels!=u64::from(decoder.channels())) {return Err(invalid("Matroska audio geometry disagrees with configuration"));}
@@ -883,7 +885,8 @@ pub fn audio_source_info_selected(
             Default::default(),
         )?;
         let index = mp4_audio_index(&reader, selected)?;
-        let in_band_ps = negotiate_mp4_ps(&mut reader,index,||Ok(()))?;
+        reader.tracks()[index].ensure_constant_description()?;
+        let in_band_ps = negotiate_mp4_ps(&mut reader,index,None,||Ok(()))?;
         let source_track = &reader.tracks()[index];
         let first = source_track.samples.get(0).ok_or_else(|| invalid("MP4 audio has no samples"))?;
         let setup = source_track.decoder_setup(first.description_index)?;

@@ -1,0 +1,9 @@
+{
+  "generator": "scripts/generate_raw_flac_mp3_prefix_budget_regressions.py",
+  "batch_id": "FVID-0266",
+  "provenance": "100% synthetic bare FLAC (CONSTANT 11-byte frame + VERBATIM 393-byte frame) and bare MPEG-1 Layer III (960-byte frame + 961-byte padded frame); no FFmpeg, network, or private media.",
+  "sha256": {
+    "prefix-budget.flac": "48a5cfcb74b59f57a79bd07a0fd537e35da4663cda1f37aa3daf733c10022834",
+    "prefix-budget.mp3": "13b3074a0b01fb489c0476281770a72f21d0e35a80e61372243c64f95ba814dd"
+  }
+}

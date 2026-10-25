@@ -187,6 +187,28 @@ pub fn plan_loudnorm(
     ) {
         return Err("request has no owned WAVE loudnorm route".into());
     }
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet limit leaves no decoded audio samples".into());
+    }
+    let mut wave_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    let wave_info = crate::owned_wave_inspect::inspect(&mut wave_file, options.cancel.as_ref())
+        .map_err(|e| e.to_string())?;
+    let frame_bytes = usize::from(wave_info.block);
+    let capacity = if frame_bytes == 0 {
+        0
+    } else {
+        (4096 * frame_bytes).min(options.max_packet_bytes / frame_bytes * frame_bytes)
+    };
+    if capacity == 0 {
+        return Err("PCM packet limit cannot hold one sample frame".into());
+    }
     let info = crate::owned_probe::probe_wave(source).map_err(|e| e.to_string())?;
     let report = report_requested(Some(&resolved))?;
     let mut steps = vec![PlanStep {

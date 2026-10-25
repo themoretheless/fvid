@@ -1,0 +1,9 @@
+{
+  "batch_id": "FVID-0272",
+  "generator": "scripts/generate_mp4_matroska_encoder_concat_prefix.py",
+  "provenance": "100% synthetic mono AAC-LC 48 kHz MP4 segments with iTunes \u00a9nam/\u00a9too tags, where segment-a has two 8-byte packets and segment-b has an 8-byte packet 0 followed by a 48-byte packet 1; no FFmpeg, network, or private media.",
+  "sha256": {
+    "segment-a.m4a": "2fe7274c17fd0f31d30f12b18a30a7ea1171f024f4d0f9f8493c1e5994480d26",
+    "segment-b.m4a": "bbf8a623ecbfb0f2a8d15ab236a3176c24fac15793014f8ed9b100a890683ba8"
+  }
+}
