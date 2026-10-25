@@ -938,3 +938,40 @@ fn independent_prefix_does_not_hide_an_incomplete_selected_dependent() {
         assert!(error.contains("missing final E-AC-3 dependent"),"{kind}: {error}");
     }
 }
+
+#[test]
+fn optional_dependents_keep_native_roles_pcm_clock_seek_and_rewind() {
+    let target=SpeakerLayout::from_wave_mask(0x63f).unwrap();
+    for pattern in ["prefix","suffix","middle"] {for variant in ["plain","transient"] {
+        let name=format!("optional-{pattern}-{variant}");
+        for kind in ["mkv","ec3"] {
+            let raw=kind=="ec3";
+            let mut direct=if raw {Eac3Decoder::new(&[],48000,8)}else{Eac3Decoder::for_container_with_compression(&[],48000,8,fvid::codec::ac3_decoder::CompressionMode::Line)}.unwrap().with_output_layout(target.clone()).unwrap();
+            let want=direct.decode_complete(&read(&format!("{name}.ec3")),0,2304).unwrap().unwrap().data;
+            let base=control(&name,0,6,raw);
+            assert_eq!(want.len(),base.len()/6*8*4);
+            let absent=match pattern {"prefix"=>0,"middle"=>1,_=>2};
+            for (n,(frame,b)) in want.chunks_exact(32).zip(base.chunks_exact(6)).enumerate() {
+                let samples:Vec<_>=frame.chunks_exact(4).map(|v|f32::from_le_bytes(v.try_into().unwrap())).collect();
+                for (slot,i) in [0,1,2,3,6,7].into_iter().zip(0..6) {assert_eq!(samples[slot],b[i],"{name}.{kind} base");}
+                if (n+if raw {256}else{0})/768==absent {assert_eq!(&samples[4..6],&[0.0,0.0],"{name}.{kind} absent roles");}
+            }
+            assert!(want.chunks_exact(32).any(|r|r[16..24].chunks_exact(4).any(|v|f32::from_le_bytes(v.try_into().unwrap())!=0.0)),"{name}.{kind} dependent signal");
+            let mut s=source(&name,kind);assert_eq!(s.channels(),8,"{name}.{kind}");assert_eq!(s.eac3_output_layout(),Some(target.clone()));
+            let full=source_packets(s.as_mut());assert_eq!(full.len(),3,"{name}.{kind}");
+            let mut clock=0u64;
+            for ((pts,bytes),samples) in full.iter().zip(if raw {[512,768,768]}else{[768,768,768]}) {
+                assert_eq!(*pts,Duration::from_nanos(clock*1_000_000_000/48000),"{name}.{kind} clock");
+                assert_eq!(bytes.len(),samples*32,"{name}.{kind} packet size");clock+=samples as u64;
+            }
+            assert_eq!(full.iter().flat_map(|p|p.1.iter().copied()).collect::<Vec<_>>(),want,"{name}.{kind}");
+            s.rewind();assert_eq!(source_packets(s.as_mut()),full);
+            s.seek_time(Duration::from_millis(20));
+            let seek=source_packets(s.as_mut());let offset=960*32;
+            assert_eq!(seek[0].0,Duration::from_millis(20));
+            assert_eq!(seek.iter().flat_map(|p|p.1.iter().copied()).collect::<Vec<_>>(),want[offset..],"{name}.{kind} seek");
+            s.rewind();
+            capture::worker_check_with_layout_and_seek_expected(s,&full,Duration::from_millis(20),&seek,0x63f);
+        }
+    }}
+}
