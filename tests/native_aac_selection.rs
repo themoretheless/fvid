@@ -143,12 +143,22 @@ fn chosen_mp4_and_matroska_tracks_match_independent_pcm_references() {
             );
         }
     }
+    // Container default/enable metadata now resolves these authored fixtures.
+    // Retain explicit wrong-index refusals below; automatic choice is acceptance.
+    for (name, preferred) in [("two-audio.mp4", 1), ("two-audio.mka", 0)] {
+        let automatic = dir.0.join(format!("automatic-{name}.f32le"));
+        export_aac_pcm_selected(&fixture(name), &automatic,
+            Some((Duration::ZERO, Duration::from_millis(40))),
+            1.0, None, None, None, None, None).unwrap();
+        assert_eq!(std::fs::read(automatic).unwrap(),
+            std::fs::read(dir.0.join(format!("{name}-{preferred}.f32le"))).unwrap());
+        assert_eq!(fvid::native_plan::decode_audio(&fixture(name), &Default::default())
+            .unwrap().streams[0].index, preferred);
+    }
     let missing = dir.0.join("invalid.f32le");
     for (name, selected) in [
-        ("two-audio.mp4", None),
         ("two-audio.mp4", Some(0)),
         ("two-audio.mp4", Some(3)),
-        ("two-audio.mka", None),
         ("two-audio.mka", Some(2)),
         ("aac-mono-44k.aac", Some(1)),
         ("ac3-51.mka", Some(0)),
@@ -165,7 +175,8 @@ fn chosen_mp4_and_matroska_tracks_match_independent_pcm_references() {
                 None,
                 None
             )
-            .is_err()
+            .is_err(),
+            "unexpected acceptance: {name} selected={selected:?}"
         );
         assert!(!missing.exists());
     }

@@ -119,6 +119,7 @@ pub struct AdpcmDecoder {
     block_bytes: usize,
     block_frames: u64,
     duration_timescale: u32,
+    defer_trimming: bool,
 }
 
 impl AdpcmDecoder {
@@ -169,6 +170,7 @@ impl AdpcmDecoder {
             block_bytes: block_bytes as usize,
             block_frames: frames,
             duration_timescale: sample_rate,
+            defer_trimming: false,
         })
     }
 
@@ -183,6 +185,7 @@ impl AdpcmDecoder {
 }
 
 impl AudioDecode for AdpcmDecoder {
+    fn defer_packet_trimming(&mut self) {self.defer_trimming=true;}
     fn set_source_timescale(&mut self, timescale: u32) -> Result<()> {
         if timescale == 0 {
             return Err(invalid("zero ADPCM duration timescale"));
@@ -210,7 +213,7 @@ impl AudioDecode for AdpcmDecoder {
         if self.duration_timescale == 0 {
             return Err(invalid("zero ADPCM duration timescale"));
         }
-        let native_duration = if duration == 0 {
+        let native_duration = if self.defer_trimming || duration == 0 {
             0
         } else {
             (u128::from(duration) * u128::from(self.sample_rate))

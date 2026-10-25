@@ -1,3 +1,5 @@
+#[path = "support/wave_chunks.rs"]
+mod wave_chunks;
 use fvid::native_media::decode_matroska_aac_pcm_interval;
 use std::time::Duration;
 
@@ -94,7 +96,7 @@ fn mp4_and_cli_preserve_960_sample_frames() {
         String::from_utf8_lossy(&result.stderr)
     );
     let wav = std::fs::read(destination).unwrap();
-    assert_eq!(wav[80..], pcm);
+    assert_eq!(wave_chunks::data(&wav), pcm);
 }
 
 #[cfg(feature = "player")]

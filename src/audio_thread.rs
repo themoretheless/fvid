@@ -42,7 +42,9 @@ enum Command {
     Play,
     Pause,
     Rewind,
+    #[cfg(test)]
     Seek(i64),
+    SeekTime(Duration),
     /// Output gain in thousandths.
     Level(u32),
     /// Stream frames consumed per device frame, in thousandths.
@@ -201,18 +203,7 @@ impl AudioPlayback {
     pub fn seek(&mut self, target: Duration) {
         self.generation += 1;
         if self.timescale > 0 {
-            let scale = u128::from(self.timescale);
-            let mut ticks = u128::from(target.as_secs()) * scale
-                + u128::from(target.subsec_nanos()) * scale / 1_000_000_000;
-            // Recover a tick whose exact public Duration was rounded down to ns.
-            // Other targets retain floor semantics; sub-ns clocks are ambiguous.
-            if scale < 1_000_000_000
-                && (ticks + 1) * 1_000_000_000 / scale == target.as_nanos()
-            {
-                ticks += 1;
-            }
-            let pts = i64::try_from(ticks).unwrap_or(i64::MAX);
-            let _ = self.commands.send(Command::Seek(pts));
+            let _ = self.commands.send(Command::SeekTime(target));
         }
     }
 
@@ -433,17 +424,18 @@ impl Worker {
             }
             crate::audio::AudioStep::Pcm(packet) => (packet,None),
             crate::audio::AudioStep::Encoded(packet) => {
+                let stamp=self.stream.decoder_stamp(&packet);
                 if self.stream.preroll_target().is_some() && self.stream.timescale()!=0 {
-                    let bucket=packet.pts/i64::from(self.stream.timescale());
-                    if !self.checkpoints.iter().any(|(p,_)|*p/i64::from(self.stream.timescale())==bucket) {
+                    let bucket=self.stream.checkpoint_bucket(stamp);
+                    if !self.checkpoints.iter().any(|(p,_)|self.stream.checkpoint_bucket(*p)==bucket) {
                         if let Some(state)=self.decoder.checkpoint() {
                             if self.checkpoints.len()==32 {self.checkpoints.remove(0);}
-                            self.checkpoints.push((packet.pts,state));
+                            self.checkpoints.push((stamp,state));
                         }
                     }
                 }
 
-                return match self.decoder.decode_packet(&packet.data,packet.pts,packet.duration.max(0) as u64) {
+                return match self.decoder.decode_packet(&packet.data,stamp,packet.duration.max(0) as u64) {
                     Ok(Some(frame)) => self.present_frame(frame),
                     Ok(None) => (None,Duration::ZERO),
                     Err(error) => {self.ended=true;(Some(AudioEvent::Error(error.to_string())),Duration::ZERO)},
@@ -456,7 +448,7 @@ impl Worker {
     fn present_frame(&mut self,frame:crate::audio::DecodedAudio)->(Option<AudioEvent>,Duration) {
         let mut decoded=frame.packet;
 
-        match self.stream.packet_sample_limit(frame.source_duration) {
+        match self.stream.decoded_packet_sample_limit(frame.source_pts,frame.source_duration) {
             Ok(Some(frames)) => {
                 let bytes = frames.checked_mul(usize::from(self.stream.channels())).and_then(|n| n.checked_mul(4));
                 match bytes {
@@ -546,10 +538,35 @@ impl Worker {
         true
     }
 
+    fn finish_seek(&mut self,result_pts:i64)->bool {
+                if let Err(error) = self.reset_decoder().and_then(|_|self.restore_preroll()) {
+                    self.fail_output("seek decoder reset", error);
+                    return false;
+                }
+                // Anchor the clock at the sample actually landed on, which can
+                // precede the requested point; the backend advances from there.
+                let anchor = self.stream.time_of(result_pts);
+                if let Err(error) = self.backend.flush(anchor) {
+                    self.fail_output("seek flush", error);
+                    return false;
+                }
+                if let Err(error) = self.sync_output(anchor) {
+                    self.fail_output("seek output configuration", error);return false;
+                }
+                self.queued_frontier = anchor;
+
+                if let Ok(mut pos) = self.position.lock() {
+                    *pos = anchor;
+                }
+        true
+    }
+
     fn drain_commands(&mut self, first: Option<Command>) -> bool {
         enum DeferredNav {
             Rewind,
+            #[cfg(test)]
             Seek(i64),
+            SeekTime(Duration),
         }
         let mut nav: Option<DeferredNav> = None;
         let mut latest_level: Option<u32> = None;
@@ -582,6 +599,11 @@ impl Worker {
                     self.reconfiguration = None;
                     nav = Some(DeferredNav::Rewind);
                 }
+                Command::SeekTime(target) => {
+                    self.generation += 1;self.ended=false;self.draining=false;self.reconfiguration=None;
+                    nav=Some(DeferredNav::SeekTime(target));
+                }
+                #[cfg(test)]
                 Command::Seek(pts) => {
                     self.generation += 1;
                     self.ended = false;
@@ -626,27 +648,12 @@ impl Worker {
                     *pos = Duration::ZERO;
                 }
             }
+            Some(DeferredNav::SeekTime(target)) => {
+                let at=self.stream.seek_time(target);if !self.finish_seek(at){return false;}
+            }
+            #[cfg(test)]
             Some(DeferredNav::Seek(pts)) => {
-                let result_pts = self.stream.seek_to(pts);
-                if let Err(error) = self.reset_decoder().and_then(|_|self.restore_preroll()) {
-                    self.fail_output("seek decoder reset", error);
-                    return false;
-                }
-                // Anchor the clock at the sample actually landed on, which can
-                // precede the requested point; the backend advances from there.
-                let anchor = self.stream.time_of(result_pts);
-                if let Err(error) = self.backend.flush(anchor) {
-                    self.fail_output("seek flush", error);
-                    return false;
-                }
-                if let Err(error) = self.sync_output(anchor) {
-                    self.fail_output("seek output configuration", error);return false;
-                }
-                self.queued_frontier = anchor;
-
-                if let Ok(mut pos) = self.position.lock() {
-                    *pos = anchor;
-                }
+                let at=self.stream.seek_to(pts);if !self.finish_seek(at){return false;}
             }
             None => {}
         }
@@ -1802,7 +1809,10 @@ mod exact_seek_clock_regressions {
         ] {
             playback.seek(target);
             match received.try_recv().unwrap() {
-                Command::Seek(pts)=>assert_eq!(pts,expected,"target={target:?}"),
+                Command::SeekTime(received)=>{
+                    assert_eq!(received,target);
+                    assert_eq!(super::sample_seek_clock_regressions::Clock(source.timescale()).seek_time(received),expected,"target={target:?}");
+                },
                 _=>panic!("seek did not send a navigation command"),
             }
         }
@@ -1946,6 +1956,19 @@ mod duration_publication_guards {
 #[cfg(test)]
 mod sample_seek_clock_regressions {
     use super::*;
+    pub(super) struct Clock(pub u32);
+    impl AudioStream for Clock {
+        fn codec(&self)->&str {"A_PCM/FLOAT/IEEE"}
+        fn timescale(&self)->u32 {self.0}
+        fn sample_rate(&self)->u32 {self.0}
+        fn channels(&self)->u16 {1}
+        fn extra_data(&self)->&[u8] {&[]}
+        fn audio_tracks(&self)->Vec<crate::audio::AudioTrack> {Vec::new()}
+        fn next_packet(&mut self)->crate::Result<Option<crate::audio::EncodedPacket>> {Ok(None)}
+        fn rewind(&mut self) {}
+        fn seek_to(&mut self,pts:i64)->i64 {pts}
+    }
+
     #[test]
     fn inverse_seek_recovers_floored_sample_boundaries_and_keeps_other_targets_floored() {
         for scale in [8000u32,44100,48000,1_000_000_000] {
@@ -1953,10 +1976,10 @@ mod sample_seek_clock_regressions {
             let mut playback=AudioPlayback{commands,events,generation:0,thread:None,position:Arc::new(Mutex::new(Duration::ZERO)),timescale:scale,duration:Arc::new(Mutex::new(None))};
             for tick in [0u64,1,2,7,2816,12032,9_000_000_000_000_000_000,i64::MAX as u64] {
                 let rate=u64::from(scale);let target=Duration::new(tick/rate,((tick%rate)*1_000_000_000/rate) as u32);
-                playback.seek(target);match received.try_recv().unwrap(){Command::Seek(at)=>assert_eq!(at,tick as i64,"rate{scale} tick{tick}"),_=>panic!("seek command")}
+                playback.seek(target);match received.try_recv().unwrap(){Command::SeekTime(at)=>{assert_eq!(at,target);assert_eq!(Clock(scale).seek_time(at),tick as i64,"rate{scale} tick{tick}")},_=>panic!("seek command")}
             }
             if scale==48000 {for (ns,expected) in [(1,0),(20832,0),(20833,1),(20834,1),(41665,1),(41666,2)] {
-                playback.seek(Duration::from_nanos(ns));match received.try_recv().unwrap(){Command::Seek(at)=>assert_eq!(at,expected,"fractional target{ns}"),_=>panic!("seek command")}
+                playback.seek(Duration::from_nanos(ns));match received.try_recv().unwrap(){Command::SeekTime(at)=>{assert_eq!(at,Duration::from_nanos(ns));assert_eq!(Clock(scale).seek_time(at),expected,"fractional target{ns}")},_=>panic!("seek command")}
             }}
         }
     }
