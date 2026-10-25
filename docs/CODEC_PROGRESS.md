@@ -1,5 +1,37 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+
+## Repeated complete target IDR output epochs, 2026-10-25
+
+The owned layered HEVC queue now starts a new POC comparison epoch when a
+complete target IDR AU starts all selected layers' new coded video sequences.
+The decision reuses the decoder's existing necessary-layer coverage rule and
+is staged with queue, parameter and reconstruction state. This admits repeated
+IDR without requiring an unnecessary VPS replacement or cross-layer BLA flag.
+Standalone queue pushes retain their explicit boundary requirements.
+
+Epoch bookkeeping does not widen prior-output discard scope. A base-layer
+`no_output_of_prior_pics_flag` still leaves prior dependent-layer output alive;
+its eventual emission cannot set the new epoch's POC lower bound. Equal POCs
+from different epochs can coexist in pending output. Sub-DPB fullness matches
+layer/POC identity within the current CVS epoch, so an old output picture and
+a new reference with reused POC do not alias one storage slot. Metadata copies
+of a current-CVS reference do not create another coded-picture DPB slot.
+
+Twelve original three-AU scenarios exercise PCM, multislice and separate colour
+planes, independent/dependent layers and both prior-output flags in native MP4
+and Matroska. Acceptance checks exact saved synthetic samples, per-AU/layer
+identity, source clocks, automatic owned dispatch, rewind and seek. A shortened
+second-IDR enhancement preserves valid NAL/header planning but fails entropy
+reconstruction; refusal must preserve old POC, queue pixels/bindings and valid
+retry. A capacity regression uses original IDR/inter pictures with equal old/new
+POC and a conforming three-slot/two-reorder boundary. Fixture generation uses
+only owned muxers and saved synthetic entropy, with no external process/network.
+
+Prior-output sub-DPB rules follow H.265 F.13.5.2.2; this finite matrix does not
+prove all partial-target or non-aligned IRAP combinations. See
+[ITU-T H.265 V11](https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-202601-I%21%21PDF-E&lang=e&type=items).
+
 ## Base-only and multilayer HEVC topology transitions, 2026-10-25
 
 Native MP4/Matroska dispatch now checks activated VPS chains beyond an initial

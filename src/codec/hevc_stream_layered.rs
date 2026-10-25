@@ -166,7 +166,11 @@ impl LayeredDecoder {
             return Err(invalid("HEVC queued decode temporal limit is invalid"));
         }
         let preview = self.dpb.output_preview(&plan)?;
+        let access_unit = self.dpb.next_access_unit();
         let mut staged_queue = queue.clone();
+        if preview.complete_target_idr {
+            staged_queue.begin_idr_epoch(access_unit);
+        }
         let mut ready = Vec::new();
         let mut staged_dpb = self.dpb.clone();
         let (parameters, pictures, end) =
