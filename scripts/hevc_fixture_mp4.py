@@ -25,7 +25,7 @@ def header(size, values, matrix_offset=None):
     return bytes(data)
 
 
-def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False, presentation_order=None, chroma_format=1, chroma_depth=None, access_units=None, multilayer=False, empty_configuration=False, configuration_types=None):
+def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False, presentation_order=None, chroma_format=1, chroma_depth=None, access_units=None, multilayer=False, empty_configuration=False, configuration_types=None, independent_layer=False):
     chroma_depth = depth if chroma_depth is None else chroma_depth
     if not 8 <= chroma_depth <= 16:
         raise ValueError("invalid fixture chroma depth")
@@ -86,7 +86,9 @@ def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False,
             samples.append(b''.join(current))
     if pending:
         raise ValueError('parameter update without a following picture')
-    if (not samples or any(not parameters[k] for k in parameters)
+    required=(33,34)if independent_layer else(32,33,34)
+    if independent_layer and parameters[32]:raise ValueError('independent rewritten output must omit VPS')
+    if (not samples or any(not parameters[k] for k in required)
             or (not inband_parameters and not multilayer and any(len(parameters[k]) != 1 for k in parameters))):
         raise ValueError('requires parameter sets and pictures; hvc1 requires one VPS/SPS/PPS')
     if multilayer and access_units is None:
@@ -98,7 +100,7 @@ def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False,
     sps = re.sub(b'\x00\x00\x03', b'\x00\x00', sps)
     if (sps[0] >> 1) & 7:
         raise ValueError('fixture muxer requires one temporal layer')
-    recorded=parameters
+    recorded={k:v for k,v in parameters.items()if v}if independent_layer else parameters
     if configuration_types is not None:
         if not inband_parameters or any(k not in parameters for k in configuration_types):
             raise ValueError('partial fixture configuration requires hev1 parameter types')

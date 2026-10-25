@@ -1,6 +1,46 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
 
+## HEVC independent-layer rewriting (F.10.2 / INBLD), 2026-10-25
+
+`LayeredSubstream::rewrite_independent_packet` validates a singleton independent
+additional-set root, its selected OLS and effective temporal Annex A INBLD
+capability. It removes every VPS, filters excluded layers and temporal IDs,
+retains layer-zero/selected SPS and PPS plus EOB, then changes only the retained
+NAL headers' layer bits to zero. Payload bytes, length fields and order remain
+unchanged. The output intentionally has no invented VPS.
+
+The owned single-layer decoder and MP4/Matroska dispatch now admit this VPS-less
+Annex A SPS configuration. Received mismatched VPS IDs, malformed VPS data,
+parameter-binding changes and VPS-dependent POC-reset syntax remain checked.
+Absence is admitted only when the entire active VPS bank is empty.
+
+Static HDR follows CLVS lifetime in both pixel decoding and header-only seek
+priming: a new CLVS clears old guidance, while newly received prefix guidance
+survives even in a separate parameter-only packet. Explicit zero CLL remains a
+received statement. This fixes a reproduced discrepancy between the original
+layered stream and its rewritten single-layer output.
+
+The synthetic matrix covers 22 two-picture scenarios: PCM, multiple slices,
+separate colour planes, unnecessary layers, internal/external base headers,
+available/unavailable base flags, populated/empty configuration, and separate
+HDR refresh/zero packets. Tests compare source/output saved pixels, CLL,
+MP4/Matroska clocks, seek and rewind. Byte controls cover length widths 1/2/4,
+terminal retention, temporal capability selection, missing INBLD and small
+budgets. All 88 saved files (1,311,729 bytes) reproduce exactly with process and
+socket creation forbidden; ordinary tests never run a generator or FFmpeg.
+
+The supplementary AAC concatenation control was also corrected to compare
+WAVE format, fact/frame count and every PCM byte independently of retained LIST
+tags. Its former whole-file equality failed on the unchanged baseline solely
+because the Matroska route preserves metadata; the 212,992-byte PCM data matches.
+
+This is finite independent-layer qualification, not universal HEVC completion.
+A VPS-less prefix followed by a later genuinely multilayer epoch, external base
+pictures required by other OLSs, and arbitrary inter/tool/profile combinations
+still require separate qualification.
+
+
 ## HEVC additional layer sets (F.10.3), 2026-10-25
 
 Globally scanned OLS selection now admits additional layer sets. Export uses
@@ -36,9 +76,10 @@ parameters, POC, queue and OLS unpublished and permit valid retry. All 87 saved
 files reproduce byte-for-byte with process/socket creation denied; ordinary
 tests never invoke their generator or an external codec.
 
-This is finite additional-set qualification. F.10.2 independent-layer renumbering,
-external base pictures needed by other operation points, arbitrary P/B/tool/profile
-combinations and universal codec coverage are not established by this matrix.
+This is finite additional-set qualification. F.10.2 independent-layer renumbering
+is qualified separately above. External base pictures needed by other operation
+points, arbitrary P/B/tool/profile combinations and universal codec coverage are
+not established by this matrix.
 
 
 ## Unreferenced MP4 video descriptions and presented codec, 2026-10-25

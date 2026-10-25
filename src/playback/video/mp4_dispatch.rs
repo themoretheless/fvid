@@ -105,7 +105,11 @@ fn dispatch_hevc_vps<R: Read + Seek>(
                 parameters.receive(nal)?;
             }
             if header.is_vcl() {
-                let referenced = parameters.referenced_vps(nal)?;
+                let Some(referenced) = parameters.referenced_vps_if_available(nal)? else {
+                    header.require_base_layer()?;
+                    seen_vcl = true;
+                    continue;
+                };
                 let topology =
                     crate::codec::hevc_vps::Vps::parse_layered_metadata(referenced, budget / 2)?;
                 if !seen_vcl {
