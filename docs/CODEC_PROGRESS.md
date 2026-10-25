@@ -18498,9 +18498,10 @@ All 152 artifacts (2212688 bytes) regenerate byte-exact with external process
 and network creation forbidden. Ordinary tests require no FFmpeg or network.
 
 This adds alternate-BSI parsing/access and the existing selected Lo/Ro path.
-It does not claim complete Annex D decoder processing: user-selectable Lt/Rt
-and automatic preferred-mode rendering remain open, as do other codec tools
-and profiles. The full no-gap objective remains active.
+Stereo matrix/session selection is implemented in the following section.
+Application UI/native-device routing and other codec tools/profiles remain
+open; complete Annex D application processing is not claimed. The full
+no-gap objective remains active.
 
 ### AC-3 stereo matrix selection and session policy (2026-10-25)
 
@@ -18539,5 +18540,47 @@ creation forbidden; the older 152 alternate-BSI artifacts remain byte-exact.
 
 This qualifies the decoder/session API for explicit stereo output. A player UI
 for this choice and metadata-aware routing of native multichannel PCM to a
-physical stereo device are not implemented here. E-AC-3 selection and further
+physical stereo device are not implemented here. Independent/compatibility
+E-AC-3 selection is qualified below; extended-presentation folding and further
 codec tools/profiles remain part of the full no-gap objective.
+
+### E-AC-3 stereo matrix selection (2026-10-25)
+
+Annex E mixing metadata now retains dmixmod, ltrtcmixlev and ltrtsurmixlev
+alongside the existing Lo/Ro/LFE codes. Eac3Decoder accepts the common
+StereoDownmixPolicy through a builder and AudioDecode setter; the scheduling
+session owns an independent eac3_stereo_downmix choice and reapplies it after
+decoder replacement. Native and expanded/coded presentations remain native.
+The choice applies to independent/compatibility stereo output; new_stereo
+explicitly requests L/R even when the native two-channel layout is C+LFE.
+Mono retains its existing Lo/Ro-then-sum behavior.
+
+AC-3 and Annex E now share the stereo-matrix selection/normalization kernel.
+Lt/Rt uses its own signalled coefficients and opposite surround signs,
+automatic follows applicable preferred mode 1 and otherwise selects Lo/Ro.
+Missing metadata restores defaults at the next frame. Optional E-AC-3 LFE
+injection is added to both channels before computing matrix headroom, so
+the LFE coefficient participates in the row-sum bound. The 4.5 dB adjustment
+and mono -6 dB sum retain the existing Annex E.3.9 behavior.
+Primary source: https://www.atsc.org/wp-content/uploads/2021/04/A52-2018.pdf
+(Annex E, Tables E1.2 and section E3.9; Annex D mixing level tables).
+
+An owned Lt/Rt witness reproduces the parent decoder's missing selection
+(error 0.0007143187 against its scalar matrix). Acceptance covers 322 authored
+cases across all eight acmod values, LFE present/absent, both centre/surround
+matrices, all preferred-mode codes and all 32 LFE levels plus absence, all
+three modes and both headroom settings. Scalar expectations use native PCM
+controls and independently computed matrix equations. Tests also check
+checked-header fields, delayed-PCM policy snapshots, midstream changes, reset,
+unchanged native/mono PCM, and a real scheduling worker with an explicit
+stereo-output source: encoded packet extraction from Matroska, real neutral
+VP9 video decode, EOF/seek/rewind and policy restoration after decoder creation.
+The un-clipped full-scale unit-vector test covers LFE before normalization.
+All 661 artifacts (12319728 bytes) regenerate byte-exact with processes/network
+forbidden; all 561 older LFE witnesses remain byte-exact. Ordinary tests require
+no FFmpeg or network.
+
+This is independent/compatibility stereo rendering, not a new fold of the full
+extended dependent presentation. Player UI/device routing of native multichannel
+PCM, complete programme mixing and other codec profiles/tools remain open.
+The full no-gap objective remains active.

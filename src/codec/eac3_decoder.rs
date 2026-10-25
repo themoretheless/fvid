@@ -165,16 +165,15 @@ pub struct Frame {
     pub block_starts: Option<[usize; BLOCKS - 1]>,
 }
 
-/// The Lo/Ro downmix levels the frame's mixing metadata states, held as the 3-bit
-/// codes Table D2.5 and Table D2.6 name them rather than as levels, so that a frame
-/// reads back as the bits that were written to it. [`Eac3Decoder`] turns a code into
-/// the level the fold mixes by, and supplies the `-3 dB` default for the level a
-/// stream does not name: Annex E puts these coefficients inside `bsi`, where AC-3's
-/// own 2-bit `cmixlev` and `surmixlev` sit beside `acmod`, and its tables are the
-/// wider Lo/Ro ones - the Lt/Rt codes of the same group are for a stream that asks to
-/// be folded to Lt/Rt, which is not what a stereo container states.
+/// Stereo downmix and LFE levels retained as their signalled codes.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Downmix {
+    /// `dmixmod`, present only when acmod > 2.
+    pub preferred: Option<u8>,
+    /// `ltrtcmixlev`, present only with three front channels.
+    pub ltrt_centre: Option<u8>,
+    /// `ltrtsurmixlev`, present only with surround channels.
+    pub ltrt_surround: Option<u8>,
     /// `lorocmixlev`, present only for a mode with a centre channel.
     pub centre: Option<u8>,
     /// `lorosurmixlev`, present only for a mode with surround channels.
@@ -183,13 +182,13 @@ pub struct Downmix {
     pub lfe: Option<u8>,
 }
 
-/// Table D2.5, the Lo/Ro centre mix level per `lorocmixlev`.
-const LORO_CENTRE: [f32; 8] = [1.414, 1.189, 1.000, 0.841, 0.707, 0.595, 0.500, 0.000];
+/// Tables D2.3/D2.5: Lt/Rt and Lo/Ro centre mix levels.
+const STEREO_CENTRE: [f32; 8] = [1.414, 1.189, 1.000, 0.841, 0.707, 0.595, 0.500, 0.000];
 
-/// Table D2.6, the Lo/Ro surround mix level per `lorosurmixlev`. The three lowest
+/// Tables D2.4/D2.6: Lt/Rt and Lo/Ro surround levels. The three lowest
 /// codes are reserved, and the table's own instruction is to mix by `-1.5 dB` for
 /// one of them.
-const LORO_SURROUND: [f32; 8] = [0.841, 0.841, 0.841, 0.841, 0.707, 0.595, 0.500, 0.000];
+const STEREO_SURROUND: [f32; 8] = [0.841, 0.841, 0.841, 0.841, 0.707, 0.595, 0.500, 0.000];
 
 /// The exponent strategy codes a frame states, in one of the two forms `expstre`
 /// selects. Both are codes, not band structures: [`Frame::strategies`] resolves them
@@ -364,14 +363,14 @@ impl Frame {
     fn centre_level(&self) -> f32 {
         self.downmix
             .and_then(|mix| mix.centre)
-            .map_or(0.707, |code| LORO_CENTRE[usize::from(code)])
+            .map_or(0.707, |code| STEREO_CENTRE[usize::from(code)])
     }
 
     /// The level the surround channels join a Lo/Ro fold at, with the same default.
     fn surround_level(&self) -> f32 {
         self.downmix
             .and_then(|mix| mix.surround)
-            .map_or(0.707, |code| LORO_SURROUND[usize::from(code)])
+            .map_or(0.707, |code| STEREO_SURROUND[usize::from(code)])
     }
 
     /// What `block` codes its exponents by, resolved from whichever form `expstre`
@@ -852,8 +851,7 @@ fn ceil_log2(n: usize) -> usize {
     (0..).find(|shift| 1usize << shift >= n).unwrap_or(usize::BITS as usize)
 }
 
-/// Step over `bsi` past the fields `header` has already read: Table E1.2 from
-/// `dialnorm` on. The Lo/Ro coefficients the metadata carries come back with the walk.
+/// Read Table E1.2 from `dialnorm` onward, retaining stereo mixing metadata.
 fn bsi(
     bits: &mut BitReader<'_>,
     acmod: usize,
@@ -898,28 +896,18 @@ fn bsi(
     Ok((downmix,compression,dialogue))
 }
 
-/// Step over the mixing metadata of Table E1.2, and take the two Lo/Ro coefficients a
-/// stream's own fold reads from it. Each sits behind its Lt/Rt twin, which is for a
-/// stream encoded to surround-aware decoding rather than to a stereo container.
+/// Read the stereo matrices, preference and LFE levels from Table E1.2.
 fn mixing(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize, stream_type: u32) -> Result<Option<Downmix>> {
-    if acmod > 2 {
-        bits.skip(2)?; // dmixmod
-    }
-    let centre = if acmod > 2 && acmod & 1 != 0 {
-        bits.skip(3)?; // ltrtcmixlev
-        Some(bits.read(3)? as u8) // lorocmixlev
-    } else {
-        None
-    };
-    let surround = if acmod & 4 != 0 {
-        bits.skip(3)?; // ltrtsurmixlev
-        Some(bits.read(3)? as u8) // lorosurmixlev
-    } else {
-        None
-    };
+    let preferred = if acmod > 2 {Some(bits.read(2)? as u8)}else{None};
+    let (ltrt_centre,centre) = if acmod > 2 && acmod & 1 != 0 {
+        (Some(bits.read(3)? as u8),Some(bits.read(3)? as u8))
+    } else {(None,None)};
+    let (ltrt_surround,surround) = if acmod & 4 != 0 {
+        (Some(bits.read(3)? as u8),Some(bits.read(3)? as u8))
+    } else {(None,None)};
     let lfe=if lfeon && bits.bit()? {Some(bits.read(5)? as u8)}else{None};
     if stream_type != 0 {
-        return Ok(Some(Downmix { centre, surround, lfe }));
+        return Ok(Some(Downmix { preferred, ltrt_centre, ltrt_surround, centre, surround, lfe }));
     }
     if bits.bit()? {
         bits.skip(6)?; // pgmscl
@@ -964,7 +952,7 @@ fn mixing(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize, st
             }
         }
     }
-    Ok(Some(Downmix { centre, surround, lfe }))
+    Ok(Some(Downmix { preferred, ltrt_centre, ltrt_surround, centre, surround, lfe }))
 }
 
 /// Step over the most flexible mixing definition: `mixdeflen` says how many bytes
@@ -1289,6 +1277,7 @@ impl Spx {
 }
 
 pub use super::dolby_compression::CompressionMode;
+pub use super::ac3_decoder::{StereoDownmixMode,StereoDownmixPolicy};
 
 /// Enhanced AC-3 decoder: a packet of Annex E syncframes in, interleaved f32 out.
 ///
@@ -1307,6 +1296,7 @@ pub struct Eac3Decoder {
     /// produce.
     channels: usize,
     force_stereo: bool,
+    stereo_downmix: StereoDownmixPolicy,
     compression_mode: CompressionMode,
     programme_id: u8,
     dialogue_normalization: bool,
@@ -1354,6 +1344,7 @@ impl Eac3Decoder {
             sample_rate,
             channels: usize::from(channels),
             force_stereo:false,
+            stereo_downmix:StereoDownmixPolicy::default(),
             compression_mode:CompressionMode::Line,
             programme_id:0,
             dialogue_normalization:false,
@@ -1385,6 +1376,13 @@ impl Eac3Decoder {
         Ok(self)
     }
 
+    /// Choose stereo folding of the independent/compatibility output. Native
+    /// output layouts, expanded presentations and mono retain their existing behavior.
+    /// Use `new_stereo` to request L/R explicitly for a native two-channel C+LFE stream.
+    pub fn with_stereo_downmix(mut self, policy:StereoDownmixPolicy)->Self {
+        self.stereo_downmix=policy;self
+    }
+
     /// Choose compression for subsequently decoded frames. Buffered PCM retains
     /// its captured gain; reset preserves this selection. No calibration gain is added.
     pub fn with_compression(mut self, mode: CompressionMode) -> Self {
@@ -1407,7 +1405,8 @@ impl Eac3Decoder {
         Ok(Self::for_container(configuration,sample_rate,channels)?.with_compression(mode))
     }
 
-    /// Explicit conventional L/R output. Unlike the native-first channel-count
+    /// Explicit two-channel output. The stereo policy chooses its matrix.
+    /// Unlike the native-first channel-count
     /// constructor, this also folds a two-channel C+LFE input into stereo.
     /// The result has the ordinary raw-stream priming; reset preserves the mode.
     pub fn new_stereo(configuration:&[u8],sample_rate:u32)->Result<Self> {
@@ -1551,7 +1550,12 @@ impl Eac3Decoder {
         out: &mut Vec<f32>,
     ) -> Result<bool> {
         let header = Self::geometry(frame);
-        let folding=if frame.stream_type==1 || self.assembly_mode {Some(Folding::coded(header))}else{Folding::eac3(header,self.channels,frame.downmix.and_then(|mix|mix.lfe),self.force_stereo)};
+        let folding=if frame.stream_type==1 || self.assembly_mode {Some(Folding::coded(header))}else{Folding::eac3(header,self.channels,frame.downmix.and_then(|mix|mix.lfe),self.force_stereo,
+            self.stereo_downmix,super::ac3_decoder::StereoMixLevels {
+                preferred:frame.downmix.and_then(|m|m.preferred),
+                ltrt_centre:frame.downmix.and_then(|m|m.ltrt_centre).map_or(0.707,|v|STEREO_CENTRE[v as usize]),
+                ltrt_surround:frame.downmix.and_then(|m|m.ltrt_surround).map_or(0.707,|v|STEREO_SURROUND[v as usize]),
+            })};
         let Some(folding) = folding else {
             return Ok(false);
         };
@@ -2153,6 +2157,7 @@ impl Eac3Decoder {
 }
 
 impl AudioDecode for Eac3Decoder {
+    fn set_eac3_stereo_downmix(&mut self,policy:StereoDownmixPolicy) {self.stereo_downmix=policy;}
     fn set_dolby_dialogue_normalization(&mut self, enabled: bool) {
         self.dialogue_normalization=enabled;
         if let Some(p)=self.presentation.as_mut(){p.set_dialogue_normalization(enabled);}

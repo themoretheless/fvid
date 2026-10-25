@@ -768,6 +768,10 @@ pub trait AudioDecode: Send {
     #[cfg(feature = "player")]
     fn set_ac3_stereo_downmix(&mut self, _policy: crate::codec::ac3_decoder::StereoDownmixPolicy) {}
 
+    /// Independent/compatibility E-AC-3 stereo folding; other codecs ignore it.
+    #[cfg(feature = "player")]
+    fn set_eac3_stereo_downmix(&mut self, _policy: crate::codec::eac3_decoder::StereoDownmixPolicy) {}
+
     /// Session policy for Dolby decoders. Other codecs intentionally ignore it.
     #[cfg(feature = "player")]
     fn set_dolby_compression(&mut self, _mode: crate::codec::ac3_decoder::CompressionMode) {}
