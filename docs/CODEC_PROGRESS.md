@@ -26,7 +26,7 @@ sample index. Generator byte parity is checked separately from ordinary tests.
 
 The broader gate also reproduced a pre-existing ER-LC/PS player startup stack
 overflow on the exact pre-ELD source. The generic audio factory retained about
-640 KiB of unrelated codec constructor temporaries in debug builds. AAC/PS
+627 KiB of unrelated codec constructor temporaries in debug builds. AAC/PS
 construction now has a separate dispatch frame from the non-AAC factory.
 `aac-player-factory-stack` contains a newly muxed own short ER-LC/PS video and
 Matroska companion; `aac_player_factory_stack` decodes both on an explicit
@@ -41,6 +41,26 @@ PCM with and without valid fill. Truncated entropy payloads still must fail.
 `aac-er-fill-resilience` adds 32 own valid-fill videos and 32 independently
 malformed EXT_FILL_DATA-nibble videos, verifying public/backend PCM parity and
 the exact malformed-payload error. It changes tests, not decoder permissiveness.
+
+SSR playback now interprets packet windows in the declared source timescale,
+rather than forcing every explicitly timed packet into 1024 rows. Native
+`decode_timed_in_clock` keeps the original source PTS/duration while recognizing
+configured access-unit windows under floor/ceil timestamp quantization. Explicit
+variable-window MP4 timing remains variable; absent player packet durations use
+the configured clock, preserving standard Matroska AAC. Native zero-duration
+untimed synthesis retains its separate behavior. Seek therefore restores the
+same PCM prefix and trims at the requested sample rather than shifting by a
+window-transition difference.
+
+`aac-ssr-packet-clock` contains six own mono/stereo/coupling/independent-window
+sources, each muxed with native variable MP4 timing, quantized 1 kHz MP4 timing
+(with a separate correct 24 kHz audio sample entry), and nanosecond Matroska.
+Public/backend export, complete player output, rewind and repeated exact seek
+must agree on the continuous PCM. The original SSR coupling playback helper now
+drains EOF, including delayed alignment output. Existing TNS negative geometry
+checks use an actually unsupported length (513), with nonzero FIR acceptance
+for 480/512; WAVE export checks compare the declared data chunk because valid
+RIFF metadata may follow it.
 
 This is core acceptance, not complete AAC-ELD profile coverage. Low-delay SBR,
 nonzero epConfig and known ELD extension tools remain explicit refusals.

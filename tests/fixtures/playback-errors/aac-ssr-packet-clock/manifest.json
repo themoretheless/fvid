@@ -1,0 +1,65 @@
+{
+  "cases": [
+    {
+      "name": "mono",
+      "control": "aac-ssr-1-0-0-synthetic.mp4",
+      "variable": "mono-variable.mp4",
+      "coarse": "mono-coarse.mp4",
+      "matroska": "mono-fixed.mka",
+      "channels": 1,
+      "rate": 24000,
+      "samples": 6144
+    },
+    {
+      "name": "stereo",
+      "control": "aac-ssr-2-0-0-synthetic.mp4",
+      "variable": "stereo-variable.mp4",
+      "coarse": "stereo-coarse.mp4",
+      "matroska": "stereo-fixed.mka",
+      "channels": 2,
+      "rate": 24000,
+      "samples": 6144
+    },
+    {
+      "name": "coupled",
+      "control": "aac-ssr-coupling-multiple-2-synthetic.mp4",
+      "variable": "coupled-variable.mp4",
+      "coarse": "coupled-coarse.mp4",
+      "matroska": "coupled-fixed.mka",
+      "channels": 2,
+      "rate": 24000,
+      "samples": 6144
+    },
+    {
+      "name": "source-behind",
+      "control": "aac-ssr-alignment-source-behind-synthetic.mp4",
+      "variable": "source-behind-variable.mp4",
+      "coarse": "source-behind-coarse.mp4",
+      "matroska": "source-behind-fixed.mka",
+      "channels": 1,
+      "rate": 24000,
+      "samples": 6144
+    },
+    {
+      "name": "late-source",
+      "control": "aac-ssr-alignment-late-source-behind-synthetic.mp4",
+      "variable": "late-source-variable.mp4",
+      "coarse": "late-source-coarse.mp4",
+      "matroska": "late-source-fixed.mka",
+      "channels": 1,
+      "rate": 24000,
+      "samples": 6144
+    },
+    {
+      "name": "independent-pair",
+      "control": "aac-ssr-alignment-independent-cpe-synthetic.mp4",
+      "variable": "independent-pair-variable.mp4",
+      "coarse": "independent-pair-coarse.mp4",
+      "matroska": "independent-pair-fixed.mka",
+      "channels": 2,
+      "rate": 24000,
+      "samples": 6144
+    }
+  ],
+  "provenance": "Own SSR gain/window/coupling payload writers and own AVC/MP4/Matroska muxers; variable PQF windows, quantized 1 kHz MP4 and nanosecond Matroska. No private media, external codec, process or network."
+}

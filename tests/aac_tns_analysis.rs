@@ -105,7 +105,7 @@ fn malformed_tns_analysis_refuses_geometry_coefficients_and_overflow() {
             .contains("overflow")
     );
     for (n, offsets, limit) in [
-        (512, vec![0, 4, 512], 2),
+        (513, vec![0, 4, 513], 2),
         (1024, vec![1, 4, 1024], 2),
         (1024, vec![0, 4, 4, 1024], 2),
         (1024, vec![0, 4, 1024], 3),
@@ -117,4 +117,40 @@ fn malformed_tns_analysis_refuses_geometry_coefficients_and_overflow() {
             .analyze_owned(vec![0.; 1024], &[0, 1024], 1)
             .is_err()
     );
+}
+
+#[test]
+fn ld_and_eld_long_tns_analysis_accepts_480_and_512_sample_geometry() {
+    for n in [480, 512] {
+        let data = TnsData {
+            windows: vec![vec![TnsFilter {
+                length: 2,
+                reverse: false,
+                lpc: vec![0.25],
+            }]],
+        };
+        let input: Vec<f64> = (0..n)
+            .map(|i| ((i * 13 % 47) as f64 - 23.) * 0.125)
+            .collect();
+        let expected: Vec<f64> = input
+            .iter()
+            .enumerate()
+            .map(|(i, v)| *v + if i > 0 { 0.25 * input[i - 1] } else { 0. })
+            .collect();
+        let encoded = data.analyze_owned(input.clone(), &[0, 4, n], 2).unwrap();
+        assert_eq!(encoded, expected);
+        let decoded = data
+            .filter(
+                &encoded.iter().map(|v| *v as f32).collect::<Vec<_>>(),
+                &[0, 4, n],
+                2,
+            )
+            .unwrap();
+        assert!(
+            decoded
+                .iter()
+                .zip(&input)
+                .all(|(a, b)| (f64::from(*a) - b).abs() < 1e-6)
+        );
+    }
 }

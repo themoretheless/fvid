@@ -220,6 +220,11 @@ fn owned_wave_export_preserves_top_front_mask_and_continuous_pcm() {
             None,
         )
         .unwrap();
-        assert!(std::fs::read(output).unwrap().ends_with(&pcm), "{name}");
+        // RIFF metadata may follow data; compare the declared PCM chunk.
+        let payload = fvid_media::owned_wave_inspect::inspect(&mut file, None).unwrap();
+        let stored = std::fs::read(output).unwrap();
+        let start = payload.data_offset as usize;
+        let end = start + payload.data_bytes as usize;
+        assert_eq!(&stored[start..end], pcm, "{name}");
     }
 }

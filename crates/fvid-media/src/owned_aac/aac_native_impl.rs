@@ -519,6 +519,12 @@ impl NativeAacDecoder {
         Ok(Some(output))
     }
     pub fn decode_timed(&mut self, packet: &[u8], pts:i64, duration:u64) -> Result<Option<AacFrame>> {
+        self.decode_timed_in_clock(packet, pts, duration, self.config.sample_rate)
+    }
+    /// Preserve source timestamps/durations while interpreting the SSR packet
+    /// window in its declared clock. Zero duration retains untimed synthesis.
+    pub fn decode_timed_in_clock(&mut self, packet: &[u8], pts:i64, duration:u64, source_timescale:u32) -> Result<Option<AacFrame>> {
+        if source_timescale == 0 {return Err(invalid("zero AAC source timescale"));}
         if self.config.object_type==39 {return self.decode_eld_timed(packet,pts,duration);}
         if self.config.object_type==23 {return self.decode_ld_timed(packet,pts,duration);}
         let mut ltp_coupling_synthesis=self.ltp_coupling_synthesis.clone();
@@ -827,7 +833,10 @@ impl NativeAacDecoder {
             // Standard AAC clocks keep 1024 rows per access unit. SSR window
             // transitions change internal block length, not that packet clock.
             // Duration zero preserves the explicitly untimed synthesis API.
-            if duration == u64::from(self.config.frame_samples) && samples != self.config.frame_samples as usize {self.ssr_fixed_clock=true;}
+            let ticks = u128::from(self.config.frame_samples) * u128::from(source_timescale);
+            let rate = u128::from(self.config.sample_rate);
+            let configured_window = duration != 0 && (u128::from(duration) == ticks / rate || u128::from(duration) == ticks.div_ceil(rate));
+            if configured_window && samples != self.config.frame_samples as usize {self.ssr_fixed_clock=true;}
             if self.ssr_fixed_clock {self.config.frame_samples as usize} else {samples}
         } else { self.config.frame_samples as usize };
         let alignment_history=self.ssr_alignment.clone();

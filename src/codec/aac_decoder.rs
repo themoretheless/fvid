@@ -6,6 +6,7 @@ pub struct AacDecoder {
     decoder: super::aac_native::NativeAacDecoder,
     sample_rate: u32,
     channels: u16,
+    source_timescale: u32,
     failed: bool,
 }
 
@@ -22,13 +23,13 @@ impl AacDecoder {
             ));
         }
 
-        let mut decoder = super::aac_native::NativeAacDecoder::new_with_output_rate(asc, sample_rate)?;
-        decoder.use_fixed_packet_clock();
+        let decoder = super::aac_native::NativeAacDecoder::new_with_output_rate(asc, sample_rate)?;
 
         Ok(Self {
             decoder,
             sample_rate,
             channels,
+            source_timescale: sample_rate,
             failed: false,
         })
     }
@@ -69,7 +70,15 @@ impl AacDecoder {
         if self.failed {
             return Err(crate::invalid("AAC decoder requires reset after an error"));
         }
-        match self.decoder.decode_timed(data, pts, duration) {
+        // An absent container window means the configured access-unit clock,
+        // as in Matroska AAC. Native untimed synthesis remains a separate API.
+        if duration == 0 {
+            self.decoder.use_fixed_packet_clock();
+        }
+        match self
+            .decoder
+            .decode_timed_in_clock(data, pts, duration, self.source_timescale)
+        {
             Ok(frame) => Ok(frame.map(|frame| self.frame(frame))),
             Err(error) => {
                 self.failed = true;
@@ -89,12 +98,18 @@ impl AacDecoder {
     /// Reset decoder state (e.g., after a seek).
     pub fn reset(&mut self) {
         self.decoder.reset();
-        self.decoder.use_fixed_packet_clock();
         self.failed = false;
     }
 }
 
 impl crate::audio::AudioDecode for AacDecoder {
+    fn set_source_timescale(&mut self, timescale: u32) -> crate::Result<()> {
+        if timescale == 0 {
+            return Err(crate::invalid("zero AAC source timescale"));
+        }
+        self.source_timescale = timescale;
+        Ok(())
+    }
     fn decode_packet(
         &mut self,
         data: &[u8],
