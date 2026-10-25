@@ -18423,3 +18423,24 @@ payload bytes. Generator output is byte-exact with process/network access denied
 This closes word-order support for the qualified native readers. Coarse-clock
 edit qualification, additional codec profiles/tools, nonconforming transport
 compatibility and physical-device timing remain part of the active full goal.
+
+### E-AC-3 reduced-rate allocation (2026-10-25)
+
+Reduced-rate headers previously selected the correct output rate but discarded
+the rate division before the shared A/52 bit allocator. The native core now
+uses half-rate slow/fast decay and quiet-threshold band coordinates for 24,
+22.05 and 16 kHz, retaining the unchanged full-rate path.
+
+The owned `eac3-reduced-allocation` witnesses encode quiet spectra with a
+closed-form threshold-limited allocation. Separately encoded full-rate,
+high-precision controls establish a PCM quantization error bound; the former
+24 kHz decoder exceeds it (2.743e-4 versus 8.567e-11). Acceptance covers all
+three reduced rates, elementary PCM, Matroska PCM and rewind, and real neutral
+VP9 video decoding. A separate closed-form coupling-leak test covers both
+fast and slow decay across all three base-rate rows and four decay codes.
+
+Fixture generation uses pinned public normative table data and owned spectra,
+not private media or decoder-source extraction during generation. All 13 files
+(118469 bytes) regenerate byte-exact with process/network creation forbidden.
+This qualifies the named allocation cases; it does not prove every E-AC-3
+profile/tool combination or close the overall codec parity goal.

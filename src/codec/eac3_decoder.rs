@@ -1443,14 +1443,16 @@ impl Eac3Decoder {
     /// levels the frame's mixing metadata states in place of the 2-bit codes AC-3
     /// keeps beside `acmod`.
     fn geometry(frame: &Frame) -> Header {
-        Header::annex_e(
+        let mut header = Header::annex_e(
             usize::from(frame.rate_code),
             frame.frame_bytes,
             usize::from(frame.layout),
             frame.low_frequency,
             frame.centre_level(),
             frame.surround_level(),
-        )
+        );
+        header.rate_shift = usize::from(frame.sample_rate < 32_000);
+        header
     }
 
     /// Every syncframe the packet holds, each standing on its own. A frame whose syntax
@@ -3308,7 +3310,7 @@ mod spx_notch_regressions {
             decoder.spx.signal[0][..3].fill(1.0);
             decoder.spx.noise[0][..3].fill(0.0);
             decoder.core.coefficients(0).fill(1.0);
-            let header = Header {rate:0,frame_bytes:1024,acmod:2,nfchans:2,lfeon:false,clev:1.0,slev:1.0,compression:[None;2],dialogue:[31;2]};
+            let header = Header {rate:0,rate_shift:0,frame_bytes:1024,acmod:2,nfchans:2,lfeon:false,clev:1.0,slev:1.0,compression:[None;2],dialogue:[31;2]};
             let mut attenuation = [None; CHANS];
             attenuation[0] = Some(code);
             decoder.synthesise(header, &attenuation);

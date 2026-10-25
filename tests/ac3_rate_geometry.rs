@@ -26,7 +26,9 @@ fn first(
     loop {
         match source.next_step().unwrap().unwrap() {
             AudioStep::Encoded(p) => return p,
-            AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
+            AudioStep::ReconfigureDecoder => {
+                panic!("unexpected configuration change in constant-setup fixture")
+            }
             AudioStep::ResetDecoder => source.reset_decoder(engine).unwrap(),
             AudioStep::Pcm(_) => panic!("unexpected source silence"),
         }
@@ -50,10 +52,11 @@ fn ac3_configured_rate_must_match_clean_frame_headers_without_disabling_downmix(
             .unwrap()
             .packet;
         assert_eq!(p.data.len() / 4 / usize::from(channels), 1280);
-        assert!(p
-            .data
-            .chunks_exact(4)
-            .any(|b| f32::from_le_bytes(b.try_into().unwrap()).abs() > 0.001));
+        assert!(
+            p.data
+                .chunks_exact(4)
+                .any(|b| f32::from_le_bytes(b.try_into().unwrap()).abs() > 0.001)
+        );
     }
     for (file, rate) in [("48k.ac3", 32000), ("48k.ac3", 44100), ("32k.ac3", 48000)] {
         let bytes = std::fs::read(base.join(file)).unwrap();
@@ -100,29 +103,48 @@ fn ac3_configured_rate_must_match_clean_frame_headers_without_disabling_downmix(
         let mut source = open(ext, good.clone());
         let mut engine = source.make_decoder().unwrap();
         let clean = first(source.as_mut(), &mut engine);
-        let mut source = open(ext, bad.clone());
-        assert_eq!(source.sample_rate(), 32000);
-        let mut engine = source.make_decoder().unwrap();
-        let encoded = first(source.as_mut(), &mut engine);
-        assert_eq!(encoded.data, clean.data, "only container rate is corrupted");
-        match engine.decode_packet(&encoded.data, encoded.pts, encoded.duration as u64) {
-            Ok(Some(p)) => {
-                assert!(p.packet.data.chunks_exact(4).any(|b| f32::from_le_bytes(
-                    b.try_into().unwrap()
-                )
-                .abs()
-                    > 0.001));
-                failures.push(format!("{ext}: native48000Hz PCM mislabeled32000Hz"));
+        if ext == "mp4" {
+            // MP4 validates the coded clock while opening, before constructing
+            // a decoder that could label 48 kHz PCM as 32 kHz.
+            let error = fvid::playback_mp4_audio::Mp4AudioReader::open(
+                Cursor::new(bad.clone()),
+                Default::default(),
+            )
+            .err()
+            .expect("mismatched MP4 clock accepted");
+            assert!(
+                error
+                    .to_string()
+                    .contains("AC-3 coded clock rate disagrees with description"),
+                "{error}"
+            );
+        } else {
+            let mut source = open(ext, bad.clone());
+            assert_eq!(source.sample_rate(), 32000);
+            let mut engine = source.make_decoder().unwrap();
+            let encoded = first(source.as_mut(), &mut engine);
+            assert_eq!(encoded.data, clean.data, "only container rate is corrupted");
+            match engine.decode_packet(&encoded.data, encoded.pts, encoded.duration as u64) {
+                Ok(Some(p)) => {
+                    assert!(
+                        p.packet.data.chunks_exact(4).any(|b| f32::from_le_bytes(
+                            b.try_into().unwrap()
+                        )
+                        .abs()
+                            > 0.001)
+                    );
+                    failures.push(format!("{ext}: native48000Hz PCM mislabeled32000Hz"));
+                }
+                Err(e) => {
+                    assert!(
+                        e.to_string().contains("frame sample rate")
+                            && e.to_string().contains("disagrees"),
+                        "{e}"
+                    );
+                    capture::worker_refusal(open(ext, bad), "frame sample rate");
+                }
+                _ => panic!("no output or precise refusal"),
             }
-            Err(e) => {
-                assert!(
-                    e.to_string().contains("frame sample rate")
-                        && e.to_string().contains("disagrees"),
-                    "{e}"
-                );
-                capture::worker_refusal(open(ext, bad), "frame sample rate");
-            }
-            _ => panic!("no output or precise refusal"),
         }
         let mut source = open(ext, good.clone());
         let mut engine = source.make_decoder().unwrap();
@@ -137,7 +159,9 @@ fn ac3_configured_rate_must_match_clean_frame_headers_without_disabling_downmix(
                     source.present_decoded(f.packet, f.source_pts).unwrap()
                 }
                 AudioStep::Pcm(p) => Some(p),
-                AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
+                AudioStep::ReconfigureDecoder => {
+                    panic!("unexpected configuration change in constant-setup fixture")
+                }
                 AudioStep::ResetDecoder => {
                     source.reset_decoder(&mut engine).unwrap();
                     None

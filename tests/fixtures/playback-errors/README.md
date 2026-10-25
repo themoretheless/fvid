@@ -4914,3 +4914,12 @@ The test also checks native/library WAVE, nanosecond intervals, packet prefixes
 and refusal of a whole tick added to an already exact coded endpoint. Parent
 production rejects the valid clock-only witness before the fix; acceptance now
 compares complete PCM. These export tests do not qualify live playback.
+
+`eac3-reduced-allocation/` contains 13 owned artifacts (118469 bytes), authored
+by `scripts/generate_eac3_reduced_allocation.py`. Three half-rate quiet spectra
+use a closed-form threshold allocation; separate high-precision full-rate
+controls provide an analytical PCM error bound. `eac3_reduced_allocation`
+checks PCM at 24/22.05/16 kHz, Matroska PCM/rewind and neutral VP9 video decode.
+The old decoder fails the specific PCM bound, not an unrelated parsing error.
+Pinned normative constants live in `scripts/dolby_reduced_rate_tables.json`;
+generation and ordinary tests require neither FFmpeg nor network access.
