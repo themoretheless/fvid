@@ -1,0 +1,96 @@
+{
+  "cases": [
+    {
+      "name": "plain",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "replacement": false,
+      "active_channels": [
+        8,
+        8,
+        8
+      ],
+      "output_channels": 10,
+      "output_mask": 22079,
+      "samples": 2304
+    },
+    {
+      "name": "transient",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "replacement": false,
+      "active_channels": [
+        8,
+        8,
+        8
+      ],
+      "output_channels": 10,
+      "output_mask": 22079,
+      "samples": 2304
+    },
+    {
+      "name": "replace-plain",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "replacement": true,
+      "active_channels": [
+        8,
+        10,
+        8
+      ],
+      "output_channels": 10,
+      "output_mask": 22079,
+      "samples": 2304
+    },
+    {
+      "name": "replace-transient",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "replacement": true,
+      "active_channels": [
+        8,
+        10,
+        8
+      ],
+      "output_channels": 10,
+      "output_mask": 22079,
+      "samples": 2304
+    },
+    {
+      "name": "six-replace-plain",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "replacement": true,
+      "active_channels": [
+        6,
+        10,
+        6
+      ],
+      "output_channels": 10,
+      "output_mask": 22079,
+      "samples": 2304
+    },
+    {
+      "name": "six-replace-transient",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "replacement": true,
+      "active_channels": [
+        6,
+        10,
+        6
+      ],
+      "output_channels": 10,
+      "output_mask": 22079,
+      "samples": 2304
+    }
+  ],
+  "stack_reproducer": "aac-factory-stack.mp4",
+  "provenance": "Owned C/L/R/Ls/Rs/LFE, rear/height/replacement roles and continuous transform/transient controls with neutral VP9; AAC stack witness re-authors metadata of an existing repository-owned synthetic AAC/PS video. No private media, process, external encoder or network."
+}

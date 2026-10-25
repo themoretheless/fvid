@@ -18737,3 +18737,56 @@ artifacts / 215869 bytes. Disabling AC-3 startup negotiation specifically fails
 with `speaker mask Some(1551), expected 0x3` on the owned 5.1 witness. The test
 becomes acceptance with codec-aware negotiation restored. No physical output
 or complete codec-family coverage is inferred from these gates.
+
+### Negotiated E-AC-3 native output role supersets (2026-10-25)
+
+`PresentationDecoder::with_output_layout` and the EAC3 wrapper's builder/mutating
+setter accept a fixed canonical 7..16-role output map before decoding. All active
+roles must belong to this map; absent roles are emitted as zero PCM. This makes
+rear/height changes and changing active-role counts render into one stable PCM
+order without resetting coded transform/transient history or mislabelling delayed
+programmes. Each work item retains its actual component maps and replacement
+order. Wrong width, duplicate/noncanonical roles, out-of-map active roles and
+late configuration explicitly refuse. Reset retains the negotiated roles.
+
+`AudioStream::set_eac3_output_layout` implements this negotiation for raw, MP4
+and Matroska sources. Decoder width, speaker mask, device router and PCM
+presentation strides agree on the chosen output. Raw indexing retains complete
+substream bundles even with a replacement-only six-role prefix, records actual
+per-programme active counts, and no longer treats changing role sets as damaged
+framing. Compatibility output still decodes the independent downmix. Explicit
+stereo takes precedence while retaining the native map for subsequent decoder construction.
+
+The new owned fixture family contains rear/height/rear changes, L/R replacement
+with 8/10/8 active roles, and replacement-only 6/10/6 active roles, each with and
+without transient windows. Native 10-role PCM is compared exactly against
+continuous component controls and an independent role/replacement mapper.
+Raw/container priming, explicit 16-role zero-padded output, EOF/rewind/partial
+seek and source metadata are exercised. Unknown physical device mapping remains
+a separate refusal; codec PCM accepts the semantic map without inventing WAVE
+positions. Unnegotiated changes still refuse rather than silently changing PCM
+order. Automatic union discovery and arbitrary dynamic device reconfiguration
+are not implemented by this checkpoint.
+
+An intermediate factory implementation moved the large EAC3 decoder by value
+before boxing and inflated even the non-Dolby branch's stack. Both the existing
+AAC PS core-clock unit and a newly re-authored owned AAC video reproduce a real
+2 MiB stack overflow with that implementation. Factories now box first and
+configure through `&mut self`; the same named 2 MiB thread and AAC unit pass
+without increasing stack limits. The builder remains available to callers; the
+mutating setter avoids extra transform-state moves in factories.
+
+Ordinary tests read checked-in fixtures only, without FFmpeg or network access.
+This closes explicitly negotiated native role changes for the exercised complete
+programme graphs; it does not prove all codec profiles/tools, automatic maps,
+missing-component graphs, rate changes, or physical extended-device support.
+
+Verification: 1049 root unit tests pass (26 ignored); 190 integration tests pass
+in 67 Dolby/selected-MP4 targets. All-test-target checking and player-bin build
+pass with `--offline --no-default-features --features player`. The 36 new
+fixture artifacts (437279 bytes) regenerate byte-exact with process and network
+creation forbidden. Six role-map patterns exercise raw/container controls and
+18 actual source/worker combinations; source-level seek/rewind, raw 6/10/6
+index metadata, 16-role padding and the AAC 2 MiB stack regression pass.
+These gates qualify the explicitly negotiated output contract, not universal
+codec completion or automatic layout discovery.

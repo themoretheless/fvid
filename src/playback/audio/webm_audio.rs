@@ -388,6 +388,7 @@ pub struct WebmAudioReader<R> {
     dolby_rate: Option<u32>,
     eac3_programme: u8,
     eac3_stereo_output: bool,
+    eac3_output_layout: Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>,
     ac3_stereo_output: bool,
     wavpack_dsd: bool,
     flac_end_ns: Option<u64>,
@@ -667,6 +668,7 @@ impl<R: Read + Seek> WebmAudioReader<R> {
             dolby_rate:None,
             eac3_programme:programme.unwrap_or(0),
             eac3_stereo_output: false,
+            eac3_output_layout: None,
             ac3_stereo_output: false,
             wavpack_dsd: false,
             flac_end_ns: None,
@@ -1509,7 +1511,7 @@ mod tests {
 
 impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     fn stereo_router(&self)->Result<Option<fvid_media::owned_stereo_router::StereoRouter>>{
-        if self.codec_tag=="A_EAC3" && self.channels()>6 && self.dolby_mask.is_none() {return Err(unsupported("E-AC-3 speaker locations need an extended speaker mask"));}
+        if self.codec_tag=="A_EAC3" && self.channels()>6 && self.speaker_mask()?.is_none() {return Err(unsupported("E-AC-3 speaker locations need an extended speaker mask"));}
         if self.codec_tag!="mp4a"&&self.codec_tag!="A_AAC"{return self.speaker_mask()?.map(|mask|fvid_media::owned_stereo_router::StereoRouter::new(self.channels(),mask).map_err(|e|invalid(&e))).transpose();}
         let asc=crate::codec::config::aac_specific_config(&self.extra_data)?;
         fvid_media::owned_aac::speaker_routing::stereo_router(asc,self.sample_rate(),self.channels(),self.in_band_ps).map(Some).map_err(|e|invalid(&e))
@@ -1528,7 +1530,9 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
             if self.eac3_stereo_output {
                 return Ok(Box::new(crate::codec::eac3_decoder::Eac3Decoder::for_container_stereo(self.extra_data(),self.sample_rate())?.with_programme(self.eac3_programme)?));
             }
-            return Ok(Box::new(crate::codec::eac3_decoder::Eac3Decoder::for_container(self.extra_data(),self.sample_rate(),self.channels())?.with_programme(self.eac3_programme)?));
+            let mut d=Box::new(crate::codec::eac3_decoder::Eac3Decoder::for_container(self.extra_data(),self.sample_rate(),self.channels())?.with_programme(self.eac3_programme)?);
+            if let Some(layout)=&self.eac3_output_layout {d.set_output_layout(layout.clone())?;}
+            return Ok(d);
         }
         if self.in_band_ps {
             Ok(Box::new(
@@ -1589,6 +1593,10 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
         true
     }
 
+    fn set_eac3_output_layout(&mut self, layout:Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>)->Result<()> {
+        if let Some(l)=&layout {if self.codec_tag!="A_EAC3" {return Err(invalid("native E-AC-3 layout requires an E-AC-3 source"));}l.validate_output()?;}
+        self.eac3_output_layout=layout;Ok(())
+    }
     fn set_ac3_stereo_output(&mut self, enabled: bool) -> Result<()> {self.ac3_stereo_output=enabled;Ok(())}
     fn set_eac3_stereo_output(&mut self, enabled: bool) -> Result<()> {
         self.eac3_stereo_output=enabled;
@@ -1596,6 +1604,7 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     }
     fn speaker_mask(&self)->Result<Option<u32>>{
         if (self.eac3_stereo_output && self.codec_tag=="A_EAC3") || (self.ac3_stereo_output && self.codec_tag=="A_AC3") {return Ok(Some(3));}
+        if self.codec_tag=="A_EAC3" && let Some(l)=&self.eac3_output_layout {return Ok(l.wave_mask());}
         if matches!(self.codec_tag.as_str(),"A_AC3"|"A_EAC3") {return Ok(self.dolby_mask);}
         if self.codec_tag=="A_WAVPACK4" {return Ok(self.wavpack_mask);}
         if self.codec_tag=="A_ALAC" {return crate::codec::alac_decoder::AlacDecoder::configuration_mask(&self.extra_data,self.sample_rate(),self.channels()).map(Some);}
@@ -1625,7 +1634,7 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     fn channels(&self) -> u16 {
         if self.in_band_ps || (self.eac3_stereo_output && self.codec_tag=="A_EAC3") || (self.ac3_stereo_output && self.codec_tag=="A_AC3") {
             2
-        } else {
+        } else if self.codec_tag=="A_EAC3" && let Some(l)=&self.eac3_output_layout {l.0.len()as u16} else {
             self.dolby_channels.unwrap_or(self.track().channels as u16)
         }
     }

@@ -33,6 +33,16 @@ pub enum Speaker {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SpeakerLayout(pub Vec<Speaker>);
 impl SpeakerLayout {
+    /// Canonical native output map for an expanded programme. A fixed superset
+    /// preserves role identity when frame-level channel maps change. Missing
+    /// roles are silent; active roles outside this map must be refused.
+    pub fn validate_output(&self) -> Result<()> {
+        if !(7..=16).contains(&self.0.len()) || !self.0.windows(2).all(|w|w[0]<w[1]) {
+            return Err(invalid("E-AC-3 output layout requires 7..16 unique speakers in canonical order"));
+        }
+        Ok(())
+    }
+
     pub fn wave_mask(&self) -> Option<u32> {
         let mut mask = 0;
         for &s in &self.0 {
@@ -303,6 +313,7 @@ pub struct PresentationDecoder {
     finished: bool,
     streams: Vec<Option<Stream>>,
     speakers: Option<SpeakerLayout>,
+    output_layout: Option<SpeakerLayout>,
 }
 impl PresentationDecoder {
     pub fn new(rate: u32, width: u16) -> Result<Self> {
@@ -326,6 +337,7 @@ impl PresentationDecoder {
             finished: false,
             streams: (0..9).map(|_| None).collect(),
             speakers: None,
+            output_layout: None,
         })
     }
     pub fn for_container(rate: u32, width: u16) -> Result<Self> {
@@ -359,12 +371,35 @@ impl PresentationDecoder {
         self.lead = n;
         self.initial_lead = n;
     }
+    /// Configure a stable output superset before decoding. All active speaker
+    /// roles must belong to it; its length must match the configured PCM width.
+    pub fn with_output_layout(mut self, layout: SpeakerLayout) -> Result<Self> {
+        self.set_output_layout(layout)?;
+        Ok(self)
+    }
+    pub(super) fn set_output_layout(&mut self, layout: SpeakerLayout) -> Result<()> {
+        layout.validate_output()?;
+        if layout.0.len()!=usize::from(self.width) || self.serial!=0 {
+            return Err(invalid("E-AC-3 output layout must match configured width and precede decoding"));
+        }
+        self.speakers=Some(layout.clone());
+        self.output_layout=Some(layout);
+        Ok(())
+    }
+    /// Speaker order of emitted PCM; an explicit superset is known before input.
     pub fn speakers(&self) -> Option<&SpeakerLayout> {
         self.speakers.as_ref()
     }
     fn assemble(&mut self, pending: Pending) -> Result<()> {
         let headers: Vec<_> = pending.frames.iter().map(|(h, _)| h.clone()).collect();
-        let order = layout(&headers, self.width)?;
+        let order = if let Some(target)=&self.output_layout {
+            let count=headers.iter().flat_map(locations).collect::<BTreeSet<_>>().len();
+            let active=layout(&headers,count as u16)?;
+            if active.0.iter().any(|s|target.0.binary_search(s).is_err()) {
+                return Err(invalid("E-AC-3 programme speaker is outside negotiated output layout"));
+            }
+            target.clone()
+        } else {layout(&headers, self.width)?};
         if self.speakers.as_ref().is_some_and(|s| s != &order) {
             return Err(unsupported("changing E-AC-3 presentation speaker layout"));
         }
@@ -692,6 +727,6 @@ impl AudioDecode for PresentationDecoder {
         self.work_serial = 0;
         self.finished = false;
         self.streams = (0..9).map(|_| None).collect();
-        self.speakers = None;
+        self.speakers = self.output_layout.clone();
     }
 }
