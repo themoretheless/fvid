@@ -99,6 +99,40 @@ def generate():
     return result
    files[name+'.mp4']=full_duration(mp4)
    cases.append(dict(name=name,rate=48000,blocks=3,transient=transient,late=late,active_channels=[8]*count,output_channels=10 if late else 8,output_mask=None,output_roles=['Left','Right','Centre','Lfe']+(['LeftRear','RightRear']if late else[])+['LeftSurround','RightSurround','TopSurroundLeft','TopSurroundRight'],samples=count*768,chan_loc=2 if late else 0))
+ # Independent-only streams must also accept an explicit native output map.
+ independent=[]
+ for mode,nf in enumerate([2,1,2,3,3,4,4,5]):
+  for lfe in [False,True]:
+   for variant in ['plain','transient','gain']+(['aht']if nf<=2 else[]):
+    name=f'independent-m{mode}-l{int(lfe)}-'+variant;blocks=6 if variant=='aht' else 3
+    windows=[(0,255)if ch%2==0 else(240,127)for ch in range(nf)]if variant=='transient' else None
+    gains=[0x10,0x40,0x80]if variant=='gain' else None
+    raw,_=packet(mode,lfe,0,(1<<nf)-1 if variant=='aht' else 0,'mixed',None,False,blocks_override=blocks,divisor=16,compact=True,transient_windows=windows,gains=gains,gains_second=[0x30,0x50,0x90]if variant=='gain'and mode==0 else None,compression=0x12 if variant=='gain'else None,compression_second=0x08 if variant=='gain'and mode==0 else None)
+    packets=[raw]*3;width=nf+int(lfe)
+    files[name+'.ec3']=raw*3;files[name+'.mkv']=movie(packets,blocks=blocks,channels=width)
+    mp4=audiovisual(packets,mode,lfe,width)
+    def clock(data,audio=False):
+     result=b''
+     for k,b in boxes(data):
+      if k==b'moov':b=clock(b)
+      elif k==b'trak':b=clock(b,b'ec-3'in b)
+      elif k in [b'mdia',b'minf',b'stbl']:b=clock(b,audio)
+      elif k==b'mvhd':b=bytearray(b);b[16:20]=max(60,blocks*16).to_bytes(4,'big')
+      elif audio and k==b'tkhd':b=bytearray(b);b[20:24]=(blocks*16).to_bytes(4,'big')
+      elif audio and k==b'mdhd':b=bytearray(b);b[16:20]=(3*blocks*256).to_bytes(4,'big')
+      elif audio and k==b'stts':b=bytearray(b);b[12:16]=(blocks*256).to_bytes(4,'big')
+      result+=atom(k,b)
+     return result
+    files[name+'.mp4']=clock(mp4)
+    mask=[3,4,3,7,0x103,0x107,0x603,0x607][mode]|(8 if lfe else 0)
+    independent.append(dict(name=name,mode=mode,lfe=lfe,variant=variant,channels=width,blocks=blocks,mask=mask,samples=3*blocks*256))
+ # A malformed dependent after a valid independent-only prefix must not be
+ # trimmed out of raw packets and mistaken for another independent-only frame.
+ base,_=packet(7,True,0,0,'mixed',None,False,blocks_override=3,divisor=16,compact=True)
+ nonlast,_=packet(2,False,0,0,'mixed',0xa000,True,last=False,blocks_override=3,divisor=32,compact=True)
+ name='independent-prefix-incomplete-dependent';packets=[base,base+nonlast,base]
+ files[name+'.ec3']=b''.join(packets);files[name+'.mkv']=movie(packets,blocks=3,channels=6)
+ files[name+'.mp4']=audiovisual(packets,7,True,6)
  # Re-author only metadata of an existing repository-owned synthetic AAC/PS
  # witness, exercising non-Dolby factory stack size without external encoders.
  from generate_aac_ps_core_clock_fixtures import rewrite_audio
@@ -108,7 +142,7 @@ def generate():
   if tag==b'moov':body=b''.join(rewrite_audio(k,p)if k==b'trak'and b'mp4a'in p else box(k,p)for k,p in audio_boxes(body))
   rebuilt.append(box(tag,body))
  files['aac-factory-stack.mp4']=b''.join(rebuilt)
- files['manifest.json']=(json.dumps(dict(cases=cases,stack_reproducer='aac-factory-stack.mp4',matroska_automatic_layout='Selected-track header-only full role union, including late.mkv change after 160 programmes.',mp4_automatic_layout='Selected dec3 programme locations negotiate stable output before packet decode.',raw_automatic_layout='Union of selected programme roles; stable 10-channel output without an explicit output-map request; preserve actual per-programme channel counts.',provenance='Owned C/L/R/Ls/Rs/LFE, rear/height/replacement roles and continuous transform/transient controls with neutral VP9; AAC stack witness re-authors metadata of an existing repository-owned synthetic AAC/PS video. No private media, process, external encoder or network.'),indent=2)+'\n').encode()
+ files['manifest.json']=(json.dumps(dict(cases=cases,independent_cases=independent,independent_refusals=[dict(name="independent-prefix-incomplete-dependent",reason="missing final selected dependent after a valid independent-only prefix")],stack_reproducer='aac-factory-stack.mp4',matroska_automatic_layout='Selected-track header-only full role union, including late.mkv change after 160 programmes.',mp4_automatic_layout='Selected dec3 programme locations negotiate stable output before packet decode.',raw_automatic_layout='Union of selected programme roles; stable 10-channel output without an explicit output-map request; preserve actual per-programme channel counts.',provenance='Owned C/L/R/Ls/Rs/LFE, rear/height/replacement roles and continuous transform/transient controls with neutral VP9; AAC stack witness re-authors metadata of an existing repository-owned synthetic AAC/PS video. No private media, process, external encoder or network.'),indent=2)+'\n').encode()
  return files
 if __name__=='__main__':
  OUT.mkdir(parents=True,exist_ok=True)
