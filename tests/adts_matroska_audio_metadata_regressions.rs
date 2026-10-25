@@ -510,3 +510,303 @@ fn adts_remux_concat_and_matroska_pcm_decode_trim_metadata_mutations_work_in_api
         "expected metadata mutations on headerless .f32le to fail"
     );
 }
+
+#[test]
+fn decode_audio_and_trim_support_controlled_memory_budget_with_matroska_metadata_and_destination_aware_cli_planning() {
+    let dir = TempDir::new("budget-and-cli");
+    let adts_a = fixture("adts-seg-a-48k.aac");
+    let wav = fixture("pcm-source-48k.wav");
+
+    // 1. API: `plan_decode_audio`, `decode_audio_transformed`, `plan_trim`, and `trim` accept `max_controlled_bytes`
+    // alongside Matroska container and stream 0 metadata mutations.
+    let mut controlled_mka_opts = CopyOptions {
+        metadata_set: vec![
+            ("title".into(), "Controlled Budget MKA".into()),
+            ("CUSTOM_BUDGET_TAG".into(), "BudgetTagVal".into()),
+        ],
+        stream_metadata_set: vec![
+            (0, "title".into(), "Controlled Stream".into()),
+            (0, "language".into(), "deu".into()),
+        ],
+        max_controlled_bytes: Some(16 * 1024 * 1024),
+        ..Default::default()
+    };
+    let decode_plan = fvid::media::plan_decode_audio(
+        &adts_a,
+        &AudioDecodeTransform::default(),
+        &controlled_mka_opts,
+    )
+    .expect("plan_decode_audio should accept max_controlled_bytes with Matroska metadata edits");
+    assert_eq!(decode_plan.command, "decode-audio");
+    assert!(decode_plan.steps.iter().any(|s| s.action == "metadata"));
+
+    let trim_plan = fvid::media::plan_trim(&adts_a, 0, 20_000, &controlled_mka_opts)
+        .expect("plan_trim should accept max_controlled_bytes with Matroska metadata edits");
+    assert_eq!(trim_plan.command, "trim");
+    assert!(trim_plan.steps.iter().any(|s| s.action == "metadata"));
+
+    let decoded_mka = dir.0.join("controlled-decoded.mka");
+    let decode_stats = fvid::media::decode_audio(&adts_a, &decoded_mka, &controlled_mka_opts)
+        .expect("decode_audio to .mka should accept max_controlled_bytes with metadata edits");
+    assert!(decode_stats.sample_frames > 0);
+    let probed_decode = fvid::media::probe(&decoded_mka).unwrap();
+    assert_eq!(
+        probed_decode.metadata.get("title").map(String::as_str),
+        Some("Controlled Budget MKA")
+    );
+    assert_eq!(
+        probed_decode
+            .metadata
+            .get("CUSTOM_BUDGET_TAG")
+            .map(String::as_str),
+        Some("BudgetTagVal")
+    );
+    assert_eq!(
+        probed_decode.streams[0]
+            .metadata
+            .get("title")
+            .map(String::as_str),
+        Some("Controlled Stream")
+    );
+
+    let trimmed_mka = dir.0.join("controlled-trimmed.mka");
+    let trim_stats = fvid::media::trim(&adts_a, &trimmed_mka, 0, 20_000, &controlled_mka_opts)
+        .expect("trim to .mka should accept max_controlled_bytes with metadata edits");
+    assert!(trim_stats.packets > 0);
+    let probed_trim = fvid::media::probe(&trimmed_mka).unwrap();
+    assert_eq!(
+        probed_trim.metadata.get("title").map(String::as_str),
+        Some("Controlled Budget MKA")
+    );
+
+    // Tight `max_controlled_bytes` (1 byte) still refuses before writing output.
+    controlled_mka_opts.max_controlled_bytes = Some(1);
+    let tight_err = fvid::media::plan_decode_audio(
+        &wav,
+        &AudioDecodeTransform::default(),
+        &controlled_mka_opts,
+    )
+    .expect_err("tight max_controlled_bytes must refuse during plan_decode_audio");
+    assert!(
+        tight_err.contains("controlled memory budget exceeded"),
+        "unexpected error: {tight_err}"
+    );
+    let tight_out = dir.0.join("tight-should-not-exist.mka");
+    let tight_exec_err =
+        fvid::media::decode_audio(&wav, &tight_out, &controlled_mka_opts)
+            .expect_err("tight max_controlled_bytes must refuse during decode_audio");
+    assert!(
+        tight_exec_err.contains("controlled memory budget exceeded"),
+        "unexpected error: {tight_exec_err}"
+    );
+    assert!(!tight_out.exists());
+
+    // 2. CLI `plan decode-audio` and `plan trim` accept an optional destination path and flags before positional args.
+    let cli_plan_mka = Command::new(bin_path())
+        .args([
+            "media",
+            "plan",
+            "decode-audio",
+            "--max-memory-mib",
+            "16",
+            adts_a.to_str().unwrap(),
+            dir.0.join("planned-out.mka").to_str().unwrap(),
+            "--metadata",
+            "CUSTOM_TAG=OkMka",
+            "--stream-metadata",
+            "0:title=TrackZero",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        cli_plan_mka.status.success(),
+        "cli plan decode-audio with OUTPUT.mka failed: {}",
+        String::from_utf8_lossy(&cli_plan_mka.stderr)
+    );
+
+    let cli_plan_trim_mka = Command::new(bin_path())
+        .args([
+            "media",
+            "plan",
+            "trim",
+            "--max-memory-mib",
+            "16",
+            adts_a.to_str().unwrap(),
+            dir.0.join("planned-trim.mka").to_str().unwrap(),
+            "--from",
+            "0",
+            "--to",
+            "0.02",
+            "--metadata",
+            "CUSTOM_TAG=OkTrimMka",
+            "--stream-metadata",
+            "0:title=TrimTrackZero",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        cli_plan_trim_mka.status.success(),
+        "cli plan trim with OUTPUT.mka failed: {}",
+        String::from_utf8_lossy(&cli_plan_trim_mka.stderr)
+    );
+
+    // 3. Destination-specific validation on `plan decode-audio` and `plan trim`:
+    // `.wav` rejects `--stream-metadata` and non-RIFF-INFO container keys; `.f32le` rejects all metadata mutations; `.mp3` is rejected.
+    for bad_args in [
+        vec![
+            "media",
+            "plan",
+            "decode-audio",
+            wav.to_str().unwrap(),
+            dir.0.join("planned.wav").to_str().unwrap(),
+            "--stream-metadata",
+            "0:title=NotAllowedOnWav",
+        ],
+        vec![
+            "media",
+            "plan",
+            "decode-audio",
+            wav.to_str().unwrap(),
+            dir.0.join("planned.wav").to_str().unwrap(),
+            "--metadata",
+            "CUSTOM_NON_RIFF=NotAllowedOnWav",
+        ],
+        vec![
+            "media",
+            "plan",
+            "decode-audio",
+            wav.to_str().unwrap(),
+            dir.0.join("planned.f32le").to_str().unwrap(),
+            "--metadata",
+            "title=NotAllowedOnF32le",
+        ],
+        vec![
+            "media",
+            "plan",
+            "decode-audio",
+            wav.to_str().unwrap(),
+            dir.0.join("planned.mp3").to_str().unwrap(),
+        ],
+        vec![
+            "media",
+            "plan",
+            "trim",
+            wav.to_str().unwrap(),
+            dir.0.join("planned-trim.wav").to_str().unwrap(),
+            "--from",
+            "0",
+            "--to",
+            "0.02",
+            "--stream-metadata",
+            "0:title=NotAllowedOnWav",
+        ],
+        vec![
+            "media",
+            "plan",
+            "trim-pcm",
+            wav.to_str().unwrap(),
+            dir.0.join("planned-trim.mka").to_str().unwrap(),
+            "--from",
+            "0",
+            "--to",
+            "0.02",
+        ],
+        vec![
+            "media",
+            "decode-audio",
+            wav.to_str().unwrap(),
+            dir.0.join("bad.mp3").to_str().unwrap(),
+        ],
+        vec![
+            "media",
+            "decode-audio",
+            wav.to_str().unwrap(),
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "decode-audio",
+            wav.to_str().unwrap(),
+            dir.0.join("ok.wav").to_str().unwrap(),
+            "--unknown-decode-audio-flag",
+        ],
+    ] {
+        let out = Command::new(bin_path()).args(&bad_args).output().unwrap();
+        assert!(
+            !out.status.success(),
+            "expected failure for args {:?}",
+            bad_args
+        );
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(
+            !stderr.contains("requires cargo build --release --features media"),
+            "unexpected feature-gate fallback for {:?}: {stderr}",
+            bad_args
+        );
+    }
+
+    // 4. WAVE -> `.f32le` `trim` with custom budgets (`max_controlled_bytes`, `max_packet_bytes`, `max_packets`):
+    // `fvid::media::trim` and `fvid media trim` on a WAVE input to `.f32le` with `--max-memory-mib` or `--max-packets`
+    // must succeed via `decode_fvid_media_audio_to_destination` instead of failing in `trim_pcm` (`"WAVE PCM trim requires .wav output"`),
+    // and must reject metadata mutations on `.f32le`.
+    let f32le_budget_opts = CopyOptions {
+        max_controlled_bytes: Some(16 * 1024 * 1024),
+        ..Default::default()
+    };
+    let wav_trimmed_f32le = dir.0.join("wav-controlled-trimmed.f32le");
+    let wav_trimmed_f32le_stats =
+        fvid::media::trim(&wav, &wav_trimmed_f32le, 0, 10_000, &f32le_budget_opts)
+            .expect("trim WAVE -> .f32le with max_controlled_bytes");
+    assert!(wav_trimmed_f32le_stats.packets > 0);
+    assert_eq!(
+        std::fs::metadata(&wav_trimmed_f32le).unwrap().len(),
+        480 * 4
+    );
+
+    let cli_wav_trimmed_f32le = dir.0.join("cli-wav-controlled-trimmed.f32le");
+    let cli_wav_trimmed_f32le_out = Command::new(bin_path())
+        .args([
+            "media",
+            "trim",
+            wav.to_str().unwrap(),
+            cli_wav_trimmed_f32le.to_str().unwrap(),
+            "--from",
+            "0",
+            "--to",
+            "0.01",
+            "--max-memory-mib",
+            "16",
+            "--quiet",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        cli_wav_trimmed_f32le_out.status.success(),
+        "cli trim WAVE -> .f32le with --max-memory-mib failed: {}",
+        String::from_utf8_lossy(&cli_wav_trimmed_f32le_out.stderr)
+    );
+    assert_eq!(
+        std::fs::metadata(&cli_wav_trimmed_f32le).unwrap().len(),
+        480 * 4
+    );
+
+    // Tight `max_controlled_bytes` (1 byte) on WAVE -> `.f32le` `trim` must refuse before writing output.
+    let tight_wav_f32le = dir.0.join("tight-wav-trimmed.f32le");
+    let tight_wav_f32le_err = fvid::media::trim(
+        &wav,
+        &tight_wav_f32le,
+        0,
+        10_000,
+        &CopyOptions {
+            max_controlled_bytes: Some(1),
+            ..Default::default()
+        },
+    )
+    .expect_err("tight max_controlled_bytes on WAVE -> .f32le trim must fail");
+    assert!(
+        tight_wav_f32le_err.contains("controlled memory budget exceeded"),
+        "unexpected error: {tight_wav_f32le_err}"
+    );
+    assert!(!tight_wav_f32le.exists());
+}
+

@@ -1,0 +1,21 @@
+{
+  "batch": 291,
+  "accepted": [
+    "FVID-0298"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-291-pre-edit/src/native_loudnorm.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-291-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-291-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-291-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/alac-two-tracks.m4a",
+    "tests/fixtures/playback-errors/aac-rounded-two-tracks.m4a"
+  ],
+  "tests": [
+    "tests/native_loudnorm_cli.rs"
+  ]
+}

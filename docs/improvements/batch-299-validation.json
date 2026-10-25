@@ -1,0 +1,22 @@
+{
+  "batch": 299,
+  "accepted": [
+    "FVID-0306"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-299-pre-edit/src/native_export.rs",
+    "docs/improvements/snapshots/batch-299-pre-edit/src/media_cli.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-299-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-299-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-299-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/lossless-plan/source-8x4.y4m",
+    "tests/fixtures/playback-errors/adts-matroska-audio-metadata/pcm-source-48k.wav"
+  ],
+  "tests": [
+    "tests/lossless_plan_regressions.rs"
+  ]
+}

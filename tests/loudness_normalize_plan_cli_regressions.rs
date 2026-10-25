@@ -226,4 +226,152 @@ fn loudness_and_normalize_loudness_plan_cli_and_api_regressions() {
         !exec_missing_out.status.success(),
         "normalize-loudness execution without OUTPUT must fail"
     );
+
+    // 5. CLI `plan mix-audio` and `plan merge-audio` accept an optional leading destination path
+    //    `[OUTPUT.wav|OUTPUT.mka|OUTPUT.mkv] INPUT INPUT...` or `--output-format wav|mka|mkv|matroska`,
+    //    and validate destination-specific metadata rules:
+    //    - `.wav` / `--output-format wav` rejects `--stream-metadata` and non-RIFF-INFO container keys
+    //    - `.mka` / `.mkv` / `--output-format mka|mkv` accepts Matroska container and stream 0 metadata
+    //    - unsupported destination extensions (e.g. `.mp3`) are rejected cleanly.
+    for ok_mix_merge_args in [
+        vec![
+            "media",
+            "plan",
+            "mix-audio",
+            "planned-mix.mka",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+            "--metadata",
+            "CUSTOM_MIX_TAG=MixVal",
+            "--stream-metadata",
+            "0:title=MixTrackZero",
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "plan",
+            "mix-audio",
+            "--output-format",
+            "wav",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+            "--metadata",
+            "title=ValidWavMixTitle",
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "plan",
+            "merge-audio",
+            "planned-merge.mka",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+            "--metadata",
+            "CUSTOM_MERGE_TAG=MergeVal",
+            "--stream-metadata",
+            "0:title=MergeTrackZero",
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "plan",
+            "merge-audio",
+            "--output-format",
+            "wav",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+            "--metadata",
+            "title=ValidWavMergeTitle",
+            "--quiet",
+        ],
+    ] {
+        let out = Command::new(bin_path())
+            .args(&ok_mix_merge_args)
+            .output()
+            .unwrap();
+        assert!(
+            out.status.success(),
+            "expected success for {:?}: {}",
+            ok_mix_merge_args,
+            String::from_utf8_lossy(&out.stderr)
+        );
+    }
+
+    for bad_mix_merge_args in [
+        vec![
+            "media",
+            "plan",
+            "mix-audio",
+            "planned-mix.wav",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+            "--stream-metadata",
+            "0:title=BadOnWavMix",
+        ],
+        vec![
+            "media",
+            "plan",
+            "mix-audio",
+            "--output-format",
+            "wav",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+            "--metadata",
+            "CUSTOM_NON_RIFF=BadOnWavMix",
+        ],
+        vec![
+            "media",
+            "plan",
+            "mix-audio",
+            "planned-mix.mp3",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+        ],
+        vec![
+            "media",
+            "plan",
+            "merge-audio",
+            "planned-merge.wav",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+            "--stream-metadata",
+            "0:title=BadOnWavMerge",
+        ],
+        vec![
+            "media",
+            "plan",
+            "merge-audio",
+            "--output-format",
+            "wav",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+            "--metadata",
+            "CUSTOM_NON_RIFF=BadOnWavMerge",
+        ],
+        vec![
+            "media",
+            "plan",
+            "merge-audio",
+            "planned-merge.mp3",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+        ],
+    ] {
+        let out = Command::new(bin_path())
+            .args(&bad_mix_merge_args)
+            .output()
+            .unwrap();
+        assert!(
+            !out.status.success(),
+            "expected failure for {:?}: {}",
+            bad_mix_merge_args,
+            String::from_utf8_lossy(&out.stderr)
+        );
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(
+            !stderr.contains("requires cargo build --release --features media"),
+            "unexpected feature-gate fallback for {:?}: {stderr}",
+            bad_mix_merge_args
+        );
+    }
 }

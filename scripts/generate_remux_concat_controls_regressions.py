@@ -36,6 +36,12 @@ def make_pcm_wave(sample_rate: int, samples: list[int], title: str | None = None
     return b"RIFF" + struct.pack("<I", len(body)) + body
 
 
+def make_corrupt_adts() -> bytes:
+    valid = build_adts_48k()
+    # Keep the first valid ADTS packet header/payload, then append a truncated second ADTS header
+    return valid[:64] + b"\xff\xf1\x50\x40\x20\x00\xfc\xde\xad"
+
+
 def generate() -> dict[str, bytes]:
     samples_a = [3000 if (i % 16 < 8) else -3000 for i in range(6000)]
     samples_b = [2000 if (i % 16 < 8) else -2000 for i in range(4000)]
@@ -63,6 +69,7 @@ def generate() -> dict[str, bytes]:
         "pcm-48k-b.wav": pcm_b,
         "g711-alaw-48k.wav": g711_alaw,
         "adts-mono-48k.aac": build_adts_48k(),
+        "adts-corrupt-second-packet.aac": make_corrupt_adts(),
         "ogg-opus-48k.ogg": ogg_opus,
         "matroska-flac-48k.mka": build_matroska_flac_mka(),
         "mp4-pcm-48k.m4a": build_mp4_pcm_m4a(),
