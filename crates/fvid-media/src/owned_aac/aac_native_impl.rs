@@ -421,6 +421,11 @@ impl NativeAacDecoder {
         self.sbr_rate.unwrap_or(self.config.sample_rate)
     }
     pub fn core_frame_samples(&self) -> u16 { self.config.frame_samples }
+    /// Packet/container adapters retain the configured SSR access-unit clock;
+    /// window-sequence row counts are internal synthesis geometry.
+    pub fn use_fixed_packet_clock(&mut self) {
+        if self.config.object_type==3 {self.ssr_fixed_clock=true;}
+    }
     pub fn channels(&self) -> u8 {
         self.config.channels
     }

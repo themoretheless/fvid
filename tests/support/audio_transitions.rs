@@ -31,7 +31,26 @@ pub fn collect_with_decoder(
     mut decoder: Box<dyn fvid::audio::AudioDecode>,
 ) -> Frames {
     let mut out = Vec::new();
-    fn present(stream: &dyn AudioStream, frame: fvid::audio::DecodedAudio, out: &mut Frames) {
+    fn present(stream: &dyn AudioStream, mut frame: fvid::audio::DecodedAudio, out: &mut Frames) {
+        if let Some(frames) = stream
+            .decoded_packet_sample_limit(frame.source_pts, frame.source_duration)
+            .unwrap()
+        {
+            let bytes = frames
+                .checked_mul(usize::from(stream.channels()) * 4)
+                .unwrap();
+            assert!(
+                bytes <= frame.packet.data.len(),
+                "decoded window exceeds PCM: stamp {} duration {} rate {} ch {} wanted {} actual {}",
+                frame.source_pts,
+                frame.source_duration,
+                stream.sample_rate(),
+                stream.channels(),
+                bytes,
+                frame.packet.data.len()
+            );
+            frame.packet.data.truncate(bytes);
+        }
         if let Some(packet) = stream
             .present_decoded(frame.packet, frame.source_pts)
             .unwrap()
@@ -48,7 +67,7 @@ pub fn collect_with_decoder(
         match stream.next_step().unwrap() {
             Some(AudioStep::Encoded(p)) => {
                 if let Some(frame) = decoder
-                    .decode_packet(&p.data, p.pts, p.duration as u64)
+                    .decode_packet(&p.data, stream.decoder_stamp(&p), p.duration as u64)
                     .unwrap()
                 {
                     present(stream, frame, &mut out);
@@ -68,11 +87,18 @@ pub fn collect_with_decoder(
                 p.presentation_time(),
                 p.data,
             )),
-            None => break,
+            None => {
+                if !stream.drain_decoded_at_eof() {
+                    decoder.reset();
+                    break;
+                }
+                if let Some(frame) = decoder.finish_packet().unwrap() {
+                    present(stream, frame, &mut out);
+                    continue;
+                }
+                break;
+            }
         }
-    }
-    while let Some(frame) = decoder.finish_packet().unwrap() {
-        present(stream, frame, &mut out);
     }
     stream.validate_eof().unwrap();
     out

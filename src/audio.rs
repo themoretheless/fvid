@@ -658,6 +658,15 @@ pub trait AudioStream: Send {
         Err(crate::invalid("audio source has no pending configuration change"))
     }
 
+    /// Association stamp passed to the decoder. Containers may use an exact
+    /// sample identity when quantized PTS values are not unique; encoded packet
+    /// metadata keeps its original media timestamps.
+    fn decoder_stamp(&self, packet:&EncodedPacket)->i64 {packet.pts}
+    /// Retention bucket for association-stamped decoder checkpoints.
+    fn checkpoint_bucket(&self, stamp:i64)->i64 {stamp/i64::from(self.timescale().max(1))}
+    /// Exact window for the decoded packet identified by its association stamp.
+    fn decoded_packet_sample_limit(&self, _stamp:i64, duration:u64)->crate::Result<Option<usize>> {self.packet_sample_limit(duration)}
+
     /// Source timestamp required for the current seek/range preroll.
     fn preroll_target(&self)->Option<i64> {None}
     /// Continue at an exact encoded packet boundary, retaining presentation trim.
@@ -714,6 +723,14 @@ pub trait AudioStream: Send {
         self.next_packet().map(|packet|packet.map(AudioStep::Encoded))
     }
     fn rewind(&mut self);
+    /// Seek without first quantizing a user time into the file's media ticks.
+    /// The default preserves the existing tick-coordinate navigation contract.
+    fn seek_time(&mut self,target:Duration)->i64 {
+        let scale=u128::from(self.timescale());
+        let mut ticks=target.as_nanos()*scale/1_000_000_000;
+        if scale>0 && scale<1_000_000_000 && (ticks+1)*1_000_000_000/scale==target.as_nanos() {ticks+=1;}
+        self.seek_to(i64::try_from(ticks).unwrap_or(i64::MAX))
+    }
     /// Move the cursor to the last packet at or before `pts` and report the
     /// timestamp actually landed on.
     fn seek_to(&mut self, pts: i64) -> i64;
@@ -738,6 +755,10 @@ pub struct DecodedAudio {
     pub source_duration: u64,
 }
 pub trait AudioDecode: Send {
+    /// Return the full access unit when the source owns its exact decoded
+    /// sample window. Other adapters retain their existing trimming policy.
+    fn defer_packet_trimming(&mut self) {}
+
     /// Duration units of encoded input packets. Duration-sensitive codecs use
     /// this to translate container ticks into native PCM frames. The default
     /// preserves codecs whose reconstruction does not depend on that window.

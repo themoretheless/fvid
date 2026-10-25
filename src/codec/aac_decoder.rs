@@ -22,7 +22,8 @@ impl AacDecoder {
             ));
         }
 
-        let decoder = super::aac_native::NativeAacDecoder::new_with_output_rate(asc, sample_rate)?;
+        let mut decoder = super::aac_native::NativeAacDecoder::new_with_output_rate(asc, sample_rate)?;
+        decoder.use_fixed_packet_clock();
 
         Ok(Self {
             decoder,
@@ -88,6 +89,7 @@ impl AacDecoder {
     /// Reset decoder state (e.g., after a seek).
     pub fn reset(&mut self) {
         self.decoder.reset();
+        self.decoder.use_fixed_packet_clock();
         self.failed = false;
     }
 }

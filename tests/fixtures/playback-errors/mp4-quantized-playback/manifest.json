@@ -1,0 +1,725 @@
+{
+  "cases": [
+    {
+      "name": "pcm-900-floor",
+      "oracle": "pcm.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm.mp4"
+    },
+    {
+      "name": "pcm-900-ceil",
+      "oracle": "pcm.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm.mp4"
+    },
+    {
+      "name": "pcm-900-nearest",
+      "oracle": "pcm.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm.mp4"
+    },
+    {
+      "name": "pcm-1000-floor",
+      "oracle": "pcm.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm.mp4"
+    },
+    {
+      "name": "pcm-1000-ceil",
+      "oracle": "pcm.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm.mp4"
+    },
+    {
+      "name": "pcm-1000-nearest",
+      "oracle": "pcm.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm.mp4"
+    },
+    {
+      "name": "aac-900-floor",
+      "oracle": "aac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 13808,
+      "exact": "exact-aac.mp4"
+    },
+    {
+      "name": "aac-900-ceil",
+      "oracle": "aac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 13808,
+      "exact": "exact-aac.mp4"
+    },
+    {
+      "name": "aac-900-nearest",
+      "oracle": "aac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 13808,
+      "exact": "exact-aac.mp4"
+    },
+    {
+      "name": "aac-1000-floor",
+      "oracle": "aac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 13808,
+      "exact": "exact-aac.mp4"
+    },
+    {
+      "name": "aac-1000-ceil",
+      "oracle": "aac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 13808,
+      "exact": "exact-aac.mp4"
+    },
+    {
+      "name": "aac-1000-nearest",
+      "oracle": "aac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 13808,
+      "exact": "exact-aac.mp4"
+    },
+    {
+      "name": "ssr-900-floor",
+      "oracle": "ssr.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 9976,
+      "exact": "exact-ssr.mp4"
+    },
+    {
+      "name": "ssr-900-ceil",
+      "oracle": "ssr.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 9976,
+      "exact": "exact-ssr.mp4"
+    },
+    {
+      "name": "ssr-900-nearest",
+      "oracle": "ssr.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 9976,
+      "exact": "exact-ssr.mp4"
+    },
+    {
+      "name": "ssr-1000-floor",
+      "oracle": "ssr.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 9976,
+      "exact": "exact-ssr.mp4"
+    },
+    {
+      "name": "ssr-1000-ceil",
+      "oracle": "ssr.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 9976,
+      "exact": "exact-ssr.mp4"
+    },
+    {
+      "name": "ssr-1000-nearest",
+      "oracle": "ssr.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 9976,
+      "exact": "exact-ssr.mp4"
+    },
+    {
+      "name": "alac-raw-900-floor",
+      "oracle": "alac-raw.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-alac-raw.mp4"
+    },
+    {
+      "name": "alac-raw-900-ceil",
+      "oracle": "alac-raw.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-alac-raw.mp4"
+    },
+    {
+      "name": "alac-raw-900-nearest",
+      "oracle": "alac-raw.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-alac-raw.mp4"
+    },
+    {
+      "name": "alac-raw-1000-floor",
+      "oracle": "alac-raw.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-alac-raw.mp4"
+    },
+    {
+      "name": "alac-raw-1000-ceil",
+      "oracle": "alac-raw.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-alac-raw.mp4"
+    },
+    {
+      "name": "alac-raw-1000-nearest",
+      "oracle": "alac-raw.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-alac-raw.mp4"
+    },
+    {
+      "name": "alac-rice-900-floor",
+      "oracle": "alac-rice.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-alac-rice.mp4"
+    },
+    {
+      "name": "alac-rice-900-ceil",
+      "oracle": "alac-rice.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-alac-rice.mp4"
+    },
+    {
+      "name": "alac-rice-900-nearest",
+      "oracle": "alac-rice.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-alac-rice.mp4"
+    },
+    {
+      "name": "alac-rice-1000-floor",
+      "oracle": "alac-rice.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-alac-rice.mp4"
+    },
+    {
+      "name": "alac-rice-1000-ceil",
+      "oracle": "alac-rice.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-alac-rice.mp4"
+    },
+    {
+      "name": "alac-rice-1000-nearest",
+      "oracle": "alac-rice.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-alac-rice.mp4"
+    },
+    {
+      "name": "constant-aac-900-floor",
+      "oracle": "constant-aac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 3072,
+      "exact": "exact-constant-aac.mp4"
+    },
+    {
+      "name": "constant-aac-900-ceil",
+      "oracle": "constant-aac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 3072,
+      "exact": "exact-constant-aac.mp4"
+    },
+    {
+      "name": "constant-aac-900-nearest",
+      "oracle": "constant-aac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 3072,
+      "exact": "exact-constant-aac.mp4"
+    },
+    {
+      "name": "constant-aac-1000-floor",
+      "oracle": "constant-aac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 3072,
+      "exact": "exact-constant-aac.mp4"
+    },
+    {
+      "name": "constant-aac-1000-ceil",
+      "oracle": "constant-aac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 3072,
+      "exact": "exact-constant-aac.mp4"
+    },
+    {
+      "name": "constant-aac-1000-nearest",
+      "oracle": "constant-aac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 3072,
+      "exact": "exact-constant-aac.mp4"
+    },
+    {
+      "name": "aac-edits-900-floor",
+      "oracle": "aac-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 22448,
+      "exact": "exact-aac-edits.mp4"
+    },
+    {
+      "name": "aac-edits-900-ceil",
+      "oracle": "aac-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 22448,
+      "exact": "exact-aac-edits.mp4"
+    },
+    {
+      "name": "aac-edits-900-nearest",
+      "oracle": "aac-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 22448,
+      "exact": "exact-aac-edits.mp4"
+    },
+    {
+      "name": "aac-edits-1000-floor",
+      "oracle": "aac-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 22448,
+      "exact": "exact-aac-edits.mp4"
+    },
+    {
+      "name": "aac-edits-1000-ceil",
+      "oracle": "aac-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 22448,
+      "exact": "exact-aac-edits.mp4"
+    },
+    {
+      "name": "aac-edits-1000-nearest",
+      "oracle": "aac-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 22448,
+      "exact": "exact-aac-edits.mp4"
+    },
+    {
+      "name": "ssr-edits-900-floor",
+      "oracle": "ssr-edits.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 11224,
+      "exact": "exact-ssr-edits.mp4"
+    },
+    {
+      "name": "ssr-edits-900-ceil",
+      "oracle": "ssr-edits.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 11224,
+      "exact": "exact-ssr-edits.mp4"
+    },
+    {
+      "name": "ssr-edits-900-nearest",
+      "oracle": "ssr-edits.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 11224,
+      "exact": "exact-ssr-edits.mp4"
+    },
+    {
+      "name": "ssr-edits-1000-floor",
+      "oracle": "ssr-edits.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 11224,
+      "exact": "exact-ssr-edits.mp4"
+    },
+    {
+      "name": "ssr-edits-1000-ceil",
+      "oracle": "ssr-edits.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 11224,
+      "exact": "exact-ssr-edits.mp4"
+    },
+    {
+      "name": "ssr-edits-1000-nearest",
+      "oracle": "ssr-edits.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 11224,
+      "exact": "exact-ssr-edits.mp4"
+    },
+    {
+      "name": "pcm64-900-floor",
+      "oracle": "pcm64.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm64.mp4"
+    },
+    {
+      "name": "pcm64-900-ceil",
+      "oracle": "pcm64.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm64.mp4"
+    },
+    {
+      "name": "pcm64-900-nearest",
+      "oracle": "pcm64.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm64.mp4"
+    },
+    {
+      "name": "pcm64-1000-floor",
+      "oracle": "pcm64.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm64.mp4"
+    },
+    {
+      "name": "pcm64-1000-ceil",
+      "oracle": "pcm64.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm64.mp4"
+    },
+    {
+      "name": "pcm64-1000-nearest",
+      "oracle": "pcm64.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm64.mp4"
+    },
+    {
+      "name": "adpcm-900-floor",
+      "oracle": "adpcm.f32le",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 800,
+      "exact": "exact-adpcm.mp4"
+    },
+    {
+      "name": "adpcm-900-ceil",
+      "oracle": "adpcm.f32le",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 800,
+      "exact": "exact-adpcm.mp4"
+    },
+    {
+      "name": "adpcm-900-nearest",
+      "oracle": "adpcm.f32le",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 800,
+      "exact": "exact-adpcm.mp4"
+    },
+    {
+      "name": "adpcm-1000-floor",
+      "oracle": "adpcm.f32le",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 800,
+      "exact": "exact-adpcm.mp4"
+    },
+    {
+      "name": "adpcm-1000-ceil",
+      "oracle": "adpcm.f32le",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 800,
+      "exact": "exact-adpcm.mp4"
+    },
+    {
+      "name": "adpcm-1000-nearest",
+      "oracle": "adpcm.f32le",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 800,
+      "exact": "exact-adpcm.mp4"
+    },
+    {
+      "name": "opaque-900-floor",
+      "oracle": "opaque.f32le",
+      "rate": 48000,
+      "channels": 4,
+      "frames": 12288,
+      "exact": "exact-opaque.mp4"
+    },
+    {
+      "name": "opaque-900-ceil",
+      "oracle": "opaque.f32le",
+      "rate": 48000,
+      "channels": 4,
+      "frames": 12288,
+      "exact": "exact-opaque.mp4"
+    },
+    {
+      "name": "opaque-900-nearest",
+      "oracle": "opaque.f32le",
+      "rate": 48000,
+      "channels": 4,
+      "frames": 12288,
+      "exact": "exact-opaque.mp4"
+    },
+    {
+      "name": "opaque-1000-floor",
+      "oracle": "opaque.f32le",
+      "rate": 48000,
+      "channels": 4,
+      "frames": 12288,
+      "exact": "exact-opaque.mp4"
+    },
+    {
+      "name": "opaque-1000-ceil",
+      "oracle": "opaque.f32le",
+      "rate": 48000,
+      "channels": 4,
+      "frames": 12288,
+      "exact": "exact-opaque.mp4"
+    },
+    {
+      "name": "opaque-1000-nearest",
+      "oracle": "opaque.f32le",
+      "rate": 48000,
+      "channels": 4,
+      "frames": 12288,
+      "exact": "exact-opaque.mp4"
+    },
+    {
+      "name": "pcm-fragmented-900-floor",
+      "oracle": "pcm-fragmented.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm-fragmented.mp4"
+    },
+    {
+      "name": "pcm-fragmented-900-ceil",
+      "oracle": "pcm-fragmented.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm-fragmented.mp4"
+    },
+    {
+      "name": "pcm-fragmented-900-nearest",
+      "oracle": "pcm-fragmented.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm-fragmented.mp4"
+    },
+    {
+      "name": "pcm-fragmented-1000-floor",
+      "oracle": "pcm-fragmented.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm-fragmented.mp4"
+    },
+    {
+      "name": "pcm-fragmented-1000-ceil",
+      "oracle": "pcm-fragmented.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm-fragmented.mp4"
+    },
+    {
+      "name": "pcm-fragmented-1000-nearest",
+      "oracle": "pcm-fragmented.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "exact": "exact-pcm-fragmented.mp4"
+    },
+    {
+      "name": "aac-fragmented-900-floor",
+      "oracle": "aac-fragmented.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 13808,
+      "exact": "exact-aac-fragmented.mp4"
+    },
+    {
+      "name": "aac-fragmented-900-ceil",
+      "oracle": "aac-fragmented.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 13808,
+      "exact": "exact-aac-fragmented.mp4"
+    },
+    {
+      "name": "aac-fragmented-900-nearest",
+      "oracle": "aac-fragmented.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 13808,
+      "exact": "exact-aac-fragmented.mp4"
+    },
+    {
+      "name": "aac-fragmented-1000-floor",
+      "oracle": "aac-fragmented.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 13808,
+      "exact": "exact-aac-fragmented.mp4"
+    },
+    {
+      "name": "aac-fragmented-1000-ceil",
+      "oracle": "aac-fragmented.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 13808,
+      "exact": "exact-aac-fragmented.mp4"
+    },
+    {
+      "name": "aac-fragmented-1000-nearest",
+      "oracle": "aac-fragmented.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 13808,
+      "exact": "exact-aac-fragmented.mp4"
+    },
+    {
+      "name": "ssr-fragmented-900-floor",
+      "oracle": "ssr-fragmented.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 9976,
+      "exact": "exact-ssr-fragmented.mp4"
+    },
+    {
+      "name": "ssr-fragmented-900-ceil",
+      "oracle": "ssr-fragmented.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 9976,
+      "exact": "exact-ssr-fragmented.mp4"
+    },
+    {
+      "name": "ssr-fragmented-900-nearest",
+      "oracle": "ssr-fragmented.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 9976,
+      "exact": "exact-ssr-fragmented.mp4"
+    },
+    {
+      "name": "ssr-fragmented-1000-floor",
+      "oracle": "ssr-fragmented.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 9976,
+      "exact": "exact-ssr-fragmented.mp4"
+    },
+    {
+      "name": "ssr-fragmented-1000-ceil",
+      "oracle": "ssr-fragmented.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 9976,
+      "exact": "exact-ssr-fragmented.mp4"
+    },
+    {
+      "name": "ssr-fragmented-1000-nearest",
+      "oracle": "ssr-fragmented.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 9976,
+      "exact": "exact-ssr-fragmented.mp4"
+    },
+    {
+      "name": "ps-edits-900-floor",
+      "oracle": "ps-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 9600,
+      "exact": "exact-ps-edits.mp4"
+    },
+    {
+      "name": "ps-edits-900-ceil",
+      "oracle": "ps-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 9600,
+      "exact": "exact-ps-edits.mp4"
+    },
+    {
+      "name": "ps-edits-900-nearest",
+      "oracle": "ps-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 9600,
+      "exact": "exact-ps-edits.mp4"
+    },
+    {
+      "name": "ps-edits-1000-floor",
+      "oracle": "ps-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 9600,
+      "exact": "exact-ps-edits.mp4"
+    },
+    {
+      "name": "ps-edits-1000-ceil",
+      "oracle": "ps-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 9600,
+      "exact": "exact-ps-edits.mp4"
+    },
+    {
+      "name": "ps-edits-1000-nearest",
+      "oracle": "ps-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 9600,
+      "exact": "exact-ps-edits.mp4"
+    }
+  ],
+  "provenance": "Owned short neutral video and authored codec packets; exact controls preserve payload bytes before timestamp quantization. No private media, external codec, process, network or FFmpeg."
+}

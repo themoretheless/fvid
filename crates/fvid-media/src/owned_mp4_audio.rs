@@ -325,7 +325,7 @@ pub(crate) fn admit_audio_reader_targeted<R: Read + Seek>(
         }
         add(normalization)?;
         // Two geometric capacities of rational per-configuration clock records.
-        add(track.samples.len().max(4).checked_mul(256).ok_or_else(overflow)?)?;
+        add(track.samples.len().max(4).checked_mul(320).ok_or_else(overflow)?)?;
     }
 
     for bytes in [

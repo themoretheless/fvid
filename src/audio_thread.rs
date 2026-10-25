@@ -42,7 +42,9 @@ enum Command {
     Play,
     Pause,
     Rewind,
+    #[cfg(test)]
     Seek(i64),
+    SeekTime(Duration),
     /// Output gain in thousandths.
     Level(u32),
     /// Stream frames consumed per device frame, in thousandths.
@@ -201,18 +203,7 @@ impl AudioPlayback {
     pub fn seek(&mut self, target: Duration) {
         self.generation += 1;
         if self.timescale > 0 {
-            let scale = u128::from(self.timescale);
-            let mut ticks = u128::from(target.as_secs()) * scale
-                + u128::from(target.subsec_nanos()) * scale / 1_000_000_000;
-            // Recover a tick whose exact public Duration was rounded down to ns.
-            // Other targets retain floor semantics; sub-ns clocks are ambiguous.
-            if scale < 1_000_000_000
-                && (ticks + 1) * 1_000_000_000 / scale == target.as_nanos()
-            {
-                ticks += 1;
-            }
-            let pts = i64::try_from(ticks).unwrap_or(i64::MAX);
-            let _ = self.commands.send(Command::Seek(pts));
+            let _ = self.commands.send(Command::SeekTime(target));
         }
     }
 
@@ -433,17 +424,18 @@ impl Worker {
             }
             crate::audio::AudioStep::Pcm(packet) => (packet,None),
             crate::audio::AudioStep::Encoded(packet) => {
+                let stamp=self.stream.decoder_stamp(&packet);
                 if self.stream.preroll_target().is_some() && self.stream.timescale()!=0 {
-                    let bucket=packet.pts/i64::from(self.stream.timescale());
-                    if !self.checkpoints.iter().any(|(p,_)|*p/i64::from(self.stream.timescale())==bucket) {
+                    let bucket=self.stream.checkpoint_bucket(stamp);
+                    if !self.checkpoints.iter().any(|(p,_)|self.stream.checkpoint_bucket(*p)==bucket) {
                         if let Some(state)=self.decoder.checkpoint() {
                             if self.checkpoints.len()==32 {self.checkpoints.remove(0);}
-                            self.checkpoints.push((packet.pts,state));
+                            self.checkpoints.push((stamp,state));
                         }
                     }
                 }
 
-                return match self.decoder.decode_packet(&packet.data,packet.pts,packet.duration.max(0) as u64) {
+                return match self.decoder.decode_packet(&packet.data,stamp,packet.duration.max(0) as u64) {
                     Ok(Some(frame)) => self.present_frame(frame),
                     Ok(None) => (None,Duration::ZERO),
                     Err(error) => {self.ended=true;(Some(AudioEvent::Error(error.to_string())),Duration::ZERO)},
@@ -456,7 +448,7 @@ impl Worker {
     fn present_frame(&mut self,frame:crate::audio::DecodedAudio)->(Option<AudioEvent>,Duration) {
         let mut decoded=frame.packet;
 
-        match self.stream.packet_sample_limit(frame.source_duration) {
+        match self.stream.decoded_packet_sample_limit(frame.source_pts,frame.source_duration) {
             Ok(Some(frames)) => {
                 let bytes = frames.checked_mul(usize::from(self.stream.channels())).and_then(|n| n.checked_mul(4));
                 match bytes {
@@ -546,10 +538,35 @@ impl Worker {
         true
     }
 
+    fn finish_seek(&mut self,result_pts:i64)->bool {
+                if let Err(error) = self.reset_decoder().and_then(|_|self.restore_preroll()) {
+                    self.fail_output("seek decoder reset", error);
+                    return false;
+                }
+                // Anchor the clock at the sample actually landed on, which can
+                // precede the requested point; the backend advances from there.
+                let anchor = self.stream.time_of(result_pts);
+                if let Err(error) = self.backend.flush(anchor) {
+                    self.fail_output("seek flush", error);
+                    return false;
+                }
+                if let Err(error) = self.sync_output(anchor) {
+                    self.fail_output("seek output configuration", error);return false;
+                }
+                self.queued_frontier = anchor;
+
+                if let Ok(mut pos) = self.position.lock() {
+                    *pos = anchor;
+                }
+        true
+    }
+
     fn drain_commands(&mut self, first: Option<Command>) -> bool {
         enum DeferredNav {
             Rewind,
+            #[cfg(test)]
             Seek(i64),
+            SeekTime(Duration),
         }
         let mut nav: Option<DeferredNav> = None;
         let mut latest_level: Option<u32> = None;
@@ -582,6 +599,11 @@ impl Worker {
                     self.reconfiguration = None;
                     nav = Some(DeferredNav::Rewind);
                 }
+                Command::SeekTime(target) => {
+                    self.generation += 1;self.ended=false;self.draining=false;self.reconfiguration=None;
+                    nav=Some(DeferredNav::SeekTime(target));
+                }
+                #[cfg(test)]
                 Command::Seek(pts) => {
                     self.generation += 1;
                     self.ended = false;
@@ -626,27 +648,12 @@ impl Worker {
                     *pos = Duration::ZERO;
                 }
             }
+            Some(DeferredNav::SeekTime(target)) => {
+                let at=self.stream.seek_time(target);if !self.finish_seek(at){return false;}
+            }
+            #[cfg(test)]
             Some(DeferredNav::Seek(pts)) => {
-                let result_pts = self.stream.seek_to(pts);
-                if let Err(error) = self.reset_decoder().and_then(|_|self.restore_preroll()) {
-                    self.fail_output("seek decoder reset", error);
-                    return false;
-                }
-                // Anchor the clock at the sample actually landed on, which can
-                // precede the requested point; the backend advances from there.
-                let anchor = self.stream.time_of(result_pts);
-                if let Err(error) = self.backend.flush(anchor) {
-                    self.fail_output("seek flush", error);
-                    return false;
-                }
-                if let Err(error) = self.sync_output(anchor) {
-                    self.fail_output("seek output configuration", error);return false;
-                }
-                self.queued_frontier = anchor;
-
-                if let Ok(mut pos) = self.position.lock() {
-                    *pos = anchor;
-                }
+                let at=self.stream.seek_to(pts);if !self.finish_seek(at){return false;}
             }
             None => {}
         }

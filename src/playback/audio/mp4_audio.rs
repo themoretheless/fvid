@@ -25,9 +25,16 @@ struct DescriptionState { rate: Option<u32>, channels: Option<u16>, mask: Option
 #[path = "mp4_edit_clock.rs"]
 mod edit_clock;
 use edit_clock::{Time as EditTime, Timeline as VariableTimeline};
+#[path="mp4_clock_recovery.rs"] mod clock_recovery;
+use clock_recovery::PlaybackClock;
 enum EditAction { Encoded, Step(crate::audio::AudioStep), End }
 /// MP4 audio track reader. Extracts encoded packets for decoding.
 pub struct Mp4AudioReader<R> {
+    navigation_error: Option<crate::Error>,
+    clock: Option<PlaybackClock>,
+    clock_mode: std::cell::Cell<bool>,
+    clock_floor: std::cell::Cell<EditTime>,
+    clock_anchor: std::cell::Cell<Option<(i64,EditTime)>>,
     variable_edits: Option<VariableTimeline>,
     opening_sample_index: usize,
     changing: bool,
@@ -213,8 +220,9 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
     /// Open a specific audio track by index.
     pub fn from_demuxer(demuxer:Mp4Reader<R>,index:usize)->Result<Self>{Self::from_programme(demuxer,index,None)}
     fn from_programme(mut demuxer: Mp4Reader<R>, index: usize,programme:Option<u8>) -> Result<Self> {
-        if demuxer.tracks().get(index).is_some_and(|t|t.ensure_constant_description().is_err()) {
-            return Self::from_changing(demuxer,index,programme);
+        let clock=PlaybackClock::build(&mut demuxer,index)?;
+        if clock.is_some() || demuxer.tracks().get(index).is_some_and(|t|t.ensure_constant_description().is_err()) {
+            return Self::from_changing(demuxer,index,programme,clock);
         }
         let selected_geometry=if let Some(programme)=programme {
             let track=demuxer.tracks().get(index).ok_or_else(||invalid("MP4 track index out of range"))?;
@@ -269,6 +277,8 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         // packets. Always re-seek the selected first packet on real playback.
         demuxer.invalidate_position();
         Ok(Self {
+            navigation_error:None,
+            clock:None,clock_mode:std::cell::Cell::new(false),clock_floor:std::cell::Cell::new(EditTime::ZERO),clock_anchor:std::cell::Cell::new(None),
             variable_edits: None, opening_sample_index: 0,
             changing: false, active_description: 0, configuration_pending: false, description_states: Vec::new(),
             dolby_mask,
@@ -288,12 +298,78 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         })
     }
 
+    fn clock_point(&self,index:usize)->Result<EditTime> {
+        if let Some(clock)=&self.clock {clock.point(self.track(),index)}else{EditTime::signed_ticks(self.track().samples.get(index).ok_or_else(||invalid("missing MP4 source point"))?.pts,self.track().timescale)}
+    }
+    fn source_time(&self,stamp:i64)->Result<EditTime> {
+        if self.clock_mode.get() && self.clock.is_some() {self.clock_point(usize::try_from(stamp).map_err(|_|invalid("negative MP4 decoder stamp"))?)}else{EditTime::signed_ticks(stamp,self.track().timescale)}
+    }
+    fn clock_target(&self)->Result<EditTime> {
+        if let Some(timeline)=&self.variable_edits {
+            let index=timeline.locate().ok_or_else(||invalid("MP4 seek outside edits"))?;
+            let segment=timeline.segments[index];
+            Ok(segment.media.ok_or_else(||invalid("silence has no decoder preroll"))?.add(timeline.cursor.get().sub(segment.start)?)?)
+        } else {Ok(self.clock_floor.get())}
+    }
+    fn clock_landing(&self,wanted:EditTime)->Result<(usize,EditTime)> {
+        let clock=self.clock.as_ref().ok_or_else(||invalid("missing MP4 recovered clock"))?;
+        if wanted.cmp(clock.end())!=std::cmp::Ordering::Less {return Ok((clock.count(),clock.end()));}
+        let mut index=clock.at_time(self.track(),wanted)?;
+        loop {
+            let start=clock.point(self.track(),index)?;let rate=clock.rate(index)?;
+            let frames=clock.frames(self.track(),index)?;
+            let first=wanted.sub(start)?.ceil_frames(rate)?.clamp(0,frames as i128) as usize;
+            if first<frames {return Ok((index,start.add(EditTime::new(first as i128,u128::from(rate))?)?));}
+            index+=1;if index==clock.count() {return Ok((index,clock.end()));}
+        }
+    }
+    fn seek_recovered(&mut self,wanted:EditTime)->Result<i64> {
+        let (index,landed)=self.clock_landing(wanted)?;
+        let mut first=index;
+        if let Some(sample)=self.track().samples.get(index) {
+            let setup=self.track().description_for_sample(index).ok_or_else(||invalid("missing MP4 seek description"))?;
+            if matches!(&setup.codec,b"mp4a"|b"MAC3"|b"MAC6") {
+                first=(0..index).rev().find(|&i|self.track().description_for_sample(i)!=Some(setup)).map_or(0,|i|i+1);
+            }
+            let _=sample;
+        }
+        let returned=i64::try_from(landed.floor_ticks(self.track().timescale)?).map_err(|_|invalid("MP4 seek clock overflow"))?;
+        self.rewind();self.sample_index=first;self.clock_floor.set(landed);self.presentation_floor=returned;self.clock_anchor.set(Some((returned,landed)));Ok(returned)
+    }
+    fn align_variable_seek(&self,mut position:EditTime)->Result<EditTime> {
+        let timeline=self.variable_edits.as_ref().ok_or_else(||invalid("missing MP4 edit timeline"))?;
+        loop {
+            timeline.cursor.set(position);
+            let Some(index)=timeline.locate()else{return Ok(position);};
+            let segment=timeline.segments[index];
+            if let Some(media)=segment.media {
+                let wanted=media.add(position.sub(segment.start)?)?;
+                let (_,landed)=self.clock_landing(wanted)?;
+                let mapped=landed.add(segment.start)?.sub(media)?;
+                if mapped.cmp(segment.end)!=std::cmp::Ordering::Less {position=segment.end;continue;}
+                position=position.max(mapped);
+            }
+            return Ok(position);
+        }
+    }
+    fn seek_exact(&mut self,wanted:EditTime)->Result<i64> {
+        if self.variable_edits.is_none() {return self.seek_recovered(wanted);}
+        self.rewind();
+        let timeline=self.variable_edits.as_ref().unwrap();
+        let position=if wanted.cmp(timeline.end)==std::cmp::Ordering::Greater {timeline.end}else{wanted};
+        timeline.cursor.set(position);
+        let position=timeline.locate().map_or(position,|i|position.max(timeline.minimum_starts[i]));
+        let position=self.align_variable_seek(position)?;timeline.cursor.set(position);
+        self.variable_edits.as_mut().unwrap().active=None;
+        let returned=i64::try_from(position.floor_ticks(self.track().timescale)?).map_err(|_|invalid("MP4 seek clock overflow"))?;
+        self.clock_anchor.set(Some((returned,position)));Ok(returned)
+    }
     fn negotiated_rate(&self)->u32 {self.dolby_rate.unwrap_or(self.setup().sample_rate)}
     fn negotiated_channels(&self)->u16 {if self.in_band_ps {2}else{self.dolby_channels.unwrap_or(self.setup().channels)}}
     fn setup(&self) -> &crate::container::mp4::SampleDescription {
         &self.track().sample_descriptions[self.active_description]
     }
-    fn from_changing(demuxer: Mp4Reader<R>, index: usize, programme: Option<u8>) -> Result<Self> {
+    fn from_changing(demuxer: Mp4Reader<R>, index: usize, programme: Option<u8>,clock:Option<PlaybackClock>) -> Result<Self> {
         let track = demuxer
             .tracks()
             .get(index)
@@ -332,6 +408,8 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         states.resize(track.sample_descriptions.len(), None);
         let tracks = demuxer.tracks().len();
         let mut source = Self {
+            navigation_error:None,
+            clock,clock_mode:std::cell::Cell::new(false),clock_floor:std::cell::Cell::new(EditTime::ZERO),clock_anchor:std::cell::Cell::new(None),
             variable_edits, opening_sample_index: 0,
             changing: true,
             active_description: first,
@@ -481,16 +559,19 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 let floor=media_end.floor_ticks(self.track().timescale)?;
                 let exact=EditTime::new(floor,u128::from(self.track().timescale))?==media_end;
                 let tick=(floor-i128::from(exact)).clamp(i128::from(i64::MIN),i128::from(i64::MAX)) as i64;
-                let sample=self.track().samples.get(self.track().samples.at_or_before(tick)).ok_or_else(||invalid("missing MP4 edit frontier sample"))?;
+                let frontier=if let Some(clock)=&self.clock {clock.at_time(self.track(),media_end)?}else{self.track().samples.at_or_before(tick)};
+                let frontier=if frontier>0 && self.clock_point(frontier)?.cmp(media_end)!=std::cmp::Ordering::Less {frontier-1}else{frontier};
+                let sample=self.track().samples.get(frontier).ok_or_else(||invalid("missing MP4 edit frontier sample"))?;
                 self.configure_description(sample.description_index as usize-1)?;
                 let rate=self.negotiated_rate();
-                let native_frames=if matches!(&self.setup().codec,b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64") {
+                let native_frames=if let Some(clock)=&self.clock {clock.frames(self.track(),frontier)? as i128}else if matches!(&self.setup().codec,b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64") {
                     let bits=usize::from(self.setup().bit_depth);let channels=usize::from(self.setup().channels);
                     let stride=bits.div_ceil(8).checked_mul(channels).filter(|n|*n>0).ok_or_else(||invalid("invalid PCM edit frontier geometry"))?;
                     if !(sample.size as usize).is_multiple_of(stride) {return Err(invalid("unaligned PCM edit frontier"));}
                     i128::from(sample.size)/stride as i128
                 } else { i128::from(sample.duration)*i128::from(rate)/i128::from(self.track().timescale) };
-                let mapped=EditTime::signed_ticks(sample.pts,self.track().timescale)?.add(segment.start)?.sub(media)?;
+                let sample_index=frontier;
+                let mapped=self.clock_point(sample_index)?.add(segment.start)?.sub(media)?;
                 let first=begin.sub(mapped)?.ceil_frames(rate)?.clamp(0,native_frames);
                 let last=segment.end.sub(mapped)?.ceil_frames(rate)?.clamp(0,native_frames);
                 if last>first {cursor=mapped.add(EditTime::new(last,u128::from(rate))?)?;}
@@ -509,7 +590,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         let Some(media)=segment.media else {return Ok(0);};
         let wanted=media.add(cursor.max(segment.start).sub(segment.start)?)?;
         let ticks=wanted.floor_ticks(self.track().timescale)?.clamp(0,i128::from(i64::MAX)) as i64;
-        let selected=self.track().samples.at_or_before(ticks);
+        let selected=if let Some(clock)=&self.clock {clock.at_time(self.track(),wanted)?}else{self.track().samples.at_or_before(ticks)};
         let setup=self.track().description_for_sample(selected).ok_or_else(||invalid("missing MP4 edit source sample"))?;
         if matches!(&setup.codec,b"mp4a"|b"ac-3"|b"ec-3"|b"MAC3"|b"MAC6") {
             // Recover history from the last real setup boundary, including
@@ -570,7 +651,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         let rate=self.negotiated_rate();let stride=usize::from(self.negotiated_channels()).checked_mul(4).filter(|n|*n>0).ok_or_else(||invalid("invalid MP4 edit PCM stride"))?;
         if rate==0 || !packet.data.len().is_multiple_of(stride) {return Err(invalid("invalid MP4 edit PCM geometry"));}
         let frames=packet.data.len()/stride;
-        let mapped=EditTime::signed_ticks(source_pts,self.track().timescale)?.add(segment.start)?.sub(media)?;
+        let mapped=self.source_time(source_pts)?.add(segment.start)?.sub(media)?;
         let first=timeline.cursor.get().max(segment.start).sub(mapped)?.ceil_frames(rate)?.clamp(0,frames as i128) as usize;
         let last=segment.end.sub(mapped)?.ceil_frames(rate)?.clamp(0,frames as i128) as usize;
         if first>=last {
@@ -635,7 +716,8 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             let state=self.description_states[initial].unwrap();self.active_description=initial;
             self.in_band_ps=state.in_band_ps;self.dolby_rate=state.rate;self.dolby_channels=state.channels;self.dolby_mask=state.mask;
         }
-        self.presentation_floor = 0;
+        self.presentation_floor = 0;self.navigation_error=None;
+        self.clock_floor.set(EditTime::ZERO);self.clock_anchor.set(None);
         self.packet.clear();
         self.edit_cursor.set(0);
         self.edit_segment.set(None);
@@ -655,6 +737,21 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
 /// Packets are timestamped in the *track* timescale, which differs from the
 /// movie timescale in most files (sample rate versus a nominal 1000 Hz).
 impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
+    fn decoder_stamp(&self,packet:&crate::audio::EncodedPacket)->i64 {
+        if self.clock.is_some() {self.clock_mode.set(true);self.sample_index.saturating_sub(1) as i64}else{packet.pts}
+    }
+    fn checkpoint_bucket(&self,stamp:i64)->i64 {
+        if self.clock_mode.get() && self.clock.is_some() {
+            return self.source_time(stamp).and_then(|t|t.floor_ticks(1)).ok().and_then(|n|i64::try_from(n).ok()).unwrap_or(stamp);
+        }
+        stamp/i64::from(self.track().timescale.max(1))
+    }
+    fn decoded_packet_sample_limit(&self,stamp:i64,duration:u64)->Result<Option<usize>> {
+        if self.clock_mode.get() && let Some(clock)=&self.clock {
+            return clock.frames(self.track(),usize::try_from(stamp).map_err(|_|invalid("negative MP4 decoder stamp"))?).map(Some);
+        }
+        self.packet_sample_limit(duration)
+    }
     fn speaker_mask(&self)->Result<Option<u32>> {
         if matches!(&self.setup().codec,b"ac-3"|b"ec-3") {return Ok(self.dolby_mask);}
         if self.setup().codec==*b"alac" {crate::codec::alac_decoder::AlacDecoder::configuration_mask(&self.setup().configuration,self.sample_rate(),self.setup().channels).map(Some)}else{Ok(None)}
@@ -680,6 +777,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         } else {
             let mut decoder=crate::codec::make_audio_decoder(self.codec(), self.extra_data(), self.sample_rate(), self.channels(), self.bits_per_sample())?;
             decoder.set_source_timescale(self.track().timescale)?;
+            if self.clock.as_ref().is_some_and(|c|c.full_packet(self.sample_index)) {decoder.defer_packet_trimming();}
             Ok(decoder)
         }
     }
@@ -709,6 +807,10 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
 
     fn preroll_target(&self)->Option<i64> {
+        if self.clock_mode.get() && let Some(clock)=&self.clock {
+            if self.setup().codec!=*b"mp4a" {return None;}
+            return self.clock_target().ok().and_then(|t|clock.at_time(self.track(),t).ok()).and_then(|n|i64::try_from(n).ok());
+        }
         if self.changing || self.setup().codec!=*b"mp4a" {return None;}
         if let Some(t)=&self.timeline {
             let (_,source)=t.locate(self.edit_cursor.get())?;
@@ -717,6 +819,12 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         } else {Some(self.presentation_floor)}
     }
     fn resume_preroll(&mut self,pts:i64)->bool {
+        if self.clock_mode.get() && let Some(clock)=&self.clock {
+            let Ok(index)=usize::try_from(pts)else{return false;};
+            let Some(target)=self.preroll_target().and_then(|n|usize::try_from(n).ok())else{return false;};
+            if index>target || !clock.same_run(index,target) || self.track().description_for_sample(index)!=Some(self.setup()) {return false;}
+            self.sample_index=index;self.demuxer.invalidate_position();return true;
+        }
         if self.preroll_target().is_none_or(|target|pts>target) {return false;}
         let index=self.track().samples.at_or_before(pts);
         if self.track().samples.get(index).is_none_or(|s|s.pts!=pts) {return false;}
@@ -724,6 +832,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
     fn duration(&self) -> Option<std::time::Duration> {
         if let Some(timeline)=&self.variable_edits {return timeline.end.duration();}
+        if let Some(clock)=&self.clock {return clock.end().duration();}
         let track = self.track();
         if (track.codec == *b"mp4a" || self.timeline.is_some()) && !track.edits.is_empty() && self.demuxer.movie_timescale() != 0 {
             let ticks = track.edits.iter().try_fold(0u128, |sum, edit| sum.checked_add(u128::from(edit.duration)))?;
@@ -737,6 +846,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
 
     fn time_of(&self, pts: i64) -> std::time::Duration {
+        if let Some((stamp,time))=self.clock_anchor.get() && stamp==pts {return time.duration().unwrap_or_default();}
         let track = self.track();
         let shift = if self.variable_edits.is_none() && track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0 { track.edits[0].media_time } else { 0 };
         if track.timescale == 0 { return std::time::Duration::ZERO; }
@@ -757,6 +867,17 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
 
     fn present_decoded(&self, mut packet: crate::audio::AudioPacket, source_pts: i64) -> Result<Option<crate::audio::AudioPacket>> {
         if self.variable_edits.is_some() {return self.present_variable_edit(packet,source_pts);}
+        if self.clock_mode.get() && let Some(clock)=&self.clock {
+            let start=self.source_time(source_pts)?;let rate=self.sample_rate();let stride=usize::from(self.channels())*4;
+            if rate==0 || stride==0 || !packet.data.len().is_multiple_of(stride) {return Err(invalid("invalid recovered MP4 PCM geometry"));}
+            let frames=packet.data.len()/stride;
+            let first=self.clock_floor.get().max(EditTime::ZERO).sub(start)?.ceil_frames(rate)?.clamp(0,frames as i128) as usize;
+            let last=clock.end().sub(start)?.ceil_frames(rate)?.clamp(0,frames as i128) as usize;
+            if first>=last {return Ok(None);}
+            packet.data.copy_within(first*stride..last*stride,0);packet.data.truncate((last-first)*stride);
+            let at=start.add(EditTime::new(first as i128,u128::from(rate))?)?;let (pts,den)=at.stamp()?;
+            packet.pts=pts;packet.timebase_num=1;packet.timebase_den=den;return Ok(Some(packet));
+        }
         let track = self.track();
         if let Some(timeline) = &self.timeline {
             let cursor=self.edit_cursor.get();
@@ -902,6 +1023,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
     fn next_step(&mut self)->Result<Option<crate::audio::AudioStep>> {
         use crate::audio::{AudioStep,AudioPacket};
+        if let Some(error)=self.navigation_error.take() {return Err(error);}
         if self.variable_edits.is_some() {match self.next_variable_step()? {EditAction::End=>return Ok(None),EditAction::Step(step)=>return Ok(Some(step)),EditAction::Encoded=>{}}}
         if self.changing && let Some(sample)=self.track().samples.get(self.sample_index) {
             let selected=sample.description_index as usize-1;
@@ -932,16 +1054,35 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         Mp4AudioReader::rewind(self);
     }
 
+    fn seek_time(&mut self,target:std::time::Duration)->i64 {
+        if self.clock.is_some() {
+            let time=EditTime::new(target.as_nanos() as i128,1_000_000_000).and_then(|t|self.seek_exact(t));
+            return match time {Ok(at)=>at,Err(error)=>{self.navigation_error=Some(error);0}};
+        }
+        let scale=u128::from(self.track().timescale);let mut ticks=target.as_nanos()*scale/1_000_000_000;
+        if scale>0 && scale<1_000_000_000 && (ticks+1)*1_000_000_000/scale==target.as_nanos(){ticks+=1;}
+        self.seek_to(i64::try_from(ticks).unwrap_or(i64::MAX))
+    }
     fn seek_to(&mut self, pts: i64) -> i64 {
+        if self.clock.is_some() {
+            let result=EditTime::signed_ticks(pts.max(0),self.track().timescale).and_then(|t|self.seek_exact(t));
+            return match result {Ok(at)=>at,Err(error)=>{self.navigation_error=Some(error);0}};
+        }
         if self.variable_edits.is_some() {
             self.rewind();
-            let position=EditTime::signed_ticks(pts.max(0),self.track().timescale).expect("validated media clock");
-            let timeline=self.variable_edits.as_mut().unwrap();
-            let position=if position.cmp(timeline.end)==std::cmp::Ordering::Greater {timeline.end}else{position};
-            timeline.cursor.set(position);
-            let position=timeline.locate().map_or(position,|i|position.max(timeline.minimum_starts[i]));
-            timeline.cursor.set(position);timeline.active=None;
-            return position.floor_ticks(self.track().timescale).unwrap_or(i128::from(i64::MAX)).min(i128::from(i64::MAX)) as i64;
+            let result=(||->Result<(i64,EditTime)> {
+                let position=EditTime::signed_ticks(pts.max(0),self.track().timescale)?;
+                let timeline=self.variable_edits.as_ref().unwrap();
+                let position=if position.cmp(timeline.end)==std::cmp::Ordering::Greater {timeline.end}else{position};
+                timeline.cursor.set(position);
+                let position=timeline.locate().map_or(position,|i|position.max(timeline.minimum_starts[i]));
+                let position=if self.clock.is_some(){self.align_variable_seek(position)?}else{position};
+                timeline.cursor.set(position);
+                let returned=i64::try_from(position.floor_ticks(self.track().timescale)?).map_err(|_|invalid("MP4 seek clock overflow"))?;
+                Ok((returned,position))
+            })();
+            self.variable_edits.as_mut().unwrap().active=None;
+            return match result {Ok((returned,position))=>{if self.clock.is_some(){self.clock_anchor.set(Some((returned,position)));}returned},Err(error)=>{self.navigation_error=Some(error);0}};
         }
         if self.changing {
             let requested=pts.max(0).min(self.track().duration.min(i64::MAX as u64)as i64);

@@ -57,7 +57,7 @@ def quantize(data,scale,mode,bad=False):
         pass
     return result
 
-def generate():
+def generate(playback_controls=False):
     g=geometry();l=lossless();a=aac();files={};cases=[]
     sources=[('pcm',g['pcm.mp4'],g['pcm.f32le'],48000),('aac',g['aac-changes.mp4'],g['aac.f32le'],48000),('ssr',g['ssr-changes.mp4'],g['ssr.f32le'],24000),('alac-raw',l['alac-raw.mp4'],l['alac.f32le'],48000),('alac-rice',l['alac-rice.mp4'],l['alac.f32le'],48000),('constant-aac',a['control-0.mp4'],a['control-0.f32le'],48000)]
     sources += [('aac-edits',g['aac-changes-edits.mp4'],g['aac-edits.f32le'],48000),('ssr-edits',g['ssr-changes-edits.mp4'],g['ssr-edits.f32le'],24000),('pcm64',g['pcm64.mp4'],g['pcm64.f32le'],48000),('adpcm',l['adpcm-regular-2000.mp4'],l['adpcm.f32le'],8000),('opaque',g['opaque-same-geometry.mp4'],g['opaque-same-geometry.f32le'],48000)]
@@ -72,6 +72,7 @@ def generate():
     expected=bytes(1600*8)+b''.join(struct.pack('<f',v)for v in source_pcm[1920*2:5120*2])*2+bytes(1600*8)
     sources.append(('ps-edits',(fixture_root/'he-aac-ps-inband-export-lc-1024-synthetic.mp4').read_bytes(),expected,48000))
     for name,source,pcm,rate in sources:
+        if playback_controls:files['exact-'+name+'.mp4']=source
         files[name+'.f32le']=pcm
         channels=1 if name=='adpcm' else 4 if name=='opaque' else 2
         for scale in [900,1000]:
