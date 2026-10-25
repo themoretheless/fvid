@@ -237,7 +237,10 @@ impl Sps {
             read_ordering(b, max_sub)?
         };
         if !multilayer_syntax {
-            if let Some(c) = context {
+            // 7.4.3.1: with an external base, the coded VPS ordering fields
+            // are required zero placeholders and decoders must ignore them.
+            // The selected OLS still supplies effective output/DPB limits.
+            if let Some(c) = context.filter(|c| c.vps.vps.layers.base_internal) {
                 for (sps, vps) in ordering.iter().zip(&c.vps.vps.ordering) {
                     if sps.max_decoded_pictures > vps.max_decoded_pictures
                         || sps.max_reorder_pictures > vps.max_reorder_pictures

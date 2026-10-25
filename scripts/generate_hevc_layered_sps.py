@@ -40,7 +40,7 @@ def representation(f):
             f'{f["depth"][0]-8:04b}{f["depth"][1]-8:04b}' + '1' + ''.join(ue(v) for v in f['crop']))
 
 
-def vps(target, independent=False, one_format=False, bad_geometry=False, wide=False, dpb=6, short_temporal=False, base_buffers=16, base_latency=0, base_format=None, dependency_type=2, poc_absent=False, output_highest=False, alternative_output=False, ordering_rows=None, layer_id=3, depth_layer=False, enhancement_profile=None, extra_output=False):
+def vps(target, independent=False, one_format=False, bad_geometry=False, wide=False, dpb=6, short_temporal=False, base_buffers=16, base_latency=0, base_format=None, dependency_type=2, poc_absent=False, output_highest=False, alternative_output=False, ordering_rows=None, layer_id=3, depth_layer=False, enhancement_profile=None, extra_output=False, additional_sets=False):
     if not 1 <= layer_id <= 62:
         raise ValueError("enhancement layer ID must be in 1..62")
     if bad_geometry:
@@ -57,12 +57,15 @@ def vps(target, independent=False, one_format=False, bad_geometry=False, wide=Fa
     b += '1' + f'{layer_id:06b}' + ('1'if depth_layer else '') + '0000'
     b += '0' if independent else '1'
     if independent:
-        b += ue(0)  # no additional layer sets for the two independent roots
+        b += ue(1)+'1' if additional_sets else ue(0)  # second independent tree
     b += ('1'+'000'+'001' if short_temporal else '0') + '00'
     if output_highest and independent:
         raise ValueError('highest-only fixture requires a dependent layer')
     # Both layers remain necessary in the dependent highest-output operation.
-    if extra_output:
+    if additional_sets:
+        assert independent and not extra_output and enhancement_profile is None
+        b += ue(1)+ue(0)+'00'+'11'+'11' # OLS1=(0,3), OLS2=(3)
+    elif extra_output:
         assert not independent and not output_highest and enhancement_profile is None
         # Explicit OLS1 selects base only; additional OLS2 selects enhancement.
         b += ue(1)+ue(1)+'10'+'10'+'1'+'01'+'11'+'0'
@@ -82,7 +85,7 @@ def vps(target, independent=False, one_format=False, bad_geometry=False, wide=Fa
     b += '01'  # max_one_active_ref=0, aligned POC=1
     if independent:
         b += str(int(poc_absent))  # poc_lsb_not_present_flag for layer 3
-    for ols in ([1,2] if extra_output else [1]):
+    for ols in ([1,2] if extra_output or additional_sets else [1]):
         b += '1'  # explicit per-temporal DPB syntax
         rows = []
         for tid in range(2 if short_temporal else 3):
@@ -93,7 +96,7 @@ def vps(target, independent=False, one_format=False, bad_geometry=False, wide=Fa
             latency = 0 if tid == 0 else tid+1
             if ordering_rows is not None:
                 counts, reorder, latency = ordering_rows[tid]
-            b += ''.join(ue(v-1) for v in (counts[:1] if extra_output and ols==1 else counts)) + ue(reorder) + ue(latency)
+            b += ''.join(ue(v-1) for v in (counts[:1] if extra_output and ols==1 else counts[1:] if additional_sets and ols==2 else counts)) + ue(reorder) + ue(latency)
             rows.append([counts[1], reorder, latency])
     b += ue(0) + '1' + f'{dependency_type:02b}' + ue(0) + '0'
     if enhancement_profile is not None and enhancement_profile[0]==8:

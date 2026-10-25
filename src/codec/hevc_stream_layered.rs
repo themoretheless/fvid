@@ -216,7 +216,7 @@ impl LayeredDecoder {
             ));
         }
         let available = self.queued_budget(queue)?;
-        let extracted = selection.extract_packet(packet, self.length_size, available)?;
+        let extracted = selection.extract_for_decode(packet, self.length_size, available)?;
         let budget = available
             .checked_sub(
                 extracted
@@ -279,7 +279,7 @@ impl LayeredDecoder {
         }
         self.require_decode_ready()?;
         let available = self.available()?;
-        let extracted = selection.extract_packet(packet, self.length_size, available)?;
+        let extracted = selection.extract_for_decode(packet, self.length_size, available)?;
         let budget = available
             .checked_sub(
                 extracted
@@ -317,6 +317,37 @@ impl LayeredDecoder {
     /// Call finish_metadata_priming before decoding the selected sync sample.
     /// Each packet publishes atomically; this is separate from parameter-only priming.
     pub fn prime_metadata(&mut self, packet: &[u8]) -> Result<()> {
+        self.prime_metadata_inner(packet, self.available()?, None)
+    }
+    /// Prime a scanned operation point in the original parameter namespace.
+    /// Selection, extraction storage, metadata and activation commit together;
+    /// F.10.3 exported VPS rewriting must not leak into seek's source bindings.
+    pub fn prime_selected_metadata(
+        &mut self,
+        selection: &super::LayeredSubstream,
+        packet: &[u8],
+    ) -> Result<()> {
+        let previous = self.output_layer_set;
+        self.output_layer_set = selection.output_layer_set();
+        let result = (|| {
+            let available = self.available()?;
+            let extracted = selection.extract_for_decode(packet, self.length_size, available)?;
+            let budget = available
+                .checked_sub(extracted.capacity().saturating_add(std::mem::size_of_val(&extracted)))
+                .ok_or_else(|| invalid("HEVC extracted priming packet exceeds decode budget"))?;
+            self.prime_metadata_inner(&extracted, budget, Some(selection.vps.as_ref()))
+        })();
+        if result.is_err() {
+            self.output_layer_set = previous;
+        }
+        result
+    }
+    fn prime_metadata_inner(
+        &mut self,
+        packet: &[u8],
+        budget: usize,
+        selected: Option<&crate::codec::hevc_vps::LayeredVps>,
+    ) -> Result<()> {
         if self.priming == Priming::Parameters {
             return Err(invalid(
                 "HEVC parameter-only and metadata priming cannot be mixed",
@@ -325,7 +356,6 @@ impl LayeredDecoder {
         if self.dpb.next_access_unit() != 0 || self.dpb.references().next().is_some() {
             return Err(invalid("HEVC metadata priming requires a reset decoder"));
         }
-        let budget = self.available()?;
         let plan = LayeredAccessUnit::parse(
             &self.parameters,
             self.dpb.poc(),
@@ -334,6 +364,9 @@ impl LayeredDecoder {
             self.output_layer_set,
             budget,
         )?;
+        if selected.is_some_and(|v| plan.pictures().iter().any(|p| p.binding.vps.as_ref() != v)) {
+            return Err(invalid("HEVC extraction VPS disagrees with active picture"));
+        }
         let parameters = self.dpb.prime_metadata(plan, budget)?;
         self.parameters = parameters;
         self.priming = Priming::Metadata;
