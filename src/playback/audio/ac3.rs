@@ -66,6 +66,20 @@ struct SyncHeader {
     samples: u32,
 }
 
+// Keep opaque associated extension bytes in native packets. A failed header
+// probe must not turn a malformed dependent into an independent-only programme.
+fn opaque_programme_span(data:&[u8],base:usize)->usize {
+    let mut at=base;
+    while at<data.len() {
+        let Some(h)=crate::codec::ac3_decoder::dolby_prefix(&data[at..]) else {return data.len();};
+        if h[..2]!=[0x0b,0x77] {return data.len();}
+        if matches!(h[2]>>6,0|2) {break;}
+        let size=(usize::from(h[2]&7)*256+usize::from(h[3])+1)*2;
+        at=at.saturating_add(size.max(6)).min(data.len());
+    }
+    at
+}
+
 fn probe_syncframe(bytes: &[u8]) -> Option<SyncHeader> {probe_programme_syncframe(bytes,0)}
 fn probe_programme_syncframe(bytes:&[u8],programme:u8)->Option<SyncHeader> {
     if programme==0 && let Some(at) = syncframe(bytes) {
@@ -259,7 +273,7 @@ impl Ac3 {
         let mut role_union = std::collections::BTreeSet::new();
         let mut frames = Vec::with_capacity(found.len());
         let mut pts = 0u64;
-        for (at, start) in found.iter().zip(&starts) {
+        for (frame_index,(at, start)) in found.iter().zip(&starts).enumerate() {
             let checked=at.codec!=TAG || crate::codec::ac3_decoder::frame_crc_valid(&bytes[*start..*start+at.frame_bytes]);
             if checked && (at.sample_rate != first.sample_rate || at.channels != first.channels) {
                 return Err(invalid(&format!(
@@ -278,10 +292,11 @@ impl Ac3 {
                         role_union.extend(layout.0.iter().copied());
                         (size,layout.0.len() as u16)
                     },
-                    // Compatibility output still ignores incomplete skipped
-                    // extensions. Complete bundles are retained so an explicit
-                    // native output map can render replacement-only prefixes.
-                    Ok(None) | Err(_) if native.is_none() => (at.frame_bytes,output_channels),
+                    Ok(None) if native.is_none() => (at.frame_bytes,output_channels),
+                    Err(_) if native.is_none() => {
+                        let end=starts.get(frame_index+1).copied().unwrap_or(bytes.len());
+                        (opaque_programme_span(&bytes[*start..end],at.frame_bytes),output_channels)
+                    },
                     Err(_) if truncated_final_frame && Some(start)==starts.last()=>break,
                     Err(error)=>return Err(error),
                     _=>return Err(invalid("E-AC-3 elementary presentation changes or loses extension channels")),

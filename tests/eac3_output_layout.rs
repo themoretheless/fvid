@@ -783,3 +783,158 @@ fn concrete_decoder_reports_configured_and_inferred_output_roles() {
     let stereo=Box::new(Eac3Decoder::new_stereo(&[],48000).unwrap());
     assert_eq!(stereo.output_layout(),Some(SpeakerLayout(vec![Speaker::Left,Speaker::Right])));
 }
+
+
+fn independent_cases()->Vec<serde_json::Value> {
+    let m:serde_json::Value=serde_json::from_slice(&read("manifest.json")).unwrap();
+    let cases=m["independent_cases"].as_array().unwrap().clone();assert_eq!(cases.len(),54);cases
+}
+#[test]
+fn independent_native_layout_roundtrip_preserves_pcm_clock_seek_and_rewind() {
+    for case in independent_cases() {
+        let name=case["name"].as_str().unwrap();
+        for kind in ["ec3","mkv","mp4"] {
+            let mut reference=source(name,kind);let expected=source_packets(&mut *reference);
+            assert_eq!(expected.len(),3);
+            let layout=reference.eac3_output_layout().unwrap();
+            assert_eq!(layout.wave_mask(),Some(case["mask"].as_u64().unwrap()as u32));
+            let mut native=source(name,kind);native.set_eac3_output_layout(Some(layout.clone())).unwrap();
+            for _ in 0..2 {
+                assert!(source_packets(&mut *native)==expected,"{name}.{kind}");
+                native.rewind();assert_eq!(native.eac3_output_layout(),Some(layout.clone()));
+            }
+            let target=Duration::from_millis(20);reference.seek_time(target);native.seek_time(target);
+            assert!(source_packets(&mut *native)==source_packets(&mut *reference),"seek {name}.{kind}");
+        }
+    }
+}
+
+fn padded_sixteen_layout()->SpeakerLayout {
+    use Speaker::*;
+    SpeakerLayout(vec![Left,Right,Centre,Lfe,LeftRear,RightRear,LeftCentre,RightCentre,
+        BackCentre,LeftSurround,RightSurround,TopCentre,HeightLeft,HeightCentre,HeightRight,TopSurroundLeft])
+}
+fn padded_packets(input:&[(Duration,Vec<u8>)],from:&SpeakerLayout,to:&SpeakerLayout)->Vec<(Duration,Vec<u8>)> {
+    input.iter().map(|(pts,bytes)|{
+        let width=from.0.len();let count=bytes.len()/(width*4);let mut output=vec![0u8;count*to.0.len()*4];
+        for (n,row) in bytes.chunks_exact(width*4).enumerate() {
+            for (i,role) in from.0.iter().enumerate() {
+                let target=to.0.binary_search(role).unwrap();let offset=(n*to.0.len()+target)*4;
+                output[offset..offset+4].copy_from_slice(&row[i*4..i*4+4]);
+            }
+        }
+        (*pts,output)
+    }).collect()
+}
+#[test]
+fn independent_native_programmes_pad_missing_speakers_without_changing_signal() {
+    let target=padded_sixteen_layout();
+    for case in independent_cases() {
+        let name=case["name"].as_str().unwrap();
+        for kind in ["ec3","mkv","mp4"] {
+            let mut reference=source(name,kind);let layout=reference.eac3_output_layout().unwrap();
+            let expected=padded_packets(&source_packets(&mut *reference),&layout,&target);
+            let mut native=source(name,kind);native.set_eac3_output_layout(Some(target.clone())).unwrap();
+            assert_eq!(native.channels(),16);assert_eq!(native.eac3_output_layout(),Some(target.clone()));
+            assert!(source_packets(&mut *native)==expected,"{name}.{kind}");
+            native.rewind();assert!(source_packets(&mut *native)==expected);
+        }
+    }
+}
+#[test]
+fn independent_native_rf_and_raw_priming_match_the_compatibility_signal() {
+    use fvid::codec::ac3_decoder::CompressionMode;
+    for case in independent_cases() {
+        let name=case["name"].as_str().unwrap();let width=case["channels"].as_u64().unwrap()as u16;
+        let bytes=read(&format!("{name}.ec3"));let layout=source(name,"ec3").eac3_output_layout().unwrap();
+        for raw in [false,true] {
+            let mut reference=Box::new(if raw {Eac3Decoder::new(&[],48000,width)}else{Eac3Decoder::for_container_with_compression(&[],48000,width,CompressionMode::Rf)}.unwrap());
+            reference.set_dolby_compression(CompressionMode::Rf);
+            let expected=reference.decode_complete(&bytes,0,case["samples"].as_u64().unwrap()).unwrap().unwrap().data;
+            let mut native=Box::new(if raw {Eac3Decoder::new(&[],48000,width)}else{Eac3Decoder::for_container_with_compression(&[],48000,width,CompressionMode::Rf)}.unwrap());
+            native.set_dolby_compression(CompressionMode::Rf);native.set_output_layout(layout.clone()).unwrap();
+            for _ in 0..2 {
+                assert_eq!(native.decode_complete(&bytes,0,case["samples"].as_u64().unwrap()).unwrap().unwrap().data,expected,"{name} raw={raw}");
+                native.reset();
+            }
+        }
+    }
+}
+
+#[test]
+fn independent_converted_frames_keep_explicit_native_output() {
+    let dir=Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/eac3-substreams");
+    let m:serde_json::Value=serde_json::from_slice(&std::fs::read(dir.join("manifest.json")).unwrap()).unwrap();
+    let cases:Vec<_>=m["cases"].as_array().unwrap().iter().filter(|c|{
+        let name=c["name"].as_str().unwrap();name.contains("-t2-")&&name.ends_with("-ind1")
+    }).collect();assert_eq!(cases.len(),4);
+    for case in cases {
+        for mkv in [false,true] {
+            let key=if mkv {"control_video"}else{"control"};
+            let open=|| -> Box<dyn AudioStream> {
+                let bytes=Cursor::new(std::fs::read(dir.join(case[key].as_str().unwrap())).unwrap());
+                if mkv {Box::new(fvid::playback_webm_audio::WebmAudioReader::open(bytes,Default::default()).unwrap())}
+                else {Box::new(fvid::playback_ac3::Ac3AudioReader::open(bytes,Default::default()).unwrap())}
+            };
+            let mut reference=open();let expected=source_packets(&mut *reference);
+            let mut native=open();let layout=native.eac3_output_layout().unwrap();
+            native.set_eac3_output_layout(Some(layout)).unwrap();
+            assert!(source_packets(&mut *native)==expected);
+            native.rewind();assert!(source_packets(&mut *native)==expected);
+        }
+    }
+}
+#[test]
+fn incomplete_dependents_and_unmapped_wide_output_remain_refused() {
+    let raw=read("native-six-plain.ec3");
+    let size=|at:usize| (usize::from(raw[at+2]&7)*256+usize::from(raw[at+3])+1)*2;
+    let base=size(0);let partial=base+size(base);
+    let mut d=Box::new(Eac3Decoder::for_container_with_compression(&[],48000,6,fvid::codec::ac3_decoder::CompressionMode::Line).unwrap());
+    d.set_output_layout(six_layout()).unwrap();
+    assert!(d.decode_complete(&raw[..partial],0,768).err().expect("expected refusal").to_string().contains("incomplete E-AC-3 dependent"));
+    d.reset();let mut next=raw[..partial].to_vec();next.extend_from_slice(&raw[..base]);
+    assert!(d.decode_complete(&next,0,1536).err().expect("expected refusal").to_string().contains("missing final E-AC-3 dependent"));
+    let mut unknown=Box::new(Eac3Decoder::for_container_with_compression(&[],48000,8,fvid::codec::ac3_decoder::CompressionMode::Line).unwrap());
+    assert!(unknown.decode_complete(&raw[..base],0,768).err().expect("expected refusal").to_string().contains("speaker count"));
+}
+
+#[test]
+fn independent_native_selected_programmes_keep_their_own_pcm_and_clock() {
+    let dir=Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/eac3-programme-reader");
+    let name="native-l0-1-r1-b3";
+    for programme in 0..8 {
+        for mkv in [false,true] {
+            let open=|| -> Box<dyn AudioStream> {
+                let bytes=Cursor::new(std::fs::read(dir.join(format!("{name}.{}",if mkv {"mkv"}else{"ec3"}))).unwrap());
+                if mkv {Box::new(fvid::playback_webm_audio::WebmAudioReader::open_programme(bytes,Default::default(),0,programme).unwrap())}
+                else {Box::new(fvid::playback_ac3::Ac3AudioReader::open_programme(bytes,Default::default(),programme).unwrap())}
+            };
+            let mut reference=open();let expected=source_packets(&mut *reference);
+            let mut native=open();let layout=native.eac3_output_layout().unwrap();
+            native.set_eac3_output_layout(Some(layout)).unwrap();
+            assert!(source_packets(&mut *native)==expected,"programme {programme} mkv={mkv}");
+            native.rewind();assert!(source_packets(&mut *native)==expected);
+        }
+    }
+}
+
+
+#[test]
+fn independent_prefix_does_not_hide_an_incomplete_selected_dependent() {
+    use fvid::audio::AudioStep;
+    for kind in ["ec3","mkv","mp4"] {
+        let mut s=source("independent-prefix-incomplete-dependent",kind);
+        s.set_eac3_output_layout(Some(six_layout())).unwrap();let mut d=s.make_decoder().unwrap();
+        let mut error=None;
+        while let Some(step)=s.next_step().unwrap() {
+            if let AudioStep::Encoded(p)=step {
+                if let Err(e)=d.decode_packet(&p.data,s.decoder_stamp(&p),p.duration as u64) {error=Some(e.to_string());break;}
+            }
+        }
+        if error.is_none() {
+            loop {match d.finish_packet() {Ok(Some(_))=>{},Ok(None)=>break,Err(e)=>{error=Some(e.to_string());break;}}}
+        }
+        let error=error.unwrap_or_else(||panic!("{kind}: incomplete selected dependent was silently dropped"));
+        assert!(error.contains("missing final E-AC-3 dependent"),"{kind}: {error}");
+    }
+}

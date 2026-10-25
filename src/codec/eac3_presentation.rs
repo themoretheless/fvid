@@ -734,6 +734,16 @@ impl PresentationDecoder {
         }
         self.ready.pop_front().map(|r| r.audio)
     }
+    // An independent frame can be a complete programme without dependents.
+    // The next independent header or EOF closes that unmarked programme.
+    fn complete_independent_only(&mut self)->Result<bool> {
+        if self.pending.as_ref().is_some_and(|p|p.frames.len()==1) {
+            let pending=self.pending.take().unwrap();
+            self.assemble(pending)?;
+            return Ok(true);
+        }
+        Ok(false)
+    }
     fn ingest(&mut self, data: &[u8], pts: i64, duration: u64) -> Result<()> {
         if self.finished {
             return Err(invalid("E-AC-3 presentation packet after EOF"));
@@ -756,7 +766,7 @@ impl PresentationDecoder {
             let raw = &data[offset..offset + size];
             offset += size;
             if kind != 1 {
-                if self.pending.is_some() {
+                if self.pending.is_some() && !self.complete_independent_only()? {
                     return Err(invalid("missing final E-AC-3 dependent substream"));
                 }
                 self.programme = Some(id);
@@ -826,7 +836,7 @@ impl AudioDecode for PresentationDecoder {
         if let Some(audio) = self.take_ready() {
             return Ok(Some(audio));
         }
-        if self.pending.is_some() {
+        if self.pending.is_some() && !self.complete_independent_only()? {
             return Err(invalid("incomplete E-AC-3 dependent presentation at EOF"));
         }
         if !self.finished {
