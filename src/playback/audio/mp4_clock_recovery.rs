@@ -2,6 +2,23 @@
 use super::{Result, invalid, edit_clock::Time as Mp4ExportTime};
 use crate::{container::mp4::{Mp4Reader as Mp4TimelineReader, Track},native_media::DecodeProgress};
 fn mp4_coded_packet_frames(codec:&[u8;4], configuration:&[u8], rate:u32, channels:u16, bits:u16, bytes:usize, payload:Option<&[u8]>)->std::result::Result<u64,String> {
+    mp4_coded_packet_frames_for_programme(0,codec,configuration,rate,channels,bits,bytes,payload)
+}
+fn mp4_coded_packet_frames_for_programme(programme:u8,codec:&[u8;4], configuration:&[u8], rate:u32, channels:u16, bits:u16, bytes:usize, payload:Option<&[u8]>)->std::result::Result<u64,String> {
+    if codec==b"ec-3" {
+        let mut encoded=payload.ok_or("E-AC-3 coded count requires packet headers")?;
+        let mut samples=0u64;
+        while !encoded.is_empty() {
+            if let Some(size)=crate::codec::eac3_decoder::skipped_programme_bytes(encoded,programme).map_err(|e|e.to_string())? {
+                encoded=&encoded[size..];continue;
+            }
+            let header=crate::codec::eac3_decoder::programme_frame(encoded,programme).ok_or("invalid selected E-AC-3 coded clock header")?;
+            if header.sample_rate!=rate {return Err("selected E-AC-3 coded clock rate changes inside description".into());}
+            encoded=encoded.get(header.frame_bytes..).ok_or("incomplete selected E-AC-3 clock packet")?;
+            samples=samples.checked_add(header.blocks as u64*256).ok_or("E-AC-3 coded clock overflow")?;
+        }
+        return Ok(samples);
+    }
     if codec!=b"ac-3" {return fvid_media::owned_mp4_audio_packet_frames::frames(codec,configuration,rate,channels,bits,bytes,payload);}
     let mut encoded=payload.ok_or("AC-3 coded count requires packet headers")?;
     let mut frames=0u64;
@@ -25,23 +42,43 @@ pub(super) struct PlaybackClock {
     end: Mp4ExportTime,
 }
 impl PlaybackClock {
-    pub(super) fn build<R:std::io::Read+std::io::Seek>(reader:&mut Mp4TimelineReader<R>, index:usize)->Result<Option<Self>> {
+    pub(super) fn build<R:std::io::Read+std::io::Seek>(reader:&mut Mp4TimelineReader<R>, index:usize,programme:u8)->Result<Option<Self>> {
         let track=reader.tracks().get(index).ok_or_else(||invalid("MP4 track index out of range"))?;
+        let descriptions=track.sample_descriptions.len();
+        let mut rates=Vec::new();
+        rates.try_reserve_exact(descriptions).map_err(|_|invalid("MP4 native clock rate allocation failed"))?;
+        rates.extend(track.sample_descriptions.iter().map(|d|d.sample_rate));
         let mut coarse=false;
-        for (i,d) in track.sample_descriptions.iter().enumerate() {
+        for i in 0..descriptions {
+            let track=&reader.tracks()[index];
+            let codec=track.sample_descriptions[i].codec;
             if !(0..track.samples.len()).any(|n|track.samples.get(n).is_some_and(|s|s.description_index as usize==i+1)){continue;}
-            if d.codec==*b"ec-3" {return Ok(None);}
-            if d.sample_rate==0 || track.timescale==0 {return Err(invalid("zero MP4 playback clock"));}
-            coarse |= track.timescale%d.sample_rate!=0;
+            if codec==*b"ec-3" {
+                if programme>7{return Err(invalid("E-AC-3 programme ID exceeds 7"));}
+                let count=track.samples.len();
+                let mut payload=Vec::new();let mut found=None;
+                for n in 0..count {
+                    if reader.tracks()[index].samples.get(n).is_none_or(|s|s.description_index as usize!=i+1){continue;}
+                    reader.read_packet(index,n,&mut payload)?;
+                    if let Some(frame)=crate::codec::eac3_decoder::checked_programme_frame(&payload,programme) {found=Some(frame.sample_rate);break;}
+                }
+                rates[i]=found.ok_or_else(||invalid("selected E-AC-3 programme is missing or corrupt in clock setup"))?;
+            }
+            let track=&reader.tracks()[index];
+            if rates[i]==0 || track.timescale==0 {return Err(invalid("zero MP4 playback clock"));}
+            coarse |= track.timescale%rates[i]!=0;
         }
         if !coarse {return Ok(None);}
         let control=DecodeProgress::new(None,None)?;
-        let runs=mp4_packet_clock_runs(reader,index,&control)?;
-        // An AC-3 packet can span an integral number of container ticks while
+        let override_rates=rates.iter().zip(&reader.tracks()[index].sample_descriptions).any(|(rate,d)|*rate!=d.sample_rate);
+        let runs=if programme==0 && !override_rates {mp4_packet_clock_runs(reader,index,&control)?}else{
+            mp4_packet_clock_runs_with(reader,index,&control,Some(&rates),|a,b,c,d,e,f,g|mp4_coded_packet_frames_for_programme(programme,a,b,c,d,e,f,g))?
+        };
+        // A Dolby packet can span an integral number of container ticks while
         // the user's seek target falls between them. Keep its compatible native
         // run for sample-accurate navigation even when no packet point moved.
-        let ac3_seek=runs.iter().any(|r|r.quantized && reader.tracks()[index].description_for_sample(r.first).is_some_and(|d|d.codec==*b"ac-3"));
-        if !runs.iter().any(|r|r.changed) && !ac3_seek {return Ok(None);}
+        let dolby_seek=runs.iter().any(|r|r.quantized && reader.tracks()[index].description_for_sample(r.first).is_some_and(|d|matches!(&d.codec,b"ac-3"|b"ec-3")));
+        if !runs.iter().any(|r|r.changed) && !dolby_seek {return Ok(None);}
         let track=&reader.tracks()[index];let mut end=Mp4ExportTime::ticks(track.duration,track.timescale)?;
         if track.samples.get(0).is_some_and(|s|s.pts==0) {
             if let Some(last)=runs.last() {
