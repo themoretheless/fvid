@@ -18319,3 +18319,33 @@ when a drained tail finishes one edit before a later repeated range.
 These checks qualify the named owned synthetic paths and worker scheduling;
 they do not prove physical-device timing, arbitrary MP4 clock semantics, Dolby
 coarse-clock recovery, every codec profile/tool or universal codec completion.
+
+
+### AC-3 MP4 playback recovers packet sample clocks and intra-tick seek
+
+Native playback counts AC-3 access units using the owned syncframe parser and
+1536 samples per syncframe. Grouped packets retain their full cumulative native
+window. CRC/body concealment stays with the decoder; a CRC-checked frame supplies
+channel geometry, including after a corrupt first frame inside one packet.
+The generic clock-run implementation reads AC-3 payloads for this player count
+adapter; other media-operation count adapters retain their existing dispatch.
+This does not add a Dolby export backend.
+
+Compatible AC-3 runs retain their native navigation clock even when all packet
+boundaries already fit the container grid. Intra-tick Duration targets resolve
+on the native sample grid. Seek replays from the last real decoder-setup boundary,
+so grouped packets, overlap history and concealment match continuous playback.
+Original encoded PTS and durations remain unchanged.
+
+An owned short-video matrix adds 45 coarse variants and five exact controls.
+The 900/1000/1001 Hz clocks cover cumulative floor/ceil/nearest endpoints, one to
+three syncframes per packet and CRC-damaged first-frame concealment. Parent
+production reproduces the 31.111111 ms versus 32 ms error. A separate witness
+shows why unchanged packet endpoints still require a native seek clock.
+Acceptance compares PCM and timing, 96 ms duration, six seek positions, rewind,
+and the actual playback worker with a capturing backend. Generation is checked
+byte-for-byte with process and network access disabled.
+
+E-AC-3 programme-aware clock recovery, additional codec profiles/tools, other
+container clock cases and physical-device timing remain open. The finite AC-3
+matrix does not establish universal AC-3 or complete codec coverage.

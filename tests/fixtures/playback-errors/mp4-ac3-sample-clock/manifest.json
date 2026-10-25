@@ -1,0 +1,459 @@
+{
+  "cases": [
+    {
+      "file": "ac3-900-floor.mp4",
+      "exact": "exact.mp4",
+      "scale": 900,
+      "rounding": "floor",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "ac3-900-ceil.mp4",
+      "exact": "exact.mp4",
+      "scale": 900,
+      "rounding": "ceil",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "ac3-900-nearest.mp4",
+      "exact": "exact.mp4",
+      "scale": 900,
+      "rounding": "nearest",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "ac3-1000-floor.mp4",
+      "exact": "exact.mp4",
+      "scale": 1000,
+      "rounding": "floor",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "ac3-1000-ceil.mp4",
+      "exact": "exact.mp4",
+      "scale": 1000,
+      "rounding": "ceil",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "ac3-1000-nearest.mp4",
+      "exact": "exact.mp4",
+      "scale": 1000,
+      "rounding": "nearest",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "ac3-1001-floor.mp4",
+      "exact": "exact.mp4",
+      "scale": 1001,
+      "rounding": "floor",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "ac3-1001-ceil.mp4",
+      "exact": "exact.mp4",
+      "scale": 1001,
+      "rounding": "ceil",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "ac3-1001-nearest.mp4",
+      "exact": "exact.mp4",
+      "scale": 1001,
+      "rounding": "nearest",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "grouped-900-floor.mp4",
+      "exact": "grouped-exact.mp4",
+      "scale": 900,
+      "rounding": "floor",
+      "samples_per_packet": [
+        1536,
+        3072
+      ]
+    },
+    {
+      "file": "grouped-900-ceil.mp4",
+      "exact": "grouped-exact.mp4",
+      "scale": 900,
+      "rounding": "ceil",
+      "samples_per_packet": [
+        1536,
+        3072
+      ]
+    },
+    {
+      "file": "grouped-900-nearest.mp4",
+      "exact": "grouped-exact.mp4",
+      "scale": 900,
+      "rounding": "nearest",
+      "samples_per_packet": [
+        1536,
+        3072
+      ]
+    },
+    {
+      "file": "grouped-1000-floor.mp4",
+      "exact": "grouped-exact.mp4",
+      "scale": 1000,
+      "rounding": "floor",
+      "samples_per_packet": [
+        1536,
+        3072
+      ]
+    },
+    {
+      "file": "grouped-1000-ceil.mp4",
+      "exact": "grouped-exact.mp4",
+      "scale": 1000,
+      "rounding": "ceil",
+      "samples_per_packet": [
+        1536,
+        3072
+      ]
+    },
+    {
+      "file": "grouped-1000-nearest.mp4",
+      "exact": "grouped-exact.mp4",
+      "scale": 1000,
+      "rounding": "nearest",
+      "samples_per_packet": [
+        1536,
+        3072
+      ]
+    },
+    {
+      "file": "grouped-1001-floor.mp4",
+      "exact": "grouped-exact.mp4",
+      "scale": 1001,
+      "rounding": "floor",
+      "samples_per_packet": [
+        1536,
+        3072
+      ]
+    },
+    {
+      "file": "grouped-1001-ceil.mp4",
+      "exact": "grouped-exact.mp4",
+      "scale": 1001,
+      "rounding": "ceil",
+      "samples_per_packet": [
+        1536,
+        3072
+      ]
+    },
+    {
+      "file": "grouped-1001-nearest.mp4",
+      "exact": "grouped-exact.mp4",
+      "scale": 1001,
+      "rounding": "nearest",
+      "samples_per_packet": [
+        1536,
+        3072
+      ]
+    },
+    {
+      "file": "bad-first-900-floor.mp4",
+      "exact": "bad-first-exact.mp4",
+      "scale": 900,
+      "rounding": "floor",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "bad-first-900-ceil.mp4",
+      "exact": "bad-first-exact.mp4",
+      "scale": 900,
+      "rounding": "ceil",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "bad-first-900-nearest.mp4",
+      "exact": "bad-first-exact.mp4",
+      "scale": 900,
+      "rounding": "nearest",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "bad-first-1000-floor.mp4",
+      "exact": "bad-first-exact.mp4",
+      "scale": 1000,
+      "rounding": "floor",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "bad-first-1000-ceil.mp4",
+      "exact": "bad-first-exact.mp4",
+      "scale": 1000,
+      "rounding": "ceil",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "bad-first-1000-nearest.mp4",
+      "exact": "bad-first-exact.mp4",
+      "scale": 1000,
+      "rounding": "nearest",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "bad-first-1001-floor.mp4",
+      "exact": "bad-first-exact.mp4",
+      "scale": 1001,
+      "rounding": "floor",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "bad-first-1001-ceil.mp4",
+      "exact": "bad-first-exact.mp4",
+      "scale": 1001,
+      "rounding": "ceil",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "bad-first-1001-nearest.mp4",
+      "exact": "bad-first-exact.mp4",
+      "scale": 1001,
+      "rounding": "nearest",
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "one-packet-900-floor.mp4",
+      "exact": "one-packet-exact.mp4",
+      "scale": 900,
+      "rounding": "floor",
+      "samples_per_packet": [
+        4608
+      ]
+    },
+    {
+      "file": "one-packet-900-ceil.mp4",
+      "exact": "one-packet-exact.mp4",
+      "scale": 900,
+      "rounding": "ceil",
+      "samples_per_packet": [
+        4608
+      ]
+    },
+    {
+      "file": "one-packet-900-nearest.mp4",
+      "exact": "one-packet-exact.mp4",
+      "scale": 900,
+      "rounding": "nearest",
+      "samples_per_packet": [
+        4608
+      ]
+    },
+    {
+      "file": "one-packet-1000-floor.mp4",
+      "exact": "one-packet-exact.mp4",
+      "scale": 1000,
+      "rounding": "floor",
+      "samples_per_packet": [
+        4608
+      ]
+    },
+    {
+      "file": "one-packet-1000-ceil.mp4",
+      "exact": "one-packet-exact.mp4",
+      "scale": 1000,
+      "rounding": "ceil",
+      "samples_per_packet": [
+        4608
+      ]
+    },
+    {
+      "file": "one-packet-1000-nearest.mp4",
+      "exact": "one-packet-exact.mp4",
+      "scale": 1000,
+      "rounding": "nearest",
+      "samples_per_packet": [
+        4608
+      ]
+    },
+    {
+      "file": "one-packet-1001-floor.mp4",
+      "exact": "one-packet-exact.mp4",
+      "scale": 1001,
+      "rounding": "floor",
+      "samples_per_packet": [
+        4608
+      ]
+    },
+    {
+      "file": "one-packet-1001-ceil.mp4",
+      "exact": "one-packet-exact.mp4",
+      "scale": 1001,
+      "rounding": "ceil",
+      "samples_per_packet": [
+        4608
+      ]
+    },
+    {
+      "file": "one-packet-1001-nearest.mp4",
+      "exact": "one-packet-exact.mp4",
+      "scale": 1001,
+      "rounding": "nearest",
+      "samples_per_packet": [
+        4608
+      ]
+    },
+    {
+      "file": "one-packet-bad-first-900-floor.mp4",
+      "exact": "one-packet-bad-first-exact.mp4",
+      "scale": 900,
+      "rounding": "floor",
+      "samples_per_packet": [
+        4608
+      ]
+    },
+    {
+      "file": "one-packet-bad-first-900-ceil.mp4",
+      "exact": "one-packet-bad-first-exact.mp4",
+      "scale": 900,
+      "rounding": "ceil",
+      "samples_per_packet": [
+        4608
+      ]
+    },
+    {
+      "file": "one-packet-bad-first-900-nearest.mp4",
+      "exact": "one-packet-bad-first-exact.mp4",
+      "scale": 900,
+      "rounding": "nearest",
+      "samples_per_packet": [
+        4608
+      ]
+    },
+    {
+      "file": "one-packet-bad-first-1000-floor.mp4",
+      "exact": "one-packet-bad-first-exact.mp4",
+      "scale": 1000,
+      "rounding": "floor",
+      "samples_per_packet": [
+        4608
+      ]
+    },
+    {
+      "file": "one-packet-bad-first-1000-ceil.mp4",
+      "exact": "one-packet-bad-first-exact.mp4",
+      "scale": 1000,
+      "rounding": "ceil",
+      "samples_per_packet": [
+        4608
+      ]
+    },
+    {
+      "file": "one-packet-bad-first-1000-nearest.mp4",
+      "exact": "one-packet-bad-first-exact.mp4",
+      "scale": 1000,
+      "rounding": "nearest",
+      "samples_per_packet": [
+        4608
+      ]
+    },
+    {
+      "file": "one-packet-bad-first-1001-floor.mp4",
+      "exact": "one-packet-bad-first-exact.mp4",
+      "scale": 1001,
+      "rounding": "floor",
+      "samples_per_packet": [
+        4608
+      ]
+    },
+    {
+      "file": "one-packet-bad-first-1001-ceil.mp4",
+      "exact": "one-packet-bad-first-exact.mp4",
+      "scale": 1001,
+      "rounding": "ceil",
+      "samples_per_packet": [
+        4608
+      ]
+    },
+    {
+      "file": "one-packet-bad-first-1001-nearest.mp4",
+      "exact": "one-packet-bad-first-exact.mp4",
+      "scale": 1001,
+      "rounding": "nearest",
+      "samples_per_packet": [
+        4608
+      ]
+    }
+  ],
+  "rate": 48000,
+  "channels": 6,
+  "syncframes": 3,
+  "native_samples": 4608,
+  "provenance": "Repository-authored short synthetic tone and neutral VP9 video, reused from ac3-mp4-channels. No private data, subprocess, network or FFmpeg."
+}
