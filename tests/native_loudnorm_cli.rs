@@ -292,6 +292,12 @@ fn compressed_packet_limit_refuses_without_publication_in_each_container() {
             "{name}: {error}"
         );
         assert!(!output.exists());
+        let plan_error =
+            fvid::native_loudnorm::try_plan(&source, None, true, &options).unwrap_err();
+        assert!(
+            plan_error.to_string().contains("packet exceeds budget"),
+            "{name} plan: {plan_error}"
+        );
     }
 }
 
@@ -333,10 +339,12 @@ fn encoded_packet_prefix_preserves_presentation_and_is_not_a_pcm_block_limit() {
         .unwrap();
         let mut file = std::fs::File::open(&full).unwrap();
         let info = fvid_media::owned_wave_inspect::inspect(&mut file, None).unwrap();
+        let info_chunks = fvid_media::owned_wave_inspect::info_chunks(&mut file, &info, None).unwrap();
         let bytes = std::fs::read(&full).unwrap();
         let payload_bytes = frames * usize::from(decoded.channels) * 4;
         let offset = info.data_offset as usize;
         let mut clipped = bytes[..offset + payload_bytes].to_vec();
+        clipped.extend_from_slice(&info_chunks);
         let riff_size = (clipped.len() - 8) as u32;
         clipped[4..8].copy_from_slice(&riff_size.to_le_bytes());
         clipped[offset - 4..offset].copy_from_slice(&(payload_bytes as u32).to_le_bytes());

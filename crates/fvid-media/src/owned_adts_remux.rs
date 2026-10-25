@@ -7,7 +7,7 @@ use std::{
     path::Path,
 };
 pub(crate) fn adts_matroska_policies(options: &CopyOptions) -> bool {
-    options.max_controlled_bytes.is_none()
+    options.max_controlled_bytes != Some(0)
         && crate::owned_budget::check_rss_budget(options).is_ok()
         && options.max_packet_bytes > 0
         && crate::owned_matroska::extract_adts_matroska_metadata(Some(options)).is_ok()
@@ -39,6 +39,14 @@ pub fn remux(
     if options.max_packets == Some(0) {
         return Err("Matroska AAC output requires at least one packet".into());
     }
+    let meta_bytes = crate::owned_matroska::estimate_adts_matroska_metadata_bytes(Some(options))
+        .map_err(|e| e.to_string())?;
+    if options
+        .max_controlled_bytes
+        .is_some_and(|limit| 16384usize.saturating_add(meta_bytes) > limit)
+    {
+        return Err("controlled memory budget exceeded".into());
+    }
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
@@ -48,7 +56,9 @@ pub fn remux(
     }
     let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
         BufReader::new(file),
-        options.max_packet_bytes,
+        options
+            .max_packet_bytes
+            .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
     )
     .map_err(|e| e.to_string())?;
     crate::owned_matroska_remux::publish(destination, options, |output| {
@@ -76,6 +86,14 @@ pub fn plan_remux(
     if options.max_packets == Some(0) {
         return Err("Matroska AAC output requires at least one packet".into());
     }
+    let meta_bytes = crate::owned_matroska::estimate_adts_matroska_metadata_bytes(Some(options))
+        .map_err(|e| e.to_string())?;
+    if options
+        .max_controlled_bytes
+        .is_some_and(|limit| 16384usize.saturating_add(meta_bytes) > limit)
+    {
+        return Err("controlled memory budget exceeded".into());
+    }
     let check = || {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             Err("media operation cancelled".to_string())
@@ -90,10 +108,14 @@ pub fn plan_remux(
     }
     let mut reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
         BufReader::new(file),
-        options.max_packet_bytes,
+        options
+            .max_packet_bytes
+            .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
     )
     .map_err(|e| e.to_string())?;
     let config = reader.configuration();
+    let asc = reader.audio_specific_config().to_vec();
+    let mut negotiated_rate = None;
     let mut packets = 0u64;
     let mut bytes = 0u64;
     loop {
@@ -104,18 +126,23 @@ pub fn plan_remux(
         let Some(packet) = reader.next_packet().map_err(|e| e.to_string())? else {
             break;
         };
+        if negotiated_rate.is_none() {
+            negotiated_rate = crate::owned_aac::adts::probe_output_rate(&packet, &asc)
+                .map_err(|e| e.to_string())?;
+        }
         packets = packets.checked_add(1).ok_or("ADTS packet count overflow")?;
         bytes = bytes
             .checked_add(packet.len() as u64)
             .ok_or("ADTS payload count overflow")?;
     }
     check()?;
+    let output_rate = negotiated_rate.unwrap_or(config.sample_rate);
     let mut steps = vec![
         PlanStep {
             action: "copy".into(),
             detail: format!(
                 "copy {packets} unchanged AAC packets, {bytes} payload bytes; {} Hz, {} channels",
-                config.sample_rate, config.channels
+                output_rate, config.channels
             ),
         },
         PlanStep {
@@ -137,6 +164,30 @@ pub fn plan_remux(
         action: "publish".into(),
         detail: "publish completed output without overwriting; remove temporary file on error or cancellation".into(),
     });
+    let mut notes = vec![
+        "backend: owned ADTS/Matroska; no external demuxer or muxer".into(),
+        "output must be .mkv or .mka; destination and publication checked during execution".into(),
+        "unedited all-track request; packet byte limit counts AAC payload, excluding ADTS headers".into(),
+    ];
+    if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        || options.max_packets.is_some()
+        || options.max_controlled_bytes.is_some()
+        || options.max_rss_bytes.is_some()
+    {
+        notes.push(format!(
+            "encoded packet limit: {} bytes; packet work limit: {} packets; controlled memory limit: {} bytes; RSS limit: {} bytes",
+            options.max_packet_bytes,
+            options
+                .max_packets
+                .map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options
+                .max_controlled_bytes
+                .map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options
+                .max_rss_bytes
+                .map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+        ));
+    }
     Ok(MediaPlan {
         command: "remux".into(),
         input: source.into(),
@@ -149,10 +200,6 @@ pub fn plan_remux(
         }],
         steps,
         graph: None,
-        notes: vec![
-            "backend: owned ADTS/Matroska; no external demuxer or muxer".into(),
-            "output must be .mkv or .mka; destination and publication checked during execution".into(),
-            "unedited all-track request; packet byte limit counts AAC payload, excluding ADTS headers".into(),
-        ],
+        notes,
     })
 }

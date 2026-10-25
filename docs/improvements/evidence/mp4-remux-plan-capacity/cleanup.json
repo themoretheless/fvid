@@ -1,0 +1,17 @@
+{
+  "deleted_inactive_test_executables": [
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_remux_plan_capacity-af1778a02c58bde5",
+      "bytes": 20739544
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_matroska_encoder_concat_prefix_regression-818598c27295d399",
+      "bytes": 32232272
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_remux_prefix_budget_regression-c17521943e038093",
+      "bytes": 33068896
+    }
+  ],
+  "retained": "fixtures, regressions, generators and all evidence"
+}

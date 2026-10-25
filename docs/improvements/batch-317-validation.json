@@ -1,0 +1,16 @@
+{
+  "batch": 317,
+  "accepted_ids": [
+    "FVID-0323"
+  ],
+  "status": "accepted",
+  "problem": "Controlled-memory admission for the top-level MP4 span table occurred only after scanning the complete input.",
+  "before": "The valid padded VP9 fixture read 80032 bytes of box headers before refusing a 65536-byte budget. Exact original-source isolated probe fails the early-admission assertion.",
+  "after": "The same budget refuses before any box read or output; sufficient budget preserves all bytes and native software playback remains exact.",
+  "evidence": "evidence/mp4-relocation-admission-audit/status.json",
+  "tests_run": [
+    "cargo test --locked --offline --test mp4_relocation_admission",
+    "cargo test --locked --offline --features player --test mp4_relocation_admission --test native_mp4_relocate"
+  ],
+  "limits": "Admission checks the existing controlled-memory bookkeeping estimate; it does not claim a physical RSS limit or benchmark speedup."
+}

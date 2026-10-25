@@ -39,7 +39,7 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    let (rate, _, mask) = match geometry(source, options) {
+    let (rate, _, mask) = match geometry_for_decode(source, Some(transform), options) {
         Ok(geometry) => geometry,
         Err(error) => return error.starts_with("controlled memory budget exceeded:"),
     };
@@ -57,7 +57,7 @@ pub(crate) fn supports(
     result.is_ok_and(|stats| {
         transform.channels.is_none_or(|channels| {
             channels == i32::from(stats.channels)
-                || (matches!(channels,1|2)&&crate::owned_aac_export_routing::router(source,stats.sample_rate,stats.channels,options).is_ok_and(|r|r.is_some()))
+                || (matches!(channels,1|2)&&crate::owned_aac_export_routing::router_for_decode(source,stats.sample_rate,stats.channels,Some(transform),options).is_ok_and(|r|r.is_some()))
                 || (((stats.channels <= 2 && (1..=8).contains(&channels))
                     || (stats.channels <= 8 && matches!(channels, 1 | 2)))
                     && crate::owned_pcm_channels::standard_mask(stats.channels)
@@ -78,8 +78,12 @@ pub(crate) fn apply(
         return Err("media operation cancelled".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    let (rate, channels, mask) = geometry(source, options)?;
-    let info = crate::owned_wave_metadata::matroska_source_info(source, options)?;
+    let (rate, channels, mask) = geometry_for_decode(source, Some(transform), options)?;
+    let info = crate::owned_wave_metadata::matroska_source_info_with_interval(
+        source,
+        prefix(transform, rate),
+        options,
+    )?;
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,
@@ -100,10 +104,18 @@ pub(crate) fn apply(
 }
 
 pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32)> {
+    geometry_for_decode(source, None, options)
+}
+
+pub(crate) fn geometry_for_decode(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u32)> {
     let mut reader = crate::owned_matroska_audio::open_aac_reader(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         options,
-        crate::owned_webm::Limits::default().packet_bytes,
+        options.max_packet_bytes,
     )
     .map_err(|e| e.to_string())?;
     let index = match options.streams.as_slice() {
@@ -130,9 +142,12 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
     {
         return Err("selected Matroska audio stream has a different codec".into());
     }
-    crate::owned_matroska_audio::admit_audio_reader(&mut reader, index, options)
+    let track_rate = u32::try_from(reader.tracks[index].sample_rate)
+        .map_err(|_| "AAC output clock overflow")?;
+    let interval = transform.and_then(|t| prefix(t, track_rate));
+    crate::owned_matroska_audio::admit_audio_reader_with_interval(&mut reader, index, interval, options)
         .map_err(|e| e.to_string())?;
-    let in_band_ps = crate::owned_matroska_audio::negotiate_matroska_ps(&mut reader, index, || Ok(()))
+    let in_band_ps = crate::owned_matroska_audio::negotiate_matroska_ps_with_interval(&mut reader, index, interval, options.max_packets, || Ok(()))
         .map_err(|e| e.to_string())?;
     let track = reader
         .tracks

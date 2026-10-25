@@ -1,0 +1,25 @@
+{
+  "deleted_inactive_executables": [
+    {
+      "path": "/private/tmp/fvid-relocation-admission-audit/probe",
+      "bytes": 709320
+    },
+    {
+      "path": "/private/tmp/fvid-relocation-admission-audit/probe-before",
+      "bytes": 711504
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-4c4eb13fbd73bdae",
+      "bytes": 1452728
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a",
+      "bytes": 11355208
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_mp4_relocate-a288c24930fc3702",
+      "bytes": 7155336
+    }
+  ],
+  "retained": "Source probes, before/after logs, Cargo logs, generator, regression fixture, manifest and tests"
+}

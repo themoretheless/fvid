@@ -1,0 +1,21 @@
+{
+  "batch": 274,
+  "accepted": [
+    "FVID-0281"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-274-pre-edit/crates/fvid-media/src/owned_ogg_audio_program.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-274-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-274-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-274-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/ogg-audio-selection-budget/joint-prefix-budget.ogg"
+  ],
+  "tests": [
+    "tests/ogg_audio_selection_budget_regressions.rs",
+    "scripts/test_ogg_audio_selection_budget_regressions.py"
+  ]
+}

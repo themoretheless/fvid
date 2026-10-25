@@ -173,7 +173,12 @@ fn write_mp4_aac_metadata<R: Read + Seek, W: Write + Seek>(
         .clone();
     let plan = aac_packet_plan(&track, input.movie_timescale(), cancel)?;
     let asc = crate::codec::config::aac_specific_config(&track.configuration)?;
-    let mut writer = PacketWriter::new_with_metadata(
+    let mut text = std::collections::BTreeMap::<String, String>::new();
+    let encoder = input.encoder().trim();
+    if !encoder.is_empty() && encoder.len() <= 1024 && !encoder.contains('\0') {
+        text.insert("ENCODER".into(), encoder.to_owned());
+    }
+    let mut writer = PacketWriter::new_with_text_metadata(
         output,
         &[TrackSpec {
             encoding: Encoding::Aac {
@@ -189,6 +194,8 @@ fn write_mp4_aac_metadata<R: Read + Seek, W: Write + Seek>(
             ..Default::default()
         }],
         metadata,
+        &text,
+        &Default::default(),
     )?;
     if let Some(h) = progress {
         h.emit(writer.event());

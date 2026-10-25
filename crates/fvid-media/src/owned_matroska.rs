@@ -371,6 +371,13 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
             check(cancel).map_err(|e| e.to_string())?;
             if let Some(options) = track_options {
                 crate::owned_budget::check_rss_budget(options)?;
+                let frame_len = header.frame_len()?;
+                if options
+                    .max_controlled_bytes
+                    .is_some_and(|limit| frame_len > limit || packet.len() > limit)
+                {
+                    return Err("Y4M frame byte length exceeds controlled memory budget".into());
+                }
             }
             if packet.len() > max_packet_bytes {
                 return Err("encoded FFV1 packet exceeds byte limit".into());

@@ -1,0 +1,13 @@
+{
+  "status": "verified-extension-FVID-0324",
+  "count_as": "extension of FVID-0324 if confirmed; no new ID",
+  "source_sha256": "94ac4c61254b3d3c32d044c3b3bbfa725cb39211a42fa9fe118996800c541400",
+  "session": 89578,
+  "expected_failure": "20 KiB budget should reject reserved capacity for 512 timing entries even though edit retains only 2 packets",
+  "original_result": "1 passed, 1 failed specifically on retained capacity budget assertion",
+  "active_session": null,
+  "after_source_sha256": "2e4d8f104885c7bdb1b5f4b1cf701fcf1b5601b1ec44d3cc421f560e545f1638",
+  "focused": "3 passed, including exact 2048 mono sample frames at 48 kHz",
+  "related": "5 passed across two related MP4 regression targets",
+  "current_source_sha256": "5c697c0f8cc00baf359a94fe048938924d2d13173fa4e86a72c76f2df229c251"
+}

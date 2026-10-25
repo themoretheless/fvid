@@ -23,21 +23,14 @@ fn qualify(
     if crate::owned_lossless::request(transform).is_none() {
         return Ok(None);
     }
-    let mut normalized = options.clone();
-    normalized.streams.clear();
-    for (i, _, _) in &mut normalized.stream_metadata_set {
-        *i = 0;
-    }
-    for (i, _) in &mut normalized.stream_metadata_delete {
-        *i = 0;
-    }
-    if !crate::owned_lossless::policy(&normalized, true) {
-        return Ok(None);
-    }
+    check(options)?;
     let reader = match Mp4Reader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         crate::owned_mp4::Limits {
-            packet_bytes: options.max_packet_bytes,
+            packet_bytes: options.max_controlled_bytes.map_or(
+                options.max_packet_bytes,
+                |limit| options.max_packet_bytes.min(limit),
+            ),
             ..Default::default()
         },
     ) {
@@ -91,6 +84,18 @@ fn qualify(
     {
         return Err("metadata refers to missing input track".into());
     }
+    crate::owned_lossless::metadata(options)?;
+    let mut normalized = options.clone();
+    normalized.streams.clear();
+    for (i, _, _) in &mut normalized.stream_metadata_set {
+        *i = 0;
+    }
+    for (i, _) in &mut normalized.stream_metadata_delete {
+        *i = 0;
+    }
+    if !crate::owned_lossless::policy(&normalized, true) {
+        return Ok(None);
+    }
     let count = selected.iter().try_fold(0u64, |n, &i| {
         let t = &tracks[i];
         n.checked_add(t.samples.len() as u64)
@@ -98,6 +103,25 @@ fn qualify(
     })?;
     if options.max_packets.is_some_and(|limit| count > limit) {
         return Err("MP4 input packet count exceeds limit".into());
+    }
+    let effective_packet_limit = options
+        .max_controlled_bytes
+        .map_or(options.max_packet_bytes, |limit| {
+            options.max_packet_bytes.min(limit)
+        });
+    for &i in &selected {
+        let t = &tracks[i];
+        let exceeds = match &t.samples {
+            crate::owned_mp4::SampleIndex::Expanded(samples) => {
+                samples.iter().any(|s| s.size as usize > effective_packet_limit)
+            }
+            crate::owned_mp4::SampleIndex::Uniform(u) => {
+                u.count > 0 && u.bytes_per_frame as usize > effective_packet_limit
+            }
+        };
+        if exceeds {
+            return Err("MP4 packet exceeds budget".into());
+        }
     }
     Ok(Some(Input {
         reader,
@@ -125,6 +149,37 @@ pub(crate) fn plan_selection(
     };
     if !crate::owned_ffv1_export::supports(&bridge.path, &request) {
         return Ok(None);
+    }
+    let mut stage = options.clone();
+    stage.streams.clear();
+    stage.max_packets = None;
+    stage.stream_metadata_set.clear();
+    stage.stream_metadata_delete.clear();
+    let enforce_encoded_budget =
+        options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+            || options.max_controlled_bytes.is_some();
+    let mut check_encoded =
+        |view: crate::owned_video_decode::FrameView<'_>| -> Result<()> {
+            crate::owned_lossless::check_encoded_ffv1_with_controlled(
+                view,
+                options.max_packet_bytes,
+                options.max_controlled_bytes,
+            )
+        };
+    let Some((stats, _)) = crate::owned_video_decode::decode_webm(
+        &bridge.path,
+        &request,
+        if enforce_encoded_budget {
+            Some(&mut check_encoded)
+        } else {
+            None
+        },
+        Some(&stage),
+    )? else {
+        return Ok(None);
+    };
+    if stats.video_frames == 0 {
+        return Err("Matroska has no selected frames".into());
     }
     Ok(Some((input.video, input.selected)))
 }
@@ -210,9 +265,11 @@ pub(crate) fn try_export(
         &stage,
     )?;
     drop(bridge);
+    let mut limits = crate::owned_webm::Limits::default();
+    limits.packet_bytes = limits.packet_bytes.min(options.max_packet_bytes);
     let mut video = crate::owned_webm::WebmReader::open(
         BufReader::new(File::open(&video_path).map_err(|e| e.to_string())?),
-        Default::default(),
+        limits,
     )
     .map_err(|e| e.to_string())?;
     video.restrict_packet_bytes(options.max_packet_bytes);

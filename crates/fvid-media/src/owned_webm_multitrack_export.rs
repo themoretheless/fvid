@@ -23,13 +23,19 @@ struct Input {
     video_origin: i64,
 }
 fn open(path: &Path, options: &CopyOptions) -> Result<Reader> {
+    let limits = webm::Limits::default();
     let mut reader = webm::WebmReader::open(
         BufReader::new(File::open(path).map_err(|e| e.to_string())?),
-        Default::default(),
+        limits,
     )
     .map_err(|e| e.to_string())?;
-    reader.restrict_packet_bytes(options.max_packet_bytes);
     reader.scan_all().map_err(|e| e.to_string())?;
+    let effective_packet_limit = options
+        .max_controlled_bytes
+        .map_or(options.max_packet_bytes, |limit| {
+            options.max_packet_bytes.min(limit)
+        });
+    reader.restrict_packet_bytes(effective_packet_limit);
     Ok(reader)
 }
 fn check(o: &CopyOptions) -> Result<()> {
@@ -49,17 +55,6 @@ fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option
         return Ok(None);
     }
     if crate::owned_lossless::request(t).is_none() {
-        return Ok(None);
-    }
-    let mut normalized = o.clone();
-    normalized.streams.clear();
-    for (i, _, _) in &mut normalized.stream_metadata_set {
-        *i = 0;
-    }
-    for (i, _) in &mut normalized.stream_metadata_delete {
-        *i = 0;
-    }
-    if !crate::owned_lossless::policy(&normalized, true) {
         return Ok(None);
     }
     check(o)?;
@@ -129,6 +124,17 @@ fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option
             .collect();
         for index in indices {
             check(o)?;
+            let packet_size = reader
+                .packet_payload_size(index)
+                .map_err(|e| e.to_string())?;
+            if packet_size > o.max_packet_bytes {
+                return Err("WebM packet exceeds budget or has empty lace frame".into());
+            }
+            if o.max_controlled_bytes
+                .is_some_and(|limit| packet_size > limit)
+            {
+                return Err("WebM packet exceeds controlled memory budget".into());
+            }
             let p = reader.packets[index].clone();
             if p.pts_ns < 0 || p.invisible && i != video || i == video && p.discard_padding_ns != 0
             {
@@ -163,6 +169,18 @@ fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option
             .any(|(i, _)| *i >= reader.tracks.len())
     {
         return Err("metadata refers to missing input track".into());
+    }
+    crate::owned_lossless::metadata(o)?;
+    let mut normalized = o.clone();
+    normalized.streams.clear();
+    for (i, _, _) in &mut normalized.stream_metadata_set {
+        *i = 0;
+    }
+    for (i, _) in &mut normalized.stream_metadata_delete {
+        *i = 0;
+    }
+    if !crate::owned_lossless::policy(&normalized, true) {
+        return Ok(None);
     }
     let mut trimmed_audio_sample_frames = 0u64;
     let mut pcm_windows=Vec::new();
@@ -209,7 +227,32 @@ pub(crate) fn plan_selection(
     stage.streams.clear();
     stage.stream_metadata_set.clear();
     stage.stream_metadata_delete.clear();
-    crate::owned_video_decode::decode_webm(source, &request, None, Some(&stage))?;
+    let enforce_encoded_budget =
+        o.max_packet_bytes != CopyOptions::default().max_packet_bytes
+            || o.max_controlled_bytes.is_some();
+    let mut check_encoded =
+        |view: crate::owned_video_decode::FrameView<'_>| -> Result<()> {
+            crate::owned_lossless::check_encoded_ffv1_with_controlled(
+                view,
+                o.max_packet_bytes,
+                o.max_controlled_bytes,
+            )
+        };
+    let Some((stats, _)) = crate::owned_video_decode::decode_webm(
+        source,
+        &request,
+        if enforce_encoded_budget {
+            Some(&mut check_encoded)
+        } else {
+            None
+        },
+        Some(&stage),
+    )? else {
+        return Ok(None);
+    };
+    if stats.video_frames == 0 {
+        return Err("Matroska has no selected frames".into());
+    }
     Ok(Some((input.video, input.selected)))
 }
 pub(crate) fn supports(source: &Path, t: &LosslessTransform, o: &CopyOptions) -> bool {

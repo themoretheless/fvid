@@ -77,11 +77,50 @@ pub(crate) fn default_matroska_pcm_metadata() -> MatroskaPcmMetadata {
     )
 }
 
+#[allow(dead_code)]
 pub(crate) fn extract_source_pcm_metadata(
     source: &std::path::Path,
     selected: Option<usize>,
     allow_wave: bool,
     max_packet_bytes: Option<usize>,
+    cancel: Option<&crate::media_control::CancelFlag>,
+) -> Result<MatroskaPcmMetadata> {
+    extract_source_pcm_metadata_with_packet_limit(
+        source,
+        selected,
+        allow_wave,
+        max_packet_bytes,
+        None,
+        cancel,
+    )
+}
+
+pub(crate) fn extract_source_pcm_metadata_with_packet_limit(
+    source: &std::path::Path,
+    selected: Option<usize>,
+    allow_wave: bool,
+    max_packet_bytes: Option<usize>,
+    max_packets: Option<u64>,
+    cancel: Option<&crate::media_control::CancelFlag>,
+) -> Result<MatroskaPcmMetadata> {
+    extract_source_pcm_metadata_with_interval_and_packet_limit(
+        source,
+        selected,
+        allow_wave,
+        None,
+        max_packet_bytes,
+        max_packets,
+        cancel,
+    )
+}
+
+pub(crate) fn extract_source_pcm_metadata_with_interval_and_packet_limit(
+    source: &std::path::Path,
+    selected: Option<usize>,
+    allow_wave: bool,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    max_packet_bytes: Option<usize>,
+    max_packets: Option<u64>,
     cancel: Option<&crate::media_control::CancelFlag>,
 ) -> Result<MatroskaPcmMetadata> {
     use std::io::{BufReader, Read, Seek, SeekFrom};
@@ -113,11 +152,10 @@ pub(crate) fn extract_source_pcm_metadata(
         return Ok(base);
     }
     if crate::container::mp4::recognizes_prefix(&prefix) {
-        let mut limits = crate::container::mp4::Limits::default();
-        if let Some(maximum) = max_packet_bytes {
-            limits.packet_bytes = limits.packet_bytes.min(maximum);
-        }
-        let reader = crate::container::mp4::Mp4Reader::open_indexed(input, limits)?;
+        let reader = crate::container::mp4::Mp4Reader::open_indexed(
+            input,
+            crate::container::mp4::Limits::default(),
+        )?;
         let index = if allow_wave {
             let automatic = if selected.is_none() {
                 reader.automatic_track_indices(&[*b"soun"])
@@ -142,20 +180,46 @@ pub(crate) fn extract_source_pcm_metadata(
             crate::native_media::mp4_aac_index(&reader, selected)?
         };
         let track = &reader.tracks()[index];
+        if let Some(maximum) = max_packet_bytes {
+            let max_samples = crate::native_media::mp4_active_samples(track, interval, max_packets);
+            let exceeds = match &track.samples {
+                crate::container::mp4::SampleIndex::Expanded(samples) => samples
+                    .iter()
+                    .take(max_samples)
+                    .any(|s| (s.size as usize) > maximum),
+                crate::container::mp4::SampleIndex::Uniform(uniform) => {
+                    uniform.count > 0
+                        && max_samples > 0
+                        && (uniform.bytes_per_frame as usize) > maximum
+                }
+            };
+            if exceeds {
+                return Err(invalid("MP4 packet exceeds budget"));
+            }
+        }
         let mut base = default_matroska_pcm_metadata();
         base.0 = track.name.clone();
         if !track.language.is_empty() && track.language.len() <= 128 && !track.language.contains('\0') {
             base.1 = track.language.clone();
         }
         base.2.tags = reader.tags().clone();
+        if !reader.encoder().is_empty()
+            && !reader.encoder().contains('\0')
+            && reader.encoder().len() <= 1024
+        {
+            base.3.insert("ENCODER".into(), reader.encoder().to_owned());
+        }
         return Ok(base);
     }
     if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-        let mut reader = crate::container::webm::WebmReader::open(input, Default::default())?;
+        let mut reader = crate::container::webm::WebmReader::open(
+            input,
+            crate::container::webm::Limits::default(),
+        )?;
         if let Some(maximum) = max_packet_bytes {
             reader.restrict_packet_bytes(maximum);
         }
-        let _ = reader.scan_all();
+        reader.scan_all()?;
         let index = if allow_wave {
             let preferred = if selected.is_none() {
                 reader.preferred_track_numbers(
@@ -187,6 +251,27 @@ pub(crate) fn extract_source_pcm_metadata(
             crate::native_media::matroska_aac_index(&reader, selected)?
         };
         let track = &reader.tracks[index];
+        if let Some(maximum) = max_packet_bytes {
+            let track_number = track.number;
+            let active_limit = crate::native_media::matroska_active_track_packets(
+                &reader,
+                index,
+                interval,
+                max_packets,
+            );
+            let mut track_packets = 0usize;
+            for (packet_index, packet) in reader.packets.iter().enumerate() {
+                if packet.track == track_number {
+                    if track_packets >= active_limit {
+                        break;
+                    }
+                    if reader.packet_payload_size(packet_index)? > maximum {
+                        return Err(invalid("WebM packet exceeds budget"));
+                    }
+                    track_packets += 1;
+                }
+            }
+        }
         let mut base = default_matroska_pcm_metadata();
         if !track.name.contains('\0') && track.name.len() <= 1024 {
             base.0 = track.name.clone();
@@ -314,11 +399,12 @@ pub(crate) fn extract_source_wave_info(
                 .map_err(|e| invalid(&e.to_string()));
         }
     }
-    let base = extract_source_pcm_metadata(
+    let base = extract_source_pcm_metadata_with_packet_limit(
         source,
         options.streams.first().copied(),
         true,
         Some(options.max_packet_bytes),
+        options.max_packets,
         cancel,
     )?;
     let mut extra = base.3.clone();
@@ -355,6 +441,91 @@ pub(crate) fn validate_matroska_pcm_metadata(
     options: Option<&fvid_media::CopyOptions>,
 ) -> Result<()> {
     parse_matroska_pcm_metadata(None, options).map(|_| ())
+}
+
+pub(crate) fn check_output_memory_budget(
+    source: &std::path::Path,
+    channels: u16,
+    stage_working_bytes: usize,
+    options: &fvid_media::CopyOptions,
+    matroska: Option<bool>,
+) -> Result<()> {
+    let Some(limit) = options.max_controlled_bytes else {
+        return Ok(());
+    };
+    if limit == 0 {
+        return Err(invalid("controlled memory budget exceeded: limit is 0"));
+    }
+    let check_wave = matroska != Some(true)
+        && options.stream_metadata_set.is_empty()
+        && options.stream_metadata_delete.is_empty();
+    let check_matroska = matroska != Some(false);
+    let mut needed = stage_working_bytes.saturating_add(16 * 1024);
+    if check_wave {
+        let source_info_len = extract_source_wave_info(source, options)
+            .map(|b| b.len())
+            .unwrap_or(0);
+        let assignments = options
+            .metadata_set
+            .iter()
+            .fold(0usize, |sum, (_, v)| sum.saturating_add(v.len().saturating_add(10)));
+        let wave_meta_bytes = 8usize.saturating_mul(source_info_len.saturating_add(assignments).saturating_add(12));
+        needed = needed.max(
+            stage_working_bytes
+                .saturating_add(wave_meta_bytes)
+                .saturating_add(16 * 1024),
+        );
+    }
+    if check_matroska {
+        let base = extract_source_pcm_metadata_with_packet_limit(
+            source,
+            options.streams.first().copied(),
+            true,
+            Some(options.max_packet_bytes),
+            options.max_packets,
+            options.cancel.as_ref(),
+        )
+        .ok();
+        let (name, language, metadata, text, scoped) =
+            parse_matroska_pcm_metadata(base, Some(options))?;
+        let mut tag_bytes = name.len().saturating_add(language.len()).saturating_add(64);
+        for val in [
+            &metadata.tags.title,
+            &metadata.tags.artist,
+            &metadata.tags.comment,
+            &metadata.tags.date,
+            &metadata.tags.album,
+            &metadata.tags.genre,
+            &metadata.tags.copyright,
+            &metadata.tags.track,
+        ] {
+            if !val.is_empty() {
+                tag_bytes = tag_bytes.saturating_add(val.len().saturating_add(32));
+            }
+        }
+        for (k, v) in &text {
+            tag_bytes = tag_bytes.saturating_add(k.len()).saturating_add(v.len()).saturating_add(32);
+        }
+        for entries in scoped.values() {
+            for (k, v) in entries {
+                tag_bytes = tag_bytes.saturating_add(k.len()).saturating_add(v.len()).saturating_add(32);
+            }
+        }
+        let mka_meta_bytes = 8usize.saturating_mul(tag_bytes.saturating_add(12));
+        let sink_block_bytes = usize::from(channels).saturating_mul(4096);
+        needed = needed.max(
+            stage_working_bytes
+                .saturating_add(sink_block_bytes)
+                .saturating_add(mka_meta_bytes)
+                .saturating_add(16 * 1024),
+        );
+    }
+    if needed > limit {
+        return Err(invalid(&format!(
+            "controlled memory budget exceeded: need {needed} bytes, limit {limit}"
+        )));
+    }
+    Ok(())
 }
 
 fn parse_matroska_pcm_metadata(
@@ -471,10 +642,43 @@ impl<'a, W: Write + Seek> Sink<'a, W> {
             name: &name,
             language: &language,
         }];
-        let writer =
-            PacketWriter::new_with_text_metadata(output, &spec, &[], &metadata, &text, &scoped)?;
         let frame_bytes = usize::from(channels) * 4;
         let block_bytes = frame_bytes * 1024;
+        if let Some(limit) = options.and_then(|o| o.max_controlled_bytes) {
+            let mut tag_bytes = name.len().saturating_add(language.len()).saturating_add(64);
+            for val in [
+                &metadata.tags.title,
+                &metadata.tags.artist,
+                &metadata.tags.comment,
+                &metadata.tags.date,
+                &metadata.tags.album,
+                &metadata.tags.genre,
+                &metadata.tags.copyright,
+                &metadata.tags.track,
+            ] {
+                if !val.is_empty() {
+                    tag_bytes = tag_bytes.saturating_add(val.len().saturating_add(32));
+                }
+            }
+            for (k, v) in &text {
+                tag_bytes = tag_bytes.saturating_add(k.len()).saturating_add(v.len()).saturating_add(32);
+            }
+            for entries in scoped.values() {
+                for (k, v) in entries {
+                    tag_bytes = tag_bytes.saturating_add(k.len()).saturating_add(v.len()).saturating_add(32);
+                }
+            }
+            let needed = block_bytes
+                .saturating_add(8usize.saturating_mul(tag_bytes.saturating_add(12)))
+                .saturating_add(16 * 1024);
+            if needed > limit {
+                return Err(invalid(&format!(
+                    "controlled memory budget exceeded: need {needed} bytes, limit {limit}"
+                )));
+            }
+        }
+        let writer =
+            PacketWriter::new_with_text_metadata(output, &spec, &[], &metadata, &text, &scoped)?;
         let mut bytes = Vec::new();
         bytes
             .try_reserve_exact(block_bytes)

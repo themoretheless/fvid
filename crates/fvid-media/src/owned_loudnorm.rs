@@ -126,8 +126,10 @@ pub(crate) fn supports(
             let pcm_options = crate::owned_adts_export::pcm_decode_options(options);
             (params.print == Print::None || crate::owned_wave_loudness::supports(source, &pcm_options))
                 && std::fs::File::open(source).is_ok_and(|mut file| {
-                    crate::owned_wave_inspect::inspect(&mut file, None)
-                        .is_ok_and(|info| params.gain.is_some() || dynamic_input(&info))
+                    crate::owned_wave_inspect::inspect(&mut file, None).is_ok_and(|info| {
+                        info.sample_frames > 0
+                            && (params.gain.is_some() || dynamic_input(&info))
+                    })
                 })
         })
 }
@@ -178,6 +180,7 @@ pub fn plan_loudnorm(
     }
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
     let resolved = validate_request(args)?;
+    let params = parse(&resolved)?;
     if !supports_request(
         source,
         Path::new("output.wav"),
@@ -187,8 +190,88 @@ pub fn plan_loudnorm(
     ) {
         return Err("request has no owned WAVE loudnorm route".into());
     }
-    let info = crate::owned_probe::probe_wave(source).map_err(|e| e.to_string())?;
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet limit leaves no decoded audio samples".into());
+    }
+    let mut wave_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    let wave_info = crate::owned_wave_inspect::inspect(&mut wave_file, options.cancel.as_ref())
+        .map_err(|e| e.to_string())?;
+    if wave_info.sample_frames == 0 {
+        return Err("no decoded audio samples or invalid channel count".into());
+    }
+    let frame_bytes = usize::from(wave_info.block);
+    let capacity = if frame_bytes == 0 {
+        0
+    } else {
+        (4096 * frame_bytes).min(options.max_packet_bytes / frame_bytes * frame_bytes)
+    };
+    if capacity == 0 {
+        return Err("PCM packet limit cannot hold one sample frame".into());
+    }
+    let size = (u128::from(wave_info.data_bytes)).min(
+        options
+            .max_packets
+            .map(|n| u128::from(n) * capacity as u128)
+            .unwrap_or(u128::from(wave_info.data_bytes)),
+    ) as usize;
+    if size == 0 {
+        return Err("packet limit leaves no decoded audio samples".into());
+    }
     let report = report_requested(Some(&resolved))?;
+    if dual_pass || report {
+        let decode_options = crate::owned_adts_export::pcm_decode_options(options);
+        crate::owned_wave_loudness::plan_loudness(source, &decode_options)?;
+    }
+    if let Some(limit) = options.max_controlled_bytes {
+        let width = usize::from(wave_info.bits_per_sample / 8).max(1);
+        let frames = size / frame_bytes;
+        let report_bytes = if params.print == Print::None {
+            0
+        } else {
+            usize::try_from(report_memory(
+                wave_info.sample_rate,
+                frames as u64,
+                wave_info.channels,
+            ))
+            .map_err(|_| "loudnorm report memory overflow")?
+        };
+        let estimate = if params.gain.is_some() {
+            let output = (size / width)
+                .checked_mul(4)
+                .ok_or("loudnorm output size overflow")?;
+            size.checked_add(output)
+                .and_then(|n| n.checked_add(report_bytes))
+                .ok_or("loudnorm memory size overflow")? as u128
+        } else {
+            let samples = usize::try_from(
+                (frames as u128 * 192000).div_ceil(u128::from(wave_info.sample_rate))
+                    * u128::from(wave_info.channels),
+            )
+            .map_err(|_| "loudnorm output size overflow")?;
+            (size as u128)
+                + samples as u128 * 12
+                + 192000 * 34 / 10 * 8
+                + 512 * 1024
+                + 2 * frames.min(4096) as u128 * u128::from(wave_info.channels) * 8
+                + samples as u128 / u128::from(wave_info.channels) * 8
+                + (samples as u128 / u128::from(wave_info.channels)).div_ceil(19200) * (40 + 1024)
+                + 19200 * u128::from(wave_info.channels) * 8
+                + report_bytes as u128
+        };
+        if estimate > limit as u128 {
+            return Err(format!(
+                "controlled memory budget exceeded: need {estimate} bytes"
+            ));
+        }
+    }
+    let info = crate::owned_probe::probe_wave(source).map_err(|e| e.to_string())?;
     let mut steps = vec![PlanStep {
         action: "decode".into(),
         detail: "owned WAVE reader retaining PCM precision and speaker layout for f64 processing"
@@ -219,6 +302,19 @@ pub fn plan_loudnorm(
     if let Some(maximum) = options.max_packets {
         notes.push(format!(
             "read at most {maximum} original WAVE PCM blocks per pass"
+        ));
+    }
+    if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        || options.max_packets.is_some()
+        || options.max_controlled_bytes.is_some()
+        || options.max_rss_bytes.is_some()
+    {
+        notes.push(format!(
+            "encoded packet limit: {} bytes; packet work limit: {} packets; controlled memory limit: {} bytes; RSS limit: {} bytes",
+            options.max_packet_bytes,
+            options.max_packets.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options.max_controlled_bytes.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options.max_rss_bytes.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
         ));
     }
     Ok(MediaPlan {
@@ -319,6 +415,10 @@ pub(crate) fn supports_dual(
             source,
             &crate::owned_adts_export::pcm_decode_options(options),
         )
+        && std::fs::File::open(source).is_ok_and(|mut file| {
+            crate::owned_wave_inspect::inspect(&mut file, None)
+                .is_ok_and(|info| info.sample_frames > 0)
+        })
 }
 fn apply_resolved(
     source: &Path,

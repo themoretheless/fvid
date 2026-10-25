@@ -1,0 +1,20 @@
+{
+  "batch": 320,
+  "accepted_ids": [
+    "FVID-0327"
+  ],
+  "status": "accepted",
+  "summary": "Derive MP4 concat segment duration only from selected output tracks",
+  "before": "Synthetic 40 ms AVC video with unselected 512-packet AAC track reproduced a second video frame at 10922666667 ns instead of 40000000 ns.",
+  "after": "Select output tracks before deriving segment duration. Exact packet PTS is 0/40 ms and native video duration is 80 ms. RGB parity, repeated EOF, rewind and seek at 0/39/40/79/80/100 ms pass.",
+  "source": "src/container/mp4_concat.rs",
+  "regression": "tests/mp4_concat_selected_clock.rs",
+  "evidence": "docs/improvements/evidence/mp4-concat-selected-clock/status.json",
+  "tests_run": [
+    "cargo test --locked --offline --features player --test mp4_concat_selected_clock --test native_mp4_concat --test mp4_concat_retained_plans",
+    "cargo test --locked --offline --test mp4_concat_selected_clock --test mp4_concat_retained_plans --test mp4_remux_plan_capacity",
+    "cargo test --locked --offline --features player --test mp4_concat_selected_clock",
+    "target/debug/deps/mp4_concat_selected_clock-442a15115cedf396"
+  ],
+  "results": "2 focused + 9 related player tests; 7 default tests. Final next_track_id metadata repair is documented and final fixture repeats pass; repetitions are not additional improvements."
+}

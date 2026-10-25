@@ -15,13 +15,26 @@ pub(crate) fn inspect<R: Read + Seek>(
 pub(crate) fn inspect_with_packet_limit<R: Read + Seek>(
     input: &mut R, audio_only: bool, cancel: Option<&CancelFlag>, packet_bytes: usize,
 ) -> Result<Vec<(u64, usize)>> {
+    inspect_with_packet_and_memory_limits(input, audio_only, cancel, packet_bytes, None)
+}
+pub(crate) fn inspect_with_packet_and_memory_limits<R: Read + Seek>(
+    input: &mut R,
+    audio_only: bool,
+    cancel: Option<&CancelFlag>,
+    packet_bytes: usize,
+    max_controlled_bytes: Option<usize>,
+) -> Result<Vec<(u64, usize)>> {
     if packet_bytes == 0 { return Err(invalid("packet byte limit must be positive")); }
+    if max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
     check(cancel)?;
     input.seek(SeekFrom::Start(0))?;
+    let effective_packet_bytes = packet_bytes.min(max_controlled_bytes.unwrap_or(usize::MAX));
     let mut reader = WebmReader::open(
         input,
         Limits {
-            packet_bytes,
+            packet_bytes: effective_packet_bytes,
             ..Default::default()
         },
     )?;
@@ -39,11 +52,23 @@ pub(crate) fn inspect_with_packet_limit<R: Read + Seek>(
             ".mka output requires audio-only Matroska input; no tracks are dropped",
         ));
     }
+    let index_bytes = reader
+        .packets
+        .len()
+        .checked_mul(std::mem::size_of::<(u64, usize)>())
+        .and_then(|n| n.checked_add(64 << 10))
+        .ok_or_else(|| invalid("Matroska copy index overflow"))?;
+    if max_controlled_bytes.is_some_and(|limit| index_bytes > limit) {
+        return Err(invalid("controlled memory budget exceeded"));
+    }
     let mut ends = Vec::new();
     ends.try_reserve_exact(reader.packets.len())
         .map_err(|_| invalid("cannot allocate Matroska copy index"))?;
     for packet in reader.packets {
         check(cancel)?;
+        if max_controlled_bytes.is_some_and(|limit| packet.size > limit) {
+            return Err(invalid("controlled memory budget exceeded"));
+        }
         let end = packet
             .offset
             .checked_add(
@@ -74,6 +99,18 @@ pub fn copy_with_packet_limit<R: Read + Seek, W: Write>(
     input: &mut R, output: &mut W, audio_only: bool,
     cancel: Option<&CancelFlag>, progress: Option<&ProgressHook>, packet_bytes: usize,
 ) -> Result<ProgressEvent> {
+    copy_with_packet_and_memory_limits(input, output, audio_only, cancel, progress, packet_bytes, None)
+}
+
+pub fn copy_with_packet_and_memory_limits<R: Read + Seek, W: Write>(
+    input: &mut R,
+    output: &mut W,
+    audio_only: bool,
+    cancel: Option<&CancelFlag>,
+    progress: Option<&ProgressHook>,
+    packet_bytes: usize,
+    max_controlled_bytes: Option<usize>,
+) -> Result<ProgressEvent> {
     check(cancel)?;
     let mut event = ProgressEvent {
         packets: 0,
@@ -83,7 +120,13 @@ pub fn copy_with_packet_limit<R: Read + Seek, W: Write>(
     if let Some(hook) = progress {
         hook.emit(event);
     }
-    let packets = inspect_with_packet_limit(input, audio_only, cancel, packet_bytes)?;
+    let packets = inspect_with_packet_and_memory_limits(
+        input,
+        audio_only,
+        cancel,
+        packet_bytes,
+        max_controlled_bytes,
+    )?;
     let length = input.seek(SeekFrom::End(0))?;
     if packets.last().is_some_and(|(end, _)| *end > length) {
         return Err(invalid("Matroska packet exceeds source length"));

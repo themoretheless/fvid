@@ -185,6 +185,39 @@ pub(crate) fn extract_adts_matroska_metadata(
     Ok((name, language, metadata, text, scoped))
 }
 
+pub(crate) fn estimate_adts_matroska_metadata_bytes(
+    options: Option<&fvid_control::CopyOptions>,
+) -> Result<usize> {
+    let (name, language, metadata, text, scoped) = extract_adts_matroska_metadata(options)?;
+    let mut raw_bytes = name.len().saturating_add(language.len());
+    for v in [
+        &metadata.tags.title,
+        &metadata.tags.artist,
+        &metadata.tags.album,
+        &metadata.tags.comment,
+        &metadata.tags.date,
+    ] {
+        if !v.is_empty() {
+            raw_bytes = raw_bytes.saturating_add(v.len()).saturating_add(32);
+        }
+    }
+    for (k, v) in &text {
+        raw_bytes = raw_bytes
+            .saturating_add(k.len())
+            .saturating_add(v.len())
+            .saturating_add(32);
+    }
+    for entries in scoped.values() {
+        for (k, v) in entries {
+            raw_bytes = raw_bytes
+                .saturating_add(k.len())
+                .saturating_add(v.len())
+                .saturating_add(32);
+        }
+    }
+    Ok(raw_bytes.saturating_mul(8))
+}
+
 #[allow(clippy::too_many_arguments)]
 fn write_aac_packets<W: Write + Seek>(
     config: adts::Header,
@@ -197,6 +230,12 @@ fn write_aac_packets<W: Write + Seek>(
     options: Option<&fvid_control::CopyOptions>,
 ) -> Result<ProgressEvent> {
     let samples = u64::from(AacConfig::parse(asc)?.frame_samples);
+    let meta_working_bytes = estimate_adts_matroska_metadata_bytes(options)?;
+    if let Some(limit) = options.and_then(|o| o.max_controlled_bytes)
+        && 16384usize.saturating_add(meta_working_bytes) > limit
+    {
+        return Err(invalid("controlled memory budget exceeded"));
+    }
     let (name, language, metadata, text, scoped) = extract_adts_matroska_metadata(options)?;
     let spec = TrackSpec {
         encoding: Encoding::Aac {

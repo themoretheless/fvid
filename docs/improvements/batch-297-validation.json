@@ -1,0 +1,22 @@
+{
+  "batch": 297,
+  "accepted": [
+    "FVID-0304"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-297-pre-edit/src/media.rs",
+    "docs/improvements/snapshots/batch-297-pre-edit/src/media_cli.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-297-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-297-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-297-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/remux-concat-controls/video-companion-8x8.y4m",
+    "tests/fixtures/playback-errors/remux-concat-controls/matroska-flac.mka"
+  ],
+  "tests": [
+    "tests/remux_concat_controls_regressions.rs"
+  ]
+}

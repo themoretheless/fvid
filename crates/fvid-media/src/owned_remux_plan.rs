@@ -16,17 +16,43 @@ pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<MediaPlan, Str
         return crate::owned_adts_remux::plan_remux(source, options);
     }
     if !supports(source, options) {
+        if !crate::owned_wave_inspect::is_wave(source).unwrap_or(false) {
+            if options.max_packet_bytes == 0 {
+                return Err("packet byte limit must be positive".into());
+            }
+            if options.max_controlled_bytes == Some(0) {
+                return Err("controlled memory limit must be positive".into());
+            }
+            if File::open(source).is_ok_and(|mut f| {
+                use std::io::Read;
+                let mut prefix = [0u8; 8];
+                f.read_exact(&mut prefix).is_ok() && crate::owned_mp4::recognizes_prefix(&prefix)
+            }) {
+                return crate::owned_mp4_remux::plan_remux(source, options);
+            }
+            if File::open(source).is_ok_and(|mut f| {
+                use std::io::Read;
+                let mut prefix = [0u8; 4];
+                f.read_exact(&mut prefix).is_ok() && prefix == [0x1a, 0x45, 0xdf, 0xa3]
+            }) {
+                return Err("request is not an owned Matroska identity remux".into());
+            }
+            if crate::owned_adts_export::recognizes(source).unwrap_or(false) {
+                return crate::owned_adts_remux::plan_remux(source, options);
+            }
+        }
         return crate::owned_wave_plan::plan_remux(source, options);
     }
     let mut input = File::open(source).map_err(|e| e.to_string())?;
     if !input.metadata().map_err(|e| e.to_string())?.is_file() {
         return Err("Matroska remux requires a regular file".into());
     }
-    let packets = crate::owned_matroska_copy::inspect_with_packet_limit(
+    let packets = crate::owned_matroska_copy::inspect_with_packet_and_memory_limits(
         &mut input,
         false,
         options.cancel.as_ref(),
         options.max_packet_bytes,
+        options.max_controlled_bytes,
     )
     .map_err(|e| e.to_string())?;
     let payload_bytes = packets.iter().try_fold(0u64, |sum, (_, size)| {
@@ -35,7 +61,7 @@ pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<MediaPlan, Str
     })?;
     let info = crate::owned_webm_probe::probe_webm_with_packet_limit(
         source,
-        options.max_packet_bytes,
+        options.max_packet_bytes.min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
     )?;
     let mut notes = vec![
         "backend: owned Matroska; no external demuxer or muxer".into(),
@@ -43,11 +69,12 @@ pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<MediaPlan, Str
         "identity request only: track/tag edits, packet-count caps and memory/RSS policies require further implementation".into(),
     ];
     if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        || options.max_controlled_bytes.is_some()
         || options.max_rss_bytes.is_some()
     {
         notes.push(format!(
-            "encoded packet limit: {} bytes; RSS limit: {:?}",
-            options.max_packet_bytes, options.max_rss_bytes
+            "encoded packet limit: {} bytes; controlled memory limit: {:?}; RSS limit: {:?}",
+            options.max_packet_bytes, options.max_controlled_bytes, options.max_rss_bytes
         ));
     }
     Ok(MediaPlan {

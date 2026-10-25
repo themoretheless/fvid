@@ -1,0 +1,13 @@
+{
+  "inactive_test_executables_removed": [
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_retained_plans-9d06920e1c1fdc63",
+      "bytes": 20452472
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_mp4_concat-ca6aaa032ad58a97",
+      "bytes": 32237312
+    }
+  ],
+  "preserved": "synthetic fixture, generator, source snapshot, regression tests, before/after/related logs and samples"
+}
