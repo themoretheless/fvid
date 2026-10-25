@@ -1,0 +1,185 @@
+{
+  "cases": [
+    {
+      "file": "vp9-hevc-vp9-insert0.mp4",
+      "source": "../mixed-layered-descriptions/vp9-hevc-vp9.mp4",
+      "insert": 0
+    },
+    {
+      "file": "vp9-hevc-vp9-insert1.mp4",
+      "source": "../mixed-layered-descriptions/vp9-hevc-vp9.mp4",
+      "insert": 1
+    },
+    {
+      "file": "vp9-hevc-vp9-insert2.mp4",
+      "source": "../mixed-layered-descriptions/vp9-hevc-vp9.mp4",
+      "insert": 2
+    },
+    {
+      "file": "vp9-hevc-vp9-fragmented-insert0.mp4",
+      "source": "../mixed-layered-descriptions/vp9-hevc-vp9-fragmented.mp4",
+      "insert": 0
+    },
+    {
+      "file": "vp9-hevc-vp9-fragmented-insert1.mp4",
+      "source": "../mixed-layered-descriptions/vp9-hevc-vp9-fragmented.mp4",
+      "insert": 1
+    },
+    {
+      "file": "vp9-hevc-vp9-fragmented-insert2.mp4",
+      "source": "../mixed-layered-descriptions/vp9-hevc-vp9-fragmented.mp4",
+      "insert": 2
+    },
+    {
+      "file": "hevc-vp9-hevc-insert0.mp4",
+      "source": "../mixed-layered-descriptions/hevc-vp9-hevc.mp4",
+      "insert": 0
+    },
+    {
+      "file": "hevc-vp9-hevc-insert1.mp4",
+      "source": "../mixed-layered-descriptions/hevc-vp9-hevc.mp4",
+      "insert": 1
+    },
+    {
+      "file": "hevc-vp9-hevc-insert2.mp4",
+      "source": "../mixed-layered-descriptions/hevc-vp9-hevc.mp4",
+      "insert": 2
+    },
+    {
+      "file": "hevc-vp9-hevc-fragmented-insert0.mp4",
+      "source": "../mixed-layered-descriptions/hevc-vp9-hevc-fragmented.mp4",
+      "insert": 0
+    },
+    {
+      "file": "hevc-vp9-hevc-fragmented-insert1.mp4",
+      "source": "../mixed-layered-descriptions/hevc-vp9-hevc-fragmented.mp4",
+      "insert": 1
+    },
+    {
+      "file": "hevc-vp9-hevc-fragmented-insert2.mp4",
+      "source": "../mixed-layered-descriptions/hevc-vp9-hevc-fragmented.mp4",
+      "insert": 2
+    },
+    {
+      "file": "av1-hevc-av1-insert0.mp4",
+      "source": "../mixed-layered-descriptions/av1-hevc-av1.mp4",
+      "insert": 0
+    },
+    {
+      "file": "av1-hevc-av1-insert1.mp4",
+      "source": "../mixed-layered-descriptions/av1-hevc-av1.mp4",
+      "insert": 1
+    },
+    {
+      "file": "av1-hevc-av1-insert2.mp4",
+      "source": "../mixed-layered-descriptions/av1-hevc-av1.mp4",
+      "insert": 2
+    },
+    {
+      "file": "av1-hevc-av1-fragmented-insert0.mp4",
+      "source": "../mixed-layered-descriptions/av1-hevc-av1-fragmented.mp4",
+      "insert": 0
+    },
+    {
+      "file": "av1-hevc-av1-fragmented-insert1.mp4",
+      "source": "../mixed-layered-descriptions/av1-hevc-av1-fragmented.mp4",
+      "insert": 1
+    },
+    {
+      "file": "av1-hevc-av1-fragmented-insert2.mp4",
+      "source": "../mixed-layered-descriptions/av1-hevc-av1-fragmented.mp4",
+      "insert": 2
+    },
+    {
+      "file": "all-owned-codecs-insert0.mp4",
+      "source": "../mixed-layered-descriptions/all-owned-codecs.mp4",
+      "insert": 0
+    },
+    {
+      "file": "all-owned-codecs-insert1.mp4",
+      "source": "../mixed-layered-descriptions/all-owned-codecs.mp4",
+      "insert": 1
+    },
+    {
+      "file": "all-owned-codecs-insert2.mp4",
+      "source": "../mixed-layered-descriptions/all-owned-codecs.mp4",
+      "insert": 2
+    },
+    {
+      "file": "all-owned-codecs-fragmented-insert0.mp4",
+      "source": "../mixed-layered-descriptions/all-owned-codecs-fragmented.mp4",
+      "insert": 0
+    },
+    {
+      "file": "all-owned-codecs-fragmented-insert1.mp4",
+      "source": "../mixed-layered-descriptions/all-owned-codecs-fragmented.mp4",
+      "insert": 1
+    },
+    {
+      "file": "all-owned-codecs-fragmented-insert2.mp4",
+      "source": "../mixed-layered-descriptions/all-owned-codecs-fragmented.mp4",
+      "insert": 2
+    },
+    {
+      "file": "pure-hevc-insert0.mp4",
+      "source": "../hevc-mp4-description-epochs/hvcC-zero-hdr-inter.mp4",
+      "insert": 0
+    },
+    {
+      "file": "pure-hevc-insert1.mp4",
+      "source": "../hevc-mp4-description-epochs/hvcC-zero-hdr-inter.mp4",
+      "insert": 1
+    },
+    {
+      "file": "pure-hevc-insert2.mp4",
+      "source": "../hevc-mp4-description-epochs/hvcC-zero-hdr-inter.mp4",
+      "insert": 2
+    },
+    {
+      "file": "pure-hevc-fragmented-insert0.mp4",
+      "source": "../hevc-mp4-description-epochs/hvcC-zero-hdr-inter-fragmented.mp4",
+      "insert": 0
+    },
+    {
+      "file": "pure-hevc-fragmented-insert1.mp4",
+      "source": "../hevc-mp4-description-epochs/hvcC-zero-hdr-inter-fragmented.mp4",
+      "insert": 1
+    },
+    {
+      "file": "pure-hevc-fragmented-insert2.mp4",
+      "source": "../hevc-mp4-description-epochs/hvcC-zero-hdr-inter-fragmented.mp4",
+      "insert": 2
+    }
+  ],
+  "refusals": [
+    {
+      "file": "active0.mp4",
+      "kind": "active",
+      "sample": 0
+    },
+    {
+      "file": "active1.mp4",
+      "kind": "active",
+      "sample": 1
+    },
+    {
+      "file": "external-reference.mp4",
+      "kind": "external"
+    },
+    {
+      "file": "active0-fragmented.mp4",
+      "kind": "active",
+      "sample": 0
+    },
+    {
+      "file": "active1-fragmented.mp4",
+      "kind": "active",
+      "sample": 1
+    },
+    {
+      "file": "external-reference-fragmented.mp4",
+      "kind": "external"
+    }
+  ],
+  "provenance": "Saved owned synthetic codec entropy; original sample-entry/table rewrites; no private media, subprocess or network."
+}

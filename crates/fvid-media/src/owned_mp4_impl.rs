@@ -1237,10 +1237,29 @@ fn parse_track(
     let language = std::mem::take(&mut result.language);
     let template = result.clone();
     let mut descriptions = Vec::new();
+    let mut supported = false;
+    let mut unknown_video = None;
     for entry in entries {
-        let Some(parsed) = parse_sample_entry(entry, template.clone(), refused, drawn, rotation)? else { return Ok(None); };
-        descriptions.push(SampleDescription::from_track(&parsed));
-        if descriptions.len() == 1 { result = parsed; }
+        let mut rejected = Vec::new();
+        if let Some(parsed) = parse_sample_entry(entry, template.clone(), &mut rejected, drawn, rotation)? {
+            descriptions.push(SampleDescription::from_track(&parsed));
+            if !supported { result = parsed; supported = true; }
+        } else if handler == *b"vide" {
+            // An unreferenced SampleEntry must not hide the supported entries.
+            // Its common header/data reference was validated above; the unknown
+            // codec's payload stays opaque and is never supplied to a decoder.
+            unknown_video.get_or_insert(entry.kind);
+            let mut opaque = template.clone();
+            opaque.codec = entry.kind;
+            descriptions.push(SampleDescription::from_track(&opaque));
+        } else {
+            refused.extend(rejected);
+            return Ok(None);
+        }
+    }
+    if !supported {
+        if let Some(codec) = unknown_video { refused.push(SkippedTrack {handler, codec}); }
+        return Ok(None);
     }
     result.name = name;
     result.language = language;

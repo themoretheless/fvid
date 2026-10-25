@@ -174,6 +174,9 @@ struct SingleLayerMp4VideoReader<R> {
 }
 /// Backward-compatible name for the indexed MP4 video reader.
 pub type Mp4AvcReader<R> = Mp4VideoReader<R>;
+fn supported_video_codec(codec: &[u8; 4]) -> bool {
+    matches!(codec, b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"vp09" | b"av01")
+}
 impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
     fn from_demuxer_with_hardware(
         demuxer: Mp4Reader<R>,
@@ -188,10 +191,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             .ok_or_else(|| invalid("MP4 track index out of range"))?;
 
         if track.handler != *b"vide"
-            || !matches!(
-                &track.codec,
-                b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"vp09" | b"av01"
-            )
+            || !track.description_for_sample(0).is_some_and(|d| supported_video_codec(&d.codec))
         {
             return Err(invalid(
                 "selected MP4 track is not AVC, HEVC, VP9 or AV1 video",
