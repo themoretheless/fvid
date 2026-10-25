@@ -1,0 +1,11 @@
+{
+  "batch_id": "FVID-0273",
+  "generator": "scripts/generate_audio_concat_packet_prefix_budget.py",
+  "provenance": "100% synthetic mono AAC-LC 48 kHz MP4 and Matroska segments (seg-a-small has two 8-byte packets; seg-b-mixed has an 8-byte packet 0 and a 48-byte packet 1); no FFmpeg, network, or private media.",
+  "sha256": {
+    "seg-a-small.m4a": "bd0377e50679a150e929510079bfbfc82e4f58ea24dcb617af613fd882b4a286",
+    "seg-a-small.mka": "a62bbad2f8c6d63d2ababcc4bae61ac37900db9a9218af7759196ee515a2c952",
+    "seg-b-mixed.m4a": "c5f7237c79d82d10ca6364c43bbb4408b90a820273b090cb1083126bbf9daa80",
+    "seg-b-mixed.mka": "4c8a2046b94f1504dbf8f089dec0aea01f2de0e680652c55c0e7e4730d9b815a"
+  }
+}

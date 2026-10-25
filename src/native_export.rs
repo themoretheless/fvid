@@ -75,6 +75,10 @@ pub fn export_y4m_pipeline_with_options(
     options: &fvid_media::CopyOptions,
 ) -> Result<crate::media_control::ProgressEvent> {
     validate_y4m_options(options)?;
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err(invalid("media operation cancelled"));
+    }
+    validate_video_selection(source, options.streams.first().copied())?;
     export_y4m_sources_with_options(
         &[source.to_owned()],
         destination,
@@ -121,6 +125,13 @@ pub fn concat_y4m_with_options(
 }
 
 pub(crate) fn validate_y4m_options(options: &fvid_media::CopyOptions) -> Result<()> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(crate::media_control::CancelFlag::is_cancelled)
+    {
+        return Err(invalid("media operation cancelled"));
+    }
     if options.streams.len() > 1
         || options.max_controlled_bytes.is_some()
         || !options.metadata_set.is_empty()
@@ -134,6 +145,137 @@ pub(crate) fn validate_y4m_options(options: &fvid_media::CopyOptions) -> Result<
         return Err(invalid("packet byte limit must be positive"));
     }
     fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))
+}
+
+pub(crate) fn inspect_first_y4m_frame(
+    source: &Path,
+    geometry: &crate::native_geometry::VideoGeometry,
+) -> Result<(
+    (u128, u128),
+    (usize, usize, &'static str, u8, bool, (u32, u32)),
+    usize,
+)> {
+    let mut reader = NativeReader::software(BufReader::new(File::open(source)?), usize::MAX)?;
+    let frame = reader
+        .read_frame_raw()?
+        .ok_or_else(|| invalid("input has no decoded video frames"))?;
+    let (start, end, scale) = reader
+        .frame_interval()
+        .ok_or_else(|| invalid("missing frame timing"))?;
+    let duration = end
+        .checked_sub(start)
+        .filter(|n| *n > 0)
+        .ok_or_else(|| invalid("invalid frame duration"))?;
+    let [width, height] = reader.dimensions();
+    let rotation = reader.rotation();
+    let (mut chroma, depth) = match &frame {
+        RawFrame::Planar(p) => (
+            match p.frame.subsampling {
+                Some([2, 2]) => "420",
+                Some([2, 1]) => "422",
+                Some([1, 1]) => "444",
+                _ => return Err(invalid("unsupported Y4M chroma layout")),
+            },
+            p.depth,
+        ),
+        RawFrame::Avc { picture, .. }
+            if width % 2 == 0
+                && height % 2 == 0
+                && picture.cb.len()
+                    == picture.coded_width.div_ceil(2) * picture.coded_height.div_ceil(2)
+                && picture.cr.len() == picture.cb.len() =>
+        {
+            ("420", picture.bit_depth)
+        }
+        RawFrame::Planar8(p) if p.chroma_width == p.width && p.chroma_height == p.height => {
+            ("444", 8)
+        }
+        RawFrame::Planar8(p)
+            if p.chroma_width == p.width.div_ceil(2) && p.chroma_height == p.height =>
+        {
+            ("422", 8)
+        }
+        RawFrame::Planar8(p)
+            if p.chroma_width == p.width.div_ceil(2) && p.chroma_height == p.height.div_ceil(2) =>
+        {
+            ("420", 8)
+        }
+        _ => return Err(invalid("Y4M export requires supported planar frames")),
+    };
+    let full = match &frame {
+        RawFrame::Avc { colour, .. } => colour.full,
+        RawFrame::Planar8(p) => p.colour.full,
+        RawFrame::Planar(p) => p.colour.full,
+        _ => reader.colour().full_range,
+    };
+    let insets = reader.insets();
+    let [visible_w, visible_h] =
+        crate::virtual_camera::visible_dimensions([width, height], insets)?;
+    let aspect = transformed_aspect(reader.pixel_aspect(), visible_w, visible_h, geometry)?;
+    let (width, height) = if geometry.is_identity() && rotation == 0 && insets == [0; 4] {
+        (width, height)
+    } else {
+        let picture = geometry.apply_cropped_display(&frame, width, height, rotation, insets)?;
+        chroma = match picture.subsampling {
+            Some([2, 2]) => "420",
+            Some([2, 1]) => "422",
+            Some([1, 1]) => "444",
+            _ => {
+                return Err(invalid(
+                    "Y4M export cannot represent this transformed chroma layout",
+                ));
+            }
+        };
+        (picture.width, picture.height)
+    };
+    let cw = if chroma == "444" {
+        width
+    } else {
+        width.div_ceil(2)
+    };
+    let ch = if chroma == "420" {
+        height.div_ceil(2)
+    } else {
+        height
+    };
+    let bytes = width
+        .checked_mul(height)
+        .and_then(|n| {
+            cw.checked_mul(ch)
+                .and_then(|c| c.checked_mul(2))
+                .and_then(|c| n.checked_add(c))
+        })
+        .and_then(|n| n.checked_mul(if depth == 8 { 1 } else { 2 }))
+        .ok_or_else(|| invalid("Y4M payload count overflow"))?;
+    Ok((
+        (duration, u128::from(scale)),
+        (width, height, chroma, depth, full, aspect),
+        bytes,
+    ))
+}
+
+pub(crate) fn validate_y4m_concat_compatibility(sources: &[PathBuf]) -> Result<()> {
+    let mut first_rate: Option<(u128, u128)> = None;
+    let mut first_layout = None;
+    for source in sources {
+        let ((duration, scale), layout, _) =
+            inspect_first_y4m_frame(source, &Default::default())?;
+        if let Some((first_duration, first_scale)) = first_rate {
+            if product(duration, first_scale)? != product(first_duration, scale)? {
+                return Err(invalid("Y4M concat requires identical frame rates"));
+            }
+        } else {
+            first_rate = Some((duration, scale));
+        }
+        if let Some(expected) = first_layout {
+            if expected != layout {
+                return Err(invalid("Y4M export requires fixed frame geometry and depth"));
+            }
+        } else {
+            first_layout = Some(layout);
+        }
+    }
+    Ok(())
 }
 
 pub(crate) fn validate_video_selection(source: &Path, selected: Option<usize>) -> Result<()> {
@@ -151,6 +293,216 @@ pub(crate) fn validate_video_selection(source: &Path, selected: Option<usize>) -
         return Err(invalid("video-only export requires explicit selection when other tracks exist"));
     }
     Ok(())
+}
+
+pub(crate) fn validate_video_packet_budget(
+    source: &Path,
+    options: &fvid_media::CopyOptions,
+) -> Result<()> {
+    validate_video_packet_budget_with_geometry_and_limit(
+        source,
+        &Default::default(),
+        options,
+        options.max_packets,
+    )
+}
+
+pub(crate) fn validate_video_packet_budget_with_geometry(
+    source: &Path,
+    geometry: &crate::native_geometry::VideoGeometry,
+    options: &fvid_media::CopyOptions,
+) -> Result<()> {
+    validate_video_packet_budget_with_geometry_and_limit(
+        source,
+        geometry,
+        options,
+        options.max_packets,
+    )
+}
+
+pub(crate) fn validate_video_packet_budget_with_geometry_and_limit(
+    source: &Path,
+    geometry: &crate::native_geometry::VideoGeometry,
+    options: &fvid_media::CopyOptions,
+    max_packets: Option<u64>,
+) -> Result<()> {
+    use std::io::Read;
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    let mut file = File::open(source)?;
+    let mut prefix = [0u8; 9];
+    let read = file.read(&mut prefix)?;
+    if read == 9 && &prefix == b"YUV4MPEG2" {
+        let mut input = BufReader::new(File::open(source)?);
+        let mut line = Vec::new();
+        if crate::line(&mut input, &mut line)? {
+            let header = crate::Header::parse(&line)?;
+            if header.frame_len()? > options.max_packet_bytes {
+                return Err(invalid("Y4M frame exceeds byte limit"));
+            }
+        }
+        if !geometry.is_identity()
+            && options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes
+        {
+            let (_, _, bytes) = inspect_first_y4m_frame(source, geometry)?;
+            if bytes > options.max_packet_bytes {
+                return Err(invalid("Y4M frame exceeds byte limit"));
+            }
+        }
+        return Ok(());
+    }
+    if options.max_packet_bytes == fvid_media::CopyOptions::default().max_packet_bytes {
+        return Ok(());
+    }
+    let selected = options.streams.first().copied();
+    let max_samples = max_packets
+        .map(|limit| usize::try_from(limit.max(1)).unwrap_or(usize::MAX))
+        .unwrap_or(usize::MAX);
+    if read >= 8 && crate::container::mp4::recognizes_prefix(&prefix[..8]) {
+        let reader = crate::container::mp4::Mp4Reader::open(
+            BufReader::new(File::open(source)?),
+            crate::container::mp4::Limits::default(),
+        )?;
+        for (idx, track) in reader.tracks().iter().enumerate() {
+            if track.handler != *b"vide" || selected.is_some_and(|sel| sel != idx) {
+                continue;
+            }
+            let sample_limit = if track.edits.is_empty()
+                && track
+                    .samples
+                    .expanded()
+                    .is_some_and(|samples| samples.windows(2).all(|w| w[0].pts <= w[1].pts))
+            {
+                max_samples
+            } else {
+                usize::MAX
+            };
+            let exceeds = match &track.samples {
+                crate::container::mp4::SampleIndex::Expanded(samples) => samples
+                    .iter()
+                    .take(sample_limit)
+                    .any(|s| s.size as usize > options.max_packet_bytes),
+                crate::container::mp4::SampleIndex::Uniform(uniform) => {
+                    uniform.count > 0
+                        && sample_limit > 0
+                        && uniform.bytes_per_frame as usize > options.max_packet_bytes
+                }
+            };
+            if exceeds {
+                return Err(invalid("MP4 packet exceeds budget"));
+            }
+        }
+        let (_, _, bytes) = inspect_first_y4m_frame(source, geometry)?;
+        if bytes > options.max_packet_bytes {
+            return Err(invalid("Y4M frame exceeds byte limit"));
+        }
+        return Ok(());
+    }
+    if read >= 4 && prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
+        let mut reader = crate::container::webm::WebmReader::open(
+            BufReader::new(File::open(source)?),
+            crate::container::webm::Limits::default(),
+        )?;
+        reader.scan_all()?;
+        let selected_tracks: Vec<(u64, bool)> = reader
+            .tracks
+            .iter()
+            .enumerate()
+            .filter(|(idx, t)| t.kind == 1 && selected.is_none_or(|sel| sel == *idx))
+            .map(|(_, t)| {
+                (
+                    t.number,
+                    matches!(t.codec.as_str(), "V_VP9" | "V_AV1" | "V_FFV1"),
+                )
+            })
+            .collect();
+        let mut visible_on_track = 0usize;
+        for index in 0..reader.packets.len() {
+            let packet = &reader.packets[index];
+            let Some((_, non_reordered)) = selected_tracks
+                .iter()
+                .find(|(num, _)| *num == packet.track)
+            else {
+                continue;
+            };
+            if *non_reordered && visible_on_track >= max_samples {
+                break;
+            }
+            if reader.packet_payload_size(index)? > options.max_packet_bytes {
+                return Err(invalid("WebM packet exceeds budget"));
+            }
+            if !packet.invisible {
+                visible_on_track = visible_on_track.saturating_add(1);
+            }
+        }
+        let (_, _, bytes) = inspect_first_y4m_frame(source, geometry)?;
+        if bytes > options.max_packet_bytes {
+            return Err(invalid("Y4M frame exceeds byte limit"));
+        }
+    }
+    Ok(())
+}
+
+pub(crate) fn y4m_segment_frame_upper_bound(
+    source: &Path,
+    selected: Option<usize>,
+) -> Result<Option<u64>> {
+    use std::io::Read;
+    let mut file = File::open(source)?;
+    let mut prefix = [0u8; 9];
+    let read = file.read(&mut prefix)?;
+    if read == 9 && &prefix == b"YUV4MPEG2" {
+        let metadata = file.metadata()?;
+        let mut input = BufReader::new(File::open(source)?);
+        let mut line = Vec::new();
+        if !crate::line(&mut input, &mut line)? {
+            return Ok(Some(0));
+        }
+        let header = crate::Header::parse(&line)?;
+        let stride = (header.frame_len()? as u64).saturating_add(6);
+        let payload = metadata.len().saturating_sub(line.len() as u64);
+        if stride > 0 && payload % stride == 0 {
+            return Ok(Some(payload / stride));
+        }
+        return Ok(None);
+    }
+    if read >= 8 && crate::container::mp4::recognizes_prefix(&prefix[..8]) {
+        let reader = crate::container::mp4::Mp4Reader::open(
+            BufReader::new(File::open(source)?),
+            crate::container::mp4::Limits::default(),
+        )?;
+        for (idx, track) in reader.tracks().iter().enumerate() {
+            if track.handler != *b"vide" || selected.is_some_and(|sel| sel != idx) {
+                continue;
+            }
+            if track.edits.is_empty() {
+                return Ok(Some(track.samples.len() as u64));
+            }
+            return Ok(None);
+        }
+        return Ok(None);
+    }
+    if read >= 4 && prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
+        let mut reader = crate::container::webm::WebmReader::open(
+            BufReader::new(File::open(source)?),
+            crate::container::webm::Limits::default(),
+        )?;
+        reader.scan_all()?;
+        for (idx, track) in reader.tracks.iter().enumerate() {
+            if track.kind != 1 || selected.is_some_and(|sel| sel != idx) {
+                continue;
+            }
+            let number = track.number;
+            let count = reader
+                .packets
+                .iter()
+                .filter(|p| p.track == number && !p.invisible)
+                .count() as u64;
+            return Ok(Some(count));
+        }
+    }
+    Ok(None)
 }
 
 struct Y4mInterval {
@@ -215,6 +567,17 @@ fn export_y4m_sources_with_options(
     let mut payload_bytes=0u64;
     'sources: for source in sources {
     control.check()?;
+    let remaining_packets = if interval.is_none_or(|(from, _)| from.is_zero()) {
+        control.packet_limit().map(|limit| limit.saturating_sub(count))
+    } else {
+        None
+    };
+    validate_video_packet_budget_with_geometry_and_limit(
+        source,
+        geometry,
+        options,
+        remaining_packets,
+    )?;
     if control.packet_limit_reached() {
         break;
     }
@@ -222,11 +585,14 @@ fn export_y4m_sources_with_options(
     let segment_start=count;
     let mut origin=None;
     let mut previous: Option<(u128, u128, u128)> = None;
-    while let Some(frame) = reader.read_frame_raw()? {
+    loop {
         control.check()?;
         if control.packet_limit_reached() {
             break 'sources;
         }
+        let Some(frame) = reader.read_frame_raw()? else {
+            break;
+        };
         let (start, end, scale) = reader
             .frame_interval()
             .ok_or_else(|| invalid("missing frame timing"))?;
@@ -676,6 +1042,7 @@ fn probe_mp4_audio_geometry<R: std::io::Read + std::io::Seek>(
     reader: &mut crate::container::mp4::Mp4Reader<R>,
     allow_wave: bool,
     selected: Option<usize>,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
     control: &mut crate::native_media::DecodeProgress<'_>,
 ) -> Result<(u32, u16, Option<u32>)> {
     let index = if allow_wave {
@@ -683,7 +1050,8 @@ fn probe_mp4_audio_geometry<R: std::io::Read + std::io::Seek>(
     } else {
         crate::native_media::mp4_aac_index(reader, selected)?
     };
-    let in_band_ps = crate::native_media::negotiate_mp4_ps(reader, index, || control.check())?;
+    let max_packets = control.packet_limit();
+    let in_band_ps = crate::native_media::negotiate_mp4_ps_with_interval(reader, index, interval, max_packets, || control.check())?;
     let source_track = &reader.tracks()[index];
     let first = source_track.samples.get(0).ok_or_else(|| invalid("MP4 audio has no samples"))?;
     let setup = source_track.decoder_setup(first.description_index)?;
@@ -700,6 +1068,7 @@ fn probe_matroska_audio_geometry<R: std::io::Read + std::io::Seek>(
     reader: &mut crate::container::webm::WebmReader<R>,
     allow_wave: bool,
     selected: Option<usize>,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
     control: &mut crate::native_media::DecodeProgress<'_>,
 ) -> Result<(u32, u16, Option<u32>)> {
     let index = if allow_wave {
@@ -707,7 +1076,8 @@ fn probe_matroska_audio_geometry<R: std::io::Read + std::io::Seek>(
     } else {
         crate::native_media::matroska_aac_index(reader, selected)?
     };
-    let in_band_ps = crate::native_media::negotiate_matroska_ps(reader, index, || control.check())?;
+    let max_packets = control.packet_limit();
+    let in_band_ps = crate::native_media::negotiate_matroska_ps_with_interval(reader, index, interval, max_packets, || control.check())?;
     let track = &reader.tracks[index];
     let decoder = if in_band_ps {
         crate::native_audio_decoder::PacketPcmDecoder::Ps(Box::new(
@@ -757,11 +1127,19 @@ fn export_pcm_selected(    source: &Path,
         info.validate_decode()?;
         (None,None,None,Some((input,info)))
     } else if crate::container::mp4::recognizes_prefix(&prefix) {
-        let mut limits = crate::container::mp4::Limits::default();
-        if let Some(maximum) = max_packet_bytes { limits.packet_bytes = limits.packet_bytes.min(maximum); }
-        (Some(crate::container::mp4::Mp4Reader::open_indexed(input, limits)?), None, None,None)
+        let mut reader = crate::container::mp4::Mp4Reader::open_indexed(
+            input,
+            crate::container::mp4::Limits::default(),
+        )?;
+        if let Some(maximum) = max_packet_bytes {
+            reader.restrict_packet_bytes(maximum);
+        }
+        (Some(reader), None, None, None)
     } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-        let mut reader = crate::container::webm::WebmReader::open(input, Default::default())?;
+        let mut reader = crate::container::webm::WebmReader::open(
+            input,
+            crate::container::webm::Limits::default(),
+        )?;
         if let Some(maximum) = max_packet_bytes { reader.restrict_packet_bytes(maximum); }
         (None, Some(reader), None,None)
     } else {
@@ -772,9 +1150,9 @@ fn export_pcm_selected(    source: &Path,
         Some(crate::native_media::negotiate_adts_aac_reader(reader, interval, &mut control)?)
     } else { None };
     let (mut input_rate, mut input_channels, mut native_mask) = if let Some(reader) = &mut mp4 {
-        probe_mp4_audio_geometry(reader, allow_wave, selected, &mut control)?
+        probe_mp4_audio_geometry(reader, allow_wave, selected, interval, &mut control)?
     } else if let Some(reader) = &mut matroska {
-        probe_matroska_audio_geometry(reader, allow_wave, selected, &mut control)?
+        probe_matroska_audio_geometry(reader, allow_wave, selected, interval, &mut control)?
     } else if let Some((_,info))=&wave {
         (info.sample_rate,info.channels,Some(info.channel_mask))
     } else {
@@ -787,7 +1165,7 @@ fn export_pcm_selected(    source: &Path,
     let mp4_target = if let Some(reader) = &mut mp4 {
         let index = if allow_wave { crate::native_media::mp4_audio_index(reader, selected)? }
             else { crate::native_media::mp4_aac_index(reader, selected)? };
-        if crate::native_media::mp4_normalized_geometry_controlled(reader,index,||control.check())?.is_some()
+        if crate::native_media::mp4_normalized_geometry_controlled_with_interval(reader,index,interval,max_packets,||control.check())?.is_some()
             || channels.is_some_and(|n| n != input_channels)
             || (native_mask != Some(0) && sample_rate.is_some_and(|n| n != input_rate))
         {
@@ -846,12 +1224,12 @@ fn export_pcm_selected(    source: &Path,
                 reader.tags(),
                 &track.name,
                 &track.language,
-                None,
+                Some(reader.encoder()),
                 &std::collections::BTreeMap::new(),
             )
             .map_err(|e| invalid(&e))?
         } else if let Some(reader) = &mut matroska {
-            let _ = reader.scan_all();
+            reader.scan_all()?;
             let index = if allow_wave {
                 crate::native_media::matroska_audio_index(reader, selected)?
             } else {
@@ -876,7 +1254,7 @@ fn export_pcm_selected(    source: &Path,
                 &reader.tags,
                 &track.name,
                 language,
-                Some(&reader.writing_app),
+                if allow_wave { Some(&reader.writing_app) } else { None },
                 &extra,
             )
             .map_err(|e| invalid(&e))?
@@ -903,11 +1281,13 @@ fn export_pcm_selected(    source: &Path,
         if let Some(meta) = source_matroska_metadata {
             Some(meta)
         } else {
-            Some(pcm_matroska::extract_source_pcm_metadata(
+            Some(pcm_matroska::extract_source_pcm_metadata_with_interval_and_packet_limit(
                 source,
                 selected,
                 allow_wave,
+                interval,
                 max_packet_bytes,
+                options.and_then(|o| o.max_packets),
                 cancel,
             )?)
         }
@@ -1090,10 +1470,9 @@ pub fn concat_adts_aac_with_options(
     let mut readers=Vec::with_capacity(sources.len());
     for source in sources {
         if options.cancel.as_ref().is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
-        readers.push(crate::container::adts::StreamReader::open_with_packet_limit(
-            BufReader::new(File::open(source)?),
-            options.max_packet_bytes,
-        )?);
+        let mut reader = crate::container::adts::StreamReader::open(BufReader::new(File::open(source)?))?;
+        reader.restrict_packet_bytes(options.max_packet_bytes);
+        readers.push(reader);
     }
     publish_adts_readers_limited(
         readers,
@@ -1237,18 +1616,19 @@ pub fn trim_audio_pcm_with_controls(
         return Err(invalid("media operation cancelled"));
     }
     let selected = options.streams.first().copied();
-    let (index, allow_wave) = if crate::native_media::is_aac_trim_source(source, selected)? {
+    let interval = (
+        std::time::Duration::from_micros(from as u64),
+        std::time::Duration::from_micros(to as u64),
+    );
+    let (index, allow_wave) = if crate::native_media::is_aac_trim_source_with_interval_and_options(source, selected, Some(interval), options)? {
         (crate::native_plan::aac_trim_selection(source, selected).map_err(|e| invalid(&e))?, false)
     } else {
-        (crate::native_plan::audio_trim_selection(source, selected).map_err(|e| invalid(&e))?, true)
+        (crate::native_plan::audio_trim_selection_with_interval_and_options(source, selected, Some(interval), options).map_err(|e| invalid(&e))?, true)
     };
     export_pcm_selected(
         source,
         destination,
-        Some((
-            std::time::Duration::from_micros(from as u64),
-            std::time::Duration::from_micros(to as u64),
-        )),
+        Some(interval),
         PcmTransform {
             volume: 1.0,
             channels: None,
@@ -1532,42 +1912,23 @@ pub fn try_concat_mp4_matroska_with_options(
     }
     fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
     let segments = if matroska_out {
-        crate::container::mp4_concat::open_with_packet_limit(
-            sources,
-            cancel,
-            options.max_packet_bytes,
-        )?
+        crate::container::mp4_concat::open_with_options(sources, options)?
     } else {
         None
     };
     let Some(mut segments) = segments else {
         let mut default_opts = fvid_media::CopyOptions::default();
         default_opts.cancel = options.cancel.clone();
-        if !crate::native_audio_mix::concat_eligible_with_options(sources, &default_opts)? {return Ok(None);}
-        let mut decode_options = options.clone();
-        decode_options.max_packets = None;
-        decode_options.streams.clear();
-        decode_options.metadata_set.clear();
-        decode_options.metadata_delete.clear();
-        decode_options.stream_metadata_set.clear();
-        decode_options.stream_metadata_delete.clear();
-        for source in sources {
-            if options.max_controlled_bytes.is_none()
-                && (crate::native_pcm::is_wave(source)?
-                    || crate::native_media::is_owned_audio_source(source)?)
-            {
-                if crate::native_pcm::is_wave(source)? {
-                    let info = crate::native_pcm::inspect(&mut File::open(source)?, cancel)?;
-                    info.validate_decode()?;
-                }
-            } else {
-                fvid_media::plan_decode_audio(source, &Default::default(), &decode_options)
-                    .map_err(|e| invalid(&e))?;
-            }
+        if !crate::native_audio_mix::concat_eligible_with_options(sources, &default_opts)? {
+            return Ok(None);
         }
-        let stats=crate::native_audio_mix::concat_audio_with_options(sources,destination,options)?;
-        return Ok(Some(crate::media_control::ProgressEvent {packets:stats.decoded_frames,
-            payload_bytes:stats.sample_frames*u64::from(stats.channels)*4,done:true}));
+        let stats =
+            crate::native_audio_mix::concat_audio_with_options(sources, destination, options)?;
+        return Ok(Some(crate::media_control::ProgressEvent {
+            packets: stats.decoded_frames,
+            payload_bytes: stats.sample_frames * u64::from(stats.channels) * 4,
+            done: true,
+        }));
     };
     if options.max_controlled_bytes.is_some() {
         return Err(invalid("compressed MP4 concat does not support controlled memory budgets"));

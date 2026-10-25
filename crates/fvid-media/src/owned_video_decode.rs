@@ -118,14 +118,12 @@ pub(crate) fn decode_webm(
         return Ok(None);
     }
     let mut reader_limits = crate::owned_webm::Limits::default();
-    if let Some(options) = options { reader_limits.packet_bytes = options.max_packet_bytes; }
     let mut reader = crate::owned_webm::WebmReader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         reader_limits,
     )
     .map_err(|e| e.to_string())?;
     if let Some(options) = options {
-        reader.restrict_packet_bytes(options.max_packet_bytes);
         if options
             .cancel
             .as_ref()
@@ -135,6 +133,22 @@ pub(crate) fn decode_webm(
         }
     }
     reader.scan_all().map_err(|e| e.to_string())?;
+    if let Some(options) = options {
+        reader.restrict_packet_bytes(options.max_packet_bytes);
+        if let Some(track) = crate::owned_webm_codec::video_track(&reader) {
+            let number = track.number;
+            for (index, p) in reader.packets.iter().enumerate() {
+                if p.track == number
+                    && reader
+                        .packet_payload_size(index)
+                        .map_err(|e| e.to_string())?
+                        > options.max_packet_bytes
+                {
+                    return Err("WebM packet exceeds budget or has empty lace frame".into());
+                }
+            }
+        }
+    }
     let inferred = if visit.is_some() && crate::owned_webm_codec::video_track(&reader).is_some_and(|t| matches!(t.codec.as_str(),"V_VP9"|"V_AV1"|"V_MPEGH/ISO/HEVC"|"V_MPEG4/ISO/AVC")) {
         let Some(durations)=crate::owned_webm_codec::presentation_durations(&mut reader,options)? else {return Ok(None);};
         Some(durations)

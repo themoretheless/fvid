@@ -11,6 +11,13 @@ use std::{
 };
 type Result<T> = std::result::Result<T, String>;
 pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<(Program, Vec<u8>)> {
+    open_with_transform(source, None, options)
+}
+pub(crate) fn open_with_transform(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(Program, Vec<u8>)> {
     check(options)?;
     let mut file = File::open(source).map_err(|e| e.to_string())?;
     let (limits, index) = preflight(&mut file, options)?;
@@ -98,6 +105,17 @@ pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<(Program, Vec
         selection,
     )
     .map_err(|e| e.to_string())?;
+    let rate = program.sample_rate();
+    let until = transform
+        .and_then(|t| crate::owned_adts_export::decoded_prefix(t, rate))
+        .map(|(_, end)| {
+            u64::try_from((end.as_nanos() * u128::from(rate)).div_ceil(1_000_000_000))
+                .map_err(|_| "Vorbis prefix overflow".to_string())
+        })
+        .transpose()?;
+    if program.max_packet_size_in_prefix(until, options.max_packets) > options.max_packet_bytes {
+        return Err("Vorbis compressed packet exceeds byte limit".into());
+    }
     check(options)?;
     Ok((program, info))
 }
@@ -106,7 +124,7 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    match open(source, options) {
+    match open_with_transform(source, Some(transform), options) {
         Ok((p, _)) => {
             let target = transform.channels.unwrap_or(i32::from(p.channels()));
             target == i32::from(p.channels())
@@ -300,7 +318,7 @@ pub(crate) fn apply(
         return Err("destination already exists".into());
     }
     check(options)?;
-    let (mut program, info) = open(source, options)?;
+    let (mut program, info) = open_with_transform(source, Some(transform), options)?;
     let rate = program.sample_rate();
     let channels = program.channels();
     let until = crate::owned_adts_export::decoded_prefix(transform, rate)
