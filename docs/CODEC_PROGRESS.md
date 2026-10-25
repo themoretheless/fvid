@@ -1,5 +1,28 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## Native layered HEVC in Matroska, 2026-10-25
+
+Matroska now resolves the first coded slice's active PPS/SPS/VPS chain, including
+CodecPrivate and early in-band updates, and selects the same automatic output
+layer set as MP4. Multilayer streams use FVid's owned layered reconstruction and
+output queue. Each emitted AU retains its original block timestamp, visibility,
+immutable SPS colour description and HDR snapshot. One display view is selected
+per AU, with the highest eligible output layer; alternative output remains the
+codec's decision. Hardware single-layer decoding is disabled for this path.
+
+The original synthetic Matroska family rewraps 38 accepted coded witnesses and
+one contradictory-output refusal. Acceptance compares exact packed samples,
+source depth/geometry, RGB conversion, timestamps, rewind and seek with native
+MP4 controls. It includes independent/dependent layers, separate colour planes,
+in-band/empty configuration bootstrap and missing/hidden alternative outputs.
+Generation is offline and separate from tests; it uses no codec process or
+private media. Seek currently replays from the first selected-track packet,
+because a Matroska keyframe flag alone cannot establish all required layer
+restart conditions. Optimized layered seek and further VPS-epoch/temporal/output
+combinations still need dedicated qualification; these cases do not prove
+universal HEVC coverage.
+
+
 ## HEVC NoClrasOutput first-picture flags, 2026-10-12
 
 POC preview now resets FirstPicInLayerDecodedFlag for every layer on a smallest-

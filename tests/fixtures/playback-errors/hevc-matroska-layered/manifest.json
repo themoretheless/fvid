@@ -1,0 +1,280 @@
+{
+  "cases": [
+    {
+      "file": "hevc-layered-reconstruct-pcm-independent.mkv",
+      "control": "hevc-layered-reconstruct-pcm-independent.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "hevc-layered-reconstruct-shared-pps.mkv",
+      "control": "hevc-layered-reconstruct-shared-pps.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "hevc-layered-reconstruct-pcm-dependent.mkv",
+      "control": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "hevc-layered-reconstruct-multilayer-sps.mkv",
+      "control": "hevc-layered-reconstruct-multilayer-sps.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "hevc-layered-reconstruct-inter-prediction.mkv",
+      "control": "hevc-layered-reconstruct-inter-prediction.mp4",
+      "frames": 2,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "hevc-layered-reconstruct-inter-prediction-output-highest.mkv",
+      "control": "hevc-layered-reconstruct-inter-prediction-output-highest.mp4",
+      "frames": 2,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "hevc-layered-reconstruct-multislice-independent.mkv",
+      "control": "hevc-layered-reconstruct-multislice-independent.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "hevc-layered-reconstruct-multislice-dependent.mkv",
+      "control": "hevc-layered-reconstruct-multislice-dependent.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "hevc-layered-reconstruct-colour-planes-independent.mkv",
+      "control": "hevc-layered-reconstruct-colour-planes-independent.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "hevc-layered-reconstruct-colour-planes-dependent.mkv",
+      "control": "hevc-layered-reconstruct-colour-planes-dependent.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "pcm-independent-base-inline.mkv",
+      "control": "hevc-inband-layered-dispatch/pcm-independent-base-inline.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "pcm-independent-base-prefix.mkv",
+      "control": "hevc-inband-layered-dispatch/pcm-independent-base-prefix.mp4",
+      "frames": 2,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "pcm-independent-empty-inline.mkv",
+      "control": "hevc-inband-layered-dispatch/pcm-independent-empty-inline.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "pcm-independent-empty-prefix.mkv",
+      "control": "hevc-inband-layered-dispatch/pcm-independent-empty-prefix.mp4",
+      "frames": 2,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "pcm-independent-multiple-vps.mkv",
+      "control": "hevc-inband-layered-dispatch/pcm-independent-multiple-vps.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "pcm-dependent-base-inline.mkv",
+      "control": "hevc-inband-layered-dispatch/pcm-dependent-base-inline.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "pcm-dependent-base-prefix.mkv",
+      "control": "hevc-inband-layered-dispatch/pcm-dependent-base-prefix.mp4",
+      "frames": 2,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "pcm-dependent-empty-inline.mkv",
+      "control": "hevc-inband-layered-dispatch/pcm-dependent-empty-inline.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "pcm-dependent-empty-prefix.mkv",
+      "control": "hevc-inband-layered-dispatch/pcm-dependent-empty-prefix.mp4",
+      "frames": 2,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "pcm-dependent-multiple-vps.mkv",
+      "control": "hevc-inband-layered-dispatch/pcm-dependent-multiple-vps.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "multislice-dependent-base-inline.mkv",
+      "control": "hevc-inband-layered-dispatch/multislice-dependent-base-inline.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "multislice-dependent-base-prefix.mkv",
+      "control": "hevc-inband-layered-dispatch/multislice-dependent-base-prefix.mp4",
+      "frames": 2,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "multislice-dependent-empty-inline.mkv",
+      "control": "hevc-inband-layered-dispatch/multislice-dependent-empty-inline.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "multislice-dependent-empty-prefix.mkv",
+      "control": "hevc-inband-layered-dispatch/multislice-dependent-empty-prefix.mp4",
+      "frames": 2,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "multislice-dependent-multiple-vps.mkv",
+      "control": "hevc-inband-layered-dispatch/multislice-dependent-multiple-vps.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "colour-planes-independent-base-inline.mkv",
+      "control": "hevc-inband-layered-dispatch/colour-planes-independent-base-inline.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "colour-planes-independent-base-prefix.mkv",
+      "control": "hevc-inband-layered-dispatch/colour-planes-independent-base-prefix.mp4",
+      "frames": 2,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "colour-planes-independent-empty-inline.mkv",
+      "control": "hevc-inband-layered-dispatch/colour-planes-independent-empty-inline.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "colour-planes-independent-empty-prefix.mkv",
+      "control": "hevc-inband-layered-dispatch/colour-planes-independent-empty-prefix.mp4",
+      "frames": 2,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "colour-planes-independent-multiple-vps.mkv",
+      "control": "hevc-inband-layered-dispatch/colour-planes-independent-multiple-vps.mp4",
+      "frames": 1,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "inter-prediction-base-inline.mkv",
+      "control": "hevc-inband-layered-dispatch/inter-prediction-base-inline.mp4",
+      "frames": 2,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "inter-prediction-base-prefix.mkv",
+      "control": "hevc-inband-layered-dispatch/inter-prediction-base-prefix.mp4",
+      "frames": 3,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "inter-prediction-empty-inline.mkv",
+      "control": "hevc-inband-layered-dispatch/inter-prediction-empty-inline.mp4",
+      "frames": 2,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "inter-prediction-empty-prefix.mkv",
+      "control": "hevc-inband-layered-dispatch/inter-prediction-empty-prefix.mp4",
+      "frames": 3,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "inter-prediction-multiple-vps.mkv",
+      "control": "hevc-inband-layered-dispatch/inter-prediction-multiple-vps.mp4",
+      "frames": 2,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "hevc-layered-output-alternative-missing.mkv",
+      "control": "hevc-layered-output-alternative-missing.mp4",
+      "frames": 2,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "hevc-layered-output-disabled-missing.mkv",
+      "control": "hevc-layered-output-disabled-missing.mp4",
+      "frames": 2,
+      "interval_ns": 40000000,
+      "error": null
+    },
+    {
+      "file": "hevc-layered-output-alternative-hidden.mkv",
+      "control": "hevc-layered-output-alternative-hidden.mp4",
+      "frames": 2,
+      "interval_ns": 40000000,
+      "error": null
+    }
+  ],
+  "refusals": [
+    {
+      "file": "hevc-layered-output-alternative-disagree.mkv",
+      "control": "hevc-layered-output-alternative-disagree.mp4",
+      "frames": 2,
+      "interval_ns": 40000000,
+      "error": "HEVC alternative output pic_output_flag disagrees across layers"
+    }
+  ],
+  "provenance": "Repository-owned layered HEVC entropy and neutral pixels, rewrapped by own EBML authoring; no private input, codec process, FFmpeg or network."
+}
