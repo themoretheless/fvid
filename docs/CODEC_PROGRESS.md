@@ -1,5 +1,29 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## Base-only and multilayer HEVC topology transitions, 2026-10-25
+
+Native MP4/Matroska dispatch now checks activated VPS chains beyond an initial
+base-only prefix. A source that later activates multilayer coding uses the owned
+layered pipeline throughout; ordinary fixed hvc1 keeps its existing fast path.
+Unused received VPS definitions do not determine the selected decoder.
+
+The layered owner now admits the normative inferred single-base state without
+inventing a coded VPS extension: layer 0, OLS0, empty inter-layer references and
+ordinary SPS POC/output ordering. Random access, complete-IDR target coverage,
+POC graph changes, output eligibility and temporal list binding use that inferred
+state. Parameter/graph changes still require their existing legal sequence
+boundary. Ordinary slice parsing is unchanged; parsing through a layered context
+retains an explicit inferred base syntax snapshot, including dependent segments.
+
+Seven short original scenarios cover five accepted base-to-multilayer,
+multilayer-to-base, roundtrip, multislice and separate-colour-plane cases, and
+two illegal non-IRAP topology changes. Exact packed samples are checked against
+saved synthetic pixel oracles, with original frame/sample clocks, displayed
+layer identity, seek and rewind in both containers. This does not prove every
+topology/profile/temporal transition; sample-description-driven topology changes
+and further random-access combinations remain qualification work.
+
+
 ## Automatic OLS reselection across VPS epochs, 2026-10-25
 
 Automatic MP4 and Matroska playback now reevaluates the preferred OLS for each

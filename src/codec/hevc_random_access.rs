@@ -29,37 +29,21 @@ impl RandomAccess {
             let h = &p.slices[0];
             let id = h.nal.layer_id;
             let bit = 1u64 << id;
-            let e = p
-                .binding
-                .vps
-                .extension
-                .as_ref()
-                .ok_or_else(|| invalid("HEVC random access has no VPS extension"))?;
-            let ols = e
-                .output
-                .sets
-                .get(p.binding.sps.output_layer_set)
-                .ok_or_else(|| invalid("HEVC random access OLS is absent"))?;
-            if ols.necessary == 0 {
-                return Err(invalid("HEVC random access OLS has no necessary layer"));
-            }
-            let smallest = ols.necessary.trailing_zeros() as u8;
-            let index = e
-                .graph
-                .layer_ids
-                .binary_search(&id)
-                .map_err(|_| invalid("HEVC random access layer is absent"))?;
-            let direct = *e
-                .graph
-                .direct
-                .get(index)
-                .ok_or_else(|| invalid("HEVC random access graph is incomplete"))?;
+            let (smallest,direct,predicted)=if let Some(e)=&p.binding.vps.extension {
+                let ols=e.output.sets.get(p.binding.sps.output_layer_set).ok_or_else(||invalid("HEVC random access OLS is absent"))?;
+                if ols.necessary==0 {return Err(invalid("HEVC random access OLS has no necessary layer"));}
+                let smallest=ols.necessary.trailing_zeros()as u8;
+                let index=e.graph.layer_ids.binary_search(&id).map_err(|_|invalid("HEVC random access layer is absent"))?;
+                let direct=*e.graph.direct.get(index).ok_or_else(||invalid("HEVC random access graph is incomplete"))?;
             let mut predicted = 0u64;
             for (&layer, &references) in e.graph.layer_ids.iter().zip(&e.graph.transitive) {
                 if references & bit != 0 {
                     predicted |= 1u64 << layer;
                 }
             }
+                (smallest,direct,predicted)
+            }else if p.binding.vps.inferred_base_layer() && id==0 && p.binding.sps.output_layer_set==0 {(0,0,0)}
+            else {return Err(invalid("HEVC random access has no VPS extension"));};
             let syntax = h
                 .layered
                 .as_ref()

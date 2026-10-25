@@ -112,24 +112,64 @@ fn layered_slice_headers_read_exact_boundaries_inherit_segments_and_bind_referen
             continue;
         }
         let header = result.unwrap_or_else(|e| panic!("{prefix}: header: {e}"));
-        if header.layered.is_none() {
+        if vps.extension.is_none() {
             assert_eq!(c["config"].as_str().unwrap(), "single-layer");
+            let ordinary_previous =
+                SliceHeader::parse(&first, &sps.sps, &pps.pps, 1 << 20).unwrap();
             let ordinary = if next {
                 SliceHeader::parse_with_previous(
                     &bytes,
                     &sps.sps,
                     &pps.pps,
                     1 << 20,
-                    previous.as_ref(),
+                    Some(&ordinary_previous),
                 )
                 .unwrap()
             } else {
-                SliceHeader::parse(&bytes, &sps.sps, &pps.pps, 1 << 20).unwrap()
+                ordinary_previous.clone()
             };
+            assert!(ordinary.layered.is_none());
+            let mut actual = header.clone();
+            let syntax = actual
+                .layered
+                .take()
+                .expect("base context retains inferred syntax");
+            assert!(!syntax.discardable && !syntax.cross_layer_bla);
+            assert!(syntax.reference_layers.is_empty());
+            assert!(syntax.inter_layer_prediction.is_none());
+            assert!(syntax.in_component_prediction.is_none());
+            assert!(syntax.coded_count_minus1.is_none());
+            assert_eq!(syntax.poc_reset, Default::default());
+            assert_eq!(syntax.poc_lsb_present, !header.nal.is_idr());
             assert_eq!(
-                format!("{header:?}"),
+                format!("{actual:?}"),
                 format!("{ordinary:?}"),
                 "{prefix}: ordinary parsing must be unchanged"
+            );
+            if next {
+                let inherited = SliceHeader::parse_layered_with_previous(
+                    &bytes,
+                    &ctx,
+                    1 << 20,
+                    Some(&ordinary_previous),
+                )
+                .unwrap();
+                assert_eq!(
+                    format!("{inherited:?}"),
+                    format!("{header:?}"),
+                    "{prefix}: ordinary base predecessor remains valid"
+                );
+            }
+            let empty: &[(fvid::codec::hevc_inter_layer::PictureStatus, ())] = &[];
+            let bound = header
+                .bind_inter_layer_references(&ctx, 41, header.poc_lsb as i32, empty, 1 << 20)
+                .unwrap();
+            assert!(bound.pictures().iter().all(|set| set.is_empty()));
+            let mut bad = header.clone();
+            bad.layered.as_mut().unwrap().reference_layers.push(1);
+            assert!(
+                bad.bind_inter_layer_references(&ctx, 41, header.poc_lsb as i32, empty, 1 << 20)
+                    .is_err()
             );
             continue;
         }

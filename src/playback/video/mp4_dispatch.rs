@@ -36,10 +36,10 @@ fn signal(vui: Option<&crate::codec::hevc_vui::Vui>) -> ColourDescription {
         })
         .unwrap_or_default()
 }
-// hev1 may introduce or replace its active parameter chain before the first
-// coded picture. Inspect only that prefix; ordinary complete hvc1 is unchanged
-// and does not incur an additional packet scan. Ignore unactivated VPS order.
-fn first_active_hevc_vps<R: Read + Seek>(
+// hvc1 keeps its fixed-configuration fast path. A hev1 base-only prefix may
+// activate a multilayer VPS later: choose one owner for the complete source,
+// inspecting actual PPS/SPS/VPS references rather than unused parameter NALs.
+fn dispatch_hevc_vps<R: Read + Seek>(
     demuxer: &mut Mp4Reader<R>,
     index: usize,
     budget: usize,
@@ -69,7 +69,8 @@ fn first_active_hevc_vps<R: Read + Seek>(
     {
         return copy(first).map(Some);
     }
-    let fallback = first.map(copy).transpose()?;
+    let mut fallback = first.map(copy).transpose()?;
+    let mut seen_vcl=false;
     let length = configuration.length_size;
     let count = track.samples.len();
     let mut parameters = crate::codec::hevc_decoder::LayeredParameters::from_configuration(
@@ -108,9 +109,12 @@ fn first_active_hevc_vps<R: Read + Seek>(
                 parameters.receive(nal)?;
             }
             if header.is_vcl() {
-                let result = copy(parameters.referenced_vps(nal)?);
-                demuxer.invalidate_position();
-                return result.map(Some);
+                let referenced=parameters.referenced_vps(nal)?;
+                let topology=crate::codec::hevc_vps::Vps::parse_layered_metadata(referenced,budget/2)?;
+                if !seen_vcl {fallback=Some(copy(referenced)?);seen_vcl=true;}
+                if topology.layers.effective_max_layers()>1 {
+                    let result=copy(referenced);demuxer.invalidate_position();return result.map(Some);
+                }
             }
         }
     }
@@ -255,7 +259,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             .ok_or_else(|| invalid("MP4 track index out of range"))?;
 
         if track.ensure_constant_description().is_ok() && matches!(&track.codec, b"hvc1" | b"hev1") {
-            let nal = first_active_hevc_vps(&mut demuxer, index, budget)?;
+            let nal = dispatch_hevc_vps(&mut demuxer, index, budget)?;
             if let Some(nal) = nal {
                 // Inspect topology without relaxing the base decoder's guard.
                 let topology =

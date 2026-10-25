@@ -127,6 +127,7 @@ impl LayeredOutputQueue {
                 - 1
         });
         let mut ready = Vec::new();
+        if std::env::var_os("FVID_HEVC_QUEUE_TRACE").is_some() {eprintln!("before current layer{} {:?} capacity{} refs{:?} pending{:?}",layer,picture.slices[0].poc_lsb,capacity,references.iter().map(|(l,r)|(*l,r.poc)).collect::<Vec<_>>(),self.pending.iter().map(|p|p.pictures.iter().map(|p|p.poc).collect::<Vec<_>>()).collect::<Vec<_>>());}
         loop {
             let reference_count = references.iter().filter(|(id, _)| *id == layer).count();
             let pending_only = self

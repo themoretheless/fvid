@@ -23,6 +23,9 @@ struct Graph {
 }
 impl Graph {
     fn read(vps: &LayeredVps) -> Result<Self> {
+        if vps.inferred_base_layer() {
+            return Ok(Self{id:vps.vps.id,internal:true,aligned:true,registered:1,predicted:[0;63]});
+        }
         let e = vps
             .extension
             .as_ref()
@@ -313,16 +316,12 @@ impl LayeredPocState {
         // POC. NoClras applies to all layers, including independent layers that
         // are not in the smallest layer's predicted closure. Retain POC header
         // history for ordinary CL-RAS omission; that alone is not a reset.
-        let extension = vps.extension.as_ref().unwrap();
-        let ols = extension
-            .output
-            .sets
-            .get(pictures[0].context.sps.output_layer_set)
-            .ok_or_else(|| invalid("HEVC POC reset OLS is absent"))?;
-        if ols.necessary == 0 {
-            return Err(invalid("HEVC POC reset OLS has no necessary layer"));
-        }
-        let smallest = ols.necessary.trailing_zeros() as u8;
+        let smallest=if let Some(extension)=&vps.extension {
+            let ols=extension.output.sets.get(pictures[0].context.sps.output_layer_set).ok_or_else(||invalid("HEVC POC reset OLS is absent"))?;
+            if ols.necessary==0 {return Err(invalid("HEVC POC reset OLS has no necessary layer"));}
+            ols.necessary.trailing_zeros()as u8
+        }else if vps.inferred_base_layer() && pictures[0].context.sps.output_layer_set==0 {0}
+        else {return Err(invalid("HEVC POC reset OLS is absent"));};
         let mut reset_decoded = 0u64;
         for picture in pictures {
             let h = picture.header;
