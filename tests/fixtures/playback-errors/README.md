@@ -4975,3 +4975,15 @@ process/network/FFmpeg). `tests/eac3_player_stereo.rs` accepts explicit real-rea
 stereo geometry and EOF/rewind/partial seek, tests MP4 configuration replacement,
 and separately refuses expanded dependent stereo without changing native state.
 A CPAL unit test checks router/ring/callback PCM without opening a device.
+
+
+`eac3-expanded-stereo/`: authored 7.1, 10- and 16-channel E-AC-3 with two
+programmes, differing independent/dependent DRC and dialogue metadata, independent
+matrix/LFE changes, and neutral VP9 MP4/Matroska companions. The 16 artifacts are
+regenerated separately by `scripts/generate_eac3_expanded_stereo.py` without
+FFmpeg/process/network. `tests/eac3_expanded_stereo.rs` accepts standards-required
+independent stereo rendering via real raw/MP4/Matroska sources for all three
+matrices, Line/RF and dialogue policies, EOF/rewind/partial seek. Previous refusal
+expectations in `eac3_player_stereo`, `eac3_presentation` and
+`eac3_raw_presentation` now distinguish accepted source/stereo decoding from the
+still explicit refusal of unmapped native physical-device output.

@@ -18637,3 +18637,56 @@ artifacts reproduce byte-for-byte with process/network denied; all 661 previous
 stereo-downmix fixture artifacts remain byte-identical after the generator's
 optional selection argument. These finite gates do not prove universal codec
 coverage or the explicitly open extended stereo/device scenarios above.
+
+### Expanded E-AC-3 inputs: standards-correct stereo acceptance (2026-10-25)
+
+The earlier "full dependent-presentation stereo folding" backlog entry was an
+incorrect description of the required codec behavior. ATSC A/52:2018 E.3.8.2
+requires output of 5.1 or fewer channels to decode the independent downmix and
+skip dependent substreams. E.3.8.5 distinguishes independent downmix DRC from
+the last dependent's complete-programme DRC. See the primary standard:
+https://www.atsc.org/wp-content/uploads/2021/04/A52-2018.pdf
+
+Removed the unnecessary greater-than-six-channel refusal from real reader
+stereo negotiation. `--eac3-stereo loro|ltrt|auto` now accepts 7.1, 10- and
+16-channel inputs and renders their selected programme's signalled independent
+downmix. The existing decoder correctly skips extensions and uses independent
+mixing, LFE, compression and dialogue metadata. This is required compatibility
+rendering, not an invented sum of replacement channels with the downmix.
+
+Source setup now retains absence of a WAVE mask for valid semantic extended
+layouts. It no longer rejects a 16-channel source before output negotiation.
+Native decoded width/roles stay intact; native device routing without an
+extended device map still explicitly refuses at `stereo_router`, rather than
+inventing a mask. Raw catalogue entries retain such decodable programmes.
+Explicit stereo negotiates L/R and identity routing before backend creation.
+
+The owned `eac3-expanded-stereo/` fixtures contain two programmes, neutral VP9,
+7.1/10/16 channel maps, independent matrix/LFE changes and deliberately different
+independent/dependent dynrng, compression and dialogue values. There are 16
+artifacts / 376198 bytes; regeneration is byte-exact with process and network
+creation denied. Tests compare exact independent-control PCM, PTS and end times
+for 216 combinations of geometry/container/programme/matrix/Line-RF/dialogue
+policy, with EOF, rewind and partial-packet seek. Independent metadata controls
+must produce nonzero PCM and distinct compression/normalization outputs.
+Reinstating the old refusal guard fails on the first valid 7.1 source with the
+specific prior error. Previous expanded-stereo refusal tests are acceptance
+tests now; native unmapped-device refusal tests moved to the actual route gate.
+
+Native extended-device maps, simultaneous programme mixing, changing extended
+presentation layouts and remaining codec tools/profiles are still separate open
+work. No physical-device or universal codec-coverage claim follows from this
+finite fixture matrix.
+
+The actual CPAL player uses `auto` stereo with headroom by default, both in the
+CLI parser and default UI state, because its Dolby router targets a two-channel
+sink. `--eac3-stereo native` is the explicit override. Generic library worker
+policy remains native by default for callers with multichannel backends; a
+regression checks this distinction and validates every explicit CLI value.
+
+Verification: the Dolby/selected-MP4 reader regression pass completes 180 tests
+in 64 targets; the final player-default change separately passes all 1047 root
+unit tests (26 ignored), all-test-target checking, and player-bin compilation.
+All commands use `--offline --no-default-features --features player`. Reader
+acceptance and native-route refusal are distinct; ordinary tests need neither
+FFmpeg nor fixture generation/network access.

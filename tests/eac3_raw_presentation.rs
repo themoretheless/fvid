@@ -161,10 +161,10 @@ fn explicit_compatible_reader_keeps_the_independent_mix_and_extended_maps_are_na
             .data;
         assert!(got == expected, "{} compatible mix", c["name"]);
         if c["wave_mask"].is_null() {
-            let error =
-                fvid::playback_ac3::Ac3AudioReader::open(Cursor::new(bytes), Default::default())
-                    .err()
-                    .expect("unmapped device roles must be named");
+            let native=fvid::playback_ac3::Ac3AudioReader::open(Cursor::new(bytes),Default::default()).unwrap();
+            assert_eq!(native.channels(),16);
+            assert_eq!(native.speaker_mask().unwrap(),None);
+            let error=native.stereo_router().err().expect("unmapped native device roles must be named");
             assert!(
                 error.to_string().contains("extended speaker mask"),
                 "{error}"

@@ -147,7 +147,7 @@ fn actual_readers_and_worker_apply_stereo_metadata_at_eof_rewind_and_partial_see
 }
 
 #[test]
-fn expanded_presentations_refuse_stereo_without_mutating_native_layout() {
+fn expanded_presentations_accept_standard_stereo_and_restore_native_layout() {
     let base = root()
         .parent()
         .unwrap()
@@ -177,12 +177,11 @@ fn expanded_presentations_refuse_stereo_without_mutating_native_layout() {
         let channels = source.channels();
         assert!(channels > 6);
         let mask = source.speaker_mask().unwrap();
-        let error = source.set_eac3_stereo_output(true).unwrap_err();
-        assert!(
-            error
-                .to_string()
-                .contains("extended dependent presentation stereo")
-        );
+        source.set_eac3_stereo_output(true).unwrap();
+        assert_eq!(source.channels(),2);
+        assert_eq!(source.speaker_mask().unwrap(),Some(3));
+        assert!(source.make_decoder().is_ok());
+        source.set_eac3_stereo_output(false).unwrap();
         assert_eq!(source.channels(), channels);
         assert_eq!(source.speaker_mask().unwrap(), mask);
         assert!(source.make_decoder().is_ok());

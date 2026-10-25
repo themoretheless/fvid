@@ -257,12 +257,13 @@ fn matroska_dispatch_and_worker_preserve_expanded_pcm_masks_rewind_and_seek() {
 #[test]
 fn sixteen_channel_video_keeps_semantic_roles_and_refuses_unknown_device_mapping() {
     for c in cases().into_iter().filter(|c| c["channels"] == 16) {
-        let error = fvid::playback_webm_audio::WebmAudioReader::open(
+        let source = fvid::playback_webm_audio::WebmAudioReader::open(
             Cursor::new(read(c["video"].as_str().unwrap())),
             Default::default(),
-        )
-        .err()
-        .expect("unsupported extended device mask must be named");
+        ).unwrap();
+        assert_eq!(source.channels(),16);
+        assert_eq!(source.speaker_mask().unwrap(),None);
+        let error=source.stereo_router().err().expect("native device route must remain explicit");
         assert!(
             error.to_string().contains("extended speaker mask"),
             "{error}"

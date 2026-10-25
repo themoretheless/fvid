@@ -13,7 +13,7 @@ pub struct DolbyPlaybackPolicy {
     pub normalize_dialogue: bool,
     pub ac3_stereo_downmix: crate::codec::ac3_decoder::StereoDownmixPolicy,
     /// Request codec-aware L/R output from E-AC-3 readers. Native output is
-    /// retained by default; expanded presentations require their full renderer.
+    /// retained by default; stereo uses the signalled independent downmix.
     pub eac3_stereo_output: bool,
     pub eac3_stereo_downmix: crate::codec::eac3_decoder::StereoDownmixPolicy,
 }

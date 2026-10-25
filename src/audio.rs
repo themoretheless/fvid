@@ -633,8 +633,8 @@ pub trait AudioStream: Send {
     /// Negotiate explicit L/R rendering of an E-AC-3 independent/compatibility
     /// programme before creating a decoder or presenting PCM. Implementations
     /// retain this request across navigation and configuration changes. Other
-    /// codecs are unaffected. Extended dependent presentations must not be
-    /// silently truncated to an independent programme.
+    /// codecs are unaffected. ATSC A/52 E.3.8.2 requires the independent downmix
+    /// and its compression metadata for stereo, including expanded inputs.
     #[cfg(feature = "player")]
     fn set_eac3_stereo_output(&mut self, enabled: bool) -> crate::Result<()> {
         if enabled && matches!(self.codec(), "A_EAC3" | "ec-3") {

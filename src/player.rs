@@ -298,7 +298,7 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
     let mut audio_device = None;
     let mut dolby_compression = CompressionMode::Line;
     let mut dolby_dialogue_normalization = false;
-    let mut eac3_stereo = None;
+    let mut eac3_stereo = Some(crate::codec::eac3_decoder::StereoDownmixMode::Automatic);
     let mut list_audio_devices = false;
     let mut no_subtitles = false;
     let mut no_audio = false;
@@ -2092,7 +2092,14 @@ impl Default for Player {
             stereo3d: fvid_media::PlayStereo3D::Off,
             preferred_embedded_subtitle: None,
             preferred_output: None,
-            dolby_policy: DolbyPlaybackPolicy::default(),
+            // This player routes Dolby to a known L/R device through CPAL.
+            // Decode the signalled independent downmix rather than folding
+            // extended replacement channels a second time in the device router.
+            dolby_policy: DolbyPlaybackPolicy {
+                eac3_stereo_output:true,
+                eac3_stereo_downmix:crate::codec::eac3_decoder::StereoDownmixPolicy {mode:crate::codec::eac3_decoder::StereoDownmixMode::Automatic,headroom:true},
+                ..Default::default()
+            },
             quit_at_end: false,
             snapshot_dir: None,
             skin: player_skin::Skin::default(),
@@ -6852,7 +6859,13 @@ mod tests {
     #[test]
     fn eac3_stereo_cli_is_session_scoped_and_validated() {
         use crate::codec::eac3_decoder::StereoDownmixMode as Mode;
-        assert_eq!(play_args(&["clip.y4m"]).unwrap().eac3_stereo,None);
+        assert_eq!(play_args(&["clip.y4m"]).unwrap().eac3_stereo,Some(Mode::Automatic));
+        let policy=Player::default().dolby_policy;
+        assert!(policy.eac3_stereo_output);
+        assert_eq!(policy.eac3_stereo_downmix.mode,Mode::Automatic);
+        assert!(policy.eac3_stereo_downmix.headroom);
+        // A library worker can still feed a native multichannel backend.
+        assert!(!crate::audio_thread::DolbyPlaybackPolicy::default().eac3_stereo_output);
         for (value,wanted) in [("native",None),("loro",Some(Mode::LoRo)),("ltrt",Some(Mode::LtRt)),("auto",Some(Mode::Automatic))] {
             for words in [vec![format!("--eac3-stereo={value}"),"clip.y4m".into()],vec!["--eac3-stereo".into(),value.into(),"clip.y4m".into()]] {
                 assert_eq!(super::parse_play_args(&words).unwrap().eac3_stereo,wanted);

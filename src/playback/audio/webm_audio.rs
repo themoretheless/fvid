@@ -436,7 +436,7 @@ impl<R: Read + Seek> WebmAudioReader<R> {
             if let Some((frame,layout))=crate::codec::eac3_decoder::presentation::probe_programme(&data,self.eac3_programme,eof)? {
                 self.dolby_rate=Some(frame.sample_rate);
                 self.dolby_channels=Some(layout.0.len()as u16);
-                self.dolby_mask=Some(layout.wave_mask().ok_or_else(||unsupported("E-AC-3 speaker locations need an extended speaker mask"))?);
+                self.dolby_mask=layout.wave_mask();
                 return Ok(());
             }
             if eof || data.len()==BYTES{break;}
@@ -450,7 +450,7 @@ impl<R: Read + Seek> WebmAudioReader<R> {
         let mut data=first.to_vec();
         for count in 0..9 {
             if let Some(layout)=crate::codec::eac3_decoder::presentation::try_packet_speakers(&data,channels)? {
-                return layout.wave_mask().map(Some).ok_or_else(||unsupported("E-AC-3 speaker locations need an extended speaker mask"));
+                return Ok(layout.wave_mask());
             }
             if count==8 {break;}
             let next=self.read_packet()?.ok_or_else(||invalid("incomplete E-AC-3 dependent presentation"))?;
@@ -1507,6 +1507,7 @@ mod tests {
 
 impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     fn stereo_router(&self)->Result<Option<fvid_media::owned_stereo_router::StereoRouter>>{
+        if self.codec_tag=="A_EAC3" && self.channels()>6 && self.dolby_mask.is_none() {return Err(unsupported("E-AC-3 speaker locations need an extended speaker mask"));}
         if self.codec_tag!="mp4a"&&self.codec_tag!="A_AAC"{return self.speaker_mask()?.map(|mask|fvid_media::owned_stereo_router::StereoRouter::new(self.channels(),mask).map_err(|e|invalid(&e))).transpose();}
         let asc=crate::codec::config::aac_specific_config(&self.extra_data)?;
         fvid_media::owned_aac::speaker_routing::stereo_router(asc,self.sample_rate(),self.channels(),self.in_band_ps).map(Some).map_err(|e|invalid(&e))
@@ -1522,7 +1523,6 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
         }
         if self.codec_tag == "A_EAC3" {
             if self.eac3_stereo_output {
-                if self.dolby_channels.unwrap_or(self.track().channels as u16)>6 {return Err(invalid("E-AC-3 extended dependent presentation stereo folding is not implemented"));}
                 return Ok(Box::new(crate::codec::eac3_decoder::Eac3Decoder::for_container_stereo(self.extra_data(),self.sample_rate())?.with_programme(self.eac3_programme)?));
             }
             return Ok(Box::new(crate::codec::eac3_decoder::Eac3Decoder::for_container(self.extra_data(),self.sample_rate(),self.channels())?.with_programme(self.eac3_programme)?));
@@ -1587,9 +1587,6 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     }
 
     fn set_eac3_stereo_output(&mut self, enabled: bool) -> Result<()> {
-        if enabled && self.codec_tag=="A_EAC3" && self.dolby_channels.unwrap_or(self.track().channels as u16)>6 {
-            return Err(invalid("E-AC-3 extended dependent presentation stereo folding is not implemented"));
-        }
         self.eac3_stereo_output=enabled;
         Ok(())
     }
