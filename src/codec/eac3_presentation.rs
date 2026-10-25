@@ -738,6 +738,12 @@ impl PresentationDecoder {
     // The next independent header or EOF closes that unmarked programme.
     fn complete_independent_only(&mut self)->Result<bool> {
         if self.pending.as_ref().is_some_and(|p|p.frames.len()==1) {
+            // Refuse an incomplete implicit-width graph without consuming it:
+            // callers may supply the remaining dependent after probing EOF.
+            if self.output_layout.is_none() {
+                let headers:Vec<_>=self.pending.as_ref().unwrap().frames.iter().map(|(h,_)|h.clone()).collect();
+                layout(&headers,self.width)?;
+            }
             let pending=self.pending.take().unwrap();
             self.assemble(pending)?;
             return Ok(true);
