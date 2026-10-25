@@ -600,6 +600,39 @@ pub struct Syncframe {
     pub frame_bytes: usize,
 }
 
+/// Logical six-byte prefix of either normative Dolby word order.
+/// Direct envelope readers must use this view rather than index physical bytes.
+pub(crate) fn dolby_prefix(bytes:&[u8])->Option<[u8;6]> {
+    let raw=bytes.get(..6)?;let little=raw[..2]==[0x77,0x0b];
+    Some(std::array::from_fn(|i|raw[if little {i^1}else{i}]))
+}
+/// Canonicalize at most one syncframe. Big-endian input stays borrowed. Bounds
+/// come from the codec header, so a multiplexed packet is never copied in full
+/// for each constituent frame. An incomplete tail remains incomplete for CRC
+/// and the decoder's existing concealment policy.
+pub(crate) fn dolby_frame(bytes:&[u8])->Result<std::borrow::Cow<'_,[u8]>> {
+    let size=dolby_prefix(bytes).and_then(|h| {
+        if h[..2]!=[0x0b,0x77] {return None;}
+        match h[5]>>3 {
+            0..=8=>FRAME_WORDS.get(usize::from(h[4]&63))?.get(usize::from(h[4]>>6)).map(|n|usize::from(*n)*2),
+            11..=16=>Some((usize::from(h[2]&7)*256+usize::from(h[3])+1)*2),
+            _=>None,
+        }
+    }).unwrap_or(bytes.len().min(6)).min(bytes.len());
+    // A lone physical low byte cannot reveal the missing logical high byte.
+    let size=if bytes.starts_with(&[0x77,0x0b]) {size&!1}else{size};
+    canonical_dolby_words(&bytes[..size])
+}
+fn canonical_dolby_words(bytes:&[u8])->Result<std::borrow::Cow<'_,[u8]>> {
+    if !bytes.starts_with(&[0x77,0x0b]) {return Ok(std::borrow::Cow::Borrowed(bytes));}
+    if !bytes.len().is_multiple_of(2){return Err(invalid("incomplete little-endian Dolby word"));}
+    let mut canonical=Vec::new();
+    canonical.try_reserve_exact(bytes.len()).map_err(|_|invalid("Dolby word-order allocation failed"))?;
+    canonical.extend_from_slice(bytes);
+    for word in canonical.chunks_exact_mut(2) {word.swap(0,1);}
+    Ok(std::borrow::Cow::Owned(canonical))
+}
+
 /// Read just the fixed header of the syncframe that starts at `bytes`.
 ///
 /// A bare `.ac3` file states its geometry in every frame rather than once up
@@ -608,6 +641,7 @@ pub struct Syncframe {
 /// [`Header::read`] makes: a foreign syncword, the reserved rate code, a frame
 /// size code outside Table 5.18, or a `bsid` whose syntax is not A/52's own.
 pub fn syncframe(bytes: &[u8]) -> Option<Syncframe> {
+    let canonical=dolby_frame(bytes).ok()?;let bytes=canonical.as_ref();
     let header = Header::read(&mut Bits::new(bytes))?;
     Some(Syncframe {
         sample_rate: SAMPLE_RATES[header.rate],
@@ -641,6 +675,7 @@ pub(crate) fn decoded_speaker_mask(layout: usize, lfe: bool, declared: u16) -> R
 }
 /// Speaker assignment for the PCM emitted at the requested channel count.
 pub fn speaker_mask(data: &[u8], channels: u16) -> Result<u32> {
+    let canonical=dolby_frame(data)?;let data=canonical.as_ref();
     let h = Header::read(&mut Bits::new(data)).ok_or_else(|| invalid("invalid AC-3 speaker header"))?;
     decoded_speaker_mask(h.acmod,h.lfeon,channels)
 }
@@ -1604,7 +1639,7 @@ impl Ac3Decoder {
         let mut offset = 0usize;
         let mut decoded = 0usize;
         while offset < data.len() {
-            let raw = &data[offset..];
+            let canonical=dolby_frame(&data[offset..])?;let raw=canonical.as_ref();
             let mut bits = Bits::new(raw);
             let Some(header) = Header::read(&mut bits) else {
                 break;
@@ -2460,6 +2495,7 @@ const AC3_CRC_TABLE: [u16; 256] = {
     table
 };
 pub(crate) fn frame_crc_valid(frame: &[u8]) -> bool {
+    let Ok(canonical)=canonical_dolby_words(frame)else{return false;};let frame=canonical.as_ref();
     let mut crc = 0u16;
     for &byte in frame.get(2..).unwrap_or_default() {
         crc = (crc << 8) ^ AC3_CRC_TABLE[usize::from((crc >> 8) as u8 ^ byte)];

@@ -18387,3 +18387,39 @@ output is byte-exact with subprocess and network access disabled.
 Coarse-clock edits, access units split across MP4 packets, further codec tools
 and profiles, other container combinations and physical-device timing remain
 unqualified by this matrix. Complete codec coverage remains an active goal.
+
+
+### Native Dolby readers decode little-endian 16-bit words
+
+The Annex F audit found a real valid-file gap: ETSI TS 102 366 v1.4.1 F.1 permits
+little-endian AC-3/E-AC-3 bitstreams in ISO BMFF, while F.2 defines complete
+six-block E-AC-3 samples. Arbitrarily byte-split MP4 access units therefore remain
+a nonconforming compatibility extension, not proof of a missing standard tool.
+Primary source: https://www.etsi.org/deliver/etsi_ts/102300_102399/102366/01.04.01_60/ts_102366v010401p.pdf
+
+Owned Dolby prefix and syncframe views recognize both syncword byte orders.
+Big-endian frame data stays borrowed; LE normalization copies at most the bounded
+codec frame, using checked allocation. Unsupported headers are bounded to their
+prefix. Incomplete LE words cannot supply an unknown logical header byte. CRC
+checks operate on canonical words without repairing invalid CRCs. The packet
+counter, native blocks, dependent-presentation assembly and raw stream catalogue
+share the same interpretation. Encoded demux payloads remain unchanged.
+
+The raw AC-3 parser also prefers a later CRC-checked setup header over a damaged
+first BSI, keeping the damaged frame in its original time window for silence
+concealment. CRC-checked real geometry changes still retain their existing
+refusal boundary. Where no checked header exists, the previous fallback remains.
+
+A short owned-video matrix adds 54 LE/mixed-word-order variants across MP4,
+Matroska and elementary streams, including native/coarse clocks, grouped frames,
+selected programmes, dependent 8-channel output and CRC-damaged data. Parent
+production reproduces the exact no-syncframe error. A second witness exposed
+uncanonicalized bytes in the presentation assembler's direct block path. The raw
+setup regression extracts its exact audio bytes from the companion neutral movie.
+Acceptance compares PCM/time/geometry with BE controls, seek and rewind, the real
+worker with a capturing backend, prefix behavior, CRC refusal and retained encoded
+payload bytes. Generator output is byte-exact with process/network access denied.
+
+This closes word-order support for the qualified native readers. Coarse-clock
+edit qualification, additional codec profiles/tools, nonconforming transport
+compatibility and physical-device timing remain part of the active full goal.

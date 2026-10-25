@@ -456,6 +456,7 @@ pub struct BlocksState {
 /// so the walker that lists a stream's packets needs the same numbers the decoder
 /// will. `None` for the same refusals `header()` makes.
 pub fn frame(bytes: &[u8]) -> Option<Frame> {
+    let canonical=crate::codec::ac3_decoder::dolby_frame(bytes).ok()?;let bytes=canonical.as_ref();
     header(&mut BitReader::new(bytes)).ok()
 }
 
@@ -463,14 +464,12 @@ pub fn frame(bytes: &[u8]) -> Option<Frame> {
 /// base-programme output to skip these without decoding their channel syntax.
 /// This validates the envelope, not the skipped stream's audio payload.
 pub(crate) fn skipped_programme_bytes(bytes:&[u8], programme:u8)->Result<Option<usize>> {
-    if bytes.len()<6 || bytes[..2]!=[0x0b,0x77] || !(11..=16).contains(&(bytes[5]>>3)) {
-        return Ok(None);
-    }
-    let kind=bytes[2]>>6;
-    let id=(bytes[2]>>3)&7;
+    let Some(h)=crate::codec::ac3_decoder::dolby_prefix(bytes)else{return Ok(None);};
+    if h[..2]!=[0x0b,0x77] || !(11..=16).contains(&(h[5]>>3)) {return Ok(None);}
+    let kind=h[2]>>6;let id=(h[2]>>3)&7;
     if kind==3 {return Err(unsupported("E-AC-3 reserved stream type 3"));}
     if kind!=1 && id==programme {return Ok(None);}
-    let size=(usize::from(bytes[2]&7)*256+usize::from(bytes[3])+1)*2;
+    let size=(usize::from(h[2]&7)*256+usize::from(h[3])+1)*2;
     if size<6 || size>bytes.len() {return Err(invalid("truncated skipped E-AC-3 substream"));}
     Ok(Some(size))
 }
@@ -487,7 +486,8 @@ pub fn checked_frame(bytes: &[u8]) -> Option<Frame> {
 /// Syntax probe of exactly this independent programme frame (no CRC guarantee).
 pub fn programme_frame(bytes:&[u8],programme:u8)->Option<Frame> {
     if programme>7{return None;}
-    let (frame,id,_,_)=read_substream_header(&mut BitReader::new(bytes),true).ok()?;
+    let canonical=crate::codec::ac3_decoder::dolby_frame(bytes).ok()?;
+    let (frame,id,_,_)=read_substream_header(&mut BitReader::new(canonical.as_ref()),true).ok()?;
     (frame.stream_type!=1 && id==programme).then_some(frame)
 }
 
@@ -499,7 +499,8 @@ pub fn checked_programme_frame(mut bytes:&[u8], programme:u8)->Option<Frame> {
         if let Some(size)=skipped_programme_bytes(bytes,programme).ok()? {
             bytes=&bytes[size..];continue;
         }
-        let (frame,id,_,_)=read_substream_header(&mut BitReader::new(bytes),true).ok()?;
+        let canonical=crate::codec::ac3_decoder::dolby_frame(bytes).ok()?;
+        let (frame,id,_,_)=read_substream_header(&mut BitReader::new(canonical.as_ref()),true).ok()?;
         if frame.stream_type==1 || id!=programme{return None;}
         let complete=bytes.get(..frame.frame_bytes)?;
         return crate::codec::ac3_decoder::frame_crc_valid(complete).then_some(frame);
@@ -519,7 +520,8 @@ pub fn speaker_mask_for_programme(data:&[u8],channels:u16,programme:u8)->Result<
 
 /// Speaker assignment follows decoded Folding order, including native LFE.
 pub fn speaker_mask(data: &[u8], channels: u16) -> Result<u32> {
-    let h = header(&mut BitReader::new(data))?;
+    let canonical=crate::codec::ac3_decoder::dolby_frame(data)?;
+    let h = header(&mut BitReader::new(canonical.as_ref()))?;
     if channels>6 {return presentation::packet_speakers(data,channels)?.wave_mask().ok_or_else(||unsupported("E-AC-3 speaker locations need an extended speaker mask"));}
     crate::codec::ac3_decoder::decoded_speaker_mask(usize::from(h.layout),h.low_frequency,channels)
 }
@@ -541,7 +543,8 @@ pub struct DependentFrame {
 }
 
 pub fn dependent_frame(data:&[u8])->Result<DependentFrame> {
-    let (frame,substream_id,channel_map,compression_present)=read_substream_header(&mut BitReader::new(data),true)?;
+    let canonical=crate::codec::ac3_decoder::dolby_frame(data)?;
+    let (frame,substream_id,channel_map,compression_present)=read_substream_header(&mut BitReader::new(canonical.as_ref()),true)?;
     if frame.stream_type!=1 {return Err(invalid("expected an E-AC-3 dependent substream"));}
     Ok(DependentFrame {frame,substream_id,channel_map,compression_present})
 }
@@ -1460,7 +1463,7 @@ impl Eac3Decoder {
         let mut decoded = 0usize;
         let mut skipped = 0usize;
         while offset < data.len() {
-            let raw = &data[offset..];
+            let canonical=crate::codec::ac3_decoder::dolby_frame(&data[offset..])?;let raw=canonical.as_ref();
             if dependent.is_none() && let Some(size)=skipped_programme_bytes(raw,self.programme_id)? {
                 offset+=size;
                 skipped+=1;

@@ -92,9 +92,10 @@ fn probe_programme_syncframe(bytes:&[u8],programme:u8)->Option<SyncHeader> {
 }
 
 fn eac3_envelope(bytes:&[u8])->Option<(u8,u8,usize)> {
-    if bytes.len()<6 || bytes[..2]!=[0x0b,0x77] || !(11..=16).contains(&(bytes[5]>>3)){return None;}
-    let kind=bytes[2]>>6;let id=(bytes[2]>>3)&7;
-    let size=((usize::from(bytes[2])&7)*256+usize::from(bytes[3])+1)*2;
+    let h=crate::codec::ac3_decoder::dolby_prefix(bytes)?;
+    if h[..2]!=[0x0b,0x77] || !(11..=16).contains(&(h[5]>>3)){return None;}
+    let kind=h[2]>>6;let id=(h[2]>>3)&7;
+    let size=((usize::from(h[2])&7)*256+usize::from(h[3])+1)*2;
     (kind!=3 && size>=6 && size<=bytes.len()).then_some((kind,id,size))
 }
 fn first_sync_start(bytes:&[u8],opaque_eac3:bool)->(usize,Option<&'static str>){
@@ -142,7 +143,8 @@ pub struct Frame {
     pub samples: u32,
 }
 
-/// A `.ac3` or `.ec3` file: the geometry its first frame states and the frames that play.
+/// A `.ac3` or `.ec3` file and its indexed frames. AC-3 setup prefers a CRC-checked
+/// header when one is available, retaining damaged frames for concealment.
 #[derive(Clone, Debug)]
 pub struct Ac3 {
     speaker_mask: u32,
@@ -238,7 +240,13 @@ impl Ac3 {
                 bytes.len()
             )));
         }
-        let first = found[0];
+        // A damaged AC-3 BSI must not establish the stream's channel/rate setup.
+        // Keep its coded frame for silence concealment, but prefer a later
+        // CRC-checked header when the raw file supplies no container metadata.
+        let first_index=if found[0].codec==TAG {
+            starts.iter().position(|&at|crate::codec::ac3_decoder::checked_syncframe(&bytes[at..]).is_some()).unwrap_or(0)
+        }else{0};
+        let first = found[first_index];
         let native=if expanded && first.codec==EAC3_TAG {
             crate::codec::eac3_decoder::presentation::raw_programme_for_programme(&bytes[starts[0]..],programme)?
                 .map(|(_,layout)|layout).filter(|layout|layout.0.len()>6)
@@ -250,7 +258,8 @@ impl Ac3 {
         let mut frames = Vec::with_capacity(found.len());
         let mut pts = 0u64;
         for (at, start) in found.iter().zip(&starts) {
-            if at.sample_rate != first.sample_rate || at.channels != first.channels {
+            let checked=at.codec!=TAG || crate::codec::ac3_decoder::frame_crc_valid(&bytes[*start..*start+at.frame_bytes]);
+            if checked && (at.sample_rate != first.sample_rate || at.channels != first.channels) {
                 return Err(invalid(&format!(
                     "stream changes geometry at frame {}: {} Hz {} ch after {} Hz {} ch",
                     frames.len(),
