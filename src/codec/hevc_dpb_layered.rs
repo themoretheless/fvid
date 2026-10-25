@@ -71,12 +71,16 @@ impl LayeredDecoded {
 pub(super) struct LayeredHdr {
     pub values: [crate::color::hdr::HdrMetadata; 63],
     started: u64,
+    pending_mastering: u64,
+    pending_clli: u64,
 }
 impl Default for LayeredHdr {
     fn default() -> Self {
         Self {
             values: [crate::color::hdr::HdrMetadata::default(); 63],
             started: 0,
+            pending_mastering: 0,
+            pending_clli: 0,
         }
     }
 }
@@ -90,14 +94,51 @@ impl LayeredHdr {
                 continue;
             }
             if access.starts_clvs & bit != 0 && next.started & bit != 0 {
+                let pending = next.values[layer as usize];
                 next.values[layer as usize] = Default::default();
+                if next.pending_mastering & bit != 0 {
+                    next.values[layer as usize].mastering = pending.mastering;
+                }
+                if next.pending_clli & bit != 0 {
+                    next.values[layer as usize].light = pending.light;
+                }
             }
+            next.pending_mastering &= !bit;
+            next.pending_clli &= !bit;
             next.started |= bit;
-            next.values[layer as usize].merge(plan.hdr(layer));
+            let received = plan.hdr(layer);
+            next.values[layer as usize].merge(received);
+            if plan.hdr_clli_received(layer) {
+                next.values[layer as usize].light = received.light;
+            }
+        }
+        // Prefix guidance can precede its coded picture in a separate MP4
+        // sample/block. Remember which halves arrived since the last picture,
+        // so a following CLVS start clears old guidance but retains this seed.
+        let present = plan
+            .pictures()
+            .iter()
+            .fold(0, |mask, p| mask | (1u64 << p.binding.sps.layer_id));
+        for layer in 0..63 {
+            let bit = 1u64 << layer;
+            if present & bit != 0 {
+                continue;
+            }
+            let received = plan.hdr(layer);
+            next.values[layer as usize].merge(received);
+            if received.mastering.is_some() {
+                next.pending_mastering |= bit;
+            }
+            if plan.hdr_clli_received(layer) {
+                next.values[layer as usize].light = received.light;
+                next.pending_clli |= bit;
+            }
         }
         next
     }
     fn end(&mut self, affected: u64) {
+        self.pending_mastering &= !affected;
+        self.pending_clli &= !affected;
         for layer in 0..63 {
             if affected & (1u64 << layer) != 0 {
                 self.values[layer] = Default::default();

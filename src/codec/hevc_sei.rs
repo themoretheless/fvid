@@ -115,9 +115,10 @@ pub fn messages(rbsp: &[u8]) -> Result<Vec<Message<'_>>> {
     })?;
     Ok(found)
 }
-// HDR needs two fixed-size values, not an allocated directory of every unknown
-// SEI message. Keep the same framing validation for both consumers.
-fn visit_messages<'a>(rbsp: &'a [u8], mut visit: impl FnMut(Message<'a>)) -> Result<()> {
+/// Visit framed SEI messages without allocating a message directory. Unknown
+/// payloads remain borrowed. Earlier callbacks may run before a later framing
+/// error, so consumers publishing state should stage their changes.
+pub fn visit_messages<'a>(rbsp: &'a [u8], mut visit: impl FnMut(Message<'a>)) -> Result<()> {
     let mut cursor = 0;
     loop {
         let rest = &rbsp[cursor..];
@@ -235,6 +236,16 @@ fn received_hdr_from_nal(nal: &[u8], budget: usize) -> Result<Option<(HdrMetadat
     }
     rbsp.header.require_base_layer()?;
     Ok(Some(received_hdr_from_rbsp(&rbsp.bytes)?))
+}
+/// Apply framed HDR RBSP guidance transactionally, preserving an explicitly
+/// received zero CLL statement. Returns whether a valid CLL payload was present.
+pub fn update_hdr_from_rbsp(hdr: &mut HdrMetadata, rbsp: &[u8]) -> Result<bool> {
+    let (received, cll_received) = received_hdr_from_rbsp(rbsp)?;
+    hdr.merge(received);
+    if cll_received {
+        hdr.light = received.light;
+    }
+    Ok(cll_received)
 }
 /// Static HDR metadata from one NAL unit, or `None` when it states none.
 pub fn hdr_from_nal(nal: &[u8], budget: usize) -> Result<Option<HdrMetadata>> {

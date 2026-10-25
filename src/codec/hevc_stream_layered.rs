@@ -36,8 +36,8 @@ impl LayeredDecoder {
                     let h = NalHeader::parse(nal)?;
                     if h.layer_id != 63 {
                         let rbsp = crate::codec::hevc_nal::NalRbsp::parse(nal, budget)?;
-                        initial_hdr.values[h.layer_id as usize]
-                            .merge(crate::codec::hevc_sei::hdr_from_rbsp(&rbsp.bytes)?);
+                        crate::codec::hevc_sei::update_hdr_from_rbsp(
+                            &mut initial_hdr.values[h.layer_id as usize], &rbsp.bytes)?;
                     }
                 }
             }

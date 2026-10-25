@@ -1,6 +1,41 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
 
+## HEVC MP4 sample descriptions and deferred HDR, 2026-10-25
+
+Native HEVC dispatch now follows every used sample description, including an
+initial base-only entry before a later layered entry. The explicit layered
+source opens the indexed demux API. Each packet uses its own hvcC length size;
+changed configuration banks are delivered before that packet's original NALs,
+after an initial AUD. The native parameter/POC owner still validates activation
+boundaries, so configuration changes cannot bypass active-VPS guards or erase
+references needed by an inter picture. Four-byte unchanged packets transfer
+their existing buffer without a second coded-frame copy.
+
+The extraction inventory keeps configuration-bearing metadata-only samples
+with the upcoming epoch. Rewind and seek replay the same seeds and retain
+original sample indices/clocks. Presented container metadata follows the actual
+frame, independently of decode-ahead description selection. Static HDR from
+hvcC preserves exact integer payloads; suffix-only non-HDR messages are not
+promoted into prefix messages. The shared SEI visitor avoids an allocated
+message directory for large collections of unrelated messages.
+
+Layered HDR state now distinguishes received zero CLL from absent guidance.
+Metadata-only prefixes retain each received HDR half until the next picture,
+including across a new CLVS; old halves still clear at their proper boundary.
+Opening hvcC receipt also honors the last zero statement. Failed parsing and
+reconstruction continue to publish no decoder or queue state.
+
+Thirteen accepted short scenarios cover regular and fragmented MP4, topology
+and profile changes, equivalent/additive configurations on inter pictures,
+length changes, unused first description, AUD/ignored NAL placement, deferred
+configuration and positive/zero HDR. Two illegal-description files require the
+specific active-VPS refusal. Four original Matroska wrappers additionally
+qualify deferred/zero HDR and seek; an opening-zero MP4 isolates hvcC receipt.
+All fixtures use saved owned entropy/oracles and own muxing, with no external
+codec process, FFmpeg or network. Mixed-codec description tracks and universal
+codec/profile/IRAP combinations are not established by this finite matrix.
+
 ## Repeated complete target IDR output epochs, 2026-10-25
 
 The owned layered HEVC queue now starts a new POC comparison epoch when a
