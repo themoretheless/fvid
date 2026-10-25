@@ -21,6 +21,7 @@ struct SingleView<R> {
     initial_signal: ColourDescription,
     hdr: HdrMetadata,
     selected: Option<u8>,
+    presented_sample: Option<usize>,
     failed: bool,
 }
 fn signal(vui: Option<&crate::codec::hevc_vui::Vui>) -> ColourDescription {
@@ -45,7 +46,10 @@ fn dispatch_hevc_vps<R: Read + Seek>(
     budget: usize,
 ) -> Result<Option<Vec<u8>>> {
     let track = &demuxer.tracks()[index];
-    let configuration = HevcConfig::parse(&track.configuration)?;
+    let setup = track
+        .description_for_sample(0)
+        .ok_or_else(|| invalid("empty HEVC track"))?;
+    let configuration = HevcConfig::parse(&setup.configuration)?;
     let mut vps = configuration
         .arrays
         .iter()
@@ -63,7 +67,8 @@ fn dispatch_hevc_vps<R: Read + Seek>(
         out.extend_from_slice(nal);
         Ok(out)
     };
-    if track.codec == *b"hvc1"
+    if track.ensure_constant_description().is_ok()
+        && setup.codec == *b"hvc1"
         && !multiple
         && let Some(first) = first
     {
@@ -71,35 +76,26 @@ fn dispatch_hevc_vps<R: Read + Seek>(
     }
     let mut fallback = first.map(copy).transpose()?;
     let mut seen_vcl = false;
-    let length = configuration.length_size;
+    let length = 4;
+    let mut description = track.samples.get(0).unwrap().description_index;
     let count = track.samples.len();
     let mut parameters = crate::codec::hevc_decoder::LayeredParameters::from_configuration(
-        &track.configuration,
+        &setup.configuration,
         budget / 2,
     )?;
     let mut packet = Vec::new();
+    let mut normalized = Vec::new();
     for sample in 0..count {
-        let size = demuxer.tracks()[index]
-            .samples
-            .get(sample)
-            .ok_or_else(|| invalid("HEVC dispatch sample is absent"))?
-            .size as usize;
-        if size > budget / 8 {
-            return Err(invalid("HEVC dispatch packet exceeds memory budget"));
-        }
-        if packet.capacity() < size {
-            packet = Vec::new();
-            packet
-                .try_reserve_exact(size)
-                .map_err(|_| invalid("cannot allocate HEVC dispatch packet"))?;
-        }
-        if packet.capacity() > budget / 8 {
-            return Err(invalid(
-                "HEVC dispatch packet capacity exceeds memory budget",
-            ));
-        }
-        demuxer.read_packet(index, sample, &mut packet)?;
-        for nal in crate::codec::config::NalUnits::new(&packet, length)? {
+        description = super::layered_packet::read_normalized(
+            demuxer,
+            index,
+            sample,
+            description,
+            &mut packet,
+            &mut normalized,
+            budget / 8,
+        )?;
+        for nal in crate::codec::config::NalUnits::new(&normalized, length)? {
             let nal = nal?;
             let header = crate::codec::hevc_nal::NalHeader::parse(nal)?;
             if header.layer_id == 63 {
@@ -133,6 +129,7 @@ impl<R: Read + Seek> SingleView<R> {
         self.source.rewind();
         self.lookahead = None;
         self.selected = None;
+        self.presented_sample = None;
         self.failed = false;
         self.colour = self.initial_colour;
         self.signal = self.initial_signal;
@@ -223,6 +220,7 @@ impl<R: Read + Seek> SingleView<R> {
         self.colour = crate::playback_native::AvcColour::from_hevc_vui(vui)?;
         self.signal = signal(vui);
         self.selected = Some(frame.decoded.layer_id);
+        self.presented_sample = Some(frame.sample_index);
         self.hdr = frame.decoded.hdr;
         Ok(Some(frame.into_video_frame()?))
     }
@@ -264,8 +262,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             .get(index)
             .ok_or_else(|| invalid("MP4 track index out of range"))?;
 
-        if track.ensure_constant_description().is_ok() && matches!(&track.codec, b"hvc1" | b"hev1")
-        {
+        if super::layered_packet::all_hevc(track) {
             let nal = dispatch_hevc_vps(&mut demuxer, index, budget)?;
             if let Some(nal) = nal {
                 // Inspect topology without relaxing the base decoder's guard.
@@ -276,7 +273,12 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     let ols = vps.automatic_output_layer_set()?;
                     let mut colour = crate::playback_native::AvcColour::default();
                     let mut stated = ColourDescription::default();
-                    let config = HevcConfig::parse(&demuxer.tracks()[index].configuration)?;
+                    let config = HevcConfig::parse(
+                        &demuxer.tracks()[index]
+                            .description_for_sample(0)
+                            .unwrap()
+                            .configuration,
+                    )?;
                     for array in &config.arrays {
                         for nal in &array.units {
                             if array.nal_type == 33
@@ -307,6 +309,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                             initial_signal: stated,
                             hdr: HdrMetadata::default(),
                             selected: None,
+                            presented_sample: None,
                             failed: false,
                         })),
                     });
@@ -339,7 +342,11 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
     pub fn container_description(&self) -> &crate::container::mp4::SampleDescription {
         match &self.source {
             Source::Single(s) => s.container_description(),
-            Source::Layered(s) => &s.source.track().sample_descriptions[0],
+            Source::Layered(s) => s
+                .source
+                .track()
+                .description_for_sample(s.presented_sample.unwrap_or(s.source.visible_sample()))
+                .unwrap(),
         }
     }
     pub fn movie_timescale(&self) -> u32 {

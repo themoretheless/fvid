@@ -1,0 +1,442 @@
+{
+  "cases": [
+    {
+      "name": "base-multi-base",
+      "layers": [
+        0,
+        3,
+        0
+      ],
+      "oracles": [
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        0
+      ],
+      "descriptions": [
+        1,
+        2,
+        1
+      ],
+      "lengths": [
+        4,
+        4
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "multi-base-multi",
+      "layers": [
+        3,
+        0,
+        3
+      ],
+      "oracles": [
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        0
+      ],
+      "descriptions": [
+        1,
+        2,
+        1
+      ],
+      "lengths": [
+        4,
+        4
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "multi-colour-multi",
+      "layers": [
+        3,
+        3,
+        3
+      ],
+      "oracles": [
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-separate-colour-planes-distinct-synthetic.yuv",
+        "hevc-pcm-reference-rext8.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        0
+      ],
+      "descriptions": [
+        1,
+        2,
+        1
+      ],
+      "lengths": [
+        4,
+        4
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "equivalent-inter",
+      "layers": [
+        3,
+        3,
+        3
+      ],
+      "oracles": [
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        1,
+        0
+      ],
+      "descriptions": [
+        1,
+        2,
+        1
+      ],
+      "lengths": [
+        4,
+        4
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "configuration-addition-inter",
+      "layers": [
+        3,
+        3,
+        3
+      ],
+      "oracles": [
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        1,
+        0
+      ],
+      "descriptions": [
+        1,
+        2,
+        1
+      ],
+      "lengths": [
+        4,
+        4
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "length-change-inter",
+      "layers": [
+        3,
+        3,
+        3
+      ],
+      "oracles": [
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        1,
+        0
+      ],
+      "descriptions": [
+        1,
+        2,
+        1
+      ],
+      "lengths": [
+        4,
+        2
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "first-description-two",
+      "layers": [
+        3,
+        0,
+        3
+      ],
+      "oracles": [
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        0
+      ],
+      "descriptions": [
+        2,
+        1,
+        2
+      ],
+      "lengths": [
+        4,
+        2
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "aud-configuration-inter",
+      "layers": [
+        3,
+        3,
+        3
+      ],
+      "oracles": [
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        1,
+        0
+      ],
+      "descriptions": [
+        1,
+        2,
+        1
+      ],
+      "lengths": [
+        4,
+        2
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "hvcC-hdr-inter",
+      "layers": [
+        3,
+        3,
+        3
+      ],
+      "oracles": [
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        1,
+        0
+      ],
+      "descriptions": [
+        1,
+        2,
+        1
+      ],
+      "lengths": [
+        4,
+        2
+      ],
+      "hdr": [
+        100,
+        900,
+        100
+      ],
+      "error": null
+    },
+    {
+      "name": "illegal-vps-inter",
+      "layers": [
+        3,
+        3,
+        3
+      ],
+      "oracles": [
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        1,
+        0
+      ],
+      "descriptions": [
+        1,
+        2,
+        1
+      ],
+      "lengths": [
+        4,
+        4
+      ],
+      "hdr": null,
+      "error": "active VPS changed"
+    },
+    {
+      "name": "hvcC-zero-hdr-inter",
+      "layers": [
+        3,
+        3,
+        3
+      ],
+      "oracles": [
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        1,
+        0
+      ],
+      "descriptions": [
+        1,
+        2,
+        1
+      ],
+      "lengths": [
+        4,
+        2
+      ],
+      "hdr": [
+        100,
+        0,
+        100
+      ],
+      "error": null
+    },
+    {
+      "name": "metadata-only-transition",
+      "layers": [
+        0,
+        null,
+        3,
+        0
+      ],
+      "oracles": [
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "descriptions": [
+        1,
+        2,
+        2,
+        1
+      ],
+      "lengths": [
+        4,
+        2
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "hvcC-metadata-inter-hdr",
+      "layers": [
+        3,
+        null,
+        3,
+        3
+      ],
+      "oracles": [
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "descriptions": [
+        1,
+        2,
+        2,
+        1
+      ],
+      "lengths": [
+        4,
+        2
+      ],
+      "hdr": [
+        100,
+        null,
+        900,
+        100
+      ],
+      "error": null
+    },
+    {
+      "name": "hvcC-metadata-idr-hdr",
+      "layers": [
+        3,
+        null,
+        3,
+        3
+      ],
+      "oracles": [
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv",
+        "hevc-pcm-reference-rext8.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "descriptions": [
+        1,
+        2,
+        2,
+        1
+      ],
+      "lengths": [
+        4,
+        2
+      ],
+      "hdr": [
+        100,
+        null,
+        900,
+        100
+      ],
+      "error": null
+    }
+  ],
+  "initial_zero": "initial-zero.mp4",
+  "provenance": "Original repository-owned HEVC entropy, parameter banks and pixel oracles. Own regular/fragmented MP4 muxing; no private media, external codec process, FFmpeg or network."
+}

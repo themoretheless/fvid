@@ -13,6 +13,8 @@ use std::sync::Arc;
 
 #[path = "mp4_layered.rs"]
 mod layered;
+#[path = "mp4_layered_packet.rs"]
+mod layered_packet;
 pub use layered::{LayeredMp4VideoReader, LayeredVideoFrame};
 #[path = "mp4_dispatch.rs"]
 mod dispatch;
