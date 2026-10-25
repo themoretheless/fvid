@@ -725,6 +725,68 @@
       "chan_loc": 2
     }
   ],
+  "optional_dependent_cases": [
+    {
+      "name": "optional-prefix-plain",
+      "presence": [
+        false,
+        true,
+        true
+      ],
+      "channels": 8,
+      "samples": 2304
+    },
+    {
+      "name": "optional-prefix-transient",
+      "presence": [
+        false,
+        true,
+        true
+      ],
+      "channels": 8,
+      "samples": 2304
+    },
+    {
+      "name": "optional-suffix-plain",
+      "presence": [
+        true,
+        true,
+        false
+      ],
+      "channels": 8,
+      "samples": 2304
+    },
+    {
+      "name": "optional-suffix-transient",
+      "presence": [
+        true,
+        true,
+        false
+      ],
+      "channels": 8,
+      "samples": 2304
+    },
+    {
+      "name": "optional-middle-plain",
+      "presence": [
+        true,
+        false,
+        true
+      ],
+      "channels": 8,
+      "samples": 2304
+    },
+    {
+      "name": "optional-middle-transient",
+      "presence": [
+        true,
+        false,
+        true
+      ],
+      "channels": 8,
+      "samples": 2304
+    }
+  ],
   "independent_cases": [
     {
       "name": "independent-m0-l0-plain",

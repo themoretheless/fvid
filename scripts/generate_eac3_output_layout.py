@@ -99,6 +99,16 @@ def generate():
     return result
    files[name+'.mp4']=full_duration(mp4)
    cases.append(dict(name=name,rate=48000,blocks=3,transient=transient,late=late,active_channels=[8]*count,output_channels=10 if late else 8,output_mask=None,output_roles=['Left','Right','Centre','Lfe']+(['LeftRear','RightRear']if late else[])+['LeftSurround','RightSurround','TopSurroundLeft','TopSurroundRight'],samples=count*768,chan_loc=2 if late else 0))
+ # Dependent channels may be absent from otherwise complete programmes.
+ for pattern,presence in [('prefix',[False,True,True]),('suffix',[True,True,False]),('middle',[True,False,True])]:
+  for transient in [False,True]:
+   name='optional-'+pattern+('-transient'if transient else'-plain');groups=[];bases=[]
+   for active in presence:
+    base,_=packet(7,True,0,0,'mixed',None,False,blocks_override=3,divisor=16,compact=True)
+    dep,_=packet(2,False,0,0,'mixed',0x0200,True,blocks_override=3,divisor=32,transient_windows=[(0,255),(240,127)]if transient else None,compact=True)
+    groups.append(base+(dep if active else b''));bases.append(base)
+   files[name+'.ec3']=b''.join(groups);files[name+'.mkv']=movie(groups,blocks=3,channels=8)
+   files[name+'-control0.ec3']=b''.join(bases)
  # Independent-only streams must also accept an explicit native output map.
  independent=[]
  for mode,nf in enumerate([2,1,2,3,3,4,4,5]):
@@ -142,7 +152,7 @@ def generate():
   if tag==b'moov':body=b''.join(rewrite_audio(k,p)if k==b'trak'and b'mp4a'in p else box(k,p)for k,p in audio_boxes(body))
   rebuilt.append(box(tag,body))
  files['aac-factory-stack.mp4']=b''.join(rebuilt)
- files['manifest.json']=(json.dumps(dict(cases=cases,independent_cases=independent,independent_refusals=[dict(name="independent-prefix-incomplete-dependent",reason="missing final selected dependent after a valid independent-only prefix")],stack_reproducer='aac-factory-stack.mp4',matroska_automatic_layout='Selected-track header-only full role union, including late.mkv change after 160 programmes.',mp4_automatic_layout='Selected dec3 programme locations negotiate stable output before packet decode.',raw_automatic_layout='Union of selected programme roles; stable 10-channel output without an explicit output-map request; preserve actual per-programme channel counts.',provenance='Owned C/L/R/Ls/Rs/LFE, rear/height/replacement roles and continuous transform/transient controls with neutral VP9; AAC stack witness re-authors metadata of an existing repository-owned synthetic AAC/PS video. No private media, process, external encoder or network.'),indent=2)+'\n').encode()
+ files['manifest.json']=(json.dumps(dict(cases=cases,optional_dependent_cases=[dict(name="optional-"+p+"-"+v,presence=a,channels=8,samples=2304) for p,a in [("prefix",[False,True,True]),("suffix",[True,True,False]),("middle",[True,False,True])] for v in ["plain","transient"]],independent_cases=independent,independent_refusals=[dict(name="independent-prefix-incomplete-dependent",reason="missing final selected dependent after a valid independent-only prefix")],stack_reproducer='aac-factory-stack.mp4',matroska_automatic_layout='Selected-track header-only full role union, including late.mkv change after 160 programmes.',mp4_automatic_layout='Selected dec3 programme locations negotiate stable output before packet decode.',raw_automatic_layout='Union of selected programme roles; stable 10-channel output without an explicit output-map request; preserve actual per-programme channel counts.',provenance='Owned C/L/R/Ls/Rs/LFE, rear/height/replacement roles and continuous transform/transient controls with neutral VP9; AAC stack witness re-authors metadata of an existing repository-owned synthetic AAC/PS video. No private media, process, external encoder or network.'),indent=2)+'\n').encode()
  return files
 if __name__=='__main__':
  OUT.mkdir(parents=True,exist_ok=True)

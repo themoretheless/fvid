@@ -727,6 +727,15 @@ impl<R: Read + Seek> WebmAudioReader<R> {
             vorbis,
             vorbis_end_ns: None,
         };
+        if source.codec_tag=="A_EAC3" {
+            // No dec3 equivalent exists in Matroska. Index metadata once and
+            // inspect only selected audio headers; video bodies are skipped.
+            source.demuxer.scan_all_headers()?;
+            // Damaged/unsupported headers retain the existing packet-probed
+            // decoder refusal/concealment path, without inventing partial maps.
+            source.eac3_automatic_layout=source.scan_eac3_speakers().ok().flatten();
+            source.rewind();
+        }
         if programme.is_some(){
             source.probe_eac3_programme()?;
             source.rewind();
@@ -740,18 +749,9 @@ impl<R: Read + Seek> WebmAudioReader<R> {
                         Some(crate::codec::ac3_decoder::speaker_mask(&packet.data,frame.channels)?)
                     }else{None}
                 }else if crate::codec::eac3_decoder::checked_frame(&packet.data).is_some() {
-                    source.eac3_speaker_mask(&packet.data)?
+                    if let Some(layout)=&source.eac3_automatic_layout {layout.wave_mask()} else {source.eac3_speaker_mask(&packet.data)?}
                 }else{None};
             }
-            source.rewind();
-        }
-        if source.codec_tag=="A_EAC3" {
-            // No dec3 equivalent exists in Matroska. Index metadata once and
-            // inspect only selected audio headers; video bodies are skipped.
-            source.demuxer.scan_all_headers()?;
-            // Damaged/unsupported headers retain the existing packet-probed
-            // decoder refusal/concealment path, without inventing partial maps.
-            source.eac3_automatic_layout=source.scan_eac3_speakers().ok().flatten();
             source.rewind();
         }
         if source.codec_tag=="A_WAVPACK4" {

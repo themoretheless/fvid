@@ -292,14 +292,15 @@ impl Ac3 {
                         role_union.extend(layout.0.iter().copied());
                         (size,layout.0.len() as u16)
                     },
-                    Ok(None) if native.is_none() => (at.frame_bytes,output_channels),
+                    // A complete independent-only programme is legal between
+                    // expanded programmes. The union map pads absent roles.
+                    Ok(None) => (at.frame_bytes,at.channels),
                     Err(_) if native.is_none() => {
                         let end=starts.get(frame_index+1).copied().unwrap_or(bytes.len());
                         (opaque_programme_span(&bytes[*start..end],at.frame_bytes),output_channels)
                     },
                     Err(_) if truncated_final_frame && Some(start)==starts.last()=>break,
                     Err(error)=>return Err(error),
-                    _=>return Err(invalid("E-AC-3 elementary presentation changes or loses extension channels")),
                 }
             }else{(at.frame_bytes,output_channels)};
             frames.push(Frame {
