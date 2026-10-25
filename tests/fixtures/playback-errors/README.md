@@ -4923,3 +4923,13 @@ checks PCM at 24/22.05/16 kHz, Matroska PCM/rewind and neutral VP9 video decode.
 The old decoder fails the specific PCM bound, not an unrelated parsing error.
 Pinned normative constants live in `scripts/dolby_reduced_rate_tables.json`;
 generation and ordinary tests require neither FFmpeg nor network access.
+
+`ac3-reduced-compatibility/` has 73 authored artifacts / 1227781 bytes. Generate
+separately with `scripts/generate_ac3_reduced_compatibility.py`, without external
+processes or network. Six BSID 9/10 half/quarter-rate cases and six BSID 0/8
+base-rate controls use quiet spectra and separate high-precision PCM controls.
+`ac3_reduced_compatibility` checks all native readers, BE/LE, legacy Matroska
+aliases, coded PCM bounds, navigation, neutral VP9 video, CRC/rate refusals and
+the capturing scheduler. BSID 9/10 support is de facto compatibility, not ATSC
+conformance. The parent decoder's exact refusal is the unsupported reduced
+setup rate. No private video, audio, codec parameters, FFmpeg or network is used.

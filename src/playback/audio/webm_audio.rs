@@ -14,7 +14,7 @@ const TIMESCALE_NS: u32 = 1_000_000_000;
 /// `A_PCM/*` IDs are uncompressed audio, whose width the track states in
 /// `BitDepth`. `A_AAC` is spelled `mp4a` by the decoder dispatch, whichever
 /// container named it, and needs its setup block rebuilt (see `aac_setup`).
-const CODECS: [&str; 14] = [
+const CODECS: [&str; 16] = [
     "A_OPUS",
     "A_VORBIS",
     "A_MPEG/L3",
@@ -24,6 +24,8 @@ const CODECS: [&str; 14] = [
     "A_ALAC",
     "A_WAVPACK4",
     "A_AC3",
+    "A_AC3/BSID9",
+    "A_AC3/BSID10",
     "A_EAC3",
     "A_AAC",
     "A_PCM/INT/LIT",
@@ -579,6 +581,8 @@ impl<R: Read + Seek> WebmAudioReader<R> {
         let extra_data = setup_data(track)?;
         let codec_tag = if track.codec == "A_AAC" {
             "mp4a".to_string()
+        } else if matches!(track.codec.as_str(), "A_AC3/BSID9" | "A_AC3/BSID10") {
+            "A_AC3".to_string()
         } else {
             track.codec.clone()
         };
