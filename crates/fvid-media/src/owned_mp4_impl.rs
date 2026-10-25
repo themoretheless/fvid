@@ -321,6 +321,8 @@ pub struct Mp4Reader<R> {
     /// What the movie's own tags say about it; every fact it states none of
     /// leaves empty.
     tags: FileTags,
+    /// The writing tool / encoder from `moov/udta/©too` or `moov/udta/meta/ilst/©too`.
+    encoder: String,
     movie_timescale: u32,
     limits: Limits,
     /// Byte position the reader was left at by the last packet read, or
@@ -614,6 +616,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
         let udta = optional(&movie, b"udta")?;
         let chapters = read_chpl(udta, movie_timescale, movie_duration);
         let tags = read_tags(udta);
+        let encoder = read_encoder(udta);
         Ok(Self {
             reader,
             tracks,
@@ -621,6 +624,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             refused,
             chapters,
             tags,
+            encoder,
             movie_timescale,
             limits,
             position: u64::MAX,
@@ -661,6 +665,10 @@ impl<R: Read + Seek> Mp4Reader<R> {
     /// What `moov/udta` says about the movie as a whole.
     pub fn tags(&self) -> &FileTags {
         &self.tags
+    }
+    /// The writing tool / encoder from `moov/udta/©too` or `moov/udta/meta/ilst/©too`.
+    pub fn encoder(&self) -> &str {
+        &self.encoder
     }
     /// Retained container-owned heap payload, including spare vector/string
     /// capacity. Excludes caller I/O buffers, packet payloads and allocator
@@ -707,6 +715,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             &self.tags.copyright,
             &self.tags.description,
             &self.tags.rating,
+            &self.encoder,
         ] {
             add(&mut total, text.capacity(), 1)?;
         }
@@ -789,6 +798,10 @@ impl<R: Read + Seek> Mp4Reader<R> {
         if let Err(error)=self.reader.read_exact(&mut out[..n]) {self.position=u64::MAX;return Err(error.into());}
         self.position=offset.checked_add(n as u64).ok_or_else(||invalid("MP4 range end overflow"))?;
         Ok(n)
+    }
+    /// Tighten the packet-size budget enforced by subsequent `read_packet` calls.
+    pub fn restrict_packet_bytes(&mut self, maximum: usize) {
+        self.limits.packet_bytes = self.limits.packet_bytes.min(maximum);
     }
     /// Forget the tracked read position; the next `read_packet` seeks again.
     pub fn invalidate_position(&mut self) {
@@ -969,6 +982,34 @@ fn read_tags(udta: Option<&[u8]>) -> FileTags {
         }
     }
     tags
+}
+
+fn read_encoder(udta: Option<&[u8]>) -> String {
+    let Ok(children) = atoms(udta.unwrap_or_default()) else {
+        return String::new();
+    };
+    if let Some(text) = optional(&children, b"\xa9too").ok().flatten().and_then(tag_text) {
+        return text;
+    }
+    let Ok(Some(meta)) = optional(&children, b"meta") else {
+        return String::new();
+    };
+    let Ok(lists) = atoms(meta.get(4..).unwrap_or_default()) else {
+        return String::new();
+    };
+    let Ok(Some(list)) = optional(&lists, b"ilst") else {
+        return String::new();
+    };
+    let Ok(entries) = atoms(list) else {
+        return String::new();
+    };
+    optional(&entries, b"\xa9too")
+        .ok()
+        .flatten()
+        .and_then(|entry| atoms(entry).ok())
+        .and_then(|parts| optional(&parts, b"data").ok().flatten())
+        .and_then(|data| tag_text(data.get(8..).unwrap_or_default()))
+        .unwrap_or_default()
 }
 
 fn is_pcm(codec: &[u8; 4]) -> bool {

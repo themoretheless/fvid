@@ -102,6 +102,10 @@ fn metadata<R: std::io::Read + std::io::Seek>(
 ) {
     let mut metadata = crate::owned_matroska::FileMetadata::from_mp4(reader);
     let mut text = std::collections::BTreeMap::<String, String>::new();
+    let encoder = reader.encoder().trim();
+    if !encoder.is_empty() && encoder.len() <= 1024 && !encoder.contains('\0') {
+        text.insert("ENCODER".into(), encoder.to_owned());
+    }
     for (key, value) in &options.metadata_set {
         text.retain(|name, _| !name.eq_ignore_ascii_case(key));
         if !metadata.tags.set(key, value) && !value.is_empty() {
@@ -122,14 +126,67 @@ fn open(
     if !file.metadata().map_err(|e| e.to_string())?.is_file() {
         return Err("MP4 remux requires a regular file".into());
     }
-    crate::owned_mp4::Mp4Reader::open(
+    let mut reader = crate::owned_mp4::Mp4Reader::open(
         BufReader::new(file),
-        crate::owned_mp4::Limits {
-            packet_bytes: options.max_packet_bytes,
-            ..Default::default()
-        },
+        crate::owned_mp4::Limits::default(),
     )
-    .map_err(|e| e.to_string())
+    .map_err(|e| e.to_string())?;
+    reader.restrict_packet_bytes(options.max_packet_bytes);
+    Ok(reader)
+}
+fn validate_selected_prefix_packet_budget<R: std::io::Read + std::io::Seek>(
+    reader: &crate::owned_mp4::Mp4Reader<R>,
+    selected: &[usize],
+    options: &CopyOptions,
+) -> Result<(u64, u64)> {
+    let plans = selected
+        .iter()
+        .map(|&index| {
+            let track = &reader.tracks()[index];
+            crate::owned_mp4_matroska::plan(
+                track,
+                reader.movie_timescale(),
+                options.cancel.as_ref(),
+            )
+            .map_err(|e| e.to_string())
+        })
+        .collect::<Result<Vec<_>>>()?;
+    let mut queue = std::collections::BinaryHeap::new();
+    for (track, plan) in plans.iter().enumerate() {
+        if let Some(first) = plan.packets.first() {
+            queue.push(std::cmp::Reverse((first.dts, selected[track], track, 0usize)));
+        }
+    }
+    let mut packets = 0u64;
+    let mut payload = 0u64;
+    while let Some(std::cmp::Reverse((_, source_track, track, index))) = queue.pop() {
+        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+            return Err("media operation cancelled".into());
+        }
+        if options.max_packets.is_some_and(|limit| packets >= limit) {
+            break;
+        }
+        let sample = reader.tracks()[source_track]
+            .samples
+            .get(index)
+            .ok_or("missing MP4 sample")?;
+        if (sample.size as usize) > options.max_packet_bytes {
+            return Err("MP4 packet exceeds budget".into());
+        }
+        packets = packets.checked_add(1).ok_or("MP4 packet count overflow")?;
+        payload = payload
+            .checked_add(u64::from(sample.size))
+            .ok_or("MP4 byte count overflow")?;
+        if let Some(next) = plans[track].packets.get(index + 1) {
+            queue.push(std::cmp::Reverse((
+                next.dts,
+                source_track,
+                track,
+                index + 1,
+            )));
+        }
+    }
+    Ok((packets, payload))
 }
 pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
     if !policies(options)
@@ -177,6 +234,9 @@ pub fn remux(
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
+    if options.max_packets == Some(0) {
+        return Err("Matroska output requires at least one packet".into());
+    }
     crate::owned_budget::check_rss_budget(options)?;
     if !supports(source, destination, options) {
         return Err("request is not an owned MP4 Matroska remux".into());
@@ -184,6 +244,7 @@ pub fn remux(
     let mut reader = open(source, options)?;
     let (metadata, text) = metadata(&reader, options);
     let selected = crate::owned_mp4_matroska::selection(reader.tracks().len(), &options.streams).map_err(|e| e.to_string())?;
+    validate_selected_prefix_packet_budget(&reader, &selected, options)?;
     let (tracks, scoped) = track_metadata(options, &selected);
     crate::owned_matroska_remux::publish(destination, options, |output| {
         crate::owned_mp4_matroska::write_selected_with_text_metadata_overrides(
@@ -207,37 +268,16 @@ pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<fvid_media_inf
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
+    if options.max_packets == Some(0) {
+        return Err("Matroska output requires at least one packet".into());
+    }
     crate::owned_budget::check_rss_budget(options)?;
     if !supports(source, Path::new("planned.mkv"), options) {
         return Err("request is not an owned MP4 Matroska remux".into());
     }
     let reader = open(source, options)?;
-    let mut packets = 0u64;
-    let mut payload = 0u64;
     let selected = crate::owned_mp4_matroska::selection(reader.tracks().len(), &options.streams).map_err(|e| e.to_string())?;
-    let plans = selected.iter().map(|&index| {
-        let track = &reader.tracks()[index];
-        crate::owned_mp4_matroska::plan(track, reader.movie_timescale(), options.cancel.as_ref())
-            .map_err(|e| e.to_string())
-    }).collect::<Result<Vec<_>>>()?;
-    let mut queue = std::collections::BinaryHeap::new();
-    for (track, plan) in plans.iter().enumerate() {
-        if let Some(first) = plan.packets.first() {
-            queue.push(std::cmp::Reverse((first.dts, selected[track], track, 0usize)));
-        }
-    }
-    while let Some(std::cmp::Reverse((_, source_track, track, index))) = queue.pop() {
-        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-            return Err("media operation cancelled".into());
-        }
-        if options.max_packets.is_some_and(|limit| packets >= limit) { break; }
-        let sample = reader.tracks()[source_track].samples.get(index).ok_or("missing MP4 sample")?;
-        packets = packets.checked_add(1).ok_or("MP4 packet count overflow")?;
-        payload = payload.checked_add(u64::from(sample.size)).ok_or("MP4 byte count overflow")?;
-        if let Some(next) = plans[track].packets.get(index + 1) {
-            queue.push(std::cmp::Reverse((next.dts, source_track, track, index + 1)));
-        }
-    }
+    let (packets, payload) = validate_selected_prefix_packet_budget(&reader, &selected, options)?;
     Ok(MediaPlan {
         command: "remux".into(), input: source.into(), inputs: vec![source.into()],
         streams: selected.iter().map(|&index| { let track = &reader.tracks()[index]; PlanStream {

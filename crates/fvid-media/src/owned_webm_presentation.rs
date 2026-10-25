@@ -66,6 +66,15 @@ impl Presentation {
                 return Err("FFV1 input packet count exceeds limit".into());
             }
             self.consumed = self.consumed.checked_add(1).ok_or("FFV1 input packet count overflow")?;
+            if let Some(options) = options {
+                if reader
+                    .packet_payload_size(index)
+                    .map_err(|e| e.to_string())?
+                    > options.max_packet_bytes
+                {
+                    return Err("WebM packet exceeds budget or has empty lace frame".into());
+                }
+            }
             let packet = reader.read_packet(index).map_err(|e|e.to_string())?;
             let decoded = decoder.decode(&packet)?;
             if decoder.has_pending_field() { self.pending_field.get_or_insert(index); }

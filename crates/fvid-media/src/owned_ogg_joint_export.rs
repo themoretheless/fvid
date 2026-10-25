@@ -12,6 +12,13 @@ use std::{
 };
 type Result<T> = std::result::Result<T, String>;
 pub(crate) fn open(path: &Path, options: &CopyOptions) -> Result<(Program, Vec<u8>)> {
+    open_with_transform(path, None, options)
+}
+pub(crate) fn open_with_transform(
+    path: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(Program, Vec<u8>)> {
     check(options)?;
     let mut file = File::open(path).map_err(|e| e.to_string())?;
     let (limits, index) = preflight(&mut file, options)?;
@@ -62,6 +69,17 @@ pub(crate) fn open(path: &Path, options: &CopyOptions) -> Result<(Program, Vec<u
     let tags = fvid_opus::OpusTags::parse(&tagged).map_err(|e| e.to_string())?;
     let info = crate::owned_ogg_opus_export::info_for_tags(&tags)?;
     let program = Program::from_ogg(ogg, nth).map_err(|e| e.to_string())?;
+    let rate = program.sample_rate();
+    let until = transform
+        .and_then(|t| crate::owned_adts_export::decoded_prefix(t, rate))
+        .map(|(_, end)| {
+            u64::try_from((end.as_nanos() * u128::from(rate)).div_ceil(1_000_000_000))
+                .map_err(|_| "Ogg PCM prefix overflow".to_string())
+        })
+        .transpose()?;
+    if program.max_packet_size_in_prefix(until, options.max_packets) > options.max_packet_bytes {
+        return Err("Ogg audio compressed packet exceeds byte limit".into());
+    }
     check(options)?;
     Ok((program, info))
 }
@@ -70,7 +88,7 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    match open(source, options) {
+    match open_with_transform(source, Some(transform), options) {
         Ok((p, _)) => {
             let target = transform.channels.unwrap_or(i32::from(p.channels()));
             target == i32::from(p.channels())
@@ -151,7 +169,7 @@ pub(crate) fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("destination already exists".into());
     }
-    let (mut program, info) = open(source, options)?;
+    let (mut program, info) = open_with_transform(source, Some(transform), options)?;
     let rate = program.sample_rate();
     let channels = program.channels();
     let mask = program.output_channel_mask();

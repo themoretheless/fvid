@@ -1,0 +1,23 @@
+{
+  "batch": 294,
+  "accepted": [
+    "FVID-0301"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-294-pre-edit/src/media_cli.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-294-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-294-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-294-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/remux-concat-controls/adts-3pkt-valid.aac",
+    "tests/fixtures/playback-errors/remux-concat-controls/mp4-pcm-48k.m4a",
+    "tests/fixtures/playback-errors/remux-concat-controls/pcm-48k-a.wav",
+    "tests/fixtures/playback-errors/remux-concat-controls/pcm-48k-b.wav"
+  ],
+  "tests": [
+    "tests/remux_concat_controls_regressions.rs"
+  ]
+}

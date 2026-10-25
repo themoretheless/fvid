@@ -123,9 +123,11 @@ impl TimedOverlay {
             origin: None,
         })
     }
-    pub(crate) fn validate_main(
+    pub(crate) fn validate_main_with_geometry(
         &mut self,
         reader: &NativeReader<BufReader<File>>,
+        frame: Option<&RawFrame>,
+        geometry: &VideoGeometry,
         pts: u64,
     ) -> Result<()> {
         if reader.colour() != self.source.colour {
@@ -133,16 +135,15 @@ impl TimedOverlay {
                 "overlay inputs require matching colour encoding and range",
             ));
         }
-        let aspect = |reader: &NativeReader<BufReader<File>>| {
-            let (n, d) = reader.pixel_aspect();
-            if matches!(reader.rotation(), 90 | 270) {
-                (d, n)
-            } else {
-                (n, d)
-            }
-        };
-        let (mn, md) = aspect(reader);
-        let (fn_, fd) = aspect(&self.source.reader);
+        let [visible_w, visible_h] =
+            crate::virtual_camera::visible_dimensions(reader.dimensions(), reader.insets())?;
+        let (mn, md) = crate::native_export::transformed_aspect(
+            reader.pixel_aspect(),
+            visible_w,
+            visible_h,
+            geometry,
+        )?;
+        let (fn_, fd) = self.source.reader.pixel_aspect();
         if u64::from(mn) * u64::from(fd) != u64::from(fn_) * u64::from(md)
             || reader.hdr() != self.source.reader.hdr()
         {
@@ -150,7 +151,98 @@ impl TimedOverlay {
                 "overlay inputs require matching display pixel aspect and HDR metadata",
             ));
         }
+        if let Some(frame) = frame {
+            let [w, h] = reader.dimensions();
+            let planes = geometry.apply_cropped_display(
+                frame,
+                w,
+                h,
+                reader.rotation(),
+                reader.insets(),
+            )?;
+            if planes.subsampling != self.source.current.planes.subsampling {
+                return Err(invalid("overlay requires matching chroma sampling"));
+            }
+            if let Some([sx, sy]) = planes.subsampling
+                && (self.x % i64::try_from(sx).unwrap() != 0
+                    || self.y % i64::try_from(sy).unwrap() != 0)
+            {
+                return Err(invalid("overlay placement must align with chroma samples"));
+            }
+        }
         self.origin.get_or_insert(pts);
+        Ok(())
+    }
+    pub(crate) fn validate_pair_with_geometry(
+        main: &Path,
+        foreground: &Path,
+        x: i64,
+        y: i64,
+        geometry: &VideoGeometry,
+    ) -> Result<()> {
+        Self::validate_pair_with_geometry_and_filters(
+            main,
+            foreground,
+            x,
+            y,
+            geometry,
+            &Default::default(),
+        )
+    }
+    pub(crate) fn validate_pair_with_geometry_and_filters(
+        main: &Path,
+        foreground: &Path,
+        x: i64,
+        y: i64,
+        geometry: &VideoGeometry,
+        filters: &crate::native_pixels::PixelFilters,
+    ) -> Result<()> {
+        let mut compositor = Self::new(foreground, x, y)?;
+        let mut main_reader = NativeReader::software(BufReader::new(File::open(main)?), usize::MAX)?;
+        let first_frame = main_reader
+            .read_frame_raw()?
+            .ok_or_else(|| invalid("main input has no frames"))?;
+        let (start, _, scale) = main_reader
+            .frame_interval()
+            .ok_or_else(|| invalid("main frame has no timing"))?;
+        if scale == 0 {
+            return Err(invalid("overlay clock is zero"));
+        }
+        let pts = u64::try_from(
+            start
+                .checked_mul(1_000_000_000)
+                .ok_or_else(|| invalid("overlay timestamp overflow"))?
+                / u128::from(scale),
+        )
+        .map_err(|_| invalid("overlay timestamp overflow"))?;
+        compositor.validate_main_with_geometry(&main_reader, Some(&first_frame), geometry, pts)?;
+        if !filters.is_empty() {
+            let [w, h] = main_reader.dimensions();
+            let mut planes = geometry.apply_cropped_display(
+                &first_frame,
+                w,
+                h,
+                main_reader.rotation(),
+                main_reader.insets(),
+            )?;
+            let depth = match &first_frame {
+                RawFrame::Avc { picture, .. } => picture.bit_depth,
+                RawFrame::Planar(p) => p.depth,
+                _ => 8,
+            };
+            compositor.apply(&mut planes, depth, pts, None)?;
+            filters.configure_vignette_source(&main_reader, geometry)?;
+            let source_colour = main_reader.colour();
+            filters.apply_colour_clock(
+                &mut planes,
+                depth,
+                source_colour.full_range,
+                source_colour.matrix,
+                0,
+                Some(start as f64 / scale as f64),
+                crate::native_pixels::frame_clock(&main_reader)?,
+            )?;
+        }
         Ok(())
     }
     pub(crate) fn apply(
@@ -247,7 +339,7 @@ pub fn overlay_video_transformed(
     }
     let mut compositor = TimedOverlay::new(foreground, x, y)?;
     let mut main_reader = NativeReader::software(BufReader::new(File::open(main)?), usize::MAX)?;
-    main_reader
+    let first_frame = main_reader
         .read_frame_raw()?
         .ok_or_else(|| invalid("main input has no frames"))?;
     let (start, _, scale) = main_reader
@@ -263,7 +355,7 @@ pub fn overlay_video_transformed(
             / u128::from(scale),
     )
     .map_err(|_| invalid("overlay timestamp overflow"))?;
-    compositor.validate_main(&main_reader, pts)?;
+    compositor.validate_main_with_geometry(&main_reader, Some(&first_frame), geometry, pts)?;
     drop(main_reader);
     let directory = destination
         .parent()

@@ -7,19 +7,23 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         );
         return Ok(());
     }
-    let source = Path::new(
-        args.get(1)
-            .ok_or("loudnorm requires INPUT.wav OUTPUT.wav")?,
-    );
-    let destination = Path::new(args.get(2).ok_or("loudnorm requires OUTPUT.wav")?);
+    let mut paths = Vec::<std::path::PathBuf>::new();
     let mut options = fvid_media::CopyOptions::default();
     let mut normalization = None;
     let mut quiet = false;
     let mut progress = false;
     let mut dual_pass = false;
     let mut seen = std::collections::HashSet::new();
-    let mut flags = args[3..].iter();
+    let mut flags = args[1..].iter();
     while let Some(flag) = flags.next() {
+        if flag == "--" {
+            paths.extend(flags.map(std::path::PathBuf::from));
+            break;
+        }
+        if !flag.starts_with('-') {
+            paths.push(std::path::PathBuf::from(flag));
+            continue;
+        }
         let key_flag = if flag == "-q" { "--quiet" } else { flag.as_str() };
         if !matches!(
             key_flag,
@@ -105,6 +109,15 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             _ => return Err(format!("unsupported loudnorm option: {flag}").into()),
         }
     }
+    let source = paths
+        .first()
+        .map(std::path::PathBuf::as_path)
+        .ok_or("loudnorm requires INPUT.wav OUTPUT.wav")?;
+    if paths.len() != 2 {
+        return Err("loudnorm requires OUTPUT.wav".into());
+    }
+    let destination = paths[1].as_path();
+    validate_loudnorm_destination(destination, &options)?;
     if progress {
         options.progress = Some(fvid_media::ProgressHook::new(|event| {
             eprintln!(
@@ -140,6 +153,29 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+fn validate_loudnorm_destination(
+    destination: &Path,
+    options: &fvid_media::CopyOptions,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let dest_ext = destination.extension().and_then(|s| s.to_str());
+    if !matches!(dest_ext, Some("wav" | "mka" | "mkv")) {
+        return Err("loudnorm requires OUTPUT.wav, OUTPUT.mka or OUTPUT.mkv".into());
+    }
+    if dest_ext == Some("wav") {
+        if !options.stream_metadata_set.is_empty()
+            || !options.stream_metadata_delete.is_empty()
+        {
+            return Err("loudnorm to .wav does not support stream metadata mutations".into());
+        }
+        fvid_media::owned_wave_metadata::edit_info_chunks(
+            &[],
+            &options.metadata_delete,
+            &options.metadata_set,
+        )?;
+    }
+    Ok(())
+}
+
 fn value<'a>(flags: &mut std::slice::Iter<'a, String>, flag: &str) -> Result<&'a String, String> {
     flags
         .next()
@@ -153,14 +189,22 @@ pub fn run_plan(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         );
         return Ok(());
     }
-    let source = Path::new(args.get(1).ok_or("plan loudnorm requires INPUT")?);
+    let mut paths = Vec::<std::path::PathBuf>::new();
     let mut normalization = None;
     let mut dual_pass = false;
     let mut quiet = false;
     let mut options = fvid_media::CopyOptions::default();
     let mut seen = std::collections::HashSet::new();
-    let mut flags = args[2..].iter();
+    let mut flags = args[1..].iter();
     while let Some(flag) = flags.next() {
+        if flag == "--" {
+            paths.extend(flags.map(std::path::PathBuf::from));
+            break;
+        }
+        if !flag.starts_with('-') {
+            paths.push(std::path::PathBuf::from(flag));
+            continue;
+        }
         let key_flag = if flag == "-q" { "--quiet" } else { flag.as_str() };
         if !matches!(
             key_flag,
@@ -243,6 +287,16 @@ pub fn run_plan(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             }
             _ => return Err(format!("unsupported loudnorm plan option: {flag}").into()),
         }
+    }
+    let source = paths
+        .first()
+        .map(std::path::PathBuf::as_path)
+        .ok_or("plan loudnorm requires INPUT")?;
+    if paths.len() > 2 {
+        return Err("plan loudnorm requires INPUT [OUTPUT.wav|OUTPUT.mka|OUTPUT.mkv]".into());
+    }
+    if let Some(destination) = paths.get(1).map(std::path::PathBuf::as_path) {
+        validate_loudnorm_destination(destination, &options)?;
     }
     let plan = match fvid::native_loudnorm::try_plan(source, normalization, dual_pass, &options)? {
         Some(plan) => plan,

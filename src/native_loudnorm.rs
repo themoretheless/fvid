@@ -99,6 +99,19 @@ pub fn try_plan(
 ) -> Result<Option<fvid_media_info::MediaPlan>> {
     use fvid_media_info::PlanStep;
     let resolved = fvid_media::owned_loudnorm::validate_request(args)?;
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("loudnorm requires at least one packet".into());
+    }
+    if options.streams.len() > 1 {
+        return Err("loudnorm requires one selected audio stream".into());
+    }
+    fvid_media::owned_budget::check_rss_budget(options).map_err(|e| crate::invalid(&e))?;
     if !valid_wave_metadata_options(options) {
         crate::native_export::pcm_matroska::validate_matroska_pcm_metadata(Some(options))?;
         let clean = strip_metadata_options(options);
@@ -119,16 +132,29 @@ pub fn try_plan(
         );
         return Ok(Some(plan));
     }
-    if crate::native_export::is_adts_source(source)?
-        && fvid_media::owned_adts_loudnorm::supports_plan(source, Some(&resolved), options)
-    {
-        return Ok(Some(fvid_media::owned_adts_loudnorm::plan_loudnorm(
-            source, Some(&resolved), dual_pass, options,
-        )?));
+    if crate::native_export::is_adts_source(source)? {
+        if options.streams.first().is_some_and(|&s| s != 0) {
+            return Err("owned ADTS loudnorm requires stream 0 and valid WAVE INFO metadata edits".into());
+        }
+        use std::io::Read;
+        let mut prefix = [0; 7];
+        std::fs::File::open(source)?.read_exact(&mut prefix)?;
+        let header = crate::container::adts::header(&prefix).ok_or("invalid ADTS header")?;
+        if header.frame_bytes - header.header_bytes > options.max_packet_bytes {
+            return Err("ADTS packet exceeds budget".into());
+        }
+        return Ok(Some(
+            fvid_media::owned_adts_loudnorm::plan_loudnorm(
+                source,
+                Some(&resolved),
+                dual_pass,
+                options,
+            )
+            .map_err(|e| crate::invalid(&e))?,
+        ));
     }
     if fvid_media::owned_container_loudness::recognizes_standalone_audio(source)
         .map_err(|e| crate::invalid(&e))?
-        && fvid_media::owned_container_loudnorm::supports_plan(source, Some(&resolved), options)
     {
         return Ok(Some(
             fvid_media::owned_container_loudnorm::plan_loudnorm(
@@ -142,6 +168,27 @@ pub fn try_plan(
     }
     let wave = crate::native_pcm::is_wave(source)?;
     if wave {
+        if options.streams.len() > 1 {
+            return Err("loudnorm requires one selected audio stream".into());
+        }
+        if options.streams.first().is_some_and(|&s| s != 0) {
+            return Err("WAVE has only stream 0".into());
+        }
+        if let Ok(info) = crate::native_pcm::inspect(
+            &mut std::fs::File::open(source)?,
+            options.cancel.as_ref(),
+        ) {
+            if info.sample_frames == 0 {
+                return Err("no decoded audio samples or invalid channel count".into());
+            }
+            let frame_bytes = usize::from(info.frame_bytes());
+            if frame_bytes == 0
+                || (4096 * frame_bytes).min(options.max_packet_bytes / frame_bytes * frame_bytes)
+                    == 0
+            {
+                return Err("PCM packet limit cannot hold one sample frame".into());
+            }
+        }
         if !fvid_media::owned_loudnorm::supports_request(
             source,
             Path::new("output.wav"),
@@ -164,10 +211,12 @@ pub fn try_plan(
         || !options.metadata_set.is_empty()
         || !options.metadata_delete.is_empty()
     {
+        let mut default_opts = CopyOptions::default();
+        default_opts.streams = options.streams.clone();
         if fvid_media::owned_container_loudnorm::supports_plan(
             source,
             Some(&resolved),
-            options,
+            &default_opts,
         ) {
             return Ok(Some(
                 fvid_media::owned_container_loudnorm::plan_loudnorm(
@@ -181,9 +230,12 @@ pub fn try_plan(
         }
         return Ok(None);
     } else {
-        let native_stream = if crate::native_media::is_owned_audio_trim_source(source)? {
+        let mut default_opts = CopyOptions::default();
+        default_opts.streams = options.streams.clone();
+        default_opts.cancel = options.cancel.clone();
+        let native_stream = if crate::native_media::is_owned_audio_trim_source_with_options(source, &default_opts)? {
             let idx = selected_audio(source, options)?;
-            crate::native_media::audio_source_info_selected(source, Some(idx))
+            crate::native_media::audio_source_info_selected_with_options(source, Some(idx), &default_opts)
                 .ok()
                 .map(|info| (idx, info))
         } else {
@@ -193,27 +245,90 @@ pub fn try_plan(
             if !fvid_media::owned_wave_loudness::qualified_rate(info.sample_rate) {
                 return Ok(None);
             }
+            if options.max_packet_bytes != CopyOptions::default().max_packet_bytes {
+                use std::io::{Read, Seek, SeekFrom};
+                let mut input = std::io::BufReader::new(std::fs::File::open(source)?);
+                let mut prefix = [0u8; 8];
+                input.read_exact(&mut prefix)?;
+                input.seek(SeekFrom::Start(0))?;
+                if crate::container::mp4::recognizes_prefix(&prefix) {
+                    let reader = crate::container::mp4::Mp4Reader::open(
+                        input,
+                        crate::container::mp4::Limits::default(),
+                    )?;
+                    if let Some(track) = reader.tracks().get(idx) {
+                        let max_samples = crate::native_media::mp4_active_samples(
+                            track,
+                            None,
+                            options.max_packets,
+                        );
+                        let exceeds = match &track.samples {
+                            crate::container::mp4::SampleIndex::Expanded(samples) => samples
+                                .iter()
+                                .take(max_samples)
+                                .any(|s| (s.size as usize) > options.max_packet_bytes),
+                            crate::container::mp4::SampleIndex::Uniform(uniform) => {
+                                uniform.count > 0
+                                    && max_samples > 0
+                                    && (uniform.bytes_per_frame as usize) > options.max_packet_bytes
+                            }
+                        };
+                        if exceeds {
+                            return Err("MP4 packet exceeds budget".into());
+                        }
+                    }
+                } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
+                    let mut reader = crate::container::webm::WebmReader::open(
+                        input,
+                        crate::container::webm::Limits::default(),
+                    )?;
+                    reader.scan_all()?;
+                    if let Some(track) = reader.tracks.get(idx) {
+                        let track_number = track.number;
+                        let mut track_packets = 0u64;
+                        for (packet_index, packet) in reader.packets.iter().enumerate() {
+                            if packet.track == track_number {
+                                if options.max_packets.is_some_and(|limit| track_packets >= limit) {
+                                    break;
+                                }
+                                if reader.packet_payload_size(packet_index)?
+                                    > options.max_packet_bytes
+                                {
+                                    return Err("WebM packet exceeds budget".into());
+                                }
+                                track_packets += 1;
+                            }
+                        }
+                    }
+                }
+            }
             idx
-        } else if fvid_media::owned_container_loudnorm::supports_plan(
-            source,
-            Some(&resolved),
-            options,
-        ) {
-            return Ok(Some(
-                fvid_media::owned_container_loudnorm::plan_loudnorm(
-                    source,
-                    Some(&resolved),
-                    dual_pass,
-                    options,
-                )
-                .map_err(|e| crate::invalid(&e))?,
-            ));
         } else {
-            return Ok(None);
+            let mut default_opts = CopyOptions::default();
+            default_opts.streams = options.streams.clone();
+            if fvid_media::owned_container_loudnorm::supports_plan(
+                source,
+                Some(&resolved),
+                &default_opts,
+            ) {
+                return Ok(Some(
+                    fvid_media::owned_container_loudnorm::plan_loudnorm(
+                        source,
+                        Some(&resolved),
+                        dual_pass,
+                        options,
+                    )
+                    .map_err(|e| crate::invalid(&e))?,
+                ));
+            } else {
+                return Ok(None);
+            }
         }
     };
+    let mut plan_options = options.clone();
+    plan_options.streams = vec![index];
     let mut plan =
-        crate::native_plan::decode_audio_selected(source, &Default::default(), Some(index))
+        crate::native_plan::decode_audio_with_options(source, &Default::default(), &plan_options)
             .map_err(|e| crate::invalid(&e))?;
     plan.command = "loudnorm".into();
     plan.steps.truncate(1);
@@ -243,6 +358,14 @@ pub fn try_plan(
         } else {
             format!("decode at most {maximum} selected compressed packets including preroll/repeated decoding; normalize that presentation prefix without counting PCM blocks again")
         });
+    }
+    if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        || options.max_rss_bytes.is_some()
+    {
+        plan.notes.push(format!(
+            "encoded packet limit: {} bytes; RSS limit: {:?}",
+            options.max_packet_bytes, options.max_rss_bytes
+        ));
     }
     Ok(Some(plan))
 }
@@ -287,11 +410,12 @@ pub fn try_apply(
         publish_options.stream_metadata_set = options.stream_metadata_set.clone();
         publish_options.stream_metadata_delete = options.stream_metadata_delete.clone();
         let source_matroska_metadata = Some(
-            crate::native_export::pcm_matroska::extract_source_pcm_metadata(
+            crate::native_export::pcm_matroska::extract_source_pcm_metadata_with_packet_limit(
                 source,
                 options.streams.first().copied(),
                 true,
                 Some(options.max_packet_bytes),
+                options.max_packets,
                 options.cancel.as_ref(),
             )?,
         );
@@ -325,15 +449,28 @@ pub fn try_apply(
             fvid_media::owned_loudnorm::apply_loudnorm(input, destination, args, options)
         }
     };
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("loudnorm requires at least one packet".into());
+    }
+    if options.streams.len() > 1 {
+        return Err("loudnorm requires one selected audio stream".into());
+    }
+    fvid_media::owned_budget::check_rss_budget(options).map_err(|e| crate::invalid(&e))?;
     if !valid_wave_metadata_options(options) {
         return Ok(None);
     }
+    let mut default_opts = CopyOptions::default();
+    default_opts.streams = options.streams.clone();
     if fvid_media::owned_container_loudness::recognizes_standalone_audio(source)
         .map_err(|e| crate::invalid(&e))?
     {
-        if destination.extension().and_then(|s| s.to_str()) == Some("wav")
-            && fvid_media::owned_container_loudnorm::supports_plan(source, args, options)
-        {
+        if destination.extension().and_then(|s| s.to_str()) == Some("wav") {
             return Ok(Some(
                 fvid_media::owned_container_loudnorm::apply(
                     source,
@@ -348,6 +485,12 @@ pub fn try_apply(
         return Ok(None);
     }
     if crate::native_pcm::is_wave(source)? {
+        if options.streams.len() > 1 {
+            return Err("loudnorm requires one selected audio stream".into());
+        }
+        if options.streams.first().is_some_and(|&s| s != 0) {
+            return Err("WAVE has only stream 0".into());
+        }
         if fvid_media::owned_loudnorm::supports_request(
             source,
             destination,
@@ -363,6 +506,9 @@ pub fn try_apply(
     // Check its declared size before any such preflight allocation.
     let adts_source = crate::native_export::is_adts_source(source)?;
     if adts_source {
+        if options.streams.first().is_some_and(|&s| s != 0) {
+            return Err("owned ADTS loudnorm requires stream 0 and valid WAVE INFO metadata edits".into());
+        }
         use std::io::Read;
         let mut prefix = [0; 7];
         std::fs::File::open(source)?.read_exact(&mut prefix)?;
@@ -371,24 +517,28 @@ pub fn try_apply(
             return Err("ADTS packet exceeds budget".into());
         }
     }
-    if adts_source
-        && destination.extension().and_then(|s| s.to_str()) == Some("wav")
-        && fvid_media::owned_adts_loudnorm::supports_plan(source, args, options)
-    {
-        return Ok(Some(fvid_media::owned_adts_loudnorm::apply(
-            source, destination, args, dual_pass, options,
-        )?));
+    if adts_source && destination.extension().and_then(|s| s.to_str()) == Some("wav") {
+        return Ok(Some(
+            fvid_media::owned_adts_loudnorm::apply(source, destination, args, dual_pass, options)
+                .map_err(|e| crate::invalid(&e))?,
+        ));
     }
+    default_opts.cancel = options.cancel.clone();
     let native_supported = options.max_controlled_bytes.is_none()
         && options.metadata_set.is_empty()
         && options.metadata_delete.is_empty()
-        && crate::native_media::is_owned_audio_trim_source(source)?
+        && crate::native_media::is_owned_audio_trim_source_with_options(source, &default_opts)?
         && selected_audio(source, options).is_ok_and(|idx| {
-            crate::native_media::audio_source_info_selected(source, Some(idx)).is_ok()
+            crate::native_media::audio_source_info_selected_with_options(
+                source,
+                Some(idx),
+                &default_opts,
+            )
+            .is_ok()
         });
     if !native_supported {
         if destination.extension().and_then(|s| s.to_str()) == Some("wav")
-            && fvid_media::owned_container_loudnorm::supports_plan(source, args, options)
+            && fvid_media::owned_container_loudnorm::supports_plan(source, args, &default_opts)
         {
             return Ok(Some(
                 fvid_media::owned_container_loudnorm::apply(
@@ -415,9 +565,11 @@ pub fn try_apply(
     // Preserve the established loudnorm default: first audio, rather than
     // choosing the first container stream when video precedes audio.
     let selected = selected_audio(source, options)?;
-    crate::native_plan::decode_audio_selected(source, &Default::default(), Some(selected))
+    let mut plan_options = options.clone();
+    plan_options.streams = vec![selected];
+    crate::native_plan::decode_audio_with_options(source, &Default::default(), &plan_options)
         .map_err(|e| crate::invalid(&e))?;
-    let info = crate::native_media::audio_source_info_selected(source, Some(selected))?;
+    let info = crate::native_media::audio_source_info_selected_with_options(source, Some(selected), options)?;
     if !fvid_media::owned_wave_loudness::qualified_rate(info.sample_rate) {
         return Ok(None);
     }
