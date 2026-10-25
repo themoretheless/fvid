@@ -503,3 +503,25 @@ fn eac3_stereo_worker_restores_session_policy_after_decoder_replacement() {
         }
     }
 }
+
+#[test]
+fn container_stereo_keeps_all_samples_and_reset_preserves_explicit_lr() {
+    use fvid::audio::AudioDecode;
+    for name in ["l1-f1-c0-s7.ec3", "l7-f1-c0-s0.ec3"] {
+        let data = std::fs::read(root().join(name)).unwrap();
+        for mode in [Mode::LoRo, Mode::LtRt, Mode::Automatic] {
+            let policy = Policy { mode, headroom: true };
+            let mut raw = Eac3Decoder::new_stereo(&[], 48000).unwrap().with_stereo_downmix(policy);
+            let expected = raw.decode_complete(&data, 0, 2304).unwrap().unwrap().data;
+            let mut container = Eac3Decoder::for_container_stereo(&[], 48000).unwrap().with_stereo_downmix(policy);
+            assert_eq!(container.spec().channels, 2);
+            let first = container.decode_complete(&data, 0, 2304).unwrap().unwrap().data;
+            assert_eq!(first.len(), 2304 * 2 * 4, "{name} {mode:?}");
+            assert_eq!(&first[256 * 2 * 4..], expected.as_slice(), "{name} {mode:?}");
+            assert!(values(&first).iter().any(|v| v.abs() > 1e-5));
+            container.reset();
+            let replay = container.decode_complete(&data, 0, 2304).unwrap().unwrap().data;
+            assert_eq!(replay, first, "reset changed container timing/matrix: {name} {mode:?}");
+        }
+    }
+}

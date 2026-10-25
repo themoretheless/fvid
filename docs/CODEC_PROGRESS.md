@@ -18584,3 +18584,19 @@ This is independent/compatibility stereo rendering, not a new fold of the full
 extended dependent presentation. Player UI/device routing of native multichannel
 PCM, complete programme mixing and other codec profiles/tools remain open.
 The full no-gap objective remains active.
+
+### Explicit container E-AC-3 stereo timing (2026-10-25)
+
+The public `Eac3Decoder::for_container_stereo` supplies explicit L/R output
+without applying raw-stream 256-sample priming. Previously external callers
+could request explicit stereo only through `new_stereo`, which loses 256
+samples when incorrectly used for container samples. Native-first construction
+also cannot distinguish C+LFE from requested L/R at channel count two.
+
+The regression reuses the owned synthetic stereo-downmix fixture family
+(including neutral VP9 Matroska companions), with C+LFE and 5.1 metadata cases.
+It verifies all 2304 container frames, equality after the raw 256-frame prefix,
+nonzero PCM, all three stereo modes with headroom, and exact reset replay.
+No new private media or FFmpeg dependency is introduced. This closes public
+constructor timing/geometry access; normal player/device routing and extended
+dependent-presentation stereo folding remain open.
