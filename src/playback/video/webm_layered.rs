@@ -2,16 +2,158 @@
 use super::*;
 use crate::codec::{
     config::HevcConfig,
-    hevc_decoder::{LayeredDecoded, LayeredDecoder, LayeredOutputQueue},
+    hevc_decoder::{
+        LayeredDecoded, LayeredDecoder, LayeredOutputQueue, LayeredParameters, LayeredSubstream,
+        SubstreamScan,
+    },
     hevc_vps::{LayeredVps, Vps},
 };
 use std::collections::VecDeque;
+struct Epoch {
+    first: usize,
+    vps: Arc<LayeredVps>,
+    scan: SubstreamScan,
+    selection: LayeredSubstream,
+}
+fn selection_bytes(epochs: &Vec<Epoch>) -> usize {
+    epochs
+        .capacity()
+        .saturating_mul(std::mem::size_of::<Epoch>())
+        .saturating_add(
+            epochs
+                .iter()
+                .map(|e| e.selection.retained_bytes())
+                .fold(0usize, usize::saturating_add),
+        )
+}
+fn retain_epoch(
+    epochs: &mut Vec<Epoch>,
+    first: usize,
+    scan: SubstreamScan,
+    vps: Arc<LayeredVps>,
+    ols: usize,
+    budget: usize,
+) -> Result<()> {
+    let rows = vps
+        .extension
+        .as_ref()
+        .and_then(|e| e.dpb.sets.get(ols))
+        .and_then(Option::as_ref)
+        .map_or(vps.vps.ordering.len(), Vec::len);
+    if rows == 0 {
+        return Err(invalid("Matroska layered VPS has no temporal ordering"));
+    }
+    let merge = epochs.last().is_some_and(|last| last.vps == vps);
+    let scan = if merge {
+        epochs.last().unwrap().scan.merged(scan)
+    } else {
+        scan
+    };
+    let selection = scan.select(vps.clone(), ols, (rows - 1) as u8)?;
+    if merge {
+        let last = epochs.last_mut().unwrap();
+        last.scan = scan;
+        last.selection = selection;
+    } else {
+        epochs
+            .try_reserve_exact(1)
+            .map_err(|_| invalid("cannot allocate Matroska HEVC epochs"))?;
+        epochs.push(Epoch {
+            first,
+            vps,
+            scan,
+            selection,
+        });
+    }
+    if selection_bytes(epochs) > budget {
+        return Err(invalid("Matroska HEVC epochs exceed budget"));
+    }
+    Ok(())
+}
+fn inventory<R: Read + Seek>(
+    demux: &mut WebmReader<R>,
+    track: u64,
+    configuration: &[u8],
+    length: u8,
+    initial: Arc<LayeredVps>,
+    ols: usize,
+    budget: usize,
+) -> Result<Vec<Epoch>> {
+    let mut parameters = LayeredParameters::from_configuration(configuration, budget)?;
+    let mut epochs = Vec::new();
+    let mut vps = initial;
+    let mut first = 0;
+    let mut ordinal = 0;
+    let mut scan = SubstreamScan::default();
+    let mut seen_vcl = false;
+    let mut boundary = false;
+    for i in 0..demux.packets.len() {
+        if demux.packets[i].track != track {
+            continue;
+        }
+        if boundary {
+            retain_epoch(&mut epochs, first, scan, vps.clone(), ols, budget)?;
+            first = ordinal;
+            scan = Default::default();
+            seen_vcl = false;
+            boundary = false;
+        }
+        if demux.packet_payload_size(i)? > budget / 2 {
+            return Err(invalid("Matroska HEVC inventory packet exceeds budget"));
+        }
+        let packet = demux.read_packet(i)?;
+        let mut candidate = None;
+        for nal in crate::codec::config::NalUnits::new(&packet, length)? {
+            let nal = nal?;
+            let h = crate::codec::hevc_nal::NalHeader::parse(nal)?;
+            if h.layer_id == 63 {
+                continue;
+            }
+            if matches!(h.unit_type, 32..=34) {
+                parameters.receive(nal)?;
+            }
+            if h.is_vcl() && candidate.is_none() {
+                let available = budget
+                    .checked_sub(selection_bytes(&epochs).saturating_add(vps.retained_bytes()))
+                    .ok_or_else(|| invalid("Matroska HEVC inventory exceeds budget"))?;
+                candidate = Some(Arc::new(LayeredVps::parse(
+                    parameters.referenced_vps(nal)?,
+                    available,
+                )?));
+            }
+        }
+        if let Some(received) = candidate {
+            if *received != *vps {
+                if seen_vcl {
+                    retain_epoch(&mut epochs, first, scan, vps.clone(), ols, budget)?;
+                    first = ordinal;
+                    scan = Default::default();
+                    seen_vcl = false;
+                }
+                vps = received;
+            }
+        }
+        scan.observe(&packet, length)?;
+        for nal in crate::codec::config::NalUnits::new(&packet, length)? {
+            let h = crate::codec::hevc_nal::NalHeader::parse(nal?)?;
+            if h.layer_id == 63 {
+                continue;
+            }
+            seen_vcl |= h.is_vcl();
+            boundary |= h.unit_type == 37 || h.unit_type == 36 && h.layer_id == 0;
+        }
+        ordinal += 1;
+    }
+    retain_epoch(&mut epochs, first, scan, vps, ols, budget)?;
+    Ok(epochs)
+}
 pub(super) struct Layered {
     decoder: LayeredDecoder,
     queue: LayeredOutputQueue,
     timeline: Vec<(i64, Option<u64>, bool)>,
     ready: VecDeque<LayeredDecoded>,
-    highest_tid: u8,
+    selections: Vec<Epoch>,
+    packet_index: usize,
     ready_budget: usize,
     ended: bool,
     pub signal: ColourDescription,
@@ -103,9 +245,16 @@ impl Layered {
             })
             .map(|(i, _)| i)
             .ok_or_else(|| invalid("layered Matroska HEVC lacks an output layer set"))?;
-        let highest_tid = (vps.vps.ordering.len() - 1) as u8;
         drop(parameters);
-        drop(vps);
+        let selections = inventory(
+            demux,
+            track,
+            configuration,
+            cfg.length_size,
+            Arc::new(vps),
+            ols,
+            budget / 4,
+        )?;
         let count = demux.packets.iter().filter(|p| p.track == track).count();
         let bytes = count
             .checked_mul(std::mem::size_of::<(i64, Option<u64>, bool)>())
@@ -131,14 +280,15 @@ impl Layered {
             .and_then(|n| n.checked_add(std::mem::size_of::<Self>()))
             .ok_or_else(|| invalid("Matroska layered timeline capacity overflow"))?;
         let decode_budget = (budget / 2)
-            .checked_sub(owned_timeline)
+            .checked_sub(owned_timeline.saturating_add(selection_bytes(&selections)))
             .ok_or_else(|| invalid("Matroska layered timeline capacity exceeds budget"))?;
         Ok(Some(Self {
             decoder: LayeredDecoder::from_configuration(configuration, ols, decode_budget)?,
             queue: Default::default(),
             timeline,
             ready: VecDeque::new(),
-            highest_tid,
+            selections,
+            packet_index: 0,
             ready_budget: budget - budget / 2,
             ended: false,
             signal: Default::default(),
@@ -148,6 +298,7 @@ impl Layered {
     pub fn reset(&mut self) {
         self.decoder.reset_queued(&mut self.queue);
         self.ready.clear();
+        self.packet_index = 0;
         self.ended = false;
         self.signal = Default::default();
         self.hdr = Default::default();
@@ -198,9 +349,18 @@ impl Layered {
         Ok(())
     }
     pub fn push(&mut self, packet: &[u8]) -> Result<()> {
-        let (pictures, _) =
-            self.decoder
-                .decode_queued_packet(&mut self.queue, packet, self.highest_tid)?;
+        let epoch = self
+            .selections
+            .partition_point(|e| e.first <= self.packet_index)
+            .saturating_sub(1);
+        let selection = &self.selections[epoch].selection;
+        let (pictures, _) = self.decoder.decode_selected_queued_packet(
+            &mut self.queue,
+            selection,
+            packet,
+            selection.highest_temporal_id(),
+        )?;
+        self.packet_index += 1;
         self.retain(pictures)
     }
     pub fn finish(&mut self) -> Result<()> {

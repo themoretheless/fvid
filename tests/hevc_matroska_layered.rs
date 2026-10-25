@@ -11,7 +11,7 @@ fn layered_matroska_matches_native_mp4_pixels_timing_seek_and_rewind() {
         &std::fs::read(root().join("hevc-matroska-layered/manifest.json")).unwrap(),
     )
     .unwrap();
-    assert_eq!(m["cases"].as_array().unwrap().len(), 38);
+    assert_eq!(m["cases"].as_array().unwrap().len(), 80);
     for c in m["cases"].as_array().unwrap() {
         let name = c["file"].as_str().unwrap();
         let mut control = Mp4VideoReader::open_software(
@@ -32,9 +32,17 @@ fn layered_matroska_matches_native_mp4_pixels_timing_seek_and_rewind() {
                 (p.frame.width, p.frame.height, p.depth),
                 control.bitstream_colour(),
                 control.bitstream_hdr(),
+                f.sample_index,
             ));
         }
         assert!(!expected.is_empty(), "{name}");
+        let pts: Vec<u128> = c["pts_ns"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|v| v.as_u64().unwrap() as u128)
+            .collect();
+        let origin = pts[expected[0].7];
         let mut actual = WebmVideoReader::open_software(
             Cursor::new(std::fs::read(root().join("hevc-matroska-layered").join(name)).unwrap()),
             BUDGET,
@@ -68,9 +76,21 @@ fn layered_matroska_matches_native_mp4_pixels_timing_seek_and_rewind() {
                 );
                 assert_eq!(
                     actual.frame_interval().unwrap().0,
-                    (expected[n].1 - expected[0].1) as u128,
+                    pts[expected[n].7] - origin,
                     "{name}"
                 );
+                if c["irregular"] == true {
+                    let explicit = pts[expected[n].7]
+                        + c["durations_ns"][expected[n].7].as_u64().unwrap() as u128;
+                    let end = expected
+                        .get(n + 1)
+                        .map_or(explicit, |f| explicit.min(pts[f.7]));
+                    assert_eq!(
+                        actual.frame_interval().unwrap().1,
+                        end - origin,
+                        "{name} endpoint"
+                    );
+                }
                 assert_eq!(actual.bitstream_colour(), expected[n].5, "{name} colour");
                 assert_eq!(actual.bitstream_hdr(), expected[n].6, "{name} HDR");
                 n += 1;
@@ -84,7 +104,7 @@ fn layered_matroska_matches_native_mp4_pixels_timing_seek_and_rewind() {
         }
         assert!(!actual.read_frame().unwrap());
         if expected.len() > 1 {
-            let target = (expected[1].1 - expected[0].1) as i64 + 1;
+            let target = (pts[expected[1].7] - origin) as i64 + 1;
             let frame = actual.seek_to_frame_raw(target).unwrap().unwrap();
             let RawFrame::Planar(p) = frame else {
                 panic!("{name}: planar expected")
@@ -100,7 +120,7 @@ fn layered_matroska_refuses_contradictory_outputs_and_requires_rewind() {
         &std::fs::read(root().join("hevc-matroska-layered/manifest.json")).unwrap(),
     )
     .unwrap();
-    assert_eq!(m["refusals"].as_array().unwrap().len(), 1);
+    assert_eq!(m["refusals"].as_array().unwrap().len(), 4);
     for c in m["refusals"].as_array().unwrap() {
         let mut source = WebmVideoReader::open_software(
             Cursor::new(
