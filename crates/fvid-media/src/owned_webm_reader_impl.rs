@@ -1237,6 +1237,11 @@ impl<R: Read + Seek> WebmReader<R> {
         self.read_packet_bytes = self.read_packet_bytes.min(maximum);
     }
 
+    /// Whether a given Matroska track uses frame-level zlib compression.
+    pub fn zlib_tracks_contains(&self, track_number: u64) -> bool {
+        self.zlib_tracks.contains(&track_number)
+    }
+
     /// Codec payload bytes after container frame decompression. Packet
     /// offsets and sizes still describe the stored source-file span.
     pub fn packet_payload_size(&self, index: usize) -> Result<usize> {
