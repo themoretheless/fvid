@@ -41,6 +41,15 @@ impl LayeredDecoded {
     /// Membership in the signalled OLS output mask, independently of the coded
     /// picture-output flag. Alternative-output policy and ordering are separate.
     pub fn signalled_output_layer(&self) -> Result<bool> {
+        if self.binding.vps.inferred_base_layer() {
+            if self.layer_id != 0
+                || self.binding.sps.layer_id != 0
+                || self.binding.sps.output_layer_set != 0
+            {
+                return Err(invalid("HEVC inferred base output binding disagrees"));
+            }
+            return Ok(true);
+        }
         let extension = self
             .binding
             .vps

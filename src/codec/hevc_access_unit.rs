@@ -217,6 +217,17 @@ impl LayeredAccessUnit {
         let Some(first) = self.pictures.first() else {
             return Ok(0);
         };
+        if first.binding.vps.inferred_base_layer() {
+            if self.pictures.len() != 1
+                || first.binding.sps.layer_id != 0
+                || first.binding.sps.output_layer_set != 0
+            {
+                return Err(invalid("HEVC inferred base output policy disagrees"));
+            }
+            return Ok(u64::from(
+                first.slices[0].picture_output && suppressed & 1 == 0,
+            ));
+        }
         let extension = first
             .binding
             .vps

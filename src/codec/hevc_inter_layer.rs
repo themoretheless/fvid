@@ -53,6 +53,26 @@ impl<'a, T> InterLayerSet<'a, T> {
         budget: usize,
     ) -> Result<Self> {
         current.validate()?;
+        if vps.inferred_base_layer() {
+            if current.identity.layer_id != 0 || current.discardable || !selected.is_empty() {
+                return Err(invalid(
+                    "HEVC inferred base cannot select inter-layer pictures",
+                ));
+            }
+            let storage = 2 * std::mem::size_of::<Vec<PictureIdentity>>()
+                + 2 * std::mem::size_of::<Vec<&T>>();
+            if storage > budget {
+                return Err(invalid("HEVC inter-layer selection exceeds memory budget"));
+            }
+            return Ok(Self {
+                current: current.identity,
+                irap_current_only: false,
+                temporal_irap_forbidden: current.nal.is_irap(),
+                pictures: [Vec::new(), Vec::new()],
+                data: [Vec::new(), Vec::new()],
+                storage,
+            });
+        }
         let e = vps
             .extension
             .as_ref()

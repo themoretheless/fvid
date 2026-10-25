@@ -185,9 +185,7 @@ impl SliceHeader {
             .layered
             .as_ref()
             .ok_or_else(|| invalid("HEVC header has no layered slice syntax"))?;
-        context
-            .layout(self.nal)?
-            .ok_or_else(|| invalid("HEVC layered reference binding has no VPS extension"))?;
+        context.layout(self.nal)?;
         if self.pps_id != context.pps.pps.id {
             return Err(invalid("HEVC reference binding PPS disagrees with slice"));
         }
@@ -300,7 +298,8 @@ impl SliceHeader {
             || pps.sps_id != sps.id
             || id != previous.pps_id
             || payload.header.layer_id != previous.nal.layer_id
-            || previous.layered.is_some() != context.is_some_and(|c| c.vps.extension.is_some())
+            || (previous.layered.is_some() != context.is_some()
+                && !context.is_some_and(|c|c.vps.inferred_base_layer()))
             || payload.header.unit_type != previous.nal.unit_type
             || payload.header.temporal_id != previous.nal.temporal_id
             || no_output != previous.no_output_of_prior_pictures
@@ -345,6 +344,11 @@ impl SliceHeader {
             }
         }
         let mut result = previous.clone();
+        if context.is_some_and(|c|c.vps.inferred_base_layer()) {
+            let inferred=LayeredSliceSyntax::inferred_base(payload.header);
+            if previous.layered.as_ref().is_some_and(|syntax|*syntax!=inferred) {return Err(invalid("HEVC dependent inferred base syntax disagrees"));}
+            result.layered=Some(inferred);
+        }
         result.dependent = true;
         result.first = false;
         result.address = address;
@@ -418,7 +422,7 @@ impl SliceHeader {
             Some(layout.extra(b, pps.extra_slice_header_bits)?)
         } else {
             b.skip(usize::from(pps.extra_slice_header_bits))?;
-            None
+            context.map(|_|LayeredSliceSyntax::inferred_base(payload.header))
         };
         let slice_type = match ue(b, 2)? {
             0 => SliceType::B,
