@@ -16,6 +16,17 @@ impl Profile {
     pub fn compatible_with(self, idc: u8) -> bool {
         idc < 32 && (self.idc == idc || self.compatibility & (1 << (31 - idc)) != 0)
     }
+    /// A declared profile compatibility in Annex A, not a tool-coverage claim.
+    pub fn is_annex_a_compatible(self) -> bool {
+        self.space == 0
+            && [1, 2, 3, 4, 5, 9, 11]
+                .into_iter()
+                .any(|id| self.compatible_with(id))
+    }
+    /// Independent non-base layer decoding capability in this PTL record.
+    pub fn inbld(self) -> bool {
+        self.is_annex_a_compatible() && self.constraints & 1 != 0
+    }
     fn read(bits: &mut BitReader<'_>) -> Result<Self> {
         let profile = Self {
             space: bits.read(2)? as u8,
