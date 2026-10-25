@@ -38,6 +38,9 @@ fn layout() -> SpeakerLayout {
     ])
 }
 fn control(name: &str, i: usize, width: u16, raw: bool) -> Vec<f32> {
+    control_with_mode(name,i,width,raw,fvid::codec::ac3_decoder::CompressionMode::Line)
+}
+fn control_with_mode(name: &str, i: usize, width: u16, raw: bool, mode:fvid::codec::ac3_decoder::CompressionMode) -> Vec<f32> {
     let bytes = read(&format!("{name}-control{i}.ec3"));
     let mut d = if raw {
         Eac3Decoder::new(&[], 48000, width)
@@ -46,10 +49,10 @@ fn control(name: &str, i: usize, width: u16, raw: bool) -> Vec<f32> {
             &[],
             48000,
             width,
-            fvid::codec::ac3_decoder::CompressionMode::Line,
+            mode,
         )
     }
-    .unwrap();
+    .unwrap().with_compression(mode);
     d.decode_complete(&bytes, 0, if name == "late" { 162*768 } else { 2304 })
         .unwrap()
         .unwrap()
@@ -425,6 +428,7 @@ fn dec3_locations_are_lsb_first_selected_and_bounded() {
         while bits.len()%8 != 0 { bits.push(0); }
         bits.chunks(8).map(|b|b.iter().fold(0,|v,x|(v<<1)|*x as u8)).collect()
     }
+    assert_eq!(configuration_speakers(&config(&[(7,0)]),0).unwrap(),Some(six_layout()));
     let data=config(&[(7,2|64),(7,1)]);
     assert_eq!(configuration_speakers(&data,0).unwrap(),Some(layout()));
     let second=configuration_speakers(&data,1).unwrap().unwrap();
@@ -532,4 +536,86 @@ fn header_only_speaker_probe_handles_word_swapping_without_audio_payloads() {
         offset+=size; frame+=1;
     }
     assert_eq!(frame,6);
+}
+
+fn six_layout() -> SpeakerLayout {
+    SpeakerLayout(vec![Speaker::Left,Speaker::Right,Speaker::Centre,Speaker::Lfe,
+        Speaker::LeftSurround,Speaker::RightSurround])
+}
+fn replacement_expected(name:&str,width:usize,raw:bool)->Vec<u8> {
+    replacement_expected_mode(name,width,raw,fvid::codec::ac3_decoder::CompressionMode::Line)
+}
+fn replacement_expected_mode(name:&str,width:usize,raw:bool,mode:fvid::codec::ac3_decoder::CompressionMode)->Vec<u8> {
+    let replace=if width<=2 {1} else {2};
+    let mut base=control_with_mode(name,0,width as u16,raw,mode);
+    let early=control_with_mode(name,1,replace as u16,raw,mode);
+    let last=control_with_mode(name,2,replace as u16,raw,mode);
+    assert!(early.iter().zip(&last).any(|(a,b)|(a-b).abs()>1e-6));
+    assert!(last.iter().any(|s|s.abs()>1e-6));
+    for (row,lr) in base.chunks_exact_mut(width).zip(last.chunks_exact(replace)) {
+        row[..replace].copy_from_slice(lr);
+    }
+    base.into_iter().flat_map(f32::to_le_bytes).collect()
+}
+#[test]
+fn native_small_channel_sources_keep_last_dependent_replacement_pcm() {
+    for (width,mask) in [(1,4),(2,12),(3,7),(4,15),(5,0x607),(6,0x60f)] {
+    for variant in ["plain","transient","gain"] {
+        if variant=="gain" && width!=6 {continue;}
+        let name=format!("{}-{variant}",if width==6 {"native-six".into()}else{format!("native-{width}")});
+        for kind in ["ec3","mkv","mp4","no-dec3"] {
+            let mut s=if kind=="no-dec3" {source(&format!("{name}-no-dec3"),"mp4")} else {source(&name,kind)};
+            assert_eq!(s.channels(),width as u16);
+            if kind=="ec3" {assert_eq!(fvid::codec::eac3_decoder::presentation::packet_speakers(&read(&format!("{name}.ec3")),width as u16).unwrap().wave_mask(),Some(mask));}
+            if kind=="no-dec3" {assert!(s.extra_data().is_empty());}
+            s.set_eac3_stereo_output(true).unwrap();assert_eq!(s.channels(),2);
+            s.set_eac3_stereo_output(false).unwrap();assert_eq!(s.channels(),width as u16);
+            s.set_eac3_output_layout(None).unwrap();assert_eq!(s.channels(),width as u16);
+            let pcm=replacement_expected(&name,width,kind=="ec3");
+            let mut full=Vec::new();let mut sought=Vec::new();let mut offset=0;
+            for frames in if kind=="ec3" {[512,768,768]}else{[768,768,768]} {
+                full.push((Duration::from_nanos(offset as u64*1_000_000_000/48000),pcm[offset*width*4..(offset+frames)*width*4].to_vec()));
+                let start=offset.max(960);
+                if start<offset+frames {sought.push((Duration::from_nanos(start as u64*1_000_000_000/48000),pcm[start*width*4..(offset+frames)*width*4].to_vec()));}
+                offset+=frames;
+            }
+            capture::worker_check_with_layout_and_seek_expected(s,&full,Duration::from_millis(20),&sought,mask);
+        }
+    }
+    }
+}
+
+#[test]
+fn native_six_map_preserves_priming_gain_reset_and_compatibility() {
+    use fvid::codec::ac3_decoder::CompressionMode;
+    for name in ["native-six-plain","native-six-transient","native-six-gain"] {
+        let encoded=read(&format!("{name}.ec3"));
+        for raw in [false,true] {
+            for mode in [CompressionMode::Line,CompressionMode::Rf] {
+                let expected=replacement_expected_mode(name,6,raw,mode);
+                let mut decoder=Box::new(if raw {Eac3Decoder::new(&[],48000,6)}else{Eac3Decoder::for_container_with_compression(&[],48000,6,mode)}.unwrap().with_compression(mode));
+                decoder.set_output_layout(six_layout()).unwrap();
+                for _ in 0..2 {
+                    let pcm=decoder.decode_complete(&encoded,0,2304).unwrap().unwrap();
+                    assert_eq!(pcm.data,expected,"{name} raw={raw} mode={mode:?}");
+                    assert!(decoder.set_output_layout(six_layout()).is_err());
+                    decoder.reset();
+                }
+            }
+        }
+        let compatible=fvid::playback_ac3::Ac3AudioReader::open_compatible(Cursor::new(encoded.clone()),Default::default()).unwrap();
+        let mut decoder=compatible.make_decoder().unwrap();
+        let pcm=decoder.decode_complete(&encoded,0,2304).unwrap().unwrap().data;
+        // Compatibility intentionally retains the independent signal; the gain
+        // witness has a different independent gain from its native common gain.
+        if name!="native-six-gain" {
+            let independent:Vec<u8>=control(name,0,6,true).into_iter().flat_map(f32::to_le_bytes).collect();
+            assert_eq!(pcm,independent);
+        }
+    }
+    let mut d=Box::new(Eac3Decoder::new(&[],48000,6).unwrap());
+    d.decode_complete(&read("native-six-plain-control0.ec3"),0,2304).unwrap();
+    assert!(d.set_output_layout(six_layout()).is_err());
+    let mut stereo=Box::new(Eac3Decoder::new_stereo(&[],48000).unwrap());
+    assert!(stereo.set_output_layout(SpeakerLayout(vec![Speaker::Left,Speaker::Right])).is_err());
 }

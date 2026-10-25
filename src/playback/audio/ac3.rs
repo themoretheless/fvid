@@ -257,8 +257,6 @@ impl Ac3 {
             layout.wave_mask()
         }else{Some(first.speaker_mask)};
         let mut role_union = std::collections::BTreeSet::new();
-        let mut first_roles = None;
-        let mut changing_roles = false;
         let mut frames = Vec::with_capacity(found.len());
         let mut pts = 0u64;
         for (at, start) in found.iter().zip(&starts) {
@@ -277,8 +275,6 @@ impl Ac3 {
                 let programme=crate::codec::eac3_decoder::presentation::raw_programme_for_programme(&bytes[*start..],programme);
                 match programme {
                     Ok(Some((size,layout))) => {
-                        if let Some(first) = &first_roles { changing_roles |= first != &layout; }
-                        else { first_roles = Some(layout.clone()); }
                         role_union.extend(layout.0.iter().copied());
                         (size,layout.0.len() as u16)
                     },
@@ -303,7 +299,7 @@ impl Ac3 {
         }
         // Indexing already visits every selected programme. Negotiate a stable
         // canonical union without decoding twice or mixing unselected tracks.
-        let automatic_layout = if changing_roles && (7..=16).contains(&role_union.len()) {
+        let automatic_layout = if !role_union.is_empty() && (1..=16).contains(&role_union.len()) {
             let layout = crate::codec::eac3_decoder::presentation::SpeakerLayout(role_union.into_iter().collect());
             layout.validate_output()?;
             Some(layout)

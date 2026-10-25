@@ -1304,6 +1304,7 @@ pub struct Eac3Decoder {
     /// Samples still owed to [`ENCODER_DELAY`], which the stream's first blocks pay off.
     lead: usize,
     initial_lead: usize,
+    input_started: bool,
     /// What this block knows about its spectral extension, and what the frame's next
     /// block inherits from it.
     spx: Spx,
@@ -1351,6 +1352,7 @@ impl Eac3Decoder {
             core: Core::new(),
             lead: ENCODER_DELAY,
             initial_lead: ENCODER_DELAY,
+            input_started: false,
             spx: Spx::default(),
             noise_state: NOISE_SEED,
             aht_cache: std::array::from_fn(|_|Vec::new()),
@@ -1364,7 +1366,8 @@ impl Eac3Decoder {
         })
     }
 
-    /// Stable native output roles for expanded presentation decoding. Configure
+    /// Stable native output roles, including replacement-only 1..6-channel
+    /// programmes. Configure
     /// this before input; missing roles are silent, unnegotiated roles refuse.
     pub fn with_output_layout(mut self, layout:presentation::SpeakerLayout)->Result<Self> {
         self.set_output_layout(layout)?;
@@ -1372,7 +1375,19 @@ impl Eac3Decoder {
     }
     /// Configure a boxed decoder without moving its large transform state.
     pub fn set_output_layout(&mut self, layout:presentation::SpeakerLayout)->Result<()> {
-        self.presentation.as_mut().ok_or_else(||invalid("E-AC-3 explicit native layout requires expanded output"))?.set_output_layout(layout)
+        layout.validate_output()?;
+        if self.force_stereo || layout.0.len()!=self.channels || self.input_started {
+            return Err(invalid("E-AC-3 native output layout must match width and precede decoding; explicit stereo cannot use it"));
+        }
+        if self.presentation.is_none() {
+            let mut p=Box::new(presentation::PresentationDecoder::new(self.sample_rate,self.channels as u16)?);
+            p.set_priming(self.initial_lead);
+            p.select_programme(self.programme_id)?;
+            p.set_compression(self.compression_mode);
+            p.set_dialogue_normalization(self.dialogue_normalization);
+            self.presentation=Some(p);
+        }
+        self.presentation.as_mut().unwrap().set_output_layout(layout)
     }
 
     /// Select independent programme ID 0..7 (zero by default).
@@ -2191,12 +2206,14 @@ impl AudioDecode for Eac3Decoder {
     }
 
     fn decode_packet(&mut self,data:&[u8],pts:i64,duration:u64)->Result<Option<crate::audio::DecodedAudio>> {
+        self.input_started=true;
         if let Some(p)=self.presentation.as_mut(){return p.decode_packet(data,pts,duration);}
         let blocks=self.reconstruct_native(data,None)?;
         self.native_packets.push(blocks,pts,duration)?;
         Ok(self.native_packets.pop(self.sample_rate,self.channels,&mut self.lead))
     }
     fn finish_packet(&mut self)->Result<Option<crate::audio::DecodedAudio>> {
+        self.input_started=true;
         if let Some(p)=self.presentation.as_mut(){return p.finish_packet();}
         self.native_packets.finish()?;
         Ok(self.native_packets.pop(self.sample_rate,self.channels,&mut self.lead))
@@ -2219,6 +2236,7 @@ impl AudioDecode for Eac3Decoder {
     /// after a seek the same packet rather than the same signal plus different noise.
     fn reset(&mut self) {
         self.core = Core::new();
+        self.input_started=false;
         self.native_capture=None;
         self.native_packets=Default::default();
         self.lead = self.initial_lead;

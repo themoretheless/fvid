@@ -20,8 +20,8 @@ pub struct AudioPacket {
     pub sample_index: usize,
 }
 
-#[derive(Clone, Copy, Default)]
-struct DescriptionState { rate: Option<u32>, channels: Option<u16>, mask: Option<u32>, in_band_ps: bool }
+#[derive(Clone, Default)]
+struct DescriptionState { rate: Option<u32>, channels: Option<u16>, mask: Option<u32>, in_band_ps: bool, native_layout: Option<crate::codec::eac3_decoder::presentation::SpeakerLayout> }
 #[path = "mp4_edit_clock.rs"]
 mod edit_clock;
 use edit_clock::{Time as EditTime, Timeline as VariableTimeline};
@@ -50,6 +50,7 @@ pub struct Mp4AudioReader<R> {
     eac3_programme:u8,
     eac3_stereo_output: bool,
     eac3_output_layout: Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>,
+    eac3_packet_layout: Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>,
     ac3_stereo_output: bool,
     dolby_track_channels: Vec<Option<u16>>,
     sample_index: usize,
@@ -188,33 +189,34 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
 
     /// Probe Dolby packet geometry before exposing track descriptions. A sample
     /// entry can carry a placeholder channel count instead of decoded roles.
-    fn dolby_geometry(demuxer: &mut Mp4Reader<R>, index: usize) -> Result<Option<(u16,Option<u32>)>> {
+    fn dolby_geometry(demuxer: &mut Mp4Reader<R>, index: usize) -> Result<Option<(u16,Option<u32>,Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>)>> {
         let track=&demuxer.tracks()[index];
         let kind=track.codec;
         if track.samples.is_empty() || !matches!(&kind,b"ac-3"|b"ec-3") {return Ok(None);}
         let mut payload=Vec::new();demuxer.read_packet(index,0,&mut payload)?;
         if kind==*b"ac-3" && let Some(frame)=crate::codec::ac3_decoder::checked_syncframe(&payload) {
-            return Ok(Some((frame.channels,Some(crate::codec::ac3_decoder::speaker_mask(&payload,frame.channels)?))));
+            return Ok(Some((frame.channels,Some(crate::codec::ac3_decoder::speaker_mask(&payload,frame.channels)?),None)));
         }
         if kind==*b"ec-3" && let Some(frame)=crate::codec::eac3_decoder::checked_frame(&payload) {
             let layout=crate::codec::eac3_decoder::presentation::raw_programme(&payload)?;
             let native_channels=layout.as_ref().map_or(frame.channels,|(_,layout)|layout.0.len() as u16);
             let mask=if native_channels>6 {layout.as_ref().and_then(|(_,l)|l.wave_mask())}else{Some(crate::codec::eac3_decoder::speaker_mask(&payload,native_channels)?)};
-            return Ok(Some((native_channels,mask)));
+            return Ok(Some((native_channels,mask,layout.map(|(_,l)|l))));
         }
         Ok(None)
     }
 
-    fn programme_geometry(demuxer:&mut Mp4Reader<R>,index:usize,programme:u8)->Result<(u32,u16,Option<u32>)> {
+    fn programme_geometry(demuxer:&mut Mp4Reader<R>,index:usize,programme:u8)->Result<(u32,u16,Option<u32>,Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>)> {
         const FRAMES:usize=2*8*9;const BYTES:usize=FRAMES*4096;
         let count=demuxer.tracks()[index].samples.len();
         let mut prefix=Vec::new();let mut packet=Vec::new();
         for sample in 0..count.min(FRAMES) {
             demuxer.read_packet(index,sample,&mut packet)?;
             prefix.extend_from_slice(&packet[..packet.len().min(BYTES.saturating_sub(prefix.len()))]);
-            if let Some((frame,layout))=crate::codec::eac3_decoder::presentation::probe_programme(&prefix,programme,sample+1==count)? {
+            if let Some((frame,layout,dependent))=crate::codec::eac3_decoder::presentation::probe_native_programme(&prefix,programme,sample+1==count)? {
                 let mask=layout.wave_mask();
-                return Ok((frame.sample_rate,layout.0.len()as u16,mask));
+                let native=dependent.then(||layout.clone());
+                return Ok((frame.sample_rate,layout.0.len()as u16,mask,native));
             }
             if prefix.len()==BYTES{break;}
         }
@@ -244,7 +246,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         let owned_adpcm = matches!(&track.codec, b"ima4" | b"ms\x00\x02" | b"ms\x00\x11");
         let timeline = if (track.codec == *b"mp4a" && (track.edits.len()>1 || track.edits.first().is_some_and(|e|e.media_time<0)))
             || ((owned_adpcm || matches!(&track.codec, b"ac-3" | b"ec-3" | b"MAC3" | b"MAC6")) && !track.edits.is_empty()) {
-            Some(crate::container::audio_timeline::AudioTimeline::new(&track.edits,track.duration,track.timescale,demuxer.movie_timescale(),selected_geometry.map_or(track.sample_rate,|g|g.0))?)
+            Some(crate::container::audio_timeline::AudioTimeline::new(&track.edits,track.duration,track.timescale,demuxer.movie_timescale(),selected_geometry.as_ref().map_or(track.sample_rate,|g|g.0))?)
         } else {None};
         // Probe with the owned parser, rather than guessing from the sample
         // entry's channel count. Keep raw ASC and packet timestamps unchanged.
@@ -267,15 +269,16 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 if probe.ps_detected() { in_band_ps = true; break; }
             }
         }
-        let geometry=if let Some((_,channels,mask))=selected_geometry{Some((channels,mask))}else{Self::dolby_geometry(&mut demuxer,index)?};
-        let dolby_channels=geometry.map(|(channels,_)|channels);
-        let dolby_mask=geometry.and_then(|(_,mask)|mask);
+        let geometry=if let Some((_,channels,mask,layout))=&selected_geometry{Some((*channels,*mask,layout.clone()))}else{Self::dolby_geometry(&mut demuxer,index)?};
+        let dolby_channels=geometry.as_ref().map(|(channels,_,_)|*channels);
+        let dolby_mask=geometry.as_ref().and_then(|(_,mask,_)|*mask);
+        let eac3_packet_layout=geometry.and_then(|(_,_,layout)|layout);
         let mut dolby_track_channels=vec![None;demuxer.tracks().len()];
         dolby_track_channels[index]=dolby_channels;
         for other in Self::supported(&demuxer).into_iter().filter(|other|*other!=index) {
             // An unreadable/unmapped unselected track must not prevent opening
             // the selected valid track. Its original metadata remains visible.
-            dolby_track_channels[other]=Self::dolby_geometry(&mut demuxer,other).ok().flatten().map(|(channels,_)|channels);
+            dolby_track_channels[other]=Self::dolby_geometry(&mut demuxer,other).ok().flatten().map(|(channels,_,_)|channels);
         }
         // A failed optional probe may have left an underlying reader between
         // packets. Always re-seek the selected first packet on real playback.
@@ -287,10 +290,11 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             changing: false, active_description: 0, configuration_pending: false, description_states: Vec::new(),
             dolby_mask,
             dolby_channels,
-            dolby_rate:selected_geometry.map(|g|g.0),
+            dolby_rate:selected_geometry.as_ref().map(|g|g.0),
             eac3_programme:programme.unwrap_or(0),
             eac3_stereo_output: false,
             eac3_output_layout: None,
+            eac3_packet_layout,
             ac3_stereo_output: false,
             dolby_track_channels,
             in_band_ps,
@@ -378,6 +382,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         self.eac3_output_layout.clone().or_else(||
             crate::codec::eac3_decoder::presentation::configuration_speakers(
                 &self.setup().configuration, self.eac3_programme).ok().flatten())
+            .or_else(||self.eac3_packet_layout.clone())
     }
     fn negotiated_channels(&self)->u16 {if self.in_band_ps || (self.eac3_stereo_output && self.setup().codec==*b"ec-3") || (self.ac3_stereo_output && self.setup().codec==*b"ac-3") {2}else if self.setup().codec==*b"ec-3" && let Some(l)=self.native_eac3_layout() {l.0.len()as u16}else{self.dolby_channels.unwrap_or(self.setup().channels)}}
     fn setup(&self) -> &crate::container::mp4::SampleDescription {
@@ -438,6 +443,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             eac3_programme: programme.unwrap_or(0),
             eac3_stereo_output: false,
             eac3_output_layout: None,
+            eac3_packet_layout: None,
             ac3_stereo_output: false,
             dolby_track_channels: vec![None; tracks],
             sample_index: 0,
@@ -453,7 +459,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         Ok(source)
     }
     fn configure_description(&mut self, selected: usize) -> Result<()> {
-        let state = if let Some(state) = self.description_states[selected] {
+        let state = if let Some(state) = self.description_states[selected].clone() {
             state
         } else {
             let setup = self.track().sample_descriptions[selected].clone();
@@ -532,13 +538,14 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                     prefix.extend_from_slice(
                         &payload[..payload.len().min(BYTES.saturating_sub(prefix.len()))],
                     );
-                    if let Some((frame, layout)) =
-                        crate::codec::eac3_decoder::presentation::probe_programme(
+                    if let Some((frame, layout, dependent)) =
+                        crate::codec::eac3_decoder::presentation::probe_native_programme(
                             &prefix,
                             self.eac3_programme,
                             i + 1 == end,
                         )?
                     {
+                        state.native_layout=dependent.then(||layout.clone());
                         found = Some((
                             frame.sample_rate,
                             layout.0.len() as u16,
@@ -557,7 +564,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 state.channels = Some(channels);
                 state.mask = mask;
             }
-            self.description_states[selected] = Some(state);
+            self.description_states[selected] = Some(state.clone());
             state
         };
         self.active_description = selected;
@@ -566,6 +573,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         self.dolby_rate = state.rate;
         self.dolby_channels = state.channels;
         self.dolby_mask = state.mask;
+        self.eac3_packet_layout=state.native_layout.clone();
         self.dolby_track_channels[self.track_index] = state.channels;
         self.demuxer.invalidate_position();
         Ok(())
@@ -737,8 +745,8 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         if self.changing {
             let initial=self.track().samples.get(self.sample_index).unwrap().description_index as usize-1;
             // The opening configuration was negotiated before exposing the reader.
-            let state=self.description_states[initial].unwrap();self.active_description=initial;
-            self.in_band_ps=state.in_band_ps;self.dolby_rate=state.rate;self.dolby_channels=state.channels;self.dolby_mask=state.mask;
+            let state=self.description_states[initial].clone().unwrap();self.active_description=initial;
+            self.in_band_ps=state.in_band_ps;self.dolby_rate=state.rate;self.dolby_channels=state.channels;self.dolby_mask=state.mask;self.eac3_packet_layout=state.native_layout;
         }
         self.presentation_floor = 0;self.navigation_error=None;
         self.clock_floor.set(EditTime::ZERO);self.clock_anchor.set(None);
@@ -1071,7 +1079,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             let selected=sample.description_index as usize-1;
             if selected!=self.active_description {
                 if self.track().sample_descriptions[selected]==*self.setup() {
-                    self.description_states[selected]=self.description_states[self.active_description];self.active_description=selected;
+                    self.description_states[selected]=self.description_states[self.active_description].clone();self.active_description=selected;
                 } else {self.configuration_pending=true;return Ok(Some(AudioStep::ReconfigureDecoder));}
             }
         }
