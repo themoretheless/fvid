@@ -148,6 +148,7 @@ pub struct Frame {
 #[derive(Clone, Debug)]
 pub struct Ac3 {
     speaker_mask: Option<u32>,
+    automatic_layout: Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>,
     programme:u8,
     tracks:Vec<(u8,AudioTrack)>,
     pub codec: &'static str,
@@ -255,6 +256,9 @@ impl Ac3 {
         let output_mask=if let Some(layout)=&native {
             layout.wave_mask()
         }else{Some(first.speaker_mask)};
+        let mut role_union = std::collections::BTreeSet::new();
+        let mut first_roles = None;
+        let mut changing_roles = false;
         let mut frames = Vec::with_capacity(found.len());
         let mut pts = 0u64;
         for (at, start) in found.iter().zip(&starts) {
@@ -272,7 +276,12 @@ impl Ac3 {
             let (size,frame_channels)=if expanded && first.codec==EAC3_TAG {
                 let programme=crate::codec::eac3_decoder::presentation::raw_programme_for_programme(&bytes[*start..],programme);
                 match programme {
-                    Ok(Some((size,layout))) => (size,layout.0.len() as u16),
+                    Ok(Some((size,layout))) => {
+                        if let Some(first) = &first_roles { changing_roles |= first != &layout; }
+                        else { first_roles = Some(layout.clone()); }
+                        role_union.extend(layout.0.iter().copied());
+                        (size,layout.0.len() as u16)
+                    },
                     // Compatibility output still ignores incomplete skipped
                     // extensions. Complete bundles are retained so an explicit
                     // native output map can render replacement-only prefixes.
@@ -292,6 +301,15 @@ impl Ac3 {
             });
             pts += u64::from(at.samples);
         }
+        // Indexing already visits every selected programme. Negotiate a stable
+        // canonical union without decoding twice or mixing unselected tracks.
+        let automatic_layout = if changing_roles && (7..=16).contains(&role_union.len()) {
+            let layout = crate::codec::eac3_decoder::presentation::SpeakerLayout(role_union.into_iter().collect());
+            layout.validate_output()?;
+            Some(layout)
+        } else { None };
+        let output_channels = automatic_layout.as_ref().map_or(output_channels, |l| l.0.len() as u16);
+        let output_mask = automatic_layout.as_ref().map_or(output_mask, |l| l.wave_mask());
         let own=AudioTrack{sample_rate:first.sample_rate,channels:output_channels,name:String::new(),language:String::new()};
         let mut tracks=if first.codec==EAC3_TAG{programme_catalogue(&bytes[first_start..],expanded)}else{Vec::new()};
         if let Some((_,track))=tracks.iter_mut().find(|(id,_)|*id==programme){*track=own;}else{tracks.push((programme,own));}
@@ -300,6 +318,7 @@ impl Ac3 {
         Ok(Self {
             programme,tracks,
             speaker_mask: output_mask,
+            automatic_layout,
             codec: first.codec,
             sample_rate: first.sample_rate,
             channels: output_channels,
@@ -416,7 +435,7 @@ impl AudioStream for Ac3AudioReader {
             }
             {
                 let mut d=Box::new(crate::codec::eac3_decoder::Eac3Decoder::new(self.extra_data(),self.sample_rate(),self.channels())?.with_programme(self.ac3.programme)?);
-                if let Some(layout)=&self.eac3_output_layout {d.set_output_layout(layout.clone())?;}
+                if let Some(layout)=self.eac3_output_layout.as_ref().or(self.ac3.automatic_layout.as_ref()) {d.set_output_layout(layout.clone())?;}
                 Ok(d)
             }
         }else{crate::codec::make_audio_decoder(self.codec(),self.extra_data(),self.sample_rate(),self.channels(),self.bits_per_sample())}
