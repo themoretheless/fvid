@@ -15,6 +15,8 @@ use std::sync::Arc;
 mod layered;
 #[path = "mp4_layered_packet.rs"]
 mod layered_packet;
+#[path = "mp4_mixed_hevc.rs"]
+mod mixed_hevc;
 pub use layered::{LayeredMp4VideoReader, LayeredVideoFrame};
 #[path = "mp4_dispatch.rs"]
 mod dispatch;
@@ -53,6 +55,7 @@ struct QueuedFrame {
     frame: VideoFrame,
     hdr: HdrMetadata,
     description_index: u32,
+    layer: Option<u8>,
     colour: crate::playback_native::AvcColour,
     signal: ColourDescription,
 }
@@ -89,6 +92,7 @@ enum Decoder {
     Unconfigured,
     Avc(Box<AvcDecoder>),
     Hevc(Box<HevcDecoder>),
+    Layered(Box<mixed_hevc::MixedHevc>),
     Vp9(Box<vp9::Decoder>),
     Av1(Box<av1::Decoder>),
 }
@@ -124,6 +128,7 @@ impl Decoder {
             Self::Unconfigured => {}
             Self::Avc(d) => d.reset(),
             Self::Hevc(d) => d.reset(),
+            Self::Layered(d) => d.reset(),
             Self::Vp9(d) => d.reset(),
             Self::Av1(d) => d.reset(),
         }
@@ -135,6 +140,8 @@ struct SingleLayerMp4VideoReader<R> {
     decoder: Decoder,
     decoder_description: u32,
     presented_description: Option<u32>,
+    presented_layer: Option<u8>,
+    mixed_hevc: bool,
     presented_colour: Option<crate::playback_native::AvcColour>,
     presented_signal: Option<ColourDescription>,
     work_budget: usize,
@@ -218,12 +225,29 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         }
         future_pts.reverse();
         let work_budget = decoder_budget - decoder_budget / 2;
-        let decoder_description = samples.first().ok_or_else(|| invalid("empty MP4 video track"))?.description_index;
+        let decoder_description = samples
+            .first()
+            .ok_or_else(|| invalid("empty MP4 video track"))?
+            .description_index;
         let setup = &track.sample_descriptions[decoder_description as usize - 1];
-        let decoder = Decoder::from_description(setup, work_budget)?;
+        let mixed_hevc = !layered_packet::all_hevc(track)
+            && (0..samples.len()).any(|i| {
+                track
+                    .description_for_sample(i)
+                    .is_some_and(|s| matches!(&s.codec, b"hvc1" | b"hev1"))
+            });
+        let deferred = mixed_hevc && matches!(&setup.codec, b"hvc1" | b"hev1");
+        let decoder = if deferred {
+            Decoder::Unconfigured
+        } else {
+            Decoder::from_description(setup, work_budget)?
+        };
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-        let hardware = if track.ensure_constant_description().is_err() || !allow_hardware || std::env::var_os("FVID_SOFTWARE_DECODE").is_some()
-            || matches!(&decoder, Decoder::Hevc(d) if d.try_parameters().is_none()) {
+        let hardware = if track.ensure_constant_description().is_err()
+            || !allow_hardware
+            || std::env::var_os("FVID_SOFTWARE_DECODE").is_some()
+            || matches!(&decoder, Decoder::Hevc(d) if d.try_parameters().is_none())
+        {
             None
         } else {
             open_hardware(
@@ -240,10 +264,12 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             decoder,
             decoder_description,
             presented_description: None,
+            presented_layer: None,
+            mixed_hevc,
             presented_colour: None,
             presented_signal: None,
             work_budget,
-            needs_description_reset: false,
+            needs_description_reset: deferred,
             initial_metadata: DecoderMetadata::default(),
             #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
             hardware,
@@ -263,6 +289,9 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             pending_bytes: 0,
             queue_budget,
         };
+        if deferred {
+            source.select_description(0)?;
+        }
         source.read_open_signal();
         source.initial_metadata = DecoderMetadata {
             colour: source.decoder_colour().ok(),
@@ -298,7 +327,11 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
     pub fn active_vui(&self) -> Option<&crate::codec::avc::Vui> {
         match &self.decoder {
             Decoder::Avc(d) => d.active_vui(),
-            Decoder::Unconfigured | Decoder::Hevc(_) | Decoder::Vp9(_) | Decoder::Av1(_) => None,
+            Decoder::Unconfigured
+            | Decoder::Hevc(_)
+            | Decoder::Layered(_)
+            | Decoder::Vp9(_)
+            | Decoder::Av1(_) => None,
         }
     }
     /// The VUI this reader's pictures are read with: the parameter set a decoded
@@ -310,7 +343,11 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
     fn avc_vui(&self) -> Option<&crate::codec::avc::Vui> {
         match &self.decoder {
             Decoder::Avc(d) => d.active_vui().or_else(|| d.recorded_vui()),
-            Decoder::Unconfigured | Decoder::Hevc(_) | Decoder::Vp9(_) | Decoder::Av1(_) => None,
+            Decoder::Unconfigured
+            | Decoder::Hevc(_)
+            | Decoder::Layered(_)
+            | Decoder::Vp9(_)
+            | Decoder::Av1(_) => None,
         }
     }
     pub fn active_colour(&self) -> Result<crate::playback_native::AvcColour> {
@@ -324,11 +361,14 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             return Ok(hardware.colour);
         }
         match &self.decoder {
-            Decoder::Hevc(d) => {
-                crate::playback_native::AvcColour::from_hevc_vui(d.try_parameters().and_then(|(s,_)| s.vui.as_ref()))
-            }
+            Decoder::Hevc(d) => crate::playback_native::AvcColour::from_hevc_vui(
+                d.try_parameters().and_then(|(s, _)| s.vui.as_ref()),
+            ),
+            Decoder::Layered(d) => Ok(d.metadata.colour.unwrap_or_default()),
             Decoder::Avc(_) => crate::playback_native::AvcColour::from_vui(self.avc_vui()),
-            Decoder::Unconfigured | Decoder::Vp9(_) | Decoder::Av1(_) => Ok(crate::playback_native::AvcColour::default()),
+            Decoder::Unconfigured | Decoder::Vp9(_) | Decoder::Av1(_) => {
+                Ok(crate::playback_native::AvcColour::default())
+            }
         }
     }
     /// The signal the coding itself states, which is what a picture is graded
@@ -351,7 +391,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         match &self.decoder {
             Decoder::Hevc(d) => d
                 .try_parameters()
-                .and_then(|(s,_)| s.vui.as_ref())
+                .and_then(|(s, _)| s.vui.as_ref())
                 .and_then(|vui| vui.signal.as_ref())
                 .map(|signal| {
                     let [primaries, transfer, matrix] = signal.colour.unwrap_or([0; 3]);
@@ -376,6 +416,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                     }
                 })
                 .unwrap_or_default(),
+            Decoder::Layered(d) => d.metadata.signal,
             Decoder::Av1(d) => {
                 let seed = self.open_signal.map(|(seed, _)| seed).unwrap_or_default();
                 d.color()
@@ -408,6 +449,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
     fn decoder_hdr(&self) -> HdrMetadata {
         match &self.decoder {
             Decoder::Hevc(d) => d.hdr(),
+            Decoder::Layered(d) => d.metadata.hdr,
             Decoder::Av1(d) => {
                 let seed = self.open_signal.map(|(_, seed)| seed).unwrap_or_default();
                 d.hdr_with_fallback(seed)
@@ -504,6 +546,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         }
         match &mut self.decoder {
             Decoder::Unconfigured => Err(invalid("MP4 decoder is not configured")),
+            Decoder::Layered(_) => Err(invalid("mixed HEVC packets require the window pipeline")),
             Decoder::Avc(d) => {
                 let Some(picture)=d.decode_order(&self.packet)? else {return Ok(None)};
                 let vui = d.active_vui().or_else(|| d.recorded_vui());
@@ -771,6 +814,12 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             .get(index)
             .ok_or_else(|| invalid("missing MP4 description sample"))?
             .description_index;
+        if !self.needs_description_reset
+            && matches!(&self.decoder,Decoder::Layered(d)if d.contains(index))
+        {
+            self.decoder_description = selected;
+            return Ok(());
+        }
         let setup = &self.track().sample_descriptions[selected as usize - 1];
         let current = self.decoder_setup();
         let changed = setup.codec != current.codec
@@ -792,7 +841,17 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         self.needs_description_reset = true;
         self.decoder = Decoder::Unconfigured;
         let setup = &self.track().sample_descriptions[selected as usize - 1];
-        self.decoder = Decoder::from_description(setup, self.work_budget)?;
+        self.decoder = if self.mixed_hevc && matches!(&setup.codec, b"hvc1" | b"hev1") {
+            self.packet = Vec::new();
+            Decoder::Layered(Box::new(mixed_hevc::MixedHevc::open(
+                &mut self.demuxer,
+                self.track_index,
+                index,
+                self.work_budget,
+            )?))
+        } else {
+            Decoder::from_description(setup, self.work_budget)?
+        };
         self.decoder_description = selected;
         self.needs_description_reset = false;
         self.pending_avc_field_sample = None;
@@ -812,6 +871,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         self.decoder.reset();
         self.needs_description_reset = true;
         self.presented_description = None;
+        self.presented_layer = None;
         self.presented_colour = None;
         self.presented_signal = None;
         self.demuxer.invalidate_position();
@@ -873,11 +933,23 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             // retained, and packet/decoder budgets still apply.
             self.select_description(end)?;
             let target = self.decoder_setup();
-            let start = (0..end).rev().find(|&i| self.track().description_for_sample(i).is_some_and(|s|
-                s.codec != target.codec || s.configuration != target.configuration || s.width != target.width || s.height != target.height
-            )).map_or(0,|i|i+1);
+            let start = (0..end)
+                .rev()
+                .find(|&i| {
+                    self.track().description_for_sample(i).is_some_and(|s| {
+                        s.codec != target.codec
+                            || s.configuration != target.configuration
+                            || s.width != target.width
+                            || s.height != target.height
+                    })
+                })
+                .map_or(0, |i| i + 1);
             for index in start..end {
-                self.demuxer.read_packet(self.track_index, index, &mut self.packet)?;
+                if matches!(&self.decoder, Decoder::Layered(_)) {
+                    break;
+                }
+                self.demuxer
+                    .read_packet(self.track_index, index, &mut self.packet)?;
                 match &mut self.decoder {
                     Decoder::Hevc(decoder) => decoder.prime_parameters(&self.packet)?,
                     Decoder::Avc(decoder) => decoder.prime_parameters(&self.packet)?,
@@ -886,13 +958,18 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             }
         }
         loop {
-            if let Some((index, frame)) = self
-                .pending
-                .iter()
-                .enumerate()
-                .min_by_key(|(_, frame)| (frame.frame.presentation_time.ticks, frame.frame.sample_index))
+            if let Some((index, frame)) =
+                self.pending.iter().enumerate().min_by_key(|(_, frame)| {
+                    (
+                        frame.frame.presentation_time.ticks,
+                        frame.frame.sample_index,
+                    )
+                })
             {
-                let future = self.future_pts.get(self.sample_index).copied();
+                let mut future = self.future_pts.get(self.sample_index).copied();
+                if let Decoder::Layered(d) = &self.decoder {
+                    future = future.into_iter().chain(d.pending_pts(&self.demuxer)).min();
+                }
                 // A future sample can be decode-only (for example a RASL
                 // suppressed after EOS). Its PTS is a sorting bound, not a
                 // display endpoint. Decode until the next output's equal-PTS
@@ -900,24 +977,52 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                 let following = self
                     .pending
                     .iter()
-                    .filter(|f| f.frame.presentation_time.ticks > frame.frame.presentation_time.ticks)
+                    .filter(|f| {
+                        f.frame.presentation_time.ticks > frame.frame.presentation_time.ticks
+                    })
                     .map(|f| f.frame.presentation_time.ticks)
                     .min();
                 if future.is_none_or(|pts| following.is_some_and(|next| next < pts)) {
                     let mut frame = self.pending.swap_remove(index);
                     self.pending_bytes -= frame.storage()?;
-                    let next = self.pending.iter().map(|f| f.frame.presentation_time.ticks).min();
+                    let next = self
+                        .pending
+                        .iter()
+                        .map(|f| f.frame.presentation_time.ticks)
+                        .min();
                     frame.frame.duration.ticks = presentation_duration(
                         frame.frame.presentation_time.ticks,
                         next,
                         frame.frame.duration.ticks,
                     )?;
                     self.presented_hdr = Some(frame.hdr);
+                    self.presented_layer = frame.layer;
                     self.presented_description = Some(frame.description_index);
                     self.presented_colour = Some(frame.colour);
                     self.presented_signal = Some(frame.signal);
                     return Ok(Some(frame.frame));
                 }
+            }
+            if !self.needs_description_reset && matches!(&self.decoder, Decoder::Layered(_)) {
+                let Decoder::Layered(d) = &mut self.decoder else {
+                    unreachable!()
+                };
+                let next = d.read(&mut self.demuxer)?;
+                self.sample_index = d.next_sample();
+                if let Some((frame, metadata, layer)) = next {
+                    let description = self
+                        .track()
+                        .samples
+                        .get(frame.sample_index)
+                        .unwrap()
+                        .description_index;
+                    self.retain_frame(frame, metadata, description, Some(layer))?;
+                } else if self.sample_index < self.track().samples.len() {
+                    self.select_description(self.sample_index)?;
+                } else {
+                    return Ok(None);
+                }
+                continue;
             }
             let index = self.sample_index;
             let Some(mut sample) = self.track().samples.get(index) else {
@@ -930,6 +1035,9 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                 return Ok(None);
             };
             self.select_description(index)?;
+            if matches!(&self.decoder, Decoder::Layered(_)) {
+                continue;
+            }
             self.demuxer
                 .read_packet(self.track_index, index, &mut self.packet)?;
             let picture = self.decode_packet()?;
@@ -957,7 +1065,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                 }
             }
             if let Some((picture, planes8)) = picture {
-                let mut frame = VideoFrame {
+                let frame = VideoFrame {
                     packed: self.decoded_planar.take(),
                     picture,
                     planes8,
@@ -973,41 +1081,61 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                     },
                     sample_index: output_index,
                 };
-                while let Some(duplicate) = self
-                    .pending
-                    .iter()
-                    .position(|old| old.frame.presentation_time.ticks == frame.presentation_time.ticks)
-                {
-                    let old = self.pending.swap_remove(duplicate);
-                    self.pending_bytes -= old.storage()?;
-                    // If this group is at EOF there is no following PTS to
-                    // establish its endpoint. Retain its nominal total span.
-                    frame.duration.ticks = frame
-                        .duration
-                        .ticks
-                        .checked_add(old.frame.duration.ticks)
-                        .ok_or_else(|| invalid("duplicate-PTS duration overflow"))?;
-                }
-                let frame = QueuedFrame {
-                    frame, hdr: self.decoder_hdr(), description_index: sample.description_index,
-                    colour: self.decoder_colour()?, signal: self.decoder_signal(),
+                let metadata = DecoderMetadata {
+                    hdr: self.decoder_hdr(),
+                    colour: Some(self.decoder_colour()?),
+                    signal: self.decoder_signal(),
                 };
-                let bytes = frame.storage()?;
-                let total = self
-                    .pending_bytes
-                    .checked_add(bytes)
-                    .ok_or_else(|| invalid("MP4 reorder storage overflow"))?;
-                if total > self.queue_budget {
-                    return Err(invalid("MP4 reordered frames exceed memory budget"));
-                }
-                self.pending
-                    .try_reserve(1)
-                    .map_err(|_| invalid("cannot allocate reorder queue"))?;
-                self.pending.push(frame);
-                self.pending_bytes = total;
+                self.retain_frame(frame, metadata, sample.description_index, None)?;
             }
         }
     }
+    fn retain_frame(
+        &mut self,
+        mut frame: VideoFrame,
+        metadata: DecoderMetadata,
+        description_index: u32,
+        layer: Option<u8>,
+    ) -> Result<()> {
+        while let Some(duplicate) = self
+            .pending
+            .iter()
+            .position(|old| old.frame.presentation_time.ticks == frame.presentation_time.ticks)
+        {
+            let old = self.pending.swap_remove(duplicate);
+            self.pending_bytes -= old.storage()?;
+            // If this group is at EOF there is no following PTS to
+            // establish its endpoint. Retain its nominal total span.
+            frame.duration.ticks = frame
+                .duration
+                .ticks
+                .checked_add(old.frame.duration.ticks)
+                .ok_or_else(|| invalid("duplicate-PTS duration overflow"))?;
+        }
+        let frame = QueuedFrame {
+            frame,
+            hdr: metadata.hdr,
+            description_index,
+            layer,
+            colour: metadata.colour.unwrap_or_default(),
+            signal: metadata.signal,
+        };
+        let bytes = frame.storage()?;
+        let total = self
+            .pending_bytes
+            .checked_add(bytes)
+            .ok_or_else(|| invalid("MP4 reorder storage overflow"))?;
+        if total > self.queue_budget {
+            return Err(invalid("MP4 reordered frames exceed memory budget"));
+        }
+        self.pending
+            .try_reserve(1)
+            .map_err(|_| invalid("cannot allocate reorder queue"))?;
+        self.pending.push(frame);
+        self.pending_bytes = total;
+        Ok(())
+    }
+
 }
 
 /// Open a VideoToolbox session for the stream's parameter sets; `None` (with a

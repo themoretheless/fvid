@@ -327,7 +327,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
     /// Last displayed layered HEVC output layer; absent for ordinary sources.
     pub fn selected_layer_id(&self) -> Option<u8> {
         match &self.source {
-            Source::Single(_) => None,
+            Source::Single(s) => s.presented_layer,
             Source::Layered(s) => s.selected,
         }
     }

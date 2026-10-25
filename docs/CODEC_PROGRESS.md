@@ -1,6 +1,30 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
 
+## Mixed AVC/HEVC/VP9/AV1 MP4 descriptions, 2026-10-25
+
+The common indexed reader now opens contiguous HEVC windows through the owned
+layered pipeline while borrowing the original demuxer. It does not reopen the
+input or duplicate the sample index. Other codec descriptions retain their
+existing native decoders. HEVC window boundaries drain output before changing
+codecs; the global presentation lower bound includes inner pending pictures,
+ready output and the single selection lookahead.
+
+Presented frames retain their original sample description, selected layer,
+colour and HDR, including explicit zero HDR and opening metadata before the
+first frame or after rewind. Seek primes only the selected HEVC window; decode
+errors still require rewind. Retained display pictures and conversion storage
+are charged against the pipeline display allowance.
+
+`mixed_layered_descriptions` covers 12 accepted synthetic scenarios plus one
+corrupt entropy scenario, each in indexed and fragmented MP4. Checks include
+independent pixel controls, cross-codec PTS ordering, visible durations,
+metadata-only input, topology changes, HDR, seek and repeated rewind/error
+recovery. The generator reproduces all 29 files byte-for-byte with subprocess
+and socket creation forbidden; ordinary tests read saved owned fixtures.
+This is finite transition qualification, not proof of all codec tools/profiles.
+
+
 ## HEVC MP4 sample descriptions and deferred HDR, 2026-10-25
 
 Native HEVC dispatch now follows every used sample description, including an

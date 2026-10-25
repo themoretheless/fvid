@@ -151,25 +151,7 @@ fn retain_selection(
 /// Demux metadata has its own Limits; caller-owned returned frames are separate.
 pub struct LayeredMp4VideoReader<R> {
     demuxer: Mp4Reader<R>,
-    track_index: usize,
-    decoder: LayeredDecoder,
-    automatic_selection: bool,
-    queue: LayeredOutputQueue,
-    selections: Vec<SelectionEpoch>,
-    seek_preroll: Vec<(usize, usize)>,
-    visible_sample: usize,
-    ready: VecDeque<LayeredDecoded>,
-    ready_budget: usize,
-    packet: Vec<u8>,
-    raw_packet: Vec<u8>,
-    packet_description: u32,
-    initial_description: u32,
-    length_size: u8,
-    sample_index: usize,
-    first_sample: usize,
-    prime_until: Option<usize>,
-    eof: bool,
-    failed: bool,
+    pipeline: LayeredPipeline,
 }
 impl<R: Read + Seek> LayeredMp4VideoReader<R> {
     pub fn open(
@@ -222,25 +204,149 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
         budget: usize,
         automatic: bool,
     ) -> Result<Self> {
+        let end = demuxer
+            .tracks()
+            .get(track_index)
+            .ok_or_else(|| invalid("MP4 track index out of range"))?
+            .samples
+            .len();
+        let pipeline = LayeredPipeline::open(
+            &mut demuxer,
+            track_index,
+            0..end,
+            output_layer_set,
+            highest_tid,
+            budget,
+            automatic,
+        )?;
+        Ok(Self { demuxer, pipeline })
+    }
+    pub fn track(&self) -> &Track {
+        &self.demuxer.tracks()[self.pipeline.track_index]
+    }
+    pub fn selection_at(&self, index: usize) -> Option<&LayeredSubstream> {
+        self.pipeline.selection_at(index)
+    }
+    pub(super) fn visible_sample(&self) -> usize {
+        self.pipeline.visible_sample
+    }
+    pub fn movie_timescale(&self) -> u32 {
+        self.demuxer.movie_timescale()
+    }
+    pub fn rewind(&mut self) {
+        self.pipeline.rewind();
+        self.demuxer.invalidate_position();
+    }
+    pub fn seek_to_sync(&mut self, pts: i64) -> i64 {
+        self.pipeline.seek_to_sync(&mut self.demuxer, pts)
+    }
+    pub fn read_frame(&mut self) -> Result<Option<LayeredVideoFrame>> {
+        self.pipeline.read_frame(&mut self.demuxer)
+    }
+}
+pub(super) struct LayeredPipeline {
+    track_index: usize,
+    pub(super) window_start: usize,
+    pub(super) window_end: usize,
+    decoder: LayeredDecoder,
+    automatic_selection: bool,
+    queue: LayeredOutputQueue,
+    selections: Vec<SelectionEpoch>,
+    seek_preroll: Vec<(usize, usize)>,
+    visible_sample: usize,
+    ready: VecDeque<LayeredDecoded>,
+    ready_budget: usize,
+    packet: Vec<u8>,
+    raw_packet: Vec<u8>,
+    packet_description: u32,
+    initial_description: u32,
+    length_size: u8,
+    sample_index: usize,
+    first_sample: usize,
+    prime_until: Option<usize>,
+    eof: bool,
+    failed: bool,
+}
+impl LayeredPipeline {
+    pub(super) fn opening_layer(&self) -> u8 {
+        let first = &self.selections[0];
+        let output = first
+            .vps
+            .extension
+            .as_ref()
+            .and_then(|e| e.output.sets.get(first.selection.output_layer_set()))
+            .map_or(1, |s| s.output);
+        (63 - output.leading_zeros()) as u8
+    }
+    pub(super) fn next_sample(&self) -> usize {
+        self.sample_index
+    }
+    pub(super) fn display_available(&self) -> Result<usize> {
+        let held = self.ready.iter().try_fold(
+            self.ready
+                .capacity()
+                .saturating_mul(2 * std::mem::size_of::<LayeredDecoded>()),
+            |n, p| Ok::<_, crate::Error>(n.saturating_add(p.retained_bytes()?)),
+        )?;
+        self.ready_budget
+            .checked_sub(held)
+            .ok_or_else(|| invalid("mixed HEVC retained output exceeds memory budget"))
+    }
+    pub(super) fn pending_pts<R: Read + Seek>(&self, demux: &Mp4Reader<R>) -> Option<i64> {
+        self.ready
+            .iter()
+            .map(|p| p.access_unit)
+            .chain(self.queue.pending_access_unit_ids())
+            .filter_map(|id| {
+                usize::try_from(id)
+                    .ok()
+                    .and_then(|i| self.first_sample.checked_add(i))
+            })
+            .filter_map(|i| {
+                demux.tracks()[self.track_index]
+                    .samples
+                    .get(i)
+                    .map(|s| s.pts)
+            })
+            .min()
+    }
+
+    pub(super) fn open<R: Read + Seek>(
+        demuxer: &mut Mp4Reader<R>,
+        track_index: usize,
+        window: std::ops::Range<usize>,
+        output_layer_set: usize,
+        highest_tid: u8,
+        budget: usize,
+        automatic: bool,
+    ) -> Result<Self> {
         let track = demuxer
             .tracks()
             .get(track_index)
             .ok_or_else(|| invalid("MP4 track index out of range"))?;
-        if track.handler != *b"vide" || !super::layered_packet::all_hevc(track) {
+        if track.handler != *b"vide"
+            || !(window.start < window.end
+                && window.end <= track.samples.len()
+                && window.clone().all(|i| {
+                    track
+                        .description_for_sample(i)
+                        .is_some_and(|d| matches!(&d.codec, b"hvc1" | b"hev1"))
+                }))
+        {
             return Err(invalid("selected MP4 track is not HEVC video"));
         }
-        if track
-            .samples
-            .expanded()
-            .is_some_and(|samples| samples.iter().any(|s| s.size as usize > budget / 8))
-        {
+        if track.samples.expanded().is_some_and(|samples| {
+            samples[window.clone()]
+                .iter()
+                .any(|s| s.size as usize > budget / 8)
+        }) {
             return Err(invalid("HEVC packet exceeds source memory budget"));
         }
         if track.samples.expanded().is_none() {
             return Err(invalid("HEVC video samples are not indexed"));
         }
-        let initial_description = track.samples.get(0).unwrap().description_index;
-        let initial_setup = track.description_for_sample(0).unwrap();
+        let initial_description = track.samples.get(window.start).unwrap().description_index;
+        let initial_setup = track.description_for_sample(window.start).unwrap();
         let config = HevcConfig::parse(&initial_setup.configuration)?;
         let length_size = 4;
         let vps = config
@@ -258,12 +364,12 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             .transpose()?;
         let mut inventory_parameters =
             LayeredParameters::from_configuration(&initial_setup.configuration, budget / 8)?;
-        let count = track.samples.len();
+        let count = window.end;
         let mut epochs = Vec::new();
         let mut seek_preroll = Vec::new();
-        let mut safe_sync = 0usize;
+        let mut safe_sync = window.start;
         let mut restart_pending = true;
-        let mut first_sample = 0usize;
+        let mut first_sample = window.start;
         let mut scan = SubstreamScan::default();
         let mut seen_vcl = false;
         let mut boundary = false;
@@ -273,7 +379,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
         // Inventory the whole sequence before extracting even its earliest SEI.
         // Metadata-only samples after EOS belong to the upcoming sequence, whose
         // VPS may arrive later. Keep their inventory with that upcoming epoch.
-        for index in 0..count {
+        for index in window.start..count {
             let next = demuxer.tracks()[track_index]
                 .samples
                 .get(index)
@@ -286,7 +392,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             // picture. Keep that seed in the upcoming extraction inventory.
             boundary |= changed;
             packet_description = super::layered_packet::read_normalized(
-                &mut demuxer,
+                demuxer,
                 track_index,
                 index,
                 packet_description,
@@ -450,7 +556,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             )
             .ok_or_else(|| invalid("HEVC source selections exceed memory budget"))?;
         let mut initial_configuration = demuxer.tracks()[track_index]
-            .description_for_sample(0)
+            .description_for_sample(window.start)
             .unwrap()
             .configuration
             .clone();
@@ -463,14 +569,15 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
         demuxer.invalidate_position();
         packet.clear();
         Ok(Self {
-            demuxer,
             track_index,
+            window_start: window.start,
+            window_end: window.end,
             decoder,
             automatic_selection: automatic,
             queue: LayeredOutputQueue::default(),
             selections: epochs,
             seek_preroll,
-            visible_sample: 0,
+            visible_sample: window.start,
             ready: VecDeque::new(),
             ready_budget: budget / 4,
             packet,
@@ -478,20 +585,17 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             packet_description: initial_description,
             initial_description,
             length_size,
-            sample_index: 0,
-            first_sample: 0,
+            sample_index: window.start,
+            first_sample: window.start,
             prime_until: None,
             eof: false,
             failed: false,
         })
     }
-    pub fn track(&self) -> &Track {
-        &self.demuxer.tracks()[self.track_index]
-    }
     /// Completed extraction policy at a source sample, including metadata-only
     /// samples before its sequence's first coded picture or replacement VPS.
     pub fn selection_at(&self, sample_index: usize) -> Option<&LayeredSubstream> {
-        if sample_index >= self.track().samples.len() {
+        if sample_index < self.window_start || sample_index >= self.window_end {
             return None;
         }
         Some(&self.selections[self.selection_index(sample_index)].selection)
@@ -501,22 +605,15 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             .partition_point(|e| e.first_sample <= sample_index)
             .saturating_sub(1)
     }
-    pub(super) fn visible_sample(&self) -> usize {
-        self.visible_sample
-    }
-    pub fn movie_timescale(&self) -> u32 {
-        self.demuxer.movie_timescale()
-    }
     pub fn rewind(&mut self) {
         self.decoder.reset_queued(&mut self.queue);
         self.ready.clear();
         self.packet.clear();
         self.raw_packet.clear();
         self.packet_description = self.initial_description;
-        self.demuxer.invalidate_position();
-        self.sample_index = 0;
-        self.first_sample = 0;
-        self.visible_sample = 0;
+        self.sample_index = self.window_start;
+        self.first_sample = self.window_start;
+        self.visible_sample = self.window_start;
         self.prime_until = None;
         self.eof = false;
         self.failed = false;
@@ -525,28 +622,37 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
     /// header history without reconstructing skipped pixels. Reading performs
     /// the deferred I/O. Mixed sync AUs preroll from the last complete layer
     /// entry; their preparatory frames are hidden while references initialize.
-    pub fn seek_to_sync(&mut self, pts: i64) -> i64 {
-        let index = self
-            .track()
+    pub(super) fn seek_to_sync<R: Read + Seek>(
+        &mut self,
+        demux: &mut Mp4Reader<R>,
+        pts: i64,
+    ) -> i64 {
+        let index = demux.tracks()[self.track_index]
             .samples
             .expanded()
             .unwrap()
             .iter()
             .enumerate()
-            .filter(|(_, s)| s.sync && s.pts <= pts)
+            .filter(|(i, s)| {
+                *i >= self.window_start && *i < self.window_end && s.sync && s.pts <= pts
+            })
             .max_by_key(|(i, s)| (s.pts, std::cmp::Reverse(*i)))
-            .map_or(0, |(i, _)| i);
+            .map_or(self.window_start, |(i, _)| i);
         let start = self
             .seek_preroll
             .binary_search_by_key(&index, |entry| entry.0)
             .ok()
             .map_or(index, |at| self.seek_preroll[at].1);
         self.rewind();
+        demux.invalidate_position();
         self.sample_index = start;
         self.first_sample = start;
         self.visible_sample = index;
-        self.prime_until = (start > 0).then_some(start);
-        self.track().samples.get(index).map_or(0, |s| s.pts)
+        self.prime_until = (start > self.window_start).then_some(start);
+        demux.tracks()[self.track_index]
+            .samples
+            .get(index)
+            .map_or(0, |s| s.pts)
     }
     fn retain_ready(&mut self, pictures: Vec<LayeredDecoded>) -> Result<()> {
         let mut bytes = self
@@ -570,19 +676,25 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
         self.ready.extend(pictures);
         Ok(())
     }
-    pub fn read_frame(&mut self) -> Result<Option<LayeredVideoFrame>> {
+    pub(super) fn read_frame<R: Read + Seek>(
+        &mut self,
+        demux: &mut Mp4Reader<R>,
+    ) -> Result<Option<LayeredVideoFrame>> {
         if self.failed {
             return Err(invalid("layered MP4 source requires rewind after an error"));
         }
-        let result = self.read_frame_inner();
+        let result = self.read_frame_inner(demux);
         self.failed = result.is_err();
         result
     }
-    fn read_frame_inner(&mut self) -> Result<Option<LayeredVideoFrame>> {
+    fn read_frame_inner<R: Read + Seek>(
+        &mut self,
+        demux: &mut Mp4Reader<R>,
+    ) -> Result<Option<LayeredVideoFrame>> {
         if let Some(end) = self.prime_until.take() {
-            for index in 0..end {
+            for index in self.window_start..end {
                 self.packet_description = super::layered_packet::read_normalized(
-                    &mut self.demuxer,
+                    demux,
                     self.track_index,
                     index,
                     self.packet_description,
@@ -627,12 +739,11 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                 if sample_index < self.visible_sample {
                     continue;
                 }
-                let sample = self
-                    .track()
+                let sample = demux.tracks()[self.track_index]
                     .samples
                     .get(sample_index)
                     .ok_or_else(|| invalid("HEVC output sample is absent"))?;
-                let timescale = self.track().timescale;
+                let timescale = demux.tracks()[self.track_index].timescale;
                 return Ok(Some(LayeredVideoFrame {
                     decoded,
                     sample_index,
@@ -649,14 +760,14 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             if self.eof {
                 return Ok(None);
             }
-            if self.sample_index == self.track().samples.len() {
+            if self.sample_index == self.window_end {
                 let tail = self.queue.drain();
                 self.retain_ready(tail)?;
                 self.eof = true;
                 continue;
             }
             self.packet_description = super::layered_packet::read_normalized(
-                &mut self.demuxer,
+                demux,
                 self.track_index,
                 self.sample_index,
                 self.packet_description,
