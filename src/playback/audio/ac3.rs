@@ -330,6 +330,7 @@ impl Ac3 {
 pub struct Ac3AudioReader {
     ac3: Ac3,
     eac3_stereo_output: bool,
+    ac3_stereo_output: bool,
     packet: usize,
     presentation_trim: Cell<u64>,
     presentation_floor: Option<u64>,
@@ -370,7 +371,7 @@ impl Ac3AudioReader {
         Ok(bytes)
     }
     fn from_bytes(bytes:&[u8],limits:Limits,expanded:bool,programme:u8)->Result<Self>{
-        Ok(Self{ac3:Ac3::parse_mode(bytes,&limits,expanded,programme)?,eac3_stereo_output:false,packet:0,presentation_trim:Cell::new(0),presentation_floor:None})
+        Ok(Self{ac3:Ac3::parse_mode(bytes,&limits,expanded,programme)?,eac3_stereo_output:false,ac3_stereo_output:false,packet:0,presentation_trim:Cell::new(0),presentation_floor:None})
     }
     fn open_mode<R:Read>(reader:R,limits:Limits,expanded:bool,programme:u8)->Result<Self>{
         let bytes=Self::read_limited(reader,limits)?;
@@ -388,6 +389,7 @@ impl Ac3AudioReader {
 }
 
 impl AudioStream for Ac3AudioReader {
+    fn set_ac3_stereo_output(&mut self, enabled:bool)->Result<()> {self.ac3_stereo_output=enabled;Ok(())}
     fn stereo_router(&self)->Result<Option<fvid_media::owned_stereo_router::StereoRouter>> {
         let mask=self.speaker_mask()?;
         if mask.is_none() && self.codec()==EAC3_TAG && self.channels()>6 {return Err(crate::unsupported("E-AC-3 speaker locations need an extended speaker mask"));}
@@ -398,6 +400,7 @@ impl AudioStream for Ac3AudioReader {
         Ok(())
     }
     fn make_decoder(&self)->Result<Box<dyn crate::audio::AudioDecode>> {
+        if self.ac3_stereo_output && self.codec()==TAG {return Ok(Box::new(crate::codec::ac3_decoder::Ac3Decoder::new_stereo(self.extra_data(),self.sample_rate())?));}
         if self.codec()==EAC3_TAG {
             if self.eac3_stereo_output {
                 return Ok(Box::new(crate::codec::eac3_decoder::Eac3Decoder::new_stereo(self.extra_data(),self.sample_rate())?.with_programme(self.ac3.programme)?));
@@ -407,7 +410,7 @@ impl AudioStream for Ac3AudioReader {
     }
     fn audio_track_index(&self)->usize {self.ac3.tracks.iter().position(|(id,_)|*id==self.ac3.programme).unwrap_or(0)}
 
-    fn speaker_mask(&self) -> Result<Option<u32>> {Ok(if self.eac3_stereo_output && self.codec()==EAC3_TAG {Some(3)}else{self.ac3.speaker_mask})}
+    fn speaker_mask(&self) -> Result<Option<u32>> {Ok(if (self.eac3_stereo_output && self.codec()==EAC3_TAG)||(self.ac3_stereo_output && self.codec()==TAG) {Some(3)}else{self.ac3.speaker_mask})}
 
     fn codec(&self) -> &str {
         self.ac3.codec
@@ -426,7 +429,7 @@ impl AudioStream for Ac3AudioReader {
     /// when a container states none: five full-bandwidth channels plus an LFE for
     /// a 5.1 stream, two for stereo, one for mono.
     fn channels(&self) -> u16 {
-        if self.eac3_stereo_output && self.codec()==EAC3_TAG {2}else{self.ac3.channels}
+        if (self.eac3_stereo_output && self.codec()==EAC3_TAG)||(self.ac3_stereo_output && self.codec()==TAG) {2}else{self.ac3.channels}
     }
 
     fn duration(&self) -> Option<Duration> {

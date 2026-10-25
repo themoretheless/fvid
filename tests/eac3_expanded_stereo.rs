@@ -162,6 +162,7 @@ fn expanded_worker_uses_independent_downmix_and_drc_for_eof_rewind_and_seek() {
                                     compression,
                                     normalize_dialogue: dialogue,
                                     eac3_stereo_output: true,
+                                    ac3_stereo_output: true,
                                     eac3_stereo_downmix: Policy {
                                         mode,
                                         headroom: true,

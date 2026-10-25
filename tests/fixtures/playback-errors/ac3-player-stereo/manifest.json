@@ -1,0 +1,80 @@
+{
+  "cases": [
+    {
+      "name": "51",
+      "channels": 6,
+      "rate": 48000,
+      "layout": 7,
+      "lfe": true,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          0,
+          4,
+          7,
+          6
+        ],
+        [
+          2,
+          7,
+          6,
+          0,
+          4
+        ],
+        null
+      ]
+    },
+    {
+      "name": "single",
+      "channels": 4,
+      "rate": 32000,
+      "layout": 5,
+      "lfe": false,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          0,
+          4,
+          7,
+          6
+        ],
+        [
+          2,
+          7,
+          6,
+          0,
+          4
+        ],
+        null
+      ]
+    },
+    {
+      "name": "c-lfe",
+      "channels": 2,
+      "rate": 48000,
+      "layout": 1,
+      "lfe": true,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          0,
+          4,
+          7,
+          6
+        ],
+        [
+          2,
+          7,
+          6,
+          0,
+          4
+        ],
+        null
+      ]
+    }
+  ],
+  "provenance": "Repository-authored 5.1 tone plus owned C+LFE/single-surround spectra, BSI and neutral VP9. No private media, external encoder, process or network."
+}

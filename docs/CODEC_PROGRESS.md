@@ -18690,3 +18690,50 @@ unit tests (26 ignored), all-test-target checking, and player-bin compilation.
 All commands use `--offline --no-default-features --features player`. Reader
 acceptance and native-route refusal are distinct; ordinary tests need neither
 FFmpeg nor fixture generation/network access.
+
+### Explicit AC-3 L/R geometry and real player BSI routing (2026-10-25)
+
+`Ac3Decoder::new_stereo` and `for_container_stereo` now distinguish L/R output
+from native two-channel C+LFE. Native-first `new(...,2)` remains unchanged.
+Explicit stereo uses the existing scalar-verified Dolby matrix, with optional
+headroom, and omits the optional AC-3 LFE contribution. Raw priming remains 256
+samples; container output removes none. Reset retains explicit geometry, policy
+and timing. The native path still uses the original matrix entry point.
+
+A session-owned `ac3_stereo_output` request negotiates decoded geometry in raw,
+MP4 and Matroska readers before backend/decoder creation. Emitted channels,
+speaker mask 0x03, PCM presentation/silence strides, and identity device routing
+agree. Container configuration replacement and navigation retain the request;
+the worker reapplies compression/dialogue/matrix policy to replacement decoders.
+The actual stereo CPAL player now defaults to codec-aware AC-3 `auto` with matrix
+headroom, with `--ac3-stereo native|loro|ltrt|auto` accepted by both argument paths.
+The generic library worker retains native output by default. Explicit `native`
+means native decoder geometry with the existing backend route; no physical
+multichannel output capability is newly claimed.
+
+Owned short C+LFE spectra at all three base rates and BSID 8/9/10 have an
+independent centre-only stereo oracle, separate native C/LFE energy, both
+headroom values, all stereo modes, raw/container priming and exact reset replay.
+Neutral VP9 companions are included in `ac3-explicit-stereo/`.
+`ac3-player-stereo/` adds authored alternate-BSI 5.1, single-surround and C+LFE
+raw/MP4/Matroska witnesses plus a valid rate/layout-changing MP4. Real worker
+tests compare exact PCM, PTS and end positions for EOF, rewind and partial seek;
+a separate test checks actual CPAL router/ring/callback samples. E-AC-3 expanded
+acceptance also enables both codec output flags to check policy isolation.
+Existing independent matrix-oracle tests validate the shared coefficient core;
+new direct-decoder comparisons verify its routing through actual source/session
+lifetimes rather than claiming a new independent coefficient oracle.
+
+This closes this AC-3 stereo decoder/source path. Simultaneous programme mixing,
+physical extended device maps, changing E-AC-3 presentation layouts and other
+codec tools/profiles remain open; finite fixture tests do not prove full coverage.
+
+Verification: 1049 root unit tests pass (26 ignored); 184 Dolby/selected-MP4
+integration tests pass in 66 targets. All-test-target `cargo check` and player
+`cargo build --bins` pass. Commands use `--offline --no-default-features
+--features player`. New fixtures reproduce byte-exact with process/network
+creation forbidden: 19 explicit-stereo artifacts / 280472 bytes and 11 player
+artifacts / 215869 bytes. Disabling AC-3 startup negotiation specifically fails
+with `speaker mask Some(1551), expected 0x3` on the owned 5.1 witness. The test
+becomes acceptance with codec-aware negotiation restored. No physical output
+or complete codec-family coverage is inferred from these gates.

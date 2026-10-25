@@ -1585,14 +1585,17 @@ impl Folding {
         Some(result)
     }
     fn ac3(header: Header, declared: usize, policy: StereoDownmixPolicy) -> Option<Self> {
+        Self::ac3_output(header,declared,policy,false)
+    }
+    fn ac3_output(header: Header, declared: usize, policy: StereoDownmixPolicy, force_stereo: bool) -> Option<Self> {
         let metadata = header.alternate.and_then(|a| a.downmix);
         let mix=StereoMixLevels {
             preferred:metadata.map(|m|m.preferred),
             ltrt_centre:metadata.map_or(0.707,|m|ALTERNATE_CENTRE[m.ltrt_centre as usize]),
             ltrt_surround:metadata.map_or(0.707,|m|ALTERNATE_SURROUND[m.ltrt_surround as usize]),
         };
-        let mut result=Self::stereo_matrix(header,declared,true,policy.mode,mix)?;
-        if policy.headroom && declared==2 && declared!=header.native_channels() {result.normalize_stereo();}
+        let mut result=Self::stereo_matrix(header,declared,!force_stereo,policy.mode,mix)?;
+        if policy.headroom && declared==2 && (force_stereo || declared!=header.native_channels()) {result.normalize_stereo();}
         Some(result)
     }
     /// Annex E.3.9: optional LFE injection belongs only to mono/stereo
@@ -1701,6 +1704,7 @@ pub struct Ac3Decoder {
     channels: usize,
     compression_mode: CompressionMode,
     stereo_downmix: StereoDownmixPolicy,
+    force_stereo: bool,
     dialogue_normalization: bool,
     core: Core,
     /// Samples still owed to `ENCODER_DELAY`, which the stream's first blocks pay off.
@@ -1730,6 +1734,7 @@ impl Ac3Decoder {
             channels: usize::from(channels),
             compression_mode: CompressionMode::Line,
             stereo_downmix: StereoDownmixPolicy::default(),
+            force_stereo: false,
             dialogue_normalization: false,
             core: Core::new(),
             lead: ENCODER_DELAY,
@@ -1742,6 +1747,24 @@ impl Ac3Decoder {
         let mut decoder = Self::new(configuration, sample_rate, channels)?;
         decoder.lead = 0;
         decoder.initial_lead = 0;
+        Ok(decoder)
+    }
+
+    /// Explicit L/R output, including native two-channel C+LFE input. Raw
+    /// elementary-stream priming is removed. Optional LFE injection is not
+    /// enabled by this constructor; its LFE output is omitted from stereo.
+    pub fn new_stereo(configuration: &[u8], sample_rate: u32) -> Result<Self> {
+        let mut decoder=Self::new(configuration,sample_rate,2)?;
+        decoder.force_stereo=true;
+        Ok(decoder)
+    }
+
+    /// Explicit L/R output for container samples. Container presentation owns
+    /// priming/padding; no raw-stream encoder delay is removed. Reset retains
+    /// both container timing and the explicit stereo geometry.
+    pub fn for_container_stereo(configuration: &[u8], sample_rate: u32) -> Result<Self> {
+        let mut decoder=Self::for_container(configuration,sample_rate,2)?;
+        decoder.force_stereo=true;
         Ok(decoder)
     }
 
@@ -1826,7 +1849,7 @@ impl Ac3Decoder {
 
     /// One syncframe: the header, then six blocks. `false` mutes the frame.
     fn syncframe(&mut self, header: Header, bits: &mut Bits<'_>, out: &mut Vec<f32>) -> bool {
-        let Some(folding) = Folding::ac3(header, self.channels, self.stereo_downmix) else {
+        let Some(folding) = (if self.force_stereo {Folding::ac3_output(header,self.channels,self.stereo_downmix,true)}else{Folding::ac3(header,self.channels,self.stereo_downmix)}) else {
             return false;
         };
         // Reuse is a within-frame promise.

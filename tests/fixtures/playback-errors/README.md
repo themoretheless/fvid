@@ -4987,3 +4987,18 @@ matrices, Line/RF and dialogue policies, EOF/rewind/partial seek. Previous refus
 expectations in `eac3_player_stereo`, `eac3_presentation` and
 `eac3_raw_presentation` now distinguish accepted source/stereo decoding from the
 still explicit refusal of unmapped native physical-device output.
+
+
+`ac3-explicit-stereo/`: authored C+LFE with distinct plane spectra at 48/44.1/32k
+base rates and BSID8/9/10 reduced rates, raw and neutral VP9 Matroska. Reproduce
+with `scripts/generate_ac3_explicit_stereo.py`; `tests/ac3_explicit_stereo.rs`
+checks the independent centre-only L/R oracle, native preservation, priming,
+headroom/modes and reset. No private input or external process/network is used.
+
+`ac3-player-stereo/`: owned/repository-authored alternate-BSI 5.1, single-surround
+and C+LFE raw/MP4/Matroska, plus rate/layout-changing MP4. Generate separately
+with `scripts/generate_ac3_player_stereo.py`. `tests/ac3_player_stereo.rs`
+accepts real-reader/worker stereo negotiation, exact EOF/rewind/partial seeks and
+policy restoration after configuration replacement. CPAL unit coverage checks
+ring/callback samples without opening a device. Ordinary tests generate nothing
+and require no FFmpeg/network.
