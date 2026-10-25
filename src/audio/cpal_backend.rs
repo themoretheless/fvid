@@ -2491,3 +2491,41 @@ mod signed_aac_timeline_regressions {
         }
     }
 }
+
+#[cfg(test)]
+mod eac3_codec_stereo_device_path {
+    use super::*;
+    use crate::audio::AudioStream;
+    #[test]
+    fn codec_stereo_survives_cpal_routing_ring_and_callback() {
+        let base=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/eac3-player-stereo");
+        for name in ["l1-f1-c0-s7", "l7-f1-c0-s1", "l5-f0-c3-s4"] {
+            let raw=std::fs::read(base.join(format!("{name}.ec3"))).unwrap();
+            let mut source=crate::playback_ac3::Ac3AudioReader::open(std::io::Cursor::new(raw),Default::default()).unwrap();
+            source.set_eac3_stereo_output(true).unwrap();
+            let router=source.stereo_router().unwrap().unwrap();
+            assert_eq!(router.coefficients(), &[[1.,0.],[0.,1.]]);
+            let mut decoder=source.make_decoder().unwrap();
+            decoder.set_eac3_stereo_downmix(crate::codec::eac3_decoder::StereoDownmixPolicy {mode:crate::codec::eac3_decoder::StereoDownmixMode::LtRt,headroom:true});
+            let mut backend=CpalBackend::new();backend.channels=2;backend.sample_rate=48000;
+            *backend.shared.ring.lock().unwrap()=Ring::new(2);backend.stereo_router=Some(router);
+            let mut expected=Vec::new();
+            while let Some(p)=source.next_packet().unwrap() {
+                if let Some(frame)=decoder.decode_packet(&p.data,p.pts,p.duration as u64).unwrap() {
+                    let packet=source.present_decoded(frame.packet,frame.source_pts).unwrap().unwrap();
+                    expected.extend(packet.data.chunks_exact(4).map(|b|f32::from_le_bytes(b.try_into().unwrap())));
+                    backend.push(packet).unwrap();
+                }
+            }
+            while let Some(frame)=decoder.finish_packet().unwrap() {
+                let packet=source.present_decoded(frame.packet,frame.source_pts).unwrap().unwrap();
+                expected.extend(packet.data.chunks_exact(4).map(|b|f32::from_le_bytes(b.try_into().unwrap())));
+                backend.push(packet).unwrap();
+            }
+            assert_eq!(expected.len(),2048*2);
+            let mut actual=vec![0.;expected.len()];
+            for chunk in actual.chunks_mut(254) {backend.shared.fill_timed(chunk,48000,Duration::ZERO);}
+            assert!(actual==expected,"CPAL altered codec stereo for {name}");
+        }
+    }
+}

@@ -154,7 +154,7 @@ fn worker_check_impl(
     wanted_mask: Option<u32>,
     policy: DolbyPlaybackPolicy,
 ) {
-    let spec = (audio.sample_rate(), audio.channels());
+    let spec = (audio.sample_rate(), if policy.eac3_stereo_output && matches!(audio.codec(), "A_EAC3" | "ec-3") {2}else{audio.channels()});
     let captured = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
     let sink = captured.clone();
     let mut playback =

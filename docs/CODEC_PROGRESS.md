@@ -18600,3 +18600,40 @@ nonzero PCM, all three stereo modes with headroom, and exact reset replay.
 No new private media or FFmpeg dependency is introduced. This closes public
 constructor timing/geometry access; normal player/device routing and extended
 dependent-presentation stereo folding remain open.
+
+### Real-reader E-AC-3 stereo output negotiation (2026-10-25)
+
+The player session can now request codec-aware L/R output through
+`DolbyPlaybackPolicy.eac3_stereo_output`, with matrix/headroom supplied by
+`eac3_stereo_downmix`. `fvid play --eac3-stereo native|loro|ltrt|auto` exposes
+this choice for the session; native remains the default, explicit stereo enables
+matrix headroom. The media-play argument path accepts the same option.
+
+Before decoder/backend creation the worker negotiates decoded geometry with the
+source. Raw E-AC-3, MP4 and Matroska readers retain native probe metadata while
+emitting two-channel PCM, mask 0x03, and matching presentation/silence strides.
+Container sources use zero raw priming; raw files retain their 256-sample lead.
+The request survives rewind, seek and MP4 decoder-description replacement.
+Other codecs retain their existing output behavior. Extended dependent outputs
+above six channels explicitly refuse this request without altering native state;
+this is a refusal test, not acceptance of full dependent-presentation stereo.
+
+Owned short VP9 + E-AC-3 witnesses cover C+LFE, 5.1 and single-surround input
+in raw, MP4 and Matroska forms. Disabling startup negotiation reproduces the
+specific missing route: `speaker mask Some(12), expected 0x3`, rather than a
+parse/decode error. Acceptance compares exact PCM, PTS and end positions through
+EOF, rewind and partial-packet seek for all three matrices. Separate tests cover
+rate/layout-changing MP4 descriptions and actual CPAL router/ring/callback
+transfers with identity L/R routing. The existing independent scalar-matrix
+suite verifies the underlying downmix coefficients. This does not claim a live
+physical-device run, automatic device capability selection, full dependent
+presentation folding, programme mixing, or completion of other codec gaps.
+
+Verification for this checkpoint: `cargo test --offline --no-default-features
+--features player --lib` passes 1047 tests (26 ignored); the 63 AC-3/E-AC-3/Dolby
+and selected MP4 integration targets pass 177 tests. `cargo check` with the same
+features and `--tests`, and player `cargo build --bins`, pass. The 13 new fixture
+artifacts reproduce byte-for-byte with process/network denied; all 661 previous
+stereo-downmix fixture artifacts remain byte-identical after the generator's
+optional selection argument. These finite gates do not prove universal codec
+coverage or the explicitly open extended stereo/device scenarios above.
