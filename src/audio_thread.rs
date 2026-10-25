@@ -11,11 +11,13 @@ use std::time::Duration;
 pub struct DolbyPlaybackPolicy {
     pub compression: crate::codec::ac3_decoder::CompressionMode,
     pub normalize_dialogue: bool,
+    pub ac3_stereo_downmix: crate::codec::ac3_decoder::StereoDownmixPolicy,
 }
 impl DolbyPlaybackPolicy {
     fn apply_to(self, decoder: &mut dyn AudioDecode) {
         decoder.set_dolby_compression(self.compression);
         decoder.set_dolby_dialogue_normalization(self.normalize_dialogue);
+        decoder.set_ac3_stereo_downmix(self.ac3_stereo_downmix);
     }
 }
 impl From<crate::codec::ac3_decoder::CompressionMode> for DolbyPlaybackPolicy {

@@ -276,6 +276,7 @@ fn selected_expanded_worker_keeps_rf_and_dialogue_policy_through_seek() {
         DolbyPlaybackPolicy {
             compression: CompressionMode::Rf,
             normalize_dialogue: true,
+            ..Default::default()
         },
     );
 }

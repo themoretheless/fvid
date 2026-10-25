@@ -39,6 +39,24 @@ use crate::audio::{AudioDecode, AudioPacket, AudioSpec, SampleFormat};
 use crate::{Result, invalid};
 pub use super::dolby_compression::CompressionMode;
 
+/// Two-channel AC-3 folding. Native layouts and mono output are unaffected.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum StereoDownmixMode {
+    #[default]
+    LoRo,
+    LtRt,
+    /// Follow BSID 6 `dmixmod`; absent, reserved or inapplicable metadata uses Lo/Ro.
+    Automatic,
+}
+/// Downmix policy retained across decoder resets. Defaults preserve legacy Lo/Ro gain.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct StereoDownmixPolicy {
+    pub mode: StereoDownmixMode,
+    /// Apply one shared gain so neither matrix row's absolute weight sum exceeds one.
+    pub headroom: bool,
+}
+
+
 /// Transform coefficients, mantissas and exponents per block and per plane.
 pub(crate) const BINS: usize = 256;
 /// Full-bandwidth channels a stream can carry.
@@ -1529,6 +1547,41 @@ impl Folding {
     pub(crate) fn new(header: Header, declared: usize) -> Option<Self> {
         Self::for_output(header,declared,true)
     }
+    fn ac3(mut header: Header, declared: usize, policy: StereoDownmixPolicy) -> Option<Self> {
+        if declared != 2 || declared == header.native_channels() {
+            return Self::new(header, declared);
+        }
+        let metadata = header.alternate.and_then(|a| a.downmix);
+        let ltrt = match policy.mode {
+            StereoDownmixMode::LoRo => false,
+            StereoDownmixMode::LtRt => true,
+            StereoDownmixMode::Automatic => header.acmod > 2 && metadata.is_some_and(|m| m.preferred == 1),
+        };
+        if ltrt {
+            // The original-syntax Lt/Rt matrix uses fixed -3 dB centre/surround
+            // coefficients, independent of the original Lo/Ro cmixlev/surmixlev.
+            header.clev = 0.707;
+            header.slev = 0.707;
+            if let Some(mix) = metadata {
+                if header.acmod > 2 && header.acmod & 1 != 0 { header.clev = ALTERNATE_CENTRE[mix.ltrt_centre as usize]; }
+                if header.acmod & 4 != 0 { header.slev = ALTERNATE_SURROUND[mix.ltrt_surround as usize]; }
+            }
+        }
+        let mut result = Self::new(header, declared)?;
+        if ltrt && header.acmod & 4 != 0 {
+            let count = if matches!(header.acmod,4|5) {1} else {2};
+            for plane in header.nfchans-count..header.nfchans {
+                result.weight[0][plane] = -header.slev;
+                result.weight[1][plane] = header.slev;
+            }
+        }
+        if policy.headroom {
+            let total = result.weight[..2].iter()
+                .map(|row| row.iter().map(|v| v.abs()).sum::<f32>()).fold(1.0f32, f32::max);
+            for row in &mut result.weight[..2] { for weight in row { *weight /= total; } }
+        }
+        Some(result)
+    }
     /// Annex E.2.9: optional LFE injection belongs only to mono/stereo
     /// output with no separate LFE. AC-3 and native/coded layouts stay distinct.
     pub(crate) fn eac3(header:Header,declared:usize,lfe:Option<u8>,force_stereo:bool)->Option<Self> {
@@ -1629,6 +1682,7 @@ pub struct Ac3Decoder {
     /// has to produce.
     channels: usize,
     compression_mode: CompressionMode,
+    stereo_downmix: StereoDownmixPolicy,
     dialogue_normalization: bool,
     core: Core,
     /// Samples still owed to `ENCODER_DELAY`, which the stream's first blocks pay off.
@@ -1657,6 +1711,7 @@ impl Ac3Decoder {
             sample_rate,
             channels: usize::from(channels),
             compression_mode: CompressionMode::Line,
+            stereo_downmix: StereoDownmixPolicy::default(),
             dialogue_normalization: false,
             core: Core::new(),
             lead: ENCODER_DELAY,
@@ -1670,6 +1725,12 @@ impl Ac3Decoder {
         decoder.lead = 0;
         decoder.initial_lead = 0;
         Ok(decoder)
+    }
+
+    /// Choose stereo folding and optional overload protection; reset retains this policy.
+    pub fn with_stereo_downmix(mut self, policy: StereoDownmixPolicy) -> Self {
+        self.stereo_downmix = policy;
+        self
     }
 
     /// Select compression gain for subsequent frames; reset retains this choice.
@@ -1747,7 +1808,7 @@ impl Ac3Decoder {
 
     /// One syncframe: the header, then six blocks. `false` mutes the frame.
     fn syncframe(&mut self, header: Header, bits: &mut Bits<'_>, out: &mut Vec<f32>) -> bool {
-        let Some(folding) = Folding::new(header, self.channels) else {
+        let Some(folding) = Folding::ac3(header, self.channels, self.stereo_downmix) else {
             return false;
         };
         // Reuse is a within-frame promise.
@@ -2574,6 +2635,7 @@ pub(crate) fn frame_crc_valid(frame: &[u8]) -> bool {
 }
 
 impl AudioDecode for Ac3Decoder {
+    fn set_ac3_stereo_downmix(&mut self, policy: StereoDownmixPolicy) { self.stereo_downmix = policy; }
     fn set_dolby_dialogue_normalization(&mut self, enabled: bool) {
         self.dialogue_normalization=enabled;
     }
@@ -2624,6 +2686,41 @@ impl AudioDecode for Ac3Decoder {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn stereo_headroom_keeps_full_scale_sign_combinations_bounded_without_clipping() {
+        for layout in 3..=7 {
+            let mut header = Header::annex_e(0,1024,layout,true,1.414,0.841);
+            header.alternate=Some(AlternateBsi {coding_mode:layout as u8,lfe:true,
+                downmix:Some(AlternateDownmix {preferred:1,ltrt_centre:0,ltrt_surround:0,loro_centre:0,loro_surround:0}),information:None});
+            for mode in [StereoDownmixMode::LoRo,StereoDownmixMode::LtRt,StereoDownmixMode::Automatic] {
+                let fold=Folding::ac3(header,2,StereoDownmixPolicy {mode,headroom:true}).unwrap();
+                let mut peak=0f32;
+                for signs in 0..1<<PLANES {
+                    let pcm=std::array::from_fn(|plane|[if signs&(1<<plane)!=0 {1.0}else{-1.0};SAMPLES]);
+                    let mut out=Vec::new();fold.write_pcm(&pcm,&[1.;PLANES],&mut out,false);
+                    for sample in out { assert!(sample.abs()<=1.0000003,"layout={layout} mode={mode:?} sample={sample}");peak=peak.max(sample.abs()); }
+                }
+                assert!(peak>0.999999,"headroom needlessly attenuated the largest signed combination");
+            }
+        }
+    }
+
+    #[test]
+    fn stereo_policy_does_not_fold_native_or_change_mono_output() {
+        for layout in 0..=7 {
+            let header=Header::annex_e(0,1024,layout,true,0.595,0.5);
+            let pcm=std::array::from_fn(|plane|[plane as f32/32.;SAMPLES]);
+            for width in [1,header.native_channels()] {
+                let mut original=Vec::new();Folding::new(header,width).unwrap().write_pcm(&pcm,&[1.;PLANES],&mut original,false);
+                for mode in [StereoDownmixMode::LoRo,StereoDownmixMode::LtRt,StereoDownmixMode::Automatic] {
+                    let mut actual=Vec::new();Folding::ac3(header,width,StereoDownmixPolicy {mode,headroom:true}).unwrap().write_pcm(&pcm,&[1.;PLANES],&mut actual,false);
+                    assert_eq!(actual,original);
+                }
+            }
+        }
+    }
+
 
     #[test]
     fn reduced_rate_coupling_leaks_follow_closed_form_decay() {

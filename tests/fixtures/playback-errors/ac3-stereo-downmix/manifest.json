@@ -1,0 +1,4442 @@
+{
+  "cases": [
+    {
+      "name": "51-b6-c0-s0",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          0,
+          0,
+          7,
+          7
+        ],
+        [
+          1,
+          3,
+          5,
+          0,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b8-c0-s0",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 8,
+      "mixes": [
+        [
+          0,
+          0,
+          0,
+          7,
+          7
+        ],
+        [
+          1,
+          3,
+          5,
+          0,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c0-s1",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          0,
+          1,
+          7,
+          6
+        ],
+        [
+          2,
+          3,
+          6,
+          0,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c0-s2",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          0,
+          2,
+          7,
+          5
+        ],
+        [
+          3,
+          3,
+          7,
+          0,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c0-s3",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          0,
+          3,
+          7,
+          4
+        ],
+        [
+          0,
+          3,
+          0,
+          0,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c0-s4",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          0,
+          4,
+          7,
+          3
+        ],
+        [
+          1,
+          3,
+          1,
+          0,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c0-s5",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          0,
+          5,
+          7,
+          2
+        ],
+        [
+          2,
+          3,
+          2,
+          0,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c0-s6",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          0,
+          6,
+          7,
+          1
+        ],
+        [
+          3,
+          3,
+          3,
+          0,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c0-s7",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          0,
+          7,
+          7,
+          0
+        ],
+        [
+          0,
+          3,
+          4,
+          0,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c1-s0",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          1,
+          0,
+          6,
+          7
+        ],
+        [
+          2,
+          4,
+          5,
+          1,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c1-s1",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          1,
+          1,
+          6,
+          6
+        ],
+        [
+          3,
+          4,
+          6,
+          1,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c1-s2",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          1,
+          2,
+          6,
+          5
+        ],
+        [
+          0,
+          4,
+          7,
+          1,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c1-s3",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          1,
+          3,
+          6,
+          4
+        ],
+        [
+          1,
+          4,
+          0,
+          1,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c1-s4",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          1,
+          4,
+          6,
+          3
+        ],
+        [
+          2,
+          4,
+          1,
+          1,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c1-s5",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          1,
+          5,
+          6,
+          2
+        ],
+        [
+          3,
+          4,
+          2,
+          1,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c1-s6",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          1,
+          6,
+          6,
+          1
+        ],
+        [
+          0,
+          4,
+          3,
+          1,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c1-s7",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          1,
+          7,
+          6,
+          0
+        ],
+        [
+          1,
+          4,
+          4,
+          1,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c2-s0",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          2,
+          0,
+          5,
+          7
+        ],
+        [
+          3,
+          5,
+          5,
+          2,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c2-s1",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          2,
+          1,
+          5,
+          6
+        ],
+        [
+          0,
+          5,
+          6,
+          2,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c2-s2",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          2,
+          2,
+          5,
+          5
+        ],
+        [
+          1,
+          5,
+          7,
+          2,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c2-s3",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          2,
+          3,
+          5,
+          4
+        ],
+        [
+          2,
+          5,
+          0,
+          2,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c2-s4",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          2,
+          4,
+          5,
+          3
+        ],
+        [
+          3,
+          5,
+          1,
+          2,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c2-s5",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          2,
+          5,
+          5,
+          2
+        ],
+        [
+          0,
+          5,
+          2,
+          2,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c2-s6",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          2,
+          6,
+          5,
+          1
+        ],
+        [
+          1,
+          5,
+          3,
+          2,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c2-s7",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          2,
+          7,
+          5,
+          0
+        ],
+        [
+          2,
+          5,
+          4,
+          2,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c3-s0",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          3,
+          0,
+          4,
+          7
+        ],
+        [
+          0,
+          6,
+          5,
+          3,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c3-s1",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          3,
+          1,
+          4,
+          6
+        ],
+        [
+          1,
+          6,
+          6,
+          3,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c3-s2",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          3,
+          2,
+          4,
+          5
+        ],
+        [
+          2,
+          6,
+          7,
+          3,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c3-s3",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          3,
+          3,
+          4,
+          4
+        ],
+        [
+          3,
+          6,
+          0,
+          3,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c3-s4",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          3,
+          4,
+          4,
+          3
+        ],
+        [
+          0,
+          6,
+          1,
+          3,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c3-s5",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          3,
+          5,
+          4,
+          2
+        ],
+        [
+          1,
+          6,
+          2,
+          3,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c3-s6",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          3,
+          6,
+          4,
+          1
+        ],
+        [
+          2,
+          6,
+          3,
+          3,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c3-s7",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          3,
+          7,
+          4,
+          0
+        ],
+        [
+          3,
+          6,
+          4,
+          3,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c4-s0",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          4,
+          0,
+          3,
+          7
+        ],
+        [
+          1,
+          7,
+          5,
+          4,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c4-s1",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          4,
+          1,
+          3,
+          6
+        ],
+        [
+          2,
+          7,
+          6,
+          4,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c4-s2",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          4,
+          2,
+          3,
+          5
+        ],
+        [
+          3,
+          7,
+          7,
+          4,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c4-s3",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          4,
+          3,
+          3,
+          4
+        ],
+        [
+          0,
+          7,
+          0,
+          4,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c4-s4",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          4,
+          4,
+          3,
+          3
+        ],
+        [
+          1,
+          7,
+          1,
+          4,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c4-s5",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          4,
+          5,
+          3,
+          2
+        ],
+        [
+          2,
+          7,
+          2,
+          4,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c4-s6",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          4,
+          6,
+          3,
+          1
+        ],
+        [
+          3,
+          7,
+          3,
+          4,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c4-s7",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          4,
+          7,
+          3,
+          0
+        ],
+        [
+          0,
+          7,
+          4,
+          4,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c5-s0",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          5,
+          0,
+          2,
+          7
+        ],
+        [
+          2,
+          0,
+          5,
+          5,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c5-s1",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          5,
+          1,
+          2,
+          6
+        ],
+        [
+          3,
+          0,
+          6,
+          5,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c5-s2",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          5,
+          2,
+          2,
+          5
+        ],
+        [
+          0,
+          0,
+          7,
+          5,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c5-s3",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          5,
+          3,
+          2,
+          4
+        ],
+        [
+          1,
+          0,
+          0,
+          5,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c5-s4",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          5,
+          4,
+          2,
+          3
+        ],
+        [
+          2,
+          0,
+          1,
+          5,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c5-s5",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          5,
+          5,
+          2,
+          2
+        ],
+        [
+          3,
+          0,
+          2,
+          5,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c5-s6",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          5,
+          6,
+          2,
+          1
+        ],
+        [
+          0,
+          0,
+          3,
+          5,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c5-s7",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          5,
+          7,
+          2,
+          0
+        ],
+        [
+          1,
+          0,
+          4,
+          5,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c6-s0",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          6,
+          0,
+          1,
+          7
+        ],
+        [
+          3,
+          1,
+          5,
+          6,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c6-s1",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          6,
+          1,
+          1,
+          6
+        ],
+        [
+          0,
+          1,
+          6,
+          6,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c6-s2",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          6,
+          2,
+          1,
+          5
+        ],
+        [
+          1,
+          1,
+          7,
+          6,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c6-s3",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          6,
+          3,
+          1,
+          4
+        ],
+        [
+          2,
+          1,
+          0,
+          6,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c6-s4",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          6,
+          4,
+          1,
+          3
+        ],
+        [
+          3,
+          1,
+          1,
+          6,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c6-s5",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          6,
+          5,
+          1,
+          2
+        ],
+        [
+          0,
+          1,
+          2,
+          6,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c6-s6",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          6,
+          6,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          3,
+          6,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c6-s7",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          6,
+          7,
+          1,
+          0
+        ],
+        [
+          2,
+          1,
+          4,
+          6,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c7-s0",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          7,
+          0,
+          0,
+          7
+        ],
+        [
+          0,
+          2,
+          5,
+          7,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c7-s1",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          7,
+          1,
+          0,
+          6
+        ],
+        [
+          1,
+          2,
+          6,
+          7,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c7-s2",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          7,
+          2,
+          0,
+          5
+        ],
+        [
+          2,
+          2,
+          7,
+          7,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c7-s3",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          7,
+          3,
+          0,
+          4
+        ],
+        [
+          3,
+          2,
+          0,
+          7,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c7-s4",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          7,
+          4,
+          0,
+          3
+        ],
+        [
+          0,
+          2,
+          1,
+          7,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c7-s5",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          7,
+          5,
+          0,
+          2
+        ],
+        [
+          1,
+          2,
+          2,
+          7,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c7-s6",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          7,
+          6,
+          0,
+          1
+        ],
+        [
+          2,
+          2,
+          3,
+          7,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "51-b6-c7-s7",
+      "control": "51-control.ac3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          7,
+          7,
+          0,
+          0
+        ],
+        [
+          3,
+          2,
+          4,
+          7,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.595,
+      "basic_surround": 0.5,
+      "frame_bytes": 2560
+    },
+    {
+      "name": "layout3-b6-c0-s0",
+      "control": "layout3-control.ac3",
+      "layout": 3,
+      "lfe": false,
+      "channels": 3,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          0,
+          0,
+          7,
+          7
+        ],
+        [
+          1,
+          3,
+          5,
+          0,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout3-b6-c1-s1",
+      "control": "layout3-control.ac3",
+      "layout": 3,
+      "lfe": false,
+      "channels": 3,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          1,
+          1,
+          6,
+          6
+        ],
+        [
+          3,
+          4,
+          6,
+          1,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout3-b6-c2-s2",
+      "control": "layout3-control.ac3",
+      "layout": 3,
+      "lfe": false,
+      "channels": 3,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          2,
+          2,
+          5,
+          5
+        ],
+        [
+          1,
+          5,
+          7,
+          2,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout3-b6-c3-s3",
+      "control": "layout3-control.ac3",
+      "layout": 3,
+      "lfe": false,
+      "channels": 3,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          3,
+          3,
+          4,
+          4
+        ],
+        [
+          3,
+          6,
+          0,
+          3,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout3-b6-c4-s4",
+      "control": "layout3-control.ac3",
+      "layout": 3,
+      "lfe": false,
+      "channels": 3,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          4,
+          4,
+          3,
+          3
+        ],
+        [
+          1,
+          7,
+          1,
+          4,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout3-b6-c5-s5",
+      "control": "layout3-control.ac3",
+      "layout": 3,
+      "lfe": false,
+      "channels": 3,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          5,
+          5,
+          2,
+          2
+        ],
+        [
+          3,
+          0,
+          2,
+          5,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout3-b6-c6-s6",
+      "control": "layout3-control.ac3",
+      "layout": 3,
+      "lfe": false,
+      "channels": 3,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          6,
+          6,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          3,
+          6,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout3-b6-c7-s7",
+      "control": "layout3-control.ac3",
+      "layout": 3,
+      "lfe": false,
+      "channels": 3,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          7,
+          7,
+          0,
+          0
+        ],
+        [
+          3,
+          2,
+          4,
+          7,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout4-b6-c0-s0",
+      "control": "layout4-control.ac3",
+      "layout": 4,
+      "lfe": false,
+      "channels": 3,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          0,
+          0,
+          7,
+          7
+        ],
+        [
+          1,
+          3,
+          5,
+          0,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout4-b6-c1-s1",
+      "control": "layout4-control.ac3",
+      "layout": 4,
+      "lfe": false,
+      "channels": 3,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          1,
+          1,
+          6,
+          6
+        ],
+        [
+          3,
+          4,
+          6,
+          1,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout4-b6-c2-s2",
+      "control": "layout4-control.ac3",
+      "layout": 4,
+      "lfe": false,
+      "channels": 3,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          2,
+          2,
+          5,
+          5
+        ],
+        [
+          1,
+          5,
+          7,
+          2,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout4-b6-c3-s3",
+      "control": "layout4-control.ac3",
+      "layout": 4,
+      "lfe": false,
+      "channels": 3,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          3,
+          3,
+          4,
+          4
+        ],
+        [
+          3,
+          6,
+          0,
+          3,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout4-b6-c4-s4",
+      "control": "layout4-control.ac3",
+      "layout": 4,
+      "lfe": false,
+      "channels": 3,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          4,
+          4,
+          3,
+          3
+        ],
+        [
+          1,
+          7,
+          1,
+          4,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout4-b6-c5-s5",
+      "control": "layout4-control.ac3",
+      "layout": 4,
+      "lfe": false,
+      "channels": 3,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          5,
+          5,
+          2,
+          2
+        ],
+        [
+          3,
+          0,
+          2,
+          5,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout4-b6-c6-s6",
+      "control": "layout4-control.ac3",
+      "layout": 4,
+      "lfe": false,
+      "channels": 3,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          6,
+          6,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          3,
+          6,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout4-b6-c7-s7",
+      "control": "layout4-control.ac3",
+      "layout": 4,
+      "lfe": false,
+      "channels": 3,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          7,
+          7,
+          0,
+          0
+        ],
+        [
+          3,
+          2,
+          4,
+          7,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c0-s0",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          0,
+          0,
+          7,
+          7
+        ],
+        [
+          1,
+          3,
+          5,
+          0,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c0-s1",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          0,
+          1,
+          7,
+          6
+        ],
+        [
+          2,
+          3,
+          6,
+          0,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c0-s2",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          0,
+          2,
+          7,
+          5
+        ],
+        [
+          3,
+          3,
+          7,
+          0,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c0-s3",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          0,
+          3,
+          7,
+          4
+        ],
+        [
+          0,
+          3,
+          0,
+          0,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c0-s4",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          0,
+          4,
+          7,
+          3
+        ],
+        [
+          1,
+          3,
+          1,
+          0,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c0-s5",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          0,
+          5,
+          7,
+          2
+        ],
+        [
+          2,
+          3,
+          2,
+          0,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c0-s6",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          0,
+          6,
+          7,
+          1
+        ],
+        [
+          3,
+          3,
+          3,
+          0,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c0-s7",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          0,
+          7,
+          7,
+          0
+        ],
+        [
+          0,
+          3,
+          4,
+          0,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c1-s0",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          1,
+          0,
+          6,
+          7
+        ],
+        [
+          2,
+          4,
+          5,
+          1,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c1-s1",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          1,
+          1,
+          6,
+          6
+        ],
+        [
+          3,
+          4,
+          6,
+          1,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c1-s2",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          1,
+          2,
+          6,
+          5
+        ],
+        [
+          0,
+          4,
+          7,
+          1,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c1-s3",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          1,
+          3,
+          6,
+          4
+        ],
+        [
+          1,
+          4,
+          0,
+          1,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c1-s4",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          1,
+          4,
+          6,
+          3
+        ],
+        [
+          2,
+          4,
+          1,
+          1,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c1-s5",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          1,
+          5,
+          6,
+          2
+        ],
+        [
+          3,
+          4,
+          2,
+          1,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c1-s6",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          1,
+          6,
+          6,
+          1
+        ],
+        [
+          0,
+          4,
+          3,
+          1,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c1-s7",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          1,
+          7,
+          6,
+          0
+        ],
+        [
+          1,
+          4,
+          4,
+          1,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c2-s0",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          2,
+          0,
+          5,
+          7
+        ],
+        [
+          3,
+          5,
+          5,
+          2,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c2-s1",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          2,
+          1,
+          5,
+          6
+        ],
+        [
+          0,
+          5,
+          6,
+          2,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c2-s2",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          2,
+          2,
+          5,
+          5
+        ],
+        [
+          1,
+          5,
+          7,
+          2,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c2-s3",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          2,
+          3,
+          5,
+          4
+        ],
+        [
+          2,
+          5,
+          0,
+          2,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c2-s4",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          2,
+          4,
+          5,
+          3
+        ],
+        [
+          3,
+          5,
+          1,
+          2,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c2-s5",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          2,
+          5,
+          5,
+          2
+        ],
+        [
+          0,
+          5,
+          2,
+          2,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c2-s6",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          2,
+          6,
+          5,
+          1
+        ],
+        [
+          1,
+          5,
+          3,
+          2,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c2-s7",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          2,
+          7,
+          5,
+          0
+        ],
+        [
+          2,
+          5,
+          4,
+          2,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c3-s0",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          3,
+          0,
+          4,
+          7
+        ],
+        [
+          0,
+          6,
+          5,
+          3,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c3-s1",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          3,
+          1,
+          4,
+          6
+        ],
+        [
+          1,
+          6,
+          6,
+          3,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c3-s2",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          3,
+          2,
+          4,
+          5
+        ],
+        [
+          2,
+          6,
+          7,
+          3,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c3-s3",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          3,
+          3,
+          4,
+          4
+        ],
+        [
+          3,
+          6,
+          0,
+          3,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c3-s4",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          3,
+          4,
+          4,
+          3
+        ],
+        [
+          0,
+          6,
+          1,
+          3,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c3-s5",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          3,
+          5,
+          4,
+          2
+        ],
+        [
+          1,
+          6,
+          2,
+          3,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c3-s6",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          3,
+          6,
+          4,
+          1
+        ],
+        [
+          2,
+          6,
+          3,
+          3,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c3-s7",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          3,
+          7,
+          4,
+          0
+        ],
+        [
+          3,
+          6,
+          4,
+          3,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c4-s0",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          4,
+          0,
+          3,
+          7
+        ],
+        [
+          1,
+          7,
+          5,
+          4,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c4-s1",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          4,
+          1,
+          3,
+          6
+        ],
+        [
+          2,
+          7,
+          6,
+          4,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c4-s2",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          4,
+          2,
+          3,
+          5
+        ],
+        [
+          3,
+          7,
+          7,
+          4,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c4-s3",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          4,
+          3,
+          3,
+          4
+        ],
+        [
+          0,
+          7,
+          0,
+          4,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c4-s4",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          4,
+          4,
+          3,
+          3
+        ],
+        [
+          1,
+          7,
+          1,
+          4,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c4-s5",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          4,
+          5,
+          3,
+          2
+        ],
+        [
+          2,
+          7,
+          2,
+          4,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c4-s6",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          4,
+          6,
+          3,
+          1
+        ],
+        [
+          3,
+          7,
+          3,
+          4,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c4-s7",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          4,
+          7,
+          3,
+          0
+        ],
+        [
+          0,
+          7,
+          4,
+          4,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c5-s0",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          5,
+          0,
+          2,
+          7
+        ],
+        [
+          2,
+          0,
+          5,
+          5,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c5-s1",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          5,
+          1,
+          2,
+          6
+        ],
+        [
+          3,
+          0,
+          6,
+          5,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c5-s2",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          5,
+          2,
+          2,
+          5
+        ],
+        [
+          0,
+          0,
+          7,
+          5,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c5-s3",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          5,
+          3,
+          2,
+          4
+        ],
+        [
+          1,
+          0,
+          0,
+          5,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c5-s4",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          5,
+          4,
+          2,
+          3
+        ],
+        [
+          2,
+          0,
+          1,
+          5,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c5-s5",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          5,
+          5,
+          2,
+          2
+        ],
+        [
+          3,
+          0,
+          2,
+          5,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c5-s6",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          5,
+          6,
+          2,
+          1
+        ],
+        [
+          0,
+          0,
+          3,
+          5,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c5-s7",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          5,
+          7,
+          2,
+          0
+        ],
+        [
+          1,
+          0,
+          4,
+          5,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c6-s0",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          6,
+          0,
+          1,
+          7
+        ],
+        [
+          3,
+          1,
+          5,
+          6,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c6-s1",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          6,
+          1,
+          1,
+          6
+        ],
+        [
+          0,
+          1,
+          6,
+          6,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c6-s2",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          6,
+          2,
+          1,
+          5
+        ],
+        [
+          1,
+          1,
+          7,
+          6,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c6-s3",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          6,
+          3,
+          1,
+          4
+        ],
+        [
+          2,
+          1,
+          0,
+          6,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c6-s4",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          6,
+          4,
+          1,
+          3
+        ],
+        [
+          3,
+          1,
+          1,
+          6,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c6-s5",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          6,
+          5,
+          1,
+          2
+        ],
+        [
+          0,
+          1,
+          2,
+          6,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c6-s6",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          6,
+          6,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          3,
+          6,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c6-s7",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          6,
+          7,
+          1,
+          0
+        ],
+        [
+          2,
+          1,
+          4,
+          6,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c7-s0",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          7,
+          0,
+          0,
+          7
+        ],
+        [
+          0,
+          2,
+          5,
+          7,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c7-s1",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          7,
+          1,
+          0,
+          6
+        ],
+        [
+          1,
+          2,
+          6,
+          7,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c7-s2",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          7,
+          2,
+          0,
+          5
+        ],
+        [
+          2,
+          2,
+          7,
+          7,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c7-s3",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          7,
+          3,
+          0,
+          4
+        ],
+        [
+          3,
+          2,
+          0,
+          7,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c7-s4",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          3,
+          7,
+          4,
+          0,
+          3
+        ],
+        [
+          0,
+          2,
+          1,
+          7,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c7-s5",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          7,
+          5,
+          0,
+          2
+        ],
+        [
+          1,
+          2,
+          2,
+          7,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c7-s6",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          1,
+          7,
+          6,
+          0,
+          1
+        ],
+        [
+          2,
+          2,
+          3,
+          7,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout5-b6-c7-s7",
+      "control": "layout5-control.ac3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          7,
+          7,
+          0,
+          0
+        ],
+        [
+          3,
+          2,
+          4,
+          7,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout6-b6-c0-s0",
+      "control": "layout6-control.ac3",
+      "layout": 6,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          0,
+          0,
+          7,
+          7
+        ],
+        [
+          1,
+          3,
+          5,
+          0,
+          0
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout6-b6-c1-s1",
+      "control": "layout6-control.ac3",
+      "layout": 6,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          1,
+          1,
+          6,
+          6
+        ],
+        [
+          3,
+          4,
+          6,
+          1,
+          1
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout6-b6-c2-s2",
+      "control": "layout6-control.ac3",
+      "layout": 6,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          2,
+          2,
+          5,
+          5
+        ],
+        [
+          1,
+          5,
+          7,
+          2,
+          2
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout6-b6-c3-s3",
+      "control": "layout6-control.ac3",
+      "layout": 6,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          3,
+          3,
+          4,
+          4
+        ],
+        [
+          3,
+          6,
+          0,
+          3,
+          3
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout6-b6-c4-s4",
+      "control": "layout6-control.ac3",
+      "layout": 6,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          4,
+          4,
+          3,
+          3
+        ],
+        [
+          1,
+          7,
+          1,
+          4,
+          4
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout6-b6-c5-s5",
+      "control": "layout6-control.ac3",
+      "layout": 6,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          5,
+          5,
+          2,
+          2
+        ],
+        [
+          3,
+          0,
+          2,
+          5,
+          5
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout6-b6-c6-s6",
+      "control": "layout6-control.ac3",
+      "layout": 6,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          0,
+          6,
+          6,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          3,
+          6,
+          6
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    },
+    {
+      "name": "layout6-b6-c7-s7",
+      "control": "layout6-control.ac3",
+      "layout": 6,
+      "lfe": false,
+      "channels": 4,
+      "rate": 32000,
+      "bsid": 6,
+      "mixes": [
+        [
+          2,
+          7,
+          7,
+          0,
+          0
+        ],
+        [
+          3,
+          2,
+          4,
+          7,
+          7
+        ],
+        null
+      ],
+      "basic_centre": 0.707,
+      "basic_surround": 0.707,
+      "frame_bytes": 3840
+    }
+  ],
+  "provenance": "Owned A/52 spectra for modes 3/0,2/1,3/1,2/2 plus existing repository-authored 5.1 tone. Independent scalar matrices in tests, authored neutral VP9. No private media, process, external encoder or network."
+}

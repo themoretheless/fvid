@@ -256,6 +256,7 @@ fn worker_dialogue_normalization_survives_navigation_and_reader_decoder_replacem
                             fvid::audio_thread::DolbyPlaybackPolicy {
                                 compression: mode,
                                 normalize_dialogue: normalize,
+                                ..Default::default()
                             },
                         );
                     }
