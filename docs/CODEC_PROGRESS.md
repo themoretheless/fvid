@@ -1,5 +1,71 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## AAC-ELD core (AOT 39), 2026-10-25
+
+Owned decoding now accepts the 480/512-sample ELD core, indexed layouts
+1–7/11/12/14, configured channel ordering, MS/intensity/PNS, TNS and the
+section/RVLC/HCR resilience flags. ELD uses its own ASC and tagless channel
+syntax, inverse modulation, normative four-block windows and three-block
+history. It does not run the ordinary LC/LD synthesis or infer implicit SBR.
+Packet errors leave both noise state and synthesis history unchanged; retained
+payload accounting includes the ELD history and checkpoint allocations.
+
+The offline generator `scripts/generate_aac_eld_fixtures.py` produces 60 own
+nonzero/decay cases: 242 checked-in files (4,379,924 bytes), including MP4 videos
+and Matroska audio. Independent direct cosine/window arithmetic supplies PCM
+references. Window numeric facts are transcribed from GOST R 53556.4-2013,
+tables A.15/A.16; the ten shifted entries 536–545 in A.15 are corrected against
+ISO/IEC 14496-3:2005/Amd.9:2008. Source URLs are recorded with the tables.
+No foreign decoder implementation, FFmpeg process or network is required.
+
+`tests/aac_eld.rs` checks all 60 cases through root/backend decoders, public
+MP4/Matroska PCM export, repeated ranges, player rewind/seek, signed packet
+PTS, checkpoint rollback and stable retained storage. Player navigation uses
+each reader's actual timescale; a nanosecond Matroska timestamp is not a PCM
+sample index. Generator byte parity is checked separately from ordinary tests.
+
+The broader gate also reproduced a pre-existing ER-LC/PS player startup stack
+overflow on the exact pre-ELD source. The generic audio factory retained about
+627 KiB of unrelated codec constructor temporaries in debug builds. AAC/PS
+construction now has a separate dispatch frame from the non-AAC factory.
+`aac-player-factory-stack` contains a newly muxed own short ER-LC/PS video and
+Matroska companion; `aac_player_factory_stack` decodes both on an explicit
+2 MiB worker with 128 KiB caller headroom. The old factory crashes on that
+fixture at native PS construction, rather than at parsing or an unrelated
+unsupported tool. This does not change decoder algorithms or increase stacks.
+
+The wide AAC gate also exposed obsolete HCR/RVLC negative expectations: a zero
+ER EXT_FILL payload had been treated as forbidden trailing data, despite the
+already-supported ER extension parser. Those expectations now require identical
+PCM with and without valid fill. Truncated entropy payloads still must fail.
+`aac-er-fill-resilience` adds 32 own valid-fill videos and 32 independently
+malformed EXT_FILL_DATA-nibble videos, verifying public/backend PCM parity and
+the exact malformed-payload error. It changes tests, not decoder permissiveness.
+
+SSR playback now interprets packet windows in the declared source timescale,
+rather than forcing every explicitly timed packet into 1024 rows. Native
+`decode_timed_in_clock` keeps the original source PTS/duration while recognizing
+configured access-unit windows under floor/ceil timestamp quantization. Explicit
+variable-window MP4 timing remains variable; absent player packet durations use
+the configured clock, preserving standard Matroska AAC. Native zero-duration
+untimed synthesis retains its separate behavior. Seek therefore restores the
+same PCM prefix and trims at the requested sample rather than shifting by a
+window-transition difference.
+
+`aac-ssr-packet-clock` contains six own mono/stereo/coupling/independent-window
+sources, each muxed with native variable MP4 timing, quantized 1 kHz MP4 timing
+(with a separate correct 24 kHz audio sample entry), and nanosecond Matroska.
+Public/backend export, complete player output, rewind and repeated exact seek
+must agree on the continuous PCM. The original SSR coupling playback helper now
+drains EOF, including delayed alignment output. Existing TNS negative geometry
+checks use an actually unsupported length (513), with nonzero FIR acceptance
+for 480/512; WAVE export checks compare the declared data chunk because valid
+RIFF metadata may follow it.
+
+This is core acceptance, not complete AAC-ELD profile coverage. Low-delay SBR,
+nonzero epConfig and known ELD extension tools remain explicit refusals.
+Arbitrary combinations and complete codec coverage remain unproven.
+
 
 ## VPS-less HEVC prefix and layered epoch handoff, 2026-10-25
 

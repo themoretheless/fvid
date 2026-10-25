@@ -59,16 +59,33 @@ pub fn make_audio_decoder(
     channels: u16,
     bits_per_sample: u16,
 ) -> crate::Result<Box<dyn crate::audio::AudioDecode>> {
+    // Debug builds retain constructor temporaries for every match arm. Keep
+    // AAC/PS construction outside the large non-AAC factory stack frame, so
+    // normal audio workers have room for native synthesis initialization.
+    if codec == "mp4a" {
+        let asc = config::aac_specific_config(extra_data)?;
+        return if config::AudioSpecificConfig::parse(asc)?.ps_present == Some(true) {
+            Ok(Box::new(aac_ps_playback::PsAacDecoder::new(extra_data, sample_rate, channels)?))
+        } else {
+            Ok(Box::new(aac_decoder::AacDecoder::new(extra_data, sample_rate, channels)?))
+        };
+    }
+    make_non_aac_audio_decoder(codec, extra_data, sample_rate, channels, bits_per_sample)
+}
+
+#[cfg(feature = "player")]
+#[inline(never)]
+fn make_non_aac_audio_decoder(
+    codec: &str,
+    extra_data: &[u8],
+    sample_rate: u32,
+    channels: u16,
+    bits_per_sample: u16,
+) -> crate::Result<Box<dyn crate::audio::AudioDecode>> {
     use symphonia::core::codecs::audio::well_known::{
         CODEC_ID_ADPCM_IMA_QT, CODEC_ID_ADPCM_IMA_WAV, CODEC_ID_ADPCM_MS,
     };
     let decoder: Box<dyn crate::audio::AudioDecode> = match codec {
-        "mp4a" => {
-            let asc=config::aac_specific_config(extra_data)?;
-            if config::AudioSpecificConfig::parse(asc)?.ps_present==Some(true) {
-                Box::new(aac_ps_playback::PsAacDecoder::new(extra_data,sample_rate,channels)?)
-            } else {Box::new(aac_decoder::AacDecoder::new(extra_data,sample_rate,channels)?)}
-        },
         "A_OPUS" => Box::new(opus_decoder::OpusDecoder::new(extra_data, sample_rate, channels)?),
         "A_VORBIS" => Box::new(vorbis_decoder::VorbisDecoder::new(
             extra_data,
@@ -293,5 +310,5 @@ pub mod ffv1_decoder;
 pub mod aac_coupling;
 
 // LD transforms/history are owned by the media library.
-pub use fvid_media::owned_aac::{aac_ld_bands,aac_ld_channel,aac_ld_ltp,aac_ld_synthesis};
+pub use fvid_media::owned_aac::{aac_eld_synthesis,aac_ld_bands,aac_ld_channel,aac_ld_ltp,aac_ld_synthesis};
 pub mod aac_ld_syntax;

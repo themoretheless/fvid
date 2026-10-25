@@ -45,6 +45,27 @@ impl AacConfig {
         sample_rate: u32,
         config: u32,
     ) -> Result<(Self, Option<super::aac_pce::ProgramConfig>)> {
+        if object_type == 39 {
+            let channels=match config {1..=6=>config as u8,7|12|14=>8,11=>7,_=>return Err(invalid("unsupported AAC ELD channel configuration"))};
+            let frame_samples=if b.bit()?{480}else{512};
+            let section_data_resilience=b.bit()?;
+            let scalefactor_data_resilience=b.bit()?;
+            let spectral_data_resilience=b.bit()?;
+            if b.bit()? {return Err(invalid("AAC ELD low-delay SBR is not yet implemented"));}
+            loop {
+                let kind=b.read(4)?;
+                if kind==0 {break;}
+                let mut bytes=b.read(4)? as usize;
+                if bytes==15 {let add=b.read(8)? as usize;bytes+=add;if add==255 {bytes+=b.read(16)? as usize;}}
+                // Reserved descriptors are length delimited. Known extensions
+                // change the rendering model and require their own decoder.
+                if matches!(kind,1..=3) {return Err(invalid("AAC ELD extension tool is not yet implemented"));}
+                for _ in 0..bytes {b.read(8)?;}
+            }
+            if b.read(2)?!=0 {return Err(invalid("AAC ELD epConfig is not yet implemented"));}
+            super::aac_ld_bands::LdBands::for_eld(sample_rate,frame_samples as usize).map_err(|e|invalid(&e.0))?;
+            return Ok((Self{channel_configuration:config as u8,object_type,sample_rate,channels,frame_samples,core_coder_delay:None,section_data_resilience,scalefactor_data_resilience,spectral_data_resilience},None));
+        }
         if !matches!(object_type, 1 | 2 | 3 | 4 | 17 | 19 | 23) {
             return Err(invalid(
                 "only AAC Main, LC, SSR, LTP, ER-LC, ER-LTP and ER-LD core configurations are implemented",
@@ -185,6 +206,12 @@ impl AudioSpecificConfig {
         };
         let (core, program) =
             AacConfig::read_core(&mut b, core_object_type, sample_rate, configuration)?;
+        if core.object_type == 39 && !explicit {
+            // ELD's own ldSbrPresentFlag was zero. It does not permit the
+            // ordinary implicit SBR/PS discovery route or a doubled clock.
+            sbr_present=Some(false);
+            ps_present=Some(false);
+        }
         if !explicit && b.remaining() >= 16 {
             if b.read(11)? != 0x2b7 {
                 return Err(invalid("unsupported AAC trailing extension"));
@@ -203,6 +230,9 @@ impl AudioSpecificConfig {
                     ps_present = Some(b.bit()?);
                 }
             }
+        }
+        if core.object_type == 39 && (explicit || sbr_present == Some(true) || ps_present == Some(true)) {
+            return Err(invalid("AAC ELD requires low-delay SBR signalling"));
         }
         if core.object_type == 23 && (sbr_present == Some(true) || ps_present == Some(true)) {
             return Err(invalid(if core.object_type == 23 {"ER AAC LD SBR/PS is not yet implemented"} else if core.object_type == 19 {"ER AAC LTP SBR/PS is not yet implemented"} else {"ER AAC LC SBR/PS is not yet implemented"}));

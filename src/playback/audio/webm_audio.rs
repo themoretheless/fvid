@@ -1583,13 +1583,15 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
                 )?,
             ))
         } else {
-            crate::codec::make_audio_decoder(
+            let mut decoder = crate::codec::make_audio_decoder(
                 self.codec(),
                 self.extra_data(),
                 self.sample_rate(),
                 self.channels(),
                 self.bits_per_sample(),
-            )
+            )?;
+            if self.codec_tag == "mp4a" {decoder.set_source_timescale(self.timescale())?;}
+            Ok(decoder)
         }
     }
 
