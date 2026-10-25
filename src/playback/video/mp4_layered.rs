@@ -86,9 +86,11 @@ fn retain_selection(
     scan: SubstreamScan,
     vps: Arc<LayeredVps>,
     ols: usize,
+    automatic:bool,
     highest_tid: u8,
     budget: usize,
 ) -> Result<()> {
+    let ols=if automatic {vps.automatic_output_layer_set()?}else{ols};
     // HighestTid is an upper bound; a later VPS may have fewer sublayers.
     let rows = vps
         .extension
@@ -147,6 +149,7 @@ pub struct LayeredMp4VideoReader<R> {
     demuxer: Mp4Reader<R>,
     track_index: usize,
     decoder: LayeredDecoder,
+    automatic_selection:bool,
     queue: LayeredOutputQueue,
     selections: Vec<SelectionEpoch>,
     seek_preroll: Vec<(usize, usize)>,
@@ -181,11 +184,36 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
         Self::from_demuxer(demuxer, track_index, output_layer_set, highest_tid, budget)
     }
     pub fn from_demuxer(
+        demuxer: Mp4Reader<R>,
+        track_index: usize,
+        output_layer_set: usize,
+        highest_tid: u8,
+        budget: usize,
+    ) -> Result<Self> {
+        Self::from_demuxer_impl(
+            demuxer,
+            track_index,
+            output_layer_set,
+            highest_tid,
+            budget,
+            false,
+        )
+    }
+    pub(super) fn from_demuxer_automatic(
+        demuxer: Mp4Reader<R>,
+        track_index: usize,
+        initial_ols: usize,
+        budget: usize,
+    ) -> Result<Self> {
+        Self::from_demuxer_impl(demuxer, track_index, initial_ols, 6, budget, true)
+    }
+    fn from_demuxer_impl(
         mut demuxer: Mp4Reader<R>,
         track_index: usize,
         output_layer_set: usize,
         highest_tid: u8,
         budget: usize,
+        automatic:bool,
     ) -> Result<Self> {
         let track = demuxer
             .tracks()
@@ -246,6 +274,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                         scan,
                         vps.clone(),
                         output_layer_set,
+                        automatic,
                         highest_tid,
                         selection_budget.saturating_sub(seek_storage(&seek_preroll)),
                     )?;
@@ -298,6 +327,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                             vps.take()
                                 .ok_or_else(|| invalid("HEVC coded epoch has no VPS"))?,
                             output_layer_set,
+                            automatic,
                             highest_tid,
                             selection_budget.saturating_sub(seek_storage(&seek_preroll)),
                         )?;
@@ -325,10 +355,11 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                 }
                 boundary |= h.unit_type == 37 || h.unit_type == 36 && h.layer_id == 0;
             }
+            let current_ols=if automatic {vps.as_ref().map(|v|v.automatic_output_layer_set()).transpose()?.unwrap_or(output_layer_set)}else{output_layer_set};
             let required = vps
                 .as_ref()
                 .and_then(|v| v.extension.as_ref())
-                .and_then(|e| e.output.sets.get(output_layer_set))
+                .and_then(|e| e.output.sets.get(current_ols))
                 .map_or(0, |set| set.necessary);
             let safe = present != 0
                 && (restart_pending || base_restart || required != 0 && required & !irap == 0);
@@ -370,6 +401,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             scan,
             vps.ok_or_else(|| invalid("layered HEVC source has no active VPS"))?,
             output_layer_set,
+            automatic,
             highest_tid,
             selection_budget.saturating_sub(seek_storage(&seek_preroll)),
         )?;
@@ -392,6 +424,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             demuxer,
             track_index,
             decoder,
+            automatic_selection:automatic,
             queue: LayeredOutputQueue::default(),
             selections: epochs,
             seek_preroll,
@@ -514,7 +547,9 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                 {
                     return Err(invalid("HEVC seek priming exceeds memory budget"));
                 }
-                self.decoder.prime_metadata(&extracted)?;
+                if self.automatic_selection {
+                    self.decoder.prime_reselected_metadata(&extracted,self.selections[selection].selection.output_layer_set())?;
+                }else{self.decoder.prime_metadata(&extracted)?;}
             }
             self.decoder.finish_metadata_priming();
         }
@@ -562,12 +597,9 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                 .read_packet(self.track_index, self.sample_index, &mut self.packet)?;
             let selection = self.selection_index(self.sample_index);
             let selection = &self.selections[selection].selection;
-            let (pictures, _) = self.decoder.decode_selected_queued_packet(
-                &mut self.queue,
-                selection,
-                &self.packet,
-                selection.highest_temporal_id(),
-            )?;
+            let (pictures,_)=if self.automatic_selection {
+                self.decoder.decode_reselected_queued_packet(&mut self.queue,selection,&self.packet,selection.highest_temporal_id())?
+            }else{self.decoder.decode_selected_queued_packet(&mut self.queue,selection,&self.packet,selection.highest_temporal_id())?};
             self.sample_index += 1;
             self.retain_ready(pictures)?;
         }

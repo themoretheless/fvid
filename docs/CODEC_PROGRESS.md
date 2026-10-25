@@ -1,5 +1,30 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## Automatic OLS reselection across VPS epochs, 2026-10-25
+
+Automatic MP4 and Matroska playback now reevaluates the preferred OLS for each
+activated VPS snapshot. Highest output layer, then fewer output/necessary
+layers and earliest OLS preserve the existing single-view policy. A later VPS
+whose enhancement output moves from OLS1 to OLS2 no longer silently displays
+its still-valid base-only OLS1. Automatic MP4 extraction requests the full
+normative temporal domain and clamps it to each selected epoch; explicitly
+selected sources retain their caller's OLS and temporal limit.
+
+`LayeredDecoder::decode_reselected_queued_packet` and
+`prime_reselected_metadata` stage source selection around the existing atomic
+activation paths. They do not relax active-CVS VPS/SPS guards. Refusals restore
+the previous selected OLS, queue, POC and immutable decoded references; reset
+restores the constructor OLS. Matroska exposes the layer of the actually
+presented picture, rather than a decode-ahead selection.
+
+An original synthetic family changes explicit OLS masks and DPB rows after
+EOS, BLA or complete target IDR. Acceptance verifies selected layer, exact
+pixels, original timestamps, rewind and seek across the OLS index change in
+both frontends. An illegal non-IRAP replacement still refuses; a low-level
+regression verifies rollback, strict-entry refusal and retry with a valid AU.
+This finite matrix does not establish universal OLS/topology conformance.
+
+
 ## Matroska layered HEVC VPS epochs, 2026-10-25
 
 The layered Matroska source now inventories each activated VPS epoch and uses
@@ -20,8 +45,8 @@ Segment Duration as a per-track duration. Exact samples, RGB, geometry, colour,
 HDR, frame endpoints, seek and rewind are checked against native MP4 pixels and
 independent authored block clocks. Illegal active-VPS replacement and truncated
 new-epoch entropy still refuse and require rewind. This does not qualify every
-VPS/OLS mutation; automatic reselection when OLS indices change and optimized
-layered random access remain separate work.
+VPS/OLS mutation; further output-topology combinations and optimized layered random access
+remain separate qualification work.
 
 
 ## Native layered HEVC in Matroska, 2026-10-25

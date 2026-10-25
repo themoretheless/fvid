@@ -1,0 +1,25 @@
+{
+  "cases": [
+    {
+      "name": "eos",
+      "control": "hevc-layered-vps-epoch-eos.mp4",
+      "error": null
+    },
+    {
+      "name": "bla",
+      "control": "hevc-layered-vps-epoch-bla.mp4",
+      "error": null
+    },
+    {
+      "name": "idr",
+      "control": "hevc-layered-vps-epoch-idr.mp4",
+      "error": null
+    },
+    {
+      "name": "illegal",
+      "control": "hevc-layered-vps-epoch-illegal.mp4",
+      "error": "HEVC active VPS changed before sequence end"
+    }
+  ],
+  "provenance": "Owned VPS writer changes explicit OLS masks and DPB rows; all entropy and parameters originate in repository synthetic fixtures. No private input, external codec, process or network."
+}

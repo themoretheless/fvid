@@ -21,6 +21,7 @@ pub struct LayeredDecoder {
     initial_hdr: super::layered_dpb::LayeredHdr,
     length_size: u8,
     output_layer_set: usize,
+    initial_output_layer_set: usize,
     budget: usize,
     priming: Priming,
 }
@@ -59,6 +60,7 @@ impl LayeredDecoder {
             initial_hdr,
             length_size,
             output_layer_set,
+            initial_output_layer_set:output_layer_set,
             budget,
             priming: Priming::None,
         })
@@ -86,6 +88,7 @@ impl LayeredDecoder {
     pub fn reset(&mut self) {
         self.priming = Priming::None;
         self.parameters = self.initial.clone();
+        self.output_layer_set=self.initial_output_layer_set;
         self.dpb.reset();
         self.dpb.seed_hdr(&self.initial_hdr);
     }
@@ -234,6 +237,27 @@ impl LayeredDecoder {
         }
         self.decode_queued_plan(queue, plan, highest_tid, budget)
     }
+    /// Decode a source-selected OLS, committing the selection only with the AU.
+    /// Ordinary parameter activation still rejects switches inside an active CVS.
+    /// reset restores the constructor's OLS. The strict selected entry is unchanged.
+    pub fn decode_reselected_queued_packet(
+        &mut self,
+        queue: &mut super::LayeredOutputQueue,
+        selection: &super::LayeredSubstream,
+        packet: &[u8],
+        highest_tid: u8,
+    ) -> Result<(Vec<LayeredDecoded>, LayeredEndMarkers)> {
+        let previous = self.output_layer_set;
+        self.output_layer_set = selection.output_layer_set();
+        let result = self.decode_selected_queued_packet(queue, selection, packet, highest_tid);
+        if result.is_err() {
+            self.output_layer_set = previous;
+        }
+        result
+    }
+    pub fn output_layer_set(&self) -> usize {
+        self.output_layer_set
+    }
     /// Seek/reset discards pending output and references as one operation.
     pub fn reset_queued(&mut self, queue: &mut super::LayeredOutputQueue) {
         self.reset();
@@ -310,6 +334,21 @@ impl LayeredDecoder {
         self.parameters = parameters;
         self.priming = Priming::Metadata;
         Ok(())
+    }
+    /// Prime skipped AUs under their source epoch's OLS, with the same atomic
+    /// parameter-activation checks as prime_metadata.
+    pub fn prime_reselected_metadata(
+        &mut self,
+        packet: &[u8],
+        output_layer_set: usize,
+    ) -> Result<()> {
+        let previous = self.output_layer_set;
+        self.output_layer_set = output_layer_set;
+        let result = self.prime_metadata(packet);
+        if result.is_err() {
+            self.output_layer_set = previous;
+        }
+        result
     }
     /// Discard skipped POC history for pixel reconstruction but preserve original
     /// metadata CLVS history, so seeking to an ordinary CRA cannot reset its HDR.

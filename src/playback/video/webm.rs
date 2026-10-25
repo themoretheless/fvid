@@ -46,6 +46,7 @@ enum VideoDecoder {
     Av1(Box<crate::codec::av1_decoder::Decoder>),
 }
 struct Frame {
+    layer_id: Option<u8>,
     signal: Option<ColourDescription>,
     paired: bool,
     hdr: HdrMetadata,
@@ -74,6 +75,7 @@ pub struct WebmVideoReader<R> {
     queued: Vec<Frame>,
     presented_hdr: Option<HdrMetadata>,
     presented_signal: Option<ColourDescription>,
+    presented_layer: Option<u8>,
     queue_budget: usize,
     rgb: Vec<u8>,
     dimensions: [usize; 2],
@@ -295,6 +297,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             queued: Vec::new(),
             presented_hdr: None,
             presented_signal: None,
+            presented_layer: None,
             queue_budget,
             rgb: Vec::new(),
             dimensions: [0; 2],
@@ -471,6 +474,8 @@ impl<R: Read + Seek> WebmVideoReader<R> {
     pub fn hdr(&self) -> HdrMetadata {
         self.hdr
     }
+    /// Layer selected for the displayed multilayer HEVC picture; other codecs return None.
+    pub fn selected_layer_id(&self)->Option<u8> {self.presented_layer}
     /// The signal the coding states for itself: an AV1 sequence header's colour
     /// description, which the reader takes from the track's own bytes when it
     /// opens — the CodecPrivate configuration OBUs and the first packet — and
@@ -651,6 +656,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         self.queued.clear();
         self.presented_hdr = None;
         self.presented_signal = None;
+        self.presented_layer = None;
         self.base = None;
         self.start = 0;
         self.end = 0;
@@ -745,6 +751,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         self.queued.clear();
         self.presented_hdr = None;
         self.presented_signal = None;
+        self.presented_layer = None;
         self.failed = false;
         self.index = index;
         if index > 0 && !self.hardware_accelerated()
@@ -945,7 +952,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                         .decode_surface(&packet)
                         .map_err(|error| invalid(&error.to_string()))?;
                     if let Some(surface) = surface {
-                        visible = Some(Frame { signal: None,
+                        visible = Some(Frame { layer_id: None, signal: None,
                             hdr: HdrMetadata::default(),
                             paired: false,
                             decoded: Picture::Surface(surface, hardware.colour),
@@ -965,7 +972,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                         } else {
                             Picture::Coded(Arc::new(picture), hardware.colour)
                         };
-                        visible = Some(Frame { signal: None,
+                        visible = Some(Frame { layer_id: None, signal: None,
                             hdr: HdrMetadata::default(),
                             paired: false,
                             decoded,
@@ -1007,7 +1014,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                             } else {
                                 Picture::Coded(picture, AvcColour::from_vui(vui)?)
                             };
-                            visible = Some(Frame { signal: None,
+                            visible = Some(Frame { layer_id: None, signal: None,
                             hdr: HdrMetadata::default(),
                                 paired,
                                 decoded,
@@ -1026,7 +1033,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                         let packed=crate::playback_native::hevc_picture_with_vui(
                             p,d.parameters().0.chroma_format,d.parameters().0.vui.as_ref(),
                         )?;
-                        visible = Some(Frame { signal: None,
+                        visible = Some(Frame { layer_id: None, signal: None,
                             hdr: HdrMetadata::default(),
                             paired: false,
                             decoded: Picture::Packed(Arc::new(packed)),
@@ -1054,7 +1061,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                         && self.explicit_full_range == Some(false);
                     let p = PackedPlanar::with_alpha(decoded.frame, decoded.depth, colour, decoded.alpha)?
                         .with_rgb_limited(rgb_limited)?;
-                    visible = Some(Frame { signal: None,
+                    visible = Some(Frame { layer_id: None, signal: None,
                             hdr: HdrMetadata::default(),
                             paired: false,
                         decoded: Picture::Packed(Arc::new(p)),
@@ -1071,7 +1078,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                                     "multiple visible frames in one WebM packet need distinct timestamps",
                                 ));
                             }
-                            visible = Some(Frame { signal: None,
+                            visible = Some(Frame { layer_id: None, signal: None,
                             hdr: HdrMetadata::default(),
                             paired: false,
                                 decoded: Picture::Vp9(Box::new(decoded)),
@@ -1083,7 +1090,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 }
                 VideoDecoder::Av1(d) => {
                     if let Some(decoded) = d.decode_container_sample(&packet)? {
-                        visible = Some(Frame { signal: None,
+                        visible = Some(Frame { layer_id: None, signal: None,
                             hdr: HdrMetadata::default(),
                             paired: false,
                             decoded: Picture::Av1(decoded),
@@ -1237,6 +1244,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         self.frames += 1;
         self.presented_hdr = Some(current.hdr);
         self.presented_signal = current.signal;
+        self.presented_layer = current.layer_id;
         Ok(Some(CurrentFrame {
             decoded: current.decoded,
             size,

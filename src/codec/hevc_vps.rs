@@ -156,6 +156,29 @@ pub struct LayeredVps {
     pub future_extension: bool,
 }
 impl LayeredVps {
+    /// Highest output layer, then fewest output/necessary layers and earliest OLS.
+    /// This is the native frontend's automatic single-view selection policy.
+    pub fn automatic_output_layer_set(&self) -> Result<usize> {
+        let Some(extension) = &self.extension else {
+            return Ok(0);
+        };
+        extension
+            .output
+            .sets
+            .iter()
+            .enumerate()
+            .filter(|(_, s)| s.output != 0)
+            .max_by_key(|(i, s)| {
+                (
+                    63 - s.output.leading_zeros(),
+                    std::cmp::Reverse(s.output.count_ones()),
+                    std::cmp::Reverse(s.necessary.count_ones()),
+                    std::cmp::Reverse(*i),
+                )
+            })
+            .map(|(i, _)| i)
+            .ok_or_else(|| invalid("HEVC VPS has no output layer set"))
+    }
     /// Complete TargetDecLayerIdList coverage for the all-IDR activation rule.
     pub(crate) fn covers_idr_target(&self, ols: usize, idr_layers: u64) -> bool {
         self.extension.as_ref().and_then(|e| e.output.sets.get(ols))
