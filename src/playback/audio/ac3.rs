@@ -116,7 +116,7 @@ fn programme_catalogue(mut bytes:&[u8],expanded:bool)->Vec<(u8,AudioTrack)> {
         if kind!=1 && tracks[usize::from(id)].is_none() && let Some(header)=probe_programme_syncframe(bytes,id) {
             let channels=if expanded {
                 match crate::codec::eac3_decoder::presentation::raw_programme_for_programme(bytes,id) {
-                    Ok(Some((_,layout))) if layout.0.len()>6 && layout.wave_mask().is_some()=>Some(layout.0.len()as u16),
+                    Ok(Some((_,layout))) if layout.0.len()>6=>Some(layout.0.len()as u16),
                     Ok(None)=>Some(header.channels),
                     Ok(Some((_,layout))) if layout.0.len()<=6=>Some(header.channels),
                     _=>None,
@@ -147,7 +147,7 @@ pub struct Frame {
 /// header when one is available, retaining damaged frames for concealment.
 #[derive(Clone, Debug)]
 pub struct Ac3 {
-    speaker_mask: u32,
+    speaker_mask: Option<u32>,
     programme:u8,
     tracks:Vec<(u8,AudioTrack)>,
     pub codec: &'static str,
@@ -253,8 +253,8 @@ impl Ac3 {
         }else{None};
         let output_channels=native.as_ref().map_or(first.channels,|layout|layout.0.len() as u16);
         let output_mask=if let Some(layout)=&native {
-            layout.wave_mask().ok_or_else(||crate::unsupported("E-AC-3 speaker locations need an extended speaker mask"))?
-        }else{first.speaker_mask};
+            layout.wave_mask()
+        }else{Some(first.speaker_mask)};
         let mut frames = Vec::with_capacity(found.len());
         let mut pts = 0u64;
         for (at, start) in found.iter().zip(&starts) {
@@ -388,10 +388,12 @@ impl Ac3AudioReader {
 }
 
 impl AudioStream for Ac3AudioReader {
+    fn stereo_router(&self)->Result<Option<fvid_media::owned_stereo_router::StereoRouter>> {
+        let mask=self.speaker_mask()?;
+        if mask.is_none() && self.codec()==EAC3_TAG && self.channels()>6 {return Err(crate::unsupported("E-AC-3 speaker locations need an extended speaker mask"));}
+        mask.map(|m|fvid_media::owned_stereo_router::StereoRouter::new(self.channels(),m).map_err(|e|invalid(&e))).transpose()
+    }
     fn set_eac3_stereo_output(&mut self, enabled: bool) -> Result<()> {
-        if enabled && self.codec()==EAC3_TAG && self.ac3.channels>6 {
-            return Err(invalid("E-AC-3 extended dependent presentation stereo folding is not implemented"));
-        }
         self.eac3_stereo_output=enabled;
         Ok(())
     }
@@ -405,7 +407,7 @@ impl AudioStream for Ac3AudioReader {
     }
     fn audio_track_index(&self)->usize {self.ac3.tracks.iter().position(|(id,_)|*id==self.ac3.programme).unwrap_or(0)}
 
-    fn speaker_mask(&self) -> Result<Option<u32>> {Ok(Some(if self.eac3_stereo_output && self.codec()==EAC3_TAG {3}else{self.ac3.speaker_mask}))}
+    fn speaker_mask(&self) -> Result<Option<u32>> {Ok(if self.eac3_stereo_output && self.codec()==EAC3_TAG {Some(3)}else{self.ac3.speaker_mask})}
 
     fn codec(&self) -> &str {
         self.ac3.codec

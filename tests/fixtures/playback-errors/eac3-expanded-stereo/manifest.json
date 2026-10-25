@@ -1,0 +1,84 @@
+{
+  "cases": [
+    {
+      "name": "7.1",
+      "channels": 8,
+      "rate": 48000,
+      "programmes": [
+        0,
+        1
+      ],
+      "samples": 2304,
+      "independent_dynrng": [
+        0,
+        32,
+        224
+      ],
+      "dependent_dynrng": 96,
+      "independent_compression": [
+        128,
+        144
+      ],
+      "dependent_compression": 32,
+      "independent_dialnorm": [
+        25,
+        26
+      ],
+      "dependent_dialnorm": 15
+    },
+    {
+      "name": "10",
+      "channels": 10,
+      "rate": 48000,
+      "programmes": [
+        0,
+        1
+      ],
+      "samples": 2304,
+      "independent_dynrng": [
+        0,
+        32,
+        224
+      ],
+      "dependent_dynrng": 96,
+      "independent_compression": [
+        128,
+        144
+      ],
+      "dependent_compression": 32,
+      "independent_dialnorm": [
+        25,
+        26
+      ],
+      "dependent_dialnorm": 15
+    },
+    {
+      "name": "16",
+      "channels": 16,
+      "rate": 48000,
+      "programmes": [
+        0,
+        1
+      ],
+      "samples": 2304,
+      "independent_dynrng": [
+        0,
+        32,
+        224
+      ],
+      "dependent_dynrng": 96,
+      "independent_compression": [
+        128,
+        144
+      ],
+      "dependent_compression": 32,
+      "independent_dialnorm": [
+        25,
+        26
+      ],
+      "dependent_dialnorm": 15
+    }
+  ],
+  "provenance": "Owned EAC3 independent/extension metadata and neutral VP9; no private media, FFmpeg, external process or network.",
+  "standard": "ATSC A/52:2018 E.3.8.2, E.3.8.5"
+}

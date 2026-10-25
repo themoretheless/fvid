@@ -186,23 +186,24 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
 
     /// Probe Dolby packet geometry before exposing track descriptions. A sample
     /// entry can carry a placeholder channel count instead of decoded roles.
-    fn dolby_geometry(demuxer: &mut Mp4Reader<R>, index: usize) -> Result<Option<(u16,u32)>> {
+    fn dolby_geometry(demuxer: &mut Mp4Reader<R>, index: usize) -> Result<Option<(u16,Option<u32>)>> {
         let track=&demuxer.tracks()[index];
         let kind=track.codec;
         if track.samples.is_empty() || !matches!(&kind,b"ac-3"|b"ec-3") {return Ok(None);}
         let mut payload=Vec::new();demuxer.read_packet(index,0,&mut payload)?;
         if kind==*b"ac-3" && let Some(frame)=crate::codec::ac3_decoder::checked_syncframe(&payload) {
-            return Ok(Some((frame.channels,crate::codec::ac3_decoder::speaker_mask(&payload,frame.channels)?)));
+            return Ok(Some((frame.channels,Some(crate::codec::ac3_decoder::speaker_mask(&payload,frame.channels)?))));
         }
         if kind==*b"ec-3" && let Some(frame)=crate::codec::eac3_decoder::checked_frame(&payload) {
             let layout=crate::codec::eac3_decoder::presentation::raw_programme(&payload)?;
             let native_channels=layout.as_ref().map_or(frame.channels,|(_,layout)|layout.0.len() as u16);
-            return Ok(Some((native_channels,crate::codec::eac3_decoder::speaker_mask(&payload,native_channels)?)));
+            let mask=if native_channels>6 {layout.as_ref().and_then(|(_,l)|l.wave_mask())}else{Some(crate::codec::eac3_decoder::speaker_mask(&payload,native_channels)?)};
+            return Ok(Some((native_channels,mask)));
         }
         Ok(None)
     }
 
-    fn programme_geometry(demuxer:&mut Mp4Reader<R>,index:usize,programme:u8)->Result<(u32,u16,u32)> {
+    fn programme_geometry(demuxer:&mut Mp4Reader<R>,index:usize,programme:u8)->Result<(u32,u16,Option<u32>)> {
         const FRAMES:usize=2*8*9;const BYTES:usize=FRAMES*4096;
         let count=demuxer.tracks()[index].samples.len();
         let mut prefix=Vec::new();let mut packet=Vec::new();
@@ -210,7 +211,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             demuxer.read_packet(index,sample,&mut packet)?;
             prefix.extend_from_slice(&packet[..packet.len().min(BYTES.saturating_sub(prefix.len()))]);
             if let Some((frame,layout))=crate::codec::eac3_decoder::presentation::probe_programme(&prefix,programme,sample+1==count)? {
-                let mask=layout.wave_mask().ok_or_else(||unsupported("E-AC-3 speaker locations need an extended speaker mask"))?;
+                let mask=layout.wave_mask();
                 return Ok((frame.sample_rate,layout.0.len()as u16,mask));
             }
             if prefix.len()==BYTES{break;}
@@ -266,7 +267,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         }
         let geometry=if let Some((_,channels,mask))=selected_geometry{Some((channels,mask))}else{Self::dolby_geometry(&mut demuxer,index)?};
         let dolby_channels=geometry.map(|(channels,_)|channels);
-        let dolby_mask=geometry.map(|(_,mask)|mask);
+        let dolby_mask=geometry.and_then(|(_,mask)|mask);
         let mut dolby_track_channels=vec![None;demuxer.tracks().len()];
         dolby_track_channels[index]=dolby_channels;
         for other in Self::supported(&demuxer).into_iter().filter(|other|*other!=index) {
@@ -527,11 +528,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                         found = Some((
                             frame.sample_rate,
                             layout.0.len() as u16,
-                            layout.wave_mask().ok_or_else(|| {
-                                unsupported(
-                                    "E-AC-3 speaker locations need an extended speaker mask",
-                                )
-                            })?,
+                            layout.wave_mask(),
                         ));
                         break;
                     }
@@ -544,7 +541,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 })?;
                 state.rate = Some(rate);
                 state.channels = Some(channels);
-                state.mask = Some(mask);
+                state.mask = mask;
             }
             self.description_states[selected] = Some(state);
             state
@@ -766,9 +763,6 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         self.packet_sample_limit(duration)
     }
     fn set_eac3_stereo_output(&mut self, enabled: bool) -> Result<()> {
-        if enabled && self.setup().codec==*b"ec-3" && self.dolby_channels.unwrap_or(self.setup().channels)>6 {
-            return Err(invalid("E-AC-3 extended dependent presentation stereo folding is not implemented"));
-        }
         self.eac3_stereo_output=enabled;
         Ok(())
     }
@@ -779,6 +773,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
 
     fn stereo_router(&self)->Result<Option<fvid_media::owned_stereo_router::StereoRouter>>{
+        if self.setup().codec==*b"ec-3" && self.channels()>6 && self.dolby_mask.is_none() {return Err(unsupported("E-AC-3 speaker locations need an extended speaker mask"));}
         if self.setup().codec!=*b"mp4a"{return self.speaker_mask()?.map(|mask|fvid_media::owned_stereo_router::StereoRouter::new(self.channels(),mask).map_err(|e|invalid(&e))).transpose();}
         let asc=crate::codec::config::aac_specific_config(&self.setup().configuration)?;
         fvid_media::owned_aac::speaker_routing::stereo_router(asc,self.sample_rate(),self.channels(),self.in_band_ps).map(Some).map_err(|e|invalid(&e))
@@ -790,7 +785,6 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         }
         if self.setup().codec == *b"ec-3" {
             if self.eac3_stereo_output {
-                if self.dolby_channels.unwrap_or(self.setup().channels)>6 {return Err(invalid("E-AC-3 extended dependent presentation stereo folding is not implemented"));}
                 return Ok(Box::new(crate::codec::eac3_decoder::Eac3Decoder::for_container_stereo(self.extra_data(),self.sample_rate())?.with_programme(self.eac3_programme)?));
             }
             return Ok(Box::new(crate::codec::eac3_decoder::Eac3Decoder::for_container(self.extra_data(),self.sample_rate(),self.channels())?.with_programme(self.eac3_programme)?));
