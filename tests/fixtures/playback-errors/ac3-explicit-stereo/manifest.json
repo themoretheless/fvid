@@ -1,0 +1,77 @@
+{
+  "cases": [
+    {
+      "name": "c-lfe-r48000-b8",
+      "rate": 48000,
+      "bsid": 8,
+      "frame_bytes": 2560,
+      "raw_frames": 4352,
+      "container_frames": 4608
+    },
+    {
+      "name": "c-lfe-r48000-b9",
+      "rate": 24000,
+      "bsid": 9,
+      "frame_bytes": 2560,
+      "raw_frames": 4352,
+      "container_frames": 4608
+    },
+    {
+      "name": "c-lfe-r48000-b10",
+      "rate": 12000,
+      "bsid": 10,
+      "frame_bytes": 2560,
+      "raw_frames": 4352,
+      "container_frames": 4608
+    },
+    {
+      "name": "c-lfe-r44100-b8",
+      "rate": 44100,
+      "bsid": 8,
+      "frame_bytes": 2786,
+      "raw_frames": 4352,
+      "container_frames": 4608
+    },
+    {
+      "name": "c-lfe-r44100-b9",
+      "rate": 22050,
+      "bsid": 9,
+      "frame_bytes": 2786,
+      "raw_frames": 4352,
+      "container_frames": 4608
+    },
+    {
+      "name": "c-lfe-r44100-b10",
+      "rate": 11025,
+      "bsid": 10,
+      "frame_bytes": 2786,
+      "raw_frames": 4352,
+      "container_frames": 4608
+    },
+    {
+      "name": "c-lfe-r32000-b8",
+      "rate": 32000,
+      "bsid": 8,
+      "frame_bytes": 3840,
+      "raw_frames": 4352,
+      "container_frames": 4608
+    },
+    {
+      "name": "c-lfe-r32000-b9",
+      "rate": 16000,
+      "bsid": 9,
+      "frame_bytes": 3840,
+      "raw_frames": 4352,
+      "container_frames": 4608
+    },
+    {
+      "name": "c-lfe-r32000-b10",
+      "rate": 8000,
+      "bsid": 10,
+      "frame_bytes": 3840,
+      "raw_frames": 4352,
+      "container_frames": 4608
+    }
+  ],
+  "provenance": "Owned distinct C/LFE spectra and neutral VP9; no private media, process, network or external encoder."
+}

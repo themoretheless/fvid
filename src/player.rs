@@ -224,6 +224,7 @@ struct PlayArgs {
     dolby_compression: CompressionMode,
     dolby_dialogue_normalization: bool,
     eac3_stereo: Option<crate::codec::eac3_decoder::StereoDownmixMode>,
+    ac3_stereo: Option<crate::codec::ac3_decoder::StereoDownmixMode>,
     list_audio_devices: bool,
     fullscreen: bool,
     on_top: bool,
@@ -299,6 +300,7 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
     let mut dolby_compression = CompressionMode::Line;
     let mut dolby_dialogue_normalization = false;
     let mut eac3_stereo = Some(crate::codec::eac3_decoder::StereoDownmixMode::Automatic);
+    let mut ac3_stereo = Some(crate::codec::ac3_decoder::StereoDownmixMode::Automatic);
     let mut list_audio_devices = false;
     let mut no_subtitles = false;
     let mut no_audio = false;
@@ -337,6 +339,13 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
                 eac3_stereo=match option_value(args,&mut index,flag,inline)?.as_str() {
                     "native"=>None,"loro"=>Some(Mode::LoRo),"ltrt"=>Some(Mode::LtRt),"auto"=>Some(Mode::Automatic),
                     _=>return Err(crate::invalid("--eac3-stereo requires native, loro, ltrt or auto")),
+                };
+            }
+            "--ac3-stereo" => {
+                use crate::codec::ac3_decoder::StereoDownmixMode as Mode;
+                ac3_stereo=match option_value(args,&mut index,flag,inline)?.as_str() {
+                    "native"=>None,"loro"=>Some(Mode::LoRo),"ltrt"=>Some(Mode::LtRt),"auto"=>Some(Mode::Automatic),
+                    _=>return Err(crate::invalid("--ac3-stereo requires native, loro, ltrt or auto")),
                 };
             }
             "--dolby-compression" => {
@@ -572,6 +581,7 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         dolby_compression,
         dolby_dialogue_normalization,
         eac3_stereo,
+        ac3_stereo,
         list_audio_devices,
         fullscreen,
         on_top,
@@ -1082,7 +1092,7 @@ fn parse_media_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         } else {
             native.push(arg.clone());
             if inline.is_none() && matches!(flag,
-                "--hdr-tonemap" | "--hdr-mastering" | "--hdr-nits" | "--hdr-maxcll" | "--spherical-stereo" | "--spherical-projection" | "--yaw" | "--pitch" | "--roll" | "--fov" | "--play-stereo3d" | "--audio-device" | "--dolby-compression" | "--dolby-dialogue-normalization" | "--eac3-stereo" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
+                "--hdr-tonemap" | "--hdr-mastering" | "--hdr-nits" | "--hdr-maxcll" | "--spherical-stereo" | "--spherical-projection" | "--yaw" | "--pitch" | "--roll" | "--fov" | "--play-stereo3d" | "--audio-device" | "--dolby-compression" | "--dolby-dialogue-normalization" | "--eac3-stereo" | "--ac3-stereo" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
                 | "--backend" | "--device" | "--shader" | "--skin" | "--start-time" | "--stop-time"
                 | "--rate" | "--audio-delay" | "--subtitle-delay" | "--volume" | "--zoom"
                 | "--crop" | "--aspect" | "--brightness" | "--gamma" | "--saturation" | "--contrast"
@@ -1111,6 +1121,8 @@ fn run_parsed(parsed: PlayArgs) -> Result<(), Box<dyn std::error::Error>> {
         preferred_output: parsed.audio_device,
         dolby_policy: DolbyPlaybackPolicy {
             compression:parsed.dolby_compression,normalize_dialogue:parsed.dolby_dialogue_normalization,
+            ac3_stereo_output:parsed.ac3_stereo.is_some(),
+            ac3_stereo_downmix:parsed.ac3_stereo.map(|mode|crate::codec::ac3_decoder::StereoDownmixPolicy {mode,headroom:true}).unwrap_or_default(),
             eac3_stereo_output:parsed.eac3_stereo.is_some(),
             eac3_stereo_downmix:parsed.eac3_stereo.map(|mode|crate::codec::eac3_decoder::StereoDownmixPolicy {mode,headroom:true}).unwrap_or_default(),
             ..Default::default()
@@ -2096,6 +2108,8 @@ impl Default for Player {
             // Decode the signalled independent downmix rather than folding
             // extended replacement channels a second time in the device router.
             dolby_policy: DolbyPlaybackPolicy {
+                ac3_stereo_output:true,
+                ac3_stereo_downmix:crate::codec::ac3_decoder::StereoDownmixPolicy {mode:crate::codec::ac3_decoder::StereoDownmixMode::Automatic,headroom:true},
                 eac3_stereo_output:true,
                 eac3_stereo_downmix:crate::codec::eac3_decoder::StereoDownmixPolicy {mode:crate::codec::eac3_decoder::StereoDownmixMode::Automatic,headroom:true},
                 ..Default::default()
@@ -6873,6 +6887,25 @@ mod tests {
             }
         }
         for words in [vec!["--eac3-stereo"],vec!["--eac3-stereo=bad","clip.y4m"],vec!["--eac3-stereo=","clip.y4m"]] {assert!(play_args(&words).is_err());}
+    }
+
+    #[test]
+    fn ac3_stereo_cli_is_session_scoped_and_validated() {
+        use crate::codec::ac3_decoder::StereoDownmixMode as Mode;
+        assert_eq!(play_args(&["clip.y4m"]).unwrap().ac3_stereo,Some(Mode::Automatic));
+        let policy=Player::default().dolby_policy;
+        assert!(policy.ac3_stereo_output);
+        assert_eq!(policy.ac3_stereo_downmix.mode,Mode::Automatic);
+        assert!(policy.ac3_stereo_downmix.headroom);
+        // A library worker can still feed a native multichannel backend.
+        assert!(!crate::audio_thread::DolbyPlaybackPolicy::default().ac3_stereo_output);
+        for (value,wanted) in [("native",None),("loro",Some(Mode::LoRo)),("ltrt",Some(Mode::LtRt)),("auto",Some(Mode::Automatic))] {
+            for words in [vec![format!("--ac3-stereo={value}"),"clip.y4m".into()],vec!["--ac3-stereo".into(),value.into(),"clip.y4m".into()]] {
+                assert_eq!(super::parse_play_args(&words).unwrap().ac3_stereo,wanted);
+                assert_eq!(super::parse_media_play_args(&words).unwrap().ac3_stereo,wanted);
+            }
+        }
+        for words in [vec!["--ac3-stereo"],vec!["--ac3-stereo=bad","clip.y4m"],vec!["--ac3-stereo=","clip.y4m"]] {assert!(play_args(&words).is_err());}
     }
 
     #[test]

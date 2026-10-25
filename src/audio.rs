@@ -630,6 +630,15 @@ pub enum AudioStep {
 }
 
 pub trait AudioStream: Send {
+    /// Negotiate decoded AC-3 L/R output before constructing a decoder. Readers
+    /// retain this request across seek and configuration changes. Other codecs
+    /// keep their own geometry; library workers default to native output.
+    #[cfg(feature = "player")]
+    fn set_ac3_stereo_output(&mut self, enabled: bool) -> crate::Result<()> {
+        if enabled && matches!(self.codec(),"ac-3"|"A_AC3"|"A_AC3/BSID9"|"A_AC3/BSID10") {return Err(crate::invalid("this AC-3 source does not negotiate explicit stereo output"));}
+        Ok(())
+    }
+
     /// Negotiate explicit L/R rendering of an E-AC-3 independent/compatibility
     /// programme before creating a decoder or presenting PCM. Implementations
     /// retain this request across navigation and configuration changes. Other
