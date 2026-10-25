@@ -61,6 +61,10 @@ pub struct HevcDecoder {
     active_pps: Option<u8>,
     hdr: HdrMetadata,
     cll_received: bool,
+    pending_hdr_mastering: bool,
+    pending_hdr_cll: bool,
+    metadata_started: bool,
+    metadata_ended: bool,
     primed: HdrMetadata,
     primed_cll_received: bool,
     primed_active_parameters: Option<hevc_sei::ActiveParameterSets>,
@@ -254,6 +258,10 @@ impl HevcDecoder {
             active_pps: None,
             hdr: primed,
             cll_received: primed_cll_received,
+            pending_hdr_mastering: primed.mastering.is_some(),
+            pending_hdr_cll: primed_cll_received,
+            metadata_started: false,
+            metadata_ended: false,
             primed,
             primed_cll_received,
             pending_active_parameters: primed_active_parameters.clone(),
@@ -291,6 +299,10 @@ impl HevcDecoder {
         self.active_pps = None;
         self.hdr = self.primed;
         self.cll_received = self.primed_cll_received;
+        self.pending_hdr_mastering = self.primed.mastering.is_some();
+        self.pending_hdr_cll = self.primed_cll_received;
+        self.metadata_started = false;
+        self.metadata_ended = false;
         self.pending_active_parameters.clone_from(&self.primed_active_parameters);
         self.active_parameters = None;
         self.cvs_raw_generation = 0;
@@ -323,18 +335,46 @@ impl HevcDecoder {
 
     /// Inspect in-band SEI NAL units in a packet to update HDR metadata without full picture decoding.
     pub fn observe_packet(&mut self, packet: &[u8]) {
+        let mut first_vcl = None;
+        let mut end_after_picture = false;
         if let Ok(units) = NalUnits::new(packet, self.length) {
             for nal in units {
                 let Ok(nal) = nal else { break };
-                let Ok(header) = NalHeader::parse(nal) else {
-                    continue;
-                };
+                let Ok(header) = NalHeader::parse(nal) else { continue };
+                if header.layer_id != 0 { continue; }
+                if header.is_vcl() {
+                    first_vcl.get_or_insert(header);
+                } else if matches!(header.unit_type, 36 | 37) {
+                    if first_vcl.is_some() { end_after_picture = true; }
+                    else { self.metadata_ended = true; }
+                }
                 if hevc_sei::is_sei_unit(header.unit_type) {
-                    if let Ok(received) = hevc_sei::update_hdr_from_nal(&mut self.hdr, nal, self.budget) {
+                    let mut received_hdr = HdrMetadata::default();
+                    if let Ok(received) = hevc_sei::update_hdr_from_nal(&mut received_hdr, nal, self.budget) {
+                        self.hdr.merge(received_hdr);
+                        if received { self.hdr.light = received_hdr.light; }
                         self.cll_received |= received;
+                        self.pending_hdr_cll |= received;
+                        self.pending_hdr_mastering |= received_hdr.mastering.is_some();
                     }
                 }
             }
+        }
+        if let Some(header) = first_vcl {
+            // Header-only seek priming follows the same CLVS lifetime as pixel
+            // decoding. Prefix guidance may arrive in an earlier empty sample.
+            if self.metadata_started && (self.metadata_ended || header.is_idr()
+                || matches!(header.unit_type, 16..=18)) {
+                if !self.pending_hdr_mastering { self.hdr.mastering = None; }
+                if !self.pending_hdr_cll {
+                    self.hdr.light = Default::default();
+                    self.cll_received = false;
+                }
+            }
+            self.metadata_started = true;
+            self.metadata_ended = end_after_picture;
+            self.pending_hdr_mastering = false;
+            self.pending_hdr_cll = false;
         }
     }
     // Validate parameter updates before committing them to decoder state.
@@ -572,6 +612,7 @@ impl HevcDecoder {
             self.params = params;
         }
         let headers = self.slice_headers(packet)?;
+        self.observe_packet(packet);
         let mut slice = None;
         let mut end_after_picture = false;
         for nal in NalUnits::new(packet, self.length)? {
@@ -610,11 +651,6 @@ impl HevcDecoder {
                         .as_ref().is_some_and(|p| p.no_parameter_set_update);
                     self.pending_active_parameters = Some(active);
                 }
-                // An SEI this module cannot walk costs the guidance, never the
-                // picture it travels with.
-                if let Ok(received) = hevc_sei::update_hdr_from_nal(&mut self.hdr, nal, self.budget) {
-                    self.cll_received |= received;
-                }
             } else {
                 // AUD/filler and reserved/unspecified non-VCL units
                 // do not contribute slices or change the decoded base picture.
@@ -629,19 +665,33 @@ impl HevcDecoder {
             .iter()
             .find(|(_, p)| p.id == id)
             .ok_or_else(|| invalid("HEVC slice references unknown PPS"))?;
-        let vps = self.params.vps.iter().find(|v| v.id == sps.vps_id)
-            .ok_or_else(|| invalid("HEVC SPS references unavailable VPS"))?;
-        if sps.ordering.len() > vps.ordering.len() {
-            return Err(invalid("HEVC SPS exceeds VPS temporal sublayers"));
-        }
-        if vps.temporal_id_nesting && !sps.temporal_id_nesting {
-            return Err(invalid("HEVC SPS contradicts VPS temporal nesting"));
-        }
         let header = &headers[0];
+        let vps = self.params.vps.iter().find(|v| v.id == sps.vps_id);
+        if vps.is_none() {
+            // F.10.2/F.11.1 independent-layer output deliberately has no VPS.
+            // An existing mismatched VPS is still an error; omission is not a
+            // fallback for a received, malformed or otherwise unrelated VPS.
+            if !self.params.vps.is_empty() {
+                return Err(invalid("HEVC SPS references unavailable VPS"));
+            }
+            let profile = sps.profile.sub_layers.get(header.nal.temporal_id as usize)
+                .and_then(|p|p.profile).or(sps.profile.profile);
+            if !profile.is_some_and(|p|p.is_annex_a_compatible()) {
+                return Err(invalid("VPS-less HEVC requires a self-contained Annex A SPS"));
+            }
+        }
+        if let Some(vps) = vps {
+            if sps.ordering.len() > vps.ordering.len() {
+                return Err(invalid("HEVC SPS exceeds VPS temporal sublayers"));
+            }
+            if vps.temporal_id_nesting && !sps.temporal_id_nesting {
+                return Err(invalid("HEVC SPS contradicts VPS temporal nesting"));
+            }
+        }
         let poc_extension_active = pps.poc_reset_info_present
-            || pps.slice_header_extension && (pps.multilayer_extension || vps.has_poc_extension());
+            || pps.slice_header_extension && (pps.multilayer_extension || vps.is_some_and(Vps::has_poc_extension));
         let reset_syntax = if poc_extension_active {
-            let lsb_aligned = vps.poc_lsb_aligned()?;
+            let lsb_aligned = vps.ok_or_else(|| invalid("HEVC POC-reset syntax requires an active VPS"))?.poc_lsb_aligned()?;
             let parse = |h: &SliceHeader| {
                 if pps.slice_header_extension {
                     super::hevc_poc::ResetSyntax::parse_base(&h.extension, pps.poc_reset_info_present, sps.poc_bits, h.nal, lsb_aligned)
@@ -671,7 +721,7 @@ impl HevcDecoder {
             if active.vps_id != sps.vps_id || active.sps_ids[0] != sps.id {
                 return Err(invalid("HEVC active parameter SEI disagrees with picture binding"));
             }
-            if !begins_cvs && (self.decoded_vps.as_ref() != Some(vps)
+            if !begins_cvs && (self.decoded_vps.as_ref() != vps
                 || self.decoded_sps.as_ref() != Some(sps)) {
                 return Err(invalid("HEVC active parameter SEI requires new sequence"));
             }
@@ -712,15 +762,16 @@ impl HevcDecoder {
         let reset_alignment_changed = if poc_extension_active
             || pps.slice_header_extension && self.decoded_vps.as_ref().is_some_and(Vps::has_poc_extension)
         {
-            match self.decoded_vps.as_ref() {
+            match (self.decoded_vps.as_ref(), vps) {
                 // A new CVS can activate Annex F after an opaque Annex A tail.
                 // Only the newly active VPS needs strict interpretation then.
-                Some(previous) if begins_cvs => !previous.same_reset_semantics(vps),
-                Some(previous) => previous.poc_lsb_aligned()? != vps.poc_lsb_aligned()?,
-                None => false,
+                (Some(previous), Some(vps)) if begins_cvs => !previous.same_reset_semantics(vps),
+                (Some(previous), Some(vps)) => previous.poc_lsb_aligned()? != vps.poc_lsb_aligned()?,
+                (Some(_), None) => true,
+                _ => false,
             }
         } else { false };
-        if reset_alignment_changed || self.decoded_vps.as_ref().is_some_and(|previous| previous != vps) {
+        if reset_alignment_changed || self.decoded_sps.is_some() && self.decoded_vps.as_ref() != vps {
             if !begins_cvs {
                 return Err(invalid("HEVC active VPS changed within sequence"));
             }
@@ -729,7 +780,7 @@ impl HevcDecoder {
             self.reset_periods = Default::default();
             self.suppress_rasl = false;
         }
-        self.decoded_vps = Some(vps.clone());
+        self.decoded_vps = vps.cloned();
         if self.decoded_sps.as_ref() != Some(sps) {
             self.decoded_sps = Some(sps.clone());
         }

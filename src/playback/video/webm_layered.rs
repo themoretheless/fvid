@@ -209,7 +209,11 @@ impl Layered {
                     parameters.receive(nal)?;
                 }
                 if h.is_vcl() {
-                    let referenced = parameters.referenced_vps(nal)?;
+                    let Some(referenced) = parameters.referenced_vps_if_available(nal)? else {
+                        h.require_base_layer()?;
+                        seen_vcl = true;
+                        continue;
+                    };
                     let layered = Vps::parse_layered_metadata(referenced, budget / 2)?
                         .layers
                         .effective_max_layers()

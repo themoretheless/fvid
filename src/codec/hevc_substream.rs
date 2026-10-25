@@ -1,6 +1,6 @@
-//! H.265 F.10.1/F.10.3 extraction of complete length-prefixed NAL sequences.
+//! H.265 F.10 extraction/independent rewriting of length-prefixed NAL sequences.
 //! The caller supplies a dependency-closed layer list from the active VPS.
-//! Independent non-base layer renumbering (F.10.2) is a separate operation.
+//! F.10.2 rewrites a capability-checked independent layer to layer zero.
 use crate::codec::{
     config::NalUnits,
     hevc_nal::{NalHeader, NalRbsp},
@@ -11,6 +11,7 @@ use crate::{Result, invalid};
 enum Extraction {
     Ordinary { reduced: bool },
     Additional { rewrite_vps: bool },
+    Independent { layer: u8 },
 }
 fn keep(
     nal: &[u8],
@@ -20,6 +21,16 @@ fn keep(
     policy: Extraction,
     budget: usize,
 ) -> Result<bool> {
+    if let Extraction::Independent { layer } = policy {
+        if h.temporal_id > temporal || h.unit_type == 32 {
+            return Ok(false);
+        }
+        return Ok(match h.unit_type {
+            33 | 34 => h.layer_id == 0 || h.layer_id == layer,
+            37 => true,
+            _ => h.layer_id == layer,
+        });
+    }
     if let Extraction::Additional { .. } = policy {
         if h.temporal_id > temporal {
             return Ok(false);
@@ -185,6 +196,11 @@ fn extract_with_policy(
                 // first two RBSP bytes cannot both become zero, and EBSP
                 // escaping/NAL length cannot change when bit 2 is cleared.
                 output[start + 2] &= !4;
+            } else if matches!(policy, Extraction::Independent { .. }) {
+                // Only nuh_layer_id changes. NAL type, temporal ID and the
+                // complete EBSP payload/length stay byte-identical.
+                output[start] &= 0xfe;
+                output[start + 1] &= 7;
             }
         }
     }
@@ -345,6 +361,106 @@ impl LayeredSubstream {
     /// layers unnecessary for the selected OLS's native reconstruction.
     pub fn extracted_layers(&self) -> u64 {
         self.additional.unwrap_or(self.layers)
+    }
+    /// F.10.2 independent non-base layer rewriting. The selected OLS must
+    /// consist of one independent layer beginning an additional layer set,
+    /// and its effective PTL must signal Annex A INBLD at the target temporal
+    /// layer. Output deliberately contains no VPS; retained NALs use layer 0.
+    pub fn rewrite_independent_packet(
+        &self,
+        packet: &[u8],
+        length_size: u8,
+        budget: usize,
+    ) -> Result<Vec<u8>> {
+        let layer = self.layers.trailing_zeros() as u8;
+        let ext = self
+            .vps
+            .extension
+            .as_ref()
+            .ok_or_else(|| invalid("HEVC independent-layer rewrite requires a layered VPS"))?;
+        let set = ext
+            .output
+            .sets
+            .get(self.ols)
+            .ok_or_else(|| invalid("HEVC independent-layer rewrite OLS is absent"))?;
+        let index = ext.graph.layer_ids.iter().position(|&id| id == layer);
+        if self.layers.count_ones() != 1
+            || layer == 0
+            || layer > 62
+            || set.output != self.layers
+            || set.necessary != self.layers
+            || index
+                .and_then(|i| ext.graph.direct.get(i))
+                .is_none_or(|&refs| refs != 0)
+            || !ext
+                .layer_sets
+                .layer_sets
+                .iter()
+                .skip(self.vps.vps.layers.sets.len())
+                .any(|layers| layers.first() == Some(&layer))
+        {
+            return Err(invalid(
+                "HEVC independent-layer rewrite requires one independent additional-set root",
+            ));
+        }
+        let maximum = self
+            .vps
+            .vps
+            .ordering
+            .len()
+            .checked_sub(1)
+            .filter(|&n| n <= 6)
+            .ok_or_else(|| invalid("invalid HEVC independent-layer temporal metadata"))?;
+        let temporal = (self.temporal as usize).min(maximum);
+        let profile = {
+            let scratch = self
+                .vps
+                .vps
+                .profile
+                .sub_layers
+                .len()
+                .checked_mul(std::mem::size_of::<crate::codec::hevc_profile::SubLayer>())
+                .and_then(|n| {
+                    n.checked_add(std::mem::size_of::<
+                        crate::codec::hevc_profile::ProfileTierLevel,
+                    >())
+                })
+                .ok_or_else(|| invalid("HEVC independent-layer profile storage overflow"))?;
+            if scratch > budget {
+                return Err(invalid(
+                    "HEVC independent-layer profile check exceeds memory budget",
+                ));
+            }
+            let ptl = self.vps.profile_for_layer(self.ols, layer)?;
+            if temporal < maximum {
+                ptl.sub_layers
+                    .get(temporal)
+                    .and_then(|p| p.profile)
+                    .or(ptl.profile)
+            } else {
+                ptl.profile
+            }
+        };
+        if !profile.is_some_and(|p| p.inbld()) {
+            return Err(invalid(
+                "HEVC independent-layer rewrite requires signalled INBLD capability",
+            ));
+        }
+        let mut seen = SubstreamScan::default();
+        seen.observe(packet, length_size)?;
+        if seen.layers & !self.source.layers != 0
+            || seen.highest_temporal > self.source.highest_temporal
+        {
+            return Err(invalid("HEVC packet exceeds scanned extraction source"));
+        }
+        extract_with_policy(
+            packet,
+            length_size,
+            self.layers,
+            self.temporal,
+            Extraction::Independent { layer },
+            budget,
+        )
     }
     pub fn extract_packet(&self, packet: &[u8], length_size: u8, budget: usize) -> Result<Vec<u8>> {
         self.extract_checked(packet, length_size, budget, false)

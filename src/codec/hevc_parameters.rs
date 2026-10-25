@@ -278,6 +278,11 @@ impl LayeredParameters {
     /// This does not activate parameters or release existing sequence pins.
     /// Source inventories can inspect actual references without decoding pixels.
     pub fn referenced_vps(&self, nal: &[u8]) -> Result<&[u8]> {
+        self.referenced_vps_if_available(nal)?.ok_or_else(|| invalid("HEVC active VPS is absent"))
+    }
+    /// Distinguish a genuinely omitted VPS (F.10.2) from a mismatched received
+    /// bank. PPS/SPS lookup and malformed syntax remain strict in both modes.
+    pub fn referenced_vps_if_available(&self, nal: &[u8]) -> Result<Option<&[u8]>> {
         let left = self.remaining()?;
         if nal.len() > left {
             return Err(invalid("HEVC slice parameter lookup exceeds memory budget"));
@@ -299,9 +304,11 @@ impl LayeredParameters {
             .ok_or_else(|| invalid("HEVC active SPS is absent"))?;
         let sps_rbsp = NalRbsp::parse(sps, left.saturating_sub(rbsp.bytes.capacity()))?;
         let vps_id = BitReader::new(&sps_rbsp.bytes).read(4)? as usize;
-        self.vps[vps_id]
-            .as_deref()
-            .ok_or_else(|| invalid("HEVC active VPS is absent"))
+        match self.vps[vps_id].as_deref() {
+            Some(nal) => Ok(Some(nal)),
+            None if self.vps.iter().all(Option::is_none) => Ok(None),
+            None => Err(invalid("HEVC active VPS is absent")),
+        }
     }
     /// Read only the independent base IDR's coded cross-layer restart flag.
     /// Full slice/VPS validation follows before the staged bank is published.

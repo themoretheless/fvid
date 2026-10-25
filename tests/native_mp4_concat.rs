@@ -131,8 +131,33 @@ fn zero_delay_aac_matches_the_concatenated_coded_sequence() {
     native_export::export_aac_pcm(&output, &combined).unwrap();
     let a = std::fs::read(expected).unwrap();
     let b = std::fs::read(combined).unwrap();
-    assert_eq!(a.len(), b.len());
-    assert!(a == b, "coded-sequence PCM mismatch");
+    let wave_chunks = |bytes: &[u8]| {
+        assert_eq!(&bytes[..4], b"RIFF");
+        assert_eq!(&bytes[8..12], b"WAVE");
+        assert_eq!(u32::from_le_bytes(bytes[4..8].try_into().unwrap()) as usize + 8, bytes.len());
+        let mut chunks = Vec::new();
+        let mut at = 12;
+        while at < bytes.len() {
+            let size = u32::from_le_bytes(bytes[at+4..at+8].try_into().unwrap()) as usize;
+            let end = at + 8 + size;
+            chunks.push((bytes[at..at+4].to_vec(), bytes[at+8..end].to_vec()));
+            at = end + (size & 1);
+        }
+        assert_eq!(at, bytes.len());
+        chunks
+    };
+    let a = wave_chunks(&a);
+    let b = wave_chunks(&b);
+    // The Matroska path preserves container tags as a WAVE LIST chunk.
+    // Compare the stored format, frame count and all PCM bytes independently
+    // of those tags; file-byte equality would reject correct metadata retention.
+    for tag in [b"fmt ", b"fact", b"data"] {
+        let x: Vec<_> = a.iter().filter(|(key,_)|key == tag).collect();
+        let y: Vec<_> = b.iter().filter(|(key,_)|key == tag).collect();
+        assert_eq!(x.len(),1);
+        assert_eq!(y.len(),1);
+        assert_eq!(x,y,"coded-sequence format/PCM mismatch");
+    }
 
 }
 #[test]
