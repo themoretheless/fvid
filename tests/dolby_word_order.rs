@@ -75,6 +75,8 @@ fn an_incomplete_little_endian_word_cannot_supply_an_unknown_header_byte() {
         "eac3",
         "eac3-expanded",
         "eac3-coarse",
+        "eac3-short-silent-p0",
+        "eac3-short-tone-p0",
     ] {
         let be = std::fs::read(root().join(format!("{name}-be.raw"))).unwrap();
         let le = std::fs::read(root().join(format!("{name}-le.raw"))).unwrap();
@@ -235,4 +237,22 @@ fn damaged_raw_ac3_header_preserves_its_silent_window_and_later_native_setup() {
         pcm[1..].iter().any(|p| p.3.iter().any(|v| *v != 0)),
         "later valid tone must remain audible"
     );
+}
+
+#[test]
+fn compact_word_order_programmes_have_complete_native_pcm_windows() {
+    for silent in [false,true] {for programme in [0,7] {for order in ["be","le","mixed"] {for kind in ["mp4","mkv","raw"] {
+        let name=format!("eac3-short-{}-p{programme}-{order}.{kind}",if silent {"silent"}else{"tone"});
+        let mut source=open(&name,programme);let channels=if silent {1}else{2};
+        assert_eq!((source.sample_rate(),source.channels()),(48000,channels));
+        let pcm=transitions::collect(source.as_mut());assert_eq!(pcm.len(),3,"{name}");
+        let mut clock=0u64;
+        for ((rate,width,pts,bytes),samples) in pcm.iter().zip(if kind=="raw" {[512,768,768]}else{[768,768,768]}) {
+            assert_eq!((*rate,*width),(48000,channels));
+            assert_eq!(*pts,std::time::Duration::from_nanos(clock*1_000_000_000/48000),"{name}");
+            assert_eq!(bytes.len(),samples*channels as usize*4,"{name}");clock+=samples as u64;
+        }
+        let audible=pcm.iter().flat_map(|p|p.3.chunks_exact(4)).any(|b|f32::from_le_bytes(b.try_into().unwrap())!=0.0);
+        assert_eq!(audible,!silent,"{name} signal");
+    }}}}
 }
