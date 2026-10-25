@@ -181,9 +181,9 @@ fn actual_sources_and_worker_keep_fixed_speakers_at_eof_rewind_and_partial_seek(
     ] {
         for kind in ["ec3", "mkv", "mp4"] {
             let mut s = source(name, kind);
-            assert_eq!(s.channels(), if name.starts_with("six-") { 6 } else { 8 });
+            assert_eq!(s.channels(), if kind == "ec3" { 10 } else if name.starts_with("six-") { 6 } else { 8 });
             let duration = s.duration();
-            s.set_eac3_output_layout(Some(layout())).unwrap();
+            if kind != "ec3" { s.set_eac3_output_layout(Some(layout())).unwrap(); }
             assert_eq!(s.channels(), 10);
             assert_eq!(s.speaker_mask().unwrap(), Some(0x563f));
             assert_eq!(s.duration(), duration);
@@ -343,7 +343,7 @@ fn extended_output_roles_remain_explicit_and_late_map_changes_are_refused() {
 
 #[test]
 fn raw_index_records_changing_active_counts_before_output_negotiation() {
-    for (name, counts, first) in [
+    for (name, counts, _first) in [
         ("replace-plain", vec![8, 10, 8], 8),
         ("six-replace-plain", vec![6, 10, 6], 6),
     ] {
@@ -360,7 +360,9 @@ fn raw_index_records_changing_active_counts_before_output_negotiation() {
                 .collect::<Vec<_>>(),
             counts
         );
-        assert_eq!(s.channels(), first);
+        assert_eq!(s.channels(), 10);
+        s.set_eac3_output_layout(None).unwrap();
+        assert_eq!(s.channels(), 10);
         s.set_eac3_output_layout(Some(layout())).unwrap();
         assert_eq!(s.channels(), 10);
     }
@@ -384,4 +386,25 @@ fn non_dolby_reader_factory_fits_a_two_mib_stack() {
         .unwrap()
         .join()
         .unwrap();
+}
+
+#[test]
+fn raw_automatic_map_survives_explicit_override_stereo_and_clear() {
+    let mut s = source("six-replace-transient", "ec3");
+    assert_eq!(s.channels(), 10);
+    let mut padded = layout();
+    padded.0.push(Speaker::WideLeft);
+    s.set_eac3_output_layout(Some(padded)).unwrap();
+    assert_eq!(s.channels(), 11);
+    assert_eq!(s.speaker_mask().unwrap(), None);
+    s.set_eac3_output_layout(None).unwrap();
+    assert_eq!(s.channels(), 10);
+    assert_eq!(s.speaker_mask().unwrap(), Some(0x563f));
+    s.set_eac3_stereo_output(true).unwrap();
+    assert_eq!(s.channels(), 2);
+    s.set_eac3_stereo_output(false).unwrap();
+    assert_eq!(s.channels(), 10);
+    let compatible = fvid::playback_ac3::Ac3AudioReader::open_compatible(
+        Cursor::new(read("six-replace-transient.ec3")), Default::default()).unwrap();
+    assert_eq!(compatible.channels(), 6);
 }
