@@ -1,7 +1,22 @@
 //! Exact native sample coordinates beneath quantized MP4 packet points.
 use super::{Result, invalid, edit_clock::Time as Mp4ExportTime};
 use crate::{container::mp4::{Mp4Reader as Mp4TimelineReader, Track},native_media::DecodeProgress};
-use fvid_media::owned_mp4_audio_packet_frames::frames as mp4_coded_packet_frames;
+fn mp4_coded_packet_frames(codec:&[u8;4], configuration:&[u8], rate:u32, channels:u16, bits:u16, bytes:usize, payload:Option<&[u8]>)->std::result::Result<u64,String> {
+    if codec!=b"ac-3" {return fvid_media::owned_mp4_audio_packet_frames::frames(codec,configuration,rate,channels,bits,bytes,payload);}
+    let mut encoded=payload.ok_or("AC-3 coded count requires packet headers")?;
+    let mut frames=0u64;
+    while !encoded.is_empty() {
+        // CRC/body concealment remains the decoder's decision. The syncframe
+        // header bounds each coded access unit; channel geometry is negotiated
+        // separately from a CRC-checked header before constructing the decoder.
+        let header=crate::codec::ac3_decoder::syncframe(encoded).ok_or("invalid MP4 AC-3 coded clock header")?;
+        if header.sample_rate!=rate {return Err("MP4 AC-3 coded clock rate disagrees with description".into());}
+        encoded=encoded.get(header.frame_bytes..).ok_or("incomplete MP4 AC-3 clock packet")?;
+        frames=frames.checked_add(1536).ok_or("MP4 AC-3 coded clock overflow")?;
+    }
+    if frames==0 {return Err("empty MP4 AC-3 clock packet".into());}
+    Ok(frames)
+}
 include!("../../../crates/fvid-media/src/owned_mp4_audio_clock_runs_impl.rs");
 pub(super) struct PlaybackClock {
     runs: Vec<Mp4PacketClockRun>,
@@ -15,14 +30,18 @@ impl PlaybackClock {
         let mut coarse=false;
         for (i,d) in track.sample_descriptions.iter().enumerate() {
             if !(0..track.samples.len()).any(|n|track.samples.get(n).is_some_and(|s|s.description_index as usize==i+1)){continue;}
-            if matches!(&d.codec,b"ac-3"|b"ec-3") {return Ok(None);}
+            if d.codec==*b"ec-3" {return Ok(None);}
             if d.sample_rate==0 || track.timescale==0 {return Err(invalid("zero MP4 playback clock"));}
             coarse |= track.timescale%d.sample_rate!=0;
         }
         if !coarse {return Ok(None);}
         let control=DecodeProgress::new(None,None)?;
         let runs=mp4_packet_clock_runs(reader,index,&control)?;
-        if !runs.iter().any(|r|r.changed) {return Ok(None);}
+        // An AC-3 packet can span an integral number of container ticks while
+        // the user's seek target falls between them. Keep its compatible native
+        // run for sample-accurate navigation even when no packet point moved.
+        let ac3_seek=runs.iter().any(|r|r.quantized && reader.tracks()[index].description_for_sample(r.first).is_some_and(|d|d.codec==*b"ac-3"));
+        if !runs.iter().any(|r|r.changed) && !ac3_seek {return Ok(None);}
         let track=&reader.tracks()[index];let mut end=Mp4ExportTime::ticks(track.duration,track.timescale)?;
         if track.samples.get(0).is_some_and(|s|s.pts==0) {
             if let Some(last)=runs.last() {

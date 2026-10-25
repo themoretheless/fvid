@@ -46,7 +46,7 @@ fn mp4_packet_clock_runs<R: std::io::Read + std::io::Seek>(
             if declared_end.is_some_and(|expected|expected!=begin) {return Err(invalid("non-contiguous MP4 audio timeline"));}
             declared_end=Some(end);
             if quantized {
-                let payload=if setup.codec==*b"alac" {reader.read_packet(index,i,&mut packet)?;Some(packet.as_slice())}else{None};
+                let payload=if matches!(&setup.codec,b"alac"|b"ac-3") {reader.read_packet(index,i,&mut packet)?;Some(packet.as_slice())}else{None};
                 let frames=mp4_coded_packet_frames(&setup.codec,&setup.configuration,rate,setup.channels,setup.bit_depth,sample.size as usize,payload).map_err(|e|invalid(&e))?;
                 let start=origin.add(Mp4ExportTime::new(i128::from(native),u128::from(rate))?)?;
                 if let Some(fixed)=fixed_frames {

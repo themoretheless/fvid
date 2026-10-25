@@ -328,7 +328,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         let mut first=index;
         if self.track().samples.get(index).is_some() {
             let setup=self.track().description_for_sample(index).ok_or_else(||invalid("missing MP4 seek description"))?;
-            if matches!(&setup.codec,b"mp4a"|b"MAC3"|b"MAC6") {
+            if matches!(&setup.codec,b"mp4a"|b"ac-3"|b"ec-3"|b"MAC3"|b"MAC6") {
                 first=(0..index).rev().find(|&i|self.track().description_for_sample(i)!=Some(setup)).map_or(0,|i|i+1);
             }
         }
@@ -475,16 +475,27 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 }
             } else if setup.codec == *b"ac-3" {
                 let mut payload = Vec::new();
-                self.demuxer
-                    .read_packet(self.track_index, first, &mut payload)?;
-                let frame = crate::codec::ac3_decoder::checked_syncframe(&payload)
-                    .ok_or_else(|| invalid("invalid AC-3 description setup"))?;
+                let end=(first+1..self.track().samples.len())
+                    .find(|&i|self.track().description_for_sample(i)!=Some(&setup))
+                    .unwrap_or(self.track().samples.len());
+                let mut valid=None;
+                for i in first..end {
+                    self.demuxer.read_packet(self.track_index,i,&mut payload)?;
+                    let mut tail=payload.as_slice();
+                    while let Some(header)=crate::codec::ac3_decoder::syncframe(tail) {
+                        let Some(encoded)=tail.get(..header.frame_bytes)else{break;};
+                        if let Some(frame)=crate::codec::ac3_decoder::checked_syncframe(encoded) {
+                            let mask=crate::codec::ac3_decoder::speaker_mask(encoded,frame.channels)?;
+                            valid=Some((frame,mask));break;
+                        }
+                        tail=&tail[header.frame_bytes..];
+                    }
+                    if valid.is_some(){break;}
+                }
+                let (frame,mask)=valid.ok_or_else(||invalid("invalid AC-3 description setup"))?;
                 state.rate = Some(frame.sample_rate);
                 state.channels = Some(frame.channels);
-                state.mask = Some(crate::codec::ac3_decoder::speaker_mask(
-                    &payload,
-                    frame.channels,
-                )?);
+                state.mask = Some(mask);
             } else if setup.codec == *b"ec-3" {
                 const FRAMES: usize = 2 * 8 * 9;
                 const BYTES: usize = FRAMES * 4096;
