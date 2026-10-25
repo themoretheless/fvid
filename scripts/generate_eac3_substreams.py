@@ -25,6 +25,15 @@ def generate():
      files[name+'.mkv']=movie([bundle]*3);files[name+'-control.mkv']=movie([base]*3)
      files[name+'-extra.ec3']=added
      cases.append(dict(name=name,file=name+'.ec3',control=name+'-control.ec3',video=name+'.mkv',control_video=name+'-control.mkv',extra=name+'-extra.ec3',streams=streams))
+ # Native replacement acceptance uses an independently authored LR control,
+ # while the original controls continue to describe compatibility output.
+ dependent_control=packet(False,3,8,[(1,1)]*6,False)
+ files['dependent-native-control.ec3']=dependent_control*3
+ files['dependent-native-control.mkv']=movie([dependent_control]*3)
+ for c in cases:
+  if len(c['streams'])==1 and c['streams'][0][0]==1:
+   c['native_control']='dependent-native-control.ec3'
+   c['native_control_video']='dependent-native-control.mkv'
  example=cases[0];tail=files[example['file']][:-1]
  files['truncated-tail.ec3']=tail
  packet_size=len(files[example['file']])//3

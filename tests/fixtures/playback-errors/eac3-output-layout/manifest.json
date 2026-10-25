@@ -89,6 +89,214 @@
       "output_channels": 10,
       "output_mask": 22079,
       "samples": 2304
+    },
+    {
+      "name": "native-1-plain",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "replacement": true,
+      "active_channels": [
+        1,
+        1,
+        1
+      ],
+      "output_channels": 1,
+      "output_mask": 4,
+      "samples": 2304,
+      "legacy_no_dec3": "native-1-plain-no-dec3.mp4"
+    },
+    {
+      "name": "native-1-transient",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "replacement": true,
+      "active_channels": [
+        1,
+        1,
+        1
+      ],
+      "output_channels": 1,
+      "output_mask": 4,
+      "samples": 2304,
+      "legacy_no_dec3": "native-1-transient-no-dec3.mp4"
+    },
+    {
+      "name": "native-2-plain",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "replacement": true,
+      "active_channels": [
+        2,
+        2,
+        2
+      ],
+      "output_channels": 2,
+      "output_mask": 12,
+      "samples": 2304,
+      "legacy_no_dec3": "native-2-plain-no-dec3.mp4"
+    },
+    {
+      "name": "native-2-transient",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "replacement": true,
+      "active_channels": [
+        2,
+        2,
+        2
+      ],
+      "output_channels": 2,
+      "output_mask": 12,
+      "samples": 2304,
+      "legacy_no_dec3": "native-2-transient-no-dec3.mp4"
+    },
+    {
+      "name": "native-3-plain",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "replacement": true,
+      "active_channels": [
+        3,
+        3,
+        3
+      ],
+      "output_channels": 3,
+      "output_mask": 7,
+      "samples": 2304,
+      "legacy_no_dec3": "native-3-plain-no-dec3.mp4"
+    },
+    {
+      "name": "native-3-transient",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "replacement": true,
+      "active_channels": [
+        3,
+        3,
+        3
+      ],
+      "output_channels": 3,
+      "output_mask": 7,
+      "samples": 2304,
+      "legacy_no_dec3": "native-3-transient-no-dec3.mp4"
+    },
+    {
+      "name": "native-4-plain",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "replacement": true,
+      "active_channels": [
+        4,
+        4,
+        4
+      ],
+      "output_channels": 4,
+      "output_mask": 15,
+      "samples": 2304,
+      "legacy_no_dec3": "native-4-plain-no-dec3.mp4"
+    },
+    {
+      "name": "native-4-transient",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "replacement": true,
+      "active_channels": [
+        4,
+        4,
+        4
+      ],
+      "output_channels": 4,
+      "output_mask": 15,
+      "samples": 2304,
+      "legacy_no_dec3": "native-4-transient-no-dec3.mp4"
+    },
+    {
+      "name": "native-5-plain",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "replacement": true,
+      "active_channels": [
+        5,
+        5,
+        5
+      ],
+      "output_channels": 5,
+      "output_mask": 1543,
+      "samples": 2304,
+      "legacy_no_dec3": "native-5-plain-no-dec3.mp4"
+    },
+    {
+      "name": "native-5-transient",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "replacement": true,
+      "active_channels": [
+        5,
+        5,
+        5
+      ],
+      "output_channels": 5,
+      "output_mask": 1543,
+      "samples": 2304,
+      "legacy_no_dec3": "native-5-transient-no-dec3.mp4"
+    },
+    {
+      "name": "native-six-plain",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "replacement": true,
+      "active_channels": [
+        6,
+        6,
+        6
+      ],
+      "output_channels": 6,
+      "output_mask": 1551,
+      "samples": 2304,
+      "legacy_no_dec3": "native-six-plain-no-dec3.mp4"
+    },
+    {
+      "name": "native-six-transient",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": true,
+      "replacement": true,
+      "active_channels": [
+        6,
+        6,
+        6
+      ],
+      "output_channels": 6,
+      "output_mask": 1551,
+      "samples": 2304,
+      "legacy_no_dec3": "native-six-transient-no-dec3.mp4"
+    },
+    {
+      "name": "native-six-gain",
+      "rate": 48000,
+      "blocks": 3,
+      "transient": false,
+      "replacement": true,
+      "active_channels": [
+        6,
+        6,
+        6
+      ],
+      "output_channels": 6,
+      "output_mask": 1551,
+      "samples": 2304,
+      "legacy_no_dec3": "native-six-gain-no-dec3.mp4"
     }
   ],
   "stack_reproducer": "aac-factory-stack.mp4",

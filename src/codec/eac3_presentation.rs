@@ -33,12 +33,12 @@ pub enum Speaker {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SpeakerLayout(pub Vec<Speaker>);
 impl SpeakerLayout {
-    /// Canonical native output map for an expanded programme. A fixed superset
+    /// Canonical native output map, including replacement-only programmes. A fixed superset
     /// preserves role identity when frame-level channel maps change. Missing
     /// roles are silent; active roles outside this map must be refused.
     pub fn validate_output(&self) -> Result<()> {
-        if !(7..=16).contains(&self.0.len()) || !self.0.windows(2).all(|w|w[0]<w[1]) {
-            return Err(invalid("E-AC-3 output layout requires 7..16 unique speakers in canonical order"));
+        if !(1..=16).contains(&self.0.len()) || !self.0.windows(2).all(|w|w[0]<w[1]) {
+            return Err(invalid("E-AC-3 output layout requires 1..16 unique speakers in canonical order"));
         }
         Ok(())
     }
@@ -96,7 +96,7 @@ pub fn configuration_speakers(data: &[u8], selected: u8) -> Result<Option<Speake
         }
         roles.sort(); roles.dedup();
         let layout = SpeakerLayout(roles);
-        if layout.0.len() > 6 { layout.validate_output()?; found = Some(layout); }
+        if dependent != 0 || layout.0.len() > 6 { layout.validate_output()?; found = Some(layout); }
     }
     Ok(found)
 }
@@ -222,12 +222,17 @@ fn layout(descriptors: &[Descriptor], width: u16) -> Result<SpeakerLayout> {
 /// selected programme closes. Native-only programmes need the following
 /// independent frame or EOF to distinguish a missing dependent from no extension.
 pub(crate) fn probe_programme(data:&[u8],selected:u8,eof:bool)->Result<Option<(Frame,SpeakerLayout)>> {
+    probe_native_programme(data,selected,eof).map(|p|p.map(|(frame,layout,_)|(frame,layout)))
+}
+/// Preserve whether a complete programme actually carries dependent components,
+/// including replacement-only output that fits within the independent width.
+pub(crate) fn probe_native_programme(data:&[u8],selected:u8,eof:bool)->Result<Option<(Frame,SpeakerLayout,bool)>> {
     if selected>7{return Err(invalid("E-AC-3 programme ID exceeds 7"));}
-    fn complete(frames:&[Descriptor])->Result<(Frame,SpeakerLayout)> {
+    fn complete(frames:&[Descriptor])->Result<(Frame,SpeakerLayout,bool)> {
         let base=frames[0].frame;
         let count=frames.iter().flat_map(locations).collect::<BTreeSet<_>>().len();
-        let speakers=if count>6 {layout(frames,count as u16)?}else{layout(&frames[..1],base.channels)?};
-        Ok((base,speakers))
+        let speakers=layout(frames,count as u16)?;
+        Ok((base,speakers,frames.len()>1))
     }
     let mut offset=0;let mut frames:Vec<Descriptor>=Vec::new();
     while offset<data.len() {
@@ -266,12 +271,12 @@ pub fn packet_speakers(data: &[u8], width: u16) -> Result<SpeakerLayout> {
 /// Speaker assignment of a complete explicitly selected programme.
 pub fn packet_speakers_for_programme(data:&[u8],width:u16,programme:u8)->Result<SpeakerLayout> {
     if programme>7{return Err(invalid("E-AC-3 programme ID exceeds 7"));}
-    if !(7..=16).contains(&width){return Err(invalid("expanded E-AC-3 output requires 7..16 channels"));}
+    if !(1..=16).contains(&width){return Err(invalid("native E-AC-3 output requires 1..16 channels"));}
     first_programme(data,false,programme)?.map(|(_,frames)|layout(&frames,width)).transpose()?.ok_or_else(||invalid("incomplete selected E-AC-3 dependent presentation"))
 }
 pub(crate) fn try_packet_speakers(data: &[u8], width: u16) -> Result<Option<SpeakerLayout>> {
-    if !(7..=16).contains(&width) {
-        return Err(invalid("expanded E-AC-3 output requires 7..16 channels"));
+    if !(1..=16).contains(&width) {
+        return Err(invalid("native E-AC-3 output requires 1..16 channels"));
     }
     first_programme(data, false, 0)?
         .map(|(_, frames)| layout(&frames, width))
@@ -393,7 +398,7 @@ pub struct PresentationDecoder {
 }
 impl PresentationDecoder {
     pub fn new(rate: u32, width: u16) -> Result<Self> {
-        if !ALL_SAMPLE_RATES.contains(&rate) || !(7..=16).contains(&width) {
+        if !ALL_SAMPLE_RATES.contains(&rate) || !(1..=16).contains(&width) {
             return Err(invalid("invalid E-AC-3 presentation geometry"));
         }
         Ok(Self {

@@ -450,6 +450,7 @@ impl<R: Read + Seek> WebmAudioReader<R> {
     fn scan_eac3_speakers(&mut self) -> Result<Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>> {
         let (mut index,mut offset)=(0,0);
         let mut parent=None;
+        let mut dependent=false;
         let mut roles=std::collections::BTreeSet::new();
         loop {
             let mut prefix=[0u8;16];
@@ -469,13 +470,14 @@ impl<R: Read + Seek> WebmAudioReader<R> {
                 return Err(invalid("truncated E-AC-3 layout scan BSI"));
             }
             if selected {
+                dependent |= kind==1;
                 roles.extend(crate::codec::eac3_decoder::presentation::header_speakers(&prefix[..header])?.0);
             }
             if self.eac3_range(&mut index,&mut offset,size-header,None)?!=size-header {
                 return Err(invalid("truncated E-AC-3 layout scan frame"));
             }
         }
-        if roles.len()<=6 {return Ok(None);}
+        if roles.len()<=6 && !dependent {return Ok(None);}
         let layout=crate::codec::eac3_decoder::presentation::SpeakerLayout(roles.into_iter().collect());
         layout.validate_output()?; Ok(Some(layout))
     }

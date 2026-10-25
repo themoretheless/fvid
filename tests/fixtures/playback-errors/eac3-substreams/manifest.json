@@ -223,7 +223,9 @@
           0,
           false
         ]
-      ]
+      ],
+      "native_control": "dependent-native-control.ec3",
+      "native_control_video": "dependent-native-control.mkv"
     },
     {
       "name": "a0-t0-m0-depmap",
@@ -238,7 +240,9 @@
           0,
           true
         ]
-      ]
+      ],
+      "native_control": "dependent-native-control.ec3",
+      "native_control_video": "dependent-native-control.mkv"
     },
     {
       "name": "a0-t0-m0-programmes",
@@ -563,7 +567,9 @@
           0,
           false
         ]
-      ]
+      ],
+      "native_control": "dependent-native-control.ec3",
+      "native_control_video": "dependent-native-control.mkv"
     },
     {
       "name": "a0-t0-m3-depmap",
@@ -578,7 +584,9 @@
           0,
           true
         ]
-      ]
+      ],
+      "native_control": "dependent-native-control.ec3",
+      "native_control_video": "dependent-native-control.mkv"
     },
     {
       "name": "a0-t0-m3-programmes",
@@ -903,7 +911,9 @@
           0,
           false
         ]
-      ]
+      ],
+      "native_control": "dependent-native-control.ec3",
+      "native_control_video": "dependent-native-control.mkv"
     },
     {
       "name": "a0-t2-m0-depmap",
@@ -918,7 +928,9 @@
           0,
           true
         ]
-      ]
+      ],
+      "native_control": "dependent-native-control.ec3",
+      "native_control_video": "dependent-native-control.mkv"
     },
     {
       "name": "a0-t2-m0-programmes",
@@ -1243,7 +1255,9 @@
           0,
           false
         ]
-      ]
+      ],
+      "native_control": "dependent-native-control.ec3",
+      "native_control_video": "dependent-native-control.mkv"
     },
     {
       "name": "a0-t2-m3-depmap",
@@ -1258,7 +1272,9 @@
           0,
           true
         ]
-      ]
+      ],
+      "native_control": "dependent-native-control.ec3",
+      "native_control_video": "dependent-native-control.mkv"
     },
     {
       "name": "a0-t2-m3-programmes",
@@ -1583,7 +1599,9 @@
           0,
           false
         ]
-      ]
+      ],
+      "native_control": "dependent-native-control.ec3",
+      "native_control_video": "dependent-native-control.mkv"
     },
     {
       "name": "a1-t0-m0-depmap",
@@ -1598,7 +1616,9 @@
           0,
           true
         ]
-      ]
+      ],
+      "native_control": "dependent-native-control.ec3",
+      "native_control_video": "dependent-native-control.mkv"
     },
     {
       "name": "a1-t0-m0-programmes",
@@ -1923,7 +1943,9 @@
           0,
           false
         ]
-      ]
+      ],
+      "native_control": "dependent-native-control.ec3",
+      "native_control_video": "dependent-native-control.mkv"
     },
     {
       "name": "a1-t0-m3-depmap",
@@ -1938,7 +1960,9 @@
           0,
           true
         ]
-      ]
+      ],
+      "native_control": "dependent-native-control.ec3",
+      "native_control_video": "dependent-native-control.mkv"
     },
     {
       "name": "a1-t0-m3-programmes",
@@ -2263,7 +2287,9 @@
           0,
           false
         ]
-      ]
+      ],
+      "native_control": "dependent-native-control.ec3",
+      "native_control_video": "dependent-native-control.mkv"
     },
     {
       "name": "a1-t2-m0-depmap",
@@ -2278,7 +2304,9 @@
           0,
           true
         ]
-      ]
+      ],
+      "native_control": "dependent-native-control.ec3",
+      "native_control_video": "dependent-native-control.mkv"
     },
     {
       "name": "a1-t2-m0-programmes",
@@ -2603,7 +2631,9 @@
           0,
           false
         ]
-      ]
+      ],
+      "native_control": "dependent-native-control.ec3",
+      "native_control_video": "dependent-native-control.mkv"
     },
     {
       "name": "a1-t2-m3-depmap",
@@ -2618,7 +2648,9 @@
           0,
           true
         ]
-      ]
+      ],
+      "native_control": "dependent-native-control.ec3",
+      "native_control_video": "dependent-native-control.mkv"
     },
     {
       "name": "a1-t2-m3-programmes",
