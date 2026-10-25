@@ -460,6 +460,8 @@ impl<'a> Bits<'a> {
 pub(crate) struct Header {
     /// `fscod` itself, the index into the rate, frame length and threshold tables.
     pub(crate) rate: usize,
+    /// Division of the base sample rate by a power of two (Annex E reduced rates).
+    pub(crate) rate_shift: usize,
     /// Bytes this syncframe occupies, from Table 5.18.
     pub(crate) frame_bytes: usize,
     pub(crate) acmod: usize,
@@ -544,6 +546,7 @@ impl Header {
         }
         Some(Self {
             rate: fscod,
+            rate_shift: 0,
             frame_bytes: usize::from(words) * 2,
             acmod,
             nfchans: NFCHANS[acmod],
@@ -569,6 +572,7 @@ impl Header {
     ) -> Self {
         Self {
             rate,
+            rate_shift: 0,
             frame_bytes,
             acmod,
             nfchans: NFCHANS[acmod],
@@ -1907,13 +1911,13 @@ impl Core {
             return;
         }
         for plane in 0..header.nfchans {
-            self.bit_allocation(plane, header.rate, aht[plane]);
+            self.bit_allocation(plane, header.rate, header.rate_shift, aht[plane]);
         }
         if self.strategy.cplinu {
-            self.bit_allocation(CPL, header.rate, aht[CPL]);
+            self.bit_allocation(CPL, header.rate, header.rate_shift, aht[CPL]);
         }
         if header.lfeon {
-            self.bit_allocation(LFE, header.rate, aht[LFE]);
+            self.bit_allocation(LFE, header.rate, header.rate_shift, aht[LFE]);
         }
     }
 
@@ -1939,7 +1943,7 @@ impl Core {
     /// The seven steps of Section 7.2.2, run over one plane's exponent set. Every
     /// step is integer arithmetic on a 14-bit accumulator because the result has to
     /// match what the encoder assumed when it packed the mantissas.
-    fn bit_allocation(&mut self, plane: usize, fscod: usize, aht: bool) {
+    fn bit_allocation(&mut self, plane: usize, fscod: usize, rate_shift: usize, aht: bool) {
         let start = self.strategy.start[plane];
         let end = self.strategy.end[plane];
         if end <= start {
@@ -1950,8 +1954,8 @@ impl Core {
         }
         let params = self.strategy.params;
         let dba = self.strategy.dba[plane];
-        let sdecay = SLOWDEC[params.sdcycod];
-        let fdecay = FASTDEC[params.fdcycod];
+        let sdecay = SLOWDEC[params.sdcycod] >> rate_shift;
+        let fdecay = FASTDEC[params.fdcycod] >> rate_shift;
         let sgain = SLOWGAIN[params.sgaincod];
         let dbknee = DBKNEE[params.dbpbcod];
         let floor = FLOORTAB[params.floorcod];
@@ -2050,7 +2054,7 @@ impl Core {
             if bndpsd[band] < dbknee {
                 self.scratch.excite[band] += (dbknee - bndpsd[band]) >> 2;
             }
-            self.scratch.mask[band] = self.scratch.excite[band].max(HTH[fscod][band]);
+            self.scratch.mask[band] = self.scratch.excite[band].max(HTH[fscod][band >> rate_shift]);
         }
 
         // Step 6: the encoder's own adjustments to that curve.
@@ -2554,6 +2558,37 @@ impl AudioDecode for Ac3Decoder {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn reduced_rate_coupling_leaks_follow_closed_form_decay() {
+        for rate in 0..3 {
+            for shift in 0..=1 {
+                for code in 0..4 {
+                    for fast in [false, true] {
+                        let mut core = Core::new();
+                        core.strategy.start[CPL] = 37;
+                        core.strategy.end[CPL] = 73;
+                        core.strategy.exp[CPL] = [24; BINS];
+                        let p = &mut core.strategy.params;
+                        p.sdcycod = code;
+                        p.fdcycod = code;
+                        p.dbpbcod = 0;
+                        p.cplleak = if fast { [7, 0] } else { [0, 0] };
+                        core.bit_allocation(CPL, rate, shift, false);
+                        let first = usize::from(MASKTAB[37]);
+                        let last = usize::from(MASKTAB[72]);
+                        let seed = if fast { 2560 } else { 768 };
+                        let decay = if fast { FASTDEC[code] } else { SLOWDEC[code] } >> shift;
+                        for band in first..=last {
+                            assert_eq!(core.scratch.excite[band], seed - decay * (band-first+1) as i32,
+                                "rate={rate} shift={shift} code={code} fast={fast} band={band}");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     /// A 2/0 stream at 48 kHz and 192 kbps whose channels each mix two tones. The
     /// mixture is what makes the fixture worth having: a channel that lands in the

@@ -122,30 +122,15 @@ fn eac3_conversion_layer_1_2_3_and_6_block_syncframes_decode_matching_reference(
 }
 
 #[test]
-fn eac3_reduced_sample_rates_24k_22k05_and_16k_decode_cleanly() {
+fn historical_reduced_rate_header_mutations_are_header_probes_only() {
+    // These legacy samples changed only the full-rate header, not the packed
+    // mantissas. They cannot establish reduced-rate PCM correctness. The owned
+    // eac3_reduced_allocation suite supplies valid recoded PCM acceptance.
     let dir = fixture_dir();
     for rate in [24_000u32, 22_050, 16_000] {
         let raw = std::fs::read(dir.join(format!("reduced-{rate}.ec3"))).unwrap();
-        let hdr = eac3_frame(&raw)
-            .unwrap_or_else(|| panic!("reduced-{rate}.ec3 header was refused"));
-        assert_eq!(hdr.sample_rate, rate);
-        assert_eq!(hdr.blocks, 6);
-        assert_eq!(hdr.channels, 2);
-
-        let mut dec = make_audio_decoder("A_EAC3", &[], rate, 2, 0)
-            .unwrap_or_else(|e| panic!("make_audio_decoder at {rate} Hz failed: {e}"));
-        let pkt = dec
-            .decode_complete(&raw, 0, 0)
-            .unwrap_or_else(|e| panic!("decode at {rate} Hz failed: {e}"))
-            .unwrap();
-        assert_eq!((pkt.timebase_num, pkt.timebase_den), (1, rate));
-        let samples = f32_samples(&pkt.data);
-        assert_eq!(samples.len(), (2 * 1536 - 256) * 2);
-        let peaks = peak_channels(&samples, 2);
-        assert!(
-            peaks[0] > 0.2 && peaks[1] > 0.15,
-            "reduced-{rate} peaks={peaks:?}"
-        );
+        let hdr = eac3_frame(&raw).expect("historical reduced-rate header");
+        assert_eq!((hdr.sample_rate, hdr.blocks, hdr.channels), (rate, 6, 2));
     }
 }
 

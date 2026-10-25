@@ -373,7 +373,8 @@ def generate() -> dict[str, bytes]:
 
     # 3. Reduced sample rates (fscod = 3, fscod2 = 0 -> 24000, 1 -> 22050, 2 -> 16000)
     # Derived from a 2-frame (6 blocks each) stereo stream at matching base rate (48000, 44100, 32000 Hz)
-    # so that rate_code bit allocation matches fscod2, then setting fscod=3, fscod2=0..2 and updating CRC2.
+    # Header probes only: packed mantissas are NOT reallocated for half rate.
+    # Valid owned PCM acceptance is authored by generate_eac3_reduced_allocation.py.
     for fscod2, base_rate, rate in [(0, 48000, 24000), (1, 44100, 22050), (2, 32000, 16000)]:
         name = f"reduced-{rate}.ec3"
         base_raw = subprocess.check_output(
