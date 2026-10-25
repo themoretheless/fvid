@@ -811,7 +811,7 @@ const CODEC_ENTRIES: &[CodecEntry] = &[
     CodecEntry { tags: &["A_MPEG/L2"], name: "MP2" },
     CodecEntry { tags: &["A_FLAC"], name: "FLAC" },
     CodecEntry { tags: &["alac", "A_ALAC"], name: "ALAC" },
-    CodecEntry { tags: &["A_AC3", "ac-3"], name: "Dolby Digital" },
+    CodecEntry { tags: &["A_AC3", "A_AC3/BSID9", "A_AC3/BSID10", "ac-3"], name: "Dolby Digital" },
     CodecEntry { tags: &["A_EAC3", "ec-3"], name: "Dolby Digital Plus" },
     CodecEntry { tags: &["mp4a"], name: "AAC" },
     CodecEntry { 

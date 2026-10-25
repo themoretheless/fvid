@@ -18444,3 +18444,30 @@ not private media or decoder-source extraction during generation. All 13 files
 (118469 bytes) regenerate byte-exact with process/network creation forbidden.
 This qualifies the named allocation cases; it does not prove every E-AC-3
 profile/tool combination or close the overall codec parity goal.
+
+### AC-3 BSID 9/10 compatibility (2026-10-25)
+
+Native AC-3 accepts the de facto BSID 9/10 rate divisions described in the
+Matroska codec specification (half/quarter of the base rate). These are
+compatibility modes, not ATSC-defined AC-3 modes. Source:
+https://datatracker.ietf.org/doc/html/draft-ietf-cellar-codec-20#section-3.4.12
+
+The header, bounded word-order view, configured-rate validation and shared
+allocator agree on the divisor. Six reduced rate/BSID combinations use the
+correct quiet-threshold coordinates and decay. Matroska supports generic
+A_AC3 and the legacy A_AC3/BSID9 and A_AC3/BSID10 identifiers; canonicalization
+is internal to playback and preserves demux metadata and encoded bytes.
+Public decoder dispatch, display labels and probe labels recognize the aliases.
+Raw and MP4 decoding use the actual checked frame rate. Zero-rate setup is refused.
+
+The owned generator authors new quantized spectra, CRCs and short neutral VP9
+videos. Independently encoded high-precision full-rate controls bound PCM error,
+rather than merely relabeling full-rate payloads. Parent code refuses 24 kHz
+setup. Acceptance covers all six reduced cases plus BSID 0/8 base-rate controls
+for all three rows, BE/LE elementary streams, MP4, generic/alias Matroska,
+sample-coordinate or nanosecond seek as appropriate, rewind, video decode,
+CRC concealment and clean rate-mismatch refusal. A capturing worker checks
+EOF/rewind and geometry. The coupling decay kernel also covers quarter rate.
+All 73 artifacts (1227781 bytes) regenerate byte-exact with subprocess and
+network creation forbidden. Complete profile/tool and physical-device timing
+coverage remains unproven; the overall no-gap goal remains active.

@@ -460,7 +460,7 @@ impl<'a> Bits<'a> {
 pub(crate) struct Header {
     /// `fscod` itself, the index into the rate, frame length and threshold tables.
     pub(crate) rate: usize,
-    /// Division of the base sample rate by a power of two (Annex E reduced rates).
+    /// Division of the base rate by a power of two (Annex E or BSID 9/10).
     pub(crate) rate_shift: usize,
     /// Bytes this syncframe occupies, from Table 5.18.
     pub(crate) frame_bytes: usize,
@@ -476,7 +476,7 @@ pub(crate) struct Header {
 impl Header {
     /// Read Table 5.1 and Table 5.2. `None` for what this transcription will not
     /// misread: a foreign syncword, the reserved rate code, a frame size code
-    /// outside Table 5.18, a `bsid` whose syntax is not A/52's own, or a header that
+    /// outside Table 5.18, a `bsid` beyond AC-3 and the BSID 9/10 compatibility modes, or a header that
     /// runs off the end of the packet.
     fn read(bits: &mut Bits<'_>) -> Option<Self> {
         if bits.take(16) != 0x0B77 {
@@ -489,9 +489,12 @@ impl Header {
             return None;
         }
         let words = *FRAME_WORDS.get(frmsizecod)?.get(fscod)?;
-        if bits.take(5) > 8 {
+        let bsid = bits.take(5);
+        if bsid > 10 {
             return None;
         }
+        // De facto Matroska-compatible BSID 9/10 divide the base rate by 2/4.
+        let rate_shift = (bsid - 8).max(0) as usize;
         let _bsmod = bits.take(3);
         let acmod = bits.take(3) as usize;
         let clev = if (acmod & 1) != 0 && acmod != 1 {
@@ -546,7 +549,7 @@ impl Header {
         }
         Some(Self {
             rate: fscod,
-            rate_shift: 0,
+            rate_shift,
             frame_bytes: usize::from(words) * 2,
             acmod,
             nfchans: NFCHANS[acmod],
@@ -618,7 +621,7 @@ pub(crate) fn dolby_frame(bytes:&[u8])->Result<std::borrow::Cow<'_,[u8]>> {
     let size=dolby_prefix(bytes).and_then(|h| {
         if h[..2]!=[0x0b,0x77] {return None;}
         match h[5]>>3 {
-            0..=8=>FRAME_WORDS.get(usize::from(h[4]&63))?.get(usize::from(h[4]>>6)).map(|n|usize::from(*n)*2),
+            0..=10=>FRAME_WORDS.get(usize::from(h[4]&63))?.get(usize::from(h[4]>>6)).map(|n|usize::from(*n)*2),
             11..=16=>Some((usize::from(h[2]&7)*256+usize::from(h[3])+1)*2),
             _=>None,
         }
@@ -643,12 +646,12 @@ fn canonical_dolby_words(bytes:&[u8])->Result<std::borrow::Cow<'_,[u8]>> {
 /// front, so the frame walker that lists a stream's packets needs the same four
 /// numbers this decoder reads for itself. `None` for the same refusals
 /// [`Header::read`] makes: a foreign syncword, the reserved rate code, a frame
-/// size code outside Table 5.18, or a `bsid` whose syntax is not A/52's own.
+/// size code outside Table 5.18, or a `bsid` beyond AC-3 and the BSID 9/10 compatibility modes.
 pub fn syncframe(bytes: &[u8]) -> Option<Syncframe> {
     let canonical=dolby_frame(bytes).ok()?;let bytes=canonical.as_ref();
     let header = Header::read(&mut Bits::new(bytes))?;
     Some(Syncframe {
-        sample_rate: SAMPLE_RATES[header.rate],
+        sample_rate: SAMPLE_RATES[header.rate] >> header.rate_shift,
         channels: header.native_channels() as u16,
         frame_bytes: header.frame_bytes,
     })
@@ -1572,14 +1575,13 @@ pub struct Ac3Decoder {
 impl Ac3Decoder {
     /// Open an AC-3 stream. `configuration` holds nothing this codec needs, since the
     /// geometry is in the frames themselves, and is only taken to match the other
-    /// decoders' signature. The rate has to be one of AC-3's three and the channel
-    /// count one the folding can reach; anything else is refused by name rather than
-    /// guessed at.
+    /// decoders' signature. The rate must be a base rate or its BSID 9/10 division,
+    /// and the channel count must be reachable by folding. Other geometry is refused.
     pub fn new(configuration: &[u8], sample_rate: u32, channels: u16) -> Result<Self> {
         let _ = configuration;
-        if !SAMPLE_RATES.contains(&sample_rate) {
+        if ![48_000,44_100,32_000,24_000,22_050,16_000,12_000,11_025,8_000].contains(&sample_rate) {
             return Err(invalid(&format!(
-                "AC-3 track at {sample_rate} Hz is outside AC-3's 48000, 44100 and 32000 Hz"
+                "AC-3 track at {sample_rate} Hz is outside AC-3 base rates and BSID 9/10 reduced rates"
             )));
         }
         if !(1..=SLOTS as u16).contains(&channels) {
@@ -1656,7 +1658,7 @@ impl Ac3Decoder {
             bits.data = &raw[..usable];
             let mut samples = Vec::with_capacity(silence);
             let protected = usable == header.frame_bytes && frame_crc_valid(&raw[..usable]);
-            let coded_rate = SAMPLE_RATES[header.rate];
+            let coded_rate = SAMPLE_RATES[header.rate] >> header.rate_shift;
             if protected && coded_rate != self.sample_rate {
                 return Err(invalid(&format!(
                     "AC-3 frame sample rate {coded_rate} Hz disagrees with configured {} Hz",
@@ -2562,7 +2564,7 @@ mod tests {
     #[test]
     fn reduced_rate_coupling_leaks_follow_closed_form_decay() {
         for rate in 0..3 {
-            for shift in 0..=1 {
+            for shift in 0..=2 {
                 for code in 0..4 {
                     for fast in [false, true] {
                         let mut core = Core::new();
@@ -2901,7 +2903,8 @@ mod tests {
     #[test]
     fn an_impossible_geometry_is_refused() {
         for (rate, channels, why) in [
-            (22_050, 2u16, "AC-3 has no 22050 Hz"),
+            (0, 2u16, "zero sample rate"),
+            (22_000, 2u16, "AC-3 has no 22000 Hz"),
             (48_000, 7, "no layout of seven channels"),
             (48_000, 0, "no layout of none"),
         ] {

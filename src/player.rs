@@ -4390,7 +4390,7 @@ fn sound_codec(tag: &str) -> String {
         "A_FLAC" => "FLAC",
         "wavpack" | "A_WAVPACK4" => "WavPack",
         "A_ALAC" | "alac" => "ALAC",
-        "A_AC3" | "ac-3" => "Dolby Digital",
+        "A_AC3" | "A_AC3/BSID9" | "A_AC3/BSID10" | "ac-3" => "Dolby Digital",
         "A_EAC3" | "ec-3" => "Dolby Digital Plus",
         "mp4a" => "AAC",
         "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE" | "sowt" | "twos" | "fl32"

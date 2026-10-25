@@ -1,0 +1,101 @@
+{
+  "cases": [
+    {
+      "name": "bsid0-48000",
+      "bsid": 0,
+      "rate": 48000,
+      "base_rate": 48000,
+      "frames": 4352,
+      "error_bound": 1.165413124350141e-10
+    },
+    {
+      "name": "bsid8-48000",
+      "bsid": 8,
+      "rate": 48000,
+      "base_rate": 48000,
+      "frames": 4352,
+      "error_bound": 1.165413124350141e-10
+    },
+    {
+      "name": "bsid9-24000",
+      "bsid": 9,
+      "rate": 24000,
+      "base_rate": 48000,
+      "frames": 4352,
+      "error_bound": 7.566995918757116e-11
+    },
+    {
+      "name": "bsid10-12000",
+      "bsid": 10,
+      "rate": 12000,
+      "base_rate": 48000,
+      "frames": 4352,
+      "error_bound": 9.94380873934784e-11
+    },
+    {
+      "name": "bsid0-44100",
+      "bsid": 0,
+      "rate": 44100,
+      "base_rate": 44100,
+      "frames": 4352,
+      "error_bound": 1.176500297858101e-10
+    },
+    {
+      "name": "bsid8-44100",
+      "bsid": 8,
+      "rate": 44100,
+      "base_rate": 44100,
+      "frames": 4352,
+      "error_bound": 1.176500297858101e-10
+    },
+    {
+      "name": "bsid9-22050",
+      "bsid": 9,
+      "rate": 22050,
+      "base_rate": 44100,
+      "frames": 4352,
+      "error_bound": 7.761021455132517e-11
+    },
+    {
+      "name": "bsid10-11025",
+      "bsid": 10,
+      "rate": 11025,
+      "base_rate": 44100,
+      "frames": 4352,
+      "error_bound": 9.94380873934784e-11
+    },
+    {
+      "name": "bsid0-32000",
+      "bsid": 0,
+      "rate": 32000,
+      "base_rate": 32000,
+      "frames": 4352,
+      "error_bound": 1.2062340813537488e-10
+    },
+    {
+      "name": "bsid8-32000",
+      "bsid": 8,
+      "rate": 32000,
+      "base_rate": 32000,
+      "frames": 4352,
+      "error_bound": 1.2062340813537488e-10
+    },
+    {
+      "name": "bsid9-16000",
+      "bsid": 9,
+      "rate": 16000,
+      "base_rate": 32000,
+      "frames": 4352,
+      "error_bound": 1.0671404500763536e-10
+    },
+    {
+      "name": "bsid10-8000",
+      "bsid": 10,
+      "rate": 8000,
+      "base_rate": 32000,
+      "frames": 4352,
+      "error_bound": 9.216212977932144e-11
+    }
+  ],
+  "provenance": "Owned mono quiet spectra and independent full-rate high-precision PCM controls; public normative allocation tables. Neutral VP9 videos. BSID9/10 are de facto compatibility, not ATSC modes. No private media, external encoder, subprocess or network."
+}

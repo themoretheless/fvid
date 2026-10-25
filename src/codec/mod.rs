@@ -95,7 +95,7 @@ pub fn make_audio_decoder(
         // by the `ac-3` fourcc. The frames carry their own geometry, so the setup
         // block is empty here, and the bundled decoder has no arm for the coding -
         // this one is fvid's own, transcribed from the public standard.
-        "A_AC3" | "ac-3" => Box::new(ac3_decoder::Ac3Decoder::new(
+        "A_AC3" | "A_AC3/BSID9" | "A_AC3/BSID10" | "ac-3" => Box::new(ac3_decoder::Ac3Decoder::new(
             extra_data,
             sample_rate,
             channels,
