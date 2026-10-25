@@ -1,0 +1,24 @@
+{
+  "batch": 270,
+  "accepted": [
+    "FVID-0277"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-270-pre-edit/crates/fvid-media/src/owned_adts_loudness.rs",
+    "docs/improvements/snapshots/batch-270-pre-edit/crates/fvid-media/src/owned_adts_loudnorm.rs",
+    "docs/improvements/snapshots/batch-270-pre-edit/src/native_loudnorm.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-270-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-270-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-270-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/adts-loudness-prefix-sbr/sbr-11k-to-22k.aac",
+    "tests/fixtures/playback-errors/adts-loudness-prefix-sbr/lc-then-ps-24k.aac"
+  ],
+  "tests": [
+    "tests/adts_loudness_prefix_sbr_regression.rs",
+    "scripts/test_adts_loudness_prefix_sbr.py"
+  ]
+}

@@ -227,7 +227,9 @@ impl DecodeProgress<'_> {
         }
         crate::owned_budget::check_rss_budget(self.options).map_err(Error)
     }
-    pub(crate) fn packet_limit(&self) -> Option<u64> { self.options.max_packets }
+    pub(crate) fn packet_limit(&self) -> Option<u64> {
+        self.options.max_packets
+    }
     pub(crate) fn packet_limit_reached(&self) -> bool {
         self.options
             .max_packets
@@ -286,17 +288,14 @@ pub(crate) fn open_audio_reader<R: Read + Seek>(
     options: &CopyOptions,
     packet_bytes: usize,
 ) -> Result<MatroskaTimelineReader<R>> {
-    let mut limits = crate::owned_webm::Limits {
-        packet_bytes,
-        ..Default::default()
-    };
+    let mut limits = crate::owned_webm::Limits::default();
     let memory_packets = options
         .max_controlled_bytes
         .map(|bytes| bytes / std::mem::size_of::<crate::owned_webm::Packet>());
     if let Some(maximum) = memory_packets {
         limits.packets = limits.packets.min(maximum);
     }
-    MatroskaTimelineReader::open(source, limits).map_err(|error| {
+    let mut reader = MatroskaTimelineReader::open(source, limits).map_err(|error| {
         if memory_packets.is_some_and(|max| max < crate::owned_webm::Limits::default().packets)
             && error
                 .to_string()
@@ -306,7 +305,37 @@ pub(crate) fn open_audio_reader<R: Read + Seek>(
         } else {
             error.into()
         }
-    })
+    })?;
+    reader.restrict_packet_bytes(packet_bytes);
+    Ok(reader)
+}
+pub(crate) fn validate_audio_packet_budget<R: Read + Seek>(
+    reader: &mut MatroskaTimelineReader<R>,
+    index: usize,
+    options: &CopyOptions,
+) -> Result<()> {
+    if options.max_packet_bytes >= crate::owned_webm::Limits::default().packet_bytes {
+        return Ok(());
+    }
+    reader.scan_all()?;
+    let track = reader
+        .tracks
+        .get(index)
+        .ok_or_else(|| invalid("selected audio stream is absent"))?;
+    let track_number = track.number;
+    let mut track_packets = 0u64;
+    for (packet_index, packet) in reader.packets.iter().enumerate() {
+        if packet.track == track_number {
+            if options.max_packets.is_some_and(|limit| track_packets >= limit) {
+                break;
+            }
+            if reader.packet_payload_size(packet_index)? > options.max_packet_bytes {
+                return Err(invalid("WebM packet exceeds budget"));
+            }
+            track_packets += 1;
+        }
+    }
+    Ok(())
 }
 pub(crate) fn admit_audio_reader<R: Read + Seek>(
     reader: &mut MatroskaTimelineReader<R>,
@@ -314,7 +343,7 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
     options: &CopyOptions,
 ) -> Result<()> {
     if options.max_controlled_bytes.is_none() {
-        return Ok(());
+        return validate_audio_packet_budget(reader, index, options);
     }
     let track = reader
         .tracks
@@ -362,6 +391,7 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
     );
     let opus = track.codec == "A_OPUS";
     let mut visited_packets = 0;
+    let mut track_packets = 0u64;
     let mut largest_packet = 0;
     let mut largest_read_overhead = 0;
     reader
@@ -375,8 +405,19 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
             })?;
             for (packet_index, packet) in reader.packets.iter().enumerate().skip(visited_packets) {
                 if packet.track == track.number {
-                    largest_packet = largest_packet.max(reader.packet_payload_size(packet_index)?);
+                    if options.max_packets.is_some_and(|limit| track_packets >= limit) {
+                        continue;
+                    }
+                    let payload_size = reader.packet_payload_size(packet_index)?;
+                    if payload_size > options.max_packet_bytes {
+                        return Err(crate::owned_ebml::Error(
+                            "WebM packet exceeds budget".into(),
+                        )
+                        .into());
+                    }
+                    largest_packet = largest_packet.max(payload_size);
                     largest_read_overhead = largest_read_overhead.max(reader.packet_read_overhead(packet_index)?);
+                    track_packets += 1;
                 }
             }
             visited_packets = reader.packets.len();
@@ -477,16 +518,8 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
     control.check()?;
     let mut reader = if codec == "A_AAC" {
         open_aac_reader(source, options, options.max_packet_bytes)?
-    } else if matches!(codec, "A_FLAC" | "A_ALAC" | "A_OPUS" | "A_MPEG/L3" | "MPEG" | "PCM") {
-        open_audio_reader(source, options, options.max_packet_bytes)?
     } else {
-        MatroskaTimelineReader::open(
-            source,
-            crate::owned_webm::Limits {
-                packet_bytes: options.max_packet_bytes,
-                ..Default::default()
-            },
-        )?
+        open_audio_reader(source, options, options.max_packet_bytes)?
     };
     let index = matroska_audio_index(&reader, selected)?;
     if if codec == "PCM" {

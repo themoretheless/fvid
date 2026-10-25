@@ -1,0 +1,11 @@
+{
+  "batch_id": "FVID-0251",
+  "sha256": {
+    "burn-primary.y4m": "09518c6e4c3346e01f2a4e44a3a1105cde05cd05c01d171379a84b72809d2527",
+    "burn-secondary.y4m": "22a1f7dad9beb8a22c43a788c70c3ae3089963dc7ee95a0b917909694c12a1dc",
+    "burn-source-ffv1.mkv": "be21035e4108a550ba63104dac3a3b4fe56dcb2d91e77b53cbb692bd4e18b3cd",
+    "muxed-audio-and-subrip.mkv": "edfc92bd7a8ae46c7e1684d108b87a4e6570d19c4a63c9c4cbcb2d3baedf579d",
+    "sample.ass": "cc37cf7e134191cea0481bbd0c049744c77f4d407a2baad0130ffff201d249a3",
+    "sample.srt": "f9fd5613c33c1fa406e7b891c05925a420fdfb1662adfc90e916f005eef86efc"
+  }
+}

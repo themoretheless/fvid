@@ -1,0 +1,9 @@
+{
+  "batch_id": "FVID-0275",
+  "generator": "scripts/generate_y4m_prefix_budget.py",
+  "sha256": {
+    "avc-two-frames-tail-oversized.mp4": "0dafb5cb2ba269e13157596f19453a88d42ced39b4f145d88d64c6676e984b5d",
+    "ffv1-one-frame.mkv": "5f2b176b8ab024999dd1598cdc8311aedd4253c081edd300fa7bc97ac3a2ccd8",
+    "ffv1-two-frames-tail-oversized.mkv": "8d77cbb8159bd5ae92314a0b5f99fcff53062094a60281a6548dbd219eae8250"
+  }
+}
