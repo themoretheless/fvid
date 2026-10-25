@@ -108,7 +108,7 @@ pub(crate) fn geometry_with_mask(source: &Path, options: &CopyOptions) -> Result
     let mut reader = crate::owned_matroska_audio::open_audio_reader(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         options,
-        crate::owned_webm::Limits::default().packet_bytes,
+        options.max_packet_bytes,
     )
     .map_err(|e| e.to_string())?;
     let index = match options.streams.as_slice() {

@@ -173,10 +173,7 @@ pub(crate) fn mp4_source_info(
 ) -> Result<Vec<u8>> {
     let reader = crate::owned_mp4::Mp4Reader::open_indexed(
         std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?),
-        crate::owned_mp4::Limits {
-            packet_bytes: options.max_packet_bytes,
-            ..Default::default()
-        },
+        crate::owned_mp4::Limits::default(),
     )
     .map_err(|e| e.to_string())?;
     let selected = options.streams.first().copied();
@@ -187,7 +184,7 @@ pub(crate) fn mp4_source_info(
         reader.tags(),
         &track.name,
         &track.language,
-        None,
+        Some(reader.encoder()),
         &BTreeMap::new(),
     )
 }

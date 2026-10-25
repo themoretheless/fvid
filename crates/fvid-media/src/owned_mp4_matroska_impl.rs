@@ -301,7 +301,25 @@ pub fn write_selected<R: Read + Seek, W: Write + Seek>(
 ) -> Result<ProgressEvent> {
     check(cancel)?;
     let metadata = FileMetadata::from_mp4(input);
-    write_selected_with_metadata(input, output, cancel, progress, max_packets, requested, &metadata)
+    let mut text = std::collections::BTreeMap::<String, String>::new();
+    let encoder = input.encoder().trim();
+    if !encoder.is_empty() && encoder.len() <= 1024 && !encoder.contains('\0') {
+        text.insert("ENCODER".into(), encoder.to_owned());
+    }
+    write_selected_with_text_metadata_overrides(
+        input,
+        output,
+        cancel,
+        progress,
+        max_packets,
+        requested,
+        RemuxMetadata {
+            file: &metadata,
+            tracks: &[],
+        },
+        &text,
+        &Default::default(),
+    )
 }
 
 /// Packet copy with caller-prepared file tags and chapters.

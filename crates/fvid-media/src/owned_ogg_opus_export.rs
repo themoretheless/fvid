@@ -103,6 +103,13 @@ impl Read for CheckedRead<'_> {
     }
 }
 pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<Program> {
+    open_with_transform(source, None, options)
+}
+pub(crate) fn open_with_transform(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<Program> {
     let selected = match options.streams.as_slice() {
         [] => None,
         [index] => Some(*index),
@@ -128,6 +135,16 @@ pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<Program> {
         .and_then(|n| n.checked_add(usize::from(program.channels()) * 5760 * 8 + 64 * 1024))
         .ok_or("Ogg decoder admission overflow")?;
     admit(estimate, options)?;
+    let until = transform
+        .and_then(|t| crate::owned_adts_export::decoded_prefix(t, 48000))
+        .map(|(_, end)| {
+            u64::try_from((end.as_nanos() * 48000).div_ceil(1_000_000_000))
+                .map_err(|_| "Opus prefix duration overflow".to_string())
+        })
+        .transpose()?;
+    if program.max_packet_size_in_prefix(until, options.max_packets) > options.max_packet_bytes {
+        return Err("Opus compressed packet exceeds byte limit".into());
+    }
     check(options)?;
     Ok(program)
 }
@@ -136,15 +153,19 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    match open(source, options) {
+    match open_with_transform(source, Some(transform), options) {
         Ok(program) => {
             let target = transform.channels.unwrap_or(i32::from(program.channels()));
+            let mask = program.output_channel_mask().unwrap_or(0);
             target == i32::from(program.channels())
-                || (crate::owned_pcm_channels::rematrix_layout_supported(
-                    program.channels(),
-                    program.output_channel_mask().unwrap_or(0),
-                ) && ((program.channels() <= 8 && matches!(target, 1 | 2))
-                    || (program.channels() <= 2 && (1..=8).contains(&target))))
+                || (((program.channels() <= 8 && matches!(target, 1 | 2))
+                    || (program.channels() <= 2 && (1..=8).contains(&target)))
+                    && ((program.channels() <= 2 && mask == 0)
+                        || (mask != 0
+                            && crate::owned_pcm_channels::rematrix_layout_supported(
+                                program.channels(),
+                                mask,
+                            ))))
         }
         Err(e) => e.starts_with("controlled memory budget exceeded:"),
     }
@@ -254,6 +275,23 @@ fn source_info(program: &Program) -> Result<Vec<u8>> {
 }
 pub(crate) fn info_for_tags(tags: &fvid_opus::OpusTags) -> Result<Vec<u8>> {
     let mut entries = Vec::new();
+    for comment in &tags.comments {
+        let Some((key, value)) = comment.split_once('=') else {
+            continue;
+        };
+        if value.is_empty() || value.contains('\0') {
+            continue;
+        }
+        if key.len() == 4
+            && !matches!(
+                key.to_ascii_uppercase().as_str(),
+                "DATE"
+            )
+            && crate::owned_wave_metadata::tag_for_key(key).is_ok()
+        {
+            entries.push((key.to_string(), value.to_string()));
+        }
+    }
     for (source, target) in [
         ("TITLE", "title"),
         ("ARTIST", "artist"),
@@ -328,7 +366,7 @@ pub(crate) fn apply(
         return Err("output already exists".into());
     }
     check(options)?;
-    let mut program = open(source, options)?;
+    let mut program = open_with_transform(source, Some(transform), options)?;
     let channels = program.channels();
     let mask = program.output_channel_mask().unwrap_or(0);
     let info = source_info(&program)?;

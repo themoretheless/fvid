@@ -284,11 +284,20 @@ pub(crate) fn admit_audio_reader_targeted<R: Read + Seek>(
         .tracks()
         .get(index)
         .ok_or_else(|| invalid("selected audio stream is absent"))?;
+    let active_samples = if track.edits.is_empty() {
+        options
+            .max_packets
+            .map(|m| usize::try_from(m).unwrap_or(usize::MAX))
+            .unwrap_or(track.samples.len())
+            .min(track.samples.len())
+    } else {
+        track.samples.len()
+    };
     let mut decoder = 0usize;
     let mut checkpoint = 0usize;
     let mut configuration = 0usize;
     for i in 0..track.sample_descriptions.len() {
-        if !(0..track.samples.len()).any(|n| track.samples.get(n).is_some_and(|s| s.description_index as usize == i+1)) { continue; }
+        if !(0..active_samples).any(|n| track.samples.get(n).is_some_and(|s| s.description_index as usize == i+1)) { continue; }
         let setup = track.decoder_setup((i+1) as u32)?;
         let state = mp4_decoder_admission(&setup)?;
         decoder = decoder.max(state);
@@ -308,12 +317,15 @@ pub(crate) fn admit_audio_reader_targeted<R: Read + Seek>(
     add(decoder)?;
     add(track.sample_descriptions.len())?; // per-description in-band PS flags
     add(configuration.checked_mul(2).ok_or_else(overflow)?)?; // initial and replacement decoder headers
-    if target.is_some() || track.description_for_sample(0).is_some_and(|d| d.sample_rate>0 && track.timescale%d.sample_rate!=0) || (0..track.samples.len()).any(|n|track.description_for_sample(n)!=track.description_for_sample(0)) {
+    if target.is_some() || track.description_for_sample(0).is_some_and(|d| d.sample_rate>0 && track.timescale%d.sample_rate!=0) || (0..active_samples).any(|n|track.description_for_sample(n)!=track.description_for_sample(0)) {
         let first=track.description_for_sample(0).ok_or_else(||invalid("MP4 audio has no samples"))?;
         let output_rate=target.map_or(first.sample_rate,|t|t.0);
         let output_channels=usize::from(target.map_or(first.channels.max(2),|t|t.1));
         let mut normalization=0usize;
-        for description in &track.sample_descriptions {
+        for (i, description) in track.sample_descriptions.iter().enumerate() {
+            if !(0..active_samples).any(|n| track.samples.get(n).is_some_and(|s| s.description_index as usize == i + 1)) {
+                continue;
+            }
             if description.sample_rate==0 || output_rate==0 {return Err(invalid("zero MP4 normalization clock"));}
             let radius=usize::try_from(crate::owned_resample::input_radius(description.sample_rate,output_rate)).map_err(|_|overflow())?;
             // Geometric queue capacity, f64 slots (also bounds f32), four scalar
@@ -325,7 +337,7 @@ pub(crate) fn admit_audio_reader_targeted<R: Read + Seek>(
         }
         add(normalization)?;
         // Two geometric capacities of rational per-configuration clock records.
-        add(track.samples.len().max(4).checked_mul(320).ok_or_else(overflow)?)?;
+        add(active_samples.max(4).checked_mul(320).ok_or_else(overflow)?)?;
     }
 
     for bytes in [
@@ -359,11 +371,14 @@ pub(crate) fn admit_audio_reader_targeted<R: Read + Seek>(
         ),
     };
     add(records.checked_mul(width).ok_or_else(overflow)?)?;
-    let largest_packet = (0..track.samples.len())
+    let largest_packet = (0..active_samples)
         .filter_map(|i| track.samples.get(i))
         .map(|s| s.size as usize)
         .max()
         .unwrap_or(0);
+    if largest_packet > options.max_packet_bytes {
+        return Err(invalid("MP4 packet exceeds budget"));
+    }
     // The reusable packet Vec may grow geometrically while reading larger packets.
     let expansion = track.sample_descriptions.iter().map(|d| match &d.codec {
         b"MAC3" | b"MAC6" => 64,
@@ -422,13 +437,11 @@ pub(crate) fn decode_mp4_audio_pcm_targeted<R: Read + Seek>(
         hook.emit(control.event);
     }
     control.check()?;
-    let reader = Mp4TimelineReader::open_indexed(
+    let mut reader = Mp4TimelineReader::open_indexed(
         source,
-        crate::owned_mp4::Limits {
-            packet_bytes: options.max_packet_bytes,
-            ..Default::default()
-        },
+        crate::owned_mp4::Limits::default(),
     )?;
+    reader.restrict_packet_bytes(options.max_packet_bytes);
     let index = mp4_audio_index(&reader, selected)?;
     admit_audio_reader_targeted(&reader, index, options,target)?;
     decode_mp4_audio_reader_targeted(reader, output, interval, selected, &mut control,target)
@@ -445,7 +458,6 @@ mod mp4_export_clock {
     include!("owned_mp4_edit_clock_impl.rs");
 }
 include!("owned_mp4_audio_timeline_impl.rs");
-
 
 #[cfg(test)]
 mod admission_tests {
@@ -578,13 +590,11 @@ mod precise {
             hook.emit(control.event);
         }
         control.check()?;
-        let reader = Mp4TimelineReader::open_indexed(
+        let mut reader = Mp4TimelineReader::open_indexed(
             source,
-            crate::owned_mp4::Limits {
-                packet_bytes: options.max_packet_bytes,
-                ..Default::default()
-            },
+            crate::owned_mp4::Limits::default(),
         )?;
+        reader.restrict_packet_bytes(options.max_packet_bytes);
         let index = mp4_audio_index(&reader, selected)?;
         admit_audio_reader_targeted(&reader, index, options,target)?;
         decode_mp4_audio_reader_targeted(reader, output, interval, selected, &mut control,target)
