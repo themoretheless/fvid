@@ -43,6 +43,16 @@ impl SpeakerLayout {
         Ok(())
     }
 
+    /// Convert only WAVE positions represented by this speaker vocabulary.
+    /// Higher WAVE bits must not be confused with the extended SMPTE roles.
+    pub fn from_wave_mask(mask:u32)->Option<Self> {
+        use Speaker::*;
+        if mask==0 || mask & !((1u32<<15)-1)!=0 {return None;}
+        let roles=[Left,Right,Centre,Lfe,LeftRear,RightRear,LeftCentre,RightCentre,
+            BackCentre,LeftSurround,RightSurround,TopCentre,HeightLeft,HeightCentre,HeightRight];
+        Some(Self(roles.into_iter().enumerate().filter(|(bit,_)|mask&(1<<bit)!=0).map(|(_,role)|role).collect()))
+    }
+
     pub fn wave_mask(&self) -> Option<u32> {
         let mut mask = 0;
         for &s in &self.0 {

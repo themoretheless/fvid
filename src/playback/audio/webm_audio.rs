@@ -1642,6 +1642,11 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
         self.eac3_stereo_output=enabled;
         Ok(())
     }
+    fn eac3_output_layout(&self)->Option<crate::codec::eac3_decoder::presentation::SpeakerLayout> {
+        if self.codec_tag!="A_EAC3" {return None;}
+        if !self.eac3_stereo_output && let Some(layout)=self.native_eac3_layout() {return Some(layout.clone());}
+        crate::audio::eac3_mask_output_layout(self)
+    }
     fn speaker_mask(&self)->Result<Option<u32>>{
         if (self.eac3_stereo_output && self.codec_tag=="A_EAC3") || (self.ac3_stereo_output && self.codec_tag=="A_AC3") {return Ok(Some(3));}
         if self.codec_tag=="A_EAC3" && let Some(l)=self.native_eac3_layout() {return Ok(l.wave_mask());}

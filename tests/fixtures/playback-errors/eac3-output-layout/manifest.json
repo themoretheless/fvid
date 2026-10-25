@@ -311,6 +311,16 @@
       ],
       "output_channels": 8,
       "output_mask": null,
+      "output_roles": [
+        "Left",
+        "Right",
+        "Centre",
+        "Lfe",
+        "LeftSurround",
+        "RightSurround",
+        "TopSurroundLeft",
+        "TopSurroundRight"
+      ],
       "samples": 2304,
       "chan_loc": 0
     },
@@ -327,6 +337,16 @@
       ],
       "output_channels": 8,
       "output_mask": null,
+      "output_roles": [
+        "Left",
+        "Right",
+        "Centre",
+        "Lfe",
+        "LeftSurround",
+        "RightSurround",
+        "TopSurroundLeft",
+        "TopSurroundRight"
+      ],
       "samples": 2304,
       "chan_loc": 0
     },
@@ -502,6 +522,18 @@
       ],
       "output_channels": 10,
       "output_mask": null,
+      "output_roles": [
+        "Left",
+        "Right",
+        "Centre",
+        "Lfe",
+        "LeftRear",
+        "RightRear",
+        "LeftSurround",
+        "RightSurround",
+        "TopSurroundLeft",
+        "TopSurroundRight"
+      ],
       "samples": 124416,
       "chan_loc": 2
     },
@@ -677,6 +709,18 @@
       ],
       "output_channels": 10,
       "output_mask": null,
+      "output_roles": [
+        "Left",
+        "Right",
+        "Centre",
+        "Lfe",
+        "LeftRear",
+        "RightRear",
+        "LeftSurround",
+        "RightSurround",
+        "TopSurroundLeft",
+        "TopSurroundRight"
+      ],
       "samples": 124416,
       "chan_loc": 2
     }
