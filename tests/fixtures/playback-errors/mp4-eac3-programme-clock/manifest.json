@@ -1,0 +1,6269 @@
+{
+  "cases": [
+    {
+      "file": "dual-48000-900-floor.mp4",
+      "programme": 0,
+      "control": "dual-48000-p0-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-floor.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-floor.mp4",
+      "programme": 2,
+      "control": "dual-48000-p2-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-floor.mp4",
+      "programme": 3,
+      "control": "dual-48000-p3-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-floor.mp4",
+      "programme": 4,
+      "control": "dual-48000-p4-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-floor.mp4",
+      "programme": 5,
+      "control": "dual-48000-p5-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-floor.mp4",
+      "programme": 6,
+      "control": "dual-48000-p6-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-floor.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-ceil.mp4",
+      "programme": 0,
+      "control": "dual-48000-p0-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-ceil.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-ceil.mp4",
+      "programme": 2,
+      "control": "dual-48000-p2-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-ceil.mp4",
+      "programme": 3,
+      "control": "dual-48000-p3-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-ceil.mp4",
+      "programme": 4,
+      "control": "dual-48000-p4-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-ceil.mp4",
+      "programme": 5,
+      "control": "dual-48000-p5-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-ceil.mp4",
+      "programme": 6,
+      "control": "dual-48000-p6-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-ceil.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-nearest.mp4",
+      "programme": 0,
+      "control": "dual-48000-p0-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-nearest.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-nearest.mp4",
+      "programme": 2,
+      "control": "dual-48000-p2-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-nearest.mp4",
+      "programme": 3,
+      "control": "dual-48000-p3-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-nearest.mp4",
+      "programme": 4,
+      "control": "dual-48000-p4-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-nearest.mp4",
+      "programme": 5,
+      "control": "dual-48000-p5-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-nearest.mp4",
+      "programme": 6,
+      "control": "dual-48000-p6-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-900-nearest.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-floor.mp4",
+      "programme": 0,
+      "control": "dual-48000-p0-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-floor.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-floor.mp4",
+      "programme": 2,
+      "control": "dual-48000-p2-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-floor.mp4",
+      "programme": 3,
+      "control": "dual-48000-p3-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-floor.mp4",
+      "programme": 4,
+      "control": "dual-48000-p4-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-floor.mp4",
+      "programme": 5,
+      "control": "dual-48000-p5-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-floor.mp4",
+      "programme": 6,
+      "control": "dual-48000-p6-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-floor.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-ceil.mp4",
+      "programme": 0,
+      "control": "dual-48000-p0-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-ceil.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-ceil.mp4",
+      "programme": 2,
+      "control": "dual-48000-p2-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-ceil.mp4",
+      "programme": 3,
+      "control": "dual-48000-p3-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-ceil.mp4",
+      "programme": 4,
+      "control": "dual-48000-p4-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-ceil.mp4",
+      "programme": 5,
+      "control": "dual-48000-p5-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-ceil.mp4",
+      "programme": 6,
+      "control": "dual-48000-p6-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-ceil.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-nearest.mp4",
+      "programme": 0,
+      "control": "dual-48000-p0-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-nearest.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-nearest.mp4",
+      "programme": 2,
+      "control": "dual-48000-p2-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-nearest.mp4",
+      "programme": 3,
+      "control": "dual-48000-p3-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-nearest.mp4",
+      "programme": 4,
+      "control": "dual-48000-p4-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-nearest.mp4",
+      "programme": 5,
+      "control": "dual-48000-p5-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-nearest.mp4",
+      "programme": 6,
+      "control": "dual-48000-p6-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1000-nearest.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-floor.mp4",
+      "programme": 0,
+      "control": "dual-48000-p0-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-floor.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-floor.mp4",
+      "programme": 2,
+      "control": "dual-48000-p2-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-floor.mp4",
+      "programme": 3,
+      "control": "dual-48000-p3-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-floor.mp4",
+      "programme": 4,
+      "control": "dual-48000-p4-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-floor.mp4",
+      "programme": 5,
+      "control": "dual-48000-p5-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-floor.mp4",
+      "programme": 6,
+      "control": "dual-48000-p6-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-floor.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-ceil.mp4",
+      "programme": 0,
+      "control": "dual-48000-p0-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-ceil.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-ceil.mp4",
+      "programme": 2,
+      "control": "dual-48000-p2-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-ceil.mp4",
+      "programme": 3,
+      "control": "dual-48000-p3-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-ceil.mp4",
+      "programme": 4,
+      "control": "dual-48000-p4-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-ceil.mp4",
+      "programme": 5,
+      "control": "dual-48000-p5-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-ceil.mp4",
+      "programme": 6,
+      "control": "dual-48000-p6-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-ceil.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-nearest.mp4",
+      "programme": 0,
+      "control": "dual-48000-p0-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-nearest.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-nearest.mp4",
+      "programme": 2,
+      "control": "dual-48000-p2-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-nearest.mp4",
+      "programme": 3,
+      "control": "dual-48000-p3-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-nearest.mp4",
+      "programme": 4,
+      "control": "dual-48000-p4-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-nearest.mp4",
+      "programme": 5,
+      "control": "dual-48000-p5-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-nearest.mp4",
+      "programme": 6,
+      "control": "dual-48000-p6-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "dual-48000-1001-nearest.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-floor.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-floor.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-floor.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-floor.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-floor.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-floor.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-floor.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-floor.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-ceil.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-ceil.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-ceil.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-ceil.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-ceil.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-ceil.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-ceil.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-ceil.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-nearest.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-nearest.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-nearest.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-nearest.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-nearest.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-nearest.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-nearest.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-900-nearest.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-floor.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-floor.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-floor.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-floor.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-floor.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-floor.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-floor.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-floor.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-ceil.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-ceil.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-ceil.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-ceil.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-ceil.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-ceil.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-ceil.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-ceil.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-nearest.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-nearest.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-nearest.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-nearest.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-nearest.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-nearest.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-nearest.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1000-nearest.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-floor.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-floor.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-floor.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-floor.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-floor.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-floor.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-floor.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-floor.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-ceil.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-ceil.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-ceil.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-ceil.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-ceil.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-ceil.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-ceil.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-ceil.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-nearest.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-nearest.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-nearest.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-nearest.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-nearest.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-nearest.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-nearest.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-1001-nearest.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-floor.mp4",
+      "programme": 0,
+      "control": "expanded-48000-b3-p0-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-floor.mp4",
+      "programme": 1,
+      "control": "expanded-48000-b3-p1-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-floor.mp4",
+      "programme": 2,
+      "control": "expanded-48000-b3-p2-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-floor.mp4",
+      "programme": 3,
+      "control": "expanded-48000-b3-p3-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-floor.mp4",
+      "programme": 4,
+      "control": "expanded-48000-b3-p4-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-floor.mp4",
+      "programme": 5,
+      "control": "expanded-48000-b3-p5-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-floor.mp4",
+      "programme": 6,
+      "control": "expanded-48000-b3-p6-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-floor.mp4",
+      "programme": 7,
+      "control": "expanded-48000-b3-p7-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-ceil.mp4",
+      "programme": 0,
+      "control": "expanded-48000-b3-p0-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-ceil.mp4",
+      "programme": 1,
+      "control": "expanded-48000-b3-p1-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-ceil.mp4",
+      "programme": 2,
+      "control": "expanded-48000-b3-p2-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-ceil.mp4",
+      "programme": 3,
+      "control": "expanded-48000-b3-p3-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-ceil.mp4",
+      "programme": 4,
+      "control": "expanded-48000-b3-p4-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-ceil.mp4",
+      "programme": 5,
+      "control": "expanded-48000-b3-p5-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-ceil.mp4",
+      "programme": 6,
+      "control": "expanded-48000-b3-p6-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-ceil.mp4",
+      "programme": 7,
+      "control": "expanded-48000-b3-p7-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-nearest.mp4",
+      "programme": 0,
+      "control": "expanded-48000-b3-p0-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-nearest.mp4",
+      "programme": 1,
+      "control": "expanded-48000-b3-p1-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-nearest.mp4",
+      "programme": 2,
+      "control": "expanded-48000-b3-p2-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-nearest.mp4",
+      "programme": 3,
+      "control": "expanded-48000-b3-p3-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-nearest.mp4",
+      "programme": 4,
+      "control": "expanded-48000-b3-p4-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-nearest.mp4",
+      "programme": 5,
+      "control": "expanded-48000-b3-p5-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-nearest.mp4",
+      "programme": 6,
+      "control": "expanded-48000-b3-p6-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-900-nearest.mp4",
+      "programme": 7,
+      "control": "expanded-48000-b3-p7-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-floor.mp4",
+      "programme": 0,
+      "control": "expanded-48000-b3-p0-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-floor.mp4",
+      "programme": 1,
+      "control": "expanded-48000-b3-p1-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-floor.mp4",
+      "programme": 2,
+      "control": "expanded-48000-b3-p2-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-floor.mp4",
+      "programme": 3,
+      "control": "expanded-48000-b3-p3-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-floor.mp4",
+      "programme": 4,
+      "control": "expanded-48000-b3-p4-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-floor.mp4",
+      "programme": 5,
+      "control": "expanded-48000-b3-p5-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-floor.mp4",
+      "programme": 6,
+      "control": "expanded-48000-b3-p6-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-floor.mp4",
+      "programme": 7,
+      "control": "expanded-48000-b3-p7-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-ceil.mp4",
+      "programme": 0,
+      "control": "expanded-48000-b3-p0-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-ceil.mp4",
+      "programme": 1,
+      "control": "expanded-48000-b3-p1-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-ceil.mp4",
+      "programme": 2,
+      "control": "expanded-48000-b3-p2-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-ceil.mp4",
+      "programme": 3,
+      "control": "expanded-48000-b3-p3-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-ceil.mp4",
+      "programme": 4,
+      "control": "expanded-48000-b3-p4-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-ceil.mp4",
+      "programme": 5,
+      "control": "expanded-48000-b3-p5-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-ceil.mp4",
+      "programme": 6,
+      "control": "expanded-48000-b3-p6-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-ceil.mp4",
+      "programme": 7,
+      "control": "expanded-48000-b3-p7-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-nearest.mp4",
+      "programme": 0,
+      "control": "expanded-48000-b3-p0-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-nearest.mp4",
+      "programme": 1,
+      "control": "expanded-48000-b3-p1-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-nearest.mp4",
+      "programme": 2,
+      "control": "expanded-48000-b3-p2-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-nearest.mp4",
+      "programme": 3,
+      "control": "expanded-48000-b3-p3-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-nearest.mp4",
+      "programme": 4,
+      "control": "expanded-48000-b3-p4-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-nearest.mp4",
+      "programme": 5,
+      "control": "expanded-48000-b3-p5-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-nearest.mp4",
+      "programme": 6,
+      "control": "expanded-48000-b3-p6-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1000-nearest.mp4",
+      "programme": 7,
+      "control": "expanded-48000-b3-p7-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-floor.mp4",
+      "programme": 0,
+      "control": "expanded-48000-b3-p0-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-floor.mp4",
+      "programme": 1,
+      "control": "expanded-48000-b3-p1-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-floor.mp4",
+      "programme": 2,
+      "control": "expanded-48000-b3-p2-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-floor.mp4",
+      "programme": 3,
+      "control": "expanded-48000-b3-p3-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-floor.mp4",
+      "programme": 4,
+      "control": "expanded-48000-b3-p4-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-floor.mp4",
+      "programme": 5,
+      "control": "expanded-48000-b3-p5-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-floor.mp4",
+      "programme": 6,
+      "control": "expanded-48000-b3-p6-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-floor.mp4",
+      "programme": 7,
+      "control": "expanded-48000-b3-p7-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-ceil.mp4",
+      "programme": 0,
+      "control": "expanded-48000-b3-p0-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-ceil.mp4",
+      "programme": 1,
+      "control": "expanded-48000-b3-p1-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-ceil.mp4",
+      "programme": 2,
+      "control": "expanded-48000-b3-p2-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-ceil.mp4",
+      "programme": 3,
+      "control": "expanded-48000-b3-p3-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-ceil.mp4",
+      "programme": 4,
+      "control": "expanded-48000-b3-p4-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-ceil.mp4",
+      "programme": 5,
+      "control": "expanded-48000-b3-p5-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-ceil.mp4",
+      "programme": 6,
+      "control": "expanded-48000-b3-p6-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-ceil.mp4",
+      "programme": 7,
+      "control": "expanded-48000-b3-p7-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-nearest.mp4",
+      "programme": 0,
+      "control": "expanded-48000-b3-p0-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-nearest.mp4",
+      "programme": 1,
+      "control": "expanded-48000-b3-p1-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-nearest.mp4",
+      "programme": 2,
+      "control": "expanded-48000-b3-p2-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-nearest.mp4",
+      "programme": 3,
+      "control": "expanded-48000-b3-p3-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-nearest.mp4",
+      "programme": 4,
+      "control": "expanded-48000-b3-p4-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-nearest.mp4",
+      "programme": 5,
+      "control": "expanded-48000-b3-p5-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-nearest.mp4",
+      "programme": 6,
+      "control": "expanded-48000-b3-p6-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-48000-b3-1001-nearest.mp4",
+      "programme": 7,
+      "control": "expanded-48000-b3-p7-control.mp4",
+      "rate": 48000,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-floor.mp4",
+      "programme": 0,
+      "control": "expanded-44100-b6-p0-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-floor.mp4",
+      "programme": 1,
+      "control": "expanded-44100-b6-p1-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-floor.mp4",
+      "programme": 2,
+      "control": "expanded-44100-b6-p2-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-floor.mp4",
+      "programme": 3,
+      "control": "expanded-44100-b6-p3-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-floor.mp4",
+      "programme": 4,
+      "control": "expanded-44100-b6-p4-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-floor.mp4",
+      "programme": 5,
+      "control": "expanded-44100-b6-p5-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-floor.mp4",
+      "programme": 6,
+      "control": "expanded-44100-b6-p6-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-floor.mp4",
+      "programme": 7,
+      "control": "expanded-44100-b6-p7-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-ceil.mp4",
+      "programme": 0,
+      "control": "expanded-44100-b6-p0-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-ceil.mp4",
+      "programme": 1,
+      "control": "expanded-44100-b6-p1-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-ceil.mp4",
+      "programme": 2,
+      "control": "expanded-44100-b6-p2-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-ceil.mp4",
+      "programme": 3,
+      "control": "expanded-44100-b6-p3-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-ceil.mp4",
+      "programme": 4,
+      "control": "expanded-44100-b6-p4-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-ceil.mp4",
+      "programme": 5,
+      "control": "expanded-44100-b6-p5-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-ceil.mp4",
+      "programme": 6,
+      "control": "expanded-44100-b6-p6-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-ceil.mp4",
+      "programme": 7,
+      "control": "expanded-44100-b6-p7-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-nearest.mp4",
+      "programme": 0,
+      "control": "expanded-44100-b6-p0-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-nearest.mp4",
+      "programme": 1,
+      "control": "expanded-44100-b6-p1-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-nearest.mp4",
+      "programme": 2,
+      "control": "expanded-44100-b6-p2-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-nearest.mp4",
+      "programme": 3,
+      "control": "expanded-44100-b6-p3-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-nearest.mp4",
+      "programme": 4,
+      "control": "expanded-44100-b6-p4-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-nearest.mp4",
+      "programme": 5,
+      "control": "expanded-44100-b6-p5-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-nearest.mp4",
+      "programme": 6,
+      "control": "expanded-44100-b6-p6-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-900-nearest.mp4",
+      "programme": 7,
+      "control": "expanded-44100-b6-p7-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-floor.mp4",
+      "programme": 0,
+      "control": "expanded-44100-b6-p0-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-floor.mp4",
+      "programme": 1,
+      "control": "expanded-44100-b6-p1-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-floor.mp4",
+      "programme": 2,
+      "control": "expanded-44100-b6-p2-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-floor.mp4",
+      "programme": 3,
+      "control": "expanded-44100-b6-p3-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-floor.mp4",
+      "programme": 4,
+      "control": "expanded-44100-b6-p4-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-floor.mp4",
+      "programme": 5,
+      "control": "expanded-44100-b6-p5-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-floor.mp4",
+      "programme": 6,
+      "control": "expanded-44100-b6-p6-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-floor.mp4",
+      "programme": 7,
+      "control": "expanded-44100-b6-p7-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-ceil.mp4",
+      "programme": 0,
+      "control": "expanded-44100-b6-p0-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-ceil.mp4",
+      "programme": 1,
+      "control": "expanded-44100-b6-p1-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-ceil.mp4",
+      "programme": 2,
+      "control": "expanded-44100-b6-p2-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-ceil.mp4",
+      "programme": 3,
+      "control": "expanded-44100-b6-p3-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-ceil.mp4",
+      "programme": 4,
+      "control": "expanded-44100-b6-p4-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-ceil.mp4",
+      "programme": 5,
+      "control": "expanded-44100-b6-p5-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-ceil.mp4",
+      "programme": 6,
+      "control": "expanded-44100-b6-p6-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-ceil.mp4",
+      "programme": 7,
+      "control": "expanded-44100-b6-p7-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-nearest.mp4",
+      "programme": 0,
+      "control": "expanded-44100-b6-p0-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-nearest.mp4",
+      "programme": 1,
+      "control": "expanded-44100-b6-p1-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-nearest.mp4",
+      "programme": 2,
+      "control": "expanded-44100-b6-p2-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-nearest.mp4",
+      "programme": 3,
+      "control": "expanded-44100-b6-p3-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-nearest.mp4",
+      "programme": 4,
+      "control": "expanded-44100-b6-p4-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-nearest.mp4",
+      "programme": 5,
+      "control": "expanded-44100-b6-p5-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-nearest.mp4",
+      "programme": 6,
+      "control": "expanded-44100-b6-p6-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1000-nearest.mp4",
+      "programme": 7,
+      "control": "expanded-44100-b6-p7-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-floor.mp4",
+      "programme": 0,
+      "control": "expanded-44100-b6-p0-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-floor.mp4",
+      "programme": 1,
+      "control": "expanded-44100-b6-p1-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-floor.mp4",
+      "programme": 2,
+      "control": "expanded-44100-b6-p2-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-floor.mp4",
+      "programme": 3,
+      "control": "expanded-44100-b6-p3-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-floor.mp4",
+      "programme": 4,
+      "control": "expanded-44100-b6-p4-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-floor.mp4",
+      "programme": 5,
+      "control": "expanded-44100-b6-p5-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-floor.mp4",
+      "programme": 6,
+      "control": "expanded-44100-b6-p6-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-floor.mp4",
+      "programme": 7,
+      "control": "expanded-44100-b6-p7-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-ceil.mp4",
+      "programme": 0,
+      "control": "expanded-44100-b6-p0-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-ceil.mp4",
+      "programme": 1,
+      "control": "expanded-44100-b6-p1-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-ceil.mp4",
+      "programme": 2,
+      "control": "expanded-44100-b6-p2-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-ceil.mp4",
+      "programme": 3,
+      "control": "expanded-44100-b6-p3-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-ceil.mp4",
+      "programme": 4,
+      "control": "expanded-44100-b6-p4-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-ceil.mp4",
+      "programme": 5,
+      "control": "expanded-44100-b6-p5-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-ceil.mp4",
+      "programme": 6,
+      "control": "expanded-44100-b6-p6-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-ceil.mp4",
+      "programme": 7,
+      "control": "expanded-44100-b6-p7-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-nearest.mp4",
+      "programme": 0,
+      "control": "expanded-44100-b6-p0-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-nearest.mp4",
+      "programme": 1,
+      "control": "expanded-44100-b6-p1-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-nearest.mp4",
+      "programme": 2,
+      "control": "expanded-44100-b6-p2-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-nearest.mp4",
+      "programme": 3,
+      "control": "expanded-44100-b6-p3-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-nearest.mp4",
+      "programme": 4,
+      "control": "expanded-44100-b6-p4-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-nearest.mp4",
+      "programme": 5,
+      "control": "expanded-44100-b6-p5-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-nearest.mp4",
+      "programme": 6,
+      "control": "expanded-44100-b6-p6-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "expanded-44100-b6-1001-nearest.mp4",
+      "programme": 7,
+      "control": "expanded-44100-b6-p7-control.mp4",
+      "rate": 44100,
+      "channels": 8,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-floor.mp4",
+      "programme": 0,
+      "control": "51-32000-p0-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-floor.mp4",
+      "programme": 1,
+      "control": "51-32000-p1-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-floor.mp4",
+      "programme": 2,
+      "control": "51-32000-p2-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-floor.mp4",
+      "programme": 3,
+      "control": "51-32000-p3-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-floor.mp4",
+      "programme": 4,
+      "control": "51-32000-p4-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-floor.mp4",
+      "programme": 5,
+      "control": "51-32000-p5-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-floor.mp4",
+      "programme": 6,
+      "control": "51-32000-p6-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-floor.mp4",
+      "programme": 7,
+      "control": "51-32000-p7-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-ceil.mp4",
+      "programme": 0,
+      "control": "51-32000-p0-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-ceil.mp4",
+      "programme": 1,
+      "control": "51-32000-p1-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-ceil.mp4",
+      "programme": 2,
+      "control": "51-32000-p2-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-ceil.mp4",
+      "programme": 3,
+      "control": "51-32000-p3-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-ceil.mp4",
+      "programme": 4,
+      "control": "51-32000-p4-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-ceil.mp4",
+      "programme": 5,
+      "control": "51-32000-p5-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-ceil.mp4",
+      "programme": 6,
+      "control": "51-32000-p6-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-ceil.mp4",
+      "programme": 7,
+      "control": "51-32000-p7-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-nearest.mp4",
+      "programme": 0,
+      "control": "51-32000-p0-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-nearest.mp4",
+      "programme": 1,
+      "control": "51-32000-p1-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-nearest.mp4",
+      "programme": 2,
+      "control": "51-32000-p2-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-nearest.mp4",
+      "programme": 3,
+      "control": "51-32000-p3-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-nearest.mp4",
+      "programme": 4,
+      "control": "51-32000-p4-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-nearest.mp4",
+      "programme": 5,
+      "control": "51-32000-p5-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-nearest.mp4",
+      "programme": 6,
+      "control": "51-32000-p6-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-900-nearest.mp4",
+      "programme": 7,
+      "control": "51-32000-p7-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-floor.mp4",
+      "programme": 0,
+      "control": "51-32000-p0-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-floor.mp4",
+      "programme": 1,
+      "control": "51-32000-p1-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-floor.mp4",
+      "programme": 2,
+      "control": "51-32000-p2-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-floor.mp4",
+      "programme": 3,
+      "control": "51-32000-p3-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-floor.mp4",
+      "programme": 4,
+      "control": "51-32000-p4-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-floor.mp4",
+      "programme": 5,
+      "control": "51-32000-p5-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-floor.mp4",
+      "programme": 6,
+      "control": "51-32000-p6-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-floor.mp4",
+      "programme": 7,
+      "control": "51-32000-p7-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-ceil.mp4",
+      "programme": 0,
+      "control": "51-32000-p0-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-ceil.mp4",
+      "programme": 1,
+      "control": "51-32000-p1-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-ceil.mp4",
+      "programme": 2,
+      "control": "51-32000-p2-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-ceil.mp4",
+      "programme": 3,
+      "control": "51-32000-p3-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-ceil.mp4",
+      "programme": 4,
+      "control": "51-32000-p4-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-ceil.mp4",
+      "programme": 5,
+      "control": "51-32000-p5-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-ceil.mp4",
+      "programme": 6,
+      "control": "51-32000-p6-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-ceil.mp4",
+      "programme": 7,
+      "control": "51-32000-p7-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-nearest.mp4",
+      "programme": 0,
+      "control": "51-32000-p0-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-nearest.mp4",
+      "programme": 1,
+      "control": "51-32000-p1-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-nearest.mp4",
+      "programme": 2,
+      "control": "51-32000-p2-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-nearest.mp4",
+      "programme": 3,
+      "control": "51-32000-p3-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-nearest.mp4",
+      "programme": 4,
+      "control": "51-32000-p4-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-nearest.mp4",
+      "programme": 5,
+      "control": "51-32000-p5-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-nearest.mp4",
+      "programme": 6,
+      "control": "51-32000-p6-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1000-nearest.mp4",
+      "programme": 7,
+      "control": "51-32000-p7-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-floor.mp4",
+      "programme": 0,
+      "control": "51-32000-p0-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-floor.mp4",
+      "programme": 1,
+      "control": "51-32000-p1-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-floor.mp4",
+      "programme": 2,
+      "control": "51-32000-p2-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-floor.mp4",
+      "programme": 3,
+      "control": "51-32000-p3-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-floor.mp4",
+      "programme": 4,
+      "control": "51-32000-p4-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-floor.mp4",
+      "programme": 5,
+      "control": "51-32000-p5-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-floor.mp4",
+      "programme": 6,
+      "control": "51-32000-p6-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-floor.mp4",
+      "programme": 7,
+      "control": "51-32000-p7-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-ceil.mp4",
+      "programme": 0,
+      "control": "51-32000-p0-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-ceil.mp4",
+      "programme": 1,
+      "control": "51-32000-p1-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-ceil.mp4",
+      "programme": 2,
+      "control": "51-32000-p2-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-ceil.mp4",
+      "programme": 3,
+      "control": "51-32000-p3-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-ceil.mp4",
+      "programme": 4,
+      "control": "51-32000-p4-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-ceil.mp4",
+      "programme": 5,
+      "control": "51-32000-p5-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-ceil.mp4",
+      "programme": 6,
+      "control": "51-32000-p6-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-ceil.mp4",
+      "programme": 7,
+      "control": "51-32000-p7-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-nearest.mp4",
+      "programme": 0,
+      "control": "51-32000-p0-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-nearest.mp4",
+      "programme": 1,
+      "control": "51-32000-p1-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-nearest.mp4",
+      "programme": 2,
+      "control": "51-32000-p2-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-nearest.mp4",
+      "programme": 3,
+      "control": "51-32000-p3-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-nearest.mp4",
+      "programme": 4,
+      "control": "51-32000-p4-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-nearest.mp4",
+      "programme": 5,
+      "control": "51-32000-p5-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-nearest.mp4",
+      "programme": 6,
+      "control": "51-32000-p6-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "51-32000-1001-nearest.mp4",
+      "programme": 7,
+      "control": "51-32000-p7-control.mp4",
+      "rate": 32000,
+      "channels": 6,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-floor.mp4",
+      "programme": 0,
+      "control": "dual-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-floor.mp4",
+      "programme": 1,
+      "control": "dual-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-floor.mp4",
+      "programme": 2,
+      "control": "dual-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-floor.mp4",
+      "programme": 3,
+      "control": "dual-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-floor.mp4",
+      "programme": 4,
+      "control": "dual-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-floor.mp4",
+      "programme": 5,
+      "control": "dual-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-floor.mp4",
+      "programme": 6,
+      "control": "dual-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-floor.mp4",
+      "programme": 7,
+      "control": "dual-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-ceil.mp4",
+      "programme": 0,
+      "control": "dual-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-ceil.mp4",
+      "programme": 1,
+      "control": "dual-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-ceil.mp4",
+      "programme": 2,
+      "control": "dual-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-ceil.mp4",
+      "programme": 3,
+      "control": "dual-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-ceil.mp4",
+      "programme": 4,
+      "control": "dual-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-ceil.mp4",
+      "programme": 5,
+      "control": "dual-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-ceil.mp4",
+      "programme": 6,
+      "control": "dual-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-ceil.mp4",
+      "programme": 7,
+      "control": "dual-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-nearest.mp4",
+      "programme": 0,
+      "control": "dual-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-nearest.mp4",
+      "programme": 1,
+      "control": "dual-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-nearest.mp4",
+      "programme": 2,
+      "control": "dual-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-nearest.mp4",
+      "programme": 3,
+      "control": "dual-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-nearest.mp4",
+      "programme": 4,
+      "control": "dual-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-nearest.mp4",
+      "programme": 5,
+      "control": "dual-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-nearest.mp4",
+      "programme": 6,
+      "control": "dual-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-900-nearest.mp4",
+      "programme": 7,
+      "control": "dual-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-floor.mp4",
+      "programme": 0,
+      "control": "dual-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-floor.mp4",
+      "programme": 1,
+      "control": "dual-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-floor.mp4",
+      "programme": 2,
+      "control": "dual-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-floor.mp4",
+      "programme": 3,
+      "control": "dual-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-floor.mp4",
+      "programme": 4,
+      "control": "dual-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-floor.mp4",
+      "programme": 5,
+      "control": "dual-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-floor.mp4",
+      "programme": 6,
+      "control": "dual-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-floor.mp4",
+      "programme": 7,
+      "control": "dual-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-ceil.mp4",
+      "programme": 0,
+      "control": "dual-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-ceil.mp4",
+      "programme": 1,
+      "control": "dual-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-ceil.mp4",
+      "programme": 2,
+      "control": "dual-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-ceil.mp4",
+      "programme": 3,
+      "control": "dual-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-ceil.mp4",
+      "programme": 4,
+      "control": "dual-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-ceil.mp4",
+      "programme": 5,
+      "control": "dual-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-ceil.mp4",
+      "programme": 6,
+      "control": "dual-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-ceil.mp4",
+      "programme": 7,
+      "control": "dual-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-nearest.mp4",
+      "programme": 0,
+      "control": "dual-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-nearest.mp4",
+      "programme": 1,
+      "control": "dual-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-nearest.mp4",
+      "programme": 2,
+      "control": "dual-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-nearest.mp4",
+      "programme": 3,
+      "control": "dual-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-nearest.mp4",
+      "programme": 4,
+      "control": "dual-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-nearest.mp4",
+      "programme": 5,
+      "control": "dual-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-nearest.mp4",
+      "programme": 6,
+      "control": "dual-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1000-nearest.mp4",
+      "programme": 7,
+      "control": "dual-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-floor.mp4",
+      "programme": 0,
+      "control": "dual-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-floor.mp4",
+      "programme": 1,
+      "control": "dual-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-floor.mp4",
+      "programme": 2,
+      "control": "dual-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-floor.mp4",
+      "programme": 3,
+      "control": "dual-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-floor.mp4",
+      "programme": 4,
+      "control": "dual-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-floor.mp4",
+      "programme": 5,
+      "control": "dual-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-floor.mp4",
+      "programme": 6,
+      "control": "dual-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-floor.mp4",
+      "programme": 7,
+      "control": "dual-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-ceil.mp4",
+      "programme": 0,
+      "control": "dual-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-ceil.mp4",
+      "programme": 1,
+      "control": "dual-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-ceil.mp4",
+      "programme": 2,
+      "control": "dual-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-ceil.mp4",
+      "programme": 3,
+      "control": "dual-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-ceil.mp4",
+      "programme": 4,
+      "control": "dual-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-ceil.mp4",
+      "programme": 5,
+      "control": "dual-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-ceil.mp4",
+      "programme": 6,
+      "control": "dual-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-ceil.mp4",
+      "programme": 7,
+      "control": "dual-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-nearest.mp4",
+      "programme": 0,
+      "control": "dual-44100-p0-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-nearest.mp4",
+      "programme": 1,
+      "control": "dual-44100-p1-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-nearest.mp4",
+      "programme": 2,
+      "control": "dual-44100-p2-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-nearest.mp4",
+      "programme": 3,
+      "control": "dual-44100-p3-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-nearest.mp4",
+      "programme": 4,
+      "control": "dual-44100-p4-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-nearest.mp4",
+      "programme": 5,
+      "control": "dual-44100-p5-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-nearest.mp4",
+      "programme": 6,
+      "control": "dual-44100-p6-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "placeholder-rate-1001-nearest.mp4",
+      "programme": 7,
+      "control": "dual-44100-p7-control.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-floor.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-floor.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-floor.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-floor.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-floor.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control-variable.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-floor.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control-variable.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-floor.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-floor.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control-variable.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-ceil.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-ceil.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-ceil.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-ceil.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-ceil.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control-variable.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-ceil.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control-variable.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-ceil.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-ceil.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control-variable.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-nearest.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-nearest.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-nearest.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-nearest.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-nearest.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control-variable.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-nearest.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control-variable.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-nearest.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-900-nearest.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control-variable.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-floor.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-floor.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-floor.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-floor.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-floor.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control-variable.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-floor.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control-variable.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-floor.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-floor.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control-variable.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-ceil.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-ceil.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-ceil.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-ceil.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-ceil.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control-variable.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-ceil.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control-variable.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-ceil.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-ceil.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control-variable.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-nearest.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-nearest.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-nearest.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-nearest.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-nearest.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control-variable.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-nearest.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control-variable.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-nearest.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1000-nearest.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control-variable.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-floor.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-floor.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-floor.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-floor.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-floor.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control-variable.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-floor.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control-variable.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-floor.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-floor.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control-variable.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-ceil.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-ceil.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-ceil.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-ceil.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-ceil.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control-variable.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-ceil.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control-variable.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-ceil.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-ceil.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control-variable.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-nearest.mp4",
+      "programme": 0,
+      "control": "heterogeneous-44100-p0-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-nearest.mp4",
+      "programme": 1,
+      "control": "heterogeneous-44100-p1-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-nearest.mp4",
+      "programme": 2,
+      "control": "heterogeneous-44100-p2-control-variable.mp4",
+      "rate": 44100,
+      "channels": 2,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-nearest.mp4",
+      "programme": 3,
+      "control": "heterogeneous-44100-p3-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-nearest.mp4",
+      "programme": 4,
+      "control": "heterogeneous-44100-p4-control-variable.mp4",
+      "rate": 44100,
+      "channels": 3,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-nearest.mp4",
+      "programme": 5,
+      "control": "heterogeneous-44100-p5-control-variable.mp4",
+      "rate": 44100,
+      "channels": 5,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-nearest.mp4",
+      "programme": 6,
+      "control": "heterogeneous-44100-p6-control-variable.mp4",
+      "rate": 44100,
+      "channels": 4,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "heterogeneous-44100-variable-1001-nearest.mp4",
+      "programme": 7,
+      "control": "heterogeneous-44100-p7-control-variable.mp4",
+      "rate": 44100,
+      "channels": 6,
+      "samples_per_packet": [
+        768,
+        2304,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p1-900-floor.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p1-900-ceil.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p1-900-nearest.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p1-1000-floor.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p1-1000-ceil.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p1-1000-nearest.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p1-1001-floor.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p1-1001-ceil.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p1-1001-nearest.mp4",
+      "programme": 1,
+      "control": "dual-48000-p1-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p7-900-floor.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p7-900-ceil.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p7-900-nearest.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p7-1000-floor.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p7-1000-ceil.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p7-1000-nearest.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p7-1001-floor.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p7-1001-ceil.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    },
+    {
+      "file": "corrupt-unselected-p7-1001-nearest.mp4",
+      "programme": 7,
+      "control": "dual-48000-p7-control.mp4",
+      "rate": 48000,
+      "channels": 3,
+      "samples_per_packet": [
+        1536,
+        1536,
+        1536
+      ]
+    }
+  ],
+  "provenance": "Existing repository-authored neutral VP9 and authored E-AC-3 independent/dependent spectra from eac3-mp4-programmes. No private media, process, FFmpeg or network."
+}

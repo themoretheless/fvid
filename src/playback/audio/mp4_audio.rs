@@ -220,7 +220,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
     /// Open a specific audio track by index.
     pub fn from_demuxer(demuxer:Mp4Reader<R>,index:usize)->Result<Self>{Self::from_programme(demuxer,index,None)}
     fn from_programme(mut demuxer: Mp4Reader<R>, index: usize,programme:Option<u8>) -> Result<Self> {
-        let clock=PlaybackClock::build(&mut demuxer,index)?;
+        let clock=PlaybackClock::build(&mut demuxer,index,programme.unwrap_or(0))?;
         if clock.is_some() || demuxer.tracks().get(index).is_some_and(|t|t.ensure_constant_description().is_err()) {
             return Self::from_changing(demuxer,index,programme,clock);
         }

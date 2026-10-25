@@ -18346,6 +18346,44 @@ Acceptance compares PCM and timing, 96 ms duration, six seek positions, rewind,
 and the actual playback worker with a capturing backend. Generation is checked
 byte-for-byte with process and network access disabled.
 
-E-AC-3 programme-aware clock recovery, additional codec profiles/tools, other
-container clock cases and physical-device timing remain open. The finite AC-3
+Additional E-AC-3 clock cases, remaining codec profiles/tools, other container
+clock cases and physical-device timing remain open. The finite AC-3
 matrix does not establish universal AC-3 or complete codec coverage.
+
+
+### Selected E-AC-3 programmes retain native MP4 sample clocks
+
+The playback clock now counts coding blocks only from the selected independent
+programme. Dependent substreams and other independent IDs are skipped with the
+owned envelope parser and do not multiply presentation duration. The player's
+count adapter reads each selected header, supports multiple cycles per packet,
+and preserves packet identity through delayed native/presentation PCM. Geometry
+and native sample rate come from the selected CRC-checked programme, including
+placeholder-rate entries; original container PTS/duration/configuration stay
+unchanged. The shared run builder accepts per-description native-rate overrides
+and a count adapter. Existing media-operation callers retain their original
+adapter and declared-rate behavior; no Dolby export backend is implied.
+
+Per-description rate storage uses checked allocation. Packet scanning does not
+expand the compressed sample index into a vector of packet indices. Fixed-size
+runs retain scalar counts; unequal packet windows use the existing lazy prefix
+cache. No default memory cap, common-u32-LCM requirement or external codec is
+introduced.
+
+The owned video fixtures qualify 522 movie/programme combinations: all eight IDs,
+48/44.1/32 kHz, heterogeneous/native and dependent 8-channel layouts, 3/6-block
+frames, three coarse scales and rounding modes, placeholder sample rates and
+768/2304/1536-sample packet windows. Separate single-programme controls verify
+selection and exact native PCM, not just agreement with the multiplexed path.
+Corrupt unselected payloads are included in acceptance. A separate refusal test
+rejects missing/corrupt selected IDs without default fallback. Parent production
+reproduces the precise 31.111111 ms versus 32 ms packet-clock error.
+
+Acceptance also checks native duration, five seek targets and rewind for every
+combination, plus the real scheduling worker's EOF/seek/rewind and output geometry
+on representative native/expanded/placeholder/unequal-window paths. Generator
+output is byte-exact with subprocess and network access disabled.
+
+Coarse-clock edits, access units split across MP4 packets, further codec tools
+and profiles, other container combinations and physical-device timing remain
+unqualified by this matrix. Complete codec coverage remains an active goal.

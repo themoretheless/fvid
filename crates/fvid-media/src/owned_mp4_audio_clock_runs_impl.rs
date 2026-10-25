@@ -18,6 +18,15 @@ fn mp4_tick_matches(point: Mp4ExportTime, ticks: i128, scale: u32) -> Result<boo
 fn mp4_packet_clock_runs<R: std::io::Read + std::io::Seek>(
     reader: &mut Mp4TimelineReader<R>, index: usize, control: &DecodeProgress<'_>,
 ) -> Result<Vec<Mp4PacketClockRun>> {
+    mp4_packet_clock_runs_with(reader,index,control,None,mp4_coded_packet_frames)
+}
+fn mp4_packet_clock_runs_with<R,F>(
+    reader:&mut Mp4TimelineReader<R>, index:usize, control:&DecodeProgress<'_>,
+    rates:Option<&[u32]>, mut coded_frames:F,
+)->Result<Vec<Mp4PacketClockRun>>
+where R:std::io::Read+std::io::Seek,
+      F:FnMut(&[u8;4],&[u8],u32,u16,u16,usize,Option<&[u8]>)->std::result::Result<u64,String>,
+{
     let count=reader.tracks()[index].samples.len();
     let count=control.packet_limit().map(|n|usize::try_from(n).unwrap_or(usize::MAX).min(count)).unwrap_or(count);
     let mut result:Vec<Mp4PacketClockRun>=Vec::new();
@@ -27,7 +36,7 @@ fn mp4_packet_clock_runs<R: std::io::Read + std::io::Seek>(
         let source=&reader.tracks()[index];
         let sample=source.samples.get(first).ok_or_else(||invalid("missing MP4 clock sample"))?;
         let setup=source.decoder_setup(sample.description_index)?;
-        let scale=source.timescale;let rate=setup.sample_rate;
+        let scale=source.timescale;let rate=match rates {Some(rates)=>*rates.get(sample.description_index as usize-1).ok_or_else(||invalid("missing MP4 native clock rate"))?,None=>setup.sample_rate};
         if scale==0 || rate==0 {return Err(invalid("zero MP4 packet clock"));}
         let mut last=first+1;
         while last<count && source.description_for_sample(last)==source.description_for_sample(first) {last+=1;}
@@ -46,8 +55,8 @@ fn mp4_packet_clock_runs<R: std::io::Read + std::io::Seek>(
             if declared_end.is_some_and(|expected|expected!=begin) {return Err(invalid("non-contiguous MP4 audio timeline"));}
             declared_end=Some(end);
             if quantized {
-                let payload=if matches!(&setup.codec,b"alac"|b"ac-3") {reader.read_packet(index,i,&mut packet)?;Some(packet.as_slice())}else{None};
-                let frames=mp4_coded_packet_frames(&setup.codec,&setup.configuration,rate,setup.channels,setup.bit_depth,sample.size as usize,payload).map_err(|e|invalid(&e))?;
+                let payload=if matches!(&setup.codec,b"alac"|b"ac-3"|b"ec-3") {reader.read_packet(index,i,&mut packet)?;Some(packet.as_slice())}else{None};
+                let frames=coded_frames(&setup.codec,&setup.configuration,rate,setup.channels,setup.bit_depth,sample.size as usize,payload).map_err(|e|invalid(&e))?;
                 let start=origin.add(Mp4ExportTime::new(i128::from(native),u128::from(rate))?)?;
                 if let Some(fixed)=fixed_frames {
                     if fixed!=frames && prefix.is_empty() {
