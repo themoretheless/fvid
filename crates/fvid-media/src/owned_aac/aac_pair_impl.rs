@@ -234,6 +234,14 @@ impl ChannelPair {
         };
         *bits=cursor; Ok((Self {left,right,mid_side,explicit_mask},prediction))
     }
+    pub fn read_eld(bits:&mut BitReader<'_>,config:&AacConfig)->Result<Self>{
+        let mut cursor=bits.clone();
+        let info=ChannelData::eld_info(&mut cursor,config)?;
+        let (explicit_mask,mid_side)=Self::read_mask(&mut cursor,Some(&info))?;
+        let left=ChannelData::read_eld(&mut cursor,config,Some(&info),true)?;
+        let right=ChannelData::read_eld(&mut cursor,config,Some(&info),true)?;
+        *bits=cursor;Ok(Self{left,right,mid_side,explicit_mask})
+    }
     fn read_er_prediction(bits: &mut BitReader<'_>, info: &super::aac_ics::IcsInfo, config: &AacConfig)
         -> Result<Option<super::aac_ltp_syntax::LtpData>> {
         if bits.bit()? {
