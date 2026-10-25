@@ -1415,6 +1415,18 @@ impl Eac3Decoder {
         Ok(decoder)
     }
 
+    /// Explicit L/R output for samples read from a container. Container timing
+    /// owns encoder-delay trimming; unlike `new_stereo`, this removes no raw
+    /// elementary-stream priming. Reset retains both this timing and stereo mode.
+    /// This folds the selected independent/compatibility programme, not an
+    /// extended dependent presentation. Configure container presentation windows
+    /// separately, as for other container decoders.
+    pub fn for_container_stereo(configuration: &[u8], sample_rate: u32) -> Result<Self> {
+        let mut decoder = Self::for_container(configuration, sample_rate, 2)?;
+        decoder.force_stereo = true;
+        Ok(decoder)
+    }
+
     pub(crate) fn for_container(
         configuration: &[u8],
         sample_rate: u32,
