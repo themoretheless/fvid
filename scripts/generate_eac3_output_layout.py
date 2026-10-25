@@ -66,6 +66,39 @@ def generate():
    config=None;files[name+'-no-dec3.mp4']=configure(audiovisual(groups,mode,lfe,width))
    mask={1:4,2:12,3:7,4:15,5:0x607,6:0x60f}[width]
    cases.append(dict(name=name,rate=48000,blocks=3,transient=transient,replacement=True,active_channels=[width]*3,output_channels=width,output_mask=mask,samples=2304,legacy_no_dec3=name+'-no-dec3.mp4'))
+ # ETSI E.1.4 includes Lts/Rts, but dec3.chan_loc has no bit for it.
+ # Exercise both initial presence and a late change beyond bounded setup probes.
+ for late in [False,True]:
+  for transient in [False,True]:
+   name='top-'+('late-'if late else'')+('transient'if transient else'plain')
+   groups=[];controls=[[],[]];count=162 if late else 3
+   for f in range(count):
+    base,_=packet(7,True,0,0,'mixed',None,False,blocks_override=3,divisor=16,compact=True)
+    windows=[(0,255),(240,127)]if transient else None
+    mapping=0x0004 if not late or f==160 else 0x0200
+    dep,_=packet(2,False,0,0,'mixed',mapping,True,blocks_override=3,divisor=32,transient_windows=windows,compact=True)
+    control,_=packet(2,False,0,0,'mixed',None,False,blocks_override=3,divisor=32,transient_windows=windows,compact=True)
+    groups.append(base+dep);controls[0].append(base);controls[1].append(control)
+   files[name+'.ec3']=b''.join(groups);files[name+'.mkv']=movie(groups,blocks=3,channels=8)
+   for i,c in enumerate(controls):files[f'{name}-control{i}.ec3']=b''.join(c)
+   w=BitWriter().put(200,13).put(0,3).put(0,2).put(16,5).zeros(5).put(7,3).put(1,1).zeros(3).put(1,4).put(2 if late else 0,9)
+   config=bytes(sum(w.bits[i+j]<<(7-j)for j in range(8))for i in range(0,len(w.bits),8))
+   mp4=configure(audiovisual(groups,7,True,8))
+   def full_duration(data):
+    result=b''
+    for k,b in boxes(data):
+     if k==b'moov':b=full_duration(b)
+     elif k==b'mvhd':b=bytearray(b);b[16:20]=max(60,count*16).to_bytes(4,'big')
+     elif k==b'trak'and b'ec-3'in b:
+      track=b''
+      for kind,body in boxes(b):
+       if kind==b'tkhd':body=bytearray(body);body[20:24]=(count*16).to_bytes(4,'big')
+       track+=atom(kind,body)
+      b=track
+     result+=atom(k,b)
+    return result
+   files[name+'.mp4']=full_duration(mp4)
+   cases.append(dict(name=name,rate=48000,blocks=3,transient=transient,late=late,active_channels=[8]*count,output_channels=10 if late else 8,output_mask=None,samples=count*768,chan_loc=2 if late else 0))
  # Re-author only metadata of an existing repository-owned synthetic AAC/PS
  # witness, exercising non-Dolby factory stack size without external encoders.
  from generate_aac_ps_core_clock_fixtures import rewrite_audio

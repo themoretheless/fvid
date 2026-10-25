@@ -449,37 +449,8 @@ impl<R: Read + Seek> WebmAudioReader<R> {
 
     fn scan_eac3_speakers(&mut self) -> Result<Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>> {
         let (mut index,mut offset)=(0,0);
-        let mut parent=None;
-        let mut dependent=false;
-        let mut roles=std::collections::BTreeSet::new();
-        loop {
-            let mut prefix=[0u8;16];
-            let n=self.eac3_range(&mut index,&mut offset,6,Some(&mut prefix[..6]))?;
-            if n==0 {break;}
-            if n!=6 {return Err(invalid("truncated E-AC-3 layout scan header"));}
-            let h=crate::codec::ac3_decoder::dolby_prefix(&prefix[..6])
-                .filter(|h|h[..2]==[0x0b,0x77]).ok_or_else(||invalid("invalid E-AC-3 layout scan sync"))?;
-            let kind=h[2]>>6;
-            let id=(h[2]>>3)&7;
-            let size=(usize::from(h[2]&7)*256+usize::from(h[3])+1)*2;
-            if size<6 || kind==3 {return Err(invalid("invalid E-AC-3 layout scan envelope"));}
-            if kind!=1 {parent=Some(id);}
-            let selected=parent==Some(self.eac3_programme);
-            let header=if selected {size.min(16)}else{6};
-            if self.eac3_range(&mut index,&mut offset,header-6,Some(&mut prefix[6..header]))?!=header-6 {
-                return Err(invalid("truncated E-AC-3 layout scan BSI"));
-            }
-            if selected {
-                dependent |= kind==1;
-                roles.extend(crate::codec::eac3_decoder::presentation::header_speakers(&prefix[..header])?.0);
-            }
-            if self.eac3_range(&mut index,&mut offset,size-header,None)?!=size-header {
-                return Err(invalid("truncated E-AC-3 layout scan frame"));
-            }
-        }
-        if roles.len()<=6 && !dependent {return Ok(None);}
-        let layout=crate::codec::eac3_decoder::presentation::SpeakerLayout(roles.into_iter().collect());
-        layout.validate_output()?; Ok(Some(layout))
+        crate::codec::eac3_decoder::presentation::scan_stream_speakers(self.eac3_programme,
+            |wanted,out|self.eac3_range(&mut index,&mut offset,wanted,out))
     }
 
     fn probe_eac3_programme(&mut self)->Result<()> {

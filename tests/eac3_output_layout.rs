@@ -53,7 +53,7 @@ fn control_with_mode(name: &str, i: usize, width: u16, raw: bool, mode:fvid::cod
         )
     }
     .unwrap().with_compression(mode);
-    d.decode_complete(&bytes, 0, if name == "late" { 162*768 } else { 2304 })
+    d.decode_complete(&bytes, 0, if name.contains("late") { 162*768 } else { 2304 })
         .unwrap()
         .unwrap()
         .data
@@ -618,4 +618,104 @@ fn native_six_map_preserves_priming_gain_reset_and_compatibility() {
     assert!(d.set_output_layout(six_layout()).is_err());
     let mut stereo=Box::new(Eac3Decoder::new_stereo(&[],48000).unwrap());
     assert!(stereo.set_output_layout(SpeakerLayout(vec![Speaker::Left,Speaker::Right])).is_err());
+}
+
+
+fn top_expected(name:&str,raw:bool)->Vec<u8> {
+    let late=name.contains("late");let width=if late {10}else{8};
+    let base=control(name,0,6,raw);let dep=control(name,1,2,raw);
+    let count=base.len()/6;assert_eq!(dep.len(),count*2);
+    let mut out=vec![0f32;count*width];
+    for n in 0..count {
+        for i in 0..6 {let slot=if late && i>=4 {i+2}else{i};out[n*width+slot]=base[n*6+i];}
+        let frame=(n+if raw {256}else{0})/768;
+        let slot=if late && frame!=160 {4}else{width-2};
+        out[n*width+slot..n*width+slot+2].copy_from_slice(&dep[n*2..n*2+2]);
+    }
+    out.into_iter().flat_map(f32::to_le_bytes).collect()
+}
+fn source_packets(s:&mut dyn AudioStream)->Vec<(Duration,Vec<u8>)> {
+    use fvid::audio::AudioStep;
+    let mut d=s.make_decoder().unwrap();let mut out=Vec::new();
+    while let Some(step)=s.next_step().unwrap() {
+        match step {
+            AudioStep::Encoded(p)=>{
+                let stamp=s.decoder_stamp(&p);
+                if let Some(p)=d.decode_packet(&p.data,stamp,p.duration as u64).unwrap() {
+                    if let Some(p)=s.present_decoded(p.packet,p.source_pts).unwrap() {out.push((p.presentation_time(),p.data));}
+                }
+            },
+            AudioStep::ResetDecoder=>s.reset_decoder(&mut d).unwrap(),
+            _=>panic!("unexpected source step"),
+        }
+    }
+    out.extend(d.drain_presented(s).into_iter().map(|p|(p.presentation_time(),p.data)));
+    s.validate_eof().unwrap();out
+}
+#[test]
+fn top_surround_roles_missing_from_dec3_keep_native_pcm_clocks_seek_and_rewind() {
+    for name in ["top-plain","top-transient","top-late-plain","top-late-transient"] {
+        for kind in ["mp4","ec3","mkv"] {
+            let mut s=source(name,kind);let late=name.contains("late");let width=if late {10}else{8};
+            assert_eq!(s.channels(),width as u16,"{name}.{kind}");
+            assert_eq!(s.speaker_mask().unwrap(),None);
+            assert!(s.stereo_router().err().unwrap().to_string().contains("extended speaker mask"));
+            let pcm=top_expected(name,kind=="ec3");
+            let count=if late {162}else{3};let mut offset=0;let mut expected=Vec::new();
+            for frame in 0..count {
+                let n=if frame==0 && kind=="ec3" {512}else{768};
+                expected.push((Duration::from_nanos(offset as u64*1_000_000_000/48000),pcm[offset*width*4..(offset+n)*width*4].to_vec()));offset+=n;
+            }
+            for _ in 0..2 {assert!(source_packets(&mut *s)==expected,"{name}.{kind}");s.rewind();}
+            let target=Duration::from_millis(if late {2562}else{20});let floor=target.as_millis() as usize*48;
+            s.seek_time(target);let got=source_packets(&mut *s);
+            assert_eq!(got.first().unwrap().0,target);
+            assert!(got.into_iter().flat_map(|(_,b)|b).eq(pcm[floor*width*4..].iter().copied()),"seek {name}.{kind}");
+        }
+    }
+}
+
+#[test]
+fn mp4_packet_ranges_preserve_cursor_bounds_and_packet_budget() {
+    use fvid_media::owned_mp4::{Mp4Reader,Limits};
+    let bytes=read("top-late-plain.mp4");
+    let mut r=Mp4Reader::open_indexed(Cursor::new(bytes.clone()),Default::default()).unwrap();
+    let track=r.tracks().iter().position(|t|t.codec==*b"ec-3").unwrap();
+    for sample in [0,160,161] {
+        let mut full=Vec::new();r.read_packet(track,sample,&mut full).unwrap();
+        for start in [0,1,6,full.len()/2,full.len()] {
+            let mut out=[0xa5;17];let n=r.read_packet_range(track,sample,start,&mut out).unwrap();
+            assert_eq!(&out[..n],&full[start..(start+17).min(full.len())]);
+            assert!(out[n..].iter().all(|&x|x==0xa5));
+            let mut again=Vec::new();r.read_packet(track,sample,&mut again).unwrap();assert_eq!(again,full);
+        }
+        assert!(r.read_packet_range(track,sample,full.len()+1,&mut[0;1]).is_err());
+    }
+    assert!(r.read_packet_range(usize::MAX,0,0,&mut[0;1]).is_err());
+    let mut tiny=Mp4Reader::open_indexed(Cursor::new(bytes),Limits{packet_bytes:1,..Default::default()}).unwrap();
+    assert!(tiny.read_packet_range(track,0,0,&mut[0;1]).unwrap_err().to_string().contains("budget"));
+}
+
+#[test]
+fn top_surround_stereo_policy_keeps_standard_independent_downmix() {
+    use fvid::audio_thread::DolbyPlaybackPolicy;
+    for name in ["top-plain","top-transient","top-late-plain","top-late-transient"] {
+        for kind in ["mp4","ec3","mkv"] {
+            let raw=kind=="ec3";let count=if name.contains("late") {162}else{3};
+            let bytes=read(&format!("{name}-control0.ec3"));
+            let mut control=if raw {Eac3Decoder::new_stereo(&[],48000)}else{Eac3Decoder::for_container_stereo(&[],48000)}.unwrap();
+            let pcm=control.decode_complete(&bytes,0,count*768).unwrap().unwrap().data;
+            let mut offset=0;let mut expected=Vec::new();let mut sought=Vec::new();
+            let target=Duration::from_millis(if count==162 {2562}else{20});let floor=target.as_millis() as usize*48;
+            for frame in 0..count {
+                let n=if frame==0 && raw {512}else{768};
+                expected.push((Duration::from_nanos(offset as u64*1_000_000_000/48000),pcm[offset*8..(offset+n)*8].to_vec()));
+                let start=offset.max(floor);
+                if start<offset+n {sought.push((Duration::from_nanos(start as u64*1_000_000_000/48000),pcm[start*8..(offset+n)*8].to_vec()));}
+                offset+=n;
+            }
+            capture::worker_check_with_dolby_policy(source(name,kind),&expected,target,&sought,Some(3),
+                DolbyPlaybackPolicy{eac3_stereo_output:true,..Default::default()});
+        }
+    }
 }

@@ -771,6 +771,25 @@ impl<R: Read + Seek> Mp4Reader<R> {
         self.position = sample.offset.saturating_add(u64::from(sample.size));
         Ok(())
     }
+    /// Read a bounded sample range without allocating or reading the remainder.
+    /// Packet admission remains identical to a full packet read.
+    pub fn read_packet_range(&mut self,track:usize,sample:usize,start:usize,out:&mut[u8])->Result<usize> {
+        let sample=self.tracks.get(track).and_then(|t|t.samples.get(sample))
+            .ok_or_else(||invalid("MP4 packet index out of range"))?;
+        let size=sample.size as usize;
+        if size>self.limits.packet_bytes {return Err(invalid("MP4 packet exceeds budget"));}
+        if start>size {return Err(invalid("MP4 packet range starts beyond payload"));}
+        let n=out.len().min(size-start);
+        if n==0 {return Ok(0);}
+        let offset=sample.offset.checked_add(start as u64).ok_or_else(||invalid("MP4 range offset overflow"))?;
+        if self.position!=offset {
+            self.position=u64::MAX;
+            self.reader.seek(SeekFrom::Start(offset))?;
+        }
+        if let Err(error)=self.reader.read_exact(&mut out[..n]) {self.position=u64::MAX;return Err(error.into());}
+        self.position=offset.checked_add(n as u64).ok_or_else(||invalid("MP4 range end overflow"))?;
+        Ok(n)
+    }
     /// Forget the tracked read position; the next `read_packet` seeks again.
     pub fn invalidate_position(&mut self) {
         self.position = u64::MAX;
