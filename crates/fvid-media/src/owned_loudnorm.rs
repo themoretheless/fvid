@@ -126,8 +126,10 @@ pub(crate) fn supports(
             let pcm_options = crate::owned_adts_export::pcm_decode_options(options);
             (params.print == Print::None || crate::owned_wave_loudness::supports(source, &pcm_options))
                 && std::fs::File::open(source).is_ok_and(|mut file| {
-                    crate::owned_wave_inspect::inspect(&mut file, None)
-                        .is_ok_and(|info| params.gain.is_some() || dynamic_input(&info))
+                    crate::owned_wave_inspect::inspect(&mut file, None).is_ok_and(|info| {
+                        info.sample_frames > 0
+                            && (params.gain.is_some() || dynamic_input(&info))
+                    })
                 })
         })
 }
@@ -186,6 +188,31 @@ pub fn plan_loudnorm(
         options,
     ) {
         return Err("request has no owned WAVE loudnorm route".into());
+    }
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet limit leaves no decoded audio samples".into());
+    }
+    let mut wave_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    let wave_info = crate::owned_wave_inspect::inspect(&mut wave_file, options.cancel.as_ref())
+        .map_err(|e| e.to_string())?;
+    if wave_info.sample_frames == 0 {
+        return Err("no decoded audio samples or invalid channel count".into());
+    }
+    let frame_bytes = usize::from(wave_info.block);
+    let capacity = if frame_bytes == 0 {
+        0
+    } else {
+        (4096 * frame_bytes).min(options.max_packet_bytes / frame_bytes * frame_bytes)
+    };
+    if capacity == 0 {
+        return Err("PCM packet limit cannot hold one sample frame".into());
     }
     let info = crate::owned_probe::probe_wave(source).map_err(|e| e.to_string())?;
     let report = report_requested(Some(&resolved))?;
@@ -319,6 +346,10 @@ pub(crate) fn supports_dual(
             source,
             &crate::owned_adts_export::pcm_decode_options(options),
         )
+        && std::fs::File::open(source).is_ok_and(|mut file| {
+            crate::owned_wave_inspect::inspect(&mut file, None)
+                .is_ok_and(|info| info.sample_frames > 0)
+        })
 }
 fn apply_resolved(
     source: &Path,

@@ -89,7 +89,7 @@ fn wave_concat_and_remux_support_budgets_and_metadata_in_public_api_and_cli() {
             "--metadata-delete",
             "title",
             "--metadata",
-            "title=Edited WAVE Title",
+            "artist=Edited WAVE Artist",
         ])
         .output()
         .unwrap();
@@ -113,7 +113,7 @@ fn wave_concat_and_remux_support_budgets_and_metadata_in_public_api_and_cli() {
             "--metadata-delete",
             "title",
             "--metadata",
-            "title=Edited WAVE Title",
+            "artist=Edited WAVE Artist",
         ])
         .output()
         .unwrap();
@@ -123,9 +123,10 @@ fn wave_concat_and_remux_support_budgets_and_metadata_in_public_api_and_cli() {
         String::from_utf8_lossy(&cli_remux.stderr)
     );
     let cli_remux_info = fvid::media::probe(&cli_remux_out).unwrap();
+    assert!(!cli_remux_info.metadata.contains_key("title"));
     assert_eq!(
-        cli_remux_info.metadata.get("title").map(String::as_str),
-        Some("Edited WAVE Title")
+        cli_remux_info.metadata.get("artist").map(String::as_str),
+        Some("Edited WAVE Artist")
     );
 
     // 4. CLI `plan concat` and `concat` on WAVE with packet cap and metadata edits.
@@ -286,9 +287,10 @@ fn sample_domain_and_mp4_matroska_concat_enforce_budgets_in_api_and_cli() {
     assert!(fvid::media::concat(&mixed, &dir.0.join("never-pkt.mka"), &tight_pkt).is_err());
 
     let tight_work = CopyOptions {
-        max_packets: Some(1),
+        max_packets: Some(0),
         ..Default::default()
     };
+    assert!(fvid::media::plan_concat(&mixed, &tight_work).is_err());
     assert!(fvid::media::concat(&mixed, &dir.0.join("never-work.mka"), &tight_work).is_err());
 
     let tight_rss = CopyOptions {
@@ -341,4 +343,97 @@ fn sample_domain_and_mp4_matroska_concat_enforce_budgets_in_api_and_cli() {
         "{}",
         String::from_utf8_lossy(&cli_ok.stderr)
     );
+}
+
+#[test]
+fn remux_plan_adts_packet_scan_matroska_budget_step_and_plan_transcode_cli_parity() {
+    let corrupt_adts = fixture("adts-corrupt-second-packet.aac");
+    let valid_adts = fixture("adts-mono-48k.aac");
+    let matroska = fixture("video.mkv");
+    let mp4_pcm = fixture("mp4-pcm-48k.m4a");
+    let y4m = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/lossless-plan/source-8x4.y4m");
+
+    // 1. Corrupt ADTS second packet must be rejected by both `fvid::native_plan::remux`,
+    //    `fvid::media::plan_remux`, and `fvid media plan remux` even when called with default options.
+    let api_err = fvid::media::plan_remux(&corrupt_adts, &CopyOptions::default())
+        .expect_err("fvid::media::plan_remux must reject truncated second ADTS packet");
+    let native_err = fvid::native_plan::remux(&corrupt_adts)
+        .expect_err("fvid::native_plan::remux must scan ADTS packets and reject truncated second packet");
+    assert_eq!(native_err, api_err);
+
+    let cli_corrupt = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", "remux"])
+        .arg(&corrupt_adts)
+        .output()
+        .unwrap();
+    assert!(
+        !cli_corrupt.status.success(),
+        "fvid media plan remux must reject truncated second ADTS packet"
+    );
+
+    // 2. Matroska `fvid media plan remux` and `fvid::native_plan::remux` must match
+    //    `fvid::media::plan_remux` (including the `budget` step).
+    let expected_mkv_plan =
+        serde_json::to_value(fvid::media::plan_remux(&matroska, &CopyOptions::default()).unwrap())
+            .unwrap();
+    assert_eq!(
+        serde_json::to_value(fvid::native_plan::remux(&matroska).unwrap().unwrap()).unwrap(),
+        expected_mkv_plan
+    );
+    let cli_mkv = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", "remux"])
+        .arg(&matroska)
+        .output()
+        .unwrap();
+    assert!(
+        cli_mkv.status.success(),
+        "{}",
+        String::from_utf8_lossy(&cli_mkv.stderr)
+    );
+    assert_eq!(
+        serde_json::from_slice::<serde_json::Value>(&cli_mkv.stdout).unwrap(),
+        expected_mkv_plan
+    );
+
+    // 3. `fvid::media::plan_remux` must reject out-of-range stream selection on MP4, Matroska, and ADTS.
+    let mut bad_stream_opts = CopyOptions::default();
+    bad_stream_opts.streams = vec![99];
+    assert!(fvid::media::plan_remux(&mp4_pcm, &bad_stream_opts).is_err());
+    assert!(fvid::media::plan_remux(&matroska, &bad_stream_opts).is_err());
+    assert!(fvid::media::plan_remux(&valid_adts, &bad_stream_opts).is_err());
+
+    // 4. Shorthand `fvid media plan INPUT [--crop ...]` must work in default builds without `--features media`.
+    let cli_shorthand_remux = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", matroska.to_str().unwrap()])
+        .output()
+        .unwrap();
+    assert!(
+        cli_shorthand_remux.status.success(),
+        "shorthand plan INPUT (remux) failed: {}",
+        String::from_utf8_lossy(&cli_shorthand_remux.stderr)
+    );
+    assert_eq!(
+        serde_json::from_slice::<serde_json::Value>(&cli_shorthand_remux.stdout).unwrap(),
+        expected_mkv_plan
+    );
+
+    let cli_shorthand_lossless = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args([
+            "media",
+            "plan",
+            y4m.to_str().unwrap(),
+            "--crop",
+            "0:0:4:2",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        cli_shorthand_lossless.status.success(),
+        "shorthand plan INPUT --crop failed: {}",
+        String::from_utf8_lossy(&cli_shorthand_lossless.stderr)
+    );
+    let shorthand_lossless_json: serde_json::Value =
+        serde_json::from_slice(&cli_shorthand_lossless.stdout).unwrap();
+    assert_eq!(shorthand_lossless_json["command"], "transcode-lossless");
 }

@@ -38,7 +38,7 @@ pub(crate) fn recognizes(source: &Path) -> Result<bool> {
     }
     recognizes_standalone_audio(source)
 }
-fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, String)> {
+fn geometry_unqualified(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, String)> {
     if options.streams.len() > 1
         || !options.metadata_set.is_empty()
         || !options.metadata_delete.is_empty()
@@ -60,13 +60,21 @@ fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, Stri
         if crate::owned_mp4_audio_export::recognizes(source, options)? {
             crate::owned_mp4_audio_export::descriptor(source, options)?
         } else if crate::owned_g711_wave_export::recognizes(source, options)? {
-            let (rate, channels, mask, codec, _) =
+            let (rate, channels, mask, codec, frames) =
                 crate::owned_g711_wave_export::descriptor(source, options)?;
+            if frames == 0 {
+                return Err("loudness requires at least one audio frame".into());
+            }
             (0, rate, channels, mask, codec.into())
         } else if crate::owned_ogg_opus_export::recognizes(source)? {
             let (index, rate, channels, mask, codec) =
                 crate::owned_ogg_audio_export::descriptor(source, options)?;
-            (index, rate, channels, mask, codec.into())
+            let effective_mask = if mask == 0 && channels <= 2 {
+                crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32
+            } else {
+                mask
+            };
+            (index, rate, channels, effective_mask, codec.into())
         } else if crate::owned_raw_flac::recognizes(source)? {
             let (rate, channels, mask) = crate::owned_raw_flac::descriptor(source, options)?;
             let effective_mask = if mask == 0 && channels <= 2 {
@@ -85,6 +93,10 @@ fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, Stri
                     .ok_or("source is not a supported Matroska audio container")?;
             (index, rate, channels, mask, codec)
         };
+    Ok((rate, channels, mask, codec))
+}
+fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, String)> {
+    let (rate, channels, mask, codec) = geometry_unqualified(source, options)?;
     if mask == 0 || mask & !0x7ff != 0 {
         return Err("owned loudness speaker positions are not yet qualified".into());
     }
@@ -115,6 +127,29 @@ pub fn decode_to_wave(
     options: &CopyOptions,
 ) -> Result<crate::owned_adts_export::DecodedSpool> {
     let (rate, channels, mask, codec) = geometry(source, options)?;
+    decode_to_wave_from_geometry(source, rate, channels, mask, &codec, options)
+}
+pub fn decode_to_wave_unqualified(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<crate::owned_adts_export::DecodedSpool> {
+    let (rate, channels, mask, codec) = geometry_unqualified(source, options)?;
+    decode_to_wave_from_geometry(source, rate, channels, mask, &codec, options)
+}
+pub fn decode_adts_to_wave(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<crate::owned_adts_export::DecodedSpool> {
+    crate::owned_adts_export::decode_to_wave(source, None, options)
+}
+fn decode_to_wave_from_geometry(
+    source: &Path,
+    rate: u32,
+    channels: u16,
+    mask: u32,
+    codec: &str,
+    options: &CopyOptions,
+) -> Result<crate::owned_adts_export::DecodedSpool> {
     if crate::owned_g711_wave_export::recognizes(source, options)? {
         return crate::owned_g711_wave_export::decode_to_wave(source, options);
     }
@@ -182,7 +217,7 @@ pub fn decode_to_wave(
                 crate::owned_matroska_alac::decode_matroska_alac_pcm(file, writer, None, options)
             } else if codec == "flac" {
                 crate::owned_matroska_flac::decode_matroska_flac_pcm(file, writer, None, options)
-            } else if matches!(codec.as_str(), "mp1" | "mp2" | "mp3") {
+            } else if matches!(codec, "mp1" | "mp2" | "mp3") {
                 crate::owned_matroska_mpeg::decode_matroska_mpeg_pcm(file, writer, None, options)
             } else {
                 crate::owned_matroska_pcm::decode_matroska_pcm_f64(file, writer, None, options)

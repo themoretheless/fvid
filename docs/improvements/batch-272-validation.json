@@ -1,0 +1,31 @@
+{
+  "batch": 272,
+  "accepted": [
+    "FVID-0279"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-272-pre-edit/crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs",
+    "docs/improvements/snapshots/batch-272-pre-edit/crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs",
+    "docs/improvements/snapshots/batch-272-pre-edit/crates/fvid-media/src/owned_mp4_audio.rs",
+    "docs/improvements/snapshots/batch-272-pre-edit/crates/fvid-media/src/owned_mp4_audio_export.rs",
+    "docs/improvements/snapshots/batch-272-pre-edit/crates/fvid-media/src/owned_audio_plan.rs",
+    "docs/improvements/snapshots/batch-272-pre-edit/crates/fvid-media/src/owned_aac_export_routing.rs",
+    "docs/improvements/snapshots/batch-272-pre-edit/src/native_media.rs",
+    "docs/improvements/snapshots/batch-272-pre-edit/src/native_plan.rs",
+    "docs/improvements/snapshots/batch-272-pre-edit/src/native_export.rs",
+    "docs/improvements/snapshots/batch-272-pre-edit/src/media.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-272-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-272-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-272-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/mp4-adts-interval-prefix-budget/mp4-mono-then-ps.m4a",
+    "tests/fixtures/playback-errors/mp4-adts-interval-prefix-budget/adts-small-then-large.aac"
+  ],
+  "tests": [
+    "tests/mp4_adts_interval_prefix_budget_regression.rs",
+    "scripts/test_mp4_adts_interval_prefix_budget.py"
+  ]
+}

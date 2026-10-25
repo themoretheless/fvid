@@ -26,12 +26,28 @@ fn plan(
     steps.push(PlanStep{action:if sources.len()>1 {"concat"} else {"copy"}.into(),detail:format!("copy {} unchanged PCM bytes in {} frame-aligned blocks across {} input(s); {} Hz, {} channels, codec {}",stats.payload_bytes,stats.packets,stats.segments,info.sample_rate,info.channels,codec)});
     steps.push(PlanStep{action:"metadata".into(),detail:"preserve first input fmt/valid bits/channel mask and INFO metadata; apply container tag edits; rewrite RIFF/data/fact lengths".into()});
     steps.push(PlanStep{action:"publish".into(),detail:"publish completed .wav without overwriting; failure or cancellation removes temporary output".into()});
+    let mut notes = vec![
+        "backend: owned WAVE; no external demuxer, decoder or muxer".into(),
+        "owned output requires .wav; packet limits apply globally to frame-aligned input blocks of at most 4096 sample frames".into(),
+        "metadata-only preflight shares execution validation; PCM reads, output permissions and publication are checked during execution".into(),
+    ];
+    if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        || options.max_packets.is_some()
+        || options.max_controlled_bytes.is_some()
+        || options.max_rss_bytes.is_some()
+    {
+        notes.push(format!(
+            "encoded packet limit: {} bytes; packet work limit: {} packets; controlled memory limit: {} bytes; RSS limit: {} bytes",
+            options.max_packet_bytes,
+            options.max_packets.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options.max_controlled_bytes.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options.max_rss_bytes.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+        ));
+    }
     Ok(MediaPlan{
         command:command.into(),input:sources[0].to_owned(),inputs:sources.iter().map(|p|p.to_path_buf()).collect(),
         streams:vec![PlanStream{index:0,media_type:"audio".into(),codec,disposition:if interval.is_some() {"trim_pcm"} else {"copy"}.into()}],
-        steps,graph:None,notes:vec!["backend: owned WAVE; no external demuxer, decoder or muxer".into(),
-        "owned output requires .wav; packet limits apply globally to frame-aligned input blocks of at most 4096 sample frames".into(),
-        "metadata-only preflight shares execution validation; PCM reads, output permissions and publication are checked during execution".into()],
+        steps,graph:None,notes,
     })
 }
 pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
@@ -45,7 +61,9 @@ pub fn plan_trim(source: &Path, from: i64, to: i64, options: &CopyOptions) -> Re
         interval: Some((from, to)),
         ..Default::default()
     };
-    if crate::owned_audio_plan::supports(source, &transform, options) {
+    if !crate::owned_wave_inspect::is_wave(source).unwrap_or(false)
+        || crate::owned_g711_wave_export::recognizes(source, &CopyOptions::default()).unwrap_or(false)
+    {
         let mut planned = crate::owned_audio_plan::plan_decode_audio(source, &transform, options)?;
         planned.command = "trim".into();
         return Ok(planned);

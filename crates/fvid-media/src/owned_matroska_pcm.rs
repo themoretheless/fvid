@@ -100,7 +100,7 @@ mod precise {
             options.max_packet_bytes,
         )?;
         let index = matroska_audio_index(&reader, selected)?;
-        crate::owned_matroska_audio::admit_audio_reader(&mut reader, index, options)?;
+        crate::owned_matroska_audio::admit_audio_reader_with_interval(&mut reader, index, interval, options)?;
         decode_matroska_audio_reader_controlled(reader, output, interval, selected, &mut control)
     }
     include!("owned_matroska_audio_timeline_impl.rs");

@@ -725,6 +725,554 @@
       "chan_loc": 2
     }
   ],
+  "independent_cases": [
+    {
+      "name": "independent-m0-l0-plain",
+      "mode": 0,
+      "lfe": false,
+      "variant": "plain",
+      "channels": 2,
+      "blocks": 3,
+      "mask": 3,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m0-l0-transient",
+      "mode": 0,
+      "lfe": false,
+      "variant": "transient",
+      "channels": 2,
+      "blocks": 3,
+      "mask": 3,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m0-l0-gain",
+      "mode": 0,
+      "lfe": false,
+      "variant": "gain",
+      "channels": 2,
+      "blocks": 3,
+      "mask": 3,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m0-l0-aht",
+      "mode": 0,
+      "lfe": false,
+      "variant": "aht",
+      "channels": 2,
+      "blocks": 6,
+      "mask": 3,
+      "samples": 4608
+    },
+    {
+      "name": "independent-m0-l1-plain",
+      "mode": 0,
+      "lfe": true,
+      "variant": "plain",
+      "channels": 3,
+      "blocks": 3,
+      "mask": 11,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m0-l1-transient",
+      "mode": 0,
+      "lfe": true,
+      "variant": "transient",
+      "channels": 3,
+      "blocks": 3,
+      "mask": 11,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m0-l1-gain",
+      "mode": 0,
+      "lfe": true,
+      "variant": "gain",
+      "channels": 3,
+      "blocks": 3,
+      "mask": 11,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m0-l1-aht",
+      "mode": 0,
+      "lfe": true,
+      "variant": "aht",
+      "channels": 3,
+      "blocks": 6,
+      "mask": 11,
+      "samples": 4608
+    },
+    {
+      "name": "independent-m1-l0-plain",
+      "mode": 1,
+      "lfe": false,
+      "variant": "plain",
+      "channels": 1,
+      "blocks": 3,
+      "mask": 4,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m1-l0-transient",
+      "mode": 1,
+      "lfe": false,
+      "variant": "transient",
+      "channels": 1,
+      "blocks": 3,
+      "mask": 4,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m1-l0-gain",
+      "mode": 1,
+      "lfe": false,
+      "variant": "gain",
+      "channels": 1,
+      "blocks": 3,
+      "mask": 4,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m1-l0-aht",
+      "mode": 1,
+      "lfe": false,
+      "variant": "aht",
+      "channels": 1,
+      "blocks": 6,
+      "mask": 4,
+      "samples": 4608
+    },
+    {
+      "name": "independent-m1-l1-plain",
+      "mode": 1,
+      "lfe": true,
+      "variant": "plain",
+      "channels": 2,
+      "blocks": 3,
+      "mask": 12,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m1-l1-transient",
+      "mode": 1,
+      "lfe": true,
+      "variant": "transient",
+      "channels": 2,
+      "blocks": 3,
+      "mask": 12,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m1-l1-gain",
+      "mode": 1,
+      "lfe": true,
+      "variant": "gain",
+      "channels": 2,
+      "blocks": 3,
+      "mask": 12,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m1-l1-aht",
+      "mode": 1,
+      "lfe": true,
+      "variant": "aht",
+      "channels": 2,
+      "blocks": 6,
+      "mask": 12,
+      "samples": 4608
+    },
+    {
+      "name": "independent-m2-l0-plain",
+      "mode": 2,
+      "lfe": false,
+      "variant": "plain",
+      "channels": 2,
+      "blocks": 3,
+      "mask": 3,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m2-l0-transient",
+      "mode": 2,
+      "lfe": false,
+      "variant": "transient",
+      "channels": 2,
+      "blocks": 3,
+      "mask": 3,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m2-l0-gain",
+      "mode": 2,
+      "lfe": false,
+      "variant": "gain",
+      "channels": 2,
+      "blocks": 3,
+      "mask": 3,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m2-l0-aht",
+      "mode": 2,
+      "lfe": false,
+      "variant": "aht",
+      "channels": 2,
+      "blocks": 6,
+      "mask": 3,
+      "samples": 4608
+    },
+    {
+      "name": "independent-m2-l1-plain",
+      "mode": 2,
+      "lfe": true,
+      "variant": "plain",
+      "channels": 3,
+      "blocks": 3,
+      "mask": 11,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m2-l1-transient",
+      "mode": 2,
+      "lfe": true,
+      "variant": "transient",
+      "channels": 3,
+      "blocks": 3,
+      "mask": 11,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m2-l1-gain",
+      "mode": 2,
+      "lfe": true,
+      "variant": "gain",
+      "channels": 3,
+      "blocks": 3,
+      "mask": 11,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m2-l1-aht",
+      "mode": 2,
+      "lfe": true,
+      "variant": "aht",
+      "channels": 3,
+      "blocks": 6,
+      "mask": 11,
+      "samples": 4608
+    },
+    {
+      "name": "independent-m3-l0-plain",
+      "mode": 3,
+      "lfe": false,
+      "variant": "plain",
+      "channels": 3,
+      "blocks": 3,
+      "mask": 7,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m3-l0-transient",
+      "mode": 3,
+      "lfe": false,
+      "variant": "transient",
+      "channels": 3,
+      "blocks": 3,
+      "mask": 7,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m3-l0-gain",
+      "mode": 3,
+      "lfe": false,
+      "variant": "gain",
+      "channels": 3,
+      "blocks": 3,
+      "mask": 7,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m3-l1-plain",
+      "mode": 3,
+      "lfe": true,
+      "variant": "plain",
+      "channels": 4,
+      "blocks": 3,
+      "mask": 15,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m3-l1-transient",
+      "mode": 3,
+      "lfe": true,
+      "variant": "transient",
+      "channels": 4,
+      "blocks": 3,
+      "mask": 15,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m3-l1-gain",
+      "mode": 3,
+      "lfe": true,
+      "variant": "gain",
+      "channels": 4,
+      "blocks": 3,
+      "mask": 15,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m4-l0-plain",
+      "mode": 4,
+      "lfe": false,
+      "variant": "plain",
+      "channels": 3,
+      "blocks": 3,
+      "mask": 259,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m4-l0-transient",
+      "mode": 4,
+      "lfe": false,
+      "variant": "transient",
+      "channels": 3,
+      "blocks": 3,
+      "mask": 259,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m4-l0-gain",
+      "mode": 4,
+      "lfe": false,
+      "variant": "gain",
+      "channels": 3,
+      "blocks": 3,
+      "mask": 259,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m4-l1-plain",
+      "mode": 4,
+      "lfe": true,
+      "variant": "plain",
+      "channels": 4,
+      "blocks": 3,
+      "mask": 267,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m4-l1-transient",
+      "mode": 4,
+      "lfe": true,
+      "variant": "transient",
+      "channels": 4,
+      "blocks": 3,
+      "mask": 267,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m4-l1-gain",
+      "mode": 4,
+      "lfe": true,
+      "variant": "gain",
+      "channels": 4,
+      "blocks": 3,
+      "mask": 267,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m5-l0-plain",
+      "mode": 5,
+      "lfe": false,
+      "variant": "plain",
+      "channels": 4,
+      "blocks": 3,
+      "mask": 263,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m5-l0-transient",
+      "mode": 5,
+      "lfe": false,
+      "variant": "transient",
+      "channels": 4,
+      "blocks": 3,
+      "mask": 263,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m5-l0-gain",
+      "mode": 5,
+      "lfe": false,
+      "variant": "gain",
+      "channels": 4,
+      "blocks": 3,
+      "mask": 263,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m5-l1-plain",
+      "mode": 5,
+      "lfe": true,
+      "variant": "plain",
+      "channels": 5,
+      "blocks": 3,
+      "mask": 271,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m5-l1-transient",
+      "mode": 5,
+      "lfe": true,
+      "variant": "transient",
+      "channels": 5,
+      "blocks": 3,
+      "mask": 271,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m5-l1-gain",
+      "mode": 5,
+      "lfe": true,
+      "variant": "gain",
+      "channels": 5,
+      "blocks": 3,
+      "mask": 271,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m6-l0-plain",
+      "mode": 6,
+      "lfe": false,
+      "variant": "plain",
+      "channels": 4,
+      "blocks": 3,
+      "mask": 1539,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m6-l0-transient",
+      "mode": 6,
+      "lfe": false,
+      "variant": "transient",
+      "channels": 4,
+      "blocks": 3,
+      "mask": 1539,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m6-l0-gain",
+      "mode": 6,
+      "lfe": false,
+      "variant": "gain",
+      "channels": 4,
+      "blocks": 3,
+      "mask": 1539,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m6-l1-plain",
+      "mode": 6,
+      "lfe": true,
+      "variant": "plain",
+      "channels": 5,
+      "blocks": 3,
+      "mask": 1547,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m6-l1-transient",
+      "mode": 6,
+      "lfe": true,
+      "variant": "transient",
+      "channels": 5,
+      "blocks": 3,
+      "mask": 1547,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m6-l1-gain",
+      "mode": 6,
+      "lfe": true,
+      "variant": "gain",
+      "channels": 5,
+      "blocks": 3,
+      "mask": 1547,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m7-l0-plain",
+      "mode": 7,
+      "lfe": false,
+      "variant": "plain",
+      "channels": 5,
+      "blocks": 3,
+      "mask": 1543,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m7-l0-transient",
+      "mode": 7,
+      "lfe": false,
+      "variant": "transient",
+      "channels": 5,
+      "blocks": 3,
+      "mask": 1543,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m7-l0-gain",
+      "mode": 7,
+      "lfe": false,
+      "variant": "gain",
+      "channels": 5,
+      "blocks": 3,
+      "mask": 1543,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m7-l1-plain",
+      "mode": 7,
+      "lfe": true,
+      "variant": "plain",
+      "channels": 6,
+      "blocks": 3,
+      "mask": 1551,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m7-l1-transient",
+      "mode": 7,
+      "lfe": true,
+      "variant": "transient",
+      "channels": 6,
+      "blocks": 3,
+      "mask": 1551,
+      "samples": 2304
+    },
+    {
+      "name": "independent-m7-l1-gain",
+      "mode": 7,
+      "lfe": true,
+      "variant": "gain",
+      "channels": 6,
+      "blocks": 3,
+      "mask": 1551,
+      "samples": 2304
+    }
+  ],
+  "independent_refusals": [
+    {
+      "name": "independent-prefix-incomplete-dependent",
+      "reason": "missing final selected dependent after a valid independent-only prefix"
+    }
+  ],
   "stack_reproducer": "aac-factory-stack.mp4",
   "matroska_automatic_layout": "Selected-track header-only full role union, including late.mkv change after 160 programmes.",
   "mp4_automatic_layout": "Selected dec3 programme locations negotiate stable output before packet decode.",

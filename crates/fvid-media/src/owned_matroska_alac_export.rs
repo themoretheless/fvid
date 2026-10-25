@@ -39,7 +39,7 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    let (rate, _, mask) = match geometry_with_mask(source, options) {
+    let (rate, _, mask) = match geometry_with_mask_for_decode(source, Some(transform), options) {
         Ok(value) => value,
         Err(error) => return error.starts_with("controlled memory budget exceeded:"),
     };
@@ -81,8 +81,12 @@ pub(crate) fn apply(
         return Err("media operation cancelled".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    let (rate, channels, mask) = geometry_with_mask(source, options)?;
-    let info = crate::owned_wave_metadata::matroska_source_info(source, options)?;
+    let (rate, channels, mask) = geometry_with_mask_for_decode(source, Some(transform), options)?;
+    let info = crate::owned_wave_metadata::matroska_source_info_with_interval(
+        source,
+        prefix(transform, rate),
+        options,
+    )?;
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,
@@ -104,10 +108,17 @@ pub(crate) fn apply(
 
 pub(crate) fn geometry(source:&Path,options:&CopyOptions)->Result<(u32,u16)>{let (rate,channels,_)=geometry_with_mask(source,options)?;Ok((rate,channels))}
 pub(crate) fn geometry_with_mask(source: &Path, options: &CopyOptions) -> Result<(u32, u16,u32)> {
+    geometry_with_mask_for_decode(source, None, options)
+}
+pub(crate) fn geometry_with_mask_for_decode(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u32)> {
     let mut reader = crate::owned_matroska_audio::open_audio_reader(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         options,
-        crate::owned_webm::Limits::default().packet_bytes,
+        options.max_packet_bytes,
     )
     .map_err(|e| e.to_string())?;
     let index = match options.streams.as_slice() {
@@ -127,16 +138,17 @@ pub(crate) fn geometry_with_mask(source: &Path, options: &CopyOptions) -> Result
         }
         _ => return Err("select exactly one audio stream".into()),
     };
-    crate::owned_matroska_audio::admit_audio_reader(&mut reader, index, options)
-        .map_err(|e| e.to_string())?;
     let track = reader
         .tracks
         .get(index)
         .ok_or("selected audio stream is absent")?;
     let decoder =
         crate::owned_alac::AlacDecoder::from_matroska(track).map_err(|e| e.to_string())?;
-    let (rate, channels) = (decoder.sample_rate(), decoder.channels());
-    Ok((rate, channels,decoder.channel_mask()))
+    let (rate, channels, mask) = (decoder.sample_rate(), decoder.channels(), decoder.channel_mask());
+    let interval = transform.and_then(|t| prefix(t, rate));
+    crate::owned_matroska_audio::admit_audio_reader_with_interval(&mut reader, index, interval, options)
+        .map_err(|e| e.to_string())?;
+    Ok((rate, channels, mask))
 }
 
 #[cfg(test)]

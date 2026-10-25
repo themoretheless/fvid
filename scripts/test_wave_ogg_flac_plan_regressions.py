@@ -39,6 +39,7 @@ class WaveOggFlacPlanRegressionsTest(unittest.TestCase):
         self.assertEqual(int.from_bytes(valid[34:36], "little"), 32)
         self.assertEqual(int.from_bytes(valid[38:40], "little"), 24)
         self.assertTrue(files["g711-alaw-48k-mono.wav"].startswith(b"RIFF"))
+        self.assertTrue(files["wave-pcm-empty.wav"].startswith(b"RIFF"))
         self.assertTrue(files["ogg-vorbis-chained-8ch-0x73f.ogg"].startswith(b"OggS"))
 
 

@@ -118,14 +118,12 @@ pub(crate) fn decode_webm(
         return Ok(None);
     }
     let mut reader_limits = crate::owned_webm::Limits::default();
-    if let Some(options) = options { reader_limits.packet_bytes = options.max_packet_bytes; }
     let mut reader = crate::owned_webm::WebmReader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         reader_limits,
     )
     .map_err(|e| e.to_string())?;
     if let Some(options) = options {
-        reader.restrict_packet_bytes(options.max_packet_bytes);
         if options
             .cancel
             .as_ref()
@@ -135,6 +133,22 @@ pub(crate) fn decode_webm(
         }
     }
     reader.scan_all().map_err(|e| e.to_string())?;
+    if let Some(options) = options {
+        reader.restrict_packet_bytes(options.max_packet_bytes);
+        if let Some(spec) = &transform.overlay {
+            if crate::owned_y4m_decode::supports(&spec.path) {
+                let mut ov_reader =
+                    BufReader::new(File::open(&spec.path).map_err(|e| e.to_string())?);
+                let mut ov_line = Vec::new();
+                if crate::owned_y4m::line(&mut ov_reader, &mut ov_line)? {
+                    let ov_header = crate::owned_y4m::Header::parse(&ov_line)?;
+                    if ov_header.frame_len()? > options.max_packet_bytes {
+                        return Err("Y4M frame byte length exceeds packet byte limit".into());
+                    }
+                }
+            }
+        }
+    }
     let inferred = if visit.is_some() && crate::owned_webm_codec::video_track(&reader).is_some_and(|t| matches!(t.codec.as_str(),"V_VP9"|"V_AV1"|"V_MPEGH/ISO/HEVC"|"V_MPEG4/ISO/AVC")) {
         let Some(durations)=crate::owned_webm_codec::presentation_durations(&mut reader,options)? else {return Ok(None);};
         Some(durations)
@@ -412,6 +426,16 @@ pub(crate) fn decode_webm(
                 if metadata.2 == 8 {"ya8".into()} else {"ya16le".into()}
             } else {stats.pixel_format.replacen("yuv", "yuva", 1)};
         }
+    }
+    if visit.is_none()
+        && options.is_none()
+        && (consumed == 0
+            || (stats.video_frames == 0
+                && (transform.framestep.is_some()
+                    || transform.shuffleframes.is_some()
+                    || transform.reverse.is_some())))
+    {
+        return Err("input has no decoded video frames".into());
     }
     Ok(Some((stats, consumed)))
 }
