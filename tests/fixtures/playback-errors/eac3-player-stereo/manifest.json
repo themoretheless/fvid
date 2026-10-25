@@ -1,0 +1,98 @@
+{
+  "cases": [
+    {
+      "name": "l1-f1-c0-s7",
+      "control": "l1-f1-control.ec3",
+      "layout": 1,
+      "lfe": true,
+      "channels": 2,
+      "rate": 48000,
+      "mixes": [
+        [
+          3,
+          0,
+          7,
+          7,
+          0
+        ],
+        [
+          0,
+          3,
+          4,
+          0,
+          7
+        ],
+        null
+      ],
+      "lfe_codes": [
+        7,
+        24,
+        null
+      ],
+      "frame_bytes": 4096
+    },
+    {
+      "name": "l7-f1-c0-s1",
+      "control": "l7-f1-control.ec3",
+      "layout": 7,
+      "lfe": true,
+      "channels": 6,
+      "rate": 48000,
+      "mixes": [
+        [
+          1,
+          0,
+          1,
+          7,
+          6
+        ],
+        [
+          2,
+          3,
+          6,
+          0,
+          1
+        ],
+        null
+      ],
+      "lfe_codes": [
+        1,
+        30,
+        null
+      ],
+      "frame_bytes": 4096
+    },
+    {
+      "name": "l5-f0-c3-s4",
+      "control": "l5-f0-control.ec3",
+      "layout": 5,
+      "lfe": false,
+      "channels": 4,
+      "rate": 48000,
+      "mixes": [
+        [
+          3,
+          3,
+          4,
+          4,
+          3
+        ],
+        [
+          0,
+          6,
+          1,
+          3,
+          4
+        ],
+        null
+      ],
+      "lfe_codes": [
+        null,
+        null,
+        null
+      ],
+      "frame_bytes": 4096
+    }
+  ],
+  "provenance": "Owned EAC3 metadata and neutral VP9 authoring. No private source, FFmpeg, process or network."
+}

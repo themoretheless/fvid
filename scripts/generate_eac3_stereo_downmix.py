@@ -4,7 +4,7 @@ from pathlib import Path
 from generate_eac3_dependent import packet,COUNTS
 from generate_eac3_bsid import movie
 OUT=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/eac3-stereo-downmix'
-def generate():
+def generate(names=None):
  files={};cases=[]
  for layout in range(8):
   for lfe in [False,True]:
@@ -14,6 +14,7 @@ def generate():
    files[family+'-control.ec3']=control*3
    pairs=[(c,s)for c in range(8)for s in range(8)]if layout in [5,7]else[(c,c)for c in range(8)]if layout>2 else[(0,7),(4,4),(7,0)]
    for c,s in pairs:
+    if names is not None and f'{family}-c{c}-s{s}' not in names:continue
     mixes=[[(c+s)%4,c,s,7-c,7-s],[(c+s+1)%4,(c+3)%8,(s+5)%8,c,s],None]
     code=(c*8+s)%32
     lfe_codes=[code,31-code,None]if lfe and c!=s else[None]*3

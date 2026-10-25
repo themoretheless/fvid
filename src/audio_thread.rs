@@ -12,6 +12,9 @@ pub struct DolbyPlaybackPolicy {
     pub compression: crate::codec::ac3_decoder::CompressionMode,
     pub normalize_dialogue: bool,
     pub ac3_stereo_downmix: crate::codec::ac3_decoder::StereoDownmixPolicy,
+    /// Request codec-aware L/R output from E-AC-3 readers. Native output is
+    /// retained by default; expanded presentations require their full renderer.
+    pub eac3_stereo_output: bool,
     pub eac3_stereo_downmix: crate::codec::eac3_decoder::StereoDownmixPolicy,
 }
 impl DolbyPlaybackPolicy {
@@ -97,7 +100,7 @@ impl AudioPlayback {
     }
 
     /// Apply all session Dolby choices whenever a reader supplies a decoder.
-    pub fn start_with_dolby_policy<F>(stream:Box<dyn AudioStream>,policy:DolbyPlaybackPolicy,backend_factory:F)->Self
+    pub fn start_with_dolby_policy<F>(mut stream:Box<dyn AudioStream>,policy:DolbyPlaybackPolicy,backend_factory:F)->Self
     where F:FnOnce()->Box<dyn AudioBackend>+Send+'static {
         let timescale = stream.timescale();
         let duration = Arc::new(Mutex::new(stream.duration()));
@@ -113,6 +116,10 @@ impl AudioPlayback {
                 #[cfg(feature = "player")]
                 fvid_platform::prioritize_playback_thread();
 
+                if let Err(error) = stream.set_eac3_stereo_output(policy.eac3_stereo_output) {
+                    let _ = event_tx.send(AudioEvent::Error(format!("Audio output negotiation: {error}")));
+                    return;
+                }
                 let sample_rate = stream.sample_rate();
                 let channels = stream.channels();
 

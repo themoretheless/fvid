@@ -630,6 +630,19 @@ pub enum AudioStep {
 }
 
 pub trait AudioStream: Send {
+    /// Negotiate explicit L/R rendering of an E-AC-3 independent/compatibility
+    /// programme before creating a decoder or presenting PCM. Implementations
+    /// retain this request across navigation and configuration changes. Other
+    /// codecs are unaffected. Extended dependent presentations must not be
+    /// silently truncated to an independent programme.
+    #[cfg(feature = "player")]
+    fn set_eac3_stereo_output(&mut self, enabled: bool) -> crate::Result<()> {
+        if enabled && matches!(self.codec(), "A_EAC3" | "ec-3") {
+            return Err(crate::invalid("this E-AC-3 source does not negotiate explicit stereo output"));
+        }
+        Ok(())
+    }
+
     /// Device fold in the decoder's emitted PCM order. Codecs with positions
     /// beyond WAVE masks override this; mask-only readers retain compatibility.
     fn stereo_router(&self)->crate::Result<Option<fvid_media::owned_stereo_router::StereoRouter>>{

@@ -4966,3 +4966,12 @@ metadata retention, native/mono preservation and explicit-stereo worker
 EOF/seek/rewind/decoder replacement. This qualifies independent/compatibility
 stereo, not an extended-presentation fold or physical-device routing.
 No private media, copied codec parameters, FFmpeg or network is required.
+
+
+`eac3-player-stereo/`: owned C+LFE, 5.1 and single-surround E-AC-3 metadata
+witnesses with neutral VP9 MP4/Matroska companions and raw/control streams.
+Regenerate separately using `scripts/generate_eac3_player_stereo.py` (no external
+process/network/FFmpeg). `tests/eac3_player_stereo.rs` accepts explicit real-reader
+stereo geometry and EOF/rewind/partial seek, tests MP4 configuration replacement,
+and separately refuses expanded dependent stereo without changing native state.
+A CPAL unit test checks router/ring/callback PCM without opening a device.
