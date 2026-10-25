@@ -830,6 +830,11 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         self.eac3_stereo_output=enabled;
         Ok(())
     }
+    fn eac3_output_layout(&self)->Option<crate::codec::eac3_decoder::presentation::SpeakerLayout> {
+        if self.setup().codec!=*b"ec-3" {return None;}
+        if !self.eac3_stereo_output && let Some(layout)=self.native_eac3_layout() {return Some(layout);}
+        crate::audio::eac3_mask_output_layout(self)
+    }
     fn speaker_mask(&self)->Result<Option<u32>> {
         if (self.eac3_stereo_output && self.setup().codec==*b"ec-3") || (self.ac3_stereo_output && self.setup().codec==*b"ac-3") {return Ok(Some(3));}
         if self.setup().codec==*b"ec-3" && let Some(l)=self.native_eac3_layout() {return Ok(l.wave_mask());}

@@ -629,7 +629,22 @@ pub enum AudioStep {
     ReconfigureDecoder,
 }
 
+#[cfg(feature="player")]
+pub(crate) fn eac3_mask_output_layout<S:AudioStream+?Sized>(source:&S)->Option<crate::codec::eac3_decoder::presentation::SpeakerLayout> {
+    if !matches!(source.codec(),"A_EAC3"|"ec-3") {return None;}
+    let layout=crate::codec::eac3_decoder::presentation::SpeakerLayout::from_wave_mask(source.speaker_mask().ok()??)?;
+    (layout.0.len()==usize::from(source.channels())).then_some(layout)
+}
+
 pub trait AudioStream: Send {
+    /// Actual E-AC-3 PCM speaker order after output negotiation. Extended
+    /// positions remain explicit even when no WAVE mask can represent them.
+    /// None means unknown or a different codec; never infer roles from width.
+    #[cfg(feature="player")]
+    fn eac3_output_layout(&self)->Option<crate::codec::eac3_decoder::presentation::SpeakerLayout> {
+        eac3_mask_output_layout(self)
+    }
+
     /// Configure stable native E-AC-3 output roles before creating a decoder.
     /// A superset allows changing channel maps without changing device geometry.
     #[cfg(feature="player")]

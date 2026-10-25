@@ -98,7 +98,7 @@ def generate():
      result+=atom(k,b)
     return result
    files[name+'.mp4']=full_duration(mp4)
-   cases.append(dict(name=name,rate=48000,blocks=3,transient=transient,late=late,active_channels=[8]*count,output_channels=10 if late else 8,output_mask=None,samples=count*768,chan_loc=2 if late else 0))
+   cases.append(dict(name=name,rate=48000,blocks=3,transient=transient,late=late,active_channels=[8]*count,output_channels=10 if late else 8,output_mask=None,output_roles=['Left','Right','Centre','Lfe']+(['LeftRear','RightRear']if late else[])+['LeftSurround','RightSurround','TopSurroundLeft','TopSurroundRight'],samples=count*768,chan_loc=2 if late else 0))
  # Re-author only metadata of an existing repository-owned synthetic AAC/PS
  # witness, exercising non-Dolby factory stack size without external encoders.
  from generate_aac_ps_core_clock_fixtures import rewrite_audio

@@ -1390,6 +1390,13 @@ impl Eac3Decoder {
         self.presentation.as_mut().unwrap().set_output_layout(layout)
     }
 
+    /// Speaker order of configured/inferred presentation PCM or explicit L/R.
+    /// Unconfigured independent decoding has no known map until a source probes it.
+    pub fn output_layout(&self)->Option<presentation::SpeakerLayout> {
+        if self.force_stereo {return presentation::SpeakerLayout::from_wave_mask(3);}
+        self.presentation.as_ref().and_then(|p|p.speakers()).cloned()
+    }
+
     /// Select independent programme ID 0..7 (zero by default).
     /// Changing the choice clears transform/lookahead history; reset retains it.
     /// Callers configure rate/output geometry for the selected programme.

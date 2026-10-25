@@ -719,3 +719,67 @@ fn top_surround_stereo_policy_keeps_standard_independent_downmix() {
         }
     }
 }
+
+
+fn top_layout(late:bool)->SpeakerLayout {
+    use Speaker::*;
+    let mut roles=vec![Left,Right,Centre,Lfe];
+    if late {roles.extend([LeftRear,RightRear]);}
+    roles.extend([LeftSurround,RightSurround,TopSurroundLeft,TopSurroundRight]);
+    SpeakerLayout(roles)
+}
+#[test]
+fn sources_report_explicit_pcm_roles_without_a_wave_mask() {
+    for name in ["top-plain","top-late-transient"] {
+        for kind in ["ec3","mp4","mkv"] {
+            let mut s=source(name,kind);let expected=top_layout(name.contains("late"));
+            assert_eq!(s.speaker_mask().unwrap(),None);
+            assert_eq!(s.eac3_output_layout(),Some(expected.clone()),"{name}.{kind}");
+            let mut padded=expected.clone();padded.0.push(Speaker::WideLeft);
+            s.set_eac3_output_layout(Some(padded.clone())).unwrap();
+            assert_eq!(s.eac3_output_layout(),Some(padded.clone()));
+            s.set_eac3_stereo_output(true).unwrap();
+            assert_eq!(s.eac3_output_layout(),Some(SpeakerLayout(vec![Speaker::Left,Speaker::Right])));
+            s.set_eac3_stereo_output(false).unwrap();
+            assert_eq!(s.eac3_output_layout(),Some(padded));
+            s.set_eac3_output_layout(None).unwrap();
+            assert_eq!(s.eac3_output_layout(),Some(expected.clone()));
+            s.seek_time(Duration::from_millis(20));
+            assert_eq!(s.eac3_output_layout(),Some(expected.clone()));
+            s.rewind();assert_eq!(s.eac3_output_layout(),Some(expected));
+        }
+    }
+}
+
+
+#[test]
+fn pcm_role_queries_preserve_c_lfe_and_refuse_unknown_wave_positions() {
+    assert_eq!(SpeakerLayout::from_wave_mask(0x60f),Some(six_layout()));
+    assert_eq!(SpeakerLayout::from_wave_mask(12),Some(SpeakerLayout(vec![Speaker::Centre,Speaker::Lfe])));
+    assert!(SpeakerLayout::from_wave_mask(0).is_none());
+    assert!(SpeakerLayout::from_wave_mask(1<<15).is_none());
+    assert!(SpeakerLayout::from_wave_mask(u32::MAX).is_none());
+    let mut independent=source("native-2-plain-control0","ec3");
+    assert_eq!(independent.channels(),2);
+    assert_eq!(independent.eac3_output_layout(),Some(SpeakerLayout(vec![Speaker::Centre,Speaker::Lfe])));
+    independent.set_eac3_stereo_output(true).unwrap();
+    assert_eq!(independent.eac3_output_layout(),Some(SpeakerLayout(vec![Speaker::Left,Speaker::Right])));
+    let mut aac=source("aac-factory-stack","mp4");
+    assert!(aac.eac3_output_layout().is_none());
+    aac.set_eac3_stereo_output(true).unwrap();
+    assert!(aac.eac3_output_layout().is_none());
+}
+#[test]
+fn concrete_decoder_reports_configured_and_inferred_output_roles() {
+    let bytes=read("top-transient.ec3");let expected=top_layout(false);
+    let mut inferred=Box::new(Eac3Decoder::for_container_with_compression(&[],48000,8,fvid::codec::ac3_decoder::CompressionMode::Line).unwrap());
+    assert!(inferred.output_layout().is_none());
+    assert_eq!(inferred.decode_complete(&bytes,0,2304).unwrap().unwrap().data,top_expected("top-transient",false));
+    assert_eq!(inferred.output_layout(),Some(expected.clone()));
+    inferred.reset();assert!(inferred.output_layout().is_none());
+    inferred.set_output_layout(expected.clone()).unwrap();
+    assert_eq!(inferred.output_layout(),Some(expected.clone()));
+    inferred.reset();assert_eq!(inferred.output_layout(),Some(expected));
+    let stereo=Box::new(Eac3Decoder::new_stereo(&[],48000).unwrap());
+    assert_eq!(stereo.output_layout(),Some(SpeakerLayout(vec![Speaker::Left,Speaker::Right])));
+}

@@ -438,6 +438,13 @@ impl AudioStream for Ac3AudioReader {
     }
     fn audio_track_index(&self)->usize {self.ac3.tracks.iter().position(|(id,_)|*id==self.ac3.programme).unwrap_or(0)}
 
+    fn eac3_output_layout(&self)->Option<crate::codec::eac3_decoder::presentation::SpeakerLayout> {
+        if self.codec()!=EAC3_TAG {return None;}
+        if !self.eac3_stereo_output && let Some(layout)=self.eac3_output_layout.as_ref().or(self.ac3.automatic_layout.as_ref()) {
+            return Some(layout.clone());
+        }
+        crate::audio::eac3_mask_output_layout(self)
+    }
     fn speaker_mask(&self) -> Result<Option<u32>> {Ok(if (self.eac3_stereo_output && self.codec()==EAC3_TAG)||(self.ac3_stereo_output && self.codec()==TAG) {Some(3)}else if self.codec()==EAC3_TAG && let Some(l)=&self.eac3_output_layout {l.wave_mask()}else{self.ac3.speaker_mask})}
 
     fn codec(&self) -> &str {
