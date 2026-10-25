@@ -31,9 +31,9 @@ fn retain_epoch(
     first: usize,
     scan: SubstreamScan,
     vps: Arc<LayeredVps>,
-    ols: usize,
     budget: usize,
 ) -> Result<()> {
+    let ols = vps.automatic_output_layer_set()?;
     let rows = vps
         .extension
         .as_ref()
@@ -76,7 +76,6 @@ fn inventory<R: Read + Seek>(
     configuration: &[u8],
     length: u8,
     initial: Arc<LayeredVps>,
-    ols: usize,
     budget: usize,
 ) -> Result<Vec<Epoch>> {
     let mut parameters = LayeredParameters::from_configuration(configuration, budget)?;
@@ -92,7 +91,7 @@ fn inventory<R: Read + Seek>(
             continue;
         }
         if boundary {
-            retain_epoch(&mut epochs, first, scan, vps.clone(), ols, budget)?;
+            retain_epoch(&mut epochs, first, scan, vps.clone(), budget)?;
             first = ordinal;
             scan = Default::default();
             seen_vcl = false;
@@ -125,7 +124,7 @@ fn inventory<R: Read + Seek>(
         if let Some(received) = candidate {
             if *received != *vps {
                 if seen_vcl {
-                    retain_epoch(&mut epochs, first, scan, vps.clone(), ols, budget)?;
+                    retain_epoch(&mut epochs, first, scan, vps.clone(), budget)?;
                     first = ordinal;
                     scan = Default::default();
                     seen_vcl = false;
@@ -144,7 +143,7 @@ fn inventory<R: Read + Seek>(
         }
         ordinal += 1;
     }
-    retain_epoch(&mut epochs, first, scan, vps, ols, budget)?;
+    retain_epoch(&mut epochs, first, scan, vps, budget)?;
     Ok(epochs)
 }
 pub(super) struct Layered {
@@ -225,26 +224,7 @@ impl Layered {
             return Ok(None);
         }
         let vps = LayeredVps::parse(&nal, budget / 2)?;
-        let extension = vps
-            .extension
-            .as_ref()
-            .ok_or_else(|| invalid("layered Matroska HEVC lacks a VPS extension"))?;
-        let ols = extension
-            .output
-            .sets
-            .iter()
-            .enumerate()
-            .filter(|(_, s)| s.output != 0)
-            .max_by_key(|(i, s)| {
-                (
-                    63 - s.output.leading_zeros(),
-                    std::cmp::Reverse(s.output.count_ones()),
-                    std::cmp::Reverse(s.necessary.count_ones()),
-                    std::cmp::Reverse(*i),
-                )
-            })
-            .map(|(i, _)| i)
-            .ok_or_else(|| invalid("layered Matroska HEVC lacks an output layer set"))?;
+        let ols = vps.automatic_output_layer_set()?;
         drop(parameters);
         let selections = inventory(
             demux,
@@ -252,7 +232,6 @@ impl Layered {
             configuration,
             cfg.length_size,
             Arc::new(vps),
-            ols,
             budget / 4,
         )?;
         let count = demux.packets.iter().filter(|p| p.track == track).count();
@@ -354,7 +333,7 @@ impl Layered {
             .partition_point(|e| e.first <= self.packet_index)
             .saturating_sub(1);
         let selection = &self.selections[epoch].selection;
-        let (pictures, _) = self.decoder.decode_selected_queued_packet(
+        let (pictures, _) = self.decoder.decode_reselected_queued_packet(
             &mut self.queue,
             selection,
             packet,
@@ -405,6 +384,7 @@ impl Layered {
                 .unwrap_or_default();
             self.hdr = p.hdr;
             return Ok(Some(Frame {
+                layer_id: Some(p.layer_id),
                 signal: Some(self.signal),
                 paired: false,
                 hdr: p.hdr,

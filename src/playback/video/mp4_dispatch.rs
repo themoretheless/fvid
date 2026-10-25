@@ -262,27 +262,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     crate::codec::hevc_vps::Vps::parse_layered_metadata(&nal, budget / 2)?;
                 if topology.layers.effective_max_layers() > 1 {
                     let vps = LayeredVps::parse(&nal, budget / 2)?;
-                    let e = vps
-                        .extension
-                        .as_ref()
-                        .ok_or_else(|| invalid("layered HEVC VPS extension is absent"))?;
-                    let ols = e
-                        .output
-                        .sets
-                        .iter()
-                        .enumerate()
-                        .filter(|(_, s)| s.output != 0)
-                        .max_by_key(|(i, s)| {
-                            (
-                                63 - s.output.leading_zeros(),
-                                std::cmp::Reverse(s.output.count_ones()),
-                                std::cmp::Reverse(s.necessary.count_ones()),
-                                std::cmp::Reverse(*i),
-                            )
-                        })
-                        .map(|(i, _)| i)
-                        .ok_or_else(|| invalid("HEVC VPS has no output layer set"))?;
-                    let tid = (vps.vps.ordering.len() - 1) as u8;
+                    let ols=vps.automatic_output_layer_set()?;
                     let mut colour = crate::playback_native::AvcColour::default();
                     let mut stated = ColourDescription::default();
                     let config = HevcConfig::parse(&demuxer.tracks()[index].configuration)?;
@@ -300,7 +280,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                         }
                     }
                     let source =
-                        LayeredMp4VideoReader::from_demuxer(demuxer, index, ols, tid, budget / 2)?;
+                        LayeredMp4VideoReader::from_demuxer_automatic(demuxer, index, ols, budget / 2)?;
                     return Ok(Self {
                         source: Source::Layered(Box::new(SingleView {
                             source,
