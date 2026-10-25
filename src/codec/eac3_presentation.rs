@@ -53,7 +53,8 @@ struct Descriptor {
     last: bool,
 }
 fn descriptor(bytes: &[u8]) -> Result<Descriptor> {
-    let (frame, id, map, last) = read_substream_header(&mut BitReader::new(bytes), true)?;
+    let canonical=crate::codec::ac3_decoder::dolby_frame(bytes)?;
+    let (frame, id, map, last) = read_substream_header(&mut BitReader::new(canonical.as_ref()), true)?;
     Ok(Descriptor {
         frame,
         id,
@@ -62,15 +63,14 @@ fn descriptor(bytes: &[u8]) -> Result<Descriptor> {
     })
 }
 fn envelope(bytes: &[u8]) -> Result<(u8, u8, usize)> {
-    if bytes.len() < 6 || bytes[..2] != [0x0b, 0x77] || !(11..=16).contains(&(bytes[5] >> 3)) {
-        return Err(invalid("invalid E-AC-3 presentation envelope"));
-    }
-    let kind = bytes[2] >> 6;
-    let id = (bytes[2] >> 3) & 7;
+    let h=crate::codec::ac3_decoder::dolby_prefix(bytes).ok_or_else(||invalid("invalid E-AC-3 presentation envelope"))?;
+    if h[..2] != [0x0b, 0x77] || !(11..=16).contains(&(h[5] >> 3)) {return Err(invalid("invalid E-AC-3 presentation envelope"));}
+    let kind = h[2] >> 6;
+    let id = (h[2] >> 3) & 7;
     if kind == 3 {
         return Err(unsupported("reserved E-AC-3 presentation stream type"));
     }
-    let size = (usize::from(bytes[2] & 7) * 256 + usize::from(bytes[3]) + 1) * 2;
+    let size = (usize::from(h[2] & 7) * 256 + usize::from(h[3]) + 1) * 2;
     if size < 6 || size > bytes.len() {
         return Err(invalid("truncated E-AC-3 presentation substream"));
     }
@@ -398,7 +398,8 @@ impl PresentationDecoder {
             child.compression_mode = self.compression_mode;
             child.dialogue_normalization = self.dialogue_normalization;
             let mut decoded = Vec::new();
-            let mut bits = Bits::at(bytes, d.frame.audio_bit);
+            let canonical=crate::codec::ac3_decoder::dolby_frame(bytes)?;
+            let mut bits = Bits::at(canonical.as_ref(), d.frame.audio_bit);
             child.native_capture = Some(Vec::new());
             let sound = child.syncframe(&d.frame, &mut bits, &mut decoded);
             // Restore the capture switch even when syntax decoding errors.
