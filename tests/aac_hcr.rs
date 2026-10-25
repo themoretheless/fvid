@@ -42,18 +42,15 @@ fn hcr_native_spectral_codewords_stereo_and_tns_match_scalar_pcm() {
                 let len = row["bytes"].as_u64().unwrap() as usize;
                 let raw = &blob[at..at + len];
                 let saved = decoder.checkpoint();
-                let mut bad = raw.to_vec();
-                bad.push(0);
-                assert!(
-                    decoder
-                        .decode(&bad)
-                        .err()
-                        .unwrap()
-                        .to_string()
-                        .contains("trailing bytes after ER AAC block")
-                );
+                // ER EXT_FILL is valid and must preserve PCM. The old
+                // trailing-byte refusal predated ER extension support.
+                let mut filled = raw.to_vec();
+                filled.push(0);
+                let filled_pcm = decoder.decode(&filled).unwrap();
+                decoder.restore(&saved).unwrap();
                 assert!(decoder.decode(&raw[..raw.len() - 1]).is_err());
                 let pcm = decoder.decode(raw).unwrap();
+                assert_eq!(filled_pcm, pcm, "valid ER fill must preserve PCM");
                 decoder.restore(&saved).unwrap();
                 assert_eq!(decoder.decode(raw).unwrap(), pcm);
                 out.extend(pcm);

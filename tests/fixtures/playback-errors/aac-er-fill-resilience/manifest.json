@@ -1,0 +1,261 @@
+{
+  "cases": [
+    {
+      "name": "hcr-960-0-0-1",
+      "tool": "hcr",
+      "control": "aac-hcr-960-0-0-1-synthetic.mp4",
+      "fill": "hcr-960-0-0-1-fill.mp4",
+      "malformed": "hcr-960-0-0-1-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "hcr-960-0-0-2",
+      "tool": "hcr",
+      "control": "aac-hcr-960-0-0-2-synthetic.mp4",
+      "fill": "hcr-960-0-0-2-fill.mp4",
+      "malformed": "hcr-960-0-0-2-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "hcr-960-0-1-1",
+      "tool": "hcr",
+      "control": "aac-hcr-960-0-1-1-synthetic.mp4",
+      "fill": "hcr-960-0-1-1-fill.mp4",
+      "malformed": "hcr-960-0-1-1-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "hcr-960-0-1-2",
+      "tool": "hcr",
+      "control": "aac-hcr-960-0-1-2-synthetic.mp4",
+      "fill": "hcr-960-0-1-2-fill.mp4",
+      "malformed": "hcr-960-0-1-2-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "hcr-960-1-0-1",
+      "tool": "hcr",
+      "control": "aac-hcr-960-1-0-1-synthetic.mp4",
+      "fill": "hcr-960-1-0-1-fill.mp4",
+      "malformed": "hcr-960-1-0-1-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "hcr-960-1-0-2",
+      "tool": "hcr",
+      "control": "aac-hcr-960-1-0-2-synthetic.mp4",
+      "fill": "hcr-960-1-0-2-fill.mp4",
+      "malformed": "hcr-960-1-0-2-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "hcr-960-1-1-1",
+      "tool": "hcr",
+      "control": "aac-hcr-960-1-1-1-synthetic.mp4",
+      "fill": "hcr-960-1-1-1-fill.mp4",
+      "malformed": "hcr-960-1-1-1-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "hcr-960-1-1-2",
+      "tool": "hcr",
+      "control": "aac-hcr-960-1-1-2-synthetic.mp4",
+      "fill": "hcr-960-1-1-2-fill.mp4",
+      "malformed": "hcr-960-1-1-2-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "hcr-1024-0-0-1",
+      "tool": "hcr",
+      "control": "aac-hcr-1024-0-0-1-synthetic.mp4",
+      "fill": "hcr-1024-0-0-1-fill.mp4",
+      "malformed": "hcr-1024-0-0-1-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "hcr-1024-0-0-2",
+      "tool": "hcr",
+      "control": "aac-hcr-1024-0-0-2-synthetic.mp4",
+      "fill": "hcr-1024-0-0-2-fill.mp4",
+      "malformed": "hcr-1024-0-0-2-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "hcr-1024-0-1-1",
+      "tool": "hcr",
+      "control": "aac-hcr-1024-0-1-1-synthetic.mp4",
+      "fill": "hcr-1024-0-1-1-fill.mp4",
+      "malformed": "hcr-1024-0-1-1-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "hcr-1024-0-1-2",
+      "tool": "hcr",
+      "control": "aac-hcr-1024-0-1-2-synthetic.mp4",
+      "fill": "hcr-1024-0-1-2-fill.mp4",
+      "malformed": "hcr-1024-0-1-2-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "hcr-1024-1-0-1",
+      "tool": "hcr",
+      "control": "aac-hcr-1024-1-0-1-synthetic.mp4",
+      "fill": "hcr-1024-1-0-1-fill.mp4",
+      "malformed": "hcr-1024-1-0-1-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "hcr-1024-1-0-2",
+      "tool": "hcr",
+      "control": "aac-hcr-1024-1-0-2-synthetic.mp4",
+      "fill": "hcr-1024-1-0-2-fill.mp4",
+      "malformed": "hcr-1024-1-0-2-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "hcr-1024-1-1-1",
+      "tool": "hcr",
+      "control": "aac-hcr-1024-1-1-1-synthetic.mp4",
+      "fill": "hcr-1024-1-1-1-fill.mp4",
+      "malformed": "hcr-1024-1-1-1-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "hcr-1024-1-1-2",
+      "tool": "hcr",
+      "control": "aac-hcr-1024-1-1-2-synthetic.mp4",
+      "fill": "hcr-1024-1-1-2-fill.mp4",
+      "malformed": "hcr-1024-1-1-2-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "rvlc-960-0-mono",
+      "tool": "rvlc",
+      "control": "aac-rvlc-960-0-mono-synthetic.mp4",
+      "fill": "rvlc-960-0-mono-fill.mp4",
+      "malformed": "rvlc-960-0-mono-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "rvlc-960-0-stereo",
+      "tool": "rvlc",
+      "control": "aac-rvlc-960-0-stereo-synthetic.mp4",
+      "fill": "rvlc-960-0-stereo-fill.mp4",
+      "malformed": "rvlc-960-0-stereo-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "rvlc-960-0-intensity",
+      "tool": "rvlc",
+      "control": "aac-rvlc-960-0-intensity-synthetic.mp4",
+      "fill": "rvlc-960-0-intensity-fill.mp4",
+      "malformed": "rvlc-960-0-intensity-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "rvlc-960-0-pns",
+      "tool": "rvlc",
+      "control": "aac-rvlc-960-0-pns-synthetic.mp4",
+      "fill": "rvlc-960-0-pns-fill.mp4",
+      "malformed": "rvlc-960-0-pns-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "rvlc-960-1-mono",
+      "tool": "rvlc",
+      "control": "aac-rvlc-960-1-mono-synthetic.mp4",
+      "fill": "rvlc-960-1-mono-fill.mp4",
+      "malformed": "rvlc-960-1-mono-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "rvlc-960-1-stereo",
+      "tool": "rvlc",
+      "control": "aac-rvlc-960-1-stereo-synthetic.mp4",
+      "fill": "rvlc-960-1-stereo-fill.mp4",
+      "malformed": "rvlc-960-1-stereo-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "rvlc-960-1-intensity",
+      "tool": "rvlc",
+      "control": "aac-rvlc-960-1-intensity-synthetic.mp4",
+      "fill": "rvlc-960-1-intensity-fill.mp4",
+      "malformed": "rvlc-960-1-intensity-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "rvlc-960-1-pns",
+      "tool": "rvlc",
+      "control": "aac-rvlc-960-1-pns-synthetic.mp4",
+      "fill": "rvlc-960-1-pns-fill.mp4",
+      "malformed": "rvlc-960-1-pns-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "rvlc-1024-0-mono",
+      "tool": "rvlc",
+      "control": "aac-rvlc-1024-0-mono-synthetic.mp4",
+      "fill": "rvlc-1024-0-mono-fill.mp4",
+      "malformed": "rvlc-1024-0-mono-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "rvlc-1024-0-stereo",
+      "tool": "rvlc",
+      "control": "aac-rvlc-1024-0-stereo-synthetic.mp4",
+      "fill": "rvlc-1024-0-stereo-fill.mp4",
+      "malformed": "rvlc-1024-0-stereo-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "rvlc-1024-0-intensity",
+      "tool": "rvlc",
+      "control": "aac-rvlc-1024-0-intensity-synthetic.mp4",
+      "fill": "rvlc-1024-0-intensity-fill.mp4",
+      "malformed": "rvlc-1024-0-intensity-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "rvlc-1024-0-pns",
+      "tool": "rvlc",
+      "control": "aac-rvlc-1024-0-pns-synthetic.mp4",
+      "fill": "rvlc-1024-0-pns-fill.mp4",
+      "malformed": "rvlc-1024-0-pns-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "rvlc-1024-1-mono",
+      "tool": "rvlc",
+      "control": "aac-rvlc-1024-1-mono-synthetic.mp4",
+      "fill": "rvlc-1024-1-mono-fill.mp4",
+      "malformed": "rvlc-1024-1-mono-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "rvlc-1024-1-stereo",
+      "tool": "rvlc",
+      "control": "aac-rvlc-1024-1-stereo-synthetic.mp4",
+      "fill": "rvlc-1024-1-stereo-fill.mp4",
+      "malformed": "rvlc-1024-1-stereo-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "rvlc-1024-1-intensity",
+      "tool": "rvlc",
+      "control": "aac-rvlc-1024-1-intensity-synthetic.mp4",
+      "fill": "rvlc-1024-1-intensity-fill.mp4",
+      "malformed": "rvlc-1024-1-intensity-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    },
+    {
+      "name": "rvlc-1024-1-pns",
+      "tool": "rvlc",
+      "control": "aac-rvlc-1024-1-pns-synthetic.mp4",
+      "fill": "rvlc-1024-1-pns-fill.mp4",
+      "malformed": "rvlc-1024-1-pns-invalid-nibble.mp4",
+      "error": "invalid AAC fill-data nibble"
+    }
+  ],
+  "provenance": "Own ER HCR/RVLC entropy payloads and own AVC/MP4 muxer; valid EXT_FILL versus invalid EXT_FILL_DATA nibble. No private media, external decoder, process or network."
+}

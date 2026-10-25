@@ -34,6 +34,14 @@ Matroska companion; `aac_player_factory_stack` decodes both on an explicit
 fixture at native PS construction, rather than at parsing or an unrelated
 unsupported tool. This does not change decoder algorithms or increase stacks.
 
+The wide AAC gate also exposed obsolete HCR/RVLC negative expectations: a zero
+ER EXT_FILL payload had been treated as forbidden trailing data, despite the
+already-supported ER extension parser. Those expectations now require identical
+PCM with and without valid fill. Truncated entropy payloads still must fail.
+`aac-er-fill-resilience` adds 32 own valid-fill videos and 32 independently
+malformed EXT_FILL_DATA-nibble videos, verifying public/backend PCM parity and
+the exact malformed-payload error. It changes tests, not decoder permissiveness.
+
 This is core acceptance, not complete AAC-ELD profile coverage. Low-delay SBR,
 nonzero epConfig and known ELD extension tools remain explicit refusals.
 Arbitrary combinations and complete codec coverage remain unproven.
