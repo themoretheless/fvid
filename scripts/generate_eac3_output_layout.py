@@ -47,7 +47,7 @@ def generate():
   if tag==b'moov':body=b''.join(rewrite_audio(k,p)if k==b'trak'and b'mp4a'in p else box(k,p)for k,p in audio_boxes(body))
   rebuilt.append(box(tag,body))
  files['aac-factory-stack.mp4']=b''.join(rebuilt)
- files['manifest.json']=(json.dumps(dict(cases=cases,stack_reproducer='aac-factory-stack.mp4',raw_automatic_layout='Union of selected programme roles; stable 10-channel output without an explicit output-map request; preserve actual per-programme channel counts.',provenance='Owned C/L/R/Ls/Rs/LFE, rear/height/replacement roles and continuous transform/transient controls with neutral VP9; AAC stack witness re-authors metadata of an existing repository-owned synthetic AAC/PS video. No private media, process, external encoder or network.'),indent=2)+'\n').encode()
+ files['manifest.json']=(json.dumps(dict(cases=cases,stack_reproducer='aac-factory-stack.mp4',mp4_automatic_layout='Selected dec3 programme locations negotiate stable output before packet decode.',raw_automatic_layout='Union of selected programme roles; stable 10-channel output without an explicit output-map request; preserve actual per-programme channel counts.',provenance='Owned C/L/R/Ls/Rs/LFE, rear/height/replacement roles and continuous transform/transient controls with neutral VP9; AAC stack witness re-authors metadata of an existing repository-owned synthetic AAC/PS video. No private media, process, external encoder or network.'),indent=2)+'\n').encode()
  return files
 if __name__=='__main__':
  OUT.mkdir(parents=True,exist_ok=True)

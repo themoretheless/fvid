@@ -181,9 +181,9 @@ fn actual_sources_and_worker_keep_fixed_speakers_at_eof_rewind_and_partial_seek(
     ] {
         for kind in ["ec3", "mkv", "mp4"] {
             let mut s = source(name, kind);
-            assert_eq!(s.channels(), if kind == "ec3" { 10 } else if name.starts_with("six-") { 6 } else { 8 });
+            assert_eq!(s.channels(), if kind != "mkv" { 10 } else if name.starts_with("six-") { 6 } else { 8 });
             let duration = s.duration();
-            if kind != "ec3" { s.set_eac3_output_layout(Some(layout())).unwrap(); }
+            if kind == "mkv" { s.set_eac3_output_layout(Some(layout())).unwrap(); }
             assert_eq!(s.channels(), 10);
             assert_eq!(s.speaker_mask().unwrap(), Some(0x563f));
             assert_eq!(s.duration(), duration);
@@ -389,8 +389,9 @@ fn non_dolby_reader_factory_fits_a_two_mib_stack() {
 }
 
 #[test]
-fn raw_automatic_map_survives_explicit_override_stereo_and_clear() {
-    let mut s = source("six-replace-transient", "ec3");
+fn automatic_map_survives_explicit_override_stereo_and_clear() {
+    for kind in ["ec3", "mp4"] {
+    let mut s = source("six-replace-transient", kind);
     assert_eq!(s.channels(), 10);
     let mut padded = layout();
     padded.0.push(Speaker::WideLeft);
@@ -404,7 +405,36 @@ fn raw_automatic_map_survives_explicit_override_stereo_and_clear() {
     assert_eq!(s.channels(), 2);
     s.set_eac3_stereo_output(false).unwrap();
     assert_eq!(s.channels(), 10);
+    }
     let compatible = fvid::playback_ac3::Ac3AudioReader::open_compatible(
         Cursor::new(read("six-replace-transient.ec3")), Default::default()).unwrap();
     assert_eq!(compatible.channels(), 6);
+}
+
+#[test]
+fn dec3_locations_are_lsb_first_selected_and_bounded() {
+    use fvid::codec::eac3_decoder::presentation::configuration_speakers;
+    fn config(entries: &[(u32,u32)]) -> Vec<u8> {
+        let mut bits = Vec::new();
+        let mut put = |value: u32, n: u32| { for i in (0..n).rev() { bits.push((value >> i) & 1); } };
+        put(0,13); put(entries.len() as u32 - 1,3);
+        for &(mode,locations) in entries {
+            put(0,2); put(16,5); put(0,5); put(mode,3); put(1,1);
+            put(0,3); put(1,4); put(locations,9);
+        }
+        while bits.len()%8 != 0 { bits.push(0); }
+        bits.chunks(8).map(|b|b.iter().fold(0,|v,x|(v<<1)|*x as u8)).collect()
+    }
+    let data=config(&[(7,2|64),(7,1)]);
+    assert_eq!(configuration_speakers(&data,0).unwrap(),Some(layout()));
+    let second=configuration_speakers(&data,1).unwrap().unwrap();
+    assert_eq!(second.0.len(),8);
+    assert!(second.0.contains(&Speaker::LeftCentre));
+    assert!(!second.0.contains(&Speaker::HeightLeft));
+    assert!(configuration_speakers(&data,2).unwrap().is_none());
+    assert!(configuration_speakers(&data[..data.len()-1],0).is_err());
+    let extended=configuration_speakers(&config(&[(7,1<<8)]),0).unwrap().unwrap();
+    assert!(extended.0.contains(&Speaker::Lfe2));
+    assert_eq!(extended.wave_mask(),None);
+    assert!(configuration_speakers(&config(&[(7,511)]),0).is_err());
 }

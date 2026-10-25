@@ -55,6 +55,51 @@ impl SpeakerLayout {
         Some(mask)
     }
 }
+/// Parse the selected independent programme's stable ISO BMFF speaker map.
+/// ETSI TS 102 366 F.6: chan_loc uses LSB-first location indices, unlike chanmap.
+/// Empty configuration retains the packet-probed legacy path.
+pub fn configuration_speakers(data: &[u8], selected: u8) -> Result<Option<SpeakerLayout>> {
+    use Speaker::*;
+    if data.is_empty() { return Ok(None); }
+    let mut bits = BitReader::new(data);
+    bits.read(13)?;
+    let last = bits.read(3)? as u8;
+    let mut found = None;
+    for id in 0..=last {
+        bits.read(2)?;
+        let bsid = bits.read(5)?;
+        if !(11..=16).contains(&bsid) { return Err(invalid("invalid dec3 bitstream ID")); }
+        bits.read(5)?;
+        let mode = bits.read(3)?;
+        let lfe = bits.read(1)? != 0;
+        bits.read(3)?;
+        let dependent = bits.read(4)?;
+        let extra = if dependent != 0 { bits.read(9)? } else { bits.read(1)?; 0 };
+        if id != selected { continue; }
+        let mut roles = match mode {
+            0 | 2 => vec![Left, Right],
+            1 => vec![Centre],
+            3 => vec![Left, Centre, Right],
+            4 => vec![Left, Right, BackCentre],
+            5 => vec![Left, Centre, Right, BackCentre],
+            6 => vec![Left, Right, LeftSurround, RightSurround],
+            _ => vec![Left, Centre, Right, LeftSurround, RightSurround],
+        };
+        if lfe { roles.push(Lfe); }
+        let extensions: &[&[Speaker]] = &[
+            &[LeftCentre,RightCentre], &[LeftRear,RightRear], &[BackCentre],
+            &[TopCentre], &[SurroundDirectLeft,SurroundDirectRight],
+            &[WideLeft,WideRight], &[HeightLeft,HeightRight], &[HeightCentre], &[Lfe2],
+        ];
+        for (bit, speakers) in extensions.iter().enumerate() {
+            if extra & (1 << bit) != 0 { roles.extend_from_slice(speakers); }
+        }
+        roles.sort(); roles.dedup();
+        let layout = SpeakerLayout(roles);
+        if layout.0.len() > 6 { layout.validate_output()?; found = Some(layout); }
+    }
+    Ok(found)
+}
 #[derive(Clone)]
 struct Descriptor {
     frame: Frame,

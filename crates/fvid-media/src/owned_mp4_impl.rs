@@ -1383,11 +1383,18 @@ fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<Skip
             }
             (28, Some(b"alac"))
         }
-        // Dolby Digital: Matroska names the coding `A_AC3` and an ISO BMFF sample
-        // entry spells it `ac-3`. Every frame carries its own geometry, so no
-        // configuration box follows; the `dac3` some writers nest states only what
-        // the frames restate, and the setup block the decoder is handed stays empty.
-        (b"soun", b"ac-3" | b"ec-3") => {
+        // E-AC-3 dec3 carries a stable per-programme union of dependent
+        // speaker locations. Retain it even when packet zero uses fewer roles.
+        // Older writers without dec3 retain packet-probed playback.
+        (b"soun", b"ec-3") => {
+            if !audio_entry(entry.data, &mut result)? { return Ok(None); }
+            let children = atoms(entry.data.get(28..).unwrap_or_default())?;
+            if let Some(config) = optional(&children, b"dec3")? {
+                result.configuration = config.to_vec();
+            }
+            (entry.data.len(), None)
+        }
+        (b"soun", b"ac-3") => {
             if !audio_entry(entry.data, &mut result)? {
                 return Ok(None);
             }
