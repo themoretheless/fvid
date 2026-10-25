@@ -1,3 +1,41 @@
+pub(crate) fn mp4_active_samples(
+    track: &Mp4NormalizationTrack,
+    interval: Option<(Duration, Duration)>,
+    max_packets: Option<u64>,
+) -> usize {
+    if !track.edits.is_empty() {
+        return track.samples.len();
+    }
+    let mut active = max_packets
+        .map(|m| usize::try_from(m).unwrap_or(usize::MAX))
+        .unwrap_or(track.samples.len())
+        .min(track.samples.len());
+    if let Some((_, end)) = interval
+        && track.timescale > 0
+    {
+        if end.is_zero() {
+            return 0;
+        }
+        let scale = u128::from(track.timescale);
+        if let Some(end_scaled) = end.as_nanos().checked_mul(scale) {
+            let mut interval_samples = 0usize;
+            while interval_samples < active {
+                let Some(sample) = track.samples.get(interval_samples) else {
+                    break;
+                };
+                if sample.pts >= 0
+                    && (sample.pts as u128).saturating_mul(1_000_000_000) >= end_scaled
+                {
+                    break;
+                }
+                interval_samples += 1;
+            }
+            active = active.min(interval_samples);
+        }
+    }
+    active
+}
+
 pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::Seek>(
     reader: Mp4TimelineReader<R>,
     output: &mut impl std::io::Write,
@@ -23,12 +61,14 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
     let track = reader.tracks()[index].clone();
     let initial_description = track.samples.get(0).ok_or_else(|| invalid("MP4 audio has no samples"))?.description_index;
     let initial_setup = track.decoder_setup(initial_description)?;
+    let max_packets = control.packet_limit();
+    let active_samples = mp4_active_samples(&track, interval, max_packets);
     let mut ps = vec![false; track.sample_descriptions.len()];
     // Probe each used configuration independently; never feed packets from a
     // different setup into an AAC entropy/history state.
     for (i, flag) in ps.iter_mut().enumerate() {
-        if (0..track.samples.len()).any(|n| track.samples.get(n).is_some_and(|s| s.description_index as usize == i+1)) {
-            *flag = negotiate_mp4_description_ps(&mut reader, index, (i+1) as u32, || control.check())?;
+        if (0..active_samples).any(|n| track.samples.get(n).is_some_and(|s| s.description_index as usize == i+1)) {
+            *flag = negotiate_mp4_description_ps_with_interval(&mut reader, index, (i+1) as u32, interval, max_packets, || control.check())?;
         }
     }
     let make_decoder = |id: u32| -> Result<Mp4TimelineDecoder> {
@@ -44,7 +84,7 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
     // Detect the need for normalization before caller-owned output.
     let mut checked = initial_description;
     let mut normalize = target.is_some() || track.timescale % rate != 0;
-    for i in 0..track.samples.len() {
+    for i in 0..active_samples {
         control.check()?;
         let id = track.samples.get(i).ok_or_else(|| invalid("missing audio sample"))?.description_index;
         if track.sample_descriptions[(id - 1) as usize] != track.sample_descriptions[(checked - 1) as usize] {
@@ -273,22 +313,31 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
     Ok(stats)
 }
 
+#[allow(dead_code)] // Precise PCM instantiation shares this implementation too.
 pub(crate) fn negotiate_mp4_ps<R: std::io::Read + std::io::Seek>(
-    reader: &mut Mp4TimelineReader<R>, index: usize, check: impl FnMut() -> Result<()>,
+    reader: &mut Mp4TimelineReader<R>, index: usize, max_packets: Option<u64>, check: impl FnMut() -> Result<()>,
 ) -> Result<bool> {
-    let Some(first) = reader.tracks()[index].samples.get(0) else { return Ok(false); };
-    negotiate_mp4_description_ps(reader, index, first.description_index, check)
+    negotiate_mp4_ps_with_interval(reader, index, None, max_packets, check)
 }
 
-fn negotiate_mp4_description_ps<R: std::io::Read + std::io::Seek>(
-    reader: &mut Mp4TimelineReader<R>, index: usize, description: u32, mut check: impl FnMut() -> Result<()>,
+#[allow(dead_code)] // Precise PCM instantiation shares this implementation too.
+pub(crate) fn negotiate_mp4_ps_with_interval<R: std::io::Read + std::io::Seek>(
+    reader: &mut Mp4TimelineReader<R>, index: usize, interval: Option<(Duration, Duration)>, max_packets: Option<u64>, check: impl FnMut() -> Result<()>,
+) -> Result<bool> {
+    let Some(first) = reader.tracks()[index].samples.get(0) else { return Ok(false); };
+    negotiate_mp4_description_ps_with_interval(reader, index, first.description_index, interval, max_packets, check)
+}
+
+fn negotiate_mp4_description_ps_with_interval<R: std::io::Read + std::io::Seek>(
+    reader: &mut Mp4TimelineReader<R>, index: usize, description: u32, interval: Option<(Duration, Duration)>, max_packets: Option<u64>, mut check: impl FnMut() -> Result<()>,
 ) -> Result<bool> {
     let setup = reader.tracks()[index].decoder_setup(description)?;
     if setup.codec != *b"mp4a" { return Ok(false); }
     let asc = mp4_probe_config(&setup.configuration)?;
     let Ok(mut probe) = InBandPsProbe::new(asc, setup.sample_rate) else { return Ok(false); };
+    let active_samples = mp4_active_samples(&reader.tracks()[index], interval, max_packets);
     let mut packet = Vec::new();
-    for sample in 0..reader.tracks()[index].samples.len() {
+    for sample in 0..active_samples {
         check()?;
         if reader.tracks()[index].description_for_sample(sample) != reader.tracks()[index].sample_descriptions.get((description-1) as usize) {
             probe.reset();
@@ -304,22 +353,32 @@ fn negotiate_mp4_description_ps<R: std::io::Read + std::io::Seek>(
 include!("owned_mp4_audio_normalized_impl.rs");
 
 #[allow(dead_code)] // Precise PCM instantiation shares this implementation too.
-pub(crate) fn mp4_normalized_geometry<R:std::io::Read+std::io::Seek>(reader:&mut Mp4TimelineReader<R>,index:usize)->Result<Option<(u32,u16,u32)>> {
-    mp4_normalized_geometry_controlled(reader,index,||Ok(()))
+pub(crate) fn mp4_normalized_geometry<R:std::io::Read+std::io::Seek>(reader:&mut Mp4TimelineReader<R>,index:usize,max_packets:Option<u64>)->Result<Option<(u32,u16,u32)>> {
+    mp4_normalized_geometry_with_interval(reader,index,None,max_packets)
 }
-pub(crate) fn mp4_normalized_geometry_controlled<R:std::io::Read+std::io::Seek>(reader:&mut Mp4TimelineReader<R>,index:usize,mut check:impl FnMut()->Result<()>)->Result<Option<(u32,u16,u32)>> {
+#[allow(dead_code)]
+pub(crate) fn mp4_normalized_geometry_with_interval<R:std::io::Read+std::io::Seek>(reader:&mut Mp4TimelineReader<R>,index:usize,interval:Option<(Duration,Duration)>,max_packets:Option<u64>)->Result<Option<(u32,u16,u32)>> {
+    mp4_normalized_geometry_controlled_with_interval(reader,index,interval,max_packets,||Ok(()))
+}
+#[allow(dead_code)] // Precise PCM instantiation shares this implementation too.
+pub(crate) fn mp4_normalized_geometry_controlled<R:std::io::Read+std::io::Seek>(reader:&mut Mp4TimelineReader<R>,index:usize,max_packets:Option<u64>,check:impl FnMut()->Result<()>)->Result<Option<(u32,u16,u32)>> {
+    mp4_normalized_geometry_controlled_with_interval(reader,index,None,max_packets,check)
+}
+#[allow(dead_code)] // Precise PCM instantiation shares this implementation too.
+pub(crate) fn mp4_normalized_geometry_controlled_with_interval<R:std::io::Read+std::io::Seek>(reader:&mut Mp4TimelineReader<R>,index:usize,interval:Option<(Duration,Duration)>,max_packets:Option<u64>,mut check:impl FnMut()->Result<()>)->Result<Option<(u32,u16,u32)>> {
     let track=&reader.tracks()[index];
     let first=track.samples.get(0).ok_or_else(||invalid("MP4 audio has no samples"))?.description_index;
     let setup=track.decoder_setup(first)?;
-    let ps=negotiate_mp4_description_ps(reader,index,first,&mut check)?;
+    let ps=negotiate_mp4_description_ps_with_interval(reader,index,first,interval,max_packets,&mut check)?;
     let decoder=if ps {Mp4TimelineDecoder::with_in_band_ps(&setup)?}else{Mp4TimelineDecoder::new(&setup)?};
     let initial=(decoder.sample_rate(),decoder.channels(),decoder.normalization_mask());
+    let active_samples=mp4_active_samples(&reader.tracks()[index],interval,max_packets);
     for i in 0..reader.tracks()[index].sample_descriptions.len() {
         check()?;
         let track=&reader.tracks()[index];
-        if !(0..track.samples.len()).any(|n|track.samples.get(n).is_some_and(|s|s.description_index as usize==i+1)) {continue;}
+        if !(0..active_samples).any(|n|track.samples.get(n).is_some_and(|s|s.description_index as usize==i+1)) {continue;}
         let setup=track.decoder_setup((i+1)as u32)?;
-        let ps=negotiate_mp4_description_ps(reader,index,(i+1)as u32,&mut check)?;
+        let ps=negotiate_mp4_description_ps_with_interval(reader,index,(i+1)as u32,interval,max_packets,&mut check)?;
         let next=if ps {Mp4TimelineDecoder::with_in_band_ps(&setup)?}else{Mp4TimelineDecoder::new(&setup)?};
         if (next.sample_rate(),next.channels(),next.normalization_mask())!=initial {return Ok(Some(initial));}
     }

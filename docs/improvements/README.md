@@ -1,6 +1,6 @@
 # Verified improvements
 
-Accepted: **247 / 1000 independent, useful changes**. Only entries marked `accepted` in
+Accepted: **279 / 1000 independent, useful changes**. Only entries marked `accepted` in
 [`registry.json`](registry.json) count. Fixture variants, test cases, documentation
 and baseline integration repairs do not inflate the count.
 
@@ -1976,5 +1976,537 @@ normalizes `backend: "fvid"` and `fvid_payload_copies: 0` when
 `fvid::media::remux` delegates MP4 -> Matroska remux with custom options to
 `fvid_media::remux`. Two focused integration tests, 6 related integration tests,
 and 1 offline fixture unit test pass. See `batch-240-validation.json`.
+
+## Batch 241 — Enforce packet-byte, zero-packet, and RSS budgets across audio planning, loudness, loudnorm, mix/merge, and sample-domain concat paths and align CLI dispatch
+
+FVID-0248 propagates `options.max_packet_bytes` and `scan_all()` through
+`owned_matroska_{aac,alac,flac,mp3,opus,pcm}_export.rs` and
+`owned_audio_plan::matroska_descriptor`; validates MP4 `SampleIndex` packet sizes
+against `options.max_packet_bytes` in `owned_mp4_audio_export::descriptor`,
+`native_loudnorm::try_plan`, `native_plan::loudness_with_options`,
+`native_plan::concat_mp4_matroska_with_options`, and `native_audio_mix`; enforces
+WAVE frame-size packet limits and `max_packets == Some(0)` across
+`owned_audio_plan`, `owned_loudnorm`, `native_loudnorm`, `native_plan`, and
+`native_audio_mix`; preserves budget refusal errors in `src/media.rs` mix/merge
+wrappers instead of falling back to control-unaware planners; and routes
+`plan overlay`, `overlay`, `plan loudnorm`, and `loudnorm` in `src/media_cli.rs`
+through `fvid::media::*`. Three focused integration tests, 7 related integration
+tests, and 1 offline fixture unit test pass. See `batch-241-validation.json`.
+
+## Batch 242 — Enforce packet-byte and zero-packet budgets in `decode-audio` and `trim` planning/execution and align WAVE `trim`/`trim-pcm`/`concat` stream-0 errors, backend attribution, and budget notes
+
+FVID-0249 adds `decode_audio_with_options`, `trim_audio_with_options`,
+`trim_aac_with_options`, and `trim_adts_with_options` in `src/native_plan.rs` to
+enforce `max_packet_bytes`, `max_packets == Some(0)`, and `max_rss_bytes` across
+WAVE, ADTS, MP4, and Matroska inputs; rejects `max_packets == Some(0)` in
+`validate_owned_audio_options_for_destination` (`src/media.rs`),
+`validate_request` (`crates/fvid-media/src/owned_audio_export.rs`), and
+zero-sample `decode_reader` (`src/native_pcm.rs`); passes `Limits.packet_bytes`
+into `WebmReader::open` and propagates `scan_all()?` in `src/native_export.rs`
+and `src/native_export/pcm_matroska.rs`; and aligns WAVE `trim`, `trim_pcm`, and
+`concat` stream-0 errors (`"WAVE has only stream 0"`), `fvid::media::concat`
+backend attribution (`"fvid"`), and budget notes in `src/media.rs`,
+`src/media_cli.rs`, `crates/fvid-media/src/owned_wave_plan.rs`, and
+`crates/fvid-media/src/owned_audio_plan.rs`. Two focused integration tests, 7
+related integration tests, and 1 offline fixture unit test pass. See
+`batch-242-validation.json`.
+
+## Batch 243 — Enforce packet-byte, zero-packet, and RSS budgets in `loudness` and `normalize-loudness` channel-weight inspection and execution and align CLI metadata refusal and plan budget notes
+
+FVID-0250 adds `default_weights_with_options`
+(`loudness_channel_weights_with_options`) in `src/native_pcm/loudness.rs` and
+`src/native_pcm.rs` and wires it through `src/media.rs`, `src/native_plan.rs`,
+and `src/media_cli.rs`; rejects `options.max_packets == Some(0)` at preflight and
+passes `limits.packet_bytes` to `WebmReader::open` in
+`measure_file_with_options` (`src/native_pcm/loudness.rs`); deduplicates budget
+notes in `native_plan::loudness_with_options` (`src/native_plan.rs`); and parses
+metadata flags in CLI `loudness` and `plan loudness` (`src/media_cli.rs`) so
+they report the owned loudness contract error before channel-weight inspection.
+Three focused integration tests, 8 related integration tests, and 1 offline
+fixture unit test pass. See `batch-243-validation.json`.
+
+## Batch 244 — Enforce input packet-byte budgets in `convert-subtitles`, `burn-subtitles`, `xfade`, and FFV1 export and preserve CLI policy refusal messages across subtitle and cross-fade paths
+
+FVID-0251 propagates `max_packet_bytes` into `WebmReader::open` and
+`restrict_packet_bytes` in `crates/fvid-media/src/owned_subtitle_impl.rs`,
+`crates/fvid-media/src/owned_subtitle_burn.rs`, and
+`crates/fvid-media/src/owned_ffv1_export.rs`; enforces
+`header.frame_len() > options.max_packet_bytes` in
+`owned_subtitle_burn::burn_subtitles` and `owned_xfade::write_y4m_ffv1_counted`
+to match `plan_burn_subtitles` and `plan_xfade`; parses `--max-memory-mib` in
+CLI `convert-subtitles`, `burn-subtitles`, and `xfade` (`src/media_cli.rs`); and
+retains owned `burn-subtitles` and `xfade` CLI dispatch when source inputs are
+supported with default options so policy refusals (`--streams`,
+`--max-memory-mib`, metadata limits) are reported directly in all build
+configurations. Three focused integration tests, 3 related unit tests, and 1
+offline fixture unit test pass. See `batch-244-validation.json`.
+
+## Batch 245 — Enforce input and companion packet-byte budgets across Y4M, Matroska, and MP4 lossless export, `crop-lossless`, and `overlay` paths and preserve CLI policy refusal messages
+
+FVID-0252 validates raw source and overlay foreground Y4M
+`header.frame_len() > options.max_packet_bytes` in both `transcode_lossless` and
+`plan_transcode_lossless` (`crates/fvid-media/src/owned_lossless.rs`); passes
+`limits.packet_bytes = limits.packet_bytes.min(options.max_packet_bytes)` into
+`WebmReader::open` in `crates/fvid-media/src/owned_webm_multitrack_export.rs` and
+`crates/fvid-media/src/owned_mp4_multitrack_export.rs` and validates selected MP4
+`SampleIndex` packet sizes against `options.max_packet_bytes` in
+`owned_mp4_multitrack_export::qualify`; and parses `--max-memory-mib` in
+`try_owned_overlay` and `owned_lossless_command_with_name` (`src/media_cli.rs`)
+while retaining owned CLI dispatch when
+`supports(source, &transform, &CopyOptions::default())` is true. Three focused
+integration tests, 7 related unit tests, and 1 offline fixture unit test pass.
+See `batch-245-validation.json`.
+
+## Batch 246 — Enforce encoded packet-byte budgets and positive limit validation across Y4M export, concat, and trim planning and execution
+
+FVID-0253 adds `validate_video_packet_budget` in `src/native_export.rs` to
+inspect Y4M frame lengths, MP4 video `SampleIndex` sizes, and Matroska packet
+sizes against `options.max_packet_bytes` before decoding or planning, and calls
+`validate_video_selection` in `export_y4m_pipeline_with_options`; invokes
+`validate_video_packet_budget` and rejects `options.max_packets == Some(0)` in
+`concat_y4m_with_options` and `trim_y4m_with_options` (`src/native_plan.rs`);
+and rejects `--max-packet-bytes 0` (`"packet byte limit must be positive"`) and
+routes `--max-rss-mib` through `fvid_media::parse_max_rss_mib` in
+`parse_native_audio_limit` and `run_native` (`src/media_cli.rs`). Three focused
+integration tests, 4 related integration tests, and 1 offline fixture unit test
+pass. See `batch-246-validation.json`.
+
+## Batch 247 — Enforce packet-byte and zero-packet budgets and single-stream validation parity across MP4-to-Matroska remux and concat, native remux planning, and WAVE/ADTS operations
+
+FVID-0254 enforces `(sample.size as usize) > options.max_packet_bytes` in
+`owned_mp4_remux::plan_remux` (`crates/fvid-media/src/owned_mp4_remux.rs`) and
+`mp4_concat::open_with_packet_limit` (`src/container/mp4_concat.rs`), and
+rejects `options.max_packets == Some(0)` in `owned_mp4_remux::plan_remux`,
+`owned_mp4_remux::remux`, and `mp4_concat::write_with_options`; validates
+`options.max_packet_bytes > 0` and `check_rss_budget(options)` in
+`native_plan::remux_with_options` (`src/native_plan.rs`); and checks
+`options.streams.iter().any(|&s| s != 0)` before secondary policy validation in
+WAVE and ADTS operations in `src/media.rs`. Three focused integration tests, 3
+related integration tests, and 2 offline fixture unit tests pass. See
+`batch-247-validation.json`.
+
+## Batch 248 — Enforce packet-byte and controlled-memory budgets and stream-selection parity across native loudnorm, loudness, normalization, and audio mix/merge paths
+
+FVID-0255 validates the first ADTS packet size against `options.max_packet_bytes`
+and enforces WAVE stream selection and sample-frame `max_packet_bytes` in
+`native_loudnorm::try_plan` and `try_apply`, and routes native container loudnorm
+through `native_plan::decode_audio_with_options` (`src/native_loudnorm.rs`);
+probes single-stream audio eligibility with default budget limits in
+`native_audio_mix::validate_and_inspect_source_with_options`
+(`src/native_audio_mix.rs`) so `plan_decode_audio` surfaces exact
+`max_controlled_bytes` and `max_packet_bytes` errors; calls
+`decode_audio_with_options` in `native_plan::loudness_with_options`
+(`src/native_plan.rs`); and enforces single-stream and metadata guards in
+`native_pcm::loudness::default_weights_with_options`
+(`src/native_pcm/loudness.rs`). Three focused integration tests, 6 related
+integration tests, and 2 offline fixture unit tests pass. See
+`batch-248-validation.json`.
+
+## Batch 249 — Enforce packet-byte budgets and stream-selection parity across Ogg Opus/Vorbis/joint, G.711 WAVE, and standalone container loudness and loudnorm paths
+
+FVID-0256 adds `max_packet_size` on `owned_ogg_opus::Program`,
+`owned_ogg_vorbis::Program`, and `owned_ogg_audio_program::Program` and rejects
+oversized packets in `owned_ogg_opus_export::open`,
+`owned_ogg_vorbis_export::open`, and `owned_ogg_joint_export::open`; enforces
+`options.max_packet_bytes < usize::from(shape.channels)` in
+`owned_g711_wave_export::open` (`crates/fvid-media/src/owned_g711_wave_export.rs`);
+and validates stream selection in `native_loudnorm::try_plan` and `try_apply`
+(`src/native_loudnorm.rs`) while routing recognized standalone audio directly to
+`owned_container_loudnorm` so stream-selection and budget refusals propagate
+consistently for both `.wav` and `.mka`/`.mkv` outputs. Three focused integration
+tests, 6 related integration tests, and 2 offline fixture unit tests pass. See
+`batch-249-validation.json`.
+
+## Batch 250 — Enforce packet-byte budget and error parity across sample-domain audio concat and standalone audio trim planning and execution
+
+FVID-0257 probes sample-domain concat eligibility with default budget/stream
+controls in `try_concat_mp4_matroska_with_options` (`src/native_export.rs`) and
+`concat_mp4_matroska_with_options` (`src/native_plan.rs`), then explicitly
+validates output controls, WAVE sample-frame `max_packet_bytes`,
+MP4/Matroska/ADTS packet budgets, and standalone audio `plan_decode_audio`
+before execution or plan admission; and routes recognized standalone audio
+directly to `decode_audio_transformed` / `plan_decode_audio` in
+`owned_wave_remux::trim` (`crates/fvid-media/src/owned_wave_remux.rs`),
+`owned_wave_plan::plan_trim` (`crates/fvid-media/src/owned_wave_plan.rs`), and
+`media::trim` (`src/media.rs`) so packet-budget and stream-selection refusals
+propagate directly without falling back to WAVE trim. Three focused integration
+tests, 9 related integration tests, and 2 offline fixture unit tests pass. See
+`batch-250-validation.json`.
+
+## Batch 251 — Enforce packet-byte budget and container-specific policy diagnostics across Matroska/MP4 remux and non-WAVE concat planning and execution
+
+FVID-0258 validates `options.max_packet_bytes > 0` up front and returns
+container-specific refusals (`"request is not an owned Matroska identity remux"`,
+`"request is not an owned MP4 Matroska remux"`,
+`"request is not an owned ADTS Matroska remux"`) for non-WAVE inputs in
+`owned_remux::remux` (`crates/fvid-media/src/owned_remux.rs`) and
+`owned_remux_plan::plan_remux` (`crates/fvid-media/src/owned_remux_plan.rs`);
+validates MP4 track sample sizes against `options.max_packet_bytes` in
+`native_plan::remux_with_options` (`src/native_plan.rs`) and
+`validate_mp4_packet_budget` (`src/media.rs`), allows positive custom
+`max_packet_bytes` in `validate_mp4_relocate_options`, and aligns
+`media::plan_remux` with `media::remux` on `is_native_mp4_matroska`; and refuses
+non-WAVE inputs that fail ADTS `supports` with
+`"request is not an owned ADTS Matroska concat"` in `owned_concat::concat` and
+`owned_concat::plan_concat` (`crates/fvid-media/src/owned_concat.rs`). Three
+focused integration tests, 3 related integration tests, and 2 offline fixture
+unit tests pass. See `batch-251-validation.json`.
+
+## Batch 252 — Enforce encoded FFV1 packet-byte budgets, positive limit checks, and policy refusal parity across lossless transcode planning and Y4M trim/concat
+
+FVID-0259 validates `options.max_packet_bytes > 0` up front in
+`transcode_lossless` and `plan_transcode_lossless`
+(`crates/fvid-media/src/owned_lossless.rs`), admits sources in
+`plan_transcode_lossless` when `supports(source, transform, &CopyOptions::default())`
+holds so policy refusals match `transcode_lossless`, and verifies encoded FFV1
+packet sizes against custom `options.max_packet_bytes` in
+`plan_transcode_lossless` across Y4M and single-track Matroska/MP4 paths while
+removing the bogus transformed-Y4M frame-byte check inside the Y4M visitor; and
+validates `validate_video_packet_budget` before checking
+`control.packet_limit_reached()` in `export_y4m_sources_with_options`
+(`src/native_export.rs`) and after all `validate_video_selection` checks in
+`concat_y4m_with_options` (`src/native_plan.rs`). Three focused integration
+tests, 3 related integration tests, and 2 offline fixture unit tests pass. See
+`batch-252-validation.json`.
+
+## Batch 253 — Enforce positive packet-byte checks, source header error parity, encoded FFV1 packet-byte budgets, and per-cue formatted ASS event byte limits across xfade, subtitle burn-in, and subtitle conversion
+
+FVID-0260 validates `options.max_packet_bytes > 0`, `check_rss_budget(options)`,
+and `metadata(options)` before generic policy refusal in `plan_xfade` and
+`xfade_video` (`crates/fvid-media/src/owned_xfade.rs`) and validates
+primary/secondary Y4M headers and frame-rate parity in `xfade_video` so header
+errors match `plan_xfade`; composites active subtitle cues and encodes FFV1
+packets during `plan_burn_subtitles`
+(`crates/fvid-media/src/owned_subtitle_burn.rs`) for both Y4M and Matroska/MP4
+sources when `options.max_packet_bytes` is customized; and enforces formatted ASS
+event payload byte limits per cue inside the cue loops of `try_convert_srt_inner`
+and `try_convert_matroska_inner`
+(`crates/fvid-media/src/owned_subtitle_impl.rs`). Three focused integration
+tests, 5 related integration tests, and 1 offline fixture unit test pass. See
+`batch-253-validation.json`.
+
+## Batch 254 — Enforce encoded FFV1 packet-byte budgets, selected-track packet-byte admission, and metadata/policy refusal parity across multitrack Matroska and MP4 lossless planning and execution
+
+FVID-0261 shares `check_encoded_ffv1` in `crates/fvid-media/src/owned_lossless.rs`
+and invokes it during `owned_webm_multitrack_export::plan_selection` and
+`owned_mp4_multitrack_export::plan_selection` when `options.max_packet_bytes` is
+customized, while validating `metadata(options)` unconditionally in
+`plan_transcode_lossless`, `owned_webm_multitrack_export::qualify`, and
+`owned_mp4_multitrack_export::qualify`; scans Matroska containers with default
+index limits before applying `restrict_packet_bytes(options.max_packet_bytes)`
+and checking `packet_payload_size(index) > options.max_packet_bytes` on the
+selected tracks in `owned_webm_multitrack_export::qualify`,
+`owned_video_decode::decode_webm`, and `owned_ffv1_export::input_limited`; and
+validates `check(options)`, track selection, and
+`stream_metadata_set`/`stream_metadata_delete` track bounds before
+`owned_lossless::policy(&normalized, true)` in both multitrack exporters. Three
+focused integration tests, 6 related integration tests, and 1 offline fixture
+unit test pass. See `batch-254-validation.json`.
+
+## Batch 255 — Preserve upright display pixel aspect on rotated overlay inputs, validate post-geometry overlay compatibility in planning and execution, and honor pre-cancelled native copy options
+
+FVID-0262 validates `transformed_aspect(reader.pixel_aspect(), visible_w, visible_h, geometry)`
+directly against `self.source.reader.pixel_aspect()` without double-swapping
+90/270-degree rotated tracks, and checks post-geometry main chroma subsampling
+and chroma-aligned `(x, y)` placement in
+`TimedOverlay::validate_main_with_geometry` (`src/native_export/overlay.rs`)
+across `overlay_video_transformed`, `decode_video_pipeline_overlay_step`
+(`src/native_media.rs`), `native_plan::overlay_with_geometry`,
+`native_plan::decode_overlay_with_geometry`, and
+`native_plan::transcode_lossless` (`src/native_plan.rs`); checks
+`options.cancel` in `validate_native_copy_options` (`src/media.rs`); and routes
+`!custom_policy && supports_overlay(&transform) && overlay_eligible(source)?`
+directly in `owned_lossless_command_with_name` (`src/media_cli.rs`). Four
+focused integration tests, 10 related integration tests, and 1 offline fixture
+unit test pass. See `batch-255-validation.json`.
+
+## Batch 256 — Scope Y4M export/concat/trim packet-byte budgets to selected video tracks and output Y4M frames, validate Y4M planner cancellation and segment compatibility, enforce xfade pixel aspect parity, and prioritize subtitle-burn cancellation and single-track admission
+
+FVID-0263 scopes MP4 and Matroska packet-byte checks in
+`validate_video_packet_budget_with_geometry` (`src/native_export.rs`) to the
+selected video track and verifies decoded output Y4M frame byte size via
+`inspect_first_y4m_frame`, checks `options.cancel` in `validate_y4m_options`,
+and validates segment rate/layout compatibility in
+`native_plan::concat_y4m_with_options` (`src/native_plan.rs`) while supporting
+`--streams` and `--max-memory-mib` in `export-y4m` CLI (`src/media_cli.rs`);
+enforces reduced pixel aspect ratio equality in `SecondaryReader::new`
+(`crates/fvid-media/src/owned_xfade.rs`); and checks `options.cancel` in
+`owned_subtitle_burn::policy` (`crates/fvid-media/src/owned_subtitle_burn.rs`)
+while qualifying single-track Matroska video before applying
+`options.max_packet_bytes`. Four focused integration tests, 7 related
+integration tests, and 1 offline fixture unit test pass. See
+`batch-256-validation.json`.
+
+## Batch 257 — Scope Matroska and MP4 audio export, planning, loudness, loudnorm, metadata extraction, and mix/merge packet-byte budgets to the selected audio track
+
+FVID-0264 opens Matroska containers with default index packet-byte limits and
+applies `restrict_packet_bytes(options.max_packet_bytes)` plus selected-track
+`packet_payload_size(packet_index) > options.max_packet_bytes` validation in
+`validate_encoded_audio_packet_budget` (`src/native_plan.rs`),
+`export_pcm_selected` (`src/native_export.rs`), `extract_source_pcm_metadata`
+(`src/native_export/pcm_matroska.rs`), `native_loudnorm::try_plan`
+(`src/native_loudnorm.rs`), `validate_and_inspect_source_with_options` and
+`eligible_with_options` (`src/native_audio_mix.rs`), `matroska_descriptor`
+(`crates/fvid-media/src/owned_audio_plan.rs`), and `open_audio_reader` /
+`admit_audio_reader` (`crates/fvid-media/src/owned_matroska_audio.rs`), and
+scopes MP4 packet-byte eligibility in `native_audio_mix::eligible_with_options`
+to `reader.tracks().get(info.stream_index)`. Three focused integration tests,
+13 related integration tests, and 1 offline fixture unit test pass. See
+`batch-257-validation.json`.
+
+## Batch 258 — Preserve selected source stream index across multi-stream Ogg audio planning and loudness, qualify discrete mono/stereo Ogg Opus loudness and channel rematrixing, and scope Ogg packet-byte budgets to the active decode prefix
+
+FVID-0265 returns `(selected.source_index, Backend)` from `select_backend` and
+threads `Some(stream_index)` plus `transform` through `descriptor_for_decode`,
+`supports`, and `apply` in `crates/fvid-media/src/owned_ogg_audio_export.rs`
+and `crates/fvid-media/src/owned_audio_plan.rs`; admits
+`channels <= 2 && mask == 0` in `owned_ogg_opus_export::supports` and maps
+`mask == 0 && channels <= 2` to `standard_mask(channels)` in
+`owned_container_loudness::geometry`
+(`crates/fvid-media/src/owned_container_loudness.rs`); and adds
+`max_packet_size_in_prefix(until, max_packets)` to `OggOpus`, `OggVorbis`, and
+`OggAudioProgram`
+(`crates/fvid-media/src/{owned_ogg_opus.rs,owned_ogg_vorbis.rs,owned_ogg_audio_program.rs}`)
+so `open_with_transform` validates `options.max_packet_bytes` only across
+packets within the active `max_packets` and `interval` decode prefix. Three
+focused integration tests, 7 related test suites, and 2 offline fixture unit
+tests pass. See `batch-258-validation.json`.
+
+## Batch 259 — Scope bare FLAC and bare MPEG Layer I/II/III packet-byte budgets to the active decode prefix across planning, trimming, and WAVE export
+
+FVID-0266 adds `max_packet_size_in_prefix(until, max_packets)` to `Flac`
+(`crates/fvid-media/src/owned_flac.rs`) and `Mp3`
+(`crates/fvid-media/src/owned_mpeg_audio.rs`), adds `open_with_transform`,
+`open_with_interval`, and `descriptor_with_transform` to
+`crates/fvid-media/src/owned_raw_flac.rs` and
+`crates/fvid-media/src/owned_raw_mp3.rs`, and threads `transform.copied()` from
+`owned_audio_plan::source_descriptor_for_decode`
+(`crates/fvid-media/src/owned_audio_plan.rs`), `supports`, `apply`, and
+`decode_raw_checked` so `options.max_packet_bytes` is enforced over the active
+decode prefix (`max_packets` and `interval`) while still rejecting oversized
+packets in full-stream plans and decodes. Two focused integration tests, 7
+related test suites, and 2 offline fixture unit tests pass. See
+`batch-259-validation.json`.
+
+## Batch 260 — Qualify discrete multichannel and non-standard sample-rate standalone/container audio in sample-peak PCM loudness and normalization, report encoded packet progress across spooled loudness decodes, and scope Matroska PCM loudness packet-byte budgets to the selected audio stream
+
+FVID-0267 adds `geometry_unqualified`, `decode_to_wave_unqualified`, and
+`decode_adts_to_wave` in `crates/fvid-media/src/owned_container_loudness.rs`
+and uses them in `measure_file_with_options` (`src/native_pcm/loudness.rs`)
+after validating `LoudnessMeter::new(rate, weights)` while forwarding encoded
+packet progress during spooling and emitting
+`ProgressEvent { done: true, ..spool.progress }` after measurement completes;
+and scopes Matroska `max_packet_bytes` checks in `measure_file_with_options`,
+`default_weights_with_options`, and `loudness_with_options`
+(`src/native_plan.rs`) to the selected audio stream (`info.stream_index`) and
+active `max_packets` prefix. Two focused integration tests, 6 related test
+suites, and 2 offline fixture unit tests pass. See
+`batch-260-validation.json`.
+
+## Batch 261 — Scope mix-audio and merge-audio packet-byte admission to the active max_packets prefix and preserve 4-CC RIFF INFO tags when exporting or normalizing bare FLAC, Ogg Opus/Vorbis, and bare MP3 to WAVE
+
+FVID-0268 preserves `options.max_packets` in
+`is_single_stream_fvid_media_audio_with_options`,
+`validate_and_inspect_source_with_options`, and `eligible_with_options`
+(`src/native_audio_mix.rs`) while bounding MP4, Matroska, and ADTS packet-byte
+inspection loops to `options.max_packets` (and keeping `concat` per-source
+inspection unbounded on `max_packets` in `src/native_audio_mix/concat.rs`
+because `concat` shares `max_packets` cumulatively across segments); and retains
+printable 4-CC RIFF `INFO` keys (`key.len() == 4 && tag_for_key(key).is_ok()`)
+alongside the 10 semantic keys in `owned_ogg_opus_export::info_for_tags`
+(`crates/fvid-media/src/owned_ogg_opus_export.rs`),
+`owned_flac_layout::wave_info_from_extra`
+(`crates/fvid-media/src/owned_flac_layout.rs`), and `Mp3::wave_info`
+(`crates/fvid-media/src/owned_mpeg_audio.rs`). Two focused integration tests, 6
+related test suites, and 2 offline fixture unit tests pass. See
+`batch-261-validation.json`.
+
+## Batch 262 — Scope Matroska and MP4 audio packet-byte and controlled-memory admission to the active max_packets prefix and preserve QuickTime/iTunes ©too encoder tags across probe, WAVE INFO, and Matroska PCM exports
+
+FVID-0269 bounds `validate_audio_packet_budget` and `admit_audio_reader`
+(`crates/fvid-media/src/owned_matroska_audio.rs`),
+`validate_encoded_audio_packet_budget` (`src/native_plan.rs`),
+`native_loudnorm::try_plan` (`src/native_loudnorm.rs`), and
+`extract_source_pcm_metadata_with_packet_limit`
+(`src/native_export/pcm_matroska.rs`) by `options.max_packets`; parses
+QuickTime/iTunes `©too` (`0xa9746f6f`) into `Mp4Reader::encoder()`
+(`crates/fvid-media/src/owned_mp4_impl.rs`) and exposes it in `try_mp4`
+(`crates/fvid-media/src/owned_mp4_probe_impl.rs`), `mp4_source_info`
+(`crates/fvid-media/src/owned_wave_metadata.rs`), `export_pcm_selected`
+(`src/native_export.rs`), and `extract_source_pcm_metadata_with_packet_limit`;
+and clears output metadata edits before `loudness_channel_weights_with_options`
+in `src/media.rs` and `src/media_cli.rs`. Two focused integration tests, 5
+related test suites, and 2 offline fixture unit tests pass. See
+`batch-262-validation.json`.
+
+## Batch 263 — Scope unedited MP4 audio max_packet_bytes and max_controlled_bytes admission in fvid-media and loudness channel-weight inspection to the active max_packets prefix
+
+FVID-0270 bounds `owned_mp4_audio_export::descriptor`
+(`crates/fvid-media/src/owned_mp4_audio_export.rs`),
+`owned_mp4_audio::admit_audio_reader`
+(`crates/fvid-media/src/owned_mp4_audio.rs`), and
+`default_weights_with_options` (`src/native_pcm/loudness.rs`) by
+`options.max_packets` when `track.edits.is_empty()` and enforces
+`largest_packet <= options.max_packet_bytes` inside `admit_audio_reader`. One
+focused integration test, 2 related test suites, and 2 offline fixture unit
+tests pass. See `batch-263-validation.json`.
+
+## Batch 264 — Scope mono AAC in-band Parametric Stereo (PS) probing and MP4 sample-description inspection to the active max_packets prefix across MP4 and Matroska audio pipelines
+
+FVID-0271 threads `max_packets` into `negotiate_mp4_ps`,
+`negotiate_mp4_description_ps`, `mp4_normalized_geometry`,
+`mp4_normalized_geometry_controlled`
+(`crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs`), and
+`negotiate_matroska_ps`
+(`crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs`), exposes
+`DecodeProgress::packet_limit` in
+`crates/fvid-media/src/owned_matroska_audio.rs` and `src/native_media.rs`, and
+bounds unedited MP4 sample-description loops in
+`decode_mp4_audio_reader_targeted`, `decode_mp4_audio_normalized`,
+`owned_mp4_audio_export::geometry`, and `owned_aac_export_routing::router` to
+`active_samples`. Two focused integration tests, 3 related test cases, and 1
+offline fixture unit test pass. See `batch-264-validation.json`.
+
+## Batch 265 — Preserve QuickTime/iTunes ©too encoder metadata in MP4-to-Matroska remux and concat with set/delete override support and scope compressed MP4 concat packet-byte admission to selected streams and the active max_packets prefix
+
+FVID-0272 seeds `text` with `("ENCODER", encoder.to_owned())` from
+`Mp4Reader::encoder()` (`©too`) before applying `options.metadata_set` and
+`options.metadata_delete` in `owned_mp4_remux::metadata`
+(`crates/fvid-media/src/owned_mp4_remux.rs`) and `mp4_concat::write_with_options`
+(`src/container/mp4_concat.rs`), as well as in
+`owned_mp4_matroska_impl::write_selected`
+(`crates/fvid-media/src/owned_mp4_matroska_impl.rs`) and
+`matroska_write::write_mp4_aac_metadata` (`src/container/matroska_write.rs`),
+and adds `mp4_concat::open_with_options` (`src/container/mp4_concat.rs`) wired
+into `concat_mp4_matroska_with_options` (`src/native_plan.rs`) and
+`try_concat_mp4_matroska_with_options` (`src/native_export.rs`) to validate
+`max_packet_bytes` in DTS-interleaved order across `selected` tracks up to
+`options.max_packets`. Two focused integration tests, 4 related test suites,
+and 1 offline fixture unit test pass. See `batch-265-validation.json`.
+
+## Batch 266 — Scope sample-domain audio concat packet-byte admission to the cumulative max_packets prefix across segments and defer MP4 reader packet-byte enforcement until after moov index open
+
+FVID-0273 adds `Mp4Reader::restrict_packet_bytes`
+(`crates/fvid-media/src/owned_mp4_impl.rs`) and opens `Mp4Reader` with
+`Limits::default()` before restricting packet bytes or checking `0..max_samples`
+across `owned_mp4_audio` (`crates/fvid-media/src/owned_mp4_audio.rs`),
+`owned_mp4_audio_export` (`crates/fvid-media/src/owned_mp4_audio_export.rs`),
+`owned_aac_export_routing` (`crates/fvid-media/src/owned_aac_export_routing.rs`),
+`owned_wave_metadata` (`crates/fvid-media/src/owned_wave_metadata.rs`),
+`src/media.rs`, `src/native_export.rs`, `src/native_export/pcm_matroska.rs`,
+`src/native_loudnorm.rs`, `src/native_plan.rs`, and `src/native_audio_mix.rs`,
+and adds `validate_concat_segments_with_options`
+(`src/native_audio_mix/concat.rs`) wired into `concat_mp4_matroska_with_options`
+(`src/native_plan.rs`), `try_concat_mp4_matroska_with_options`
+(`src/native_export.rs`), `concat::eligible_with_options`, and
+`concat::concat_audio_with_options` so sample-domain concat validates
+`max_packet_bytes` and `max_controlled_bytes` across the cumulative
+`options.max_packets` prefix and breaks cleanly when `remaining == 0`. Two
+focused integration tests, 4 related test suites, and 1 offline fixture unit
+test pass. See `batch-266-validation.json`.
+
+## Batch 267 — Forward caller budgets through dynamic-description MP4 audio planning and scope MP4 remux, concat, loudness, and normalization admission to the active max_packets prefix and selected streams
+
+FVID-0274 forwards a cloned `CopyOptions` (with `streams` normalized to
+`selected` and container metadata stripped) from
+`native_plan::decode_audio_with_options` (`src/native_plan.rs`) to
+`fvid_media::plan_decode_audio`, requires `ensure_constant_description()` in
+`native_media::audio_source_info_selected` (`src/native_media.rs`) so
+dynamic-`stsd` MP4 audio routes through `fvid-media` normalization across
+`decode_audio`, `loudness`, and `normalize_loudness`, bounds unedited
+sample-description checks in `admit_audio_reader_targeted`
+(`crates/fvid-media/src/owned_mp4_audio.rs`) and `decode_mp4_audio_normalized`
+(`crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs`) to
+`0..active_samples`, and opens `Mp4Reader` with `Limits::default()` followed by
+`restrict_packet_bytes(options.max_packet_bytes)` and
+`validate_selected_prefix_packet_budget` in `owned_mp4_remux`
+(`crates/fvid-media/src/owned_mp4_remux.rs`), `mp4_concat::open_with_options`
+(`src/container/mp4_concat.rs`), and `native_pcm::loudness`
+(`src/native_pcm/loudness.rs`). Three focused integration tests, 4 related test
+suites, and 1 offline fixture unit test pass. See `batch-267-validation.json`.
+
+## Batch 268 — Scope Y4M export, trim, and concat packet-byte admission and segment compatibility validation to the active max_packets prefix
+
+FVID-0275 adds `validate_video_packet_budget_with_geometry_and_limit` and
+`y4m_segment_frame_upper_bound` (`src/native_export.rs`), scopes
+`export_y4m_sources_with_options` packet-budget validation to
+`remaining_packets` when `interval.is_none_or(|(from, _)| from.is_zero())`,
+checks `control.packet_limit_reached()` before `reader.read_frame_raw()?` so
+trailing oversized packets are never read after reaching `max_packets`, and
+bounds `concat_y4m_with_options` and `trim_y4m_with_options`
+(`src/native_plan.rs`) packet-budget and segment-compatibility checks to the
+active `max_packets` prefix. Two focused integration tests, 5 related test
+suites, and 1 offline fixture unit test pass. See `batch-268-validation.json`.
+
+## Batch 269 — Scope native AAC and audio source-info PS/SBR negotiation and packet-byte admission to the active max_packets prefix and interval across MP4, Matroska, and ADTS
+
+FVID-0276 adds `aac_source_info_selected_with_options`,
+`audio_source_info_selected_with_options`,
+`audio_source_info_selected_with_interval_and_options`,
+`is_owned_audio_source_with_options`, `is_owned_audio_trim_source_with_options`,
+`is_aac_trim_source_with_options`, and `inspect_adts_with_options`
+(`src/native_media.rs`), and threads caller `CopyOptions` (`max_packets`,
+`max_packet_bytes`, `cancel`, `max_rss_bytes`) and decode intervals through
+`src/native_plan.rs`, `src/native_pcm/loudness.rs`,
+`src/native_pcm/normalize.rs`, `src/native_loudnorm.rs`,
+`src/native_audio_mix.rs`, `src/native_audio_mix/concat.rs`,
+`src/native_export.rs`, and `src/media.rs`. Two focused integration tests, 9
+related tests across 5 suites, and 1 offline fixture unit test pass. See
+`batch-269-validation.json`.
+
+## Batch 270 — Negotiate implicit SBR output clock in owned ADTS loudness and loudnorm qualification, include budget notes in ADTS loudness and loudnorm plans, and scope ADTS loudnorm plan preflight to the active max_packets prefix
+
+FVID-0277 adds `validate_header_configuration` and `adts_prefix_info` fallback
+in `owned_adts_loudness` (`crates/fvid-media/src/owned_adts_loudness.rs`) and
+verifies `qualified_rate(spool.stats.sample_rate)` after `decode_to_wave` in
+`owned_adts_loudness::measure_loudness` and `owned_adts_loudnorm::apply`
+(`crates/fvid-media/src/owned_adts_loudnorm.rs`) so implicit-SBR 11025->22050 Hz
+ADTS inputs are admitted while metadata-only `plan_loudness` on standard-rate
+headers preserves dry-run packet fault behavior, appends budget notes to
+`owned_adts_loudness::plan_loudness` and `owned_adts_loudnorm::plan`, and bounds
+the ADTS packet-byte loop in `native_loudnorm::try_plan`
+(`src/native_loudnorm.rs`) by `options.max_packets`. One focused integration
+test, 8 related tests across 4 suites, and 1 offline fixture unit test pass. See
+`batch-270-validation.json`.
+
+## Batch 271 — Scope ADTS concat and remux packet-byte admission to the active max_packets prefix while verifying segment compatibility across all inputs, and negotiate implicit SBR output rate with budget notes in owned ADTS remux and concat plans
+
+FVID-0278 adds `StreamReader::restrict_packet_bytes`
+(`crates/fvid-media/src/owned_aac/adts_impl.rs`) and opens all ADTS concat
+segments with `StreamReader::open` followed by
+`restrict_packet_bytes(options.max_packet_bytes)` and `SequenceReader::new` in
+`owned_concat::open_readers` (`crates/fvid-media/src/owned_concat.rs`),
+`native_plan::concat_adts_with_options` (`src/native_plan.rs`), and
+`native_export::concat_adts_aac_with_options` (`src/native_export.rs`) so ADTS
+header validity and identical AAC configurations are verified across all
+segments while `options.max_packet_bytes` is enforced only on packets actually
+read within the active `options.max_packets` prefix, and probes implicit SBR
+output clock (`adts::probe_output_rate`) and appends budget notes in
+`owned_adts_remux::plan_remux` (`crates/fvid-media/src/owned_adts_remux.rs`) and
+`owned_concat::plan_concat` (`crates/fvid-media/src/owned_concat.rs`). One
+focused integration test, 10 related tests across 5 suites, and 1 offline
+fixture unit test pass. See `batch-271-validation.json`.
+
+## Batch 272 — Scope MP4 and ADTS audio decode, trim, and plan packet-byte admission, controlled-memory admission, sample-description reconfiguration checks, and in-band PS negotiation to the active decode interval prefix
+
+FVID-0279 adds `mp4_active_samples`, `negotiate_mp4_ps_with_interval`,
+`negotiate_mp4_description_ps_with_interval`,
+`mp4_normalized_geometry_with_interval`, and
+`mp4_normalized_geometry_controlled_with_interval`
+(`crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs`),
+`admit_audio_reader_with_interval` (`crates/fvid-media/src/owned_mp4_audio.rs`),
+`descriptor_for_decode` and `geometry_for_decode`
+(`crates/fvid-media/src/owned_mp4_audio_export.rs`), `router_for_decode`
+(`crates/fvid-media/src/owned_aac_export_routing.rs`), and
+`inspect_adts_with_interval_and_options`,
+`is_owned_audio_source_with_interval_and_options`,
+`is_owned_audio_trim_source_with_interval_and_options`, and
+`is_aac_trim_source_with_interval_and_options` (`src/native_media.rs`), and
+wires the decode `interval` through
+`crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs`,
+`crates/fvid-media/src/owned_audio_plan.rs`, `src/native_plan.rs`,
+`src/native_export.rs`, and `src/media.rs`. Two focused integration tests, 5
+related tests across 3 suites, and 1 offline fixture unit test pass. See
+`batch-272-validation.json`.
 
 Delivery verification uses a real 1 KiB BufReader and preserves the earlier raw telemetry in the evidence logs.

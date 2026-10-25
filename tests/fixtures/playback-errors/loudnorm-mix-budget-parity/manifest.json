@@ -1,0 +1,9 @@
+{
+  "batch_id": "FVID-0255",
+  "generator": "scripts/generate_loudnorm_mix_budget_parity_regressions.py",
+  "sha256": {
+    "aac-48k-mono.aac": "908b15fff1601da22f60901535cac012f88bbc476892817f3c662bd8dd887b1c",
+    "aac-48k-mono.m4a": "f1d34e012bc5c20c7d318bbe5a89b71a19f4c765cc5eb851bc2be331c92a6e6b",
+    "pcm-48k-stereo.wav": "8b38f2bc9e10bb1ff4af2d32a39e4bba0cc7757c71db017c9abf98ec19de097a"
+  }
+}
