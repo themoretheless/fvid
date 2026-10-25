@@ -76,18 +76,23 @@ fn inventory<R: Read + Seek>(
     configuration: &[u8],
     length: u8,
     initial: Arc<LayeredVps>,
+    start: usize,
     budget: usize,
 ) -> Result<Vec<Epoch>> {
     let mut parameters = LayeredParameters::from_configuration(configuration, budget)?;
     let mut epochs = Vec::new();
     let mut vps = initial;
-    let mut first = 0;
+    let mut first = start;
     let mut ordinal = 0;
     let mut scan = SubstreamScan::default();
     let mut seen_vcl = false;
     let mut boundary = false;
     for i in 0..demux.packets.len() {
         if demux.packets[i].track != track {
+            continue;
+        }
+        if ordinal < start {
+            ordinal += 1;
             continue;
         }
         if boundary {
@@ -148,6 +153,9 @@ fn inventory<R: Read + Seek>(
 }
 pub(super) struct Layered {
     decoder: LayeredDecoder,
+    prefix: Option<Box<HevcDecoder>>,
+    prefix_end: usize,
+    prefix_ready: Option<Frame>,
     queue: LayeredOutputQueue,
     timeline: Vec<(i64, Option<u64>, bool)>,
     ready: VecDeque<LayeredDecoded>,
@@ -191,6 +199,11 @@ impl Layered {
             .map(|n| copy_vps(n))
             .transpose()?;
         let mut seen_vcl = false;
+        let mut vpsless = false;
+        let mut prefix_ended = false;
+        let mut activated_vps = false;
+        let mut first_vps = None;
+        let mut ordinal = 0;
         'packets: for i in 0..demux.packets.len() {
             if demux.packets[i].track != track {
                 continue;
@@ -198,6 +211,8 @@ impl Layered {
             if demux.packet_payload_size(i)? > budget / 8 {
                 return Err(invalid("Matroska HEVC dispatch packet exceeds budget"));
             }
+            let packet_ordinal = ordinal;
+            ordinal += 1;
             let packet = demux.read_packet(i)?;
             for nal in crate::codec::config::NalUnits::new(&packet, cfg.length_size)? {
                 let nal = nal?;
@@ -205,15 +220,29 @@ impl Layered {
                 if h.layer_id == 63 {
                     continue;
                 }
+                if h.unit_type == 37 || h.unit_type == 36 && h.layer_id == 0 {
+                    prefix_ended = true;
+                }
                 if matches!(h.unit_type, 32..=34) {
                     parameters.receive(nal)?;
+                }
+                if h.unit_type == 32 {
+                    first_vps.get_or_insert(packet_ordinal);
                 }
                 if h.is_vcl() {
                     let Some(referenced) = parameters.referenced_vps_if_available(nal)? else {
                         h.require_base_layer()?;
+                        vpsless = true;
+                        prefix_ended = false;
                         seen_vcl = true;
                         continue;
                     };
+                    if !activated_vps {
+                        if vpsless && !prefix_ended && !matches!(h.unit_type, 16..=20) {
+                            return Err(invalid("HEVC active VPS changed before sequence end"));
+                        }
+                        activated_vps = true;
+                    }
                     let layered = Vps::parse_layered_metadata(referenced, budget / 2)?
                         .layers
                         .effective_max_layers()
@@ -240,13 +269,25 @@ impl Layered {
         }
         let vps = LayeredVps::parse(&nal, budget / 2)?;
         let ols = vps.automatic_output_layer_set()?;
+        let received_configuration = if vpsless {
+            Some(parameters.received_configuration(configuration, budget / 8)?)
+        } else {
+            None
+        };
         drop(parameters);
+        let layered_configuration = received_configuration.as_deref().unwrap_or(configuration);
+        let prefix_end = if vpsless {
+            first_vps.ok_or_else(|| invalid("Matroska layered activation has no received VPS"))?
+        } else {
+            0
+        };
         let selections = inventory(
             demux,
             track,
-            configuration,
+            layered_configuration,
             cfg.length_size,
             Arc::new(vps),
+            prefix_end,
             budget / 4,
         )?;
         let count = demux.packets.iter().filter(|p| p.track == track).count();
@@ -276,8 +317,23 @@ impl Layered {
         let decode_budget = (budget / 2)
             .checked_sub(owned_timeline.saturating_add(selection_bytes(&selections)))
             .ok_or_else(|| invalid("Matroska layered timeline capacity exceeds budget"))?;
+        let prefix_budget = if prefix_end > 0 { decode_budget / 2 } else { 0 };
         Ok(Some(Self {
-            decoder: LayeredDecoder::from_configuration(configuration, ols, decode_budget)?,
+            decoder: LayeredDecoder::from_configuration(
+                layered_configuration,
+                ols,
+                decode_budget - prefix_budget,
+            )?,
+            prefix: if prefix_end > 0 {
+                Some(Box::new(HevcDecoder::from_inband_configuration(
+                    configuration,
+                    prefix_budget,
+                )?))
+            } else {
+                None
+            },
+            prefix_end,
+            prefix_ready: None,
             queue: Default::default(),
             timeline,
             ready: VecDeque::new(),
@@ -291,6 +347,10 @@ impl Layered {
     }
     pub fn reset(&mut self) {
         self.decoder.reset_queued(&mut self.queue);
+        if let Some(p) = &mut self.prefix {
+            p.reset();
+        }
+        self.prefix_ready = None;
         self.ready.clear();
         self.packet_index = 0;
         self.ended = false;
@@ -343,6 +403,50 @@ impl Layered {
         Ok(())
     }
     pub fn push(&mut self, packet: &[u8]) -> Result<()> {
+        if self.packet_index < self.prefix_end {
+            if self.prefix_ready.is_some() {
+                return Err(invalid("Matroska VPS-less prefix output must be consumed"));
+            }
+            let decoder = self.prefix.as_mut().unwrap();
+            let decoded = decoder.decode_packet(packet)?;
+            let (pts, duration, invisible) = self.timeline[self.packet_index];
+            self.packet_index += 1;
+            if let Some(decoded) = decoded.filter(|p| p.output && !invisible) {
+                let s = &decoder.parameters().0;
+                let packed = crate::playback_native::hevc_picture_with_vui(
+                    &decoded.picture,
+                    s.chroma_format,
+                    s.vui.as_ref(),
+                )?;
+                if packed.frame.data.len() > self.ready_budget {
+                    return Err(invalid("Matroska VPS-less prefix display exceeds budget"));
+                }
+                let signal = s
+                    .vui
+                    .as_ref()
+                    .and_then(|v| v.signal.as_ref())
+                    .map(|v| {
+                        let [primaries, transfer, matrix] = v.colour.unwrap_or([0; 3]);
+                        ColourDescription {
+                            primaries,
+                            transfer,
+                            matrix,
+                            full_range: v.full_range,
+                        }
+                    })
+                    .unwrap_or_default();
+                self.prefix_ready = Some(Frame {
+                    layer_id: Some(0),
+                    signal: Some(signal),
+                    paired: false,
+                    hdr: decoder.hdr(),
+                    decoded: Picture::Packed(Arc::new(packed)),
+                    pts,
+                    duration,
+                });
+            }
+            return Ok(());
+        }
         let epoch = self
             .selections
             .partition_point(|e| e.first <= self.packet_index)
@@ -366,12 +470,19 @@ impl Layered {
         Ok(())
     }
     pub fn take(&mut self) -> Result<Option<Frame>> {
+        if let Some(frame) = self.prefix_ready.take() {
+            self.signal = frame.signal.unwrap_or_default();
+            self.hdr = frame.hdr;
+            return Ok(Some(frame));
+        }
         while let Some(p) = self.ready.pop_front() {
             let &(pts, duration, invisible) = self
                 .timeline
                 .get(
                     usize::try_from(p.access_unit)
-                        .map_err(|_| invalid("Matroska layered AU index overflow"))?,
+                        .map_err(|_| invalid("Matroska layered AU index overflow"))?
+                        .checked_add(self.prefix_end)
+                        .ok_or_else(|| invalid("Matroska layered AU index overflow"))?,
                 )
                 .ok_or_else(|| invalid("Matroska layered output has no source timestamp"))?;
             if invisible {

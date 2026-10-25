@@ -1,6 +1,39 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
 
+## VPS-less HEVC prefix and layered epoch handoff, 2026-10-25
+
+Native MP4 and Matroska now decode a genuinely VPS-less Annex A prefix with
+the owned single-layer decoder, then hand off to the owned layered scheduler
+when an actual in-band VPS becomes available. No synthetic VPS or external
+codec is inserted. The prefix and later scheduler share the source clock;
+layered AU numbering is offset back to the original packet/sample timeline.
+MP4 mixed-codec windows also admit a VPS-less HEVC prefix, including a complete
+HEVC window with no VPS at all between VP9 pictures.
+
+`LayeredParameters::received_configuration` snapshots only the current received
+VPS/SPS/PPS bytes, with a bounded output buffer and preserved hvcC header.
+This transfers parameter history from separate bootstrap packets, without
+moving old pictures, references or HDR across the handoff. An absent VPS stays
+absent until a real one has been received. Fresh decoder reset seeds preserve
+this received bank for rewind and seek. Actual mismatched VPS references and
+illegal topology changes retain their existing refusal behavior.
+
+The owned regression matrix covers PCM, multiple slices and separate colour
+planes with populated and empty hvcC: six MP4/Matroska pairs, two corrupted
+selected-layer streams, two illegal VPS activation controls, two mixed VP9/HEVC
+movies, a saved VP9 pixel oracle and a manifest. All 20 files (609,159 bytes) reproduce byte-for-byte with subprocess
+and socket creation forbidden. Acceptance checks compare saved pixels, exact
+clocks, selected layer identity, distinct prefix/layered/base HDR, reverse seek,
+rewind, and recovery of the valid prefix after late selected entropy failure.
+Snapshot controls verify that every serialized parameter was actually received.
+Ordinary tests require no fixture generation, FFmpeg or network.
+
+This closes the reproduced leading VPS-less epoch dispatch failure. It does
+not prove arbitrary inter/profile/tool combinations, provide external base
+pictures, or establish complete codec coverage.
+
+
 ## HEVC independent-layer rewriting (F.10.2 / INBLD), 2026-10-25
 
 `LayeredSubstream::rewrite_independent_packet` validates a singleton independent
@@ -36,9 +69,9 @@ tags. Its former whole-file equality failed on the unchanged baseline solely
 because the Matroska route preserves metadata; the 212,992-byte PCM data matches.
 
 This is finite independent-layer qualification, not universal HEVC completion.
-A VPS-less prefix followed by a later genuinely multilayer epoch, external base
-pictures required by other OLSs, and arbitrary inter/tool/profile combinations
-still require separate qualification.
+The leading VPS-less prefix followed by a genuinely multilayer epoch is
+qualified separately above. External base pictures required by other OLSs and
+arbitrary inter/tool/profile combinations still require separate qualification.
 
 
 ## HEVC additional layer sets (F.10.3), 2026-10-25

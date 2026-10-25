@@ -24,7 +24,7 @@ struct SingleView<R> {
     presented_sample: Option<usize>,
     failed: bool,
 }
-fn signal(vui: Option<&crate::codec::hevc_vui::Vui>) -> ColourDescription {
+pub(super) fn signal(vui: Option<&crate::codec::hevc_vui::Vui>) -> ColourDescription {
     vui.and_then(|v| v.signal.as_ref())
         .map(|s| {
             let [primaries, transfer, matrix] = s.colour.unwrap_or([0; 3]);
@@ -44,7 +44,7 @@ fn dispatch_hevc_vps<R: Read + Seek>(
     demuxer: &mut Mp4Reader<R>,
     index: usize,
     budget: usize,
-) -> Result<Option<Vec<u8>>> {
+) -> Result<(Option<Vec<u8>>, bool)> {
     let track = &demuxer.tracks()[index];
     let setup = track
         .description_for_sample(0)
@@ -72,10 +72,11 @@ fn dispatch_hevc_vps<R: Read + Seek>(
         && !multiple
         && let Some(first) = first
     {
-        return copy(first).map(Some);
+        return copy(first).map(|v| (Some(v), false));
     }
     let mut fallback = first.map(copy).transpose()?;
     let mut seen_vcl = false;
+    let mut vpsless = false;
     let length = 4;
     let mut description = track.samples.get(0).unwrap().description_index;
     let count = track.samples.len();
@@ -107,6 +108,7 @@ fn dispatch_hevc_vps<R: Read + Seek>(
             if header.is_vcl() {
                 let Some(referenced) = parameters.referenced_vps_if_available(nal)? else {
                     header.require_base_layer()?;
+                    vpsless = true;
                     seen_vcl = true;
                     continue;
                 };
@@ -119,13 +121,13 @@ fn dispatch_hevc_vps<R: Read + Seek>(
                 if topology.layers.effective_max_layers() > 1 {
                     let result = copy(referenced);
                     demuxer.invalidate_position();
-                    return result.map(Some);
+                    return result.map(|v| (Some(v), vpsless));
                 }
             }
         }
     }
     demuxer.invalidate_position();
-    Ok(fallback)
+    Ok((fallback, vpsless))
 }
 
 impl<R: Read + Seek> SingleView<R> {
@@ -266,12 +268,21 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             .ok_or_else(|| invalid("MP4 track index out of range"))?;
 
         if super::layered_packet::all_hevc(track) {
-            let nal = dispatch_hevc_vps(&mut demuxer, index, budget)?;
+            let (nal, vpsless) = dispatch_hevc_vps(&mut demuxer, index, budget)?;
             if let Some(nal) = nal {
                 // Inspect topology without relaxing the base decoder's guard.
                 let topology =
                     crate::codec::hevc_vps::Vps::parse_layered_metadata(&nal, budget / 2)?;
                 if topology.layers.effective_max_layers() > 1 {
+                    if vpsless {
+                        return Ok(Self {
+                            source: Source::Single(Box::new(
+                                SingleLayerMp4VideoReader::from_demuxer_with_hardware(
+                                    demuxer, index, budget, false, true,
+                                )?,
+                            )),
+                        });
+                    }
                     let vps = LayeredVps::parse(&nal, budget / 2)?;
                     let ols = vps.automatic_output_layer_set()?;
                     let mut colour = crate::playback_native::AvcColour::default();
@@ -322,7 +333,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
         Ok(Self {
             source: Source::Single(Box::new(
                 SingleLayerMp4VideoReader::from_demuxer_with_hardware(
-                    demuxer, index, budget, hardware,
+                    demuxer, index, budget, hardware, false,
                 )?,
             )),
         })
