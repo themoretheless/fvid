@@ -1,0 +1,7 @@
+{
+  "suite": "remux-concat-policy-parity",
+  "fixtures": {
+    "mp4_aac": "mp4-aac-mono-48khz.m4a",
+    "matroska_pcm": "matroska-pcm-mono-48khz.mka"
+  }
+}

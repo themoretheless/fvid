@@ -630,6 +630,42 @@ impl Mp3 {
     pub fn presentation_samples(&self) -> u64 {
         self.presentation_window.end - self.presentation_window.start
     }
+    /// Largest encoded packet size within the active decode prefix (including any Info frame).
+    pub fn max_packet_size_in_prefix(
+        &self,
+        until: Option<std::time::Duration>,
+        max_packets: Option<u64>,
+    ) -> usize {
+        let window = self.presentation_window();
+        let last = match until {
+            Some(at) => u64::try_from(
+                (at.as_nanos() * u128::from(self.sample_rate)).div_ceil(1_000_000_000),
+            )
+            .unwrap_or(u64::MAX),
+            None => self.presentation_samples(),
+        };
+        let to = window.start.saturating_add(last).min(window.end);
+        let mut packets = 0u64;
+        let mut max_size = 0usize;
+        if let Some(info) = self.info_packet() {
+            if max_packets.is_some_and(|max| packets >= max) {
+                return max_size;
+            }
+            packets += 1;
+            max_size = max_size.max(info.len());
+        }
+        for frame in &self.frames {
+            if frame.pts >= to {
+                break;
+            }
+            if max_packets.is_some_and(|max| packets >= max) {
+                break;
+            }
+            packets += 1;
+            max_size = max_size.max(frame.size);
+        }
+        max_size
+    }
     /// Extract canonical container and stream 0 metadata maps from ID3v2 and ID3v1 tags.
     pub fn probe_metadata(
         &self,
@@ -656,6 +692,17 @@ impl Mp3 {
     pub fn wave_info(&self) -> std::result::Result<Vec<u8>, String> {
         let (container, _) = self.probe_metadata();
         let mut entries = Vec::new();
+        for (key, value) in &container {
+            if value.is_empty() || value.contains('\0') {
+                continue;
+            }
+            if key.len() == 4
+                && !matches!(key.to_ascii_uppercase().as_str(), "DATE")
+                && crate::owned_wave_metadata::tag_for_key(key).is_ok()
+            {
+                entries.push((key.clone(), value.clone()));
+            }
+        }
         for (source, target) in [
             ("title", "title"),
             ("artist", "artist"),
