@@ -390,6 +390,9 @@ impl<R: Read + Seek> WebmReader<R> {
     /// Index what the file holds next: the cluster that opens the picture, or
     /// every cluster that is left when a reader has to know the whole item.
     fn walk(&mut self, one_cluster: bool) -> Result<()> {
+        self.walk_navigation(one_cluster, false)
+    }
+    fn walk_navigation(&mut self, one_cluster: bool, seek_payloads: bool) -> Result<()> {
         let Self {
             reader,
             tracks,
@@ -430,7 +433,7 @@ impl<R: Read + Seek> WebmReader<R> {
         let mut lace_groups = Vec::new();
         let mut block_timings = Vec::new();
         while *at < *segment_end {
-            goto(&mut *reader, *at)?;
+            if seek_payloads { reader.seek(SeekFrom::Start(*at))?; } else { goto(&mut *reader, *at)?; }
             let e = element(&mut *reader, *segment_end, &mut *elements, limits.elements)?;
             match e.id {
                 0x1549a966 => {
@@ -770,7 +773,7 @@ impl<R: Read + Seek> WebmReader<R> {
                     let mut pos = e.data;
                     let mut timestamp = None;
                     while pos < cluster_end {
-                        goto(&mut *reader, pos)?;
+                        if seek_payloads { reader.seek(SeekFrom::Start(pos))?; } else { goto(&mut *reader, pos)?; }
                         let child = element(&mut *reader, cluster_end, &mut *elements, limits.elements)?;
                         if e.end.is_none()
                             && matches!(
@@ -801,7 +804,15 @@ impl<R: Read + Seek> WebmReader<R> {
                                 &mut block_timings,
                             )?,
                             0xa0 => {
-                                let fs = fields(&mut *reader, child, &mut *elements, limits.elements)?;
+                                let fs = if seek_payloads {
+                                    let limit=end(child)?; let mut at=child.data; let mut fs=Vec::new();
+                                    while at<limit {
+                                        reader.seek(SeekFrom::Start(at))?;
+                                        let field=element(&mut *reader,limit,&mut *elements,limits.elements)?;
+                                        at=end(field)?; fs.push(field);
+                                    }
+                                    fs
+                                } else { fields(&mut *reader, child, &mut *elements, limits.elements)? };
                                 let key = !fs.iter().any(|f| f.id == 0xfb);
                                 let mut padding = None;
                                 let mut duration = None;
@@ -1104,6 +1115,13 @@ impl<R: Read + Seek> WebmReader<R> {
         self.walk(false)?;
         self.settle()
     }
+    /// Complete metadata indexing while seeking past stored packet bodies.
+    /// Codec-dependent lace timing and zlib admission retain their normal reads.
+    pub fn scan_all_headers(&mut self) -> Result<()> {
+        if self.scanned { return Ok(()); }
+        self.walk_navigation(false, true)?;
+        self.settle()
+    }
     /// Whether every cluster the file holds has been indexed. A reader that
     /// measures the item from its own blocks can only do that once the tail has
     /// been met, so it asks before trusting a short answer.
@@ -1258,6 +1276,36 @@ impl<R: Read + Seek> WebmReader<R> {
         packet.size.checked_add(fvid_matroska_zlib::state_bytes())
             .and_then(|size| size.checked_add(1))
             .ok_or_else(|| invalid("Matroska packet scratch size overflow"))
+    }
+
+    /// Read a bounded restored-payload range. Uncompressed frames seek directly
+    /// past the body; header stripping is restored before applying the range.
+    /// Zlib needs the existing bounded full-packet inflater.
+    pub fn read_packet_range(&mut self, index: usize, start: usize, out: &mut [u8]) -> Result<usize> {
+        let size = self.packet_payload_size(index)?;
+        if size > self.read_packet_bytes { return Err(invalid("WebM packet exceeds budget")); }
+        if start > size { return Err(invalid("WebM packet range starts beyond payload")); }
+        let count = out.len().min(size - start);
+        if count == 0 { return Ok(0); }
+        let packet = &self.packets[index];
+        if self.zlib_tracks.contains(&packet.track) {
+            let data = self.read_packet(index)?;
+            out[..count].copy_from_slice(&data[start..start+count]);
+            return Ok(count);
+        }
+        let prefix = self.frame_prefixes.iter().find(|&&(track, _)| track == packet.track)
+            .map_or(&[][..], |(_, prefix)| prefix.as_slice());
+        let copied = if start < prefix.len() {
+            let n = count.min(prefix.len()-start);
+            out[..n].copy_from_slice(&prefix[start..start+n]); n
+        } else { 0 };
+        if copied < count {
+            let offset = packet.offset.checked_add((start+copied-prefix.len()) as u64)
+                .ok_or_else(|| invalid("WebM packet range offset overflow"))?;
+            self.reader.seek(SeekFrom::Start(offset))?;
+            self.reader.read_exact(&mut out[copied..count])?;
+        }
+        Ok(count)
     }
 
     pub fn read_packet_into(&mut self, index: usize, out: &mut Vec<u8>) -> Result<()> {

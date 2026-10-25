@@ -24,6 +24,10 @@ def generate():
      parts.append(dep);controls[component].append(control)
     groups.append(b''.join(parts))
    files[name+'.ec3']=b''.join(groups);files[name+'.mkv']=movie(groups,blocks=3,channels=6 if initial_six else 8)
+   if name=='plain':
+    late=[groups[0]]*160+groups[1:]
+    files['late.mkv']=movie(late,blocks=3,channels=8)
+    for i,c in enumerate(controls):files[f'late-control{i}.ec3']=b''.join([c[0]]*160+c[1:])
    for i,c in enumerate(controls):files[f'{name}-control{i}.ec3']=b''.join(c)
    bitrate=(max(map(len,groups))*8*48000+767999)//768000
    w=BitWriter().put(bitrate,13).put(0,3).put(0,2).put(16,5).zeros(5).put(7,3).put(1,1).zeros(3).put(len(controls)-1,4).put(2|64,9)
@@ -47,7 +51,7 @@ def generate():
   if tag==b'moov':body=b''.join(rewrite_audio(k,p)if k==b'trak'and b'mp4a'in p else box(k,p)for k,p in audio_boxes(body))
   rebuilt.append(box(tag,body))
  files['aac-factory-stack.mp4']=b''.join(rebuilt)
- files['manifest.json']=(json.dumps(dict(cases=cases,stack_reproducer='aac-factory-stack.mp4',mp4_automatic_layout='Selected dec3 programme locations negotiate stable output before packet decode.',raw_automatic_layout='Union of selected programme roles; stable 10-channel output without an explicit output-map request; preserve actual per-programme channel counts.',provenance='Owned C/L/R/Ls/Rs/LFE, rear/height/replacement roles and continuous transform/transient controls with neutral VP9; AAC stack witness re-authors metadata of an existing repository-owned synthetic AAC/PS video. No private media, process, external encoder or network.'),indent=2)+'\n').encode()
+ files['manifest.json']=(json.dumps(dict(cases=cases,stack_reproducer='aac-factory-stack.mp4',matroska_automatic_layout='Selected-track header-only full role union, including late.mkv change after 160 programmes.',mp4_automatic_layout='Selected dec3 programme locations negotiate stable output before packet decode.',raw_automatic_layout='Union of selected programme roles; stable 10-channel output without an explicit output-map request; preserve actual per-programme channel counts.',provenance='Owned C/L/R/Ls/Rs/LFE, rear/height/replacement roles and continuous transform/transient controls with neutral VP9; AAC stack witness re-authors metadata of an existing repository-owned synthetic AAC/PS video. No private media, process, external encoder or network.'),indent=2)+'\n').encode()
  return files
 if __name__=='__main__':
  OUT.mkdir(parents=True,exist_ok=True)

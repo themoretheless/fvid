@@ -389,6 +389,7 @@ pub struct WebmAudioReader<R> {
     eac3_programme: u8,
     eac3_stereo_output: bool,
     eac3_output_layout: Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>,
+    eac3_automatic_layout: Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>,
     ac3_stereo_output: bool,
     wavpack_dsd: bool,
     flac_end_ns: Option<u64>,
@@ -423,6 +424,62 @@ pub struct WebmAudioReader<R> {
 }
 
 impl<R: Read + Seek> WebmAudioReader<R> {
+    fn native_eac3_layout(&self) -> Option<&crate::codec::eac3_decoder::presentation::SpeakerLayout> {
+        self.eac3_output_layout.as_ref().or(self.eac3_automatic_layout.as_ref())
+    }
+
+    // Traverse the selected track as one byte stream, including split frames
+    // and laces. Skips consult indexed sizes; they do not read frame bodies.
+    fn eac3_range(&mut self, index: &mut usize, offset: &mut usize,
+        wanted: usize, mut out: Option<&mut [u8]>) -> Result<usize> {
+        let mut done=0;
+        while done<wanted && *index<self.demuxer.packets.len() {
+            if self.demuxer.packets[*index].track!=self.track_number { *index+=1; *offset=0; continue; }
+            let size=self.demuxer.packet_payload_size(*index)?;
+            if *offset>=size { *index+=1; *offset=0; continue; }
+            let count=(wanted-done).min(size-*offset);
+            if let Some(bytes)=out.as_deref_mut() {
+                let read=self.demuxer.read_packet_range(*index,*offset,&mut bytes[done..done+count])?;
+                if read!=count {return Err(invalid("incomplete E-AC-3 header range"));}
+            }
+            *offset+=count; done+=count;
+        }
+        Ok(done)
+    }
+
+    fn scan_eac3_speakers(&mut self) -> Result<Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>> {
+        let (mut index,mut offset)=(0,0);
+        let mut parent=None;
+        let mut roles=std::collections::BTreeSet::new();
+        loop {
+            let mut prefix=[0u8;16];
+            let n=self.eac3_range(&mut index,&mut offset,6,Some(&mut prefix[..6]))?;
+            if n==0 {break;}
+            if n!=6 {return Err(invalid("truncated E-AC-3 layout scan header"));}
+            let h=crate::codec::ac3_decoder::dolby_prefix(&prefix[..6])
+                .filter(|h|h[..2]==[0x0b,0x77]).ok_or_else(||invalid("invalid E-AC-3 layout scan sync"))?;
+            let kind=h[2]>>6;
+            let id=(h[2]>>3)&7;
+            let size=(usize::from(h[2]&7)*256+usize::from(h[3])+1)*2;
+            if size<6 || kind==3 {return Err(invalid("invalid E-AC-3 layout scan envelope"));}
+            if kind!=1 {parent=Some(id);}
+            let selected=parent==Some(self.eac3_programme);
+            let header=if selected {size.min(16)}else{6};
+            if self.eac3_range(&mut index,&mut offset,header-6,Some(&mut prefix[6..header]))?!=header-6 {
+                return Err(invalid("truncated E-AC-3 layout scan BSI"));
+            }
+            if selected {
+                roles.extend(crate::codec::eac3_decoder::presentation::header_speakers(&prefix[..header])?.0);
+            }
+            if self.eac3_range(&mut index,&mut offset,size-header,None)?!=size-header {
+                return Err(invalid("truncated E-AC-3 layout scan frame"));
+            }
+        }
+        if roles.len()<=6 {return Ok(None);}
+        let layout=crate::codec::eac3_decoder::presentation::SpeakerLayout(roles.into_iter().collect());
+        layout.validate_output()?; Ok(Some(layout))
+    }
+
     fn probe_eac3_programme(&mut self)->Result<()> {
         // Two complete programme cycles cover a packet boundary that starts
         // part-way through a multiplex. Each cycle has at most 8*(1+8) frames.
@@ -669,6 +726,7 @@ impl<R: Read + Seek> WebmAudioReader<R> {
             eac3_programme:programme.unwrap_or(0),
             eac3_stereo_output: false,
             eac3_output_layout: None,
+            eac3_automatic_layout: None,
             ac3_stereo_output: false,
             wavpack_dsd: false,
             flac_end_ns: None,
@@ -712,6 +770,15 @@ impl<R: Read + Seek> WebmAudioReader<R> {
                     source.eac3_speaker_mask(&packet.data)?
                 }else{None};
             }
+            source.rewind();
+        }
+        if source.codec_tag=="A_EAC3" {
+            // No dec3 equivalent exists in Matroska. Index metadata once and
+            // inspect only selected audio headers; video bodies are skipped.
+            source.demuxer.scan_all_headers()?;
+            // Damaged/unsupported headers retain the existing packet-probed
+            // decoder refusal/concealment path, without inventing partial maps.
+            source.eac3_automatic_layout=source.scan_eac3_speakers().ok().flatten();
             source.rewind();
         }
         if source.codec_tag=="A_WAVPACK4" {
@@ -1531,7 +1598,7 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
                 return Ok(Box::new(crate::codec::eac3_decoder::Eac3Decoder::for_container_stereo(self.extra_data(),self.sample_rate())?.with_programme(self.eac3_programme)?));
             }
             let mut d=Box::new(crate::codec::eac3_decoder::Eac3Decoder::for_container(self.extra_data(),self.sample_rate(),self.channels())?.with_programme(self.eac3_programme)?);
-            if let Some(layout)=&self.eac3_output_layout {d.set_output_layout(layout.clone())?;}
+            if let Some(layout)=self.native_eac3_layout() {d.set_output_layout(layout.clone())?;}
             return Ok(d);
         }
         if self.in_band_ps {
@@ -1604,7 +1671,7 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     }
     fn speaker_mask(&self)->Result<Option<u32>>{
         if (self.eac3_stereo_output && self.codec_tag=="A_EAC3") || (self.ac3_stereo_output && self.codec_tag=="A_AC3") {return Ok(Some(3));}
-        if self.codec_tag=="A_EAC3" && let Some(l)=&self.eac3_output_layout {return Ok(l.wave_mask());}
+        if self.codec_tag=="A_EAC3" && let Some(l)=self.native_eac3_layout() {return Ok(l.wave_mask());}
         if matches!(self.codec_tag.as_str(),"A_AC3"|"A_EAC3") {return Ok(self.dolby_mask);}
         if self.codec_tag=="A_WAVPACK4" {return Ok(self.wavpack_mask);}
         if self.codec_tag=="A_ALAC" {return crate::codec::alac_decoder::AlacDecoder::configuration_mask(&self.extra_data,self.sample_rate(),self.channels()).map(Some);}
@@ -1634,7 +1701,7 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     fn channels(&self) -> u16 {
         if self.in_band_ps || (self.eac3_stereo_output && self.codec_tag=="A_EAC3") || (self.ac3_stereo_output && self.codec_tag=="A_AC3") {
             2
-        } else if self.codec_tag=="A_EAC3" && let Some(l)=&self.eac3_output_layout {l.0.len()as u16} else {
+        } else if self.codec_tag=="A_EAC3" && let Some(l)=self.native_eac3_layout() {l.0.len()as u16} else {
             self.dolby_channels.unwrap_or(self.track().channels as u16)
         }
     }
