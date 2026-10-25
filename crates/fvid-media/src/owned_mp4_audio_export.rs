@@ -11,14 +11,13 @@ fn open(
     source: &Path,
     options: &CopyOptions,
 ) -> Result<crate::owned_mp4::Mp4Reader<BufReader<File>>> {
-    crate::owned_mp4::Mp4Reader::open_indexed(
+    let mut reader = crate::owned_mp4::Mp4Reader::open_indexed(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        crate::owned_mp4::Limits {
-            packet_bytes: options.max_packet_bytes,
-            ..Default::default()
-        },
+        crate::owned_mp4::Limits::default(),
     )
-    .map_err(|e| e.to_string())
+    .map_err(|e| e.to_string())?;
+    reader.restrict_packet_bytes(options.max_packet_bytes);
+    Ok(reader)
 }
 pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
     let mut prefix = [0; 8];
@@ -54,6 +53,13 @@ pub(crate) fn descriptor(
     source: &Path,
     options: &CopyOptions,
 ) -> Result<(usize, u32, u16, u32, String)> {
+    descriptor_for_decode(source, None, options)
+}
+pub(crate) fn descriptor_for_decode(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(usize, u32, u16, u32, String)> {
     let mut reader = open(source, options)?;
     if !reader.refused().is_empty() {
         return Err("MP4 stream selection requires every track to be represented".into());
@@ -65,9 +71,31 @@ pub(crate) fn descriptor(
     };
     let index =
         crate::owned_mp4_audio::mp4_audio_index(&reader, selected).map_err(|e| e.to_string())?;
-    crate::owned_mp4_audio::admit_audio_reader(&reader, index, options)
+    let initial_rate = reader.tracks()[index]
+        .description_for_sample(0)
+        .map_or(reader.tracks()[index].sample_rate, |d| d.sample_rate);
+    let interval = transform.and_then(|t| prefix(t, initial_rate));
+    crate::owned_mp4_audio::admit_audio_reader_with_interval(&reader, index, interval, options, None)
         .map_err(|e| e.to_string())?;
-    let in_band_ps = crate::owned_mp4_audio::negotiate_mp4_ps(&mut reader,index,||Ok(())).map_err(|e|e.to_string())?;
+    if options.max_packet_bytes < crate::owned_mp4::Limits::default().packet_bytes {
+        let track = &reader.tracks()[index];
+        let max_samples = crate::owned_mp4_audio::mp4_active_samples(track, interval, options.max_packets);
+        let exceeds = match &track.samples {
+            crate::owned_mp4::SampleIndex::Expanded(samples) => samples
+                .iter()
+                .take(max_samples)
+                .any(|s| (s.size as usize) > options.max_packet_bytes),
+            crate::owned_mp4::SampleIndex::Uniform(uniform) => {
+                uniform.count > 0
+                    && max_samples > 0
+                    && (uniform.bytes_per_frame as usize) > options.max_packet_bytes
+            }
+        };
+        if exceeds {
+            return Err("MP4 packet exceeds budget".into());
+        }
+    }
+    let in_band_ps = crate::owned_mp4_audio::negotiate_mp4_ps_with_interval(&mut reader,index,interval,options.max_packets,||Ok(())).map_err(|e|e.to_string())?;
     let source_track = &reader.tracks()[index];
     let first = source_track.samples.get(0).ok_or("MP4 audio has no samples")?;
     let setup = source_track.decoder_setup(first.description_index).map_err(|e| e.to_string())?;
@@ -108,12 +136,18 @@ pub(crate) fn descriptor(
         .into(),
     ))
 }
-fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, bool)> {
-    let (_, rate, channels, mask, codec) = descriptor(source, options)?;
+fn geometry_for_decode(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u32, bool)> {
+    let (_, rate, channels, mask, codec) = descriptor_for_decode(source, transform, options)?;
     let reader = open(source, options)?;
     let index = crate::owned_mp4_audio::mp4_audio_index(&reader, options.streams.first().copied()).map_err(|e|e.to_string())?;
     let track = &reader.tracks()[index];
-    let all_pcm = (0..track.samples.len()).all(|n| track.description_for_sample(n).is_some_and(|d| matches!(&d.codec,b"raw "|b"sowt"|b"twos"|b"in24"|b"in32"|b"fl32"|b"fl64")));
+    let interval = transform.and_then(|t| prefix(t, rate));
+    let active_samples = crate::owned_mp4_audio::mp4_active_samples(track, interval, options.max_packets);
+    let all_pcm = (0..active_samples).all(|n| track.description_for_sample(n).is_some_and(|d| matches!(&d.codec,b"raw "|b"sowt"|b"twos"|b"in24"|b"in32"|b"fl32"|b"fl64")));
     Ok((rate, channels, mask, codec.starts_with("pcm_") && all_pcm))
 }
 pub(crate) fn normalization_target(source:&Path,transform:AudioDecodeTransform,options:&CopyOptions,rate:u32,channels:u16,mask:u32)->Result<Option<(u32,u16,u32)>> {
@@ -121,12 +155,15 @@ pub(crate) fn normalization_target(source:&Path,transform:AudioDecodeTransform,o
     if !requested&&mask!=0 {return Ok(None);}
     let mut reader=open(source,options)?;
     let index=crate::owned_mp4_audio::mp4_audio_index(&reader,options.streams.first().copied()).map_err(|e|e.to_string())?;
-    let changing=reader.tracks()[index].ensure_constant_description().is_err();
+    let interval = prefix(transform, rate);
+    let active_samples = crate::owned_mp4_audio::mp4_active_samples(&reader.tracks()[index], interval, options.max_packets);
+    let first_desc = reader.tracks()[index].description_for_sample(0).cloned();
+    let changing = (0..active_samples).any(|i| reader.tracks()[index].description_for_sample(i) != first_desc.as_ref());
     if !changing {
         let projection=transform.channels.is_some_and(|c|c!=i32::from(channels)&&(mask==0||(channels>2&&c>2)));
         if !projection {return Ok(None);}
     }else if mask==0&&transform.channels.is_none() {
-        if crate::owned_mp4_audio::mp4_normalized_geometry(&mut reader,index).map_err(|e|e.to_string())?.is_some() {
+        if crate::owned_mp4_audio::mp4_normalized_geometry_with_interval(&mut reader,index,interval,options.max_packets).map_err(|e|e.to_string())?.is_some() {
             return Err("MP4 normalization requires an explicit destination speaker layout".into());
         }
         return Ok(None);
@@ -143,13 +180,13 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    let (rate, channels, mask, precise) = match geometry(source, options) {
+    let (rate, channels, mask, precise) = match geometry_for_decode(source, Some(transform), options) {
         Ok(value) => value,
         Err(error) => return error.starts_with("controlled memory budget exceeded:"),
     };
     let target=match normalization_target(source,transform,options,rate,channels,mask) {Ok(t)=>t,Err(e)=>return e.starts_with("controlled memory budget exceeded:")};
     let output = transform.channels.unwrap_or(i32::from(channels));
-    let aac_fold=if target.is_none() && output!=i32::from(channels)&&matches!(output,1|2){match crate::owned_aac_export_routing::router(source,rate,channels,options){Ok(router)=>router.is_some(),Err(error)=>return error.starts_with("controlled memory budget exceeded:")}}else{false};
+    let aac_fold=if target.is_none() && output!=i32::from(channels)&&matches!(output,1|2){match crate::owned_aac_export_routing::router_for_decode(source,rate,channels,Some(transform),options){Ok(router)=>router.is_some(),Err(error)=>return error.starts_with("controlled memory budget exceeded:")}}else{false};
     if target.is_none() && output != i32::from(channels) && !aac_fold
         && (!((channels <= 2 && (1..=8).contains(&output))
             || (channels <= 8 && matches!(output, 1 | 2)))
@@ -199,7 +236,7 @@ pub(crate) fn apply(
         return Err("media operation cancelled".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    let (rate, channels, mask, precise) = geometry(source, options)?;
+    let (rate, channels, mask, precise) = geometry_for_decode(source, Some(transform), options)?;
     let target=normalization_target(source,transform,options,rate,channels,mask)?;
     let (rate,channels,mask)=target.unwrap_or((rate,channels,mask));
     let info = crate::owned_wave_metadata::mp4_source_info(source, options)?;

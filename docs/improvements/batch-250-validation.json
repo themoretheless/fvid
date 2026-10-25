@@ -1,0 +1,22 @@
+{
+  "batch": 250,
+  "id": "FVID-0257",
+  "title": "Enforce packet-byte budget and error parity across sample-domain audio concat and standalone audio trim planning and execution",
+  "status": "accepted",
+  "pre_edit_snapshot": "docs/improvements/snapshots/batch-250-pre-edit",
+  "fixtures": {
+    "generator": "scripts/generate_concat_trim_budget_parity_regressions.py",
+    "unit_test": "scripts/test_concat_trim_budget_parity_regressions.py",
+    "manifest": "tests/fixtures/playback-errors/concat-trim-budget-parity/manifest.json"
+  },
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-250-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-250-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-250-related-after.txt"
+  },
+  "commands": [
+    "python3 -m unittest scripts/test_concat_trim_budget_parity_regressions.py",
+    "cargo test --test concat_trim_budget_parity_regressions",
+    "cargo test --test ogg_g711_loudnorm_budget_regressions --test loudnorm_mix_budget_parity_regressions --test mp4_matroska_budget_parity_regressions"
+  ]
+}

@@ -71,6 +71,58 @@ pub(crate) fn supports(
         return false;
     };
     crate::owned_wave_inspect::inspect(&mut file, None).is_ok_and(|info| {
+        if info.sample_frames == 0 || !(1..=255).contains(&info.channels) {
+            return false;
+        }
+        let frame_bytes = usize::from(info.block);
+        let capacity = if frame_bytes == 0 {
+            0
+        } else {
+            (4096 * frame_bytes).min(options.max_packet_bytes / frame_bytes * frame_bytes)
+        };
+        if capacity == 0 {
+            return false;
+        }
+        let Ok(full_size) = usize::try_from(info.data_bytes) else {
+            return false;
+        };
+        let limit = options
+            .max_packets
+            .map(|packets| u128::from(packets) * capacity as u128)
+            .unwrap_or(full_size as u128);
+        let size = (full_size as u128).min(limit) as usize;
+        if size == 0 {
+            return false;
+        }
+        if let Some((from, to)) = transform.interval {
+            if from < 0 || to <= from {
+                return false;
+            }
+            let frames_read = size / frame_bytes;
+            let Ok(out_rate) =
+                u128::try_from(transform.sample_rate.unwrap_or(info.sample_rate as i32))
+            else {
+                return false;
+            };
+            let Some(output_frames) = (frames_read as u128)
+                .checked_mul(out_rate)
+                .and_then(|n| usize::try_from(n.div_ceil(u128::from(info.sample_rate))).ok())
+            else {
+                return false;
+            };
+            let boundary = |time: i64| -> Option<usize> {
+                (time as u128)
+                    .checked_mul(out_rate)
+                    .and_then(|n| usize::try_from(n.div_ceil(1_000_000)).ok())
+                    .map(|n| n.min(output_frames))
+            };
+            let (Some(first), Some(last)) = (boundary(from), boundary(to)) else {
+                return false;
+            };
+            if last <= first {
+                return false;
+            }
+        }
         let channels = transform.channels.unwrap_or(i32::from(info.channels));
         let changes_channels = channels != i32::from(info.channels);
         let conversion = !changes_channels
@@ -110,6 +162,12 @@ pub(crate) fn validate_request(
         return Err(
             "owned audio export does not yet implement these control/metadata policies".into(),
         );
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
     }
     if transform
         .interval

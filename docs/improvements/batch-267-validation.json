@@ -1,0 +1,29 @@
+{
+  "batch": 267,
+  "accepted": [
+    "FVID-0274"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-267-pre-edit/crates/fvid-media/src/owned_mp4_audio.rs",
+    "docs/improvements/snapshots/batch-267-pre-edit/crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs",
+    "docs/improvements/snapshots/batch-267-pre-edit/crates/fvid-media/src/owned_mp4_remux.rs",
+    "docs/improvements/snapshots/batch-267-pre-edit/src/container/mp4_concat.rs",
+    "docs/improvements/snapshots/batch-267-pre-edit/src/native_media.rs",
+    "docs/improvements/snapshots/batch-267-pre-edit/src/native_pcm/loudness.rs",
+    "docs/improvements/snapshots/batch-267-pre-edit/src/native_plan.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-267-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-267-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-267-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/mp4-remux-prefix-budget/single-mixed.m4a",
+    "tests/fixtures/playback-errors/mp4-remux-prefix-budget/dual-track-mixed.m4a",
+    "tests/fixtures/playback-errors/mp4-remux-prefix-budget/dynamic-stsd-mixed.m4a"
+  ],
+  "tests": [
+    "tests/mp4_remux_prefix_budget_regression.rs",
+    "scripts/test_mp4_remux_prefix_budget.py"
+  ]
+}
