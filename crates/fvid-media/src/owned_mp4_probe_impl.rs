@@ -236,6 +236,12 @@ pub(crate) fn try_mp4(path: &Path) -> Result<Option<MediaInfo>> {
             })
         })
         .collect::<Result<Vec<_>>>()?;
+    let mut metadata = tags(reader.tags());
+    if !reader.encoder().is_empty() {
+        metadata
+            .entry("encoder".into())
+            .or_insert_with(|| reader.encoder().to_owned());
+    }
     Ok(Some(MediaInfo {
         path: path.to_path_buf(),
         format: "mov,mp4,m4a,3gp,3g2,mj2".into(),
@@ -246,7 +252,7 @@ pub(crate) fn try_mp4(path: &Path) -> Result<Option<MediaInfo>> {
             .and_then(|duration| {
                 i64::try_from(u128::from(file_bytes) * 8 * 1_000_000 / duration as u128).ok()
             }),
-        metadata: tags(reader.tags()),
+        metadata,
         chapters,
         streams,
     }))

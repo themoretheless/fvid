@@ -173,10 +173,7 @@ pub(crate) fn mp4_source_info(
 ) -> Result<Vec<u8>> {
     let reader = crate::owned_mp4::Mp4Reader::open_indexed(
         std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?),
-        crate::owned_mp4::Limits {
-            packet_bytes: options.max_packet_bytes,
-            ..Default::default()
-        },
+        crate::owned_mp4::Limits::default(),
     )
     .map_err(|e| e.to_string())?;
     let selected = options.streams.first().copied();
@@ -187,13 +184,21 @@ pub(crate) fn mp4_source_info(
         reader.tags(),
         &track.name,
         &track.language,
-        None,
+        Some(reader.encoder()),
         &BTreeMap::new(),
     )
 }
 
 pub(crate) fn matroska_source_info(
     source: &std::path::Path,
+    options: &fvid_control::CopyOptions,
+) -> Result<Vec<u8>> {
+    matroska_source_info_with_interval(source, None, options)
+}
+
+pub(crate) fn matroska_source_info_with_interval(
+    source: &std::path::Path,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
     options: &fvid_control::CopyOptions,
 ) -> Result<Vec<u8>> {
     let mut reader = crate::owned_matroska_audio::open_audio_reader(
@@ -206,7 +211,7 @@ pub(crate) fn matroska_source_info(
     let index = crate::owned_matroska_audio::matroska_audio_index(&reader, selected)
         .map_err(|e| e.to_string())?;
     if options.max_controlled_bytes.is_some() {
-        crate::owned_matroska_audio::admit_audio_reader(&mut reader, index, options)
+        crate::owned_matroska_audio::admit_audio_reader_with_interval(&mut reader, index, interval, options)
             .map_err(|e| e.to_string())?;
     } else {
         let _ = reader.scan_all();
