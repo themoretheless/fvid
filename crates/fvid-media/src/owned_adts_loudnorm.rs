@@ -45,6 +45,12 @@ pub fn apply(
         return Err("owned ADTS loudnorm requires stream 0 and valid WAVE INFO metadata edits".into());
     }
     let resolved = crate::owned_loudnorm::validate_request(args)?;
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("loudnorm requires at least one packet".into());
+    }
     if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
         return Err("owned ADTS loudnorm requires .wav output".into());
     }
@@ -54,8 +60,13 @@ pub fn apply(
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     // Read-only configuration/policy preflight; actual packet failures propagate
     // once execution starts, without retry through the legacy backend.
-    crate::owned_adts_loudness::validate_configuration(source, &decode_options)?;
+    crate::owned_adts_loudness::validate_header_configuration(source, &decode_options)?;
     let spool = crate::owned_adts_export::decode_to_wave(source, None, &decode_options)?;
+    if !crate::owned_wave_loudness::qualified_rate(spool.stats.sample_rate) {
+        return Err(
+            "owned AAC true-peak measurement requires a qualified standard PCM rate".into(),
+        );
+    }
     let mut pcm_options = options.clone();
     pcm_options.max_packets = None;
     pcm_options.max_packet_bytes = CopyOptions::default().max_packet_bytes;
@@ -94,6 +105,12 @@ pub fn plan_loudnorm(
         return Err("owned ADTS loudnorm requires stream 0 and valid WAVE INFO metadata edits".into());
     }
     let resolved = crate::owned_loudnorm::validate_request(args)?;
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("loudnorm requires at least one packet".into());
+    }
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     let mut plan = crate::owned_adts_loudness::plan_loudness(source, &decode_options)?;
     plan.command = "loudnorm".into();

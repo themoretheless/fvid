@@ -81,7 +81,7 @@ fn prepare_selected(
     {
         return Ok(None);
     }
-    if options.is_some_and(|o| o.max_controlled_bytes.is_some()) {
+    if options.is_some_and(|o| o.max_controlled_bytes == Some(0)) {
         return Ok(None);
     }
     if let Some(options) = options {
@@ -90,7 +90,10 @@ fn prepare_selected(
     let reader = match crate::owned_mp4::Mp4Reader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         crate::owned_mp4::Limits {
-            packet_bytes: options.map_or(32 << 20, |o| o.max_packet_bytes),
+            packet_bytes: options.map_or(32 << 20, |o| {
+                o.max_controlled_bytes
+                    .map_or(o.max_packet_bytes, |limit| o.max_packet_bytes.min(limit))
+            }),
             ..Default::default()
         },
     ) {
@@ -141,6 +144,12 @@ fn prepare_selected(
             }
             if let Some(options) = options {
                 crate::owned_budget::check_rss_budget(options)?;
+                if options
+                    .max_controlled_bytes
+                    .is_some_and(|limit| pixels.len() > limit)
+                {
+                    return Err("MP4 video frame exceeds controlled memory budget".into());
+                }
             }
             let current = (
                 frame.size,

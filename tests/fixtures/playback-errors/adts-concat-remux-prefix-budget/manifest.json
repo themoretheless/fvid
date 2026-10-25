@@ -1,0 +1,21 @@
+{
+  "generator": "scripts/generate_adts_concat_remux_prefix_budget.py",
+  "files": {
+    "seg-a-small.aac": {
+      "bytes": 30,
+      "sha256": "48987f5d626765a001a64569ffe88d7f97aa0d8ee50d8b7439b03d143296da4a"
+    },
+    "seg-b-large.aac": {
+      "bytes": 38,
+      "sha256": "4a2b574b0128448c85065f661b12365e6981d702743235fee03b613664f0c168"
+    },
+    "seg-c-invalid-rate.aac": {
+      "bytes": 15,
+      "sha256": "5598ba7f798712520376a8fc0c9c0f87cba875b9f07dcff9995f70785a82d591"
+    },
+    "sbr-24k-to-48k.aac": {
+      "bytes": 61,
+      "sha256": "2dc8f7fd1e14a2770b05a3f6a038e220886461e06e81d78430176410c720caef"
+    }
+  }
+}

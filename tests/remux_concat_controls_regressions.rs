@@ -89,7 +89,7 @@ fn wave_concat_and_remux_support_budgets_and_metadata_in_public_api_and_cli() {
             "--metadata-delete",
             "title",
             "--metadata",
-            "title=Edited WAVE Title",
+            "artist=Edited WAVE Artist",
         ])
         .output()
         .unwrap();
@@ -113,7 +113,7 @@ fn wave_concat_and_remux_support_budgets_and_metadata_in_public_api_and_cli() {
             "--metadata-delete",
             "title",
             "--metadata",
-            "title=Edited WAVE Title",
+            "artist=Edited WAVE Artist",
         ])
         .output()
         .unwrap();
@@ -123,9 +123,10 @@ fn wave_concat_and_remux_support_budgets_and_metadata_in_public_api_and_cli() {
         String::from_utf8_lossy(&cli_remux.stderr)
     );
     let cli_remux_info = fvid::media::probe(&cli_remux_out).unwrap();
+    assert!(!cli_remux_info.metadata.contains_key("title"));
     assert_eq!(
-        cli_remux_info.metadata.get("title").map(String::as_str),
-        Some("Edited WAVE Title")
+        cli_remux_info.metadata.get("artist").map(String::as_str),
+        Some("Edited WAVE Artist")
     );
 
     // 4. CLI `plan concat` and `concat` on WAVE with packet cap and metadata edits.
@@ -286,9 +287,10 @@ fn sample_domain_and_mp4_matroska_concat_enforce_budgets_in_api_and_cli() {
     assert!(fvid::media::concat(&mixed, &dir.0.join("never-pkt.mka"), &tight_pkt).is_err());
 
     let tight_work = CopyOptions {
-        max_packets: Some(1),
+        max_packets: Some(0),
         ..Default::default()
     };
+    assert!(fvid::media::plan_concat(&mixed, &tight_work).is_err());
     assert!(fvid::media::concat(&mixed, &dir.0.join("never-work.mka"), &tight_work).is_err());
 
     let tight_rss = CopyOptions {
@@ -342,3 +344,935 @@ fn sample_domain_and_mp4_matroska_concat_enforce_budgets_in_api_and_cli() {
         String::from_utf8_lossy(&cli_ok.stderr)
     );
 }
+
+#[test]
+fn remux_plan_adts_packet_scan_matroska_budget_step_and_plan_transcode_cli_parity() {
+    let corrupt_adts = fixture("adts-corrupt-second-packet.aac");
+    let valid_adts = fixture("adts-mono-48k.aac");
+    let matroska = fixture("video.mkv");
+    let mp4_pcm = fixture("mp4-pcm-48k.m4a");
+    let y4m = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/lossless-plan/source-8x4.y4m");
+
+    // 1. Corrupt ADTS second packet must be rejected by both `fvid::native_plan::remux`,
+    //    `fvid::media::plan_remux`, and `fvid media plan remux` even when called with default options.
+    let api_err = fvid::media::plan_remux(&corrupt_adts, &CopyOptions::default())
+        .expect_err("fvid::media::plan_remux must reject truncated second ADTS packet");
+    let native_err = fvid::native_plan::remux(&corrupt_adts)
+        .expect_err("fvid::native_plan::remux must scan ADTS packets and reject truncated second packet");
+    assert_eq!(native_err, api_err);
+
+    let cli_corrupt = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", "remux"])
+        .arg(&corrupt_adts)
+        .output()
+        .unwrap();
+    assert!(
+        !cli_corrupt.status.success(),
+        "fvid media plan remux must reject truncated second ADTS packet"
+    );
+
+    // 2. Matroska `fvid media plan remux` and `fvid::native_plan::remux` must match
+    //    `fvid::media::plan_remux` (including the `budget` step).
+    let expected_mkv_plan =
+        serde_json::to_value(fvid::media::plan_remux(&matroska, &CopyOptions::default()).unwrap())
+            .unwrap();
+    assert_eq!(
+        serde_json::to_value(fvid::native_plan::remux(&matroska).unwrap().unwrap()).unwrap(),
+        expected_mkv_plan
+    );
+    let cli_mkv = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", "remux"])
+        .arg(&matroska)
+        .output()
+        .unwrap();
+    assert!(
+        cli_mkv.status.success(),
+        "{}",
+        String::from_utf8_lossy(&cli_mkv.stderr)
+    );
+    assert_eq!(
+        serde_json::from_slice::<serde_json::Value>(&cli_mkv.stdout).unwrap(),
+        expected_mkv_plan
+    );
+
+    // 3. `fvid::media::plan_remux` must reject out-of-range stream selection on MP4, Matroska, and ADTS.
+    let mut bad_stream_opts = CopyOptions::default();
+    bad_stream_opts.streams = vec![99];
+    assert!(fvid::media::plan_remux(&mp4_pcm, &bad_stream_opts).is_err());
+    assert!(fvid::media::plan_remux(&matroska, &bad_stream_opts).is_err());
+    assert!(fvid::media::plan_remux(&valid_adts, &bad_stream_opts).is_err());
+
+    // 4. Shorthand `fvid media plan INPUT [--crop ...]` must work in default builds without `--features media`.
+    let cli_shorthand_remux = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", matroska.to_str().unwrap()])
+        .output()
+        .unwrap();
+    assert!(
+        cli_shorthand_remux.status.success(),
+        "shorthand plan INPUT (remux) failed: {}",
+        String::from_utf8_lossy(&cli_shorthand_remux.stderr)
+    );
+    assert_eq!(
+        serde_json::from_slice::<serde_json::Value>(&cli_shorthand_remux.stdout).unwrap(),
+        expected_mkv_plan
+    );
+
+    let cli_shorthand_lossless = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args([
+            "media",
+            "plan",
+            y4m.to_str().unwrap(),
+            "--crop",
+            "0:0:4:2",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        cli_shorthand_lossless.status.success(),
+        "shorthand plan INPUT --crop failed: {}",
+        String::from_utf8_lossy(&cli_shorthand_lossless.stderr)
+    );
+    let shorthand_lossless_json: serde_json::Value =
+        serde_json::from_slice(&cli_shorthand_lossless.stdout).unwrap();
+    assert_eq!(shorthand_lossless_json["command"], "transcode-lossless");
+
+    // 5. CLI `plan remux`, `remux`, `plan loudness`, and `loudness`:
+    //    - accept flags before positional arguments (`--quiet`, `--max-packets`, etc.)
+    //    - `plan remux` accepts an optional destination path `INPUT [OUTPUT.wav|OUTPUT.mp4|OUTPUT.m4a|OUTPUT.mka|OUTPUT.mkv]`
+    //      and validates destination-specific constraints (e.g. `.wav` rejects `--stream-metadata` and non-INFO keys;
+    //      `.m4a` on ADTS rejects metadata mutations; `.mp3` is rejected)
+    //    - `remux`, `plan remux`, `loudness`, and `plan loudness` reject missing/extra positional arguments or
+    //      unsupported extensions directly instead of falling through to the feature-gate error.
+    let wav_a = fixture("pcm-48k-a.wav");
+    let dir = TempDir::new("cli-remux-loudness");
+
+    for ok_args in [
+        vec![
+            "media",
+            "plan",
+            "remux",
+            "--quiet",
+            wav_a.to_str().unwrap(),
+            dir.0.join("planned.wav").to_str().unwrap(),
+            "--metadata",
+            "title=Valid Wav Riff Info",
+        ],
+        vec![
+            "media",
+            "plan",
+            "remux",
+            "--max-packets",
+            "1",
+            valid_adts.to_str().unwrap(),
+            dir.0.join("planned.mka").to_str().unwrap(),
+            "--metadata",
+            "CUSTOM_TAG=ValidMkaTag",
+            "--stream-metadata",
+            "0:title=TrackZero",
+        ],
+        vec![
+            "media",
+            "plan",
+            "loudness",
+            "--quiet",
+            wav_a.to_str().unwrap(),
+        ],
+        vec![
+            "media",
+            "loudness",
+            "--quiet",
+            wav_a.to_str().unwrap(),
+        ],
+    ] {
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(&ok_args)
+            .output()
+            .unwrap();
+        assert!(
+            out.status.success(),
+            "expected success for {:?}: {}",
+            ok_args,
+            String::from_utf8_lossy(&out.stderr)
+        );
+    }
+
+    for bad_args in [
+        vec![
+            "media",
+            "plan",
+            "remux",
+            wav_a.to_str().unwrap(),
+            dir.0.join("planned.wav").to_str().unwrap(),
+            "--stream-metadata",
+            "0:title=NotAllowedOnWav",
+        ],
+        vec![
+            "media",
+            "plan",
+            "remux",
+            wav_a.to_str().unwrap(),
+            dir.0.join("planned.wav").to_str().unwrap(),
+            "--metadata",
+            "CUSTOM_NON_RIFF=NotAllowedOnWav",
+        ],
+        vec![
+            "media",
+            "plan",
+            "remux",
+            valid_adts.to_str().unwrap(),
+            dir.0.join("planned.m4a").to_str().unwrap(),
+            "--metadata",
+            "title=NotAllowedOnAdtsMp4",
+        ],
+        vec![
+            "media",
+            "plan",
+            "remux",
+            wav_a.to_str().unwrap(),
+            dir.0.join("planned.mp3").to_str().unwrap(),
+        ],
+        vec![
+            "media",
+            "remux",
+            wav_a.to_str().unwrap(),
+            dir.0.join("bad.mp3").to_str().unwrap(),
+        ],
+        vec![
+            "media",
+            "remux",
+            wav_a.to_str().unwrap(),
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "plan",
+            "loudness",
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "loudness",
+            "--quiet",
+        ],
+    ] {
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(&bad_args)
+            .output()
+            .unwrap();
+        assert!(
+            !out.status.success(),
+            "expected failure for args {:?}",
+            bad_args
+        );
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(
+            !stderr.contains("requires cargo build --release --features media"),
+            "unexpected feature-gate fallback for {:?}: {stderr}",
+            bad_args
+        );
+    }
+
+    // 6. CLI `concat` and `plan concat`:
+    //    - accept flags before positional arguments (`--quiet`, `--max-packets`, etc.)
+    //    - validate destination-specific metadata constraints on `concat` (e.g. `.wav` rejects `--stream-metadata`
+    //      and non-RIFF-INFO container keys; `.m4a` on ADTS rejects metadata mutations; `.mp3` is rejected)
+    //    - reject missing/too-few positional arguments or unknown flags directly instead of falling through
+    //      to the feature-gate error.
+    let wav_b = fixture("pcm-48k-b.wav");
+    let mp4_pcm = fixture("mp4-pcm-48k.m4a");
+    for ok_concat_args in [
+        vec![
+            "media",
+            "plan",
+            "concat",
+            "--quiet",
+            "--max-packets",
+            "2",
+            wav_a.to_str().unwrap(),
+            wav_b.to_str().unwrap(),
+        ],
+        vec![
+            "media",
+            "concat",
+            "--quiet",
+            "--max-packets",
+            "2",
+            dir.0.join("flag-first-concat.wav").to_str().unwrap(),
+            wav_a.to_str().unwrap(),
+            wav_b.to_str().unwrap(),
+            "--metadata",
+            "title=FlagFirstWavConcat",
+        ],
+        vec![
+            "media",
+            "concat",
+            "--quiet",
+            dir.0.join("flag-first-concat.mka").to_str().unwrap(),
+            mp4_pcm.to_str().unwrap(),
+            mp4_pcm.to_str().unwrap(),
+        ],
+        vec![
+            "media",
+            "plan",
+            "concat",
+            dir.0.join("planned-concat.wav").to_str().unwrap(),
+            wav_a.to_str().unwrap(),
+            wav_b.to_str().unwrap(),
+            "--metadata",
+            "title=PlannedWavConcatTitle",
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "plan",
+            "concat",
+            dir.0.join("planned-concat.mka").to_str().unwrap(),
+            wav_a.to_str().unwrap(),
+            wav_b.to_str().unwrap(),
+            "--metadata",
+            "CUSTOM_CONCAT_TAG=ValidMkaConcat",
+            "--stream-metadata",
+            "0:title=ConcatTrackZero",
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "plan",
+            "concat",
+            dir.0.join("planned-concat.y4m").to_str().unwrap(),
+            y4m.to_str().unwrap(),
+            y4m.to_str().unwrap(),
+            "--quiet",
+        ],
+    ] {
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(&ok_concat_args)
+            .output()
+            .unwrap();
+        assert!(
+            out.status.success(),
+            "expected success for {:?}: {}",
+            ok_concat_args,
+            String::from_utf8_lossy(&out.stderr)
+        );
+    }
+
+    for bad_concat_args in [
+        vec![
+            "media",
+            "plan",
+            "concat",
+            dir.0.join("planned-concat.wav").to_str().unwrap(),
+            wav_a.to_str().unwrap(),
+            wav_b.to_str().unwrap(),
+            "--stream-metadata",
+            "0:title=NotAllowedOnWavConcatPlan",
+        ],
+        vec![
+            "media",
+            "plan",
+            "concat",
+            dir.0.join("planned-concat.wav").to_str().unwrap(),
+            wav_a.to_str().unwrap(),
+            wav_b.to_str().unwrap(),
+            "--metadata",
+            "CUSTOM_NON_RIFF=NotAllowedOnWavConcatPlan",
+        ],
+        vec![
+            "media",
+            "plan",
+            "concat",
+            dir.0.join("planned-concat.m4a").to_str().unwrap(),
+            valid_adts.to_str().unwrap(),
+            valid_adts.to_str().unwrap(),
+            "--metadata",
+            "title=NotAllowedOnMp4ConcatPlan",
+        ],
+        vec![
+            "media",
+            "plan",
+            "concat",
+            "--output-format",
+            "m4a",
+            valid_adts.to_str().unwrap(),
+            valid_adts.to_str().unwrap(),
+            "--metadata",
+            "title=NotAllowedOnMp4ConcatPlan",
+        ],
+        vec![
+            "media",
+            "plan",
+            "concat",
+            dir.0.join("planned-concat.mp3").to_str().unwrap(),
+            wav_a.to_str().unwrap(),
+            wav_b.to_str().unwrap(),
+        ],
+        vec![
+            "media",
+            "plan",
+            "concat",
+            "--output-format",
+            "mp3",
+            wav_a.to_str().unwrap(),
+            wav_b.to_str().unwrap(),
+        ],
+        vec![
+            "media",
+            "concat",
+            dir.0.join("bad-concat.mp3").to_str().unwrap(),
+            wav_a.to_str().unwrap(),
+            wav_b.to_str().unwrap(),
+        ],
+        vec![
+            "media",
+            "concat",
+            dir.0.join("bad-concat-stream-meta.wav").to_str().unwrap(),
+            wav_a.to_str().unwrap(),
+            wav_b.to_str().unwrap(),
+            "--stream-metadata",
+            "0:title=NotAllowedOnWav",
+        ],
+        vec![
+            "media",
+            "concat",
+            dir.0.join("bad-concat-adts-meta.m4a").to_str().unwrap(),
+            valid_adts.to_str().unwrap(),
+            valid_adts.to_str().unwrap(),
+            "--metadata",
+            "title=NotAllowedOnAdtsMp4",
+        ],
+        vec![
+            "media",
+            "concat",
+            dir.0.join("too-few.wav").to_str().unwrap(),
+            wav_a.to_str().unwrap(),
+        ],
+        vec![
+            "media",
+            "plan",
+            "concat",
+            wav_a.to_str().unwrap(),
+        ],
+        vec![
+            "media",
+            "concat",
+            dir.0.join("unknown-flag.mka").to_str().unwrap(),
+            mp4_pcm.to_str().unwrap(),
+            mp4_pcm.to_str().unwrap(),
+            "--unknown-concat-flag",
+        ],
+    ] {
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(&bad_concat_args)
+            .output()
+            .unwrap();
+        assert!(
+            !out.status.success(),
+            "expected failure for args {:?}",
+            bad_concat_args
+        );
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(
+            !stderr.contains("requires cargo build --release --features media"),
+            "unexpected feature-gate fallback for {:?}: {stderr}",
+            bad_concat_args
+        );
+    }
+
+    // 7. CLI `trim` and `plan trim`:
+    //    - Y4M `trim` and `plan trim --output-format y4m` accept flags before positional paths
+    //    - Matroska/MP4 audio `trim` with `--max-packet-bytes 1` or `--max-packets 0` fails with
+    //      the budget diagnostic instead of falling through to the feature-gate error
+    //    - `trim`, `trim-pcm`, `plan trim`, and `plan trim-pcm` with missing positional paths or
+    //      unsupported destination extensions (`bad.mp3`) fail with direct CLI diagnostics.
+    let mkv_flac = fixture("matroska-flac-48k.mka");
+    for ok_trim_args in [
+        vec![
+            "media",
+            "plan",
+            "trim",
+            "--quiet",
+            "--output-format",
+            "y4m",
+            "--from",
+            "0",
+            "--to",
+            "0.08",
+            y4m.to_str().unwrap(),
+        ],
+        vec![
+            "media",
+            "trim",
+            "--quiet",
+            "--from",
+            "0",
+            "--to",
+            "0.08",
+            y4m.to_str().unwrap(),
+            dir.0.join("trimmed.y4m").to_str().unwrap(),
+        ],
+    ] {
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(&ok_trim_args)
+            .output()
+            .unwrap();
+        assert!(
+            out.status.success(),
+            "expected success for {:?}: {}",
+            ok_trim_args,
+            String::from_utf8_lossy(&out.stderr)
+        );
+    }
+
+    for bad_trim_args in [
+        vec![
+            "media",
+            "trim",
+            mkv_flac.to_str().unwrap(),
+            dir.0.join("never-trim.wav").to_str().unwrap(),
+            "--from",
+            "0",
+            "--to",
+            "0.02",
+            "--max-packet-bytes",
+            "1",
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "trim",
+            mkv_flac.to_str().unwrap(),
+            dir.0.join("bad-trim.mp3").to_str().unwrap(),
+            "--from",
+            "0",
+            "--to",
+            "0.02",
+            "--quiet",
+        ],
+        vec!["media", "trim", "--from", "0", "--to", "0.02", "--quiet"],
+        vec!["media", "trim-pcm", "--from", "0", "--to", "0.02", "--quiet"],
+        vec!["media", "plan", "trim", "--from", "0", "--to", "0.02", "--quiet"],
+        vec!["media", "plan", "trim-pcm", "--from", "0", "--to", "0.02", "--quiet"],
+    ] {
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(&bad_trim_args)
+            .output()
+            .unwrap();
+        assert!(
+            !out.status.success(),
+            "expected failure for args {:?}",
+            bad_trim_args
+        );
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(
+            !stderr.contains("requires cargo build --release --features media"),
+            "unexpected feature-gate fallback for {:?}: {stderr}",
+            bad_trim_args
+        );
+    }
+}
+
+#[test]
+fn export_y4m_planning_and_remux_duplicate_streams_and_metadata_validation() {
+    let dir = TempDir::new("export-y4m-remux-val");
+    let wav_a = fixture("pcm-48k-a.wav");
+    let mp4_aac = fixture("mp4-aac-48k-a.m4a");
+    let y4m = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/lossless-plan/source-8x4.y4m");
+
+    // 1. Public API `native_plan::export_y4m_with_options` and CLI `plan export-y4m`
+    //    validate geometry, pixel filters, interval, and budgets, and reject metadata mutations.
+    let export_plan = fvid::native_plan::export_y4m_with_options(
+        &y4m,
+        Some((
+            std::time::Duration::from_micros(0),
+            std::time::Duration::from_micros(80_000),
+        )),
+        &fvid::native_geometry::VideoGeometry {
+            horizontal_flip: true,
+            ..Default::default()
+        },
+        &fvid::native_pixels::PixelFilters::default(),
+        &CopyOptions {
+            max_controlled_bytes: Some(1024 * 1024),
+            ..Default::default()
+        },
+    )
+    .expect("native_plan::export_y4m_with_options should succeed");
+    assert_eq!(export_plan.command, "export-y4m");
+    assert!(
+        export_plan
+            .steps
+            .iter()
+            .any(|s| s.action == "geometry" && s.detail.contains("horizontal flip true"))
+    );
+    assert!(
+        export_plan
+            .notes
+            .iter()
+            .any(|n| n.contains("controlled memory limit: Some(1048576)"))
+    );
+
+    let cli_plan_export = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args([
+            "media",
+            "plan",
+            "export-y4m",
+            y4m.to_str().unwrap(),
+            dir.0.join("planned-export.y4m").to_str().unwrap(),
+            "--hflip",
+            "--from",
+            "0",
+            "--to",
+            "0.08",
+            "--max-memory-mib",
+            "4",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        cli_plan_export.status.success(),
+        "cli plan export-y4m failed: {}",
+        String::from_utf8_lossy(&cli_plan_export.stderr)
+    );
+    let cli_plan_export_json: serde_json::Value =
+        serde_json::from_slice(&cli_plan_export.stdout).unwrap();
+    assert_eq!(cli_plan_export_json["command"], "export-y4m");
+
+    // 2. Both `export-y4m` and `plan export-y4m` reject metadata mutations with
+    //    `"Y4M output does not support metadata mutations"`.
+    for meta_args in [
+        vec![
+            "media",
+            "export-y4m",
+            y4m.to_str().unwrap(),
+            dir.0.join("never-meta.y4m").to_str().unwrap(),
+            "--metadata",
+            "title=Bad",
+        ],
+        vec![
+            "media",
+            "plan",
+            "export-y4m",
+            y4m.to_str().unwrap(),
+            "--metadata-delete",
+            "title",
+        ],
+    ] {
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(&meta_args)
+            .output()
+            .unwrap();
+        assert!(!out.status.success());
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(
+            stderr.contains("Y4M output does not support metadata mutations"),
+            "expected Y4M metadata refusal for {meta_args:?}, got: {stderr}"
+        );
+    }
+
+    // 3. `remux` and `plan remux` reject duplicate `--streams` with `"duplicate streams option"`,
+    //    and `remux` rejects WAVE stream metadata (`"WAVE remux does not support stream metadata edits"`)
+    //    and `.mp4`/`.m4a` metadata mutations (`"remux to .mp4/.m4a does not support metadata mutations"`).
+    for (args, expected_err) in [
+        (
+            vec![
+                "media",
+                "remux",
+                wav_a.to_str().unwrap(),
+                dir.0.join("never-dup.wav").to_str().unwrap(),
+                "--streams",
+                "0",
+                "--streams",
+                "0",
+            ],
+            "duplicate streams option",
+        ),
+        (
+            vec![
+                "media",
+                "plan",
+                "remux",
+                wav_a.to_str().unwrap(),
+                "--streams",
+                "0",
+                "--streams",
+                "0",
+            ],
+            "duplicate streams option",
+        ),
+        (
+            vec![
+                "media",
+                "remux",
+                wav_a.to_str().unwrap(),
+                dir.0.join("never-stream-meta.wav").to_str().unwrap(),
+                "--stream-metadata",
+                "0:title=Bad",
+            ],
+            "WAVE remux does not support stream metadata edits",
+        ),
+        (
+            vec![
+                "media",
+                "remux",
+                mp4_aac.to_str().unwrap(),
+                dir.0.join("never-mp4-meta.m4a").to_str().unwrap(),
+                "--metadata",
+                "title=Bad",
+            ],
+            "remux to .mp4/.m4a does not support metadata mutations",
+        ),
+    ] {
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(&args)
+            .output()
+            .unwrap();
+        assert!(
+            !out.status.success(),
+            "expected failure for {args:?}"
+        );
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(
+            stderr.contains(expected_err),
+            "expected `{expected_err}` for {args:?}, got: {stderr}"
+        );
+    }
+}
+
+#[test]
+fn remux_and_concat_admit_and_enforce_controlled_memory_budgets_across_matroska_mp4_and_adts() {
+    let dir = TempDir::new("remux-concat-mem-budget");
+    let matroska = fixture("video.mkv");
+    let adts = fixture("adts-mono-48k.aac");
+    let mp4_aac_a = dir.0.join("source-mp4-aac-a.m4a");
+    let mp4_aac_b = dir.0.join("source-mp4-aac-b.m4a");
+    fvid::media::remux(&adts, &mp4_aac_a, &CopyOptions::default()).unwrap();
+    fvid::media::remux(&adts, &mp4_aac_b, &CopyOptions::default()).unwrap();
+    let adts_sources = vec![adts.clone(), adts.clone()];
+    let mp4_sources = vec![mp4_aac_a.clone(), mp4_aac_b.clone()];
+
+    let generous = CopyOptions {
+        max_controlled_bytes: Some(4 * 1024 * 1024),
+        ..Default::default()
+    };
+    let tight = CopyOptions {
+        max_controlled_bytes: Some(1024),
+        ..Default::default()
+    };
+
+    // 1. Matroska identity remux (`plan_remux` and `remux`).
+    let mkv_plan = fvid::media::plan_remux(&matroska, &generous)
+        .expect("Matroska plan_remux should accept generous controlled memory budget");
+    assert!(
+        mkv_plan
+            .notes
+            .iter()
+            .any(|n| n.contains("controlled memory limit: Some(4194304)")),
+        "unexpected notes: {:?}",
+        mkv_plan.notes
+    );
+    let mkv_out = dir.0.join("identity-mem.mkv");
+    let mkv_stats = fvid::media::remux(&matroska, &mkv_out, &generous)
+        .expect("Matroska remux should accept generous controlled memory budget");
+    assert!(mkv_stats.packets >= 1);
+    assert!(fvid::media::plan_remux(&matroska, &tight).is_err());
+    let mkv_tight_out = dir.0.join("identity-tight.mkv");
+    assert!(fvid::media::remux(&matroska, &mkv_tight_out, &tight).is_err());
+    assert!(!mkv_tight_out.exists());
+
+    // 2. MP4 fast-start relocation (`plan_remux` and `remux` to `.m4a`).
+    let mp4_reloc_plan = fvid::media::plan_remux(&mp4_aac_a, &generous)
+        .expect("MP4 fast-start plan_remux should accept generous controlled memory budget");
+    assert!(
+        mp4_reloc_plan
+            .notes
+            .iter()
+            .any(|n| n.contains("controlled memory limit: Some(4194304)")),
+        "unexpected notes: {:?}",
+        mp4_reloc_plan.notes
+    );
+    let mp4_reloc_out = dir.0.join("reloc-mem.m4a");
+    fvid::media::remux(&mp4_aac_a, &mp4_reloc_out, &generous)
+        .expect("MP4 fast-start remux should accept generous controlled memory budget");
+    assert!(mp4_reloc_out.exists());
+    assert!(fvid::media::plan_remux(&mp4_aac_a, &tight).is_err());
+    let mp4_reloc_tight_out = dir.0.join("reloc-tight.m4a");
+    assert!(fvid::media::remux(&mp4_aac_a, &mp4_reloc_tight_out, &tight).is_err());
+    assert!(!mp4_reloc_tight_out.exists());
+
+    // 3. MP4-to-Matroska remux (`fvid_media::plan_remux`, `fvid_media::remux`, `fvid::media::remux` to `.mka`).
+    let mp4_mka_plan = fvid_media::plan_remux(&mp4_aac_a, &generous)
+        .expect("MP4-to-Matroska plan_remux should accept generous controlled memory budget");
+    assert!(
+        mp4_mka_plan
+            .notes
+            .iter()
+            .any(|n| n.contains("controlled memory limit:")),
+        "unexpected notes: {:?}",
+        mp4_mka_plan.notes
+    );
+    let mp4_mka_out = dir.0.join("mp4-to-mka-mem.mka");
+    let mp4_mka_stats = fvid::media::remux(&mp4_aac_a, &mp4_mka_out, &generous)
+        .expect("MP4-to-Matroska remux should accept generous controlled memory budget");
+    assert!(mp4_mka_stats.packets >= 1);
+    assert!(fvid_media::plan_remux(&mp4_aac_a, &tight).is_err());
+    let mp4_mka_tight_out = dir.0.join("mp4-to-mka-tight.mka");
+    assert!(fvid::media::remux(&mp4_aac_a, &mp4_mka_tight_out, &tight).is_err());
+    assert!(!mp4_mka_tight_out.exists());
+
+    // 4. Compressed MP4-to-Matroska concat (`plan_concat` and `concat` to `.mka`).
+    let mp4_concat_plan = fvid::media::plan_concat(&mp4_sources, &generous)
+        .expect("MP4-to-Matroska plan_concat should accept generous controlled memory budget");
+    assert!(
+        mp4_concat_plan
+            .notes
+            .iter()
+            .any(|n| n.contains("controlled memory limit: Some(4194304)")),
+        "unexpected notes: {:?}",
+        mp4_concat_plan.notes
+    );
+    let mp4_concat_out = dir.0.join("mp4-concat-mem.mka");
+    let mp4_concat_stats = fvid::media::concat(&mp4_sources, &mp4_concat_out, &generous)
+        .expect("MP4-to-Matroska concat should accept generous controlled memory budget");
+    assert_eq!(mp4_concat_stats.segments, 2);
+    assert!(fvid::media::plan_concat(&mp4_sources, &tight).is_err());
+    let mp4_concat_tight_out = dir.0.join("mp4-concat-tight.mka");
+    assert!(fvid::media::concat(&mp4_sources, &mp4_concat_tight_out, &tight).is_err());
+    assert!(!mp4_concat_tight_out.exists());
+
+    // 5. ADTS remux & concat (`plan_remux`, `remux`, `plan_concat`, `concat` to `.mka` and `.m4a`).
+    let adts_plan = fvid::media::plan_remux(&adts, &generous)
+        .expect("ADTS plan_remux should accept generous controlled memory budget");
+    assert!(
+        adts_plan
+            .notes
+            .iter()
+            .any(|n| n.contains("controlled memory limit:")),
+        "unexpected notes: {:?}",
+        adts_plan.notes
+    );
+    let adts_mka_out = dir.0.join("adts-remux-mem.mka");
+    fvid::media::remux(&adts, &adts_mka_out, &generous)
+        .expect("ADTS remux to .mka should accept generous controlled memory budget");
+    let adts_m4a_out = dir.0.join("adts-remux-mem.m4a");
+    fvid::media::remux(&adts, &adts_m4a_out, &generous)
+        .expect("ADTS remux to .m4a should accept generous controlled memory budget");
+    assert!(fvid::media::plan_remux(&adts, &tight).is_err());
+    let adts_tight_mka = dir.0.join("adts-tight.mka");
+    assert!(fvid::media::remux(&adts, &adts_tight_mka, &tight).is_err());
+    assert!(!adts_tight_mka.exists());
+
+    let adts_concat_plan = fvid::media::plan_concat(&adts_sources, &generous)
+        .expect("ADTS plan_concat should accept generous controlled memory budget");
+    assert!(
+        adts_concat_plan
+            .notes
+            .iter()
+            .any(|n| n.contains("controlled memory limit:")),
+        "unexpected notes: {:?}",
+        adts_concat_plan.notes
+    );
+    let adts_concat_mka = dir.0.join("adts-concat-mem.mka");
+    fvid::media::concat(&adts_sources, &adts_concat_mka, &generous)
+        .expect("ADTS concat to .mka should accept generous controlled memory budget");
+    let adts_concat_m4a = dir.0.join("adts-concat-mem.m4a");
+    fvid::media::concat(&adts_sources, &adts_concat_m4a, &generous)
+        .expect("ADTS concat to .m4a should accept generous controlled memory budget");
+    assert!(fvid::media::plan_concat(&adts_sources, &tight).is_err());
+    let adts_concat_tight = dir.0.join("adts-concat-tight.mka");
+    assert!(fvid::media::concat(&adts_sources, &adts_concat_tight, &tight).is_err());
+    assert!(!adts_concat_tight.exists());
+
+    // 6. CLI `remux`, `plan remux`, `concat`, and `plan concat` with `--max-memory-mib 4`.
+    for cli_args in [
+        vec![
+            "media",
+            "plan",
+            "remux",
+            matroska.to_str().unwrap(),
+            "--max-memory-mib",
+            "4",
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "remux",
+            matroska.to_str().unwrap(),
+            dir.0.join("cli-mkv.mkv").to_str().unwrap(),
+            "--max-memory-mib",
+            "4",
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "remux",
+            mp4_aac_a.to_str().unwrap(),
+            dir.0.join("cli-mp4.m4a").to_str().unwrap(),
+            "--max-memory-mib",
+            "4",
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "remux",
+            mp4_aac_a.to_str().unwrap(),
+            dir.0.join("cli-mp4-mka.mka").to_str().unwrap(),
+            "--max-memory-mib",
+            "4",
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "remux",
+            adts.to_str().unwrap(),
+            dir.0.join("cli-adts.mka").to_str().unwrap(),
+            "--max-memory-mib",
+            "4",
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "plan",
+            "concat",
+            mp4_aac_a.to_str().unwrap(),
+            mp4_aac_b.to_str().unwrap(),
+            "--max-memory-mib",
+            "4",
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "concat",
+            dir.0.join("cli-mp4-concat.mka").to_str().unwrap(),
+            mp4_aac_a.to_str().unwrap(),
+            mp4_aac_b.to_str().unwrap(),
+            "--max-memory-mib",
+            "4",
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "concat",
+            dir.0.join("cli-adts-concat.m4a").to_str().unwrap(),
+            adts.to_str().unwrap(),
+            adts.to_str().unwrap(),
+            "--max-memory-mib",
+            "4",
+            "--quiet",
+        ],
+    ] {
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(&cli_args)
+            .output()
+            .unwrap();
+        assert!(
+            out.status.success(),
+            "expected CLI success for {cli_args:?}: {}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+    }
+}
+
+

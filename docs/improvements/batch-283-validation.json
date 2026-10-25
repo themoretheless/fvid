@@ -1,0 +1,26 @@
+{
+  "batch": 283,
+  "accepted": [
+    "FVID-0290"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-283-pre-edit/src/media_cli.rs",
+    "docs/improvements/snapshots/batch-283-pre-edit/crates/fvid-media/src/owned_video_decode.rs",
+    "docs/improvements/snapshots/batch-283-pre-edit/crates/fvid-media/src/owned_y4m_decode.rs",
+    "docs/improvements/snapshots/batch-283-pre-edit/crates/fvid-media/src/owned_lossless.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-283-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-283-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-283-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/lossless-plan/zero-frames-8x4.y4m",
+    "tests/fixtures/playback-errors/lossless-plan/two-frames-8x4.y4m",
+    "tests/fixtures/playback-errors/lossless-plan/rotated-90-4x2-dar-2x1.mp4"
+  ],
+  "tests": [
+    "tests/lossless_plan_regressions.rs",
+    "scripts/test_lossless_plan_regressions.py"
+  ]
+}

@@ -284,10 +284,8 @@ pub fn try_plan_with_controls(
     options: &media_info::SubtitleConvertOptions,
     controls: &media_control::CopyOptions,
 ) -> Result<Option<media_info::MediaPlan>> {
-    if controls.max_controlled_bytes.is_some() {
-        return Err(invalid(
-            "convert-subtitles does not support controlled memory budgets",
-        ));
+    if controls.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
     }
     let streams = if !options.streams.is_empty() {
         options.streams.as_slice()
@@ -351,10 +349,15 @@ pub fn try_plan_with_controls(
             (0usize, "subrip", stats.cues)
         }
     } else {
+        let effective_packet_bytes =
+            max_packet_bytes.min(controls.max_controlled_bytes.unwrap_or(usize::MAX));
+        let mut limits = webm::Limits::default();
+        limits.packet_bytes = limits.packet_bytes.min(effective_packet_bytes);
         let mut reader = webm::WebmReader::open(
             std::io::BufReader::new(File::open(source)?),
-            Default::default(),
+            limits,
         )?;
+        reader.restrict_packet_bytes(effective_packet_bytes);
         reader.scan_all()?;
         let idx = match streams {
             [] => reader
@@ -413,11 +416,12 @@ pub fn try_plan_with_controls(
     let mut notes = vec!["subtitle conversion preserves source cues and Matroska metadata".into()];
     if max_packet_bytes != media_control::CopyOptions::default().max_packet_bytes
         || max_packets.is_some()
+        || controls.max_controlled_bytes.is_some()
         || max_rss_bytes.is_some()
     {
         notes.push(format!(
-            "encoded packet limit: {} bytes; packet work limit: {:?}; RSS limit: {:?}",
-            max_packet_bytes, max_packets, max_rss_bytes
+            "encoded packet limit: {} bytes; packet work limit: {:?}; controlled memory limit: {:?}; RSS limit: {:?}",
+            max_packet_bytes, max_packets, controls.max_controlled_bytes, max_rss_bytes
         ));
     }
     Ok(Some(media_info::MediaPlan {
@@ -442,10 +446,8 @@ pub fn try_convert_with_controls(
     options: &media_info::SubtitleConvertOptions,
     controls: &media_control::CopyOptions,
 ) -> Result<Option<SubtitleStats>> {
-    if controls.max_controlled_bytes.is_some() {
-        return Err(invalid(
-            "convert-subtitles does not support controlled memory budgets",
-        ));
+    if controls.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
     }
     let streams = if !options.streams.is_empty() {
         options.streams.as_slice()
@@ -646,11 +648,26 @@ fn try_convert_matroska_inner(
     check_controls: &impl Fn() -> Result<()>,
     dry_run: bool,
 ) -> Result<Option<SubtitleStats>> {
+    let max_controlled_bytes = controls.and_then(|c| c.max_controlled_bytes);
+    let effective_packet_bytes = max_packet_bytes.min(max_controlled_bytes.unwrap_or(usize::MAX));
+    let mut limits = webm::Limits::default();
+    limits.packet_bytes = limits.packet_bytes.min(effective_packet_bytes);
     let mut reader = webm::WebmReader::open(
         std::io::BufReader::new(File::open(source)?),
-        Default::default(),
+        limits,
     )?;
+    reader.restrict_packet_bytes(effective_packet_bytes);
     reader.scan_all()?;
+    if let Some(limit) = max_controlled_bytes {
+        let index_bytes = reader
+            .packets
+            .len()
+            .saturating_mul(64)
+            .saturating_add(16384);
+        if index_bytes > limit {
+            return Err(invalid("controlled memory budget exceeded"));
+        }
+    }
     if !reader.chapters.is_empty() {
         return Err(invalid("convert-subtitles with chapters is not qualified"));
     }
@@ -741,6 +758,15 @@ fn try_convert_matroska_inner(
                 .checked_add(packet_size)
                 .filter(|n| *n <= 64 << 20)
                 .ok_or_else(|| invalid("subtitle metadata exceeds 64 MiB"))?;
+            if let Some(limit) = max_controlled_bytes {
+                let working = bytes
+                    .saturating_add(events.len().saturating_add(1).saturating_mul(48))
+                    .saturating_add(configuration.len())
+                    .saturating_add(16384);
+                if working > limit {
+                    return Err(invalid("controlled memory budget exceeded"));
+                }
+            }
             let payload = reader.read_packet(i)?;
             let text =
                 std::str::from_utf8(&payload).map_err(|_| invalid("Matroska ASS is not UTF-8"))?;
@@ -806,6 +832,14 @@ fn try_convert_matroska_inner(
         if bytes > 64 << 20 {
             return Err(invalid("subtitle metadata exceeds 64 MiB"));
         }
+        if let Some(limit) = max_controlled_bytes {
+            let working = bytes
+                .saturating_add(cues.len().saturating_add(1).saturating_mul(48))
+                .saturating_add(16384);
+            if working > limit {
+                return Err(invalid("controlled memory budget exceeded"));
+            }
+        }
         let data = reader.read_packet(i)?;
         let text =
             std::str::from_utf8(&data).map_err(|_| invalid("Matroska SubRip is not UTF-8"))?;
@@ -814,6 +848,9 @@ fn try_convert_matroska_inner(
         };
         if text.is_empty() {
             return Err(invalid("empty subtitle cue"));
+        }
+        if format!("{},0,Default,,0,0,0,,{text}", cues.len()).len() > max_packet_bytes {
+            return Err(invalid("subtitle packet exceeds packet byte limit"));
         }
         cues.push((start, end, text));
     }
@@ -860,12 +897,19 @@ fn try_convert_ass_inner(
         return Err(invalid("ASS has only subtitle stream 0"));
     }
     let meta = apply_subtitle_matroska_metadata("", "", None, None, None, controls)?;
+    let max_controlled_bytes = controls.and_then(|c| c.max_controlled_bytes);
     let mut bytes = Vec::new();
     File::open(source)?
         .take((64 << 20) + 1)
         .read_to_end(&mut bytes)?;
     if bytes.len() > 64 << 20 {
         return Err(invalid("ASS metadata exceeds 64 MiB"));
+    }
+    if let Some(limit) = max_controlled_bytes {
+        let working = bytes.len().saturating_mul(3).saturating_add(16384);
+        if working > limit {
+            return Err(invalid("controlled memory budget exceeded"));
+        }
     }
     let Ok(text) = std::str::from_utf8(&bytes) else {
         return Ok(None);
@@ -1007,12 +1051,19 @@ fn try_convert_srt_inner(
         return Err(invalid("SRT has only subtitle stream 0"));
     }
     let meta = apply_subtitle_matroska_metadata("", "und", None, None, None, controls)?;
+    let max_controlled_bytes = controls.and_then(|c| c.max_controlled_bytes);
     let mut bytes = Vec::new();
     File::open(source)?
         .take((64 << 20) + 1)
         .read_to_end(&mut bytes)?;
     if bytes.len() > 64 << 20 {
         return Err(invalid("SRT metadata exceeds 64 MiB"));
+    }
+    if let Some(limit) = max_controlled_bytes {
+        let working = bytes.len().saturating_mul(3).saturating_add(16384);
+        if working > limit {
+            return Err(invalid("controlled memory budget exceeded"));
+        }
     }
     let Ok(text) = std::str::from_utf8(&bytes) else {
         return Ok(None);
@@ -1059,6 +1110,9 @@ fn try_convert_srt_inner(
         let Some(body) = ass_text(&body) else {
             return Ok(None);
         };
+        if format!("{},0,Default,,0,0,0,,{body}", cues.len()).len() > max_packet_bytes {
+            return Err(invalid("subtitle packet exceeds packet byte limit"));
+        }
         cues.push((start, end, body));
     }
     if cues.is_empty() {

@@ -16,7 +16,7 @@ pub(crate) fn unedited_policies(o: &CopyOptions) -> bool {
         && o.metadata_delete.is_empty()
         && o.stream_metadata_set.is_empty()
         && o.stream_metadata_delete.is_empty()
-        && o.max_controlled_bytes.is_none()
+        && o.max_controlled_bytes != Some(0)
         && crate::owned_budget::check_rss_budget(o).is_ok()
         && o.max_packet_bytes > 0
 }
@@ -65,21 +65,23 @@ pub fn remux(
         return Err("Matroska remux requires a regular file".into());
     }
     let audio_only = destination.extension().and_then(|s| s.to_str()) == Some("mka");
-    crate::owned_matroska_copy::inspect_with_packet_limit(
+    crate::owned_matroska_copy::inspect_with_packet_and_memory_limits(
         &mut input,
         audio_only,
         options.cancel.as_ref(),
         options.max_packet_bytes,
+        options.max_controlled_bytes,
     )
     .map_err(|e| e.to_string())?;
     publish(destination, options, |output| {
-        crate::owned_matroska_copy::copy_with_packet_limit(
+        crate::owned_matroska_copy::copy_with_packet_and_memory_limits(
             &mut input,
             output,
             audio_only,
             options.cancel.as_ref(),
             options.progress.as_ref(),
             options.max_packet_bytes,
+            options.max_controlled_bytes,
         )
         .map_err(|e| e.to_string())
     })
