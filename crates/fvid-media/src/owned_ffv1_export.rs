@@ -5,12 +5,20 @@ use fvid_media_info::{DecodeStats, DecodeTransform};
 use std::{fs::File, io::BufReader, path::Path};
 type Result<T> = std::result::Result<T, String>;
 fn input(source: &Path) -> Result<crate::owned_webm::WebmReader<BufReader<File>>> {
+    input_limited(source, usize::MAX)
+}
+fn input_limited(
+    source: &Path,
+    max_packet_bytes: usize,
+) -> Result<crate::owned_webm::WebmReader<BufReader<File>>> {
+    let limits = crate::owned_webm::Limits::default();
     let mut input = crate::owned_webm::WebmReader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        Default::default(),
+        limits,
     )
     .map_err(|e| e.to_string())?;
     input.scan_all().map_err(|e| e.to_string())?;
+    input.restrict_packet_bytes(max_packet_bytes);
     Ok(input)
 }
 pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
@@ -200,7 +208,7 @@ pub(crate) fn export_processed(
     options: &CopyOptions,
     mut process: Option<&mut dyn FnMut(&mut crate::owned_frame::GeometryFrame, u8, i64, bool) -> Result<()>>,
 ) -> Result<(DecodeStats, fvid_control::ProgressEvent, u64)> {
-    let input = input(source)?;
+    let input = input_limited(source, options.max_packet_bytes)?;
     let track = input.tracks.iter().find(|t|t.kind==1).ok_or("input has no video stream")?;
     let mut description = mkv::VideoTrackDescription {
         name: track.name.clone(),

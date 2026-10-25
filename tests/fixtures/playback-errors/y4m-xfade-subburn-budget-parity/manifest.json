@@ -1,0 +1,14 @@
+{
+  "batch_id": "FVID-0263",
+  "generator": "scripts/generate_y4m_xfade_subburn_budget_parity_regressions.py",
+  "sha256": {
+    "cues.srt": "243f6dc72c0900bec6512a5275a1846697f9e995b3704c48d057f7233fcdd949",
+    "multitrack-avc-aac.mp4": "ab358eac90b5deba0ff02665249ab3e6e078b7c64955c47ed1155b5fee1e8fa5",
+    "multitrack-ffv1-aac.mkv": "e0ff7f7bdf0840bda123db001e4f6ecce891db4bb632c3676db259ee7b2daf3f",
+    "seg-2x4-25fps-par1x1.y4m": "9e8fc7752787d9fc385514879787f94aa881b360186cefe18383b0379528dad2",
+    "seg-4x4-25fps-par1x1.y4m": "ad10dc2639234582754aea7d16eccb69b4a1d38ca926245fa1111410a0fbaf01",
+    "seg-4x4-25fps-par2x1.y4m": "c1584002b9aad7b908d451d6b063ffd0e221ff1476c09ce124662109bb4072a6",
+    "seg-4x4-25fps-par2x2.y4m": "e6596ccb9db468add0297efb0b37659754a7132d554eaca34008223c4862db14",
+    "seg-4x4-50fps-par1x1.y4m": "507ad67188a1648865d047417f8b71e2de7ec2da40ce7dd52f5c57264352a157"
+  }
+}

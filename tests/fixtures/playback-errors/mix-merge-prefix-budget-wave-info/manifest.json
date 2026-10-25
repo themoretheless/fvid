@@ -1,0 +1,11 @@
+{
+  "batch_id": "FVID-0268",
+  "generator": "scripts/generate_mix_merge_prefix_budget_wave_info_regressions.py",
+  "provenance": "100% synthetic bare FLAC (11-byte CONSTANT frame + 393-byte VERBATIM frame), Ogg Opus, and bare MP3 with 4-CC Vorbis/ID3 tags; no FFmpeg, network, or private media.",
+  "sha256": {
+    "fourcc-tags.mp3": "b03d55e8494f119838d2e67f02decfbece77245b70a49c71f429fac0025ef756",
+    "fourcc-tags.opus": "ef0cdb65002cefcbbad3650380325612ad1ea2cbbfb9d6f67caa8aa118bfb802",
+    "prefix-a.flac": "f7068da093d30c104469197224521eaedb1c19084aac877d49c8bc1b773d43b4",
+    "prefix-b.flac": "fbb1a7ce2e7522037069d7c97c06361fed249cdc86be57b2e92edb1d1276648a"
+  }
+}
