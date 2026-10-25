@@ -22,6 +22,8 @@ use crate::playback_mp4::{Hardware, hardware_frame, open_hardware};
 
 #[path = "webm_seek_cache.rs"]
 mod seek_cache;
+#[path = "webm_layered.rs"]
+mod layered;
 pub use seek_cache::Status as SeekCacheStatus;
 use std::sync::{Mutex, atomic::{AtomicBool, Ordering}};
 
@@ -38,11 +40,13 @@ enum Picture {
 enum VideoDecoder {
     Avc(Box<AvcDecoder>),
     Hevc(Box<HevcDecoder>),
+    Layered(Box<layered::Layered>),
     Ffv1(Box<crate::codec::ffv1_decoder::Decoder>),
     Vp9(Box<Decoder>),
     Av1(Box<crate::codec::av1_decoder::Decoder>),
 }
 struct Frame {
+    signal: Option<ColourDescription>,
     paired: bool,
     hdr: HdrMetadata,
     decoded: Picture,
@@ -69,6 +73,7 @@ pub struct WebmVideoReader<R> {
     future_pts: Option<Vec<i64>>,
     queued: Vec<Frame>,
     presented_hdr: Option<HdrMetadata>,
+    presented_signal: Option<ColourDescription>,
     queue_budget: usize,
     rgb: Vec<u8>,
     dimensions: [usize; 2],
@@ -201,19 +206,6 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             seed
         });
         let queue_budget = (budget - rgb_budget) / 2;
-        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-        let hardware = if !allow_hardware || std::env::var_os("FVID_SOFTWARE_DECODE").is_some() {
-            None
-        } else {
-            open_hardware(
-                track_codec.as_bytes(),
-                &private,
-                track_width,
-                track_height,
-                queue_budget,
-                false,
-            )
-        };
         let future_pts = if avc || hevc {
             // Reordered codecs need a suffix minimum of packet PTS to know when
             // a decoded picture can be emitted. Packet payloads remain lazy.
@@ -262,6 +254,8 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             )?))
         } else if avc {
             VideoDecoder::Avc(Box::new(AvcDecoder::new(&private, queue_budget)?))
+        } else if hevc && let Some(d)=layered::Layered::open(&private,&mut demux,track,queue_budget)? {
+            VideoDecoder::Layered(Box::new(d))
         } else if hevc {
             let mut d = HevcDecoder::from_inband_configuration(&private, queue_budget)?;
             if let Some(index) = demux.packets.iter().position(|p| p.track == track) {
@@ -277,6 +271,19 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         } else {
             VideoDecoder::Vp9(Box::new(Decoder::new((budget - rgb_budget) / 12 * 10)))
         };
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        let hardware = if matches!(decoder,VideoDecoder::Layered(_)) || !allow_hardware || std::env::var_os("FVID_SOFTWARE_DECODE").is_some() {
+            None
+        } else {
+            open_hardware(
+                track_codec.as_bytes(),
+                &private,
+                track_width,
+                track_height,
+                queue_budget,
+                false,
+            )
+        };
         Ok(Self {
             demux,
             decoder,
@@ -287,6 +294,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             future_pts,
             queued: Vec::new(),
             presented_hdr: None,
+            presented_signal: None,
             queue_budget,
             rgb: Vec::new(),
             dimensions: [0; 2],
@@ -470,12 +478,14 @@ impl<R: Read + Seek> WebmVideoReader<R> {
     /// colour matrix and a range flag in every frame header rather than an H.273
     /// triple, so it is left to the container.
     pub fn bitstream_colour(&self) -> ColourDescription {
+        if let Some(signal)=self.presented_signal {return signal;}
         let live = match &self.decoder {
             VideoDecoder::Av1(d) => d
                 .color()
                 .map(crate::codec::av1_sequence::Color::signal)
                 .unwrap_or_default(),
             VideoDecoder::Vp9(_) | VideoDecoder::Ffv1(_) => ColourDescription::default(),
+            VideoDecoder::Layered(d) => d.signal,
             VideoDecoder::Avc(d) => d
                 .active_vui()
                 .or_else(|| d.recorded_vui())
@@ -527,6 +537,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 HdrMetadata::default()
             }
             VideoDecoder::Hevc(d) => d.hdr(),
+            VideoDecoder::Layered(d) => d.hdr,
         };
         let seed = self.open_signal.map(|(_, seed)| seed).unwrap_or_default();
         match &self.decoder {
@@ -629,6 +640,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         match &mut self.decoder {
             VideoDecoder::Avc(d) => d.reset(),
             VideoDecoder::Hevc(d) => d.reset(),
+            VideoDecoder::Layered(d) => d.reset(),
             VideoDecoder::Vp9(d) => d.reset(),
             VideoDecoder::Av1(d) => d.reset(),
             VideoDecoder::Ffv1(d) => d.reset(),
@@ -638,6 +650,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         self.pending_field = None;
         self.queued.clear();
         self.presented_hdr = None;
+        self.presented_signal = None;
         self.base = None;
         self.start = 0;
         self.end = 0;
@@ -713,12 +726,14 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 })?;
             Some((index, self.demux.packets[index].pts_ns))
         });
+        let chosen=if matches!(self.decoder,VideoDecoder::Layered(_)) {self.demux.packets.iter().position(|p|p.track==self.track).map(|i|(i,self.demux.packets[i].pts_ns))}else{chosen};
         let Some((index, pts)) = chosen else {
             return Ok(0);
         };
         match &mut self.decoder {
             VideoDecoder::Avc(d) => d.reset(),
             VideoDecoder::Hevc(d) => d.reset(),
+            VideoDecoder::Layered(d) => d.reset(),
             VideoDecoder::Vp9(d) => d.reset(),
             VideoDecoder::Av1(d) => d.reset(),
             VideoDecoder::Ffv1(d) => d.reset(),
@@ -729,6 +744,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         self.pending_field = None;
         self.queued.clear();
         self.presented_hdr = None;
+        self.presented_signal = None;
         self.failed = false;
         self.index = index;
         if index > 0 && !self.hardware_accelerated()
@@ -895,6 +911,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         }
     }
     fn decode_next(&mut self) -> Result<Option<Frame>> {
+        if let VideoDecoder::Layered(d)=&mut self.decoder && let Some(frame)=d.take()? {return Ok(Some(frame));}
         // The index only holds the clusters walked so far, so a reader that has
         // run out of blocks asks the demuxer for the next one before it believes
         // the item has ended.
@@ -928,7 +945,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                         .decode_surface(&packet)
                         .map_err(|error| invalid(&error.to_string()))?;
                     if let Some(surface) = surface {
-                        visible = Some(Frame {
+                        visible = Some(Frame { signal: None,
                             hdr: HdrMetadata::default(),
                             paired: false,
                             decoded: Picture::Surface(surface, hardware.colour),
@@ -948,7 +965,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                         } else {
                             Picture::Coded(Arc::new(picture), hardware.colour)
                         };
-                        visible = Some(Frame {
+                        visible = Some(Frame { signal: None,
                             hdr: HdrMetadata::default(),
                             paired: false,
                             decoded,
@@ -990,7 +1007,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                             } else {
                                 Picture::Coded(picture, AvcColour::from_vui(vui)?)
                             };
-                            visible = Some(Frame {
+                            visible = Some(Frame { signal: None,
                             hdr: HdrMetadata::default(),
                                 paired,
                                 decoded,
@@ -999,13 +1016,17 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                             });
                         }
                     }
+                VideoDecoder::Layered(d) => {
+                    d.push(&packet)?;
+                    if let Some(frame)=d.take()? {return Ok(Some(frame));}
+                }
                 VideoDecoder::Hevc(d) => {
                     if let Some(frame) = d.decode_packet(&packet)?.filter(|f| f.output) {
                         let p = &frame.picture;
                         let packed=crate::playback_native::hevc_picture_with_vui(
                             p,d.parameters().0.chroma_format,d.parameters().0.vui.as_ref(),
                         )?;
-                        visible = Some(Frame {
+                        visible = Some(Frame { signal: None,
                             hdr: HdrMetadata::default(),
                             paired: false,
                             decoded: Picture::Packed(Arc::new(packed)),
@@ -1033,7 +1054,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                         && self.explicit_full_range == Some(false);
                     let p = PackedPlanar::with_alpha(decoded.frame, decoded.depth, colour, decoded.alpha)?
                         .with_rgb_limited(rgb_limited)?;
-                    visible = Some(Frame {
+                    visible = Some(Frame { signal: None,
                             hdr: HdrMetadata::default(),
                             paired: false,
                         decoded: Picture::Packed(Arc::new(p)),
@@ -1050,7 +1071,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                                     "multiple visible frames in one WebM packet need distinct timestamps",
                                 ));
                             }
-                            visible = Some(Frame {
+                            visible = Some(Frame { signal: None,
                             hdr: HdrMetadata::default(),
                             paired: false,
                                 decoded: Picture::Vp9(Box::new(decoded)),
@@ -1062,7 +1083,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 }
                 VideoDecoder::Av1(d) => {
                     if let Some(decoded) = d.decode_container_sample(&packet)? {
-                        visible = Some(Frame {
+                        visible = Some(Frame { signal: None,
                             hdr: HdrMetadata::default(),
                             paired: false,
                             decoded: Picture::Av1(decoded),
@@ -1082,6 +1103,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 return Ok(visible);
             }
         }
+        if let VideoDecoder::Layered(d)=&mut self.decoder {d.finish()?;return d.take();}
         if self.pending_field.is_some() { return Err(invalid("unpaired AVC field at end of Matroska")); }
         if let VideoDecoder::Av1(d) = &mut self.decoder {
             d.finish()?;
@@ -1214,6 +1236,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         self.end = start + u128::from(duration);
         self.frames += 1;
         self.presented_hdr = Some(current.hdr);
+        self.presented_signal = current.signal;
         Ok(Some(CurrentFrame {
             decoded: current.decoded,
             size,
