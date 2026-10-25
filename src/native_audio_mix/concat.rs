@@ -10,18 +10,152 @@ use std::{
 };
 
 fn geometry_with_options(source: &Path, options: &fvid_media::CopyOptions) -> Result<(u32, u16)> {
-    let mut probe_opts = super::strip_output_controls(options);
-    probe_opts.max_packets = None;
+    let mut default_probe = fvid_media::CopyOptions::default();
+    default_probe.cancel = options.cancel.clone();
+    default_probe.max_rss_bytes = options.max_rss_bytes;
     if options.max_controlled_bytes.is_none() && crate::native_pcm::is_wave(source)? {
         let info = crate::native_pcm::inspect(&mut File::open(source)?, options.cancel.as_ref())?;
         Ok((info.sample_rate, info.channels))
-    } else if options.max_controlled_bytes.is_none() && crate::native_media::is_owned_audio_source(source)? {
-        let info = crate::native_media::audio_source_info_selected(source, None)?;
+    } else if options.max_controlled_bytes.is_none() && crate::native_media::is_owned_audio_source_with_options(source, options)? {
+        let info = crate::native_media::audio_source_info_selected_with_options(source, None, options)?;
         Ok((info.sample_rate, info.channels))
     } else {
-        fvid_media::owned_audio_plan::source_geometry(source, &probe_opts)
+        fvid_media::owned_audio_plan::source_geometry(source, options)
             .map_err(|e| invalid(&e))
     }
+}
+
+fn segment_packet_count(source: &Path, options: &fvid_media::CopyOptions) -> Result<u64> {
+    if crate::native_pcm::is_wave(source)? {
+        let info = crate::native_pcm::inspect(&mut File::open(source)?, options.cancel.as_ref())?;
+        let frame = usize::from(info.frame_bytes());
+        if frame == 0 {
+            return Err(invalid("packet byte limit is smaller than one PCM sample frame"));
+        }
+        let max_chunk_bytes = if options.max_controlled_bytes.is_some() {
+            4096 * frame
+        } else {
+            65536
+        };
+        let chunk_frames = (max_chunk_bytes.min(options.max_packet_bytes) / frame) as u64;
+        if chunk_frames == 0 {
+            return Err(invalid("packet byte limit is smaller than one PCM sample frame"));
+        }
+        return Ok(info.sample_frames.div_ceil(chunk_frames));
+    }
+    let mut input = std::io::BufReader::new(File::open(source)?);
+    let mut prefix = [0u8; 8];
+    input.read_exact(&mut prefix)?;
+    input.seek(SeekFrom::Start(0))?;
+    if crate::container::mp4::recognizes_prefix(&prefix) {
+        let reader = crate::container::mp4::Mp4Reader::open(
+            input,
+            crate::container::mp4::Limits::default(),
+        )?;
+        let info = crate::native_media::audio_source_info_selected_with_options(source, None, options)?;
+        if let Some(track) = reader.tracks().get(info.stream_index) {
+            if track.edits.iter().filter(|e| e.media_time >= 0).count() <= 1 {
+                return Ok(track.samples.len() as u64);
+            }
+        }
+        return Ok(u64::MAX);
+    }
+    if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
+        let mut reader = crate::container::webm::WebmReader::open(
+            input,
+            crate::container::webm::Limits::default(),
+        )?;
+        reader.scan_all()?;
+        let info = crate::native_media::audio_source_info_selected_with_options(source, None, options)?;
+        if let Some(track) = reader.tracks.get(info.stream_index) {
+            let track_number = track.number;
+            return Ok(reader
+                .packets
+                .iter()
+                .filter(|p| p.track == track_number)
+                .count() as u64);
+        }
+        return Ok(u64::MAX);
+    }
+    if crate::container::adts::header(&prefix).is_some() {
+        let mut reader =
+            crate::container::adts::StreamReader::open_with_packet_limit(input, usize::MAX)?;
+        let mut count = 0u64;
+        while options.max_packets.is_none_or(|max| count < max) && reader.next_packet()?.is_some() {
+            count += 1;
+        }
+        return Ok(count);
+    }
+    Ok(u64::MAX)
+}
+
+pub fn validate_concat_segments_with_options(
+    sources: &[PathBuf],
+    options: &fvid_media::CopyOptions,
+) -> Result<()> {
+    if !(2..=256).contains(&sources.len()) {
+        return Err(invalid(
+            "PCM concat requires 2..=256 single audio inputs with matching sample rate and channels",
+        ));
+    }
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
+    super::validate_output_controls(options, None)?;
+    let mut default_probe = fvid_media::CopyOptions::default();
+    default_probe.cancel = options.cancel.clone();
+    default_probe.max_rss_bytes = options.max_rss_bytes;
+    let mut expected_geometry = None;
+    let mut rem_geom = options.max_packets;
+    for source in sources {
+        let mut geom_probe = default_probe.clone();
+        geom_probe.max_packets = rem_geom.filter(|&r| r > 0);
+        if !super::eligible_with_options(std::slice::from_ref(source), &geom_probe)? {
+            return Err(invalid(
+                "PCM concat requires 2..=256 single audio inputs with matching sample rate and channels",
+            ));
+        }
+        let info = crate::media::probe(source).map_err(|e| invalid(&e))?;
+        if info.streams.len() != 1 || info.streams[0].media_type != "audio" {
+            return Err(invalid(
+                "PCM concat requires 2..=256 single audio inputs with matching sample rate and channels",
+            ));
+        }
+        let current = geometry_with_options(source, &geom_probe)?;
+        if rem_geom != Some(0) {
+            if expected_geometry.is_some_and(|g| g != current) {
+                return Err(invalid(
+                    "PCM concat requires 2..=256 single audio inputs with matching sample rate and channels",
+                ));
+            }
+            expected_geometry = Some(current);
+        }
+        if let Some(rem) = &mut rem_geom
+            && *rem > 0
+        {
+            if let Ok(count) = segment_packet_count(source, &geom_probe) {
+                *rem = rem.saturating_sub(count);
+            }
+        }
+    }
+    let mut remaining_packets = options.max_packets;
+    for source in sources {
+        if remaining_packets == Some(0) {
+            break;
+        }
+        let mut segment_opts = super::strip_output_controls(options);
+        segment_opts.max_packets = remaining_packets;
+        super::validate_and_inspect_source_with_options(source, &segment_opts)?;
+        if let Some(rem) = &mut remaining_packets {
+            let count = segment_packet_count(source, &segment_opts)?;
+            *rem = rem.saturating_sub(count);
+        }
+    }
+    Ok(())
 }
 
 pub fn eligible(sources: &[PathBuf]) -> Result<bool> {
@@ -32,29 +166,7 @@ pub fn eligible_with_options(
     sources: &[PathBuf],
     options: &fvid_media::CopyOptions,
 ) -> Result<bool> {
-    if !(2..=256).contains(&sources.len()) {
-        return Ok(false);
-    }
-    if super::validate_output_controls(options, None).is_err() {
-        return Ok(false);
-    }
-    let clean_opts = super::strip_output_controls(options);
-    let mut expected_geometry = None;
-    for source in sources {
-        if !super::eligible_with_options(std::slice::from_ref(source), &clean_opts)? {
-            return Ok(false);
-        }
-        let info = crate::media::probe(source).map_err(|e| invalid(&e))?;
-        if info.streams.len() != 1 || info.streams[0].media_type != "audio" {
-            return Ok(false);
-        }
-        let current = geometry_with_options(source, &clean_opts)?;
-        if expected_geometry.is_some_and(|g| g != current) {
-            return Ok(false);
-        }
-        expected_geometry = Some(current);
-    }
-    Ok(true)
+    Ok(validate_concat_segments_with_options(sources, options).is_ok())
 }
 
 /// Decode each source independently, retaining its audible presentation samples.
@@ -89,13 +201,12 @@ pub fn concat_audio_with_options(
     if options.max_packet_bytes == 0 {
         return Err(invalid("packet byte limit must be positive"));
     }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
     fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
     super::validate_output_controls(options, Some(matroska))?;
-    if !eligible_with_options(sources, options)? {
-        return Err(invalid(
-            "PCM concat requires 2..=256 single audio inputs with matching sample rate and channels",
-        ));
-    }
+    validate_concat_segments_with_options(sources, options)?;
     if destination.try_exists()? {
         return Err(invalid("concat destination already exists"));
     }
@@ -113,11 +224,12 @@ pub fn concat_audio_with_options(
     };
     let source_matroska_metadata = if matroska {
         Some(
-            crate::native_export::pcm_matroska::extract_source_pcm_metadata(
+            crate::native_export::pcm_matroska::extract_source_pcm_metadata_with_packet_limit(
                 &sources[0],
                 options.streams.first().copied(),
                 true,
                 Some(options.max_packet_bytes),
+                options.max_packets,
                 cancel,
             )?,
         )
@@ -128,13 +240,22 @@ pub fn concat_audio_with_options(
     let mask = if matroska {
         0
     } else {
-        let masks = sources
-            .iter()
-            .map(|source| {
-                super::validate_and_inspect_source_with_options(source, options)
-                    .map(|(_, _, mask)| mask)
-            })
-            .collect::<Result<Vec<_>>>()?;
+        let mut inspect_opts = super::strip_output_controls(options);
+        inspect_opts.max_packets = options.max_packets;
+        let mut remaining = options.max_packets;
+        let mut masks = Vec::new();
+        for source in sources {
+            if remaining == Some(0) {
+                break;
+            }
+            inspect_opts.max_packets = remaining;
+            let (_, _, mask) = super::validate_and_inspect_source_with_options(source, &inspect_opts)?;
+            masks.push(mask);
+            if let Some(rem) = &mut remaining {
+                let count = segment_packet_count(source, &inspect_opts)?;
+                *rem = rem.saturating_sub(count);
+            }
+        }
         if masks.iter().all(|m| *m == masks[0]) {
             masks[0]
         } else {
@@ -182,7 +303,7 @@ pub fn concat_audio_with_options(
         if let Some(limit) = options.max_packets {
             let remaining = limit.saturating_sub(stats.decoded_frames);
             if remaining == 0 {
-                return Err(invalid("packet work limit exceeded"));
+                break;
             }
             segment_options.max_packets = Some(remaining);
         }

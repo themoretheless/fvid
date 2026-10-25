@@ -47,7 +47,7 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    let (rate, channels) = match geometry(source, options) {
+    let (rate, channels) = match geometry_for_decode(source, Some(transform), options) {
         Ok(value) => value,
         Err(error) => return error.starts_with("controlled memory budget exceeded:"),
     };
@@ -88,8 +88,12 @@ pub(crate) fn apply(
         return Err("media operation cancelled".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    let (rate, channels) = geometry(source, options)?;
-    let info = crate::owned_wave_metadata::matroska_source_info(source, options)?;
+    let (rate, channels) = geometry_for_decode(source, Some(transform), options)?;
+    let info = crate::owned_wave_metadata::matroska_source_info_with_interval(
+        source,
+        prefix(transform, rate),
+        options,
+    )?;
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,
@@ -110,10 +114,18 @@ pub(crate) fn apply(
 }
 
 pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    geometry_for_decode(source, None, options)
+}
+
+pub(crate) fn geometry_for_decode(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16)> {
     let mut reader = crate::owned_matroska_audio::open_audio_reader(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         options,
-        crate::owned_webm::Limits::default().packet_bytes,
+        options.max_packet_bytes,
     )
     .map_err(|e| e.to_string())?;
     let index = match options.streams.as_slice() {
@@ -140,8 +152,6 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
         }
         _ => return Err("select exactly one audio stream".into()),
     };
-    crate::owned_matroska_audio::admit_audio_reader(&mut reader, index, options)
-        .map_err(|e| e.to_string())?;
     let track = reader
         .tracks
         .get(index)
@@ -149,5 +159,8 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
     let decoder = crate::owned_matroska_audio::MatroskaTimelineDecoder::from_matroska(track)
         .map_err(|e| e.to_string())?;
     let (rate, channels) = (decoder.sample_rate(), decoder.channels());
+    let interval = transform.and_then(|t| prefix(t, rate));
+    crate::owned_matroska_audio::admit_audio_reader_with_interval(&mut reader, index, interval, options)
+        .map_err(|e| e.to_string())?;
     Ok((rate, channels))
 }

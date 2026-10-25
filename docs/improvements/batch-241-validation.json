@@ -1,0 +1,22 @@
+{
+  "batch": 241,
+  "id": "FVID-0248",
+  "title": "Enforce packet-byte, zero-packet, and RSS budgets across audio planning, loudness, loudnorm, mix/merge, and sample-domain concat paths and align CLI dispatch",
+  "status": "accepted",
+  "pre_edit_snapshot": "docs/improvements/snapshots/batch-241-pre-edit",
+  "fixtures": {
+    "generator": "scripts/generate_loudnorm_mix_packet_budget_parity_regressions.py",
+    "unit_test": "scripts/test_loudnorm_mix_packet_budget_parity_regressions.py",
+    "manifest": "tests/fixtures/playback-errors/loudnorm-mix-packet-budget-parity/manifest.json"
+  },
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-241-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-241-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-241-related-after.txt"
+  },
+  "commands": [
+    "python3 scripts/test_loudnorm_mix_packet_budget_parity_regressions.py",
+    "cargo test --test loudnorm_mix_packet_budget_parity_regressions",
+    "cargo test --test loudnorm_budget_mix_concat_regressions --test loudnorm_wave_metadata_routing_regressions --test loudnorm_matroska_metadata_regressions --test owned_container_loudnorm"
+  ]
+}
