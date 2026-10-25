@@ -111,6 +111,12 @@ pub(crate) fn validate_request(
             "owned audio export does not yet implement these control/metadata policies".into(),
         );
     }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
     if transform
         .interval
         .is_some_and(|(from, to)| from < 0 || to <= from)

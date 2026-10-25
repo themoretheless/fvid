@@ -242,6 +242,35 @@ impl Program {
     pub fn decoded_packets(&self) -> u64 {
         self.packets
     }
+    pub(crate) fn max_packet_size_in_prefix(
+        &self,
+        until: Option<u64>,
+        max_packets: Option<u64>,
+    ) -> usize {
+        let mut remaining = max_packets;
+        let mut maximum = 0;
+        for link in &self.links {
+            if remaining == Some(0) {
+                break;
+            }
+            let start = link.origin.whole;
+            if until.is_some_and(|end| start >= 0 && start as u64 >= end) {
+                break;
+            }
+            let count = match &link.source {
+                Source::Vorbis(p) => p.packet_times().len() as u64,
+                Source::Opus(p) => p.packet_count() as u64,
+            };
+            maximum = maximum.max(match &link.source {
+                Source::Vorbis(p) => p.max_packet_size_in_prefix(None, remaining),
+                Source::Opus(p) => p.max_packet_size_in_prefix(None, remaining),
+            });
+            if let Some(rem) = &mut remaining {
+                *rem = rem.saturating_sub(count);
+            }
+        }
+        maximum
+    }
     pub fn seek_to(&mut self, target: i64) -> i64 {
         self.target = target.clamp(0, self.end);
         self.cursor = self

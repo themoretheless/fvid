@@ -1,0 +1,10 @@
+{
+  "batch_id": "FVID-0267",
+  "generator": "scripts/generate_pcm_loudness_qualification_regressions.py",
+  "provenance": "100% synthetic bare FLAC (3ch 48 kHz discrete and 1ch 20 kHz non-standard rate) and two-track Matroska (4096-byte video + 1920-byte PCM audio); no FFmpeg, network, or private media.",
+  "sha256": {
+    "discrete-3ch-48k.flac": "387a34e8fa3d0630a854eff0d4fd558cca8770a880540170a0c1caae97de5e05",
+    "mono-20k.flac": "55a2f8c4b39fa202b4a76bd5928115c169013776216559fc54cd402b1d0189b9",
+    "video-4096-audio-1920.mkv": "e5e2bf0080b36837ffef02f45bd39ea6ca45002291e91d3d63cc878b7b2be933"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "batch": 244,
+  "id": "FVID-0251",
+  "title": "Enforce input packet-byte budgets in convert-subtitles, burn-subtitles, xfade, and FFV1 export and preserve CLI policy refusal messages across subtitle and cross-fade paths",
+  "status": "accepted",
+  "pre_edit_snapshot": "docs/improvements/snapshots/batch-244-pre-edit",
+  "fixtures": {
+    "generator": "scripts/generate_subtitle_convert_burn_budget_parity_regressions.py",
+    "unit_test": "scripts/test_subtitle_convert_burn_budget_parity_regressions.py",
+    "manifest": "tests/fixtures/playback-errors/subtitle-convert-burn-budget-parity/manifest.json"
+  },
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-244-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-244-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-244-related-after.txt"
+  },
+  "commands": [
+    "python3 scripts/test_subtitle_convert_burn_budget_parity_regressions.py",
+    "cargo test --test subtitle_convert_burn_budget_parity_regressions",
+    "cargo test --lib owned_subtitle && cargo test --package fvid-media owned_subtitle_burn && cargo test --package fvid-media owned_ffv1_export::tests::failed_or_cancelled_export_never_publishes_partial_output"
+  ]
+}

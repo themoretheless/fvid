@@ -44,6 +44,9 @@ fn open(path: &Path, options: &CopyOptions) -> Result<(Input, Vec<u8>)> {
     if !(1..=255).contains(&shape.channels) {
         return Err("owned WAVE output supports 1..255 channels".into());
     }
+    if options.max_packet_bytes < usize::from(shape.channels) {
+        return Err("G.711 channel frame exceeds byte limit".into());
+    }
     let metadata =
         crate::owned_wave_inspect::info_chunks_bytes(&mut file, &shape, options.cancel.as_ref())
             .map_err(|e| e.to_string())?;
