@@ -273,7 +273,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
         match self {
             Self::Y4m(_) => "Y4M",
             Self::Webm(r) => r.codec(),
-            Self::Avc { source, .. } => mp4_codec(&source.track().codec),
+            Self::Avc { source, .. } => mp4_codec(&source.container_description().codec),
         }
     }
     /// The signal the source states its pictures in, which is what a grade is

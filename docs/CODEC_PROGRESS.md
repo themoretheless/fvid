@@ -1,6 +1,38 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
 
+## Unreferenced MP4 video descriptions and presented codec, 2026-10-25
+
+Unknown video SampleEntry records no longer discard otherwise supported tracks.
+The demuxer retains their original description slots as opaque metadata after
+validating the common header/data reference. Known entries still receive full
+parsing. A track with no recognized video entry is still skipped before sample
+indexing and preserves its codec diagnostic. Indexed and fragmented sample
+references keep their original numbering; unknown payloads are not interpreted
+as another codec's configuration.
+
+Automatic native dispatch and explicit single-source admission use the first
+sample's referenced description. A genuinely active unknown entry still refuses
+at opening or at its later switch, with rewind required after a decode-time
+failure. External sample data references remain invalid, including on unused
+entries. The public native reader now reports the displayed frame's codec from
+its retained description instead of the track's original legacy codec alias.
+
+Thirty short synthetic acceptance files cover unknown entries before, between
+and after supported descriptions, all AVC/HEVC/VP9/AV1 transitions, pure layered
+HEVC, indexed/fragmented tables, byte-identical packets, pixels, PTS/durations,
+HDR/layer metadata, seek and rewind. Six saved negative files isolate active
+unknown entries and external references. All 37 generated files reproduce
+byte-for-byte with subprocess/network creation forbidden. Both original failures
+were observed before their fixes: supported tracks disappeared as `zzzz`, and
+public codec reporting remained H.264 while displaying HEVC.
+
+The preceding mixed-description milestone also completed its broad video gate:
+385 integration targets, 1141 passing tests, eight hardware-dependent ignores.
+These counts qualify their specific synthetic scenarios; universal codec tools,
+profiles, containers and physical decoder/device paths remain unproven.
+
+
 ## Mixed AVC/HEVC/VP9/AV1 MP4 descriptions, 2026-10-25
 
 The common indexed reader now opens contiguous HEVC windows through the owned

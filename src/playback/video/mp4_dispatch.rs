@@ -240,10 +240,9 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             .automatic_track_indices(&[*b"vide"])
             .into_iter()
             .find(|&index| {
-                matches!(
-                    &demuxer.tracks()[index].codec,
-                    b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"vp09" | b"av01"
-                )
+                demuxer.tracks()[index]
+                    .description_for_sample(0)
+                    .is_some_and(|d| supported_video_codec(&d.codec))
             })
             .ok_or_else(|| invalid("MP4 has no supported AVC, HEVC, VP9 or AV1 video track"))?;
         Self::from_inner(demuxer, index, budget, hardware)
