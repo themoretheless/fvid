@@ -1,0 +1,187 @@
+{
+  "cases": [
+    {
+      "name": "base-to-multi",
+      "samples": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "layers": [
+        0,
+        0,
+        3,
+        3
+      ],
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first_vps": 3,
+      "hdr": [
+        100,
+        100,
+        300,
+        300
+      ],
+      "inline": false
+    },
+    {
+      "name": "base-to-multi-inline",
+      "samples": [
+        1,
+        2,
+        4,
+        5
+      ],
+      "layers": [
+        0,
+        0,
+        3,
+        3
+      ],
+      "oracle": "../hevc-pcm-reference-rext8.yuv",
+      "first_vps": 4,
+      "hdr": [
+        100,
+        100,
+        300,
+        300
+      ],
+      "inline": true
+    },
+    {
+      "name": "multislice-roundtrip",
+      "samples": [
+        0,
+        1,
+        2
+      ],
+      "layers": [
+        0,
+        3,
+        0
+      ],
+      "oracle": "../hevc-pcm-dependent-rext8.yuv",
+      "first_vps": 1,
+      "hdr": [
+        100,
+        300,
+        200
+      ],
+      "inline": false
+    },
+    {
+      "name": "multislice-roundtrip-inline",
+      "samples": [
+        1,
+        2,
+        3
+      ],
+      "layers": [
+        0,
+        3,
+        0
+      ],
+      "oracle": "../hevc-pcm-dependent-rext8.yuv",
+      "first_vps": 2,
+      "hdr": [
+        100,
+        300,
+        200
+      ],
+      "inline": true
+    },
+    {
+      "name": "colour-planes-roundtrip",
+      "samples": [
+        0,
+        1,
+        2
+      ],
+      "layers": [
+        0,
+        3,
+        0
+      ],
+      "oracle": "../hevc-separate-colour-planes-distinct-synthetic.yuv",
+      "first_vps": 1,
+      "hdr": [
+        100,
+        300,
+        200
+      ],
+      "inline": false
+    },
+    {
+      "name": "colour-planes-roundtrip-inline",
+      "samples": [
+        1,
+        2,
+        3
+      ],
+      "layers": [
+        0,
+        3,
+        0
+      ],
+      "oracle": "../hevc-separate-colour-planes-distinct-synthetic.yuv",
+      "first_vps": 2,
+      "hdr": [
+        100,
+        300,
+        200
+      ],
+      "inline": true
+    }
+  ],
+  "mixed": [
+    {
+      "name": "mixed-handoff",
+      "samples": [
+        0,
+        1,
+        2,
+        4,
+        5,
+        6
+      ],
+      "hdr": [
+        0,
+        100,
+        100,
+        300,
+        300,
+        0
+      ],
+      "oracles": [
+        "vp9.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "vp9.yuv"
+      ]
+    },
+    {
+      "name": "mixed-prefix-only",
+      "samples": [
+        0,
+        1,
+        2,
+        4
+      ],
+      "hdr": [
+        0,
+        100,
+        100,
+        0
+      ],
+      "oracles": [
+        "vp9.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "vp9.yuv"
+      ]
+    }
+  ],
+  "provenance": "Owned synthetic PCM, dependent multislice and separate-colour-plane entropy. Initial hvcC intentionally omits VPS; genuine later VPS is transmitted in-band. No private media, subprocess or network."
+}

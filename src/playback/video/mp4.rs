@@ -183,6 +183,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         index: usize,
         decoder_budget: usize,
         allow_hardware: bool,
+        owned_hevc_window: bool,
     ) -> Result<Self> {
         let _ = allow_hardware;
         let track = demuxer
@@ -230,7 +231,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             .ok_or_else(|| invalid("empty MP4 video track"))?
             .description_index;
         let setup = &track.sample_descriptions[decoder_description as usize - 1];
-        let mixed_hevc = !layered_packet::all_hevc(track)
+        let mixed_hevc = owned_hevc_window || !layered_packet::all_hevc(track)
             && (0..samples.len()).any(|i| {
                 track
                     .description_for_sample(i)

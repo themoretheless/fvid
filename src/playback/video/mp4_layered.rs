@@ -218,6 +218,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             highest_tid,
             budget,
             automatic,
+            None,
         )?;
         Ok(Self { demuxer, pipeline })
     }
@@ -319,6 +320,7 @@ impl LayeredPipeline {
         highest_tid: u8,
         budget: usize,
         automatic: bool,
+        received_configuration: Option<&[u8]>,
     ) -> Result<Self> {
         let track = demuxer
             .tracks()
@@ -347,7 +349,8 @@ impl LayeredPipeline {
         }
         let initial_description = track.samples.get(window.start).unwrap().description_index;
         let initial_setup = track.description_for_sample(window.start).unwrap();
-        let config = HevcConfig::parse(&initial_setup.configuration)?;
+        let mut initial_configuration = received_configuration.unwrap_or(&initial_setup.configuration).to_vec();
+        let config = HevcConfig::parse(&initial_configuration)?;
         let length_size = 4;
         let vps = config
             .arrays
@@ -363,7 +366,7 @@ impl LayeredPipeline {
             .map(|nal| LayeredVps::parse(nal, selection_budget).map(Arc::new))
             .transpose()?;
         let mut inventory_parameters =
-            LayeredParameters::from_configuration(&initial_setup.configuration, budget / 8)?;
+            LayeredParameters::from_configuration(&initial_configuration, budget / 8)?;
         let count = window.end;
         let mut epochs = Vec::new();
         let mut seek_preroll = Vec::new();
@@ -555,11 +558,6 @@ impl LayeredPipeline {
                     .saturating_add(std::mem::size_of::<Self>()),
             )
             .ok_or_else(|| invalid("HEVC source selections exceed memory budget"))?;
-        let mut initial_configuration = demuxer.tracks()[track_index]
-            .description_for_sample(window.start)
-            .unwrap()
-            .configuration
-            .clone();
         initial_configuration[21] |= 3;
         let decoder = LayeredDecoder::from_configuration(
             &initial_configuration,

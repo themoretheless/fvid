@@ -145,6 +145,59 @@ impl LayeredParameters {
         }
         Ok(result)
     }
+    /// Snapshot the actually received parameter bank into an hvcC record.
+    /// The template supplies the profile/framing header; no parameter is invented.
+    /// This permits a container adapter to hand an in-band bootstrap to another
+    /// owned decoder while retaining its original reset seed. Budget bounds the
+    /// additional output buffer; the borrowed bank is charged separately.
+    pub fn received_configuration(&self, template: &[u8], budget: usize) -> Result<Vec<u8>> {
+        HevcConfig::parse(template)?;
+        let banks = [&self.vps[..], &self.sps[..], &self.pps[..]];
+        let mut size = 23usize;
+        let mut arrays = 0u8;
+        for bank in banks {
+            let count = bank.iter().flatten().count();
+            if count == 0 {
+                continue;
+            }
+            arrays += 1;
+            size = size
+                .checked_add(3)
+                .ok_or_else(|| invalid("HEVC parameter snapshot size overflow"))?;
+            for nal in bank.iter().flatten() {
+                if nal.len() > u16::MAX as usize {
+                    return Err(invalid("HEVC parameter snapshot NAL exceeds hvcC range"));
+                }
+                size = size
+                    .checked_add(2)
+                    .and_then(|n| n.checked_add(nal.len()))
+                    .ok_or_else(|| invalid("HEVC parameter snapshot size overflow"))?;
+            }
+        }
+        if size > budget {
+            return Err(invalid("HEVC parameter snapshot exceeds memory budget"));
+        }
+        let mut out = Vec::new();
+        out.try_reserve_exact(size)
+            .map_err(|_| invalid("cannot allocate HEVC parameter snapshot"))?;
+        out.extend_from_slice(&template[..23]);
+        out[22] = arrays;
+        for (kind, bank) in [32u8, 33, 34].into_iter().zip(banks) {
+            let count = bank.iter().flatten().count();
+            if count == 0 {
+                continue;
+            }
+            // Received in-band data does not assert array_completeness.
+            out.push(kind);
+            out.extend_from_slice(&(count as u16).to_be_bytes());
+            for nal in bank.iter().flatten() {
+                out.extend_from_slice(&(nal.len() as u16).to_be_bytes());
+                out.extend_from_slice(nal);
+            }
+        }
+        debug_assert_eq!(out.len(), size);
+        Ok(out)
+    }
     /// Conservative retained bound; shared raw snapshots may be counted twice.
     /// Excludes caller-owned configuration/packet bytes and older cloned banks.
     pub fn storage_bytes(&self) -> usize {
