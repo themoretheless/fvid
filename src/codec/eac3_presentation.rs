@@ -132,8 +132,11 @@ fn envelope(bytes: &[u8]) -> Result<(u8, u8, usize)> {
     Ok((kind, id, size))
 }
 fn locations(d: &Descriptor) -> Vec<Speaker> {
+    mapped_locations(d.frame.layout, d.frame.low_frequency, d.map)
+}
+fn mapped_locations(mode: u8, lfe: bool, map: Option<u16>) -> Vec<Speaker> {
     use Speaker::*;
-    if let Some(map) = d.map {
+    if let Some(map) = map {
         let entries: &[&[Speaker]] = &[
             &[Left],
             &[Centre],
@@ -159,7 +162,7 @@ fn locations(d: &Descriptor) -> Vec<Speaker> {
             .flat_map(|(_, s)| s.iter().copied())
             .collect();
     }
-    let mut out = match d.frame.layout {
+    let mut out = match mode {
         0 | 2 => vec![Left, Right],
         1 => vec![Centre],
         3 => vec![Left, Centre, Right],
@@ -168,10 +171,38 @@ fn locations(d: &Descriptor) -> Vec<Speaker> {
         6 => vec![Left, Right, LeftSurround, RightSurround],
         _ => vec![Left, Centre, Right, LeftSurround, RightSurround],
     };
-    if d.frame.low_frequency {
+    if lfe {
         out.push(Lfe);
     }
     out
+}
+/// Speaker-only BSI probe; at most sixteen bytes, without entropy or CRC reads.
+/// The ordinary decoder remains responsible for complete frame validation.
+pub fn header_speakers(data: &[u8]) -> Result<SpeakerLayout> {
+    let mut canonical = [0u8; 16];
+    let n=data.len().min(canonical.len()); canonical[..n].copy_from_slice(&data[..n]);
+    if canonical[..2] == [0x77,0x0b] {
+        for word in canonical[..n].chunks_exact_mut(2) { word.swap(0,1); }
+    }
+    let mut b=BitReader::new(&canonical[..n]);
+    if b.read(16)? != SYNCWORD { return Err(invalid("invalid E-AC-3 speaker header sync")); }
+    let kind=b.read(2)?; b.read(3)?; b.read(11)?;
+    if kind==3 { return Err(invalid("reserved E-AC-3 speaker header type")); }
+    let rate=b.read(2)?; let second=b.read(2)?;
+    if rate==3 && second==3 { return Err(invalid("reserved E-AC-3 speaker header rate")); }
+    let mode=b.read(3)? as u8; let lfe=b.bit()?;
+    if !(11..=16).contains(&b.read(5)?) { return Err(invalid("invalid E-AC-3 speaker header ID")); }
+    b.read(5)?; if b.bit()? { b.read(8)?; }
+    if mode==0 { b.read(5)?; if b.bit()? { b.read(8)?; } }
+    let map=if kind==1 && b.bit()? { Some(b.read(16)? as u16) } else { None };
+    if let Some(map)=map {
+        let pairs=0x0400u16|0x0200|0x0040|0x0020|0x0010|0x0004;
+        if map.count_ones()+(map & pairs).count_ones()!=NFCHANS[mode as usize] as u32+u32::from(lfe) {
+            return Err(invalid("E-AC-3 speaker header map disagrees with coded channel count"));
+        }
+    }
+    let mut roles=mapped_locations(mode,lfe,map); roles.sort(); roles.dedup();
+    Ok(SpeakerLayout(roles))
 }
 fn layout(descriptors: &[Descriptor], width: u16) -> Result<SpeakerLayout> {
     let speakers: Vec<_> = descriptors

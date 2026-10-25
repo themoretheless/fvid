@@ -50,7 +50,7 @@ fn control(name: &str, i: usize, width: u16, raw: bool) -> Vec<f32> {
         )
     }
     .unwrap();
-    d.decode_complete(&bytes, 0, 2304)
+    d.decode_complete(&bytes, 0, if name == "late" { 162*768 } else { 2304 })
         .unwrap()
         .unwrap()
         .data
@@ -66,7 +66,7 @@ fn expected(name: &str, raw: bool) -> Vec<u8> {
     } else {
         None
     };
-    let count = if raw { 2048 } else { 2304 };
+    let count = if name == "late" { 162*768 - if raw {256} else {0} } else if raw { 2048 } else { 2304 };
     assert_eq!(base.len(), count * 6);
     assert_eq!(dep.len(), count * 2);
     assert!(dep.iter().any(|x| x.abs() > 1e-6));
@@ -74,10 +74,11 @@ fn expected(name: &str, raw: bool) -> Vec<u8> {
     for n in 0..count {
         let original = n + if raw { 256 } else { 0 };
         let frame = original / 768;
+        let changed = frame == if name == "late" {160} else {1};
         for (input, output) in [(0, 0), (1, 1), (2, 2), (3, 3), (4, 6), (5, 7)] {
             out[n * 10 + output] = base[n * 6 + input];
         }
-        let pos = if frame == 1 && extra.is_none() {
+        let pos = if changed && extra.is_none() {
             8
         } else if name.starts_with("six-") && frame != 1 {
             0
@@ -180,10 +181,9 @@ fn actual_sources_and_worker_keep_fixed_speakers_at_eof_rewind_and_partial_seek(
         "six-replace-transient",
     ] {
         for kind in ["ec3", "mkv", "mp4"] {
-            let mut s = source(name, kind);
-            assert_eq!(s.channels(), if kind != "mkv" { 10 } else if name.starts_with("six-") { 6 } else { 8 });
+            let s = source(name, kind);
+            assert_eq!(s.channels(), 10);
             let duration = s.duration();
-            if kind == "mkv" { s.set_eac3_output_layout(Some(layout())).unwrap(); }
             assert_eq!(s.channels(), 10);
             assert_eq!(s.speaker_mask().unwrap(), Some(0x563f));
             assert_eq!(s.duration(), duration);
@@ -269,7 +269,7 @@ fn unnegotiated_changing_sets_and_invalid_or_incomplete_maps_refuse_explicitly()
     s.set_eac3_stereo_output(false).unwrap();
     assert_eq!(s.channels(), 10);
     s.set_eac3_output_layout(None).unwrap();
-    assert_eq!(s.channels(), 8);
+    assert_eq!(s.channels(), 10);
 }
 
 #[test]
@@ -390,7 +390,7 @@ fn non_dolby_reader_factory_fits_a_two_mib_stack() {
 
 #[test]
 fn automatic_map_survives_explicit_override_stereo_and_clear() {
-    for kind in ["ec3", "mp4"] {
+    for kind in ["ec3", "mp4", "mkv"] {
     let mut s = source("six-replace-transient", kind);
     assert_eq!(s.channels(), 10);
     let mut padded = layout();
@@ -437,4 +437,99 @@ fn dec3_locations_are_lsb_first_selected_and_bounded() {
     assert!(extended.0.contains(&Speaker::Lfe2));
     assert_eq!(extended.wave_mask(),None);
     assert!(configuration_speakers(&config(&[(7,511)]),0).is_err());
+}
+
+#[test]
+fn matroska_late_roles_negotiate_before_decode_without_reading_frame_bodies() {
+    use std::{sync::{Arc,Mutex},io::{Read,Seek,SeekFrom}};
+    struct Logged { data: Cursor<Vec<u8>>, spans: Arc<Mutex<Vec<(u64,usize)>>> }
+    impl Read for Logged {
+        fn read(&mut self,out:&mut[u8])->std::io::Result<usize> {
+            let start=self.data.position(); let n=self.data.read(out)?;
+            self.spans.lock().unwrap().push((start,n)); Ok(n)
+        }
+    }
+    impl Seek for Logged {
+        fn seek(&mut self,pos:SeekFrom)->std::io::Result<u64> {self.data.seek(pos)}
+    }
+    let bytes=read("late.mkv");
+    let spans=Arc::new(Mutex::new(Vec::new()));
+    let s=fvid::playback_webm_audio::WebmAudioReader::open(
+        Logged{data:Cursor::new(bytes.clone()),spans:spans.clone()},Default::default()).unwrap();
+    assert_eq!(s.channels(),10);
+    assert_eq!(s.speaker_mask().unwrap(),Some(0x563f));
+    let mut index=fvid_media::owned_webm::WebmReader::open(Cursor::new(bytes),Default::default()).unwrap();
+    index.scan_all().unwrap();
+    let touched=|offset:u64,size:usize| -> usize {
+        spans.lock().unwrap().iter().map(|&(start,n)|
+            (start+n as u64).min(offset+size as u64).saturating_sub(start.max(offset)) as usize).sum()
+    };
+    let mut audio=0;
+    let mut video=0;
+    for packet in &index.packets {
+        if packet.track==1 {
+            // The existing initial-cluster open precedes header negotiation.
+            if video>0 { assert_eq!(touched(packet.offset,packet.size),0,"video payload read"); }
+            video+=1;
+        }
+        if packet.track==2 {
+            if audio>0 { assert!(touched(packet.offset,packet.size)<=32,"read audio frame body at {audio}"); }
+            audio+=1;
+        }
+    }
+    assert_eq!(audio,162);
+    let pcm=expected("late",false);
+    let full:Vec<_>=(0..162).map(|i|(
+        Duration::from_millis(i as u64*16),pcm[i*768*40..(i+1)*768*40].to_vec())).collect();
+    let start=160*768+96;
+    let sought=vec![
+        (Duration::from_millis(2562),pcm[start*40..161*768*40].to_vec()),
+        (Duration::from_millis(2576),pcm[161*768*40..].to_vec()),
+    ];
+    capture::worker_check_with_layout_and_seek_expected(
+        Box::new(s),&full,Duration::from_millis(2562),&sought,0x563f);
+}
+
+#[test]
+fn matroska_payload_ranges_restore_prefixes_and_zlib_and_enforce_bounds() {
+    let base=Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    for name in ["matroska-header-stripping/one-byte.mkv",
+        "matroska-header-stripping/whole-frame.mkv", "matroska-zlib/identical-zlib.mkv"] {
+        let mut r=fvid_media::owned_webm::WebmReader::open(
+            Cursor::new(std::fs::read(base.join(name)).unwrap()),Default::default()).unwrap();
+        r.scan_all().unwrap();
+        let full=r.read_packet(0).unwrap();
+        for start in [0,1,full.len()/2,full.len()] {
+            let mut out=[0xa5;17];
+            let n=r.read_packet_range(0,start,&mut out).unwrap();
+            assert_eq!(&out[..n],&full[start..(start+17).min(full.len())]);
+            assert!(out[n..].iter().all(|&b|b==0xa5));
+        }
+        assert!(r.read_packet_range(0,full.len()+1,&mut [0;1]).is_err());
+        r.restrict_packet_bytes(full.len()-1);
+        assert!(r.read_packet_range(0,0,&mut [0;1]).is_err());
+    }
+}
+
+#[test]
+fn header_only_speaker_probe_handles_word_swapping_without_audio_payloads() {
+    use fvid::codec::eac3_decoder::presentation::header_speakers;
+    let bytes=read("plain.ec3");
+    let mut offset=0; let mut frame=0;
+    while offset<bytes.len() {
+        let size=(usize::from(bytes[offset+2]&7)*256+usize::from(bytes[offset+3])+1)*2;
+        let prefix=&bytes[offset..offset+size.min(16)];
+        let roles=header_speakers(prefix).unwrap();
+        let expected=if frame%2==0 {
+            vec![Speaker::Left,Speaker::Right,Speaker::Centre,Speaker::Lfe,Speaker::LeftSurround,Speaker::RightSurround]
+        } else if frame/2==1 {vec![Speaker::HeightLeft,Speaker::HeightRight]}
+        else {vec![Speaker::LeftRear,Speaker::RightRear]};
+        assert_eq!(roles.0,expected);
+        let mut swapped=prefix.to_vec();
+        for word in swapped.chunks_exact_mut(2) {word.swap(0,1);}
+        assert_eq!(header_speakers(&swapped).unwrap(),roles);
+        assert!(header_speakers(&prefix[..5]).is_err());
+        offset+=size; frame+=1;
+    }
+    assert_eq!(frame,6);
 }
