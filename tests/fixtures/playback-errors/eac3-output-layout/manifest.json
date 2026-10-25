@@ -92,6 +92,7 @@
     }
   ],
   "stack_reproducer": "aac-factory-stack.mp4",
+  "mp4_automatic_layout": "Selected dec3 programme locations negotiate stable output before packet decode.",
   "raw_automatic_layout": "Union of selected programme roles; stable 10-channel output without an explicit output-map request; preserve actual per-programme channel counts.",
   "provenance": "Owned C/L/R/Ls/Rs/LFE, rear/height/replacement roles and continuous transform/transient controls with neutral VP9; AAC stack witness re-authors metadata of an existing repository-owned synthetic AAC/PS video. No private media, process, external encoder or network."
 }
