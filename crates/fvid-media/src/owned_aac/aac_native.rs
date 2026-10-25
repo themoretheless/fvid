@@ -13,6 +13,7 @@ fn ltp_data_for_channel(data: &super::aac_ltp_syntax::LtpData) -> std::borrow::C
 }
 include!("aac_native_impl.rs");
 include!("aac_ld_native_impl.rs");
+include!("aac_eld_native_impl.rs");
 
 #[cfg(test)]
 mod channel_window_tests {
@@ -73,6 +74,12 @@ impl NativeAacDecoder {
             Ok(())
         }
         let mut footprint = super::memory::Footprint::new();
+        footprint.vector(&self.eld_synthesis).map_err(|e|invalid(&e))?;
+        for state in &self.eld_synthesis {state.visit_retained(&mut footprint).map_err(|e|invalid(&e))?;}
+        if let Some(saved)=checkpoint {
+            footprint.vector(&saved.eld_synthesis).map_err(|e|invalid(&e))?;
+            for state in &saved.eld_synthesis {state.visit_retained(&mut footprint).map_err(|e|invalid(&e))?;}
+        }
         footprint.vector(&self.ld_synthesis).map_err(|e|invalid(&e))?;
         for state in &self.ld_synthesis {state.visit_retained(&mut footprint).map_err(|e|invalid(&e))?;}
         if let Some(saved)=checkpoint {

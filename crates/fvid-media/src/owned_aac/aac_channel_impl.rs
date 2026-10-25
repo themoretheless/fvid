@@ -163,7 +163,7 @@ impl ChannelData {
             let short = self.info.sequence == WindowSequence::EightShort;
             let offsets = if short { tables.short } else { tables.long };
             let limit =
-                (if config.object_type == 3 { BandTables::ssr_tns_limit(config.sample_rate, short) } else { BandTables::tns_limit(config.sample_rate, short) }).min(self.info.max_sfb as usize);
+                (if config.object_type == 39 {super::aac_ld_bands::LdBands::for_eld(config.sample_rate,config.frame_samples as usize).map_err(|e|invalid(&e.0))?.tns_max_bands} else if config.object_type == 3 { BandTables::ssr_tns_limit(config.sample_rate, short) } else { BandTables::tns_limit(config.sample_rate, short) }).min(self.info.max_sfb as usize);
             tns.filter_owned(spectrum, offsets, limit).map_err(Error::from)
         } else {
             Ok(spectrum)
@@ -222,6 +222,20 @@ impl ChannelData {
         let channel=Self::read_payload(&mut cursor,config,&tables,gain,info,pair)?;
         *bits=cursor; Ok((channel,data))
     }
+    /// ELD fixes the long window and omits tags, pulse, gain control and LTP.
+    pub fn read_eld(bits:&mut BitReader<'_>,config:&AacConfig,common:Option<&IcsInfo>,pair:bool)->Result<Self>{
+        if config.object_type!=39 {return Err(invalid("AAC ELD channel requires AOT39"));}
+        let tables=BandTables::for_config(config)?;
+        let mut cursor=bits.clone();let gain=cursor.read(8)? as u8;
+        let info=match common {Some(i)=>i.clone(),None=>Self::eld_info(&mut cursor,config)?};
+        let channel=Self::read_payload(&mut cursor,config,&tables,gain,info,pair)?;
+        *bits=cursor;Ok(channel)
+    }
+    pub(crate) fn eld_info(bits:&mut BitReader<'_>,config:&AacConfig)->Result<IcsInfo>{
+        let max_sfb=bits.read(6)? as u8;
+        if usize::from(max_sfb)>=BandTables::for_config(config)?.long.len(){return Err(invalid("AAC ELD max_sfb exceeds band table"));}
+        Ok(IcsInfo{sequence:WindowSequence::OnlyLong,shape:super::aac_synthesis::WindowShape::Sine,max_sfb,group_lengths:vec![1],prediction:None})
+    }
     fn read_payload(
         bits: &mut BitReader<'_>, config: &AacConfig, tables: &BandTables,
         gain: u8, info: IcsInfo, pair: bool,
@@ -236,7 +250,7 @@ impl ChannelData {
         let mut scales = if rvlc.is_none() {
             aac_scalefactors::read(&mut cursor, gain, &codebooks)?
         } else { Vec::new() };
-        let pulse = if cursor.bit()? {
+        let pulse = if config.object_type!=39 && cursor.bit()? {
             Some(PulseData::read(&mut cursor, info.sequence, tables.long)?)
         } else {
             None
@@ -246,7 +260,7 @@ impl ChannelData {
         let mut tns = if tns_present && !er {
             Some(tns_syntax::read_profile(&mut cursor, info.sequence, config.object_type == 1)?)
         } else { None };
-        let gain_control = if cursor.bit()? {
+        let gain_control = if config.object_type!=39 && cursor.bit()? {
             let gain = super::aac_gain_control::GainControl::read(&mut cursor, info.sequence)?;
             if config.object_type != 3 && !gain.is_empty() {
                 return Err(unsupported("owned AAC active gain control synthesis is not implemented"));

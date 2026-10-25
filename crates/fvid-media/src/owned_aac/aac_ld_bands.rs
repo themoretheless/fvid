@@ -32,6 +32,11 @@ pub struct LdBands {
     pub tns_max_bands: usize,
 }
 impl LdBands {
+    /// ELD extends the outer LD frequency groups to the full AAC rate range.
+    pub fn for_eld(sample_rate:u32,frame_samples:usize)->Result<Self>{
+        if sample_rate==0 {return Err(invalid("zero AAC ELD sample rate"));}
+        Self::new(sample_rate.clamp(22050,48000),frame_samples)
+    }
     pub fn new(sample_rate: u32, frame_samples: usize) -> Result<Self> {
         // LD has no short windows. Do not invent tables for rates outside
         // the standardized LD range; explicit rates use the ordinary intervals.

@@ -67,7 +67,14 @@ def video_fixture(cases,blob,channels=1,filename="he-aac-sbr-synthetic.mp4",writ
             body=bytearray(body);assert body[0]==0;struct.pack_into('>II',body,12,container_rate,duration);body=bytes(body)
         elif tag==b'stsd':
             entries=list(boxes(body[8:]));assert len(entries)==1 and entries[0][0]==b'mp4a'
-            entry=bytearray(entries[0][1][:28]);struct.pack_into('>H',entry,16,channels);struct.pack_into('>I',entry,24,container_rate<<16)
+            entry=bytearray(entries[0][1][:28]);struct.pack_into('>H',entry,16,channels)
+            if container_rate<=65535:
+                struct.pack_into('>I',entry,24,container_rate<<16)
+            else:
+                # QuickTime audio version 2 carries an exact f64 sample rate.
+                struct.pack_into('>H',entry,8,2);struct.pack_into('>H',entry,16,3)
+                struct.pack_into('>h',entry,20,-2);struct.pack_into('>I',entry,24,65536)
+                entry.extend(struct.pack('>IdIIIIII',72,float(container_rate),channels,0x7f000000,0,0,0,frame_samples))
             body=bytes(4)+struct.pack('>I',1)+box(b'mp4a',bytes(entry)+box(b'esds',esds))
         elif tag==b'stts':
             body=(bytes(4)+struct.pack('>III',1,len(packets),frame_samples) if all(d==frame_samples for d in durations) else

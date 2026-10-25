@@ -1,5 +1,33 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## AAC-ELD core (AOT 39), 2026-10-25
+
+Owned decoding now accepts the 480/512-sample ELD core, indexed layouts
+1–7/11/12/14, configured channel ordering, MS/intensity/PNS, TNS and the
+section/RVLC/HCR resilience flags. ELD uses its own ASC and tagless channel
+syntax, inverse modulation, normative four-block windows and three-block
+history. It does not run the ordinary LC/LD synthesis or infer implicit SBR.
+Packet errors leave both noise state and synthesis history unchanged; retained
+payload accounting includes the ELD history and checkpoint allocations.
+
+The offline generator `scripts/generate_aac_eld_fixtures.py` produces 60 own
+nonzero/decay cases: 242 checked-in files (4,379,924 bytes), including MP4 videos
+and Matroska audio. Independent direct cosine/window arithmetic supplies PCM
+references. Window numeric facts are transcribed from GOST R 53556.4-2013,
+tables A.15/A.16; the ten shifted entries 536–545 in A.15 are corrected against
+ISO/IEC 14496-3:2005/Amd.9:2008. Source URLs are recorded with the tables.
+No foreign decoder implementation, FFmpeg process or network is required.
+
+`tests/aac_eld.rs` checks all 60 cases through root/backend decoders, public
+MP4/Matroska PCM export, repeated ranges, player rewind/seek, signed packet
+PTS, checkpoint rollback and stable retained storage. Player navigation uses
+each reader's actual timescale; a nanosecond Matroska timestamp is not a PCM
+sample index. Generator byte parity is checked separately from ordinary tests.
+
+This is core acceptance, not complete AAC-ELD profile coverage. Low-delay SBR,
+nonzero epConfig and known ELD extension tools remain explicit refusals.
+Arbitrary combinations and complete codec coverage remain unproven.
+
 
 ## VPS-less HEVC prefix and layered epoch handoff, 2026-10-25
 
