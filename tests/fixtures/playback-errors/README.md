@@ -4943,3 +4943,15 @@ check alternate metadata/CRC/LE/prefix boundaries, legacy timecodes, absent and
 reserved fields, container native PCM, rewind, video and the capturing worker.
 This qualifies selected Lo/Ro processing, not Lt/Rt/automatic-mode completion.
 Generation is byte-exact without subprocesses, FFmpeg, private data or network.
+
+`ac3-stereo-downmix/` contains 312 artifacts / 5079086 bytes from
+`scripts/generate_ac3_stereo_downmix.py`. Owned 32 kHz spectra for 3/0, 2/1,
+3/1, 2/2 and a repository-authored 48 kHz 5.1 tone have neutral VP9 Matroska
+companions. Tests compare 153 cases against independent scalar Lt/Rt/LoRo
+matrices, all preference codes, absence, legacy timecodes, both headroom
+settings and reset/midstream policy changes. The capturing worker test uses
+an explicit stereo-output source and checks actual packet extraction, video,
+EOF, seek, rewind and session policy after decoder replacement. It does not
+claim the native player UI/device router selects these modes automatically.
+Generation and ordinary tests require no FFmpeg, external process, private
+media or network. Parent output reproduces the requested Lt/Rt matrix gap.

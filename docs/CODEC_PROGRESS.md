@@ -18501,3 +18501,43 @@ This adds alternate-BSI parsing/access and the existing selected Lo/Ro path.
 It does not claim complete Annex D decoder processing: user-selectable Lt/Rt
 and automatic preferred-mode rendering remain open, as do other codec tools
 and profiles. The full no-gap objective remains active.
+
+### AC-3 stereo matrix selection and session policy (2026-10-25)
+
+The native decoder now offers Lo/Ro, Lt/Rt and automatic selection through
+`StereoDownmixPolicy`, its builder and `AudioDecode::set_ac3_stereo_downmix`.
+`DolbyPlaybackPolicy` owns the AC-3 choice for the scheduling session and
+reapplies it whenever navigation or reconfiguration replaces a decoder.
+Existing calls retain Lo/Ro and existing gain by default. Native output layouts
+and mono output retain their existing behavior. This policy is AC-3-specific;
+other decoders ignore the AC-3 setter.
+
+Lt/Rt uses opposite surround polarity in left/right and includes a single
+surround once (without the Lo/Ro 0.7 single-surround factor). Original-syntax
+Lt/Rt uses 0.707 centre/surround coefficients; BSID 6 selects its own Lt/Rt
+coefficients. Automatic follows applicable dmixmod=1 as Lt/Rt; 0/2/reserved 3,
+absent metadata and ordinary timecode words select Lo/Ro. Optional matrix
+headroom applies a common attenuation from the largest absolute row sum.
+This is matrix headroom for bounded input, not physical-output calibration
+or a guarantee against later gain/compression overload.
+Primary sources: ETSI TS 102 366 V1.1.1 section 6.8.2 and ATSC A/52:2018 Annex D
+https://www.etsi.org/deliver/etsi_ts/102300_102399/102366/01.01.01_60/ts_102366v010101p.pdf
+https://www.atsc.org/wp-content/uploads/2021/04/A52-2018.pdf
+
+The parent offered only Lo/Ro: the requested Lt/Rt witness differs by 0.58872116
+from its scalar matrix until explicit selection is available. New owned spectra
+and repository-authored 5.1 tones cover 153 cases across 3/0, 2/1, 3/1, 2/2
+and 3/2, centre/surround levels, reserved fallback, per-frame preference changes
+and absence. Independent scalar native-PCM matrices qualify all three modes
+and both headroom settings. Unit vectors exhaust full-scale sign combinations
+without using output clipping. Builder/trait changes, reset persistence and
+a real scheduler with an explicit stereo-output test source check mode policy,
+PCM, decoder replacement, EOF/seek/rewind. That source extracts encoded packets
+from the neutral VP9 Matroska companion, whose video is also actually decoded.
+All 312 artifacts (5079086 bytes) regenerate byte-exact with subprocess/network
+creation forbidden; the older 152 alternate-BSI artifacts remain byte-exact.
+
+This qualifies the decoder/session API for explicit stereo output. A player UI
+for this choice and metadata-aware routing of native multichannel PCM to a
+physical stereo device are not implemented here. E-AC-3 selection and further
+codec tools/profiles remain part of the full no-gap objective.

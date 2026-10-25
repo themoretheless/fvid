@@ -1099,7 +1099,7 @@ fn run_parsed(parsed: PlayArgs) -> Result<(), Box<dyn std::error::Error>> {
         subtitle_shown: !parsed.no_subtitles,
         preferred_embedded_subtitle: parsed.embedded_subtitle,
         preferred_output: parsed.audio_device,
-        dolby_policy: DolbyPlaybackPolicy {compression:parsed.dolby_compression,normalize_dialogue:parsed.dolby_dialogue_normalization},
+        dolby_policy: DolbyPlaybackPolicy {compression:parsed.dolby_compression,normalize_dialogue:parsed.dolby_dialogue_normalization,..Default::default()},
         queue: expand_inputs(&parsed.paths),
         bounds: PlayBounds {
             start: parsed.start,

@@ -764,6 +764,10 @@ pub trait AudioDecode: Send {
     /// preserves codecs whose reconstruction does not depend on that window.
     fn set_source_timescale(&mut self, _timescale: u32) -> crate::Result<()> { Ok(()) }
 
+    /// AC-3 stereo folding policy; other codecs intentionally ignore it.
+    #[cfg(feature = "player")]
+    fn set_ac3_stereo_downmix(&mut self, _policy: crate::codec::ac3_decoder::StereoDownmixPolicy) {}
+
     /// Session policy for Dolby decoders. Other codecs intentionally ignore it.
     #[cfg(feature = "player")]
     fn set_dolby_compression(&mut self, _mode: crate::codec::ac3_decoder::CompressionMode) {}

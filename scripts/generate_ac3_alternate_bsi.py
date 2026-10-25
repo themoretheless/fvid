@@ -5,7 +5,7 @@ from generate_ac3_rf_compression import crc_frame,authored,mp4_movie
 from generate_eac3_bsid import movie
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'tests/fixtures/playback-errors/ac3-alternate-bsi'
-def replace(raw,bsid,mix,info,extra=b''):
+def replace(raw,bsid,mix,info,extra=b'',*,frame_bytes=2560):
  bits=''.join(f'{x:08b}'for x in raw);layout=int(bits[48:51],2)
  at=51+2*int(layout&1!=0 and layout!=1)+2*int(layout&4!=0)+2*int(layout==2)+1
  for _ in range(2 if layout==0 else 1):
@@ -23,8 +23,8 @@ def replace(raw,bsid,mix,info,extra=b''):
  meta+=('1'+f'{len(extra)-1:06b}'+''.join(f'{v:08b}'for v in extra))if extra else'0'
  data=bits[:start]+meta+bits[at:-16]
  data=data[:34]+f'{36:06b}{bsid:05b}'+data[45:]
- assert len(data.rstrip('0'))<=2560*8-16
- data=data[:2560*8-16].ljust(2560*8,'0')
+ assert len(data.rstrip('0'))<=frame_bytes*8-16
+ data=data[:frame_bytes*8-16].ljust(frame_bytes*8,'0')
  return crc_frame(bytes(int(data[i:i+8],2)for i in range(0,len(data),8)))
 def generate():
  files={};cases=[]

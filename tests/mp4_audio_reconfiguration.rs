@@ -331,6 +331,7 @@ fn eac3_session_rf_and_dialogue_choices_survive_natural_decoder_recreation() {
         DolbyPlaybackPolicy {
             compression: CompressionMode::Rf,
             normalize_dialogue: true,
+            ..Default::default()
         },
         move || {
             Box::new(Capture {
