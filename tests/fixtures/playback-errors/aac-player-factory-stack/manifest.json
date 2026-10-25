@@ -1,0 +1,9 @@
+{
+  "provenance": "Own tagged ER-LC/PS packet writer and AVC/MP4/Matroska muxers from the authored AAC ER PCE generator. No private media or codec parameter sets.",
+  "failure": "Player decoder construction exhausts a normal 2 MiB worker stack while the generic factory retains temporaries for unrelated codecs.",
+  "sample_rate": 48000,
+  "channels": 2,
+  "sample_frames": 7680,
+  "video": "ps-er-960.mp4",
+  "matroska": "ps-er-960.mka"
+}

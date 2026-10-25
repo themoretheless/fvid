@@ -24,6 +24,16 @@ PTS, checkpoint rollback and stable retained storage. Player navigation uses
 each reader's actual timescale; a nanosecond Matroska timestamp is not a PCM
 sample index. Generator byte parity is checked separately from ordinary tests.
 
+The broader gate also reproduced a pre-existing ER-LC/PS player startup stack
+overflow on the exact pre-ELD source. The generic audio factory retained about
+640 KiB of unrelated codec constructor temporaries in debug builds. AAC/PS
+construction now has a separate dispatch frame from the non-AAC factory.
+`aac-player-factory-stack` contains a newly muxed own short ER-LC/PS video and
+Matroska companion; `aac_player_factory_stack` decodes both on an explicit
+2 MiB worker with 128 KiB caller headroom. The old factory crashes on that
+fixture at native PS construction, rather than at parsing or an unrelated
+unsupported tool. This does not change decoder algorithms or increase stacks.
+
 This is core acceptance, not complete AAC-ELD profile coverage. Low-delay SBR,
 nonzero epConfig and known ELD extension tools remain explicit refusals.
 Arbitrary combinations and complete codec coverage remain unproven.
