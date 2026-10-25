@@ -1,5 +1,29 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## Matroska layered HEVC VPS epochs, 2026-10-25
+
+The layered Matroska source now inventories each activated VPS epoch and uses
+FVid-owned substream extraction before queued reconstruction. Temporal depth
+comes from that epoch's selected OLS ordering rows, so a later shorter VPS does
+not inherit an invalid initial temporal limit. Complete epoch scans also keep
+metadata-only blocks after EOS with the upcoming sequence, preserving the same
+global timing-removal decision as native MP4 extraction. Rewind resets both the
+codec and source-selection cursor; timestamps remain attached to original block
+indices even when extraction removes an entire coded/metadata payload.
+
+The synthetic Matroska matrix now has 80 accepted cases and four refusals. It
+adds 21 VPS-epoch variants (EOS/EOB, split/before-first/multiple definitions,
+shorter temporal depth, BLA/IDR/cross-layer resets, changed layer graphs and
+deferred VPS activation), each with uniform and irregular source times. The
+irregular variants explicitly author BlockDuration, rather than treating overall
+Segment Duration as a per-track duration. Exact samples, RGB, geometry, colour,
+HDR, frame endpoints, seek and rewind are checked against native MP4 pixels and
+independent authored block clocks. Illegal active-VPS replacement and truncated
+new-epoch entropy still refuse and require rewind. This does not qualify every
+VPS/OLS mutation; automatic reselection when OLS indices change and optimized
+layered random access remain separate work.
+
+
 ## Native layered HEVC in Matroska, 2026-10-25
 
 Matroska now resolves the first coded slice's active PPS/SPS/VPS chain, including
