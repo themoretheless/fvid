@@ -184,6 +184,10 @@ impl LayeredOutputQueue {
         self.record_output(&ready);
         Ok(ready)
     }
+    /// Decode-order identities still awaiting output, without cloning pixels or metadata.
+    pub fn pending_access_unit_ids(&self) -> impl Iterator<Item = u64> + '_ {
+        self.pending.iter().map(|p| p.pictures[0].access_unit)
+    }
     pub fn pending_access_units(&self) -> usize {
         self.pending.len()
     }

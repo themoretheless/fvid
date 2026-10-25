@@ -1,0 +1,485 @@
+{
+  "cases": [
+    {
+      "name": "vp9-hevc-vp9",
+      "descriptions": [
+        1,
+        2,
+        1
+      ],
+      "pts": [
+        0,
+        1,
+        2
+      ],
+      "layers": [
+        null,
+        3,
+        null
+      ],
+      "oracles": [
+        "vp9.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "vp9.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        0
+      ],
+      "visible": [
+        0,
+        1,
+        2
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "hevc-vp9-hevc",
+      "descriptions": [
+        1,
+        2,
+        1
+      ],
+      "pts": [
+        0,
+        1,
+        2
+      ],
+      "layers": [
+        3,
+        null,
+        3
+      ],
+      "oracles": [
+        "../hevc-pcm-reference-rext8.yuv",
+        "vp9.yuv",
+        "../hevc-pcm-reference-rext8.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        0
+      ],
+      "visible": [
+        0,
+        1,
+        2
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "reordered-vp9-hevc",
+      "descriptions": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ],
+      "pts": [
+        1,
+        0,
+        3,
+        2,
+        4
+      ],
+      "layers": [
+        null,
+        3,
+        3,
+        3,
+        null
+      ],
+      "oracles": [
+        "vp9.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "vp9.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "visible": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "avc-hevc-avc",
+      "descriptions": [
+        1,
+        2,
+        1
+      ],
+      "pts": [
+        0,
+        1,
+        2
+      ],
+      "layers": [
+        null,
+        3,
+        null
+      ],
+      "oracles": [
+        "avc.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "avc.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        0
+      ],
+      "visible": [
+        0,
+        1,
+        2
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "hevc-avc-hevc",
+      "descriptions": [
+        1,
+        2,
+        1
+      ],
+      "pts": [
+        0,
+        1,
+        2
+      ],
+      "layers": [
+        3,
+        null,
+        3
+      ],
+      "oracles": [
+        "../hevc-pcm-reference-rext8.yuv",
+        "avc.yuv",
+        "../hevc-pcm-reference-rext8.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        0
+      ],
+      "visible": [
+        0,
+        1,
+        2
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "av1-hevc-av1",
+      "descriptions": [
+        1,
+        2,
+        1
+      ],
+      "pts": [
+        0,
+        1,
+        2
+      ],
+      "layers": [
+        null,
+        3,
+        null
+      ],
+      "oracles": [
+        "../av1-separate-tiles-w128-h128-groups2.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "../av1-separate-tiles-w128-h128-groups2.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        0
+      ],
+      "visible": [
+        0,
+        1,
+        2
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "hevc-av1-hevc",
+      "descriptions": [
+        1,
+        2,
+        1
+      ],
+      "pts": [
+        0,
+        1,
+        2
+      ],
+      "layers": [
+        3,
+        null,
+        3
+      ],
+      "oracles": [
+        "../hevc-pcm-reference-rext8.yuv",
+        "../av1-separate-tiles-w128-h128-groups2.yuv",
+        "../hevc-pcm-reference-rext8.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        0
+      ],
+      "visible": [
+        0,
+        1,
+        2
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "all-owned-codecs",
+      "descriptions": [
+        1,
+        2,
+        3,
+        2,
+        4
+      ],
+      "pts": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "layers": [
+        null,
+        3,
+        null,
+        3,
+        null
+      ],
+      "oracles": [
+        "avc.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "vp9.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "../av1-separate-tiles-w128-h128-groups2.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "visible": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "corrupt-hevc-between-vp9",
+      "descriptions": [
+        1,
+        2,
+        1
+      ],
+      "pts": [
+        0,
+        1,
+        2
+      ],
+      "layers": [
+        null,
+        3,
+        null
+      ],
+      "oracles": [
+        "vp9.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "vp9.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        0
+      ],
+      "visible": [
+        0,
+        1,
+        2
+      ],
+      "hdr": null,
+      "error": "truncated or oversized bit field"
+    },
+    {
+      "name": "metadata-hevc-window",
+      "descriptions": [
+        1,
+        2,
+        2,
+        1
+      ],
+      "pts": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "layers": [
+        null,
+        null,
+        3,
+        null
+      ],
+      "oracles": [
+        "vp9.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "vp9.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "visible": [
+        0,
+        2,
+        3
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "vp9-hevc-topology-vp9",
+      "descriptions": [
+        1,
+        2,
+        3,
+        2,
+        1
+      ],
+      "pts": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "layers": [
+        null,
+        0,
+        3,
+        0,
+        null
+      ],
+      "oracles": [
+        "vp9.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "vp9.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "visible": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "hdr": null,
+      "error": null
+    },
+    {
+      "name": "vp9-hevc-hdr-vp9",
+      "descriptions": [
+        1,
+        2,
+        3,
+        2,
+        1
+      ],
+      "pts": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "layers": [
+        null,
+        3,
+        3,
+        3,
+        null
+      ],
+      "oracles": [
+        "vp9.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "../hevc-pcm-reference-rext8.yuv",
+        "vp9.yuv"
+      ],
+      "oracle_frames": [
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "visible": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "hdr": [
+        0,
+        100,
+        0,
+        100,
+        0
+      ],
+      "error": null
+    }
+  ],
+  "opening_hdr": "opening-hdr",
+  "provenance": "Original synthetic VP9 integer entropy and pixels, saved owned HEVC PCM entropy/oracle; own MP4 muxing, no private data, codecs, FFmpeg or network."
+}
