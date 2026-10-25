@@ -176,8 +176,8 @@ impl Layered {
             out.extend_from_slice(nal);
             Ok(out)
         };
-        // Matroska permits parameter banks to arrive in CodecPrivate or in
-        // early blocks. Resolve the first coded slice's actual PPS/SPS/VPS.
+        // Resolve activated VPSs, including a base-only prefix before a later
+        // multilayer CVS. Receiving an unused VPS does not select this path.
         let mut parameters = crate::codec::hevc_decoder::LayeredParameters::from_configuration(
             configuration,
             budget / 2,
@@ -190,6 +190,7 @@ impl Layered {
             .next()
             .map(|n| copy_vps(n))
             .transpose()?;
+        let mut seen_vcl = false;
         'packets: for i in 0..demux.packets.len() {
             if demux.packets[i].track != track {
                 continue;
@@ -208,8 +209,18 @@ impl Layered {
                     parameters.receive(nal)?;
                 }
                 if h.is_vcl() {
-                    active = Some(copy_vps(parameters.referenced_vps(nal)?)?);
-                    break 'packets;
+                    let referenced = parameters.referenced_vps(nal)?;
+                    let layered = Vps::parse_layered_metadata(referenced, budget / 2)?
+                        .layers
+                        .effective_max_layers()
+                        > 1;
+                    if !seen_vcl || layered {
+                        active = Some(copy_vps(referenced)?);
+                        seen_vcl = true;
+                    }
+                    if layered {
+                        break 'packets;
+                    }
                 }
             }
         }

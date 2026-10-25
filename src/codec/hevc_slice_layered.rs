@@ -59,6 +59,22 @@ pub struct LayeredSliceSyntax {
     pub poc_lsb_present: bool,
     pub poc_reset: super::super::hevc_poc::ResetSyntax,
 }
+impl LayeredSliceSyntax {
+    pub(crate) fn inferred_base(nal: NalHeader) -> Self {
+        Self {
+            discardable: false,
+            cross_layer_bla: false,
+            illumination_compensation: None,
+            camera: None,
+            inter_layer_prediction: None,
+            in_component_prediction: None,
+            coded_count_minus1: None,
+            reference_layers: Vec::new(),
+            poc_lsb_present: !nal.is_idr(),
+            poc_reset: Default::default(),
+        }
+    }
+}
 #[derive(Clone, Copy)]
 pub(super) struct Layout<'a> {
     e: &'a LayeredExtensionPrefix,
@@ -120,9 +136,19 @@ impl LayeredSliceContext<'_> {
         Ok(true)
     }
     pub(crate) fn validate_poc_header(&self, header: &super::SliceHeader) -> Result<()> {
-        let layout = self
-            .layout(header.nal)?
-            .ok_or_else(|| invalid("HEVC layered POC has no VPS extension"))?;
+        let layout = self.layout(header.nal)?;
+        if layout.is_none() {
+            if !self.vps.inferred_base_layer()
+                || !(4..=16).contains(&self.sps.sps.poc_bits)
+                || header.pps_id != self.pps.pps.id
+                || header.poc_lsb >= (1u32 << self.sps.sps.poc_bits)
+                || header.layered.as_ref() != Some(&LayeredSliceSyntax::inferred_base(header.nal))
+            {
+                return Err(invalid("HEVC inferred base POC context disagrees"));
+            }
+            return Ok(());
+        }
+        let layout = layout.unwrap();
         let syntax = header
             .layered
             .as_ref()

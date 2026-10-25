@@ -64,7 +64,9 @@ impl LayeredOutputQueue {
             scope = (1u64 << 63) - 1;
         }
         if scope == 0 {
-            if p.resetting { ready.extend(self.drain()); }
+            if p.resetting {
+                ready.extend(self.drain());
+            }
             return ready;
         }
         if discard {
@@ -87,7 +89,12 @@ impl LayeredOutputQueue {
                 self.last_poc = Some(last.poc);
             }
         }
-        if scope == (1u64 << 63) - 1 {
+        // An ordinary base-only CLVS has just one sub-DPB. Its IRAP
+        // prior-output scope therefore completes the old output epoch even
+        // without an Annex F cross-layer reset covering all possible layers.
+        if scope == (1u64 << 63) - 1
+            || p.binding.vps.inferred_base_layer() && preview.starts_clvs & 1 != 0
+        {
             self.last_poc = None;
             self.last_access_unit = None;
             self.highest_tid = None;
@@ -95,7 +102,9 @@ impl LayeredOutputQueue {
         // Prior-output discard must happen before the reset drains remaining
         // pictures. Reset ordering last: flushing old output must not restore
         // its POC as the lower bound for the new resetting period.
-        if p.resetting { ready.extend(self.drain()); }
+        if p.resetting {
+            ready.extend(self.drain());
+        }
         ready
     }
     /// F.13.5.2.2: RPS has already marked unused references. Count the union of

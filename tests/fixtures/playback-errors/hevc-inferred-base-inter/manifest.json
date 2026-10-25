@@ -1,0 +1,35 @@
+{
+  "cases": [
+    {
+      "file": "hevc-inferred-base-inter/repeated-idr-8.mkv",
+      "frames": [
+        "hevc-matroska-ipb-8-0.yuv",
+        "hevc-matroska-ipb-8-1.yuv",
+        "hevc-matroska-ipb-8-2.yuv",
+        "hevc-matroska-ipb-8-3.yuv",
+        "hevc-matroska-ipb-8-4.yuv",
+        "hevc-matroska-ipb-8-5.yuv",
+        "hevc-matroska-ipb-8-6.yuv",
+        "hevc-matroska-ipb-8-7.yuv",
+        "hevc-matroska-ipb-8-8.yuv"
+      ],
+      "depth": 8
+    },
+    {
+      "file": "hevc-inferred-base-inter/repeated-idr-10.mkv",
+      "frames": [
+        "hevc-matroska-ipb-10-0.yuv",
+        "hevc-matroska-ipb-10-1.yuv",
+        "hevc-matroska-ipb-10-2.yuv",
+        "hevc-matroska-ipb-10-3.yuv",
+        "hevc-matroska-ipb-10-4.yuv",
+        "hevc-matroska-ipb-10-5.yuv",
+        "hevc-matroska-ipb-10-6.yuv",
+        "hevc-matroska-ipb-10-7.yuv",
+        "hevc-matroska-ipb-10-8.yuv"
+      ],
+      "depth": 10
+    }
+  ],
+  "provenance": "Nine owned synthetic I/P/B packets from repository main/main10 fixtures, including the second IDR with pending old output. Existing independent saved pixel oracles; own Matroska muxing, no private media, FFmpeg or network."
+}

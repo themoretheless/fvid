@@ -179,8 +179,18 @@ impl LayeredVps {
             .map(|(i, _)| i)
             .ok_or_else(|| invalid("HEVC VPS has no output layer set"))
     }
+    /// Inferred graph of an ordinary, internally decoded single base layer.
+    pub(crate) fn inferred_base_layer(&self) -> bool {
+        self.extension.is_none()
+            && self.vps.layers.effective_max_layers() == 1
+            && self.vps.layers.base_internal
+            && self.vps.layers.base_available
+    }
     /// Complete TargetDecLayerIdList coverage for the all-IDR activation rule.
     pub(crate) fn covers_idr_target(&self, ols: usize, idr_layers: u64) -> bool {
+        if self.inferred_base_layer() {
+            return ols == 0 && idr_layers & 1 != 0;
+        }
         self.extension.as_ref().and_then(|e| e.output.sets.get(ols))
             .is_some_and(|set| set.necessary != 0 && set.necessary & !idr_layers == 0)
     }

@@ -1,5 +1,36 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## Base-only and multilayer HEVC topology transitions, 2026-10-25
+
+Native MP4/Matroska dispatch now checks activated VPS chains beyond an initial
+base-only prefix. A source that later activates multilayer coding uses the owned
+layered pipeline throughout; ordinary fixed hvc1 keeps its existing fast path.
+Unused received VPS definitions do not determine the selected decoder.
+
+The layered owner now admits the normative inferred single-base state without
+inventing a coded VPS extension: layer 0, OLS0, empty inter-layer references and
+ordinary SPS POC/output ordering. Random access, complete-IDR target coverage,
+POC graph changes, output eligibility and temporal list binding use that inferred
+state. Parameter/graph changes still require their existing legal sequence
+boundary. Ordinary slice parsing is unchanged; parsing through a layered context
+retains an explicit inferred base syntax snapshot, including dependent segments.
+
+Seven short original scenarios cover five accepted base-to-multilayer,
+multilayer-to-base, roundtrip, multislice and separate-colour-plane cases, and
+two illegal non-IRAP topology changes. Two new nine-picture Main/Main10
+Matroska witnesses isolate repeated IDR with pending prior output; a further
+regression reuses 16 original short I/P/B fixtures with saved independent pixel
+oracles, exercising
+reordered base-only pictures and repeated IDR sequences through the layered
+owner. A base-only IRAP now resets the completed output epoch's POC lower bound
+after flushing or discarding prior output; it no longer rejects the new POC0
+against a previous sequence's emitted POC. Exact packed samples are checked against
+saved synthetic pixel oracles, with original frame/sample clocks, displayed
+layer identity, seek and rewind in both containers. This does not prove every
+topology/profile/temporal transition; sample-description-driven topology changes
+and further random-access combinations remain qualification work.
+
+
 ## Automatic OLS reselection across VPS epochs, 2026-10-25
 
 Automatic MP4 and Matroska playback now reevaluates the preferred OLS for each
