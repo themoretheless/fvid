@@ -103,7 +103,7 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
     let mut reader = crate::owned_matroska_audio::open_aac_reader(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         options,
-        crate::owned_webm::Limits::default().packet_bytes,
+        options.max_packet_bytes,
     )
     .map_err(|e| e.to_string())?;
     let index = match options.streams.as_slice() {
@@ -132,7 +132,7 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
     }
     crate::owned_matroska_audio::admit_audio_reader(&mut reader, index, options)
         .map_err(|e| e.to_string())?;
-    let in_band_ps = crate::owned_matroska_audio::negotiate_matroska_ps(&mut reader, index, || Ok(()))
+    let in_band_ps = crate::owned_matroska_audio::negotiate_matroska_ps(&mut reader, index, options.max_packets, || Ok(()))
         .map_err(|e| e.to_string())?;
     let track = reader
         .tracks

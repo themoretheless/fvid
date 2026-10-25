@@ -1,0 +1,28 @@
+{
+  "batch": 261,
+  "accepted": [
+    "FVID-0268"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-261-pre-edit/src/native_audio_mix.rs",
+    "docs/improvements/snapshots/batch-261-pre-edit/src/native_audio_mix/concat.rs",
+    "docs/improvements/snapshots/batch-261-pre-edit/crates/fvid-media/src/owned_ogg_opus_export.rs",
+    "docs/improvements/snapshots/batch-261-pre-edit/crates/fvid-media/src/owned_flac_layout.rs",
+    "docs/improvements/snapshots/batch-261-pre-edit/crates/fvid-media/src/owned_mpeg_audio.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-261-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-261-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-261-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/mix-merge-prefix-budget-wave-info/prefix-a.flac",
+    "tests/fixtures/playback-errors/mix-merge-prefix-budget-wave-info/prefix-b.flac",
+    "tests/fixtures/playback-errors/mix-merge-prefix-budget-wave-info/fourcc-tags.opus",
+    "tests/fixtures/playback-errors/mix-merge-prefix-budget-wave-info/fourcc-tags.mp3"
+  ],
+  "tests": [
+    "tests/mix_merge_prefix_budget_wave_info_regressions.rs",
+    "scripts/test_mix_merge_prefix_budget_wave_info_regressions.py"
+  ]
+}

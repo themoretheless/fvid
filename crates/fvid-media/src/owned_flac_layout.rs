@@ -122,6 +122,17 @@ pub fn probe_metadata_from_entries<'a>(
 pub fn wave_info_from_extra(extra: &[u8]) -> std::result::Result<Vec<u8>, String> {
     let comments = vorbis_comments(extra).map_err(|e| e.to_string())?;
     let mut entries = Vec::new();
+    for (key, value) in &comments {
+        if value.is_empty() || value.contains('\0') {
+            continue;
+        }
+        if key.len() == 4
+            && !matches!(key.to_ascii_uppercase().as_str(), "DATE")
+            && crate::owned_wave_metadata::tag_for_key(key).is_ok()
+        {
+            entries.push((key.clone(), value.clone()));
+        }
+    }
     for (source, target) in [
         ("TITLE", "title"),
         ("ARTIST", "artist"),

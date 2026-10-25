@@ -17,12 +17,21 @@ pub fn concat(
     destination: &Path,
     options: &CopyOptions,
 ) -> Result<CopyStats, String> {
-    crate::owned_budget::check_rss_budget(options)?;
-    if !supports(sources, destination, options) {
-        return crate::owned_wave_remux::concat(sources, destination, options);
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
     }
     if options.max_packets == Some(0) {
-        return Err("Matroska AAC output requires at least one packet".into());
+        return Err("packet work limit requires at least one packet".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    if !supports(sources, destination, options) {
+        if sources
+            .first()
+            .is_some_and(|p| !crate::owned_wave_inspect::is_wave(p).unwrap_or(false))
+        {
+            return Err("request is not an owned ADTS Matroska concat".into());
+        }
+        return crate::owned_wave_remux::concat(sources, destination, options);
     }
     let readers = open_readers(sources, options)?;
     let mut stats = crate::owned_matroska_remux::publish(destination, options, |output| {
@@ -70,12 +79,21 @@ pub fn plan_concat(
     options: &CopyOptions,
 ) -> Result<fvid_media_info::MediaPlan, String> {
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
-    crate::owned_budget::check_rss_budget(options)?;
-    if !supports(sources, Path::new("planned.mka"), options) {
-        return crate::owned_wave_plan::plan_concat(sources, options);
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
     }
     if options.max_packets == Some(0) {
-        return Err("Matroska AAC output requires at least one packet".into());
+        return Err("packet work limit requires at least one packet".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    if !supports(sources, Path::new("planned.mka"), options) {
+        if sources
+            .first()
+            .is_some_and(|p| !crate::owned_wave_inspect::is_wave(p).unwrap_or(false))
+        {
+            return Err("request is not an owned ADTS Matroska concat".into());
+        }
+        return crate::owned_wave_plan::plan_concat(sources, options);
     }
     let mut sequence = crate::owned_aac::adts::SequenceReader::new(open_readers(sources, options)?)
         .map_err(|e| e.to_string())?;
