@@ -1364,6 +1364,17 @@ impl Eac3Decoder {
         })
     }
 
+    /// Stable native output roles for expanded presentation decoding. Configure
+    /// this before input; missing roles are silent, unnegotiated roles refuse.
+    pub fn with_output_layout(mut self, layout:presentation::SpeakerLayout)->Result<Self> {
+        self.set_output_layout(layout)?;
+        Ok(self)
+    }
+    /// Configure a boxed decoder without moving its large transform state.
+    pub fn set_output_layout(&mut self, layout:presentation::SpeakerLayout)->Result<()> {
+        self.presentation.as_mut().ok_or_else(||invalid("E-AC-3 explicit native layout requires expanded output"))?.set_output_layout(layout)
+    }
+
     /// Select independent programme ID 0..7 (zero by default).
     /// Changing the choice clears transform/lookahead history; reset retains it.
     /// Callers configure rate/output geometry for the selected programme.

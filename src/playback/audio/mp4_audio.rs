@@ -49,6 +49,7 @@ pub struct Mp4AudioReader<R> {
     dolby_rate:Option<u32>,
     eac3_programme:u8,
     eac3_stereo_output: bool,
+    eac3_output_layout: Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>,
     ac3_stereo_output: bool,
     dolby_track_channels: Vec<Option<u16>>,
     sample_index: usize,
@@ -289,6 +290,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             dolby_rate:selected_geometry.map(|g|g.0),
             eac3_programme:programme.unwrap_or(0),
             eac3_stereo_output: false,
+            eac3_output_layout: None,
             ac3_stereo_output: false,
             dolby_track_channels,
             in_band_ps,
@@ -369,7 +371,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         self.clock_anchor.set(Some((returned,position)));Ok(returned)
     }
     fn negotiated_rate(&self)->u32 {self.dolby_rate.unwrap_or(self.setup().sample_rate)}
-    fn negotiated_channels(&self)->u16 {if self.in_band_ps || (self.eac3_stereo_output && self.setup().codec==*b"ec-3") || (self.ac3_stereo_output && self.setup().codec==*b"ac-3") {2}else{self.dolby_channels.unwrap_or(self.setup().channels)}}
+    fn negotiated_channels(&self)->u16 {if self.in_band_ps || (self.eac3_stereo_output && self.setup().codec==*b"ec-3") || (self.ac3_stereo_output && self.setup().codec==*b"ac-3") {2}else if self.setup().codec==*b"ec-3" && let Some(l)=&self.eac3_output_layout {l.0.len()as u16}else{self.dolby_channels.unwrap_or(self.setup().channels)}}
     fn setup(&self) -> &crate::container::mp4::SampleDescription {
         &self.track().sample_descriptions[self.active_description]
     }
@@ -427,6 +429,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             dolby_rate: None,
             eac3_programme: programme.unwrap_or(0),
             eac3_stereo_output: false,
+            eac3_output_layout: None,
             ac3_stereo_output: false,
             dolby_track_channels: vec![None; tracks],
             sample_index: 0,
@@ -765,6 +768,10 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         }
         self.packet_sample_limit(duration)
     }
+    fn set_eac3_output_layout(&mut self, layout:Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>)->Result<()> {
+        if let Some(l)=&layout {if self.setup().codec!=*b"ec-3" {return Err(invalid("native E-AC-3 layout requires an E-AC-3 source"));}l.validate_output()?;}
+        self.eac3_output_layout=layout;Ok(())
+    }
     fn set_ac3_stereo_output(&mut self, enabled: bool) -> Result<()> {self.ac3_stereo_output=enabled;Ok(())}
     fn set_eac3_stereo_output(&mut self, enabled: bool) -> Result<()> {
         self.eac3_stereo_output=enabled;
@@ -772,12 +779,13 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
     fn speaker_mask(&self)->Result<Option<u32>> {
         if (self.eac3_stereo_output && self.setup().codec==*b"ec-3") || (self.ac3_stereo_output && self.setup().codec==*b"ac-3") {return Ok(Some(3));}
+        if self.setup().codec==*b"ec-3" && let Some(l)=&self.eac3_output_layout {return Ok(l.wave_mask());}
         if matches!(&self.setup().codec,b"ac-3"|b"ec-3") {return Ok(self.dolby_mask);}
         if self.setup().codec==*b"alac" {crate::codec::alac_decoder::AlacDecoder::configuration_mask(&self.setup().configuration,self.sample_rate(),self.setup().channels).map(Some)}else{Ok(None)}
     }
 
     fn stereo_router(&self)->Result<Option<fvid_media::owned_stereo_router::StereoRouter>>{
-        if self.setup().codec==*b"ec-3" && self.channels()>6 && self.dolby_mask.is_none() {return Err(unsupported("E-AC-3 speaker locations need an extended speaker mask"));}
+        if self.setup().codec==*b"ec-3" && self.channels()>6 && self.speaker_mask()?.is_none() {return Err(unsupported("E-AC-3 speaker locations need an extended speaker mask"));}
         if self.setup().codec!=*b"mp4a"{return self.speaker_mask()?.map(|mask|fvid_media::owned_stereo_router::StereoRouter::new(self.channels(),mask).map_err(|e|invalid(&e))).transpose();}
         let asc=crate::codec::config::aac_specific_config(&self.setup().configuration)?;
         fvid_media::owned_aac::speaker_routing::stereo_router(asc,self.sample_rate(),self.channels(),self.in_band_ps).map(Some).map_err(|e|invalid(&e))
@@ -792,7 +800,9 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             if self.eac3_stereo_output {
                 return Ok(Box::new(crate::codec::eac3_decoder::Eac3Decoder::for_container_stereo(self.extra_data(),self.sample_rate())?.with_programme(self.eac3_programme)?));
             }
-            return Ok(Box::new(crate::codec::eac3_decoder::Eac3Decoder::for_container(self.extra_data(),self.sample_rate(),self.channels())?.with_programme(self.eac3_programme)?));
+            let mut d=Box::new(crate::codec::eac3_decoder::Eac3Decoder::for_container(self.extra_data(),self.sample_rate(),self.channels())?.with_programme(self.eac3_programme)?);
+            if let Some(layout)=&self.eac3_output_layout {d.set_output_layout(layout.clone())?;}
+            return Ok(d);
         }
         if self.in_band_ps {
             Ok(Box::new(crate::codec::aac_ps_playback::PsAacDecoder::new_with_in_band_ps(

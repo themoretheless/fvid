@@ -5002,3 +5002,16 @@ accepts real-reader/worker stereo negotiation, exact EOF/rewind/partial seeks an
 policy restoration after configuration replacement. CPAL unit coverage checks
 ring/callback samples without opening a device. Ordinary tests generate nothing
 and require no FFmpeg/network.
+
+
+`eac3-output-layout/`: authored rear/height maps, 8/10/8 and replacement-only
+6/10/6 active-role counts, continuous component controls, optional transient
+windows, raw/neutral VP9 MP4/Matroska companions. Generate separately with
+`scripts/generate_eac3_output_layout.py`; ordinary `tests/eac3_output_layout.rs`
+accepts a negotiated stable 10-role output with exact PCM/PTS, priming,
+EOF/rewind/partial seeks, 16-role padding and negative map invariants. It
+separately preserves refusal of unsafe unnegotiated maps/device routes.
+`aac-factory-stack.mp4` re-authors metadata of the repository-owned synthetic
+AAC/PS export witness and checks construction on a named 2 MiB thread; the
+intermediate by-value EAC3 factory reproduces stack overflow on this AAC input.
+No private source media/parameters, external encoder/process or network is used.

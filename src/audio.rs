@@ -630,6 +630,14 @@ pub enum AudioStep {
 }
 
 pub trait AudioStream: Send {
+    /// Configure stable native E-AC-3 output roles before creating a decoder.
+    /// A superset allows changing channel maps without changing device geometry.
+    #[cfg(feature="player")]
+    fn set_eac3_output_layout(&mut self, layout:Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>)->crate::Result<()> {
+        if layout.is_some() {return Err(crate::invalid("this source does not negotiate E-AC-3 output layouts"));}
+        Ok(())
+    }
+
     /// Negotiate decoded AC-3 L/R output before constructing a decoder. Readers
     /// retain this request across seek and configuration changes. Other codecs
     /// keep their own geometry; library workers default to native output.

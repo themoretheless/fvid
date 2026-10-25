@@ -269,21 +269,25 @@ impl Ac3 {
                     first.channels
                 )));
             }
-            let size=if let Some(expected)=&native {
+            let (size,frame_channels)=if expanded && first.codec==EAC3_TAG {
                 let programme=crate::codec::eac3_decoder::presentation::raw_programme_for_programme(&bytes[*start..],programme);
                 match programme {
-                    Ok(Some((size,layout))) if &layout==expected=>size,
+                    Ok(Some((size,layout))) => (size,layout.0.len() as u16),
+                    // Compatibility output still ignores incomplete skipped
+                    // extensions. Complete bundles are retained so an explicit
+                    // native output map can render replacement-only prefixes.
+                    Ok(None) | Err(_) if native.is_none() => (at.frame_bytes,output_channels),
                     Err(_) if truncated_final_frame && Some(start)==starts.last()=>break,
                     Err(error)=>return Err(error),
                     _=>return Err(invalid("E-AC-3 elementary presentation changes or loses extension channels")),
                 }
-            }else{at.frame_bytes};
+            }else{(at.frame_bytes,output_channels)};
             frames.push(Frame {
                 start: *start,
                 size,
                 pts,
                 rate: at.sample_rate,
-                channels: output_channels,
+                channels: frame_channels,
                 samples: at.samples,
             });
             pts += u64::from(at.samples);
@@ -330,6 +334,7 @@ impl Ac3 {
 pub struct Ac3AudioReader {
     ac3: Ac3,
     eac3_stereo_output: bool,
+    eac3_output_layout: Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>,
     ac3_stereo_output: bool,
     packet: usize,
     presentation_trim: Cell<u64>,
@@ -371,7 +376,7 @@ impl Ac3AudioReader {
         Ok(bytes)
     }
     fn from_bytes(bytes:&[u8],limits:Limits,expanded:bool,programme:u8)->Result<Self>{
-        Ok(Self{ac3:Ac3::parse_mode(bytes,&limits,expanded,programme)?,eac3_stereo_output:false,ac3_stereo_output:false,packet:0,presentation_trim:Cell::new(0),presentation_floor:None})
+        Ok(Self{ac3:Ac3::parse_mode(bytes,&limits,expanded,programme)?,eac3_stereo_output:false,eac3_output_layout:None,ac3_stereo_output:false,packet:0,presentation_trim:Cell::new(0),presentation_floor:None})
     }
     fn open_mode<R:Read>(reader:R,limits:Limits,expanded:bool,programme:u8)->Result<Self>{
         let bytes=Self::read_limited(reader,limits)?;
@@ -389,6 +394,10 @@ impl Ac3AudioReader {
 }
 
 impl AudioStream for Ac3AudioReader {
+    fn set_eac3_output_layout(&mut self, layout:Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>)->Result<()> {
+        if let Some(l)=&layout {if self.codec()!=EAC3_TAG {return Err(invalid("native E-AC-3 layout requires an E-AC-3 source"));}l.validate_output()?;}
+        self.eac3_output_layout=layout;Ok(())
+    }
     fn set_ac3_stereo_output(&mut self, enabled:bool)->Result<()> {self.ac3_stereo_output=enabled;Ok(())}
     fn stereo_router(&self)->Result<Option<fvid_media::owned_stereo_router::StereoRouter>> {
         let mask=self.speaker_mask()?;
@@ -405,12 +414,16 @@ impl AudioStream for Ac3AudioReader {
             if self.eac3_stereo_output {
                 return Ok(Box::new(crate::codec::eac3_decoder::Eac3Decoder::new_stereo(self.extra_data(),self.sample_rate())?.with_programme(self.ac3.programme)?));
             }
-            Ok(Box::new(crate::codec::eac3_decoder::Eac3Decoder::new(self.extra_data(),self.sample_rate(),self.channels())?.with_programme(self.ac3.programme)?))
+            {
+                let mut d=Box::new(crate::codec::eac3_decoder::Eac3Decoder::new(self.extra_data(),self.sample_rate(),self.channels())?.with_programme(self.ac3.programme)?);
+                if let Some(layout)=&self.eac3_output_layout {d.set_output_layout(layout.clone())?;}
+                Ok(d)
+            }
         }else{crate::codec::make_audio_decoder(self.codec(),self.extra_data(),self.sample_rate(),self.channels(),self.bits_per_sample())}
     }
     fn audio_track_index(&self)->usize {self.ac3.tracks.iter().position(|(id,_)|*id==self.ac3.programme).unwrap_or(0)}
 
-    fn speaker_mask(&self) -> Result<Option<u32>> {Ok(if (self.eac3_stereo_output && self.codec()==EAC3_TAG)||(self.ac3_stereo_output && self.codec()==TAG) {Some(3)}else{self.ac3.speaker_mask})}
+    fn speaker_mask(&self) -> Result<Option<u32>> {Ok(if (self.eac3_stereo_output && self.codec()==EAC3_TAG)||(self.ac3_stereo_output && self.codec()==TAG) {Some(3)}else if self.codec()==EAC3_TAG && let Some(l)=&self.eac3_output_layout {l.wave_mask()}else{self.ac3.speaker_mask})}
 
     fn codec(&self) -> &str {
         self.ac3.codec
@@ -429,7 +442,7 @@ impl AudioStream for Ac3AudioReader {
     /// when a container states none: five full-bandwidth channels plus an LFE for
     /// a 5.1 stream, two for stereo, one for mono.
     fn channels(&self) -> u16 {
-        if (self.eac3_stereo_output && self.codec()==EAC3_TAG)||(self.ac3_stereo_output && self.codec()==TAG) {2}else{self.ac3.channels}
+        if (self.eac3_stereo_output && self.codec()==EAC3_TAG)||(self.ac3_stereo_output && self.codec()==TAG) {2}else if self.codec()==EAC3_TAG && let Some(l)=&self.eac3_output_layout {l.0.len()as u16}else{self.ac3.channels}
     }
 
     fn duration(&self) -> Option<Duration> {
