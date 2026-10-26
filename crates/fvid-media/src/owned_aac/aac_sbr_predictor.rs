@@ -25,7 +25,14 @@ fn magnitude_squared(a: Complex) -> f64 {
 /// selects this window; prediction itself has no hidden frame history.
 /// A common normalization preserves the covariance ratios and avoids overflow.
 pub fn predict(samples: &[Complex], time_slots: u8) -> Result<Predictor> {
-    if !matches!(time_slots, 15 | 16) || samples.len() != 2 * usize::from(time_slots) + 8 {
+    predict_with_timing(samples, time_slots, super::aac_sbr_timing::Timing::Legacy)
+}
+pub(crate) fn predict_with_timing(
+    samples: &[Complex],
+    time_slots: u8,
+    timing: super::aac_sbr_timing::Timing,
+) -> Result<Predictor> {
+    if !matches!(time_slots, 15 | 16) || samples.len() != timing.columns(time_slots)? + 2 {
         return Err(invalid("invalid SBR predictor window"));
     }
     if samples

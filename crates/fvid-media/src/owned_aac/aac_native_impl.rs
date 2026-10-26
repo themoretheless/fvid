@@ -226,6 +226,7 @@ pub struct NativeAacDecoder {
     synthesis: Vec<LongSineSynthesis>,
     ld_synthesis: Vec<super::aac_ld_channel::LdChannel>,
     eld_synthesis: Vec<super::aac_eld_synthesis::EldSynthesis>,
+    eld_sbr: Option<super::aac_eld_sbr::Decoder>,
     ltp_synthesis: Vec<super::aac_ltp_channel::LtpChannel>,
     ltp_coupling_synthesis: Vec<Option<super::aac_ltp_channel::LtpChannel>>,
     ssr_synthesis: Vec<super::aac_ssr_synthesis::SsrSynthesis>,
@@ -258,6 +259,7 @@ pub struct AacCheckpoint {
     synthesis: Vec<LongSineSynthesis>,
     ld_synthesis: Vec<super::aac_ld_channel::LdChannelCheckpoint>,
     eld_synthesis: Vec<super::aac_eld_synthesis::EldHistory>,
+    eld_sbr: Option<super::aac_eld_sbr::Decoder>,
     ltp_synthesis: Vec<super::aac_ltp_channel::LtpChannelCheckpoint>,
     ltp_coupling_synthesis: Vec<Option<super::aac_ltp_channel::LtpChannelCheckpoint>>,
     ssr_synthesis: Vec<super::aac_ssr_synthesis::SsrSynthesis>,
@@ -291,7 +293,8 @@ impl NativeAacDecoder {
         if parsed.ps_present == Some(true) {
             return Err(unsupported("AAC parametric stereo synthesis is not yet implemented"));
         }
-        let sbr_rate = if parsed.sbr_present == Some(true) {
+        let eld_sbr=parsed.eld_sbr.clone().map(|config|super::aac_eld_sbr::Decoder::new(config,parsed.core.sample_rate,parsed.core.frame_samples,parsed.core.channel_configuration)).transpose()?;
+        let sbr_rate = if parsed.sbr_present == Some(true) && eld_sbr.is_none() {
             let rate = parsed.extension_sample_rate.ok_or_else(|| invalid("missing SBR output frequency"))?;
             let core = parsed.core.sample_rate;
             if rate != core && core.checked_mul(2) != Some(rate) {
@@ -369,7 +372,7 @@ impl NativeAacDecoder {
         Ok(Self {
             main_prediction,
             config,
-            eld_synthesis, ld_synthesis, synthesis, ssr_synthesis, ltp_synthesis, ltp_coupling_synthesis,
+            eld_sbr, eld_synthesis, ld_synthesis, synthesis, ssr_synthesis, ltp_synthesis, ltp_coupling_synthesis,
             ssr_coupling_synthesis, ssr_alignment:None, ssr_alignment_tags:Vec::new(), ssr_pending_duration:Default::default(), ssr_fixed_clock:false,ssr_source_alignment:false,
             coupling_synthesis:vec![None;16],
             noise: NoiseState::default(),
@@ -421,7 +424,7 @@ impl NativeAacDecoder {
         usize::from(self.config.channels) + 16
     }
     pub fn sample_rate(&self) -> u32 {
-        self.sbr_rate.unwrap_or(self.config.sample_rate)
+        self.eld_sbr.as_ref().map_or(self.sbr_rate.unwrap_or(self.config.sample_rate),|ld|ld.output_rate())
     }
     pub fn core_frame_samples(&self) -> u16 { self.config.frame_samples }
     /// Packet/container adapters retain the configured SSR access-unit clock;
@@ -442,7 +445,7 @@ impl NativeAacDecoder {
     }
     pub fn checkpoint(&self) -> AacCheckpoint {
         AacCheckpoint {main_prediction:self.main_prediction.clone(),config:self.config.clone(),initial_program:self.initial_program.clone(),program:self.program.clone(),
-            eld_synthesis:self.eld_synthesis.iter().map(super::aac_eld_synthesis::EldSynthesis::checkpoint).collect(),
+            eld_synthesis:self.eld_synthesis.iter().map(super::aac_eld_synthesis::EldSynthesis::checkpoint).collect(),eld_sbr:self.eld_sbr.clone(),
             ld_synthesis:self.ld_synthesis.iter().map(super::aac_ld_channel::LdChannel::checkpoint).collect(),
             synthesis:self.synthesis.clone(),ltp_coupling_synthesis:self.ltp_coupling_synthesis.iter().map(|s|s.as_ref().map(super::aac_ltp_channel::LtpChannel::checkpoint)).collect(),ltp_synthesis:self.ltp_synthesis.iter().map(super::aac_ltp_channel::LtpChannel::checkpoint).collect(),ssr_synthesis:self.ssr_synthesis.clone(),ssr_coupling_synthesis:self.ssr_coupling_synthesis.clone(),ssr_alignment:self.ssr_alignment.clone(),ssr_alignment_tags:self.ssr_alignment_tags.clone(),ssr_pending_duration:self.ssr_pending_duration.clone(),ssr_fixed_clock:self.ssr_fixed_clock,ssr_source_alignment:self.ssr_source_alignment,coupling_synthesis:self.coupling_synthesis.clone(),noise:self.noise.clone(),
             mapping:self.mapping.clone(),channel_mask:self.channel_mask,
@@ -453,6 +456,7 @@ impl NativeAacDecoder {
         if self.config!=state.config || self.initial_program!=state.initial_program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask || self.detect_sbr!=state.detect_sbr || self.sbr_detection_rate!=state.sbr_detection_rate || (!self.detect_sbr && self.sbr_rate!=state.sbr_rate) {
             return Err(invalid("AAC checkpoint configuration mismatch"));
         }
+        if self.eld_sbr.as_ref().map(|s|s.initial_config())!=state.eld_sbr.as_ref().map(|s|s.initial_config()) {return Err(invalid("AAC ELD low-delay SBR checkpoint configuration mismatch"));}
         if self.eld_synthesis.len()!=state.eld_synthesis.len(){return Err(invalid("AAC ELD checkpoint channel count mismatch"));}
         for (channel,saved)in self.eld_synthesis.iter_mut().zip(&state.eld_synthesis){channel.restore(saved)?;}
         if self.ld_synthesis.len()!=state.ld_synthesis.len() {return Err(invalid("AAC LD checkpoint channel count mismatch"));}
@@ -467,6 +471,7 @@ impl NativeAacDecoder {
             } else {*channel=None;}
         }
         self.ssr_alignment=state.ssr_alignment.clone();self.ssr_alignment_tags=state.ssr_alignment_tags.clone();self.ssr_pending_duration=state.ssr_pending_duration.clone();self.ssr_fixed_clock=state.ssr_fixed_clock;self.ssr_source_alignment=state.ssr_source_alignment;
+        self.eld_sbr=state.eld_sbr.clone();
         self.program=state.program.clone();
         self.main_prediction=state.main_prediction.clone();
         self.synthesis=state.synthesis.clone();self.ssr_synthesis=state.ssr_synthesis.clone();self.ssr_coupling_synthesis=state.ssr_coupling_synthesis.clone();self.coupling_synthesis=state.coupling_synthesis.clone();self.noise=state.noise.clone();self.sbr_rate=state.sbr_rate;self.sbr_elements=state.sbr_elements.clone();
@@ -475,6 +480,7 @@ impl NativeAacDecoder {
     pub fn reset(&mut self) {
         self.program=self.initial_program.clone();
         self.ssr_alignment=None; self.ssr_alignment_tags.clear(); self.ssr_pending_duration=Default::default();self.ssr_fixed_clock=false;self.ssr_source_alignment=false;
+        if let Some(ld)=&mut self.eld_sbr {ld.reset();}
         for synth in &mut self.synthesis {
             synth.reset();
         }

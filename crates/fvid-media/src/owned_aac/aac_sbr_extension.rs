@@ -39,6 +39,62 @@ impl State {
         *self = Self::default();
     }
 
+    pub(crate) fn with_low_delay_header(header: Header) -> Self {
+        Self {
+            header: Some(header),
+            format: None,
+        }
+    }
+    /// ELD carries a self-delimited LD-SBR block, without a FIL type/count.
+    /// Its CRC excludes byte alignment; another configured element may follow.
+    pub(crate) fn read_low_delay(
+        &mut self,
+        bits: &mut BitReader<'_>,
+        end: usize,
+        crc_present: bool,
+        sbr_rate: u32,
+        slots: u8,
+        channels: usize,
+    ) -> Result<Frame> {
+        let start = bits.position();
+        if end < start || end - start > bits.remaining() {
+            return Err(invalid("invalid low-delay SBR block boundary"));
+        }
+        let mut trial = bits.clone();
+        let crc = if crc_present {
+            Some(trial.read(10)? as u16)
+        } else {
+            None
+        };
+        let crc_start = trial.clone();
+        let header = if trial.bit()? {
+            Header::read(&mut trial, end)?
+        } else {
+            self.header
+                .clone()
+                .ok_or_else(|| invalid("missing low-delay SBR configuration header"))?
+        };
+        let data = Data::read_low_delay(&mut trial, end, &header, sbr_rate, slots, channels)?;
+        if let Some(expected) = crc {
+            if crc10(crc_start, trial.position())? != expected {
+                return Err(invalid("low-delay SBR CRC mismatch"));
+            }
+        }
+        let format = (sbr_rate, slots, channels);
+        let result = Frame {
+            header_reset: self.format.is_none() || header.requires_reset(self.header.as_ref()),
+            format_reset: self.format != Some(format),
+            header: header.clone(),
+            data,
+            crc,
+            consumed_bytes: (trial.position() - start).div_ceil(8),
+        };
+        self.header = Some(header);
+        self.format = Some(format);
+        *bits = trial;
+        Ok(result)
+    }
+
     /// Read after EXT_SBR_DATA/EXT_SBR_DATA_CRC's four-bit type. `end` is
     /// the absolute FIL boundary, possibly including subsequent extensions.
     /// The caller has decoded the AAC element type to one/two channels.

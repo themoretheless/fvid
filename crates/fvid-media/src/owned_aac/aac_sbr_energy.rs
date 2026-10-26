@@ -22,12 +22,31 @@ pub fn estimate(
     tables: &FrequencyTables,
     interpolate: bool,
 ) -> Result<Vec<Vec<f64>>> {
+    estimate_with_timing(
+        high,
+        slots,
+        grid,
+        resolution,
+        tables,
+        interpolate,
+        super::aac_sbr_timing::Timing::Legacy,
+    )
+}
+pub(crate) fn estimate_with_timing(
+    high: &[[Complex; 64]],
+    slots: u8,
+    grid: &TimeGrid,
+    resolution: &[bool],
+    tables: &FrequencyTables,
+    interpolate: bool,
+    timing: super::aac_sbr_timing::Timing,
+) -> Result<Vec<Vec<f64>>> {
     if !matches!(slots, 15 | 16)
-        || high.len() != 2 * usize::from(slots) + 6
+        || high.len() != timing.columns(slots)?
         || grid.envelope.len() < 2
         || grid.envelope.len() > 6
         || grid.envelope.windows(2).any(|x| x[0] >= x[1])
-        || usize::from(*grid.envelope.last().unwrap()) > usize::from(slots) + 3
+        || usize::from(*grid.envelope.last().unwrap()) > timing.maximum_border(slots)
         || resolution.len() + 1 != grid.envelope.len()
         || !valid_borders(&tables.high)
         || !valid_borders(&tables.low)
@@ -48,8 +67,8 @@ pub fn estimate(
     let stop = usize::from(*tables.high.last().unwrap());
     let mut output = Vec::with_capacity(resolution.len());
     for (envelope, &fine) in resolution.iter().enumerate() {
-        let time_start = 2 * usize::from(grid.envelope[envelope]);
-        let time_stop = 2 * usize::from(grid.envelope[envelope + 1]);
+        let time_start = timing.rate() * usize::from(grid.envelope[envelope]);
+        let time_stop = timing.rate() * usize::from(grid.envelope[envelope + 1]);
         let mut row = vec![0.0; stop - kx];
         if interpolate {
             for band in kx..stop {

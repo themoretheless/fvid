@@ -7,6 +7,8 @@ pub enum FrameClass {
     FixVar,
     VarFix,
     VarVar,
+    LowDelayFixed { amplitude_resolution: bool },
+    LowDelayTransient { position: u8 },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -100,6 +102,35 @@ impl GridSyntax {
     /// Reconstruct the normative grid for 960/1024-sample AAC core frames.
     pub fn time_grid(&self, time_slots: u8) -> Result<TimeGrid> {
         let count = self.high_resolution.len();
+        if let FrameClass::LowDelayTransient { position } = self.class {
+            if !matches!(time_slots, 15 | 16)
+                || position >= time_slots
+                || self.leading_offset != 0
+                || self.trailing_offset != 0
+                || self.pointer != 0
+                || !self.leading_relative.is_empty()
+                || !self.trailing_relative.is_empty()
+            {
+                return Err(invalid("invalid low-delay SBR transient grid"));
+            }
+            let mut envelope = vec![0];
+            if position < 2 {
+                envelope.push(position + 4);
+            } else {
+                envelope.push(position);
+                if position <= 9 || position == 10 && time_slots == 16 {
+                    envelope.push(position + 4);
+                }
+            }
+            envelope.push(time_slots);
+            if count + 1 != envelope.len() || envelope.windows(2).any(|v| v[0] >= v[1]) {
+                return Err(invalid("inconsistent low-delay SBR transient count"));
+            }
+            return Ok(TimeGrid {
+                noise: vec![0, envelope[1], time_slots],
+                envelope,
+            });
+        }
         let lead = self.leading_relative.len();
         let trail = self.trailing_relative.len();
         if !matches!(time_slots, 15 | 16)
@@ -118,7 +149,7 @@ impl GridSyntax {
             return Err(invalid("invalid SBR time grid parameters"));
         }
         let shape_valid = match self.class {
-            FrameClass::FixFix => {
+            FrameClass::FixFix | FrameClass::LowDelayFixed { .. } => {
                 matches!(count, 1 | 2 | 4)
                     && lead == 0
                     && trail == 0
@@ -137,6 +168,7 @@ impl GridSyntax {
                 count <= 4 && trail == 0 && self.trailing_offset == 0 && count == lead + 1
             }
             FrameClass::VarVar => count <= 5 && count == lead + trail + 1,
+            FrameClass::LowDelayTransient { .. } => unreachable!(),
         };
         if !shape_valid {
             return Err(invalid("inconsistent SBR grid class or envelope count"));
@@ -144,7 +176,10 @@ impl GridSyntax {
         let mut envelope = vec![0; count + 1];
         envelope[0] = self.leading_offset;
         envelope[count] = time_slots + self.trailing_offset;
-        if self.class == FrameClass::FixFix {
+        if matches!(
+            self.class,
+            FrameClass::FixFix | FrameClass::LowDelayFixed { .. }
+        ) {
             // NINT(numTimeSlots / count), including 15-slot core frames.
             let step = (usize::from(time_slots) + count / 2) / count;
             for (i, b) in envelope.iter_mut().enumerate().take(count).skip(1) {
@@ -170,7 +205,8 @@ impl GridSyntax {
         } else {
             let pointer = usize::from(self.pointer);
             let middle = match self.class {
-                FrameClass::FixFix => count / 2,
+                FrameClass::FixFix | FrameClass::LowDelayFixed { .. } => count / 2,
+                FrameClass::LowDelayTransient { .. } => unreachable!(),
                 FrameClass::VarFix => match pointer {
                     0 => 1,
                     1 => count - 1,
@@ -205,6 +241,74 @@ impl GridSyntax {
         Ok((syntax, grid))
     }
 
+    /// GOST 53556.4 table 178: one-bit class and frame-bound LD_TRANS.
+    pub fn read_low_delay(
+        bits: &mut BitReader<'_>,
+        end: usize,
+        slots: u8,
+        header_amplitude: bool,
+    ) -> Result<Self> {
+        if !matches!(slots, 15 | 16)
+            || end < bits.position()
+            || end - bits.position() > bits.remaining()
+        {
+            return Err(invalid("invalid low-delay SBR grid boundary"));
+        }
+        let mut trial = bits.clone();
+        let mut read = |n: u8| -> Result<u8> {
+            if usize::from(n) > end.saturating_sub(trial.position()) {
+                return Err(invalid("truncated low-delay SBR grid"));
+            }
+            Ok(trial.read(n)? as u8)
+        };
+        let transient = read(1)? != 0;
+        let (class, resolution) = if transient {
+            let position = read(4)?;
+            if position >= slots {
+                return Err(invalid("low-delay SBR transient position exceeds frame"));
+            }
+            let count = if position >= 2 && (position <= 9 || position == 10 && slots == 16) {
+                3
+            } else {
+                2
+            };
+            let mut resolution = Vec::with_capacity(count);
+            for _ in 0..count {
+                resolution.push(read(1)? != 0);
+            }
+            (FrameClass::LowDelayTransient { position }, resolution)
+        } else {
+            let count = 1usize << read(2)?;
+            if count > 4 {
+                return Err(invalid("low-delay SBR FIXFIX envelope count exceeds four"));
+            }
+            let amplitude_resolution = if count == 1 {
+                read(1)? != 0
+            } else {
+                header_amplitude
+            };
+            let fine = read(1)? != 0;
+            (
+                FrameClass::LowDelayFixed {
+                    amplitude_resolution,
+                },
+                vec![fine; count],
+            )
+        };
+        let syntax = Self {
+            class,
+            leading_offset: 0,
+            trailing_offset: 0,
+            leading_relative: Vec::new(),
+            trailing_relative: Vec::new(),
+            pointer: 0,
+            high_resolution: resolution,
+        };
+        syntax.time_grid(slots)?;
+        *bits = trial;
+        Ok(syntax)
+    }
+
     pub fn noise_envelopes(&self) -> usize {
         if self.high_resolution.len() == 1 {
             1
@@ -214,6 +318,12 @@ impl GridSyntax {
     }
     /// FIXFIX with one envelope forces the finer 1.5 dB envelope resolution.
     pub fn amplitude_resolution(&self, header_resolution: bool) -> bool {
+        if let FrameClass::LowDelayFixed {
+            amplitude_resolution,
+        } = self.class
+        {
+            return amplitude_resolution;
+        }
         header_resolution && !(self.class == FrameClass::FixFix && self.high_resolution.len() == 1)
     }
 }
@@ -379,6 +489,81 @@ mod tests {
         }
         for slots in [0, 1, 14, 17, 255] {
             assert!(base.time_grid(slots).is_err());
+        }
+    }
+}
+
+#[cfg(test)]
+mod low_delay_tests {
+    use super::*;
+    fn packed(bits: &str) -> Vec<u8> {
+        let mut out = vec![0; bits.len().div_ceil(8)];
+        for (i, b) in bits.bytes().enumerate() {
+            out[i / 8] |= (b - b'0') << (7 - i % 8);
+        }
+        out
+    }
+    #[test]
+    fn every_ld_transient_position_matches_the_normative_envelope_table() {
+        let interiors: &[&[u8]] = &[
+            &[4],
+            &[5],
+            &[2, 6],
+            &[3, 7],
+            &[4, 8],
+            &[5, 9],
+            &[6, 10],
+            &[7, 11],
+            &[8, 12],
+            &[9, 13],
+            &[10, 14],
+            &[11],
+            &[12],
+            &[13],
+            &[14],
+            &[15],
+        ];
+        for slots in [15, 16] {
+            for position in 0..slots {
+                let interior = if slots == 15 && position == 10 {
+                    &[10][..]
+                } else {
+                    interiors[position as usize]
+                };
+                let text = format!("1{position:04b}{}", "1".repeat(interior.len() + 1));
+                let raw = packed(&text);
+                let mut bits = BitReader::new(&raw);
+                let grid = GridSyntax::read_low_delay(&mut bits, text.len(), slots, false).unwrap();
+                assert_eq!(bits.position(), text.len());
+                let actual = grid.time_grid(slots).unwrap();
+                let expected = [&[0][..], interior, &[slots][..]].concat();
+                assert_eq!(actual.envelope, expected);
+                assert_eq!(actual.noise, vec![0, interior[0], slots]);
+                for end in 0..text.len() {
+                    let mut truncated = BitReader::new(&raw);
+                    assert!(GridSyntax::read_low_delay(&mut truncated, end, slots, false).is_err());
+                    assert_eq!(truncated.position(), 0);
+                }
+            }
+        }
+    }
+    #[test]
+    fn ld_fixfix_amplitude_override_and_invalid_counts_are_transactional() {
+        for coarse in [false, true] {
+            for header in [false, true] {
+                let text = format!("000{}1", u8::from(coarse));
+                let raw = packed(&text);
+                let mut bits = BitReader::new(&raw);
+                let grid = GridSyntax::read_low_delay(&mut bits, text.len(), 16, header).unwrap();
+                assert_eq!(grid.amplitude_resolution(header), coarse);
+                assert_eq!(grid.time_grid(16).unwrap().envelope, vec![0, 16]);
+            }
+        }
+        for (text, slots) in [("0111", 16), ("1111111", 15)] {
+            let raw = packed(text);
+            let mut bits = BitReader::new(&raw);
+            assert!(GridSyntax::read_low_delay(&mut bits, text.len(), slots, false).is_err());
+            assert_eq!(bits.position(), 0);
         }
     }
 }

@@ -50,12 +50,36 @@ impl Assembly {
         disable_smoothing: bool,
         header_reset: bool,
     ) -> Result<Vec<[Complex; 64]>> {
+        self.process_with_timing(
+            high,
+            slots,
+            grid,
+            kx,
+            levels,
+            suppress_noise,
+            disable_smoothing,
+            header_reset,
+            super::aac_sbr_timing::Timing::Legacy,
+        )
+    }
+    pub(crate) fn process_with_timing(
+        &mut self,
+        high: &[[Complex; 64]],
+        slots: u8,
+        grid: &TimeGrid,
+        kx: u8,
+        levels: &[Vec<Levels>],
+        suppress_noise: &[bool],
+        disable_smoothing: bool,
+        header_reset: bool,
+        timing: super::aac_sbr_timing::Timing,
+    ) -> Result<Vec<[Complex; 64]>> {
         if !matches!(slots, 15 | 16)
-            || high.len() != 2 * usize::from(slots) + 6
+            || high.len() != timing.columns(slots)?
             || grid.envelope.len() < 2
             || grid.envelope.len() > 6
             || grid.envelope.windows(2).any(|b| b[0] >= b[1])
-            || usize::from(*grid.envelope.last().unwrap()) > usize::from(slots) + 3
+            || usize::from(*grid.envelope.last().unwrap()) > timing.maximum_border(slots)
             || levels.len() + 1 != grid.envelope.len()
             || suppress_noise.len() != levels.len()
             || levels[0].is_empty()
@@ -100,8 +124,8 @@ impl Assembly {
         }
         let mut output = vec![[Complex::default(); 64]; high.len()];
         for (envelope, row) in levels.iter().enumerate() {
-            for t in 2 * usize::from(grid.envelope[envelope])
-                ..2 * usize::from(grid.envelope[envelope + 1])
+            for t in timing.rate() * usize::from(grid.envelope[envelope])
+                ..timing.rate() * usize::from(grid.envelope[envelope + 1])
             {
                 for (m, level) in row.iter().enumerate() {
                     let k = start_band + m;

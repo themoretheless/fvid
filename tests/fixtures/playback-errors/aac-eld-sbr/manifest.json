@@ -1,0 +1,7199 @@
+{
+  "cases": [
+    {
+      "name": "n512-c1-x1-crc0",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 1,
+      "mask": 4,
+      "asc": "f8ec210460c05800",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 14
+        },
+        {
+          "offset": 14,
+          "bytes": 13
+        },
+        {
+          "offset": 27,
+          "bytes": 13
+        },
+        {
+          "offset": 40,
+          "bytes": 13
+        },
+        {
+          "offset": 53,
+          "bytes": 13
+        },
+        {
+          "offset": 66,
+          "bytes": 13
+        },
+        {
+          "offset": 79,
+          "bytes": 13
+        },
+        {
+          "offset": 92,
+          "bytes": 11
+        },
+        {
+          "offset": 103,
+          "bytes": 11
+        },
+        {
+          "offset": 114,
+          "bytes": 11
+        },
+        {
+          "offset": 125,
+          "bytes": 11
+        },
+        {
+          "offset": 136,
+          "bytes": 11
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c1-x1-crc0.mp4",
+      "matroska": "n512-c1-x1-crc0.mka"
+    },
+    {
+      "name": "n512-c1-x1-crc1",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 1,
+      "mask": 4,
+      "asc": "f8ec214460c05800",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 147,
+          "bytes": 15
+        },
+        {
+          "offset": 162,
+          "bytes": 14
+        },
+        {
+          "offset": 176,
+          "bytes": 14
+        },
+        {
+          "offset": 190,
+          "bytes": 14
+        },
+        {
+          "offset": 204,
+          "bytes": 14
+        },
+        {
+          "offset": 218,
+          "bytes": 14
+        },
+        {
+          "offset": 232,
+          "bytes": 14
+        },
+        {
+          "offset": 246,
+          "bytes": 12
+        },
+        {
+          "offset": 258,
+          "bytes": 12
+        },
+        {
+          "offset": 270,
+          "bytes": 12
+        },
+        {
+          "offset": 282,
+          "bytes": 12
+        },
+        {
+          "offset": 294,
+          "bytes": 12
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c1-x1-crc1.mp4",
+      "matroska": "n512-c1-x1-crc1.mka"
+    },
+    {
+      "name": "n512-c1-x2-crc0",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 1,
+      "mask": 4,
+      "asc": "f8ec218460c05800",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 306,
+          "bytes": 14
+        },
+        {
+          "offset": 320,
+          "bytes": 13
+        },
+        {
+          "offset": 333,
+          "bytes": 13
+        },
+        {
+          "offset": 346,
+          "bytes": 13
+        },
+        {
+          "offset": 359,
+          "bytes": 13
+        },
+        {
+          "offset": 372,
+          "bytes": 13
+        },
+        {
+          "offset": 385,
+          "bytes": 13
+        },
+        {
+          "offset": 398,
+          "bytes": 11
+        },
+        {
+          "offset": 409,
+          "bytes": 11
+        },
+        {
+          "offset": 420,
+          "bytes": 11
+        },
+        {
+          "offset": 431,
+          "bytes": 11
+        },
+        {
+          "offset": 442,
+          "bytes": 11
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c1-x2-crc0.mp4",
+      "matroska": "n512-c1-x2-crc0.mka"
+    },
+    {
+      "name": "n512-c1-x2-crc1",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 1,
+      "mask": 4,
+      "asc": "f8ec21c460c05800",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 453,
+          "bytes": 15
+        },
+        {
+          "offset": 468,
+          "bytes": 14
+        },
+        {
+          "offset": 482,
+          "bytes": 14
+        },
+        {
+          "offset": 496,
+          "bytes": 14
+        },
+        {
+          "offset": 510,
+          "bytes": 14
+        },
+        {
+          "offset": 524,
+          "bytes": 14
+        },
+        {
+          "offset": 538,
+          "bytes": 14
+        },
+        {
+          "offset": 552,
+          "bytes": 12
+        },
+        {
+          "offset": 564,
+          "bytes": 12
+        },
+        {
+          "offset": 576,
+          "bytes": 12
+        },
+        {
+          "offset": 588,
+          "bytes": 12
+        },
+        {
+          "offset": 600,
+          "bytes": 12
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c1-x2-crc1.mp4",
+      "matroska": "n512-c1-x2-crc1.mka"
+    },
+    {
+      "name": "n512-c2-x1-crc0",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec410460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 612,
+          "bytes": 26
+        },
+        {
+          "offset": 638,
+          "bytes": 24
+        },
+        {
+          "offset": 662,
+          "bytes": 24
+        },
+        {
+          "offset": 686,
+          "bytes": 24
+        },
+        {
+          "offset": 710,
+          "bytes": 24
+        },
+        {
+          "offset": 734,
+          "bytes": 24
+        },
+        {
+          "offset": 758,
+          "bytes": 24
+        },
+        {
+          "offset": 782,
+          "bytes": 20
+        },
+        {
+          "offset": 802,
+          "bytes": 20
+        },
+        {
+          "offset": 822,
+          "bytes": 20
+        },
+        {
+          "offset": 842,
+          "bytes": 20
+        },
+        {
+          "offset": 862,
+          "bytes": 20
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c2-x1-crc0.mp4",
+      "matroska": "n512-c2-x1-crc0.mka"
+    },
+    {
+      "name": "n512-c2-x1-crc1",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec414460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 882,
+          "bytes": 27
+        },
+        {
+          "offset": 909,
+          "bytes": 25
+        },
+        {
+          "offset": 934,
+          "bytes": 25
+        },
+        {
+          "offset": 959,
+          "bytes": 25
+        },
+        {
+          "offset": 984,
+          "bytes": 25
+        },
+        {
+          "offset": 1009,
+          "bytes": 25
+        },
+        {
+          "offset": 1034,
+          "bytes": 25
+        },
+        {
+          "offset": 1059,
+          "bytes": 22
+        },
+        {
+          "offset": 1081,
+          "bytes": 22
+        },
+        {
+          "offset": 1103,
+          "bytes": 22
+        },
+        {
+          "offset": 1125,
+          "bytes": 22
+        },
+        {
+          "offset": 1147,
+          "bytes": 22
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c2-x1-crc1.mp4",
+      "matroska": "n512-c2-x1-crc1.mka"
+    },
+    {
+      "name": "n512-c2-x2-crc0",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec418460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 1169,
+          "bytes": 26
+        },
+        {
+          "offset": 1195,
+          "bytes": 24
+        },
+        {
+          "offset": 1219,
+          "bytes": 24
+        },
+        {
+          "offset": 1243,
+          "bytes": 24
+        },
+        {
+          "offset": 1267,
+          "bytes": 24
+        },
+        {
+          "offset": 1291,
+          "bytes": 24
+        },
+        {
+          "offset": 1315,
+          "bytes": 24
+        },
+        {
+          "offset": 1339,
+          "bytes": 20
+        },
+        {
+          "offset": 1359,
+          "bytes": 20
+        },
+        {
+          "offset": 1379,
+          "bytes": 20
+        },
+        {
+          "offset": 1399,
+          "bytes": 20
+        },
+        {
+          "offset": 1419,
+          "bytes": 20
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c2-x2-crc0.mp4",
+      "matroska": "n512-c2-x2-crc0.mka"
+    },
+    {
+      "name": "n512-c2-x2-crc1",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec41c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 1439,
+          "bytes": 27
+        },
+        {
+          "offset": 1466,
+          "bytes": 25
+        },
+        {
+          "offset": 1491,
+          "bytes": 25
+        },
+        {
+          "offset": 1516,
+          "bytes": 25
+        },
+        {
+          "offset": 1541,
+          "bytes": 25
+        },
+        {
+          "offset": 1566,
+          "bytes": 25
+        },
+        {
+          "offset": 1591,
+          "bytes": 25
+        },
+        {
+          "offset": 1616,
+          "bytes": 22
+        },
+        {
+          "offset": 1638,
+          "bytes": 22
+        },
+        {
+          "offset": 1660,
+          "bytes": 22
+        },
+        {
+          "offset": 1682,
+          "bytes": 22
+        },
+        {
+          "offset": 1704,
+          "bytes": 22
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c2-x2-crc1.mp4",
+      "matroska": "n512-c2-x2-crc1.mka"
+    },
+    {
+      "name": "n512-c3-x1-crc0",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 3,
+      "mask": 7,
+      "asc": "f8ec610460c0588c180b00",
+      "channels": 3,
+      "frames": [
+        {
+          "offset": 1726,
+          "bytes": 40
+        },
+        {
+          "offset": 1766,
+          "bytes": 36
+        },
+        {
+          "offset": 1802,
+          "bytes": 36
+        },
+        {
+          "offset": 1838,
+          "bytes": 36
+        },
+        {
+          "offset": 1874,
+          "bytes": 36
+        },
+        {
+          "offset": 1910,
+          "bytes": 36
+        },
+        {
+          "offset": 1946,
+          "bytes": 36
+        },
+        {
+          "offset": 1982,
+          "bytes": 31
+        },
+        {
+          "offset": 2013,
+          "bytes": 31
+        },
+        {
+          "offset": 2044,
+          "bytes": 31
+        },
+        {
+          "offset": 2075,
+          "bytes": 31
+        },
+        {
+          "offset": 2106,
+          "bytes": 31
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c3-x1-crc0.mp4",
+      "matroska": "n512-c3-x1-crc0.mka"
+    },
+    {
+      "name": "n512-c3-x1-crc1",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 3,
+      "mask": 7,
+      "asc": "f8ec614460c0588c180b00",
+      "channels": 3,
+      "frames": [
+        {
+          "offset": 2137,
+          "bytes": 42
+        },
+        {
+          "offset": 2179,
+          "bytes": 39
+        },
+        {
+          "offset": 2218,
+          "bytes": 39
+        },
+        {
+          "offset": 2257,
+          "bytes": 39
+        },
+        {
+          "offset": 2296,
+          "bytes": 39
+        },
+        {
+          "offset": 2335,
+          "bytes": 39
+        },
+        {
+          "offset": 2374,
+          "bytes": 39
+        },
+        {
+          "offset": 2413,
+          "bytes": 33
+        },
+        {
+          "offset": 2446,
+          "bytes": 33
+        },
+        {
+          "offset": 2479,
+          "bytes": 33
+        },
+        {
+          "offset": 2512,
+          "bytes": 33
+        },
+        {
+          "offset": 2545,
+          "bytes": 33
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c3-x1-crc1.mp4",
+      "matroska": "n512-c3-x1-crc1.mka"
+    },
+    {
+      "name": "n512-c3-x2-crc0",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 3,
+      "mask": 7,
+      "asc": "f8ec618460c0588c180b00",
+      "channels": 3,
+      "frames": [
+        {
+          "offset": 2578,
+          "bytes": 40
+        },
+        {
+          "offset": 2618,
+          "bytes": 36
+        },
+        {
+          "offset": 2654,
+          "bytes": 36
+        },
+        {
+          "offset": 2690,
+          "bytes": 36
+        },
+        {
+          "offset": 2726,
+          "bytes": 36
+        },
+        {
+          "offset": 2762,
+          "bytes": 36
+        },
+        {
+          "offset": 2798,
+          "bytes": 36
+        },
+        {
+          "offset": 2834,
+          "bytes": 31
+        },
+        {
+          "offset": 2865,
+          "bytes": 31
+        },
+        {
+          "offset": 2896,
+          "bytes": 31
+        },
+        {
+          "offset": 2927,
+          "bytes": 31
+        },
+        {
+          "offset": 2958,
+          "bytes": 31
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c3-x2-crc0.mp4",
+      "matroska": "n512-c3-x2-crc0.mka"
+    },
+    {
+      "name": "n512-c3-x2-crc1",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 3,
+      "mask": 7,
+      "asc": "f8ec61c460c0588c180b00",
+      "channels": 3,
+      "frames": [
+        {
+          "offset": 2989,
+          "bytes": 42
+        },
+        {
+          "offset": 3031,
+          "bytes": 39
+        },
+        {
+          "offset": 3070,
+          "bytes": 39
+        },
+        {
+          "offset": 3109,
+          "bytes": 39
+        },
+        {
+          "offset": 3148,
+          "bytes": 39
+        },
+        {
+          "offset": 3187,
+          "bytes": 39
+        },
+        {
+          "offset": 3226,
+          "bytes": 39
+        },
+        {
+          "offset": 3265,
+          "bytes": 33
+        },
+        {
+          "offset": 3298,
+          "bytes": 33
+        },
+        {
+          "offset": 3331,
+          "bytes": 33
+        },
+        {
+          "offset": 3364,
+          "bytes": 33
+        },
+        {
+          "offset": 3397,
+          "bytes": 33
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c3-x2-crc1.mp4",
+      "matroska": "n512-c3-x2-crc1.mka"
+    },
+    {
+      "name": "n512-c4-x1-crc0",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 4,
+      "mask": 263,
+      "asc": "f8ec810460c0588c180b1183016000",
+      "channels": 4,
+      "frames": [
+        {
+          "offset": 3430,
+          "bytes": 53
+        },
+        {
+          "offset": 3483,
+          "bytes": 48
+        },
+        {
+          "offset": 3531,
+          "bytes": 49
+        },
+        {
+          "offset": 3580,
+          "bytes": 48
+        },
+        {
+          "offset": 3628,
+          "bytes": 48
+        },
+        {
+          "offset": 3676,
+          "bytes": 49
+        },
+        {
+          "offset": 3725,
+          "bytes": 48
+        },
+        {
+          "offset": 3773,
+          "bytes": 41
+        },
+        {
+          "offset": 3814,
+          "bytes": 41
+        },
+        {
+          "offset": 3855,
+          "bytes": 41
+        },
+        {
+          "offset": 3896,
+          "bytes": 41
+        },
+        {
+          "offset": 3937,
+          "bytes": 41
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c4-x1-crc0.mp4",
+      "matroska": "n512-c4-x1-crc0.mka"
+    },
+    {
+      "name": "n512-c4-x1-crc1",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 4,
+      "mask": 263,
+      "asc": "f8ec814460c0588c180b1183016000",
+      "channels": 4,
+      "frames": [
+        {
+          "offset": 3978,
+          "bytes": 57
+        },
+        {
+          "offset": 4035,
+          "bytes": 52
+        },
+        {
+          "offset": 4087,
+          "bytes": 52
+        },
+        {
+          "offset": 4139,
+          "bytes": 52
+        },
+        {
+          "offset": 4191,
+          "bytes": 52
+        },
+        {
+          "offset": 4243,
+          "bytes": 52
+        },
+        {
+          "offset": 4295,
+          "bytes": 52
+        },
+        {
+          "offset": 4347,
+          "bytes": 45
+        },
+        {
+          "offset": 4392,
+          "bytes": 45
+        },
+        {
+          "offset": 4437,
+          "bytes": 45
+        },
+        {
+          "offset": 4482,
+          "bytes": 45
+        },
+        {
+          "offset": 4527,
+          "bytes": 45
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c4-x1-crc1.mp4",
+      "matroska": "n512-c4-x1-crc1.mka"
+    },
+    {
+      "name": "n512-c4-x2-crc0",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 4,
+      "mask": 263,
+      "asc": "f8ec818460c0588c180b1183016000",
+      "channels": 4,
+      "frames": [
+        {
+          "offset": 4572,
+          "bytes": 53
+        },
+        {
+          "offset": 4625,
+          "bytes": 48
+        },
+        {
+          "offset": 4673,
+          "bytes": 49
+        },
+        {
+          "offset": 4722,
+          "bytes": 48
+        },
+        {
+          "offset": 4770,
+          "bytes": 48
+        },
+        {
+          "offset": 4818,
+          "bytes": 49
+        },
+        {
+          "offset": 4867,
+          "bytes": 48
+        },
+        {
+          "offset": 4915,
+          "bytes": 41
+        },
+        {
+          "offset": 4956,
+          "bytes": 41
+        },
+        {
+          "offset": 4997,
+          "bytes": 41
+        },
+        {
+          "offset": 5038,
+          "bytes": 41
+        },
+        {
+          "offset": 5079,
+          "bytes": 41
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c4-x2-crc0.mp4",
+      "matroska": "n512-c4-x2-crc0.mka"
+    },
+    {
+      "name": "n512-c4-x2-crc1",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 4,
+      "mask": 263,
+      "asc": "f8ec81c460c0588c180b1183016000",
+      "channels": 4,
+      "frames": [
+        {
+          "offset": 5120,
+          "bytes": 57
+        },
+        {
+          "offset": 5177,
+          "bytes": 52
+        },
+        {
+          "offset": 5229,
+          "bytes": 52
+        },
+        {
+          "offset": 5281,
+          "bytes": 52
+        },
+        {
+          "offset": 5333,
+          "bytes": 52
+        },
+        {
+          "offset": 5385,
+          "bytes": 52
+        },
+        {
+          "offset": 5437,
+          "bytes": 52
+        },
+        {
+          "offset": 5489,
+          "bytes": 45
+        },
+        {
+          "offset": 5534,
+          "bytes": 45
+        },
+        {
+          "offset": 5579,
+          "bytes": 45
+        },
+        {
+          "offset": 5624,
+          "bytes": 45
+        },
+        {
+          "offset": 5669,
+          "bytes": 45
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c4-x2-crc1.mp4",
+      "matroska": "n512-c4-x2-crc1.mka"
+    },
+    {
+      "name": "n512-c5-x1-crc0",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 5,
+      "mask": 55,
+      "asc": "f8eca10460c0588c180b1183016000",
+      "channels": 5,
+      "frames": [
+        {
+          "offset": 5714,
+          "bytes": 65
+        },
+        {
+          "offset": 5779,
+          "bytes": 60
+        },
+        {
+          "offset": 5839,
+          "bytes": 60
+        },
+        {
+          "offset": 5899,
+          "bytes": 60
+        },
+        {
+          "offset": 5959,
+          "bytes": 60
+        },
+        {
+          "offset": 6019,
+          "bytes": 60
+        },
+        {
+          "offset": 6079,
+          "bytes": 60
+        },
+        {
+          "offset": 6139,
+          "bytes": 51
+        },
+        {
+          "offset": 6190,
+          "bytes": 51
+        },
+        {
+          "offset": 6241,
+          "bytes": 51
+        },
+        {
+          "offset": 6292,
+          "bytes": 51
+        },
+        {
+          "offset": 6343,
+          "bytes": 51
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c5-x1-crc0.mp4",
+      "matroska": "n512-c5-x1-crc0.mka"
+    },
+    {
+      "name": "n512-c5-x1-crc1",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 5,
+      "mask": 55,
+      "asc": "f8eca14460c0588c180b1183016000",
+      "channels": 5,
+      "frames": [
+        {
+          "offset": 6394,
+          "bytes": 69
+        },
+        {
+          "offset": 6463,
+          "bytes": 64
+        },
+        {
+          "offset": 6527,
+          "bytes": 64
+        },
+        {
+          "offset": 6591,
+          "bytes": 64
+        },
+        {
+          "offset": 6655,
+          "bytes": 64
+        },
+        {
+          "offset": 6719,
+          "bytes": 64
+        },
+        {
+          "offset": 6783,
+          "bytes": 64
+        },
+        {
+          "offset": 6847,
+          "bytes": 55
+        },
+        {
+          "offset": 6902,
+          "bytes": 55
+        },
+        {
+          "offset": 6957,
+          "bytes": 55
+        },
+        {
+          "offset": 7012,
+          "bytes": 55
+        },
+        {
+          "offset": 7067,
+          "bytes": 55
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c5-x1-crc1.mp4",
+      "matroska": "n512-c5-x1-crc1.mka"
+    },
+    {
+      "name": "n512-c5-x2-crc0",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 5,
+      "mask": 55,
+      "asc": "f8eca18460c0588c180b1183016000",
+      "channels": 5,
+      "frames": [
+        {
+          "offset": 7122,
+          "bytes": 65
+        },
+        {
+          "offset": 7187,
+          "bytes": 60
+        },
+        {
+          "offset": 7247,
+          "bytes": 60
+        },
+        {
+          "offset": 7307,
+          "bytes": 60
+        },
+        {
+          "offset": 7367,
+          "bytes": 60
+        },
+        {
+          "offset": 7427,
+          "bytes": 60
+        },
+        {
+          "offset": 7487,
+          "bytes": 60
+        },
+        {
+          "offset": 7547,
+          "bytes": 51
+        },
+        {
+          "offset": 7598,
+          "bytes": 51
+        },
+        {
+          "offset": 7649,
+          "bytes": 51
+        },
+        {
+          "offset": 7700,
+          "bytes": 51
+        },
+        {
+          "offset": 7751,
+          "bytes": 51
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c5-x2-crc0.mp4",
+      "matroska": "n512-c5-x2-crc0.mka"
+    },
+    {
+      "name": "n512-c5-x2-crc1",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 5,
+      "mask": 55,
+      "asc": "f8eca1c460c0588c180b1183016000",
+      "channels": 5,
+      "frames": [
+        {
+          "offset": 7802,
+          "bytes": 69
+        },
+        {
+          "offset": 7871,
+          "bytes": 64
+        },
+        {
+          "offset": 7935,
+          "bytes": 64
+        },
+        {
+          "offset": 7999,
+          "bytes": 64
+        },
+        {
+          "offset": 8063,
+          "bytes": 64
+        },
+        {
+          "offset": 8127,
+          "bytes": 64
+        },
+        {
+          "offset": 8191,
+          "bytes": 64
+        },
+        {
+          "offset": 8255,
+          "bytes": 55
+        },
+        {
+          "offset": 8310,
+          "bytes": 55
+        },
+        {
+          "offset": 8365,
+          "bytes": 55
+        },
+        {
+          "offset": 8420,
+          "bytes": 55
+        },
+        {
+          "offset": 8475,
+          "bytes": 55
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c5-x2-crc1.mp4",
+      "matroska": "n512-c5-x2-crc1.mka"
+    },
+    {
+      "name": "n512-c6-x1-crc0",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 6,
+      "mask": 63,
+      "asc": "f8ecc10460c0588c180b1183016000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 8530,
+          "bytes": 70
+        },
+        {
+          "offset": 8600,
+          "bytes": 64
+        },
+        {
+          "offset": 8664,
+          "bytes": 64
+        },
+        {
+          "offset": 8728,
+          "bytes": 64
+        },
+        {
+          "offset": 8792,
+          "bytes": 64
+        },
+        {
+          "offset": 8856,
+          "bytes": 64
+        },
+        {
+          "offset": 8920,
+          "bytes": 64
+        },
+        {
+          "offset": 8984,
+          "bytes": 54
+        },
+        {
+          "offset": 9038,
+          "bytes": 54
+        },
+        {
+          "offset": 9092,
+          "bytes": 54
+        },
+        {
+          "offset": 9146,
+          "bytes": 54
+        },
+        {
+          "offset": 9200,
+          "bytes": 54
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c6-x1-crc0.mp4",
+      "matroska": "n512-c6-x1-crc0.mka"
+    },
+    {
+      "name": "n512-c6-x1-crc1",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 6,
+      "mask": 63,
+      "asc": "f8ecc14460c0588c180b1183016000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 9254,
+          "bytes": 73
+        },
+        {
+          "offset": 9327,
+          "bytes": 68
+        },
+        {
+          "offset": 9395,
+          "bytes": 68
+        },
+        {
+          "offset": 9463,
+          "bytes": 68
+        },
+        {
+          "offset": 9531,
+          "bytes": 68
+        },
+        {
+          "offset": 9599,
+          "bytes": 68
+        },
+        {
+          "offset": 9667,
+          "bytes": 68
+        },
+        {
+          "offset": 9735,
+          "bytes": 58
+        },
+        {
+          "offset": 9793,
+          "bytes": 58
+        },
+        {
+          "offset": 9851,
+          "bytes": 58
+        },
+        {
+          "offset": 9909,
+          "bytes": 58
+        },
+        {
+          "offset": 9967,
+          "bytes": 58
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c6-x1-crc1.mp4",
+      "matroska": "n512-c6-x1-crc1.mka"
+    },
+    {
+      "name": "n512-c6-x2-crc0",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 6,
+      "mask": 63,
+      "asc": "f8ecc18460c0588c180b1183016000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 10025,
+          "bytes": 70
+        },
+        {
+          "offset": 10095,
+          "bytes": 64
+        },
+        {
+          "offset": 10159,
+          "bytes": 64
+        },
+        {
+          "offset": 10223,
+          "bytes": 64
+        },
+        {
+          "offset": 10287,
+          "bytes": 64
+        },
+        {
+          "offset": 10351,
+          "bytes": 64
+        },
+        {
+          "offset": 10415,
+          "bytes": 64
+        },
+        {
+          "offset": 10479,
+          "bytes": 54
+        },
+        {
+          "offset": 10533,
+          "bytes": 54
+        },
+        {
+          "offset": 10587,
+          "bytes": 54
+        },
+        {
+          "offset": 10641,
+          "bytes": 54
+        },
+        {
+          "offset": 10695,
+          "bytes": 54
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c6-x2-crc0.mp4",
+      "matroska": "n512-c6-x2-crc0.mka"
+    },
+    {
+      "name": "n512-c6-x2-crc1",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 6,
+      "mask": 63,
+      "asc": "f8ecc1c460c0588c180b1183016000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 10749,
+          "bytes": 73
+        },
+        {
+          "offset": 10822,
+          "bytes": 68
+        },
+        {
+          "offset": 10890,
+          "bytes": 68
+        },
+        {
+          "offset": 10958,
+          "bytes": 68
+        },
+        {
+          "offset": 11026,
+          "bytes": 68
+        },
+        {
+          "offset": 11094,
+          "bytes": 68
+        },
+        {
+          "offset": 11162,
+          "bytes": 68
+        },
+        {
+          "offset": 11230,
+          "bytes": 58
+        },
+        {
+          "offset": 11288,
+          "bytes": 58
+        },
+        {
+          "offset": 11346,
+          "bytes": 58
+        },
+        {
+          "offset": 11404,
+          "bytes": 58
+        },
+        {
+          "offset": 11462,
+          "bytes": 58
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c6-x2-crc1.mp4",
+      "matroska": "n512-c6-x2-crc1.mka"
+    },
+    {
+      "name": "n512-c7-x1-crc0",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 7,
+      "mask": 255,
+      "asc": "f8ece10460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 11520,
+          "bytes": 95
+        },
+        {
+          "offset": 11615,
+          "bytes": 88
+        },
+        {
+          "offset": 11703,
+          "bytes": 88
+        },
+        {
+          "offset": 11791,
+          "bytes": 88
+        },
+        {
+          "offset": 11879,
+          "bytes": 88
+        },
+        {
+          "offset": 11967,
+          "bytes": 88
+        },
+        {
+          "offset": 12055,
+          "bytes": 88
+        },
+        {
+          "offset": 12143,
+          "bytes": 74
+        },
+        {
+          "offset": 12217,
+          "bytes": 74
+        },
+        {
+          "offset": 12291,
+          "bytes": 74
+        },
+        {
+          "offset": 12365,
+          "bytes": 74
+        },
+        {
+          "offset": 12439,
+          "bytes": 74
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c7-x1-crc0.mp4",
+      "matroska": "n512-c7-x1-crc0.mka"
+    },
+    {
+      "name": "n512-c7-x1-crc1",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 7,
+      "mask": 255,
+      "asc": "f8ece14460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 12513,
+          "bytes": 100
+        },
+        {
+          "offset": 12613,
+          "bytes": 93
+        },
+        {
+          "offset": 12706,
+          "bytes": 93
+        },
+        {
+          "offset": 12799,
+          "bytes": 93
+        },
+        {
+          "offset": 12892,
+          "bytes": 93
+        },
+        {
+          "offset": 12985,
+          "bytes": 93
+        },
+        {
+          "offset": 13078,
+          "bytes": 93
+        },
+        {
+          "offset": 13171,
+          "bytes": 79
+        },
+        {
+          "offset": 13250,
+          "bytes": 79
+        },
+        {
+          "offset": 13329,
+          "bytes": 79
+        },
+        {
+          "offset": 13408,
+          "bytes": 79
+        },
+        {
+          "offset": 13487,
+          "bytes": 79
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c7-x1-crc1.mp4",
+      "matroska": "n512-c7-x1-crc1.mka"
+    },
+    {
+      "name": "n512-c7-x2-crc0",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 7,
+      "mask": 255,
+      "asc": "f8ece18460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 13566,
+          "bytes": 95
+        },
+        {
+          "offset": 13661,
+          "bytes": 88
+        },
+        {
+          "offset": 13749,
+          "bytes": 88
+        },
+        {
+          "offset": 13837,
+          "bytes": 88
+        },
+        {
+          "offset": 13925,
+          "bytes": 88
+        },
+        {
+          "offset": 14013,
+          "bytes": 88
+        },
+        {
+          "offset": 14101,
+          "bytes": 88
+        },
+        {
+          "offset": 14189,
+          "bytes": 74
+        },
+        {
+          "offset": 14263,
+          "bytes": 74
+        },
+        {
+          "offset": 14337,
+          "bytes": 74
+        },
+        {
+          "offset": 14411,
+          "bytes": 74
+        },
+        {
+          "offset": 14485,
+          "bytes": 74
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c7-x2-crc0.mp4",
+      "matroska": "n512-c7-x2-crc0.mka"
+    },
+    {
+      "name": "n512-c7-x2-crc1",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 7,
+      "mask": 255,
+      "asc": "f8ece1c460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 14559,
+          "bytes": 100
+        },
+        {
+          "offset": 14659,
+          "bytes": 93
+        },
+        {
+          "offset": 14752,
+          "bytes": 93
+        },
+        {
+          "offset": 14845,
+          "bytes": 93
+        },
+        {
+          "offset": 14938,
+          "bytes": 93
+        },
+        {
+          "offset": 15031,
+          "bytes": 93
+        },
+        {
+          "offset": 15124,
+          "bytes": 93
+        },
+        {
+          "offset": 15217,
+          "bytes": 79
+        },
+        {
+          "offset": 15296,
+          "bytes": 79
+        },
+        {
+          "offset": 15375,
+          "bytes": 79
+        },
+        {
+          "offset": 15454,
+          "bytes": 79
+        },
+        {
+          "offset": 15533,
+          "bytes": 79
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c7-x2-crc1.mp4",
+      "matroska": "n512-c7-x2-crc1.mka"
+    },
+    {
+      "name": "n512-c11-x1-crc0",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 11,
+      "mask": 319,
+      "asc": "f8ed610460c0588c180b1183016230602c00",
+      "channels": 7,
+      "frames": [
+        {
+          "offset": 15612,
+          "bytes": 83
+        },
+        {
+          "offset": 15695,
+          "bytes": 76
+        },
+        {
+          "offset": 15771,
+          "bytes": 76
+        },
+        {
+          "offset": 15847,
+          "bytes": 76
+        },
+        {
+          "offset": 15923,
+          "bytes": 76
+        },
+        {
+          "offset": 15999,
+          "bytes": 76
+        },
+        {
+          "offset": 16075,
+          "bytes": 76
+        },
+        {
+          "offset": 16151,
+          "bytes": 64
+        },
+        {
+          "offset": 16215,
+          "bytes": 64
+        },
+        {
+          "offset": 16279,
+          "bytes": 64
+        },
+        {
+          "offset": 16343,
+          "bytes": 64
+        },
+        {
+          "offset": 16407,
+          "bytes": 64
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c11-x1-crc0.mp4",
+      "matroska": "n512-c11-x1-crc0.mka"
+    },
+    {
+      "name": "n512-c11-x1-crc1",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 11,
+      "mask": 319,
+      "asc": "f8ed614460c0588c180b1183016230602c00",
+      "channels": 7,
+      "frames": [
+        {
+          "offset": 16471,
+          "bytes": 88
+        },
+        {
+          "offset": 16559,
+          "bytes": 81
+        },
+        {
+          "offset": 16640,
+          "bytes": 81
+        },
+        {
+          "offset": 16721,
+          "bytes": 81
+        },
+        {
+          "offset": 16802,
+          "bytes": 81
+        },
+        {
+          "offset": 16883,
+          "bytes": 81
+        },
+        {
+          "offset": 16964,
+          "bytes": 81
+        },
+        {
+          "offset": 17045,
+          "bytes": 69
+        },
+        {
+          "offset": 17114,
+          "bytes": 69
+        },
+        {
+          "offset": 17183,
+          "bytes": 69
+        },
+        {
+          "offset": 17252,
+          "bytes": 69
+        },
+        {
+          "offset": 17321,
+          "bytes": 69
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c11-x1-crc1.mp4",
+      "matroska": "n512-c11-x1-crc1.mka"
+    },
+    {
+      "name": "n512-c11-x2-crc0",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 11,
+      "mask": 319,
+      "asc": "f8ed618460c0588c180b1183016230602c00",
+      "channels": 7,
+      "frames": [
+        {
+          "offset": 17390,
+          "bytes": 83
+        },
+        {
+          "offset": 17473,
+          "bytes": 76
+        },
+        {
+          "offset": 17549,
+          "bytes": 76
+        },
+        {
+          "offset": 17625,
+          "bytes": 76
+        },
+        {
+          "offset": 17701,
+          "bytes": 76
+        },
+        {
+          "offset": 17777,
+          "bytes": 76
+        },
+        {
+          "offset": 17853,
+          "bytes": 76
+        },
+        {
+          "offset": 17929,
+          "bytes": 64
+        },
+        {
+          "offset": 17993,
+          "bytes": 64
+        },
+        {
+          "offset": 18057,
+          "bytes": 64
+        },
+        {
+          "offset": 18121,
+          "bytes": 64
+        },
+        {
+          "offset": 18185,
+          "bytes": 64
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c11-x2-crc0.mp4",
+      "matroska": "n512-c11-x2-crc0.mka"
+    },
+    {
+      "name": "n512-c11-x2-crc1",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 11,
+      "mask": 319,
+      "asc": "f8ed61c460c0588c180b1183016230602c00",
+      "channels": 7,
+      "frames": [
+        {
+          "offset": 18249,
+          "bytes": 88
+        },
+        {
+          "offset": 18337,
+          "bytes": 81
+        },
+        {
+          "offset": 18418,
+          "bytes": 81
+        },
+        {
+          "offset": 18499,
+          "bytes": 81
+        },
+        {
+          "offset": 18580,
+          "bytes": 81
+        },
+        {
+          "offset": 18661,
+          "bytes": 81
+        },
+        {
+          "offset": 18742,
+          "bytes": 81
+        },
+        {
+          "offset": 18823,
+          "bytes": 69
+        },
+        {
+          "offset": 18892,
+          "bytes": 69
+        },
+        {
+          "offset": 18961,
+          "bytes": 69
+        },
+        {
+          "offset": 19030,
+          "bytes": 69
+        },
+        {
+          "offset": 19099,
+          "bytes": 69
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c11-x2-crc1.mp4",
+      "matroska": "n512-c11-x2-crc1.mka"
+    },
+    {
+      "name": "n512-c12-x1-crc0",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 12,
+      "mask": 1599,
+      "asc": "f8ed810460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 19168,
+          "bytes": 95
+        },
+        {
+          "offset": 19263,
+          "bytes": 88
+        },
+        {
+          "offset": 19351,
+          "bytes": 88
+        },
+        {
+          "offset": 19439,
+          "bytes": 88
+        },
+        {
+          "offset": 19527,
+          "bytes": 88
+        },
+        {
+          "offset": 19615,
+          "bytes": 88
+        },
+        {
+          "offset": 19703,
+          "bytes": 88
+        },
+        {
+          "offset": 19791,
+          "bytes": 74
+        },
+        {
+          "offset": 19865,
+          "bytes": 74
+        },
+        {
+          "offset": 19939,
+          "bytes": 74
+        },
+        {
+          "offset": 20013,
+          "bytes": 74
+        },
+        {
+          "offset": 20087,
+          "bytes": 74
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c12-x1-crc0.mp4",
+      "matroska": "n512-c12-x1-crc0.mka"
+    },
+    {
+      "name": "n512-c12-x1-crc1",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 12,
+      "mask": 1599,
+      "asc": "f8ed814460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 20161,
+          "bytes": 100
+        },
+        {
+          "offset": 20261,
+          "bytes": 93
+        },
+        {
+          "offset": 20354,
+          "bytes": 93
+        },
+        {
+          "offset": 20447,
+          "bytes": 93
+        },
+        {
+          "offset": 20540,
+          "bytes": 93
+        },
+        {
+          "offset": 20633,
+          "bytes": 93
+        },
+        {
+          "offset": 20726,
+          "bytes": 93
+        },
+        {
+          "offset": 20819,
+          "bytes": 79
+        },
+        {
+          "offset": 20898,
+          "bytes": 79
+        },
+        {
+          "offset": 20977,
+          "bytes": 79
+        },
+        {
+          "offset": 21056,
+          "bytes": 79
+        },
+        {
+          "offset": 21135,
+          "bytes": 79
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c12-x1-crc1.mp4",
+      "matroska": "n512-c12-x1-crc1.mka"
+    },
+    {
+      "name": "n512-c12-x2-crc0",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 12,
+      "mask": 1599,
+      "asc": "f8ed818460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 21214,
+          "bytes": 95
+        },
+        {
+          "offset": 21309,
+          "bytes": 88
+        },
+        {
+          "offset": 21397,
+          "bytes": 88
+        },
+        {
+          "offset": 21485,
+          "bytes": 88
+        },
+        {
+          "offset": 21573,
+          "bytes": 88
+        },
+        {
+          "offset": 21661,
+          "bytes": 88
+        },
+        {
+          "offset": 21749,
+          "bytes": 88
+        },
+        {
+          "offset": 21837,
+          "bytes": 74
+        },
+        {
+          "offset": 21911,
+          "bytes": 74
+        },
+        {
+          "offset": 21985,
+          "bytes": 74
+        },
+        {
+          "offset": 22059,
+          "bytes": 74
+        },
+        {
+          "offset": 22133,
+          "bytes": 74
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c12-x2-crc0.mp4",
+      "matroska": "n512-c12-x2-crc0.mka"
+    },
+    {
+      "name": "n512-c12-x2-crc1",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 12,
+      "mask": 1599,
+      "asc": "f8ed81c460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 22207,
+          "bytes": 100
+        },
+        {
+          "offset": 22307,
+          "bytes": 93
+        },
+        {
+          "offset": 22400,
+          "bytes": 93
+        },
+        {
+          "offset": 22493,
+          "bytes": 93
+        },
+        {
+          "offset": 22586,
+          "bytes": 93
+        },
+        {
+          "offset": 22679,
+          "bytes": 93
+        },
+        {
+          "offset": 22772,
+          "bytes": 93
+        },
+        {
+          "offset": 22865,
+          "bytes": 79
+        },
+        {
+          "offset": 22944,
+          "bytes": 79
+        },
+        {
+          "offset": 23023,
+          "bytes": 79
+        },
+        {
+          "offset": 23102,
+          "bytes": 79
+        },
+        {
+          "offset": 23181,
+          "bytes": 79
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c12-x2-crc1.mp4",
+      "matroska": "n512-c12-x2-crc1.mka"
+    },
+    {
+      "name": "n512-c14-x1-crc0",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 14,
+      "mask": 20543,
+      "asc": "f8edc10460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 23260,
+          "bytes": 95
+        },
+        {
+          "offset": 23355,
+          "bytes": 88
+        },
+        {
+          "offset": 23443,
+          "bytes": 88
+        },
+        {
+          "offset": 23531,
+          "bytes": 88
+        },
+        {
+          "offset": 23619,
+          "bytes": 88
+        },
+        {
+          "offset": 23707,
+          "bytes": 88
+        },
+        {
+          "offset": 23795,
+          "bytes": 88
+        },
+        {
+          "offset": 23883,
+          "bytes": 74
+        },
+        {
+          "offset": 23957,
+          "bytes": 74
+        },
+        {
+          "offset": 24031,
+          "bytes": 74
+        },
+        {
+          "offset": 24105,
+          "bytes": 74
+        },
+        {
+          "offset": 24179,
+          "bytes": 74
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c14-x1-crc0.mp4",
+      "matroska": "n512-c14-x1-crc0.mka"
+    },
+    {
+      "name": "n512-c14-x1-crc1",
+      "n": 512,
+      "rate": 24000,
+      "configuration": 14,
+      "mask": 20543,
+      "asc": "f8edc14460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 24253,
+          "bytes": 100
+        },
+        {
+          "offset": 24353,
+          "bytes": 93
+        },
+        {
+          "offset": 24446,
+          "bytes": 93
+        },
+        {
+          "offset": 24539,
+          "bytes": 93
+        },
+        {
+          "offset": 24632,
+          "bytes": 93
+        },
+        {
+          "offset": 24725,
+          "bytes": 93
+        },
+        {
+          "offset": 24818,
+          "bytes": 93
+        },
+        {
+          "offset": 24911,
+          "bytes": 79
+        },
+        {
+          "offset": 24990,
+          "bytes": 79
+        },
+        {
+          "offset": 25069,
+          "bytes": 79
+        },
+        {
+          "offset": 25148,
+          "bytes": 79
+        },
+        {
+          "offset": 25227,
+          "bytes": 79
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "n512-c14-x1-crc1.mp4",
+      "matroska": "n512-c14-x1-crc1.mka"
+    },
+    {
+      "name": "n512-c14-x2-crc0",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 14,
+      "mask": 20543,
+      "asc": "f8edc18460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 25306,
+          "bytes": 95
+        },
+        {
+          "offset": 25401,
+          "bytes": 88
+        },
+        {
+          "offset": 25489,
+          "bytes": 88
+        },
+        {
+          "offset": 25577,
+          "bytes": 88
+        },
+        {
+          "offset": 25665,
+          "bytes": 88
+        },
+        {
+          "offset": 25753,
+          "bytes": 88
+        },
+        {
+          "offset": 25841,
+          "bytes": 88
+        },
+        {
+          "offset": 25929,
+          "bytes": 74
+        },
+        {
+          "offset": 26003,
+          "bytes": 74
+        },
+        {
+          "offset": 26077,
+          "bytes": 74
+        },
+        {
+          "offset": 26151,
+          "bytes": 74
+        },
+        {
+          "offset": 26225,
+          "bytes": 74
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c14-x2-crc0.mp4",
+      "matroska": "n512-c14-x2-crc0.mka"
+    },
+    {
+      "name": "n512-c14-x2-crc1",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 14,
+      "mask": 20543,
+      "asc": "f8edc1c460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 26299,
+          "bytes": 100
+        },
+        {
+          "offset": 26399,
+          "bytes": 93
+        },
+        {
+          "offset": 26492,
+          "bytes": 93
+        },
+        {
+          "offset": 26585,
+          "bytes": 93
+        },
+        {
+          "offset": 26678,
+          "bytes": 93
+        },
+        {
+          "offset": 26771,
+          "bytes": 93
+        },
+        {
+          "offset": 26864,
+          "bytes": 93
+        },
+        {
+          "offset": 26957,
+          "bytes": 79
+        },
+        {
+          "offset": 27036,
+          "bytes": 79
+        },
+        {
+          "offset": 27115,
+          "bytes": 79
+        },
+        {
+          "offset": 27194,
+          "bytes": 79
+        },
+        {
+          "offset": 27273,
+          "bytes": 79
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c14-x2-crc1.mp4",
+      "matroska": "n512-c14-x2-crc1.mka"
+    },
+    {
+      "name": "n480-c1-x1-crc0",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 1,
+      "mask": 4,
+      "asc": "f8ec310460c05800",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 27352,
+          "bytes": 14
+        },
+        {
+          "offset": 27366,
+          "bytes": 13
+        },
+        {
+          "offset": 27379,
+          "bytes": 13
+        },
+        {
+          "offset": 27392,
+          "bytes": 13
+        },
+        {
+          "offset": 27405,
+          "bytes": 13
+        },
+        {
+          "offset": 27418,
+          "bytes": 13
+        },
+        {
+          "offset": 27431,
+          "bytes": 13
+        },
+        {
+          "offset": 27444,
+          "bytes": 11
+        },
+        {
+          "offset": 27455,
+          "bytes": 11
+        },
+        {
+          "offset": 27466,
+          "bytes": 11
+        },
+        {
+          "offset": 27477,
+          "bytes": 11
+        },
+        {
+          "offset": 27488,
+          "bytes": 11
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c1-x1-crc0.mp4",
+      "matroska": "n480-c1-x1-crc0.mka"
+    },
+    {
+      "name": "n480-c1-x1-crc1",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 1,
+      "mask": 4,
+      "asc": "f8ec314460c05800",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 27499,
+          "bytes": 15
+        },
+        {
+          "offset": 27514,
+          "bytes": 14
+        },
+        {
+          "offset": 27528,
+          "bytes": 14
+        },
+        {
+          "offset": 27542,
+          "bytes": 14
+        },
+        {
+          "offset": 27556,
+          "bytes": 14
+        },
+        {
+          "offset": 27570,
+          "bytes": 14
+        },
+        {
+          "offset": 27584,
+          "bytes": 14
+        },
+        {
+          "offset": 27598,
+          "bytes": 12
+        },
+        {
+          "offset": 27610,
+          "bytes": 12
+        },
+        {
+          "offset": 27622,
+          "bytes": 12
+        },
+        {
+          "offset": 27634,
+          "bytes": 12
+        },
+        {
+          "offset": 27646,
+          "bytes": 12
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c1-x1-crc1.mp4",
+      "matroska": "n480-c1-x1-crc1.mka"
+    },
+    {
+      "name": "n480-c1-x2-crc0",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 1,
+      "mask": 4,
+      "asc": "f8ec318460c05800",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 27658,
+          "bytes": 14
+        },
+        {
+          "offset": 27672,
+          "bytes": 13
+        },
+        {
+          "offset": 27685,
+          "bytes": 13
+        },
+        {
+          "offset": 27698,
+          "bytes": 13
+        },
+        {
+          "offset": 27711,
+          "bytes": 13
+        },
+        {
+          "offset": 27724,
+          "bytes": 13
+        },
+        {
+          "offset": 27737,
+          "bytes": 13
+        },
+        {
+          "offset": 27750,
+          "bytes": 11
+        },
+        {
+          "offset": 27761,
+          "bytes": 11
+        },
+        {
+          "offset": 27772,
+          "bytes": 11
+        },
+        {
+          "offset": 27783,
+          "bytes": 11
+        },
+        {
+          "offset": 27794,
+          "bytes": 11
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c1-x2-crc0.mp4",
+      "matroska": "n480-c1-x2-crc0.mka"
+    },
+    {
+      "name": "n480-c1-x2-crc1",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 1,
+      "mask": 4,
+      "asc": "f8ec31c460c05800",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 27805,
+          "bytes": 15
+        },
+        {
+          "offset": 27820,
+          "bytes": 14
+        },
+        {
+          "offset": 27834,
+          "bytes": 14
+        },
+        {
+          "offset": 27848,
+          "bytes": 14
+        },
+        {
+          "offset": 27862,
+          "bytes": 14
+        },
+        {
+          "offset": 27876,
+          "bytes": 14
+        },
+        {
+          "offset": 27890,
+          "bytes": 14
+        },
+        {
+          "offset": 27904,
+          "bytes": 12
+        },
+        {
+          "offset": 27916,
+          "bytes": 12
+        },
+        {
+          "offset": 27928,
+          "bytes": 12
+        },
+        {
+          "offset": 27940,
+          "bytes": 12
+        },
+        {
+          "offset": 27952,
+          "bytes": 12
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c1-x2-crc1.mp4",
+      "matroska": "n480-c1-x2-crc1.mka"
+    },
+    {
+      "name": "n480-c2-x1-crc0",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec510460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 27964,
+          "bytes": 26
+        },
+        {
+          "offset": 27990,
+          "bytes": 24
+        },
+        {
+          "offset": 28014,
+          "bytes": 24
+        },
+        {
+          "offset": 28038,
+          "bytes": 24
+        },
+        {
+          "offset": 28062,
+          "bytes": 24
+        },
+        {
+          "offset": 28086,
+          "bytes": 24
+        },
+        {
+          "offset": 28110,
+          "bytes": 24
+        },
+        {
+          "offset": 28134,
+          "bytes": 20
+        },
+        {
+          "offset": 28154,
+          "bytes": 20
+        },
+        {
+          "offset": 28174,
+          "bytes": 20
+        },
+        {
+          "offset": 28194,
+          "bytes": 20
+        },
+        {
+          "offset": 28214,
+          "bytes": 20
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c2-x1-crc0.mp4",
+      "matroska": "n480-c2-x1-crc0.mka"
+    },
+    {
+      "name": "n480-c2-x1-crc1",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec514460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 28234,
+          "bytes": 27
+        },
+        {
+          "offset": 28261,
+          "bytes": 25
+        },
+        {
+          "offset": 28286,
+          "bytes": 25
+        },
+        {
+          "offset": 28311,
+          "bytes": 25
+        },
+        {
+          "offset": 28336,
+          "bytes": 25
+        },
+        {
+          "offset": 28361,
+          "bytes": 25
+        },
+        {
+          "offset": 28386,
+          "bytes": 25
+        },
+        {
+          "offset": 28411,
+          "bytes": 22
+        },
+        {
+          "offset": 28433,
+          "bytes": 22
+        },
+        {
+          "offset": 28455,
+          "bytes": 22
+        },
+        {
+          "offset": 28477,
+          "bytes": 22
+        },
+        {
+          "offset": 28499,
+          "bytes": 22
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c2-x1-crc1.mp4",
+      "matroska": "n480-c2-x1-crc1.mka"
+    },
+    {
+      "name": "n480-c2-x2-crc0",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec518460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 28521,
+          "bytes": 26
+        },
+        {
+          "offset": 28547,
+          "bytes": 24
+        },
+        {
+          "offset": 28571,
+          "bytes": 24
+        },
+        {
+          "offset": 28595,
+          "bytes": 24
+        },
+        {
+          "offset": 28619,
+          "bytes": 24
+        },
+        {
+          "offset": 28643,
+          "bytes": 24
+        },
+        {
+          "offset": 28667,
+          "bytes": 24
+        },
+        {
+          "offset": 28691,
+          "bytes": 20
+        },
+        {
+          "offset": 28711,
+          "bytes": 20
+        },
+        {
+          "offset": 28731,
+          "bytes": 20
+        },
+        {
+          "offset": 28751,
+          "bytes": 20
+        },
+        {
+          "offset": 28771,
+          "bytes": 20
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c2-x2-crc0.mp4",
+      "matroska": "n480-c2-x2-crc0.mka"
+    },
+    {
+      "name": "n480-c2-x2-crc1",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec51c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 28791,
+          "bytes": 27
+        },
+        {
+          "offset": 28818,
+          "bytes": 25
+        },
+        {
+          "offset": 28843,
+          "bytes": 25
+        },
+        {
+          "offset": 28868,
+          "bytes": 25
+        },
+        {
+          "offset": 28893,
+          "bytes": 25
+        },
+        {
+          "offset": 28918,
+          "bytes": 25
+        },
+        {
+          "offset": 28943,
+          "bytes": 25
+        },
+        {
+          "offset": 28968,
+          "bytes": 22
+        },
+        {
+          "offset": 28990,
+          "bytes": 22
+        },
+        {
+          "offset": 29012,
+          "bytes": 22
+        },
+        {
+          "offset": 29034,
+          "bytes": 22
+        },
+        {
+          "offset": 29056,
+          "bytes": 22
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c2-x2-crc1.mp4",
+      "matroska": "n480-c2-x2-crc1.mka"
+    },
+    {
+      "name": "n480-c3-x1-crc0",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 3,
+      "mask": 7,
+      "asc": "f8ec710460c0588c180b00",
+      "channels": 3,
+      "frames": [
+        {
+          "offset": 29078,
+          "bytes": 40
+        },
+        {
+          "offset": 29118,
+          "bytes": 36
+        },
+        {
+          "offset": 29154,
+          "bytes": 36
+        },
+        {
+          "offset": 29190,
+          "bytes": 36
+        },
+        {
+          "offset": 29226,
+          "bytes": 36
+        },
+        {
+          "offset": 29262,
+          "bytes": 36
+        },
+        {
+          "offset": 29298,
+          "bytes": 36
+        },
+        {
+          "offset": 29334,
+          "bytes": 31
+        },
+        {
+          "offset": 29365,
+          "bytes": 31
+        },
+        {
+          "offset": 29396,
+          "bytes": 31
+        },
+        {
+          "offset": 29427,
+          "bytes": 31
+        },
+        {
+          "offset": 29458,
+          "bytes": 31
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c3-x1-crc0.mp4",
+      "matroska": "n480-c3-x1-crc0.mka"
+    },
+    {
+      "name": "n480-c3-x1-crc1",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 3,
+      "mask": 7,
+      "asc": "f8ec714460c0588c180b00",
+      "channels": 3,
+      "frames": [
+        {
+          "offset": 29489,
+          "bytes": 42
+        },
+        {
+          "offset": 29531,
+          "bytes": 39
+        },
+        {
+          "offset": 29570,
+          "bytes": 39
+        },
+        {
+          "offset": 29609,
+          "bytes": 39
+        },
+        {
+          "offset": 29648,
+          "bytes": 39
+        },
+        {
+          "offset": 29687,
+          "bytes": 39
+        },
+        {
+          "offset": 29726,
+          "bytes": 39
+        },
+        {
+          "offset": 29765,
+          "bytes": 33
+        },
+        {
+          "offset": 29798,
+          "bytes": 33
+        },
+        {
+          "offset": 29831,
+          "bytes": 33
+        },
+        {
+          "offset": 29864,
+          "bytes": 33
+        },
+        {
+          "offset": 29897,
+          "bytes": 33
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c3-x1-crc1.mp4",
+      "matroska": "n480-c3-x1-crc1.mka"
+    },
+    {
+      "name": "n480-c3-x2-crc0",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 3,
+      "mask": 7,
+      "asc": "f8ec718460c0588c180b00",
+      "channels": 3,
+      "frames": [
+        {
+          "offset": 29930,
+          "bytes": 40
+        },
+        {
+          "offset": 29970,
+          "bytes": 36
+        },
+        {
+          "offset": 30006,
+          "bytes": 36
+        },
+        {
+          "offset": 30042,
+          "bytes": 36
+        },
+        {
+          "offset": 30078,
+          "bytes": 36
+        },
+        {
+          "offset": 30114,
+          "bytes": 36
+        },
+        {
+          "offset": 30150,
+          "bytes": 36
+        },
+        {
+          "offset": 30186,
+          "bytes": 31
+        },
+        {
+          "offset": 30217,
+          "bytes": 31
+        },
+        {
+          "offset": 30248,
+          "bytes": 31
+        },
+        {
+          "offset": 30279,
+          "bytes": 31
+        },
+        {
+          "offset": 30310,
+          "bytes": 31
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c3-x2-crc0.mp4",
+      "matroska": "n480-c3-x2-crc0.mka"
+    },
+    {
+      "name": "n480-c3-x2-crc1",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 3,
+      "mask": 7,
+      "asc": "f8ec71c460c0588c180b00",
+      "channels": 3,
+      "frames": [
+        {
+          "offset": 30341,
+          "bytes": 42
+        },
+        {
+          "offset": 30383,
+          "bytes": 39
+        },
+        {
+          "offset": 30422,
+          "bytes": 39
+        },
+        {
+          "offset": 30461,
+          "bytes": 39
+        },
+        {
+          "offset": 30500,
+          "bytes": 39
+        },
+        {
+          "offset": 30539,
+          "bytes": 39
+        },
+        {
+          "offset": 30578,
+          "bytes": 39
+        },
+        {
+          "offset": 30617,
+          "bytes": 33
+        },
+        {
+          "offset": 30650,
+          "bytes": 33
+        },
+        {
+          "offset": 30683,
+          "bytes": 33
+        },
+        {
+          "offset": 30716,
+          "bytes": 33
+        },
+        {
+          "offset": 30749,
+          "bytes": 33
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c3-x2-crc1.mp4",
+      "matroska": "n480-c3-x2-crc1.mka"
+    },
+    {
+      "name": "n480-c4-x1-crc0",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 4,
+      "mask": 263,
+      "asc": "f8ec910460c0588c180b1183016000",
+      "channels": 4,
+      "frames": [
+        {
+          "offset": 30782,
+          "bytes": 53
+        },
+        {
+          "offset": 30835,
+          "bytes": 48
+        },
+        {
+          "offset": 30883,
+          "bytes": 49
+        },
+        {
+          "offset": 30932,
+          "bytes": 48
+        },
+        {
+          "offset": 30980,
+          "bytes": 48
+        },
+        {
+          "offset": 31028,
+          "bytes": 49
+        },
+        {
+          "offset": 31077,
+          "bytes": 48
+        },
+        {
+          "offset": 31125,
+          "bytes": 41
+        },
+        {
+          "offset": 31166,
+          "bytes": 41
+        },
+        {
+          "offset": 31207,
+          "bytes": 41
+        },
+        {
+          "offset": 31248,
+          "bytes": 41
+        },
+        {
+          "offset": 31289,
+          "bytes": 41
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c4-x1-crc0.mp4",
+      "matroska": "n480-c4-x1-crc0.mka"
+    },
+    {
+      "name": "n480-c4-x1-crc1",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 4,
+      "mask": 263,
+      "asc": "f8ec914460c0588c180b1183016000",
+      "channels": 4,
+      "frames": [
+        {
+          "offset": 31330,
+          "bytes": 57
+        },
+        {
+          "offset": 31387,
+          "bytes": 52
+        },
+        {
+          "offset": 31439,
+          "bytes": 52
+        },
+        {
+          "offset": 31491,
+          "bytes": 52
+        },
+        {
+          "offset": 31543,
+          "bytes": 52
+        },
+        {
+          "offset": 31595,
+          "bytes": 52
+        },
+        {
+          "offset": 31647,
+          "bytes": 52
+        },
+        {
+          "offset": 31699,
+          "bytes": 45
+        },
+        {
+          "offset": 31744,
+          "bytes": 45
+        },
+        {
+          "offset": 31789,
+          "bytes": 45
+        },
+        {
+          "offset": 31834,
+          "bytes": 45
+        },
+        {
+          "offset": 31879,
+          "bytes": 45
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c4-x1-crc1.mp4",
+      "matroska": "n480-c4-x1-crc1.mka"
+    },
+    {
+      "name": "n480-c4-x2-crc0",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 4,
+      "mask": 263,
+      "asc": "f8ec918460c0588c180b1183016000",
+      "channels": 4,
+      "frames": [
+        {
+          "offset": 31924,
+          "bytes": 53
+        },
+        {
+          "offset": 31977,
+          "bytes": 48
+        },
+        {
+          "offset": 32025,
+          "bytes": 49
+        },
+        {
+          "offset": 32074,
+          "bytes": 48
+        },
+        {
+          "offset": 32122,
+          "bytes": 48
+        },
+        {
+          "offset": 32170,
+          "bytes": 49
+        },
+        {
+          "offset": 32219,
+          "bytes": 48
+        },
+        {
+          "offset": 32267,
+          "bytes": 41
+        },
+        {
+          "offset": 32308,
+          "bytes": 41
+        },
+        {
+          "offset": 32349,
+          "bytes": 41
+        },
+        {
+          "offset": 32390,
+          "bytes": 41
+        },
+        {
+          "offset": 32431,
+          "bytes": 41
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c4-x2-crc0.mp4",
+      "matroska": "n480-c4-x2-crc0.mka"
+    },
+    {
+      "name": "n480-c4-x2-crc1",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 4,
+      "mask": 263,
+      "asc": "f8ec91c460c0588c180b1183016000",
+      "channels": 4,
+      "frames": [
+        {
+          "offset": 32472,
+          "bytes": 57
+        },
+        {
+          "offset": 32529,
+          "bytes": 52
+        },
+        {
+          "offset": 32581,
+          "bytes": 52
+        },
+        {
+          "offset": 32633,
+          "bytes": 52
+        },
+        {
+          "offset": 32685,
+          "bytes": 52
+        },
+        {
+          "offset": 32737,
+          "bytes": 52
+        },
+        {
+          "offset": 32789,
+          "bytes": 52
+        },
+        {
+          "offset": 32841,
+          "bytes": 45
+        },
+        {
+          "offset": 32886,
+          "bytes": 45
+        },
+        {
+          "offset": 32931,
+          "bytes": 45
+        },
+        {
+          "offset": 32976,
+          "bytes": 45
+        },
+        {
+          "offset": 33021,
+          "bytes": 45
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c4-x2-crc1.mp4",
+      "matroska": "n480-c4-x2-crc1.mka"
+    },
+    {
+      "name": "n480-c5-x1-crc0",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 5,
+      "mask": 55,
+      "asc": "f8ecb10460c0588c180b1183016000",
+      "channels": 5,
+      "frames": [
+        {
+          "offset": 33066,
+          "bytes": 65
+        },
+        {
+          "offset": 33131,
+          "bytes": 60
+        },
+        {
+          "offset": 33191,
+          "bytes": 60
+        },
+        {
+          "offset": 33251,
+          "bytes": 60
+        },
+        {
+          "offset": 33311,
+          "bytes": 60
+        },
+        {
+          "offset": 33371,
+          "bytes": 60
+        },
+        {
+          "offset": 33431,
+          "bytes": 60
+        },
+        {
+          "offset": 33491,
+          "bytes": 51
+        },
+        {
+          "offset": 33542,
+          "bytes": 51
+        },
+        {
+          "offset": 33593,
+          "bytes": 51
+        },
+        {
+          "offset": 33644,
+          "bytes": 51
+        },
+        {
+          "offset": 33695,
+          "bytes": 51
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c5-x1-crc0.mp4",
+      "matroska": "n480-c5-x1-crc0.mka"
+    },
+    {
+      "name": "n480-c5-x1-crc1",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 5,
+      "mask": 55,
+      "asc": "f8ecb14460c0588c180b1183016000",
+      "channels": 5,
+      "frames": [
+        {
+          "offset": 33746,
+          "bytes": 69
+        },
+        {
+          "offset": 33815,
+          "bytes": 64
+        },
+        {
+          "offset": 33879,
+          "bytes": 64
+        },
+        {
+          "offset": 33943,
+          "bytes": 64
+        },
+        {
+          "offset": 34007,
+          "bytes": 64
+        },
+        {
+          "offset": 34071,
+          "bytes": 64
+        },
+        {
+          "offset": 34135,
+          "bytes": 64
+        },
+        {
+          "offset": 34199,
+          "bytes": 55
+        },
+        {
+          "offset": 34254,
+          "bytes": 55
+        },
+        {
+          "offset": 34309,
+          "bytes": 55
+        },
+        {
+          "offset": 34364,
+          "bytes": 55
+        },
+        {
+          "offset": 34419,
+          "bytes": 55
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c5-x1-crc1.mp4",
+      "matroska": "n480-c5-x1-crc1.mka"
+    },
+    {
+      "name": "n480-c5-x2-crc0",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 5,
+      "mask": 55,
+      "asc": "f8ecb18460c0588c180b1183016000",
+      "channels": 5,
+      "frames": [
+        {
+          "offset": 34474,
+          "bytes": 65
+        },
+        {
+          "offset": 34539,
+          "bytes": 60
+        },
+        {
+          "offset": 34599,
+          "bytes": 60
+        },
+        {
+          "offset": 34659,
+          "bytes": 60
+        },
+        {
+          "offset": 34719,
+          "bytes": 60
+        },
+        {
+          "offset": 34779,
+          "bytes": 60
+        },
+        {
+          "offset": 34839,
+          "bytes": 60
+        },
+        {
+          "offset": 34899,
+          "bytes": 51
+        },
+        {
+          "offset": 34950,
+          "bytes": 51
+        },
+        {
+          "offset": 35001,
+          "bytes": 51
+        },
+        {
+          "offset": 35052,
+          "bytes": 51
+        },
+        {
+          "offset": 35103,
+          "bytes": 51
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c5-x2-crc0.mp4",
+      "matroska": "n480-c5-x2-crc0.mka"
+    },
+    {
+      "name": "n480-c5-x2-crc1",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 5,
+      "mask": 55,
+      "asc": "f8ecb1c460c0588c180b1183016000",
+      "channels": 5,
+      "frames": [
+        {
+          "offset": 35154,
+          "bytes": 69
+        },
+        {
+          "offset": 35223,
+          "bytes": 64
+        },
+        {
+          "offset": 35287,
+          "bytes": 64
+        },
+        {
+          "offset": 35351,
+          "bytes": 64
+        },
+        {
+          "offset": 35415,
+          "bytes": 64
+        },
+        {
+          "offset": 35479,
+          "bytes": 64
+        },
+        {
+          "offset": 35543,
+          "bytes": 64
+        },
+        {
+          "offset": 35607,
+          "bytes": 55
+        },
+        {
+          "offset": 35662,
+          "bytes": 55
+        },
+        {
+          "offset": 35717,
+          "bytes": 55
+        },
+        {
+          "offset": 35772,
+          "bytes": 55
+        },
+        {
+          "offset": 35827,
+          "bytes": 55
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c5-x2-crc1.mp4",
+      "matroska": "n480-c5-x2-crc1.mka"
+    },
+    {
+      "name": "n480-c6-x1-crc0",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 6,
+      "mask": 63,
+      "asc": "f8ecd10460c0588c180b1183016000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 35882,
+          "bytes": 70
+        },
+        {
+          "offset": 35952,
+          "bytes": 64
+        },
+        {
+          "offset": 36016,
+          "bytes": 64
+        },
+        {
+          "offset": 36080,
+          "bytes": 64
+        },
+        {
+          "offset": 36144,
+          "bytes": 64
+        },
+        {
+          "offset": 36208,
+          "bytes": 64
+        },
+        {
+          "offset": 36272,
+          "bytes": 64
+        },
+        {
+          "offset": 36336,
+          "bytes": 54
+        },
+        {
+          "offset": 36390,
+          "bytes": 54
+        },
+        {
+          "offset": 36444,
+          "bytes": 54
+        },
+        {
+          "offset": 36498,
+          "bytes": 54
+        },
+        {
+          "offset": 36552,
+          "bytes": 54
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c6-x1-crc0.mp4",
+      "matroska": "n480-c6-x1-crc0.mka"
+    },
+    {
+      "name": "n480-c6-x1-crc1",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 6,
+      "mask": 63,
+      "asc": "f8ecd14460c0588c180b1183016000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 36606,
+          "bytes": 73
+        },
+        {
+          "offset": 36679,
+          "bytes": 68
+        },
+        {
+          "offset": 36747,
+          "bytes": 68
+        },
+        {
+          "offset": 36815,
+          "bytes": 68
+        },
+        {
+          "offset": 36883,
+          "bytes": 68
+        },
+        {
+          "offset": 36951,
+          "bytes": 68
+        },
+        {
+          "offset": 37019,
+          "bytes": 68
+        },
+        {
+          "offset": 37087,
+          "bytes": 58
+        },
+        {
+          "offset": 37145,
+          "bytes": 58
+        },
+        {
+          "offset": 37203,
+          "bytes": 58
+        },
+        {
+          "offset": 37261,
+          "bytes": 58
+        },
+        {
+          "offset": 37319,
+          "bytes": 58
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c6-x1-crc1.mp4",
+      "matroska": "n480-c6-x1-crc1.mka"
+    },
+    {
+      "name": "n480-c6-x2-crc0",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 6,
+      "mask": 63,
+      "asc": "f8ecd18460c0588c180b1183016000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 37377,
+          "bytes": 70
+        },
+        {
+          "offset": 37447,
+          "bytes": 64
+        },
+        {
+          "offset": 37511,
+          "bytes": 64
+        },
+        {
+          "offset": 37575,
+          "bytes": 64
+        },
+        {
+          "offset": 37639,
+          "bytes": 64
+        },
+        {
+          "offset": 37703,
+          "bytes": 64
+        },
+        {
+          "offset": 37767,
+          "bytes": 64
+        },
+        {
+          "offset": 37831,
+          "bytes": 54
+        },
+        {
+          "offset": 37885,
+          "bytes": 54
+        },
+        {
+          "offset": 37939,
+          "bytes": 54
+        },
+        {
+          "offset": 37993,
+          "bytes": 54
+        },
+        {
+          "offset": 38047,
+          "bytes": 54
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c6-x2-crc0.mp4",
+      "matroska": "n480-c6-x2-crc0.mka"
+    },
+    {
+      "name": "n480-c6-x2-crc1",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 6,
+      "mask": 63,
+      "asc": "f8ecd1c460c0588c180b1183016000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 38101,
+          "bytes": 73
+        },
+        {
+          "offset": 38174,
+          "bytes": 68
+        },
+        {
+          "offset": 38242,
+          "bytes": 68
+        },
+        {
+          "offset": 38310,
+          "bytes": 68
+        },
+        {
+          "offset": 38378,
+          "bytes": 68
+        },
+        {
+          "offset": 38446,
+          "bytes": 68
+        },
+        {
+          "offset": 38514,
+          "bytes": 68
+        },
+        {
+          "offset": 38582,
+          "bytes": 58
+        },
+        {
+          "offset": 38640,
+          "bytes": 58
+        },
+        {
+          "offset": 38698,
+          "bytes": 58
+        },
+        {
+          "offset": 38756,
+          "bytes": 58
+        },
+        {
+          "offset": 38814,
+          "bytes": 58
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c6-x2-crc1.mp4",
+      "matroska": "n480-c6-x2-crc1.mka"
+    },
+    {
+      "name": "n480-c7-x1-crc0",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 7,
+      "mask": 255,
+      "asc": "f8ecf10460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 38872,
+          "bytes": 95
+        },
+        {
+          "offset": 38967,
+          "bytes": 88
+        },
+        {
+          "offset": 39055,
+          "bytes": 88
+        },
+        {
+          "offset": 39143,
+          "bytes": 88
+        },
+        {
+          "offset": 39231,
+          "bytes": 88
+        },
+        {
+          "offset": 39319,
+          "bytes": 88
+        },
+        {
+          "offset": 39407,
+          "bytes": 88
+        },
+        {
+          "offset": 39495,
+          "bytes": 74
+        },
+        {
+          "offset": 39569,
+          "bytes": 74
+        },
+        {
+          "offset": 39643,
+          "bytes": 74
+        },
+        {
+          "offset": 39717,
+          "bytes": 74
+        },
+        {
+          "offset": 39791,
+          "bytes": 74
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c7-x1-crc0.mp4",
+      "matroska": "n480-c7-x1-crc0.mka"
+    },
+    {
+      "name": "n480-c7-x1-crc1",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 7,
+      "mask": 255,
+      "asc": "f8ecf14460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 39865,
+          "bytes": 100
+        },
+        {
+          "offset": 39965,
+          "bytes": 93
+        },
+        {
+          "offset": 40058,
+          "bytes": 93
+        },
+        {
+          "offset": 40151,
+          "bytes": 93
+        },
+        {
+          "offset": 40244,
+          "bytes": 93
+        },
+        {
+          "offset": 40337,
+          "bytes": 93
+        },
+        {
+          "offset": 40430,
+          "bytes": 93
+        },
+        {
+          "offset": 40523,
+          "bytes": 79
+        },
+        {
+          "offset": 40602,
+          "bytes": 79
+        },
+        {
+          "offset": 40681,
+          "bytes": 79
+        },
+        {
+          "offset": 40760,
+          "bytes": 79
+        },
+        {
+          "offset": 40839,
+          "bytes": 79
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c7-x1-crc1.mp4",
+      "matroska": "n480-c7-x1-crc1.mka"
+    },
+    {
+      "name": "n480-c7-x2-crc0",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 7,
+      "mask": 255,
+      "asc": "f8ecf18460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 40918,
+          "bytes": 95
+        },
+        {
+          "offset": 41013,
+          "bytes": 88
+        },
+        {
+          "offset": 41101,
+          "bytes": 88
+        },
+        {
+          "offset": 41189,
+          "bytes": 88
+        },
+        {
+          "offset": 41277,
+          "bytes": 88
+        },
+        {
+          "offset": 41365,
+          "bytes": 88
+        },
+        {
+          "offset": 41453,
+          "bytes": 88
+        },
+        {
+          "offset": 41541,
+          "bytes": 74
+        },
+        {
+          "offset": 41615,
+          "bytes": 74
+        },
+        {
+          "offset": 41689,
+          "bytes": 74
+        },
+        {
+          "offset": 41763,
+          "bytes": 74
+        },
+        {
+          "offset": 41837,
+          "bytes": 74
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c7-x2-crc0.mp4",
+      "matroska": "n480-c7-x2-crc0.mka"
+    },
+    {
+      "name": "n480-c7-x2-crc1",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 7,
+      "mask": 255,
+      "asc": "f8ecf1c460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 41911,
+          "bytes": 100
+        },
+        {
+          "offset": 42011,
+          "bytes": 93
+        },
+        {
+          "offset": 42104,
+          "bytes": 93
+        },
+        {
+          "offset": 42197,
+          "bytes": 93
+        },
+        {
+          "offset": 42290,
+          "bytes": 93
+        },
+        {
+          "offset": 42383,
+          "bytes": 93
+        },
+        {
+          "offset": 42476,
+          "bytes": 93
+        },
+        {
+          "offset": 42569,
+          "bytes": 79
+        },
+        {
+          "offset": 42648,
+          "bytes": 79
+        },
+        {
+          "offset": 42727,
+          "bytes": 79
+        },
+        {
+          "offset": 42806,
+          "bytes": 79
+        },
+        {
+          "offset": 42885,
+          "bytes": 79
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c7-x2-crc1.mp4",
+      "matroska": "n480-c7-x2-crc1.mka"
+    },
+    {
+      "name": "n480-c11-x1-crc0",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 11,
+      "mask": 319,
+      "asc": "f8ed710460c0588c180b1183016230602c00",
+      "channels": 7,
+      "frames": [
+        {
+          "offset": 42964,
+          "bytes": 83
+        },
+        {
+          "offset": 43047,
+          "bytes": 76
+        },
+        {
+          "offset": 43123,
+          "bytes": 76
+        },
+        {
+          "offset": 43199,
+          "bytes": 76
+        },
+        {
+          "offset": 43275,
+          "bytes": 76
+        },
+        {
+          "offset": 43351,
+          "bytes": 76
+        },
+        {
+          "offset": 43427,
+          "bytes": 76
+        },
+        {
+          "offset": 43503,
+          "bytes": 64
+        },
+        {
+          "offset": 43567,
+          "bytes": 64
+        },
+        {
+          "offset": 43631,
+          "bytes": 64
+        },
+        {
+          "offset": 43695,
+          "bytes": 64
+        },
+        {
+          "offset": 43759,
+          "bytes": 64
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c11-x1-crc0.mp4",
+      "matroska": "n480-c11-x1-crc0.mka"
+    },
+    {
+      "name": "n480-c11-x1-crc1",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 11,
+      "mask": 319,
+      "asc": "f8ed714460c0588c180b1183016230602c00",
+      "channels": 7,
+      "frames": [
+        {
+          "offset": 43823,
+          "bytes": 88
+        },
+        {
+          "offset": 43911,
+          "bytes": 81
+        },
+        {
+          "offset": 43992,
+          "bytes": 81
+        },
+        {
+          "offset": 44073,
+          "bytes": 81
+        },
+        {
+          "offset": 44154,
+          "bytes": 81
+        },
+        {
+          "offset": 44235,
+          "bytes": 81
+        },
+        {
+          "offset": 44316,
+          "bytes": 81
+        },
+        {
+          "offset": 44397,
+          "bytes": 69
+        },
+        {
+          "offset": 44466,
+          "bytes": 69
+        },
+        {
+          "offset": 44535,
+          "bytes": 69
+        },
+        {
+          "offset": 44604,
+          "bytes": 69
+        },
+        {
+          "offset": 44673,
+          "bytes": 69
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c11-x1-crc1.mp4",
+      "matroska": "n480-c11-x1-crc1.mka"
+    },
+    {
+      "name": "n480-c11-x2-crc0",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 11,
+      "mask": 319,
+      "asc": "f8ed718460c0588c180b1183016230602c00",
+      "channels": 7,
+      "frames": [
+        {
+          "offset": 44742,
+          "bytes": 83
+        },
+        {
+          "offset": 44825,
+          "bytes": 76
+        },
+        {
+          "offset": 44901,
+          "bytes": 76
+        },
+        {
+          "offset": 44977,
+          "bytes": 76
+        },
+        {
+          "offset": 45053,
+          "bytes": 76
+        },
+        {
+          "offset": 45129,
+          "bytes": 76
+        },
+        {
+          "offset": 45205,
+          "bytes": 76
+        },
+        {
+          "offset": 45281,
+          "bytes": 64
+        },
+        {
+          "offset": 45345,
+          "bytes": 64
+        },
+        {
+          "offset": 45409,
+          "bytes": 64
+        },
+        {
+          "offset": 45473,
+          "bytes": 64
+        },
+        {
+          "offset": 45537,
+          "bytes": 64
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c11-x2-crc0.mp4",
+      "matroska": "n480-c11-x2-crc0.mka"
+    },
+    {
+      "name": "n480-c11-x2-crc1",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 11,
+      "mask": 319,
+      "asc": "f8ed71c460c0588c180b1183016230602c00",
+      "channels": 7,
+      "frames": [
+        {
+          "offset": 45601,
+          "bytes": 88
+        },
+        {
+          "offset": 45689,
+          "bytes": 81
+        },
+        {
+          "offset": 45770,
+          "bytes": 81
+        },
+        {
+          "offset": 45851,
+          "bytes": 81
+        },
+        {
+          "offset": 45932,
+          "bytes": 81
+        },
+        {
+          "offset": 46013,
+          "bytes": 81
+        },
+        {
+          "offset": 46094,
+          "bytes": 81
+        },
+        {
+          "offset": 46175,
+          "bytes": 69
+        },
+        {
+          "offset": 46244,
+          "bytes": 69
+        },
+        {
+          "offset": 46313,
+          "bytes": 69
+        },
+        {
+          "offset": 46382,
+          "bytes": 69
+        },
+        {
+          "offset": 46451,
+          "bytes": 69
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c11-x2-crc1.mp4",
+      "matroska": "n480-c11-x2-crc1.mka"
+    },
+    {
+      "name": "n480-c12-x1-crc0",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 12,
+      "mask": 1599,
+      "asc": "f8ed910460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 46520,
+          "bytes": 95
+        },
+        {
+          "offset": 46615,
+          "bytes": 88
+        },
+        {
+          "offset": 46703,
+          "bytes": 88
+        },
+        {
+          "offset": 46791,
+          "bytes": 88
+        },
+        {
+          "offset": 46879,
+          "bytes": 88
+        },
+        {
+          "offset": 46967,
+          "bytes": 88
+        },
+        {
+          "offset": 47055,
+          "bytes": 88
+        },
+        {
+          "offset": 47143,
+          "bytes": 74
+        },
+        {
+          "offset": 47217,
+          "bytes": 74
+        },
+        {
+          "offset": 47291,
+          "bytes": 74
+        },
+        {
+          "offset": 47365,
+          "bytes": 74
+        },
+        {
+          "offset": 47439,
+          "bytes": 74
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c12-x1-crc0.mp4",
+      "matroska": "n480-c12-x1-crc0.mka"
+    },
+    {
+      "name": "n480-c12-x1-crc1",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 12,
+      "mask": 1599,
+      "asc": "f8ed914460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 47513,
+          "bytes": 100
+        },
+        {
+          "offset": 47613,
+          "bytes": 93
+        },
+        {
+          "offset": 47706,
+          "bytes": 93
+        },
+        {
+          "offset": 47799,
+          "bytes": 93
+        },
+        {
+          "offset": 47892,
+          "bytes": 93
+        },
+        {
+          "offset": 47985,
+          "bytes": 93
+        },
+        {
+          "offset": 48078,
+          "bytes": 93
+        },
+        {
+          "offset": 48171,
+          "bytes": 79
+        },
+        {
+          "offset": 48250,
+          "bytes": 79
+        },
+        {
+          "offset": 48329,
+          "bytes": 79
+        },
+        {
+          "offset": 48408,
+          "bytes": 79
+        },
+        {
+          "offset": 48487,
+          "bytes": 79
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c12-x1-crc1.mp4",
+      "matroska": "n480-c12-x1-crc1.mka"
+    },
+    {
+      "name": "n480-c12-x2-crc0",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 12,
+      "mask": 1599,
+      "asc": "f8ed918460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 48566,
+          "bytes": 95
+        },
+        {
+          "offset": 48661,
+          "bytes": 88
+        },
+        {
+          "offset": 48749,
+          "bytes": 88
+        },
+        {
+          "offset": 48837,
+          "bytes": 88
+        },
+        {
+          "offset": 48925,
+          "bytes": 88
+        },
+        {
+          "offset": 49013,
+          "bytes": 88
+        },
+        {
+          "offset": 49101,
+          "bytes": 88
+        },
+        {
+          "offset": 49189,
+          "bytes": 74
+        },
+        {
+          "offset": 49263,
+          "bytes": 74
+        },
+        {
+          "offset": 49337,
+          "bytes": 74
+        },
+        {
+          "offset": 49411,
+          "bytes": 74
+        },
+        {
+          "offset": 49485,
+          "bytes": 74
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c12-x2-crc0.mp4",
+      "matroska": "n480-c12-x2-crc0.mka"
+    },
+    {
+      "name": "n480-c12-x2-crc1",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 12,
+      "mask": 1599,
+      "asc": "f8ed91c460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 49559,
+          "bytes": 100
+        },
+        {
+          "offset": 49659,
+          "bytes": 93
+        },
+        {
+          "offset": 49752,
+          "bytes": 93
+        },
+        {
+          "offset": 49845,
+          "bytes": 93
+        },
+        {
+          "offset": 49938,
+          "bytes": 93
+        },
+        {
+          "offset": 50031,
+          "bytes": 93
+        },
+        {
+          "offset": 50124,
+          "bytes": 93
+        },
+        {
+          "offset": 50217,
+          "bytes": 79
+        },
+        {
+          "offset": 50296,
+          "bytes": 79
+        },
+        {
+          "offset": 50375,
+          "bytes": 79
+        },
+        {
+          "offset": 50454,
+          "bytes": 79
+        },
+        {
+          "offset": 50533,
+          "bytes": 79
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c12-x2-crc1.mp4",
+      "matroska": "n480-c12-x2-crc1.mka"
+    },
+    {
+      "name": "n480-c14-x1-crc0",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 14,
+      "mask": 20543,
+      "asc": "f8edd10460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 50612,
+          "bytes": 95
+        },
+        {
+          "offset": 50707,
+          "bytes": 88
+        },
+        {
+          "offset": 50795,
+          "bytes": 88
+        },
+        {
+          "offset": 50883,
+          "bytes": 88
+        },
+        {
+          "offset": 50971,
+          "bytes": 88
+        },
+        {
+          "offset": 51059,
+          "bytes": 88
+        },
+        {
+          "offset": 51147,
+          "bytes": 88
+        },
+        {
+          "offset": 51235,
+          "bytes": 74
+        },
+        {
+          "offset": 51309,
+          "bytes": 74
+        },
+        {
+          "offset": 51383,
+          "bytes": 74
+        },
+        {
+          "offset": 51457,
+          "bytes": 74
+        },
+        {
+          "offset": 51531,
+          "bytes": 74
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c14-x1-crc0.mp4",
+      "matroska": "n480-c14-x1-crc0.mka"
+    },
+    {
+      "name": "n480-c14-x1-crc1",
+      "n": 480,
+      "rate": 24000,
+      "configuration": 14,
+      "mask": 20543,
+      "asc": "f8edd14460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 51605,
+          "bytes": 100
+        },
+        {
+          "offset": 51705,
+          "bytes": 93
+        },
+        {
+          "offset": 51798,
+          "bytes": 93
+        },
+        {
+          "offset": 51891,
+          "bytes": 93
+        },
+        {
+          "offset": 51984,
+          "bytes": 93
+        },
+        {
+          "offset": 52077,
+          "bytes": 93
+        },
+        {
+          "offset": 52170,
+          "bytes": 93
+        },
+        {
+          "offset": 52263,
+          "bytes": 79
+        },
+        {
+          "offset": 52342,
+          "bytes": 79
+        },
+        {
+          "offset": 52421,
+          "bytes": 79
+        },
+        {
+          "offset": 52500,
+          "bytes": 79
+        },
+        {
+          "offset": 52579,
+          "bytes": 79
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "n480-c14-x1-crc1.mp4",
+      "matroska": "n480-c14-x1-crc1.mka"
+    },
+    {
+      "name": "n480-c14-x2-crc0",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 14,
+      "mask": 20543,
+      "asc": "f8edd18460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 52658,
+          "bytes": 95
+        },
+        {
+          "offset": 52753,
+          "bytes": 88
+        },
+        {
+          "offset": 52841,
+          "bytes": 88
+        },
+        {
+          "offset": 52929,
+          "bytes": 88
+        },
+        {
+          "offset": 53017,
+          "bytes": 88
+        },
+        {
+          "offset": 53105,
+          "bytes": 88
+        },
+        {
+          "offset": 53193,
+          "bytes": 88
+        },
+        {
+          "offset": 53281,
+          "bytes": 74
+        },
+        {
+          "offset": 53355,
+          "bytes": 74
+        },
+        {
+          "offset": 53429,
+          "bytes": 74
+        },
+        {
+          "offset": 53503,
+          "bytes": 74
+        },
+        {
+          "offset": 53577,
+          "bytes": 74
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c14-x2-crc0.mp4",
+      "matroska": "n480-c14-x2-crc0.mka"
+    },
+    {
+      "name": "n480-c14-x2-crc1",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 14,
+      "mask": 20543,
+      "asc": "f8edd1c460c0588c180b1183016230602c00",
+      "channels": 8,
+      "frames": [
+        {
+          "offset": 53651,
+          "bytes": 100
+        },
+        {
+          "offset": 53751,
+          "bytes": 93
+        },
+        {
+          "offset": 53844,
+          "bytes": 93
+        },
+        {
+          "offset": 53937,
+          "bytes": 93
+        },
+        {
+          "offset": 54030,
+          "bytes": 93
+        },
+        {
+          "offset": 54123,
+          "bytes": 93
+        },
+        {
+          "offset": 54216,
+          "bytes": 93
+        },
+        {
+          "offset": 54309,
+          "bytes": 79
+        },
+        {
+          "offset": 54388,
+          "bytes": 79
+        },
+        {
+          "offset": 54467,
+          "bytes": 79
+        },
+        {
+          "offset": 54546,
+          "bytes": 79
+        },
+        {
+          "offset": 54625,
+          "bytes": 79
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c14-x2-crc1.mp4",
+      "matroska": "n480-c14-x2-crc1.mka"
+    },
+    {
+      "name": "n480-c2-two",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec51c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 54704,
+          "bytes": 38
+        },
+        {
+          "offset": 54742,
+          "bytes": 38
+        },
+        {
+          "offset": 54780,
+          "bytes": 38
+        },
+        {
+          "offset": 54818,
+          "bytes": 38
+        },
+        {
+          "offset": 54856,
+          "bytes": 38
+        },
+        {
+          "offset": 54894,
+          "bytes": 38
+        },
+        {
+          "offset": 54932,
+          "bytes": 38
+        },
+        {
+          "offset": 54970,
+          "bytes": 35
+        },
+        {
+          "offset": 55005,
+          "bytes": 35
+        },
+        {
+          "offset": 55040,
+          "bytes": 35
+        },
+        {
+          "offset": 55075,
+          "bytes": 35
+        },
+        {
+          "offset": 55110,
+          "bytes": 35
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c2-two.mp4",
+      "matroska": "n480-c2-two.mka"
+    },
+    {
+      "name": "n480-c2-four",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec51c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 55145,
+          "bytes": 57
+        },
+        {
+          "offset": 55202,
+          "bytes": 57
+        },
+        {
+          "offset": 55259,
+          "bytes": 57
+        },
+        {
+          "offset": 55316,
+          "bytes": 57
+        },
+        {
+          "offset": 55373,
+          "bytes": 57
+        },
+        {
+          "offset": 55430,
+          "bytes": 57
+        },
+        {
+          "offset": 55487,
+          "bytes": 57
+        },
+        {
+          "offset": 55544,
+          "bytes": 54
+        },
+        {
+          "offset": 55598,
+          "bytes": 54
+        },
+        {
+          "offset": 55652,
+          "bytes": 54
+        },
+        {
+          "offset": 55706,
+          "bytes": 54
+        },
+        {
+          "offset": 55760,
+          "bytes": 54
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c2-four.mp4",
+      "matroska": "n480-c2-four.mka"
+    },
+    {
+      "name": "n480-c2-coarse",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec51c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 55814,
+          "bytes": 23
+        },
+        {
+          "offset": 55837,
+          "bytes": 24
+        },
+        {
+          "offset": 55861,
+          "bytes": 24
+        },
+        {
+          "offset": 55885,
+          "bytes": 23
+        },
+        {
+          "offset": 55908,
+          "bytes": 24
+        },
+        {
+          "offset": 55932,
+          "bytes": 24
+        },
+        {
+          "offset": 55956,
+          "bytes": 23
+        },
+        {
+          "offset": 55979,
+          "bytes": 20
+        },
+        {
+          "offset": 55999,
+          "bytes": 20
+        },
+        {
+          "offset": 56019,
+          "bytes": 20
+        },
+        {
+          "offset": 56039,
+          "bytes": 20
+        },
+        {
+          "offset": 56059,
+          "bytes": 20
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c2-coarse.mp4",
+      "matroska": "n480-c2-coarse.mka"
+    },
+    {
+      "name": "n480-c2-low",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec51c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 56079,
+          "bytes": 23
+        },
+        {
+          "offset": 56102,
+          "bytes": 24
+        },
+        {
+          "offset": 56126,
+          "bytes": 24
+        },
+        {
+          "offset": 56150,
+          "bytes": 23
+        },
+        {
+          "offset": 56173,
+          "bytes": 24
+        },
+        {
+          "offset": 56197,
+          "bytes": 24
+        },
+        {
+          "offset": 56221,
+          "bytes": 23
+        },
+        {
+          "offset": 56244,
+          "bytes": 20
+        },
+        {
+          "offset": 56264,
+          "bytes": 20
+        },
+        {
+          "offset": 56284,
+          "bytes": 20
+        },
+        {
+          "offset": 56304,
+          "bytes": 20
+        },
+        {
+          "offset": 56324,
+          "bytes": 20
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c2-low.mp4",
+      "matroska": "n480-c2-low.mka"
+    },
+    {
+      "name": "n480-c2-transient0",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec51c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 56344,
+          "bytes": 39
+        },
+        {
+          "offset": 56383,
+          "bytes": 39
+        },
+        {
+          "offset": 56422,
+          "bytes": 49
+        },
+        {
+          "offset": 56471,
+          "bytes": 49
+        },
+        {
+          "offset": 56520,
+          "bytes": 49
+        },
+        {
+          "offset": 56569,
+          "bytes": 49
+        },
+        {
+          "offset": 56618,
+          "bytes": 49
+        },
+        {
+          "offset": 56667,
+          "bytes": 45
+        },
+        {
+          "offset": 56712,
+          "bytes": 45
+        },
+        {
+          "offset": 56757,
+          "bytes": 45
+        },
+        {
+          "offset": 56802,
+          "bytes": 35
+        },
+        {
+          "offset": 56837,
+          "bytes": 35
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c2-transient0.mp4",
+      "matroska": "n480-c2-transient0.mka"
+    },
+    {
+      "name": "n480-c2-transient8",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec51c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 56872,
+          "bytes": 49
+        },
+        {
+          "offset": 56921,
+          "bytes": 49
+        },
+        {
+          "offset": 56970,
+          "bytes": 39
+        },
+        {
+          "offset": 57009,
+          "bytes": 39
+        },
+        {
+          "offset": 57048,
+          "bytes": 39
+        },
+        {
+          "offset": 57087,
+          "bytes": 39
+        },
+        {
+          "offset": 57126,
+          "bytes": 39
+        },
+        {
+          "offset": 57165,
+          "bytes": 35
+        },
+        {
+          "offset": 57200,
+          "bytes": 35
+        },
+        {
+          "offset": 57235,
+          "bytes": 45
+        },
+        {
+          "offset": 57280,
+          "bytes": 45
+        },
+        {
+          "offset": 57325,
+          "bytes": 45
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c2-transient8.mp4",
+      "matroska": "n480-c2-transient8.mka"
+    },
+    {
+      "name": "n480-c2-coupled",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec51c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 57370,
+          "bytes": 25
+        },
+        {
+          "offset": 57395,
+          "bytes": 25
+        },
+        {
+          "offset": 57420,
+          "bytes": 25
+        },
+        {
+          "offset": 57445,
+          "bytes": 25
+        },
+        {
+          "offset": 57470,
+          "bytes": 25
+        },
+        {
+          "offset": 57495,
+          "bytes": 25
+        },
+        {
+          "offset": 57520,
+          "bytes": 25
+        },
+        {
+          "offset": 57545,
+          "bytes": 21
+        },
+        {
+          "offset": 57566,
+          "bytes": 21
+        },
+        {
+          "offset": 57587,
+          "bytes": 21
+        },
+        {
+          "offset": 57608,
+          "bytes": 21
+        },
+        {
+          "offset": 57629,
+          "bytes": 21
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c2-coupled.mp4",
+      "matroska": "n480-c2-coupled.mka"
+    },
+    {
+      "name": "n480-c2-coupled-pan",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec51c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 57650,
+          "bytes": 25
+        },
+        {
+          "offset": 57675,
+          "bytes": 25
+        },
+        {
+          "offset": 57700,
+          "bytes": 25
+        },
+        {
+          "offset": 57725,
+          "bytes": 25
+        },
+        {
+          "offset": 57750,
+          "bytes": 25
+        },
+        {
+          "offset": 57775,
+          "bytes": 25
+        },
+        {
+          "offset": 57800,
+          "bytes": 25
+        },
+        {
+          "offset": 57825,
+          "bytes": 21
+        },
+        {
+          "offset": 57846,
+          "bytes": 21
+        },
+        {
+          "offset": 57867,
+          "bytes": 21
+        },
+        {
+          "offset": 57888,
+          "bytes": 21
+        },
+        {
+          "offset": 57909,
+          "bytes": 21
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c2-coupled-pan.mp4",
+      "matroska": "n480-c2-coupled-pan.mka"
+    },
+    {
+      "name": "n480-c2-invf",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec51c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 57930,
+          "bytes": 27
+        },
+        {
+          "offset": 57957,
+          "bytes": 28
+        },
+        {
+          "offset": 57985,
+          "bytes": 28
+        },
+        {
+          "offset": 58013,
+          "bytes": 27
+        },
+        {
+          "offset": 58040,
+          "bytes": 28
+        },
+        {
+          "offset": 58068,
+          "bytes": 28
+        },
+        {
+          "offset": 58096,
+          "bytes": 27
+        },
+        {
+          "offset": 58123,
+          "bytes": 24
+        },
+        {
+          "offset": 58147,
+          "bytes": 24
+        },
+        {
+          "offset": 58171,
+          "bytes": 24
+        },
+        {
+          "offset": 58195,
+          "bytes": 24
+        },
+        {
+          "offset": 58219,
+          "bytes": 24
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c2-invf.mp4",
+      "matroska": "n480-c2-invf.mka"
+    },
+    {
+      "name": "n480-c2-smoothing",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec51c460c05000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 58243,
+          "bytes": 27
+        },
+        {
+          "offset": 58270,
+          "bytes": 28
+        },
+        {
+          "offset": 58298,
+          "bytes": 28
+        },
+        {
+          "offset": 58326,
+          "bytes": 27
+        },
+        {
+          "offset": 58353,
+          "bytes": 28
+        },
+        {
+          "offset": 58381,
+          "bytes": 28
+        },
+        {
+          "offset": 58409,
+          "bytes": 27
+        },
+        {
+          "offset": 58436,
+          "bytes": 24
+        },
+        {
+          "offset": 58460,
+          "bytes": 24
+        },
+        {
+          "offset": 58484,
+          "bytes": 24
+        },
+        {
+          "offset": 58508,
+          "bytes": 24
+        },
+        {
+          "offset": 58532,
+          "bytes": 24
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c2-smoothing.mp4",
+      "matroska": "n480-c2-smoothing.mka"
+    },
+    {
+      "name": "n480-c2-harmonic",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec51c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 58556,
+          "bytes": 31
+        },
+        {
+          "offset": 58587,
+          "bytes": 32
+        },
+        {
+          "offset": 58619,
+          "bytes": 28
+        },
+        {
+          "offset": 58647,
+          "bytes": 31
+        },
+        {
+          "offset": 58678,
+          "bytes": 32
+        },
+        {
+          "offset": 58710,
+          "bytes": 28
+        },
+        {
+          "offset": 58738,
+          "bytes": 31
+        },
+        {
+          "offset": 58769,
+          "bytes": 28
+        },
+        {
+          "offset": 58797,
+          "bytes": 24
+        },
+        {
+          "offset": 58821,
+          "bytes": 28
+        },
+        {
+          "offset": 58849,
+          "bytes": 28
+        },
+        {
+          "offset": 58877,
+          "bytes": 24
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c2-harmonic.mp4",
+      "matroska": "n480-c2-harmonic.mka"
+    },
+    {
+      "name": "n480-c2-header",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec51c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 58901,
+          "bytes": 31
+        },
+        {
+          "offset": 58932,
+          "bytes": 28
+        },
+        {
+          "offset": 58960,
+          "bytes": 28
+        },
+        {
+          "offset": 58988,
+          "bytes": 27
+        },
+        {
+          "offset": 59015,
+          "bytes": 31
+        },
+        {
+          "offset": 59046,
+          "bytes": 28
+        },
+        {
+          "offset": 59074,
+          "bytes": 27
+        },
+        {
+          "offset": 59101,
+          "bytes": 24
+        },
+        {
+          "offset": 59125,
+          "bytes": 27
+        },
+        {
+          "offset": 59152,
+          "bytes": 24
+        },
+        {
+          "offset": 59176,
+          "bytes": 24
+        },
+        {
+          "offset": 59200,
+          "bytes": 24
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c2-header.mp4",
+      "matroska": "n480-c2-header.mka"
+    },
+    {
+      "name": "n512-c2-two",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec41c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 59224,
+          "bytes": 38
+        },
+        {
+          "offset": 59262,
+          "bytes": 38
+        },
+        {
+          "offset": 59300,
+          "bytes": 38
+        },
+        {
+          "offset": 59338,
+          "bytes": 38
+        },
+        {
+          "offset": 59376,
+          "bytes": 38
+        },
+        {
+          "offset": 59414,
+          "bytes": 38
+        },
+        {
+          "offset": 59452,
+          "bytes": 38
+        },
+        {
+          "offset": 59490,
+          "bytes": 35
+        },
+        {
+          "offset": 59525,
+          "bytes": 35
+        },
+        {
+          "offset": 59560,
+          "bytes": 35
+        },
+        {
+          "offset": 59595,
+          "bytes": 35
+        },
+        {
+          "offset": 59630,
+          "bytes": 35
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c2-two.mp4",
+      "matroska": "n512-c2-two.mka"
+    },
+    {
+      "name": "n512-c2-four",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec41c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 59665,
+          "bytes": 57
+        },
+        {
+          "offset": 59722,
+          "bytes": 57
+        },
+        {
+          "offset": 59779,
+          "bytes": 57
+        },
+        {
+          "offset": 59836,
+          "bytes": 57
+        },
+        {
+          "offset": 59893,
+          "bytes": 57
+        },
+        {
+          "offset": 59950,
+          "bytes": 57
+        },
+        {
+          "offset": 60007,
+          "bytes": 57
+        },
+        {
+          "offset": 60064,
+          "bytes": 54
+        },
+        {
+          "offset": 60118,
+          "bytes": 54
+        },
+        {
+          "offset": 60172,
+          "bytes": 54
+        },
+        {
+          "offset": 60226,
+          "bytes": 54
+        },
+        {
+          "offset": 60280,
+          "bytes": 54
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c2-four.mp4",
+      "matroska": "n512-c2-four.mka"
+    },
+    {
+      "name": "n512-c2-coarse",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec41c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 60334,
+          "bytes": 23
+        },
+        {
+          "offset": 60357,
+          "bytes": 24
+        },
+        {
+          "offset": 60381,
+          "bytes": 24
+        },
+        {
+          "offset": 60405,
+          "bytes": 23
+        },
+        {
+          "offset": 60428,
+          "bytes": 24
+        },
+        {
+          "offset": 60452,
+          "bytes": 24
+        },
+        {
+          "offset": 60476,
+          "bytes": 23
+        },
+        {
+          "offset": 60499,
+          "bytes": 20
+        },
+        {
+          "offset": 60519,
+          "bytes": 20
+        },
+        {
+          "offset": 60539,
+          "bytes": 20
+        },
+        {
+          "offset": 60559,
+          "bytes": 20
+        },
+        {
+          "offset": 60579,
+          "bytes": 20
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c2-coarse.mp4",
+      "matroska": "n512-c2-coarse.mka"
+    },
+    {
+      "name": "n512-c2-low",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec41c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 60599,
+          "bytes": 23
+        },
+        {
+          "offset": 60622,
+          "bytes": 24
+        },
+        {
+          "offset": 60646,
+          "bytes": 24
+        },
+        {
+          "offset": 60670,
+          "bytes": 23
+        },
+        {
+          "offset": 60693,
+          "bytes": 24
+        },
+        {
+          "offset": 60717,
+          "bytes": 24
+        },
+        {
+          "offset": 60741,
+          "bytes": 23
+        },
+        {
+          "offset": 60764,
+          "bytes": 20
+        },
+        {
+          "offset": 60784,
+          "bytes": 20
+        },
+        {
+          "offset": 60804,
+          "bytes": 20
+        },
+        {
+          "offset": 60824,
+          "bytes": 20
+        },
+        {
+          "offset": 60844,
+          "bytes": 20
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c2-low.mp4",
+      "matroska": "n512-c2-low.mka"
+    },
+    {
+      "name": "n512-c2-transient0",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec41c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 60864,
+          "bytes": 39
+        },
+        {
+          "offset": 60903,
+          "bytes": 39
+        },
+        {
+          "offset": 60942,
+          "bytes": 49
+        },
+        {
+          "offset": 60991,
+          "bytes": 49
+        },
+        {
+          "offset": 61040,
+          "bytes": 49
+        },
+        {
+          "offset": 61089,
+          "bytes": 49
+        },
+        {
+          "offset": 61138,
+          "bytes": 49
+        },
+        {
+          "offset": 61187,
+          "bytes": 45
+        },
+        {
+          "offset": 61232,
+          "bytes": 45
+        },
+        {
+          "offset": 61277,
+          "bytes": 45
+        },
+        {
+          "offset": 61322,
+          "bytes": 45
+        },
+        {
+          "offset": 61367,
+          "bytes": 35
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c2-transient0.mp4",
+      "matroska": "n512-c2-transient0.mka"
+    },
+    {
+      "name": "n512-c2-transient8",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec41c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 61402,
+          "bytes": 49
+        },
+        {
+          "offset": 61451,
+          "bytes": 49
+        },
+        {
+          "offset": 61500,
+          "bytes": 49
+        },
+        {
+          "offset": 61549,
+          "bytes": 39
+        },
+        {
+          "offset": 61588,
+          "bytes": 39
+        },
+        {
+          "offset": 61627,
+          "bytes": 39
+        },
+        {
+          "offset": 61666,
+          "bytes": 39
+        },
+        {
+          "offset": 61705,
+          "bytes": 35
+        },
+        {
+          "offset": 61740,
+          "bytes": 35
+        },
+        {
+          "offset": 61775,
+          "bytes": 35
+        },
+        {
+          "offset": 61810,
+          "bytes": 45
+        },
+        {
+          "offset": 61855,
+          "bytes": 45
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c2-transient8.mp4",
+      "matroska": "n512-c2-transient8.mka"
+    },
+    {
+      "name": "n512-c2-coupled",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec41c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 61900,
+          "bytes": 25
+        },
+        {
+          "offset": 61925,
+          "bytes": 25
+        },
+        {
+          "offset": 61950,
+          "bytes": 25
+        },
+        {
+          "offset": 61975,
+          "bytes": 25
+        },
+        {
+          "offset": 62000,
+          "bytes": 25
+        },
+        {
+          "offset": 62025,
+          "bytes": 25
+        },
+        {
+          "offset": 62050,
+          "bytes": 25
+        },
+        {
+          "offset": 62075,
+          "bytes": 21
+        },
+        {
+          "offset": 62096,
+          "bytes": 21
+        },
+        {
+          "offset": 62117,
+          "bytes": 21
+        },
+        {
+          "offset": 62138,
+          "bytes": 21
+        },
+        {
+          "offset": 62159,
+          "bytes": 21
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c2-coupled.mp4",
+      "matroska": "n512-c2-coupled.mka"
+    },
+    {
+      "name": "n512-c2-coupled-pan",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec41c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 62180,
+          "bytes": 25
+        },
+        {
+          "offset": 62205,
+          "bytes": 25
+        },
+        {
+          "offset": 62230,
+          "bytes": 25
+        },
+        {
+          "offset": 62255,
+          "bytes": 25
+        },
+        {
+          "offset": 62280,
+          "bytes": 25
+        },
+        {
+          "offset": 62305,
+          "bytes": 25
+        },
+        {
+          "offset": 62330,
+          "bytes": 25
+        },
+        {
+          "offset": 62355,
+          "bytes": 21
+        },
+        {
+          "offset": 62376,
+          "bytes": 21
+        },
+        {
+          "offset": 62397,
+          "bytes": 21
+        },
+        {
+          "offset": 62418,
+          "bytes": 21
+        },
+        {
+          "offset": 62439,
+          "bytes": 21
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c2-coupled-pan.mp4",
+      "matroska": "n512-c2-coupled-pan.mka"
+    },
+    {
+      "name": "n512-c2-invf",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec41c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 62460,
+          "bytes": 27
+        },
+        {
+          "offset": 62487,
+          "bytes": 28
+        },
+        {
+          "offset": 62515,
+          "bytes": 28
+        },
+        {
+          "offset": 62543,
+          "bytes": 27
+        },
+        {
+          "offset": 62570,
+          "bytes": 28
+        },
+        {
+          "offset": 62598,
+          "bytes": 28
+        },
+        {
+          "offset": 62626,
+          "bytes": 27
+        },
+        {
+          "offset": 62653,
+          "bytes": 24
+        },
+        {
+          "offset": 62677,
+          "bytes": 24
+        },
+        {
+          "offset": 62701,
+          "bytes": 24
+        },
+        {
+          "offset": 62725,
+          "bytes": 24
+        },
+        {
+          "offset": 62749,
+          "bytes": 24
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c2-invf.mp4",
+      "matroska": "n512-c2-invf.mka"
+    },
+    {
+      "name": "n512-c2-smoothing",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec41c460c05000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 62773,
+          "bytes": 27
+        },
+        {
+          "offset": 62800,
+          "bytes": 28
+        },
+        {
+          "offset": 62828,
+          "bytes": 28
+        },
+        {
+          "offset": 62856,
+          "bytes": 27
+        },
+        {
+          "offset": 62883,
+          "bytes": 28
+        },
+        {
+          "offset": 62911,
+          "bytes": 28
+        },
+        {
+          "offset": 62939,
+          "bytes": 27
+        },
+        {
+          "offset": 62966,
+          "bytes": 24
+        },
+        {
+          "offset": 62990,
+          "bytes": 24
+        },
+        {
+          "offset": 63014,
+          "bytes": 24
+        },
+        {
+          "offset": 63038,
+          "bytes": 24
+        },
+        {
+          "offset": 63062,
+          "bytes": 24
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c2-smoothing.mp4",
+      "matroska": "n512-c2-smoothing.mka"
+    },
+    {
+      "name": "n512-c2-harmonic",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec41c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 63086,
+          "bytes": 31
+        },
+        {
+          "offset": 63117,
+          "bytes": 32
+        },
+        {
+          "offset": 63149,
+          "bytes": 28
+        },
+        {
+          "offset": 63177,
+          "bytes": 31
+        },
+        {
+          "offset": 63208,
+          "bytes": 32
+        },
+        {
+          "offset": 63240,
+          "bytes": 28
+        },
+        {
+          "offset": 63268,
+          "bytes": 31
+        },
+        {
+          "offset": 63299,
+          "bytes": 28
+        },
+        {
+          "offset": 63327,
+          "bytes": 24
+        },
+        {
+          "offset": 63351,
+          "bytes": 28
+        },
+        {
+          "offset": 63379,
+          "bytes": 28
+        },
+        {
+          "offset": 63407,
+          "bytes": 24
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c2-harmonic.mp4",
+      "matroska": "n512-c2-harmonic.mka"
+    },
+    {
+      "name": "n512-c2-header",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec41c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 63431,
+          "bytes": 31
+        },
+        {
+          "offset": 63462,
+          "bytes": 28
+        },
+        {
+          "offset": 63490,
+          "bytes": 28
+        },
+        {
+          "offset": 63518,
+          "bytes": 27
+        },
+        {
+          "offset": 63545,
+          "bytes": 31
+        },
+        {
+          "offset": 63576,
+          "bytes": 28
+        },
+        {
+          "offset": 63604,
+          "bytes": 27
+        },
+        {
+          "offset": 63631,
+          "bytes": 24
+        },
+        {
+          "offset": 63655,
+          "bytes": 27
+        },
+        {
+          "offset": 63682,
+          "bytes": 24
+        },
+        {
+          "offset": 63706,
+          "bytes": 24
+        },
+        {
+          "offset": 63730,
+          "bytes": 24
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c2-header.mp4",
+      "matroska": "n512-c2-header.mka"
+    }
+  ],
+  "malformed": [
+    {
+      "name": "n480-crc",
+      "video": "n480-crc.mp4",
+      "asc": "f8ec31c460c05800",
+      "frames": [
+        {
+          "offset": 63754,
+          "bytes": 15
+        },
+        {
+          "offset": 63769,
+          "bytes": 14
+        },
+        {
+          "offset": 63783,
+          "bytes": 14
+        },
+        {
+          "offset": 63797,
+          "bytes": 14
+        },
+        {
+          "offset": 63811,
+          "bytes": 14
+        },
+        {
+          "offset": 63825,
+          "bytes": 14
+        },
+        {
+          "offset": 63839,
+          "bytes": 14
+        },
+        {
+          "offset": 63853,
+          "bytes": 12
+        },
+        {
+          "offset": 63865,
+          "bytes": 12
+        },
+        {
+          "offset": 63877,
+          "bytes": 12
+        },
+        {
+          "offset": 63889,
+          "bytes": 12
+        },
+        {
+          "offset": 63901,
+          "bytes": 12
+        }
+      ],
+      "error": "CRC"
+    },
+    {
+      "name": "n480-truncated",
+      "video": "n480-truncated.mp4",
+      "asc": "f8ec31c460c05800",
+      "frames": [
+        {
+          "offset": 63913,
+          "bytes": 15
+        },
+        {
+          "offset": 63928,
+          "bytes": 14
+        },
+        {
+          "offset": 63942,
+          "bytes": 14
+        },
+        {
+          "offset": 63956,
+          "bytes": 13
+        },
+        {
+          "offset": 63969,
+          "bytes": 14
+        },
+        {
+          "offset": 63983,
+          "bytes": 14
+        },
+        {
+          "offset": 63997,
+          "bytes": 14
+        },
+        {
+          "offset": 64011,
+          "bytes": 12
+        },
+        {
+          "offset": 64023,
+          "bytes": 12
+        },
+        {
+          "offset": 64035,
+          "bytes": 12
+        },
+        {
+          "offset": 64047,
+          "bytes": 12
+        },
+        {
+          "offset": 64059,
+          "bytes": 12
+        }
+      ],
+      "error": "truncated"
+    },
+    {
+      "name": "n512-crc",
+      "video": "n512-crc.mp4",
+      "asc": "f8ec21c460c05800",
+      "frames": [
+        {
+          "offset": 64071,
+          "bytes": 15
+        },
+        {
+          "offset": 64086,
+          "bytes": 14
+        },
+        {
+          "offset": 64100,
+          "bytes": 14
+        },
+        {
+          "offset": 64114,
+          "bytes": 14
+        },
+        {
+          "offset": 64128,
+          "bytes": 14
+        },
+        {
+          "offset": 64142,
+          "bytes": 14
+        },
+        {
+          "offset": 64156,
+          "bytes": 14
+        },
+        {
+          "offset": 64170,
+          "bytes": 12
+        },
+        {
+          "offset": 64182,
+          "bytes": 12
+        },
+        {
+          "offset": 64194,
+          "bytes": 12
+        },
+        {
+          "offset": 64206,
+          "bytes": 12
+        },
+        {
+          "offset": 64218,
+          "bytes": 12
+        }
+      ],
+      "error": "CRC"
+    },
+    {
+      "name": "n512-truncated",
+      "video": "n512-truncated.mp4",
+      "asc": "f8ec21c460c05800",
+      "frames": [
+        {
+          "offset": 64230,
+          "bytes": 15
+        },
+        {
+          "offset": 64245,
+          "bytes": 14
+        },
+        {
+          "offset": 64259,
+          "bytes": 14
+        },
+        {
+          "offset": 64273,
+          "bytes": 13
+        },
+        {
+          "offset": 64286,
+          "bytes": 14
+        },
+        {
+          "offset": 64300,
+          "bytes": 14
+        },
+        {
+          "offset": 64314,
+          "bytes": 14
+        },
+        {
+          "offset": 64328,
+          "bytes": 12
+        },
+        {
+          "offset": 64340,
+          "bytes": 12
+        },
+        {
+          "offset": 64352,
+          "bytes": 12
+        },
+        {
+          "offset": 64364,
+          "bytes": 12
+        },
+        {
+          "offset": 64376,
+          "bytes": 12
+        }
+      ],
+      "error": "truncated"
+    }
+  ],
+  "provenance": "Own encoded nonzero ELD core, LD-SBR syntax/CRC and direct CLDFB convolution, patch/energy/gain/noise and column-superposition oracle; no production decoder, foreign codec, process, private media or network."
+}

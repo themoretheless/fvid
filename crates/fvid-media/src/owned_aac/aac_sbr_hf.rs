@@ -2,7 +2,7 @@
 use super::{
     Result,
     aac_sbr_grid::TimeGrid,
-    aac_sbr_predictor::{Predictor, predict},
+    aac_sbr_predictor::{Predictor, predict_with_timing},
     aac_sbr_qmf::Complex,
     invalid,
 };
@@ -102,8 +102,29 @@ pub fn generate(
     noise: &[u8],
     bandwidth: &[f64],
 ) -> Result<Vec<[Complex; 64]>> {
+    generate_with_timing(
+        low,
+        slots,
+        grid,
+        k0,
+        patch_list,
+        noise,
+        bandwidth,
+        super::aac_sbr_timing::Timing::Legacy,
+    )
+}
+pub(crate) fn generate_with_timing(
+    low: &[[Complex; 32]],
+    slots: u8,
+    grid: &TimeGrid,
+    k0: u8,
+    patch_list: &[Patch],
+    noise: &[u8],
+    bandwidth: &[f64],
+    timing: super::aac_sbr_timing::Timing,
+) -> Result<Vec<[Complex; 64]>> {
     if !matches!(slots, 15 | 16)
-        || low.len() != 2 * usize::from(slots) + 8
+        || low.len() != timing.columns(slots)? + 2
         || !(2..=32).contains(&k0)
         || noise.len() < 2
         || noise.len() > 6
@@ -116,7 +137,7 @@ pub fn generate(
             .any(|x| !x.is_finite() || !(0.0..=1.0).contains(x))
         || grid.envelope.len() < 2
         || grid.envelope.windows(2).any(|x| x[0] >= x[1])
-        || usize::from(*grid.envelope.last().unwrap()) > usize::from(slots) + 3
+        || usize::from(*grid.envelope.last().unwrap()) > timing.maximum_border(slots)
     {
         return Err(invalid("invalid SBR HF frame geometry"));
     }
@@ -147,8 +168,8 @@ pub fn generate(
     }
     let mut predictors = [None::<Predictor>; 32];
     let mut output = vec![[Complex::default(); 64]; low.len() - 2];
-    let start = 2 * usize::from(grid.envelope[0]);
-    let stop = 2 * usize::from(*grid.envelope.last().unwrap());
+    let start = timing.rate() * usize::from(grid.envelope[0]);
+    let stop = timing.rate() * usize::from(*grid.envelope.last().unwrap());
     for patch in patch_list {
         for band in 0..patch.bands {
             let source = usize::from(patch.source + band);
@@ -164,7 +185,7 @@ pub fn generate(
                 p
             } else {
                 let samples: Vec<_> = low.iter().map(|slot| slot[source]).collect();
-                let p = predict(&samples, slots)?;
+                let p = predict_with_timing(&samples, slots, timing)?;
                 predictors[source] = Some(p);
                 p
             };
