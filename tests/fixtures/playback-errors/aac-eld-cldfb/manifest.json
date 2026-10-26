@@ -1,0 +1,35 @@
+{
+  "cases": [
+    {
+      "name": "impulse-first",
+      "kind": "analysis",
+      "rows": 40
+    },
+    {
+      "name": "impulse-boundary",
+      "kind": "analysis",
+      "rows": 40
+    },
+    {
+      "name": "dense",
+      "kind": "analysis",
+      "rows": 40
+    },
+    {
+      "name": "tones",
+      "kind": "analysis",
+      "rows": 40
+    },
+    {
+      "name": "complex-dense",
+      "kind": "synthesis",
+      "rows": 24
+    },
+    {
+      "name": "high-imaginary",
+      "kind": "synthesis",
+      "rows": 24
+    }
+  ],
+  "provenance": "Own direct 320-tap time convolution, complex modulation and modulated-column superposition; normative GOST table A.90 numeric facts only. No private media, foreign codec, process or network."
+}

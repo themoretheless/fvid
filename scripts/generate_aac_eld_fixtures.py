@@ -61,9 +61,9 @@ def specifications():
     specs += [(n,24000,2,t,0,1,False)for n in [512,480]for t in ['pns','correlated-pns','intensity','tns']]
     return specs
 
-def generate():
+def generate(include_payload_bits=False, specs=None):
     files={};cases=[];blob=bytearray()
-    for n,rate,configuration,tool,flags,ms,high in specifications():
+    for n,rate,configuration,tool,flags,ms,high in (specifications() if specs is None else specs):
         elements,mapping,mask=LAYOUTS[configuration];channels=len(mapping);w=window(n)
         overlap=[[0.]*(3*n)for _ in mapping];noise=Noise();pcm=[];rows=[];packets=[]
         count,last=geometry(n,max(22050,min(48000,rate)))if high else(2,4)
@@ -132,6 +132,7 @@ def generate():
                             v=spectrum.get(k,0.)-math.sin(math.pi/7)*prior;spectrum[k]=f32(v);prior=v
                 ch+=width
             payload=packed(bits);packets.append(payload);rows.append(dict(offset=len(blob),bytes=len(payload)));blob.extend(payload)
+            if include_payload_bits:rows[-1]['bits']=bits
             outputs=[]
             for c,spectrum in enumerate(spectra):
                 values=[spectrum.get(k,0.)for k in positions]

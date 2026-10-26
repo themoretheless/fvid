@@ -117,7 +117,8 @@ impl History {
         }
         let pointer = usize::from(syntax.pointer);
         let attack = match syntax.class {
-            FrameClass::FixFix => None,
+            FrameClass::FixFix | FrameClass::LowDelayFixed { .. } => None,
+            FrameClass::LowDelayTransient { position } => Some(if position < 2 { 0 } else { 1 }),
             FrameClass::FixVar | FrameClass::VarVar => {
                 if pointer == 0 {
                     None

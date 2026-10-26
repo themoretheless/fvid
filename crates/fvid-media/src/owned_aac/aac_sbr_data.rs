@@ -38,7 +38,9 @@ impl Data {
     /// Table 8.A.1: PS is ID 2. Any other first ID consumes the whole
     /// remaining area as opaque fill, including bits resembling later IDs.
     pub fn has_ps_extension(&self) -> bool {
-        self.extended_data.as_ref().and_then(|v| v.first())
+        self.extended_data
+            .as_ref()
+            .and_then(|v| v.first())
             .is_some_and(|byte| byte >> 6 == 2)
     }
 }
@@ -66,6 +68,27 @@ impl Data {
         slots: u8,
         channel_count: usize,
     ) -> Result<Self> {
+        Self::read_mode(bits, end, header, sbr_rate, slots, channel_count, false)
+    }
+    pub fn read_low_delay(
+        bits: &mut BitReader<'_>,
+        end: usize,
+        header: &Header,
+        sbr_rate: u32,
+        slots: u8,
+        channel_count: usize,
+    ) -> Result<Self> {
+        Self::read_mode(bits, end, header, sbr_rate, slots, channel_count, true)
+    }
+    fn read_mode(
+        bits: &mut BitReader<'_>,
+        end: usize,
+        header: &Header,
+        sbr_rate: u32,
+        slots: u8,
+        channel_count: usize,
+        low_delay: bool,
+    ) -> Result<Self> {
         if !(1..=2).contains(&channel_count) || !matches!(slots, 15 | 16) {
             return Err(invalid("invalid non-scalable SBR element dimensions"));
         }
@@ -80,7 +103,11 @@ impl Data {
         let coupled = channel_count == 2 && field(&mut trial, end, 1)? != 0;
         let mut grids = Vec::with_capacity(channel_count);
         for _ in 0..if coupled { 1 } else { channel_count } {
-            grids.push(GridSyntax::read_validated(&mut trial, end, slots)?.0);
+            grids.push(if low_delay {
+                GridSyntax::read_low_delay(&mut trial, end, slots, header.amplitude_resolution)?
+            } else {
+                GridSyntax::read_validated(&mut trial, end, slots)?.0
+            });
         }
         if coupled {
             grids.push(grids[0].clone());
@@ -207,6 +234,8 @@ mod tests {
             FrameClass::FixVar => "FixVar",
             FrameClass::VarFix => "VarFix",
             FrameClass::VarVar => "VarVar",
+            FrameClass::LowDelayFixed { .. } => "LowDelayFixed",
+            FrameClass::LowDelayTransient { .. } => "LowDelayTransient",
         }
     }
     fn direction(value: DeltaDirection) -> &'static str {

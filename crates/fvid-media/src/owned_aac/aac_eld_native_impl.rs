@@ -33,8 +33,22 @@ impl NativeAacDecoder {
                 channels.push((c, s));
             }
         }
+        let mut next = self.eld_synthesis.clone();
+        let mut planar = Vec::with_capacity(channels.len());
+        for (slot, (channel, spectrum)) in channels.into_iter().enumerate() {
+            planar.push(
+                next[self.mapping[slot]].synthesize_pcm(&channel.apply_tns(config, spectrum)?)?,
+            );
+        }
+        let mut ld = self.eld_sbr.clone();
+        if let Some(ld) = &mut ld {
+            let end = bits.position() + bits.remaining();
+            let (output, used) = ld.process_prefix(packet, bits.position(), end, &planar)?;
+            bits.skip(used)?;
+            planar = output;
+        }
         super::aac_pce::skip_er_extensions(&mut bits)?;
-        if bits.remaining() > 7 || channels.len() != usize::from(config.channels) {
+        if bits.remaining() > 7 || planar.len() != usize::from(config.channels) {
             return Err(invalid(
                 "trailing bytes or channel mismatch after AAC ELD block",
             ));
@@ -44,17 +58,18 @@ impl NativeAacDecoder {
                 return Err(invalid("nonzero AAC ELD alignment bits"));
             }
         }
-        let mut next = self.eld_synthesis.clone();
-        let n = usize::from(config.frame_samples);
-        let mut output = vec![0.; n * channels.len()];
-        for (slot, (channel, spectrum)) in channels.into_iter().enumerate() {
-            let pcm =
-                next[self.mapping[slot]].synthesize_pcm(&channel.apply_tns(config, spectrum)?)?;
-            for (i, v) in pcm.into_iter().enumerate() {
-                output[i * usize::from(config.channels) + self.mapping[slot]] = v;
+        let n = planar.first().map_or(0, Vec::len);
+        if n == 0 || planar.iter().any(|c| c.len() != n) {
+            return Err(invalid("AAC ELD output channel length mismatch"));
+        }
+        let mut output = vec![0.0; n * planar.len()];
+        for (slot, channel) in planar.iter().enumerate() {
+            for (i, &value) in channel.iter().enumerate() {
+                output[i * usize::from(config.channels) + self.mapping[slot]] = value;
             }
         }
         self.eld_synthesis = next;
+        self.eld_sbr = ld;
         self.noise = noise;
         Ok(Some(AacFrame {
             samples: output,

@@ -1,5 +1,46 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## AAC-ELD LD-SBR (AOT 39), 2026-10-26
+
+The owned ELD path now reads LD-SBR headers from ELDSpecificConfig, associates
+self-delimited SCE/CPE payloads with their configured elements, checks optional
+CRC-10 without including byte alignment, and upsamples LFE separately. Both
+480/512-sample cores and single/double output rates use owned complex low-delay
+filterbanks (CLDFB). The numeric prototype is GOST R 53556.4-2013 table A.90;
+modulation and time geometry follow section 6.19. No foreign decoder or FFmpeg
+is linked or invoked by this path.
+
+LD-SBR uses RATE=1, 15/16 columns and two prediction-history columns. Legacy
+SBR retains RATE=2 and its six additional columns. FIXFIX amplitude overrides,
+2/4-envelope grids and every legal LD_TRAN position have separate checks.
+The shared owned entropy/history, patching, inverse filtering, gain, limiter,
+noise, harmonic and smoothing algorithms run on the selected time geometry.
+LD-SBR history participates in reset, checkpoint validation, transactional
+packet decoding and retained-allocation accounting.
+
+`scripts/generate_aac_eld_sbr_fixtures.py` creates 104 nonzero/decay acceptance
+sources with MP4 video and Matroska audio, plus four malformed MP4 videos.
+The matrix includes layouts 1–7/11/12/14, LFE, CRC on/off, both frame lengths
+and rates; further stereo sources exercise frequency/time deltas, coarse/fine
+amplitudes, low/high resolution, 2/4 envelopes, all transient positions,
+centered/asymmetric coupling, changing inverse filtering, smoothing, harmonics
+and in-band headers. An independent direct convolution/modulation, covariance,
+patch/energy/gain/noise and column-superposition calculation supplies saved PCM.
+The separate `aac-eld-cldfb` fixtures isolate filterbank numeric conventions.
+Ordinary tests read saved assets and need neither generation nor network.
+
+`tests/aac_eld_sbr.rs` compares native/backend and public MP4/Matroska PCM,
+repeated sample ranges, complete AudioStream playback, EOF draining, rewind,
+forward/backward/repeated seek and end-of-stream seek. Navigation compares PCM
+against the uninterrupted decode in each container's actual timescale.
+Checkpoint replay and a late truncated block verify rollback; malformed videos
+first decode three valid packets, then must fail specifically at LD-SBR CRC
+or truncation. This is offline playback verification, not a physical audio
+output-device qualification or a proof of every possible tool combination.
+Nonzero epConfig and other known ELD extension tools remain separate gaps.
+
+Normative source: [GOST R 53556.4-2013, section 6.19 and table A.90](https://rags.ru/documents/prod/gost-r_gosudarstvennyj-standart/38/gost_50462.html).
+
 ## AAC-ELD core (AOT 39), 2026-10-25
 
 Owned decoding now accepts the 480/512-sample ELD core, indexed layouts
@@ -62,8 +103,8 @@ checks use an actually unsupported length (513), with nonzero FIR acceptance
 for 480/512; WAVE export checks compare the declared data chunk because valid
 RIFF metadata may follow it.
 
-This is core acceptance, not complete AAC-ELD profile coverage. Low-delay SBR,
-nonzero epConfig and known ELD extension tools remain explicit refusals.
+This was the core-only checkpoint. LD-SBR is implemented and qualified separately
+above; nonzero epConfig and known ELD extension tools remain explicit refusals.
 Arbitrary combinations and complete codec coverage remain unproven.
 
 

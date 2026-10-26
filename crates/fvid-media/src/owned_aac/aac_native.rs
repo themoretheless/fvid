@@ -74,6 +74,9 @@ impl NativeAacDecoder {
             Ok(())
         }
         let mut footprint = super::memory::Footprint::new();
+        if let Some(ld)=&self.eld_sbr {ld.visit_retained(&mut footprint).map_err(|e|invalid(&e))?;}
+        if let Some(ld)=checkpoint.and_then(|c|c.eld_sbr.as_ref()) {ld.visit_retained(&mut footprint).map_err(|e|invalid(&e))?;}
+
         footprint.vector(&self.eld_synthesis).map_err(|e|invalid(&e))?;
         for state in &self.eld_synthesis {state.visit_retained(&mut footprint).map_err(|e|invalid(&e))?;}
         if let Some(saved)=checkpoint {

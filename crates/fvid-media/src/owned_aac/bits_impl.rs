@@ -8,6 +8,9 @@ impl<'a> BitReader<'a> {
     pub fn new(bytes: &'a [u8]) -> Self {
         Self { bytes, position: 0 }
     }
+    /// Original bounded source; cursors in other owned decoder facades may
+    /// parse a self-delimited extension without copying the bitstream.
+    pub fn source_bytes(&self) -> &'a [u8] { self.bytes }
     pub fn position(&self) -> usize {
         self.position
     }

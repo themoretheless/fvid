@@ -123,3 +123,12 @@ pub use stream::{decode_adts_pcm, AudioDecodeStats as AdtsPcmStats};
 mod memory;
 
 pub mod aac_ltp_channel;
+
+pub mod aac_eld_cldfb;
+mod aac_eld_cldfb_window;
+
+mod aac_sbr_timing;
+
+mod aac_eld_sbr_dsp;
+
+pub mod aac_eld_sbr;
