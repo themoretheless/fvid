@@ -315,7 +315,7 @@ mod tests {
         compare_pcm(&pcm);
     }
     #[test]
-    fn protected_movie_reproduces_the_ep_configuration_dispatch_gap() {
+    fn protected_movie_and_plain_companion_match_pcm_through_ep_dispatch() {
         use std::io::Cursor;
         let mut pcm = vec![];
         crate::owned_mp4_audio::decode_mp4_audio_pcm(
@@ -328,21 +328,20 @@ mod tests {
         )
         .unwrap();
         compare_pcm(&pcm);
-        let error = crate::owned_mp4_audio::decode_mp4_audio_pcm(
+        pcm.clear();
+        crate::owned_mp4_audio::decode_mp4_audio_pcm(
             Cursor::new(include_bytes!(
                 "../../../../tests/fixtures/playback-errors/aac-ep-srcpc/protected.mp4"
             )),
-            &mut Vec::new(),
+            &mut pcm,
             None,
             &Default::default(),
         )
-        .unwrap_err()
-        .to_string();
-        assert!(error.contains("epConfig"), "unrelated failure: {error}");
+        .unwrap();
+        compare_pcm(&pcm);
     }
     #[test]
-    #[ignore = "acceptance pending EP ASC configuration, header/FEC and class routing; refusal above is not playback acceptance"]
-    fn protected_movie_decodes_complete_pcm_when_ep_routing_is_implemented() {
+    fn protected_movie_decodes_complete_pcm_with_ep_routing() {
         let mut pcm = vec![];
         crate::owned_mp4_audio::decode_mp4_audio_pcm(
             std::io::Cursor::new(include_bytes!(

@@ -1,7 +1,7 @@
 """Own EP channel-code vectors and short protected ELD video; explicit/offline.
 
 Reference encoder uses a polynomial impulse sequence, not production registers
-or a Viterbi trellis. The EP video reproduces the still-unimplemented EP route.
+or a Viterbi trellis. The EP video is an acceptance source for the owned EP2 raw-AU route.
 """
 import json,struct
 from pathlib import Path
@@ -14,6 +14,7 @@ MASKS=[(255,a,b,c)for a,b,c in [
 (255,128,0),(255,136,0),(255,168,0),(255,170,0),(255,234,0),(255,238,0),(255,254,0),(255,255,0),
 (255,255,128),(255,255,136),(255,255,168),(255,255,170),(255,255,234),(255,255,238),(255,255,254),(255,255,255)]]
 TAILS=[0,13,10,7,4,9,14,3,8,5,2,15,12,1,6,11]
+POWERS={0:[],1:[1,0],2:[2,1,0],3:[3,1,0],4:[4,3,2,0],5:[5,4,2,0],6:[6,5,3,2,1,0],7:[7,6,2,0],8:[8,2,1,0],9:[9,8,5,2,1,0],10:[10,9,5,4,1,0],11:[11,10,4,3,1,0],12:[12,11,3,2,1,0],13:[13,12,7,6,5,4,2,0],14:[14,13,5,3,2,0],15:[15,14,11,10,7,6,2,0],16:[16,12,5,0],24:[24,23,6,5,1,0],32:[32,26,23,22,16,12,11,10,8,7,5,4,2,1,0]}
 def code(message,rate,terminate):
     # Solve (1+D+D^2+D^4)c=u, then convolve c with output polynomials.
     c=[];u=[int(v)for v in message];n=len(u)
@@ -33,7 +34,7 @@ def code(message,rate,terminate):
 
 def generate():
     files={};vectors=[];crc=[]
-    powers={0:[],1:[1,0],2:[2,1,0],3:[3,1,0],4:[4,3,2,0],5:[5,4,2,0],6:[6,5,3,2,1,0],7:[7,6,2,0],8:[8,2,1,0],9:[9,8,5,2,1,0],10:[10,9,5,4,1,0],11:[11,10,4,3,1,0],12:[12,11,3,2,1,0],13:[13,12,7,6,5,4,2,0],14:[14,13,5,3,2,0],15:[15,14,11,10,7,6,2,0],16:[16,12,5,0],24:[24,23,6,5,1,0],32:[32,26,23,22,16,12,11,10,8,7,5,4,2,1,0]}
+    powers=POWERS
     for n in [0,1,7,8,31,64]:
         message=''.join(str((i//3+i//7)%2)for i in range(n))
         for width,exponents in powers.items():
@@ -72,7 +73,7 @@ def generate():
     files['protected.mp4']=video_fixture([protected_case],blob,1,filename='protected.mp4',write=False)['data']
     files['plain.mp4']=base[case['video']];files['plain.asc']=base[case['name']+'.asc'];files['protected.asc']=asc
     files['pcm.f32le']=base[case['name']+'.f32le'];files['packets.bin']=bytes(blob)
-    files['manifest.json']=(json.dumps(dict(vectors=vectors,tails=tails,crc=crc,frames=frames,provenance='Own polynomial impulse-sequence encoder and normative Tables 1.60/1.61; own ELD core/cosine PCM and own MP4 video; no private media, external process/codec or network.',scope='SRCPC primitive acceptance; protected MP4 playback remains a refusal until EP configuration/header routing is implemented.'),indent=2)+'\n').encode()
+    files['manifest.json']=(json.dumps(dict(vectors=vectors,tails=tails,crc=crc,frames=frames,provenance='Own polynomial impulse-sequence encoder and normative Tables 1.60/1.61; own ELD core/cosine PCM and own MP4 video; no private media, external process/codec or network.',scope='SRCPC primitive and EP2 single-class raw-AU acceptance; separate ESC mappings, RS, interleaving and concatenated classes remain separate gaps.'),indent=2)+'\n').encode()
     return files
 if __name__=='__main__':
     OUT.mkdir(exist_ok=True)

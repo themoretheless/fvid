@@ -1,34 +1,48 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
-## MPEG-4 EP channel coding — work in progress, 2026-10-28
+## MPEG-4 EP2 raw-AU playback, 2026-10-28
 
-The next confirmed gap is `epConfig`, which is still rejected by native AAC.
-ISO/IEC 14496-3 table 1.20 distinguishes separate sensitivity-category streams
-(epConfig=1) from error-protected access units (2/3). Permitting the ASC value
-without implementing the corresponding framing would decode the wrong bits.
+Native AAC-ELD now accepts EP2's application mapping in which one EP class
+contains one complete raw AAC access unit. ErrorProtectionSpecificConfig is
+parsed into owned typed sets/classes, preserving length/rate/CRC escape fields,
+FEC, termination, ordering, optional classes and header/interleave information.
+Reserved encodings and invalid permutations are rejected. Core-only AacConfig
+parsing refuses protected ASC rather than silently discarding its EP metadata.
 
-`aac_ep_srcpc` now provides an owned independently initialized class encoder
-and hard-decision Viterbi decoder for all 25 puncturing rates (8/8–8/32), with
-optional four-bit termination. It reports the chosen legal path's Hamming
-distance; that distance does not establish integrity and must not replace CRC.
-`aac_ep_crc` implements the inverted polynomial parity for widths 0–16/24/32,
-which differs from the ADTS/SBR CRC protocols.
+For the supported mapping, BCH/Golay headers, large CRC/SRCPC headers, in-band
+length, puncture rate, CRC length and stuffing are recovered before decoding
+AAC. The engine supports all 25 SRCPC rates (8/8–8/32), inverted CRC widths
+0–16/24/32 and per-packet rate/CRC changes. Saved single-bit header and
+8/32 class errors are corrected; correction capability depends on the code rate.
+No header or class CRC failure commits AAC/LD-SBR history. Reset retains the
+configured EP mapping; checkpoint restore checks EP configuration before
+changing synthesis history. Retained accounting includes EP descriptors and
+checkpoint copies. No foreign codec or FFmpeg is used.
 
-The explicit offline generator `generate_aac_ep_srcpc_fixtures.py` supplies
-500 independent polynomial/convolution vectors, all 16 normative tail rows,
-114 independent big-integer polynomial-division CRC vectors, and a short own
-nonzero ELD MP4 with an EP2 SRCPC+CRC16 payload. Tests compare exact encoded
-bits, exhaustive short-message minimum distance, every single transmitted-bit
-error in a dense terminated class, and corrected ELD packets against saved PCM.
-Generation is deterministic with process and network creation forbidden.
+The offline `generate_aac_ep_playback_fixtures.py` matrix contains 276 own MP4
+and Matroska acceptance sources: 480/512-sample mono/stereo ELD and ELD+LD-SBR,
+all puncture rates, fixed/dynamic CRC, declared/until-end lengths, BCH/Golay and
+basic/extended large headers, and a stream with damaged header/data bits. Two
+additional streams independently encode a wrong CRC or truncate a declared
+class. References are saved independently computed ELD/LD-SBR PCM; header and
+class writers use polynomial long division and impulse-sequence convolution.
 
-The plain companion MP4 decodes successfully; the protected MP4 must still
-reproduce the exact epConfig dispatch refusal. Its intended PCM acceptance is
-explicitly ignored until production EP framing/configuration/class routing is
-implemented. These passing primitive/reproduction tests are **not** protected
-MP4 playback acceptance. EP header protection, concatenated classes/frames,
-streaming puncture phase/state, RS, interleaving, ESC association and complete
-playback/rewind/seek remain open; the codec-gap objective is not complete.
+`tests/aac_ep_playback.rs` checks native/front/backend PCM, both containers,
+repeated ranges, AudioStream playback/EOF, rewind, forward/backward/repeated/end
+seek, checkpoint replay, retained descriptors, and exact CRC/declared-length
+error rollback. The old refusal expectation and ignored protected-MP4 PCM test
+are now enabled acceptance. Primitive tests retain 500 SRCPC vectors, all 16
+tail rows, 114 CRC vectors, 132 header vectors and exhaustive short-message
+minimum-distance controls. Ordinary tests do not generate fixtures or use a
+network. An until-end class with a small CRC does not guarantee rejection of
+arbitrary truncation; length-refusal tests use explicitly declared lengths.
+
+This closes the reproduced EP2 single-class ELD dispatch failure, not the full
+EP tool or the codec-gap goal. EP1/EP3 separate ESC association, arbitrary EP2
+application assemblers, multiple/optional classes and concatenated frames,
+streaming puncture state, RS, interleaving, short majority headers and non-ELD
+EP integration remain open. Playback qualification is offline AudioStream PCM,
+not physical audio output-device qualification.
 
 Primary definition: [ISO/IEC 14496-3:2009, sections 1.6.3.6 and 1.8](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
 
@@ -69,7 +83,8 @@ Checkpoint replay and a late truncated block verify rollback; malformed videos
 first decode three valid packets, then must fail specifically at LD-SBR CRC
 or truncation. This is offline playback verification, not a physical audio
 output-device qualification or a proof of every possible tool combination.
-Nonzero epConfig and other known ELD extension tools remain separate gaps.
+EP2 raw-AU recovery is described above; other EP mappings and known ELD
+extension tools remain separate gaps.
 
 Normative source: [GOST R 53556.4-2013, section 6.19 and table A.90](https://rags.ru/documents/prod/gost-r_gosudarstvennyj-standart/38/gost_50462.html).
 
@@ -136,7 +151,7 @@ for 480/512; WAVE export checks compare the declared data chunk because valid
 RIFF metadata may follow it.
 
 This was the core-only checkpoint. LD-SBR is implemented and qualified separately
-above; nonzero epConfig and known ELD extension tools remain explicit refusals.
+above; unsupported EP mappings and known ELD extension tools remain explicit refusals.
 Arbitrary combinations and complete codec coverage remain unproven.
 
 

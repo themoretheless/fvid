@@ -3742,5 +3742,5 @@
     }
   ],
   "provenance": "Own polynomial impulse-sequence encoder and normative Tables 1.60/1.61; own ELD core/cosine PCM and own MP4 video; no private media, external process/codec or network.",
-  "scope": "SRCPC primitive acceptance; protected MP4 playback remains a refusal until EP configuration/header routing is implemented."
+  "scope": "SRCPC primitive and EP2 single-class raw-AU acceptance; separate ESC mappings, RS, interleaving and concatenated classes remain separate gaps."
 }
