@@ -1,0 +1,3746 @@
+{
+  "vectors": [
+    {
+      "message": "",
+      "rate": 0,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 0,
+      "terminated": true,
+      "encoded": "0000"
+    },
+    {
+      "message": "",
+      "rate": 1,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 1,
+      "terminated": true,
+      "encoded": "00000"
+    },
+    {
+      "message": "",
+      "rate": 2,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 2,
+      "terminated": true,
+      "encoded": "00000"
+    },
+    {
+      "message": "",
+      "rate": 3,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 3,
+      "terminated": true,
+      "encoded": "000000"
+    },
+    {
+      "message": "",
+      "rate": 4,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 4,
+      "terminated": true,
+      "encoded": "000000"
+    },
+    {
+      "message": "",
+      "rate": 5,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 5,
+      "terminated": true,
+      "encoded": "0000000"
+    },
+    {
+      "message": "",
+      "rate": 6,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 6,
+      "terminated": true,
+      "encoded": "0000000"
+    },
+    {
+      "message": "",
+      "rate": 7,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 7,
+      "terminated": true,
+      "encoded": "00000000"
+    },
+    {
+      "message": "",
+      "rate": 8,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 8,
+      "terminated": true,
+      "encoded": "00000000"
+    },
+    {
+      "message": "",
+      "rate": 9,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 9,
+      "terminated": true,
+      "encoded": "000000000"
+    },
+    {
+      "message": "",
+      "rate": 10,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 10,
+      "terminated": true,
+      "encoded": "000000000"
+    },
+    {
+      "message": "",
+      "rate": 11,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 11,
+      "terminated": true,
+      "encoded": "0000000000"
+    },
+    {
+      "message": "",
+      "rate": 12,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 12,
+      "terminated": true,
+      "encoded": "0000000000"
+    },
+    {
+      "message": "",
+      "rate": 13,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 13,
+      "terminated": true,
+      "encoded": "00000000000"
+    },
+    {
+      "message": "",
+      "rate": 14,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 14,
+      "terminated": true,
+      "encoded": "00000000000"
+    },
+    {
+      "message": "",
+      "rate": 15,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 15,
+      "terminated": true,
+      "encoded": "000000000000"
+    },
+    {
+      "message": "",
+      "rate": 16,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 16,
+      "terminated": true,
+      "encoded": "000000000000"
+    },
+    {
+      "message": "",
+      "rate": 17,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 17,
+      "terminated": true,
+      "encoded": "0000000000000"
+    },
+    {
+      "message": "",
+      "rate": 18,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 18,
+      "terminated": true,
+      "encoded": "0000000000000"
+    },
+    {
+      "message": "",
+      "rate": 19,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 19,
+      "terminated": true,
+      "encoded": "00000000000000"
+    },
+    {
+      "message": "",
+      "rate": 20,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 20,
+      "terminated": true,
+      "encoded": "00000000000000"
+    },
+    {
+      "message": "",
+      "rate": 21,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 21,
+      "terminated": true,
+      "encoded": "000000000000000"
+    },
+    {
+      "message": "",
+      "rate": 22,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 22,
+      "terminated": true,
+      "encoded": "000000000000000"
+    },
+    {
+      "message": "",
+      "rate": 23,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 23,
+      "terminated": true,
+      "encoded": "0000000000000000"
+    },
+    {
+      "message": "",
+      "rate": 24,
+      "terminated": false,
+      "encoded": ""
+    },
+    {
+      "message": "",
+      "rate": 24,
+      "terminated": true,
+      "encoded": "0000000000000000"
+    },
+    {
+      "message": "1",
+      "rate": 0,
+      "terminated": false,
+      "encoded": "1"
+    },
+    {
+      "message": "1",
+      "rate": 0,
+      "terminated": true,
+      "encoded": "11101"
+    },
+    {
+      "message": "1",
+      "rate": 1,
+      "terminated": false,
+      "encoded": "11"
+    },
+    {
+      "message": "1",
+      "rate": 1,
+      "terminated": true,
+      "encoded": "111101"
+    },
+    {
+      "message": "1",
+      "rate": 2,
+      "terminated": false,
+      "encoded": "11"
+    },
+    {
+      "message": "1",
+      "rate": 2,
+      "terminated": true,
+      "encoded": "1111011"
+    },
+    {
+      "message": "1",
+      "rate": 3,
+      "terminated": false,
+      "encoded": "11"
+    },
+    {
+      "message": "1",
+      "rate": 3,
+      "terminated": true,
+      "encoded": "11110011"
+    },
+    {
+      "message": "1",
+      "rate": 4,
+      "terminated": false,
+      "encoded": "11"
+    },
+    {
+      "message": "1",
+      "rate": 4,
+      "terminated": true,
+      "encoded": "11110011"
+    },
+    {
+      "message": "1",
+      "rate": 5,
+      "terminated": false,
+      "encoded": "11"
+    },
+    {
+      "message": "1",
+      "rate": 5,
+      "terminated": true,
+      "encoded": "111010011"
+    },
+    {
+      "message": "1",
+      "rate": 6,
+      "terminated": false,
+      "encoded": "11"
+    },
+    {
+      "message": "1",
+      "rate": 6,
+      "terminated": true,
+      "encoded": "111010011"
+    },
+    {
+      "message": "1",
+      "rate": 7,
+      "terminated": false,
+      "encoded": "11"
+    },
+    {
+      "message": "1",
+      "rate": 7,
+      "terminated": true,
+      "encoded": "1110100111"
+    },
+    {
+      "message": "1",
+      "rate": 8,
+      "terminated": false,
+      "encoded": "11"
+    },
+    {
+      "message": "1",
+      "rate": 8,
+      "terminated": true,
+      "encoded": "1110100111"
+    },
+    {
+      "message": "1",
+      "rate": 9,
+      "terminated": false,
+      "encoded": "111"
+    },
+    {
+      "message": "1",
+      "rate": 9,
+      "terminated": true,
+      "encoded": "11110100111"
+    },
+    {
+      "message": "1",
+      "rate": 10,
+      "terminated": false,
+      "encoded": "111"
+    },
+    {
+      "message": "1",
+      "rate": 10,
+      "terminated": true,
+      "encoded": "111101001111"
+    },
+    {
+      "message": "1",
+      "rate": 11,
+      "terminated": false,
+      "encoded": "111"
+    },
+    {
+      "message": "1",
+      "rate": 11,
+      "terminated": true,
+      "encoded": "1111010101111"
+    },
+    {
+      "message": "1",
+      "rate": 12,
+      "terminated": false,
+      "encoded": "111"
+    },
+    {
+      "message": "1",
+      "rate": 12,
+      "terminated": true,
+      "encoded": "1111010101111"
+    },
+    {
+      "message": "1",
+      "rate": 13,
+      "terminated": false,
+      "encoded": "111"
+    },
+    {
+      "message": "1",
+      "rate": 13,
+      "terminated": true,
+      "encoded": "11110010101111"
+    },
+    {
+      "message": "1",
+      "rate": 14,
+      "terminated": false,
+      "encoded": "111"
+    },
+    {
+      "message": "1",
+      "rate": 14,
+      "terminated": true,
+      "encoded": "11110010101111"
+    },
+    {
+      "message": "1",
+      "rate": 15,
+      "terminated": false,
+      "encoded": "111"
+    },
+    {
+      "message": "1",
+      "rate": 15,
+      "terminated": true,
+      "encoded": "111100101011111"
+    },
+    {
+      "message": "1",
+      "rate": 16,
+      "terminated": false,
+      "encoded": "111"
+    },
+    {
+      "message": "1",
+      "rate": 16,
+      "terminated": true,
+      "encoded": "111100101011111"
+    },
+    {
+      "message": "1",
+      "rate": 17,
+      "terminated": false,
+      "encoded": "1111"
+    },
+    {
+      "message": "1",
+      "rate": 17,
+      "terminated": true,
+      "encoded": "1111100101011111"
+    },
+    {
+      "message": "1",
+      "rate": 18,
+      "terminated": false,
+      "encoded": "1111"
+    },
+    {
+      "message": "1",
+      "rate": 18,
+      "terminated": true,
+      "encoded": "11111001010111111"
+    },
+    {
+      "message": "1",
+      "rate": 19,
+      "terminated": false,
+      "encoded": "1111"
+    },
+    {
+      "message": "1",
+      "rate": 19,
+      "terminated": true,
+      "encoded": "111110010100111111"
+    },
+    {
+      "message": "1",
+      "rate": 20,
+      "terminated": false,
+      "encoded": "1111"
+    },
+    {
+      "message": "1",
+      "rate": 20,
+      "terminated": true,
+      "encoded": "111110010100111111"
+    },
+    {
+      "message": "1",
+      "rate": 21,
+      "terminated": false,
+      "encoded": "1111"
+    },
+    {
+      "message": "1",
+      "rate": 21,
+      "terminated": true,
+      "encoded": "1111100110100111111"
+    },
+    {
+      "message": "1",
+      "rate": 22,
+      "terminated": false,
+      "encoded": "1111"
+    },
+    {
+      "message": "1",
+      "rate": 22,
+      "terminated": true,
+      "encoded": "1111100110100111111"
+    },
+    {
+      "message": "1",
+      "rate": 23,
+      "terminated": false,
+      "encoded": "1111"
+    },
+    {
+      "message": "1",
+      "rate": 23,
+      "terminated": true,
+      "encoded": "11111001101001111111"
+    },
+    {
+      "message": "1",
+      "rate": 24,
+      "terminated": false,
+      "encoded": "1111"
+    },
+    {
+      "message": "1",
+      "rate": 24,
+      "terminated": true,
+      "encoded": "11111001101001111111"
+    },
+    {
+      "message": "1011",
+      "rate": 0,
+      "terminated": false,
+      "encoded": "1011"
+    },
+    {
+      "message": "1011",
+      "rate": 0,
+      "terminated": true,
+      "encoded": "10111011"
+    },
+    {
+      "message": "1011",
+      "rate": 1,
+      "terminated": false,
+      "encoded": "11011"
+    },
+    {
+      "message": "1011",
+      "rate": 1,
+      "terminated": true,
+      "encoded": "110111011"
+    },
+    {
+      "message": "1011",
+      "rate": 2,
+      "terminated": false,
+      "encoded": "11011"
+    },
+    {
+      "message": "1011",
+      "rate": 2,
+      "terminated": true,
+      "encoded": "1101110011"
+    },
+    {
+      "message": "1011",
+      "rate": 3,
+      "terminated": false,
+      "encoded": "110111"
+    },
+    {
+      "message": "1011",
+      "rate": 3,
+      "terminated": true,
+      "encoded": "11011110011"
+    },
+    {
+      "message": "1011",
+      "rate": 4,
+      "terminated": false,
+      "encoded": "110111"
+    },
+    {
+      "message": "1011",
+      "rate": 4,
+      "terminated": true,
+      "encoded": "110111100101"
+    },
+    {
+      "message": "1011",
+      "rate": 5,
+      "terminated": false,
+      "encoded": "1101111"
+    },
+    {
+      "message": "1011",
+      "rate": 5,
+      "terminated": true,
+      "encoded": "1101111100101"
+    },
+    {
+      "message": "1011",
+      "rate": 6,
+      "terminated": false,
+      "encoded": "1101111"
+    },
+    {
+      "message": "1011",
+      "rate": 6,
+      "terminated": true,
+      "encoded": "11011111000101"
+    },
+    {
+      "message": "1011",
+      "rate": 7,
+      "terminated": false,
+      "encoded": "11011110"
+    },
+    {
+      "message": "1011",
+      "rate": 7,
+      "terminated": true,
+      "encoded": "110111101000101"
+    },
+    {
+      "message": "1011",
+      "rate": 8,
+      "terminated": false,
+      "encoded": "11011110"
+    },
+    {
+      "message": "1011",
+      "rate": 8,
+      "terminated": true,
+      "encoded": "1101111010001011"
+    },
+    {
+      "message": "1011",
+      "rate": 9,
+      "terminated": false,
+      "encoded": "111011110"
+    },
+    {
+      "message": "1011",
+      "rate": 9,
+      "terminated": true,
+      "encoded": "11101111010001011"
+    },
+    {
+      "message": "1011",
+      "rate": 10,
+      "terminated": false,
+      "encoded": "111011110"
+    },
+    {
+      "message": "1011",
+      "rate": 10,
+      "terminated": true,
+      "encoded": "111011110101001011"
+    },
+    {
+      "message": "1011",
+      "rate": 11,
+      "terminated": false,
+      "encoded": "1110111010"
+    },
+    {
+      "message": "1011",
+      "rate": 11,
+      "terminated": true,
+      "encoded": "1110111010101001011"
+    },
+    {
+      "message": "1011",
+      "rate": 12,
+      "terminated": false,
+      "encoded": "1110111010"
+    },
+    {
+      "message": "1011",
+      "rate": 12,
+      "terminated": true,
+      "encoded": "11101110101010010011"
+    },
+    {
+      "message": "1011",
+      "rate": 13,
+      "terminated": false,
+      "encoded": "11101111010"
+    },
+    {
+      "message": "1011",
+      "rate": 13,
+      "terminated": true,
+      "encoded": "111011110101010010011"
+    },
+    {
+      "message": "1011",
+      "rate": 14,
+      "terminated": false,
+      "encoded": "11101111010"
+    },
+    {
+      "message": "1011",
+      "rate": 14,
+      "terminated": true,
+      "encoded": "1110111101010100110011"
+    },
+    {
+      "message": "1011",
+      "rate": 15,
+      "terminated": false,
+      "encoded": "111011110101"
+    },
+    {
+      "message": "1011",
+      "rate": 15,
+      "terminated": true,
+      "encoded": "11101111010110100110011"
+    },
+    {
+      "message": "1011",
+      "rate": 16,
+      "terminated": false,
+      "encoded": "111011110101"
+    },
+    {
+      "message": "1011",
+      "rate": 16,
+      "terminated": true,
+      "encoded": "111011110101101001100111"
+    },
+    {
+      "message": "1011",
+      "rate": 17,
+      "terminated": false,
+      "encoded": "1111011110101"
+    },
+    {
+      "message": "1011",
+      "rate": 17,
+      "terminated": true,
+      "encoded": "1111011110101101001100111"
+    },
+    {
+      "message": "1011",
+      "rate": 18,
+      "terminated": false,
+      "encoded": "1111011110101"
+    },
+    {
+      "message": "1011",
+      "rate": 18,
+      "terminated": true,
+      "encoded": "11110111101011011001100111"
+    },
+    {
+      "message": "1011",
+      "rate": 19,
+      "terminated": false,
+      "encoded": "11110111100101"
+    },
+    {
+      "message": "1011",
+      "rate": 19,
+      "terminated": true,
+      "encoded": "111101111001011011001100111"
+    },
+    {
+      "message": "1011",
+      "rate": 20,
+      "terminated": false,
+      "encoded": "11110111100101"
+    },
+    {
+      "message": "1011",
+      "rate": 20,
+      "terminated": true,
+      "encoded": "1111011110010110110011000111"
+    },
+    {
+      "message": "1011",
+      "rate": 21,
+      "terminated": false,
+      "encoded": "111101101100101"
+    },
+    {
+      "message": "1011",
+      "rate": 21,
+      "terminated": true,
+      "encoded": "11110110110010110110011000111"
+    },
+    {
+      "message": "1011",
+      "rate": 22,
+      "terminated": false,
+      "encoded": "111101101100101"
+    },
+    {
+      "message": "1011",
+      "rate": 22,
+      "terminated": true,
+      "encoded": "111101101100101101100101000111"
+    },
+    {
+      "message": "1011",
+      "rate": 23,
+      "terminated": false,
+      "encoded": "1111011011001011"
+    },
+    {
+      "message": "1011",
+      "rate": 23,
+      "terminated": true,
+      "encoded": "1111011011001011101100101000111"
+    },
+    {
+      "message": "1011",
+      "rate": 24,
+      "terminated": false,
+      "encoded": "1111011011001011"
+    },
+    {
+      "message": "1011",
+      "rate": 24,
+      "terminated": true,
+      "encoded": "11110110110010111011001010001111"
+    },
+    {
+      "message": "1011011",
+      "rate": 0,
+      "terminated": false,
+      "encoded": "1011011"
+    },
+    {
+      "message": "1011011",
+      "rate": 0,
+      "terminated": true,
+      "encoded": "10110110001"
+    },
+    {
+      "message": "1011011",
+      "rate": 1,
+      "terminated": false,
+      "encoded": "11011011"
+    },
+    {
+      "message": "1011011",
+      "rate": 1,
+      "terminated": true,
+      "encoded": "1101101100101"
+    },
+    {
+      "message": "1011011",
+      "rate": 2,
+      "terminated": false,
+      "encoded": "110110111"
+    },
+    {
+      "message": "1011011",
+      "rate": 2,
+      "terminated": true,
+      "encoded": "11011011100101"
+    },
+    {
+      "message": "1011011",
+      "rate": 3,
+      "terminated": false,
+      "encoded": "1101110111"
+    },
+    {
+      "message": "1011011",
+      "rate": 3,
+      "terminated": true,
+      "encoded": "1101110111001011"
+    },
+    {
+      "message": "1011011",
+      "rate": 4,
+      "terminated": false,
+      "encoded": "11011101111"
+    },
+    {
+      "message": "1011011",
+      "rate": 4,
+      "terminated": true,
+      "encoded": "11011101111001011"
+    },
+    {
+      "message": "1011011",
+      "rate": 5,
+      "terminated": false,
+      "encoded": "110111101111"
+    },
+    {
+      "message": "1011011",
+      "rate": 5,
+      "terminated": true,
+      "encoded": "1101111011110010111"
+    },
+    {
+      "message": "1011011",
+      "rate": 6,
+      "terminated": false,
+      "encoded": "1101111011011"
+    },
+    {
+      "message": "1011011",
+      "rate": 6,
+      "terminated": true,
+      "encoded": "11011110110110010111"
+    },
+    {
+      "message": "1011011",
+      "rate": 7,
+      "terminated": false,
+      "encoded": "11011110011011"
+    },
+    {
+      "message": "1011011",
+      "rate": 7,
+      "terminated": true,
+      "encoded": "110111100110110010111"
+    },
+    {
+      "message": "1011011",
+      "rate": 8,
+      "terminated": false,
+      "encoded": "11011110011011"
+    },
+    {
+      "message": "1011011",
+      "rate": 8,
+      "terminated": true,
+      "encoded": "1101111001101100010111"
+    },
+    {
+      "message": "1011011",
+      "rate": 9,
+      "terminated": false,
+      "encoded": "111011110011011"
+    },
+    {
+      "message": "1011011",
+      "rate": 9,
+      "terminated": true,
+      "encoded": "111011110011011000100111"
+    },
+    {
+      "message": "1011011",
+      "rate": 10,
+      "terminated": false,
+      "encoded": "1110111100101011"
+    },
+    {
+      "message": "1011011",
+      "rate": 10,
+      "terminated": true,
+      "encoded": "1110111100101011000100111"
+    },
+    {
+      "message": "1011011",
+      "rate": 11,
+      "terminated": false,
+      "encoded": "11101110100101011"
+    },
+    {
+      "message": "1011011",
+      "rate": 11,
+      "terminated": true,
+      "encoded": "111011101001010110001001111"
+    },
+    {
+      "message": "1011011",
+      "rate": 12,
+      "terminated": false,
+      "encoded": "111011101001010110"
+    },
+    {
+      "message": "1011011",
+      "rate": 12,
+      "terminated": true,
+      "encoded": "1110111010010101100001001111"
+    },
+    {
+      "message": "1011011",
+      "rate": 13,
+      "terminated": false,
+      "encoded": "1110111101001010110"
+    },
+    {
+      "message": "1011011",
+      "rate": 13,
+      "terminated": true,
+      "encoded": "111011110100101011000010011111"
+    },
+    {
+      "message": "1011011",
+      "rate": 14,
+      "terminated": false,
+      "encoded": "11101111010010101110"
+    },
+    {
+      "message": "1011011",
+      "rate": 14,
+      "terminated": true,
+      "encoded": "1110111101001010111000010011111"
+    },
+    {
+      "message": "1011011",
+      "rate": 15,
+      "terminated": false,
+      "encoded": "111011110101010101110"
+    },
+    {
+      "message": "1011011",
+      "rate": 15,
+      "terminated": true,
+      "encoded": "11101111010101010111000010011111"
+    },
+    {
+      "message": "1011011",
+      "rate": 16,
+      "terminated": false,
+      "encoded": "111011110101010101110"
+    },
+    {
+      "message": "1011011",
+      "rate": 16,
+      "terminated": true,
+      "encoded": "111011110101010101110000010011111"
+    },
+    {
+      "message": "1011011",
+      "rate": 17,
+      "terminated": false,
+      "encoded": "1111011110101010101110"
+    },
+    {
+      "message": "1011011",
+      "rate": 17,
+      "terminated": true,
+      "encoded": "11110111101010101011100000101011111"
+    },
+    {
+      "message": "1011011",
+      "rate": 18,
+      "terminated": false,
+      "encoded": "11110111101010100101110"
+    },
+    {
+      "message": "1011011",
+      "rate": 18,
+      "terminated": true,
+      "encoded": "111101111010101001011100000101011111"
+    },
+    {
+      "message": "1011011",
+      "rate": 19,
+      "terminated": false,
+      "encoded": "111101111001010100101110"
+    },
+    {
+      "message": "1011011",
+      "rate": 19,
+      "terminated": true,
+      "encoded": "11110111100101010010111000001010111111"
+    },
+    {
+      "message": "1011011",
+      "rate": 20,
+      "terminated": false,
+      "encoded": "1111011110010101001011101"
+    },
+    {
+      "message": "1011011",
+      "rate": 20,
+      "terminated": true,
+      "encoded": "111101111001010100101110100001010111111"
+    },
+    {
+      "message": "1011011",
+      "rate": 21,
+      "terminated": false,
+      "encoded": "11110110110010101001011101"
+    },
+    {
+      "message": "1011011",
+      "rate": 21,
+      "terminated": true,
+      "encoded": "11110110110010101001011101000010101111111"
+    },
+    {
+      "message": "1011011",
+      "rate": 22,
+      "terminated": false,
+      "encoded": "111101101100101010010111101"
+    },
+    {
+      "message": "1011011",
+      "rate": 22,
+      "terminated": true,
+      "encoded": "111101101100101010010111101000010101111111"
+    },
+    {
+      "message": "1011011",
+      "rate": 23,
+      "terminated": false,
+      "encoded": "1111011011001011010010111101"
+    },
+    {
+      "message": "1011011",
+      "rate": 23,
+      "terminated": true,
+      "encoded": "1111011011001011010010111101000010101111111"
+    },
+    {
+      "message": "1011011",
+      "rate": 24,
+      "terminated": false,
+      "encoded": "1111011011001011010010111101"
+    },
+    {
+      "message": "1011011",
+      "rate": 24,
+      "terminated": true,
+      "encoded": "11110110110010110100101111010001010101111111"
+    },
+    {
+      "message": "10110110",
+      "rate": 0,
+      "terminated": false,
+      "encoded": "10110110"
+    },
+    {
+      "message": "10110110",
+      "rate": 0,
+      "terminated": true,
+      "encoded": "101101100010"
+    },
+    {
+      "message": "10110110",
+      "rate": 1,
+      "terminated": false,
+      "encoded": "110110110"
+    },
+    {
+      "message": "10110110",
+      "rate": 1,
+      "terminated": true,
+      "encoded": "11011011001010"
+    },
+    {
+      "message": "10110110",
+      "rate": 2,
+      "terminated": false,
+      "encoded": "1101101110"
+    },
+    {
+      "message": "10110110",
+      "rate": 2,
+      "terminated": true,
+      "encoded": "110110111001010"
+    },
+    {
+      "message": "10110110",
+      "rate": 3,
+      "terminated": false,
+      "encoded": "11011101110"
+    },
+    {
+      "message": "10110110",
+      "rate": 3,
+      "terminated": true,
+      "encoded": "11011101110010110"
+    },
+    {
+      "message": "10110110",
+      "rate": 4,
+      "terminated": false,
+      "encoded": "110111011110"
+    },
+    {
+      "message": "10110110",
+      "rate": 4,
+      "terminated": true,
+      "encoded": "110111011110010110"
+    },
+    {
+      "message": "10110110",
+      "rate": 5,
+      "terminated": false,
+      "encoded": "1101111011110"
+    },
+    {
+      "message": "10110110",
+      "rate": 5,
+      "terminated": true,
+      "encoded": "11011110111100101110"
+    },
+    {
+      "message": "10110110",
+      "rate": 6,
+      "terminated": false,
+      "encoded": "11011110110110"
+    },
+    {
+      "message": "10110110",
+      "rate": 6,
+      "terminated": true,
+      "encoded": "110111101101100101110"
+    },
+    {
+      "message": "10110110",
+      "rate": 7,
+      "terminated": false,
+      "encoded": "110111100110110"
+    },
+    {
+      "message": "10110110",
+      "rate": 7,
+      "terminated": true,
+      "encoded": "11011110011011001011100"
+    },
+    {
+      "message": "10110110",
+      "rate": 8,
+      "terminated": false,
+      "encoded": "1101111001101100"
+    },
+    {
+      "message": "10110110",
+      "rate": 8,
+      "terminated": true,
+      "encoded": "110111100110110001011100"
+    },
+    {
+      "message": "10110110",
+      "rate": 9,
+      "terminated": false,
+      "encoded": "11101111001101100"
+    },
+    {
+      "message": "10110110",
+      "rate": 9,
+      "terminated": true,
+      "encoded": "11101111001101100010011100"
+    },
+    {
+      "message": "10110110",
+      "rate": 10,
+      "terminated": false,
+      "encoded": "111011110010101100"
+    },
+    {
+      "message": "10110110",
+      "rate": 10,
+      "terminated": true,
+      "encoded": "111011110010101100010011100"
+    },
+    {
+      "message": "10110110",
+      "rate": 11,
+      "terminated": false,
+      "encoded": "1110111010010101100"
+    },
+    {
+      "message": "10110110",
+      "rate": 11,
+      "terminated": true,
+      "encoded": "11101110100101011000100111100"
+    },
+    {
+      "message": "10110110",
+      "rate": 12,
+      "terminated": false,
+      "encoded": "11101110100101011000"
+    },
+    {
+      "message": "10110110",
+      "rate": 12,
+      "terminated": true,
+      "encoded": "111011101001010110000100111100"
+    },
+    {
+      "message": "10110110",
+      "rate": 13,
+      "terminated": false,
+      "encoded": "111011110100101011000"
+    },
+    {
+      "message": "10110110",
+      "rate": 13,
+      "terminated": true,
+      "encoded": "11101111010010101100001001111100"
+    },
+    {
+      "message": "10110110",
+      "rate": 14,
+      "terminated": false,
+      "encoded": "1110111101001010111000"
+    },
+    {
+      "message": "10110110",
+      "rate": 14,
+      "terminated": true,
+      "encoded": "111011110100101011100001001111100"
+    },
+    {
+      "message": "10110110",
+      "rate": 15,
+      "terminated": false,
+      "encoded": "11101111010101010111000"
+    },
+    {
+      "message": "10110110",
+      "rate": 15,
+      "terminated": true,
+      "encoded": "11101111010101010111000010011111000"
+    },
+    {
+      "message": "10110110",
+      "rate": 16,
+      "terminated": false,
+      "encoded": "111011110101010101110000"
+    },
+    {
+      "message": "10110110",
+      "rate": 16,
+      "terminated": true,
+      "encoded": "111011110101010101110000010011111000"
+    },
+    {
+      "message": "10110110",
+      "rate": 17,
+      "terminated": false,
+      "encoded": "1111011110101010101110000"
+    },
+    {
+      "message": "10110110",
+      "rate": 17,
+      "terminated": true,
+      "encoded": "11110111101010101011100000101011111000"
+    },
+    {
+      "message": "10110110",
+      "rate": 18,
+      "terminated": false,
+      "encoded": "11110111101010100101110000"
+    },
+    {
+      "message": "10110110",
+      "rate": 18,
+      "terminated": true,
+      "encoded": "111101111010101001011100000101011111000"
+    },
+    {
+      "message": "10110110",
+      "rate": 19,
+      "terminated": false,
+      "encoded": "111101111001010100101110000"
+    },
+    {
+      "message": "10110110",
+      "rate": 19,
+      "terminated": true,
+      "encoded": "11110111100101010010111000001010111111000"
+    },
+    {
+      "message": "10110110",
+      "rate": 20,
+      "terminated": false,
+      "encoded": "1111011110010101001011101000"
+    },
+    {
+      "message": "10110110",
+      "rate": 20,
+      "terminated": true,
+      "encoded": "111101111001010100101110100001010111111000"
+    },
+    {
+      "message": "10110110",
+      "rate": 21,
+      "terminated": false,
+      "encoded": "11110110110010101001011101000"
+    },
+    {
+      "message": "10110110",
+      "rate": 21,
+      "terminated": true,
+      "encoded": "11110110110010101001011101000010101111111000"
+    },
+    {
+      "message": "10110110",
+      "rate": 22,
+      "terminated": false,
+      "encoded": "111101101100101010010111101000"
+    },
+    {
+      "message": "10110110",
+      "rate": 22,
+      "terminated": true,
+      "encoded": "111101101100101010010111101000010101111111000"
+    },
+    {
+      "message": "10110110",
+      "rate": 23,
+      "terminated": false,
+      "encoded": "1111011011001011010010111101000"
+    },
+    {
+      "message": "10110110",
+      "rate": 23,
+      "terminated": true,
+      "encoded": "11110110110010110100101111010000101011111110000"
+    },
+    {
+      "message": "10110110",
+      "rate": 24,
+      "terminated": false,
+      "encoded": "11110110110010110100101111010001"
+    },
+    {
+      "message": "10110110",
+      "rate": 24,
+      "terminated": true,
+      "encoded": "111101101100101101001011110100010101011111110000"
+    },
+    {
+      "message": "101101101",
+      "rate": 0,
+      "terminated": false,
+      "encoded": "101101101"
+    },
+    {
+      "message": "101101101",
+      "rate": 0,
+      "terminated": true,
+      "encoded": "1011011011001"
+    },
+    {
+      "message": "101101101",
+      "rate": 1,
+      "terminated": false,
+      "encoded": "11011011010"
+    },
+    {
+      "message": "101101101",
+      "rate": 1,
+      "terminated": true,
+      "encoded": "110110110101001"
+    },
+    {
+      "message": "101101101",
+      "rate": 2,
+      "terminated": false,
+      "encoded": "110110111010"
+    },
+    {
+      "message": "101101101",
+      "rate": 2,
+      "terminated": true,
+      "encoded": "11011011101010011"
+    },
+    {
+      "message": "101101101",
+      "rate": 3,
+      "terminated": false,
+      "encoded": "1101110111010"
+    },
+    {
+      "message": "101101101",
+      "rate": 3,
+      "terminated": true,
+      "encoded": "1101110111010101011"
+    },
+    {
+      "message": "101101101",
+      "rate": 4,
+      "terminated": false,
+      "encoded": "11011101111010"
+    },
+    {
+      "message": "101101101",
+      "rate": 4,
+      "terminated": true,
+      "encoded": "11011101111010101011"
+    },
+    {
+      "message": "101101101",
+      "rate": 5,
+      "terminated": false,
+      "encoded": "110111101111010"
+    },
+    {
+      "message": "101101101",
+      "rate": 5,
+      "terminated": true,
+      "encoded": "1101111011110101101011"
+    },
+    {
+      "message": "101101101",
+      "rate": 6,
+      "terminated": false,
+      "encoded": "1101111011011010"
+    },
+    {
+      "message": "101101101",
+      "rate": 6,
+      "terminated": true,
+      "encoded": "11011110110110101101011"
+    },
+    {
+      "message": "101101101",
+      "rate": 7,
+      "terminated": false,
+      "encoded": "11011110011011010"
+    },
+    {
+      "message": "101101101",
+      "rate": 7,
+      "terminated": true,
+      "encoded": "1101111001101101011010111"
+    },
+    {
+      "message": "101101101",
+      "rate": 8,
+      "terminated": false,
+      "encoded": "110111100110110010"
+    },
+    {
+      "message": "101101101",
+      "rate": 8,
+      "terminated": true,
+      "encoded": "11011110011011001011010111"
+    },
+    {
+      "message": "101101101",
+      "rate": 9,
+      "terminated": false,
+      "encoded": "11101111001101100101"
+    },
+    {
+      "message": "101101101",
+      "rate": 9,
+      "terminated": true,
+      "encoded": "1110111100110110010111010111"
+    },
+    {
+      "message": "101101101",
+      "rate": 10,
+      "terminated": false,
+      "encoded": "111011110010101100101"
+    },
+    {
+      "message": "101101101",
+      "rate": 10,
+      "terminated": true,
+      "encoded": "111011110010101100101110101111"
+    },
+    {
+      "message": "101101101",
+      "rate": 11,
+      "terminated": false,
+      "encoded": "1110111010010101100101"
+    },
+    {
+      "message": "101101101",
+      "rate": 11,
+      "terminated": true,
+      "encoded": "11101110100101011001011101001111"
+    },
+    {
+      "message": "101101101",
+      "rate": 12,
+      "terminated": false,
+      "encoded": "11101110100101011000101"
+    },
+    {
+      "message": "101101101",
+      "rate": 12,
+      "terminated": true,
+      "encoded": "111011101001010110001011101001111"
+    },
+    {
+      "message": "101101101",
+      "rate": 13,
+      "terminated": false,
+      "encoded": "111011110100101011000101"
+    },
+    {
+      "message": "101101101",
+      "rate": 13,
+      "terminated": true,
+      "encoded": "11101111010010101100010111101001111"
+    },
+    {
+      "message": "101101101",
+      "rate": 14,
+      "terminated": false,
+      "encoded": "1110111101001010111000101"
+    },
+    {
+      "message": "101101101",
+      "rate": 14,
+      "terminated": true,
+      "encoded": "111011110100101011100010111101001111"
+    },
+    {
+      "message": "101101101",
+      "rate": 15,
+      "terminated": false,
+      "encoded": "11101111010101010111000101"
+    },
+    {
+      "message": "101101101",
+      "rate": 15,
+      "terminated": true,
+      "encoded": "11101111010101010111000101111010011111"
+    },
+    {
+      "message": "101101101",
+      "rate": 16,
+      "terminated": false,
+      "encoded": "111011110101010101110000101"
+    },
+    {
+      "message": "101101101",
+      "rate": 16,
+      "terminated": true,
+      "encoded": "111011110101010101110000101111010011111"
+    },
+    {
+      "message": "101101101",
+      "rate": 17,
+      "terminated": false,
+      "encoded": "11110111101010101011100001010"
+    },
+    {
+      "message": "101101101",
+      "rate": 17,
+      "terminated": true,
+      "encoded": "11110111101010101011100001010111010011111"
+    },
+    {
+      "message": "101101101",
+      "rate": 18,
+      "terminated": false,
+      "encoded": "111101111010101001011100001010"
+    },
+    {
+      "message": "101101101",
+      "rate": 18,
+      "terminated": true,
+      "encoded": "1111011110101010010111000010101110100111111"
+    },
+    {
+      "message": "101101101",
+      "rate": 19,
+      "terminated": false,
+      "encoded": "1111011110010101001011100001010"
+    },
+    {
+      "message": "101101101",
+      "rate": 19,
+      "terminated": true,
+      "encoded": "111101111001010100101110000101011101010111111"
+    },
+    {
+      "message": "101101101",
+      "rate": 20,
+      "terminated": false,
+      "encoded": "11110111100101010010111010001010"
+    },
+    {
+      "message": "101101101",
+      "rate": 20,
+      "terminated": true,
+      "encoded": "1111011110010101001011101000101011101010111111"
+    },
+    {
+      "message": "101101101",
+      "rate": 21,
+      "terminated": false,
+      "encoded": "111101101100101010010111010001010"
+    },
+    {
+      "message": "101101101",
+      "rate": 21,
+      "terminated": true,
+      "encoded": "111101101100101010010111010001010111001010111111"
+    },
+    {
+      "message": "101101101",
+      "rate": 22,
+      "terminated": false,
+      "encoded": "1111011011001010100101111010001010"
+    },
+    {
+      "message": "101101101",
+      "rate": 22,
+      "terminated": true,
+      "encoded": "1111011011001010100101111010001010111001010111111"
+    },
+    {
+      "message": "101101101",
+      "rate": 23,
+      "terminated": false,
+      "encoded": "11110110110010110100101111010001010"
+    },
+    {
+      "message": "101101101",
+      "rate": 23,
+      "terminated": true,
+      "encoded": "111101101100101101001011110100010101110010101111111"
+    },
+    {
+      "message": "101101101",
+      "rate": 24,
+      "terminated": false,
+      "encoded": "111101101100101101001011110100011010"
+    },
+    {
+      "message": "101101101",
+      "rate": 24,
+      "terminated": true,
+      "encoded": "1111011011001011010010111101000110101110010101111111"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 0,
+      "terminated": false,
+      "encoded": "101101101101101"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 0,
+      "terminated": true,
+      "encoded": "1011011011011011100"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 1,
+      "terminated": false,
+      "encoded": "11011011010101101"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 1,
+      "terminated": true,
+      "encoded": "1101101101010110111100"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 2,
+      "terminated": false,
+      "encoded": "1101101110101011001"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 2,
+      "terminated": true,
+      "encoded": "110110111010101100111100"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 3,
+      "terminated": false,
+      "encoded": "110111011101010111001"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 3,
+      "terminated": true,
+      "encoded": "110111011101010111001111000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 4,
+      "terminated": false,
+      "encoded": "11011101111010101110011"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 4,
+      "terminated": true,
+      "encoded": "11011101111010101110011111000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 5,
+      "terminated": false,
+      "encoded": "1101111011110101101110011"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 5,
+      "terminated": true,
+      "encoded": "11011110111101011011100111110000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 6,
+      "terminated": false,
+      "encoded": "110111101101101011011100011"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 6,
+      "terminated": true,
+      "encoded": "1101111011011010110111000111110000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 7,
+      "terminated": false,
+      "encoded": "11011110011011010110110100011"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 7,
+      "terminated": true,
+      "encoded": "110111100110110101101101000111110000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 8,
+      "terminated": false,
+      "encoded": "110111100110110010110110100011"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 8,
+      "terminated": true,
+      "encoded": "11011110011011001011011010001110110000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 9,
+      "terminated": false,
+      "encoded": "11101111001101100101110110100011"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 9,
+      "terminated": true,
+      "encoded": "11101111001101100101110110100011101110000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 10,
+      "terminated": false,
+      "encoded": "1110111100101011001011101101000011"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 10,
+      "terminated": true,
+      "encoded": "1110111100101011001011101101000011101110000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 11,
+      "terminated": false,
+      "encoded": "111011101001010110010111010101000011"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 11,
+      "terminated": true,
+      "encoded": "1110111010010101100101110101010000111011100000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 12,
+      "terminated": false,
+      "encoded": "11101110100101011000101110101010000110"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 12,
+      "terminated": true,
+      "encoded": "111011101001010110001011101010100001101011100000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 13,
+      "terminated": false,
+      "encoded": "1110111101001010110001011110101010000110"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 13,
+      "terminated": true,
+      "encoded": "111011110100101011000101111010101000011010111000000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 14,
+      "terminated": false,
+      "encoded": "111011110100101011100010111101010100001110"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 14,
+      "terminated": true,
+      "encoded": "11101111010010101110001011110101010000111010111000000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 15,
+      "terminated": false,
+      "encoded": "11101111010101010111000101111010100100001110"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 15,
+      "terminated": true,
+      "encoded": "1110111101010101011100010111101010010000111010111000000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 16,
+      "terminated": false,
+      "encoded": "111011110101010101110000101111010100100001110"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 16,
+      "terminated": true,
+      "encoded": "111011110101010101110000101111010100100001110100111000000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 17,
+      "terminated": false,
+      "encoded": "11110111101010101011100001010111010100100001110"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 17,
+      "terminated": true,
+      "encoded": "111101111010101010111000010101110101001000011101001111000000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 18,
+      "terminated": false,
+      "encoded": "1111011110101010010111000010101110101001001001110"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 18,
+      "terminated": true,
+      "encoded": "11110111101010100101110000101011101010010010011101001111000000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 19,
+      "terminated": false,
+      "encoded": "111101111001010100101110000101011101011001001001110"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 19,
+      "terminated": true,
+      "encoded": "11110111100101010010111000010101110101100100100111010011110000000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 20,
+      "terminated": false,
+      "encoded": "11110111100101010010111010001010111010110010010011101"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 20,
+      "terminated": true,
+      "encoded": "1111011110010101001011101000101011101011001001001110110011110000000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 21,
+      "terminated": false,
+      "encoded": "1111011011001010100101110100010101110010110010010011101"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 21,
+      "terminated": true,
+      "encoded": "1111011011001010100101110100010101110010110010010011101100111100000000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 22,
+      "terminated": false,
+      "encoded": "111101101100101010010111101000101011100101100100100111101"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 22,
+      "terminated": true,
+      "encoded": "111101101100101010010111101000101011100101100100100111101100111100000000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 23,
+      "terminated": false,
+      "encoded": "11110110110010110100101111010001010111001011000100100111101"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 23,
+      "terminated": true,
+      "encoded": "11110110110010110100101111010001010111001011000100100111101100111100000000"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 24,
+      "terminated": false,
+      "encoded": "111101101100101101001011110100011010111001011000100100111101"
+    },
+    {
+      "message": "101101101101101",
+      "rate": 24,
+      "terminated": true,
+      "encoded": "1111011011001011010010111101000110101110010110001001001111011000111100000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 0,
+      "terminated": false,
+      "encoded": "1011011011011011"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 0,
+      "terminated": true,
+      "encoded": "10110110110110111000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 1,
+      "terminated": false,
+      "encoded": "110110110101011011"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 1,
+      "terminated": true,
+      "encoded": "11011011010101101111000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 2,
+      "terminated": false,
+      "encoded": "11011011101010110011"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 2,
+      "terminated": true,
+      "encoded": "1101101110101011001111000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 3,
+      "terminated": false,
+      "encoded": "1101110111010101110011"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 3,
+      "terminated": true,
+      "encoded": "1101110111010101110011110000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 4,
+      "terminated": false,
+      "encoded": "110111011110101011100111"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 4,
+      "terminated": true,
+      "encoded": "110111011110101011100111110000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 5,
+      "terminated": false,
+      "encoded": "11011110111101011011100111"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 5,
+      "terminated": true,
+      "encoded": "110111101111010110111001111100000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 6,
+      "terminated": false,
+      "encoded": "1101111011011010110111000111"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 6,
+      "terminated": true,
+      "encoded": "11011110110110101101110001111100000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 7,
+      "terminated": false,
+      "encoded": "110111100110110101101101000111"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 7,
+      "terminated": true,
+      "encoded": "11011110011011010110110100011111000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 8,
+      "terminated": false,
+      "encoded": "11011110011011001011011010001110"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 8,
+      "terminated": true,
+      "encoded": "1101111001101100101101101000111011000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 9,
+      "terminated": false,
+      "encoded": "1110111100110110010111011010001110"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 9,
+      "terminated": true,
+      "encoded": "1110111100110110010111011010001110111000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 10,
+      "terminated": false,
+      "encoded": "111011110010101100101110110100001110"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 10,
+      "terminated": true,
+      "encoded": "111011110010101100101110110100001110111000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 11,
+      "terminated": false,
+      "encoded": "11101110100101011001011101010100001110"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 11,
+      "terminated": true,
+      "encoded": "111011101001010110010111010101000011101110000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 12,
+      "terminated": false,
+      "encoded": "1110111010010101100010111010101000011010"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 12,
+      "terminated": true,
+      "encoded": "11101110100101011000101110101010000110101110000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 13,
+      "terminated": false,
+      "encoded": "111011110100101011000101111010101000011010"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 13,
+      "terminated": true,
+      "encoded": "11101111010010101100010111101010100001101011100000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 14,
+      "terminated": false,
+      "encoded": "11101111010010101110001011110101010000111010"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 14,
+      "terminated": true,
+      "encoded": "1110111101001010111000101111010101000011101011100000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 15,
+      "terminated": false,
+      "encoded": "1110111101010101011100010111101010010000111010"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 15,
+      "terminated": true,
+      "encoded": "1110111101010101011100010111101010010000111010111000000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 16,
+      "terminated": false,
+      "encoded": "111011110101010101110000101111010100100001110100"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 16,
+      "terminated": true,
+      "encoded": "111011110101010101110000101111010100100001110100111000000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 17,
+      "terminated": false,
+      "encoded": "11110111101010101011100001010111010100100001110100"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 17,
+      "terminated": true,
+      "encoded": "111101111010101010111000010101110101001000011101001111000000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 18,
+      "terminated": false,
+      "encoded": "1111011110101010010111000010101110101001001001110100"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 18,
+      "terminated": true,
+      "encoded": "11110111101010100101110000101011101010010010011101001111000000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 19,
+      "terminated": false,
+      "encoded": "111101111001010100101110000101011101011001001001110100"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 19,
+      "terminated": true,
+      "encoded": "11110111100101010010111000010101110101100100100111010011110000000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 20,
+      "terminated": false,
+      "encoded": "11110111100101010010111010001010111010110010010011101100"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 20,
+      "terminated": true,
+      "encoded": "1111011110010101001011101000101011101011001001001110110011110000000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 21,
+      "terminated": false,
+      "encoded": "1111011011001010100101110100010101110010110010010011101100"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 21,
+      "terminated": true,
+      "encoded": "1111011011001010100101110100010101110010110010010011101100111100000000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 22,
+      "terminated": false,
+      "encoded": "111101101100101010010111101000101011100101100100100111101100"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 22,
+      "terminated": true,
+      "encoded": "111101101100101010010111101000101011100101100100100111101100111100000000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 23,
+      "terminated": false,
+      "encoded": "11110110110010110100101111010001010111001011000100100111101100"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 23,
+      "terminated": true,
+      "encoded": "111101101100101101001011110100010101110010110001001001111011001111000000000000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 24,
+      "terminated": false,
+      "encoded": "1111011011001011010010111101000110101110010110001001001111011000"
+    },
+    {
+      "message": "1011011011011011",
+      "rate": 24,
+      "terminated": true,
+      "encoded": "11110110110010110100101111010001101011100101100010010011110110001111000000000000"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 0,
+      "terminated": false,
+      "encoded": "101101101101101101101101101101101"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 0,
+      "terminated": true,
+      "encoded": "1011011011011011011011011011011010101"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 1,
+      "terminated": false,
+      "encoded": "11011011010101101100110110110011011010"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 1,
+      "terminated": true,
+      "encoded": "110110110101011011001101101100110110100101"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 2,
+      "terminated": false,
+      "encoded": "110110111010101100110011011101100110011010"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 2,
+      "terminated": true,
+      "encoded": "11011011101010110011001101110110011001101001011"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 3,
+      "terminated": false,
+      "encoded": "1101110111010101110011001100111011001010011010"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 3,
+      "terminated": true,
+      "encoded": "1101110111010101110011001100111011001010011010010011"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 4,
+      "terminated": false,
+      "encoded": "11011101111010101110011100110011101110010100111010"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 4,
+      "terminated": true,
+      "encoded": "11011101111010101110011100110011101110010100111010010011"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 5,
+      "terminated": false,
+      "encoded": "110111101111010110111001110010100111011100110100111010"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 5,
+      "terminated": true,
+      "encoded": "1101111011110101101110011100101001110111001101001110100110011"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 6,
+      "terminated": false,
+      "encoded": "1101111011011010110111000111001010011110111001101001011010"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 6,
+      "terminated": true,
+      "encoded": "11011110110110101101110001110010100111101110011010010110100110011"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 7,
+      "terminated": false,
+      "encoded": "11011110011011010110110100011100101001111101110011011001011010"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 7,
+      "terminated": true,
+      "encoded": "1101111001101101011011010001110010100111110111001101100101101001100111"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 8,
+      "terminated": false,
+      "encoded": "110111100110110010110110100011100010100111110111100110110010110110"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 8,
+      "terminated": true,
+      "encoded": "11011110011011001011011010001110001010011111011110011011001011011001100111"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 9,
+      "terminated": false,
+      "encoded": "11101111001101100101110110100011100001010011111011110101101100101101100"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 9,
+      "terminated": true,
+      "encoded": "1110111100110110010111011010001110000101001111101111010110110010110110001100111"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 10,
+      "terminated": false,
+      "encoded": "111011110010101100101110110100001110000101001111110111101011011000101101100"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 10,
+      "terminated": true,
+      "encoded": "111011110010101100101110110100001110000101001111110111101011011000101101100011001111"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 11,
+      "terminated": false,
+      "encoded": "1110111010010101100101110101010000111000010101011111101111010110111000101101100"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 11,
+      "terminated": true,
+      "encoded": "11101110100101011001011101010100001110000101010111111011110101101110001011011000110101111"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 12,
+      "terminated": false,
+      "encoded": "11101110100101011000101110101010000110100001010101111110111110101101110001011101100"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 12,
+      "terminated": true,
+      "encoded": "111011101001010110001011101010100001101000010101011111101111101011011100010111011000110101111"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 13,
+      "terminated": false,
+      "encoded": "111011110100101011000101111010101000011010000100101011111101111101010101110001011101100"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 13,
+      "terminated": true,
+      "encoded": "11101111010010101100010111101010100001101000010010101111110111110101010111000101110110001110101111"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 14,
+      "terminated": false,
+      "encoded": "1110111101001010111000101111010101000011101000010010101111111011111010101011100010111101100"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 14,
+      "terminated": true,
+      "encoded": "111011110100101011100010111101010100001110100001001010111111101111101010101110001011110110001110101111"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 15,
+      "terminated": false,
+      "encoded": "11101111010101010111000101111010100100001110100001001010111111110111110101010111000010111101100"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 15,
+      "terminated": true,
+      "encoded": "11101111010101010111000101111010100100001110100001001010111111110111110101010111000010111101100011101011111"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 16,
+      "terminated": false,
+      "encoded": "111011110101010101110000101111010100100001110100000100101011111111011110101010101110000101111010100"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 16,
+      "terminated": true,
+      "encoded": "111011110101010101110000101111010100100001110100000100101011111111011110101010101110000101111010100011101011111"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 17,
+      "terminated": false,
+      "encoded": "11110111101010101011100001010111010100100001110100000010010101111111101111010110101011100001011110101000"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 17,
+      "terminated": true,
+      "encoded": "11110111101010101011100001010111010100100001110100000010010101111111101111010110101011100001011110101000011101011111"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 18,
+      "terminated": false,
+      "encoded": "111101111010101001011100001010111010100100100111010000001001010111111111011110101101010111000011011110101000"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 18,
+      "terminated": true,
+      "encoded": "1111011110101010010111000010101110101001001001110100000010010101111111110111101011010101110000110111101010000111010111111"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 19,
+      "terminated": false,
+      "encoded": "1111011110010101001011100001010111010110010010011101000000100101001111111110111101011010101111000011011110101000"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 19,
+      "terminated": true,
+      "encoded": "111101111001010100101110000101011101011001001001110100000010010100111111111011110101101010111100001101111010100001110100111111"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 20,
+      "terminated": false,
+      "encoded": "11110111100101010010111010001010111010110010010011101100000010010100111111111011011010110101011110000110111100101000"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 20,
+      "terminated": true,
+      "encoded": "1111011110010101001011101000101011101011001001001110110000001001010011111111101101101011010101111000011011110010100001110100111111"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 21,
+      "terminated": false,
+      "encoded": "111101101100101010010111010001010111001011001001001110110000001001101001111111110110110101101001011110000110111100101000"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 21,
+      "terminated": true,
+      "encoded": "111101101100101010010111010001010111001011001001001110110000001001101001111111110110110101101001011110000110111100101000011010100111111"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 22,
+      "terminated": false,
+      "encoded": "1111011011001010100101111010001010111001011001001001111011000000100110100111111111101101101011010010111100001101011100101000"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 22,
+      "terminated": true,
+      "encoded": "1111011011001010100101111010001010111001011001001001111011000000100110100111111111101101101011010010111100001101011100101000011010100111111"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 23,
+      "terminated": false,
+      "encoded": "11110110110010110100101111010001010111001011000100100111101100000010011010011111111111011011010110100101111010001101011100101000"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 23,
+      "terminated": true,
+      "encoded": "111101101100101101001011110100010101110010110001001001111011000000100110100111111111110110110101101001011110100011010111001010000110101001111111"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 24,
+      "terminated": false,
+      "encoded": "111101101100101101001011110100011010111001011000100100111101100000001001101001111111111101101100101101001011110100011010111001011000"
+    },
+    {
+      "message": "101101101101101101101101101101101",
+      "rate": 24,
+      "terminated": true,
+      "encoded": "1111011011001011010010111101000110101110010110001001001111011000000010011010011111111111011011001011010010111101000110101110010110000110101001111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 0,
+      "terminated": false,
+      "encoded": "1011011011011011011011011011011011011011011011011011011011011011"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 0,
+      "terminated": true,
+      "encoded": "10110110110110110110110110110110110110110110110110110110110110111101"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 1,
+      "terminated": false,
+      "encoded": "110110110101011011001101101100110110101011011011101101110110110111011011"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 1,
+      "terminated": true,
+      "encoded": "11011011010101101100110110110011011010101101101110110111011011011101101110101"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 2,
+      "terminated": false,
+      "encoded": "11011011101010110011001101110110011001101010110011011101110111011011101110110011"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 2,
+      "terminated": true,
+      "encoded": "1101101110101011001100110111011001100110101011001101110111011101101110111011001110101"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 3,
+      "terminated": false,
+      "encoded": "1101110111010101110011001100111011001010011010100110011011110111011101010111011100110011"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 3,
+      "terminated": true,
+      "encoded": "1101110111010101110011001100111011001010011010100110011011110111011101010111011100110011101011"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 4,
+      "terminated": false,
+      "encoded": "110111011110101011100111001100111011100101001110101001100101011110111011110101011100111001100111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 4,
+      "terminated": true,
+      "encoded": "110111011110101011100111001100111011100101001110101001100101011110111011110101011100111001100111101011"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 5,
+      "terminated": false,
+      "encoded": "11011110111101011011100111001010011101110011010011101010001100101011111011101111001010111001110001100111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 5,
+      "terminated": true,
+      "encoded": "110111101111010110111001110010100111011100110100111010100011001010111110111011110010101110011100011001111010011"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 6,
+      "terminated": false,
+      "encoded": "1101111011011010110111000111001010011110111001101001011010100011000101011111011100111100101011010011100011001111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 6,
+      "terminated": true,
+      "encoded": "11011110110110101101110001110010100111101110011010010110101000110001010111110111001111001010110100111000110011111010011"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 7,
+      "terminated": false,
+      "encoded": "110111100110110101101101000111001010011111011100110110010110101000111000101011111011110011110010110110100111000101001111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 7,
+      "terminated": true,
+      "encoded": "11011110011011010110110100011100101001111101110011011001011010100011100010101111101111001111001011011010011100010100111110100111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 8,
+      "terminated": false,
+      "encoded": "11011110011011001011011010001110001010011111011110011011001011011010001110001010011111011110011011001011011010001110001010011111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 8,
+      "terminated": true,
+      "encoded": "1101111001101100101101101000111000101001111101111001101100101101101000111000101001111101111001101100101101101000111000101001111110100111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 9,
+      "terminated": false,
+      "encoded": "1110111100110110010111011010001110000101001111101111010110110010110110010001110001010011111101111001101100010110110100011010001010011111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 9,
+      "terminated": true,
+      "encoded": "1110111100110110010111011010001110000101001111101111010110110010110110010001110001010011111101111001101100010110110100011010001010011111100100111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 10,
+      "terminated": false,
+      "encoded": "111011110010101100101110110100001110000101001111110111101011011000101101100100011100001010011111101110100110110001011010101000110100010101011111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 10,
+      "terminated": true,
+      "encoded": "111011110010101100101110110100001110000101001111110111101011011000101101100100011100001010011111101110100110110001011010101000110100010101011111100100111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 11,
+      "terminated": false,
+      "encoded": "11101110100101011001011101010100001110000101010111111011110101101110001011011001000111100001010011111110111010011011000101110101010001101000010101011111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 11,
+      "terminated": true,
+      "encoded": "111011101001010110010111010101000011100001010101111110111101011011100010110110010001111000010100111111101110100110110001011101010100011010000101010111111001001111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 12,
+      "terminated": false,
+      "encoded": "1110111010010101100010111010101000011010000101010111111011111010110111000101110110010001111000010010011111110111010010101100010111010101000011010000101010111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 12,
+      "terminated": true,
+      "encoded": "11101110100101011000101110101010000110100001010101111110111110101101110001011101100100011110000100100111111101110100101011000101110101010000110100001010101111111001001111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 13,
+      "terminated": false,
+      "encoded": "111011110100101011000101111010101000011010000100101011111101111101010101110001011101100100001111000010010011111111011101001010110000101110101010000110100000101010111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 13,
+      "terminated": true,
+      "encoded": "11101111010010101100010111101010100001101000010010101111110111110101010111000101110110010000111100001001001111111101110100101011000010111010101000011010000010101011111110010101111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 14,
+      "terminated": false,
+      "encoded": "11101111010010101110001011110101010000111010000100101011111110111110101010111000101111011001000011110000010010011111111011101010101011000010111010100100001101000001010101111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 14,
+      "terminated": true,
+      "encoded": "1110111101001010111000101111010101000011101000010010101111111011111010101011100010111101100100001111000001001001111111101110101010101100001011101010010000110100000101010111111110010101111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 15,
+      "terminated": false,
+      "encoded": "1110111101010101011100010111101010010000111010000100101011111111011111010101011100001011110110010000111010000010010011111111011110101010101100001011110101001000011010000010010101111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 15,
+      "terminated": true,
+      "encoded": "1110111101010101011100010111101010010000111010000100101011111111011111010101011100001011110110010000111010000010010011111111011110101010101100001011110101001000011010000010010101111111100101011111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 16,
+      "terminated": false,
+      "encoded": "111011110101010101110000101111010100100001110100000100101011111111011110101010101110000101111010100100001110100000100101011111111011110101010101110000101111010100100001110100000100101011111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 16,
+      "terminated": true,
+      "encoded": "111011110101010101110000101111010100100001110100000100101011111111011110101010101110000101111010100100001110100000100101011111111011110101010101110000101111010100100001110100000100101011111111100101011111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 17,
+      "terminated": false,
+      "encoded": "11110111101010101011100001010111010100100001110100000010010101111111101111010110101011100001011110101000100001110100000100101011111111101111010101010111010001011110101001000011101100000100101011111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 17,
+      "terminated": true,
+      "encoded": "111101111010101010111000010101110101001000011101000000100101011111111011110101101010111000010111101010001000011101000001001010111111111011110101010101110100010111101010010000111011000001001010111111111001101011111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 18,
+      "terminated": false,
+      "encoded": "1111011110101010010111000010101110101001001001110100000010010101111111110111101011010101110000110111101010001000011101000000100101011111111101111001010101011101000101111010110010000111011000001001010011111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 18,
+      "terminated": true,
+      "encoded": "11110111101010100101110000101011101010010010011101000000100101011111111101111010110101011100001101111010100010000111010000001001010111111111011110010101010111010001011110101100100001110110000010010100111111111001101011111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 19,
+      "terminated": false,
+      "encoded": "111101111001010100101110000101011101011001001001110100000010010100111111111011110101101010111100001101111010100010000111101000000100101011111111110111100101010101110100010101110101100100001110110000001001010011111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 19,
+      "terminated": true,
+      "encoded": "11110111100101010010111000010101110101100100100111010000001001010011111111101111010110101011110000110111101010001000011110100000010010101111111111011110010101010111010001010111010110010000111011000000100101001111111110011010111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 20,
+      "terminated": false,
+      "encoded": "11110111100101010010111010001010111010110010010011101100000010010100111111111011011010110101011110000110111100101000100001111010000001001101011111111110111100101010010111010001010111010110010010011101100000010010100111111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 20,
+      "terminated": true,
+      "encoded": "1111011110010101001011101000101011101011001001001110110000001001010011111111101101101011010101111000011011110010100010000111101000000100110101111111111011110010101001011101000101011101011001001001110110000001001010011111111110011010111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 21,
+      "terminated": false,
+      "encoded": "1111011011001010100101110100010101110010110010010011101100000010011010011111111101101101011010010111100001101111001010001001001111010000001001101011111111111011110010101001011101000110101110101100100100111011000000010010100111111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 21,
+      "terminated": true,
+      "encoded": "1111011011001010100101110100010101110010110010010011101100000010011010011111111101101101011010010111100001101111001010001001001111010000001001101011111111111011110010101001011101000110101110101100100100111011000000010010100111111111100110100111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 22,
+      "terminated": false,
+      "encoded": "111101101100101010010111101000101011100101100100100111101100000010011010011111111110110110101101001011110000110101110010100010010011110100000001001101011111111111011110010110100101110100011010111010110001001001110110000000100101001111111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 22,
+      "terminated": true,
+      "encoded": "111101101100101010010111101000101011100101100100100111101100000010011010011111111110110110101101001011110000110101110010100010010011110100000001001101011111111111011110010110100101110100011010111010110001001001110110000000100101001111111111100110100111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 23,
+      "terminated": false,
+      "encoded": "11110110110010110100101111010001010111001011000100100111101100000010011010011111111111011011010110100101111010001101011100101000100100111101100000001001101011111111111011011001011010010111010001101011100101100010010011101100000001001101001111111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 23,
+      "terminated": true,
+      "encoded": "111101101100101101001011110100010101110010110001001001111011000000100110100111111111110110110101101001011110100011010111001010001001001111011000000010011010111111111110110110010110100101110100011010111001011000100100111011000000010011010011111111111001101001111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 24,
+      "terminated": false,
+      "encoded": "1111011011001011010010111101000110101110010110001001001111011000000010011010011111111111011011001011010010111101000110101110010110001001001111011000000010011010011111111111011011001011010010111101000110101110010110001001001111011000000010011010011111111111"
+    },
+    {
+      "message": "1011011011011011011011011011011011011011011011011011011011011011",
+      "rate": 24,
+      "terminated": true,
+      "encoded": "11110110110010110100101111010001101011100101100010010011110110000000100110100111111111110110110010110100101111010001101011100101100010010011110110000000100110100111111111110110110010110100101111010001101011100101100010010011110110000000100110100111111111111001101001111111"
+    }
+  ],
+  "tails": [
+    {
+      "state": 0,
+      "prefix": "0000",
+      "tail": "0000"
+    },
+    {
+      "state": 1,
+      "prefix": "0001",
+      "tail": "1101"
+    },
+    {
+      "state": 2,
+      "prefix": "0011",
+      "tail": "1010"
+    },
+    {
+      "state": 3,
+      "prefix": "0010",
+      "tail": "0111"
+    },
+    {
+      "state": 4,
+      "prefix": "0111",
+      "tail": "0100"
+    },
+    {
+      "state": 5,
+      "prefix": "0110",
+      "tail": "1001"
+    },
+    {
+      "state": 6,
+      "prefix": "0100",
+      "tail": "1110"
+    },
+    {
+      "state": 7,
+      "prefix": "0101",
+      "tail": "0011"
+    },
+    {
+      "state": 8,
+      "prefix": "1110",
+      "tail": "1000"
+    },
+    {
+      "state": 9,
+      "prefix": "1111",
+      "tail": "0101"
+    },
+    {
+      "state": 10,
+      "prefix": "1101",
+      "tail": "0010"
+    },
+    {
+      "state": 11,
+      "prefix": "1100",
+      "tail": "1111"
+    },
+    {
+      "state": 12,
+      "prefix": "1001",
+      "tail": "1100"
+    },
+    {
+      "state": 13,
+      "prefix": "1000",
+      "tail": "0001"
+    },
+    {
+      "state": 14,
+      "prefix": "1010",
+      "tail": "0110"
+    },
+    {
+      "state": 15,
+      "prefix": "1011",
+      "tail": "1011"
+    }
+  ],
+  "crc": [
+    {
+      "message": "",
+      "width": 0,
+      "parity": ""
+    },
+    {
+      "message": "",
+      "width": 1,
+      "parity": "1"
+    },
+    {
+      "message": "",
+      "width": 2,
+      "parity": "11"
+    },
+    {
+      "message": "",
+      "width": 3,
+      "parity": "111"
+    },
+    {
+      "message": "",
+      "width": 4,
+      "parity": "1111"
+    },
+    {
+      "message": "",
+      "width": 5,
+      "parity": "11111"
+    },
+    {
+      "message": "",
+      "width": 6,
+      "parity": "111111"
+    },
+    {
+      "message": "",
+      "width": 7,
+      "parity": "1111111"
+    },
+    {
+      "message": "",
+      "width": 8,
+      "parity": "11111111"
+    },
+    {
+      "message": "",
+      "width": 9,
+      "parity": "111111111"
+    },
+    {
+      "message": "",
+      "width": 10,
+      "parity": "1111111111"
+    },
+    {
+      "message": "",
+      "width": 11,
+      "parity": "11111111111"
+    },
+    {
+      "message": "",
+      "width": 12,
+      "parity": "111111111111"
+    },
+    {
+      "message": "",
+      "width": 13,
+      "parity": "1111111111111"
+    },
+    {
+      "message": "",
+      "width": 14,
+      "parity": "11111111111111"
+    },
+    {
+      "message": "",
+      "width": 15,
+      "parity": "111111111111111"
+    },
+    {
+      "message": "",
+      "width": 16,
+      "parity": "1111111111111111"
+    },
+    {
+      "message": "",
+      "width": 24,
+      "parity": "111111111111111111111111"
+    },
+    {
+      "message": "",
+      "width": 32,
+      "parity": "11111111111111111111111111111111"
+    },
+    {
+      "message": "0",
+      "width": 0,
+      "parity": ""
+    },
+    {
+      "message": "0",
+      "width": 1,
+      "parity": "1"
+    },
+    {
+      "message": "0",
+      "width": 2,
+      "parity": "11"
+    },
+    {
+      "message": "0",
+      "width": 3,
+      "parity": "111"
+    },
+    {
+      "message": "0",
+      "width": 4,
+      "parity": "1111"
+    },
+    {
+      "message": "0",
+      "width": 5,
+      "parity": "11111"
+    },
+    {
+      "message": "0",
+      "width": 6,
+      "parity": "111111"
+    },
+    {
+      "message": "0",
+      "width": 7,
+      "parity": "1111111"
+    },
+    {
+      "message": "0",
+      "width": 8,
+      "parity": "11111111"
+    },
+    {
+      "message": "0",
+      "width": 9,
+      "parity": "111111111"
+    },
+    {
+      "message": "0",
+      "width": 10,
+      "parity": "1111111111"
+    },
+    {
+      "message": "0",
+      "width": 11,
+      "parity": "11111111111"
+    },
+    {
+      "message": "0",
+      "width": 12,
+      "parity": "111111111111"
+    },
+    {
+      "message": "0",
+      "width": 13,
+      "parity": "1111111111111"
+    },
+    {
+      "message": "0",
+      "width": 14,
+      "parity": "11111111111111"
+    },
+    {
+      "message": "0",
+      "width": 15,
+      "parity": "111111111111111"
+    },
+    {
+      "message": "0",
+      "width": 16,
+      "parity": "1111111111111111"
+    },
+    {
+      "message": "0",
+      "width": 24,
+      "parity": "111111111111111111111111"
+    },
+    {
+      "message": "0",
+      "width": 32,
+      "parity": "11111111111111111111111111111111"
+    },
+    {
+      "message": "0001110",
+      "width": 0,
+      "parity": ""
+    },
+    {
+      "message": "0001110",
+      "width": 1,
+      "parity": "0"
+    },
+    {
+      "message": "0001110",
+      "width": 2,
+      "parity": "11"
+    },
+    {
+      "message": "0001110",
+      "width": 3,
+      "parity": "011"
+    },
+    {
+      "message": "0001110",
+      "width": 4,
+      "parity": "0111"
+    },
+    {
+      "message": "0001110",
+      "width": 5,
+      "parity": "11101"
+    },
+    {
+      "message": "0001110",
+      "width": 6,
+      "parity": "011001"
+    },
+    {
+      "message": "0001110",
+      "width": 7,
+      "parity": "0011000"
+    },
+    {
+      "message": "0001110",
+      "width": 8,
+      "parity": "11010101"
+    },
+    {
+      "message": "0001110",
+      "width": 9,
+      "parity": "110101110"
+    },
+    {
+      "message": "0001110",
+      "width": 10,
+      "parity": "0000110010"
+    },
+    {
+      "message": "0001110",
+      "width": 11,
+      "parity": "01100001010"
+    },
+    {
+      "message": "0001110",
+      "width": 12,
+      "parity": "011110010110"
+    },
+    {
+      "message": "0001110",
+      "width": 13,
+      "parity": "0100101001000"
+    },
+    {
+      "message": "0001110",
+      "width": 14,
+      "parity": "01111011100000"
+    },
+    {
+      "message": "0001110",
+      "width": 15,
+      "parity": "100110010011000"
+    },
+    {
+      "message": "0001110",
+      "width": 16,
+      "parity": "0001111000110001"
+    },
+    {
+      "message": "0001110",
+      "width": 24,
+      "parity": "011111111111110001000010"
+    },
+    {
+      "message": "0001110",
+      "width": 32,
+      "parity": "11000011011100010101111111110101"
+    },
+    {
+      "message": "00011101",
+      "width": 0,
+      "parity": ""
+    },
+    {
+      "message": "00011101",
+      "width": 1,
+      "parity": "1"
+    },
+    {
+      "message": "00011101",
+      "width": 2,
+      "parity": "00"
+    },
+    {
+      "message": "00011101",
+      "width": 3,
+      "parity": "111"
+    },
+    {
+      "message": "00011101",
+      "width": 4,
+      "parity": "1111"
+    },
+    {
+      "message": "00011101",
+      "width": 5,
+      "parity": "01110"
+    },
+    {
+      "message": "00011101",
+      "width": 6,
+      "parity": "110011"
+    },
+    {
+      "message": "00011101",
+      "width": 7,
+      "parity": "0110001"
+    },
+    {
+      "message": "00011101",
+      "width": 8,
+      "parity": "10101100"
+    },
+    {
+      "message": "00011101",
+      "width": 9,
+      "parity": "001111010"
+    },
+    {
+      "message": "00011101",
+      "width": 10,
+      "parity": "0001100101"
+    },
+    {
+      "message": "00011101",
+      "width": 11,
+      "parity": "11000010101"
+    },
+    {
+      "message": "00011101",
+      "width": 12,
+      "parity": "111100101101"
+    },
+    {
+      "message": "00011101",
+      "width": 13,
+      "parity": "1001010010001"
+    },
+    {
+      "message": "00011101",
+      "width": 14,
+      "parity": "11110111000001"
+    },
+    {
+      "message": "00011101",
+      "width": 15,
+      "parity": "101010111110100"
+    },
+    {
+      "message": "00011101",
+      "width": 16,
+      "parity": "0011110001100011"
+    },
+    {
+      "message": "00011101",
+      "width": 24,
+      "parity": "111111111111100010000101"
+    },
+    {
+      "message": "00011101",
+      "width": 32,
+      "parity": "10000010001000111010001001011100"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 0,
+      "parity": ""
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 1,
+      "parity": "0"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 2,
+      "parity": "10"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 3,
+      "parity": "010"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 4,
+      "parity": "1110"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 5,
+      "parity": "11101"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 6,
+      "parity": "100101"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 7,
+      "parity": "1110010"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 8,
+      "parity": "11001101"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 9,
+      "parity": "011000000"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 10,
+      "parity": "0101110010"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 11,
+      "parity": "00011111111"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 12,
+      "parity": "010111010000"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 13,
+      "parity": "1000110000100"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 14,
+      "parity": "00101111101011"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 15,
+      "parity": "000110010000010"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 16,
+      "parity": "1100011100010001"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 24,
+      "parity": "010010101100111011101010"
+    },
+    {
+      "message": "0001110110001101110000001110110",
+      "width": 32,
+      "parity": "01000001000011110101100011011100"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 0,
+      "parity": ""
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 1,
+      "parity": "1"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 2,
+      "parity": "01"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 3,
+      "parity": "101"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 4,
+      "parity": "0000"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 5,
+      "parity": "10000"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 6,
+      "parity": "011011"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 7,
+      "parity": "1111111"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 8,
+      "parity": "11101000"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 9,
+      "parity": "001000011"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 10,
+      "parity": "1001011110"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 11,
+      "parity": "00101111110"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 12,
+      "parity": "000111111000"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 13,
+      "parity": "1111011100110"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 14,
+      "parity": "01010010100101"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 15,
+      "parity": "101011010001100"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 16,
+      "parity": "1000010100111101"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 24,
+      "parity": "111101110111001101011100"
+    },
+    {
+      "message": "0001110110001101110000001110110001101110000001110110001101110000",
+      "width": 32,
+      "parity": "01110111010010001010101100101110"
+    }
+  ],
+  "frames": [
+    {
+      "offset": 0,
+      "bytes": 38,
+      "information_bits": 72,
+      "payload_bits": 56,
+      "crc_width": 16
+    },
+    {
+      "offset": 38,
+      "bytes": 38,
+      "information_bits": 72,
+      "payload_bits": 56,
+      "crc_width": 16
+    },
+    {
+      "offset": 76,
+      "bytes": 38,
+      "information_bits": 72,
+      "payload_bits": 56,
+      "crc_width": 16
+    },
+    {
+      "offset": 114,
+      "bytes": 38,
+      "information_bits": 72,
+      "payload_bits": 56,
+      "crc_width": 16
+    },
+    {
+      "offset": 152,
+      "bytes": 38,
+      "information_bits": 72,
+      "payload_bits": 56,
+      "crc_width": 16
+    },
+    {
+      "offset": 190,
+      "bytes": 38,
+      "information_bits": 72,
+      "payload_bits": 56,
+      "crc_width": 16
+    },
+    {
+      "offset": 228,
+      "bytes": 38,
+      "information_bits": 72,
+      "payload_bits": 56,
+      "crc_width": 16
+    },
+    {
+      "offset": 266,
+      "bytes": 30,
+      "information_bits": 56,
+      "payload_bits": 40,
+      "crc_width": 16
+    },
+    {
+      "offset": 296,
+      "bytes": 30,
+      "information_bits": 56,
+      "payload_bits": 40,
+      "crc_width": 16
+    },
+    {
+      "offset": 326,
+      "bytes": 30,
+      "information_bits": 56,
+      "payload_bits": 40,
+      "crc_width": 16
+    },
+    {
+      "offset": 356,
+      "bytes": 30,
+      "information_bits": 56,
+      "payload_bits": 40,
+      "crc_width": 16
+    },
+    {
+      "offset": 386,
+      "bytes": 30,
+      "information_bits": 56,
+      "payload_bits": 40,
+      "crc_width": 16
+    }
+  ],
+  "provenance": "Own polynomial impulse-sequence encoder and normative Tables 1.60/1.61; own ELD core/cosine PCM and own MP4 video; no private media, external process/codec or network.",
+  "scope": "SRCPC primitive acceptance; protected MP4 playback remains a refusal until EP configuration/header routing is implemented."
+}
