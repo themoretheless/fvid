@@ -1,5 +1,96 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## EP2 predefined-set switching and short headers, 2026-10-28
+
+The raw-AU mapping accepts 1..255 predefined EP sets, each containing one
+mandatory complete AAC access unit. Every packet first recovers the separately
+protected selector; its selected set determines the subsequent attribute-header
+length, class length, CRC and SRCPC/RS parameters. Out-of-range selectors fail
+before class interpretation. No previous selection is cached across packets,
+rewind or checkpoint restore. Config validation and retained-memory accounting
+cover every set. Arbitrary class-to-ESC assembly remains separate work.
+
+The 1/2-bit headers now recover each information bit from its three repetitions
+(information first, then parity). Longer selectors retain BCH/Golay protection;
+extended header protection applies independently to long attribute headers.
+A repetition header cannot detect every error beyond its correction radius.
+
+`scripts/generate_aac_ep_sets_fixtures.py` saves 136 own nonzero ELD/LD-SBR
+acceptance sources and 24 malformed videos, with MP4 and Matroska versions.
+The matrix covers 480/512 cores, mono/stereo, all selector widths 1..8, power-of-two
+and non-power-of-two set counts through 255, SRCPC/RS switches, different header
+lengths and fixed/dynamic CRC/rates. Corrected streams damage both independently
+protected headers. Malformed packets isolate a validly protected unused selector,
+CRC failure and a truncated selector after three valid packets.
+
+The independent header oracle contains every possible selector word of widths
+1..8 (510 words). Unit controls check every transmitted-bit error, all 64
+received two-bit majority codewords, every count 1..255 with every legal and
+unused selector, and truncated prefixes. `tests/aac_ep_sets_playback.rs` checks
+independent full PCM, both container/export paths, repeated ranges, playback,
+rewind, repeated/frame-edge/EOF seeks, checkpoint replay and error rollback.
+The MP4 fixture writer now emits variable-length ES descriptors, allowing the
+935-byte ASC required by the largest saved configuration.
+
+The old decoder refusal was reproduced on the new synthetic LD-SBR MP4's ASC
+before enabling this acceptance route. All fixtures are authored offline and
+ordinary tests only read saved data. The generators reproduce both the new
+files and the existing SRCPC/RS matrices byte-for-byte with process and socket
+creation forbidden.
+
+Qualification: the default dev build passed 550 media unit tests (one ignored),
+1,050 root library tests (26 ignored), all seven new set-switching integration
+tests, and existing public/owned export tests over the 276 SRCPC and 217 RS
+sources. The final navigation sweep additionally uses actual output-frame
+lengths (480/512/960/1024 samples), checking the sample before, at and after
+each boundary, repeated targets and a return from EOF. This sweep builds the
+owned media dependency with `--config 'profile.dev.package.fvid-media.opt-level=2'`;
+it does not change repository or production build settings. All 20 integration
+tests in the final LD-SBR/RS/set-switching sweep passed (104/217/136
+acceptance sources, respectively).
+
+Primary definition: [ISO/IEC 14496-3:2009, tables 1.51/1.59 and section 1.8.4.3](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+
+## LD-SBR: RS-protected playback and navigation, 2026-10-28
+
+The owned EP2 single raw-AU mapping now also recovers FEC=1 shortened
+Reed–Solomon classes over GF(256), polynomial 0x11d, roots alpha^1 through
+alpha^(2k), for every fixed correction count k=0..127. Information and parity
+use the normative lowest-coefficient-first order; all part parity trailers
+follow the complete information class. Recovery uses owned Berlekamp–Massey,
+Chien and Forney algorithms, validates residual syndromes and the recovered
+class CRC before submitting AAC to the transactional ELD/LD-SBR decoder.
+
+The saved synthetic matrix has 217 acceptance sources and six malformed
+videos: 480/512 cores, mono/stereo, ELD with/without LD-SBR, declared/until-end
+lengths, corrected header and class errors, fixed CRC24/CRC32 and dynamic
+CRC0/8/16/32. Independent polynomial long division generates reference RS
+words; primitive controls cover all 128 correction counts, shortening and
+multipart boundaries. Saved PCM references are independent ELD/LD-SBR results.
+Normal tests neither generate fixtures nor invoke FFmpeg/network.
+
+`tests/aac_ep_rs_playback.rs` verifies PCM, MP4/Matroska export and ranges,
+AudioStream playback, EOF, rewind and seeks. Navigation regressions also test
+repeated targets, frame-edge positions and seeking back after EOF. The same
+expanded navigation sequence covers all 104 ordinary LD-SBR acceptance sources
+in `tests/aac_eld_sbr.rs`. Malformed videos isolate CRC mismatch, uncorrectable
+RS and declared-length truncation; failed recovery preserves decoder history.
+
+Qualification in this checkout: 548 media unit tests passed (one ignored),
+plus 27 integration tests across ELD, CLDFB, ordinary LD-SBR, SRCPC and RS.
+The final LD-SBR/RS run passed all 13 tests with expanded navigation on the
+104 ordinary and 217 RS acceptance sources. All six RS malformed sources
+(including three LD-SBR streams) passed exact-error and rollback checks.
+Both independent RS generators reproduced every saved byte with process and
+socket creation forbidden. The player test binary has no libav linkage.
+
+This RS route requires octet-aligned information/CRC and fixed correction
+counts. RS concatenated classes (FEC=2), escaped RS correction rates and
+non-octet CRC handling remain explicit refusals. Other EP mappings, interleave,
+multiple classes and separate ELD extension tools remain open. These tests
+qualify offline PCM playback and seek, not physical speaker output or universal
+AAC-ELD conformance.
+
 ## MPEG-4 EP2 raw-AU playback, 2026-10-28
 
 Native AAC-ELD now accepts EP2's application mapping in which one EP class
@@ -40,7 +131,7 @@ arbitrary truncation; length-refusal tests use explicitly declared lengths.
 This closes the reproduced EP2 single-class ELD dispatch failure, not the full
 EP tool or the codec-gap goal. EP1/EP3 separate ESC association, arbitrary EP2
 application assemblers, multiple/optional classes and concatenated frames,
-streaming puncture state, RS, interleaving, short majority headers and non-ELD
+streaming puncture state, grouped RS, interleaving and non-ELD
 EP integration remain open. Playback qualification is offline AudioStream PCM,
 not physical audio output-device qualification.
 

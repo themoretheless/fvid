@@ -3,6 +3,7 @@
 pub mod aac_gain_control;
 pub mod aac_ep_srcpc;
 pub mod aac_ep_crc;
+pub mod aac_ep_rs;
 pub mod aac_ep;
 pub mod speaker_routing;
 pub mod aac_main_predictor;

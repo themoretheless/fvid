@@ -176,7 +176,22 @@ fn eld_sbr_player_rewind_and_sample_seek_preserve_pcm_in_both_containers() {
             assert_eq!(play(reader.as_mut()), full, "{name} container {container}");
             reader.rewind();
             assert_eq!(play(reader.as_mut()), full, "{name} rewind {container}");
-            for target in [13, 512, 2500, 7, (full.len() / width) as i64] {
+            // Repeated targets and returning from EOF must rebuild the same
+            // LD-SBR history as an uninterrupted decode, including frame edges.
+            for target in [
+                0,
+                13,
+                512,
+                2500,
+                7,
+                7,
+                c["container_frame_samples"].as_i64().unwrap() - 1,
+                c["container_frame_samples"].as_i64().unwrap(),
+                c["container_frame_samples"].as_i64().unwrap() + 1,
+                (full.len() / width) as i64,
+                13,
+                0,
+            ] {
                 let ticks = (i128::from(target) * i128::from(reader.timescale())
                     / i128::from(reader.sample_rate())) as i64;
                 let landed = reader.seek_to(ticks);

@@ -4,6 +4,7 @@
 *.rgb binary
 *.rgba binary
 *.pcm binary
+tests/fixtures/playback-errors/**/*.asc binary
 tests/fixtures/playback-errors/*.packet binary
 tests/fixtures/playback-errors/*.keypacket binary
 tests/fixtures/playback-errors/*.config binary

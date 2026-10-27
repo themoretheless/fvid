@@ -1,6 +1,6 @@
 //! Owned MPEG-4 ErrorProtectionSpecificConfig and access-unit recovery.
 //! Syntax: ISO/IEC 14496-3 tables 1.49–1.53. Unsupported mappings remain errors.
-use super::{Result, aac_ep_crc, aac_ep_srcpc, bits::BitReader, invalid};
+use super::{Result, aac_ep_crc, aac_ep_rs, aac_ep_srcpc, bits::BitReader, invalid};
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Length {
     Fixed(u16),
@@ -157,31 +157,44 @@ impl Config {
     /// Current application mapping: one class contains the complete raw AAC AU.
     /// EP2 does not normatively define arbitrary application class-to-ESC mapping.
     pub fn validate_raw_access_unit(&self) -> Result<()> {
-        if self.interleave != 0 || self.frames != 1 || self.sets.len() != 1 {
+        if self.sets.is_empty() || self.sets.len() > 255 {
+            return Err(invalid("EP predefined set count out of range"));
+        }
+        if self.interleave != 0 || self.frames != 1 {
             return Err(invalid(
                 "EP interleaving or concatenated frame routing is not yet implemented",
             ));
         }
-        let set = &self.sets[0];
-        if set.classes.len() != 1 || set.classes[0].optional {
-            return Err(invalid(
-                "EP application class mapping requires an explicit assembler",
-            ));
-        }
-        let c = &set.classes[0];
-        if c.fec != 0 {
-            return Err(invalid(
-                "EP Reed-Solomon class recovery is not yet implemented",
-            ));
-        }
-        let header_bits = self.header_bits();
-        if matches!(header_bits, 1 | 2) {
-            return Err(invalid("EP short majority header is not yet implemented"));
+        for set in &self.sets {
+            if set.classes.len() != 1 || set.classes[0].optional {
+                return Err(invalid(
+                    "EP application class mapping requires an explicit assembler",
+                ));
+            }
+            if set.order.as_deref().is_some_and(|order| order != [0]) {
+                return Err(invalid("invalid EP class output permutation"));
+            }
+            let c = &set.classes[0];
+            if c.fec > 2 {
+                return Err(invalid("reserved EP FEC type"));
+            }
+            if c.fec == 2 {
+                return Err(invalid(
+                    "EP RS concatenated class routing is not yet implemented",
+                ));
+            }
+            if c.fec == 1 && c.rate.is_none() {
+                return Err(invalid(
+                    "EP RS escaped correction rate is not yet implemented",
+                ));
+            }
+            if c.fec == 1 && c.crc.is_some_and(|width| width % 8 != 0) {
+                return Err(invalid("EP RS raw-AU mapping requires octet-aligned CRC"));
+            }
         }
         Ok(())
     }
-    fn header_bits(&self) -> usize {
-        let c = &self.sets[0].classes[0];
+    fn header_bits(&self, c: &Class) -> usize {
         let length = match c.length {
             Length::InBand(n) => usize::from(n),
             _ => 0,
@@ -193,12 +206,24 @@ impl Config {
     }
     pub fn decode_raw_access_unit(&self, packet: &[u8]) -> Result<Vec<u8>> {
         self.validate_raw_access_unit()?;
-        let c = &self.sets[0].classes[0];
         let all: Vec<u8> = packet
             .iter()
             .flat_map(|&b| (0..8).rev().map(move |i| (b >> i) & 1))
             .collect();
-        let (header, offset) = decode_header(&all, self.header_bits(), self.header)?;
+        // The selector is protected independently: its result determines the
+        // size and interpretation of the following class-attribute header.
+        let selector_bits = (usize::BITS - (self.sets.len() - 1).leading_zeros()) as usize;
+        let (selector, prefix) = decode_header(&all, selector_bits, None)?;
+        let selected = selector
+            .iter()
+            .fold(0usize, |v, &b| (v << 1) | usize::from(b));
+        let set = self
+            .sets
+            .get(selected)
+            .ok_or_else(|| invalid("EP predefined set index out of range"))?;
+        let c = &set.classes[0];
+        let (header, used) = decode_header(&all[prefix..], self.header_bits(c), self.header)?;
+        let offset = prefix + used;
         let mut at = 0;
         let mut read = |n: usize| -> usize {
             let value = header[at..at + n]
@@ -225,6 +250,9 @@ impl Config {
             .filter(|&end| end >= offset)
             .ok_or_else(|| invalid("truncated EP stuffing/header"))?;
         let size = end - offset;
+        if c.fec == 1 {
+            return decode_rs_class(&all[offset..end], length, rate, width);
+        }
         let information = if let Some(n) = length {
             if n == 0 {
                 if size == 0 {
@@ -298,7 +326,14 @@ fn decode_header(bits: &[u8], n: usize, extended: Option<(u8, u8)>) -> Result<(V
     }
     if n <= 16 {
         if n < 3 {
-            return Err(invalid("EP majority header is not yet implemented"));
+            if bits.len() < 3 * n {
+                return Err(invalid("truncated EP majority header"));
+            }
+            // Information first, followed by two repetitions as parity.
+            let message = (0..n)
+                .map(|i| u8::from(bits[i] + bits[n + i] + bits[2 * n + i] >= 2))
+                .collect();
+            return Ok((message, 3 * n));
         }
         let (_, degree, cap) = small_code(0, n);
         let count = n + degree;
@@ -393,6 +428,131 @@ mod tests {
         }
     }
     #[test]
+    fn predefined_set_headers_match_all_independent_selector_words() {
+        let m: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../../tests/fixtures/playback-errors/aac-ep-sets/manifest.json"
+        ))
+        .unwrap();
+        assert_eq!(m["header_vectors"].as_array().unwrap().len(), 510);
+        for row in m["header_vectors"].as_array().unwrap() {
+            let information = bits(row["information"].as_str().unwrap());
+            let encoded = bits(row["encoded"].as_str().unwrap());
+            let n = information.len();
+            assert_eq!(
+                decode_header(&encoded, n, None).unwrap(),
+                (information.clone(), encoded.len())
+            );
+            for i in 0..encoded.len() {
+                let mut damaged = encoded.clone();
+                damaged[i] ^= 1;
+                assert_eq!(
+                    decode_header(&damaged, n, None).unwrap().0,
+                    information,
+                    "{n}-bit selector, flipped {i}"
+                );
+            }
+            for end in 0..encoded.len() {
+                assert!(decode_header(&encoded[..end], n, None).is_err());
+            }
+        }
+        // A two-bit header corrects one error in EACH repetition column.
+        // Check all 64 received words, including patterns beyond that radius:
+        // majority is total and cannot detect a different legal selector.
+        for word in 0..64u8 {
+            let received: Vec<_> = (0..6).rev().map(|i| (word >> i) & 1).collect();
+            let expected: Vec<_> = (0..2)
+                .map(|i| {
+                    u8::from(
+                        [received[i], received[i + 2], received[i + 4]]
+                            .iter()
+                            .filter(|&&v| v == 1)
+                            .count()
+                            >= 2,
+                    )
+                })
+                .collect();
+            assert_eq!(decode_header(&received, 2, None).unwrap(), (expected, 6));
+        }
+        assert!(
+            Config {
+                sets: vec![],
+                interleave: 0,
+                stuffing: false,
+                frames: 1,
+                header: None
+            }
+            .decode_raw_access_unit(&[])
+            .is_err()
+        );
+    }
+
+    #[test]
+    fn every_predefined_set_count_and_selector_has_bounded_dispatch() {
+        let m: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../../tests/fixtures/playback-errors/aac-ep-sets/manifest.json"
+        ))
+        .unwrap();
+        let mut words: [Vec<Vec<u8>>; 9] = std::array::from_fn(|_| vec![]);
+        words[0].push(vec![]);
+        for row in m["header_vectors"].as_array().unwrap() {
+            words[row["information"].as_str().unwrap().len()]
+                .push(bits(row["encoded"].as_str().unwrap()));
+        }
+        let class = Class {
+            length: Length::Fixed(16),
+            rate: Some(0),
+            crc: Some(0),
+            concatenated: false,
+            fec: 0,
+            terminated: false,
+            interleave: None,
+            optional: false,
+        };
+        for count in 1..=255usize {
+            let config = Config {
+                sets: vec![
+                    Set {
+                        classes: vec![class.clone()],
+                        order: None
+                    };
+                    count
+                ],
+                interleave: 0,
+                stuffing: true,
+                frames: 1,
+                header: None,
+            };
+            let n = (usize::BITS - (count - 1).leading_zeros()) as usize;
+            for (selected, prefix) in words[n].iter().enumerate() {
+                let stuffing = (8 - (prefix.len() + 6 + 16) % 8) % 8;
+                let mut packet = prefix.clone();
+                packet.extend(&words[3][stuffing]);
+                packet.extend(bits("0110110110100111"));
+                packet.resize(packet.len() + stuffing, 0);
+                let packed: Vec<u8> = packet
+                    .chunks_exact(8)
+                    .map(|row| row.iter().fold(0, |v, &b| (v << 1) | b))
+                    .collect();
+                let result = config.decode_raw_access_unit(&packed);
+                if selected < count {
+                    assert_eq!(
+                        result.unwrap(),
+                        [0x6d, 0xa7],
+                        "count {count} selector {selected}"
+                    );
+                } else {
+                    assert!(
+                        result
+                            .unwrap_err()
+                            .to_string()
+                            .contains("EP predefined set index out of range")
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
     fn ep_configuration_is_bounded_and_reserved_modes_remain_errors() {
         let asc =
             include_bytes!("../../../../tests/fixtures/playback-errors/aac-ep-srcpc/protected.asc");
@@ -441,4 +601,43 @@ mod tests {
                 .contains("reserved EP FEC")
         );
     }
+}
+
+fn decode_rs_class(
+    bits: &[u8],
+    length: Option<usize>,
+    capability: u8,
+    width: u8,
+) -> Result<Vec<u8>> {
+    if bits.len() % 8 != 0 || width % 8 != 0 || length.is_some_and(|n| n % 8 != 0) {
+        return Err(invalid(
+            "EP RS raw-AU mapping requires octet-aligned information and CRC",
+        ));
+    }
+    let received: Vec<_> = bits
+        .chunks_exact(8)
+        .map(|row| row.iter().fold(0, |v, &b| (v << 1) | b))
+        .collect();
+    let information = if let Some(n) = length {
+        n.checked_add(usize::from(width))
+            .ok_or_else(|| invalid("EP RS class length overflow"))?
+            / 8
+    } else {
+        aac_ep_rs::information_len(received.len(), capability)?
+    };
+    if aac_ep_rs::encoded_len(information, capability)? != received.len()
+        || information <= usize::from(width) / 8
+    {
+        return Err(invalid("EP RS class/packet length mismatch"));
+    }
+    let recovered = aac_ep_rs::decode(&received, information, capability)?;
+    let checked: Vec<_> = recovered
+        .information
+        .iter()
+        .flat_map(|&b| (0..8).rev().map(move |i| (b >> i) & 1))
+        .collect();
+    if !aac_ep_crc::verify(&checked, width)? {
+        return Err(invalid("EP class CRC mismatch"));
+    }
+    Ok(recovered.information[..information - usize::from(width) / 8].to_vec())
 }
