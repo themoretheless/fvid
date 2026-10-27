@@ -17,12 +17,13 @@ def attributes(index):
             dict(fec=1,rate=2,crc=24,length=13,dynamic=False),
             dict(fec=0,rate=None,crc=None,length=15,dynamic=True),
             dict(fec=1,rate=4,crc=32,length=8,dynamic=False)][index%4]
-def config(count):
-    result=field(count,8)+'00'+'001'+'001'
+def config(count,interleave=0,switch=0,offset=0):
+    result=field(count,8)+field(interleave,2)+'001'+'001'
     for i in range(count):
-        c=attributes(i)
+        c=attributes(i+offset)
         result+=field(1,6)+'1'+field(c['dynamic'],1)*2+field(c['fec'],2)
         if c['fec']==0:result+='1'
+        if interleave==2:result+=field(1 if c['fec']and switch==2 else switch,2)
         result+='0'+field(c['length'],4)
         if not c['dynamic']:result+=field(c['rate'],7 if c['fec']else 5)+field(17 if c['crc']==24 else 18 if c['crc']==32 else c['crc'],5)
         # Both forms of a one-class output permutation are exercised.

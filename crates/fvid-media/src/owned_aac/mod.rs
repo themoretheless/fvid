@@ -5,6 +5,7 @@ pub mod aac_ep_srcpc;
 pub mod aac_ep_crc;
 pub mod aac_ep_rs;
 pub mod aac_ep;
+pub mod aac_ep_interleave;
 pub mod speaker_routing;
 pub mod aac_main_predictor;
 pub mod aac_ssr_ipqf;

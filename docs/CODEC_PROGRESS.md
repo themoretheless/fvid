@@ -1,5 +1,54 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## EP2 recursive interleaving modes 1/2, 2026-10-28
+
+The owned single raw-AU class mapping now accepts interleave_type 1 and 2.
+Selector and class-attribute stages are reversed separately before interpreting
+subsequent fields. The inverse recursive interleaver handles incomplete final
+rows without padding; short repetition headers use width 3, BCH/Golay headers
+their shortened codeword width, and long SRCPC headers width 28. The SRCPC
+class stage uses width 28 in mode 1 or mode-2 switch 2. All four mode-2 switches
+are supported for SRCPC; RS accepts switches 0/1/3 and rejects reserved switch 2.
+For a lone RS class, octets occupy separate columns without an intraclass
+transpose. Stuffing is removed after header stages and before class reversal.
+
+`scripts/generate_aac_ep_interleave_fixtures.py` implements an independent
+occupied-cell matrix with explicit row/column traversal. Its 19,438 saved
+primitive vectors cover X/Y boundaries, zero-length streams, incomplete rows,
+widths larger than the input and byte-labelled permutations. Separate controls
+check impossible lengths, zero width and usize::MAX width without overflow.
+Ordinary tests never generate fixtures.
+
+The new playback matrix has 560 own acceptance sources and 120 malformed
+videos, each in MP4 and Matroska: 480/512 ELD, mono/stereo, LD-SBR on/off,
+selector widths 0..8, up to 255 sets, all mode/switch combinations, multiple
+class-header shapes, fixed/dynamic CRC/rates, SRCPC/RS and repaired selector,
+attribute and class errors. Malformed videos first decode three valid packets,
+then isolate an independently protected unused selector, a wrong CRC encoded
+with fresh valid FEC, or a shortened declared RS class. An old linked decoder
+reproduced the interleave dispatch refusal on the new LD-SBR configuration.
+
+`tests/aac_ep_interleave_playback.rs` checks independently saved complete PCM,
+public/owned exports, MP4/Matroska ranges, AudioStream playback and drain,
+rewind, repeated/frame-edge/EOF seek, checkpoint replay, retained accounting
+and transactional error rollback. Source video, audio and parameter sets are
+synthetic; no private media or foreign codec is used. Both interleave generators
+and the existing set-switching generator reproduce saved bytes with external
+process and socket creation forbidden.
+
+Qualification in this checkout passed 552 media unit tests (one ignored),
+1,050 root library tests (26 ignored), and all 41 integration tests across
+ELD, CLDFB, ordinary LD-SBR, SRCPC, RS, set switching and recursive interleaving.
+The playback sweep uses `--config 'profile.dev.package.fvid-media.opt-level=2'`;
+no repository build setting was changed. This is not a throughput benchmark.
+
+This closes interleaving for the existing one-class raw-AU mapping. Arbitrary
+multiple classes, class-to-ESC assembly, RS groups and concatenated source
+frames remain separate codec gaps. Playback qualification is offline PCM;
+physical output-device and performance qualification are separate.
+
+Primary definition: [ISO/IEC 14496-3:2009, section 1.8.4.8](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+
 ## EP2 predefined-set switching and short headers, 2026-10-28
 
 The raw-AU mapping accepts 1..255 predefined EP sets, each containing one
@@ -86,7 +135,7 @@ socket creation forbidden. The player test binary has no libav linkage.
 
 This RS route requires octet-aligned information/CRC and fixed correction
 counts. RS concatenated classes (FEC=2), escaped RS correction rates and
-non-octet CRC handling remain explicit refusals. Other EP mappings, interleave,
+non-octet CRC handling remain explicit refusals. Other EP mappings, multiclass interleave,
 multiple classes and separate ELD extension tools remain open. These tests
 qualify offline PCM playback and seek, not physical speaker output or universal
 AAC-ELD conformance.
@@ -131,7 +180,7 @@ arbitrary truncation; length-refusal tests use explicitly declared lengths.
 This closes the reproduced EP2 single-class ELD dispatch failure, not the full
 EP tool or the codec-gap goal. EP1/EP3 separate ESC association, arbitrary EP2
 application assemblers, multiple/optional classes and concatenated frames,
-streaming puncture state, grouped RS, interleaving and non-ELD
+streaming puncture state, grouped RS, multiclass interleaving and non-ELD
 EP integration remain open. Playback qualification is offline AudioStream PCM,
 not physical audio output-device qualification.
 

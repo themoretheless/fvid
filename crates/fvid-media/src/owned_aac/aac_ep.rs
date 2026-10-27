@@ -1,6 +1,8 @@
 //! Owned MPEG-4 ErrorProtectionSpecificConfig and access-unit recovery.
 //! Syntax: ISO/IEC 14496-3 tables 1.49–1.53. Unsupported mappings remain errors.
-use super::{Result, aac_ep_crc, aac_ep_rs, aac_ep_srcpc, bits::BitReader, invalid};
+use super::{
+    Result, aac_ep_crc, aac_ep_interleave, aac_ep_rs, aac_ep_srcpc, bits::BitReader, invalid,
+};
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Length {
     Fixed(u16),
@@ -160,9 +162,12 @@ impl Config {
         if self.sets.is_empty() || self.sets.len() > 255 {
             return Err(invalid("EP predefined set count out of range"));
         }
-        if self.interleave != 0 || self.frames != 1 {
+        if self.interleave > 2 {
+            return Err(invalid("reserved EP interleave mode"));
+        }
+        if self.frames != 1 {
             return Err(invalid(
-                "EP interleaving or concatenated frame routing is not yet implemented",
+                "EP concatenated frame routing is not yet implemented",
             ));
         }
         for set in &self.sets {
@@ -175,6 +180,13 @@ impl Config {
                 return Err(invalid("invalid EP class output permutation"));
             }
             let c = &set.classes[0];
+            match (self.interleave, c.interleave) {
+                (0 | 1, None) | (2, Some(0..=3)) => (),
+                _ => return Err(invalid("invalid EP class interleave switch")),
+            }
+            if c.fec != 0 && c.interleave == Some(2) {
+                return Err(invalid("reserved RS intraclass interleave mode"));
+            }
             if c.fec > 2 {
                 return Err(invalid("reserved EP FEC type"));
             }
@@ -213,7 +225,8 @@ impl Config {
         // The selector is protected independently: its result determines the
         // size and interpretation of the following class-attribute header.
         let selector_bits = (usize::BITS - (self.sets.len() - 1).leading_zeros()) as usize;
-        let (selector, prefix) = decode_header(&all, selector_bits, None)?;
+        let (selector, following) =
+            decode_frame_header(all, selector_bits, None, self.interleave != 0)?;
         let selected = selector
             .iter()
             .fold(0usize, |v, &b| (v << 1) | usize::from(b));
@@ -222,8 +235,12 @@ impl Config {
             .get(selected)
             .ok_or_else(|| invalid("EP predefined set index out of range"))?;
         let c = &set.classes[0];
-        let (header, used) = decode_header(&all[prefix..], self.header_bits(c), self.header)?;
-        let offset = prefix + used;
+        let (header, body) = decode_frame_header(
+            following,
+            self.header_bits(c),
+            self.header,
+            self.interleave != 0,
+        )?;
         let mut at = 0;
         let mut read = |n: usize| -> usize {
             let value = header[at..at + n]
@@ -244,15 +261,24 @@ impl Config {
             .crc
             .unwrap_or_else(|| [0, 6, 8, 10, 12, 14, 16, 32][read(3)]);
         let stuffing = if self.stuffing { read(3) } else { 0 };
-        let end = all
+        let end = body
             .len()
             .checked_sub(stuffing)
-            .filter(|&end| end >= offset)
             .ok_or_else(|| invalid("truncated EP stuffing/header"))?;
-        let size = end - offset;
+        let class = &body[..end];
+        let size = class.len();
         if c.fec == 1 {
-            return decode_rs_class(&all[offset..end], length, rate, width);
+            // One RS class with no following classes has no intraclass
+            // transpose: its octets occupy one byte per column.
+            return decode_rs_class(class, length, rate, width);
         }
+        let restored;
+        let class = if self.interleave == 1 || (self.interleave == 2 && c.interleave == Some(2)) {
+            restored = aac_ep_interleave::split_stage(class, class.len(), 28)?.0;
+            &restored
+        } else {
+            class
+        };
         let information = if let Some(n) = length {
             if n == 0 {
                 if size == 0 {
@@ -280,7 +306,7 @@ impl Config {
         {
             return Err(invalid("EP class/packet length mismatch"));
         }
-        let recovered = aac_ep_srcpc::decode(&all[offset..end], information, rate, c.terminated)?;
+        let recovered = aac_ep_srcpc::decode(class, information, rate, c.terminated)?;
         if !aac_ep_crc::verify(&recovered.information, width)? {
             return Err(invalid("EP class CRC mismatch"));
         }
@@ -304,6 +330,41 @@ impl Config {
         }
         Ok(())
     }
+}
+
+/// Remove one header stage before interpreting the next stage's shape.
+fn decode_frame_header(
+    mut bits: Vec<u8>,
+    n: usize,
+    extended: Option<(u8, u8)>,
+    interleaved: bool,
+) -> Result<(Vec<u8>, Vec<u8>)> {
+    if n == 0 {
+        return Ok((vec![], bits));
+    }
+    if !interleaved {
+        let (header, used) = decode_header(&bits, n, extended)?;
+        let body = bits.split_off(used);
+        return Ok((header, body));
+    }
+    let (count, width) = match n {
+        1..=2 => (3 * n, 3),
+        3..=16 => {
+            let degree = small_code(0, n).1;
+            (n + degree, n + degree)
+        }
+        _ => {
+            let (rate, crc) = extended.unwrap_or((8, 4));
+            (
+                aac_ep_srcpc::encoded_len(n + usize::from(crc), rate, true)?,
+                28,
+            )
+        }
+    };
+    let (protected, body) = aac_ep_interleave::split_stage(&bits, count, width)?;
+    let (header, used) = decode_header(&protected, n, extended)?;
+    debug_assert_eq!(used, count);
+    Ok((header, body))
 }
 
 fn small_code(message: u32, n: usize) -> (u32, usize, usize) {
