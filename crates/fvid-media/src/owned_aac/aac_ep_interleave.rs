@@ -37,6 +37,37 @@ pub fn split_stage(encoded: &[u8], x_len: usize, width: usize) -> Result<(Vec<u8
     Ok((x, y))
 }
 
+/// Reverse an RS stage whose X octets occupy eight consecutive cells in
+/// each column; Y may contain a non-octet-aligned SRCPC stream.
+pub fn split_octet_stage(encoded: &[u8], x_len: usize) -> Result<(Vec<u8>, Vec<u8>)> {
+    if x_len % 8 != 0 {
+        return Err(invalid("EP RS stage is not octet aligned"));
+    }
+    if x_len > encoded.len() {
+        return Err(invalid("truncated EP RS interleave stage"));
+    }
+    if x_len == 0 {
+        return Ok((vec![], encoded.to_vec()));
+    }
+    let width = x_len / 8;
+    let mut x = Vec::new();
+    let mut y = Vec::new();
+    x.try_reserve_exact(x_len)
+        .map_err(|_| invalid("EP interleave allocation failed"))?;
+    y.try_reserve_exact(encoded.len() - x_len)
+        .map_err(|_| invalid("EP interleave allocation failed"))?;
+    let rows = encoded.len() / width;
+    let extra = encoded.len() % width;
+    let mut start = 0;
+    for col in 0..width {
+        let count = rows + usize::from(col < extra);
+        x.extend_from_slice(&encoded[start..start + 8]);
+        y.extend_from_slice(&encoded[start + 8..start + count]);
+        start += count;
+    }
+    Ok((x, y))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -63,6 +94,31 @@ mod tests {
             assert_eq!(actual_x, expected_x, "X={x} Y={y} width={width}");
             assert_eq!(actual_y, expected_y, "X={x} Y={y} width={width}");
         }
+    }
+    #[test]
+    fn rs_column_stages_match_independent_mixed_unit_oracle() {
+        let m: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../../tests/fixtures/playback-errors/aac-ep-class-codes/manifest.json"
+        ))
+        .unwrap();
+        let bytes = include_bytes!(
+            "../../../../tests/fixtures/playback-errors/aac-ep-class-codes/vectors.bin"
+        );
+        for row in m["octet_stages"].as_array().unwrap() {
+            let x = row["x"].as_u64().unwrap() as usize;
+            let y = row["y"].as_u64().unwrap() as usize;
+            let at = row["offset"].as_u64().unwrap() as usize;
+            let (actual_x, actual_y) =
+                split_octet_stage(&bytes[at + x + y..at + 2 * (x + y)], x).unwrap();
+            assert_eq!(actual_x, &bytes[at..at + x]);
+            assert_eq!(actual_y, &bytes[at + x..at + x + y]);
+        }
+        assert!(split_octet_stage(&[0; 9], 7).is_err());
+        assert!(split_octet_stage(&[0; 7], 8).is_err());
+        assert_eq!(
+            split_octet_stage(&[1, 0, 1], 0).unwrap(),
+            (vec![], vec![1, 0, 1])
+        );
     }
     #[test]
     fn bounds_and_unoccupied_columns_do_not_wrap_or_pad() {

@@ -1,8 +1,7 @@
 //! Owned MPEG-4 EP SRCPC channel code, ISO/IEC 14496-3 §1.8.4.6.
 //!
-//! One independently initialized class; rates 8/8 through 8/32, optional four
-//! tail bits, hard-decision maximum-likelihood decoding. This primitive is not
-//! the EP frame demultiplexer or an assertion of protected AAC playback.
+//! Rates 8/8 through 8/32, optional four-bit tails, continuous class state and
+//! joint hard-decision maximum-likelihood decoding.
 use super::{Result, invalid};
 
 const PATTERNS: [u8; 9] = [0x00, 0x80, 0x88, 0xa8, 0xaa, 0xea, 0xee, 0xfe, 0xff];
@@ -57,112 +56,245 @@ fn bits(data: &[u8]) -> Result<()> {
     }
     Ok(())
 }
+/// One SRCPC section. A non-terminated section continues the trellis and
+/// puncture period into the next section. A terminated one resets both.
+#[derive(Clone, Copy, Debug)]
+pub struct Section {
+    pub information_bits: usize,
+    pub rate: u8,
+    pub terminated: bool,
+}
+/// Encoded lengths in transmission order, preserving eight-bit puncture periods.
+pub fn encoded_lengths(sections: &[Section]) -> Result<Vec<usize>> {
+    let mut phase = 0;
+    let mut active_rate = 0;
+    let mut sizes = Vec::new();
+    for section in sections {
+        let requested = masks(section.rate)?;
+        let n = steps(section.information_bits, section.terminated)?;
+        if n == 0 {
+            sizes.push(0);
+            continue;
+        }
+        // Keep the inherited mask until its full eight-bit period completes.
+        let lead = if phase == 0 { 0 } else { n.min(8 - phase) };
+        let inherited = masks(active_rate)?;
+        let first = (0..lead)
+            .map(|t| {
+                inherited
+                    .iter()
+                    .filter(|&&m| m & (0x80 >> (phase + t)) != 0)
+                    .count()
+            })
+            .sum::<usize>();
+        let rest = n - lead;
+        let full = (rest / 8)
+            .checked_mul(8 + usize::from(section.rate))
+            .ok_or_else(|| invalid("EP SRCPC length overflow"))?;
+        let partial = (0..rest % 8)
+            .map(|t| requested.iter().filter(|&&m| m & (0x80 >> t) != 0).count())
+            .sum::<usize>();
+        sizes.push(
+            first
+                .checked_add(full)
+                .and_then(|v| v.checked_add(partial))
+                .ok_or_else(|| invalid("EP SRCPC length overflow"))?,
+        );
+        if rest != 0 {
+            active_rate = section.rate;
+        }
+        phase = if section.terminated {
+            0
+        } else {
+            (phase + n % 8) % 8
+        };
+    }
+    Ok(sizes)
+}
 /// Input and output are unpacked bits, in transmission order, not octets.
 pub fn encode(information: &[u8], rate: u8, terminated: bool) -> Result<Vec<u8>> {
-    bits(information)?;
-    let masks = masks(rate)?;
-    let n = steps(information.len(), terminated)?;
-    let mut result = Vec::new();
-    result
-        .try_reserve_exact(encoded_len(information.len(), rate, terminated)?)
-        .map_err(|_| invalid("EP SRCPC output allocation failed"))?;
-    let mut state = 0;
-    for t in 0..n {
-        let input = if t < information.len() {
-            information[t]
-        } else {
-            (state & 1) ^ ((state >> 1) & 1) ^ ((state >> 3) & 1)
-        };
-        let (next, outputs) = transition(state, input);
-        state = next;
-        for (m, v) in masks.iter().zip(outputs) {
-            if m & (0x80 >> (t % 8)) != 0 {
-                result.push(v);
-            }
-        }
+    Ok(encode_chain(
+        &[information],
+        &[Section {
+            information_bits: information.len(),
+            rate,
+            terminated,
+        }],
+    )?
+    .remove(0))
+}
+pub fn encode_chain(messages: &[&[u8]], sections: &[Section]) -> Result<Vec<Vec<u8>>> {
+    if messages.len() != sections.len() {
+        return Err(invalid("EP SRCPC section count mismatch"));
     }
-    debug_assert!(!terminated || state == 0);
-    Ok(result)
+    let sizes = encoded_lengths(sections)?;
+    let mut output = Vec::new();
+    let mut state = 0;
+    let mut phase = 0;
+    let mut active_masks = [0; 4];
+    for ((information, section), size) in messages.iter().zip(sections).zip(sizes) {
+        bits(information)?;
+        if information.len() != section.information_bits {
+            return Err(invalid("EP SRCPC information length mismatch"));
+        }
+        let requested = masks(section.rate)?;
+        let mut coded = Vec::new();
+        coded
+            .try_reserve_exact(size)
+            .map_err(|_| invalid("EP SRCPC output allocation failed"))?;
+        for t in 0..steps(section.information_bits, section.terminated)? {
+            if phase == 0 {
+                active_masks = requested;
+            }
+            let input = if t < information.len() {
+                information[t]
+            } else {
+                (state & 1) ^ ((state >> 1) & 1) ^ ((state >> 3) & 1)
+            };
+            let (next, values) = transition(state, input);
+            state = next;
+            for (mask, value) in active_masks.iter().zip(values) {
+                if mask & (0x80 >> phase) != 0 {
+                    coded.push(value);
+                }
+            }
+            phase = (phase + 1) % 8;
+        }
+        if section.terminated {
+            debug_assert_eq!(state, 0);
+            phase = 0;
+        }
+        output.push(coded);
+    }
+    Ok(output)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Decoded {
     pub information: Vec<u8>,
-    /// Hamming distance of the chosen legal trellis path, not proof of correctness.
-    /// The enclosing EP decoder must still validate the class CRC.
+    /// Hamming distance of the selected path, not proof of correctness.
     pub distance: usize,
 }
-/// Hard-decision Viterbi; no parity is silently ignored. A damaged class can
-/// exceed the code's correction capability: distance alone is not a CRC check.
 pub fn decode(
     received: &[u8],
     information_bits: usize,
     rate: u8,
     terminated: bool,
 ) -> Result<Decoded> {
-    bits(received)?;
-    if received.len() != encoded_len(information_bits, rate, terminated)? {
-        return Err(invalid("EP SRCPC encoded class length mismatch"));
+    Ok(decode_chain(
+        &[received],
+        &[Section {
+            information_bits,
+            rate,
+            terminated,
+        }],
+    )?
+    .remove(0))
+}
+/// Joint hard-decision Viterbi. Later sections can disambiguate an earlier
+/// non-terminated section; per-class CRC checks belong to the EP frame decoder.
+pub fn decode_chain(received: &[&[u8]], sections: &[Section]) -> Result<Vec<Decoded>> {
+    if received.len() != sections.len() {
+        return Err(invalid("EP SRCPC section count mismatch"));
     }
-    let masks = masks(rate)?;
-    let n = steps(information_bits, terminated)?;
+    let sizes = encoded_lengths(sections)?;
+    let mut total = 0usize;
+    for ((coded, section), size) in received.iter().zip(sections).zip(sizes) {
+        bits(coded)?;
+        if coded.len() != size {
+            return Err(invalid("EP SRCPC encoded class length mismatch"));
+        }
+        total = total
+            .checked_add(steps(section.information_bits, section.terminated)?)
+            .ok_or_else(|| invalid("EP SRCPC length overflow"))?;
+    }
     const INF: usize = usize::MAX / 4;
     let mut metric = [INF; 16];
     metric[0] = 0;
     let mut history = Vec::<[u8; 16]>::new();
     history
-        .try_reserve_exact(n)
+        .try_reserve_exact(total)
         .map_err(|_| invalid("EP SRCPC traceback allocation failed"))?;
-    let mut at = 0;
-    for t in 0..n {
-        let selected: [bool; 4] = std::array::from_fn(|i| masks[i] & (0x80 >> (t % 8)) != 0);
-        let mut observation = [0; 4];
-        for i in 0..4 {
-            if selected[i] {
-                observation[i] = received[at];
-                at += 1;
+    let mut phase = 0;
+    let mut active_masks = [0; 4];
+    for (coded, section) in received.iter().zip(sections) {
+        let requested = masks(section.rate)?;
+        let mut at = 0;
+        for _ in 0..steps(section.information_bits, section.terminated)? {
+            if phase == 0 {
+                active_masks = requested;
             }
-        }
-        let mut next = [INF; 16];
-        let mut predecessors = [0; 16];
-        for prior in 0u8..16 {
-            if metric[usize::from(prior)] == INF {
-                continue;
-            }
-            for input in 0..=1 {
-                let (state, output) = transition(prior, input);
-                let errors = (0..4)
-                    .filter(|&i| selected[i] && observation[i] != output[i])
-                    .count();
-                let candidate = metric[usize::from(prior)] + errors;
-                if candidate < next[usize::from(state)] {
-                    next[usize::from(state)] = candidate;
-                    predecessors[usize::from(state)] = (prior << 1) | input;
+            let selected: [bool; 4] =
+                std::array::from_fn(|i| active_masks[i] & (0x80 >> phase) != 0);
+            let mut observation = [0; 4];
+            for i in 0..4 {
+                if selected[i] {
+                    observation[i] = coded[at];
+                    at += 1;
                 }
             }
+            let mut next = [INF; 16];
+            let mut predecessors = [0; 16];
+            for prior in 0u8..16 {
+                if metric[usize::from(prior)] == INF {
+                    continue;
+                }
+                for input in 0..=1 {
+                    let (state, output) = transition(prior, input);
+                    let errors = (0..4)
+                        .filter(|&i| selected[i] && observation[i] != output[i])
+                        .count();
+                    let candidate = metric[usize::from(prior)].saturating_add(errors).min(INF);
+                    if candidate < next[usize::from(state)] {
+                        next[usize::from(state)] = candidate;
+                        predecessors[usize::from(state)] = (prior << 1) | input;
+                    }
+                }
+            }
+            metric = next;
+            history.push(predecessors);
+            phase = (phase + 1) % 8;
         }
-        metric = next;
-        history.push(predecessors);
+        if section.terminated {
+            for value in &mut metric[1..] {
+                *value = INF;
+            }
+            phase = 0;
+        }
     }
-    let mut state = if terminated {
-        0
-    } else {
-        (0..16).min_by_key(|&s| metric[s]).unwrap()
-    };
-    let distance = metric[state];
-    let mut information = vec![0; n];
-    for t in (0..n).rev() {
+    let mut state = (0..16).min_by_key(|&s| metric[s]).unwrap();
+    if metric[state] == INF {
+        return Err(invalid("EP SRCPC has no legal initial path"));
+    }
+    let mut information = vec![0; total];
+    for t in (0..total).rev() {
         let previous = history[t][state];
         information[t] = previous & 1;
         state = usize::from(previous >> 1);
     }
-    if state != 0 || distance == INF {
+    if state != 0 {
         return Err(invalid("EP SRCPC has no legal initial path"));
     }
-    information.truncate(information_bits);
-    Ok(Decoded {
-        information,
-        distance,
-    })
+    let mut at = 0;
+    let mut messages = Vec::new();
+    for section in sections {
+        messages.push(information[at..at + section.information_bits].to_vec());
+        at += steps(section.information_bits, section.terminated)?;
+    }
+    let views: Vec<_> = messages.iter().map(Vec::as_slice).collect();
+    let predicted = encode_chain(&views, sections)?;
+    Ok(messages
+        .into_iter()
+        .zip(predicted)
+        .zip(received)
+        .map(|((information, encoded), actual)| Decoded {
+            information,
+            distance: encoded
+                .iter()
+                .zip(actual.iter())
+                .filter(|(a, b)| a != b)
+                .count(),
+        })
+        .collect())
 }
 
 #[cfg(test)]
@@ -175,6 +307,94 @@ mod tests {
     }
     fn manifest() -> serde_json::Value {
         serde_json::from_str(MANIFEST).unwrap()
+    }
+    #[test]
+    fn continuous_sections_match_independent_polynomial_chains() {
+        let m: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../../tests/fixtures/playback-errors/aac-ep-class-codes/manifest.json"
+        ))
+        .unwrap();
+        assert_eq!(m["chains"].as_array().unwrap().len(), 327);
+        for row in m["chains"].as_array().unwrap() {
+            let messages: Vec<_> = row["messages"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|v| unpack(v.as_str().unwrap()))
+                .collect();
+            let encoded: Vec<_> = row["encoded"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|v| unpack(v.as_str().unwrap()))
+                .collect();
+            let sections: Vec<_> = messages
+                .iter()
+                .enumerate()
+                .map(|(i, m)| Section {
+                    information_bits: m.len(),
+                    rate: row["rates"][i].as_u64().unwrap() as u8,
+                    terminated: row["terminated"][i].as_bool().unwrap(),
+                })
+                .collect();
+            let messages_view: Vec<_> = messages.iter().map(Vec::as_slice).collect();
+            assert_eq!(encode_chain(&messages_view, &sections).unwrap(), encoded);
+            let encoded_view: Vec<_> = encoded.iter().map(Vec::as_slice).collect();
+            let decoded = decode_chain(&encoded_view, &sections).unwrap();
+            assert_eq!(
+                decoded
+                    .iter()
+                    .map(|d| d.information.clone())
+                    .collect::<Vec<_>>(),
+                messages
+            );
+            if let Some(damaged) = row.get("damaged") {
+                let data: Vec<_> = damaged
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|v| unpack(v.as_str().unwrap()))
+                    .collect();
+                let views: Vec<_> = data.iter().map(Vec::as_slice).collect();
+                assert_ne!(
+                    decode(
+                        &data[0],
+                        sections[0].information_bits,
+                        sections[0].rate,
+                        false
+                    )
+                    .unwrap()
+                    .information,
+                    messages[0]
+                );
+                let restored = decode_chain(&views, &sections).unwrap();
+                assert_eq!(
+                    restored
+                        .iter()
+                        .map(|d| d.information.clone())
+                        .collect::<Vec<_>>(),
+                    messages
+                );
+                assert_eq!(restored[0].distance, 1);
+                assert_eq!(restored[1].distance, 0);
+            }
+        }
+        assert_eq!(
+            encoded_lengths(&[
+                Section {
+                    information_bits: 7,
+                    rate: 0,
+                    terminated: false
+                },
+                Section {
+                    information_bits: 1,
+                    rate: 24,
+                    terminated: true
+                }
+            ])
+            .unwrap(),
+            [7, 17]
+        );
     }
     #[test]
     fn independent_polynomial_vectors_cover_all_rates_and_partial_periods() {

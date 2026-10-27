@@ -1,8 +1,77 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## EP2 bit-class assembly and continuous SRCPC, 2026-10-28
+
+Owned EP2 decoding now reassembles multiple mandatory classes into the original
+AAC AU, including non-octet class boundaries. ISO/IEC 14496-3 section 1.8.1
+requires the concatenated EP decoder output to equal epConfig=0 data; the
+previous one-class restriction unnecessarily rejected this valid mapping.
+The wire class order is decoded with its signalled output permutation, and
+bits are concatenated before byte packing. Classes retain independent lengths,
+CRC/FEC parameters and interleave controls; an until-end class must be last in
+transmission order. A zero-information class has no CRC, parity, tail or
+SRCPC state advance.
+
+SRCPC now uses one joint trellis across non-terminated sections. Termination
+constrains the boundary to state zero and restarts the encoder. Puncture masks
+carry across partial periods; the next requested rate takes effect at the next
+eight-bit boundary. The independent polynomial writer reproduces 327 chain
+controls across all rates, partial periods, delayed rate transitions, zero-bit
+sections and termination combinations. A separate noisy control exhaustively
+establishes a unique maximum-likelihood path whose first section is recovered
+using later parity. The old single-section 500-vector/tail/distance controls
+continue to exercise the same implementation.
+
+Both interleave modes now reverse multiple class stages. SRCPC uses bitwise
+row/column geometry; RS uses eight occupied cells per octet column, allowing
+later SRCPC data to have a non-octet length. Mode 2 separately restores the
+non-interleaved buffer, recursive stages and concatenated buffer. An independent
+occupied-cell matrix supplies 1,353 mixed-unit RS stage controls, in addition
+to the existing 19,438 bit-stage controls.
+
+`scripts/generate_aac_ep_multiclass_fixtures.py` saves 1,200 own acceptance
+sources and 112 malformed videos in MP4 and Matroska. The matrix covers
+480/512 cores, mono/stereo, ELD and LD-SBR, 2..63 classes, three selectable sets,
+fixed/variable/until-end lengths, zero classes, natural/reversed/cyclic output
+order, SRCPC/RS mixtures and all interleave modes. Additional mode-2 sources
+mix per-class switches 0/1/2/3 in one packet. Further streams signal rate and
+CRC changes independently for multiple classes in every packet. Continuous bit-class sources change
+rate off a puncture boundary; corrected-chain movies damage an early weak
+section and recover it through later parity. A pre-fix linked decoder reproduced
+both the explicit-assembler refusal and the partial-period rate-change refusal
+on these authored LD-SBR sources.
+
+`tests/aac_ep_multiclass_playback.rs` requires exact recovered raw-AU bytes
+before matching independent complete PCM. It then checks native/public/owned
+exports, MP4/Matroska ranges, complete AudioStream playback/drain, rewind,
+repeated/output-frame-edge/EOF seek, checkpoint replay and retained allocation
+accounting. Malformed movies decode three valid packets before a late class CRC
+or declared-length failure. Rollback controls use byte-identical ASC; declared
+length truncation is authored before interleaving. CRC and class recovery finish
+before any AAC/LD-SBR synthesis history can change. Normal tests only read saved
+synthetic data and never generate fixtures or require FFmpeg/network.
+
+Qualification passed 554 media unit tests (one ignored), 1,050 root library
+tests (26 ignored), and 48 integration tests across ELD, CLDFB, ordinary LD-SBR,
+SRCPC, RS, set switching, interleaving and multiclass recovery. The final
+multiclass gate covers all 1,200 acceptance sources, including per-class escaped
+rate/CRC controls, plus 112 exact malformed/rollback controls. The test player
+has no libav linkage. Tests use `--no-default-features --features player` and
+`--config 'profile.dev.package.fvid-media.opt-level=2'`; repository build
+settings were not changed. Both generators reproduce all saved bytes with
+process and socket creation disabled.
+
+Optional-class derivation, grouped RS (FEC=2), non-octet RS CRC mapping,
+concatenated source frames, EP1/EP3 ESC routing and non-ELD EP integration remain
+open. This is offline PCM/navigation qualification, not physical output-device
+or throughput qualification.
+
+Primary definition: [ISO/IEC 14496-3:2009, sections 1.8.1, 1.8.4.6 and 1.8.4.8–9](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+
 ## EP2 recursive interleaving modes 1/2, 2026-10-28
 
-The owned single raw-AU class mapping now accepts interleave_type 1 and 2.
+The initial single-class raw-AU route qualified interleave_type 1 and 2;
+the multiclass route above extends both modes.
 Selector and class-attribute stages are reversed separately before interpreting
 subsequent fields. The inverse recursive interleaver handles incomplete final
 rows without padding; short repetition headers use width 3, BCH/Golay headers
@@ -42,22 +111,23 @@ ELD, CLDFB, ordinary LD-SBR, SRCPC, RS, set switching and recursive interleaving
 The playback sweep uses `--config 'profile.dev.package.fvid-media.opt-level=2'`;
 no repository build setting was changed. This is not a throughput benchmark.
 
-This closes interleaving for the existing one-class raw-AU mapping. Arbitrary
-multiple classes, class-to-ESC assembly, RS groups and concatenated source
-frames remain separate codec gaps. Playback qualification is offline PCM;
+This section records the initial one-class interleave qualification. The
+multiclass section above extends it to bit-class reassembly; RS groups and
+concatenated source frames remain separate codec gaps. Playback qualification is offline PCM;
 physical output-device and performance qualification are separate.
 
 Primary definition: [ISO/IEC 14496-3:2009, section 1.8.4.8](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
 
 ## EP2 predefined-set switching and short headers, 2026-10-28
 
-The raw-AU mapping accepts 1..255 predefined EP sets, each containing one
-mandatory complete AAC access unit. Every packet first recovers the separately
+The initial raw-AU qualification accepted 1..255 predefined EP sets with one
+mandatory complete AAC access unit each. The multiclass route above extends
+this to multiple bit classes per set. Every packet first recovers the separately
 protected selector; its selected set determines the subsequent attribute-header
 length, class length, CRC and SRCPC/RS parameters. Out-of-range selectors fail
 before class interpretation. No previous selection is cached across packets,
 rewind or checkpoint restore. Config validation and retained-memory accounting
-cover every set. Arbitrary class-to-ESC assembly remains separate work.
+cover every set. EP1/EP3 class-to-ESC association remains separate work.
 
 The 1/2-bit headers now recover each information bit from its three repetitions
 (information first, then parity). Longer selectors retain BCH/Golay protection;
@@ -135,8 +205,8 @@ socket creation forbidden. The player test binary has no libav linkage.
 
 This RS route requires octet-aligned information/CRC and fixed correction
 counts. RS concatenated classes (FEC=2), escaped RS correction rates and
-non-octet CRC handling remain explicit refusals. Other EP mappings, multiclass interleave,
-multiple classes and separate ELD extension tools remain open. These tests
+non-octet CRC handling remain explicit refusals. Other EP mappings, grouped RS, optional classes and separate ELD extension
+tools remain open; multiclass recovery is described above. These tests
 qualify offline PCM playback and seek, not physical speaker output or universal
 AAC-ELD conformance.
 
@@ -178,10 +248,9 @@ network. An until-end class with a small CRC does not guarantee rejection of
 arbitrary truncation; length-refusal tests use explicitly declared lengths.
 
 This closes the reproduced EP2 single-class ELD dispatch failure, not the full
-EP tool or the codec-gap goal. EP1/EP3 separate ESC association, arbitrary EP2
-application assemblers, multiple/optional classes and concatenated frames,
-streaming puncture state, grouped RS, multiclass interleaving and non-ELD
-EP integration remain open. Playback qualification is offline AudioStream PCM,
+EP tool or the codec-gap goal. EP1/EP3 separate ESC association, optional classes, concatenated frames,
+grouped RS and non-ELD EP integration remain open. Bit-class assembly,
+continuous puncture state and multiclass interleaving are described above. Playback qualification is offline AudioStream PCM,
 not physical audio output-device qualification.
 
 Primary definition: [ISO/IEC 14496-3:2009, sections 1.6.3.6 and 1.8](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).

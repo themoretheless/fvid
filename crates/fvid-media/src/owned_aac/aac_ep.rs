@@ -3,6 +3,8 @@
 use super::{
     Result, aac_ep_crc, aac_ep_interleave, aac_ep_rs, aac_ep_srcpc, bits::BitReader, invalid,
 };
+#[path = "aac_ep_classes.rs"]
+mod classes;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Length {
     Fixed(u16),
@@ -156,166 +158,12 @@ impl Config {
             used,
         ))
     }
-    /// Current application mapping: one class contains the complete raw AAC AU.
-    /// EP2 does not normatively define arbitrary application class-to-ESC mapping.
+    /// EP2 output classes concatenate, after reordering, to the epConfig=0 AU.
     pub fn validate_raw_access_unit(&self) -> Result<()> {
-        if self.sets.is_empty() || self.sets.len() > 255 {
-            return Err(invalid("EP predefined set count out of range"));
-        }
-        if self.interleave > 2 {
-            return Err(invalid("reserved EP interleave mode"));
-        }
-        if self.frames != 1 {
-            return Err(invalid(
-                "EP concatenated frame routing is not yet implemented",
-            ));
-        }
-        for set in &self.sets {
-            if set.classes.len() != 1 || set.classes[0].optional {
-                return Err(invalid(
-                    "EP application class mapping requires an explicit assembler",
-                ));
-            }
-            if set.order.as_deref().is_some_and(|order| order != [0]) {
-                return Err(invalid("invalid EP class output permutation"));
-            }
-            let c = &set.classes[0];
-            match (self.interleave, c.interleave) {
-                (0 | 1, None) | (2, Some(0..=3)) => (),
-                _ => return Err(invalid("invalid EP class interleave switch")),
-            }
-            if c.fec != 0 && c.interleave == Some(2) {
-                return Err(invalid("reserved RS intraclass interleave mode"));
-            }
-            if c.fec > 2 {
-                return Err(invalid("reserved EP FEC type"));
-            }
-            if c.fec == 2 {
-                return Err(invalid(
-                    "EP RS concatenated class routing is not yet implemented",
-                ));
-            }
-            if c.fec == 1 && c.rate.is_none() {
-                return Err(invalid(
-                    "EP RS escaped correction rate is not yet implemented",
-                ));
-            }
-            if c.fec == 1 && c.crc.is_some_and(|width| width % 8 != 0) {
-                return Err(invalid("EP RS raw-AU mapping requires octet-aligned CRC"));
-            }
-        }
-        Ok(())
-    }
-    fn header_bits(&self, c: &Class) -> usize {
-        let length = match c.length {
-            Length::InBand(n) => usize::from(n),
-            _ => 0,
-        };
-        length
-            + 3 * usize::from(c.rate.is_none())
-            + 3 * usize::from(c.crc.is_none())
-            + 3 * usize::from(self.stuffing)
+        classes::validate(self)
     }
     pub fn decode_raw_access_unit(&self, packet: &[u8]) -> Result<Vec<u8>> {
-        self.validate_raw_access_unit()?;
-        let all: Vec<u8> = packet
-            .iter()
-            .flat_map(|&b| (0..8).rev().map(move |i| (b >> i) & 1))
-            .collect();
-        // The selector is protected independently: its result determines the
-        // size and interpretation of the following class-attribute header.
-        let selector_bits = (usize::BITS - (self.sets.len() - 1).leading_zeros()) as usize;
-        let (selector, following) =
-            decode_frame_header(all, selector_bits, None, self.interleave != 0)?;
-        let selected = selector
-            .iter()
-            .fold(0usize, |v, &b| (v << 1) | usize::from(b));
-        let set = self
-            .sets
-            .get(selected)
-            .ok_or_else(|| invalid("EP predefined set index out of range"))?;
-        let c = &set.classes[0];
-        let (header, body) = decode_frame_header(
-            following,
-            self.header_bits(c),
-            self.header,
-            self.interleave != 0,
-        )?;
-        let mut at = 0;
-        let mut read = |n: usize| -> usize {
-            let value = header[at..at + n]
-                .iter()
-                .fold(0, |v, &b| (v << 1) | usize::from(b));
-            at += n;
-            value
-        };
-        let length = match c.length {
-            Length::Fixed(n) => Some(usize::from(n)),
-            Length::InBand(0) => None,
-            Length::InBand(n) => Some(read(usize::from(n))),
-        };
-        let rate = c
-            .rate
-            .unwrap_or_else(|| [0, 3, 4, 6, 8, 12, 16, 24][read(3)]);
-        let width = c
-            .crc
-            .unwrap_or_else(|| [0, 6, 8, 10, 12, 14, 16, 32][read(3)]);
-        let stuffing = if self.stuffing { read(3) } else { 0 };
-        let end = body
-            .len()
-            .checked_sub(stuffing)
-            .ok_or_else(|| invalid("truncated EP stuffing/header"))?;
-        let class = &body[..end];
-        let size = class.len();
-        if c.fec == 1 {
-            // One RS class with no following classes has no intraclass
-            // transpose: its octets occupy one byte per column.
-            return decode_rs_class(class, length, rate, width);
-        }
-        let restored;
-        let class = if self.interleave == 1 || (self.interleave == 2 && c.interleave == Some(2)) {
-            restored = aac_ep_interleave::split_stage(class, class.len(), 28)?.0;
-            &restored
-        } else {
-            class
-        };
-        let information = if let Some(n) = length {
-            if n == 0 {
-                if size == 0 {
-                    return Ok(vec![]);
-                }
-                return Err(invalid("nonempty EP encoding for zero-bit class"));
-            }
-            n.checked_add(usize::from(width))
-                .ok_or_else(|| invalid("EP class length overflow"))?
-        } else {
-            let mut low = 0;
-            let mut high = size;
-            while low < high {
-                let middle = low + (high - low) / 2;
-                if aac_ep_srcpc::encoded_len(middle, rate, c.terminated)? >= size {
-                    high = middle;
-                } else {
-                    low = middle + 1;
-                }
-            }
-            low
-        };
-        if aac_ep_srcpc::encoded_len(information, rate, c.terminated)? != size
-            || information <= usize::from(width)
-        {
-            return Err(invalid("EP class/packet length mismatch"));
-        }
-        let recovered = aac_ep_srcpc::decode(class, information, rate, c.terminated)?;
-        if !aac_ep_crc::verify(&recovered.information, width)? {
-            return Err(invalid("EP class CRC mismatch"));
-        }
-        let bits = &recovered.information[..information - usize::from(width)];
-        let mut raw = vec![0; bits.len().div_ceil(8)];
-        for (i, &bit) in bits.iter().enumerate() {
-            raw[i / 8] |= bit << (7 - i % 8);
-        }
-        Ok(raw)
+        classes::decode(self, packet)
     }
     pub(crate) fn visit_retained(
         &self,
