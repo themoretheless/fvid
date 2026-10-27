@@ -37,6 +37,7 @@ impl AacConfig {
                 "AAC SBR configuration requires the extension-aware decoder",
             ));
         }
+        if parsed.protection.is_some() {return Err(invalid("AAC error protection requires the extension-aware decoder"));}
         Ok((parsed.core, parsed.program))
     }
     fn read_core(
@@ -44,7 +45,7 @@ impl AacConfig {
         object_type: u32,
         sample_rate: u32,
         config: u32,
-    ) -> Result<(Self, Option<super::aac_pce::ProgramConfig>, Option<super::aac_eld_sbr::Config>)> {
+    ) -> Result<(Self, Option<super::aac_pce::ProgramConfig>, Option<super::aac_eld_sbr::Config>, Option<super::aac_ep::Config>)> {
         if object_type == 39 {
             let channels=match config {1..=6=>config as u8,7|12|14=>8,11=>7,_=>return Err(invalid("unsupported AAC ELD channel configuration"))};
             let frame_samples=if b.bit()?{480}else{512};
@@ -62,9 +63,12 @@ impl AacConfig {
                 if matches!(kind,1..=3) {return Err(invalid("AAC ELD extension tool is not yet implemented"));}
                 for _ in 0..bytes {b.read(8)?;}
             }
-            if b.read(2)?!=0 {return Err(invalid("AAC ELD epConfig is not yet implemented"));}
+            let protection=match b.read(2)? {
+                0=>None,2=>{let (ep,used)=super::aac_ep::Config::read_prefix(b.source_bytes(),b.position())?;b.skip(used)?;Some(ep)},
+                _=>return Err(invalid("AAC ELD epConfig separate ESC stream mapping is not yet implemented")),
+            };
             super::aac_ld_bands::LdBands::for_eld(sample_rate,frame_samples as usize).map_err(|e|invalid(&e.0))?;
-            return Ok((Self{channel_configuration:config as u8,object_type,sample_rate,channels,frame_samples,core_coder_delay:None,section_data_resilience,scalefactor_data_resilience,spectral_data_resilience},None,eld_sbr));
+            return Ok((Self{channel_configuration:config as u8,object_type,sample_rate,channels,frame_samples,core_coder_delay:None,section_data_resilience,scalefactor_data_resilience,spectral_data_resilience},None,eld_sbr,protection));
         }
         if !matches!(object_type, 1 | 2 | 3 | 4 | 17 | 19 | 23) {
             return Err(invalid(
@@ -136,6 +140,7 @@ impl AacConfig {
             },
             program,
             None,
+            None,
         ))
     }
 }
@@ -152,6 +157,7 @@ pub struct AudioSpecificConfig {
     pub ps_present: Option<bool>,
     pub extension_sample_rate: Option<u32>,
     pub eld_sbr: Option<super::aac_eld_sbr::Config>,
+    pub protection: Option<super::aac_ep::Config>,
 }
 fn sampling_frequency(b: &mut BitReader<'_>) -> Result<u32> {
     let index = b.read(4)? as usize;
@@ -206,7 +212,7 @@ impl AudioSpecificConfig {
         } else {
             signaled_object_type
         };
-        let (core, program, eld_sbr) =
+        let (core, program, eld_sbr, protection) =
             AacConfig::read_core(&mut b, core_object_type, sample_rate, configuration)?;
         if core.object_type == 39 && !explicit {
             // ELD's own ldSbrPresentFlag was zero. It does not permit the
@@ -256,6 +262,7 @@ impl AudioSpecificConfig {
             ps_present,
             extension_sample_rate,
             eld_sbr,
+            protection,
         })
     }
 }
