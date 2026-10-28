@@ -1,0 +1,136 @@
+{
+  "cases": [
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-indexed",
+      "video": "aac-er-ltp-resilient-960-7-mono-indexed.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono.f32le",
+      "channels": 1,
+      "rate": 24000,
+      "frames": 3,
+      "mode": "indexed"
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-per-row",
+      "video": "aac-er-ltp-resilient-960-7-mono-per-row.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono.f32le",
+      "channels": 1,
+      "rate": 24000,
+      "frames": 3,
+      "mode": "per-row"
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-tfhd-zero",
+      "video": "aac-er-ltp-resilient-960-7-mono-tfhd-zero.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono.f32le",
+      "channels": 1,
+      "rate": 24000,
+      "frames": 3,
+      "mode": "tfhd-zero"
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-trex-zero",
+      "video": "aac-er-ltp-resilient-960-7-mono-trex-zero.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono.f32le",
+      "channels": 1,
+      "rate": 24000,
+      "frames": 3,
+      "mode": "trex-zero"
+    },
+    {
+      "name": "sbr-mono-17-15-64-explicit-indexed",
+      "video": "sbr-mono-17-15-64-explicit-indexed.mp4",
+      "golden": "sbr-mono-17-15-64-explicit.f32le",
+      "channels": 1,
+      "rate": 48000,
+      "frames": 3,
+      "mode": "indexed"
+    },
+    {
+      "name": "sbr-mono-17-15-64-explicit-per-row",
+      "video": "sbr-mono-17-15-64-explicit-per-row.mp4",
+      "golden": "sbr-mono-17-15-64-explicit.f32le",
+      "channels": 1,
+      "rate": 48000,
+      "frames": 3,
+      "mode": "per-row"
+    },
+    {
+      "name": "sbr-mono-17-15-64-explicit-tfhd-zero",
+      "video": "sbr-mono-17-15-64-explicit-tfhd-zero.mp4",
+      "golden": "sbr-mono-17-15-64-explicit.f32le",
+      "channels": 1,
+      "rate": 48000,
+      "frames": 3,
+      "mode": "tfhd-zero"
+    },
+    {
+      "name": "sbr-mono-17-15-64-explicit-trex-zero",
+      "video": "sbr-mono-17-15-64-explicit-trex-zero.mp4",
+      "golden": "sbr-mono-17-15-64-explicit.f32le",
+      "channels": 1,
+      "rate": 48000,
+      "frames": 3,
+      "mode": "trex-zero"
+    },
+    {
+      "name": "sbr-multi-19-14-16-64-indexed",
+      "video": "sbr-multi-19-14-16-64-indexed.mp4",
+      "golden": "sbr-multi-19-14-16-64.f32le",
+      "channels": 8,
+      "rate": 48000,
+      "frames": 3,
+      "mode": "indexed"
+    },
+    {
+      "name": "sbr-multi-19-14-16-64-per-row",
+      "video": "sbr-multi-19-14-16-64-per-row.mp4",
+      "golden": "sbr-multi-19-14-16-64.f32le",
+      "channels": 8,
+      "rate": 48000,
+      "frames": 3,
+      "mode": "per-row"
+    },
+    {
+      "name": "sbr-multi-19-14-16-64-tfhd-zero",
+      "video": "sbr-multi-19-14-16-64-tfhd-zero.mp4",
+      "golden": "sbr-multi-19-14-16-64.f32le",
+      "channels": 8,
+      "rate": 48000,
+      "frames": 3,
+      "mode": "tfhd-zero"
+    },
+    {
+      "name": "sbr-multi-19-14-16-64-trex-zero",
+      "video": "sbr-multi-19-14-16-64-trex-zero.mp4",
+      "golden": "sbr-multi-19-14-16-64.f32le",
+      "channels": 8,
+      "rate": 48000,
+      "frames": 3,
+      "mode": "trex-zero"
+    }
+  ],
+  "malformed": [
+    {
+      "video": "padding-on-empty.mp4",
+      "error": "MP4 sample padding exceeds stored bits"
+    },
+    {
+      "video": "fragment-padding-on-empty.mp4",
+      "error": "MP4 sample padding exceeds stored bits"
+    },
+    {
+      "video": "missing-empty.mp4",
+      "kind": "group",
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "ordinary-zero.mp4",
+      "error": "zero MP4 sample size"
+    },
+    {
+      "video": "unused-ep1-description.mp4",
+      "error": "zero MP4 sample size"
+    }
+  ],
+  "provenance": "Own AVC/ER-LTP/SBR movies with real separate EP1 ESC tracks. Explicit empty AUs retain source clocks and dependencies; they are not omitted AUs. Independent saved PCM. No foreign codec, private media, process or network."
+}

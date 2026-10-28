@@ -35,8 +35,13 @@ fn run(worker: &mut Worker) {
 }
 #[test]
 fn ep1_worker_queues_exact_pcm_after_partial_playback_seek_rewind_and_edits() {
+    check_corpus("mp4-ep1");
+    check_corpus("mp4-ep1-empty");
+}
+fn check_corpus(corpus: &str) {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/fixtures/playback-errors/mp4-ep1");
+        .join("tests/fixtures/playback-errors")
+        .join(corpus);
     let m: serde_json::Value =
         serde_json::from_slice(&std::fs::read(root.join("manifest.json")).unwrap()).unwrap();
     let cases = m["cases"]
@@ -44,7 +49,12 @@ fn ep1_worker_queues_exact_pcm_after_partial_playback_seek_rewind_and_edits() {
         .unwrap()
         .iter()
         .filter(|c| !c["name"].as_str().unwrap().ends_with("-signed"))
-        .chain(m["exports"].as_array().unwrap());
+        .chain(
+            m.get("exports")
+                .and_then(|v| v.as_array())
+                .into_iter()
+                .flatten(),
+        );
     for case in cases {
         let bytes = std::fs::read(root.join(case["video"].as_str().unwrap())).unwrap();
         let mut full = Vec::new();

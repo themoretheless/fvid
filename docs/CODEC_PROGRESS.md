@@ -1,3 +1,43 @@
+## Explicit empty ESC AUs in indexed and fragmented MP4, 2026-10-28
+
+The shared MP4 index now retains zero-sized samples when their selected sample
+description declares AAC separate ESC transport (epConfig=1). Zero bytes still
+represent a real timed AU: sample count, source clocks, dependencies and packet
+identity remain present. Ordinary AAC/other zero-sized coding refusals remain;
+an unused EP1 description cannot authorize an empty sample in another selected
+entry. Mixed MACE/other-description indexing uses the same selected-entry gate.
+
+Fragment indexing accepts explicit zero per-row sizes, zero tfhd size overriding
+a nonzero trex default, and inherited zero trex size for declared EP1 ESCs.
+The absence of a size/default outside this binding retains its prior refusal.
+Impossible nonzero padding on zero-byte fragment samples now fails during
+indexing, matching the stbl/padb check. Raw reads clear reused output buffers
+and return zero bits without dropping the sample or treating it as EOF.
+
+The first saved ER-LTP movie reproduced `zero MP4 sample size` before the fix.
+The new corpus has twelve accepted real AVC/ER-LTP/SBR MP4s, using mixed empty/
+nonempty classes and all-empty auxiliary streams in indexed, per-row fragment,
+tfhd-zero and trex-zero forms. Three independent PCM references cover complete
+source output. Owned/public PCM export, AudioStream playback, frame-edge and
+repeated seeks, checkpoint replay, EOF seek and rewind pass on every variant.
+Five refusal controls distinguish missing empty AUs, impossible stbl/fragment
+padding, ordinary AAC zero samples and unused EP1 sample descriptions.
+
+The worker capture acceptance now includes all twelve new programs as well as
+the previous eight EP1 programs. After live partial decoding, seek/checkpoint
+preroll and rewind, queued PCM and rational packet clocks remain exact.
+
+All 21 new assets / 378,474 bytes regenerate exactly with process/socket
+creation forbidden. The existing 25 EP1 assets remain byte-identical. Ordinary
+tests read saved assets; no foreign codec, network or generator is invoked.
+All 34 selected integration checks and 1,622 root/media unit tests pass
+offline (29 unit tests ignored).
+
+**Still open:** actual EP1 PS movie qualification, changing dependent sample
+descriptions, physical audio output, external SL/clock bindings and wider codec
+coverage. This completes the tested empty-ESC container/playback path, not the
+full codec-gap objective or generic acceptance of empty codec byte packets.
+
 ## Typed EP1 AudioStream playback and worker navigation, 2026-10-28
 
 `AudioStream::decode_source_packet` now provides a container-owned decoding

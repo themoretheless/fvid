@@ -5,7 +5,7 @@ from generate_he_aac_packet_fixtures import box,boxes
 from generate_aac_esds_stream_fixtures import descriptor
 ROOT=Path(__file__).resolve().parents[1];SOURCE=ROOT/'tests/fixtures/playback-errors';OUT=SOURCE/'mp4-ep1'
 def word(*values):return b''.join(struct.pack('>I',v)for v in values)
-def make_movie(base,source,units,mode=None):
+def make_movie(base,source,units,mode=None,allow_empty=False):
     original=dict(boxes(source));moov=list(boxes(original[b'moov']));tracks=[];audio=None
     for tag,body in moov:
         if tag!=b'trak':continue
@@ -17,17 +17,20 @@ def make_movie(base,source,units,mode=None):
     parts=list(boxes(source));assert parts[-1][0]==b'moov'
     prefix=b''.join(box(t,p)for t,p in parts[:-1]);media=bytearray();rows=base['frames'][:3]
     order=[u['stream_id']for u in rows[0]['units']];root=next(u['stream_id']for u in rows[0]['units']if u['depends_on']is None)
-    asc=bytes.fromhex(base['asc'])
+    asc=bytes.fromhex(base['asc']);skipped=False
     for ordinal,sid in enumerate(order):
         selected=[next(u for u in frame['units']if u['stream_id']==sid)for frame in rows]
         assert all(u['depends_on']==selected[0]['depends_on']for u in selected)
+        omit=False
+        if mode=='omit-empty' and not skipped and selected[0]['bits']==0:
+            selected=selected[1:];skipped=True;omit=True
         if mode=='missing' and ordinal==0:selected=selected[:2]
         parent=selected[0]['depends_on']
         if mode=='fork' and ordinal==1:parent=root
         esid=root if mode=='duplicate'and ordinal==0 else sid
         head=struct.pack('>H',esid)+bytes([128 if parent is not None else 0])+(struct.pack('>H',parent)if parent is not None else b'')
         esds=bytes(4)+descriptor(3,head+descriptor(4,b'\x40\x14'+bytes(11)+descriptor(5,asc))+descriptor(6,b'\x02'))
-        raw=[units[u['offset']:u['offset']+u['bytes']]for u in selected];assert all(raw)
+        raw=[units[u['offset']:u['offset']+u['bytes']]for u in selected];assert allow_empty or all(raw)
         offset=len(prefix)+8+len(media);media.extend(b''.join(raw))
         padding=[(-u['bits'])%8 for u in selected];packed=bytes((padding[i]<<4)|(padding[i+1]if i+1<len(padding)else 7)for i in range(0,len(padding),2))
         scale=selected[0]['timescale'];step=selected[0]['duration']+(1 if mode=='duration'and ordinal==0 else 0);count=len(selected)
@@ -38,6 +41,7 @@ def make_movie(base,source,units,mode=None):
                 if tag==b'stbl':
                     body+=box(b'padb',word(0,count)+packed)
                     if mode=='signed':body+=box(b'ctts',word(0x01000000,1,count,(-37*(scale//24000))&0xffffffff))
+                    if omit:body+=box(b'ctts',word(0,1,count,step))
             elif tag==b'tkhd':body=body[:12]+word(ordinal+2)+body[16:20]+word(3 if mode=='edits'and sid==root else (3*base['n']*movie_scale+23999)//24000)+body[24:]
             elif tag==b'mdhd':body=body[:12]+word(scale,count*step)+body[20:]
             elif tag==b'stsd':body=body[:8]+b''.join(rewrite(t,p)for t,p in boxes(body[8:]))

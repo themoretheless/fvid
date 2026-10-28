@@ -1595,6 +1595,13 @@ fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<Skip
 /// The sample tables of one track collapsed into an index, or `None` when the
 /// track holds more index than the budget allows.
 ///
+// Separate ESC transport may carry an explicitly empty AU. This is not an
+// omitted sample or an invitation to feed empty byte packets to ordinary AAC.
+fn empty_esc_description(d: &SampleDescription) -> bool {
+    d.codec == *b"mp4a" && mp4_aac_specific_config(&d.configuration).is_ok_and(|asc|
+        Mp4AudioSpecificConfig::parse(asc).is_ok_and(|c|c.separate_esc))
+}
+
 /// An uncompressed audio track states one size for every frame in `stsz` and
 /// one length for every frame in a single `stts` run, so frame `n` of a chunk
 /// starts `n * size` past the chunk offset and `n * length` past the run's
@@ -1685,7 +1692,7 @@ fn sample_index(
         mace_block(codec, channels)
     };
     let Some((samples_per_unit, bytes_per_unit)) = unit else {
-        return expanded_index(stbl, codec, count, timing, limit, size_at, mdats);
+        return expanded_index(stbl, codec, descriptions, count, timing, limit, size_at, mdats);
     };
     if timing.len() == 1 && optional(stbl, b"ctts")?.is_none() && optional(stbl, b"stss")?.is_none()
     {
@@ -1716,7 +1723,7 @@ fn sample_index(
         }
         return Ok(Some(index));
     }
-    expanded_index(stbl, codec, count, timing, limit, size_at, mdats)
+    expanded_index(stbl, codec, descriptions, count, timing, limit, size_at, mdats)
 }
 
 /// QuickTime MACE counts six decoded samples per encoded block; other entries
@@ -1743,7 +1750,7 @@ fn changing_mace_index(
         } else {
             size_at(raw)?
         };
-        if bytes == 0 {
+        if bytes == 0 && !descriptions.get(d as usize-1).is_some_and(empty_esc_description) {
             return Err(invalid("zero MP4 sample size"));
         }
         Ok(bytes)
@@ -1876,6 +1883,7 @@ fn changing_mace_index(
 fn expanded_index(
     stbl: &[Atom<'_>],
     codec: &[u8; 4],
+    descriptions: &[SampleDescription],
     count: usize,
     timing: Vec<(usize, u32)>,
     limit: usize,
@@ -1897,9 +1905,10 @@ fn expanded_index(
     samples
         .try_reserve_exact(count)
         .map_err(|_| invalid("sample index allocation failed"))?;
+    let may_have_empty_esc = descriptions.iter().any(empty_esc_description);
     for index in 0..count {
         let size = size_at(index)?;
-        if size == 0 {
+        if size == 0 && !may_have_empty_esc {
             return Err(invalid("zero MP4 sample size"));
         }
         samples.push(Sample {
@@ -1975,7 +1984,9 @@ fn expanded_index(
     let runs = chunk_runs(stbl, count, mdats, 1, chunk_bytes)?;
     for run in runs {
         let mut offset = run.offset;
+        let empty_esc = descriptions.get(run.description_index as usize-1).is_some_and(empty_esc_description);
         for s in &mut samples[run.first..run.first + run.frames] {
+            if s.size == 0 && !empty_esc {return Err(invalid("zero MP4 sample size"));}
             s.description_index = run.description_index;
             s.offset = offset;
             offset += u64::from(s.size);
@@ -2155,7 +2166,8 @@ fn index_fragments(
             } else {
                 duration
             };
-            let size = size.or_else(|| extends.and_then(|e| (e.size != 0).then_some(e.size)));
+            let empty_esc = description.checked_sub(1).and_then(|i|tracks[position].sample_descriptions.get(i as usize)).is_some_and(empty_esc_description);
+            let size = size.or_else(|| extends.and_then(|e| (e.size != 0 || empty_esc).then_some(e.size)));
             let header_flags = header_flags.or_else(|| extends.and_then(|e| e.flags));
             let track = &mut tracks[position];
             let descriptions = track.sample_descriptions.len();
@@ -2263,7 +2275,7 @@ fn index_fragments(
                             invalid("MP4 fragment sample states no size and none is defaulted")
                         })?
                     };
-                    if bytes_of_sample == 0 {
+                    if bytes_of_sample == 0 && !empty_esc {
                         return Err(invalid("zero MP4 fragment sample size"));
                     }
                     let bits = if flags & 0x00_0400 != 0 {
@@ -2275,6 +2287,9 @@ fn index_fragments(
                     } else {
                         header_flags.unwrap_or(0)
                     };
+                    if u64::from((bits >> 17)&7) > u64::from(bytes_of_sample)*8 {
+                        return Err(invalid("MP4 sample padding exceeds stored bits"));
+                    }
                     let shift = if flags & 0x00_0800 != 0 {
                         let value = u32be(bytes, at)?;
                         at += 4;
