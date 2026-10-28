@@ -210,9 +210,20 @@ def generate(include_category_bits=False, include_header_switch=False):
             case=dict(good,name=name,frames=frames)
             filename=name+'.mp4';files[filename]=video_fixture([case],blob,1,filename=filename,write=False)['data']
             malformed.append(dict(name=name,video=filename,asc=good['asc'],frames=frames,error='CRC'if kind=='crc'else 'truncated'))
+    if include_header_switch and not include_category_bits:
+        # Append new acceptance sources without shifting any existing packet
+        # span. Shared EP generators can still request these cases explicitly.
+        switched=[case for case in cases if case['name'].endswith('-header-switch')]
+        cases=[case for case in cases if not case['name'].endswith('-header-switch')]
+        original=bytes(blob);blob=bytearray()
+        for case in cases+malformed+switched:
+            for row in case['frames']:
+                packet=original[row['offset']:row['offset']+row['bytes']]
+                row['offset']=len(blob);blob.extend(packet)
+        cases+=switched
     files['packets.bin']=bytes(blob)
     files['manifest.json']=(json.dumps(dict(cases=cases,malformed=malformed,provenance='Own encoded nonzero ELD core, LD-SBR syntax/CRC and direct CLDFB convolution, patch/energy/gain/noise and column-superposition oracle; no production decoder, foreign codec, process, private media or network.'),indent=2)+'\n').encode()
     return files
 if __name__=='__main__':
     OUT.mkdir(exist_ok=True)
-    for name,data in generate().items():(OUT/name).write_bytes(data)
+    for name,data in generate(include_header_switch=True).items():(OUT/name).write_bytes(data)

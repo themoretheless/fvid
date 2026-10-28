@@ -178,7 +178,7 @@ fn eld_sbr_player_rewind_and_sample_seek_preserve_pcm_in_both_containers() {
             assert_eq!(play(reader.as_mut()), full, "{name} rewind {container}");
             // Repeated targets and returning from EOF must rebuild the same
             // LD-SBR history as an uninterrupted decode, including frame edges.
-            for target in [
+            let mut targets = vec![
                 -1,
                 -c["container_frame_samples"].as_i64().unwrap(),
                 0,
@@ -194,11 +194,27 @@ fn eld_sbr_player_rewind_and_sample_seek_preserve_pcm_in_both_containers() {
                 (full.len() / width) as i64 * 2,
                 13,
                 0,
-            ] {
+            ];
+            if name.ends_with("-header-switch") {
+                let frame = c["container_frame_samples"].as_i64().unwrap();
+                // Header epochs change at frames 4 and 8. Seek in reverse
+                // order too: cached synthesis must not retain a later header.
+                for epoch in [8, 4, 8, 4] {
+                    targets.extend([epoch * frame - 1, epoch * frame, epoch * frame + 1]);
+                }
+            }
+            for target in targets {
                 let ticks = (i128::from(target) * i128::from(reader.timescale())
                     / i128::from(reader.sample_rate())) as i64;
                 let landed = reader.seek_to(ticks);
                 assert!(landed >= 0);
+                if target <= (full.len() / width) as i64 {
+                    assert_eq!(
+                        landed,
+                        ticks.max(0),
+                        "{name} seek landed at a different target"
+                    );
+                }
                 assert_eq!(
                     play(reader.as_mut()),
                     full[(((landed as u128 * u128::from(reader.sample_rate()))
@@ -331,5 +347,24 @@ fn eld_sbr_own_malformed_videos_fail_at_the_specific_ld_sbr_block() {
                 .contains(&c["error"].as_str().unwrap().to_lowercase()),
             "container: {error}"
         );
+    }
+}
+
+#[test]
+fn ld_sbr_header_switch_acceptance_cases_remain_in_the_playback_matrix() {
+    let manifest: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(root().join("manifest.json")).unwrap()).unwrap();
+    for n in [480, 512] {
+        let name = format!("n{n}-c2-header-switch");
+        let case = manifest["cases"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|case| case["name"] == name)
+            .unwrap_or_else(|| panic!("missing independent header-switch acceptance: {name}"));
+        assert!(case["frames"].as_array().unwrap().len() > 8);
+        assert_eq!(case["container_frame_samples"], n * 2);
+        assert!(root().join(case["video"].as_str().unwrap()).is_file());
+        assert!(root().join(case["matroska"].as_str().unwrap()).is_file());
     }
 }

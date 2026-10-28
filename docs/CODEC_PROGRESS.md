@@ -1,3 +1,34 @@
+## LD-SBR header-epoch playback acceptance, 2026-10-28
+
+The ordinary LD-SBR corpus now saves its two independently calculated
+header-switch sources as well as the previous 256 cases. Both 480/512 stereo
+sources change amplitude precision at frame 4 and restore it at frame 8;
+CRC-protected packets and independent scalar CLDFB/SBR PCM are saved in MP4
+and Matroska. These cases were already generated for EP3, but were absent
+from the ordinary player acceptance matrix. No production decoder change was
+needed to admit them.
+
+The player test now seeks immediately before, at and after both header epochs,
+repeats those targets in reverse epoch order, and compares the complete PCM
+suffix against uninterrupted decoding. For targets through EOF it also checks
+that the returned position equals the requested nonnegative timestamp, rather
+than accepting any position with matching PCM. Existing EOF, past-EOF, rewind,
+negative and repeated-target checks remain in the matrix.
+
+All 1,038 saved files / 27,871,422 bytes regenerate identically with process
+and socket creation forbidden. All previous positive per-source ASC, PCM,
+MP4 and Matroska assets remain byte-identical. Ordinary tests only read saved
+assets; the linked player integration binary has no FFmpeg/libav dependencies.
+
+All 27 integration checks across ordinary LD-SBR, EP3 LD-SBR, and EP3
+multi-AU header history pass offline with `--no-default-features --features
+player`. The stricter exact-position seek check also passes separately.
+
+This is native decoder and AudioStream acceptance, not a listening test on a
+physical audio device or a claim that every AAC transport/rendering extension
+is implemented. EP1 separate-stream mapping and known ELD extension tools
+still have explicit unsupported paths in config_impl.rs.
+
 # Собственные контейнеры и кодеки: состояние реализации
 
 ## EP3 extension categories 5..8, 2026-10-28

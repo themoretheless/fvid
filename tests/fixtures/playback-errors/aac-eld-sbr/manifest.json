@@ -17455,6 +17455,140 @@
       "resilience": 0,
       "video": "n512-r24000-c2-tns-f0-x2-crc1.mp4",
       "matroska": "n512-r24000-c2-tns-f0-x2-crc1.mka"
+    },
+    {
+      "name": "n480-c2-header-switch",
+      "n": 480,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec51c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 111048,
+          "bytes": 38
+        },
+        {
+          "offset": 111086,
+          "bytes": 38
+        },
+        {
+          "offset": 111124,
+          "bytes": 38
+        },
+        {
+          "offset": 111162,
+          "bytes": 38
+        },
+        {
+          "offset": 111200,
+          "bytes": 34
+        },
+        {
+          "offset": 111234,
+          "bytes": 30
+        },
+        {
+          "offset": 111264,
+          "bytes": 30
+        },
+        {
+          "offset": 111294,
+          "bytes": 27
+        },
+        {
+          "offset": 111321,
+          "bytes": 38
+        },
+        {
+          "offset": 111359,
+          "bytes": 35
+        },
+        {
+          "offset": 111394,
+          "bytes": 35
+        },
+        {
+          "offset": 111429,
+          "bytes": 35
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": "n480-c2-header-switch.mp4",
+      "matroska": "n480-c2-header-switch.mka"
+    },
+    {
+      "name": "n512-c2-header-switch",
+      "n": 512,
+      "rate": 48000,
+      "configuration": 2,
+      "mask": 3,
+      "asc": "f8ec41c460c05800",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 111464,
+          "bytes": 38
+        },
+        {
+          "offset": 111502,
+          "bytes": 38
+        },
+        {
+          "offset": 111540,
+          "bytes": 38
+        },
+        {
+          "offset": 111578,
+          "bytes": 38
+        },
+        {
+          "offset": 111616,
+          "bytes": 34
+        },
+        {
+          "offset": 111650,
+          "bytes": 30
+        },
+        {
+          "offset": 111680,
+          "bytes": 30
+        },
+        {
+          "offset": 111710,
+          "bytes": 27
+        },
+        {
+          "offset": 111737,
+          "bytes": 38
+        },
+        {
+          "offset": 111775,
+          "bytes": 35
+        },
+        {
+          "offset": 111810,
+          "bytes": 35
+        },
+        {
+          "offset": 111845,
+          "bytes": 35
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": "n512-c2-header-switch.mp4",
+      "matroska": "n512-c2-header-switch.mka"
     }
   ],
   "malformed": [
