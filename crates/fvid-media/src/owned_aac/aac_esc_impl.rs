@@ -36,6 +36,7 @@ pub(crate) struct Reader {
     next: usize,
     current: [Option<usize>; 11],
     spans: Vec<Span>,
+    grouped_sbr: bool,
 }
 impl Reader {
     fn new(frame: &RecoveredFrame) -> Result<Self> {
@@ -59,6 +60,7 @@ impl Reader {
             next: 0,
             current: [None; 11],
             spans: Vec::new(),
+            grouped_sbr: false,
         })
     }
     fn allocate(&mut self, category: usize) -> Result<()> {
@@ -71,13 +73,29 @@ impl Reader {
     }
     fn sbr(&mut self) -> Result<()> {
         self.allocate(9)?;
-        self.allocate(10)
+        if self.grouped_sbr {
+            self.current[10] = None;
+            Ok(())
+        } else {
+            self.allocate(10)
+        }
     }
     fn read_sbr<T>(
         &mut self,
         category: usize,
         f: impl FnOnce(&mut SbrBitReader<'_>) -> SbrResult<T>,
     ) -> Result<T> {
+        if self.grouped_sbr && category == 10 && self.current[10].is_none() {
+            let prefix = self.current[9].ok_or_else(|| invalid("unassigned LD-SBR ESC prefix"))?;
+            if self.instances[prefix].position < self.instances[prefix].bits {
+                // EP1 may put the adjacent prefix and data instances in one AU.
+                // The syntax parser has established the exact prefix boundary;
+                // remaining bits belong to data, never guessed byte padding.
+                self.current[10] = Some(prefix);
+            } else {
+                self.allocate(10)?;
+            }
+        }
         let index =
             self.current[category].ok_or_else(|| invalid("unassigned LD-SBR ESC category"))?;
         let source = &mut self.instances[index];
@@ -437,6 +455,24 @@ pub fn reassemble_eld(
     frame: &RecoveredFrame,
     sbr: Option<&SbrDecoder>,
 ) -> Result<Vec<u8>> {
+    reassemble_eld_transport(config, frame, sbr, false)
+}
+/// EP1 AUs can contain adjacent LD-SBR prefix/data instances. EP3 recovered
+/// classes retain their declared separate-instance boundaries through the
+/// ordinary entrypoint above.
+pub fn reassemble_eld_ep1(
+    config: &AacConfig,
+    frame: &RecoveredFrame,
+    sbr: Option<&SbrDecoder>,
+) -> Result<Vec<u8>> {
+    reassemble_eld_transport(config, frame, sbr, true)
+}
+fn reassemble_eld_transport(
+    config: &AacConfig,
+    frame: &RecoveredFrame,
+    sbr: Option<&SbrDecoder>,
+    grouped_sbr: bool,
+) -> Result<Vec<u8>> {
     if config.object_type != 39 {
         return Err(invalid("ELD ESC mapping requires AOT39"));
     }
@@ -453,6 +489,7 @@ pub fn reassemble_eld(
         _ => return Err(invalid("unsupported ELD ESC layout")),
     };
     let mut reader = Reader::new(frame)?;
+    reader.grouped_sbr = grouped_sbr;
     for &kind in kinds {
         if kind == 1 {
             super::aac_pair::ChannelPair::read_eld_esc(&mut reader, config)?;

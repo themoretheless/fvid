@@ -1,3 +1,50 @@
+## EP1 grouped LD-SBR prefix/data AUs, 2026-10-28
+
+A saved own six-frame MP4 reproduced `missing AAC ESC instance` before the
+fix: one transported EP1 AU held adjacent LD-SBR instances 9 and 10 instead of
+placing each in a separate track. The native reader now lets the prefix syntax
+parser establish the exact bit boundary before assigning the data reader. This
+works per SBR element, including separate earlier pairs and a grouped last pair;
+meaningful trailing bits are still validated and transport padding is excluded.
+Only the EP1 native path enables this behavior. The EP3 recovered-class path
+retains its declared separate-instance boundaries and existing strict entrypoint.
+The general successive-instance grouping rule is described in ISO/IEC 14496-3
+working draft w2803, section 10.5.2 (the older draft is not an ELD syntax oracle):
+https://www.lpi.tel.uva.es/~nacho/docencia/ing_ond_1/trabajos_01_02/formatos_audio_digital/archivos/w2803_n.pdf
+
+The new corpus contains 96 programmes across 480/512 core samples, channel
+configurations 1..7, core/double output rates and CRC off/on. Native complete
+PCM matches independently authored scalar references within 1e-7; reconstructed
+logical AUs are byte-exact against separate-instance controls. Alternating
+separate/grouped packetization preserves continuous DSP history and checkpoint
+replay without a reset. The strict recovered-class entrypoint refuses grouped
+input rather than silently relaxing EP3 class boundaries.
+
+All 240 malformed programmes reach their intended failure: truncated data,
+eight extra meaningful bits, or a corrupted CRC in the final SBR element.
+A failed decode preserves history: retry without reset, checkpoint replay and
+subsequent frames match an independent continuous separate-instance decoder.
+Full public/owned PCM exports, repeated millisecond ranges, stereo WAVE export
+with gain/crop/32-kHz resampling, AudioStream playback, frame-edge/repeated/EOF/
+past-EOF seek and rewind match the separate controls. Worker capture now covers
+286 programmes, including these 96, with queued PCM and rational-clock checks.
+This qualifies software playback/navigation, not physical-device listening.
+
+All 449 new artifacts / 10080435 bytes regenerate byte-exact with process/socket
+creation forbidden and an exact inventory. All six older EP1 corpora regenerate
+unchanged after generalizing the shared control helper. Ordinary tests use saved
+own files only and require neither FFmpeg nor network. Root/media unit suites
+pass: 1623 tests, 29 ignored. All-test compilation passes offline with
+`--no-default-features --features player`; the new integration binary has no
+FFmpeg/libav linkage. All 98 selected integration checks pass: six new grouped-
+pair checks, 61 existing AAC/ESC checks and 31 existing MP4 EP1 checks.
+
+Scope remains bounded: this supports adjacent LD-SBR prefix/data pairs, not
+arbitrary core/RVLC/TNS grouping or multiple SBR pairs inside one transported AU.
+Same-ASC changes to physical MP4 track membership, external SL/OD updates,
+physical output and broader codec/profile conformance remain open. This milestone
+does not assert full LD-SBR conformance or completion of all codec gaps.
+
 ## Fragmented and hybrid LD-SBR active-prefix qualification, 2026-10-28
 
 The active-chain corpus now covers indexed, fully fragmented and hybrid

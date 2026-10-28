@@ -609,7 +609,11 @@ impl NativeAacDecoder {
                         &self.config, self.program.as_ref(), frame, &headers,
                     )?
                 } else {
-                    super::aac_esc::reassemble_eld(&self.config, frame, self.eld_sbr.as_ref())?
+                    if self.separate_esc {
+                        super::aac_esc::reassemble_eld_ep1(&self.config, frame, self.eld_sbr.as_ref())?
+                    } else {
+                        super::aac_esc::reassemble_eld(&self.config, frame, self.eld_sbr.as_ref())?
+                    }
                 },
             )),
         }
