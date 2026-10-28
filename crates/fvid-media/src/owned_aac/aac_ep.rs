@@ -158,6 +158,11 @@ impl Config {
             used,
         ))
     }
+    /// Number of selectable wire sets after optional-class derivation. No
+    /// derived class lists are materialized, including counts exceeding u64.
+    pub fn predefined_set_count(&self) -> Result<u128> {
+        classes::predefined_count(self)
+    }
     /// EP2 output classes concatenate, after reordering, to the epConfig=0 AU.
     pub fn validate_raw_access_unit(&self) -> Result<()> {
         classes::validate(self)

@@ -1,5 +1,74 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## EP2 optional classes and large setup playback, 2026-10-28
+
+Owned EP2 recovery derives wire sets from optional descriptors. Each original
+set contributes 2^N variants in original-set order; zero presence-mask bits
+retain the corresponding optional classes. The decoder selects the original
+set and active class indices directly, then filters the wire order and class
+attributes. Output slots preserve original class identity while absent classes
+contribute no bits. No expanded table is allocated. The public
+`Config::predefined_set_count()` exposes the derived cardinality as u128.
+Original limits allow 255 sets of 63 optional classes: 255 * 2^63 variants and
+a 71-bit selector. Both selector and attribute headers honour extended
+protection when their length exceeds 16 bits. Checkpoints and retained-memory
+accounting keep original descriptors, including optional flags.
+
+A transport-label regression reproduces the ten sets in ISO Table 1.58 and
+checks exact reassembly with a filtered nontrivial output permutation. Sparse
+selection controls cover 0..63 optional flags, original-set transitions beyond
+u64 and the largest legal descriptor count. Empty derived sets successfully
+recover an empty EP payload; AAC playback refuses the missing audio data with
+its truncation error. This refusal is explicitly separate from playback
+acceptance and is checked after successful empty transport recovery.
+
+`scripts/generate_aac_ep_optional_fixtures.py` saves 780 own acceptance sources
+and 168 negative controls in MP4/Matroska. It covers 480/512 ELD with/without
+LD-SBR, mono/stereo, SRCPC/RS mixtures, dynamic parameters, reordered and zero
+classes, both interleave modes, and selector lengths 1..18/32/64/71 bits.
+The largest configurations have 255 original sets, 63 optional classes each,
+and ASC lengths up to 55,474 bytes. Original sets in this case have different
+rates, CRCs and permutations, so high-index truncation cannot pass by selecting
+an equivalent set. Basic and extended long-header protection are both covered.
+Negative movies first decode three valid packets, then isolate an unused
+selector, class CRC mismatch, declared-length truncation or empty AAC data.
+Decoder rollback controls retain byte-identical ASC.
+
+The playback gate exposed the old 4,096-byte cutoff in the shared ESDS wrapper:
+Matroska playback refused a valid 55,469-byte setup that native and export paths
+already decoded. The wrapper now checks all nested 28-bit descriptor payload
+lengths before one fallible output allocation and preserves the complete ASC.
+It retains the two-byte minimum and reports the actual setup length on refusal.
+Independent descriptor parsing round-trips sizes across one/two/three length
+bytes up to 262,144 bytes; pure length controls check the full four-byte format
+boundary without allocating huge buffers. The same tests compile through the
+media library and root compatibility entrypoint.
+
+`tests/aac_ep_optional_playback.rs` checks exact recovered AU bytes and saved
+independent PCM, native/public/owned paths, MP4/Matroska ranges, playback/drain,
+rewind, repeated/frame-edge/EOF seeks, checkpoint replay and retained accounting.
+The saved large Matroska movie reproduces the wrapper refusal and its enabled
+navigation acceptance requires the fix. Both generation and ordinary tests
+use no private media or foreign codec; generators reproduce every saved byte
+with process and socket creation disabled, while normal tests never generate
+fixtures or require FFmpeg/network.
+
+Qualification passed 558 media unit tests (one ignored), 1,052 root library
+tests (26 ignored), and 55 integration tests across ELD, CLDFB, ordinary LD-SBR,
+SRCPC, RS, set switching, interleaving, multiclass and optional-class recovery.
+All seven optional tests pass over 780 acceptance and 168 negative sources.
+The test player has no libav linkage. Tests use `--no-default-features
+--features player` and `--config 'profile.dev.package.fvid-media.opt-level=2'`;
+repository build settings were not changed. The initial failed large-ASC
+Matroska navigation gate was replaced by passing playback/seek acceptance
+with the wrapper fix.
+
+RS groups, concatenated source frames, EP1/EP3 association, non-ELD EP routing
+and remaining ELD extension tools are still separate gaps. This qualification
+is offline PCM/navigation, not physical output-device or throughput validation.
+
+Primary definition: [ISO/IEC 14496-3:2009, section 1.8.4.2 and Table 1.58](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+
 ## EP2 bit-class assembly and continuous SRCPC, 2026-10-28
 
 Owned EP2 decoding now reassembles multiple mandatory classes into the original
@@ -61,7 +130,7 @@ has no libav linkage. Tests use `--no-default-features --features player` and
 settings were not changed. Both generators reproduce all saved bytes with
 process and socket creation disabled.
 
-Optional-class derivation, grouped RS (FEC=2), non-octet RS CRC mapping,
+Grouped RS (FEC=2), non-octet RS CRC mapping,
 concatenated source frames, EP1/EP3 ESC routing and non-ELD EP integration remain
 open. This is offline PCM/navigation qualification, not physical output-device
 or throughput qualification.
@@ -205,7 +274,7 @@ socket creation forbidden. The player test binary has no libav linkage.
 
 This RS route requires octet-aligned information/CRC and fixed correction
 counts. RS concatenated classes (FEC=2), escaped RS correction rates and
-non-octet CRC handling remain explicit refusals. Other EP mappings, grouped RS, optional classes and separate ELD extension
+non-octet CRC handling remain explicit refusals. Other EP mappings, grouped RS and separate ELD extension
 tools remain open; multiclass recovery is described above. These tests
 qualify offline PCM playback and seek, not physical speaker output or universal
 AAC-ELD conformance.
@@ -248,7 +317,7 @@ network. An until-end class with a small CRC does not guarantee rejection of
 arbitrary truncation; length-refusal tests use explicitly declared lengths.
 
 This closes the reproduced EP2 single-class ELD dispatch failure, not the full
-EP tool or the codec-gap goal. EP1/EP3 separate ESC association, optional classes, concatenated frames,
+EP tool or the codec-gap goal. EP1/EP3 separate ESC association and concatenated frames,
 grouped RS and non-ELD EP integration remain open. Bit-class assembly,
 continuous puncture state and multiclass interleaving are described above. Playback qualification is offline AudioStream PCM,
 not physical audio output-device qualification.

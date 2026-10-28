@@ -335,20 +335,86 @@ pub(crate) fn esds_for_mp4(asc: &[u8]) -> Option<Vec<u8>> {
     esds_descriptor(asc, true)
 }
 
-fn esds_descriptor(asc: &[u8], sl_config: bool) -> Option<Vec<u8>> {
-    if !(2..=4096).contains(&asc.len()) {return None;}
-    fn descriptor(tag: u8, payload: &[u8]) -> Vec<u8> {
-        let mut groups=vec![(payload.len() & 127) as u8];
-        let mut length=payload.len() >> 7;
-        while length!=0 {groups.push((length & 127) as u8 | 128);length>>=7;}
-        groups.reverse();
-        let mut bytes=vec![tag];bytes.extend(groups);bytes.extend_from_slice(payload);bytes
+// MPEG-4 descriptor payload lengths have at most four seven-bit groups.
+const ES_DESCRIPTOR_MAX: usize = 0x0fff_ffff;
+fn descriptor_size(payload: usize) -> Option<usize> {
+    if payload > ES_DESCRIPTOR_MAX {
+        return None;
     }
-    let mut decoder=vec![0x40,0x15,0,0,0,0,0,0,0,0,0,0,0];
-    decoder.extend(descriptor(5,asc));
-    let mut stream=vec![0,1,0];stream.extend(descriptor(4,&decoder));
-    if sl_config {stream.extend(descriptor(6, &[2]));}
-    let mut output=vec![0;4];output.extend(descriptor(3,&stream));Some(output)
+    let groups = ((usize::BITS - payload.leading_zeros()).max(1) as usize).div_ceil(7);
+    payload.checked_add(1 + groups)
+}
+fn esds_lengths(asc: usize, sl_config: bool) -> Option<[usize; 3]> {
+    if asc < 2 {
+        return None;
+    }
+    let decoder = 13usize.checked_add(descriptor_size(asc)?)?;
+    let stream = 3usize
+        .checked_add(descriptor_size(decoder)?)?
+        .checked_add(if sl_config { 3 } else { 0 })?;
+    let total = 4usize.checked_add(descriptor_size(stream)?)?;
+    Some([decoder, stream, total])
+}
+fn descriptor_header(out: &mut Vec<u8>, tag: u8, payload: usize) {
+    let groups = descriptor_size(payload).unwrap() - payload - 1;
+    out.push(tag);
+    for group in (0..groups).rev() {
+        out.push(((payload >> (group * 7)) & 127) as u8 | if group != 0 { 128 } else { 0 });
+    }
+}
+fn esds_descriptor(asc: &[u8], sl_config: bool) -> Option<Vec<u8>> {
+    // Check every nested length before allocating or copying configuration.
+    let [decoder, stream, total] = esds_lengths(asc.len(), sl_config)?;
+    let mut output = Vec::new();
+    output.try_reserve_exact(total).ok()?;
+    output.extend_from_slice(&[0; 4]);
+    descriptor_header(&mut output, 3, stream);
+    output.extend_from_slice(&[0, 1, 0]);
+    descriptor_header(&mut output, 4, decoder);
+    output.extend_from_slice(&[0x40, 0x15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    descriptor_header(&mut output, 5, asc.len());
+    output.extend_from_slice(asc);
+    if sl_config {
+        descriptor_header(&mut output, 6, 1);
+        output.push(2);
+    }
+    debug_assert_eq!(output.len(), total);
+    Some(output)
+}
+
+#[cfg(test)]
+mod descriptor_length_tests {
+    use super::*;
+    #[test]
+    fn variable_length_esds_preserves_large_asc_in_both_wrappers() {
+        for n in [
+            2, 5, 126, 127, 128, 4096, 4097, 16383, 16384, 55469, 65535, 262144,
+        ] {
+            let mut asc = vec![0; n];
+            asc[..2].copy_from_slice(&[0x11, 0x90]);
+            for sl in [false, true] {
+                let wrapped = esds_descriptor(&asc, sl).unwrap();
+                assert_eq!(
+                    esds_specific_config(&wrapped).unwrap(),
+                    asc
+                );
+                assert_eq!(wrapped.len(), esds_lengths(n, sl).unwrap()[2]);
+            }
+        }
+        assert_eq!(esds_for(&[0x11, 0x90]).unwrap().len(), 28);
+        assert_eq!(esds_for_mp4(&[0x11, 0x90]).unwrap().len(), 31);
+    }
+    #[test]
+    fn nested_descriptor_field_bounds_are_checked_without_large_allocations() {
+        for sl in [false, true] {
+            let maximum = ES_DESCRIPTOR_MAX - if sl { 29 } else { 26 };
+            assert_eq!(esds_lengths(maximum, sl).unwrap()[2], ES_DESCRIPTOR_MAX + 9);
+            assert!(esds_lengths(maximum + 1, sl).is_none());
+            assert!(esds_lengths(usize::MAX, sl).is_none());
+        }
+        assert!(esds_lengths(0, false).is_none());
+        assert!(esds_lengths(1, false).is_none());
+    }
 }
 
 fn check_packet_limit(header: Header, max: usize) -> Result<()> {

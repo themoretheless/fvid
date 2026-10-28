@@ -61,12 +61,12 @@ fn setup_data(track: &Track) -> Result<Vec<u8>> {
 /// short form, so the wrapper is rebuilt around it; a track whose setup block is
 /// too short to name a coding is refused by the reason the config parser gives.
 fn aac_setup(private: &[u8]) -> Result<Vec<u8>> {
-    let Some(esds) = crate::playback_aac::esds_for(private) else {
-        return Err(unsupported(&format!(
-            "AAC in WebM names its setup block {} bytes, and a config shorter than two states no coding",
-            private.len()
-        )));
-    };
+    if private.len() < 2 {
+        return Err(unsupported(&format!("AAC CodecPrivate is {} bytes; at least two are required", private.len())));
+    }
+    let esds = crate::playback_aac::esds_for(private).ok_or_else(|| {
+        unsupported(&format!("AAC CodecPrivate is {} bytes and cannot be wrapped in MPEG-4 ES descriptors", private.len()))
+    })?;
     // Let the decoder's own parser judge the rebuilt box, so a config this
     // reader wraps wrongly is refused here rather than two frames in.
     crate::codec::config::aac_specific_config(&esds)?;

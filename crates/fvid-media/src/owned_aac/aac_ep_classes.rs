@@ -32,11 +32,6 @@ pub(super) fn validate(config: &Config) -> Result<()> {
             }
         }
         for (index, c) in set.classes.iter().enumerate() {
-            if c.optional {
-                return Err(invalid(
-                    "EP optional class derivation is not yet implemented",
-                ));
-            }
             if c.fec > 2 {
                 return Err(invalid("reserved EP FEC type"));
             }
@@ -81,6 +76,53 @@ pub(super) fn validate(config: &Config) -> Result<()> {
     }
     Ok(())
 }
+/// Wire cardinality after optional-class derivation. The stored descriptors
+/// stay original; even 255 sets of 63 optional classes require only a count.
+pub(super) fn predefined_count(config: &Config) -> Result<u128> {
+    if config.sets.is_empty() || config.sets.len() > 255 {
+        return Err(invalid("EP predefined set count out of range"));
+    }
+    let mut total = 0u128;
+    for set in &config.sets {
+        if set.classes.len() > 63 {
+            return Err(invalid("EP class count out of range"));
+        }
+        let optional = set.classes.iter().filter(|c| c.optional).count();
+        total = total
+            .checked_add(1u128 << optional)
+            .ok_or_else(|| invalid("EP derived set count overflow"))?;
+    }
+    Ok(total)
+}
+fn select_derived(config: &Config, mut selected: u128) -> Result<(usize, Vec<usize>)> {
+    if selected >= predefined_count(config)? {
+        return Err(invalid("EP predefined set index out of range"));
+    }
+    for (original, set) in config.sets.iter().enumerate() {
+        let count = 1u128 << set.classes.iter().filter(|c| c.optional).count();
+        if selected >= count {
+            selected -= count;
+            continue;
+        }
+        let mut rank = 0;
+        let mut present = Vec::new();
+        for (index, class) in set.classes.iter().enumerate() {
+            let keep = if class.optional {
+                let keep = selected & (1u128 << rank) == 0;
+                rank += 1;
+                keep
+            } else {
+                true
+            };
+            if keep {
+                present.push(index);
+            }
+        }
+        return Ok((original, present));
+    }
+    Err(invalid("EP predefined set index out of range"))
+}
+
 struct Parameter<'a> {
     class: &'a Class,
     output: usize,
@@ -255,21 +297,40 @@ pub(super) fn decode(config: &Config, packet: &[u8]) -> Result<Vec<u8>> {
         .iter()
         .flat_map(|&b| (0..8).rev().map(move |i| (b >> i) & 1))
         .collect();
-    let n = (usize::BITS - (config.sets.len() - 1).leading_zeros()) as usize;
-    let (selector, following) = decode_frame_header(bits, n, None, config.interleave != 0)?;
+    let count = predefined_count(config)?;
+    let n = (u128::BITS - (count - 1).leading_zeros()) as usize;
+    let (selector, following) =
+        decode_frame_header(bits, n, config.header, config.interleave != 0)?;
     let selected = selector
         .iter()
-        .fold(0usize, |v, &b| (v << 1) | usize::from(b));
-    let set = config
-        .sets
-        .get(selected)
-        .ok_or_else(|| invalid("EP predefined set index out of range"))?;
+        .fold(0u128, |v, &b| (v << 1) | u128::from(b));
+    let (original, present) = select_derived(config, selected)?;
+    let set = &config.sets[original];
+    let mask = present
+        .iter()
+        .fold(0u64, |mask, &index| mask | (1u64 << index));
     let order: Vec<_> = set
         .order
         .as_ref()
-        .map(|o| o.iter().map(|&v| usize::from(v)).collect())
-        .unwrap_or_else(|| (0..set.classes.len()).collect());
-    let n=set.classes.iter().map(|c|match c.length{Length::InBand(n)=>usize::from(n),_=>0}+3*usize::from(c.rate.is_none())+3*usize::from(c.crc.is_none())).sum::<usize>()+3*usize::from(config.stuffing);
+        .map(|o| {
+            o.iter()
+                .map(|&v| usize::from(v))
+                .filter(|&index| mask & (1u64 << index) != 0)
+                .collect()
+        })
+        .unwrap_or(present);
+    let n = order
+        .iter()
+        .map(|&index| {
+            let c = &set.classes[index];
+            (match c.length {
+                Length::InBand(n) => usize::from(n),
+                _ => 0,
+            }) + 3 * usize::from(c.rate.is_none())
+                + 3 * usize::from(c.crc.is_none())
+        })
+        .sum::<usize>()
+        + 3 * usize::from(config.stuffing);
     let (header, mut body) =
         decode_frame_header(following, n, config.header, config.interleave != 0)?;
     let mut parameters = Vec::new();
@@ -359,4 +420,156 @@ pub(super) fn decode(config: &Config, packet: &[u8]) -> Result<Vec<u8>> {
         }
     }
     Ok(raw)
+}
+
+#[cfg(test)]
+mod optional_tests {
+    use super::*;
+    use crate::owned_aac::aac_ep::Set;
+    fn class(optional: bool) -> Class {
+        Class {
+            length: Length::Fixed(8),
+            rate: Some(0),
+            crc: Some(0),
+            concatenated: false,
+            fec: 0,
+            terminated: false,
+            interleave: None,
+            optional,
+        }
+    }
+    fn config(sets: Vec<Set>) -> Config {
+        Config {
+            sets,
+            interleave: 0,
+            stuffing: true,
+            frames: 1,
+            header: None,
+        }
+    }
+    fn oracle_header(information: &str) -> Vec<u8> {
+        let m: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../../tests/fixtures/playback-errors/aac-ep-sets/manifest.json"
+        ))
+        .unwrap();
+        m["header_vectors"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|v| v["information"] == information)
+            .unwrap()["encoded"]
+            .as_str()
+            .unwrap()
+            .bytes()
+            .map(|v| v - b'0')
+            .collect()
+    }
+    fn pack(bits: &[u8]) -> Vec<u8> {
+        bits.chunks_exact(8)
+            .map(|row| row.iter().fold(0, |v, &b| (v << 1) | b))
+            .collect()
+    }
+    #[test]
+    fn normative_optional_table_and_filtered_output_order_recover_exact_labels() {
+        let cfg = config(vec![
+            Set {
+                classes: vec![
+                    class(true),
+                    class(false),
+                    class(true),
+                    class(false),
+                    class(true),
+                ],
+                order: Some(vec![4, 0, 1, 3, 2]),
+            },
+            Set {
+                classes: vec![class(true), class(false)],
+                order: Some(vec![1, 0]),
+            },
+        ]);
+        assert_eq!(cfg.predefined_set_count().unwrap(), 10);
+        // Table 1.58. These are EP transport labels, not AAC playback fixtures.
+        for (selected, expected) in [
+            "ABCDE", "BCDE", "ABDE", "BDE", "ABCD", "BCD", "ABD", "BD", "FG", "G",
+        ]
+        .iter()
+        .enumerate()
+        {
+            let (original, present) = select_derived(&cfg, selected as u128).unwrap();
+            let start = if original == 0 { b'A' } else { b'F' };
+            assert_eq!(
+                present.iter().map(|&i| start + i as u8).collect::<Vec<_>>(),
+                expected.as_bytes()
+            );
+            let mut bits = oracle_header(&format!("{selected:04b}"));
+            bits.extend(oracle_header("011"));
+            for &i in cfg.sets[original].order.as_ref().unwrap() {
+                if present.contains(&usize::from(i)) {
+                    bits.extend((0..8).rev().map(|b| ((start + i) >> b) & 1));
+                }
+            }
+            bits.extend([0, 0, 0]);
+            assert_eq!(
+                cfg.decode_raw_access_unit(&pack(&bits)).unwrap(),
+                expected.as_bytes()
+            );
+        }
+        assert!(select_derived(&cfg, 10).is_err());
+        let empty = config(vec![Set {
+            classes: vec![class(true)],
+            order: None,
+        }]);
+        let mut bits = vec![1, 1, 1];
+        bits.extend(oracle_header("111"));
+        bits.extend([0; 7]);
+        assert!(
+            empty
+                .decode_raw_access_unit(&pack(&bits))
+                .unwrap()
+                .is_empty()
+        );
+    }
+    #[test]
+    fn optional_cardinality_and_sparse_selection_cover_all_63_flags_without_expansion() {
+        for optional in 0..=63 {
+            let cfg = config(vec![Set {
+                classes: (0..63).map(|i| class(i < optional)).collect(),
+                order: None,
+            }]);
+            let count = 1u128 << optional;
+            assert_eq!(cfg.predefined_set_count().unwrap(), count);
+            assert_eq!(
+                select_derived(&cfg, 0).unwrap().1,
+                (0..63).collect::<Vec<_>>()
+            );
+            assert_eq!(
+                select_derived(&cfg, count - 1).unwrap().1,
+                (optional..63).collect::<Vec<_>>()
+            );
+            if optional > 0 {
+                assert_eq!(
+                    select_derived(&cfg, 1u128 << (optional - 1)).unwrap().1,
+                    (0..63).filter(|&i| i != optional - 1).collect::<Vec<_>>()
+                );
+            }
+        }
+        let set = Set {
+            classes: vec![class(true); 63],
+            order: None,
+        };
+        let cfg = config(vec![set; 255]);
+        let count = 255u128 * (1u128 << 63);
+        assert_eq!(cfg.predefined_set_count().unwrap(), count);
+        assert_eq!(128 - (count - 1).leading_zeros(), 71);
+        assert_eq!(select_derived(&cfg, count - 1).unwrap(), (254, vec![]));
+        assert_eq!(select_derived(&cfg, count - 2).unwrap(), (254, vec![0]));
+        assert_eq!(
+            select_derived(&cfg, 1u128 << 64).unwrap(),
+            (2, (0..63).collect())
+        );
+        assert!(select_derived(&cfg, count).is_err());
+        let mut invalid = cfg;
+        invalid.sets[0].classes.push(class(true));
+        assert!(invalid.predefined_set_count().is_err());
+    }
 }
