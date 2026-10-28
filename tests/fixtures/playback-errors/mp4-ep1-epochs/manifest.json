@@ -65,6 +65,384 @@
         5760,
         11904
       ]
+    },
+    {
+      "name": "ps-aot17-960-1024-960-fragmented",
+      "video": "ps-aot17-960-1024-960-fragmented.mp4",
+      "malformed": "ps-aot17-960-1024-960-fragmented-mismatch.mp4",
+      "controls": [
+        "sbr-ps-aot17-960-48000-explicit-indexed.mp4",
+        "sbr-ps-aot17-1024-48000-explicit-indexed.mp4"
+      ],
+      "frames": 18,
+      "streams": 4,
+      "channels": 2,
+      "edges": [
+        11520,
+        23808
+      ],
+      "mode": "fragmented",
+      "indexed": "ps-aot17-960-1024-960.mp4"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-hybrid",
+      "video": "ps-aot17-960-1024-960-hybrid.mp4",
+      "malformed": "ps-aot17-960-1024-960-hybrid-mismatch.mp4",
+      "controls": [
+        "sbr-ps-aot17-960-48000-explicit-indexed.mp4",
+        "sbr-ps-aot17-1024-48000-explicit-indexed.mp4"
+      ],
+      "frames": 18,
+      "streams": 4,
+      "channels": 2,
+      "edges": [
+        11520,
+        23808
+      ],
+      "mode": "hybrid",
+      "indexed": "ps-aot17-960-1024-960.mp4"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-fragmented",
+      "video": "ps-aot19-960-1024-960-fragmented.mp4",
+      "malformed": "ps-aot19-960-1024-960-fragmented-mismatch.mp4",
+      "controls": [
+        "sbr-ps-aot19-960-48000-explicit-indexed.mp4",
+        "sbr-ps-aot19-1024-48000-explicit-indexed.mp4"
+      ],
+      "frames": 18,
+      "streams": 4,
+      "channels": 2,
+      "edges": [
+        11520,
+        23808
+      ],
+      "mode": "fragmented",
+      "indexed": "ps-aot19-960-1024-960.mp4"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-hybrid",
+      "video": "ps-aot19-960-1024-960-hybrid.mp4",
+      "malformed": "ps-aot19-960-1024-960-hybrid-mismatch.mp4",
+      "controls": [
+        "sbr-ps-aot19-960-48000-explicit-indexed.mp4",
+        "sbr-ps-aot19-1024-48000-explicit-indexed.mp4"
+      ],
+      "frames": 18,
+      "streams": 4,
+      "channels": 2,
+      "edges": [
+        11520,
+        23808
+      ],
+      "mode": "hybrid",
+      "indexed": "ps-aot19-960-1024-960.mp4"
+    },
+    {
+      "name": "ld-sbr-c1-480-512-480-fragmented",
+      "video": "ld-sbr-c1-480-512-480-fragmented.mp4",
+      "malformed": "ld-sbr-c1-480-512-480-fragmented-mismatch.mp4",
+      "controls": [
+        "ld-sbr-c1-480-512-480-control-0.mp4",
+        "ld-sbr-c1-480-512-480-control-1.mp4"
+      ],
+      "local_controls": true,
+      "frames": 18,
+      "streams": 4,
+      "channels": 1,
+      "edges": [
+        5760,
+        11904
+      ],
+      "mode": "fragmented",
+      "indexed": "ld-sbr-c1-480-512-480.mp4"
+    },
+    {
+      "name": "ld-sbr-c1-480-512-480-hybrid",
+      "video": "ld-sbr-c1-480-512-480-hybrid.mp4",
+      "malformed": "ld-sbr-c1-480-512-480-hybrid-mismatch.mp4",
+      "controls": [
+        "ld-sbr-c1-480-512-480-control-0.mp4",
+        "ld-sbr-c1-480-512-480-control-1.mp4"
+      ],
+      "local_controls": true,
+      "frames": 18,
+      "streams": 4,
+      "channels": 1,
+      "edges": [
+        5760,
+        11904
+      ],
+      "mode": "hybrid",
+      "indexed": "ld-sbr-c1-480-512-480.mp4"
+    },
+    {
+      "name": "ld-sbr-c7-480-512-480-fragmented",
+      "video": "ld-sbr-c7-480-512-480-fragmented.mp4",
+      "malformed": "ld-sbr-c7-480-512-480-fragmented-mismatch.mp4",
+      "controls": [
+        "ld-sbr-c7-480-512-480-control-0.mp4",
+        "ld-sbr-c7-480-512-480-control-1.mp4"
+      ],
+      "local_controls": true,
+      "frames": 18,
+      "streams": 27,
+      "channels": 8,
+      "edges": [
+        5760,
+        11904
+      ],
+      "mode": "fragmented",
+      "indexed": "ld-sbr-c7-480-512-480.mp4"
+    },
+    {
+      "name": "ld-sbr-c7-480-512-480-hybrid",
+      "video": "ld-sbr-c7-480-512-480-hybrid.mp4",
+      "malformed": "ld-sbr-c7-480-512-480-hybrid-mismatch.mp4",
+      "controls": [
+        "ld-sbr-c7-480-512-480-control-0.mp4",
+        "ld-sbr-c7-480-512-480-control-1.mp4"
+      ],
+      "local_controls": true,
+      "frames": 18,
+      "streams": 27,
+      "channels": 8,
+      "edges": [
+        5760,
+        11904
+      ],
+      "mode": "hybrid",
+      "indexed": "ld-sbr-c7-480-512-480.mp4"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-unused-first",
+      "video": "ps-aot17-960-1024-960-unused-first.mp4",
+      "malformed": "ps-aot17-960-1024-960-unused-first-mismatch.mp4",
+      "controls": [
+        "sbr-ps-aot17-960-48000-explicit-indexed.mp4",
+        "sbr-ps-aot17-1024-48000-explicit-indexed.mp4"
+      ],
+      "frames": 18,
+      "streams": 4,
+      "channels": 2,
+      "edges": [
+        11520,
+        23808
+      ],
+      "unused_first": true,
+      "indexed": "ps-aot17-960-1024-960.mp4"
+    },
+    {
+      "name": "ps-aot19-960-1024-960-unused-first",
+      "video": "ps-aot19-960-1024-960-unused-first.mp4",
+      "malformed": "ps-aot19-960-1024-960-unused-first-mismatch.mp4",
+      "controls": [
+        "sbr-ps-aot19-960-48000-explicit-indexed.mp4",
+        "sbr-ps-aot19-1024-48000-explicit-indexed.mp4"
+      ],
+      "frames": 18,
+      "streams": 4,
+      "channels": 2,
+      "edges": [
+        11520,
+        23808
+      ],
+      "unused_first": true,
+      "indexed": "ps-aot19-960-1024-960.mp4"
+    },
+    {
+      "name": "ld-sbr-c1-480-512-480-unused-first",
+      "video": "ld-sbr-c1-480-512-480-unused-first.mp4",
+      "malformed": "ld-sbr-c1-480-512-480-unused-first-mismatch.mp4",
+      "controls": [
+        "ld-sbr-c1-480-512-480-control-0.mp4",
+        "ld-sbr-c1-480-512-480-control-1.mp4"
+      ],
+      "local_controls": true,
+      "frames": 18,
+      "streams": 4,
+      "channels": 1,
+      "edges": [
+        5760,
+        11904
+      ],
+      "unused_first": true,
+      "indexed": "ld-sbr-c1-480-512-480.mp4"
+    },
+    {
+      "name": "ld-sbr-c7-480-512-480-unused-first",
+      "video": "ld-sbr-c7-480-512-480-unused-first.mp4",
+      "malformed": "ld-sbr-c7-480-512-480-unused-first-mismatch.mp4",
+      "controls": [
+        "ld-sbr-c7-480-512-480-control-0.mp4",
+        "ld-sbr-c7-480-512-480-control-1.mp4"
+      ],
+      "local_controls": true,
+      "frames": 18,
+      "streams": 27,
+      "channels": 8,
+      "edges": [
+        5760,
+        11904
+      ],
+      "unused_first": true,
+      "indexed": "ld-sbr-c7-480-512-480.mp4"
+    },
+    {
+      "name": "ps-aot17-960-1024-960-fragmented-unused-first",
+      "video": "ps-aot17-960-1024-960-fragmented-unused-first.mp4",
+      "malformed": "ps-aot17-960-1024-960-fragmented-unused-first-mismatch.mp4",
+      "controls": [
+        "sbr-ps-aot17-960-48000-explicit-indexed.mp4",
+        "sbr-ps-aot17-1024-48000-explicit-indexed.mp4"
+      ],
+      "frames": 18,
+      "streams": 4,
+      "channels": 2,
+      "edges": [
+        11520,
+        23808
+      ],
+      "mode": "fragmented",
+      "indexed": "ps-aot17-960-1024-960.mp4",
+      "unused_first": true
+    },
+    {
+      "name": "ps-aot17-960-1024-960-hybrid-unused-first",
+      "video": "ps-aot17-960-1024-960-hybrid-unused-first.mp4",
+      "malformed": "ps-aot17-960-1024-960-hybrid-unused-first-mismatch.mp4",
+      "controls": [
+        "sbr-ps-aot17-960-48000-explicit-indexed.mp4",
+        "sbr-ps-aot17-1024-48000-explicit-indexed.mp4"
+      ],
+      "frames": 18,
+      "streams": 4,
+      "channels": 2,
+      "edges": [
+        11520,
+        23808
+      ],
+      "mode": "hybrid",
+      "indexed": "ps-aot17-960-1024-960.mp4",
+      "unused_first": true
+    },
+    {
+      "name": "ps-aot19-960-1024-960-fragmented-unused-first",
+      "video": "ps-aot19-960-1024-960-fragmented-unused-first.mp4",
+      "malformed": "ps-aot19-960-1024-960-fragmented-unused-first-mismatch.mp4",
+      "controls": [
+        "sbr-ps-aot19-960-48000-explicit-indexed.mp4",
+        "sbr-ps-aot19-1024-48000-explicit-indexed.mp4"
+      ],
+      "frames": 18,
+      "streams": 4,
+      "channels": 2,
+      "edges": [
+        11520,
+        23808
+      ],
+      "mode": "fragmented",
+      "indexed": "ps-aot19-960-1024-960.mp4",
+      "unused_first": true
+    },
+    {
+      "name": "ps-aot19-960-1024-960-hybrid-unused-first",
+      "video": "ps-aot19-960-1024-960-hybrid-unused-first.mp4",
+      "malformed": "ps-aot19-960-1024-960-hybrid-unused-first-mismatch.mp4",
+      "controls": [
+        "sbr-ps-aot19-960-48000-explicit-indexed.mp4",
+        "sbr-ps-aot19-1024-48000-explicit-indexed.mp4"
+      ],
+      "frames": 18,
+      "streams": 4,
+      "channels": 2,
+      "edges": [
+        11520,
+        23808
+      ],
+      "mode": "hybrid",
+      "indexed": "ps-aot19-960-1024-960.mp4",
+      "unused_first": true
+    },
+    {
+      "name": "ld-sbr-c1-480-512-480-fragmented-unused-first",
+      "video": "ld-sbr-c1-480-512-480-fragmented-unused-first.mp4",
+      "malformed": "ld-sbr-c1-480-512-480-fragmented-unused-first-mismatch.mp4",
+      "controls": [
+        "ld-sbr-c1-480-512-480-control-0.mp4",
+        "ld-sbr-c1-480-512-480-control-1.mp4"
+      ],
+      "local_controls": true,
+      "frames": 18,
+      "streams": 4,
+      "channels": 1,
+      "edges": [
+        5760,
+        11904
+      ],
+      "mode": "fragmented",
+      "indexed": "ld-sbr-c1-480-512-480.mp4",
+      "unused_first": true
+    },
+    {
+      "name": "ld-sbr-c1-480-512-480-hybrid-unused-first",
+      "video": "ld-sbr-c1-480-512-480-hybrid-unused-first.mp4",
+      "malformed": "ld-sbr-c1-480-512-480-hybrid-unused-first-mismatch.mp4",
+      "controls": [
+        "ld-sbr-c1-480-512-480-control-0.mp4",
+        "ld-sbr-c1-480-512-480-control-1.mp4"
+      ],
+      "local_controls": true,
+      "frames": 18,
+      "streams": 4,
+      "channels": 1,
+      "edges": [
+        5760,
+        11904
+      ],
+      "mode": "hybrid",
+      "indexed": "ld-sbr-c1-480-512-480.mp4",
+      "unused_first": true
+    },
+    {
+      "name": "ld-sbr-c7-480-512-480-fragmented-unused-first",
+      "video": "ld-sbr-c7-480-512-480-fragmented-unused-first.mp4",
+      "malformed": "ld-sbr-c7-480-512-480-fragmented-unused-first-mismatch.mp4",
+      "controls": [
+        "ld-sbr-c7-480-512-480-control-0.mp4",
+        "ld-sbr-c7-480-512-480-control-1.mp4"
+      ],
+      "local_controls": true,
+      "frames": 18,
+      "streams": 27,
+      "channels": 8,
+      "edges": [
+        5760,
+        11904
+      ],
+      "mode": "fragmented",
+      "indexed": "ld-sbr-c7-480-512-480.mp4",
+      "unused_first": true
+    },
+    {
+      "name": "ld-sbr-c7-480-512-480-hybrid-unused-first",
+      "video": "ld-sbr-c7-480-512-480-hybrid-unused-first.mp4",
+      "malformed": "ld-sbr-c7-480-512-480-hybrid-unused-first-mismatch.mp4",
+      "controls": [
+        "ld-sbr-c7-480-512-480-control-0.mp4",
+        "ld-sbr-c7-480-512-480-control-1.mp4"
+      ],
+      "local_controls": true,
+      "frames": 18,
+      "streams": 27,
+      "channels": 8,
+      "edges": [
+        5760,
+        11904
+      ],
+      "mode": "hybrid",
+      "indexed": "ld-sbr-c7-480-512-480.mp4",
+      "unused_first": true
     }
   ],
   "provenance": "Own six-AU EP1 PS and LD-SBR controls spliced into 960/1024/960 and 480/512/480 sample-description epochs with canonical dpnd, exact padding and rational clocks. Controls reset each epoch; mismatch changes a dependent ASC only. No private media or foreign codec."

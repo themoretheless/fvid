@@ -49,8 +49,17 @@ struct Binding {
     parent: Option<u16>,
     file: bool,
 }
+// Track's convenience header describes stsd[0], which can be unused. Bind the
+// initial group to the description selected by its first actual sample.
+fn initial_setup(track: &Track) -> ([u8; 4], &[u8]) {
+    track
+        .description_for_sample(0)
+        .map_or((track.codec, track.configuration.as_slice()), |d| {
+            (d.codec, d.configuration.as_slice())
+        })
+}
 fn binding(track: &Track) -> Result<Binding> {
-    binding_config(track, &track.configuration)
+    binding_config(track, initial_setup(track).1)
 }
 fn binding_config(track: &Track, configuration: &[u8]) -> Result<Binding> {
     let d = aac_stream_descriptor(configuration)?;
@@ -96,10 +105,10 @@ fn binding_config(track: &Track, configuration: &[u8]) -> Result<Binding> {
 }
 impl Group {
     pub fn dependent_track(track: &Track) -> bool {
-        if track.handler != *b"soun" || track.codec != *b"mp4a" {
+        if track.handler != *b"soun" || initial_setup(track).0 != *b"mp4a" {
             return false;
         }
-        aac_stream_descriptor(&track.configuration).is_ok_and(|d| {
+        aac_stream_descriptor(initial_setup(track).1).is_ok_and(|d| {
             (d.depends_on.is_some() || !track.dependencies.is_empty())
                 && AudioSpecificConfig::parse(d.asc).is_ok_and(|p| p.separate_esc)
         })
@@ -138,10 +147,10 @@ impl Group {
         let track = tracks
             .get(root)
             .ok_or_else(|| invalid("EP1 MP4 root track index out of range"))?;
-        if track.codec != *b"mp4a" {
+        if initial_setup(track).0 != *b"mp4a" {
             return Ok(None);
         }
-        let d = aac_stream_descriptor(&track.configuration)?;
+        let d = aac_stream_descriptor(initial_setup(track).1)?;
         if !AudioSpecificConfig::parse(d.asc)?.separate_esc {
             return Ok(None);
         }
@@ -153,10 +162,10 @@ impl Group {
         let source = tracks
             .get(root)
             .ok_or_else(|| invalid("EP1 MP4 root track index out of range"))?;
-        if source.codec != *b"mp4a" {
+        if initial_setup(source).0 != *b"mp4a" {
             return Ok(0);
         }
-        let d = aac_stream_descriptor(&source.configuration)?;
+        let d = aac_stream_descriptor(initial_setup(source).1)?;
         if !AudioSpecificConfig::parse(d.asc)?.separate_esc {
             return Ok(0);
         }
@@ -169,11 +178,11 @@ impl Group {
             Ok(())
         };
         for (index, track) in tracks.iter().enumerate() {
-            if track.codec != *b"mp4a" || track.handler != *b"soun" {
+            if initial_setup(track).0 != *b"mp4a" || track.handler != *b"soun" {
                 continue;
             }
             let mut member = index == root;
-            let descriptor = aac_stream_descriptor(&track.configuration)?;
+            let descriptor = aac_stream_descriptor(initial_setup(track).1)?;
             if !AudioSpecificConfig::parse(descriptor.asc)?.separate_esc {
                 continue;
             }
@@ -193,9 +202,9 @@ impl Group {
                 let mut found = None;
                 for candidate in tracks
                     .iter()
-                    .filter(|t| t.codec == *b"mp4a" && t.handler == *b"soun")
+                    .filter(|t| initial_setup(t).0 == *b"mp4a" && t.handler == *b"soun")
                 {
-                    let descriptor = aac_stream_descriptor(&candidate.configuration)?;
+                    let descriptor = aac_stream_descriptor(initial_setup(candidate).1)?;
                     if !AudioSpecificConfig::parse(descriptor.asc)?.separate_esc {
                         continue;
                     }
@@ -252,10 +261,10 @@ impl Group {
         let track = tracks
             .get(root)
             .ok_or_else(|| invalid("EP1 MP4 root track index out of range"))?;
-        if track.handler != *b"soun" || track.codec != *b"mp4a" {
+        if track.handler != *b"soun" || initial_setup(track).0 != *b"mp4a" {
             return Err(invalid("EP1 MP4 root is not MPEG-4 audio"));
         }
-        let descriptor = aac_stream_descriptor(&track.configuration)?;
+        let descriptor = aac_stream_descriptor(initial_setup(track).1)?;
         let root_binding = binding(track)?;
         if root_binding.parent.is_some() {
             return Err(invalid("EP1 MP4 selected track is not a root ES"));
@@ -268,7 +277,7 @@ impl Group {
         let mut at = root;
         loop {
             let track = &tracks[at];
-            let d = aac_stream_descriptor(&track.configuration)?;
+            let d = aac_stream_descriptor(initial_setup(track).1)?;
             let current = binding(track)?;
             if current.file != root_binding.file {
                 return Err(invalid("EP1 MP4 mixes file and stream dependency bindings"));
@@ -349,10 +358,10 @@ impl Group {
             });
             let mut next = None;
             for (index, candidate) in tracks.iter().enumerate() {
-                if candidate.handler != *b"soun" || candidate.codec != *b"mp4a" {
+                if candidate.handler != *b"soun" || initial_setup(candidate).0 != *b"mp4a" {
                     continue;
                 }
-                let child = aac_stream_descriptor(&candidate.configuration)?;
+                let child = aac_stream_descriptor(initial_setup(candidate).1)?;
                 if !AudioSpecificConfig::parse(child.asc).is_ok_and(|p| p.separate_esc)
                     && !candidate.dependencies.contains(&track.id)
                     && child.depends_on != Some(current.id)

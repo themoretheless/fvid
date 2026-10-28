@@ -251,3 +251,89 @@ fn changing_ep1_playback_drains_each_epoch_and_preserves_seek_rewind_pcm() {
         assert_eq!(play(&mut reader, &mut decoder), full);
     }
 }
+
+#[test]
+fn fragmented_and_hybrid_epochs_retain_packet_identity_padding_and_descriptions() {
+    use fvid_media::{owned_mp4::Mp4Reader, owned_mp4_ep1::Group};
+    let m = manifest();
+    assert_eq!(m["cases"].as_array().unwrap().len(), 24);
+    for c in m["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c.get("mode").is_some())
+    {
+        let data = std::fs::read(
+            root()
+                .join("mp4-ep1-epochs")
+                .join(c["video"].as_str().unwrap()),
+        )
+        .unwrap();
+        let mut at = 0;
+        let mut fragments = 0;
+        while at < data.len() {
+            let size = u32::from_be_bytes(data[at..at + 4].try_into().unwrap()) as usize;
+            assert!(size >= 8);
+            if &data[at + 4..at + 8] == b"moof" {
+                fragments += 1;
+            }
+            at += size;
+        }
+        assert_eq!(at, data.len());
+        assert_eq!(fragments, if c["mode"] == "hybrid" { 2 } else { 3 });
+        let reference = std::fs::read(
+            root()
+                .join("mp4-ep1-epochs")
+                .join(c["indexed"].as_str().unwrap()),
+        )
+        .unwrap();
+        let mut reader = Mp4Reader::open_indexed(Cursor::new(data), Default::default()).unwrap();
+        let mut original =
+            Mp4Reader::open_indexed(Cursor::new(reference), Default::default()).unwrap();
+        let selected = Group::automatic_audio_tracks(&reader).unwrap();
+        assert_eq!(selected.len(), 1);
+        let other = Group::automatic_audio_tracks(&original).unwrap();
+        assert_eq!(other.len(), 1);
+        let group = Group::for_root(reader.tracks(), selected[0])
+            .unwrap()
+            .unwrap();
+        let baseline = Group::for_root(original.tracks(), other[0])
+            .unwrap()
+            .unwrap();
+        for t in reader.tracks().iter().filter(|t| t.handler == *b"soun") {
+            assert_eq!(t.samples.len(), 18);
+            for i in 0..18 {
+                assert_eq!(
+                    t.samples.get(i).unwrap().description_index,
+                    [1, 2, 1][i / 6] + u32::from(c["unused_first"] == true)
+                );
+            }
+        }
+        for i in 0..18 {
+            let actual = group.read_frame(&mut reader, i).unwrap();
+            let expected = baseline.read_frame(&mut original, i).unwrap();
+            assert_eq!(actual.len(), expected.len());
+            for (a, b) in actual.iter().zip(&expected) {
+                assert_eq!(
+                    (
+                        a.stream_id,
+                        a.depends_on,
+                        a.bit_len,
+                        a.pts,
+                        a.duration,
+                        a.timescale
+                    ),
+                    (
+                        b.stream_id,
+                        b.depends_on,
+                        b.bit_len,
+                        b.pts,
+                        b.duration,
+                        b.timescale
+                    )
+                );
+                assert_eq!(a.data, b.data);
+            }
+        }
+    }
+}

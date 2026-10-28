@@ -1,3 +1,44 @@
+## Fragmented EP1 epochs and first-used description binding, 2026-10-28
+
+Extended the own epoch corpus from four to 24 programmes: indexed, fully
+fragmented and hybrid initial-index-plus-fragments, each with and without an
+unused ordinary-AAC description prepended to stsd. PS AOT17/19 960/1024/960 and
+mono/8-channel LD-SBR 480/512/480 retain the same independent LD controls and
+fresh-epoch PS equivalence controls. Each programme has 18 source AUs. Fragment
+metadata deliberately uses different trex defaults and explicit tfhd description/
+duration, version-1 tfdt, exact padding flags and per-track rational clocks.
+
+Fragment/hybrid playback already accepted the synchronized epochs; no extra DSP
+or fragment-parser change was necessary. New acceptance compares all 18 complete
+ESC groups byte-for-byte and bit-for-bit with indexed controls, checks actual
+moof counts, selected description indexes and source timing, and exercises full
+owned/public PCM export, intervals across an epoch edge, frame-edge/repeated/
+EOF/past-EOF seeks and rewind. Mismatching child ASCs retain exact boundary
+refusals in all forms. These are actual fragmented acceptance tests, not merely
+parser refusal checks.
+
+The unused-first witness reproduced `select exactly one audio stream`: EP1
+selection read the convenience header for stsd[0] even though every actual sample
+selected later entries. Group detection, dependency binding, child scanning and
+memory admission now use the first real sample's description, retaining the
+header fallback for header-only tracks. Unused ordinary AAC entries therefore do
+not turn dependent ESC tracks into independent audio programmes or bypass exact
+selected-description checks. Used descriptions still must retain separate-ESC
+coding and a stable dependency binding.
+
+All 57 epoch artifacts / 1260556 bytes regenerate exactly with process/socket
+creation forbidden; the three earlier EP1 corpora remain byte-identical. Ordinary
+tests read fixtures offline, without FFmpeg/libav or a generator. The 37 selected
+integration checks, 1622 root/media unit tests (29 ignored), and all-test-target
+compilation pass. Worker capture exercises 120 programmes, including all 24 epoch
+variants, with exact queued PCM/rational clocks after live partial playback,
+seek, EOF and rewind.
+
+Still open: changing dependency graphs, separate/ordinary transport transitions,
+external SL/clock bindings, physical output qualification and wider codec tools/
+profiles. This qualifies the exercised stable-graph EP1 epochs across indexed,
+fragmented and hybrid storage, not universal codec completion.
+
 ## EP1 sample-description epochs and LD-SBR reconfiguration, 2026-10-28
 
 A saved synthetic 960/1024/960 PS movie first reproduced `MP4 sample description
