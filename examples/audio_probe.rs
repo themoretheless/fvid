@@ -100,14 +100,14 @@ fn play_platform_device(path: &str) -> Result<(), Box<dyn std::error::Error>> {
         "platform_device=started source_channels={channels} rate={rate} duration={:.6}",
         duration.as_secs_f64()
     );
-    for phase in ["full", "seek-quarter", "seek-second-showing", "rewind"] {
+    for phase in ["full", "seek-quarter", "seek-60-percent", "rewind"] {
         let from = match phase {
             "seek-quarter" => {
                 let at = duration / 4;
                 playback.seek(at);
                 at
             }
-            "seek-second-showing" => {
+            "seek-60-percent" => {
                 let at = duration.mul_f64(0.6);
                 playback.seek(at);
                 at

@@ -1,3 +1,51 @@
+## ELD downscaleInfo parsing with full-rate reconstruction, 2026-10-29
+
+The new own mono ELD movie reproduced `AAC ELD extension tool is not yet
+implemented` before the fix. Extension ID 3 was grouped with spatial tools 1/2.
+It is now parsed as sample-rate adaptation information and exposed separately as
+`AudioSpecificConfig.eld_downscale_sample_rate`. Indexed and explicit frequency
+forms use a reader bounded by the declared extension length; reserved/zero
+frequencies, truncated fields and nonzero fill nibbles keep specific failures.
+The core and LD-SBR output clocks, transform sizes and histories remain those
+of the full-rate ASC. The hint does not silently change packet durations or PCM.
+
+This implements acceptance and full-rate reconstruction of these streams, not
+an optimized short-transform/downscaled-output renderer. That optimization
+remains open, as do downscaled-output negotiation variants and spatial SAOC/
+LD MPEG Surround tools. Keeping this boundary explicit avoids claiming that a
+successful metadata parse implements another rendering model.
+
+There are 320 ordinary/EP3 and sixteen separate-ESC EP1 twelve-frame programmes,
+covering 480/512 frames, all 60 existing core fixture controls (layouts, tools,
+resilience and standard/explicit clocks), and mono/stereo/eight-channel LD-SBR with
+core/double output rate and CRC off/on. Their full PCM matches unhinted controls
+exactly and saved independent cosine/CLDFB PCM within 1e-7. Six tests cover native
+checkpoint replay, owned/public MP4/Matroska output, repeated exact ranges,
+AudioStream playback/frame-edge/repeated/EOF/past-EOF seek/rewind, typed EP1 groups
+and WAVE gain/crop/stereo/32-kHz resampling. Twelve malformed movies verify
+specific ASC errors before any caller-owned PCM is written.
+
+The 685 artifacts / 4859925 bytes regenerate byte-exact with process and socket
+creation forbidden. Ordinary tests use saved own files without FFmpeg/network.
+Root/media suites pass: 1623 tests, 29 ignored; captured worker navigation now
+covers 2446 programmes. All 58 selected previous ELD/OD integration checks and
+six new checks pass (64 integration tests). All-test compilation passes offline
+with `--no-default-features --features player`.
+
+Three new ordinary/EP1/EP3 hint-bearing files also complete twelve actual
+PlatformBackend phases: full playback, quarter/60-percent seek and rewind.
+The PCM clocks stay 24/48 kHz despite a 12-kHz adaptation hint. The device report
+is [saved here](validation/aac-eld-downscale-info-device-2026-10-29.json).
+The exercised example binary has no FFmpeg/libav linkage. This is device
+callback/drain qualification, not subjective listening or full ELD conformance.
+
+Wire references: [AOSP transport descriptor definitions](https://android.googlesource.com/platform/external/aac/+/master/libMpegTPDec/include/tp_data.h),
+[bounded-field crosscheck](https://android.googlesource.com/platform/external/aac/+/master/libMpegTPDec/src/tpdec_asc.cpp),
+and [FDK AAC downscaled-mode documentation](https://github.com/mstorsjo/fdk-aac/blob/master/libAACenc/include/aacenc_lib.h).
+Only the wire-field meaning and full-rate compatibility were crosschecked;
+no foreign codec or decoder implementation was copied or linked. The full
+codec-gap goal remains active.
+
 ## LD-SBR actual platform-output qualification, 2026-10-29
 
 The example now has a distinct `--play-device` mode. Unlike the existing `--play`

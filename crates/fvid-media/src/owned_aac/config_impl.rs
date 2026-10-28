@@ -46,7 +46,7 @@ impl AacConfig {
         object_type: u32,
         sample_rate: u32,
         config: u32,
-    ) -> Result<(Self, Option<super::aac_pce::ProgramConfig>, Option<super::aac_eld_sbr::Config>, Option<super::aac_ep::Config>, bool, bool)> {
+    ) -> Result<(Self, Option<super::aac_pce::ProgramConfig>, Option<super::aac_eld_sbr::Config>, Option<super::aac_ep::Config>, bool, bool, Option<u32>)> {
         if object_type == 39 {
             let channels=match config {1..=6=>config as u8,7|12|14=>8,11=>7,_=>return Err(invalid("unsupported AAC ELD channel configuration"))};
             let frame_samples=if b.bit()?{480}else{512};
@@ -54,14 +54,28 @@ impl AacConfig {
             let scalefactor_data_resilience=b.bit()?;
             let spectral_data_resilience=b.bit()?;
             let eld_sbr=if b.bit()? {let (value,used)=super::aac_eld_sbr::Config::read_prefix(b.source_bytes(),b.position(),config as u8)?;b.skip(used)?;Some(value)}else{None};
+            let mut eld_downscale_sample_rate=None;
             loop {
                 let kind=b.read(4)?;
                 if kind==0 {break;}
                 let mut bytes=b.read(4)? as usize;
                 if bytes==15 {let add=b.read(8)? as usize;bytes+=add;if add==255 {bytes+=b.read(16)? as usize;}}
-                // Reserved descriptors are length delimited. Known extensions
-                // change the rendering model and require their own decoder.
-                if matches!(kind,1..=3) {return Err(invalid("AAC ELD extension tool is not yet implemented"));}
+                // Reserved descriptors are length delimited. Spatial extensions
+                // require a separate renderer; adaptation metadata is distinct.
+                if matches!(kind,1|2) {return Err(invalid("AAC ELD extension tool is not yet implemented"));}
+                if kind==3 {
+                    // downscaleInfo is adaptation metadata. The default decoder
+                    // retains the signaled full-rate transform/output; expose the
+                    // hint separately rather than silently changing PCM clocks.
+                    let count=bytes.checked_mul(8).ok_or_else(||invalid("AAC ELD extension length overflow"))?;
+                    if count>b.remaining() {return Err(invalid("truncated AAC ELD extension payload"));}
+                    let end=b.position().checked_add(count).ok_or_else(||invalid("AAC ELD extension length overflow"))?;
+                    let mut payload=BitReader::with_bit_len(b.source_bytes(),end)?;
+                    payload.skip(b.position())?;
+                    let rate=sampling_frequency(&mut payload)?;
+                    if payload.read(4)?!=0 {return Err(invalid("nonzero AAC ELD downscale fill nibble"));}
+                    eld_downscale_sample_rate=Some(rate);
+                }
                 for _ in 0..bytes {b.read(8)?;}
             }
             let ep_config=b.read(2)?;
@@ -72,7 +86,7 @@ impl AacConfig {
             let direct_mapping=ep_config==3;
             if direct_mapping && !b.bit()? {return Err(invalid("reserved AAC EP3 directMapping value"));}
             super::aac_ld_bands::LdBands::for_eld(sample_rate,frame_samples as usize).map_err(|e|invalid(&e.0))?;
-            return Ok((Self{channel_configuration:config as u8,object_type,sample_rate,channels,frame_samples,core_coder_delay:None,section_data_resilience,scalefactor_data_resilience,spectral_data_resilience},None,eld_sbr,protection,direct_mapping,ep_config==1));
+            return Ok((Self{channel_configuration:config as u8,object_type,sample_rate,channels,frame_samples,core_coder_delay:None,section_data_resilience,scalefactor_data_resilience,spectral_data_resilience},None,eld_sbr,protection,direct_mapping,ep_config==1,eld_downscale_sample_rate));
         }
         if !matches!(object_type, 1 | 2 | 3 | 4 | 17 | 19 | 23) {
             return Err(invalid(
@@ -167,6 +181,7 @@ impl AacConfig {
             protection,
             direct_mapping,
             separate_esc,
+            None,
         ))
     }
 }
@@ -183,6 +198,9 @@ pub struct AudioSpecificConfig {
     pub ps_present: Option<bool>,
     pub extension_sample_rate: Option<u32>,
     pub eld_sbr: Option<super::aac_eld_sbr::Config>,
+    /// ELD extension-3 adaptation hint. Full-rate native reconstruction keeps
+    /// the ASC core/SBR clock; optimized downscaled output is not implied.
+    pub eld_downscale_sample_rate: Option<u32>,
     pub protection: Option<super::aac_ep::Config>,
     /// EP3 one-to-one EP-class/ESC-instance mapping; EP2 is false.
     pub direct_mapping: bool,
@@ -248,7 +266,7 @@ impl AudioSpecificConfig {
         } else {
             signaled_object_type
         };
-        let (core, program, eld_sbr, protection, direct_mapping, separate_esc) =
+        let (core, program, eld_sbr, protection, direct_mapping, separate_esc, eld_downscale_sample_rate) =
             AacConfig::read_core(&mut b, core_object_type, sample_rate, configuration)?;
         if core.object_type == 39 && !explicit {
             // ELD's own ldSbrPresentFlag was zero. It does not permit the
@@ -298,6 +316,7 @@ impl AudioSpecificConfig {
             ps_present,
             extension_sample_rate,
             eld_sbr,
+            eld_downscale_sample_rate,
             protection,
             direct_mapping,
             separate_esc,
