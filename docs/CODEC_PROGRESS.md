@@ -1,3 +1,42 @@
+## Base SL configuration and bounded packet syntax, 2026-10-28
+
+The new owned `owned_sl` module parses custom and predefined base SL
+configuration and externally framed packet headers. It retains duration/start
+clock metadata and raw timestamp/OCR counters, exact payload bit boundaries,
+AU-length/sequence/priority fields and arbitrary-width bitrate fields. Bitrate
+values above 64 bits remain bounded borrowed bit views; they are not refused
+or truncated to a machine word. Malformed widths, missing fields, reserved
+configuration bits, zero active clock resolutions and bad payload stuffing
+have explicit errors. No decoder or foreign transport library is used.
+
+`parse_packet` handles explicit and implicit AU boundary flags, including a
+required previous-end context when start flags are omitted. An unresolved end
+remains None. Idle and padding-only packets do not expose an AU payload.
+`mp4_sample` is a separate binding for predefined configuration 2: it retains
+bare sample bytes and takes the container's exact bit length, without stripping
+an SL header or inferring a clock from codec bytes. These APIs follow base
+ISO/IEC 14496-1:2010 sections 7.3.2.3–7.3.2.4:
+https://ossrs.io/lts/zh-cn/assets/files/ISO_IEC_14496-1-System-2010-d28d1ab7f929c646bb7317698f2386d6.pdf
+
+The offline corpus has 35 wide-field packet vectors, optional-field/implicit-
+boundary/idle/padding controls, malformed configurations, ten ordinary codec
+programs and two PS programs transported as complete separately framed ESC AUs.
+Tests compare every source information bit, complete independent ordinary PCM,
+checkpoints and reset. PS composition matches original raw-AU decoding,
+including delayed original frame identity and EOF output. Logical MP4 reference
+movies remain projections; they are not EP1 container-playback acceptance.
+The wide-field configuration and header prefixes are also checked for truncation.
+All 110 files / 1,617,547 bytes regenerate exactly with process/socket creation
+forbidden. Ordinary tests only read saved assets. The five new checks, fourteen
+existing EP1/ESDS integration checks and 1,614 root/media unit tests pass
+(27 ignored). The integration executable has no FFmpeg/libav linkage.
+
+**Still open:** packet continuity/duplicate handling, fragmented AU assembly,
+counter unwrapping and synchronized timeline state, extended SL descriptors,
+container dependency-group routing and player/export navigation. This stage
+supplies bounded base syntax and complete-AU codec composition; it does not
+claim the full SL runtime, EP1 container playback or the codec-gap objective.
+
 ## MPEG-4 Audio ES dependency and SL metadata, 2026-10-28
 
 `aac_stream_descriptor` now returns the ES_ID, dependency, OCR stream ID,
