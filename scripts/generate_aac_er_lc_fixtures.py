@@ -57,9 +57,9 @@ def main():
         for flags,ep,flag3 in [(0,ep,False) for ep in (1,2,3)]+[(0,0,True)]:
             asc=field(17,5)+frequency(24000)+'0001'+field(n==960,1)+'01'+field(flags,3)+field(flag3,1)+field(ep,2)
             c=dict(base,asc=packed(asc).hex())
-            error='ER AAC LC resilience tools are not yet implemented' if flags else 'truncated or oversized bit field' if ep==2 else 'ER AAC LC epConfig is not yet implemented' if ep else 'AAC extensionFlag3 must be zero'
+            error='ER AAC LC resilience tools are not yet implemented' if flags else 'truncated or oversized bit field' if ep in [2,3] else 'ER AAC LC epConfig is not yet implemented' if ep else 'AAC extensionFlag3 must be zero'
             video=video_fixture([c],blob,channels=1,filename=f'aac-er-lc-rejected-{n}-{flags}-{ep}-{int(flag3)}-synthetic.mp4')
-            (malformed if ep==2 else rejected).append(dict(asc=c['asc'],video=video,error=error))
+            (malformed if ep in [2,3] else rejected).append(dict(asc=c['asc'],video=video,error=error))
         for kind in ('trailing','padding'):
             c=next(c for c in cases if c['n']==n and c['channels']==6 and (kind=='trailing' or c['frames'][7]['padding']>0))
             row=c['frames'][7];raw=bytearray(blob[row['offset']:row['offset']+row['bytes']])

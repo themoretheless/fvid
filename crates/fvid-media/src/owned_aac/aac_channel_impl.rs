@@ -258,6 +258,31 @@ impl ChannelData {
             pair,
         )
     }
+    pub(crate) fn read_er_lc_esc(
+        reader: &mut super::aac_esc::Reader,
+        config: &AacConfig,
+        common: Option<&IcsInfo>,
+        pair: bool,
+    ) -> Result<Self> {
+        reader.channel(config.scalefactor_data_resilience)?;
+        if !pair {
+            reader.read(1, |b| b.read(4))?;
+        }
+        let tables = BandTables::for_config(config)?;
+        let gain = reader.read(1, |b| Ok(b.read(8)? as u8))?;
+        let info = match common {
+            Some(info) => info.clone(),
+            None => reader.read(1, |b| tables.read_ics(b))?,
+        };
+        Self::read_payload_input(
+            &mut super::aac_esc::ChannelInput::Categories(reader),
+            config,
+            &tables,
+            gain,
+            info,
+            pair,
+        )
+    }
     fn read_payload(
         bits: &mut BitReader<'_>,
         config: &AacConfig,

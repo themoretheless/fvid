@@ -40,6 +40,7 @@ struct CceState {
 pub struct NativePsAacDecoder {
     config: AacConfig,
     protection: Option<super::aac_ep::Config>,
+    direct_mapping: bool,
     packet_pcm: Option<Frame>,
     packet_sources: u8,
     initial_program: Option<aac_pce::ProgramConfig>,
@@ -144,6 +145,7 @@ impl NativePsAacDecoder {
         let prediction = main_prediction(&parsed.core)?;
         Ok(Self {
             protection: parsed.protection,
+            direct_mapping: parsed.direct_mapping,
             packet_pcm: None,
             packet_sources: 0,
             config: parsed.core,
@@ -188,6 +190,7 @@ impl NativePsAacDecoder {
     }
     pub fn restore(&mut self, checkpoint: &Checkpoint) -> Result<()> {
         if self.config != checkpoint.state.config
+            || self.direct_mapping != checkpoint.state.direct_mapping
             || self.protection != checkpoint.state.protection
             || self.initial_program != checkpoint.state.initial_program
             || self.output_rate != checkpoint.state.output_rate
@@ -280,7 +283,7 @@ impl NativePsAacDecoder {
         let Some(ep) = &self.protection else {
             return self.decode_unprotected(packet);
         };
-        let units = ep.decode_raw_access_units(packet)?;
+        let units = protected_units(&self.config, self.program.as_ref(), ep, self.direct_mapping, packet)?;
         if units.len() == 1 {
             return self.decode_unprotected(&units[0]);
         }
@@ -824,6 +827,7 @@ impl NativePsAacDecoder {
 pub struct InBandPsProbe {
     config: AacConfig,
     protection: Option<super::aac_ep::Config>,
+    direct_mapping: bool,
     requires_in_band: bool,
     initial_program: Option<aac_pce::ProgramConfig>,
     program: Option<aac_pce::ProgramConfig>,
@@ -853,6 +857,7 @@ impl InBandPsProbe {
         Ok(Self {
             requires_in_band: parsed.ps_present != Some(true),
             protection: parsed.protection,
+            direct_mapping: parsed.direct_mapping,
             config: parsed.core,
             initial_program: parsed.program.clone(),
             program: parsed.program,
@@ -886,7 +891,7 @@ impl InBandPsProbe {
         let Some(ep) = &self.protection else {
             return self.read_unprotected(packet);
         };
-        let units = ep.decode_raw_access_units(packet)?;
+        let units = protected_units(&self.config, self.program.as_ref(), ep, self.direct_mapping, packet)?;
         let mut trial = self.clone();
         for unit in units {
             trial.read_unprotected(&unit)?;
@@ -1134,4 +1139,19 @@ fn validate_coupling_target(target: &Target, tag: u8) -> Result<()> {
         return Err(invalid("AAC coupling target is absent"));
     }
     Ok(())
+}
+
+/// Discovery and PS decoding must interpret EP3 classes exactly as the ordinary
+/// decoder does. Their concatenation is not necessarily a byte-aligned raw AU.
+fn protected_units(
+    config: &AacConfig,
+    program: Option<&aac_pce::ProgramConfig>,
+    ep: &super::aac_ep::Config,
+    direct_mapping: bool,
+    packet: &[u8],
+) -> Result<Vec<Vec<u8>>> {
+    if !direct_mapping { return ep.decode_raw_access_units(packet); }
+    ep.decode_class_frames(packet)?.iter().map(|frame| {
+        super::aac_esc::reassemble_er_lc(config, program, frame)
+    }).collect()
 }

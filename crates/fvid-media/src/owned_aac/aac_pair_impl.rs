@@ -258,6 +258,29 @@ impl ChannelPair {
         let right=ChannelData::read_eld(&mut cursor,config,Some(&info),true)?;
         *bits=cursor;Ok(Self{left,right,mid_side,explicit_mask})
     }
+    pub(crate) fn read_er_lc_esc(
+        reader: &mut super::aac_esc::Reader,
+        config: &AacConfig,
+    ) -> Result<Self> {
+        reader.common()?;
+        let common = reader.read(0, |b| {
+            b.read(4)?;
+            Ok(if b.bit()? {
+                Some(BandTables::for_config(config)?.read_ics(b)?)
+            } else {
+                None
+            })
+        })?;
+        let (explicit_mask, mid_side) = reader.read(0, |b| Self::read_mask(b, common.as_ref()))?;
+        let left = ChannelData::read_er_lc_esc(reader, config, common.as_ref(), true)?;
+        let right = ChannelData::read_er_lc_esc(reader, config, common.as_ref(), true)?;
+        Ok(Self {
+            left,
+            right,
+            mid_side,
+            explicit_mask,
+        })
+    }
     fn read_er_prediction(bits: &mut BitReader<'_>, info: &super::aac_ics::IcsInfo, config: &AacConfig)
         -> Result<Option<super::aac_ltp_syntax::LtpData>> {
         if bits.bit()? {

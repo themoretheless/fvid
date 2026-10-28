@@ -171,6 +171,55 @@ impl ChannelInput<'_, '_> {
 pub fn reassemble_eld_core(config: &AacConfig, frame: &RecoveredFrame) -> Result<Vec<u8>> {
     reassemble_eld(config, frame, None)
 }
+/// Restore the ER-LC main payload in its original logical order. Extension
+/// instances must be consumed by their own semantic mapping, never appended
+/// blindly as if their category order were the logical bitstream order.
+pub fn reassemble_er_lc(
+    config: &AacConfig,
+    program: Option<&super::aac_pce::ProgramConfig>,
+    frame: &RecoveredFrame,
+) -> Result<Vec<u8>> {
+    if config.object_type != 17 {
+        return Err(invalid("ER-LC ESC mapping requires AOT17"));
+    }
+    let configured: Vec<u8>;
+    let kinds: &[u8] = match config.channel_configuration {
+        0 => {
+            let program = program.ok_or_else(|| invalid("missing ER-LC ESC PCE layout"))?;
+            configured = program
+                .elements
+                .iter()
+                .map(|e| {
+                    if e.position == super::aac_pce::Position::Lfe {
+                        3
+                    } else {
+                        u8::from(e.pair)
+                    }
+                })
+                .collect();
+            &configured
+        }
+        1 => &[0],
+        2 => &[1],
+        3 => &[0, 1],
+        4 => &[0, 1, 0],
+        5 => &[0, 1, 1],
+        6 => &[0, 1, 1, 3],
+        7 | 12 => &[0, 1, 1, 1, 3],
+        11 => &[0, 1, 1, 0, 3],
+        14 => &[0, 1, 1, 3, 1],
+        _ => return Err(invalid("unsupported ER-LC ESC layout")),
+    };
+    let mut reader = Reader::new(frame)?;
+    for &kind in kinds {
+        if kind == 1 {
+            super::aac_pair::ChannelPair::read_er_lc_esc(&mut reader, config)?;
+        } else {
+            super::aac_channel::ChannelData::read_er_lc_esc(&mut reader, config, None, false)?;
+        }
+    }
+    reader.finish()
+}
 /// Restore ELD with optional current LD-SBR context. Header history is read
 /// immutably here; the normal decoder alone commits the reconstructed packet.
 pub fn reassemble_eld(

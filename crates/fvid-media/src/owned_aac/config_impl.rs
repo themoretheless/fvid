@@ -126,6 +126,7 @@ impl AacConfig {
         if extension_flag && b.bit()? {
             return Err(invalid("AAC extensionFlag3 must be zero"));
         }
+        let mut direct_mapping = false;
         let protection = if matches!(object_type,17|19|23) {
             match b.read(2)? {
                 0 => None,
@@ -134,6 +135,13 @@ impl AacConfig {
                 2 => {
                     let (ep, used) = super::aac_ep::Config::read_prefix(b.source_bytes(), b.position())?;
                     b.skip(used)?;
+                    Some(ep)
+                }
+                3 if object_type == 17 => {
+                    let (ep, used) = super::aac_ep::Config::read_prefix(b.source_bytes(), b.position())?;
+                    b.skip(used)?;
+                    if !b.bit()? {return Err(invalid("reserved AAC EP3 directMapping value"));}
+                    direct_mapping = true;
                     Some(ep)
                 }
                 _ => return Err(invalid(if object_type == 23 {"ER AAC LD epConfig is not yet implemented"} else if object_type == 19 {"ER AAC LTP epConfig is not yet implemented"} else {"ER AAC LC epConfig is not yet implemented"})),
@@ -154,7 +162,7 @@ impl AacConfig {
             program,
             None,
             protection,
-            false,
+            direct_mapping,
         ))
     }
 }

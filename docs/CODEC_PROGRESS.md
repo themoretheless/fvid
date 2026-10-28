@@ -1,5 +1,57 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## ER AAC-LC EP3 main-payload reconstruction, 2026-10-28
+
+AOT17 now admits epConfig=3 with directMapping=1 and reconstructs its main
+payload from exact ESC instances. Category 0 holds CPE tags/common-window side
+information; category 1 holds tagged SCE/LFE or individual channel side data;
+optional categories 2/3 hold RVLC/TNS and category 4 holds the spectrum.
+New channel/pair entry points reuse the normal geometry, mask and payload
+parsers. The existing bounded category reader records original logical spans,
+so TNS placement, final alignment and reordered transport classes are restored
+before the normal transactional decoder performs synthesis. Reserved
+`directMapping=0` remains invalid. EP2 behavior is unchanged.
+
+Mono PS discovery also carries directMapping metadata and performs this semantic
+reconstruction before syntax probing. Treating EP3 classes as a byte raw AU
+previously masked the bounded short-side failure with an unrelated raw-AU
+alignment error. Both discovery and the PS candidate decoder now share the
+correct recovery path. PS candidate checkpoints distinguish EP2 and EP3 even
+when their core/protection descriptors match. This does not implement the
+remaining extended-payload ESC categories or claim EP3 PS audio acceptance.
+
+The explicit offline `generate_aac_er_lc_esc_fixtures.py` corpus traces the own
+saved ER-LC logical fields independently, checks original source bytes, and
+protects the resulting categories. It contains 42 acceptance movies: 960/1024,
+mono/stereo/3.0/5.1, common MS modes 0/1/2, independent-window stereo, long/start/
+short/stop transitions, alternating sine/KBD and deferred TNS. Independent sparse
+IMDCT/window/TNS PCM references are retained. There are also 24 late malformed
+movies isolating empty side/spectrum instances, EP CRC and nonzero final alignment.
+All 220 files / 8,903,388 bytes regenerated identically with process/network
+creation forbidden. The updated old generator likewise matched its 55 outputs.
+
+A frozen pre-change executable rejects the same complete positive ASC with
+`ER AAC LC epConfig is not yet implemented`. Nine new acceptance checks now
+cover exact recovered class bits and logical AUs, independent complete finite
+PCM, checkpoints/identity, public and owned MP4/Matroska exports and intervals,
+actual player audio-stream EOF/rewind/repeated/frame-edge/negative/past-EOF seeks,
+malformed errors/history and discovery/PS candidate paths. Mono discovery can
+report malformed syntax during opening; other layouts report it after the three
+valid prefix packets. Both phases require the same specific semantic error.
+Qualification passed offline with `--no-default-features --features player`:
+all nine new checks, 39 existing ER-LC/ER-EP/ELD/LD-SBR/EP2-PS integration checks,
+1,052 root unit tests (26 ignored) and 562 media unit tests (one ignored).
+The new executable has no FFmpeg/libav dynamic dependencies.
+Two old EP3 refusal fixtures lack a protection descriptor: they remain malformed
+input controls with a truncation error, rather than unsupported valid streams.
+
+Normative mapping: ISO/IEC 14496-3 tables 4.94/4.95/4.148,
+[ER AAC category assignment and dependency order](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+The numerical matrix above does not qualify every resilience/PCE combination.
+ER-LTP/LD EP3, EP1 association and extended-payload categories remain open;
+the full codec goal is not complete.
+
+
 ## EP3 LD-SBR header epochs inside multi-AU packets, 2026-10-28
 
 The new `aac-eld-esc-multi-history` corpus combines semantic ESC reconstruction
