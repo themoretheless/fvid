@@ -1,5 +1,42 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## Restructured multi-AU RS groups, 2026-10-28
+
+The new `aac-ep-rs-group-concatenated` acceptance corpus qualifies RS grouping
+after class-wise source-frame restructuring: 2..7 AUs per packet, joined,
+independent and mixed class flags, 480/512 ELD cores, mono/stereo, and LD-SBR
+on/off. Three predefined sets vary class transmission order and correction
+capability. Interleaving includes sequential, recursive octet and mixed modes.
+Zero-length classes retain their original identity; nonempty information and CRC
+boundaries can fall inside an octet. Mixed/independent flags leave independent
+terminating RS words after the initial protected group.
+
+The explicit offline generator extends the existing multi-AU encoder with group
+formation before parity/interleaving. Its default output remains byte-for-byte
+identical across all 4,160 saved original files. The new corpus has 432 clean
+and 24 correctable-error movies, 48 malformed controls, and eight independently
+referenced scalar PCM sources: 1,499 files / 7,775,242 bytes. Both generator
+outputs were audited with process/network creation forbidden. Tests never run
+the generator and use no foreign decoder or private media.
+
+Nine acceptance checks compare every recovered AU and original class bit,
+complete finite PCM against independent references, public/owned MP4 and
+Matroska exports and intervals, retained checkpoints, timestamp-overflow rollback,
+MP4-to-Matroska remux, and native player audio-stream EOF/rewind/repeated seeks
+at source-frame and packet boundaries. Malformed CRC is introduced before valid
+RS encoding; truncated parity retains valid protected headers. Both exact
+errors and decoder-history recovery are checked, including exports and both
+player container bridges. The first qualification run exposed an inaccurate
+fixture error expectation (generic rather than RS-specific length mismatch),
+which was corrected; no production decoder change was required for this matrix.
+All nine checks passed offline with `--no-default-features --features player`;
+the integration executable has no FFmpeg/libav dynamic dependencies.
+
+This closes the unqualified EP2 grouped multi-frame combination described below.
+It does not qualify EP1, every EP3 category/multi-frame combination, additional
+extensions, or subjective output-device playback. The full codec goal remains open.
+
+
 ## RS bit boundaries for LD-SBR EP2/EP3, 2026-10-28
 
 RS recovery now preserves exact information bits when a class or its CRC ends

@@ -4,6 +4,7 @@ from pathlib import Path
 from generate_aac_eld_fixtures import generate as eld,mkv
 from generate_aac_er_ep_fixtures import prefix as er_prefix
 from generate_aac_ep_multiclass_fixtures import chain,encode,crc,header,interleave,window,octet_stage
+from generate_aac_ep_rs_fixtures import corrupt
 from generate_aac_sbr_dsp_fixtures import header as sbr_header
 from generate_he_aac_packet_fixtures import field,frequency,packed,video_fixture
 ROOT=Path(__file__).resolve().parents[1];SOURCE=ROOT/'tests/fixtures/playback-errors';OUT=SOURCE/'aac-ep-concatenated'
@@ -16,11 +17,12 @@ def config(lengths,frames,family,kind,flagmode,escape=None):
         if selected==2:order.reverse()
         classes=[]
         for k,n in enumerate(lengths):
-            fec=1 if family=='rs'or family=='mixed'and k in [0,count-1]else 0
+            fec=(1 if k==order[-1]else 2)if family=='grouped'else 1 if family=='rs'or family=='mixed'and k in [0,count-1]else 0
             switch=([1,0,2,3][k%4]if family=='mixed'else [0,1,2,3][k%4])
             if fec and switch==2:switch=1
             joined=flagmode=='joined'or flagmode=='mixed'and k%2==0
-            classes.append(dict(fec=fec,rate=(2+selected)if fec else (k*7+3+selected)%25,crc=([8,16,24,32][k%4]if fec else [4,8,12,16][k%4]),terminated=fec==0 and k==order[-1],interleave=switch,length=n,joined=joined))
+            if family=='grouped':switch=[0,1,3][selected]
+            classes.append(dict(fec=fec,rate=(2+selected)if fec else (k*7+3+selected)%25,crc=((8-(n*frames if joined else n)%8)%8+8 if family=='grouped'else [8,16,24,32][k%4]if fec else [4,8,12,16][k%4]),terminated=fec==0 and k==order[-1],interleave=switch,length=n,joined=joined))
         sets.append(dict(classes=classes,order=order))
     ep=field(3,8)+field(kind,2)+'001'+field(frames,3)
     for s in sets:
@@ -49,10 +51,22 @@ def protect(units,sets,kind,i,mutation=None):
             rows.append(dict(c=c,message=message,payload=message+parity))
     if mutation=='crc':
         row=next(r for r in reversed(rows)if r['message']and r['c']['crc']);at=len(row['message']);row['payload']=row['payload'][:at]+str(1-int(row['payload'][at]))+row['payload'][at+1:]
+    if any(c['fec']==2 for c in classes):
+        grouped=[];pending=[]
+        for row in rows:
+            pending.append(row)
+            if row['c']['fec']==1:
+                grouped.append(dict(c=pending[0]['c'],message=''.join(r['message']for r in pending),payload=''.join(r['payload']for r in pending)));pending=[]
+        assert not pending
+        rows=grouped
     src=[j for j,r in enumerate(rows)if r['c']['fec']==0 and r['message']];coded=['']*len(rows)
     for j,value in zip(src,chain([rows[j]['payload']for j in src],[rows[j]['c']['rate']for j in src],[rows[j]['c']['terminated']for j in src])):coded[j]=value
     for j,r in enumerate(rows):
-        if r['c']['fec']and r['message']:coded[j]=''.join(f'{v:08b}'for v in encode(packed(r['payload']),r['c']['rate']))
+        if r['c']['fec']and r['message']:
+            assert len(r['payload'])%8==0
+            encoded=encode(packed(r['payload']),r['c']['rate'])
+            if mutation=='corrected':encoded,_=corrupt(encoded,len(r['payload'])//8,r['c']['rate'])
+            coded[j]=''.join(f'{v:08b}'for v in encoded)
     if mutation=='truncated':
         j=next(j for j in reversed(range(len(rows)))if len(coded[j])>=8);coded[j]=coded[j][:-8]
     selector=header(field(selected,2));h=header('000');stuff=(-len(selector)-len(h)-sum(map(len,coded)))%8;h=header(field(stuff,3))
@@ -82,9 +96,10 @@ def sources():
             original=next(c for c in m['cases']if c['n']==n and c['channels']==1);aot,setup=er_prefix(bytes.fromhex(original['asc']));a=original['reference_offset']
             yield dict(name=stem+'-'+original['name'],aot=aot,n=n,channels=1,rate=24000,setup=setup,plain_asc=original['asc'],original=original,blob=src,gold=gold[a:a+original['reference_bytes']])
 
-def generate():
+def generate(grouped=False):
     files={};cases=[];bad=[];invalid=[];blob=bytearray();plain=bytearray();padding=[]
     for source in sources():
+        if grouped and source['aot']!=39:continue
         original=source['original'];n=source['n'];channels=source['channels'];rate=source['rate'];source_n=n*(2 if rate==48000 else 1)
         raw=[source['blob'][r['offset']:r['offset']+r['bytes']]for r in original['frames']];width=max(map(len,raw))+2
         units=[r+bytes(width-len(r))for r in raw]
@@ -92,12 +107,14 @@ def generate():
         for frames in range(2,8):
             count=len(units)//frames;used=count*frames;golden=source['name']+f'-f{frames}.f32le';files[golden]=source['gold'][:used*source_n*channels*4]
             profiles=[('srcpc',0),('srcpc',1),('srcpc',2),('mixed',2),('rs',0)]
-            if source['name']=='eld-n512-c1-ld0'and frames==7:profiles.append(('wide',1))
+            if grouped:profiles=[('grouped',kind)for kind in [0,1,2]]
+            elif source['name']=='eld-n512-c1-ld0'and frames==7:profiles.append(('wide',1))
             for family,kind in profiles:
-                lengths=([1]*62+[width*8-62])if family=='wide'else[3,0,5,width*8-8]if family=='srcpc'else[8,0,8,width*8-16]
+                lengths=([1]*62+[width*8-62])if family=='wide'else[3,0,5,width*8-8]if family in ['srcpc','grouped']else[8,0,8,width*8-16]
                 for flags in ['joined','separate','mixed']:
                     name=source['name']+f'-f{frames}-{family}-i{kind}-{flags}';sets,ep=config(lengths,frames,family,kind,flags);asc=packed(source['setup']+ep);files[name+'.asc']=asc
                     variants=['clean']
+                    if grouped and channels==1 and kind==0 and flags=='mixed':variants+=['corrected','crc','truncated']
                     if channels==1 and family=='srcpc'and kind==0 and flags=='mixed':
                         variants +=['crc','truncated']
                         if source['aot']==39 and '-ld0'in source['name']:variants +=['aac-alignment']
@@ -108,14 +125,14 @@ def generate():
                             if mutation=='aac-alignment'and i==bad_index:
                                 assert len(original['frames'][(i+1)*frames-1]['bits'])%8
                                 changed=bytearray(children[-1]);changed[-1]|=1;children[-1]=bytes(changed)
-                            packet,selected=protect(children,sets,kind,i,mutation if i==bad_index and mutation in ['crc','truncated']else None)
+                            packet,selected=protect(children,sets,kind,i,mutation if i==bad_index and mutation in ['corrected','crc','truncated']else None)
                             offsets=[]
                             for unit in children:offsets.append(dict(offset=len(plain),bytes=len(unit)));plain.extend(unit)
                             rows.append(dict(offset=len(blob),bytes=len(packet),choice=selected,units=offsets));blob.extend(packet);packets.append(packet)
                         c=dict(name=label,n=n,aot=source['aot'],channels=channels,rate=rate,source_frames=frames,frame_samples=source_n,container_rate=rate,container_frame_samples=source_n*frames,samples=used*source_n,pcm_offset=0,slots=n//64,bands=64 if rate==48000 else 32,asc=asc.hex(),plain_asc=source['plain_asc'],frames=rows,golden=golden,configs=sets)
                         c['video']=label+'.mp4';files[c['video']]=video_fixture([c],blob,channels,filename=c['video'],write=False)['data'];c['matroska']=label+'.mka';files[c['matroska']]=mkv(asc,packets,rate,source_n*frames,channels)
-                        if mutation=='clean':cases.append(c)
-                        else:c.update(good=name,bad_index=bad_index,error='EP class CRC mismatch'if mutation=='crc'else'nonzero AAC ELD alignment bits'if mutation=='aac-alignment'else'EP class/packet length mismatch');bad.append(c)
+                        if mutation in ['clean','corrected']:cases.append(c)
+                        else:c.update(good=name,bad_index=bad_index,error='EP class CRC mismatch'if mutation=='crc'else'nonzero AAC ELD alignment bits'if mutation=='aac-alignment'else'EP RS class/packet length mismatch'if grouped else'EP class/packet length mismatch');bad.append(c)
                         if mutation=='clean'and source['name']=='eld-n512-c1-ld0'and frames==2 and family=='srcpc'and kind==0 and flags=='mixed':
                             for escape in ['length','rate','crc']:
                                 _,invalid_ep=config(lengths,frames,family,kind,flags,escape)
