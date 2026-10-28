@@ -1,3 +1,52 @@
+## Real MP4 EP1 ES groups and exact sample bit ends, 2026-10-28
+
+The shared MP4 reader now retains packed `stbl/padb` and fragment padding
+from the effective trex/tfhd/trun flags. `packet_bit_len` returns coded bits
+without modifying raw packet bytes. Padding metadata participates in retained
+index accounting. Version/flags, reserved bits, exact table size/count,
+duplicate tables and impossible sample bit ends are validated. Odd trailing
+pad2 values are ignored until a later fragment fills that sample position;
+the fragment overwrites that unused nibble rather than inheriting it.
+
+Before the fix the saved short synthetic `count.mp4` opened successfully while
+its padb count contradicted stsz. The new test reproduced that acceptance.
+Both public/owned demuxers, the owned export path and AudioStream now refuse
+all seven malformed movies at their specific table errors, before any PCM is
+written. Metadata-only padding vectors do not claim valid truncated AAC/VP9
+playback. Five fragment vectors separately cover trex inheritance, explicit
+zero tfhd override, first-sample/per-row flags and odd-count hybrid tables.
+
+`owned_mp4_ep1::Group` explicitly selects a root ES, follows self-contained
+AAC dependencies with SL configuration 2, indexes exact reduced rational PTS
+and reads a complete simultaneous source group with exact bit ends. Missing
+or differently timed AUs, forks, duplicate ES IDs, changed track setup,
+external URLs and unsupported SL bindings have explicit errors. It neither
+serializes invented AU framing nor decodes an incomplete group. Source sample
+selection uses a compact sorted index rather than a full scan on every AU.
+
+Eight saved MP4 movies carry actual separate ESC tracks: ER-LC, ER-LD and
+mono/7.1 LD-SBR, each with ordinary and negative PTS. Dependent tracks use
+different rational timescales, non-byte AU ends and deliberately nonzero
+excluded low bits. Reading and native decode_esc match independent complete
+PCM for their first three AUs; reverse/repeated target reads with decoder
+preroll and rewind preserve the exact suffix. Four malformed group movies
+exercise missing/mistimed AUs, dependency forks and duplicate ES IDs.
+These are real MP4 group-read/decode checks, beyond earlier logical projections.
+
+All 32 new saved assets / 317,417 bytes regenerate exactly with process and
+socket creation forbidden. Ordinary tests only read saved assets. The 33
+selected integration checks and 1,621 root/media unit tests pass offline
+(29 unit tests ignored).
+
+**Still open:** automatic group selection in AudioStream and owned export,
+root edit-list scheduling/navigation, changing dependent descriptions, empty
+ESC MP4 sample support, external-clock/SL bindings and grouped legacy-audio
+padding. Group helper navigation is not device playback acceptance or a claim
+that the EP1 player or the overall codec-gap objective is complete.
+
+Normative container fields: ISO/IEC 14496-12:2012 sections 8.7.6 and 8.8.3,
+https://ossrs.io/lts/zh-cn/assets/files/ISO_IEC_14496-12-base-format-2012-b70dd5f101daecd072700609842c9649.pdf
+
 ## Exact SL modular clock coordinates, 2026-10-28
 
 `owned_sl::Counter` now resolves 1–64-bit raw counters into checked signed

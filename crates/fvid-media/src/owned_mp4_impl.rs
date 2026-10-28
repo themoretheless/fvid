@@ -309,10 +309,23 @@ pub struct SkippedTrack {
     /// The fourcc the sample entry calls itself.
     pub codec: [u8; 4],
 }
+#[derive(Clone, Debug)]
+struct SamplePadding {
+    count: usize,
+    packed: Vec<u8>,
+}
+impl SamplePadding {
+    fn get(&self, index: usize) -> u8 {
+        if index >= self.count { return 0; }
+        let byte = self.packed[index / 2];
+        if index % 2 == 0 { (byte >> 4) & 7 } else { byte & 7 }
+    }
+}
 pub struct Mp4Reader<R> {
     reader: R,
     tracks: Vec<Track>,
     track_header_flags: Vec<u32>,
+    sample_padding: Vec<Option<SamplePadding>>,
     /// Tracks read all the way to their sample entry and then set aside because
     /// that entry names a coding with no arm here. Kept so a caller can tell a
     /// coding it has to implement apart from a file it failed to read.
@@ -564,6 +577,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
         let (movie_timescale, movie_duration) = media_time(required(&movie, b"mvhd")?)?;
         let mut tracks = Vec::new();
         let mut track_header_flags = Vec::new();
+        let mut sample_padding = Vec::new();
         let mut refused = Vec::new();
         let mut remaining = limits.samples;
         let mut skipped = 0usize;
@@ -571,7 +585,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             if tracks.len() >= limits.tracks {
                 return Err(invalid("MP4 track limit exceeded"));
             }
-            let Some((track, flags)) = parse_track(atom.data, &mdats, remaining, fragmented, &mut refused)?
+            let Some((track, flags, padding)) = parse_track(atom.data, &mdats, remaining, fragmented, &mut refused)?
             else {
                 skipped += 1;
                 continue;
@@ -582,6 +596,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             remaining -= track.samples.cost();
             tracks.push(track);
             track_header_flags.push(flags);
+            sample_padding.push(padding);
         }
         if fragmented {
             index_fragments(
@@ -589,6 +604,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
                 &fragment_defaults(&movie)?,
                 &mdats,
                 &mut tracks,
+                &mut sample_padding,
                 &mut remaining,
             )?;
         }
@@ -618,6 +634,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             reader,
             tracks,
             track_header_flags,
+            sample_padding,
             refused,
             chapters,
             tags,
@@ -674,6 +691,8 @@ impl<R: Read + Seek> Mp4Reader<R> {
             Ok(())
         }
         let mut total = 0;
+        add(&mut total, self.sample_padding.capacity(), std::mem::size_of::<Option<SamplePadding>>())?;
+        for padding in self.sample_padding.iter().flatten() { add(&mut total,padding.packed.capacity(),1)?; }
         add(&mut total, self.track_header_flags.capacity(), std::mem::size_of::<u32>())?;
         add(
             &mut total,
@@ -736,6 +755,16 @@ impl<R: Read + Seek> Mp4Reader<R> {
             }
         }
         Ok(total)
+    }
+    /// Exact coded bits in an indexed sample, excluding the trailing padding
+    /// declared by stbl/padb. Raw packet reads preserve all stored octets.
+    pub fn packet_bit_len(&self, track: usize, sample: usize) -> Result<usize> {
+        let size = self.tracks.get(track).and_then(|t|t.samples.get(sample))
+            .ok_or_else(||invalid("MP4 packet index out of range"))?.size;
+        let padding = self.sample_padding.get(track).and_then(|p|p.as_ref())
+            .map_or(0,|p|p.get(sample));
+        (size as usize).checked_mul(8).and_then(|bits|bits.checked_sub(usize::from(padding)))
+            .ok_or_else(||invalid("MP4 sample padding exceeds stored bits"))
     }
     /// Reads exactly one indexed packet; the caller may reuse the buffer.
     pub fn read_packet(&mut self, track: usize, sample: usize, output: &mut Vec<u8>) -> Result<()> {
@@ -1148,7 +1177,7 @@ fn parse_track(
     limit: usize,
     fragmented: bool,
     refused: &mut Vec<SkippedTrack>,
-) -> Result<Option<(Track, u32)>> {
+) -> Result<Option<(Track, u32, Option<SamplePadding>)>> {
     let track = atoms(data)?;
     let tkhd = required(&track, b"tkhd")?;
     let narrow = version(tkhd, 1)? == 0;
@@ -1271,6 +1300,7 @@ fn parse_track(
         return Ok(None);
     };
     result.samples = index;
+    let padding = sample_padding_table(&stbl, &result.samples)?;
     if let Some(edts) = optional(&track, b"edts")? {
         let children = atoms(edts)?;
         let elst = required(&children, b"elst")?;
@@ -1300,7 +1330,54 @@ fn parse_track(
             });
         }
     }
-    Ok(Some((result, flags)))
+    Ok(Some((result, flags, padding)))
+}
+
+fn record_padding(slot: &mut Option<SamplePadding>, index: usize, bits: u8) -> Result<()> {
+    if slot.is_none() && bits == 0 {return Ok(());}
+    if slot.is_none() {
+        let mut packed = Vec::new();
+        packed.try_reserve_exact(index.div_ceil(2)).map_err(|_|invalid("MP4 padding allocation failed"))?;
+        packed.resize(index.div_ceil(2),0);
+        *slot = Some(SamplePadding {count:index,packed});
+    }
+    let padding = slot.as_mut().unwrap();
+    if padding.count != index {return Err(invalid("MP4 fragment padding index mismatch"));}
+    if index % 2 == 0 {
+        padding.packed.try_reserve(1).map_err(|_|invalid("MP4 padding allocation failed"))?;
+        padding.packed.push(bits << 4);
+    } else {
+        // A padb with an odd count has an unused low nibble, not a sample.
+        let last = padding.packed.last_mut().unwrap();
+        *last = (*last & 0xf0) | bits;
+    }
+    padding.count += 1;
+    Ok(())
+}
+
+fn sample_padding_table(stbl: &[Atom<'_>], samples: &SampleIndex) -> Result<Option<SamplePadding>> {
+    let Some(data) = optional(stbl,b"padb")? else {return Ok(None);};
+    if u32be(data,0)? != 0 {return Err(invalid("unsupported MP4 padding version or flags"));}
+    let count = u32be(data,4)? as usize;
+    let sizes = required(stbl,b"stsz")?;
+    if count != u32be(sizes,8)? as usize {return Err(invalid("MP4 padding sample count disagrees with size table"));}
+    if data.len().checked_sub(8) != Some(count.div_ceil(2)) {return Err(invalid("invalid MP4 padding table length"));}
+    if data[8..].iter().any(|b|b&0x88 != 0) {return Err(invalid("nonzero MP4 padding reserved bits"));}
+    let mut packed = Vec::new();
+    packed.try_reserve_exact(data.len()-8).map_err(|_|invalid("MP4 padding allocation failed"))?;
+    packed.extend_from_slice(&data[8..]);
+    let padding = SamplePadding {count,packed};
+    if samples.len() != count {
+        // Block-indexed legacy PCM/MACE may group original table rows. Zero
+        // padding needs no remapping; nonzero bit spans need coded-unit support.
+        if (0..count).any(|i|padding.get(i)!=0) {return Err(unsupported("MP4 padding on grouped audio units is not implemented"));}
+        return Ok(None);
+    }
+    for index in 0..count {
+        let size = samples.get(index).ok_or_else(||invalid("MP4 padding sample index out of range"))?.size;
+        if u64::from(padding.get(index)) > u64::from(size)*8 {return Err(invalid("MP4 sample padding exceeds stored bits"));}
+    }
+    Ok(Some(padding))
 }
 
 fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<SkippedTrack>, drawn: (u32, u32), rotation: u16) -> Result<Option<Track>> {
@@ -1995,6 +2072,7 @@ fn index_fragments(
     defaults: &[TrackExtends],
     mdats: &[Range<u64>],
     tracks: &mut [Track],
+    padding: &mut [Option<SamplePadding>],
     limit: &mut usize,
 ) -> Result<()> {
     for fragment in fragments {
@@ -2219,6 +2297,7 @@ fn index_fragments(
                         .map_err(|_| invalid("MP4 timestamp overflow"))?
                         .checked_add(shift)
                         .ok_or_else(|| invalid("MP4 PTS overflow"))?;
+                    record_padding(&mut padding[position], list.len(), ((bits >> 17) & 7) as u8)?;
                     list.push(Sample {
                         description_index: description,
                         offset,

@@ -1,0 +1,109 @@
+{
+  "sizes": [
+    11,
+    11,
+    11,
+    11,
+    11,
+    23,
+    23,
+    11,
+    11,
+    11,
+    11,
+    11
+  ],
+  "padding": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    0,
+    1,
+    2,
+    3
+  ],
+  "malformed": [
+    {
+      "video": "count.mp4",
+      "error": "MP4 padding sample count disagrees with size table"
+    },
+    {
+      "video": "short.mp4",
+      "error": "invalid MP4 padding table length"
+    },
+    {
+      "video": "extra.mp4",
+      "error": "invalid MP4 padding table length"
+    },
+    {
+      "video": "version.mp4",
+      "error": "unsupported MP4 padding version or flags"
+    },
+    {
+      "video": "flags.mp4",
+      "error": "unsupported MP4 padding version or flags"
+    },
+    {
+      "video": "reserved.mp4",
+      "error": "nonzero MP4 padding reserved bits"
+    },
+    {
+      "video": "duplicate.mp4",
+      "error": "duplicate MP4 singleton box"
+    }
+  ],
+  "fragments": [
+    {
+      "video": "trex.mp4",
+      "padding": [
+        5,
+        5,
+        5
+      ],
+      "bytes": 4142
+    },
+    {
+      "video": "tfhd-zero.mp4",
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "bytes": 4142
+    },
+    {
+      "video": "first.mp4",
+      "padding": [
+        7,
+        3,
+        3
+      ],
+      "bytes": 4142
+    },
+    {
+      "video": "rows.mp4",
+      "padding": [
+        1,
+        0,
+        6
+      ],
+      "bytes": 4142
+    },
+    {
+      "video": "hybrid-odd.mp4",
+      "padding": [
+        3,
+        1,
+        0,
+        6
+      ],
+      "bytes": 4142
+    }
+  ],
+  "provenance": "Own synthetic ER-LC/AVC source with padb variants. Padding vectors test demux metadata, not valid truncated AAC playback. No private media, foreign codecs, process or network."
+}

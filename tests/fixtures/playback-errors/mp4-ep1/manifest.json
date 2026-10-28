@@ -1,0 +1,99 @@
+{
+  "cases": [
+    {
+      "name": "aac-er-lc-960-1-0-0",
+      "video": "aac-er-lc-960-1-0-0.mp4",
+      "golden": "aac-er-lc-960-1-0-0.f32le",
+      "channels": 1,
+      "rate": 24000,
+      "streams": 3,
+      "frames": 3
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-signed",
+      "video": "aac-er-lc-960-1-0-0-signed.mp4",
+      "golden": "aac-er-lc-960-1-0-0.f32le",
+      "channels": 1,
+      "rate": 24000,
+      "streams": 3,
+      "frames": 3
+    },
+    {
+      "name": "aac-ld-ltp-480-0",
+      "video": "aac-ld-ltp-480-0.mp4",
+      "golden": "aac-ld-ltp-480-0.f32le",
+      "channels": 1,
+      "rate": 24000,
+      "streams": 3,
+      "frames": 3
+    },
+    {
+      "name": "aac-ld-ltp-480-0-signed",
+      "video": "aac-ld-ltp-480-0-signed.mp4",
+      "golden": "aac-ld-ltp-480-0.f32le",
+      "channels": 1,
+      "rate": 24000,
+      "streams": 3,
+      "frames": 3
+    },
+    {
+      "name": "eld-n480-c1-x2-crc1",
+      "video": "eld-n480-c1-x2-crc1.mp4",
+      "golden": "eld-n480-c1-x2-crc1.f32le",
+      "channels": 1,
+      "rate": 48000,
+      "streams": 4,
+      "frames": 3
+    },
+    {
+      "name": "eld-n480-c1-x2-crc1-signed",
+      "video": "eld-n480-c1-x2-crc1-signed.mp4",
+      "golden": "eld-n480-c1-x2-crc1.f32le",
+      "channels": 1,
+      "rate": 48000,
+      "streams": 4,
+      "frames": 3
+    },
+    {
+      "name": "eld-n512-c7-x2-crc1",
+      "video": "eld-n512-c7-x2-crc1.mp4",
+      "golden": "eld-n512-c7-x2-crc1.f32le",
+      "channels": 8,
+      "rate": 48000,
+      "streams": 27,
+      "frames": 3
+    },
+    {
+      "name": "eld-n512-c7-x2-crc1-signed",
+      "video": "eld-n512-c7-x2-crc1-signed.mp4",
+      "golden": "eld-n512-c7-x2-crc1.f32le",
+      "channels": 8,
+      "rate": 48000,
+      "streams": 27,
+      "frames": 3
+    }
+  ],
+  "malformed": [
+    {
+      "video": "missing.mp4",
+      "mode": "missing",
+      "error": "EP1 MP4 missing simultaneous ESC access unit"
+    },
+    {
+      "video": "duration.mp4",
+      "mode": "duration",
+      "error": "EP1 MP4 ESC source clocks disagree"
+    },
+    {
+      "video": "fork.mp4",
+      "mode": "fork",
+      "error": "EP1 MP4 forked ES dependency"
+    },
+    {
+      "video": "duplicate.mp4",
+      "mode": "duplicate",
+      "error": "EP1 MP4 duplicate ES ID"
+    }
+  ],
+  "provenance": "Own AVC video and real separate native EP1 ESC tracks; rational per-ES clocks, non-byte bit ends and deliberately nonzero excluded low bits. First three AUs and independent saved PCM. No private media, foreign codec, process or network."
+}
