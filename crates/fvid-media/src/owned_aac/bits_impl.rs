@@ -3,10 +3,19 @@
 pub struct BitReader<'a> {
     bytes: &'a [u8],
     position: usize,
+    end: usize,
 }
 impl<'a> BitReader<'a> {
     pub fn new(bytes: &'a [u8]) -> Self {
-        Self { bytes, position: 0 }
+        Self { bytes, position: 0, end: bytes.len().saturating_mul(8) }
+    }
+    /// Exact bit boundary for non-octet ESC instances. Padding in the storage
+    /// byte is inaccessible to all ordinary checked field readers.
+    pub fn with_bit_len(bytes: &'a [u8], end: usize) -> Result<Self> {
+        if end > bytes.len().saturating_mul(8) {
+            return Err(invalid("bit boundary exceeds source bytes"));
+        }
+        Ok(Self { bytes, position: 0, end })
     }
     /// Original bounded source; cursors in other owned decoder facades may
     /// parse a self-delimited extension without copying the bitstream.
@@ -15,10 +24,7 @@ impl<'a> BitReader<'a> {
         self.position
     }
     pub fn remaining(&self) -> usize {
-        self.bytes
-            .len()
-            .saturating_mul(8)
-            .saturating_sub(self.position)
+        self.end.saturating_sub(self.position)
     }
     pub fn read(&mut self, count: u8) -> Result<u32> {
         if count > 32 || usize::from(count) > self.remaining() {
@@ -212,5 +218,31 @@ mod tests {
         for bad in [&[0, 0, 3][..], &[0, 0, 3, 4], &[0, 0, 1], &[0, 0, 2]] {
             assert!(unescape_rbsp(bad).is_err());
         }
+    }
+}
+
+#[cfg(test)]
+mod exact_boundary_tests {
+    use super::*;
+    #[test]
+    fn storage_padding_is_inaccessible_to_fields_short_reads_skip_and_clones() {
+        let bytes = [0xff,0xff];
+        for end in 0..=16 {
+            let mut b = BitReader::with_bit_len(&bytes,end).unwrap();
+            b.skip(end).unwrap();
+            let mut saved = b.clone();
+            assert_eq!(b.remaining(),0);
+            assert!(b.bit().is_err());
+            assert!(b.read_short(1).is_err());
+            assert!(b.skip(1).is_err());
+            assert!(saved.read(1).is_err());
+            assert_eq!(b.position(),end);
+        }
+        assert!(BitReader::with_bit_len(&bytes,17).is_err());
+        let mut b = BitReader::with_bit_len(&bytes,3).unwrap();
+        assert!(b.read(4).is_err());
+        assert_eq!(b.position(),0);
+        assert_eq!(b.read(3).unwrap(),7);
+        assert!(b.bit().is_err());
     }
 }

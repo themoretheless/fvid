@@ -228,6 +228,7 @@ pub struct NativeAacDecoder {
     eld_synthesis: Vec<super::aac_eld_synthesis::EldSynthesis>,
     eld_sbr: Option<super::aac_eld_sbr::Decoder>,
     protection: Option<super::aac_ep::Config>,
+    direct_mapping: bool,
     ltp_synthesis: Vec<super::aac_ltp_channel::LtpChannel>,
     ltp_coupling_synthesis: Vec<Option<super::aac_ltp_channel::LtpChannel>>,
     ssr_synthesis: Vec<super::aac_ssr_synthesis::SsrSynthesis>,
@@ -262,6 +263,7 @@ pub struct AacCheckpoint {
     eld_synthesis: Vec<super::aac_eld_synthesis::EldHistory>,
     eld_sbr: Option<super::aac_eld_sbr::Decoder>,
     protection: Option<super::aac_ep::Config>,
+    direct_mapping: bool,
     ltp_synthesis: Vec<super::aac_ltp_channel::LtpChannelCheckpoint>,
     ltp_coupling_synthesis: Vec<Option<super::aac_ltp_channel::LtpChannelCheckpoint>>,
     ssr_synthesis: Vec<super::aac_ssr_synthesis::SsrSynthesis>,
@@ -296,6 +298,8 @@ impl NativeAacDecoder {
             return Err(unsupported("AAC parametric stereo synthesis is not yet implemented"));
         }
         if let Some(ep)=&parsed.protection {ep.validate_raw_access_unit()?;}
+        if parsed.direct_mapping && parsed.eld_sbr.is_some() {return Err(unsupported("ELD LD-SBR ESC 9/10 mapping is not yet implemented"));}
+        let direct_mapping=parsed.direct_mapping;
         let protection=parsed.protection.clone();
         let eld_sbr=parsed.eld_sbr.clone().map(|config|super::aac_eld_sbr::Decoder::new(config,parsed.core.sample_rate,parsed.core.frame_samples,parsed.core.channel_configuration)).transpose()?;
         let sbr_rate = if parsed.sbr_present == Some(true) && eld_sbr.is_none() {
@@ -376,7 +380,7 @@ impl NativeAacDecoder {
         Ok(Self {
             main_prediction,
             config,
-            protection, eld_sbr, eld_synthesis, ld_synthesis, synthesis, ssr_synthesis, ltp_synthesis, ltp_coupling_synthesis,
+            protection, direct_mapping, eld_sbr, eld_synthesis, ld_synthesis, synthesis, ssr_synthesis, ltp_synthesis, ltp_coupling_synthesis,
             ssr_coupling_synthesis, ssr_alignment:None, ssr_alignment_tags:Vec::new(), ssr_pending_duration:Default::default(), ssr_fixed_clock:false,ssr_source_alignment:false,
             coupling_synthesis:vec![None;16],
             noise: NoiseState::default(),
@@ -452,7 +456,7 @@ impl NativeAacDecoder {
         self.program.as_ref().map(|p| p.pcm_positions()).transpose()
     }
     pub fn checkpoint(&self) -> AacCheckpoint {
-        AacCheckpoint {protection:self.protection.clone(),main_prediction:self.main_prediction.clone(),config:self.config.clone(),initial_program:self.initial_program.clone(),program:self.program.clone(),
+        AacCheckpoint {direct_mapping:self.direct_mapping,protection:self.protection.clone(),main_prediction:self.main_prediction.clone(),config:self.config.clone(),initial_program:self.initial_program.clone(),program:self.program.clone(),
             eld_synthesis:self.eld_synthesis.iter().map(super::aac_eld_synthesis::EldSynthesis::checkpoint).collect(),eld_sbr:self.eld_sbr.clone(),
             ld_synthesis:self.ld_synthesis.iter().map(super::aac_ld_channel::LdChannel::checkpoint).collect(),
             synthesis:self.synthesis.clone(),ltp_coupling_synthesis:self.ltp_coupling_synthesis.iter().map(|s|s.as_ref().map(super::aac_ltp_channel::LtpChannel::checkpoint)).collect(),ltp_synthesis:self.ltp_synthesis.iter().map(super::aac_ltp_channel::LtpChannel::checkpoint).collect(),ssr_synthesis:self.ssr_synthesis.clone(),ssr_coupling_synthesis:self.ssr_coupling_synthesis.clone(),ssr_alignment:self.ssr_alignment.clone(),ssr_alignment_tags:self.ssr_alignment_tags.clone(),ssr_pending_duration:self.ssr_pending_duration.clone(),ssr_fixed_clock:self.ssr_fixed_clock,ssr_source_alignment:self.ssr_source_alignment,coupling_synthesis:self.coupling_synthesis.clone(),noise:self.noise.clone(),
@@ -461,7 +465,7 @@ impl NativeAacDecoder {
     }
     /// Restore without changing the decoder if configuration/layout differs.
     pub fn restore(&mut self, state:&AacCheckpoint) -> Result<()> {
-        if self.protection!=state.protection {return Err(invalid("AAC EP checkpoint configuration mismatch"));}
+        if self.protection!=state.protection || self.direct_mapping!=state.direct_mapping {return Err(invalid("AAC EP checkpoint configuration mismatch"));}
         if self.config!=state.config || self.initial_program!=state.initial_program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask || self.detect_sbr!=state.detect_sbr || self.sbr_detection_rate!=state.sbr_detection_rate || (!self.detect_sbr && self.sbr_rate!=state.sbr_rate) {
             return Err(invalid("AAC checkpoint configuration mismatch"));
         }
@@ -544,7 +548,14 @@ impl NativeAacDecoder {
         let Some(ep) = self.protection.as_ref() else {
             return self.decode_unprotected_timed_in_clock(packet, pts, duration, source_timescale);
         };
-        let units = ep.decode_raw_access_units(packet)?;
+        let units = if self.direct_mapping {
+            ep.decode_class_frames(packet)?
+                .iter()
+                .map(|frame| super::aac_esc::reassemble_eld_core(&self.config, frame))
+                .collect::<Result<Vec<_>>>()?
+        } else {
+            ep.decode_raw_access_units(packet)?
+        };
         if units.len() == 1 {
             return self.decode_unprotected_timed_in_clock(&units[0], pts, duration, source_timescale);
         }

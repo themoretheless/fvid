@@ -1,5 +1,61 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## EP3 direct ESC mapping for ELD core, 2026-10-28
+
+Native AAC-ELD now accepts epConfig=3 with directMapping=1 for core-only
+payloads. ASC retains mapping identity; checkpoint restore distinguishes EP2
+and EP3 even when their core and protection descriptors are otherwise identical.
+The reserved directMapping=0 value remains an error. A frozen old decoder
+refused the same valid new mono ASC specifically at the separate-ESC mapping.
+
+The semantic mapper consumes category 0 per common CPE, category 1 channel
+side information, category 2 RVLC when enabled, category 3 TNS when present,
+and category 4 spectrum. It preserves logical syntax order even when that
+requires returning to category 1 after reading TNS. Both frontend and owned
+backend share this mapper and the same channel payload parser; the ordinary
+logical-AU route keeps its transactional cursor. Spectral, HCR, RVLC, TNS and
+section validation are reused. Parsed logical bytes then enter the existing
+transactional ELD synthesis path; syntax reconstruction does not draw PNS noise
+or mutate synthesis history.
+
+A bounded BitReader hides storage padding beyond each instance's exact bit
+length. Intermediate classes must be completely consumed. Only the last
+instance may carry the exact zero bits needed for final byte alignment;
+omitted alignment is restored. Extra instances, trailing information and
+nonzero alignment fail explicitly. The five shared video-codec bit-reader tests
+also pass, including exact-boundary checks for fields, short reads, skip and
+clones.
+
+`scripts/generate_aac_eld_esc_fixtures.py` saves 116 own nonzero/decay acceptance
+sources and 28 malformed controls as short MP4 and Matroska files. The matrix
+covers 480/512 cores, all existing indexed layouts/rates, all resilience flags,
+and every flag combination with stereo TNS/PNS/correlated PNS/intensity. Both
+single-set headers and set changes with reversed class transmission order are
+used. Independent scalar ELD PCM is retained. The source writer now excludes
+non-spectral PNS/intensity books from HCR word emission; this also enables those
+combined synthetic controls without changing its legacy output.
+
+Eight acceptance/regression tests verify exact per-class information and
+reassembled logical AUs, independent PCM, public/owned container exports,
+intervals, signed packet clocks, checkpoint replay, rollback, real AudioStream
+playback, EOF, rewind and negative/repeated/frame-edge/past-EOF seeks. Malformed
+controls fail after three valid frames: a CRC error, or a seven-bit side instance
+with valid FEC/CRC that fails exactly at global_gain. Both owned/public exports
+and player bridges preserve those errors. A ninth, separately named refusal
+test records the still-unsupported LD-SBR ESC 9/10 mapping.
+
+Qualification passes 562 media unit tests (one ignored), 1,052 root unit tests
+(26 ignored), and 29 existing ELD/LD-SBR/ER-PS/LTP-PS/Main-PS/SSR-PS integration
+tests. The generator reproduces all 524 new files (10,155,593 bytes) and all 242
+legacy ELD files byte-for-byte with process/socket creation forbidden. Ordinary
+tests only read saved data. This is offline PCM playback qualification, not a
+physical audio-device or performance result. EP1 stream association, EP3 for
+other ER cores, LD-SBR categories 9/10, extension categories and separate ELD
+extension tools remain open.
+
+Primary definition: [ISO/IEC 14496-3:2009](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf), sections 1.6.3.6–1.6.3.7 and 4.5.2.4,
+tables 4.148–4.149.
+
 ## Exact EP class recovery for ESC mapping, 2026-10-28
 
 `Config::decode_class_frames()` now returns original predefined-set identity
@@ -14,9 +70,10 @@ recovery and retain their octet-alignment requirement.
 This boundary is necessary for EP3: its direct mapping associates each EP class
 with a distinct error sensitivity category instance. Concatenating physical
 classes into an epConfig=0 AU would lose the semantic category boundaries.
-EP1 additionally requires dependent elementary-stream association. Neither
-EP1/EP3 AAC ASC admission nor ESC-to-logical-payload decoding is enabled by
-this API. They remain explicit refusals until that semantic parser is present.
+EP1 additionally requires dependent elementary-stream association. This
+checkpoint did not yet enable AAC ASC admission or ESC-to-logical-payload
+decoding. EP3 ELD core is enabled in the subsequent semantic-mapping milestone
+above; EP1 and other EP3 paths still require their own integration.
 
 `scripts/generate_aac_ep_class_boundaries.py` authors 130 saved protection
 vectors with exact information lengths 0..64 bits, all SRCPC puncture rates,

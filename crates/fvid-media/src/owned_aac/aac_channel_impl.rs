@@ -236,63 +236,128 @@ impl ChannelData {
         if usize::from(max_sfb)>=BandTables::for_config(config)?.long.len(){return Err(invalid("AAC ELD max_sfb exceeds band table"));}
         Ok(IcsInfo{sequence:WindowSequence::OnlyLong,shape:super::aac_synthesis::WindowShape::Sine,max_sfb,group_lengths:vec![1],prediction:None})
     }
+    pub(crate) fn read_eld_esc(
+        reader: &mut super::aac_esc::Reader,
+        config: &AacConfig,
+        common: Option<&IcsInfo>,
+        pair: bool,
+    ) -> Result<Self> {
+        reader.channel(config.scalefactor_data_resilience)?;
+        let gain = reader.read(1, |b| Ok(b.read(8)? as u8))?;
+        let info = match common {
+            Some(i) => i.clone(),
+            None => reader.read(1, |b| Self::eld_info(b, config))?,
+        };
+        let tables = BandTables::for_config(config)?;
+        Self::read_payload_input(
+            &mut super::aac_esc::ChannelInput::Categories(reader),
+            config,
+            &tables,
+            gain,
+            info,
+            pair,
+        )
+    }
     fn read_payload(
-        bits: &mut BitReader<'_>, config: &AacConfig, tables: &BandTables,
-        gain: u8, info: IcsInfo, pair: bool,
+        bits: &mut BitReader<'_>,
+        config: &AacConfig,
+        tables: &BandTables,
+        gain: u8,
+        info: IcsInfo,
+        pair: bool,
     ) -> Result<Self> {
         let mut cursor = bits.clone();
-        let codebooks = info.read_sections_with_resilience(&mut cursor, config.section_data_resilience)?;
+        let output = Self::read_payload_input(
+            &mut super::aac_esc::ChannelInput::Logical(&mut cursor),
+            config,
+            tables,
+            gain,
+            info,
+            pair,
+        )?;
+        *bits = cursor;
+        Ok(output)
+    }
+    fn read_payload_input(
+        input: &mut super::aac_esc::ChannelInput<'_, '_>,
+        config: &AacConfig,
+        tables: &BandTables,
+        gain: u8,
+        info: IcsInfo,
+        pair: bool,
+    ) -> Result<Self> {
+        let codebooks = input.read(1, |b| {
+            info.read_sections_with_resilience(b, config.section_data_resilience)
+        })?;
         let rvlc = if config.scalefactor_data_resilience {
-            Some(aac_scalefactors::RvlcHeader::read(
-                &mut cursor, info.sequence == WindowSequence::EightShort, &codebooks,
-            )?)
-        } else { None };
-        let mut scales = if rvlc.is_none() {
-            aac_scalefactors::read(&mut cursor, gain, &codebooks)?
-        } else { Vec::new() };
-        let pulse = if config.object_type!=39 && cursor.bit()? {
-            Some(PulseData::read(&mut cursor, info.sequence, tables.long)?)
+            Some(input.read(1, |b| {
+                aac_scalefactors::RvlcHeader::read(
+                    b,
+                    info.sequence == WindowSequence::EightShort,
+                    &codebooks,
+                )
+            })?)
         } else {
             None
         };
-        let tns_present = cursor.bit()?;
-        let er = matches!(config.object_type,17|19|23);
-        let mut tns = if tns_present && !er {
-            Some(tns_syntax::read_profile(&mut cursor, info.sequence, config.object_type == 1)?)
-        } else { None };
-        let gain_control = if config.object_type!=39 && cursor.bit()? {
-            let gain = super::aac_gain_control::GainControl::read(&mut cursor, info.sequence)?;
-            if config.object_type != 3 && !gain.is_empty() {
-                return Err(unsupported("owned AAC active gain control synthesis is not implemented"));
+        let mut scales = if rvlc.is_none() {
+            input.read(1, |b| aac_scalefactors::read(b, gain, &codebooks))?
+        } else {
+            Vec::new()
+        };
+        let pulse = input.read(1, |b| {
+            if config.object_type != 39 && b.bit()? {
+                Ok(Some(PulseData::read(b, info.sequence, tables.long)?))
+            } else {
+                Ok(None)
             }
-            Some(gain)
-        } else { None };
+        })?;
+        let tns_present = input.read(1, |b| b.bit())?;
+        input.payload(tns_present)?;
+        let er = matches!(config.object_type, 17 | 19 | 23);
+        let mut tns = if tns_present && !er {
+            Some(input.read(3, |b| {
+                tns_syntax::read_profile(b, info.sequence, config.object_type == 1)
+            })?)
+        } else {
+            None
+        };
+        let gain_control = input.read(1, |b| {
+            if config.object_type != 39 && b.bit()? {
+                let gain = super::aac_gain_control::GainControl::read(b, info.sequence)?;
+                if config.object_type != 3 && !gain.is_empty() {
+                    return Err(unsupported(
+                        "owned AAC active gain control synthesis is not implemented",
+                    ));
+                }
+                Ok(Some(gain))
+            } else {
+                Ok(None)
+            }
+        })?;
         let hcr = if config.spectral_data_resilience {
-            Some(aac_spectral::HcrHeader::read(&mut cursor, pair)?)
-        } else { None };
+            Some(input.read(1, |b| aac_spectral::HcrHeader::read(b, pair))?)
+        } else {
+            None
+        };
         if let Some(header) = rvlc {
-            scales = header.decode(&mut cursor, gain, &codebooks)?;
+            scales = input.read(2, |b| header.decode(b, gain, &codebooks))?;
         }
         if tns_present && er {
-            tns = Some(tns_syntax::read_profile(&mut cursor, info.sequence, false)?);
+            tns = Some(input.read(3, |b| tns_syntax::read_profile(b, info.sequence, false))?);
         }
         let offsets = if info.sequence == WindowSequence::EightShort {
             tables.short
         } else {
             tables.long
         };
-        let quantized = if let Some(header) = hcr {
-            header.decode(&mut cursor, &info, offsets, &codebooks, config.frame_samples as usize)?
-        } else {
-            aac_spectral::read(
-            &mut cursor,
-            &info,
-            offsets,
-            &codebooks,
-            config.frame_samples as usize,
-        )?
-        };
-        *bits = cursor;
+        let quantized = input.read(4, |b| {
+            if let Some(header) = hcr {
+                header.decode(b, &info, offsets, &codebooks, config.frame_samples as usize)
+            } else {
+                aac_spectral::read(b, &info, offsets, &codebooks, config.frame_samples as usize)
+            }
+        })?;
         Ok(Self {
             info,
             codebooks,
@@ -303,4 +368,5 @@ impl ChannelData {
             gain: gain_control,
         })
     }
+
 }

@@ -22,7 +22,7 @@ def cosines(n,bins):
     return [[math.cos(math.pi/n*(i+.5-n/2)*(k+.5))for k in bins]for i in range(4*n)]
 def asc(n,configuration,rate,flags=0):
     return packed(field(31,5)+field(7,6)+frequency(rate)+field(configuration,4)+field(n==480,1)+field(flags,3)+'0'+'0000'+'00')
-def body(books,values,bins,scales,common,flags,tns=None,tns_bands=31):
+def body(books,values,bins,scales,common,flags,tns=None,tns_bands=31,categories=False):
     # ELD omits tags, pulse, gain-control, window shape, common_window and LTP.
     section=''.join(field(b,5 if flags&4 else 4)+(''if flags&4 and(b==11 or b>=16)else field(1,5))for b in books)
     if flags&2:sf,rv,_=rvlc_scales(0,books,scales,gain=140)
@@ -37,7 +37,7 @@ def body(books,values,bins,scales,common,flags,tns=None,tns_bands=31):
             else:sf+=sc(value-ordinary);ordinary=value
     q=[values.get(k,0)for k in range(8)]
     if flags&1:
-        data,hint,_=hcr_payload(0,[books],[1],[q]);spectral_header=field(len(data),14)+field(hint,6)
+        data,hint,_=hcr_payload(0,[[0 if b in [13,14,15]else b for b in books]],[1],[q]);spectral_header=field(len(data),14)+field(hint,6)
     else:
         spectral_header='';data=''
         for band,b in enumerate(books):
@@ -45,7 +45,10 @@ def body(books,values,bins,scales,common,flags,tns=None,tns_bands=31):
             width=bins[band+1]-bins[band];dim=4 if b<=4 else 2
             for k in range(bins[band],bins[band]+width,dim):data+=cw(b,[values.get(i,0)for i in range(k,k+dim)])
     tns_bits=''if tns is None else field(1,2)+'0'+field(tns_bands,6)+field(1,5)+field(tns,1)+'0'+'001'
-    return field(140,8)+(''if common else field(len(books),6))+section+sf+field(tns is not None,1)+tns_bits+spectral_header+rv+data
+    prefix=field(140,8)+(''if common else field(len(books),6))+section+sf+field(tns is not None,1)
+    if categories:
+        return [dict(category=1,bits=prefix+spectral_header)]+([dict(category=2,bits=rv)]if flags&2 else [])+([dict(category=3,bits=tns_bits)]if tns is not None else [])+[dict(category=4,bits=data)]
+    return prefix+tns_bits+spectral_header+rv+data
 def mkv(config,packets,rate,n,channels):
     audio=element(0xe1,element(0xb5,struct.pack('>d',float(rate)))+uint(0x9f,channels))
     entry=uint(0xd7,1)+uint(0x83,2)+element(0x86,b'A_AAC')+element(0x63a2,config)+uint(0x23e383,n*1000000000//rate)+audio
@@ -61,7 +64,7 @@ def specifications():
     specs += [(n,24000,2,t,0,1,False)for n in [512,480]for t in ['pns','correlated-pns','intensity','tns']]
     return specs
 
-def generate(include_payload_bits=False, specs=None):
+def generate(include_payload_bits=False, specs=None, include_category_bits=False):
     files={};cases=[];blob=bytearray()
     for n,rate,configuration,tool,flags,ms,high in (specifications() if specs is None else specs):
         elements,mapping,mask=LAYOUTS[configuration];channels=len(mapping);w=window(n)
@@ -77,7 +80,7 @@ def generate(include_payload_bits=False, specs=None):
         positions=(0,1,2,3,last,last+1,last+2,last+3)
         cos=cosines(n,positions)
         for frame in range(12):
-            bits='';spectra=[];ch=0
+            bits='';spectra=[];ch=0;instances=[]
             for element in elements:
                 width=2 if element==1 else 1
                 band_count=1 if element==3 else count
@@ -100,10 +103,14 @@ def generate(include_payload_bits=False, specs=None):
                     values.append(value)
                 mask_bits=[bool((frame+b)%2)for b in range(band_count)]if ms==1 else[ms==2]*band_count
                 if tool=='correlated-pns'and len(mask_bits)>1:mask_bits[1]=True
-                if width==2:bits+=field(band_count,6)+field(ms,2)+(''.join(field(v,1)for v in mask_bits)if ms==1 else'')
+                if width==2:
+                    common_bits=field(band_count,6)+field(ms,2)+(''.join(field(v,1)for v in mask_bits)if ms==1 else'')
+                    bits+=common_bits
+                    if include_category_bits:instances.append(dict(category=0,bits=common_bits))
                 for c in range(width):
                     tns=(frame+c)%2 if tool=='tns'and frame<7 else None
                     bits+=body(books[c],values[c],offsets[:band_count+1],scales[c],width==2,flags,tns,geometry(n,max(22050,min(48000,rate)))[0])
+                    if include_category_bits:instances.extend(body(books[c],values[c],offsets[:band_count+1],scales[c],width==2,flags,tns,geometry(n,max(22050,min(48000,rate)))[0],True))
                     spectrum={}
                     for band,book in enumerate(books[c]):
                         lo,hi=offsets[band:band+2];value=scales[c][band]
@@ -133,6 +140,7 @@ def generate(include_payload_bits=False, specs=None):
                 ch+=width
             payload=packed(bits);packets.append(payload);rows.append(dict(offset=len(blob),bytes=len(payload)));blob.extend(payload)
             if include_payload_bits:rows[-1]['bits']=bits
+            if include_category_bits:rows[-1]['esc']=instances
             outputs=[]
             for c,spectrum in enumerate(spectra):
                 values=[spectrum.get(k,0.)for k in positions]
