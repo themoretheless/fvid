@@ -1,5 +1,36 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## LD-SBR core-tool integration and navigation, 2026-10-28
+
+The owned LD-SBR acceptance matrix now contains 256 nonzero/decay sources
+(previously 104). The additional 152 sources combine both 480/512 cores,
+mono/stereo, single/double output rate and CRC on/off with every nonzero
+combination of section/RVLC/HCR resilience flags. Stereo sources additionally
+combine LD-SBR with full MS, independent/correlated PNS, intensity and TNS.
+The ASC flag checks ensure these fixtures exercise the intended resilient
+syntax. Independent core cosine/window arithmetic feeds the existing direct
+CLDFB, patch/energy/gain/noise and synthesis oracle; production decoding is
+not used to create reference PCM.
+
+All 256 sources pass the six `tests/aac_eld_sbr.rs` checks: complete PCM,
+public/owned MP4 and Matroska export, repeated interval extraction, checkpoint
+replay, malformed-packet rollback and actual AudioStream decoding through EOF.
+Player navigation includes rewind, repeated/backwards seeks, samples immediately
+before/at/after output-frame edges, negative targets, past-EOF targets and a
+return from EOF. PCM after navigation equals the corresponding uninterrupted
+suffix. Timed decoding also preserves signed PTS and caller duration independently
+of 480/512/960/1024 output geometry, including checkpoint replay.
+
+The generator reproduces all 1,030 saved files (27,668,255 bytes) with subprocess
+and socket creation forbidden. All 416 original positive assets remain
+byte-identical. Ordinary tests read saved fixtures offline. Current qualification
+also passes 561 media unit tests (one ignored), 1,052 root library tests
+(26 ignored), and existing ELD/CLDFB acceptance. The LD-SBR player test binary
+has no FFmpeg/libav linkage. AudioStream qualification does not verify a physical
+audio device. EP1/EP3 separate-stream mappings and known ELD extension tools
+remain open; this milestone qualifies LD-SBR core-tool integration rather than
+closing the general codec-gap goal.
+
 ## EP2 concatenated source frames, 2026-10-28
 
 The EP2 assembler now restores two through seven source AUs from one protected

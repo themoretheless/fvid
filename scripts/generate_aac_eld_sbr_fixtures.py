@@ -154,6 +154,32 @@ def generate():
             files[name+'.asc']=config;files[name+'.f32le']=b''.join(struct.pack('<ff',*r)for r in zip(*planar))
             files[name+'.mp4']=video_fixture([case],blob,2,filename=name+'.mp4',write=False)['data'];case['video']=name+'.mp4'
             files[name+'.mka']=mkv(config,packets,48000,n*2,2);case['matroska']=name+'.mka';cases.append(case)
+    # Cross-product previously qualified only for the core: resilience and
+    # stereo tools must also preserve the LD-SBR bit boundary and histories.
+    specs=[(n,24000,configuration,'resilience',flags,0,False)
+           for n in [480,512] for configuration in [1,2] for flags in range(1,8)]
+    specs += [(n,24000,2,tool,0,ms,False) for n in [480,512]
+              for tool,ms in [('ms-all',2),('pns',1),('correlated-pns',1),('intensity',1),('tns',1)]]
+    tools=core_generate(True,specs)
+    for base in json.loads(tools['manifest.json'])['cases']:
+        n=base['n'];channels=base['channels'];configuration=base['configuration']
+        original=list(struct.unpack('<'+'f'*(len(tools[base['name']+'.f32le'])//4),tools[base['name']+'.f32le']))
+        rows=[reconstruct(analysis(original[ch::channels],c),n//32,noise)for ch in range(channels)]
+        for double in [False,True]:
+            bands=64 if double else 32;rate=24000*(1+double)
+            planar=[[v/(32768 if double else 65536)for v in synthesis(r,bands,c)]for r in rows]
+            pcm=b''.join(struct.pack('<'+'f'*channels,*(p[i]for p in planar))for i in range(len(planar[0])))
+            for protected in [False,True]:
+                name=f"{base['name']}-x{1+double}-crc{int(protected)}"
+                config=packed(field(31,5)+field(7,6)+frequency(24000)+field(configuration,4)+field(n==480,1)+field(base['flags'],3)+'1'+field(double,1)+field(protected,1)+header(0,True)+'0000'+'00')
+                frames=[];packets=[]
+                for i,row in enumerate(base['frames']):
+                    packet=packed(row['bits']+sbr_bits(channels,nhigh,nlow,n//32,i,protected))
+                    frames.append(dict(offset=len(blob),bytes=len(packet)));blob.extend(packet);packets.append(packet)
+                case=dict(name=name,n=n,rate=rate,configuration=configuration,mask=base['mask'],asc=config.hex(),channels=channels,frames=frames,container_rate=rate,container_frame_samples=n*(1+double),samples=len(planar[0]),pcm_offset=0,slots=n//32,bands=bands,core_tool=base['tool'],resilience=base['flags'])
+                files[name+'.asc']=config;files[name+'.f32le']=pcm
+                files[name+'.mp4']=video_fixture([case],blob,channels,filename=name+'.mp4',write=False)['data'];case['video']=name+'.mp4'
+                files[name+'.mka']=mkv(config,packets,rate,n*(1+double),channels);case['matroska']=name+'.mka';cases.append(case)
     malformed=[]
     for n in [480,512]:
         base=next(b for b in manifest['cases']if b['n']==n and b['configuration']==1)

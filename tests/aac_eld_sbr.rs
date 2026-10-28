@@ -179,6 +179,8 @@ fn eld_sbr_player_rewind_and_sample_seek_preserve_pcm_in_both_containers() {
             // Repeated targets and returning from EOF must rebuild the same
             // LD-SBR history as an uninterrupted decode, including frame edges.
             for target in [
+                -1,
+                -c["container_frame_samples"].as_i64().unwrap(),
                 0,
                 13,
                 512,
@@ -189,6 +191,7 @@ fn eld_sbr_player_rewind_and_sample_seek_preserve_pcm_in_both_containers() {
                 c["container_frame_samples"].as_i64().unwrap(),
                 c["container_frame_samples"].as_i64().unwrap() + 1,
                 (full.len() / width) as i64,
+                (full.len() / width) as i64 * 2,
                 13,
                 0,
             ] {
@@ -222,6 +225,23 @@ fn eld_sbr_checkpoint_reset_and_malformed_frame_rollback() {
         let config = AudioSpecificConfig::parse(&asc).unwrap();
         assert_eq!(config.sbr_present, Some(true));
         assert_eq!(config.ps_present, Some(false));
+        if let Some(flags) = c["resilience"].as_u64() {
+            assert_eq!(
+                config.core.section_data_resilience,
+                flags & 4 != 0,
+                "{name}"
+            );
+            assert_eq!(
+                config.core.scalefactor_data_resilience,
+                flags & 2 != 0,
+                "{name}"
+            );
+            assert_eq!(
+                config.core.spectral_data_resilience,
+                flags & 1 != 0,
+                "{name}"
+            );
+        }
         assert_eq!(
             config
                 .eld_sbr
@@ -246,9 +266,24 @@ fn eld_sbr_checkpoint_reset_and_malformed_frame_rollback() {
                     "{name} truncated LD-SBR accepted"
                 );
             }
-            let actual = d.decode(raw).unwrap();
+            let pts = -37 + i as i64 * 83;
+            let duration = 31 + i as u64;
+            let actual = d.decode_timed(raw, pts, duration).unwrap().unwrap();
+            assert_eq!(actual.pts, pts, "{name} signed PTS");
+            assert_eq!(actual.duration, duration, "{name} packet duration");
+            assert_eq!(
+                actual.samples.len(),
+                c["container_frame_samples"].as_u64().unwrap() as usize
+                    * config.core.channels as usize
+            );
             d.restore(&checkpoint).unwrap();
-            assert_eq!(actual, d.decode(raw).unwrap(), "{name} checkpoint");
+            let replay = d.decode_timed(raw, pts, duration).unwrap().unwrap();
+            assert_eq!(actual.pts, replay.pts, "{name} checkpoint PTS");
+            assert_eq!(
+                actual.duration, replay.duration,
+                "{name} checkpoint duration"
+            );
+            assert_eq!(actual.samples, replay.samples, "{name} checkpoint PCM");
         }
     }
 }
