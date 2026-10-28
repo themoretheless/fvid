@@ -1,3 +1,34 @@
+## Exact SL modular clock coordinates, 2026-10-28
+
+`owned_sl::Counter` now resolves 1–64-bit raw counters into checked signed
+128-bit coordinates. It permits forward wrap and composition-time reordering,
+retains the epoch in checkpoints, guards incompatible restore and supports an
+explicit external anchor after navigation. Reset discards the epoch. A jump
+of exactly half a period is ambiguous and refuses without state mutation;
+out-of-width input and coordinate overflow also leave the clock unchanged.
+The helper does not invent a wall-clock origin, clock rate or inter-ES offset.
+
+The saved assembly corpus now includes forty fragmented AAC programs: the ten
+existing logical codec sources with explicit boundaries, end-only boundaries,
+16-bit positive-epoch wrap and 16-bit negative-epoch wrap. Every stream resolves
+its raw CTS against the supplied common anchor before EP1 association; complete
+PCM still matches the independently calculated reference. Per-stream clock and
+fragment checkpoints replay exactly, including native LD-SBR. Separate unit
+checks cover every width, both wrap directions, reverse CTS, ambiguity, signed
+coordinate overflow, reset and incompatible checkpoints.
+
+All nine saved assembly assets / 2,421,174 bytes regenerate exactly with process
+and socket creation forbidden. The earlier 110 SL syntax assets remain byte-
+identical. Ordinary tests read saved assets and require no generator, FFmpeg,
+foreign codec or network. All 22 selected SL/EP1/ESDS integration checks and
+1,621 root/media unit tests pass (29 ignored).
+
+**Still open:** transport-owned clock recovery and shared epoch selection,
+implicit duration/start-clock scheduling, extended SL descriptors, container
+ES dependency routing and player/export navigation. This is exact anchored
+counter arithmetic and codec composition, not completed synchronized EP1
+container playback or the overall codec-gap objective.
+
 ## Stateful base SL access-unit assembly, 2026-10-28
 
 `owned_sl::Assembler` reconstructs per-ES access units across arbitrary bit

@@ -93,7 +93,7 @@ fn fragmented_per_es_access_units_decode_to_independent_complete_pcm() {
     use std::collections::BTreeMap;
     let blob = read("packets.bin");
     let m = manifest();
-    assert_eq!(m["native"].as_array().unwrap().len(), 20);
+    assert_eq!(m["native"].as_array().unwrap().len(), 40);
     let source = root().with_file_name("mpeg4-sl");
     for case in m["native"].as_array().unwrap() {
         let asc = std::fs::read(source.join(case["asc"].as_str().unwrap())).unwrap();
@@ -101,6 +101,8 @@ fn fragmented_per_es_access_units_decode_to_independent_complete_pcm() {
         let config = Config::parse(&read(case["config"].as_str().unwrap())).unwrap();
         let mut decoder = NativeAacDecoder::new(&asc).unwrap();
         let mut streams = BTreeMap::<u16, Assembler>::new();
+        let mut clocks = BTreeMap::<u16, fvid_media::owned_sl::Counter>::new();
+        let anchor = i128::from(case["clock_anchor"].as_i64().unwrap());
         let mut pcm = Vec::new();
         for row in case["frames"].as_array().unwrap() {
             let mut complete = Vec::new();
@@ -132,18 +134,36 @@ fn fragmented_per_es_access_units_decode_to_independent_complete_pcm() {
                     .map(|v| u8::from_str_radix(std::str::from_utf8(v).unwrap(), 16).unwrap())
                     .collect();
                 assert_eq!(bits(&au.data, au.bit_len), bits(&expected, au.bit_len));
-                complete.push((sid, unit["depends_on"].as_u64().map(|n| n as u16), au));
+                let clock = clocks.entry(sid).or_insert_with(|| {
+                    let mut clock =
+                        fvid_media::owned_sl::Counter::new(config.timestamp_length).unwrap();
+                    clock.anchor(anchor);
+                    clock
+                });
+                let saved = clock.checkpoint();
+                let pts = clock.observe(au.composition_timestamp.unwrap()).unwrap() - anchor;
+                clock.restore(&saved).unwrap();
+                assert_eq!(
+                    clock.observe(au.composition_timestamp.unwrap()).unwrap() - anchor,
+                    pts
+                );
+                complete.push((
+                    sid,
+                    unit["depends_on"].as_u64().map(|n| n as u16),
+                    au,
+                    i64::try_from(pts).unwrap(),
+                ));
             }
             // Arrival order is not dependency order.
             complete.reverse();
             let input: Vec<_> = complete
                 .iter()
-                .map(|(sid, parent, au)| AccessUnit {
+                .map(|(sid, parent, au, pts)| AccessUnit {
                     stream_id: *sid,
                     depends_on: *parent,
                     data: &au.data,
                     bit_len: au.bit_len,
-                    pts: au.composition_timestamp.unwrap() as i64,
+                    pts: *pts,
                     duration: row["duration"].as_u64().unwrap(),
                     timescale: config.timestamp_resolution,
                 })

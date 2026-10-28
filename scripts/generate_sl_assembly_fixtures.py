@@ -60,8 +60,10 @@ def generate():
     native=[];source=SOURCE/'mpeg4-sl';m=json.loads((source/'manifest.json').read_bytes())
     nc=dict(c,ocr=0,aseq=16,pseq=16,flags=0xcc);files['native.slc']=config(**nc)
     files['end-only-native.slc']=config(**dict(nc,flags=0x4c))
-    for base,end_only in [(b,e)for b in m['native']if not b['ps']for e in [False,True]]:
-        nc['flags']=0x4c if end_only else 0xcc
+    files['clock16.slc']=config(**dict(nc,ts=16))
+    for base,mode in [(b,e)for b in m['native']if not b['ps']for e in ['explicit','end-only','wrap','negative-wrap']]:
+        end_only=mode=='end-only';anchor=65500 if mode=='wrap'else -37 if mode=='negative-wrap'else 0
+        nc['flags']=0x4c if end_only else 0xcc;nc['ts']=16 if mode in ['wrap','negative-wrap']else 32
         counts={};au_counts={};frames=[]
         for frame_index,frame in enumerate(base['frames']):
             units=[]
@@ -70,17 +72,17 @@ def generate():
                 fragments=[];offset=0;part=0
                 if not text:
                     sequence=counts.get(sid,65534);counts[sid]=(sequence+1)&65535
-                    raw,_=packet(nc,b'',0,start=True,end=True,pseq=sequence,aseq=au_seq,cts=frame['pts'],length_override=0)
+                    raw,_=packet(nc,b'',0,start=True,end=True,pseq=sequence,aseq=au_seq,cts=(anchor+frame['pts'])% (1<<nc['ts']),length_override=0)
                     fragments.append(store(raw))
                 while offset<len(text):
                     # Every AU begins at an unaligned split; later splits span bytes.
                     width=min([1,7,13,97][part%4],len(text)-offset);last=offset+width==len(text)
                     sequence=counts.get(sid,65534);counts[sid]=(sequence+1)&65535
-                    raw,_=packet(nc,packed(text[offset:offset+width]),width,start=offset==0,end=last,pseq=sequence,aseq=au_seq,cts=frame['pts'],length_override=(len(text)+7)//8)
+                    raw,_=packet(nc,packed(text[offset:offset+width]),width,start=offset==0,end=last,pseq=sequence,aseq=au_seq,cts=(anchor+frame['pts'])% (1<<nc['ts']),length_override=(len(text)+7)//8)
                     fragments.append(store(raw));offset+=width;part+=1
                 units.append(dict(stream_id=sid,depends_on=unit['depends_on'],bits=len(text),source=unit['source'],fragments=fragments))
             frames.append(dict(pts=frame['pts'],duration=frame['duration'],units=units))
-        native.append(dict(name=base['name']+('-end-only'if end_only else''),config='end-only-native.slc'if end_only else'native.slc',asc=base['asc'],golden=base['golden'],reference_video=base['reference_video'],frames=frames))
+        native.append(dict(name=base['name']+(''if mode=='explicit'else'-'+mode),clock_anchor=anchor,config='end-only-native.slc'if end_only else'clock16.slc'if nc['ts']==16 else'native.slc',asc=base['asc'],golden=base['golden'],reference_video=base['reference_video'],frames=frames))
     files['packets.bin']=bytes(blob)
     files['manifest.json']=(json.dumps(dict(sequences=sequences,native=native,provenance='Own SL packets and synthetic ESC sources; no foreign codecs, private media, processes or network. Logical source movies remain projections, not EP1 container playback.'),indent=2)+'\n').encode()
     return files

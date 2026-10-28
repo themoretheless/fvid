@@ -351,3 +351,7 @@ pub struct Payload<'a> {
 #[path = "owned_sl_assembly.rs"]
 mod assembly;
 pub use assembly::{AccessUnit, Assembler, Bitrate, Checkpoint, Push};
+
+#[path = "owned_sl_clock.rs"]
+mod clock;
+pub use clock::{Counter, CounterCheckpoint};
