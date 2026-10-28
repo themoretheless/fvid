@@ -311,7 +311,7 @@ impl NativePsAacDecoder {
     pub fn decode_esc(&mut self, units: &[super::aac_ep1::AccessUnit<'_>]) -> Result<Option<Frame>> {
         if !self.separate_esc {return Err(invalid("ESC access-unit input requires epConfig=1"));}
         let frame = super::aac_ep1::associate(units)?;
-        let bytes = super::aac_esc::reassemble_er_with_sbr(&self.config, self.program.as_ref(), &frame.payload, &[self.extension.current_sbr_header().cloned()])?;
+        let bytes = super::aac_esc::reassemble_er_ep1(&self.config, self.program.as_ref(), &frame.payload, &[self.extension.current_sbr_header().cloned()])?;
         self.decode_unprotected(&bytes)
     }
     fn decode_unprotected(&mut self, packet: &[u8]) -> Result<Option<Frame>> {
@@ -921,7 +921,7 @@ impl InBandPsProbe {
     pub fn read_esc(&mut self, units: &[super::aac_ep1::AccessUnit<'_>]) -> Result<bool> {
         if !self.separate_esc {return Err(invalid("ESC access-unit input requires epConfig=1"));}
         let frame = super::aac_ep1::associate(units)?;
-        let bytes = super::aac_esc::reassemble_er_with_sbr(&self.config, self.program.as_ref(), &frame.payload, &[self.sbr.current_header().cloned()])?;
+        let bytes = super::aac_esc::reassemble_er_ep1(&self.config, self.program.as_ref(), &frame.payload, &[self.sbr.current_header().cloned()])?;
         self.read_unprotected(&bytes)
     }
     fn read_unprotected(&mut self, packet: &[u8]) -> Result<bool> {

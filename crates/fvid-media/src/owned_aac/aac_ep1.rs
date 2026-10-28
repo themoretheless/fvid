@@ -1,13 +1,13 @@
 //! EP1 transport-facing ESC association; no FEC or invented byte framing.
-//! ISO/IEC 14496-3 1.6.3.6 and 4.5.2.4.2 define separate AUs in dependency order.
+//! ISO/IEC 14496-3 1.6.3.6 and 4.5.2.4.2 carry ESCs in dependency order.
 use super::{
     Result,
     aac_ep::{RecoveredClass, RecoveredFrame},
     invalid,
 };
 
-/// One complete, separately transported ESC access unit. `bit_len` excludes
-/// transport padding; ignored low bits in the final octet are never decoded.
+/// One complete EP1 AU with one or more consecutive ESC instances.
+/// `bit_len` excludes transport padding; ignored low octet bits are never decoded.
 #[derive(Clone, Copy, Debug)]
 pub struct AccessUnit<'a> {
     pub stream_id: u16,
@@ -18,7 +18,7 @@ pub struct AccessUnit<'a> {
     pub duration: u64,
     pub timescale: u32,
 }
-/// Exact ESC instances in dependency order, with the root stream's clock.
+/// Exact EP1 AU bit regions in dependency order, with the root stream's clock.
 #[derive(Clone, Debug)]
 pub struct Frame {
     pub payload: RecoveredFrame,

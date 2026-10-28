@@ -1,0 +1,7945 @@
+{
+  "cases": [
+    {
+      "name": "aac-er-lc-960-1-0-0-fill-zero-whole",
+      "video": "aac-er-lc-960-1-0-0-fill-zero-whole.mp4",
+      "control": "aac-er-lc-960-1-0-0-fill-zero-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "streams": 1,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-fill-zero-extensions",
+      "video": "aac-er-lc-960-1-0-0-fill-zero-extensions.mp4",
+      "control": "aac-er-lc-960-1-0-0-fill-zero-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "streams": 4,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-fill-zero-zigzag",
+      "video": "aac-er-lc-960-1-0-0-fill-zero-zigzag.mp4",
+      "control": "aac-er-lc-960-1-0-0-fill-zero-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "streams": 3,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-fill-data-whole",
+      "video": "aac-er-lc-960-1-0-0-fill-data-whole.mp4",
+      "control": "aac-er-lc-960-1-0-0-fill-data-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-fill-data.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "streams": 1,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-lc-960-1-0-0-fill-data-whole-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-er-lc-960-1-0-0-fill-data-whole-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-fill-data-extensions",
+      "video": "aac-er-lc-960-1-0-0-fill-data-extensions.mp4",
+      "control": "aac-er-lc-960-1-0-0-fill-data-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-fill-data.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "streams": 4,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-lc-960-1-0-0-fill-data-extensions-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-er-lc-960-1-0-0-fill-data-extensions-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-fill-data-zigzag",
+      "video": "aac-er-lc-960-1-0-0-fill-data-zigzag.mp4",
+      "control": "aac-er-lc-960-1-0-0-fill-data-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-fill-data.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "streams": 3,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-lc-960-1-0-0-fill-data-zigzag-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-er-lc-960-1-0-0-fill-data-zigzag-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-anc-zero-whole",
+      "video": "aac-er-lc-960-1-0-0-anc-zero-whole.mp4",
+      "control": "aac-er-lc-960-1-0-0-anc-zero-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-anc-zero-extensions",
+      "video": "aac-er-lc-960-1-0-0-anc-zero-extensions.mp4",
+      "control": "aac-er-lc-960-1-0-0-anc-zero-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "streams": 4,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-anc-zero-zigzag",
+      "video": "aac-er-lc-960-1-0-0-anc-zero-zigzag.mp4",
+      "control": "aac-er-lc-960-1-0-0-anc-zero-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "streams": 3,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-anc-short-whole",
+      "video": "aac-er-lc-960-1-0-0-anc-short-whole.mp4",
+      "control": "aac-er-lc-960-1-0-0-anc-short-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-anc-short.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-lc-960-1-0-0-anc-short-whole-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-anc-short-extensions",
+      "video": "aac-er-lc-960-1-0-0-anc-short-extensions.mp4",
+      "control": "aac-er-lc-960-1-0-0-anc-short-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-anc-short.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "streams": 4,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-lc-960-1-0-0-anc-short-extensions-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-anc-short-zigzag",
+      "video": "aac-er-lc-960-1-0-0-anc-short-zigzag.mp4",
+      "control": "aac-er-lc-960-1-0-0-anc-short-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-anc-short.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "streams": 3,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-lc-960-1-0-0-anc-short-zigzag-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-anc-escaped-whole",
+      "video": "aac-er-lc-960-1-0-0-anc-escaped-whole.mp4",
+      "control": "aac-er-lc-960-1-0-0-anc-escaped-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-anc-escaped-extensions",
+      "video": "aac-er-lc-960-1-0-0-anc-escaped-extensions.mp4",
+      "control": "aac-er-lc-960-1-0-0-anc-escaped-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "streams": 4,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-anc-escaped-zigzag",
+      "video": "aac-er-lc-960-1-0-0-anc-escaped-zigzag.mp4",
+      "control": "aac-er-lc-960-1-0-0-anc-escaped-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "streams": 3,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-anc-version-whole",
+      "video": "aac-er-lc-960-1-0-0-anc-version-whole.mp4",
+      "control": "aac-er-lc-960-1-0-0-anc-version-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-anc-version.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-anc-version-extensions",
+      "video": "aac-er-lc-960-1-0-0-anc-version-extensions.mp4",
+      "control": "aac-er-lc-960-1-0-0-anc-version-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-anc-version.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "streams": 4,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-anc-version-zigzag",
+      "video": "aac-er-lc-960-1-0-0-anc-version-zigzag.mp4",
+      "control": "aac-er-lc-960-1-0-0-anc-version-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-anc-version.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "streams": 3,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-drc-simple-whole",
+      "video": "aac-er-lc-960-1-0-0-drc-simple-whole.mp4",
+      "control": "aac-er-lc-960-1-0-0-drc-simple-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "streams": 1,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-drc-simple-extensions",
+      "video": "aac-er-lc-960-1-0-0-drc-simple-extensions.mp4",
+      "control": "aac-er-lc-960-1-0-0-drc-simple-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "streams": 4,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-drc-simple-zigzag",
+      "video": "aac-er-lc-960-1-0-0-drc-simple-zigzag.mp4",
+      "control": "aac-er-lc-960-1-0-0-drc-simple-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "streams": 3,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-chain-whole",
+      "video": "aac-er-lc-960-1-0-0-chain-whole.mp4",
+      "control": "aac-er-lc-960-1-0-0-chain-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      ],
+      "streams": 1,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-chain-extensions",
+      "video": "aac-er-lc-960-1-0-0-chain-extensions.mp4",
+      "control": "aac-er-lc-960-1-0-0-chain-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      ],
+      "streams": 4,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-chain-zigzag",
+      "video": "aac-er-lc-960-1-0-0-chain-zigzag.mp4",
+      "control": "aac-er-lc-960-1-0-0-chain-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8
+        ]
+      ],
+      "streams": 5,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-reserved-whole",
+      "video": "aac-er-lc-960-1-0-0-reserved-whole.mp4",
+      "control": "aac-er-lc-960-1-0-0-reserved-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-reserved.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "streams": 1,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-reserved-extensions",
+      "video": "aac-er-lc-960-1-0-0-reserved-extensions.mp4",
+      "control": "aac-er-lc-960-1-0-0-reserved-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-reserved.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "streams": 4,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-reserved-zigzag",
+      "video": "aac-er-lc-960-1-0-0-reserved-zigzag.mp4",
+      "control": "aac-er-lc-960-1-0-0-reserved-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-reserved.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "streams": 3,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-fill-zero-whole",
+      "video": "aac-er-lc-1024-6-2-1-fill-zero-whole.mp4",
+      "control": "aac-er-lc-1024-6-2-1-fill-zero-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21
+        ]
+      ],
+      "streams": 1,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-fill-zero-extensions",
+      "video": "aac-er-lc-1024-6-2-1-fill-zero-extensions.mp4",
+      "control": "aac-er-lc-1024-6-2-1-fill-zero-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ],
+        [
+          11
+        ],
+        [
+          12
+        ],
+        [
+          13
+        ],
+        [
+          14
+        ],
+        [
+          15
+        ],
+        [
+          16
+        ],
+        [
+          17
+        ],
+        [
+          18
+        ],
+        [
+          19
+        ],
+        [
+          20,
+          21
+        ]
+      ],
+      "streams": 21,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-fill-zero-zigzag",
+      "video": "aac-er-lc-1024-6-2-1-fill-zero-zigzag.mp4",
+      "control": "aac-er-lc-1024-6-2-1-fill-zero-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          16,
+          17
+        ],
+        [
+          18,
+          19
+        ],
+        [
+          20,
+          21
+        ]
+      ],
+      "streams": 11,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-fill-data-whole",
+      "video": "aac-er-lc-1024-6-2-1-fill-data-whole.mp4",
+      "control": "aac-er-lc-1024-6-2-1-fill-data-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-fill-data.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21
+        ]
+      ],
+      "streams": 1,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-lc-1024-6-2-1-fill-data-whole-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-er-lc-1024-6-2-1-fill-data-whole-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-fill-data-extensions",
+      "video": "aac-er-lc-1024-6-2-1-fill-data-extensions.mp4",
+      "control": "aac-er-lc-1024-6-2-1-fill-data-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-fill-data.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ],
+        [
+          11
+        ],
+        [
+          12
+        ],
+        [
+          13
+        ],
+        [
+          14
+        ],
+        [
+          15
+        ],
+        [
+          16
+        ],
+        [
+          17
+        ],
+        [
+          18
+        ],
+        [
+          19
+        ],
+        [
+          20,
+          21
+        ]
+      ],
+      "streams": 21,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-lc-1024-6-2-1-fill-data-extensions-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-er-lc-1024-6-2-1-fill-data-extensions-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-fill-data-zigzag",
+      "video": "aac-er-lc-1024-6-2-1-fill-data-zigzag.mp4",
+      "control": "aac-er-lc-1024-6-2-1-fill-data-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-fill-data.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          16,
+          17
+        ],
+        [
+          18,
+          19
+        ],
+        [
+          20,
+          21
+        ]
+      ],
+      "streams": 11,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-lc-1024-6-2-1-fill-data-zigzag-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-er-lc-1024-6-2-1-fill-data-zigzag-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-anc-zero-whole",
+      "video": "aac-er-lc-1024-6-2-1-anc-zero-whole.mp4",
+      "control": "aac-er-lc-1024-6-2-1-anc-zero-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-anc-zero-extensions",
+      "video": "aac-er-lc-1024-6-2-1-anc-zero-extensions.mp4",
+      "control": "aac-er-lc-1024-6-2-1-anc-zero-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ],
+        [
+          11
+        ],
+        [
+          12
+        ],
+        [
+          13
+        ],
+        [
+          14
+        ],
+        [
+          15
+        ],
+        [
+          16
+        ],
+        [
+          17
+        ],
+        [
+          18
+        ],
+        [
+          19
+        ],
+        [
+          20,
+          21
+        ]
+      ],
+      "streams": 21,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-anc-zero-zigzag",
+      "video": "aac-er-lc-1024-6-2-1-anc-zero-zigzag.mp4",
+      "control": "aac-er-lc-1024-6-2-1-anc-zero-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          16,
+          17
+        ],
+        [
+          18,
+          19
+        ],
+        [
+          20,
+          21
+        ]
+      ],
+      "streams": 11,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-anc-short-whole",
+      "video": "aac-er-lc-1024-6-2-1-anc-short-whole.mp4",
+      "control": "aac-er-lc-1024-6-2-1-anc-short-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-anc-short.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-lc-1024-6-2-1-anc-short-whole-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-anc-short-extensions",
+      "video": "aac-er-lc-1024-6-2-1-anc-short-extensions.mp4",
+      "control": "aac-er-lc-1024-6-2-1-anc-short-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-anc-short.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ],
+        [
+          11
+        ],
+        [
+          12
+        ],
+        [
+          13
+        ],
+        [
+          14
+        ],
+        [
+          15
+        ],
+        [
+          16
+        ],
+        [
+          17
+        ],
+        [
+          18
+        ],
+        [
+          19
+        ],
+        [
+          20,
+          21
+        ]
+      ],
+      "streams": 21,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-lc-1024-6-2-1-anc-short-extensions-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-anc-short-zigzag",
+      "video": "aac-er-lc-1024-6-2-1-anc-short-zigzag.mp4",
+      "control": "aac-er-lc-1024-6-2-1-anc-short-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-anc-short.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          16,
+          17
+        ],
+        [
+          18,
+          19
+        ],
+        [
+          20,
+          21
+        ]
+      ],
+      "streams": 11,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-lc-1024-6-2-1-anc-short-zigzag-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-anc-escaped-whole",
+      "video": "aac-er-lc-1024-6-2-1-anc-escaped-whole.mp4",
+      "control": "aac-er-lc-1024-6-2-1-anc-escaped-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-anc-escaped-extensions",
+      "video": "aac-er-lc-1024-6-2-1-anc-escaped-extensions.mp4",
+      "control": "aac-er-lc-1024-6-2-1-anc-escaped-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ],
+        [
+          11
+        ],
+        [
+          12
+        ],
+        [
+          13
+        ],
+        [
+          14
+        ],
+        [
+          15
+        ],
+        [
+          16
+        ],
+        [
+          17
+        ],
+        [
+          18
+        ],
+        [
+          19
+        ],
+        [
+          20,
+          21
+        ]
+      ],
+      "streams": 21,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-anc-escaped-zigzag",
+      "video": "aac-er-lc-1024-6-2-1-anc-escaped-zigzag.mp4",
+      "control": "aac-er-lc-1024-6-2-1-anc-escaped-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          16,
+          17
+        ],
+        [
+          18,
+          19
+        ],
+        [
+          20,
+          21
+        ]
+      ],
+      "streams": 11,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-anc-version-whole",
+      "video": "aac-er-lc-1024-6-2-1-anc-version-whole.mp4",
+      "control": "aac-er-lc-1024-6-2-1-anc-version-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-anc-version.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-anc-version-extensions",
+      "video": "aac-er-lc-1024-6-2-1-anc-version-extensions.mp4",
+      "control": "aac-er-lc-1024-6-2-1-anc-version-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-anc-version.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ],
+        [
+          11
+        ],
+        [
+          12
+        ],
+        [
+          13
+        ],
+        [
+          14
+        ],
+        [
+          15
+        ],
+        [
+          16
+        ],
+        [
+          17
+        ],
+        [
+          18
+        ],
+        [
+          19
+        ],
+        [
+          20,
+          21
+        ]
+      ],
+      "streams": 21,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-anc-version-zigzag",
+      "video": "aac-er-lc-1024-6-2-1-anc-version-zigzag.mp4",
+      "control": "aac-er-lc-1024-6-2-1-anc-version-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-anc-version.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          16,
+          17
+        ],
+        [
+          18,
+          19
+        ],
+        [
+          20,
+          21
+        ]
+      ],
+      "streams": 11,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-drc-simple-whole",
+      "video": "aac-er-lc-1024-6-2-1-drc-simple-whole.mp4",
+      "control": "aac-er-lc-1024-6-2-1-drc-simple-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21
+        ]
+      ],
+      "streams": 1,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-drc-simple-extensions",
+      "video": "aac-er-lc-1024-6-2-1-drc-simple-extensions.mp4",
+      "control": "aac-er-lc-1024-6-2-1-drc-simple-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ],
+        [
+          11
+        ],
+        [
+          12
+        ],
+        [
+          13
+        ],
+        [
+          14
+        ],
+        [
+          15
+        ],
+        [
+          16
+        ],
+        [
+          17
+        ],
+        [
+          18
+        ],
+        [
+          19
+        ],
+        [
+          20,
+          21
+        ]
+      ],
+      "streams": 21,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-drc-simple-zigzag",
+      "video": "aac-er-lc-1024-6-2-1-drc-simple-zigzag.mp4",
+      "control": "aac-er-lc-1024-6-2-1-drc-simple-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          16,
+          17
+        ],
+        [
+          18,
+          19
+        ],
+        [
+          20,
+          21
+        ]
+      ],
+      "streams": 11,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-chain-whole",
+      "video": "aac-er-lc-1024-6-2-1-chain-whole.mp4",
+      "control": "aac-er-lc-1024-6-2-1-chain-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-chain.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25
+        ]
+      ],
+      "streams": 1,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-chain-extensions",
+      "video": "aac-er-lc-1024-6-2-1-chain-extensions.mp4",
+      "control": "aac-er-lc-1024-6-2-1-chain-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-chain.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ],
+        [
+          11
+        ],
+        [
+          12
+        ],
+        [
+          13
+        ],
+        [
+          14
+        ],
+        [
+          15
+        ],
+        [
+          16
+        ],
+        [
+          17
+        ],
+        [
+          18
+        ],
+        [
+          19
+        ],
+        [
+          20,
+          21,
+          22,
+          23,
+          24,
+          25
+        ]
+      ],
+      "streams": 21,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-chain-zigzag",
+      "video": "aac-er-lc-1024-6-2-1-chain-zigzag.mp4",
+      "control": "aac-er-lc-1024-6-2-1-chain-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-chain.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          16,
+          17
+        ],
+        [
+          18,
+          19
+        ],
+        [
+          20,
+          21
+        ],
+        [
+          22,
+          23
+        ],
+        [
+          24,
+          25
+        ]
+      ],
+      "streams": 13,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-reserved-whole",
+      "video": "aac-er-lc-1024-6-2-1-reserved-whole.mp4",
+      "control": "aac-er-lc-1024-6-2-1-reserved-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-reserved.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21
+        ]
+      ],
+      "streams": 1,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-reserved-extensions",
+      "video": "aac-er-lc-1024-6-2-1-reserved-extensions.mp4",
+      "control": "aac-er-lc-1024-6-2-1-reserved-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-reserved.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ],
+        [
+          11
+        ],
+        [
+          12
+        ],
+        [
+          13
+        ],
+        [
+          14
+        ],
+        [
+          15
+        ],
+        [
+          16
+        ],
+        [
+          17
+        ],
+        [
+          18
+        ],
+        [
+          19
+        ],
+        [
+          20,
+          21
+        ]
+      ],
+      "streams": 21,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-reserved-zigzag",
+      "video": "aac-er-lc-1024-6-2-1-reserved-zigzag.mp4",
+      "control": "aac-er-lc-1024-6-2-1-reserved-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-reserved.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          16,
+          17
+        ],
+        [
+          18,
+          19
+        ],
+        [
+          20,
+          21
+        ]
+      ],
+      "streams": 11,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-fill-zero-whole",
+      "video": "aac-er-ltp-resilient-960-7-mono-fill-zero-whole.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-fill-zero-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      ],
+      "streams": 1,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-fill-zero-extensions",
+      "video": "aac-er-ltp-resilient-960-7-mono-fill-zero-extensions.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-fill-zero-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "streams": 5,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-fill-zero-zigzag",
+      "video": "aac-er-ltp-resilient-960-7-mono-fill-zero-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-fill-zero-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "streams": 3,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-fill-data-whole",
+      "video": "aac-er-ltp-resilient-960-7-mono-fill-data-whole.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-fill-data-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-fill-data.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      ],
+      "streams": 1,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-960-7-mono-fill-data-whole-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-er-ltp-resilient-960-7-mono-fill-data-whole-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-fill-data-extensions",
+      "video": "aac-er-ltp-resilient-960-7-mono-fill-data-extensions.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-fill-data-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-fill-data.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "streams": 5,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-960-7-mono-fill-data-extensions-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-er-ltp-resilient-960-7-mono-fill-data-extensions-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-fill-data-zigzag",
+      "video": "aac-er-ltp-resilient-960-7-mono-fill-data-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-fill-data-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-fill-data.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "streams": 3,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-960-7-mono-fill-data-zigzag-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-er-ltp-resilient-960-7-mono-fill-data-zigzag-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-anc-zero-whole",
+      "video": "aac-er-ltp-resilient-960-7-mono-anc-zero-whole.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-anc-zero-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-anc-zero-extensions",
+      "video": "aac-er-ltp-resilient-960-7-mono-anc-zero-extensions.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-anc-zero-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "streams": 5,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-anc-zero-zigzag",
+      "video": "aac-er-ltp-resilient-960-7-mono-anc-zero-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-anc-zero-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "streams": 3,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-anc-short-whole",
+      "video": "aac-er-ltp-resilient-960-7-mono-anc-short-whole.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-anc-short-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-anc-short.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-960-7-mono-anc-short-whole-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-anc-short-extensions",
+      "video": "aac-er-ltp-resilient-960-7-mono-anc-short-extensions.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-anc-short-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-anc-short.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "streams": 5,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-960-7-mono-anc-short-extensions-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-anc-short-zigzag",
+      "video": "aac-er-ltp-resilient-960-7-mono-anc-short-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-anc-short-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-anc-short.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "streams": 3,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-960-7-mono-anc-short-zigzag-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-anc-escaped-whole",
+      "video": "aac-er-ltp-resilient-960-7-mono-anc-escaped-whole.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-anc-escaped-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-anc-escaped-extensions",
+      "video": "aac-er-ltp-resilient-960-7-mono-anc-escaped-extensions.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-anc-escaped-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "streams": 5,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-anc-escaped-zigzag",
+      "video": "aac-er-ltp-resilient-960-7-mono-anc-escaped-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-anc-escaped-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "streams": 3,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-anc-version-whole",
+      "video": "aac-er-ltp-resilient-960-7-mono-anc-version-whole.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-anc-version-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-anc-version.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-anc-version-extensions",
+      "video": "aac-er-ltp-resilient-960-7-mono-anc-version-extensions.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-anc-version-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-anc-version.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "streams": 5,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-anc-version-zigzag",
+      "video": "aac-er-ltp-resilient-960-7-mono-anc-version-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-anc-version-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-anc-version.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "streams": 3,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-drc-simple-whole",
+      "video": "aac-er-ltp-resilient-960-7-mono-drc-simple-whole.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-drc-simple-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      ],
+      "streams": 1,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-drc-simple-extensions",
+      "video": "aac-er-ltp-resilient-960-7-mono-drc-simple-extensions.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-drc-simple-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "streams": 5,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-drc-simple-zigzag",
+      "video": "aac-er-ltp-resilient-960-7-mono-drc-simple-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-drc-simple-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "streams": 3,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-chain-whole",
+      "video": "aac-er-ltp-resilient-960-7-mono-chain-whole.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-chain-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      ],
+      "streams": 1,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-chain-extensions",
+      "video": "aac-er-ltp-resilient-960-7-mono-chain-extensions.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-chain-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      ],
+      "streams": 5,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-chain-zigzag",
+      "video": "aac-er-ltp-resilient-960-7-mono-chain-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-chain-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ]
+      ],
+      "streams": 5,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-reserved-whole",
+      "video": "aac-er-ltp-resilient-960-7-mono-reserved-whole.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-reserved-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-reserved.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      ],
+      "streams": 1,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-reserved-extensions",
+      "video": "aac-er-ltp-resilient-960-7-mono-reserved-extensions.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-reserved-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-reserved.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "streams": 5,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-reserved-zigzag",
+      "video": "aac-er-ltp-resilient-960-7-mono-reserved-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-reserved-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-reserved.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "streams": 3,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-fill-zero-whole",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-fill-zero-whole.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-fill-zero-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      ],
+      "streams": 1,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-fill-zero-extensions",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-fill-zero-extensions.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-fill-zero-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10
+        ]
+      ],
+      "streams": 10,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-fill-zero-zigzag",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-fill-zero-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-fill-zero-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "streams": 6,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-fill-data-whole",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-fill-data-whole.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-fill-data-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-fill-data.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      ],
+      "streams": 1,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-1024-7-common-2-fill-data-whole-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-er-ltp-resilient-1024-7-common-2-fill-data-whole-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-fill-data-extensions",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-fill-data-extensions.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-fill-data-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-fill-data.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10
+        ]
+      ],
+      "streams": 10,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-1024-7-common-2-fill-data-extensions-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-er-ltp-resilient-1024-7-common-2-fill-data-extensions-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-fill-data-zigzag",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-fill-data-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-fill-data-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-fill-data.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "streams": 6,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-1024-7-common-2-fill-data-zigzag-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-er-ltp-resilient-1024-7-common-2-fill-data-zigzag-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-anc-zero-whole",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-anc-zero-whole.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-anc-zero-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-anc-zero-extensions",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-anc-zero-extensions.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-anc-zero-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10
+        ]
+      ],
+      "streams": 10,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-anc-zero-zigzag",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-anc-zero-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-anc-zero-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "streams": 6,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-anc-short-whole",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-anc-short-whole.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-anc-short-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-anc-short.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-1024-7-common-2-anc-short-whole-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-anc-short-extensions",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-anc-short-extensions.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-anc-short-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-anc-short.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10
+        ]
+      ],
+      "streams": 10,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-1024-7-common-2-anc-short-extensions-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-anc-short-zigzag",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-anc-short-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-anc-short-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-anc-short.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "streams": 6,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-1024-7-common-2-anc-short-zigzag-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-anc-escaped-whole",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-anc-escaped-whole.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-anc-escaped-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-anc-escaped-extensions",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-anc-escaped-extensions.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-anc-escaped-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10
+        ]
+      ],
+      "streams": 10,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-anc-escaped-zigzag",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-anc-escaped-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-anc-escaped-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "streams": 6,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-anc-version-whole",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-anc-version-whole.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-anc-version-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-anc-version.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-anc-version-extensions",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-anc-version-extensions.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-anc-version-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-anc-version.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10
+        ]
+      ],
+      "streams": 10,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-anc-version-zigzag",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-anc-version-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-anc-version-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-anc-version.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "streams": 6,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-drc-simple-whole",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-drc-simple-whole.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-drc-simple-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      ],
+      "streams": 1,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-drc-simple-extensions",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-drc-simple-extensions.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-drc-simple-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10
+        ]
+      ],
+      "streams": 10,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-drc-simple-zigzag",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-drc-simple-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-drc-simple-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "streams": 6,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-chain-whole",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-chain-whole.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-chain-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-chain.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ]
+      ],
+      "streams": 1,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-chain-extensions",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-chain-extensions.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-chain-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-chain.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ]
+      ],
+      "streams": 10,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-chain-zigzag",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-chain-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-chain-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-chain.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          14
+        ]
+      ],
+      "streams": 8,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-reserved-whole",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-reserved-whole.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-reserved-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-reserved.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      ],
+      "streams": 1,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-reserved-extensions",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-reserved-extensions.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-reserved-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-reserved.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10
+        ]
+      ],
+      "streams": 10,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-reserved-zigzag",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-reserved-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-reserved-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-reserved.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "streams": 6,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-fill-zero-whole",
+      "video": "aac-ld-ltp-480-0-fill-zero-whole.mp4",
+      "control": "aac-ld-ltp-480-0-fill-zero-control.mp4",
+      "golden": "aac-ld-ltp-480-0-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "streams": 1,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-fill-zero-extensions",
+      "video": "aac-ld-ltp-480-0-fill-zero-extensions.mp4",
+      "control": "aac-ld-ltp-480-0-fill-zero-control.mp4",
+      "golden": "aac-ld-ltp-480-0-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "streams": 4,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-fill-zero-zigzag",
+      "video": "aac-ld-ltp-480-0-fill-zero-zigzag.mp4",
+      "control": "aac-ld-ltp-480-0-fill-zero-control.mp4",
+      "golden": "aac-ld-ltp-480-0-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "streams": 3,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-fill-data-whole",
+      "video": "aac-ld-ltp-480-0-fill-data-whole.mp4",
+      "control": "aac-ld-ltp-480-0-fill-data-control.mp4",
+      "golden": "aac-ld-ltp-480-0-fill-data.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "streams": 1,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-ld-ltp-480-0-fill-data-whole-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-ld-ltp-480-0-fill-data-whole-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-ltp-480-0-fill-data-extensions",
+      "video": "aac-ld-ltp-480-0-fill-data-extensions.mp4",
+      "control": "aac-ld-ltp-480-0-fill-data-control.mp4",
+      "golden": "aac-ld-ltp-480-0-fill-data.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "streams": 4,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-ld-ltp-480-0-fill-data-extensions-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-ld-ltp-480-0-fill-data-extensions-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-ltp-480-0-fill-data-zigzag",
+      "video": "aac-ld-ltp-480-0-fill-data-zigzag.mp4",
+      "control": "aac-ld-ltp-480-0-fill-data-control.mp4",
+      "golden": "aac-ld-ltp-480-0-fill-data.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "streams": 3,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-ld-ltp-480-0-fill-data-zigzag-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-ld-ltp-480-0-fill-data-zigzag-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-ltp-480-0-anc-zero-whole",
+      "video": "aac-ld-ltp-480-0-anc-zero-whole.mp4",
+      "control": "aac-ld-ltp-480-0-anc-zero-control.mp4",
+      "golden": "aac-ld-ltp-480-0-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-anc-zero-extensions",
+      "video": "aac-ld-ltp-480-0-anc-zero-extensions.mp4",
+      "control": "aac-ld-ltp-480-0-anc-zero-control.mp4",
+      "golden": "aac-ld-ltp-480-0-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "streams": 4,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-anc-zero-zigzag",
+      "video": "aac-ld-ltp-480-0-anc-zero-zigzag.mp4",
+      "control": "aac-ld-ltp-480-0-anc-zero-control.mp4",
+      "golden": "aac-ld-ltp-480-0-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "streams": 3,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-anc-short-whole",
+      "video": "aac-ld-ltp-480-0-anc-short-whole.mp4",
+      "control": "aac-ld-ltp-480-0-anc-short-control.mp4",
+      "golden": "aac-ld-ltp-480-0-anc-short.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-ld-ltp-480-0-anc-short-whole-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-ltp-480-0-anc-short-extensions",
+      "video": "aac-ld-ltp-480-0-anc-short-extensions.mp4",
+      "control": "aac-ld-ltp-480-0-anc-short-control.mp4",
+      "golden": "aac-ld-ltp-480-0-anc-short.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "streams": 4,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-ld-ltp-480-0-anc-short-extensions-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-ltp-480-0-anc-short-zigzag",
+      "video": "aac-ld-ltp-480-0-anc-short-zigzag.mp4",
+      "control": "aac-ld-ltp-480-0-anc-short-control.mp4",
+      "golden": "aac-ld-ltp-480-0-anc-short.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "streams": 3,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-ld-ltp-480-0-anc-short-zigzag-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-ltp-480-0-anc-escaped-whole",
+      "video": "aac-ld-ltp-480-0-anc-escaped-whole.mp4",
+      "control": "aac-ld-ltp-480-0-anc-escaped-control.mp4",
+      "golden": "aac-ld-ltp-480-0-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-anc-escaped-extensions",
+      "video": "aac-ld-ltp-480-0-anc-escaped-extensions.mp4",
+      "control": "aac-ld-ltp-480-0-anc-escaped-control.mp4",
+      "golden": "aac-ld-ltp-480-0-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "streams": 4,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-anc-escaped-zigzag",
+      "video": "aac-ld-ltp-480-0-anc-escaped-zigzag.mp4",
+      "control": "aac-ld-ltp-480-0-anc-escaped-control.mp4",
+      "golden": "aac-ld-ltp-480-0-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "streams": 3,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-anc-version-whole",
+      "video": "aac-ld-ltp-480-0-anc-version-whole.mp4",
+      "control": "aac-ld-ltp-480-0-anc-version-control.mp4",
+      "golden": "aac-ld-ltp-480-0-anc-version.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-anc-version-extensions",
+      "video": "aac-ld-ltp-480-0-anc-version-extensions.mp4",
+      "control": "aac-ld-ltp-480-0-anc-version-control.mp4",
+      "golden": "aac-ld-ltp-480-0-anc-version.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "streams": 4,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-anc-version-zigzag",
+      "video": "aac-ld-ltp-480-0-anc-version-zigzag.mp4",
+      "control": "aac-ld-ltp-480-0-anc-version-control.mp4",
+      "golden": "aac-ld-ltp-480-0-anc-version.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "streams": 3,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-drc-simple-whole",
+      "video": "aac-ld-ltp-480-0-drc-simple-whole.mp4",
+      "control": "aac-ld-ltp-480-0-drc-simple-control.mp4",
+      "golden": "aac-ld-ltp-480-0-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "streams": 1,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-drc-simple-extensions",
+      "video": "aac-ld-ltp-480-0-drc-simple-extensions.mp4",
+      "control": "aac-ld-ltp-480-0-drc-simple-control.mp4",
+      "golden": "aac-ld-ltp-480-0-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "streams": 4,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-drc-simple-zigzag",
+      "video": "aac-ld-ltp-480-0-drc-simple-zigzag.mp4",
+      "control": "aac-ld-ltp-480-0-drc-simple-control.mp4",
+      "golden": "aac-ld-ltp-480-0-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "streams": 3,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-chain-whole",
+      "video": "aac-ld-ltp-480-0-chain-whole.mp4",
+      "control": "aac-ld-ltp-480-0-chain-control.mp4",
+      "golden": "aac-ld-ltp-480-0-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      ],
+      "streams": 1,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-chain-extensions",
+      "video": "aac-ld-ltp-480-0-chain-extensions.mp4",
+      "control": "aac-ld-ltp-480-0-chain-control.mp4",
+      "golden": "aac-ld-ltp-480-0-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      ],
+      "streams": 4,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-chain-zigzag",
+      "video": "aac-ld-ltp-480-0-chain-zigzag.mp4",
+      "control": "aac-ld-ltp-480-0-chain-control.mp4",
+      "golden": "aac-ld-ltp-480-0-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8
+        ]
+      ],
+      "streams": 5,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-reserved-whole",
+      "video": "aac-ld-ltp-480-0-reserved-whole.mp4",
+      "control": "aac-ld-ltp-480-0-reserved-control.mp4",
+      "golden": "aac-ld-ltp-480-0-reserved.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "streams": 1,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-reserved-extensions",
+      "video": "aac-ld-ltp-480-0-reserved-extensions.mp4",
+      "control": "aac-ld-ltp-480-0-reserved-control.mp4",
+      "golden": "aac-ld-ltp-480-0-reserved.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4
+        ]
+      ],
+      "streams": 4,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-ltp-480-0-reserved-zigzag",
+      "video": "aac-ld-ltp-480-0-reserved-zigzag.mp4",
+      "control": "aac-ld-ltp-480-0-reserved-control.mp4",
+      "golden": "aac-ld-ltp-480-0-reserved.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "streams": 3,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-fill-zero-whole",
+      "video": "aac-ld-stereo-512-7-common-2-fill-zero-whole.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-fill-zero-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      ],
+      "streams": 1,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-fill-zero-extensions",
+      "video": "aac-ld-stereo-512-7-common-2-fill-zero-extensions.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-fill-zero-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10
+        ]
+      ],
+      "streams": 10,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-fill-zero-zigzag",
+      "video": "aac-ld-stereo-512-7-common-2-fill-zero-zigzag.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-fill-zero-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-fill-zero.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "streams": 6,
+      "kind": "fill-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-fill-data-whole",
+      "video": "aac-ld-stereo-512-7-common-2-fill-data-whole.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-fill-data-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-fill-data.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      ],
+      "streams": 1,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-ld-stereo-512-7-common-2-fill-data-whole-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-ld-stereo-512-7-common-2-fill-data-whole-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-fill-data-extensions",
+      "video": "aac-ld-stereo-512-7-common-2-fill-data-extensions.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-fill-data-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-fill-data.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10
+        ]
+      ],
+      "streams": 10,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-ld-stereo-512-7-common-2-fill-data-extensions-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-ld-stereo-512-7-common-2-fill-data-extensions-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-fill-data-zigzag",
+      "video": "aac-ld-stereo-512-7-common-2-fill-data-zigzag.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-fill-data-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-fill-data.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "streams": 6,
+      "kind": "fill-data",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-ld-stereo-512-7-common-2-fill-data-zigzag-nibble.mp4",
+          "error": "invalid AAC fill-data nibble"
+        },
+        {
+          "video": "aac-ld-stereo-512-7-common-2-fill-data-zigzag-byte.mp4",
+          "error": "invalid AAC fill-data byte"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-anc-zero-whole",
+      "video": "aac-ld-stereo-512-7-common-2-anc-zero-whole.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-anc-zero-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-anc-zero-extensions",
+      "video": "aac-ld-stereo-512-7-common-2-anc-zero-extensions.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-anc-zero-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10
+        ]
+      ],
+      "streams": 10,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-anc-zero-zigzag",
+      "video": "aac-ld-stereo-512-7-common-2-anc-zero-zigzag.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-anc-zero-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-anc-zero.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "streams": 6,
+      "kind": "anc-zero",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-anc-short-whole",
+      "video": "aac-ld-stereo-512-7-common-2-anc-short-whole.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-anc-short-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-anc-short.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-ld-stereo-512-7-common-2-anc-short-whole-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-anc-short-extensions",
+      "video": "aac-ld-stereo-512-7-common-2-anc-short-extensions.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-anc-short-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-anc-short.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10
+        ]
+      ],
+      "streams": 10,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-ld-stereo-512-7-common-2-anc-short-extensions-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-anc-short-zigzag",
+      "video": "aac-ld-stereo-512-7-common-2-anc-short-zigzag.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-anc-short-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-anc-short.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "streams": 6,
+      "kind": "anc-short",
+      "pce_tags": null,
+      "malformed": [
+        {
+          "video": "aac-ld-stereo-512-7-common-2-anc-short-zigzag-length.mp4",
+          "error": "AAC ancillary data exceeds fill payload"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-anc-escaped-whole",
+      "video": "aac-ld-stereo-512-7-common-2-anc-escaped-whole.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-anc-escaped-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-anc-escaped-extensions",
+      "video": "aac-ld-stereo-512-7-common-2-anc-escaped-extensions.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-anc-escaped-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10
+        ]
+      ],
+      "streams": 10,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-anc-escaped-zigzag",
+      "video": "aac-ld-stereo-512-7-common-2-anc-escaped-zigzag.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-anc-escaped-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-anc-escaped.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "streams": 6,
+      "kind": "anc-escaped",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-anc-version-whole",
+      "video": "aac-ld-stereo-512-7-common-2-anc-version-whole.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-anc-version-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-anc-version.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      ],
+      "streams": 1,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-anc-version-extensions",
+      "video": "aac-ld-stereo-512-7-common-2-anc-version-extensions.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-anc-version-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-anc-version.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10
+        ]
+      ],
+      "streams": 10,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-anc-version-zigzag",
+      "video": "aac-ld-stereo-512-7-common-2-anc-version-zigzag.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-anc-version-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-anc-version.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "streams": 6,
+      "kind": "anc-version",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-drc-simple-whole",
+      "video": "aac-ld-stereo-512-7-common-2-drc-simple-whole.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-drc-simple-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      ],
+      "streams": 1,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-drc-simple-extensions",
+      "video": "aac-ld-stereo-512-7-common-2-drc-simple-extensions.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-drc-simple-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10
+        ]
+      ],
+      "streams": 10,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-drc-simple-zigzag",
+      "video": "aac-ld-stereo-512-7-common-2-drc-simple-zigzag.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-drc-simple-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-drc-simple.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "streams": 6,
+      "kind": "drc-simple",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-chain-whole",
+      "video": "aac-ld-stereo-512-7-common-2-chain-whole.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-chain-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-chain.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ]
+      ],
+      "streams": 1,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-chain-extensions",
+      "video": "aac-ld-stereo-512-7-common-2-chain-extensions.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-chain-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-chain.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ]
+      ],
+      "streams": 10,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-chain-zigzag",
+      "video": "aac-ld-stereo-512-7-common-2-chain-zigzag.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-chain-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-chain.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          14
+        ]
+      ],
+      "streams": 8,
+      "kind": "chain",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-reserved-whole",
+      "video": "aac-ld-stereo-512-7-common-2-reserved-whole.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-reserved-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-reserved.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      ],
+      "streams": 1,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-reserved-extensions",
+      "video": "aac-ld-stereo-512-7-common-2-reserved-extensions.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-reserved-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-reserved.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10
+        ]
+      ],
+      "streams": 10,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-reserved-zigzag",
+      "video": "aac-ld-stereo-512-7-common-2-reserved-zigzag.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-reserved-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-reserved.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "streams": 6,
+      "kind": "reserved",
+      "pce_tags": null,
+      "malformed": []
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-pce-core-whole",
+      "video": "aac-er-lc-960-1-0-0-pce-core-whole.mp4",
+      "control": "aac-er-lc-960-1-0-0-pce-core-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-pce-core.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-core",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-lc-960-1-0-0-pce-core-whole-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-pce-core-extensions",
+      "video": "aac-er-lc-960-1-0-0-pce-core-extensions.mp4",
+      "control": "aac-er-lc-960-1-0-0-pce-core-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-pce-core.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-core",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-lc-960-1-0-0-pce-core-extensions-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-pce-core-zigzag",
+      "video": "aac-er-lc-960-1-0-0-pce-core-zigzag.mp4",
+      "control": "aac-er-lc-960-1-0-0-pce-core-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-pce-core.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2
+        ]
+      ],
+      "streams": 2,
+      "kind": "pce-core",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-lc-960-1-0-0-pce-core-zigzag-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-pce-chain-whole",
+      "video": "aac-er-lc-960-1-0-0-pce-chain-whole.mp4",
+      "control": "aac-er-lc-960-1-0-0-pce-chain-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-chain",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-lc-960-1-0-0-pce-chain-whole-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-pce-chain-extensions",
+      "video": "aac-er-lc-960-1-0-0-pce-chain-extensions.mp4",
+      "control": "aac-er-lc-960-1-0-0-pce-chain-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      ],
+      "streams": 4,
+      "kind": "pce-chain",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-lc-960-1-0-0-pce-chain-extensions-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-960-1-0-0-pce-chain-zigzag",
+      "video": "aac-er-lc-960-1-0-0-pce-chain-zigzag.mp4",
+      "control": "aac-er-lc-960-1-0-0-pce-chain-control.mp4",
+      "golden": "aac-er-lc-960-1-0-0-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8
+        ]
+      ],
+      "streams": 5,
+      "kind": "pce-chain",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-lc-960-1-0-0-pce-chain-zigzag-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-pce-core-whole",
+      "video": "aac-er-lc-1024-6-2-1-pce-core-whole.mp4",
+      "control": "aac-er-lc-1024-6-2-1-pce-core-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-pce-core.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-core",
+      "pce_tags": [
+        3,
+        5,
+        7,
+        9
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-lc-1024-6-2-1-pce-core-whole-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-pce-core-extensions",
+      "video": "aac-er-lc-1024-6-2-1-pce-core-extensions.mp4",
+      "control": "aac-er-lc-1024-6-2-1-pce-core-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-pce-core.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-core",
+      "pce_tags": [
+        3,
+        5,
+        7,
+        9
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-lc-1024-6-2-1-pce-core-extensions-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-pce-core-zigzag",
+      "video": "aac-er-lc-1024-6-2-1-pce-core-zigzag.mp4",
+      "control": "aac-er-lc-1024-6-2-1-pce-core-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-pce-core.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          16,
+          17
+        ],
+        [
+          18,
+          19
+        ]
+      ],
+      "streams": 10,
+      "kind": "pce-core",
+      "pce_tags": [
+        3,
+        5,
+        7,
+        9
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-lc-1024-6-2-1-pce-core-zigzag-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-pce-chain-whole",
+      "video": "aac-er-lc-1024-6-2-1-pce-chain-whole.mp4",
+      "control": "aac-er-lc-1024-6-2-1-pce-chain-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-chain",
+      "pce_tags": [
+        3,
+        5,
+        7,
+        9
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-lc-1024-6-2-1-pce-chain-whole-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-pce-chain-extensions",
+      "video": "aac-er-lc-1024-6-2-1-pce-chain-extensions.mp4",
+      "control": "aac-er-lc-1024-6-2-1-pce-chain-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ],
+        [
+          11
+        ],
+        [
+          12
+        ],
+        [
+          13
+        ],
+        [
+          14
+        ],
+        [
+          15
+        ],
+        [
+          16
+        ],
+        [
+          17
+        ],
+        [
+          18
+        ],
+        [
+          19
+        ],
+        [
+          20,
+          21,
+          22,
+          23,
+          24,
+          25
+        ]
+      ],
+      "streams": 21,
+      "kind": "pce-chain",
+      "pce_tags": [
+        3,
+        5,
+        7,
+        9
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-lc-1024-6-2-1-pce-chain-extensions-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-lc-1024-6-2-1-pce-chain-zigzag",
+      "video": "aac-er-lc-1024-6-2-1-pce-chain-zigzag.mp4",
+      "control": "aac-er-lc-1024-6-2-1-pce-chain-control.mp4",
+      "golden": "aac-er-lc-1024-6-2-1-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 6,
+      "n": 1024,
+      "frames": 3,
+      "aot": 17,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          16,
+          17
+        ],
+        [
+          18,
+          19
+        ],
+        [
+          20,
+          21
+        ],
+        [
+          22,
+          23
+        ],
+        [
+          24,
+          25
+        ]
+      ],
+      "streams": 13,
+      "kind": "pce-chain",
+      "pce_tags": [
+        3,
+        5,
+        7,
+        9
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-lc-1024-6-2-1-pce-chain-zigzag-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-pce-core-whole",
+      "video": "aac-er-ltp-resilient-960-7-mono-pce-core-whole.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-pce-core-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-pce-core.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-core",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-960-7-mono-pce-core-whole-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-pce-core-extensions",
+      "video": "aac-er-ltp-resilient-960-7-mono-pce-core-extensions.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-pce-core-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-pce-core.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-core",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-960-7-mono-pce-core-extensions-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-pce-core-zigzag",
+      "video": "aac-er-ltp-resilient-960-7-mono-pce-core-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-pce-core-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-pce-core.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "streams": 2,
+      "kind": "pce-core",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-960-7-mono-pce-core-zigzag-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-pce-chain-whole",
+      "video": "aac-er-ltp-resilient-960-7-mono-pce-chain-whole.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-pce-chain-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-chain",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-960-7-mono-pce-chain-whole-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-pce-chain-extensions",
+      "video": "aac-er-ltp-resilient-960-7-mono-pce-chain-extensions.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-pce-chain-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      ],
+      "streams": 5,
+      "kind": "pce-chain",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-960-7-mono-pce-chain-extensions-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-7-mono-pce-chain-zigzag",
+      "video": "aac-er-ltp-resilient-960-7-mono-pce-chain-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-960-7-mono-pce-chain-control.mp4",
+      "golden": "aac-er-ltp-resilient-960-7-mono-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 960,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ]
+      ],
+      "streams": 5,
+      "kind": "pce-chain",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-960-7-mono-pce-chain-zigzag-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-pce-core-whole",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-pce-core-whole.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-pce-core-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-pce-core.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-core",
+      "pce_tags": [
+        5
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-1024-7-common-2-pce-core-whole-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-pce-core-extensions",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-pce-core-extensions.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-pce-core-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-pce-core.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-core",
+      "pce_tags": [
+        5
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-1024-7-common-2-pce-core-extensions-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-pce-core-zigzag",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-pce-core-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-pce-core-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-pce-core.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8
+        ]
+      ],
+      "streams": 5,
+      "kind": "pce-core",
+      "pce_tags": [
+        5
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-1024-7-common-2-pce-core-zigzag-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-pce-chain-whole",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-pce-chain-whole.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-pce-chain-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-chain",
+      "pce_tags": [
+        5
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-1024-7-common-2-pce-chain-whole-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-pce-chain-extensions",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-pce-chain-extensions.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-pce-chain-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ]
+      ],
+      "streams": 10,
+      "kind": "pce-chain",
+      "pce_tags": [
+        5
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-1024-7-common-2-pce-chain-extensions-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-7-common-2-pce-chain-zigzag",
+      "video": "aac-er-ltp-resilient-1024-7-common-2-pce-chain-zigzag.mp4",
+      "control": "aac-er-ltp-resilient-1024-7-common-2-pce-chain-control.mp4",
+      "golden": "aac-er-ltp-resilient-1024-7-common-2-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "frames": 3,
+      "aot": 19,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          14
+        ]
+      ],
+      "streams": 8,
+      "kind": "pce-chain",
+      "pce_tags": [
+        5
+      ],
+      "malformed": [
+        {
+          "video": "aac-er-ltp-resilient-1024-7-common-2-pce-chain-zigzag-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-ltp-480-0-pce-core-whole",
+      "video": "aac-ld-ltp-480-0-pce-core-whole.mp4",
+      "control": "aac-ld-ltp-480-0-pce-core-control.mp4",
+      "golden": "aac-ld-ltp-480-0-pce-core.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-core",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-ld-ltp-480-0-pce-core-whole-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-ltp-480-0-pce-core-extensions",
+      "video": "aac-ld-ltp-480-0-pce-core-extensions.mp4",
+      "control": "aac-ld-ltp-480-0-pce-core-control.mp4",
+      "golden": "aac-ld-ltp-480-0-pce-core.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-core",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-ld-ltp-480-0-pce-core-extensions-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-ltp-480-0-pce-core-zigzag",
+      "video": "aac-ld-ltp-480-0-pce-core-zigzag.mp4",
+      "control": "aac-ld-ltp-480-0-pce-core-control.mp4",
+      "golden": "aac-ld-ltp-480-0-pce-core.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2
+        ]
+      ],
+      "streams": 2,
+      "kind": "pce-core",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-ld-ltp-480-0-pce-core-zigzag-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-ltp-480-0-pce-chain-whole",
+      "video": "aac-ld-ltp-480-0-pce-chain-whole.mp4",
+      "control": "aac-ld-ltp-480-0-pce-chain-control.mp4",
+      "golden": "aac-ld-ltp-480-0-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-chain",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-ld-ltp-480-0-pce-chain-whole-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-ltp-480-0-pce-chain-extensions",
+      "video": "aac-ld-ltp-480-0-pce-chain-extensions.mp4",
+      "control": "aac-ld-ltp-480-0-pce-chain-control.mp4",
+      "golden": "aac-ld-ltp-480-0-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      ],
+      "streams": 4,
+      "kind": "pce-chain",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-ld-ltp-480-0-pce-chain-extensions-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-ltp-480-0-pce-chain-zigzag",
+      "video": "aac-ld-ltp-480-0-pce-chain-zigzag.mp4",
+      "control": "aac-ld-ltp-480-0-pce-chain-control.mp4",
+      "golden": "aac-ld-ltp-480-0-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 1,
+      "n": 480,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8
+        ]
+      ],
+      "streams": 5,
+      "kind": "pce-chain",
+      "pce_tags": [
+        3
+      ],
+      "malformed": [
+        {
+          "video": "aac-ld-ltp-480-0-pce-chain-zigzag-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-pce-core-whole",
+      "video": "aac-ld-stereo-512-7-common-2-pce-core-whole.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-pce-core-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-pce-core.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-core",
+      "pce_tags": [
+        5
+      ],
+      "malformed": [
+        {
+          "video": "aac-ld-stereo-512-7-common-2-pce-core-whole-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-pce-core-extensions",
+      "video": "aac-ld-stereo-512-7-common-2-pce-core-extensions.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-pce-core-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-pce-core.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-core",
+      "pce_tags": [
+        5
+      ],
+      "malformed": [
+        {
+          "video": "aac-ld-stereo-512-7-common-2-pce-core-extensions-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-pce-core-zigzag",
+      "video": "aac-ld-stereo-512-7-common-2-pce-core-zigzag.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-pce-core-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-pce-core.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8
+        ]
+      ],
+      "streams": 5,
+      "kind": "pce-core",
+      "pce_tags": [
+        5
+      ],
+      "malformed": [
+        {
+          "video": "aac-ld-stereo-512-7-common-2-pce-core-zigzag-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-pce-chain-whole",
+      "video": "aac-ld-stereo-512-7-common-2-pce-chain-whole.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-pce-chain-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ]
+      ],
+      "streams": 1,
+      "kind": "pce-chain",
+      "pce_tags": [
+        5
+      ],
+      "malformed": [
+        {
+          "video": "aac-ld-stereo-512-7-common-2-pce-chain-whole-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-pce-chain-extensions",
+      "video": "aac-ld-stereo-512-7-common-2-pce-chain-extensions.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-pce-chain-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ]
+      ],
+      "streams": 10,
+      "kind": "pce-chain",
+      "pce_tags": [
+        5
+      ],
+      "malformed": [
+        {
+          "video": "aac-ld-stereo-512-7-common-2-pce-chain-extensions-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    },
+    {
+      "name": "aac-ld-stereo-512-7-common-2-pce-chain-zigzag",
+      "video": "aac-ld-stereo-512-7-common-2-pce-chain-zigzag.mp4",
+      "control": "aac-ld-stereo-512-7-common-2-pce-chain-control.mp4",
+      "golden": "aac-ld-stereo-512-7-common-2-pce-chain.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "n": 512,
+      "frames": 3,
+      "aot": 23,
+      "partitions": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          14
+        ]
+      ],
+      "streams": 8,
+      "kind": "pce-chain",
+      "pce_tags": [
+        5
+      ],
+      "malformed": [
+        {
+          "video": "aac-ld-stereo-512-7-common-2-pce-chain-zigzag-tag.mp4",
+          "error": "AAC element is absent from PCE"
+        }
+      ]
+    }
+  ],
+  "provenance": "Own ER core packets and independent scalar PCM; grouped categories 5..8, ancillary escapes, DRC syntax, fill/reserved areas; explicit PCE/tagged core and PCE+DRC/ancillary chains with matching native speaker order. DRC metadata is parsed, optional gain application is unchanged. Bad fill/length and absent PCE tag occur at frame 1. No private media, foreign codec, process or network."
+}

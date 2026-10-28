@@ -1,3 +1,65 @@
+## Grouped PS discovery, PCE and ancillary/DRC transport, 2026-10-28
+
+The own grouped PS MP4 `sbr-ps-aot17-1024-24000-explicit-whole-indexed`
+reproduced `missing AAC ESC instance`. NativePsAacDecoder::decode_esc and
+InBandPsProbe::read_esc still used the strict recovered-class reassembler.
+Both EP1-only entrypoints now use grouped ER reassembly; the EP3 materialization
+path remains strict. This fixes both delayed PS decoding and in-band discovery,
+including explicit tagged PCE programmes.
+
+The PS corpus has 432 six-frame programmes: 24 original profile/length/rate/
+signaling controls, each with ordinary or explicit mono PCE/tag3 configuration,
+whole/core/pairwise grouping, and indexed/fragmented/edit-list storage. PCE ASCs
+are authored with epConfig=1 and matching unprotected reference ASCs. Retagged
+logical references differ only in the declared SCE tag. Every physical AU's exact
+bits are checked against separate controls in all storage/edit forms. All 384
+possible category-boundary partitions of the 48 indexed controls match raw
+unprotected decoding and independent syntax-only discovery through header
+changes and EOF. Checkpoints preserve delayed frame identity and the final
+flushed frame. Twenty-four saved absent-tag movies fail at frame 1 with the exact
+PCE error; retry/restore and later frames preserve PS PCM and discovery state.
+
+All PS programmes pass owned/public complete PCM and repeated exact crops,
+WAVE export with crop/gain, AudioStream playback, frame-edge/repeated/EOF/
+past-EOF seek, delayed checkpoint replay and rewind, including silence and
+repeated edit windows. Independent core PCM plus a separate invocation of the
+shared PS stage agrees within 2e-6. This is a transport/routing and independent-
+core crosscheck, not an independent numerical oracle for the complete PS DSP.
+
+A second corpus qualifies 198 three-frame ER programmes across 66 controls.
+It covers categories 5..8, opaque/reserved/fill data, 0/7/255/510-byte ancillary
+lengths, DRC metadata and chained DRC/ancillary/fill; plus explicit PCE core and
+PCE+metadata variants for ER-LC/LTP/LD, with matching native speaker order and
+nontrivial tags 3/5/7/9. Both separate and grouped reconstructions preserve exact
+logical bytes and saved independent scalar PCM. Authored PCE tags are checked
+against the parsed roster. Ninety saved malformed movies cover invalid fill
+nibbles/bytes, oversized ancillary lengths and absent PCE tags, including a late
+LFE tag error. Errors preserve retry/checkpoint/subsequent history. All 2032
+boundary partitions of mono and PCE controls pass; wide PCE chain cases exhaust
+the extension region with the core kept separate. Owned/public full and repeated
+crops, stereo/gain/32-kHz WAVE transforms, software playback, frame-edge/repeated/
+EOF/past-EOF seek and rewind pass. DRC is parsed as metadata; optional DRC gain
+application is unchanged. No additional production change was required for these
+ancillary/PCE grouping cases.
+
+Worker capture now covers 1824 programmes, including all 432 PS and 198 metadata/
+PCE programmes, with exact queued PCM and rational timestamps after live partial
+playback and navigation. The PS corpus has 553 artifacts / 3767625 bytes; the
+metadata corpus has 421 / 5153014. Both regenerate byte-exact with process/socket
+creation forbidden by an audit hook; all ten older EP1 corpora remain unchanged.
+The PCE ASC helper's new optional ep_config argument defaults to the original 0;
+144 default configurations compare byte-exact against the previous helper.
+Ordinary tests require neither FFmpeg nor network. The 1623 root/media unit
+tests pass (29 ignored), as do 123 selected integration checks: 15 new PS/metadata
+checks and the prior 108 AAC/ESC/MP4 checks. All-test compilation passes offline
+with `--no-default-features --features player`; both new integration binaries
+have no FFmpeg/libav linkage.
+
+Still open: same-ASC changes to physical MP4 dependency membership, external
+SL/OD updates, live/partial transport, other codec/profile/tool gaps and physical
+output-device checks. This qualifies the exercised grouped PS/PCE/metadata
+transport and navigation, not universal codec or independent PS DSP conformance.
+
 ## Grouped EP1 ER-LC/LTP/LD core and standard SBR, 2026-10-28
 
 A saved own MP4 reproduced `missing AAC ESC instance` before the fix for

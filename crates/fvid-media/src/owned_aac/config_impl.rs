@@ -186,7 +186,8 @@ pub struct AudioSpecificConfig {
     pub protection: Option<super::aac_ep::Config>,
     /// EP3 one-to-one EP-class/ESC-instance mapping; EP2 is false.
     pub direct_mapping: bool,
-    /// EP1: one separately transported access unit per ESC instance.
+    /// EP1: separately transported AUs carrying consecutive ESC instances,
+    /// optionally grouped within each AU.
     pub separate_esc: bool,
 }
 fn sampling_frequency(b: &mut BitReader<'_>) -> Result<u32> {
