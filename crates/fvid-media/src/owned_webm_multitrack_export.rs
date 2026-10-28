@@ -23,13 +23,38 @@ struct Input {
     video_origin: i64,
 }
 fn open(path: &Path, options: &CopyOptions) -> Result<Reader> {
+    let mut limits = webm::Limits::default();
+    let memory_packets = options
+        .max_controlled_bytes
+        .filter(|&bytes| bytes > 0)
+        .map(|bytes| bytes / std::mem::size_of::<webm::Packet>());
+    if let Some(maximum) = memory_packets {
+        limits.packets = limits.packets.min(maximum);
+    }
+    let map_packet_limit = |error: crate::owned_webm::Error| {
+        if memory_packets.is_some_and(|max| max < webm::Limits::default().packets)
+            && error
+                .to_string()
+                .contains("WebM packet count exceeds limit")
+        {
+            "controlled memory budget exceeded: Matroska packet index limit".to_owned()
+        } else {
+            error.to_string()
+        }
+    };
     let mut reader = webm::WebmReader::open(
         BufReader::new(File::open(path).map_err(|e| e.to_string())?),
-        Default::default(),
+        limits,
     )
-    .map_err(|e| e.to_string())?;
-    reader.restrict_packet_bytes(options.max_packet_bytes);
-    reader.scan_all().map_err(|e| e.to_string())?;
+    .map_err(map_packet_limit)?;
+    reader.scan_all().map_err(map_packet_limit)?;
+    let effective_packet_limit = options
+        .max_controlled_bytes
+        .filter(|&limit| limit > 0)
+        .map_or(options.max_packet_bytes, |limit| {
+            options.max_packet_bytes.min(limit)
+        });
+    reader.restrict_packet_bytes(effective_packet_limit);
     Ok(reader)
 }
 fn check(o: &CopyOptions) -> Result<()> {
@@ -39,9 +64,145 @@ fn check(o: &CopyOptions) -> Result<()> {
     {
         return Err("media operation cancelled".into());
     }
+    if o.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if o.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if o.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
     crate::owned_budget::check_rss_budget(o)
 }
+fn check_multitrack_matroska_metadata_budget(
+    reader: &Reader,
+    video: usize,
+    selected: &[usize],
+    interval: Option<(i64, i64)>,
+    options: &CopyOptions,
+) -> Result<()> {
+    let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0) else {
+        return Ok(());
+    };
+    let vtrack = &reader.tracks[video];
+    let mut description = mkv::VideoTrackDescription {
+        name: vtrack.name.clone(),
+        language: reader
+            .track_languages
+            .get(&vtrack.number)
+            .cloned()
+            .unwrap_or_else(|| "eng".into()),
+        legacy_language: reader
+            .track_legacy_languages
+            .get(&vtrack.number)
+            .cloned()
+            .unwrap_or_else(|| "eng".into()),
+        disposition: reader
+            .track_dispositions
+            .get(&vtrack.number)
+            .copied()
+            .unwrap_or(1),
+    };
+    let mut combined_track_tags = BTreeMap::new();
+    for &index in selected {
+        let track = &reader.tracks[index];
+        let mut tags = reader.track_metadata.get(&0).cloned().unwrap_or_default();
+        if let Some(uid) = reader.track_uids.get(&track.number) {
+            if let Some(scoped) = reader.track_metadata.get(uid) {
+                tags.extend(scoped.clone());
+            }
+        }
+        tags.retain(|k, v| {
+            !k.is_empty()
+                && k.len() <= 128
+                && v.len() <= 1024
+                && !k.contains('\0')
+                && !v.contains('\0')
+        });
+        for (_, key, value) in options
+            .stream_metadata_set
+            .iter()
+            .filter(|(i, _, _)| *i == index)
+        {
+            tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
+            if index == video {
+                if !crate::owned_ffv1_export::edit_track_description(&mut description, key, value)
+                    && !value.is_empty()
+                {
+                    tags.insert(key.to_ascii_uppercase(), value.clone());
+                }
+            } else if !key.eq_ignore_ascii_case("title")
+                && !key.eq_ignore_ascii_case("language")
+                && !value.is_empty()
+            {
+                tags.insert(key.to_ascii_uppercase(), value.clone());
+            }
+        }
+        for (_, key) in options
+            .stream_metadata_delete
+            .iter()
+            .filter(|(i, _)| *i == index)
+        {
+            tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
+            if index == video {
+                crate::owned_ffv1_export::edit_track_description(&mut description, key, "");
+            }
+        }
+        for (k, v) in tags {
+            combined_track_tags.insert(format!("{index}:{k}"), v);
+        }
+    }
+    let origin = reader
+        .packets
+        .iter()
+        .filter(|p| p.track == vtrack.number && !p.invisible)
+        .map(|p| p.pts_ns)
+        .min()
+        .unwrap_or(0);
+    let mut file = mkv::FileMetadata {
+        tags: reader.tags.clone(),
+        chapters: crate::owned_ffv1_export::export_chapters(&reader.chapters, origin, interval)?,
+    };
+    let mut text_tags = reader.metadata.clone();
+    if !reader.writing_app.is_empty()
+        && reader.writing_app != "FVid"
+        && !reader.writing_app.contains('\0')
+        && reader.writing_app.len() <= 1024
+        && !text_tags.keys().any(|k| k.eq_ignore_ascii_case("encoder"))
+    {
+        text_tags.insert("ENCODER".into(), reader.writing_app.clone());
+    }
+    text_tags.retain(|k, v| {
+        !k.is_empty()
+            && k.len() <= 128
+            && v.len() <= 1024
+            && !k.contains('\0')
+            && !v.contains('\0')
+    });
+    for (key, value) in &options.metadata_set {
+        text_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
+        if !file.tags.set(key, value) && !value.is_empty() {
+            text_tags.insert(key.to_ascii_uppercase(), value.clone());
+        }
+    }
+    for key in &options.metadata_delete {
+        file.tags.set(key, "");
+        text_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
+    }
+    if crate::owned_lossless::estimate_matroska_metadata_working_bytes(
+        &file,
+        &text_tags,
+        &combined_track_tags,
+        Some(&description),
+    ) > limit
+    {
+        return Err("Matroska metadata working set exceeds controlled memory budget".into());
+    }
+    Ok(())
+}
 fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option<Input>> {
+    check(o)?;
     let mut prefix = [0; 4];
     if !File::open(path)
         .is_ok_and(|mut f| f.read_exact(&mut prefix).is_ok() && prefix == [0x1a, 0x45, 0xdf, 0xa3])
@@ -51,18 +212,6 @@ fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option
     if crate::owned_lossless::request(t).is_none() {
         return Ok(None);
     }
-    let mut normalized = o.clone();
-    normalized.streams.clear();
-    for (i, _, _) in &mut normalized.stream_metadata_set {
-        *i = 0;
-    }
-    for (i, _) in &mut normalized.stream_metadata_delete {
-        *i = 0;
-    }
-    if !crate::owned_lossless::policy(&normalized, true) {
-        return Ok(None);
-    }
-    check(o)?;
     let mut reader = open(path, o)?;
     if !(2..=126).contains(&reader.tracks.len()) || !reader.metadata_complete {
         return Ok(None);
@@ -129,6 +278,17 @@ fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option
             .collect();
         for index in indices {
             check(o)?;
+            let packet_size = reader
+                .packet_payload_size(index)
+                .map_err(|e| e.to_string())?;
+            if packet_size > o.max_packet_bytes {
+                return Err("WebM packet exceeds budget or has empty lace frame".into());
+            }
+            if o.max_controlled_bytes
+                .is_some_and(|limit| limit > 0 && packet_size > limit)
+            {
+                return Err("WebM packet exceeds controlled memory budget".into());
+            }
             let p = reader.packets[index].clone();
             if p.pts_ns < 0 || p.invisible && i != video || i == video && p.discard_padding_ns != 0
             {
@@ -163,6 +323,35 @@ fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option
             .any(|(i, _)| *i >= reader.tracks.len())
     {
         return Err("metadata refers to missing input track".into());
+    }
+    crate::owned_lossless::metadata(o)?;
+    let mut normalized = o.clone();
+    normalized.streams.clear();
+    for (i, _, _) in &mut normalized.stream_metadata_set {
+        *i = 0;
+    }
+    for (i, _) in &mut normalized.stream_metadata_delete {
+        *i = 0;
+    }
+    if !crate::owned_lossless::policy(&normalized, true) {
+        return Ok(None);
+    }
+    let mut selected_options = o.clone();
+    selected_options
+        .stream_metadata_set
+        .retain(|(i, _, _)| selected.contains(i));
+    selected_options
+        .stream_metadata_delete
+        .retain(|(i, _)| selected.contains(i));
+    crate::owned_lossless::check_options_matroska_metadata_budget(&selected_options)?;
+    check_multitrack_matroska_metadata_budget(&reader, video, &selected, t.interval, o)?;
+    if let Some(limit) = o.max_controlled_bytes.filter(|&limit| limit > 0)
+        && reader
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?
+            > limit
+    {
+        return Err("controlled memory budget exceeded: Matroska index and metadata".into());
     }
     let mut trimmed_audio_sample_frames = 0u64;
     let mut pcm_windows=Vec::new();
@@ -199,25 +388,63 @@ pub(crate) fn plan_selection(
     let Some(request) = crate::owned_lossless::request(t) else {
         return Ok(None);
     };
-    if matches!(
-        crate::owned_video_decode::try_webm(source, &request),
-        Ok(None)
-    ) {
-        return Ok(None);
-    }
     let mut stage = o.clone();
     stage.streams.clear();
     stage.stream_metadata_set.clear();
     stage.stream_metadata_delete.clear();
-    crate::owned_video_decode::decode_webm(source, &request, None, Some(&stage))?;
+    let enforce_encoded_budget =
+        o.max_packet_bytes != CopyOptions::default().max_packet_bytes
+            || o.max_controlled_bytes.is_some();
+    let mut check_encoded =
+        |view: crate::owned_video_decode::FrameView<'_>| -> Result<()> {
+            crate::owned_lossless::check_encoded_ffv1_with_controlled(
+                view,
+                o.max_packet_bytes,
+                o.max_controlled_bytes,
+            )
+        };
+    let Some((stats, _)) = crate::owned_video_decode::decode_webm(
+        source,
+        &request,
+        if enforce_encoded_budget {
+            Some(&mut check_encoded)
+        } else {
+            None
+        },
+        Some(&stage),
+    )? else {
+        return Ok(None);
+    };
+    if stats.video_frames == 0 {
+        return Err("Matroska has no selected frames".into());
+    }
+    if let Some(limit) = o.max_controlled_bytes {
+        let schedule_len = input
+            .reader
+            .packets
+            .len()
+            .checked_add(stats.video_frames as usize)
+            .ok_or("packet schedule overflow")?;
+        let schedule_bytes = schedule_len
+            .checked_mul(std::mem::size_of::<(i128, usize, usize)>())
+            .ok_or("packet schedule overflow")?;
+        if schedule_bytes > limit {
+            return Err("controlled memory budget exceeded: Matroska packet schedule limit".into());
+        }
+    }
     Ok(Some((input.video, input.selected)))
 }
 pub(crate) fn supports(source: &Path, t: &LosslessTransform, o: &CopyOptions) -> bool {
+    if check(o).is_err() {
+        return false;
+    }
     match qualify(source, t, o) {
         Ok(Some(_)) => !matches!(
-            crate::owned_video_decode::try_webm(
+            crate::owned_video_decode::decode_webm(
                 source,
-                &crate::owned_lossless::request(t).unwrap()
+                &crate::owned_lossless::request(t).unwrap(),
+                None,
+                Some(o),
             ),
             Ok(None)
         ),
@@ -236,7 +463,7 @@ pub(crate) fn try_export(
     };
     let request = crate::owned_lossless::request(t).unwrap();
     if matches!(
-        crate::owned_video_decode::try_webm(source, &request),
+        crate::owned_video_decode::decode_webm(source, &request, None, Some(o)),
         Ok(None)
     ) {
         return Ok(None);
@@ -412,15 +639,22 @@ pub(crate) fn try_export(
         });
     }
     let mut schedule = Vec::new();
+    let schedule_len = input
+        .reader
+        .packets
+        .len()
+        .checked_add(video.packets.len())
+        .ok_or("packet schedule overflow")?;
+    if let Some(limit) = o.max_controlled_bytes {
+        let schedule_bytes = schedule_len
+            .checked_mul(std::mem::size_of::<(i128, usize, usize)>())
+            .ok_or("packet schedule overflow")?;
+        if schedule_bytes > limit {
+            return Err("controlled memory budget exceeded: Matroska packet schedule limit".into());
+        }
+    }
     schedule
-        .try_reserve_exact(
-            input
-                .reader
-                .packets
-                .len()
-                .checked_add(video.packets.len())
-                .ok_or("packet schedule overflow")?,
-        )
+        .try_reserve_exact(schedule_len)
         .map_err(|_| "packet schedule allocation failed")?;
 
     for (mapped, &index) in input.selected.iter().enumerate() {

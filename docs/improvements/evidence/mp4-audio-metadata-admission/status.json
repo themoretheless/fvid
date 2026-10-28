@@ -1,0 +1,38 @@
+{
+  "status": "verified-extension-FVID-0332",
+  "not_counted": true,
+  "counting": "same FVID-0332; no new ID",
+  "session": 42944,
+  "log": "/private/tmp/fvid-audio-metadata-before.log",
+  "source_hashes": {
+    "crates/fvid-media/src/owned_mp4_audio_export.rs": "79706f2f4d07ec5c412db04b5959db14803b48850b353121934d3992fd0828b2",
+    "src/native_media.rs": "2bc8ed544efbb1c672b3c749641993c5655becc8b0ced95347a6d9a9d3d615e2",
+    "crates/fvid-media/src/owned_audio_plan.rs": "a261e4263570a8dec8d02fbd64a0a299ae6ba42faea8595040d6a64e3df59eb1",
+    "crates/fvid-media/src/owned_mp4_audio.rs": "4fa7a59099c76cf919c2d6f1a389e803239b6bd352ca488d9fc3b8a7cf77f705",
+    "crates/fvid-media/src/owned_wave_metadata.rs": "385583dd81fb83aeae403551051d647893406c28e087da430fb57ce06e89f99f"
+  },
+  "hypothesis": "MP4 PCM audio geometry and decode planning construct indexed readers with default metadata admission despite a smaller controlled-memory ceiling",
+  "fixture": "17ms own PCM source with legal 2MiB moov/free padding",
+  "controls": "Small metadata at 1MiB and padded metadata at 8MiB must work",
+  "before": "2 failed on unexpected successful geometry/plan results; small and ample-budget controls passed",
+  "initial_after_session": null,
+  "player_session": null,
+  "default_session_log": "/private/tmp/fvid-audio-metadata-default-final.log",
+  "player_log": "/private/tmp/fvid-audio-metadata-player-after.log",
+  "after_source_hashes": {
+    "crates/fvid-media/src/owned_mp4_audio_export.rs": "576bc2b148baf9ac94b4eaf014242e7df2fa97941f9eae8a6d1ae5d5e0bb2b60",
+    "crates/fvid-media/src/owned_mp4_audio.rs": "f48262ddab74e08203a3eb2495af2c60ab8d9d9695791c5fe5389ebc9828d0d8",
+    "crates/fvid-media/src/owned_wave_metadata.rs": "f557407645ede26462bb046a94400e4b9b18e7d677692cc89190a93b250e5b5e",
+    "src/native_media.rs": "1df139bb256394e4cfbbbf9a3860922dfedf84efdb44bb71806c442556dfda51"
+  },
+  "test_sha256": "ded4b4d319ab5e5ed7033047fd66c277337617325ee3422e38b9746d9df62a36",
+  "default_session": null,
+  "test_harness_correction": "Replace unwrap_err with explicit match for non-Debug AudioSourceInfo; refusal and exact metadata-budget message assertions unchanged",
+  "last_observation": "Both post-correction Cargo handles verified live; player compiling fvid-media, default waiting on shared target lock",
+  "player_result": "6 focused + 9 related passed; 0 failed, 0 ignored",
+  "default_result": "6 focused + 8 related passed; 0 failed, 0 ignored",
+  "fixture_hashes": {
+    "small.m4a": "a183c07aa7bed636eae9343c6469548ba2eeb341cef80401d117a59ce03bbb7f",
+    "padded.m4a": "893ce98e126be1ea46a63fa87539a04dd65a467bb3fec905eba561bf2dabd3e1"
+  }
+}

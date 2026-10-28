@@ -103,6 +103,9 @@ impl TemporalMix {
             history: RefCell::new(None),
         })
     }
+    pub fn frame_count(&self) -> usize {
+        self.weights.len()
+    }
     pub fn apply(&self, frame: &mut GeometryFrame, depth: u8, n: u64) -> Result<()> {
         if !(8..=16).contains(&depth) || frame.width == 0 || frame.height == 0 {
             return Err("invalid tmix frame".into());

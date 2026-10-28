@@ -1,0 +1,16 @@
+{
+  "batch": 374,
+  "ids": [
+    "FVID-0381"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-374-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-374-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-374-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-374-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission mp4_and_matroska_audio_export_supports_and_admission_preserve_budget_and_packet_policies",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 41,
+  "failed": 0
+}

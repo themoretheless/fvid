@@ -1,0 +1,24 @@
+{
+  "batch": 334,
+  "accepted": [
+    {
+      "id": "FVID-0341",
+      "title": "Propagate controlled-memory ceilings (max_controlled_bytes) across validate_concat_segments_with_options trailing-segment geometry probes, native_audio_mix::eligible_with_options, mix_audio_with_controls, merge_audio_with_controls, and native_loudnorm Matroska metadata extraction and stream selection",
+      "source": "src/native_audio_mix/concat.rs",
+      "regression": "tests/mp4_audio_metadata_admission.rs",
+      "snapshots": [
+        "docs/improvements/snapshots/batch-334-pre-edit/src/native_audio_mix/concat.rs",
+        "docs/improvements/snapshots/batch-334-pre-edit/src/native_audio_mix.rs",
+        "docs/improvements/snapshots/batch-334-pre-edit/src/native_loudnorm.rs",
+        "docs/improvements/snapshots/batch-334-pre-edit/src/media.rs"
+      ],
+      "evidence": {
+        "acceptance_before": "docs/improvements/evidence/batch-334-acceptance-before.txt",
+        "acceptance_after": "docs/improvements/evidence/batch-334-acceptance-after.txt",
+        "related_after": "docs/improvements/evidence/batch-334-related-after.txt"
+      },
+      "before": "In `validate_concat_segments_with_options` (`src/native_audio_mix/concat.rs`), once `remaining_packets` reached `Some(0)` after an initial segment (e.g. `small.m4a` with `max_packets: Some(1)`), the second loop validated trailing segments' eligibility and geometry (`super::eligible_with_options`, `crate::media::probe`, and `geometry_with_options`) using `default_probe` which omitted `options.max_controlled_bytes`, allowing a trailing `padded.m4a` with a 2 MiB `moov` box to bypass a 1 MiB `max_controlled_bytes` ceiling in `concat_eligible_with_options` and `concat_matroska_to_with_options`. In addition, `is_single_stream_fvid_media_audio_with_options` and `eligible_with_options` (`src/native_audio_mix.rs`) and `selected_audio` (`src/native_loudnorm.rs`) called `crate::media::probe` / `crate::native_probe::probe` without `options`, and `mix_audio_with_controls`, `merge_audio_with_controls` (`src/native_audio_mix.rs`), and `native_loudnorm::try_apply` (`src/native_loudnorm.rs`) called `extract_source_pcm_metadata_with_packet_limit` without forwarding `max_controlled_bytes` when writing `.mka`/`.mkv` outputs.",
+      "after": "Copy `options.max_controlled_bytes` into `default_probe` and call `crate::native_probe::probe_with_options(source, &geom_probe)` in `validate_concat_segments_with_options` (`src/native_audio_mix/concat.rs`), use `try_probe_as_with_options` / `probe_with_options` in `is_single_stream_fvid_media_audio_with_options`, `eligible_with_options` (`src/native_audio_mix.rs`), and `selected_audio` (`src/native_loudnorm.rs`), and call `extract_source_pcm_metadata_with_interval_packet_and_memory_limit` with `max_controlled_bytes` in `mix_audio_with_controls`, `merge_audio_with_controls`, and `native_loudnorm::try_apply`. Nine integration tests in `mp4_audio_metadata_admission` and nine in `mp4_metadata_admission` pass."
+    }
+  ]
+}

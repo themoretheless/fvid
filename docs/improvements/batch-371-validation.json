@@ -1,0 +1,16 @@
+{
+  "batch": 371,
+  "ids": [
+    "FVID-0378"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-371-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-371-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-371-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-371-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission overlay_pcm_export_mp4_concat_and_wave_loudness_enforce_canonical_option_order -- --exact",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 38,
+  "failed": 0
+}

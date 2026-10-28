@@ -1,0 +1,13 @@
+{
+  "status": "hypothesis-not-counted",
+  "source": "src/container/mp4_concat.rs",
+  "source_sha256": "5448efdd63f2d6bfc68625d20ca711a4a1d0f399862cd661b0c13314ea130a17",
+  "observation": "open_with_options creates plans for all tracks of every segment before the controlled-memory check. The later plan_bytes sum includes only selected tracks, whereas unselected track plans remain allocated in Segment.plans.",
+  "next_steps": [
+    "Construct a short owned multitrack fixture where unselected track sample timing dominates memory",
+    "Prove budget admission differs from actual retained PacketTime table sizes",
+    "Add regression before changing allocation/admission and verify full concat playback",
+    "Preserve packet/timestamp checks and selection semantics"
+  ],
+  "heavy_checks": "Deferred during coordinated GPU quiet window; no accepted ID assigned"
+}

@@ -1,0 +1,16 @@
+{
+  "batch": 354,
+  "ids": [
+    "FVID-0361"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-354-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-354-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-354-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-354-related-after.txt",
+  "commands": [
+    "cargo test --locked --offline --no-default-features --test mp4_audio_metadata_admission",
+    "cargo check --locked --offline --no-default-features --bin fvid"
+  ],
+  "passed": 21,
+  "failed": 0
+}

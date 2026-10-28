@@ -1,0 +1,5 @@
+{
+  "crates/fvid-media/src/owned_mp4_impl.rs": "864757e11439da14ff30ea3e933a67c8c3b6cf8d9d0e1e373548111077380056",
+  "tests/mp4_unknown_duration.rs": "c109ddf40721fe05a76f941281782332603b429bd87b39eb98d0635d6e3c8ffb",
+  "scripts/generate_mp4_unknown_duration.py": "575e6f496b2467b1dc3469d00b631360954a6fde3afd9b6bb7747ff17259103c"
+}

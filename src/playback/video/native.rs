@@ -201,10 +201,15 @@ impl<R: BufRead + Seek> NativeReader<R> {
             ));
         }
         let rgb_budget = budget / 4;
+        let mp4_limits = Limits {
+            metadata_bytes: Limits::default().metadata_bytes.min(budget),
+            packet_bytes: Limits::default().packet_bytes.min(budget),
+            ..Default::default()
+        };
         let source = if allow_hardware {
-            Mp4VideoReader::open(reader, Limits::default(), budget - rgb_budget)?
+            Mp4VideoReader::open(reader, mp4_limits, budget - rgb_budget)?
         } else {
-            Mp4VideoReader::open_software(reader, Limits::default(), budget - rgb_budget)?
+            Mp4VideoReader::open_software(reader, mp4_limits, budget - rgb_budget)?
         };
         let track = source.track();
         let edits = playback_edits(track, source.movie_timescale())?;

@@ -13,6 +13,14 @@ pub(crate) fn supports(
 ) -> bool {
     if destination.extension().and_then(|s| s.to_str()) != Some("wav")
         || !single_audio_options(options)
+        || options
+            .cancel
+            .as_ref()
+            .is_some_and(fvid_control::CancelFlag::is_cancelled)
+        || options.max_packet_bytes == 0
+        || options.max_packets == Some(0)
+        || options.max_controlled_bytes == Some(0)
+        || crate::owned_budget::check_rss_budget(options).is_err()
     {
         return false;
     }
@@ -70,7 +78,59 @@ pub(crate) fn supports(
     let Ok(mut file) = std::fs::File::open(source) else {
         return false;
     };
-    crate::owned_wave_inspect::inspect(&mut file, None).is_ok_and(|info| {
+    crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref()).is_ok_and(|info| {
+        if info.sample_frames == 0 || !(1..=255).contains(&info.channels) {
+            return false;
+        }
+        let frame_bytes = usize::from(info.block);
+        let capacity = if frame_bytes == 0 {
+            0
+        } else {
+            (4096 * frame_bytes).min(options.max_packet_bytes / frame_bytes * frame_bytes)
+        };
+        if capacity == 0 {
+            return false;
+        }
+        let Ok(full_size) = usize::try_from(info.data_bytes) else {
+            return false;
+        };
+        let limit = options
+            .max_packets
+            .map(|packets| u128::from(packets) * capacity as u128)
+            .unwrap_or(full_size as u128);
+        let size = (full_size as u128).min(limit) as usize;
+        if size == 0 {
+            return false;
+        }
+        if let Some((from, to)) = transform.interval {
+            if from < 0 || to <= from {
+                return false;
+            }
+            let frames_read = size / frame_bytes;
+            let Ok(out_rate) =
+                u128::try_from(transform.sample_rate.unwrap_or(info.sample_rate as i32))
+            else {
+                return false;
+            };
+            let Some(output_frames) = (frames_read as u128)
+                .checked_mul(out_rate)
+                .and_then(|n| usize::try_from(n.div_ceil(u128::from(info.sample_rate))).ok())
+            else {
+                return false;
+            };
+            let boundary = |time: i64| -> Option<usize> {
+                (time as u128)
+                    .checked_mul(out_rate)
+                    .and_then(|n| usize::try_from(n.div_ceil(1_000_000)).ok())
+                    .map(|n| n.min(output_frames))
+            };
+            let (Some(first), Some(last)) = (boundary(from), boundary(to)) else {
+                return false;
+            };
+            if last <= first {
+                return false;
+            }
+        }
         let channels = transform.channels.unwrap_or(i32::from(info.channels));
         let changes_channels = channels != i32::from(info.channels);
         let conversion = !changes_channels
@@ -106,6 +166,23 @@ pub(crate) fn validate_request(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<f64> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
     if !single_audio_options(options) {
         return Err(
             "owned audio export does not yet implement these control/metadata policies".into(),
@@ -157,15 +234,10 @@ pub fn decode_audio_transformed(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
-    if !single_audio_options(options) {
-        return Err(
-            "owned audio export does not yet implement these control/metadata policies".into(),
-        );
-    }
+    let gain = validate_request(transform, options)?;
     if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
         return Err("owned WAVE export requires .wav output".into());
     }
-    let gain = validate_request(transform, options)?;
     if crate::owned_g711_wave_export::recognizes(source,options)? {
         return crate::owned_g711_wave_export::apply(source,destination,transform,options);
     }
@@ -294,8 +366,8 @@ pub fn decode_audio_transformed(
     let channels = transform.channels.unwrap_or(input.channels);
     if channels != input.channels {
         let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
-        let info =
-            crate::owned_wave_inspect::inspect(&mut file, None).map_err(|e| e.to_string())?;
+        let info = crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref())
+            .map_err(|e| e.to_string())?;
         if !(info.channels <= 2 && info.channel_mask == 0)
             && !(info.channel_mask != 0
                 && crate::owned_pcm_channels::rematrix_layout_supported(

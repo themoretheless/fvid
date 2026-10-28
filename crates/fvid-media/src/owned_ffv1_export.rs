@@ -5,23 +5,84 @@ use fvid_media_info::{DecodeStats, DecodeTransform};
 use std::{fs::File, io::BufReader, path::Path};
 type Result<T> = std::result::Result<T, String>;
 fn input(source: &Path) -> Result<crate::owned_webm::WebmReader<BufReader<File>>> {
+    input_limited(source, usize::MAX, None)
+}
+fn input_limited(
+    source: &Path,
+    max_packet_bytes: usize,
+    max_controlled_bytes: Option<usize>,
+) -> Result<crate::owned_webm::WebmReader<BufReader<File>>> {
+    let mut limits = crate::owned_webm::Limits::default();
+    let memory_packets =
+        max_controlled_bytes.map(|bytes| bytes / std::mem::size_of::<crate::owned_webm::Packet>());
+    if let Some(maximum) = memory_packets {
+        limits.packets = limits.packets.min(maximum);
+    }
+    let map_packet_limit = |error: crate::owned_webm::Error| {
+        if memory_packets.is_some_and(|max| max < crate::owned_webm::Limits::default().packets)
+            && error
+                .to_string()
+                .contains("WebM packet count exceeds limit")
+        {
+            "controlled memory budget exceeded: Matroska packet index limit".to_owned()
+        } else {
+            error.to_string()
+        }
+    };
     let mut input = crate::owned_webm::WebmReader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        Default::default(),
+        limits,
     )
-    .map_err(|e| e.to_string())?;
-    input.scan_all().map_err(|e| e.to_string())?;
+    .map_err(map_packet_limit)?;
+    input.scan_all().map_err(map_packet_limit)?;
+    if let Some(limit) = max_controlled_bytes.filter(|&limit| limit > 0)
+        && input
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?
+            > limit
+    {
+        return Err("controlled memory budget exceeded: Matroska index and metadata".into());
+    }
+    input.restrict_packet_bytes(max_packet_bytes);
     Ok(input)
 }
 pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
-    let Ok(mut input) = input(source) else {
+    supports_with_options(source, transform, None)
+}
+pub(crate) fn supports_with_options(
+    source: &Path,
+    transform: &DecodeTransform,
+    options: Option<&CopyOptions>,
+) -> bool {
+    if options
+        .and_then(|o| o.cancel.as_ref())
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+        || options.is_some_and(|o| {
+            o.max_packet_bytes == 0
+                || o.max_packets == Some(0)
+                || o.max_controlled_bytes == Some(0)
+                || crate::owned_budget::check_rss_budget(o).is_err()
+        })
+    {
         return false;
+    }
+    let Ok(mut input) = input_limited(
+        source,
+        options.map_or(usize::MAX, |o| o.max_packet_bytes),
+        options.and_then(|o| o.max_controlled_bytes),
+    ) else {
+        let mut prefix = [0u8; 4];
+        return options.is_some()
+            && File::open(source).is_ok_and(|mut f| {
+                std::io::Read::read_exact(&mut f, &mut prefix).is_ok()
+                    && prefix == [0x1a, 0x45, 0xdf, 0xa3]
+            });
     };
     if input.tracks.len() != 1 || !input.metadata_complete {
         return false;
     }
     if matches!(input.tracks[0].codec.as_str(),"V_VP9"|"V_AV1"|"V_MPEGH/ISO/HEVC"|"V_MPEG4/ISO/AVC") {
-        match crate::owned_webm_codec::presentation_durations(&mut input,None) {
+        match crate::owned_webm_codec::presentation_durations(&mut input, options) {
             Ok(None) => return false,
             // Corrupt admitted packets must fail execution atomically.
             Ok(Some(_)) | Err(_) => {},
@@ -49,7 +110,10 @@ pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
     }
     // Qualify all keyframes before selecting this backend, preserving legacy tools.
     // Corruption remains owned and is reported by execution, without publication.
-    !matches!(decode::try_webm(source, transform), Ok(None))
+    !matches!(
+        decode::decode_webm(source, transform, None, options),
+        Ok(None)
+    )
 }
 fn aspect(
     track: &crate::owned_webm::Track,
@@ -125,7 +189,7 @@ fn aspect(
         u32::try_from(d / a).map_err(|_| "pixel aspect overflow")?,
     ))
 }
-fn export_chapters(
+pub(crate) fn export_chapters(
     chapters: &[mkv::Chapter],
     origin: i64,
     interval: Option<(i64, i64)>,
@@ -200,7 +264,28 @@ pub(crate) fn export_processed(
     options: &CopyOptions,
     mut process: Option<&mut dyn FnMut(&mut crate::owned_frame::GeometryFrame, u8, i64, bool) -> Result<()>>,
 ) -> Result<(DecodeStats, fvid_control::ProgressEvent, u64)> {
-    let input = input(source)?;
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    let input = input_limited(
+        source,
+        options.max_packet_bytes,
+        options.max_controlled_bytes,
+    )?;
     let track = input.tracks.iter().find(|t|t.kind==1).ok_or("input has no video stream")?;
     let mut description = mkv::VideoTrackDescription {
         name: track.name.clone(),
@@ -273,6 +358,19 @@ pub(crate) fn export_processed(
         metadata.tags.set(key, "");
         text_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
     }
+    if let Some(limit) = options.max_controlled_bytes {
+        let mut preview = metadata.clone();
+        preview.chapters = input.chapters.clone();
+        if crate::owned_lossless::estimate_matroska_metadata_working_bytes(
+            &preview,
+            &text_tags,
+            &track_tags,
+            Some(&description),
+        ) > limit
+        {
+            return Err("Matroska metadata working set exceeds controlled memory budget".into());
+        }
+    }
     mkv::export_atomic(
         destination,
         options.cancel.as_ref(),
@@ -340,6 +438,12 @@ pub(crate) fn export_processed(
                 };
                 if packet.len() > options.max_packet_bytes {
                     return Err("encoded FFV1 packet exceeds byte limit".into());
+                }
+                if options
+                    .max_controlled_bytes
+                    .is_some_and(|limit| packet.len() > limit)
+                {
+                    return Err("encoded FFV1 packet exceeds controlled memory budget".into());
                 }
                 if writer.is_none() {
                     metadata.chapters=export_chapters(&input.chapters,view.origin_ns,transform.interval)?;

@@ -18,7 +18,8 @@ pub type Result<T> = std::result::Result<T, String>;
 pub use crate::native_export::{export_y4m, export_y4m_interval, export_y4m_transformed};
 
 pub fn plan_overlay(source:&std::path::Path,overlay:&std::path::Path,x:i32,y:i32,options:&CopyOptions)->Result<MediaPlan> {
-    if crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? && validate_native_copy_options(options,false).is_ok() {
+    validate_concat_matroska_options(options)?;
+    if validate_native_copy_options(options,false).is_ok() && crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? {
         return crate::native_plan::overlay(source,overlay,i64::from(x),i64::from(y));
     }
     fvid_media::plan_overlay(source,overlay,x,y,options)
@@ -26,7 +27,8 @@ pub fn plan_overlay(source:&std::path::Path,overlay:&std::path::Path,x:i32,y:i32
 
 /// Owned opaque overlay for compatible main inputs; retains supported main audio.
 pub fn overlay_video(source:&std::path::Path,overlay:&std::path::Path,destination:&std::path::Path,x:i32,y:i32,options:&CopyOptions)->Result<LosslessStats> {
-    if crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? && validate_native_copy_options(options,false).is_ok() {
+    validate_concat_matroska_options(options)?;
+    if validate_native_copy_options(options,false).is_ok() && crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? {
         return crate::native_export::overlay_video(source,overlay,destination,i64::from(x),i64::from(y),options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string());
     }
     fvid_media::overlay_video(source,overlay,destination,x,y,options)
@@ -46,6 +48,7 @@ pub fn convert_subtitles_with_controls(
     options: &SubtitleConvertOptions,
     controls: &CopyOptions,
 ) -> Result<SubtitleConvertStats> {
+    validate_concat_matroska_options(controls)?;
     if let Some(stats) =
         crate::native_subtitle::try_convert_with_controls(source, destination, options, controls)
             .map_err(|e| e.to_string())?
@@ -67,11 +70,26 @@ pub fn plan_convert_subtitles_with_controls(
     options: &SubtitleConvertOptions,
     controls: &CopyOptions,
 ) -> Result<MediaPlan> {
+    plan_convert_subtitles_for_destination(source, None, options, controls)
+}
+
+pub fn plan_convert_subtitles_for_destination(
+    source: &std::path::Path,
+    destination: Option<&std::path::Path>,
+    options: &SubtitleConvertOptions,
+    controls: &CopyOptions,
+) -> Result<MediaPlan> {
+    validate_concat_matroska_options(controls)?;
     if let Some(plan) =
-        crate::native_subtitle::try_plan_with_controls(source, None, options, controls)
+        crate::native_subtitle::try_plan_with_controls(source, destination, options, controls)
             .map_err(|e| e.to_string())?
     {
         return Ok(plan);
+    }
+    if let Some(dest) = destination
+        && dest.extension().and_then(|s| s.to_str()) != Some("mkv")
+    {
+        return Err("convert-subtitles requires Matroska (.mkv) output".into());
     }
     fvid_media::plan_convert_subtitles_with_controls(source, options, controls)
 }
@@ -142,6 +160,19 @@ fn has_only_wave_info_metadata(options: &CopyOptions) -> bool {
 }
 
 fn uses_native_audio_route(source: &std::path::Path, options: &CopyOptions, transform: &AudioDecodeTransform) -> Result<bool> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    fvid_media::owned_budget::check_rss_budget(options)?;
     if options.max_controlled_bytes.is_some() || has_metadata_mutations(options) {
         return Ok(false);
     }
@@ -157,10 +188,17 @@ fn uses_native_audio_route(source: &std::path::Path, options: &CopyOptions, tran
         match input.read_exact(&mut prefix) {
             Ok(()) if crate::container::mp4::recognizes_prefix(&prefix) => {
                 use std::io::{Seek, SeekFrom};
+                if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+                    return Err("media operation cancelled".into());
+                }
                 input.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+                let mut limits = crate::container::mp4::Limits::default();
+                if options.max_packet_bytes > 0 {
+                    limits.packet_bytes = limits.packet_bytes.min(options.max_packet_bytes);
+                }
                 let reader = crate::container::mp4::Mp4Reader::open_indexed(
                     std::io::BufReader::new(input),
-                    crate::container::mp4::Limits { packet_bytes: options.max_packet_bytes, ..Default::default() },
+                    limits,
                 ).map_err(|e| e.to_string())?;
                 if reader.tracks().iter().any(|t| t.ensure_constant_description().is_err()) {
                     return Ok(false);
@@ -174,12 +212,20 @@ fn uses_native_audio_route(source: &std::path::Path, options: &CopyOptions, tran
             Err(e) => return Err(e.to_string()),
         }
     }
-    if !crate::native_media::is_owned_audio_trim_source(source).map_err(|e| e.to_string())? {
+    let interval = transform.interval.and_then(|(from, to)| {
+        (from >= 0 && to > from).then(|| {
+            (
+                std::time::Duration::from_micros(from as u64),
+                std::time::Duration::from_micros(to as u64),
+            )
+        })
+    });
+    if !crate::native_media::is_owned_audio_trim_source_with_interval_and_options(source, interval, options).map_err(|e| e.to_string())? {
         return Ok(false);
     }
     if options.streams.len() == 1 {
         return Ok(
-            crate::native_media::audio_source_info_selected(source, Some(options.streams[0]))
+            crate::native_media::audio_source_info_selected_with_interval_and_options(source, Some(options.streams[0]), interval, options)
                 .is_ok(),
         );
     }
@@ -221,6 +267,23 @@ pub(crate) fn decode_fvid_media_audio_to_destination(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(crate::media_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    fvid_media::owned_budget::check_rss_budget(options)?;
     let ext = destination.extension().and_then(|s| s.to_str());
     if !matches!(ext, Some("f32le" | "mka" | "mkv")) {
         return fvid_media::decode_audio_transformed(source, destination, transform, options);
@@ -230,7 +293,30 @@ pub(crate) fn decode_fvid_media_audio_to_destination(
         if !matroska_out {
             return Err("native audio does not yet support requested allocation budget or metadata/stream mutations".into());
         }
-        validate_owned_audio_options_for_destination(options, Some(destination))?;
+        let mut meta_options = options.clone();
+        meta_options.max_controlled_bytes = None;
+        validate_owned_audio_options_for_destination(&meta_options, Some(destination))?;
+    }
+    if matroska_out && options.max_controlled_bytes.is_some() {
+        let mut clean_probe = options.clone();
+        clean_probe.metadata_set.clear();
+        clean_probe.metadata_delete.clear();
+        clean_probe.stream_metadata_set.clear();
+        clean_probe.stream_metadata_delete.clear();
+        let (_, src_channels) =
+            fvid_media::owned_audio_plan::source_geometry(source, &clean_probe)?;
+        let out_channels = transform
+            .channels
+            .and_then(|c| u16::try_from(c).ok())
+            .unwrap_or(src_channels);
+        crate::native_export::pcm_matroska::check_output_memory_budget(
+            source,
+            out_channels,
+            65536,
+            options,
+            Some(true),
+        )
+        .map_err(|e| e.to_string())?;
     }
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
@@ -243,6 +329,16 @@ pub(crate) fn decode_fvid_media_audio_to_destination(
     spool_options.stream_metadata_delete.clear();
     let original_progress = spool_options.progress.take();
     let decoded = fvid_media::decode_audio_transformed(source, &spool.0, transform, &spool_options)?;
+    if matroska_out && options.max_controlled_bytes.is_some() {
+        crate::native_export::pcm_matroska::check_output_memory_budget(
+            source,
+            u16::try_from(decoded.channels).unwrap_or(2),
+            65536,
+            options,
+            Some(true),
+        )
+        .map_err(|e| e.to_string())?;
+    }
     let mut publish_options = CopyOptions::default();
     publish_options.cancel = options.cancel.clone();
     publish_options.max_rss_bytes = options.max_rss_bytes;
@@ -254,12 +350,24 @@ pub(crate) fn decode_fvid_media_audio_to_destination(
         publish_options.stream_metadata_delete = options.stream_metadata_delete.clone();
     }
     let source_matroska_metadata = if matroska_out {
+        let interval = transform
+            .interval
+            .filter(|&(from, to)| from >= 0 && to > from)
+            .map(|(from, to)| {
+                (
+                    std::time::Duration::from_micros(from as u64),
+                    std::time::Duration::from_micros(to as u64),
+                )
+            });
         Some(
-            crate::native_export::pcm_matroska::extract_source_pcm_metadata(
+            crate::native_export::pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
                 source,
                 options.streams.first().copied(),
                 true,
+                interval,
                 Some(options.max_packet_bytes),
+                options.max_packets,
+                options.max_controlled_bytes,
                 options.cancel.as_ref(),
             )
             .map_err(|e| e.to_string())?,
@@ -335,6 +443,19 @@ pub(crate) fn validate_owned_audio_options_for_destination(
     options: &CopyOptions,
     destination: Option<&std::path::Path>,
 ) -> Result<()> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(crate::media_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 { return Err("packet byte limit must be positive".into()); }
+    if options.max_packets == Some(0) { return Err("packet work limit requires at least one packet".into()); }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    fvid_media::owned_budget::check_rss_budget(options)?;
     let matroska_out = destination.is_some_and(|d| {
         matches!(d.extension().and_then(|s| s.to_str()), Some("mka" | "mkv"))
     });
@@ -348,11 +469,27 @@ pub(crate) fn validate_owned_audio_options_for_destination(
         crate::native_export::pcm_matroska::validate_matroska_pcm_metadata(Some(options))
             .map_err(|e| e.to_string())?;
     }
-    if options.max_packet_bytes == 0 { return Err("packet byte limit must be positive".into()); }
-    fvid_media::owned_budget::check_rss_budget(options)
+    Ok(())
 }
 
 fn validate_native_copy_options(options: &CopyOptions, audio_selection: bool) -> Result<()> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(crate::media_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    fvid_media::owned_budget::check_rss_budget(options)?;
     if (if audio_selection { options.streams.len() > 1 } else { !options.streams.is_empty() })
         || options.max_packet_bytes != CopyOptions::default().max_packet_bytes
         || options.max_packets.is_some()
@@ -369,19 +506,112 @@ fn validate_native_copy_options(options: &CopyOptions, audio_selection: bool) ->
 }
 
 fn validate_matroska_copy_options(options: &CopyOptions) -> Result<()> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(crate::media_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
     if options.max_packet_bytes == 0 { return Err("packet byte limit must be positive".into()); }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
     fvid_media::owned_budget::check_rss_budget(options)?;
     let mut remaining = options.clone();
     remaining.max_packet_bytes = CopyOptions::default().max_packet_bytes;
+    remaining.max_controlled_bytes = None;
     remaining.max_rss_bytes = None;
     validate_native_copy_options(&remaining, false)
 }
 
 fn validate_mp4_relocate_options(options: &CopyOptions) -> Result<()> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(crate::media_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 { return Err("packet byte limit must be positive".into()); }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
     fvid_media::owned_budget::check_rss_budget(options)?;
     let mut remaining = options.clone();
+    remaining.max_packet_bytes = CopyOptions::default().max_packet_bytes;
+    remaining.max_controlled_bytes = None;
     remaining.max_rss_bytes = None;
     validate_native_copy_options(&remaining, false)
+}
+
+fn validate_mp4_packet_budget(source: &std::path::Path, options: &CopyOptions) -> Result<()> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(crate::media_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        || options.max_controlled_bytes.is_some()
+    {
+        let file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+        let effective_packet_bytes = options
+            .max_packet_bytes
+            .min(options.max_controlled_bytes.unwrap_or(usize::MAX));
+        let reader = crate::container::mp4::Mp4Reader::open(
+            std::io::BufReader::new(file),
+            crate::container::mp4::Limits {
+                packet_bytes: effective_packet_bytes,
+                metadata_bytes: crate::container::mp4::Limits::default().metadata_bytes
+                    .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+                ..Default::default()
+            },
+        )
+        .map_err(|e| e.to_string())?;
+        if let Some(mem_limit) = options.max_controlled_bytes
+            && reader.estimated_index_payload_bytes().map_err(|e| e.to_string())? > mem_limit
+        {
+            return Err("controlled memory budget exceeded: MP4 index payload exceeds budget".into());
+        }
+        for track in reader.tracks() {
+            if (0..track.samples.len()).any(|i| {
+                track
+                    .samples
+                    .get(i)
+                    .is_some_and(|sample| usize::try_from(sample.size).unwrap_or(usize::MAX) > options.max_packet_bytes)
+            }) {
+                return Err("MP4 packet exceeds budget".into());
+            }
+            if let Some(mem_limit) = options.max_controlled_bytes
+                && (0..track.samples.len()).any(|i| {
+                    track
+                        .samples
+                        .get(i)
+                        .is_some_and(|sample| usize::try_from(sample.size).unwrap_or(usize::MAX) > mem_limit)
+                })
+            {
+                return Err("controlled memory budget exceeded".into());
+            }
+        }
+    }
+    Ok(())
 }
 
 /// Plan AAC or WAVE decoding using owned metadata and decoder configuration.
@@ -393,8 +623,10 @@ pub fn plan_decode_audio(
 ) -> Result<MediaPlan> {
     if !uses_native_audio_route(source, options, transform)? {
         if has_metadata_mutations(options) && !has_only_wave_info_metadata(options) {
+            let mut meta_options = options.clone();
+            meta_options.max_controlled_bytes = None;
             validate_owned_audio_options_for_destination(
-                options,
+                &meta_options,
                 Some(std::path::Path::new("planned.mka")),
             )?;
             let mut stripped = options.clone();
@@ -403,6 +635,22 @@ pub fn plan_decode_audio(
             stripped.stream_metadata_set.clear();
             stripped.stream_metadata_delete.clear();
             let mut plan = fvid_media::plan_decode_audio(source, transform, &stripped)?;
+            if options.max_controlled_bytes.is_some() {
+                let (_, src_channels) =
+                    fvid_media::owned_audio_plan::source_geometry(source, &stripped)?;
+                let out_channels = transform
+                    .channels
+                    .and_then(|c| u16::try_from(c).ok())
+                    .unwrap_or(src_channels);
+                crate::native_export::pcm_matroska::check_output_memory_budget(
+                    source,
+                    out_channels,
+                    65536,
+                    options,
+                    Some(true),
+                )
+                .map_err(|e| e.to_string())?;
+            }
             plan.steps.push(PlanStep {
                 action: "metadata".into(),
                 detail: "apply Matroska container and stream 0 metadata mutations".into(),
@@ -412,14 +660,7 @@ pub fn plan_decode_audio(
         return fvid_media::plan_decode_audio(source, transform, options);
     }
     validate_owned_audio_options(options)?;
-    let mut plan = crate::native_plan::decode_audio_selected(source, transform, options.streams.first().copied())?;
-    if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
-        || options.max_packets.is_some() || options.max_rss_bytes.is_some()
-    {
-        plan.notes.push(format!("encoded packet limit: {} bytes; packet work limit: {:?}; RSS limit: {:?}",
-            options.max_packet_bytes, options.max_packets, options.max_rss_bytes));
-    }
-    Ok(plan)
+    crate::native_plan::decode_audio_with_options(source, transform, options)
 }
 
 fn validate_adts_copy_options_with_metadata(
@@ -427,12 +668,28 @@ fn validate_adts_copy_options_with_metadata(
     audio_selection: bool,
     allow_matroska_metadata: bool,
 ) -> Result<()> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(crate::media_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    fvid_media::owned_budget::check_rss_budget(options)?;
     if (if audio_selection {
         options.streams.len() > 1
     } else {
         !options.streams.is_empty()
-    }) || options.max_controlled_bytes.is_some()
-        || (!allow_matroska_metadata && has_metadata_mutations(options))
+    }) || (!allow_matroska_metadata && has_metadata_mutations(options))
     {
         return Err("native media operation does not yet support stream selection, custom budgets or metadata mutations".into());
     }
@@ -440,20 +697,25 @@ fn validate_adts_copy_options_with_metadata(
         crate::container::matroska_write::extract_adts_matroska_metadata(Some(options))
             .map_err(|e| e.to_string())?;
     }
-    if options.max_packet_bytes == 0 {
-        return Err("packet byte limit must be positive".into());
-    }
-    if options.max_rss_bytes.is_some()
-        && fvid_media::owned_budget::check_rss_budget(options).is_err()
-    {
-        return Err("native media operation does not yet support stream selection, custom budgets or metadata mutations".into());
-    }
     Ok(())
 }
 
 fn validate_concat_matroska_options(options: &CopyOptions) -> Result<()> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(crate::media_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
     if options.max_packet_bytes == 0 {
         return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
     }
     fvid_media::owned_budget::check_rss_budget(options)
 }
@@ -469,6 +731,7 @@ pub fn remux(
     options: &CopyOptions,
 ) -> Result<CopyStats> {
     use std::io::Read;
+    validate_concat_matroska_options(options)?;
     if !matches!(destination.extension().and_then(|s| s.to_str()), Some("mp4" | "m4a" | "mka" | "mkv")) {
         return fvid_media::remux(source, destination, options);
     }
@@ -480,7 +743,7 @@ pub fn remux(
     let matroska = matches!(destination.extension().and_then(|s|s.to_str()),Some("mka"|"mkv"));
     let matroska_copy = matroska && prefix[..4] == [0x1a,0x45,0xdf,0xa3];
     if matroska_copy && validate_matroska_copy_options(options).is_err() {return fvid_media::remux(source,destination,options);}
-    let mp4_matroska = mp4 && matroska && crate::native_export::is_native_mp4_matroska(source).map_err(|e| e.to_string())?;
+    let mp4_matroska = mp4 && matroska && crate::native_export::is_native_mp4_matroska_with_memory_limit(source, options.max_controlled_bytes).map_err(|e| e.to_string())?;
     if !adts && !mp4_matroska && !matroska_copy && (matroska || !mp4) { return fvid_media::remux(source, destination, options); }
     // Preserve unmigrated metadata mutations/stream options on the legacy path.
     if mp4_matroska && validate_native_copy_options(options, false).is_err() {
@@ -494,25 +757,38 @@ pub fn remux(
     if matroska_copy {
         validate_matroska_copy_options(options)?;
     } else if adts {
-        validate_adts_copy_options_with_metadata(options, true, matroska)?;
-        if options.streams.first().is_some_and(|&s| s != 0) {
+        if options.streams.iter().any(|&s| s != 0) {
             return Err("ADTS has only stream 0".into());
         }
+        validate_adts_copy_options_with_metadata(options, true, matroska)?;
     } else if mp4_matroska {
         validate_native_copy_options(options, false)?;
     } else {
         validate_mp4_relocate_options(options)?;
+        validate_mp4_packet_budget(source, options)?;
     }
     let stats = if matroska_copy {
-        crate::native_export::remux_matroska_with_packet_limit(source,destination,options.cancel.as_ref(),options.progress.as_ref(),options.max_packet_bytes)
+        crate::native_export::remux_matroska_with_packet_and_memory_limits(
+            source,
+            destination,
+            options.cancel.as_ref(),
+            options.progress.as_ref(),
+            options.max_packet_bytes,
+            options.max_controlled_bytes,
+        )
     } else if mp4_matroska {
         crate::native_export::remux_mp4_matroska(source, destination,
             options.cancel.as_ref(), options.progress.as_ref())
     } else if adts {
         crate::native_export::remux_adts_aac_with_options(source, destination, options)
     } else {
-        crate::native_export::remux_mp4_stats(source, destination,
-            options.cancel.as_ref(), options.progress.as_ref())
+        crate::native_export::remux_mp4_stats_with_memory_limit(
+            source,
+            destination,
+            options.cancel.as_ref(),
+            options.progress.as_ref(),
+            options.max_controlled_bytes,
+        )
     }.map_err(|e| e.to_string())?;
     Ok(CopyStats { packets: stats.packets, payload_bytes: stats.payload_bytes,
         segments: 1, backend: "fvid", fvid_payload_copies: 0 })
@@ -522,20 +798,32 @@ pub fn remux(
 /// legacy adapter. A native parsing error never falls back to another parser.
 pub fn probe(source: &std::path::Path) -> Result<MediaInfo> { probe_as(source, None) }
 pub fn probe_as(source: &std::path::Path, format: Option<&str>) -> Result<MediaInfo> {
-    match crate::native_probe::try_probe_as(source, format)? {
+    probe_as_with_options(source, format, &Default::default())
+}
+pub fn probe_with_options(source: &std::path::Path, options: &CopyOptions) -> Result<MediaInfo> {
+    probe_as_with_options(source, None, options)
+}
+pub fn probe_as_with_options(
+    source: &std::path::Path,
+    format: Option<&str>,
+    options: &CopyOptions,
+) -> Result<MediaInfo> {
+    match crate::native_probe::try_probe_as_with_options(source, format, options)? {
         Some(info) => Ok(info),
-        None => fvid_media::probe_as(source, format),
+        None => fvid_media::owned_probe::probe_as_with_options(source, format, options),
     }
 }
 
 /// Sample-exact RIFF PCM uses the owned streaming slicer and publisher.
 pub fn trim_pcm(source:&std::path::Path,destination:&std::path::Path,from:i64,to:i64,options:&CopyOptions)->Result<PcmTrimStats> {
-    if !crate::native_pcm::is_wave(source).map_err(|e|e.to_string())?
-        || validate_native_copy_options(options,true).is_err()
-    {
+    validate_concat_matroska_options(options)?;
+    if !crate::native_pcm::is_wave(source).map_err(|e|e.to_string())? {
         return fvid_media::trim_pcm(source,destination,from,to,options);
     }
-    if options.streams.first().is_some_and(|&n|n!=0) {return Err("WAVE has only stream 0".into());}
+    if options.streams.iter().any(|&n|n!=0) {return Err("WAVE has only stream 0".into());}
+    if validate_native_copy_options(options,true).is_err() {
+        return fvid_media::trim_pcm(source,destination,from,to,options);
+    }
     crate::native_pcm::trim_wave(source,destination,from,to,options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string())
 }
 
@@ -546,12 +834,17 @@ pub fn plan_trim_pcm(
     to: i64,
     options: &CopyOptions,
 ) -> Result<MediaPlan> {
-    if !crate::native_pcm::is_wave(source).map_err(|e| e.to_string())?
-        || validate_native_copy_options(options, true).is_err()
-    {
+    validate_concat_matroska_options(options)?;
+    if !crate::native_pcm::is_wave(source).map_err(|e| e.to_string())? {
         return fvid_media::plan_trim_pcm(source, from, to, options);
     }
-    crate::native_plan::trim_pcm(source, from, to, options.streams.first().copied())
+    if options.streams.iter().any(|&n| n != 0) {
+        return Err("WAVE has only stream 0".into());
+    }
+    if validate_native_copy_options(options, true).is_err() {
+        return fvid_media::plan_trim_pcm(source, from, to, options);
+    }
+    crate::native_plan::trim_pcm_with_options(source, from, to, options)
 }
 
 /// General trim of a PCM WAVE file shares the exact native sample-slicing path.
@@ -562,44 +855,33 @@ pub fn trim(
     to: i64,
     options: &CopyOptions,
 ) -> Result<CopyStats> {
+    validate_concat_matroska_options(options)?;
     if destination.extension().and_then(|s|s.to_str())==Some("y4m") {
         let stats=crate::native_export::trim_y4m_with_options(source,destination,from,to,options).map_err(|e|e.to_string())?;
         return Ok(CopyStats {packets:stats.packets,payload_bytes:stats.payload_bytes,segments:1,backend:"fvid",fvid_payload_copies:0});
     }
+    let trim_interval = (from >= 0 && to > from).then(|| {
+        (
+            std::time::Duration::from_micros(from as u64),
+            std::time::Duration::from_micros(to as u64),
+        )
+    });
     if options.max_controlled_bytes.is_none()
         && options.metadata_set.is_empty()
         && options.metadata_delete.is_empty()
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
-        && crate::native_media::is_owned_audio_trim_source(source).map_err(|e|e.to_string())?
+        && crate::native_media::is_owned_audio_trim_source_with_interval_and_options(source, trim_interval, options).map_err(|e|e.to_string())?
         && matches!(destination.extension().and_then(|s|s.to_str()),Some("wav" | "f32le" | "mka" | "mkv"))
         && (options.streams.len() != 1
-            || crate::native_media::audio_source_info_selected(source, Some(options.streams[0]))
+            || crate::native_media::audio_source_info_selected_with_interval_and_options(source, Some(options.streams[0]), trim_interval, options)
                 .is_ok()) {
         validate_owned_audio_options(options)?;
         let stats=crate::native_export::trim_audio_pcm_with_controls(source,destination,from,to,options).map_err(|e|e.to_string())?;
         return Ok(CopyStats {packets:stats.decoded_frames,payload_bytes:stats.sample_frames*u64::from(stats.channels)*4,segments:1,backend:"fvid",fvid_payload_copies:0});
     }
     if !crate::native_pcm::is_wave(source).map_err(|e| e.to_string())? {
-        if matches!(destination.extension().and_then(|s| s.to_str()), Some("f32le" | "mka" | "mkv"))
-            && {
-                let mut probe_options = options.clone();
-                if matches!(destination.extension().and_then(|s| s.to_str()), Some("mka" | "mkv")) {
-                    probe_options.metadata_set.clear();
-                    probe_options.metadata_delete.clear();
-                    probe_options.stream_metadata_set.clear();
-                    probe_options.stream_metadata_delete.clear();
-                }
-                match fvid_media::plan_decode_audio(
-                    source,
-                    &AudioDecodeTransform { interval: Some((from, to)), ..Default::default() },
-                    &probe_options,
-                ) {
-                    Ok(_) => true,
-                    Err(error) => error.starts_with("controlled memory budget exceeded:"),
-                }
-            }
-        {
+        if matches!(destination.extension().and_then(|s| s.to_str()), Some("wav" | "f32le" | "mka" | "mkv")) {
             let stats = decode_fvid_media_audio_to_destination(
                 source,
                 destination,
@@ -619,7 +901,7 @@ pub fn trim(
         }
         return fvid_media::trim(source, destination, from, to, options);
     }
-    if matches!(destination.extension().and_then(|s| s.to_str()), Some("mka" | "mkv")) {
+    if matches!(destination.extension().and_then(|s| s.to_str()), Some("f32le" | "mka" | "mkv")) {
         let stats = decode_fvid_media_audio_to_destination(
             source,
             destination,
@@ -652,27 +934,24 @@ pub fn plan_trim(
     to: i64,
     options: &CopyOptions,
 ) -> Result<MediaPlan> {
+    validate_concat_matroska_options(options)?;
+    let trim_interval = (from >= 0 && to > from).then(|| {
+        (
+            std::time::Duration::from_micros(from as u64),
+            std::time::Duration::from_micros(to as u64),
+        )
+    });
     if options.max_controlled_bytes.is_none()
         && options.metadata_set.is_empty()
         && options.metadata_delete.is_empty()
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
-        && crate::native_media::is_owned_audio_trim_source(source).map_err(|e|e.to_string())?
+        && crate::native_media::is_owned_audio_trim_source_with_interval_and_options(source, trim_interval, options).map_err(|e|e.to_string())?
         && (options.streams.len() != 1
-            || crate::native_media::audio_source_info_selected(source, Some(options.streams[0]))
+            || crate::native_media::audio_source_info_selected_with_interval_and_options(source, Some(options.streams[0]), trim_interval, options)
                 .is_ok()) {
         validate_owned_audio_options(options)?;
-        let mut plan = crate::native_plan::trim_audio(source,from,to,options.streams.first().copied())?;
-        if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
-            || options.max_packets.is_some()
-            || options.max_rss_bytes.is_some()
-        {
-            plan.notes.push(format!(
-                "encoded packet limit: {} bytes; packet work limit: {:?}; RSS limit: {:?}",
-                options.max_packet_bytes, options.max_packets, options.max_rss_bytes
-            ));
-        }
-        return Ok(plan);
+        return crate::native_plan::trim_audio_with_options(source,from,to,options);
     }
     if has_metadata_mutations(options) && !has_only_wave_info_metadata(options) {
         let mut planned = plan_decode_audio(
@@ -693,30 +972,25 @@ pub fn plan_trim(
 
 /// Plan owned ADTS/MP4 remuxing with the same option restrictions as execution.
 pub fn plan_remux(source: &std::path::Path, options: &CopyOptions) -> Result<MediaPlan> {
+    validate_concat_matroska_options(options)?;
     if crate::native_export::is_matroska_source(source).map_err(|e|e.to_string())? {
         if validate_matroska_copy_options(options).is_err() {return fvid_media::plan_remux(source,options);}
-        let mut plan = crate::native_plan::remux_with_options(source, options)?
-            .ok_or("missing Matroska remux plan")?;
-        plan.steps.push(PlanStep { action: "budget".into(), detail: format!("FVid maximum encoded packet size: {} bytes", options.max_packet_bytes) });
-        return Ok(plan);
+        return crate::native_plan::remux_with_options(source, options)?
+            .ok_or_else(|| "missing Matroska remux plan".into());
     }
     if crate::native_export::is_adts_source(source).map_err(|e| e.to_string())? {
-        validate_adts_copy_options_with_metadata(options, true, true)?;
-        if options.streams.first().is_some_and(|&s| s != 0) {
+        if validate_native_copy_options(options, false).is_ok() {
+            return crate::native_plan::remux_with_options(source, options)?
+                .ok_or_else(|| "missing ADTS remux plan".into());
+        }
+        if options.streams.iter().any(|&s| s != 0) {
             return Err("ADTS has only stream 0".into());
         }
+        validate_adts_copy_options_with_metadata(options, false, true)?;
         return crate::native_plan::remux_adts_with_options(source, options);
     }
-    if crate::native_export::is_native_mp4_matroska(source).unwrap_or(false)
+    if crate::native_export::is_native_mp4_matroska_with_memory_limit(source, options.max_controlled_bytes).unwrap_or(false)
         && validate_native_copy_options(options, false).is_err()
-        && (options.streams.is_empty()
-            || options.max_packets.is_some()
-            || options.max_packet_bytes != CopyOptions::default().max_packet_bytes
-            || options.max_rss_bytes.is_some()
-            || !options.metadata_set.is_empty()
-            || !options.metadata_delete.is_empty()
-            || !options.stream_metadata_set.is_empty()
-            || !options.stream_metadata_delete.is_empty())
     {
         return fvid_media::plan_remux(source, options);
     }
@@ -728,6 +1002,7 @@ pub fn plan_remux(source: &std::path::Path, options: &CopyOptions) -> Result<Med
 
 /// Concatenate compatible packed WAVE PCM through the owned streaming writer.
 pub fn concat(sources: &[std::path::PathBuf], destination: &std::path::Path, options: &CopyOptions) -> Result<CopyStats> {
+    validate_concat_matroska_options(options)?;
     if destination.extension().and_then(|s|s.to_str())==Some("y4m") {
         let stats=crate::native_export::concat_y4m_with_options(sources,destination,options).map_err(|e|e.to_string())?;
         return Ok(CopyStats {packets:stats.packets,payload_bytes:stats.payload_bytes,segments:sources.len(),backend:"fvid",fvid_payload_copies:0});
@@ -737,32 +1012,44 @@ pub fn concat(sources: &[std::path::PathBuf], destination: &std::path::Path, opt
             return Ok(CopyStats {packets:stats.packets,payload_bytes:stats.payload_bytes,segments:sources.len(),backend:"fvid",fvid_payload_copies:0});
         }
     if sources.first().map(|p|crate::native_export::is_adts_source(p)).transpose().map_err(|e|e.to_string())?.unwrap_or(false) {
+        if options.streams.iter().any(|&s|s!=0) {return Err("ADTS has only stream 0".into());}
         let matroska_out = matches!(destination.extension().and_then(|s| s.to_str()), Some("mka" | "mkv"));
         validate_adts_copy_options_with_metadata(options, true, matroska_out)?;
-        if options.streams.first().is_some_and(|&s|s!=0) {return Err("ADTS has only stream 0".into());}
         let stats=crate::native_export::concat_adts_aac_with_options(sources,destination,options).map_err(|e|e.to_string())?;
         return Ok(CopyStats {packets:stats.packets,payload_bytes:stats.payload_bytes,segments:sources.len(),backend:"fvid",fvid_payload_copies:0});
     }
-    if !sources.first().map(|p|crate::native_pcm::is_wave(p)).transpose().map_err(|e|e.to_string())?.unwrap_or(false)
-        || validate_native_copy_options(options, true).is_err()
-    {
+    if !sources.first().map(|p|crate::native_pcm::is_wave(p)).transpose().map_err(|e|e.to_string())?.unwrap_or(false) {
         return fvid_media::concat(sources,destination,options);
     }
-    if options.streams.first().is_some_and(|&s|s!=0) {return Err("WAVE has only stream 0".into());}
+    if options.streams.iter().any(|&s|s!=0) {return Err("WAVE has only stream 0".into());}
+    if validate_native_copy_options(options, true).is_err() {
+        let mut stats = fvid_media::concat(sources,destination,options)?;
+        if stats.backend == "owned streaming WAVE concat" {
+            stats.backend = "fvid";
+        }
+        return Ok(stats);
+    }
     let stats=crate::native_pcm::concat_wave(sources,destination,options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string())?;
     Ok(CopyStats {packets:stats.packets,payload_bytes:stats.payload_bytes,segments:sources.len(),backend:"fvid",fvid_payload_copies:0})
 }
 
 pub fn plan_concat(sources: &[std::path::PathBuf], options: &CopyOptions) -> Result<MediaPlan> {
+    validate_concat_matroska_options(options)?;
     if sources.first().map(|p|crate::native_export::is_adts_source(p)).transpose().map_err(|e|e.to_string())?.unwrap_or(false) {
+        if options.streams.iter().any(|&s|s!=0) {return Err("ADTS has only stream 0".into());}
         validate_adts_copy_options_with_metadata(options, true, true)?;
-        if options.streams.first().is_some_and(|&s|s!=0) {return Err("ADTS has only stream 0".into());}
         return crate::native_plan::concat_adts_with_options(sources, options);
     }
     let all_wave = sources.iter().try_fold(!sources.is_empty(), |all, source| {
         crate::native_pcm::is_wave(source).map(|wave| all && wave).map_err(|e| e.to_string())
     })?;
-    if all_wave && crate::native_pcm::concat_info(sources).is_ok() {
+    if all_wave {
+        validate_concat_matroska_options(options)?;
+    }
+    if all_wave
+        && crate::native_pcm::concat_info_with_cancel(sources, options.cancel.as_ref()).is_ok()
+    {
+        if options.streams.iter().any(|&s|s!=0) {return Err("WAVE has only stream 0".into());}
         if validate_native_copy_options(options, true).is_err() {
             if !(has_metadata_mutations(options) && !has_only_wave_info_metadata(options)) {
                 return fvid_media::plan_concat(sources, options);
@@ -771,19 +1058,19 @@ pub fn plan_concat(sources: &[std::path::PathBuf], options: &CopyOptions) -> Res
                 return Ok(plan);
             }
         } else {
-            if options.streams.first().is_some_and(|&s|s!=0) {return Err("WAVE has only stream 0".into());}
-            return crate::native_plan::concat_wave(sources);
+            return crate::native_plan::concat_wave_with_options(sources, options);
         }
     }
     if validate_concat_matroska_options(options).is_ok()
         && let Some(plan)=crate::native_plan::concat_mp4_matroska_with_options(sources, options)? { return Ok(plan); }
-    if !sources.first().map(|p|crate::native_pcm::is_wave(p)).transpose().map_err(|e|e.to_string())?.unwrap_or(false)
-        || validate_native_copy_options(options, true).is_err()
-    {
+    if !sources.first().map(|p|crate::native_pcm::is_wave(p)).transpose().map_err(|e|e.to_string())?.unwrap_or(false) {
         return fvid_media::plan_concat(sources,options);
     }
-    if options.streams.first().is_some_and(|&s|s!=0) {return Err("WAVE has only stream 0".into());}
-    crate::native_plan::concat_wave(sources)
+    if options.streams.iter().any(|&s|s!=0) {return Err("WAVE has only stream 0".into());}
+    if validate_native_copy_options(options, true).is_err() {
+        return fvid_media::plan_concat(sources,options);
+    }
+    crate::native_plan::concat_wave_with_options(sources, options)
 }
 
 /// Plan decoded video concatenation with an explicit Y4M output contract.
@@ -804,9 +1091,13 @@ pub fn crop_lossless(source: &std::path::Path, destination: &std::path::Path,
 
 /// Owned spatial FFV1 export for Y4M and MP4 video, retaining all supported AAC tracks.
 pub fn transcode_lossless(source:&std::path::Path,destination:&std::path::Path,transform:LosslessTransform,options:&CopyOptions)->Result<LosslessStats> {
-    if !crate::native_media::supports_deband_source(source,transform.deband.as_deref()).map_err(|e|e.to_string())? {return fvid_media::transcode_lossless(source,destination,transform,options);}
+    validate_concat_matroska_options(options)?;
+    if validate_native_copy_options(options,false).is_err()
+        || !crate::native_media::supports_deband_source(source,transform.deband.as_deref()).map_err(|e|e.to_string())?
+    {
+        return fvid_media::transcode_lossless(source,destination,transform,options);
+    }
     if crate::native_lossless::supports_framestep(&transform)
-        && validate_native_copy_options(options,false).is_ok()
         && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
         let step=fvid_media::owned_framestep::FrameStep::parse(transform.framestep.as_deref().unwrap())?;
         let mut spatial=transform.clone(); spatial.framestep=None;
@@ -815,13 +1106,13 @@ pub fn transcode_lossless(source:&std::path::Path,destination:&std::path::Path,t
     }
     if crate::native_lossless::supports_overlay(&transform) {
         let spec=transform.overlay.as_ref().unwrap();
-        if validate_native_copy_options(options,false).is_ok() && crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? {
+        if crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? {
             let mut remaining=transform.clone();remaining.overlay=None;
             let (geometry,filters)=crate::native_lossless::configuration(&remaining).map_err(|e|e.to_string())?;
             return crate::native_export::overlay_video_transformed(source,&spec.path,destination,i64::from(spec.x),i64::from(spec.y),options.cancel.as_ref(),options.progress.as_ref(),&geometry,&filters).map_err(|e|e.to_string());
         }
     }
-    if crate::native_lossless::supports(&transform) && validate_native_copy_options(options,false).is_ok() && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
+    if crate::native_lossless::supports(&transform) && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
         let (geometry,filters)=crate::native_lossless::configuration(&transform).map_err(|e|e.to_string())?;
         return crate::native_export::transcode_ffv1_transformed(source,destination,&geometry,&filters,options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string());
     }
@@ -831,11 +1122,15 @@ pub fn transcode_lossless(source:&std::path::Path,destination:&std::path::Path,t
 /// Explicit settings supported by the owned FFV1 encoder share its exporter.
 pub fn transcode(source: &std::path::Path, destination: &std::path::Path,
     transform: LosslessTransform, options: &CopyOptions, settings: &EncoderSettings) -> Result<LosslessStats> {
+    validate_concat_matroska_options(options)?;
     settings.validate()?;
-    if !crate::native_media::supports_deband_source(source,transform.deband.as_deref()).map_err(|e|e.to_string())? {return fvid_media::transcode(source,destination,transform,options,settings);}
+    if validate_native_copy_options(options,false).is_err()
+        || !crate::native_media::supports_deband_source(source,transform.deband.as_deref()).map_err(|e|e.to_string())?
+    {
+        return fvid_media::transcode(source,destination,transform,options,settings);
+    }
     if fvid_media::owned_lossless::supports_encoder(settings)
         && (crate::native_lossless::supports(&transform) || crate::native_lossless::supports_overlay(&transform) || crate::native_lossless::supports_framestep(&transform))
-        && validate_native_copy_options(options,false).is_ok()
         && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
         return transcode_lossless(source,destination,transform,options);
     }
@@ -845,9 +1140,13 @@ pub fn transcode(source: &std::path::Path, destination: &std::path::Path,
 /// Plan eligible FFV1 exports without opening the legacy demuxer.
 pub fn plan_transcode_lossless(source: &std::path::Path, transform: &LosslessTransform,
     options: &CopyOptions, encoder: Option<&str>) -> Result<MediaPlan> {
-    if !crate::native_media::supports_deband_source(source,transform.deband.as_deref()).map_err(|e|e.to_string())? {return fvid_media::plan_transcode_lossless(source,transform,options,encoder);}
+    validate_concat_matroska_options(options)?;
+    if validate_native_copy_options(options,false).is_err()
+        || !crate::native_media::supports_deband_source(source,transform.deband.as_deref()).map_err(|e|e.to_string())?
+    {
+        return fvid_media::plan_transcode_lossless(source,transform,options,encoder);
+    }
     if matches!(encoder,None|Some("ffv1")) && crate::native_lossless::supports_framestep(transform)
-        && validate_native_copy_options(options,false).is_ok()
         && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
         let mut spatial=transform.clone(); spatial.framestep=None;
         let mut plan=crate::native_plan::transcode_lossless(source,&spatial)?;
@@ -856,13 +1155,12 @@ pub fn plan_transcode_lossless(source: &std::path::Path, transform: &LosslessTra
         plan.notes.push(format!("owned framestep {}; retain selected frame PTS/duration and every AAC packet",transform.framestep.as_deref().unwrap()));
         return Ok(plan);
     }
-    if matches!(encoder,None|Some("ffv1")) && validate_native_copy_options(options,false).is_ok()
+    if matches!(encoder,None|Some("ffv1"))
         && crate::native_lossless::supports_overlay(transform)
             && crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? {
                 return crate::native_plan::transcode_lossless(source,transform);
             }
     if matches!(encoder,None|Some("ffv1")) && crate::native_lossless::supports(transform)
-        && validate_native_copy_options(options,false).is_ok()
         && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
         return crate::native_plan::transcode_lossless(source,transform);
     }
@@ -883,12 +1181,19 @@ pub fn mix_audio_with_controls(
     options: &MixAudioOptions,
     controls: &CopyOptions,
 ) -> Result<MixAudioStats> {
-    if crate::native_audio_mix::eligible_with_options(sources, controls).map_err(|e| e.to_string())? {
+    validate_concat_matroska_options(controls)?;
+    let mut default_controls = CopyOptions::default();
+    default_controls.cancel = controls.cancel.clone();
+    default_controls.max_rss_bytes = controls.max_rss_bytes;
+    if crate::native_audio_mix::eligible_with_options(sources, controls).map_err(|e| e.to_string())?
+        || crate::native_audio_mix::eligible_with_options(sources, &default_controls)
+            .map_err(|e| e.to_string())?
+    {
         crate::native_audio_mix::mix_audio_with_controls(sources, destination, options, controls)
             .map_err(|e| e.to_string())
     } else {
         validate_owned_audio_options(controls)?;
-        fvid_media::mix_audio(sources, destination, options)
+        fvid_media::mix_audio_with_controls(sources, destination, options, controls)
     }
 }
 pub fn plan_mix_audio(
@@ -902,12 +1207,19 @@ pub fn plan_mix_audio_with_controls(
     options: &MixAudioOptions,
     controls: &CopyOptions,
 ) -> Result<MediaPlan> {
-    if crate::native_audio_mix::eligible_with_options(sources, controls).map_err(|e| e.to_string())? {
+    validate_concat_matroska_options(controls)?;
+    let mut default_controls = CopyOptions::default();
+    default_controls.cancel = controls.cancel.clone();
+    default_controls.max_rss_bytes = controls.max_rss_bytes;
+    if crate::native_audio_mix::eligible_with_options(sources, controls).map_err(|e| e.to_string())?
+        || crate::native_audio_mix::eligible_with_options(sources, &default_controls)
+            .map_err(|e| e.to_string())?
+    {
         crate::native_audio_mix::plan_with_controls(sources, options, controls)
             .map_err(|e| e.to_string())
     } else {
         validate_owned_audio_options(controls)?;
-        fvid_media::plan_mix_audio(sources, options)
+        fvid_media::plan_mix_audio_with_controls(sources, options, controls)
     }
 }
 
@@ -923,12 +1235,19 @@ pub fn merge_audio_with_controls(
     destination: &std::path::Path,
     controls: &CopyOptions,
 ) -> Result<MergeAudioStats> {
-    if crate::native_audio_mix::eligible_with_options(sources, controls).map_err(|e| e.to_string())? {
+    validate_concat_matroska_options(controls)?;
+    let mut default_controls = CopyOptions::default();
+    default_controls.cancel = controls.cancel.clone();
+    default_controls.max_rss_bytes = controls.max_rss_bytes;
+    if crate::native_audio_mix::eligible_with_options(sources, controls).map_err(|e| e.to_string())?
+        || crate::native_audio_mix::eligible_with_options(sources, &default_controls)
+            .map_err(|e| e.to_string())?
+    {
         crate::native_audio_mix::merge_audio_with_controls(sources, destination, controls)
             .map_err(|e| e.to_string())
     } else {
         validate_owned_audio_options(controls)?;
-        fvid_media::merge_audio(sources, destination)
+        fvid_media::merge_audio_with_controls(sources, destination, controls)
     }
 }
 pub fn plan_merge_audio(sources: &[std::path::PathBuf]) -> Result<MediaPlan> {
@@ -938,19 +1257,48 @@ pub fn plan_merge_audio_with_controls(
     sources: &[std::path::PathBuf],
     controls: &CopyOptions,
 ) -> Result<MediaPlan> {
-    if crate::native_audio_mix::eligible_with_options(sources, controls).map_err(|e| e.to_string())? {
+    validate_concat_matroska_options(controls)?;
+    let mut default_controls = CopyOptions::default();
+    default_controls.cancel = controls.cancel.clone();
+    default_controls.max_rss_bytes = controls.max_rss_bytes;
+    if crate::native_audio_mix::eligible_with_options(sources, controls).map_err(|e| e.to_string())?
+        || crate::native_audio_mix::eligible_with_options(sources, &default_controls)
+            .map_err(|e| e.to_string())?
+    {
         crate::native_audio_mix::plan_merge_with_controls(sources, controls)
             .map_err(|e| e.to_string())
     } else {
         validate_owned_audio_options(controls)?;
-        fvid_media::plan_merge_audio(sources)
+        fvid_media::plan_merge_audio_with_controls(sources, controls)
     }
 }
 
 /// Owned integrated loudness, LRA and sample peak. True peak is not inferred.
 pub fn measure_loudness(source: &std::path::Path, options: &CopyOptions) -> Result<crate::native_pcm::IntegratedLoudness> {
-    let weights=crate::native_pcm::loudness_channel_weights(source,options.streams.first().copied()).map_err(|e|e.to_string())?;
-    measure_loudness_with_weights(source,options,&weights)
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    fvid_media::owned_budget::check_rss_budget(options)?;
+    if options.streams.len() > 1
+        || !options.metadata_set.is_empty()
+        || !options.metadata_delete.is_empty()
+        || !options.stream_metadata_set.is_empty()
+        || !options.stream_metadata_delete.is_empty()
+    {
+        return Err("owned loudness requires at most one audio stream and no metadata edits".into());
+    }
+    let weights = crate::native_pcm::loudness_channel_weights_with_options(source, options)
+        .map_err(|e| e.to_string())?;
+    measure_loudness_with_weights(source, options, &weights)
 }
 /// Explicit energy weights for multichannel layouts; no implicit channel remapping.
 pub fn measure_loudness_with_weights(source: &std::path::Path, options: &CopyOptions, weights: &[f64]) -> Result<crate::native_pcm::IntegratedLoudness> {
@@ -979,13 +1327,31 @@ pub fn normalize_loudness(source: &std::path::Path, destination: &std::path::Pat
 pub fn normalize_loudness_controlled(source: &std::path::Path, destination: &std::path::Path,
     options: &CopyOptions, weights: Option<&[f64]>, target: crate::media_info::NormalizeTarget,
     progress: Option<&crate::native_pcm::NormalizationProgressHook>) -> Result<crate::media_info::NormalizeReport> {
+    if options.cancel.as_ref().is_some_and(|flag|flag.is_cancelled()) {return Err("media operation cancelled".into());}
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    fvid_media::owned_budget::check_rss_budget(options)?;
     target.validate()?;
-    if options.cancel.as_ref().is_some_and(|flag|flag.is_cancelled()) {return Err("operation cancelled".into());}
     if options.progress.is_some() {return Err("two-pass normalization requires phase-aware progress, not a single-pass hook".into());}
     let defaults;
     let weights=match weights {
         Some(weights)=>weights,
-        None=>{defaults=crate::native_pcm::loudness_channel_weights(source,options.streams.first().copied()).map_err(|e|e.to_string())?;&defaults},
+        None=>{
+            let mut weight_options = options.clone();
+            weight_options.metadata_set.clear();
+            weight_options.metadata_delete.clear();
+            weight_options.stream_metadata_set.clear();
+            weight_options.stream_metadata_delete.clear();
+            defaults=crate::native_pcm::loudness_channel_weights_with_options(source,&weight_options).map_err(|e|e.to_string())?;
+            &defaults
+        },
     };
     crate::native_pcm::normalize_loudness_file_with_options(source,destination,weights,target,options,progress).map_err(|e|e.to_string())
 }

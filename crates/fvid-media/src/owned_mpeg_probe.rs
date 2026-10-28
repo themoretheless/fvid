@@ -5,10 +5,36 @@ use crate::owned_mpeg_audio::{LAYER_I, LAYER_II};
 use fvid_media_info::{MediaInfo, StreamInfo};
 use std::path::Path;
 pub fn probe_mpeg(path: &Path) -> Result<MediaInfo, String> {
+    probe_mpeg_with_options(path, &Default::default())
+}
+
+pub fn probe_mpeg_with_options(
+    path: &Path,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo, String> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
     if !crate::owned_raw_mp3::recognizes(path)? {
         return Err("input does not have a bare MPEG audio signature".into());
     }
-    let source = crate::owned_raw_mp3::open(path, &Default::default())?;
+    let source = crate::owned_raw_mp3::open(path, options)?;
+    if options
+        .max_packets
+        .is_some_and(|max| (source.frames.len() as u64) > max)
+    {
+        return Err("MPEG packet count exceeds packet limit".into());
+    }
     let (metadata, stream_metadata) = source.probe_metadata();
     let rate = source.sample_rate;
     let audible = source.presentation_samples();

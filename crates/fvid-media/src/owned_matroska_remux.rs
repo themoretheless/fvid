@@ -16,12 +16,13 @@ pub(crate) fn unedited_policies(o: &CopyOptions) -> bool {
         && o.metadata_delete.is_empty()
         && o.stream_metadata_set.is_empty()
         && o.stream_metadata_delete.is_empty()
-        && o.max_controlled_bytes.is_none()
+        && o.max_controlled_bytes != Some(0)
         && crate::owned_budget::check_rss_budget(o).is_ok()
         && o.max_packet_bytes > 0
 }
 pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
-    if !policies(options)
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled())
+        || !policies(options)
         || !matches!(
             destination.extension().and_then(|s| s.to_str()),
             Some("mkv" | "mka")
@@ -45,13 +46,6 @@ pub fn remux(
     destination: &Path,
     options: &CopyOptions,
 ) -> Result<CopyStats, String> {
-    crate::owned_budget::check_rss_budget(options)?;
-    if !supports(source, destination, options) {
-        return Err("request is not an owned Matroska identity remux".into());
-    }
-    if std::fs::symlink_metadata(destination).is_ok() {
-        return Err("output already exists".into());
-    }
     let check = || {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             Err("media operation cancelled".to_string())
@@ -59,27 +53,47 @@ pub fn remux(
             crate::owned_budget::check_rss_budget(options)
         }
     };
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
     check()?;
+    if !supports(source, destination, options) {
+        return Err("request is not an owned Matroska identity remux".into());
+    }
+    if std::fs::symlink_metadata(destination).is_ok() {
+        return Err("output already exists".into());
+    }
     let mut input = File::open(source).map_err(|e| e.to_string())?;
     if !input.metadata().map_err(|e| e.to_string())?.is_file() {
         return Err("Matroska remux requires a regular file".into());
     }
     let audio_only = destination.extension().and_then(|s| s.to_str()) == Some("mka");
-    crate::owned_matroska_copy::inspect_with_packet_limit(
+    crate::owned_matroska_copy::inspect_with_packet_and_memory_limits(
         &mut input,
         audio_only,
         options.cancel.as_ref(),
         options.max_packet_bytes,
+        options.max_controlled_bytes,
     )
     .map_err(|e| e.to_string())?;
     publish(destination, options, |output| {
-        crate::owned_matroska_copy::copy_with_packet_limit(
+        crate::owned_matroska_copy::copy_with_packet_and_memory_limits(
             &mut input,
             output,
             audio_only,
             options.cancel.as_ref(),
             options.progress.as_ref(),
             options.max_packet_bytes,
+            options.max_controlled_bytes,
         )
         .map_err(|e| e.to_string())
     })
@@ -89,9 +103,6 @@ pub(crate) fn publish(
     options: &CopyOptions,
     write: impl FnOnce(&mut File) -> Result<fvid_control::ProgressEvent, String>,
 ) -> Result<CopyStats, String> {
-    if std::fs::symlink_metadata(destination).is_ok() {
-        return Err("output already exists".into());
-    }
     let check = || {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             Err("media operation cancelled".to_string())
@@ -100,6 +111,18 @@ pub(crate) fn publish(
         }
     };
     check()?;
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    if std::fs::symlink_metadata(destination).is_ok() {
+        return Err("output already exists".into());
+    }
     let parent = destination
         .parent()
         .filter(|p| !p.as_os_str().is_empty())

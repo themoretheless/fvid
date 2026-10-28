@@ -1,0 +1,48 @@
+{
+  "status": "accepted",
+  "session": 14231,
+  "log": "/private/tmp/fvid-metadata-admission-before.log",
+  "hypothesis": "Owned MP4 remux open uses default 32MiB parser metadata admission independently of a 64KiB controlled-memory ceiling. A legal 1MiB moov/free padding forces a wire metadata allocation larger than that ceiling.",
+  "controls": [
+    "Direct parser metadata_bytes=64KiB refuses the padded moov",
+    "Small metadata with 64KiB and padded metadata with 2MiB remain valid"
+  ],
+  "source_hashes": {
+    "crates/fvid-media/src/owned_mp4_remux.rs": "5c697c0f8cc00baf359a94fe048938924d2d13173fa4e86a72c76f2df229c251",
+    "src/container/mp4_concat.rs": "7e111c608cc447718f7cf6d6b93ba7b5021c0806b30f37a3cf1f2f813d9f2392"
+  },
+  "scope": "Confirm the exact missed parser-metadata admission before choosing the implementation; do not claim whole-parser peak RSS bounds.",
+  "before": "2 controls passed, plan admission failed because a 1MiB padded moov was accepted with 64KiB controlled memory",
+  "initial_after": "3 passed, 0 failed, 0 ignored",
+  "default_session": null,
+  "player_session": null,
+  "default_log": "/private/tmp/fvid-metadata-admission-default-final.log",
+  "player_log": "/private/tmp/fvid-metadata-admission-player-after.log",
+  "after_source_hashes": {
+    "crates/fvid-media/src/owned_mp4_remux.rs": "3896febfa150d96410139c90bdceee0557d74a08e087d0d27932386611c76a5d",
+    "src/container/mp4_concat.rs": "fd968f74b8a7b8b2df6ce56e6cf133d2fe708fc601d85147dfefa77c8d1dd811",
+    "src/native_export.rs": "813afcab5754efd58f48034c43ae3aeeff3d24c044bbc37ceb90b2bdab93bf00",
+    "src/native_plan.rs": "294f4b7466d00b98143e02532cd219c5586867e61e7f477d6a35f1bfcecbd9a5",
+    "src/media.rs": "3b62e68c7d3f0a385930d06ac8ffa71f0cf9b894dff110543ee4d457148858f0"
+  },
+  "test_sha256": "dddd1d6f31f84c052eed64e5f6da51f277f917b9f9a016462ab34533f9799d8e",
+  "coverage": [
+    "direct parser threshold control",
+    "owned, generic and root remux budget error routing",
+    "route inspection and native concat metadata admission",
+    "existing destination preservation and no temporary output",
+    "small metadata and sufficient-budget positive controls",
+    "unsupported sample-entry route preservation",
+    "native remux playback, timestamps, EOF, rewind and seek"
+  ],
+  "player_result": "7 focused + 12 related passed",
+  "default_focused": "6 passed, 0 failed, 0 ignored",
+  "not_counted": false,
+  "accepted_id": "FVID-0332",
+  "default_result": "6 focused + 6 related passed",
+  "fixture_hashes": {
+    "small.mp4": "a55253260a48410a9667c3938edb4b5aa845e93ce414ab8c12211f9e873f6983",
+    "padded.mp4": "6b0281170863ca1ec9b182b880e400fa75a4053334629f83baf05416d74ef541",
+    "unsupported-entry.mp4": "d644ad47741edc14208e0ba18b24a5671599d60bf0ca3ab2bd625958d0d27e13"
+  }
+}

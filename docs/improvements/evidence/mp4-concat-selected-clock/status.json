@@ -1,0 +1,28 @@
+{
+  "status": "accepted",
+  "not_counted": false,
+  "session": 20166,
+  "log": "/private/tmp/fvid-concat-selected-clock-before.log",
+  "source_sha256": "8ba76c9bfc306f7af276fe291830d4e67b2cc6bb821eb8b3108212332b065d21",
+  "hypothesis": "Concat uses duration of unselected AAC when selected output contains only a 40ms AVC frame; expected selected video timestamps 0 and 40000000 ns",
+  "fixture": "tests/fixtures/playback-errors/mp4-concat-selected-clock/video-and-long-audio.mp4",
+  "next": "Wait for original failure before any timestamp fix; verify actual native playback and seek after fixing",
+  "before": "Exact timing regression failed: second selected video frame PTS 10922666667 ns, expected 40000000 ns",
+  "active_after_session": 46847,
+  "after_source_sha256": "388b670d4c3d764c34ff450f04af7fb29d080fdf7e4f13015d9edef9635c9889",
+  "pending": [],
+  "focused": "2 passed, including RGB equality, 80ms duration, repeated EOF, rewind and six seek targets",
+  "related_retained_plans": "3 passed",
+  "player": "2 focused and 9 related passed; final corrected fixture independently repeated with default and player tests",
+  "default_session": null,
+  "default_log": "/private/tmp/fvid-selected-clock-default-after.log",
+  "verified_inputs": {
+    "src/container/mp4_concat.rs": "388b670d4c3d764c34ff450f04af7fb29d080fdf7e4f13015d9edef9635c9889",
+    "tests/mp4_concat_selected_clock.rs": "84dbc3d847eda9f55f5151897927d094b2cc55a82493b719aa123c30ba1f18bc",
+    "scripts/generate_mp4_concat_selected_clock.py": "325de8f11da41c023f47bf56621f3fc4e6b633a992780c9e7678316dde02e217",
+    "tests/fixtures/playback-errors/mp4-concat-selected-clock/video-and-long-audio.mp4": "8b731d4f79828fe23810f13cd2b4c9416bbb2424b00fa6ef58b22e52893af701"
+  },
+  "default": "7 passed across 3 targets",
+  "final_fixture_sha256": "4c30293a8ed0b9044597f5a9097499791df20dd3c1b83eb850ecc09cd1a5603c",
+  "accepted_id": "FVID-0327"
+}

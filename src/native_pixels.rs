@@ -232,6 +232,29 @@ impl PixelFilters {
             && self.morphology.is_empty()
             && self.shuffleplanes.is_none()
     }
+    pub fn working_bytes(&self, output_frame_len: usize, depth: u8) -> usize {
+        let sample_bytes = if depth > 8 { 2usize } else { 1usize };
+        let samples = output_frame_len / sample_bytes;
+        let mut peak = output_frame_len;
+        if let Some(tmix) = &self.tmix {
+            let count = tmix.frame_count().max(1);
+            peak = peak.max(output_frame_len.saturating_mul(count));
+        }
+        if self.lagfun.is_some() {
+            let lagfun_bytes = samples
+                .saturating_mul(4)
+                .saturating_add(output_frame_len);
+            peak = peak.max(lagfun_bytes);
+        }
+        if self.hqdn3d.is_some() {
+            let hqdn3d_bytes = samples
+                .saturating_mul(2)
+                .saturating_add(4 * 5120 * 2)
+                .saturating_add(output_frame_len);
+            peak = peak.max(hqdn3d_bytes);
+        }
+        peak
+    }
     pub fn apply(&self, frame: &mut GeometryFrame, depth: u8) -> Result<()> {
         self.apply_range(frame, depth, false)
     }

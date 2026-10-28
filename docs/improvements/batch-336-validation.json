@@ -1,0 +1,23 @@
+{
+  "batch": 336,
+  "accepted": [
+    {
+      "id": "FVID-0343",
+      "title": "Propagate controlled-memory ceilings (max_controlled_bytes) across NativeReader::software in Y4M first-frame inspection, concat compatibility, and export/trim/concat execution, and across export_pcm_selected MP4 metadata and Matroska packet-index limits",
+      "source": "src/native_export.rs",
+      "regression": "tests/mp4_metadata_admission.rs",
+      "snapshots": [
+        "docs/improvements/snapshots/batch-336-pre-edit/src/native_export.rs",
+        "docs/improvements/snapshots/batch-336-pre-edit/src/native_plan.rs",
+        "docs/improvements/snapshots/batch-336-pre-edit/src/native_media.rs"
+      ],
+      "evidence": {
+        "acceptance_before": "docs/improvements/evidence/batch-336-acceptance-before.txt",
+        "acceptance_after": "docs/improvements/evidence/batch-336-acceptance-after.txt",
+        "related_after": "docs/improvements/evidence/batch-336-related-after.txt"
+      },
+      "before": "In `src/native_export.rs`, `inspect_first_y4m_frame_with_filters` and `export_y4m_sources_with_options` opened `NativeReader::software(BufReader::new(File::open(source)?), usize::MAX)` with an unbounded memory budget (`usize::MAX`) instead of `options.max_controlled_bytes`, and `validate_y4m_concat_compatibility` (`src/native_plan.rs:950`) and `validate_video_packet_budget_with_geometry_filters_interval_and_limit` called `inspect_first_y4m_frame_with_filters` and `y4m_segment_frame_upper_bound` without forwarding `options`. As a result, a 4 KiB `max_controlled_bytes` budget on `small.mp4` (whose metadata and encoded packet fit within 4 KiB, but whose AVC decoder requires ~16 KiB of reference/picture working storage) was admitted by `export_y4m_with_options`, `export_y4m_pipeline_with_options`, `plan_trim_y4m`, `trim`, `plan_concat_y4m`, and `concat`. In addition, `export_audio_pcm_selected_with_controls` passed `options: None` into `export_pcm_selected`, which opened `Mp4Reader::open_indexed` and `WebmReader::open` with `Limits::default()` and called `extract_source_pcm_metadata_with_interval_and_packet_limit` without `max_controlled_bytes`.",
+      "after": "Add `inspect_first_y4m_frame_with_filters_and_options` and `validate_y4m_concat_compatibility_with_options` (`src/native_export.rs`), pass `options.max_controlled_bytes.unwrap_or(usize::MAX)` to `NativeReader::software` in `inspect_first_y4m_frame_with_filters_and_options` and `export_y4m_sources_with_options`, forward `options` to `y4m_segment_frame_upper_bound_with_options` and `validate_y4m_concat_compatibility_with_options` (`src/native_plan.rs`), and propagate `options` and `max_controlled_bytes` in `export_audio_pcm_selected_with_controls` and `export_pcm_selected`. Ten integration tests in `mp4_metadata_admission` and nine in `mp4_audio_metadata_admission` pass."
+    }
+  ]
+}

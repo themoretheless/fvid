@@ -1,0 +1,15 @@
+{
+  "batch": 344,
+  "status": "accepted",
+  "counted_improvements": 1,
+  "ids": [
+    "FVID-0351"
+  ],
+  "pre_edit_snapshots": "docs/improvements/snapshots/batch-344-pre-edit",
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-344-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-344-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-344-related-after.txt"
+  },
+  "summary": "Pre-check standalone ASS and SRT script on-disk byte lengths against 64 MiB and max_controlled_bytes via std::fs::metadata(source) before reading in try_convert_ass_inner and try_convert_srt_inner, check Matroska metadata working-set budget before export_atomic in owned_subtitle_burn::burn_subtitles, and add fvid::media::probe_with_options and probe_as_with_options forwarding CopyOptions to native_probe::try_probe_as_with_options and fvid_media::owned_probe::probe_with_options."
+}

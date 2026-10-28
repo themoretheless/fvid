@@ -1,0 +1,24 @@
+{
+  "batch": 318,
+  "accepted_ids": [
+    "FVID-0324"
+  ],
+  "status": "accepted",
+  "summary": "Count all retained MP4 concat timing-table capacities, including unselected tracks, in controlled-memory admission",
+  "evidence": "docs/improvements/evidence/mp4-concat-retained-plans/candidate.json",
+  "tests_run": [
+    "cargo test --locked --offline --test mp4_concat_retained_plans",
+    "cargo test --locked --offline --features player --test native_mp4_concat"
+  ],
+  "before": "One regression failed: two segments with 2 selected packets and 512 unselected packets each were admitted under 40 KiB although both timing tables were retained. Generous-budget control passed.",
+  "after": "Three focused tests pass: tight budget refusal, generous budget acceptance, four selected output packets decoded by owned AAC. Six related tests pass.",
+  "limitations": "Checks the existing controlled-memory estimate against retained vector capacity; not a physical RSS limit. No performance claim.",
+  "remux_capacity_follow_up": {
+    "counted_as": "same FVID-0324; no new ID",
+    "source": "crates/fvid-media/src/owned_mp4_remux.rs",
+    "regression": "tests/mp4_remux_plan_capacity.rs",
+    "evidence": "docs/improvements/evidence/mp4-remux-plan-capacity/status.json",
+    "before": "20 KiB admitted storage reserved for 512 AAC timing entries after edit retained only two packets; precise refusal assertion failed.",
+    "after": "Use retained capacity. Three focused and five related tests pass on combined source including concurrent metadata accounting; successful output has two packets and 2048 mono samples at 48 kHz."
+  }
+}

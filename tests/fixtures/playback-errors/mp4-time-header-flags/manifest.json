@@ -1,0 +1,25 @@
+{
+  "invalid_flags": [
+    "mvhd-v0-flags-000001.mp4",
+    "mvhd-v0-flags-800000.mp4",
+    "mdhd-v0-flags-000001.mp4",
+    "mdhd-v0-flags-800000.mp4",
+    "mvhd-v1-flags-000001.mp4",
+    "mvhd-v1-flags-800000.mp4",
+    "mdhd-v1-flags-000001.mp4",
+    "mdhd-v1-flags-800000.mp4"
+  ],
+  "sha256": {
+    "frame.vp9": "217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c",
+    "valid-v0.mp4": "e98393bb08dedd0b6f34eb73546111d11686b6f2daffa7cb83828e9d62ff27cb",
+    "mvhd-v0-flags-000001.mp4": "13e2b7dd67f41f999db79769ccd174d4965ae1a64b3dae0cd7b61dc816a41218",
+    "mvhd-v0-flags-800000.mp4": "d3a52769a43245a87feba1163c796a775ac1ab498ff0cea7f8c3ea618349f2b1",
+    "mdhd-v0-flags-000001.mp4": "bb3f372e7c119af5e600f4ce7e9d9da916013eca93ead2bda4e8be3186cb9f02",
+    "mdhd-v0-flags-800000.mp4": "8f72cb48683ff9a8ac55e3fe1a227f2aa3c77efae4628808e394b67489b1cb30",
+    "valid-v1.mp4": "7b424c2e32f9cbf3651c85cea1f402d21d1b5b8a6b0852166b974503d1d2b18e",
+    "mvhd-v1-flags-000001.mp4": "78ba494a6298c81a9191b50d510a6b7c0c308948f9172e85294edee369441d04",
+    "mvhd-v1-flags-800000.mp4": "c1356dd858a59700ca6ffddf96b61218939b0d25c043cb9836d8fb9694a33bb9",
+    "mdhd-v1-flags-000001.mp4": "ad6d3778910833e5dfe93ae93924dac62fdce06604f9ac48f1c378625d4ba6f2",
+    "mdhd-v1-flags-800000.mp4": "97bfeab09fb0385f56ec961595ba8e999629a48b06207d0e5ca435e217a8b895"
+  }
+}

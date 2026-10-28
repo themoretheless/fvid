@@ -1,0 +1,14 @@
+{
+  "batch": 367,
+  "ids": ["FVID-0374"],
+  "snapshot": "docs/improvements/snapshots/batch-367-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-367-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-367-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-367-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission raw_pcm_decoders_and_audio_export_backends_enforce_options_before_stream_metadata_or_destination_checks",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 34,
+  "failed": 0
+}

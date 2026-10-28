@@ -1,0 +1,14 @@
+{
+  "batch": 364,
+  "ids": ["FVID-0371"],
+  "snapshot": "docs/improvements/snapshots/batch-364-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-364-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-364-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-364-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission owned_remux_plan_and_wave_remux_trim_concat_enforce_zero_limits_and_rss_before_policy_errors -- --exact",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 31,
+  "failed": 0
+}

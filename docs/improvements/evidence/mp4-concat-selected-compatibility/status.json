@@ -1,0 +1,38 @@
+{
+  "status": "accepted",
+  "not_counted": false,
+  "source_sha256": "388b670d4c3d764c34ff450f04af7fb29d080fdf7e4f13015d9edef9635c9889",
+  "session": 4894,
+  "log": "/private/tmp/fvid-selected-compatibility-before.log",
+  "hypothesis": "All-track compatibility rejects identical selected video solely because discarded AAC clocks differ",
+  "controls": "Selecting the incompatible audio or all tracks must continue refusing",
+  "before": "2 passed, 1 failed: each AAC clock individually admits matching pairs and selecting incompatible audio refuses; only mixed clocks with discarded audio fails",
+  "after_source_sha256": "31dcd6e8748aabbcd7254d3695a13e9e0a3dd329777e020a01bc7b90f7e5497e",
+  "player_session": null,
+  "pending": [],
+  "default_session": null,
+  "default_log": "/private/tmp/fvid-selected-compatibility-default-after.log",
+  "player_log": "/private/tmp/fvid-selected-compatibility-player-after.log",
+  "coverage": [
+    "mixed discarded AAC 48/44.1 kHz",
+    "discarded AAC absent in either segment order",
+    "selected incompatible audio still refused",
+    "matching pairs valid at either audio clock",
+    "public plan and concat output only selected video",
+    "player RGB parity, 80ms duration, EOF, rewind and six seeks in four input permutations"
+  ],
+  "test_sha256": "bf863e3aa8e56cc5bcec341c8bcab2f5ce65b6c2e30d068dbdde5adcad7c65e7",
+  "verified_inputs": {
+    "src/container/mp4_concat.rs": "31dcd6e8748aabbcd7254d3695a13e9e0a3dd329777e020a01bc7b90f7e5497e",
+    "tests/mp4_concat_selected_compatibility.rs": "bf863e3aa8e56cc5bcec341c8bcab2f5ce65b6c2e30d068dbdde5adcad7c65e7",
+    "scripts/generate_mp4_concat_selected_compatibility.py": "66d024dc0ff9eb183d1be189d73e550f956650074340d02fab765212c3d82220",
+    "tests/fixtures/playback-errors/mp4-concat-selected-compatibility/video-audio-48000.mp4": "181efc356b1fb48ee79597da2d62b48ffaa6b185c2f2b068c9d0469740954fad",
+    "tests/fixtures/playback-errors/mp4-concat-selected-compatibility/video-audio-44100.mp4": "4169f33653448353d2d23b3d0c37b1db1e64ec0a03e8dad41c6f6f766c57eeb0",
+    "tests/fixtures/playback-errors/mp4-concat-selected-compatibility/video-only.mp4": "ebe51454ad98968ac15839950c609594e10bb61c399a24ed2275fad54a6157d9"
+  },
+  "focused_player": "6 passed",
+  "related_player": "11 passed",
+  "accepted_id": "FVID-0328",
+  "focused_default": "5 passed",
+  "related_default": "4 passed"
+}

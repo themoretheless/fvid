@@ -40,6 +40,7 @@ pub fn write_adts_with_options<R: Read, W: Write + Seek>(
         progress,
         max_packets,
         options,
+        16384,
     )
 }
 
@@ -73,6 +74,7 @@ pub fn concat_adts_with_options<R: Read, W: Write + Seek>(
     max_packets: Option<u64>,
     options: Option<&fvid_control::CopyOptions>,
 ) -> Result<ProgressEvent> {
+    let base_bytes = readers.len().saturating_mul(8192).saturating_add(16384);
     let mut sequence = adts::SequenceReader::new(readers)?;
     let asc = sequence.audio_specific_config().to_vec();
     write_aac_packets(
@@ -84,6 +86,7 @@ pub fn concat_adts_with_options<R: Read, W: Write + Seek>(
         progress,
         max_packets,
         options,
+        base_bytes,
     )
 }
 
@@ -185,6 +188,33 @@ pub(crate) fn extract_adts_matroska_metadata(
     Ok((name, language, metadata, text, scoped))
 }
 
+pub(crate) fn estimate_adts_matroska_metadata_bytes(
+    options: Option<&fvid_control::CopyOptions>,
+) -> Result<usize> {
+    let (name, language, metadata, text, scoped) = extract_adts_matroska_metadata(options)?;
+    let mut raw_bytes = name.len().saturating_add(language.len());
+    for (_, v) in metadata.tags.entries() {
+        if !v.is_empty() {
+            raw_bytes = raw_bytes.saturating_add(v.len()).saturating_add(32);
+        }
+    }
+    for (k, v) in &text {
+        raw_bytes = raw_bytes
+            .saturating_add(k.len())
+            .saturating_add(v.len())
+            .saturating_add(32);
+    }
+    for entries in scoped.values() {
+        for (k, v) in entries {
+            raw_bytes = raw_bytes
+                .saturating_add(k.len())
+                .saturating_add(v.len())
+                .saturating_add(32);
+        }
+    }
+    Ok(raw_bytes.saturating_mul(8))
+}
+
 #[allow(clippy::too_many_arguments)]
 fn write_aac_packets<W: Write + Seek>(
     config: adts::Header,
@@ -195,8 +225,16 @@ fn write_aac_packets<W: Write + Seek>(
     progress: Option<&ProgressHook>,
     max_packets: Option<u64>,
     options: Option<&fvid_control::CopyOptions>,
+    base_bytes: usize,
 ) -> Result<ProgressEvent> {
     let samples = u64::from(AacConfig::parse(asc)?.frame_samples);
+    let meta_working_bytes = estimate_adts_matroska_metadata_bytes(options)?;
+    let max_controlled_bytes = options.and_then(|o| o.max_controlled_bytes);
+    if let Some(limit) = max_controlled_bytes
+        && base_bytes.saturating_add(meta_working_bytes) > limit
+    {
+        return Err(invalid("controlled memory budget exceeded"));
+    }
     let (name, language, metadata, text, scoped) = extract_adts_matroska_metadata(options)?;
     let spec = TrackSpec {
         encoding: Encoding::Aac {
@@ -243,6 +281,15 @@ fn write_aac_packets<W: Write + Seek>(
         let next = index
             .checked_add(1)
             .ok_or_else(|| invalid("packet count overflow"))?;
+        if let Some(limit) = max_controlled_bytes
+            && base_bytes
+                .saturating_add((next as usize).saturating_mul(32))
+                .saturating_add(meta_working_bytes)
+                .saturating_add(packet.len())
+                > limit
+        {
+            return Err(invalid("controlled memory budget exceeded"));
+        }
         let start = time(index)?;
         writer.write_packet(0, start, time(next)? - start, true, &packet)?;
         if let Some(h) = progress {

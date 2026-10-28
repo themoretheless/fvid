@@ -9,6 +9,26 @@ type Result<T> = std::result::Result<T, String>;
 /// Select supported Y4M for owned inspection. Unknown signatures and
 /// unsupported layouts return None; malformed recognized input returns an error.
 pub fn try_y4m(source: &Path) -> Result<Option<MediaInfo>> {
+    try_y4m_with_options(source, &Default::default())
+}
+
+pub fn try_y4m_with_options(
+    source: &Path,
+    options: &fvid_control::CopyOptions,
+) -> Result<Option<MediaInfo>> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
     let mut input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
     let mut signature = [0; 9];
     match input.read_exact(&mut signature) {
@@ -49,11 +69,31 @@ pub fn try_y4m(source: &Path) -> Result<Option<MediaInfo>> {
             return Ok(None);
         }
     }
-    probe_y4m(source).map(Some)
+    probe_y4m_with_options(source, options).map(Some)
 }
 
 pub fn probe_y4m(source: &Path) -> Result<MediaInfo> {
+    probe_y4m_with_options(source, &Default::default())
+}
+
+pub fn probe_y4m_with_options(
+    source: &Path,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo> {
     use std::io::{Seek, SeekFrom};
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
     let mut input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
     let length = input.get_ref().metadata().map_err(|e| e.to_string())?.len();
     let mut line = Vec::new();
@@ -61,10 +101,24 @@ pub fn probe_y4m(source: &Path) -> Result<MediaInfo> {
         return Err("empty Y4M input".into());
     }
     let header = crate::owned_y4m::Header::parse(&line).map_err(|e| e.to_string())?;
-    let frame_bytes = header.frame_len().map_err(|e| e.to_string())? as u64;
+    let frame_len = header.frame_len().map_err(|e| e.to_string())?;
+    if frame_len > options.max_packet_bytes {
+        return Err("Y4M frame byte length exceeds packet byte limit".into());
+    }
+    if options
+        .max_controlled_bytes
+        .is_some_and(|limit| frame_len > limit)
+    {
+        return Err("Y4M frame byte length exceeds controlled memory budget".into());
+    }
+    let frame_bytes = frame_len as u64;
     let rate = Some(header.frame_rate()?);
     let mut frames = 0i64;
     while crate::owned_y4m::line(&mut input, &mut line).map_err(|e| e.to_string())? {
+        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+            return Err("media operation cancelled".into());
+        }
+        crate::owned_budget::check_rss_budget(options)?;
         if line != b"FRAME\n" && !line.starts_with(b"FRAME ") {
             return Err("expected Y4M FRAME marker".into());
         }
@@ -80,6 +134,12 @@ pub fn probe_y4m(source: &Path) -> Result<MediaInfo> {
             .seek(SeekFrom::Start(end))
             .map_err(|e| e.to_string())?;
         frames = frames.checked_add(1).ok_or("Y4M frame count overflow")?;
+        if options
+            .max_packets
+            .is_some_and(|max| (frames as u64) > max)
+        {
+            return Err("Y4M frame count exceeds packet limit".into());
+        }
     }
     let duration_us = rate
         .map(|[n, d]| {

@@ -167,49 +167,140 @@ pub fn info_for_file_tags(
     edit_info_chunks(&[], &[], &entries)
 }
 
+pub fn wave_metadata_working_bytes(
+    source_info_bytes: usize,
+    options: &fvid_control::CopyOptions,
+) -> Result<usize> {
+    if source_info_bytes == 0
+        && options.metadata_set.is_empty()
+        && options.metadata_delete.is_empty()
+    {
+        return Ok(0);
+    }
+    let assignments = options.metadata_set.iter().try_fold(0usize, |sum, (_, v)| {
+        sum.checked_add(v.len().saturating_add(10))
+            .ok_or("WAVE metadata size overflow")
+    })?;
+    source_info_bytes
+        .checked_add(assignments)
+        .and_then(|n| n.checked_add(12))
+        .and_then(|n| n.checked_mul(8))
+        .ok_or_else(|| "WAVE metadata size overflow".into())
+}
+
 pub(crate) fn mp4_source_info(
     source: &std::path::Path,
     options: &fvid_control::CopyOptions,
 ) -> Result<Vec<u8>> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    let metadata_bytes = crate::owned_mp4::Limits::default()
+        .metadata_bytes
+        .min(options.max_controlled_bytes.unwrap_or(usize::MAX));
     let reader = crate::owned_mp4::Mp4Reader::open_indexed(
         std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?),
         crate::owned_mp4::Limits {
-            packet_bytes: options.max_packet_bytes,
+            metadata_bytes,
             ..Default::default()
         },
     )
-    .map_err(|e| e.to_string())?;
-    let selected = options.streams.first().copied();
+    .map_err(|error| {
+        if metadata_bytes < crate::owned_mp4::Limits::default().metadata_bytes
+            && error.to_string().contains("MP4 metadata exceeds budget")
+        {
+            "controlled memory budget exceeded: MP4 metadata exceeds budget".to_owned()
+        } else {
+            error.to_string()
+        }
+    })?;
+    let selected = match options.streams.as_slice() {
+        [] => None,
+        [index] => Some(*index),
+        _ => return Err("select exactly one audio stream".into()),
+    };
     let index =
         crate::owned_mp4_audio::mp4_audio_index(&reader, selected).map_err(|e| e.to_string())?;
     let track = &reader.tracks()[index];
-    info_for_file_tags(
+    let info = info_for_file_tags(
         reader.tags(),
         &track.name,
         &track.language,
-        None,
+        Some(reader.encoder()),
         &BTreeMap::new(),
-    )
+    )?;
+    if let Some(max) = options.max_controlled_bytes {
+        let index_bytes = reader
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?;
+        let wave_meta_bytes = wave_metadata_working_bytes(info.len(), options)?;
+        if index_bytes
+            .checked_add(wave_meta_bytes)
+            .ok_or("WAVE metadata size overflow")?
+            > max
+        {
+            return Err("controlled memory budget exceeded: WAVE metadata".into());
+        }
+    }
+    Ok(info)
 }
 
 pub(crate) fn matroska_source_info(
     source: &std::path::Path,
     options: &fvid_control::CopyOptions,
 ) -> Result<Vec<u8>> {
+    matroska_source_info_with_interval(source, None, options)
+}
+
+pub(crate) fn matroska_source_info_with_interval(
+    source: &std::path::Path,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    options: &fvid_control::CopyOptions,
+) -> Result<Vec<u8>> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
     let mut reader = crate::owned_matroska_audio::open_audio_reader(
         std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?),
         options,
         options.max_packet_bytes,
     )
     .map_err(|e| e.to_string())?;
-    let selected = options.streams.first().copied();
+    let selected = match options.streams.as_slice() {
+        [] => None,
+        [index] => Some(*index),
+        _ => return Err("select exactly one audio stream".into()),
+    };
     let index = crate::owned_matroska_audio::matroska_audio_index(&reader, selected)
         .map_err(|e| e.to_string())?;
     if options.max_controlled_bytes.is_some() {
-        crate::owned_matroska_audio::admit_audio_reader(&mut reader, index, options)
+        crate::owned_matroska_audio::admit_audio_reader_with_interval(&mut reader, index, interval, options)
             .map_err(|e| e.to_string())?;
     } else {
-        let _ = reader.scan_all();
+        crate::owned_matroska_audio::validate_audio_packet_budget_with_interval(
+            &mut reader, index, interval, options,
+        )
+        .map_err(|e| e.to_string())?;
     }
     let track = &reader.tracks[index];
     let mut extra = reader.metadata.clone();
@@ -226,13 +317,27 @@ pub(crate) fn matroska_source_info(
         .get(&track.number)
         .map(String::as_str)
         .unwrap_or(&track.language);
-    info_for_file_tags(
+    let info = info_for_file_tags(
         &reader.tags,
         &track.name,
         language,
         Some(&reader.writing_app),
         &extra,
-    )
+    )?;
+    if let Some(max) = options.max_controlled_bytes {
+        let index_bytes = reader
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?;
+        let wave_meta_bytes = wave_metadata_working_bytes(info.len(), options)?;
+        if index_bytes
+            .checked_add(wave_meta_bytes)
+            .ok_or("WAVE metadata size overflow")?
+            > max
+        {
+            return Err("controlled memory budget exceeded: WAVE metadata".into());
+        }
+    }
+    Ok(info)
 }
 
 #[cfg(test)]

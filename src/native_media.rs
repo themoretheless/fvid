@@ -101,7 +101,7 @@ pub fn decode_video_pipeline_overlay_step(
             let (start, _, scale) = reader.frame_interval().ok_or_else(|| invalid("overlay frame has no timing"))?;
             if scale == 0 {return Err(invalid("overlay clock is zero"));}
             let pts = u64::try_from(start.checked_mul(1_000_000_000).ok_or_else(|| invalid("overlay timestamp overflow"))? / u128::from(scale)).map_err(|_| invalid("overlay timestamp overflow"))?;
-            compositor.validate_main(&reader, pts)?;
+            compositor.validate_main_with_geometry(&reader, Some(&frame), geometry, pts)?;
             Some(pts)
         } else { None };
         if let Some((from, to)) = interval {
@@ -162,6 +162,22 @@ pub fn decode_video_pipeline_overlay_step(
             if let Some(compositor) = compositor.as_mut() { compositor.apply(&mut output, depth, overlay_pts.unwrap(), None)?; }
             filters.configure_vignette_source(&reader,geometry)?;
             filters.apply_colour_clock(&mut output, depth, reader.colour().full_range, reader.colour().matrix, input_frames, reader.frame_interval().map(|(start,_,scale)|start as f64/scale as f64), crate::native_pixels::frame_clock(&reader)?)?;
+            if let Some([sx, sy]) = output.subsampling {
+                let base = match [sx, sy] {
+                    [1, 1] => "yuv444p",
+                    [2, 1] => "yuv422p",
+                    [2, 2] => "yuv420p",
+                    [1, 2] => "yuv440p",
+                    [4, 1] => "yuv411p",
+                    [4, 4] => "yuv410p",
+                    _ => return Err(invalid("unrecognized decoded plane geometry")),
+                };
+                pixel_format = if depth == 8 {
+                    base.into()
+                } else {
+                    format!("{base}{depth}le")
+                };
+            }
             std::hint::black_box(output);
         }
         let emit = step.emits(input_frames);
@@ -230,7 +246,9 @@ impl<'a> DecodeProgress<'a> {
         }
         Ok(())
     }
-    pub(crate) fn packet_limit(&self) -> Option<u64> { self.max_packets }
+    pub(crate) fn packet_limit(&self) -> Option<u64> {
+        self.max_packets
+    }
     pub(crate) fn packet_limit_reached(&self) -> bool {
         self.max_packets.is_some_and(|maximum| self.event.packets >= maximum)
     }
@@ -437,22 +455,82 @@ include!("../crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs");
 /// Identify AAC in supported containers by their headers and track configuration.
 /// This only detects the codec; decoding still validates the complete bitstream.
 pub fn is_aac_source(path: &std::path::Path) -> std::io::Result<bool> {
+    is_aac_source_with_metadata_limit(path, None)
+}
+
+/// Bound MP4 metadata while inspecting an audio route with copy controls.
+pub fn is_aac_source_with_metadata_limit(path: &std::path::Path, max_controlled_bytes: Option<usize>) -> std::io::Result<bool> {
     use std::io::Read;
+    if max_controlled_bytes == Some(0) {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "controlled memory limit must be positive",
+        ));
+    }
     let mut file = std::fs::File::open(path)?;
     let mut prefix = [0; 8];
     match file.read_exact(&mut prefix) {
         Ok(()) if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) => {
             use std::io::{Seek, SeekFrom};
             file.seek(SeekFrom::Start(0))?;
-            let reader = crate::container::webm::WebmReader::open(file, Default::default())
-                .map_err(std::io::Error::other)?;
+            let mut limits = crate::container::webm::Limits::default();
+            let memory_packets = max_controlled_bytes
+                .map(|bytes| bytes / std::mem::size_of::<crate::container::webm::Packet>());
+            if let Some(maximum) = memory_packets {
+                limits.packets = limits.packets.min(maximum);
+            }
+            let map_packet_limit = |error: crate::Error| {
+                if memory_packets
+                    .is_some_and(|max| max < crate::container::webm::Limits::default().packets)
+                    && error
+                        .to_string()
+                        .contains("WebM packet count exceeds limit")
+                {
+                    std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        "controlled memory budget exceeded: Matroska packet index limit",
+                    )
+                } else {
+                    std::io::Error::other(error)
+                }
+            };
+            let mut reader =
+                crate::container::webm::WebmReader::open(file, limits).map_err(map_packet_limit)?;
+            reader.scan_all().map_err(map_packet_limit)?;
+            if let Some(limit) = max_controlled_bytes
+                && reader
+                    .estimated_index_payload_bytes()
+                    .map_err(std::io::Error::other)?
+                    > limit
+            {
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::InvalidData,
+                    "controlled memory budget exceeded: Matroska index and metadata",
+                ));
+            }
             Ok(reader.tracks.iter().any(|track| track.kind == 2 && track.codec == "A_AAC"))
         }
         Ok(()) if crate::container::mp4::recognizes_prefix(&prefix) => {
             use std::io::{Seek, SeekFrom};
             file.seek(SeekFrom::Start(0))?;
-            let reader = crate::container::mp4::Mp4Reader::open_indexed(file, Default::default())
+            let limits = crate::container::mp4::Limits {
+                metadata_bytes: crate::container::mp4::Limits::default().metadata_bytes
+                    .min(max_controlled_bytes.unwrap_or(usize::MAX)),
+                ..Default::default()
+            };
+            let reader = crate::container::mp4::Mp4Reader::open_indexed(file, limits)
                 .map_err(std::io::Error::other)?;
+            if let Some(limit) = max_controlled_bytes
+                && reader
+                    .estimated_index_payload_bytes()
+                    .map_err(std::io::Error::other)?
+                    > limit
+            {
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::InvalidData,
+                    "controlled memory budget exceeded: MP4 index and metadata",
+                ));
+            }
             Ok(reader.tracks().iter().any(|track| track.handler == *b"soun" && track.codec == *b"mp4a"))
         }
         Ok(()) => Ok(!prefix.starts_with(b"ID3") && crate::container::adts::header(&prefix).is_some()),
@@ -481,15 +559,76 @@ pub fn aac_source_info(source: &Path) -> Result<AacSourceInfo> {
 /// Implicit PS is verified from MP4/Matroska payloads. Mono ADTS scans the
 /// encoded stream before publishing its negotiated output clock and layout.
 pub fn aac_source_info_selected(source: &Path, selected: Option<usize>) -> Result<AacSourceInfo> {
+    aac_source_info_selected_with_options(source, selected, None, &fvid_media::CopyOptions::default())
+}
+
+pub fn aac_source_info_selected_with_options(
+    source: &Path,
+    selected: Option<usize>,
+    interval: Option<(Duration, Duration)>,
+    options: &fvid_media::CopyOptions,
+) -> Result<AacSourceInfo> {
     use std::io::{BufReader, Read, Seek, SeekFrom};
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(crate::media_control::CancelFlag::is_cancelled)
+    {
+        return Err(invalid("media operation cancelled"));
+    }
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    let mut control = DecodeProgress::new_with_limits(
+        options.cancel.as_ref(),
+        None,
+        options.max_rss_bytes,
+        options.max_packets,
+    )?;
+    control.check()?;
     let mut input = BufReader::new(std::fs::File::open(source)?);
     let mut prefix = [0; 8];
     input.read_exact(&mut prefix)?;
     input.seek(SeekFrom::Start(0))?;
     let (stream_index, asc, declared, in_band_ps) = if crate::container::mp4::recognizes_prefix(&prefix) {
-        let mut reader = crate::container::mp4::Mp4Reader::open_indexed(input, Default::default())?;
+        let limits = crate::container::mp4::Limits {
+            metadata_bytes: crate::container::mp4::Limits::default().metadata_bytes
+                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+            ..Default::default()
+        };
+        let mut reader = crate::container::mp4::Mp4Reader::open_indexed(input, limits)?;
+        reader.restrict_packet_bytes(options.max_packet_bytes);
+        if let Some(limit) = options.max_controlled_bytes
+            && reader.estimated_index_payload_bytes()? > limit
+        {
+            return Err(invalid("controlled memory budget exceeded: MP4 index and metadata"));
+        }
         let index = mp4_aac_index(&reader, selected)?;
-        let in_band_ps = negotiate_mp4_ps(&mut reader, index, || Ok(()))?;
+        if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
+            let track = &reader.tracks()[index];
+            let max_samples = mp4_active_samples(track, interval, options.max_packets);
+            let exceeds = match &track.samples {
+                crate::container::mp4::SampleIndex::Expanded(samples) => samples
+                    .iter()
+                    .take(max_samples)
+                    .any(|s| (s.size as usize) > options.max_packet_bytes),
+                crate::container::mp4::SampleIndex::Uniform(uniform) => {
+                    uniform.count > 0
+                        && max_samples > 0
+                        && (uniform.bytes_per_frame as usize) > options.max_packet_bytes
+                }
+            };
+            if exceeds {
+                return Err(invalid("MP4 packet exceeds budget"));
+            }
+        }
+        let in_band_ps = negotiate_mp4_ps_with_interval(&mut reader, index, interval, options.max_packets, || control.check())?;
         let source_track = &reader.tracks()[index];
         let first = source_track.samples.get(0).ok_or_else(|| invalid("MP4 audio has no samples"))?;
         let setup = source_track.decoder_setup(first.description_index)?;
@@ -497,16 +636,65 @@ pub fn aac_source_info_selected(source: &Path, selected: Option<usize>) -> Resul
         (index, crate::codec::config::aac_specific_config(&track.configuration)?.to_vec(),
             (u64::from(track.sample_rate), u64::from(track.channels)), in_band_ps)
     } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-        let mut reader = crate::container::webm::WebmReader::open(input, Default::default())?;
+        let mut limits = crate::container::webm::Limits::default();
+        let memory_packets = options
+            .max_controlled_bytes
+            .map(|bytes| bytes / std::mem::size_of::<crate::container::webm::Packet>());
+        if let Some(maximum) = memory_packets {
+            limits.packets = limits.packets.min(maximum);
+        }
+        let map_packet_limit = |error: crate::Error| {
+            if memory_packets
+                .is_some_and(|max| max < crate::container::webm::Limits::default().packets)
+                && error
+                    .to_string()
+                    .contains("WebM packet count exceeds limit")
+            {
+                invalid("controlled memory budget exceeded: Matroska packet index limit")
+            } else {
+                error
+            }
+        };
+        let mut reader =
+            crate::container::webm::WebmReader::open(input, limits).map_err(map_packet_limit)?;
+        reader.restrict_packet_bytes(options.max_packet_bytes);
+        reader.scan_all().map_err(map_packet_limit)?;
+        if let Some(limit) = options.max_controlled_bytes
+            && reader.estimated_index_payload_bytes()? > limit
+        {
+            return Err(invalid(
+                "controlled memory budget exceeded: Matroska index and metadata",
+            ));
+        }
         let index = matroska_aac_index(&reader, selected)?;
-        let in_band_ps = negotiate_matroska_ps(&mut reader, index, || Ok(()))?;
+        if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
+            let track_number = reader.tracks[index].number;
+            let active_limit = matroska_active_track_packets(&reader, index, interval, options.max_packets);
+            let mut track_packets = 0usize;
+            for (packet_index, packet) in reader.packets.iter().enumerate() {
+                if packet.track == track_number {
+                    if track_packets >= active_limit {
+                        break;
+                    }
+                    if reader.packet_payload_size(packet_index)? > options.max_packet_bytes {
+                        return Err(invalid("WebM packet exceeds budget"));
+                    }
+                    track_packets += 1;
+                }
+            }
+        }
+        let in_band_ps = negotiate_matroska_ps_with_interval(&mut reader, index, interval, options.max_packets, || control.check())?;
         let track = &reader.tracks[index];
         (index, track.codec_private.clone(), (track.sample_rate, track.channels), in_band_ps)
     } else {
         if selected.is_some_and(|index| index != 0) { return Err(invalid("ADTS has only stream 0")); }
-        let reader = crate::container::adts::StreamReader::open(input)?;
-        let mut control = DecodeProgress::new(None, None)?;
-        let negotiated = negotiate_adts_aac_reader(reader, None, &mut control)?;
+        let reader = crate::container::adts::StreamReader::open_with_packet_limit(
+            input,
+            options
+                .max_packet_bytes
+                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+        )?;
+        let negotiated = negotiate_adts_aac_reader(reader, interval, &mut control)?;
         return Ok(AacSourceInfo { stream_index: 0, sample_rate: negotiated.sample_rate(),
             channels: negotiated.channels(), channel_mask: negotiated.channel_mask() });
     };
@@ -540,11 +728,55 @@ pub struct AdtsInfo {
     pub channels: u16,
 }
 pub fn inspect_adts<R: std::io::Read>(source: R) -> Result<AdtsInfo> {
-    let mut reader = crate::container::adts::StreamReader::open(source)?;
+    inspect_adts_with_options(source, &fvid_media::CopyOptions::default())
+}
+
+pub fn inspect_adts_with_options<R: std::io::Read>(
+    source: R,
+    options: &fvid_media::CopyOptions,
+) -> Result<AdtsInfo> {
+    inspect_adts_with_interval_and_options(source, None, options)
+}
+
+pub fn inspect_adts_with_interval_and_options<R: std::io::Read>(
+    source: R,
+    interval: Option<(Duration, Duration)>,
+    options: &fvid_media::CopyOptions,
+) -> Result<AdtsInfo> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err(invalid("media operation cancelled"));
+    }
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
+    let mut reader = crate::container::adts::StreamReader::open_with_packet_limit(
+        source,
+        options
+            .max_packet_bytes
+            .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+    )?;
     let config = crate::codec::config::AacConfig::parse(reader.audio_specific_config())?;
     let mut info = AdtsInfo { packets: 0, payload_bytes: 0, sample_frames: 0,
         sample_rate: config.sample_rate, channels: u16::from(config.channels) };
-    while let Some(packet) = reader.next_packet()? {
+    let core_to = match interval {
+        Some((_, to)) => adts_sample_boundary(to, config.sample_rate)?,
+        None => u64::MAX,
+    };
+    while info.sample_frames < core_to && options.max_packets.is_none_or(|limit| info.packets < limit) {
+        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+            return Err(invalid("media operation cancelled"));
+        }
+        fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
+        let Some(packet) = reader.next_packet()? else {
+            break;
+        };
         info.packets = info.packets.checked_add(1).ok_or_else(|| crate::invalid("AAC packet count overflow"))?;
         info.payload_bytes = info.payload_bytes.checked_add(packet.len() as u64).ok_or_else(|| crate::invalid("AAC payload size overflow"))?;
         info.sample_frames = info.sample_frames.checked_add(u64::from(config.frame_samples)).ok_or_else(|| crate::invalid("AAC duration overflow"))?;
@@ -787,24 +1019,108 @@ fn is_mp4_audio_container(path: &Path) -> Result<bool> {
 /// Unsupported ALAC layouts and ambiguous default selection retain the adapter.
 /// Packed WAVE is detected separately by native_pcm::is_wave.
 pub fn is_owned_audio_source(path: &Path) -> Result<bool> {
-    if is_aac_source(path)? { return Ok(true); }
-    Ok((is_mp4_audio_container(path)? || crate::native_export::is_matroska_source(path)?) && audio_source_info_selected(path, None).is_ok())
+    is_owned_audio_source_with_options(path, &fvid_media::CopyOptions::default())
+}
+
+pub fn is_owned_audio_source_with_options(
+    path: &Path,
+    options: &fvid_media::CopyOptions,
+) -> Result<bool> {
+    is_owned_audio_source_with_interval_and_options(path, None, options)
+}
+
+pub fn is_owned_audio_source_with_interval_and_options(
+    path: &Path,
+    interval: Option<(Duration, Duration)>,
+    options: &fvid_media::CopyOptions,
+) -> Result<bool> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err(invalid("media operation cancelled"));
+    }
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
+    if is_aac_source_with_metadata_limit(path, options.max_controlled_bytes)? {
+        return Ok(true);
+    }
+    Ok(
+        (is_mp4_audio_container(path)? || crate::native_export::is_matroska_source(path)?)
+            && audio_source_info_selected_with_interval_and_options(path, None, interval, options).is_ok(),
+    )
 }
 
 /// Trim can select one supported audio track even when default decoding is
 /// ambiguous. Execution still requires explicit selection if other streams exist.
 pub fn is_owned_audio_trim_source(path: &Path) -> Result<bool> {
-    if is_owned_audio_source(path)? { return Ok(true); }
-    if !is_mp4_audio_container(path)? && !crate::native_export::is_matroska_source(path)? { return Ok(false); }
-    let info = crate::native_probe::probe(path).map_err(|e| invalid(&e))?;
-    Ok(info.streams.iter().any(|stream| stream.media_type == "audio"
-        && audio_source_info_selected(path, Some(stream.index)).is_ok()))
+    is_owned_audio_trim_source_with_options(path, &fvid_media::CopyOptions::default())
+}
+
+pub fn is_owned_audio_trim_source_with_options(
+    path: &Path,
+    options: &fvid_media::CopyOptions,
+) -> Result<bool> {
+    is_owned_audio_trim_source_with_interval_and_options(path, None, options)
+}
+
+pub fn is_owned_audio_trim_source_with_interval_and_options(
+    path: &Path,
+    interval: Option<(Duration, Duration)>,
+    options: &fvid_media::CopyOptions,
+) -> Result<bool> {
+    if is_owned_audio_source_with_interval_and_options(path, interval, options)? {
+        return Ok(true);
+    }
+    if !is_mp4_audio_container(path)? && !crate::native_export::is_matroska_source(path)? {
+        return Ok(false);
+    }
+    let info = crate::native_probe::probe_with_options(path, options).map_err(|e| invalid(&e))?;
+    Ok(info.streams.iter().any(|stream| {
+        stream.media_type == "audio"
+            && audio_source_info_selected_with_interval_and_options(path, Some(stream.index), interval, options).is_ok()
+    }))
 }
 
 pub(crate) fn is_aac_trim_source(path: &Path, selected: Option<usize>) -> Result<bool> {
+    is_aac_trim_source_with_options(path, selected, &fvid_media::CopyOptions::default())
+}
+
+pub(crate) fn is_aac_trim_source_with_options(
+    path: &Path,
+    selected: Option<usize>,
+    options: &fvid_media::CopyOptions,
+) -> Result<bool> {
+    is_aac_trim_source_with_interval_and_options(path, selected, None, options)
+}
+
+pub(crate) fn is_aac_trim_source_with_interval_and_options(
+    path: &Path,
+    selected: Option<usize>,
+    interval: Option<(Duration, Duration)>,
+    options: &fvid_media::CopyOptions,
+) -> Result<bool> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err(invalid("media operation cancelled"));
+    }
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
     match selected {
-        Some(index) => Ok(audio_source_info_selected(path, Some(index))?.codec == "aac"),
-        None => Ok(is_aac_source(path)?),
+        Some(index) => Ok(audio_source_info_selected_with_interval_and_options(path, Some(index), interval, options)?.codec == "aac"),
+        None => Ok(is_aac_source_with_metadata_limit(path, options.max_controlled_bytes)?),
     }
 }
 
@@ -848,13 +1164,98 @@ pub fn audio_source_info_selected(
     source: &Path,
     selected: Option<usize>,
 ) -> Result<AudioSourceInfo> {
+    audio_source_info_selected_with_options(source, selected, &fvid_media::CopyOptions::default())
+}
+
+pub fn audio_source_info_selected_with_options(
+    source: &Path,
+    selected: Option<usize>,
+    options: &fvid_media::CopyOptions,
+) -> Result<AudioSourceInfo> {
+    audio_source_info_selected_with_interval_and_options(source, selected, None, options)
+}
+
+pub fn audio_source_info_selected_with_interval_and_options(
+    source: &Path,
+    selected: Option<usize>,
+    interval: Option<(Duration, Duration)>,
+    options: &fvid_media::CopyOptions,
+) -> Result<AudioSourceInfo> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(crate::media_control::CancelFlag::is_cancelled)
+    {
+        return Err(invalid("media operation cancelled"));
+    }
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    let control = DecodeProgress::new_with_limits(
+        options.cancel.as_ref(),
+        None,
+        options.max_rss_bytes,
+        options.max_packets,
+    )?;
+    control.check()?;
     if is_mp4_audio_container(source)? || crate::native_export::is_matroska_source(source)? {
         use std::io::{Read,Seek,SeekFrom};
         let mut input=File::open(source)?;let mut prefix=[0;4];input.read_exact(&mut prefix)?;input.seek(SeekFrom::Start(0))?;
         if prefix==[0x1a,0x45,0xdf,0xa3] {
-            let mut reader=crate::container::webm::WebmReader::open(BufReader::new(input),Default::default())?;
+            let mut limits = crate::container::webm::Limits::default();
+            let memory_packets = options
+                .max_controlled_bytes
+                .map(|bytes| bytes / std::mem::size_of::<crate::container::webm::Packet>());
+            if let Some(maximum) = memory_packets {
+                limits.packets = limits.packets.min(maximum);
+            }
+            let map_packet_limit = |error: crate::Error| {
+                if memory_packets
+                    .is_some_and(|max| max < crate::container::webm::Limits::default().packets)
+                    && error
+                        .to_string()
+                        .contains("WebM packet count exceeds limit")
+                {
+                    invalid("controlled memory budget exceeded: Matroska packet index limit")
+                } else {
+                    error
+                }
+            };
+            let mut reader = crate::container::webm::WebmReader::open(BufReader::new(input), limits)
+                .map_err(map_packet_limit)?;
+            reader.restrict_packet_bytes(options.max_packet_bytes);
+            reader.scan_all().map_err(map_packet_limit)?;
+            if let Some(limit) = options.max_controlled_bytes
+                && reader.estimated_index_payload_bytes()? > limit
+            {
+                return Err(invalid(
+                    "controlled memory budget exceeded: Matroska index and metadata",
+                ));
+            }
             let index=matroska_audio_index(&reader,selected)?;
-            let in_band_ps=negotiate_matroska_ps(&mut reader,index,||Ok(()))?;
+            if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
+                let track_number = reader.tracks[index].number;
+                let active_limit = matroska_active_track_packets(&reader, index, interval, options.max_packets);
+                let mut track_packets = 0usize;
+                for (packet_index, packet) in reader.packets.iter().enumerate() {
+                    if packet.track == track_number {
+                        if track_packets >= active_limit {
+                            break;
+                        }
+                        if reader.packet_payload_size(packet_index)? > options.max_packet_bytes {
+                            return Err(invalid("WebM packet exceeds budget"));
+                        }
+                        track_packets += 1;
+                    }
+                }
+            }
+            let in_band_ps=negotiate_matroska_ps_with_interval(&mut reader,index,interval,options.max_packets,||control.check())?;
             let track=&reader.tracks[index];
             let decoder=if in_band_ps {MatroskaTimelineDecoder::with_in_band_ps(track)?.0} else {crate::native_audio_decoder::PacketPcmDecoder::from_matroska(track)?};
             if track.sample_rate!=u64::from(decoder.sample_rate()) || (!in_band_ps && track.channels!=u64::from(decoder.channels())) {return Err(invalid("Matroska audio geometry disagrees with configuration"));}
@@ -880,10 +1281,41 @@ pub fn audio_source_info_selected(
         }
         let mut reader = crate::container::mp4::Mp4Reader::open_indexed(
             BufReader::new(File::open(source)?),
-            Default::default(),
+            crate::container::mp4::Limits {
+                metadata_bytes: crate::container::mp4::Limits::default().metadata_bytes
+                    .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+                ..Default::default()
+            },
         )?;
+        reader.restrict_packet_bytes(options.max_packet_bytes);
+        if let Some(limit) = options.max_controlled_bytes
+            && reader.estimated_index_payload_bytes()? > limit
+        {
+            return Err(invalid(
+                "controlled memory budget exceeded: MP4 index and metadata",
+            ));
+        }
         let index = mp4_audio_index(&reader, selected)?;
-        let in_band_ps = negotiate_mp4_ps(&mut reader,index,||Ok(()))?;
+        reader.tracks()[index].ensure_constant_description()?;
+        if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
+            let track = &reader.tracks()[index];
+            let max_samples = mp4_active_samples(track, interval, options.max_packets);
+            let exceeds = match &track.samples {
+                crate::container::mp4::SampleIndex::Expanded(samples) => samples
+                    .iter()
+                    .take(max_samples)
+                    .any(|s| (s.size as usize) > options.max_packet_bytes),
+                crate::container::mp4::SampleIndex::Uniform(uniform) => {
+                    uniform.count > 0
+                        && max_samples > 0
+                        && (uniform.bytes_per_frame as usize) > options.max_packet_bytes
+                }
+            };
+            if exceeds {
+                return Err(invalid("MP4 packet exceeds budget"));
+            }
+        }
+        let in_band_ps = negotiate_mp4_ps_with_interval(&mut reader,index,interval,options.max_packets,||control.check())?;
         let source_track = &reader.tracks()[index];
         let first = source_track.samples.get(0).ok_or_else(|| invalid("MP4 audio has no samples"))?;
         let setup = source_track.decoder_setup(first.description_index)?;
@@ -919,7 +1351,7 @@ pub fn audio_source_info_selected(
             },
         })
     } else {
-        let info = aac_source_info_selected(source, selected)?;
+        let info = aac_source_info_selected_with_options(source, selected, interval, options)?;
         Ok(AudioSourceInfo {
             channel_mask: Some(info.channel_mask),
             stream_index: info.stream_index,

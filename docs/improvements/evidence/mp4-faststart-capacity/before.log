@@ -1,0 +1,2 @@
+AUDIT spans_len=10004 spans_capacity=16384 span_size=32 span_storage_plus_copy=589824
+budget=580000 result=Ok(ProgressEvent { packets: 0, payload_bytes: 12426, done: false }) output_bytes=93160

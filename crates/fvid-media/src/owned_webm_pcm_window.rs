@@ -84,7 +84,12 @@ pub(super) fn prepare(
     if frame_bytes == 0 || rate == 0 {
         return Err("invalid PCM geometry".into());
     }
-    let packet_frames = (options.max_packet_bytes / frame_bytes).min(1024);
+    let effective_packet_limit = options
+        .max_controlled_bytes
+        .map_or(options.max_packet_bytes, |limit| {
+            options.max_packet_bytes.min(limit)
+        });
+    let packet_frames = (effective_packet_limit / frame_bytes).min(1024);
     if packet_frames == 0 {
         return Err("PCM audio frame exceeds packet limit".into());
     }

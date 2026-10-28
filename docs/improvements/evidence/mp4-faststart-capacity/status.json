@@ -1,0 +1,22 @@
+{
+  "status": "verified-extension-FVID-0323",
+  "counting": "same FVID-0323; no new ID",
+  "source_sha256": "6925de4763fb8b47e1d91a3ae3528ba91ec5571b5f29304a0a321220b5e383b7",
+  "measurement": "10004 spans; Vec capacity 16384; BoxSpan size 32. Span storage plus existing 64 KiB copy buffer is 589824 bytes, excluding order/index allocations.",
+  "before": "Instrumented exact source admits 580000 controlled bytes and copies valid fixture byte-for-byte successfully despite that lower bound exceeding budget.",
+  "instrumentation": "Only an eprintln after parsing records len/capacity/size; production behavior unchanged. This is controlled allocation accounting, not a physical RSS claim.",
+  "fixture": "tests/fixtures/playback-errors/mp4-relocation-admission/many-boxes.mp4",
+  "next": "Await prior concat player checks and original Cargo refusal failure. Then explicitly admit amortized span capacity before reserve, count actual capacity in final memory admission, and allocate order storage with a known bound. Recheck refusal, sufficient budget, native playback and existing relocation tests.",
+  "cargo_before_session": 16048,
+  "cargo_before_log": "/private/tmp/fvid-faststart-capacity-before-cargo.log",
+  "regression": "tests/mp4_relocation_admission.rs::span_capacity_growth_is_admitted_before_allocation",
+  "isolated_before": "2 passed, 1 failed on unexpected successful operation with insufficient capacity budget",
+  "isolated_after": "3 passed, 0 failed, 0 ignored",
+  "after_source_sha256": "9b9a0cd2be0a5a4c514c6e25c8561d1eca51d7521d1040de7720880ea4a35c4e",
+  "default_after_session": null,
+  "player_after_session": null,
+  "default_after_log": "/private/tmp/fvid-faststart-capacity-default-after.log",
+  "player_after_log": "/private/tmp/fvid-faststart-capacity-player-after.log",
+  "default_result": "3 focused + 9 native media control + 4 native relocation passed; 0 failed, 0 ignored",
+  "player_result": "4 focused + 9 native media control + 4 native relocation passed; 0 failed, 0 ignored"
+}

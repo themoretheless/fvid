@@ -1,0 +1,13 @@
+{
+  "batch": 324,
+  "accepted_ids": [
+    "FVID-0331"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-324-pre-edit",
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-324-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-324-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-324-related-after.txt"
+  },
+  "summary": "Enforce controlled-memory budget (max_controlled_bytes) against multi-frame temporal pixel filter working sets (tmix, lagfun, hqdn3d) in native export-y4m and plan export-y4m across Y4M, MP4, and Matroska inputs."
+}

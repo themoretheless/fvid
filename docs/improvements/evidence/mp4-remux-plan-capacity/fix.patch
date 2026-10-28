@@ -1,0 +1,14 @@
+--- pre-fix
++++ post-fix
+@@ -157,8 +157,10 @@
+         .collect::<Result<Vec<_>>>()?;
+     if let Some(mem_limit) = options.max_controlled_bytes {
+         let plan_bytes = plans.iter().try_fold(16384usize, |sum, p| {
++            // Edits can shorten the initialized plan without releasing its
++            // reserved timing storage. Admit the allocation that remains live.
+             p.packets
+-                .len()
++                .capacity()
+                 .checked_mul(std::mem::size_of::<crate::owned_mp4_matroska::PacketTime>())
+                 .and_then(|n| sum.checked_add(n))
+                 .ok_or("MP4 packet plan memory overflow")

@@ -1,0 +1,24 @@
+{
+  "batch": 331,
+  "ids": [
+    "FVID-0338"
+  ],
+  "title": "Enforce controlled-memory budget (max_controlled_bytes) against selected companion audio track metadata working sets and multitrack packet-schedule / TrackPlan allocations in owned_webm_multitrack_export, owned_mp4_multitrack_export, and owned_lossless",
+  "snapshots": [
+    "docs/improvements/snapshots/batch-331-pre-edit/crates/fvid-media/src/owned_webm_multitrack_export.rs",
+    "docs/improvements/snapshots/batch-331-pre-edit/crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+    "docs/improvements/snapshots/batch-331-pre-edit/crates/fvid-media/src/owned_lossless.rs"
+  ],
+  "before_evidence": "docs/improvements/evidence/batch-331-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-331-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-331-related-after.txt",
+  "commands": [
+    "cargo test --test multitrack_lossless_budget_parity_regressions",
+    "cargo test --test multitrack_avc_mp4_stream_metadata_regressions --test lossless_overlay_multitrack_budget_parity_regressions"
+  ],
+  "summary": {
+    "acceptance_tests": 4,
+    "related_tests": 5,
+    "status": "passed"
+  }
+}

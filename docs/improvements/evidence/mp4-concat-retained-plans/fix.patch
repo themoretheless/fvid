@@ -1,0 +1,18 @@
+--- pre-fix
++++ post-fix
+@@ -165,10 +165,12 @@
+     if let Some(mem_limit) = options.max_controlled_bytes {
+         let mut plan_bytes = segments.len().saturating_mul(8192).saturating_add(16384);
+         for segment in &segments {
+-            for &track_idx in &selected {
+-                plan_bytes = segment.plans[track_idx]
++            // Plans for unselected tracks are retained too: stream selection
++            // controls output, not ownership of the segment's timing tables.
++            for plan in &segment.plans {
++                plan_bytes = plan
+                     .packets
+-                    .len()
++                    .capacity()
+                     .checked_mul(std::mem::size_of::<mp4_matroska::PacketTime>())
+                     .and_then(|n| plan_bytes.checked_add(n))
+                     .ok_or_else(|| invalid("MP4 concat packet plan memory overflow"))?;

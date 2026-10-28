@@ -1,0 +1,27 @@
+{
+  "batch": 338,
+  "id": "FVID-0345",
+  "title": "Clamp ADTS StreamReader packet limits to max_controlled_bytes across ADTS decode, loudness, planning, and spatial routing, emit budget notes in owned WAVE plan_loudness, and forward CopyOptions to G.711 WAVE recognition in plan_trim and trim",
+  "status": "accepted",
+  "source": [
+    "crates/fvid-media/src/owned_adts_loudness.rs",
+    "crates/fvid-media/src/owned_adts_export.rs",
+    "crates/fvid-media/src/owned_audio_plan.rs",
+    "crates/fvid-media/src/owned_aac_export_routing.rs",
+    "crates/fvid-media/src/owned_aac/stream.rs",
+    "crates/fvid-media/src/owned_wave_loudness.rs",
+    "crates/fvid-media/src/owned_wave_plan.rs",
+    "crates/fvid-media/src/owned_wave_remux.rs"
+  ],
+  "regression": "tests/mp4_audio_metadata_admission.rs",
+  "pre_edit_snapshot": "docs/improvements/snapshots/batch-338-pre-edit",
+  "evidence": {
+    "before": "docs/improvements/evidence/batch-338-acceptance-before.txt",
+    "after": "docs/improvements/evidence/batch-338-acceptance-after.txt",
+    "related": "docs/improvements/evidence/batch-338-related-after.txt"
+  },
+  "summary": {
+    "before": "In `owned_adts_loudness::validate_header_configuration`, `owned_adts_loudness::validate_packet_budget`, `owned_adts_export::supports`, `owned_adts_export::decode_to_wave_with_rate`, `owned_audio_plan::source_descriptor_for_decode`, `owned_aac_export_routing::router_for_decode`, `owned_aac::stream::decode_adts_pcm`, and `owned_aac::stream::adts_prefix_info`, `StreamReader::open_with_packet_limit` was called with `options.max_packet_bytes` without clamping to `options.max_controlled_bytes` (`options.max_packet_bytes.min(options.max_controlled_bytes.unwrap_or(usize::MAX))`), allowing an explicit-layout ADTS frame (`channels == 0`, PCE in first packet) to allocate its first transport frame payload (`vec![0; configuration.frame_bytes - 7]`) above `max_controlled_bytes` before decoder admission ran. In addition, `owned_wave_loudness::plan_loudness` omitted the standard `encoded packet limit: ...; packet work limit: ...; controlled memory limit: ...; RSS limit: ...` note when non-default `CopyOptions` budgets were supplied, and `owned_wave_plan::plan_trim` (`crates/fvid-media/src/owned_wave_plan.rs:65`) and `owned_wave_remux::trim` (`crates/fvid-media/src/owned_wave_remux.rs:64`) passed `&CopyOptions::default()` instead of `options` to `owned_g711_wave_export::recognizes`.",
+    "after": "Clamp `StreamReader::open_with_packet_limit` to `options.max_packet_bytes.min(options.max_controlled_bytes.unwrap_or(usize::MAX))` across `owned_adts_loudness`, `owned_adts_export`, `owned_audio_plan`, `owned_aac_export_routing`, and `owned_aac::stream`, append the standard budget note in `owned_wave_loudness::plan_loudness`, and forward `options` to `owned_g711_wave_export::recognizes` in `owned_wave_plan::plan_trim` and `owned_wave_remux::trim`. Ten integration tests in `mp4_audio_metadata_admission` and eleven in `mp4_metadata_admission` pass."
+  }
+}

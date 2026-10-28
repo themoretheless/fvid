@@ -1,0 +1,9 @@
+{
+  "frame.vp9": "217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c",
+  "regular-known.mp4": "e98393bb08dedd0b6f34eb73546111d11686b6f2daffa7cb83828e9d62ff27cb",
+  "fragmented-known.mp4": "c5197725b629513d2ddef0593921bd4d89a5285d66432c78f8ad6f9895179cc0",
+  "regular-unknown-v0.mp4": "9f1bf44b32b0a4c858052ebdb9992423bd75291b62ae359e05e8befaa75af769",
+  "regular-unknown-v1.mp4": "f5265e81c841d29d0629e9a4432283b3a203d5e691bfbf3c62ca7d47192a2ec2",
+  "fragmented-unknown-v0.mp4": "0da737ce534c29d7ef001339fc3ea288d0c87cabbcdeec7140675fd7c4487184",
+  "fragmented-unknown-v1.mp4": "67bdba396203c9201f3dc35af7d7d6f4afa5e69038956d6f43a8258074cc9003"
+}

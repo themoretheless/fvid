@@ -1,0 +1,13 @@
+{
+  "inactive_probe_executables_removed": [
+    {
+      "path": "/private/tmp/fvid-faststart-capacity-audit/functional-before",
+      "bytes": 1325488
+    },
+    {
+      "path": "/private/tmp/fvid-faststart-capacity-audit/functional-after",
+      "bytes": 1327040
+    }
+  ],
+  "retained": "original/instrumented source, exact regression harnesses and all raw results"
+}

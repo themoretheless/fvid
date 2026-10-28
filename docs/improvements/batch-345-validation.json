@@ -1,0 +1,15 @@
+{
+  "batch": 345,
+  "ids": [
+    "FVID-0352"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-345-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-345-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-345-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-345-related-after.txt",
+  "commands": [
+    "cargo test --locked --offline --no-default-features --test mp4_audio_metadata_admission"
+  ],
+  "passed": 14,
+  "failed": 0
+}

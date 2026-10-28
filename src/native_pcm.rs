@@ -2,7 +2,7 @@
 mod normalize;
 pub use normalize::{NormalizationPhase, NormalizationProgress, NormalizationProgressHook, normalize_file_controlled as normalize_loudness_file_controlled, normalize_file_with_options as normalize_loudness_file_with_options, NormalizeTarget, NormalizeReport, normalize_file as normalize_loudness_file};
 mod loudness;
-pub use loudness::{IntegratedLoudness, LoudnessMeter, default_weights as loudness_channel_weights, measure_file_controlled as measure_loudness_file_controlled, measure_file_with_options as measure_loudness_file_with_options, measure_file as measure_loudness_file};
+pub use loudness::{IntegratedLoudness, LoudnessMeter, default_weights as loudness_channel_weights, default_weights_with_options as loudness_channel_weights_with_options, measure_file_controlled as measure_loudness_file_controlled, measure_file_with_options as measure_loudness_file_with_options, measure_file as measure_loudness_file};
 pub use fvid_media::owned_k_weight::KWeighting;
 use crate::{
     Result, invalid,
@@ -172,13 +172,13 @@ pub fn trim_wave(
     cancel: Option<&CancelFlag>,
     progress: Option<&ProgressHook>,
 ) -> Result<PcmTrimStats> {
+    check(cancel)?;
     if from < 0 || to <= from {
         return Err(invalid("PCM interval requires 0 <= from < to"));
     }
     if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
         return Err(invalid("native WAVE trim output requires .wav"));
     }
-    check(cancel)?;
     let mut input = File::open(source)?;
     let info = inspect(&mut input, cancel)?;
     let range = info.interval(from, to)?;
@@ -448,6 +448,7 @@ fn concat_inputs(
     sources: &[PathBuf],
     cancel: Option<&CancelFlag>,
 ) -> Result<ConcatInputs> {
+    check(cancel)?;
     if !(2..=256).contains(&sources.len()) {
         return Err(invalid("concat requires 2..=256 inputs"));
     }
@@ -504,7 +505,14 @@ fn concat_inputs(
 
 /// Validate all input headers and total RIFF size, without decoding samples.
 pub fn concat_info(sources: &[PathBuf]) -> Result<(WaveInfo, u64)> {
-    let (info, frames, _) = concat_inputs(sources, None)?;
+    concat_info_with_cancel(sources, None)
+}
+
+pub fn concat_info_with_cancel(
+    sources: &[PathBuf],
+    cancel: Option<&CancelFlag>,
+) -> Result<(WaveInfo, u64)> {
+    let (info, frames, _) = concat_inputs(sources, cancel)?;
     Ok((info, frames))
 }
 
@@ -516,6 +524,7 @@ pub fn concat_wave(
     cancel: Option<&CancelFlag>,
     progress: Option<&ProgressHook>,
 ) -> Result<PcmTrimStats> {
+    check(cancel)?;
     if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
         return Err(invalid("native WAVE concat output requires .wav"));
     }

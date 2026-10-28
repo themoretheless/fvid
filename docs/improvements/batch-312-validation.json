@@ -1,0 +1,21 @@
+{
+  "batch": 312,
+  "ids": [
+    "FVID-0319"
+  ],
+  "summary": "Enforce early controlled-memory budget admission and budget note reporting in WAVE/native plan_loudnorm and validate Matroska destination metadata in loudnorm CLI and plan loudnorm",
+  "snapshots": [
+    "docs/improvements/snapshots/batch-312-pre-edit/src/native_loudnorm.rs",
+    "docs/improvements/snapshots/batch-312-pre-edit/src/owned_loudnorm_cli.rs",
+    "docs/improvements/snapshots/batch-312-pre-edit/crates/fvid-media/src/owned_loudnorm.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-312-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-312-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-312-related-after.txt"
+  },
+  "tests_run": [
+    "cargo test --test loudness_normalize_plan_cli_regressions -- --nocapture"
+  ],
+  "status": "accepted"
+}

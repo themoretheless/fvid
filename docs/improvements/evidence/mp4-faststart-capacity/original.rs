@@ -1,0 +1,298 @@
+//! Owned MP4 index relocation and position-preserving fragmented MP4 copy. Media and metadata stay encoded.
+use crate::{Result, invalid};
+use std::io::{Read, Seek, SeekFrom, Write};
+#[derive(Clone)]
+struct BoxSpan {
+    start: u64,
+    size: u64,
+    header: u64,
+    kind: [u8; 4],
+}
+fn header<R: Read + Seek>(reader: &mut R, start: u64, end: u64) -> Result<BoxSpan> {
+    if end - start < 8 {
+        return Err(invalid("truncated MP4 box header"));
+    }
+    reader.seek(SeekFrom::Start(start))?;
+    let mut bytes = [0; 8];
+    reader.read_exact(&mut bytes)?;
+    let mut size = u64::from(u32::from_be_bytes(bytes[..4].try_into().unwrap()));
+    let mut width = 8;
+    if size == 1 {
+        if end - start < 16 {
+            return Err(invalid("truncated extended MP4 box"));
+        }
+        let mut extended = [0; 8];
+        reader.read_exact(&mut extended)?;
+        size = u64::from_be_bytes(extended);
+        width = 16;
+    } else if size == 0 {
+        size = end - start;
+    }
+    if size < width || size > end - start {
+        return Err(invalid("MP4 box exceeds input"));
+    }
+    Ok(BoxSpan {
+        start,
+        size,
+        header: width,
+        kind: bytes[4..].try_into().unwrap(),
+    })
+}
+fn patch(data: &mut [u8], spans: &[BoxSpan], locations: &[u64], depth: usize) -> Result<()> {
+    if depth > 16 {
+        return Err(invalid("MP4 metadata nesting exceeds limit"));
+    }
+    let mut offset = 0;
+    while offset < data.len() {
+        let item = header(
+            &mut std::io::Cursor::new(&*data),
+            offset as u64,
+            data.len() as u64,
+        )?;
+        let payload = &mut data[offset + item.header as usize..offset + item.size as usize];
+        match &item.kind {
+            b"moov" | b"trak" | b"mdia" | b"minf" | b"stbl" | b"udta" => {
+                patch(payload, spans, locations, depth + 1)?
+            }
+            b"meta" => patch(
+                payload
+                    .get_mut(4..)
+                    .ok_or_else(|| invalid("truncated MP4 meta"))?,
+                spans,
+                locations,
+                depth + 1,
+            )?,
+            b"mvex" | b"saio" | b"iloc" | b"rmra" => {
+                return Err(invalid(
+                    "MP4 relocation does not support these offset-bearing extensions",
+                ));
+            }
+            b"stco" | b"co64" => {
+                if payload.len() < 8 || payload[..4] != [0; 4] {
+                    return Err(invalid("invalid MP4 chunk offset table"));
+                }
+                let count = u32::from_be_bytes(payload[4..8].try_into().unwrap()) as usize;
+                let width = if item.kind == *b"stco" { 4 } else { 8 };
+                if count.checked_mul(width).and_then(|n| n.checked_add(8)) != Some(payload.len()) {
+                    return Err(invalid("invalid MP4 chunk offset count"));
+                }
+                for entry in payload[8..].chunks_exact_mut(width) {
+                    let old = if width == 4 {
+                        u64::from(u32::from_be_bytes(entry.try_into().unwrap()))
+                    } else {
+                        u64::from_be_bytes(entry.try_into().unwrap())
+                    };
+                    let index = spans
+                        .iter()
+                        .position(|span| {
+                            span.kind == *b"mdat"
+                                && old >= span.start + span.header
+                                && old < span.start + span.size
+                        })
+                        .ok_or_else(|| invalid("MP4 chunk offset is outside media data"))?;
+                    let new = locations[index]
+                        .checked_add(old - spans[index].start)
+                        .ok_or_else(|| invalid("MP4 chunk offset overflow"))?;
+                    if width == 4 {
+                        let new = u32::try_from(new).map_err(|_| {
+                            invalid("MP4 relocation requires promoting stco to co64")
+                        })?;
+                        entry.copy_from_slice(&new.to_be_bytes());
+                    } else {
+                        entry.copy_from_slice(&new.to_be_bytes());
+                    }
+                }
+            }
+            _ => {}
+        }
+        offset += item.size as usize;
+    }
+    Ok(())
+}
+
+/// Move moov before mdat and update stco/co64 without interpreting encoded media.
+/// Preserves opaque metadata boxes. Fragmented/auxiliary-offset/item-offset variants
+/// requiring relocation are rejected. Already initialized fragmented files are
+/// copied byte-for-byte, preserving all offsets and fragment metadata. A caller must discard output on error. Index limit is 32 MiB;
+/// media bytes stream through a fixed copy buffer rather than loading the file.
+pub fn fast_start<R: Read + Seek>(reader: &mut R, output: &mut impl Write) -> Result<()> {
+    fast_start_controlled(reader, output, None, None).map(|_| ())
+}
+
+/// Relocate with cooperative cancellation and media-byte progress. `packets`
+/// stays zero because this operation copies opaque boxes, not parsed samples.
+/// `payload_bytes` counts mdat payload only, excluding all box headers/indexes.
+/// The caller owns output publication and must emit the final done event.
+pub fn fast_start_controlled<R: Read + Seek>(
+    reader: &mut R,
+    output: &mut impl Write,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::media_control::ProgressEvent> {
+    fast_start_with_memory_limit(reader, output, cancel, progress, None)
+}
+
+pub fn fast_start_with_memory_limit<R: Read + Seek>(
+    reader: &mut R,
+    output: &mut impl Write,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+    max_controlled_bytes: Option<usize>,
+) -> Result<crate::media_control::ProgressEvent> {
+    if max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    let check = || -> Result<()> {
+        if cancel.is_some_and(|flag| flag.is_cancelled()) {
+            return Err(invalid("media operation cancelled"));
+        }
+        Ok(())
+    };
+    let mut event = crate::media_control::ProgressEvent {
+        packets: 0,
+        payload_bytes: 0,
+        done: false,
+    };
+    check()?;
+    if let Some(hook) = progress {
+        hook.emit(event);
+    }
+    check()?;
+    let end = reader.seek(SeekFrom::End(0))?;
+    let mut spans = Vec::new();
+    let mut at = 0;
+    while at < end {
+        check()?;
+        if spans.len() >= 100_000 {
+            return Err(invalid("too many top-level MP4 boxes"));
+        }
+        // Admit metadata bookkeeping before scanning or growing its vector.
+        // The final check also accounts for the relocated moov payload.
+        if let Some(limit) = max_controlled_bytes {
+            let metadata_bytes = (spans.len() + 1)
+                .checked_mul(std::mem::size_of::<BoxSpan>() + 16)
+                .and_then(|n| n.checked_add(64usize << 10))
+                .ok_or_else(|| invalid("MP4 relocation memory overflow"))?;
+            if metadata_bytes > limit {
+                return Err(invalid("controlled memory budget exceeded"));
+            }
+        }
+        let span = header(reader, at, end)?;
+        at += span.size;
+        spans.push(span);
+    }
+    let movies: Vec<_> = spans
+        .iter()
+        .enumerate()
+        .filter(|(_, s)| s.kind == *b"moov")
+        .map(|(i, _)| i)
+        .collect();
+    if movies.len() != 1 {
+        return Err(invalid("MP4 relocation requires one moov"));
+    }
+    let movie = movies[0];
+    let media = spans
+        .iter()
+        .position(|s| s.kind == *b"mdat")
+        .ok_or_else(|| invalid("MP4 has no mdat"))?;
+    // Fragment offsets (including absolute base-data-offset and sidx/mfra)
+    // remain valid only if every byte keeps its original position. An existing
+    // initialization segment before all fragments already has fast-start order.
+    let fragmented = spans.iter().any(|s| s.kind == *b"moof");
+    if fragmented {
+        let first_fragment = spans.iter().position(|s| s.kind == *b"moof").unwrap();
+        if movie > first_fragment || movie > media {
+            return Err(invalid(
+                "fragmented MP4 relocation requires initialization before media",
+            ));
+        }
+    } else if spans
+        .iter()
+        .any(|s| matches!(&s.kind, b"sidx" | b"mfra" | b"meta"))
+    {
+        return Err(invalid(
+            "MP4 relocation does not support these offset-bearing extensions",
+        ));
+    }
+    if spans[movie].size > 32 << 20 {
+        return Err(invalid("MP4 index exceeds relocation budget"));
+    }
+    if let Some(limit) = max_controlled_bytes {
+        let working_set = (64usize << 10)
+            .checked_add(
+                spans
+                    .len()
+                    .saturating_mul(std::mem::size_of::<BoxSpan>() + 16),
+            )
+            .and_then(|n| {
+                if fragmented {
+                    Some(n)
+                } else {
+                    usize::try_from(spans[movie].size)
+                        .ok()
+                        .and_then(|m| n.checked_add(m))
+                }
+            })
+            .ok_or_else(|| invalid("MP4 relocation memory overflow"))?;
+        if working_set > limit {
+            return Err(invalid("controlled memory budget exceeded"));
+        }
+    }
+    let (order, moov) = if fragmented {
+        ((0..spans.len()).collect::<Vec<_>>(), None)
+    } else {
+        let mut order: Vec<_> = (0..spans.len()).filter(|i| *i != movie).collect();
+        let position = order.iter().position(|i| *i == media).unwrap();
+        order.insert(position, movie);
+        let mut locations = vec![0; spans.len()];
+        let mut next = 0u64;
+        for &index in &order {
+            locations[index] = next;
+            next += spans[index].size;
+        }
+        let mut moov = vec![0; spans[movie].size as usize];
+        reader.seek(SeekFrom::Start(spans[movie].start))?;
+        reader.read_exact(&mut moov)?;
+        if moov[..4] == [0; 4] {
+            moov[..4].copy_from_slice(&(spans[movie].size as u32).to_be_bytes());
+        }
+        patch(&mut moov, &spans, &locations, 0)?;
+        (order, Some(moov))
+    };
+    let mut buffer = [0u8; 64 << 10];
+    let mut reported = 0u64;
+    for index in order {
+        check()?;
+        if let Some(moov) = moov.as_ref().filter(|_| index == movie) {
+            output.write_all(moov)?;
+        } else {
+            let span = &spans[index];
+            reader.seek(SeekFrom::Start(span.start))?;
+            let mut copied = 0u64;
+            while copied < span.size {
+                check()?;
+                let size = (span.size - copied).min(buffer.len() as u64) as usize;
+                reader.read_exact(&mut buffer[..size])?;
+                output.write_all(&buffer[..size])?;
+                if span.kind == *b"mdat" {
+                    let before = copied.saturating_sub(span.header);
+                    let after = (copied + size as u64).saturating_sub(span.header);
+                    event.payload_bytes += after - before;
+                }
+                copied += size as u64;
+                if event.payload_bytes - reported >= 1 << 20 {
+                    if let Some(hook) = progress {
+                        hook.emit(event);
+                    }
+                    reported = event.payload_bytes;
+                }
+            }
+        }
+    }
+    check()?;
+    if let Some(hook) = progress {
+        hook.emit(event);
+    }
+    check()?;
+    Ok(event)
+}

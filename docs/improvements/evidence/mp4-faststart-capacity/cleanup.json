@@ -1,0 +1,5 @@
+{
+  "deleted_inactive_probe": "/private/tmp/fvid-faststart-capacity-audit/probe",
+  "bytes": 686952,
+  "retained": "instrumented source, unmodified original source and raw allocation trace"
+}

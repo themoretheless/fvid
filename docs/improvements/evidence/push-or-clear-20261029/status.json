@@ -1,0 +1,24 @@
+{
+  "status": "blocked-before-publication-failing-tests",
+  "owned_media_result": {
+    "passed": 540,
+    "failed": 5,
+    "ignored": 1
+  },
+  "failed_tests": [
+    "owned_adts_export::admission_tests::adts_export_admits_large_policy_and_rejects_small_without_publication",
+    "owned_adts_loudness::admission_tests::aac_loudness_and_normalization_keep_owned_budget_policy",
+    "owned_audio_export::control_tests::progress_counts_source_blocks_and_cancel_never_publishes_output",
+    "owned_audio_export::rss_tests::public_wave_export_checks_requested_process_limit_without_legacy_admission",
+    "owned_xfade::tests::atomic_export_preserves_existing_output_and_cleans_failed_decode"
+  ],
+  "remaining_gates": "Core and player gates not started after the owned-media failure.",
+  "publication": "No push performed; main unchanged.",
+  "preservation_commits": [
+    "35739ac2369320d5e4c9e6114dac4d8d12e70831",
+    "8ba7c70e95e8c8bf4a1fb061410dc4469dcf45a9"
+  ],
+  "stashes": "All four untouched.",
+  "branches_worktrees": "No deletion performed.",
+  "scope": "An integration candidate only; not a completed 1000-improvement campaign."
+}

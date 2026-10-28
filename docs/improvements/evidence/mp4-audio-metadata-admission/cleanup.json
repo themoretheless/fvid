@@ -1,0 +1,78 @@
+{
+  "deleted_inactive_artifacts": [
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_audio_metadata_admission-ee2c4a0bee02b1d4",
+      "bytes": 20788240
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_audio_metadata_admission-ee2c4a0bee02b1d4.mp4_audio_metadata_admission.2ecf9fb119682a60-cgu.0.rcgu.o",
+      "bytes": 211832
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_audio_metadata_admission-ee2c4a0bee02b1d4.d",
+      "bytes": 414
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_audio_metadata_admission-303b0cf5f86aace1",
+      "bytes": 20329200
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_audio_metadata_admission-303b0cf5f86aace1.mp4_audio_metadata_admission.9ece33383335d6ae-cgu.0.rcgu.o",
+      "bytes": 219664
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_audio_metadata_admission-303b0cf5f86aace1.d",
+      "bytes": 414
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_metadata_admission-b0a48d8507aac8f0",
+      "bytes": 25682440
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_metadata_admission-b0a48d8507aac8f0.d",
+      "bytes": 384
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_metadata_admission-b0a48d8507aac8f0.mp4_metadata_admission.a1cc000e64ef7299-cgu.0.rcgu.o",
+      "bytes": 511248
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_metadata_admission-887ec9be15138c2e",
+      "bytes": 17762136
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_metadata_admission-887ec9be15138c2e.mp4_metadata_admission.8770f336a10d7e3c-cgu.0.rcgu.o",
+      "bytes": 214312
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_metadata_admission-887ec9be15138c2e.d",
+      "bytes": 384
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_adts_interval_prefix_budget_regression-e226135c69244ec0",
+      "bytes": 30672344
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_adts_interval_prefix_budget_regression-e226135c69244ec0.mp4_adts_interval_prefix_budget_regression.20ae913d14019f44-cgu.0.rcgu.o",
+      "bytes": 157416
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_adts_interval_prefix_budget_regression-e226135c69244ec0.d",
+      "bytes": 484
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_adts_interval_prefix_budget_regression-d14251fbbcf22bcc",
+      "bytes": 29804568
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_adts_interval_prefix_budget_regression-d14251fbbcf22bcc.mp4_adts_interval_prefix_budget_regression.3833f4110eba531-cgu.0.rcgu.o",
+      "bytes": 162144
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_adts_interval_prefix_budget_regression-d14251fbbcf22bcc.d",
+      "bytes": 484
+    }
+  ],
+  "active_families_skipped": [],
+  "retained": "source, synthetic media, generators, regressions, snapshots and all evidence logs"
+}

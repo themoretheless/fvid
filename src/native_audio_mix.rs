@@ -3,6 +3,7 @@ mod concat;
 pub use concat::{
     concat_audio, concat_audio_with_options, eligible as concat_eligible,
     eligible_with_options as concat_eligible_with_options,
+    validate_concat_segments_with_options,
 };
 pub use crate::media_info::{MixAudioOptions, MixAudioStats, MixDuration};
 use crate::{Result, invalid};
@@ -105,16 +106,19 @@ fn is_single_stream_fvid_media_audio_with_options(
     source: &Path,
     options: &fvid_media::CopyOptions,
 ) -> Result<bool> {
-    let single_audio = match crate::media::probe(source) {
-        Ok(info) => info.streams.iter().filter(|s| s.media_type == "audio").count() == 1,
-        Err(_) => fvid_media::owned_container_loudness::recognizes_standalone_audio(source)
-            .map_err(|e| invalid(&e))?,
+    let probe_opts = strip_output_controls(options);
+    let single_audio = match crate::native_probe::try_probe_as_with_options(source, None, &probe_opts) {
+        Ok(Some(info)) => info.streams.iter().filter(|s| s.media_type == "audio").count() == 1,
+        Ok(None) => fvid_media::owned_container_loudness::recognizes_standalone_audio_with_options(
+            source,
+            &probe_opts,
+        )
+        .map_err(|e| invalid(&e))?,
+        Err(e) => return Err(invalid(&e)),
     };
     if !single_audio {
         return Ok(false);
     }
-    let mut probe_opts = strip_output_controls(options);
-    probe_opts.max_packets = None;
     if fvid_media::plan_decode_audio(source, &Default::default(), &probe_opts).is_err() {
         return Ok(false);
     }
@@ -132,28 +136,125 @@ fn validate_and_inspect_source_with_options(
     if options.max_packet_bytes == 0 {
         return Err(invalid("packet byte limit must be positive"));
     }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
     fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
     validate_output_controls(options, None)?;
     if options.max_controlled_bytes.is_none() && crate::native_pcm::is_wave(source)? {
-        crate::native_plan::decode_audio(source, &Default::default()).map_err(|e| invalid(&e))?;
+        let probe_opts = strip_output_controls(options);
+        crate::native_plan::decode_audio_with_options(source, &Default::default(), &probe_opts)
+            .map_err(|e| invalid(&e))?;
         let mut input = File::open(source)?;
         let info = crate::native_pcm::inspect(&mut input, options.cancel.as_ref())?;
+        let frame = usize::from(info.frame_bytes());
+        if frame == 0 || (65536usize.min(options.max_packet_bytes) / frame * frame) == 0 {
+            return Err(invalid(
+                "packet byte limit is smaller than one PCM sample frame",
+            ));
+        }
         Ok((info.sample_rate, info.channels, info.channel_mask))
-    } else if options.max_controlled_bytes.is_none() && crate::native_media::is_owned_audio_source(source)? {
-        crate::native_plan::decode_audio(source, &Default::default()).map_err(|e| invalid(&e))?;
-        let info = crate::native_media::audio_source_info_selected(source, None)?;
+    } else if options.max_controlled_bytes.is_none() && crate::native_media::is_owned_audio_source_with_options(source, options)? {
+        let probe_opts = strip_output_controls(options);
+        crate::native_plan::decode_audio_with_options(source, &Default::default(), &probe_opts)
+            .map_err(|e| invalid(&e))?;
+        let info = crate::native_media::audio_source_info_selected_with_options(source, None, &probe_opts)?;
+        if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
+            use std::io::{Seek, SeekFrom};
+            let mut input = BufReader::new(File::open(source)?);
+            let mut prefix = [0u8; 8];
+            input.read_exact(&mut prefix)?;
+            input.seek(SeekFrom::Start(0))?;
+            if crate::container::mp4::recognizes_prefix(&prefix) {
+                let reader = crate::container::mp4::Mp4Reader::open(
+                    input,
+                    crate::container::mp4::Limits::default(),
+                )?;
+                if let Some(track) = reader.tracks().get(info.stream_index) {
+                    let max_samples = crate::native_media::mp4_active_samples(
+                        track,
+                        None,
+                        options.max_packets,
+                    );
+                    let exceeds = match &track.samples {
+                        crate::container::mp4::SampleIndex::Expanded(samples) => samples
+                            .iter()
+                            .take(max_samples)
+                            .any(|s| (s.size as usize) > options.max_packet_bytes),
+                        crate::container::mp4::SampleIndex::Uniform(uniform) => {
+                            uniform.count > 0
+                                && max_samples > 0
+                                && (uniform.bytes_per_frame as usize) > options.max_packet_bytes
+                        }
+                    };
+                    if exceeds {
+                        return Err(invalid("MP4 packet exceeds budget"));
+                    }
+                }
+            } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
+                let mut reader = crate::container::webm::WebmReader::open(
+                    input,
+                    crate::container::webm::Limits::default(),
+                )?;
+                reader.scan_all()?;
+                if let Some(track) = reader.tracks.get(info.stream_index) {
+                    let track_number = track.number;
+                    let mut track_packets = 0u64;
+                    for (packet_index, packet) in reader.packets.iter().enumerate() {
+                        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+                            return Err(invalid("media operation cancelled"));
+                        }
+                        fvid_media::owned_budget::check_rss_budget(options)
+                            .map_err(|e| invalid(&e))?;
+                        if packet.track == track_number {
+                            if options.max_packets.is_some_and(|max| track_packets >= max) {
+                                break;
+                            }
+                            track_packets += 1;
+                            if reader.packet_payload_size(packet_index)? > options.max_packet_bytes
+                            {
+                                return Err(invalid("WebM packet exceeds budget"));
+                            }
+                        }
+                    }
+                }
+            } else if crate::container::adts::header(&prefix).is_some() {
+                let mut reader = crate::container::adts::StreamReader::open_with_packet_limit(
+                    input,
+                    options.max_packet_bytes,
+                )?;
+                let mut packets = 0u64;
+                while options.max_packets.is_none_or(|max| packets < max) {
+                    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+                        return Err(invalid("media operation cancelled"));
+                    }
+                    fvid_media::owned_budget::check_rss_budget(options)
+                        .map_err(|e| invalid(&e))?;
+                    if reader.next_packet()?.is_none() {
+                        break;
+                    }
+                    packets += 1;
+                }
+            }
+        }
         let mask = info
             .channel_mask
             .unwrap_or(crate::native_export::default_pcm_mask(info.channels)?);
         Ok((info.sample_rate, info.channels, mask))
     } else {
-        if !is_single_stream_fvid_media_audio_with_options(source, options)? {
-            return Err(invalid("source is not a single-stream owned audio input"));
-        }
-        let mut probe_opts = strip_output_controls(options);
-        probe_opts.max_packets = None;
+        let probe_opts = strip_output_controls(options);
         fvid_media::plan_decode_audio(source, &Default::default(), &probe_opts)
             .map_err(|e| invalid(&e))?;
+        let mut default_probe = fvid_media::CopyOptions::default();
+        default_probe.cancel = options.cancel.clone();
+        default_probe.max_rss_bytes = options.max_rss_bytes;
+        default_probe.max_controlled_bytes = options.max_controlled_bytes;
+        if !is_single_stream_fvid_media_audio_with_options(source, &default_probe)? {
+            return Err(invalid("source is not a single-stream owned audio input"));
+        }
         fvid_media::owned_audio_plan::source_geometry_with_mask(source, &probe_opts)
             .map_err(|e| invalid(&e))
     }
@@ -167,9 +268,22 @@ pub(crate) fn decode_source_to_f32le_with_options(
     options: &fvid_media::CopyOptions,
 ) -> Result<crate::native_media::AudioDecodeStats> {
     let cancel = options.cancel.as_ref();
+    if cancel.is_some_and(|c| c.is_cancelled()) {
+        return Err(invalid("media operation cancelled"));
+    }
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
     let clean_opts = strip_output_controls(options);
     if options.max_controlled_bytes.is_none()
-        && (crate::native_pcm::is_wave(source)? || crate::native_media::is_owned_audio_source(source)?)
+        && (crate::native_pcm::is_wave(source)? || crate::native_media::is_owned_audio_source_with_options(source, &clean_opts)?)
     {
         let mut export_opts = clean_opts;
         export_opts.progress = None;
@@ -188,8 +302,12 @@ pub(crate) fn decode_source_to_f32le_with_options(
         decode_opts.progress = None;
         let decoded =
             fvid_media::decode_audio(source, &temp_wav, &decode_opts).map_err(|e| invalid(&e))?;
-        let mut stats = crate::native_export::export_audio_pcm_selected(
-            &temp_wav, destination, None, 1.0, None, None, None, cancel, None,
+        let mut spool_opts = fvid_media::CopyOptions::default();
+        spool_opts.cancel = cancel.cloned();
+        spool_opts.max_rss_bytes = options.max_rss_bytes;
+        spool_opts.max_controlled_bytes = options.max_controlled_bytes;
+        let mut stats = crate::native_export::export_audio_pcm_selected_with_controls(
+            &temp_wav, destination, None, &spool_opts,
         )?;
         let _ = std::fs::remove_file(&temp_wav);
         stats.decoded_frames = decoded.decoded_frames;
@@ -214,34 +332,153 @@ pub fn eligible_with_options(
     sources: &[PathBuf],
     options: &fvid_media::CopyOptions,
 ) -> Result<bool> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled())
+        || options.max_packet_bytes == 0
+        || options.max_packets == Some(0)
+        || options.max_controlled_bytes == Some(0)
+    {
+        return Ok(false);
+    }
+    if fvid_media::owned_budget::check_rss_budget(options).is_err() {
+        return Ok(false);
+    }
     if validate_output_controls(options, None).is_err() {
         return Ok(false);
     }
     let clean_opts = strip_output_controls(options);
     for source in sources {
+        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled())
+            || fvid_media::owned_budget::check_rss_budget(options).is_err()
+        {
+            return Ok(false);
+        }
         if crate::native_pcm::is_wave(source)? {
             let mut input = File::open(source)?;
-            if !crate::native_pcm::inspect(&mut input, options.cancel.as_ref())
-                .is_ok_and(|info| info.validate_decode().is_ok())
-            {
+            let Ok(info) = crate::native_pcm::inspect(&mut input, options.cancel.as_ref()) else {
+                return Ok(false);
+            };
+            if info.validate_decode().is_err() {
                 return Ok(false);
             }
-            let mut probe_opts = clean_opts.clone();
-            probe_opts.max_packets = None;
+            let frame = usize::from(info.frame_bytes());
+            if frame == 0 || (65536usize.min(options.max_packet_bytes) / frame * frame) == 0 {
+                return Ok(false);
+            }
+            let probe_opts = clean_opts.clone();
             if options.max_controlled_bytes.is_some()
                 && fvid_media::plan_decode_audio(source, &Default::default(), &probe_opts).is_err()
             {
                 return Ok(false);
             }
-        } else if crate::native_media::is_owned_audio_source(source)? {
-            if crate::native_media::audio_source_info_selected(source, None).is_err()
-                || crate::media::probe(source)
-                    .is_ok_and(|info| info.streams.iter().filter(|s| s.media_type == "audio").count() != 1)
+        } else if crate::native_media::is_owned_audio_source_with_options(source, &clean_opts)? {
+            let Ok(info) = crate::native_media::audio_source_info_selected_with_options(source, None, &clean_opts) else {
+                return Ok(false);
+            };
+            if crate::native_probe::try_probe_as_with_options(source, None, &clean_opts)
+                .is_ok_and(|probe| {
+                    probe.is_some_and(|p| {
+                        p.streams.iter().filter(|s| s.media_type == "audio").count() != 1
+                    })
+                })
             {
                 return Ok(false);
             }
-            let mut probe_opts = clean_opts.clone();
-            probe_opts.max_packets = None;
+            if options.max_controlled_bytes.is_none()
+                && options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes
+            {
+                use std::io::{Seek, SeekFrom};
+                let mut input = BufReader::new(File::open(source)?);
+                let mut prefix = [0u8; 8];
+                if input.read_exact(&mut prefix).is_err() || input.seek(SeekFrom::Start(0)).is_err()
+                {
+                    return Ok(false);
+                }
+                if crate::container::mp4::recognizes_prefix(&prefix) {
+                    let Ok(reader) = crate::container::mp4::Mp4Reader::open(
+                        input,
+                        crate::container::mp4::Limits::default(),
+                    ) else {
+                        return Ok(false);
+                    };
+                    if let Some(track) = reader.tracks().get(info.stream_index) {
+                        let max_samples = crate::native_media::mp4_active_samples(
+                            track,
+                            None,
+                            options.max_packets,
+                        );
+                        let exceeds = match &track.samples {
+                            crate::container::mp4::SampleIndex::Expanded(samples) => samples
+                                .iter()
+                                .take(max_samples)
+                                .any(|s| (s.size as usize) > options.max_packet_bytes),
+                            crate::container::mp4::SampleIndex::Uniform(uniform) => {
+                                uniform.count > 0
+                                    && max_samples > 0
+                                    && (uniform.bytes_per_frame as usize) > options.max_packet_bytes
+                            }
+                        };
+                        if exceeds {
+                            return Ok(false);
+                        }
+                    }
+                } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
+                    let Ok(mut reader) = crate::container::webm::WebmReader::open(
+                        input,
+                        crate::container::webm::Limits::default(),
+                    ) else {
+                        return Ok(false);
+                    };
+                    if reader.scan_all().is_err() {
+                        return Ok(false);
+                    }
+                    if let Some(track) = reader.tracks.get(info.stream_index) {
+                        let track_number = track.number;
+                        let mut track_packets = 0u64;
+                        for (packet_index, packet) in reader.packets.iter().enumerate() {
+                            if options.cancel.as_ref().is_some_and(|c| c.is_cancelled())
+                                || fvid_media::owned_budget::check_rss_budget(options).is_err()
+                            {
+                                return Ok(false);
+                            }
+                            if packet.track == track_number {
+                                if options.max_packets.is_some_and(|max| track_packets >= max) {
+                                    break;
+                                }
+                                track_packets += 1;
+                                let Ok(size) = reader.packet_payload_size(packet_index) else {
+                                    return Ok(false);
+                                };
+                                if size > options.max_packet_bytes {
+                                    return Ok(false);
+                                }
+                            }
+                        }
+                    }
+                } else if crate::container::adts::header(&prefix).is_some() {
+                    let Ok(mut reader) =
+                        crate::container::adts::StreamReader::open_with_packet_limit(
+                            input,
+                            options.max_packet_bytes,
+                        )
+                    else {
+                        return Ok(false);
+                    };
+                    let mut packets = 0u64;
+                    while options.max_packets.is_none_or(|max| packets < max) {
+                        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled())
+                            || fvid_media::owned_budget::check_rss_budget(options).is_err()
+                        {
+                            return Ok(false);
+                        }
+                        match reader.next_packet() {
+                            Ok(Some(_)) => packets += 1,
+                            Ok(None) => break,
+                            Err(_) => return Ok(false),
+                        }
+                    }
+                }
+            }
+            let probe_opts = clean_opts.clone();
             if options.max_controlled_bytes.is_some()
                 && fvid_media::plan_decode_audio(source, &Default::default(), &probe_opts).is_err()
             {
@@ -290,6 +527,19 @@ pub fn plan_with_controls(
     options: &MixAudioOptions,
     controls: &fvid_media::CopyOptions,
 ) -> Result<crate::media_info::MediaPlan> {
+    if controls.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err(invalid("media operation cancelled"));
+    }
+    if controls.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if controls.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if controls.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    fvid_media::owned_budget::check_rss_budget(controls).map_err(|e| invalid(&e))?;
     weights(sources.len(), options)?;
     let mut geometry = None;
     for source in sources {
@@ -302,6 +552,14 @@ pub fn plan_with_controls(
         }
         geometry = Some(shape);
     }
+    let (_, channels) = geometry.unwrap();
+    crate::native_export::pcm_matroska::check_output_memory_budget(
+        &sources[0],
+        channels,
+        32768usize.saturating_mul(usize::from(channels)),
+        controls,
+        None,
+    )?;
     let mut notes = vec!["PCM spools bound mixing memory independently of input duration; temporary disk space is required".into()];
     if controls.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes
         || controls.max_packets.is_some()
@@ -375,6 +633,19 @@ pub fn mix_audio_with_controls(
     options: &MixAudioOptions,
     controls: &fvid_media::CopyOptions,
 ) -> Result<MixAudioStats> {
+    if controls.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err(invalid("media operation cancelled"));
+    }
+    if controls.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if controls.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if controls.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    fvid_media::owned_budget::check_rss_budget(controls).map_err(|e| invalid(&e))?;
     let weights = weights(sources.len(), options)?;
     let matroska = match destination.extension().and_then(|s| s.to_str()) {
         Some("wav") => false,
@@ -391,20 +662,32 @@ pub fn mix_audio_with_controls(
     } else {
         let source_info =
             crate::native_export::pcm_matroska::extract_source_wave_info(&sources[0], controls)?;
-        fvid_media::owned_wave_metadata::edit_info_chunks(
+        let edited = fvid_media::owned_wave_metadata::edit_info_chunks(
             &source_info,
             &controls.metadata_delete,
             &controls.metadata_set,
         )
-        .map_err(|e| invalid(&e))?
+        .map_err(|e| invalid(&e))?;
+        if controls
+            .max_controlled_bytes
+            .is_some_and(|max| edited.len() > max)
+        {
+            return Err(invalid(
+                "controlled memory budget exceeded: WAVE metadata limit",
+            ));
+        }
+        edited
     };
     let source_matroska_metadata = if matroska {
         Some(
-            crate::native_export::pcm_matroska::extract_source_pcm_metadata(
+            crate::native_export::pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
                 &sources[0],
                 controls.streams.first().copied(),
                 true,
+                None,
                 Some(controls.max_packet_bytes),
+                controls.max_packets,
+                controls.max_controlled_bytes,
                 controls.cancel.as_ref(),
             )?,
         )
@@ -573,6 +856,10 @@ fn decode_sources_with_options(
     let mut inputs = Vec::new();
     let mut descriptions = Vec::new();
     for (i, source) in sources.iter().enumerate() {
+        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+            return Err(invalid("media operation cancelled"));
+        }
+        fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
         let path = scratch.0.join(format!("{i}.f32le"));
         let stats = decode_source_to_f32le_with_options(source, &path, &scratch.0, i, options)?;
         inputs.push(BufReader::new(File::open(path)?));
@@ -586,6 +873,19 @@ fn merge_geometry_with_options(
     sources: &[PathBuf],
     options: &fvid_media::CopyOptions,
 ) -> Result<(u32, u16)> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err(invalid("media operation cancelled"));
+    }
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
     if sources.len() != 2 {
         return Err(invalid("merge-audio requires exactly two inputs"));
     }
@@ -604,6 +904,13 @@ fn merge_geometry_with_options(
     if !(1..=64).contains(&channels) {
         return Err(invalid("merge-audio output requires 1..=64 channels"));
     }
+    crate::native_export::pcm_matroska::check_output_memory_budget(
+        &sources[0],
+        channels,
+        16384usize.saturating_mul(usize::from(channels)),
+        options,
+        None,
+    )?;
     Ok((rate.unwrap(), channels))
 }
 
@@ -706,20 +1013,32 @@ pub fn merge_audio_with_controls(
     } else {
         let source_info =
             crate::native_export::pcm_matroska::extract_source_wave_info(&sources[0], controls)?;
-        fvid_media::owned_wave_metadata::edit_info_chunks(
+        let edited = fvid_media::owned_wave_metadata::edit_info_chunks(
             &source_info,
             &controls.metadata_delete,
             &controls.metadata_set,
         )
-        .map_err(|e| invalid(&e))?
+        .map_err(|e| invalid(&e))?;
+        if controls
+            .max_controlled_bytes
+            .is_some_and(|max| edited.len() > max)
+        {
+            return Err(invalid(
+                "controlled memory budget exceeded: WAVE metadata limit",
+            ));
+        }
+        edited
     };
     let source_matroska_metadata = if matroska {
         Some(
-            crate::native_export::pcm_matroska::extract_source_pcm_metadata(
+            crate::native_export::pcm_matroska::extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
                 &sources[0],
                 controls.streams.first().copied(),
                 true,
+                None,
                 Some(controls.max_packet_bytes),
+                controls.max_packets,
+                controls.max_controlled_bytes,
                 controls.cancel.as_ref(),
             )?,
         )

@@ -1,0 +1,19 @@
+{
+  "batch": 389,
+  "accepted_ids": [
+    "FVID-0395"
+  ],
+  "status": "accepted",
+  "summary": "Preserve an explicitly zero tfhd default sample duration instead of falling back to trex",
+  "source_files": [
+    "crates/fvid-media/src/owned_mp4_impl.rs"
+  ],
+  "regression": "tests/mp4_zero_default_duration.rs",
+  "evidence": "docs/improvements/evidence/mp4-zero-default-duration/status.json",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --test mp4_zero_default_duration --test mp4_tfhd_defaults --test mp4_hybrid_fragments",
+    "cargo test --locked --offline --features player --test mp4_zero_default_duration --test mp4_tfhd_defaults --test mp4_hybrid_fragments"
+  ],
+  "results": "3 focused plus 4 related no-default-feature tests; 4 focused plus 8 related player tests passed. Zero failures or ignored tests. Native software playback has 40ms duration, exact neutral RGB, two presentation intervals, repeated EOF, rewind and six seeks.",
+  "independence": "One duration-default precedence cause, across parser wrappers and fixture variants; not additional counts for tests or generator."
+}

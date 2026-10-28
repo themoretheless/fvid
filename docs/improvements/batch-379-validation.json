@@ -1,0 +1,14 @@
+{
+  "batch": 379,
+  "ids": ["FVID-0386"],
+  "snapshot": "docs/improvements/snapshots/batch-379-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-379-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-379-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-379-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission canonical_file_tags_are_charged_in_matroska_metadata_working_set_across_lossless_remux_and_subtitle_routes",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 46,
+  "failed": 0
+}

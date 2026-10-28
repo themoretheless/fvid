@@ -1,0 +1,17 @@
+--- pre-fix
++++ post-fix
+@@ -110,10 +110,10 @@
+                 return Ok(None);
+             }
+         }
+-        if reader
+-            .tracks()
+-            .iter()
+-            .any(|t| t.handler == *b"vide" && !t.samples.get(0).is_some_and(|s| s.sync))
++        if selected_tracks.iter().any(|&index| {
++            let track = &reader.tracks()[index];
++            track.handler == *b"vide" && !track.samples.get(0).is_some_and(|s| s.sync)
++        })
+         {
+             return Ok(None);
+         }

@@ -1,0 +1,25 @@
+{
+  "batch": 339,
+  "id": "FVID-0346",
+  "title": "Forward CopyOptions packet, count, and memory ceilings through owned_probe::probe_with_options across WAVE, Y4M, FLAC, MPEG, Ogg, and ADTS probes and preflight frame and mask budgets in owned_subtitle_burn::prepare and owned_video_decode::decode_webm",
+  "status": "accepted",
+  "source": [
+    "crates/fvid-media/src/owned_probe.rs",
+    "crates/fvid-media/src/owned_flac_probe.rs",
+    "crates/fvid-media/src/owned_mpeg_probe.rs",
+    "crates/fvid-media/src/owned_y4m_probe.rs",
+    "crates/fvid-media/src/owned_subtitle_burn.rs",
+    "crates/fvid-media/src/owned_video_decode.rs"
+  ],
+  "regression": "tests/mp4_metadata_admission.rs",
+  "pre_edit_snapshot": "docs/improvements/snapshots/batch-339-pre-edit",
+  "evidence": {
+    "before": "docs/improvements/evidence/batch-339-acceptance-before.txt",
+    "after": "docs/improvements/evidence/batch-339-acceptance-after.txt",
+    "related": "docs/improvements/evidence/batch-339-related-after.txt"
+  },
+  "summary": {
+    "before": "In `crates/fvid-media/src/owned_probe.rs`, `probe_with_options` forwarded `options` only for MP4 and Matroska/WebM and fell back to `probe_as(path, None)` with default `CopyOptions` for WAVE (`LIST INFO` strings up to 1 MiB without checking `max_controlled_bytes`), Y4M, bare FLAC (`owned_flac_probe::probe_flac`), bare MPEG audio (`owned_mpeg_probe::probe_mpeg`), Ogg (`probe_ogg`), and ADTS (`probe_adts`). In addition, `owned_subtitle_burn::prepare` (`crates/fvid-media/src/owned_subtitle_burn.rs:16-85`) did not check whether Y4M `frame_len > options.max_packet_bytes` or `frame_len.saturating_add(width * height) > max_controlled_bytes` (or container visible `width * height * 2 > max_controlled_bytes`), causing `plan_burn_subtitles` to allocate `width * height` raster masks for all cues and `burn_subtitles` to open the output Matroska writer before checking frame/mask memory admission; and `owned_video_decode::decode_webm` called `process_frame_with_overlay` before checking whether `decoded.frame.data.len().saturating_add(overlay_frame_len)` exceeded `max_controlled_bytes`.",
+    "after": "Add `probe_wave_with_options`, `probe_ogg_with_options`, and `probe_adts_with_options` in `owned_probe.rs`, `probe_flac_with_options` in `owned_flac_probe.rs`, `probe_mpeg_with_options` in `owned_mpeg_probe.rs`, and `probe_y4m_with_options` in `owned_y4m_probe.rs` and wire them into `owned_probe::probe_with_options`, and enforce frame/mask packet and memory budgets up front in `owned_subtitle_burn::prepare` and before `process_frame_with_overlay` in `owned_video_decode::decode_webm`. Twelve integration tests in `mp4_metadata_admission` pass."
+  }
+}

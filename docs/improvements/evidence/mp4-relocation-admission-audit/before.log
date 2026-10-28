@@ -1,0 +1,5 @@
+error=controlled memory budget exceeded; bytes_read=80032; output_bytes=0
+
+thread 'main' (65236490) panicked at /private/tmp/fvid-relocation-admission-audit/probe-before.rs:19:2:
+metadata scan exceeded admission limit: 80032 bytes
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

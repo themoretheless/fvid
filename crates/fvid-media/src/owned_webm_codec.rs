@@ -40,15 +40,24 @@ pub(crate) struct Decoder {
 }
 impl Decoder {
     pub fn new(codec: &str, private: &[u8], width: usize, height: usize) -> Result<Option<Self>> {
+        Self::new_with_budget(codec, private, width, height, usize::MAX)
+    }
+    pub fn new_with_budget(
+        codec: &str,
+        private: &[u8],
+        width: usize,
+        height: usize,
+        budget: usize,
+    ) -> Result<Option<Self>> {
         let kind = match codec {
             "V_FFV1" => Kind::Ffv1(crate::owned_ffv1_decoder::Decoder::from_configuration(
                 width,
                 height,
                 private,
-                usize::MAX,
+                budget,
             )?),
             "V_MPEG4/ISO/AVC" => {
-                let decoder = match avc_decoder::AvcDecoder::new(private, usize::MAX) {
+                let decoder = match avc_decoder::AvcDecoder::new(private, budget) {
                     Ok(value) => value,
                     Err(Error::Unsupported(_)) => return Ok(None),
                     Err(error) => return Err(error.to_string()),
@@ -56,16 +65,16 @@ impl Decoder {
                 Kind::Avc(decoder)
             }
             "V_MPEGH/ISO/HEVC" => {
-                let decoder = match hevc_decoder::HevcDecoder::from_configuration(private, usize::MAX) {
+                let decoder = match hevc_decoder::HevcDecoder::from_configuration(private, budget) {
                     Ok(value) => value,
                     Err(Error::Unsupported(_)) => return Ok(None),
                     Err(error) => return Err(error.to_string()),
                 };
                 Kind::Hevc(decoder)
             }
-            "V_VP9" => Kind::Vp9(vp9_decoder::Decoder::new(usize::MAX)),
+            "V_VP9" => Kind::Vp9(vp9_decoder::Decoder::new(budget)),
             "V_AV1" => {
-                let decoder = match av1_decoder::Decoder::from_configuration(private, usize::MAX) {
+                let decoder = match av1_decoder::Decoder::from_configuration(private, budget) {
                     Ok(value) => value,
                     Err(Error::Unsupported(_)) => return Ok(None),
                     Err(error) => return Err(error.to_string()),
@@ -380,6 +389,17 @@ pub(crate) fn presentation_durations<R: std::io::Read + std::io::Seek>(
     };
     let number = track.number;
     let default = track.default_duration_ns;
+    if let Some(limit) = options
+        .and_then(|o| o.max_controlled_bytes)
+        .filter(|&limit| limit > 0)
+        && reader
+            .packets
+            .len()
+            .saturating_mul(std::mem::size_of::<Option<u64>>())
+            > limit
+    {
+        return Err("controlled memory budget exceeded: Matroska duration index".into());
+    }
     let mut durations = Vec::new();
     durations
         .try_reserve_exact(reader.packets.len())
@@ -397,15 +417,33 @@ pub(crate) fn presentation_durations<R: std::io::Read + std::io::Seek>(
     {
         return Ok(Some(durations));
     }
-    let Some(mut decoder) = Decoder::new(
+    let decoder_budget = options
+        .and_then(|o| o.max_controlled_bytes)
+        .unwrap_or(usize::MAX);
+    let Some(mut decoder) = Decoder::new_with_budget(
         &track.codec,
         &track.codec_private,
         track.width as usize,
         track.height as usize,
+        decoder_budget,
     )?
     else {
         return Ok(None);
     };
+    if let Some(limit) = options
+        .and_then(|o| o.max_controlled_bytes)
+        .filter(|&limit| limit > 0)
+        && reader
+            .packets
+            .len()
+            .saturating_mul(
+                std::mem::size_of::<Option<u64>>()
+                    .saturating_add(std::mem::size_of::<(usize, i64)>()),
+            )
+            > limit
+    {
+        return Err("controlled memory budget exceeded: Matroska presentation index".into());
+    }
     let mut visible = Vec::new();
     visible
         .try_reserve_exact(reader.packets.len())
@@ -423,6 +461,9 @@ pub(crate) fn presentation_durations<R: std::io::Read + std::io::Seek>(
         {
             return Err("media operation cancelled".into());
         }
+        if let Some(o) = options {
+            crate::owned_budget::check_rss_budget(o)?;
+        }
         if options
             .and_then(|o| o.max_packets)
             .is_some_and(|limit| consumed >= limit)
@@ -436,6 +477,19 @@ pub(crate) fn presentation_durations<R: std::io::Read + std::io::Seek>(
             return Err("input packet exceeds byte limit".into());
         }
         let decoded = decoder.decode(&bytes);
+        if let Ok(Some(ref dec)) = decoded
+            && let Some(limit) = options
+                .and_then(|o| o.max_controlled_bytes)
+                .filter(|&limit| limit > 0)
+            && dec
+                .frame
+                .data
+                .len()
+                .saturating_add(dec.alpha.as_ref().map_or(0, Vec::len))
+                > limit
+        {
+            return Err("video frame exceeds controlled memory budget".into());
+        }
         if decoder.has_pending_field() { pending_field.get_or_insert(index); }
         match decoded {
             Ok(Some(_)) if decoder.output_is_field_pair() => {

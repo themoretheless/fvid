@@ -1,0 +1,15 @@
+{
+  "batch": 357,
+  "ids": [
+    "FVID-0364"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-357-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-357-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-357-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-357-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 24,
+  "failed": 0
+}

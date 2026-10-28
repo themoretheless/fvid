@@ -1,0 +1,396 @@
+//! Container-only descriptions, without opening an external demuxer/decoder.
+pub use fvid_media_info::{ChapterInfo, MediaInfo, StreamInfo};
+pub use fvid_media::owned_webm_probe::declared_video_frame_rate;
+type Result<T> = std::result::Result<T, String>;
+use std::{collections::BTreeMap, fs::File, io::BufReader, path::Path};
+
+fn ticks(value: u128, scale: u32, target: u32) -> Result<i64> {
+    if scale == 0 {
+        return Err("zero MP4 timescale".into());
+    }
+    i64::try_from(
+        value
+            .checked_mul(u128::from(target))
+            .ok_or("MP4 duration overflow")?
+            / u128::from(scale),
+    )
+    .map_err(|_| "MP4 duration exceeds probe API range".into())
+}
+fn tags(tags: &crate::container::FileTags) -> BTreeMap<String, String> {
+    [
+        ("title", &tags.title),
+        ("artist", &tags.artist),
+        ("album", &tags.album),
+        ("genre", &tags.genre),
+        ("date", &tags.date),
+        ("comment", &tags.comment),
+        ("track", &tags.track),
+        ("album_artist", &tags.album_artist),
+        ("disc", &tags.disc),
+        ("publisher", &tags.publisher),
+        ("copyright", &tags.copyright),
+        ("description", &tags.description),
+        ("rating", &tags.rating),
+    ]
+    .into_iter()
+    .filter(|(_, value)| !value.is_empty())
+    .map(|(key, value)| (key.into(), value.clone()))
+    .collect()
+}
+
+use crate::container::mp4::{Limits as Mp4ProbeLimits, Mp4Reader as Mp4ProbeReader};
+use crate::codec::config::aac_specific_config as aac_probe_config;
+use fvid_media::owned_avc::configuration_profile_level as avc_probe_config;
+fn mp4_unrepresented_error(error: &crate::Error) -> bool {
+    matches!(error, crate::Error::Unsupported(_))
+}
+include!("../crates/fvid-media/src/owned_mp4_probe_impl.rs");
+
+pub(crate) fn matroska(path: &Path) -> Result<MediaInfo> {
+    matroska_with_packet_limit(path, crate::container::webm::Limits::default().packet_bytes)
+}
+
+pub(crate) fn matroska_with_packet_limit(path: &Path, packet_bytes: usize) -> Result<MediaInfo> {
+    matroska_with_packet_and_memory_limit(path, packet_bytes, None)
+}
+
+pub(crate) fn matroska_with_packet_and_memory_limit(
+    path: &Path,
+    packet_bytes: usize,
+    max_controlled_bytes: Option<usize>,
+) -> Result<MediaInfo> {
+    matroska_with_limits(path, packet_bytes, max_controlled_bytes, None)
+}
+
+pub(crate) fn matroska_with_options(
+    path: &Path,
+    options: &fvid_media::CopyOptions,
+) -> Result<MediaInfo> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_media::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    fvid_media::owned_budget::check_rss_budget(options)?;
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    matroska_with_limits(
+        path,
+        options.max_packet_bytes,
+        options.max_controlled_bytes,
+        options.max_packets,
+    )
+}
+
+fn matroska_with_limits(
+    path: &Path,
+    packet_bytes: usize,
+    max_controlled_bytes: Option<usize>,
+    max_packets: Option<u64>,
+) -> Result<MediaInfo> {
+    if packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    let mut limits = crate::container::webm::Limits {
+        packet_bytes,
+        ..Default::default()
+    };
+    if let Some(max_pkts) = max_packets {
+        limits.packets = limits.packets.min(usize::try_from(max_pkts).unwrap_or(usize::MAX));
+    }
+    let memory_packets = max_controlled_bytes
+        .map(|bytes| bytes / std::mem::size_of::<crate::container::webm::Packet>());
+    if let Some(maximum) = memory_packets {
+        limits.packets = limits.packets.min(maximum);
+    }
+    let map_packet_limit = |error: crate::Error| {
+        if memory_packets
+            .is_some_and(|max| max < crate::container::webm::Limits::default().packets && max_packets.is_none_or(|p| (max as u64) <= p))
+            && error
+                .to_string()
+                .contains("WebM packet count exceeds limit")
+        {
+            "controlled memory budget exceeded: Matroska packet index limit".to_owned()
+        } else {
+            error.to_string()
+        }
+    };
+    let mut reader = crate::container::webm::WebmReader::open(
+        BufReader::new(File::open(path).map_err(|e| e.to_string())?),
+        limits,
+    )
+    .map_err(map_packet_limit)?;
+    // Tags/chapters can follow clusters. Complete the bounded index before
+    // describing the file, without decoding or retaining encoded payloads.
+    reader.scan_all().map_err(map_packet_limit)?;
+    let duration_us = reader
+        .duration_ns
+        .map(|ns| {
+            i64::try_from(ns / 1000).map_err(|_| "Matroska duration exceeds API range".to_owned())
+        })
+        .transpose()?;
+    let mut file_metadata = reader.metadata.clone();
+    let encoder = file_metadata
+        .iter()
+        .find(|(key, _)| key.eq_ignore_ascii_case("encoder"))
+        .map(|(_, value)| value.clone())
+        .or_else(|| (!reader.writing_app.is_empty()).then(|| reader.writing_app.clone()));
+    if let Some(encoder) = encoder {
+        file_metadata.entry("encoder".into()).or_insert(encoder);
+    }
+    file_metadata.extend(tags(&reader.tags));
+    let mut start_ns = None::<i64>;
+    let mut streams = Vec::with_capacity(reader.tracks.len());
+    for (index, track) in reader.tracks.iter().enumerate() {
+        let start = reader
+            .packets
+            .iter()
+            .filter(|p| p.track == track.number)
+            .map(|p| p.pts_ns)
+            .min()
+            .map(|pts| {
+                i64::try_from(i128::from(pts) - i128::from(track.codec_delay_ns))
+                    .map_err(|_| "Matroska start exceeds API range".to_owned())
+            })
+            .transpose()?;
+        if let Some(start) = start {
+            start_ns = Some(start_ns.map_or(start, |old| old.min(start)));
+        }
+        let mut metadata = reader.track_metadata.get(&0).cloned().unwrap_or_default();
+        if let Some(uid) = reader.track_uids.get(&track.number) {
+            if let Some(scoped) = reader.track_metadata.get(uid) {
+                metadata.extend(scoped.clone());
+            }
+        }
+        if !track.name.is_empty() {
+            metadata.insert("title".into(), track.name.clone());
+        }
+        let language = reader
+            .track_languages
+            .get(&track.number)
+            .unwrap_or(&track.language);
+        if !language.is_empty() {
+            metadata.insert("language".into(), language.clone());
+        }
+        let codec = match (track.codec.as_str(), track.bit_depth) {
+            ("A_PCM/INT/LIT" | "A_PCM/INT/BIG", 8) => "pcm_u8".to_owned(),
+            ("A_PCM/INT/LIT", bits @ (16 | 24 | 32)) => format!("pcm_s{bits}le"),
+            ("A_PCM/INT/BIG", bits @ (16 | 24 | 32)) => format!("pcm_s{bits}be"),
+            ("A_PCM/FLOAT/IEEE", bits @ (32 | 64)) => format!("pcm_f{bits}le"),
+            (other, _) => match other {
+                "V_MPEG4/ISO/AVC" => "h264",
+                "V_MPEGH/ISO/HEVC" => "hevc",
+                "V_VP8" => "vp8",
+                "V_VP9" => "vp9",
+                "V_AV1" => "av1",
+                "V_FFV1" => "ffv1",
+                "A_AAC" => "aac",
+                "A_ALAC" => "alac",
+                "A_OPUS" => "opus",
+                "A_VORBIS" => "vorbis",
+                "A_FLAC" => "flac",
+                "A_AC3" | "A_AC3/BSID9" | "A_AC3/BSID10" => "ac3",
+                "A_EAC3" => "eac3",
+                "A_MPEG/L3" => "mp3",
+                "A_MPEG/L2" => "mp2",
+                "A_MPEG/L1" => "mp1",
+                "S_TEXT/UTF8" => "subrip",
+                "S_TEXT/ASS" => "ass",
+                "S_TEXT/SSA" => "ssa",
+                other => other,
+            }
+            .to_owned(),
+        };
+        // DefaultDuration is a declared nominal cadence, not a measured average.
+        // Leave average_frame_rate unknown instead of substituting that value.
+        streams.push(StreamInfo {
+            index,
+            media_type: match track.kind {
+                1 => "video",
+                2 => "audio",
+                17 => "subtitle",
+                _ => "data",
+            }
+            .into(),
+            codec,
+            time_base: [1, 1_000_000_000],
+            start,
+            duration: None,
+            bit_rate: None,
+            average_frame_rate: [0, 1],
+            profile: None,
+            level: None,
+            disposition: reader
+                .track_dispositions
+                .get(&track.number)
+                .copied()
+                .unwrap_or(1),
+            metadata,
+            width: i32::try_from(track.width).map_err(|_| "Matroska width exceeds API range")?,
+            height: i32::try_from(track.height).map_err(|_| "Matroska height exceeds API range")?,
+            pixel_format: -1,
+            sample_rate: i32::try_from(track.sample_rate)
+                .map_err(|_| "Matroska sample rate exceeds API range")?,
+            channels: i32::try_from(track.channels)
+                .map_err(|_| "Matroska channels exceed API range")?,
+            video_delay: 0,
+            extradata_bytes: track.codec_private.len(),
+        });
+    }
+    let chapters = reader
+        .chapters
+        .iter()
+        .enumerate()
+        .map(|(index, chapter)| {
+            let start = i64::try_from(chapter.start_ns / 1000)
+                .map_err(|_| "Matroska chapter exceeds API range")?;
+            let end = if let Some(end) = chapter.end_ns {
+                i64::try_from(end / 1000).map_err(|_| "Matroska chapter exceeds API range")?
+            } else {
+                match reader.chapters.get(index + 1) {
+                    Some(next) => i64::try_from(next.start_ns / 1000)
+                        .map_err(|_| "Matroska chapter exceeds API range")?,
+                    None => duration_us.unwrap_or(start).max(start),
+                }
+            };
+            Ok(ChapterInfo {
+                id: index as i64,
+                time_base: [1, 1_000_000],
+                start,
+                end,
+                metadata: [("title".into(), chapter.title.clone())]
+                    .into_iter()
+                    .collect(),
+            })
+        })
+        .collect::<Result<Vec<_>>>()?;
+    Ok(MediaInfo {
+        path: path.to_path_buf(),
+        format: "matroska,webm".into(),
+        start_us: start_ns.map(|ns| ns / 1000),
+        duration_us,
+        bit_rate: None,
+        metadata: file_metadata,
+        chapters,
+        streams,
+    })
+}
+
+/// Inspect packed PCM without reading or decoding sample payloads.
+fn wave_with_options(source: &Path, options: &fvid_media::CopyOptions) -> Result<MediaInfo> {
+    fvid_media::owned_probe::probe_wave_with_options(source, options).map_err(|e| e.to_string())
+}
+
+fn try_y4m_with_options(
+    source: &Path,
+    options: &fvid_media::CopyOptions,
+) -> Result<Option<MediaInfo>> {
+    fvid_media::owned_y4m_probe::try_y4m_with_options(source, options)
+}
+
+pub fn probe(source: &Path) -> Result<MediaInfo> {
+    probe_as(source, None)
+}
+pub(crate) fn probe_with_options(
+    source: &Path,
+    options: &fvid_media::CopyOptions,
+) -> Result<MediaInfo> {
+    try_probe_as_with_options(source, None, options)?
+        .ok_or_else(|| "native probe does not yet support this container".into())
+}
+pub fn probe_as(source: &Path, format: Option<&str>) -> Result<MediaInfo> {
+    try_probe_as(source, format)?
+        .ok_or_else(|| "native probe does not yet support this container".into())
+}
+/// `None` means no owned parser recognizes the requested format/signature.
+/// A recognized but malformed source returns an error, never `None`.
+pub fn try_probe_as(source: &Path, format: Option<&str>) -> Result<Option<MediaInfo>> {
+    try_probe_as_with_options(source, format, &fvid_media::CopyOptions::default())
+}
+
+pub(crate) fn try_probe_as_with_options(
+    source: &Path,
+    format: Option<&str>,
+    options: &fvid_media::CopyOptions,
+) -> Result<Option<MediaInfo>> {
+    use std::io::Read;
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_media::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    fvid_media::owned_budget::check_rss_budget(options)?;
+    match format {
+        Some("mov" | "mp4" | "m4a" | "3gp" | "3g2" | "mj2" | "mov,mp4,m4a,3gp,3g2,mj2") => {
+            return mp4_with_options(source, options).map(Some);
+        }
+        Some("matroska" | "webm" | "matroska,webm") => {
+            return matroska_with_options(source, options).map(Some);
+        }
+        Some("wav") => return wave_with_options(source, options).map(Some),
+        Some("flac") => {
+            return fvid_media::owned_flac_probe::probe_flac_with_options(source, options)
+                .map(Some);
+        }
+        Some("mp1" | "mp2" | "mp3" | "mpeg_audio") => {
+            return fvid_media::owned_mpeg_probe::probe_mpeg_with_options(source, options)
+                .map(Some);
+        }
+        Some("ogg" | "opus") => {
+            return fvid_media::owned_probe::probe_ogg_with_options(source, options).map(Some);
+        }
+        Some("yuv4mpegpipe" | "y4m") => return try_y4m_with_options(source, options),
+        Some("aac") | None => {}
+        Some(_) => return Ok(None),
+    }
+    let mut input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
+    let mut signature = [0; 12];
+    // Read up to twelve bytes, retaining a valid seven-byte ADTS header at EOF.
+    let mut count = 0;
+    while count < signature.len() {
+        match input.read(&mut signature[count..]) {
+            Ok(0) => break,
+            Ok(n) => count += n,
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+            Err(error) => return Err(error.to_string()),
+        }
+    }
+    if format.is_none() {
+        if signature[..count].starts_with(b"YUV4MPEG2") {
+            return try_y4m_with_options(source, options);
+        }
+        if count == 12
+            && &signature[8..12] == b"WAVE"
+            && matches!(&signature[..4], b"RIFF" | b"RIFX" | b"RF64")
+        {
+            return wave_with_options(source, options).map(Some);
+        }
+        if crate::container::mp4::recognizes_prefix(&signature[..count]) {
+            return mp4_with_options(source, options).map(Some);
+        }
+        if signature[..count].starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
+            return matroska_with_options(source, options).map(Some);
+        }
+        if signature[..count].starts_with(b"fLaC") {
+            return fvid_media::owned_flac_probe::probe_flac_with_options(source, options)
+                .map(Some);
+        }
+        if signature[..count].starts_with(b"OggS") {
+            return fvid_media::owned_probe::probe_ogg_with_options(source, options).map(Some);
+        }
+        if fvid_media::owned_aac::adts::header(&signature[..count]).is_some() {
+            return fvid_media::owned_probe::probe_adts_with_options(source, options).map(Some);
+        }
+        if fvid_media::owned_mpeg_audio::has_signature(&signature[..count]) {
+            return fvid_media::owned_mpeg_probe::probe_mpeg_with_options(source, options)
+                .map(Some);
+        }
+        return Ok(None);
+    }
+    fvid_media::owned_probe::probe_adts_with_options(source, options).map(Some)
+}

@@ -1,0 +1,9 @@
+{
+  "sha256": {
+    "small.mp4": "a55253260a48410a9667c3938edb4b5aa845e93ce414ab8c12211f9e873f6983",
+    "padded.mp4": "6b0281170863ca1ec9b182b880e400fa75a4053334629f83baf05416d74ef541",
+    "unsupported-entry.mp4": "d644ad47741edc14208e0ba18b24a5671599d60bf0ca3ab2bd625958d0d27e13"
+  },
+  "source": "tests/fixtures/playback-errors/avc-444-pcm-deblock/y8-c8-o12-12-m1-e0.mp4",
+  "provenance": "Owned 32x32 PCM-coded AVC. Add one legal 1MiB moov/free box; original media, track tables and mdat offsets unchanged. No private media, FFmpeg or network."
+}

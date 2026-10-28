@@ -1,0 +1,8 @@
+
+running 3 tests
+test regression::metadata_budget_refuses_before_scanning_or_publishing ... ok
+test regression::span_capacity_growth_is_admitted_before_allocation ... ok
+test regression::sufficient_budget_preserves_all_fragment_bytes ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -1,0 +1,13 @@
+{
+  "batch": 326,
+  "accepted_ids": [
+    "FVID-0333"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-326-pre-edit",
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-326-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-326-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-326-related-after.txt"
+  },
+  "summary": "Enforce controlled-memory budget (max_controlled_bytes) against output Matroska container and stream metadata working sets in convert-subtitles and plan convert-subtitles across SRT, ASS, and Matroska inputs."
+}

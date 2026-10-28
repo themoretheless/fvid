@@ -1,0 +1,12 @@
+{
+  "status": "audit-passed-no-new-improvement",
+  "accepted_ids": [],
+  "results": "29 passed; 0 failed; 0 ignored.",
+  "command": "cargo test --locked --offline --features player --test mp4_variable_rate_edits --test pcm_exact_seek --test aac_exact_seek --test audio_sample_seek_clock --test mp4_seek_io_regressions --test playback_error_samples",
+  "source_sha256": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": "864757e11439da14ff30ea3e933a67c8c3b6cf8d9d0e1e373548111077380056",
+    "src/playback/video/native.rs": "d1a7433541cd30b55f45390515a1a440ac7a25bb2b919cc029c529b2f36529cf",
+    "src/playback/video/mp4.rs": "331ff6736df5dcba4da4e92018d0f916690893049d19f44ffa5924e63798b4aa",
+    "src/playback/audio/mp4_audio.rs": "2ef7a9981ef886ae6a1831a533276c4849a0f86823d03618df1a3225b1472ec2"
+  }
+}

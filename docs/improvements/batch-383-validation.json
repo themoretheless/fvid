@@ -1,0 +1,16 @@
+{
+  "batch": 383,
+  "ids": [
+    "FVID-0390"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-383-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-383-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-383-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-383-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission audio_mix_simultaneous_pcm_buffers_and_native_plan_export_index_payload_budget_are_enforced -- --exact --nocapture",
+    "cargo test --test mp4_audio_metadata_admission -- --nocapture"
+  ],
+  "passed": 50,
+  "failed": 0
+}

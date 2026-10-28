@@ -8,6 +8,16 @@ struct BoxSpan {
     header: u64,
     kind: [u8; 4],
 }
+fn table_working_bytes(capacity: usize, count: usize) -> Result<usize> {
+    let positions = count
+        .checked_mul(2 * std::mem::size_of::<usize>())
+        .ok_or_else(|| invalid("MP4 relocation memory overflow"))?;
+    capacity
+        .checked_mul(std::mem::size_of::<BoxSpan>())
+        .and_then(|n| n.checked_add(positions))
+        .and_then(|n| n.checked_add(64usize << 10))
+        .ok_or_else(|| invalid("MP4 relocation memory overflow"))
+}
 fn header<R: Read + Seek>(reader: &mut R, start: u64, end: u64) -> Result<BoxSpan> {
     if end - start < 8 {
         return Err(invalid("truncated MP4 box header"));
@@ -129,6 +139,19 @@ pub fn fast_start_controlled<R: Read + Seek>(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::media_control::ProgressEvent> {
+    fast_start_with_memory_limit(reader, output, cancel, progress, None)
+}
+
+pub fn fast_start_with_memory_limit<R: Read + Seek>(
+    reader: &mut R,
+    output: &mut impl Write,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+    max_controlled_bytes: Option<usize>,
+) -> Result<crate::media_control::ProgressEvent> {
+    if max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
     let check = || -> Result<()> {
         if cancel.is_some_and(|flag| flag.is_cancelled()) {
             return Err(invalid("media operation cancelled"));
@@ -153,20 +176,45 @@ pub fn fast_start_controlled<R: Read + Seek>(
         if spans.len() >= 100_000 {
             return Err(invalid("too many top-level MP4 boxes"));
         }
+        // Admit metadata bookkeeping before scanning or growing its vector.
+        // The final check also accounts for the relocated moov payload.
+        if let Some(limit) = max_controlled_bytes {
+            let capacity = if spans.len() == spans.capacity() {
+                spans
+                    .capacity()
+                    .checked_mul(2)
+                    .ok_or_else(|| invalid("MP4 relocation memory overflow"))?
+                    .max(4)
+            } else {
+                spans.capacity()
+            };
+            if table_working_bytes(capacity, spans.len() + 1)? > limit {
+                return Err(invalid("controlled memory budget exceeded"));
+            }
+            if capacity > spans.capacity() {
+                spans
+                    .try_reserve_exact(capacity - spans.len())
+                    .map_err(|_| invalid("cannot allocate MP4 relocation metadata"))?;
+            }
+            if table_working_bytes(spans.capacity(), spans.len() + 1)? > limit {
+                return Err(invalid("controlled memory budget exceeded"));
+            }
+        }
         let span = header(reader, at, end)?;
         at += span.size;
         spans.push(span);
     }
-    let movies: Vec<_> = spans
+    let mut movies = spans
         .iter()
         .enumerate()
         .filter(|(_, s)| s.kind == *b"moov")
-        .map(|(i, _)| i)
-        .collect();
-    if movies.len() != 1 {
+        .map(|(i, _)| i);
+    let movie = movies
+        .next()
+        .ok_or_else(|| invalid("MP4 relocation requires one moov"))?;
+    if movies.next().is_some() {
         return Err(invalid("MP4 relocation requires one moov"));
     }
-    let movie = movies[0];
     let media = spans
         .iter()
         .position(|s| s.kind == *b"mdat")
@@ -193,10 +241,30 @@ pub fn fast_start_controlled<R: Read + Seek>(
     if spans[movie].size > 32 << 20 {
         return Err(invalid("MP4 index exceeds relocation budget"));
     }
+    if let Some(limit) = max_controlled_bytes {
+        let movie_bytes = if fragmented {
+            0
+        } else {
+            usize::try_from(spans[movie].size)
+                .map_err(|_| invalid("MP4 relocation memory overflow"))?
+        };
+        let working_set = table_working_bytes(spans.capacity(), spans.len())?
+            .checked_add(movie_bytes)
+            .ok_or_else(|| invalid("MP4 relocation memory overflow"))?;
+        if working_set > limit {
+            return Err(invalid("controlled memory budget exceeded"));
+        }
+    }
     let (order, moov) = if fragmented {
         ((0..spans.len()).collect::<Vec<_>>(), None)
     } else {
-        let mut order: Vec<_> = (0..spans.len()).filter(|i| *i != movie).collect();
+        let mut order: Vec<_> = if max_controlled_bytes.is_some() {
+            let mut order = Vec::with_capacity(spans.len());
+            order.extend((0..spans.len()).filter(|i| *i != movie));
+            order
+        } else {
+            (0..spans.len()).filter(|i| *i != movie).collect()
+        };
         let position = order.iter().position(|i| *i == media).unwrap();
         order.insert(position, movie);
         let mut locations = vec![0; spans.len()];

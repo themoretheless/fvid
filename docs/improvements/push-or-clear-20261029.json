@@ -1,0 +1,17 @@
+{
+  "preserved_primary_snapshot": "35739ac2369320d5e4c9e6114dac4d8d12e70831",
+  "preserved_aac_snapshot": "8ba7c70e95e8c8bf4a1fb061410dc4469dcf45a9",
+  "excluded_active_draft_paths": [
+    "scripts/generate_mp4_time_header_sizes.py",
+    "tests/mp4_time_header_sizes.rs",
+    "tests/fixtures/playback-errors/mp4-time-header-sizes",
+    "docs/improvements/evidence/mp4-time-header-sizes",
+    "docs/improvements/evidence/batch-388-acceptance-before.txt",
+    "docs/improvements/snapshots/batch-388-pre-edit"
+  ],
+  "excluded_active_draft_test": "fn mp4_concat_mp4_write_and_native_plan_adts_remux_concat_charge_simultaneous_packet_working_sets()",
+  "reason": "Both new drafts have failing before regressions and no production fixes. All previously accepted tests/assertions remain. Original worktrees and full preservation commits retain drafts unchanged.",
+  "accepted_count": 398,
+  "active_aac_branch_excluded": "codex/aac-ep-srcpc-20261028",
+  "stashes_preserved": 4
+}

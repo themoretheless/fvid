@@ -1,0 +1,52 @@
+{
+  "batch": 329,
+  "accepted": [
+    {
+      "id": "FVID-0336",
+      "title": "Propagate controlled-memory packet index ceilings (max_controlled_bytes / size_of::<Packet>()) across Matroska video, subtitle burn-in, audio export recognition, Y4M export/trim/concat, and WebM playback entrypoints",
+      "source_files": [
+        "crates/fvid-media/src/owned_ffv1_export.rs",
+        "crates/fvid-media/src/owned_lossless.rs",
+        "crates/fvid-media/src/owned_matroska_aac_export.rs",
+        "crates/fvid-media/src/owned_matroska_alac_export.rs",
+        "crates/fvid-media/src/owned_matroska_flac_export.rs",
+        "crates/fvid-media/src/owned_matroska_mp3_export.rs",
+        "crates/fvid-media/src/owned_matroska_opus_export.rs",
+        "crates/fvid-media/src/owned_matroska_pcm_export.rs",
+        "crates/fvid-media/src/owned_subtitle_burn.rs",
+        "crates/fvid-media/src/owned_video_decode.rs",
+        "crates/fvid-media/src/owned_webm_multitrack_export.rs",
+        "src/media.rs",
+        "src/native_export.rs",
+        "src/native_export/pcm_matroska.rs",
+        "src/playback/video/webm.rs"
+      ],
+      "regression_files": [
+        "tests/mp4_metadata_admission.rs"
+      ],
+      "snapshots": [
+        "docs/improvements/snapshots/batch-329-pre-edit/crates/fvid-media/src/owned_ffv1_export.rs",
+        "docs/improvements/snapshots/batch-329-pre-edit/crates/fvid-media/src/owned_lossless.rs",
+        "docs/improvements/snapshots/batch-329-pre-edit/crates/fvid-media/src/owned_matroska_aac_export.rs",
+        "docs/improvements/snapshots/batch-329-pre-edit/crates/fvid-media/src/owned_matroska_alac_export.rs",
+        "docs/improvements/snapshots/batch-329-pre-edit/crates/fvid-media/src/owned_matroska_flac_export.rs",
+        "docs/improvements/snapshots/batch-329-pre-edit/crates/fvid-media/src/owned_matroska_mp3_export.rs",
+        "docs/improvements/snapshots/batch-329-pre-edit/crates/fvid-media/src/owned_matroska_opus_export.rs",
+        "docs/improvements/snapshots/batch-329-pre-edit/crates/fvid-media/src/owned_matroska_pcm_export.rs",
+        "docs/improvements/snapshots/batch-329-pre-edit/crates/fvid-media/src/owned_subtitle_burn.rs",
+        "docs/improvements/snapshots/batch-329-pre-edit/crates/fvid-media/src/owned_video_decode.rs",
+        "docs/improvements/snapshots/batch-329-pre-edit/crates/fvid-media/src/owned_webm_multitrack_export.rs",
+        "docs/improvements/snapshots/batch-329-pre-edit/src/media.rs",
+        "docs/improvements/snapshots/batch-329-pre-edit/src/native_export.rs",
+        "docs/improvements/snapshots/batch-329-pre-edit/src/native_export/pcm_matroska.rs",
+        "docs/improvements/snapshots/batch-329-pre-edit/src/playback/video/webm.rs"
+      ],
+      "evidence": {
+        "acceptance_before": "docs/improvements/evidence/batch-329-acceptance-before.txt",
+        "acceptance_after": "docs/improvements/evidence/batch-329-acceptance-after.txt",
+        "related_after": "docs/improvements/evidence/batch-329-related-after.txt"
+      },
+      "summary": "Clamps Matroska Limits::packets to max_controlled_bytes / size_of::<Packet>() across owned_video_decode::decode_webm, owned_ffv1_export::input_limited, owned_lossless::check_source_matroska_metadata_budget, owned_webm_multitrack_export::open, owned_subtitle_burn::prepare, owned_matroska_{aac,alac,flac,mp3,opus,pcm}_export::recognizes, validate_video_packet_budget_with_geometry_filters_interval_and_limit, extract_source_pcm_metadata_with_interval_packet_and_memory_limit, decode_fvid_media_audio_to_destination, and WebmVideoReader::open_with_hardware."
+    }
+  ]
+}

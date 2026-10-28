@@ -1,0 +1,15 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0397"
+  ],
+  "before": "Both MP4 parsers treat mdhd all-ones unknown duration as a numeric value. A three-frame owned VP9 file at timescale 50 reports 4294967295 ticks rather than 3; native duration reports roughly 994 days instead of 60ms. Three original parser/playback tests fail before the fix; known-duration companions pass their preceding assertions.",
+  "after": "Recognize the version-width unknown mdhd marker, derive duration from the validated last indexed sample, and let fragment indexing extend it. Preserve explicitly known durations. V0/V1 regular and fragmented witnesses keep all exact packet bytes and 60ms probe/native duration. Core: 3 focused plus 4 related pass. Player: 4 focused plus 12 related pass, including exact RGB, eight seeks per movie, rewind and repeated EOF. Zero failures/ignored tests.",
+  "reference": {
+    "url": "https://hezhaojiang.github.io/slave/MP4/ISO-IEC-14496-12-Base-Format-2015.pdf",
+    "section": "8.4.2.3",
+    "meaning": "All ones in mdhd duration indicate an unknown duration."
+  },
+  "fixture_regeneration": "Seven fixture hashes match independent generation without FFmpeg/network.",
+  "limits": "This qualifies mdhd track duration recovery; unknown mvhd chapter bounds are not claimed. No performance, GUI, hardware or RSS claim."
+}

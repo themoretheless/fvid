@@ -1,0 +1,21 @@
+--- pre-fix
++++ post-fix
+@@ -115,13 +115,17 @@
+         {
+             return Ok(None);
+         }
++        let selected_tracks = mp4_matroska::selection(reader.tracks().len(), &options.streams)?;
+         let mut plans = reader
+             .tracks()
+             .iter()
+             .map(|t| mp4_matroska::plan(t, reader.movie_timescale(), cancel))
+             .collect::<Result<Vec<_>>>()?;
+         let mut duration = 0;
+-        for p in &plans {
++        // Only output tracks determine the selected segment's end. A longer
++        // discarded track must not insert silence or a frozen-video gap.
++        for &track in &selected_tracks {
++            let p = &plans[track];
+             for packet in &p.packets {
+                 if packet.options.invisible {
+                     continue;

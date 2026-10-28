@@ -1,7 +1,7 @@
 //! Owned MP4 container descriptions and optional AVC SPS metadata, without libav.
 use crate::owned_avc::configuration_profile_level as avc_probe_config;
 use crate::owned_codec_config::aac_specific_config as aac_probe_config;
-use crate::owned_mp4::Mp4Reader as Mp4ProbeReader;
+use crate::owned_mp4::{Limits as Mp4ProbeLimits, Mp4Reader as Mp4ProbeReader};
 use fvid_media_info::{ChapterInfo, MediaInfo, StreamInfo};
 use std::{collections::BTreeMap, fs::File, io::BufReader, path::Path};
 type Result<T> = std::result::Result<T, String>;
@@ -39,6 +39,7 @@ fn tags(tags: &crate::owned_file_tags::FileTags) -> BTreeMap<String, String> {
     .collect()
 }
 
+use crate::owned_budget;
 fn mp4_unrepresented_error(error: &crate::owned_mp4::Error) -> bool {
     error.is_unsupported()
 }

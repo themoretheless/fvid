@@ -1,0 +1,13 @@
+{
+  "batch": 327,
+  "accepted_ids": [
+    "FVID-0334"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-327-pre-edit",
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-327-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-327-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-327-related-after.txt"
+  },
+  "summary": "Propagate controlled-memory ceilings (max_controlled_bytes and NativeReader budget) to MP4 parser metadata_bytes admission across transcode_lossless, plan_transcode_lossless, burn_subtitles, plan_burn_subtitles, export-y4m, trim-y4m, concat-y4m, and NativeReader."
+}

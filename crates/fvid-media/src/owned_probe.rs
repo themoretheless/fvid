@@ -13,50 +13,91 @@ pub fn probe(path: &Path) -> Result<MediaInfo, String> {
     probe_as(path, None)
 }
 
+pub fn probe_with_options(
+    path: &Path,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo, String> {
+    probe_as_with_options(path, None, options)
+}
+
 /// Inspect owned MP4/MOV, Matroska/WebM, WAVE, bare MPEG audio/FLAC, ADTS or Y4M.
 /// Format hints never override the signature or bypass container validation.
 pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo, String> {
+    probe_as_with_options(path, format, &Default::default())
+}
+
+pub fn probe_as_with_options(
+    path: &Path,
+    format: Option<&str>,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo, String> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
     match format {
-        Some("mov" | "mp4" | "m4a" | "3gp" | "3g2" | "mj2" | "mov,mp4,m4a,3gp,3g2,mj2") => return crate::owned_mp4_probe::probe_mp4(path),
-        Some("webm" | "matroska" | "matroska,webm") => return crate::owned_webm_probe::probe_webm(path),
-        Some("wav") => return probe_wave(path).map_err(|e| e.to_string()),
-        Some("aac") => return probe_adts(path),
-        Some("flac") => return crate::owned_flac_probe::probe_flac(path),
-        Some("mp1" | "mp2" | "mp3" | "mpeg_audio") => return crate::owned_mpeg_probe::probe_mpeg(path),
-        Some("ogg" | "opus") => return probe_ogg(path),
-        Some("y4m" | "yuv4mpegpipe") => return crate::owned_y4m_probe::probe_y4m(path),
+        Some("mov" | "mp4" | "m4a" | "3gp" | "3g2" | "mj2" | "mov,mp4,m4a,3gp,3g2,mj2") => {
+            return crate::owned_mp4_probe::mp4_with_options(path, options);
+        }
+        Some("webm" | "matroska" | "matroska,webm") => {
+            return crate::owned_webm_probe::probe_webm_with_options(path, options);
+        }
+        Some("wav") => return probe_wave_with_options(path, options).map_err(|e| e.to_string()),
+        Some("aac") => return probe_adts_with_options(path, options),
+        Some("flac") => return crate::owned_flac_probe::probe_flac_with_options(path, options),
+        Some("mp1" | "mp2" | "mp3" | "mpeg_audio") => {
+            return crate::owned_mpeg_probe::probe_mpeg_with_options(path, options);
+        }
+        Some("ogg" | "opus") => return probe_ogg_with_options(path, options),
+        Some("y4m" | "yuv4mpegpipe") => {
+            return crate::owned_y4m_probe::probe_y4m_with_options(path, options);
+        }
         Some(_) => return Err("format has no owned media-library probe yet".into()),
         None => {}
     }
     if crate::owned_wave_inspect::is_wave(path).map_err(|e| e.to_string())? {
-        return probe_wave(path).map_err(|e| e.to_string());
+        return probe_wave_with_options(path, options).map_err(|e| e.to_string());
     }
     let mut signature = [0; 9];
     let mut signature_file = File::open(path).map_err(|e| e.to_string())?;
-    if signature_file.read_exact(&mut signature).is_ok() && &signature == b"YUV4MPEG2" {
-        return crate::owned_y4m_probe::probe_y4m(path);
+    let read = signature_file
+        .read(&mut signature)
+        .map_err(|e| e.to_string())?;
+    if read == 9 && &signature == b"YUV4MPEG2" {
+        return crate::owned_y4m_probe::probe_y4m_with_options(path, options);
     }
-    if crate::owned_mp4::recognizes_prefix(&signature[..8]) { return crate::owned_mp4_probe::probe_mp4(path); }
-    if signature[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
-        return crate::owned_webm_probe::probe_webm(path);
+    if read >= 8 && crate::owned_mp4::recognizes_prefix(&signature[..8]) {
+        return crate::owned_mp4_probe::mp4_with_options(path, options);
     }
-    if signature.starts_with(b"fLaC") {return crate::owned_flac_probe::probe_flac(path);}
-    if signature.starts_with(b"OggS") {
-        return probe_ogg(path);
+    if read >= 4 && signature[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
+        return crate::owned_webm_probe::probe_webm_with_options(path, options);
     }
-    if crate::owned_mpeg_audio::has_signature(&signature) {
-        return crate::owned_mpeg_probe::probe_mpeg(path);
+    if read >= 4 && signature.starts_with(b"fLaC") {
+        return crate::owned_flac_probe::probe_flac_with_options(path, options);
     }
-    let mut prefix = [0; 7];
-    let mut file = File::open(path).map_err(|e| e.to_string())?;
-    match file.read_exact(&mut prefix) {
-        Ok(()) if crate::owned_aac::adts::header(&prefix).is_some() => probe_adts(path),
-        Ok(()) => Err("container has no owned media-library probe yet".into()),
-        Err(error) if error.kind() == std::io::ErrorKind::UnexpectedEof => {
-            Err("container has no owned media-library probe yet".into())
-        }
-        Err(error) => Err(error.to_string()),
+    if read >= 4 && signature.starts_with(b"OggS") {
+        return probe_ogg_with_options(path, options);
     }
+    if read >= 4 && crate::owned_mpeg_audio::has_signature(&signature[..read]) {
+        return crate::owned_mpeg_probe::probe_mpeg_with_options(path, options);
+    }
+    if read >= 7 && crate::owned_aac::adts::header(&signature[..7]).is_some() {
+        return probe_adts_with_options(path, options);
+    }
+    Err("container has no owned media-library probe yet".into())
 }
 
 /// Select owned MP4 inspection before the remaining legacy container paths.
@@ -126,12 +167,54 @@ pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<Option<Me
 /// Count AAC-LC ADTS packets using owned framing, without decoding PCM.
 /// The streaming reader retains only one bounded ADTS packet at a time.
 pub fn probe_adts(path: &Path) -> Result<MediaInfo, String> {
+    probe_adts_with_options(path, &Default::default())
+}
+
+pub fn probe_adts_with_options(
+    path: &Path,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo, String> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
     let file = File::open(path).map_err(|e| e.to_string())?;
-    let mut reader = crate::owned_aac::adts::StreamReader::open(std::io::BufReader::new(file))
-        .map_err(|e| e.to_string())?;
+    let mut reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+        std::io::BufReader::new(file),
+        options
+            .max_packet_bytes
+            .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+    )
+    .map_err(|e| e.to_string())?;
     let config = reader.configuration();
     let mut frames = 0u64;
+    let mut packets = 0u64;
     while reader.next_packet().map_err(|e| e.to_string())?.is_some() {
+        if options
+            .cancel
+            .as_ref()
+            .is_some_and(fvid_control::CancelFlag::is_cancelled)
+        {
+            return Err("media operation cancelled".into());
+        }
+        crate::owned_budget::check_rss_budget(options)?;
+        packets = packets.checked_add(1).ok_or("AAC packet count overflow")?;
+        if options.max_packets.is_some_and(|max| packets > max) {
+            return Err("ADTS packet count exceeds packet limit".into());
+        }
         frames = frames.checked_add(1024).ok_or("AAC duration overflow")?;
     }
     let duration = i64::try_from(frames).map_err(|_| "AAC duration exceeds API range")?;
@@ -172,10 +255,43 @@ pub fn probe_adts(path: &Path) -> Result<MediaInfo, String> {
 
 /// Inspect supported uncompressed or G.711 RIFF/WAVE without loading its sample payload.
 pub fn probe_wave(path: &Path) -> std::io::Result<MediaInfo> {
-    let mut file = File::open(path)?;
-    let law = crate::owned_wave_inspect::g711_law(&mut file, None)?;
-    let wave = crate::owned_wave_inspect::inspect_probe(&mut file)?;
+    probe_wave_with_options(path, &Default::default())
+}
+
+pub fn probe_wave_with_options(
+    path: &Path,
+    options: &fvid_control::CopyOptions,
+) -> std::io::Result<MediaInfo> {
     let invalid = |message| std::io::Error::new(std::io::ErrorKind::InvalidData, message);
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::Interrupted,
+            "media operation cancelled",
+        ));
+    }
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    crate::owned_budget::check_rss_budget(options)
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
+    let mut file = File::open(path)?;
+    let law = crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())?;
+    let wave = crate::owned_wave_inspect::inspect_probe(&mut file)?;
+    if options.max_packet_bytes < usize::from(wave.block) {
+        return Err(invalid(
+            "packet byte limit is smaller than one PCM sample frame",
+        ));
+    }
     let rate = i32::try_from(wave.sample_rate)
         .map_err(|_| invalid("WAVE sample rate exceeds metadata range"))?;
     let duration =
@@ -184,8 +300,21 @@ pub fn probe_wave(path: &Path) -> std::io::Result<MediaInfo> {
         i64::try_from(u128::from(wave.sample_frames) * 1_000_000 / u128::from(wave.sample_rate))
             .map_err(|_| invalid("WAVE duration overflow"))?;
     let mut metadata = BTreeMap::new();
+    let mut total_info_bytes = 0usize;
     let mut at = 12;
     while at < wave.end {
+        if options
+            .cancel
+            .as_ref()
+            .is_some_and(fvid_control::CancelFlag::is_cancelled)
+        {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::Interrupted,
+                "media operation cancelled",
+            ));
+        }
+        crate::owned_budget::check_rss_budget(options)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
         file.seek(SeekFrom::Start(at))?;
         let mut header = [0; 8];
         file.read_exact(&mut header)?;
@@ -200,6 +329,18 @@ pub fn probe_wave(path: &Path) -> std::io::Result<MediaInfo> {
             let mut cursor = at + 12;
             let end = at + 8 + u64::from(size);
             while cursor < end {
+                if options
+                    .cancel
+                    .as_ref()
+                    .is_some_and(fvid_control::CancelFlag::is_cancelled)
+                {
+                    return Err(std::io::Error::new(
+                        std::io::ErrorKind::Interrupted,
+                        "media operation cancelled",
+                    ));
+                }
+                crate::owned_budget::check_rss_budget(options)
+                    .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
                 if end - cursor < 8 {
                     return Err(invalid("truncated WAVE INFO entry"));
                 }
@@ -214,7 +355,20 @@ pub fn probe_wave(path: &Path) -> std::io::Result<MediaInfo> {
                 if length > 1_048_576 {
                     return Err(invalid("WAVE INFO entry is too large"));
                 }
-                let mut bytes = vec![0; length as usize];
+                let entry_bytes = length as usize;
+                total_info_bytes = total_info_bytes.saturating_add(entry_bytes);
+                if let Some(limit) = options.max_controlled_bytes
+                    && total_info_bytes.saturating_mul(2) > limit
+                {
+                    return Err(std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        format!(
+                            "controlled memory budget exceeded: WAVE INFO metadata need {} bytes, limit {limit}",
+                            total_info_bytes.saturating_mul(2)
+                        ),
+                    ));
+                }
+                let mut bytes = vec![0; entry_bytes];
                 file.read_exact(&mut bytes)?;
                 let key = match &header[..4] {
                     b"INAM" => "title",
@@ -278,14 +432,53 @@ pub fn probe_wave(path: &Path) -> std::io::Result<MediaInfo> {
 
 /// Inspect Ogg Opus, Vorbis, and chained Joint Vorbis/Opus bitstreams without decoding PCM.
 pub fn probe_ogg(path: &Path) -> Result<MediaInfo, String> {
+    probe_ogg_with_options(path, &Default::default())
+}
+
+pub fn probe_ogg_with_options(
+    path: &Path,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo, String> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
     if !crate::owned_ogg_opus_export::recognizes(path)? {
         return Err("input does not have an Ogg signature".into());
     }
-    let options = fvid_control::CopyOptions::default();
     let mut file = File::open(path).map_err(|e| e.to_string())?;
-    let (limits, _) = crate::owned_ogg_opus_export::preflight(&mut file, &options)?;
-    let bytes = std::fs::read(path).map_err(|e| e.to_string())?;
+    let (limits, _) = crate::owned_ogg_opus_export::preflight(&mut file, options)?;
+    if options
+        .max_packets
+        .is_some_and(|max| (limits.packets as u64) > max)
+    {
+        return Err("Ogg packet count exceeds packet limit".into());
+    }
+    let mut bytes = Vec::with_capacity(limits.file_bytes);
+    crate::owned_ogg_opus_export::CheckedRead {
+        input: std::io::BufReader::new(file),
+        options,
+    }
+    .read_to_end(&mut bytes)
+    .map_err(|e| e.to_string())?;
     let ogg = crate::owned_ogg::Ogg::parse(&bytes, &limits).map_err(|e| e.to_string())?;
+    if ogg
+        .chains()
+        .iter()
+        .flat_map(|chain| &chain.packets)
+        .any(|packet| packet.data.len() > options.max_packet_bytes)
+    {
+        return Err("Ogg compressed packet exceeds byte limit".into());
+    }
     let catalog = crate::owned_ogg_audio_catalog::from_ogg(&ogg).map_err(|e| e.to_string())?;
     if catalog.is_empty() {
         return Err("Ogg file has no supported audio streams".into());

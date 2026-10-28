@@ -1,0 +1,5 @@
+{
+  "crates/fvid-media/src/owned_mp4_impl.rs": "6b1b59bcd8deaa7abd6ae5f50365abbbefb5e7690565811abc4bbc5ac2c0e614",
+  "tests/mp4_time_header_flags.rs": "649c1bb254ab0a5b2e083e30a2a618a61de58e41e793687b477bc1b0e5e7cde5",
+  "scripts/generate_mp4_time_header_flags.py": "65981a9b0805184fa02f7343aa7958055875558e8a18ef764dbbacdd3fba7eca"
+}

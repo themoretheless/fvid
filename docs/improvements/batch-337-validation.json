@@ -1,0 +1,25 @@
+{
+  "batch": 337,
+  "id": "FVID-0344",
+  "title": "Propagate controlled-memory ceilings (max_controlled_bytes) to FFV1, AVC, HEVC, VP9, and AV1 codec decoders in owned_webm_codec::Decoder, owned_video_decode::decode_webm, and owned_mp4_video_decode::decode_presented, and to owned_probe::probe_with_options in plan_transcode_lossless and plan_burn_subtitles",
+  "status": "accepted",
+  "source": [
+    "crates/fvid-media/src/owned_webm_codec.rs",
+    "crates/fvid-media/src/owned_video_decode.rs",
+    "crates/fvid-media/src/owned_mp4_video_decode.rs",
+    "crates/fvid-media/src/owned_probe.rs",
+    "crates/fvid-media/src/owned_lossless.rs",
+    "crates/fvid-media/src/owned_subtitle_burn.rs"
+  ],
+  "regression": "tests/mp4_metadata_admission.rs",
+  "pre_edit_snapshot": "docs/improvements/snapshots/batch-337-pre-edit",
+  "evidence": {
+    "before": "docs/improvements/evidence/batch-337-acceptance-before.txt",
+    "after": "docs/improvements/evidence/batch-337-acceptance-after.txt",
+    "related": "docs/improvements/evidence/batch-337-related-after.txt"
+  },
+  "summary": {
+    "before": "In `crates/fvid-media/src/owned_webm_codec.rs`, `Decoder::new` hardcoded `usize::MAX` as the memory budget when constructing `owned_ffv1_decoder::Decoder`, `avc_decoder::AvcDecoder`, `hevc_decoder::HevcDecoder`, `vp9_decoder::Decoder`, and `av1_decoder::Decoder`, and both `owned_video_decode::decode_webm` (`crates/fvid-media/src/owned_video_decode.rs:211`) and `owned_webm_codec::presentation_durations` (`crates/fvid-media/src/owned_webm_codec.rs:411`) called `Decoder::new` without passing `options.max_controlled_bytes`. Similarly, `owned_mp4_video_decode::decode_presented` (`crates/fvid-media/src/owned_mp4_video_decode.rs:125,236,320,365`) constructed `AvcDecoder`, `Av1Decoder`, `vp9_decoder::Decoder`, and `HevcDecoder` with `usize::MAX`. As a result, a 4 KiB `max_controlled_bytes` budget on `ffv1-six-frames.mkv` or `small.mp4` (whose container metadata, packet indices, and output frame buffers fit in <4 KiB, but whose FFV1 context tables or AVC DPB/reference buffers require ~16–20 KiB) was admitted by `plan_transcode_lossless`, `transcode_lossless`, `plan_burn_subtitles`, and `burn_subtitles`. In addition, `owned_lossless::plan_transcode_lossless` (`crates/fvid-media/src/owned_lossless.rs:898`) and `owned_subtitle_burn::plan_burn_subtitles` (`crates/fvid-media/src/owned_subtitle_burn.rs:351`) called `owned_probe::probe(source)` without `options`.",
+    "after": "Add `Decoder::new_with_budget` in `crates/fvid-media/src/owned_webm_codec.rs` and pass `options.and_then(|o| o.max_controlled_bytes).unwrap_or(usize::MAX)` in `owned_video_decode::decode_webm`, `owned_webm_codec::presentation_durations`, and all four codec branches (`AvcDecoder`, `Av1Decoder`, `vp9_decoder::Decoder`, `HevcDecoder`) of `owned_mp4_video_decode::decode_presented`, and add `owned_probe::probe_with_options` (`crates/fvid-media/src/owned_probe.rs`) used by `plan_transcode_lossless` and `plan_burn_subtitles`. Eleven integration tests in `mp4_metadata_admission` and nine in `mp4_audio_metadata_admission` pass."
+  }
+}

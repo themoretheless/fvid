@@ -10,26 +10,85 @@ fn policies(options: &CopyOptions) -> bool {
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
 }
-pub(crate) fn validate_configuration(source: &Path, options: &CopyOptions) -> Result<u32> {
-    if !policies(options) {
-        return Err("owned ADTS loudness requires stream 0 and no metadata edits".into());
-    }
+pub(crate) fn validate_header_configuration(source: &Path, options: &CopyOptions) -> Result<u32> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
     crate::owned_budget::check_rss_budget(options)?;
+    if !policies(options) {
+        return Err("owned ADTS loudness requires stream 0 and no metadata edits".into());
+    }
     let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        options.max_packet_bytes,
+        options
+            .max_packet_bytes
+            .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
     )
     .map_err(|e| e.to_string())?;
     let config = reader.configuration();
     crate::owned_aac::stream::check_adts_decode_admission(reader.audio_specific_config(), options)
         .map_err(|e| e.to_string())?;
-    let rate = config.sample_rate;
     let decoder = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
         .map_err(|e| e.to_string())?;
     if decoder.channel_mask() & !0x7ff != 0 {
+        return Err("owned loudness speaker positions are not yet qualified".into());
+    }
+    if !crate::owned_wave_loudness::qualified_rate(config.sample_rate)
+        && !crate::owned_wave_loudness::qualified_rate(config.sample_rate.saturating_mul(2))
+    {
+        return Err(
+            "owned AAC true-peak measurement requires a qualified standard PCM rate".into(),
+        );
+    }
+    Ok(config.sample_rate)
+}
+fn validate_packet_budget(source: &Path, options: &CopyOptions) -> Result<()> {
+    let packet_limit = options
+        .max_packet_bytes
+        .min(options.max_controlled_bytes.unwrap_or(usize::MAX));
+    if packet_limit >= CopyOptions::default().max_packet_bytes {
+        return Ok(());
+    }
+    let mut reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+        packet_limit,
+    )
+    .map_err(|e| e.to_string())?;
+    let mut packets = 0u64;
+    while !options.max_packets.is_some_and(|limit| packets >= limit) {
+        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+            return Err("media operation cancelled".into());
+        }
+        crate::owned_budget::check_rss_budget(options)?;
+        if reader.next_packet().map_err(|e| e.to_string())?.is_none() {
+            break;
+        }
+        packets += 1;
+    }
+    Ok(())
+}
+pub(crate) fn validate_configuration(source: &Path, options: &CopyOptions) -> Result<u32> {
+    let header_rate = validate_header_configuration(source, options)?;
+    validate_packet_budget(source, options)?;
+    if crate::owned_wave_loudness::qualified_rate(header_rate) {
+        return Ok(header_rate);
+    }
+    let (rate, _channels, mask) = crate::owned_aac::stream::adts_prefix_info(
+        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+        None,
+        options,
+    )
+    .map_err(|e| e.to_string())?;
+    if mask & !0x7ff != 0 {
         return Err("owned loudness speaker positions are not yet qualified".into());
     }
     if !crate::owned_wave_loudness::qualified_rate(rate) {
@@ -52,8 +111,13 @@ pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
     }
 }
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
-    validate_configuration(source, options)?;
+    validate_header_configuration(source, options)?;
     let spool = crate::owned_adts_export::decode_to_wave(source, None, options)?;
+    if !crate::owned_wave_loudness::qualified_rate(spool.stats.sample_rate) {
+        return Err(
+            "owned AAC true-peak measurement requires a qualified standard PCM rate".into(),
+        );
+    }
     let mut pcm_options = options.clone();
     pcm_options.max_packets = None;
     pcm_options.max_packet_bytes = CopyOptions::default().max_packet_bytes;
@@ -74,6 +138,31 @@ pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<Loudness
 }
 pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
     validate_configuration(source, options)?;
+    let mut notes = vec![
+        "backend: owned fvid-media; no external demuxer, codec, resampler or muxer".into(),
+        "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution".into(),
+        "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded".into(),
+        "private decoded WAVE is removed on success or failure; measurement completion is emitted once after analysis".into(),
+    ];
+    if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        || options.max_packets.is_some()
+        || options.max_controlled_bytes.is_some()
+        || options.max_rss_bytes.is_some()
+    {
+        notes.push(format!(
+            "encoded packet limit: {} bytes; packet work limit: {} packets; controlled memory limit: {} bytes; RSS limit: {} bytes",
+            options.max_packet_bytes,
+            options
+                .max_packets
+                .map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options
+                .max_controlled_bytes
+                .map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options
+                .max_rss_bytes
+                .map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+        ));
+    }
     Ok(MediaPlan {
         command: "loudness".into(),
         input: source.into(),
@@ -95,12 +184,7 @@ pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> 
             },
         ],
         graph: None,
-        notes: vec![
-            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer".into(),
-            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution".into(),
-            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded".into(),
-            "private decoded WAVE is removed on success or failure; measurement completion is emitted once after analysis".into(),
-        ],
+        notes,
     })
 }
 

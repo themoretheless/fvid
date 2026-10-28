@@ -7,8 +7,10 @@ use std::{
 };
 type Result<T> = std::result::Result<T, String>;
 fn policies(options: &CopyOptions) -> bool {
-    options.max_packet_bytes > 0
-        && options.max_controlled_bytes.is_none()
+    !options.cancel.as_ref().is_some_and(|c| c.is_cancelled())
+        && options.max_packet_bytes > 0
+        && options.max_packets != Some(0)
+        && options.max_controlled_bytes != Some(0)
         && crate::owned_budget::check_rss_budget(options).is_ok()
         && options.stream_metadata_set.iter().all(|(_, key, value)| {
             track_key(key)
@@ -102,6 +104,10 @@ fn metadata<R: std::io::Read + std::io::Seek>(
 ) {
     let mut metadata = crate::owned_matroska::FileMetadata::from_mp4(reader);
     let mut text = std::collections::BTreeMap::<String, String>::new();
+    let encoder = reader.encoder().trim();
+    if !encoder.is_empty() && encoder.len() <= 1024 && !encoder.contains('\0') {
+        text.insert("ENCODER".into(), encoder.to_owned());
+    }
     for (key, value) in &options.metadata_set {
         text.retain(|name, _| !name.eq_ignore_ascii_case(key));
         if !metadata.tags.set(key, value) && !value.is_empty() {
@@ -117,19 +123,141 @@ fn metadata<R: std::io::Read + std::io::Seek>(
 fn open(
     source: &Path,
     options: &CopyOptions,
-) -> Result<crate::owned_mp4::Mp4Reader<BufReader<File>>> {
-    let file = File::open(source).map_err(|e| e.to_string())?;
-    if !file.metadata().map_err(|e| e.to_string())?.is_file() {
-        return Err("MP4 remux requires a regular file".into());
+) -> crate::owned_mp4::Result<crate::owned_mp4::Mp4Reader<BufReader<File>>> {
+    let file = File::open(source)?;
+    if !file.metadata()?.is_file() {
+        return Err(crate::owned_mp4::invalid("MP4 remux requires a regular file"));
     }
-    crate::owned_mp4::Mp4Reader::open(
-        BufReader::new(file),
-        crate::owned_mp4::Limits {
-            packet_bytes: options.max_packet_bytes,
-            ..Default::default()
-        },
-    )
-    .map_err(|e| e.to_string())
+    let mut limits = crate::owned_mp4::Limits::default();
+    if let Some(limit) = options.max_controlled_bytes {
+        limits.metadata_bytes = limits.metadata_bytes.min(limit);
+    }
+    let mut reader = crate::owned_mp4::Mp4Reader::open(BufReader::new(file), limits)?;
+    reader.restrict_packet_bytes(
+        options
+            .max_packet_bytes
+            .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+    );
+    Ok(reader)
+}
+fn validate_selected_prefix_packet_budget<R: std::io::Read + std::io::Seek>(
+    reader: &crate::owned_mp4::Mp4Reader<R>,
+    selected: &[usize],
+    options: &CopyOptions,
+) -> Result<(u64, u64)> {
+    let plans = selected
+        .iter()
+        .map(|&index| {
+            let track = &reader.tracks()[index];
+            crate::owned_mp4_matroska::plan(
+                track,
+                reader.movie_timescale(),
+                options.cancel.as_ref(),
+            )
+            .map_err(|e| e.to_string())
+        })
+        .collect::<Result<Vec<_>>>()?;
+    let plan_bytes = if let Some(mem_limit) = options.max_controlled_bytes {
+        let (file_meta, text_tags) = metadata(reader, options);
+        let (overrides, scoped_tags) = track_metadata(options, selected);
+        let mut raw_meta_bytes = 0usize;
+        for (_, v) in file_meta.tags.entries() {
+            if !v.is_empty() {
+                raw_meta_bytes = raw_meta_bytes.saturating_add(v.len()).saturating_add(32);
+            }
+        }
+        for c in &file_meta.chapters {
+            raw_meta_bytes = raw_meta_bytes.saturating_add(c.title.len()).saturating_add(64);
+        }
+        for (k, v) in &text_tags {
+            raw_meta_bytes = raw_meta_bytes
+                .saturating_add(k.len())
+                .saturating_add(v.len())
+                .saturating_add(32);
+        }
+        for o in &overrides {
+            if let Some(n) = o.name {
+                raw_meta_bytes = raw_meta_bytes.saturating_add(n.len()).saturating_add(16);
+            }
+            if let Some(l) = o.language {
+                raw_meta_bytes = raw_meta_bytes.saturating_add(l.len()).saturating_add(16);
+            }
+        }
+        for entries in scoped_tags.values() {
+            for (k, v) in entries {
+                raw_meta_bytes = raw_meta_bytes
+                    .saturating_add(k.len())
+                    .saturating_add(v.len())
+                    .saturating_add(32);
+            }
+        }
+        let base_bytes = 16384usize
+            .saturating_add(raw_meta_bytes.saturating_mul(8))
+            .saturating_add(
+                reader
+                    .estimated_index_payload_bytes()
+                    .map_err(|e| e.to_string())?,
+            );
+        let plan_bytes = plans.iter().try_fold(base_bytes, |sum, p| {
+            // Edits can shorten the initialized plan without releasing its
+            // reserved timing storage. Admit the allocation that remains live.
+            p.packets
+                .capacity()
+                .checked_mul(std::mem::size_of::<crate::owned_mp4_matroska::PacketTime>())
+                .and_then(|n| sum.checked_add(n))
+                .ok_or("MP4 packet plan memory overflow")
+        })?;
+        if plan_bytes > mem_limit {
+            return Err("controlled memory budget exceeded".into());
+        }
+        plan_bytes
+    } else {
+        16384usize
+    };
+    let mut queue = std::collections::BinaryHeap::new();
+    for (track, plan) in plans.iter().enumerate() {
+        if let Some(first) = plan.packets.first() {
+            queue.push(std::cmp::Reverse((first.dts, selected[track], track, 0usize)));
+        }
+    }
+    let mut packets = 0u64;
+    let mut payload = 0u64;
+    while let Some(std::cmp::Reverse((_, source_track, track, index))) = queue.pop() {
+        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+            return Err("media operation cancelled".into());
+        }
+        if options.max_packets.is_some_and(|limit| packets >= limit) {
+            break;
+        }
+        let sample = reader.tracks()[source_track]
+            .samples
+            .get(index)
+            .ok_or("missing MP4 sample")?;
+        if (sample.size as usize) > options.max_packet_bytes {
+            return Err("MP4 packet exceeds budget".into());
+        }
+        packets = packets.checked_add(1).ok_or("MP4 packet count overflow")?;
+        if options.max_controlled_bytes.is_some_and(|limit| {
+            plan_bytes
+                .saturating_add((packets as usize).saturating_mul(32))
+                .saturating_add(sample.size as usize)
+                > limit
+        }) {
+            return Err("controlled memory budget exceeded".into());
+        }
+        payload = payload
+            .checked_add(u64::from(sample.size))
+            .ok_or("MP4 byte count overflow")?;
+        if let Some(next) = plans[track].packets.get(index + 1) {
+            queue.push(std::cmp::Reverse((
+                next.dts,
+                source_track,
+                track,
+                index + 1,
+            )));
+        }
+    }
+    Ok((packets, payload))
 }
 pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
     if !policies(options)
@@ -146,8 +274,11 @@ pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions)
     }) {
         return false;
     }
-    let Ok(reader) = open(source, options) else {
-        return false;
+    let reader = match open(source, options) {
+        Ok(reader) => reader,
+        // Recognized MP4 parse/resource failures belong to this route. Keep
+        // unsupported sample entries available to other owned adapters.
+        Err(error) => return !error.is_unsupported(),
     };
     let Ok(selected) = crate::owned_mp4_matroska::selection(reader.tracks().len(), &options.streams) else {
         return false;
@@ -177,13 +308,23 @@ pub fn remux(
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
     crate::owned_budget::check_rss_budget(options)?;
     if !supports(source, destination, options) {
         return Err("request is not an owned MP4 Matroska remux".into());
     }
-    let mut reader = open(source, options)?;
+    let mut reader = open(source, options).map_err(|e| e.to_string())?;
     let (metadata, text) = metadata(&reader, options);
     let selected = crate::owned_mp4_matroska::selection(reader.tracks().len(), &options.streams).map_err(|e| e.to_string())?;
+    validate_selected_prefix_packet_budget(&reader, &selected, options)?;
     let (tracks, scoped) = track_metadata(options, &selected);
     crate::owned_matroska_remux::publish(destination, options, |output| {
         crate::owned_mp4_matroska::write_selected_with_text_metadata_overrides(
@@ -207,36 +348,39 @@ pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<fvid_media_inf
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
     crate::owned_budget::check_rss_budget(options)?;
     if !supports(source, Path::new("planned.mkv"), options) {
         return Err("request is not an owned MP4 Matroska remux".into());
     }
-    let reader = open(source, options)?;
-    let mut packets = 0u64;
-    let mut payload = 0u64;
+    let reader = open(source, options).map_err(|e| e.to_string())?;
     let selected = crate::owned_mp4_matroska::selection(reader.tracks().len(), &options.streams).map_err(|e| e.to_string())?;
-    let plans = selected.iter().map(|&index| {
-        let track = &reader.tracks()[index];
-        crate::owned_mp4_matroska::plan(track, reader.movie_timescale(), options.cancel.as_ref())
-            .map_err(|e| e.to_string())
-    }).collect::<Result<Vec<_>>>()?;
-    let mut queue = std::collections::BinaryHeap::new();
-    for (track, plan) in plans.iter().enumerate() {
-        if let Some(first) = plan.packets.first() {
-            queue.push(std::cmp::Reverse((first.dts, selected[track], track, 0usize)));
-        }
-    }
-    while let Some(std::cmp::Reverse((_, source_track, track, index))) = queue.pop() {
-        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-            return Err("media operation cancelled".into());
-        }
-        if options.max_packets.is_some_and(|limit| packets >= limit) { break; }
-        let sample = reader.tracks()[source_track].samples.get(index).ok_or("missing MP4 sample")?;
-        packets = packets.checked_add(1).ok_or("MP4 packet count overflow")?;
-        payload = payload.checked_add(u64::from(sample.size)).ok_or("MP4 byte count overflow")?;
-        if let Some(next) = plans[track].packets.get(index + 1) {
-            queue.push(std::cmp::Reverse((next.dts, source_track, track, index + 1)));
-        }
+    let (packets, payload) = validate_selected_prefix_packet_budget(&reader, &selected, options)?;
+    let mut notes = vec![
+        "backend: owned MP4/Matroska; no external demuxer or muxer".into(),
+        "destination must be .mkv or audio-only .mka; publication and packet payload reads are verified during execution".into(),
+        "selected original stream indexes retain requested output order; optional global packet cap retains a DTS-interleaved prefix; known container tags and track title/language are deleted before assignments; other track tag edits and aggregate/RSS policies remain unsupported".into(),
+    ];
+    if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        || options.max_packets.is_some()
+        || options.max_controlled_bytes.is_some()
+        || options.max_rss_bytes.is_some()
+    {
+        notes.push(format!(
+            "encoded packet limit: {} bytes; packet work limit: {:?}; controlled memory limit: {:?}; RSS limit: {:?}",
+            options.max_packet_bytes,
+            options.max_packets,
+            options.max_controlled_bytes,
+            options.max_rss_bytes
+        ));
     }
     Ok(MediaPlan {
         command: "remux".into(), input: source.into(), inputs: vec![source.into()],
@@ -251,6 +395,6 @@ pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<fvid_media_inf
             PlanStep { action: "metadata".into(), detail: format!("retain file tags/chapters and video colour/HDR/display metadata; delete {} and set {} container tags; delete {} and set {} track title/language fields by original source index", options.metadata_delete.len(), options.metadata_set.len(), options.stream_metadata_delete.len(), options.stream_metadata_set.len()) },
             PlanStep { action: "publish".into(), detail: "publish complete output without overwriting; remove temporary file on error or cancellation".into() },
         ], graph: None,
-        notes: vec!["backend: owned MP4/Matroska; no external demuxer or muxer".into(), "destination must be .mkv or audio-only .mka; publication and packet payload reads are verified during execution".into(), "selected original stream indexes retain requested output order; optional global packet cap retains a DTS-interleaved prefix; known container tags and track title/language are deleted before assignments; other track tag edits and aggregate/RSS policies remain unsupported".into()],
+        notes,
     })
 }

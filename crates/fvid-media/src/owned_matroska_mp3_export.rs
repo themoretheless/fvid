@@ -13,9 +13,10 @@ pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
     if file.read_exact(&mut signature).is_err() || signature != [0x1a, 0x45, 0xdf, 0xa3] {
         return Ok(false);
     }
-    let reader = crate::owned_webm::WebmReader::open(
+    let reader = crate::owned_matroska_audio::open_audio_reader(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        Default::default(),
+        options,
+        options.max_packet_bytes,
     )
     .map_err(|e| e.to_string())?;
     let preferred = reader.preferred_track_numbers(
@@ -47,7 +48,7 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    let (rate, channels) = match geometry(source, options) {
+    let (rate, channels) = match geometry_for_decode(source, Some(transform), options) {
         Ok(value) => value,
         Err(error) => return error.starts_with("controlled memory budget exceeded:"),
     };
@@ -81,15 +82,28 @@ pub(crate) fn apply(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
-    if destination.symlink_metadata().is_ok() {
-        return Err("output already exists".into());
-    }
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
     crate::owned_budget::check_rss_budget(options)?;
-    let (rate, channels) = geometry(source, options)?;
-    let info = crate::owned_wave_metadata::matroska_source_info(source, options)?;
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
+    let (rate, channels) = geometry_for_decode(source, Some(transform), options)?;
+    let info = crate::owned_wave_metadata::matroska_source_info_with_interval(
+        source,
+        prefix(transform, rate),
+        options,
+    )?;
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,
@@ -110,44 +124,56 @@ pub(crate) fn apply(
 }
 
 pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    geometry_for_decode(source, None, options)
+}
+
+pub(crate) fn geometry_for_decode(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16)> {
     let mut reader = crate::owned_matroska_audio::open_audio_reader(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         options,
-        crate::owned_webm::Limits::default().packet_bytes,
+        options.max_packet_bytes,
     )
     .map_err(|e| e.to_string())?;
-    let index = match options.streams.as_slice() {
-        [index] => *index,
-        [] => {
-            let preferred = reader.preferred_track_numbers(
-                &reader
-                    .tracks
-                    .iter()
-                    .filter(|t| t.kind == 2)
-                    .map(|t| t.number)
-                    .collect::<Vec<_>>(),
-            );
-            let indices: Vec<_> = reader
-                .tracks
-                .iter()
-                .enumerate()
-                .filter_map(|(i, t)| (t.kind == 2 && preferred.contains(&t.number)).then_some(i))
-                .collect();
-            if indices.len() != 1 {
-                return Err("select exactly one audio stream".into());
-            }
-            indices[0]
-        }
+    let selected = match options.streams.as_slice() {
+        [] => None,
+        [index] => Some(*index),
         _ => return Err("select exactly one audio stream".into()),
     };
-    crate::owned_matroska_audio::admit_audio_reader(&mut reader, index, options)
+    let index = crate::owned_matroska_audio::matroska_audio_index(&reader, selected)
         .map_err(|e| e.to_string())?;
     let track = reader
         .tracks
         .get(index)
         .ok_or("selected audio stream is absent")?;
+    if !matches!(track.codec.as_str(), "A_MPEG/L1" | "A_MPEG/L2" | "A_MPEG/L3") {
+        return Err("selected Matroska audio stream has a different codec".into());
+    }
     let decoder = crate::owned_matroska_audio::MatroskaTimelineDecoder::from_matroska(track)
         .map_err(|e| e.to_string())?;
     let (rate, channels) = (decoder.sample_rate(), decoder.channels());
+    let interval = transform.and_then(|t| prefix(t, rate));
+    crate::owned_matroska_audio::admit_audio_reader_with_interval(&mut reader, index, interval, options)
+        .map_err(|e| e.to_string())?;
+    let _ = crate::owned_wave_metadata::matroska_source_info_with_interval(source, interval, options)?;
+    if transform.is_some_and(|t| t.interval.is_some()) {
+        let mut probe = decode_options(options);
+        probe.progress = None;
+        let stats = crate::owned_matroska_mpeg::decode_matroska_mpeg_pcm(
+            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+            &mut std::io::sink(),
+            interval,
+            &probe,
+        )
+        .map_err(|e| e.to_string())?;
+        crate::owned_ogg_opus_export::check_nonempty_interval_prefix(
+            transform,
+            stats.sample_rate,
+            stats.sample_frames,
+        )?;
+    }
     Ok((rate, channels))
 }

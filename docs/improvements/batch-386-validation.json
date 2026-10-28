@@ -1,0 +1,16 @@
+{
+  "batch": 386,
+  "ids": [
+    "FVID-0393"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-386-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-386-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-386-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-386-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission adts_wave_metadata_budget_and_container_loudnorm_admission_preserve_metadata_working_set -- --exact",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 53,
+  "failed": 0
+}

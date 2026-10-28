@@ -136,7 +136,21 @@ impl<R: Read + Seek> WebmVideoReader<R> {
 
     fn open_with_hardware(reader: R, budget: usize, allow_hardware: bool) -> Result<Self> {
         let _ = allow_hardware;
-        let mut demux = WebmReader::open(reader, Limits::default())?;
+        let mut limits = Limits::default();
+        let memory_packets = budget / std::mem::size_of::<crate::container::webm::Packet>();
+        limits.packets = limits.packets.min(memory_packets);
+        let map_packet_limit = |error: crate::Error| {
+            if memory_packets < Limits::default().packets
+                && error
+                    .to_string()
+                    .contains("WebM packet count exceeds limit")
+            {
+                invalid("controlled memory budget exceeded: Matroska packet index limit")
+            } else {
+                error
+            }
+        };
+        let mut demux = WebmReader::open(reader, limits).map_err(map_packet_limit)?;
         let candidates:Vec<_>=demux.tracks.iter().filter(|t|t.kind==1 && matches!(t.codec.as_str(),
             "V_VP9"|"V_AV1"|"V_MPEG4/ISO/AVC"|"V_MPEGH/ISO/HEVC"|"V_FFV1")).map(|t|t.number).collect();
         let number=demux.preferred_track_numbers(&candidates).first().copied()
@@ -211,7 +225,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         let future_pts = if avc || hevc {
             // Reordered codecs need a suffix minimum of packet PTS to know when
             // a decoded picture can be emitted. Packet payloads remain lazy.
-            demux.scan_all()?;
+            demux.scan_all().map_err(map_packet_limit)?;
             let mut future = Vec::new();
             future
                 .try_reserve_exact(demux.packets.len())
@@ -690,6 +704,16 @@ impl<R: Read + Seek> WebmVideoReader<R> {
     /// rather than the last one it meets; a target in front of every keyframe
     /// restarts the track at its first block.
     pub fn seek_to_sync(&mut self, target_ns: i64) -> Result<i64> {
+        let map_packet_limit = |error: crate::Error| {
+            if error
+                .to_string()
+                .contains("WebM packet count exceeds limit")
+            {
+                invalid("controlled memory budget exceeded: Matroska packet index limit")
+            } else {
+                error
+            }
+        };
         self.cached_cursor = None;
         self.cache_previous_start = None;
         // A lazy index can initially contain only decode-only pre-roll. Find
@@ -700,7 +724,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 .packets
                 .iter()
                 .any(|p| p.track == self.track && !p.invisible)
-            && self.demux.scan_more()?
+            && self.demux.scan_more().map_err(map_packet_limit)?
         {}
         let origin = self.origin();
         let target = target_ns.saturating_add(origin);
@@ -708,7 +732,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         // front of it, which is the one question lazy indexing cannot dodge —
         // and the walk stops at the target, so the price is the distance
         // travelled rather than the length of the item.
-        self.demux.scan_until(target)?;
+        self.demux.scan_until(target).map_err(map_packet_limit)?;
         let mut chosen: Option<(usize, i64)> = None;
         for (index, packet) in self.demux.packets.iter().enumerate() {
             if packet.track != self.track || !packet.keyframe || packet.pts_ns > target {
@@ -918,11 +942,21 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         }
     }
     fn decode_next(&mut self) -> Result<Option<Frame>> {
+        let map_packet_limit = |error: crate::Error| {
+            if error
+                .to_string()
+                .contains("WebM packet count exceeds limit")
+            {
+                invalid("controlled memory budget exceeded: Matroska packet index limit")
+            } else {
+                error
+            }
+        };
         if let VideoDecoder::Layered(d)=&mut self.decoder && let Some(frame)=d.take()? {return Ok(Some(frame));}
         // The index only holds the clusters walked so far, so a reader that has
         // run out of blocks asks the demuxer for the next one before it believes
         // the item has ended.
-        while self.index < self.demux.packets.len() || self.demux.scan_more()? {
+        while self.index < self.demux.packets.len() || self.demux.scan_more().map_err(map_packet_limit)? {
             if !self.hardware_accelerated() {
                 if let VideoDecoder::Vp9(decoder) = &self.decoder {
                     let packet = &self.demux.packets[self.index];

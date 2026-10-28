@@ -371,6 +371,13 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
             check(cancel).map_err(|e| e.to_string())?;
             if let Some(options) = track_options {
                 crate::owned_budget::check_rss_budget(options)?;
+                let frame_len = header.frame_len()?;
+                if options
+                    .max_controlled_bytes
+                    .is_some_and(|limit| frame_len > limit || packet.len() > limit)
+                {
+                    return Err("Y4M frame byte length exceeds controlled memory budget".into());
+                }
             }
             if packet.len() > max_packet_bytes {
                 return Err("encoded FFV1 packet exceeds byte limit".into());
@@ -401,6 +408,20 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
                     for (_, key) in &options.stream_metadata_delete {
                         track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
                         crate::owned_ffv1_export::edit_track_description(&mut description, key, "");
+                    }
+                    if let Some(limit) = options.max_controlled_bytes {
+                        if crate::owned_lossless::estimate_matroska_metadata_working_bytes(
+                            file_metadata,
+                            &text_tags,
+                            &track_tags,
+                            Some(&description),
+                        ) > limit
+                        {
+                            return Err(
+                                "Matroska metadata working set exceeds controlled memory budget"
+                                    .into(),
+                            );
+                        }
                     }
                 }
                 writer = Some(

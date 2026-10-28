@@ -1,0 +1,16 @@
+{
+  "batch": 385,
+  "ids": [
+    "FVID-0392"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-385-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-385-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-385-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-385-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission container_wave_metadata_working_set_and_matroska_source_geometry_errors_are_enforced -- --exact",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 52,
+  "failed": 0
+}

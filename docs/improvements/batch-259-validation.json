@@ -1,0 +1,26 @@
+{
+  "batch": 259,
+  "accepted": [
+    "FVID-0266"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-259-pre-edit/crates/fvid-media/src/owned_flac.rs",
+    "docs/improvements/snapshots/batch-259-pre-edit/crates/fvid-media/src/owned_raw_flac.rs",
+    "docs/improvements/snapshots/batch-259-pre-edit/crates/fvid-media/src/owned_mpeg_audio.rs",
+    "docs/improvements/snapshots/batch-259-pre-edit/crates/fvid-media/src/owned_raw_mp3.rs",
+    "docs/improvements/snapshots/batch-259-pre-edit/crates/fvid-media/src/owned_audio_plan.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-259-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-259-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-259-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/raw-flac-mp3-prefix-budget/prefix-budget.flac",
+    "tests/fixtures/playback-errors/raw-flac-mp3-prefix-budget/prefix-budget.mp3"
+  ],
+  "tests": [
+    "tests/raw_flac_mp3_prefix_budget_regressions.rs",
+    "scripts/test_raw_flac_mp3_prefix_budget_regressions.py"
+  ]
+}

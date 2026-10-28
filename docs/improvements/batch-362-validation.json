@@ -1,0 +1,14 @@
+{
+  "batch": 362,
+  "ids": ["FVID-0369"],
+  "snapshot": "docs/improvements/snapshots/batch-362-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-362-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-362-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-362-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission public_media_routes_validate_copy_options_before_unbounded_source_io -- --exact --nocapture",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 29,
+  "failed": 0
+}

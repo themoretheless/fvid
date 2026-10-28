@@ -17,27 +17,28 @@ fn qualify(
     transform: &LosslessTransform,
     options: &CopyOptions,
 ) -> Result<Option<Input>> {
+    check(options)?;
     if !crate::owned_mp4_video_bridge::recognizes(source) {
         return Ok(None);
     }
     if crate::owned_lossless::request(transform).is_none() {
         return Ok(None);
     }
-    let mut normalized = options.clone();
-    normalized.streams.clear();
-    for (i, _, _) in &mut normalized.stream_metadata_set {
-        *i = 0;
-    }
-    for (i, _) in &mut normalized.stream_metadata_delete {
-        *i = 0;
-    }
-    if !crate::owned_lossless::policy(&normalized, true) {
-        return Ok(None);
-    }
     let reader = match Mp4Reader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         crate::owned_mp4::Limits {
-            packet_bytes: options.max_packet_bytes,
+            packet_bytes: options
+                .max_controlled_bytes
+                .filter(|&limit| limit > 0)
+                .map_or(options.max_packet_bytes, |limit| {
+                    options.max_packet_bytes.min(limit)
+                }),
+            metadata_bytes: crate::owned_mp4::Limits::default().metadata_bytes.min(
+                options
+                    .max_controlled_bytes
+                    .filter(|&limit| limit > 0)
+                    .unwrap_or(usize::MAX),
+            ),
             ..Default::default()
         },
     ) {
@@ -91,6 +92,34 @@ fn qualify(
     {
         return Err("metadata refers to missing input track".into());
     }
+    crate::owned_lossless::metadata(options)?;
+    let mut normalized = options.clone();
+    normalized.streams.clear();
+    for (i, _, _) in &mut normalized.stream_metadata_set {
+        *i = 0;
+    }
+    for (i, _) in &mut normalized.stream_metadata_delete {
+        *i = 0;
+    }
+    if !crate::owned_lossless::policy(&normalized, true) {
+        return Ok(None);
+    }
+    let mut selected_options = options.clone();
+    selected_options
+        .stream_metadata_set
+        .retain(|(i, _, _)| selected.contains(i));
+    selected_options
+        .stream_metadata_delete
+        .retain(|(i, _)| selected.contains(i));
+    crate::owned_lossless::check_options_matroska_metadata_budget(&selected_options)?;
+    if let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0)
+        && reader
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?
+            > limit
+    {
+        return Err("controlled memory budget exceeded: MP4 index and metadata".into());
+    }
     let count = selected.iter().try_fold(0u64, |n, &i| {
         let t = &tracks[i];
         n.checked_add(t.samples.len() as u64)
@@ -98,6 +127,26 @@ fn qualify(
     })?;
     if options.max_packets.is_some_and(|limit| count > limit) {
         return Err("MP4 input packet count exceeds limit".into());
+    }
+    let effective_packet_limit = options
+        .max_controlled_bytes
+        .filter(|&limit| limit > 0)
+        .map_or(options.max_packet_bytes, |limit| {
+            options.max_packet_bytes.min(limit)
+        });
+    for &i in &selected {
+        let t = &tracks[i];
+        let exceeds = match &t.samples {
+            crate::owned_mp4::SampleIndex::Expanded(samples) => {
+                samples.iter().any(|s| s.size as usize > effective_packet_limit)
+            }
+            crate::owned_mp4::SampleIndex::Uniform(u) => {
+                u.count > 0 && u.bytes_per_frame as usize > effective_packet_limit
+            }
+        };
+        if exceeds {
+            return Err("MP4 packet exceeds budget".into());
+        }
     }
     Ok(Some(Input {
         reader,
@@ -123,8 +172,81 @@ pub(crate) fn plan_selection(
     let Some(request) = crate::owned_lossless::request(transform) else {
         return Ok(None);
     };
-    if !crate::owned_ffv1_export::supports(&bridge.path, &request) {
+    if !crate::owned_ffv1_export::supports_with_options(&bridge.path, &request, Some(options)) {
         return Ok(None);
+    }
+    let mut selected_options = options.clone();
+    selected_options
+        .stream_metadata_set
+        .retain(|(i, _, _)| input.selected.contains(i));
+    selected_options
+        .stream_metadata_delete
+        .retain(|(i, _)| input.selected.contains(i));
+    crate::owned_lossless::check_source_matroska_metadata_budget(
+        &bridge.path,
+        request.interval,
+        &selected_options,
+    )?;
+    let mut stage = options.clone();
+    stage.streams.clear();
+    stage.max_packets = None;
+    stage.stream_metadata_set.clear();
+    stage.stream_metadata_delete.clear();
+    let enforce_encoded_budget =
+        options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+            || options.max_controlled_bytes.is_some();
+    let mut check_encoded =
+        |view: crate::owned_video_decode::FrameView<'_>| -> Result<()> {
+            crate::owned_lossless::check_encoded_ffv1_with_controlled(
+                view,
+                options.max_packet_bytes,
+                options.max_controlled_bytes,
+            )
+        };
+    let Some((stats, _)) = crate::owned_video_decode::decode_webm(
+        &bridge.path,
+        &request,
+        if enforce_encoded_budget {
+            Some(&mut check_encoded)
+        } else {
+            None
+        },
+        Some(&stage),
+    )? else {
+        return Ok(None);
+    };
+    if stats.video_frames == 0 {
+        return Err("Matroska has no selected frames".into());
+    }
+    if let Some(limit) = options.max_controlled_bytes {
+        let mut plan_bytes = 0usize;
+        for &i in &input.selected {
+            if i != input.video {
+                let plan = crate::owned_mp4_matroska::plan_window(
+                    &input.reader.tracks()[i],
+                    input.reader.movie_timescale(),
+                    transform.interval,
+                    options.cancel.as_ref(),
+                )
+                .map_err(|e| e.to_string())?;
+                plan_bytes = plan
+                    .packets
+                    .capacity()
+                    .checked_mul(std::mem::size_of::<crate::owned_mp4_matroska::PacketTime>())
+                    .and_then(|n| plan_bytes.checked_add(n))
+                    .ok_or("MP4 packet plan memory overflow")?;
+            }
+        }
+        let schedule_len = (stats.video_frames as usize)
+            .checked_add(input.count as usize)
+            .ok_or("packet schedule overflow")?;
+        let schedule_bytes = schedule_len
+            .checked_mul(std::mem::size_of::<(i128, usize, usize)>())
+            .and_then(|n| n.checked_add(plan_bytes))
+            .ok_or("packet schedule overflow")?;
+        if schedule_bytes > limit {
+            return Err("controlled memory budget exceeded: multitrack MP4 packet schedule limit".into());
+        }
     }
     Ok(Some((input.video, input.selected)))
 }
@@ -133,12 +255,19 @@ pub(crate) fn supports(
     transform: &LosslessTransform,
     options: &CopyOptions,
 ) -> bool {
+    if check(options).is_err() {
+        return false;
+    }
     match qualify(source, transform, options) {
         Ok(Some(_)) => {
             match crate::owned_mp4_video_bridge::prepare_video_controlled(source, Some(options)) {
                 Ok(Some(bridge)) => {
                     crate::owned_lossless::request(transform).is_some_and(|request| {
-                        crate::owned_ffv1_export::supports(&bridge.path, &request)
+                        crate::owned_ffv1_export::supports_with_options(
+                            &bridge.path,
+                            &request,
+                            Some(options),
+                        )
                     })
                 }
                 Err(_) => true,
@@ -156,6 +285,15 @@ fn check(options: &CopyOptions) -> Result<()> {
         .is_some_and(fvid_control::CancelFlag::is_cancelled)
     {
         return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)
 }
@@ -180,9 +318,9 @@ pub(crate) fn try_export(
     else {
         return Ok(None);
     };
-    if !crate::owned_lossless::request(transform)
-        .is_some_and(|request| crate::owned_ffv1_export::supports(&bridge.path, &request))
-    {
+    if !crate::owned_lossless::request(transform).is_some_and(|request| {
+        crate::owned_ffv1_export::supports_with_options(&bridge.path, &request, Some(options))
+    }) {
         return Ok(None);
     }
     let private = Directory::new()?;
@@ -210,13 +348,35 @@ pub(crate) fn try_export(
         &stage,
     )?;
     drop(bridge);
+    let effective_packet_bytes = options
+        .max_packet_bytes
+        .min(options.max_controlled_bytes.unwrap_or(usize::MAX));
+    let memory_packets = options
+        .max_controlled_bytes
+        .map(|limit| limit / std::mem::size_of::<crate::owned_webm::Packet>());
+    let mut limits = crate::owned_webm::Limits::default();
+    limits.packet_bytes = limits.packet_bytes.min(effective_packet_bytes);
+    if let Some(maximum) = memory_packets {
+        limits.packets = limits.packets.min(maximum);
+    }
+    let map_packet_limit = |error: crate::owned_webm::Error| {
+        if memory_packets.is_some_and(|max| max < crate::owned_webm::Limits::default().packets)
+            && error
+                .to_string()
+                .contains("WebM packet count exceeds limit")
+        {
+            "controlled memory budget exceeded: Matroska packet index limit".to_string()
+        } else {
+            error.to_string()
+        }
+    };
     let mut video = crate::owned_webm::WebmReader::open(
         BufReader::new(File::open(&video_path).map_err(|e| e.to_string())?),
-        Default::default(),
+        limits,
     )
-    .map_err(|e| e.to_string())?;
-    video.restrict_packet_bytes(options.max_packet_bytes);
-    video.scan_all().map_err(|e| e.to_string())?;
+    .map_err(map_packet_limit)?;
+    video.restrict_packet_bytes(effective_packet_bytes);
+    video.scan_all().map_err(map_packet_limit)?;
     let mut vt = video
         .tracks
         .first()
@@ -329,14 +489,31 @@ pub(crate) fn try_export(
         output_indices[source] = Some(output);
     }
     let mut packets = Vec::new();
-    packets
-        .try_reserve_exact(
-            video
+    let schedule_len = video
+        .packets
+        .len()
+        .checked_add(input.count as usize)
+        .ok_or("packet schedule overflow")?;
+    if let Some(limit) = options.max_controlled_bytes {
+        let mut plan_bytes = 0usize;
+        for plan in plans.iter().flatten() {
+            plan_bytes = plan
                 .packets
-                .len()
-                .checked_add(input.count as usize)
-                .ok_or("packet schedule overflow")?,
-        )
+                .capacity()
+                .checked_mul(std::mem::size_of::<crate::owned_mp4_matroska::PacketTime>())
+                .and_then(|n| plan_bytes.checked_add(n))
+                .ok_or("MP4 packet plan memory overflow")?;
+        }
+        let schedule_bytes = schedule_len
+            .checked_mul(std::mem::size_of::<(i128, usize, usize)>())
+            .and_then(|n| n.checked_add(plan_bytes))
+            .ok_or("packet schedule overflow")?;
+        if schedule_bytes > limit {
+            return Err("controlled memory budget exceeded: multitrack MP4 packet schedule limit".into());
+        }
+    }
+    packets
+        .try_reserve_exact(schedule_len)
         .map_err(|_| "packet schedule allocation failed")?;
     for (index, packet) in video.packets.iter().enumerate() {
         if packet.pts_ns < 0 || packet.duration_ns.unwrap_or(vt.default_duration_ns) == 0 {

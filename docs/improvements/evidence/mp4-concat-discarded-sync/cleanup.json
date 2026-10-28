@@ -1,0 +1,25 @@
+{
+  "inactive_test_executables_removed": [
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_discarded_sync-f937d094691ef463",
+      "bytes": 31778408
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_discarded_sync-abfcd80bffbf3ec5",
+      "bytes": 30884840
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0",
+      "bytes": 33361392
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-86bfb01096c200e9",
+      "bytes": 30853120
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_mp4_concat-ca6aaa032ad58a97",
+      "bytes": 32259872
+    }
+  ],
+  "retained": "all synthetic fixture bytes, sources, regressions, raw logs and compiler diagnostic"
+}

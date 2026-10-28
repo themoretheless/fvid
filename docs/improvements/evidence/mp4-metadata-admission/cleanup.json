@@ -1,0 +1,150 @@
+{
+  "deleted_inactive_test_artifacts": [
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_metadata_admission-b0a48d8507aac8f0",
+      "bytes": 25665384
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_metadata_admission-b0a48d8507aac8f0.d",
+      "bytes": 384
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_metadata_admission-b0a48d8507aac8f0.mp4_metadata_admission.a1cc000e64ef7299-cgu.0.rcgu.o",
+      "bytes": 511248
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_metadata_admission-887ec9be15138c2e",
+      "bytes": 17761928
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_metadata_admission-887ec9be15138c2e.mp4_metadata_admission.8770f336a10d7e3c-cgu.0.rcgu.o",
+      "bytes": 214312
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_metadata_admission-887ec9be15138c2e.d",
+      "bytes": 384
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0",
+      "bytes": 33344832
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0.mp4_concat_selected_compatibility.9a36a40fd991f5c0-cgu.03.rcgu.o",
+      "bytes": 374936
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0.mp4_concat_selected_compatibility.9a36a40fd991f5c0-cgu.11.rcgu.o",
+      "bytes": 437280
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0.d",
+      "bytes": 439
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0.mp4_concat_selected_compatibility.9a36a40fd991f5c0-cgu.13.rcgu.o",
+      "bytes": 494256
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0.mp4_concat_selected_compatibility.9a36a40fd991f5c0-cgu.01.rcgu.o",
+      "bytes": 573776
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0.mp4_concat_selected_compatibility.9a36a40fd991f5c0-cgu.05.rcgu.o",
+      "bytes": 602256
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0.mp4_concat_selected_compatibility.9a36a40fd991f5c0-cgu.09.rcgu.o",
+      "bytes": 530136
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0.mp4_concat_selected_compatibility.9a36a40fd991f5c0-cgu.15.rcgu.o",
+      "bytes": 408024
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0.mp4_concat_selected_compatibility.9a36a40fd991f5c0-cgu.07.rcgu.o",
+      "bytes": 429920
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0.mp4_concat_selected_compatibility.9a36a40fd991f5c0-cgu.02.rcgu.o",
+      "bytes": 622176
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0.mp4_concat_selected_compatibility.9a36a40fd991f5c0-cgu.10.rcgu.o",
+      "bytes": 405016
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0.mp4_concat_selected_compatibility.9a36a40fd991f5c0-cgu.12.rcgu.o",
+      "bytes": 941608
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0.mp4_concat_selected_compatibility.9a36a40fd991f5c0-cgu.00.rcgu.o",
+      "bytes": 467280
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0.mp4_concat_selected_compatibility.9a36a40fd991f5c0-cgu.04.rcgu.o",
+      "bytes": 661704
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0.mp4_concat_selected_compatibility.9a36a40fd991f5c0-cgu.08.rcgu.o",
+      "bytes": 346088
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0.mp4_concat_selected_compatibility.9a36a40fd991f5c0-cgu.14.rcgu.o",
+      "bytes": 245480
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0.mp4_concat_selected_compatibility.9a36a40fd991f5c0-cgu.06.rcgu.o",
+      "bytes": 452680
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_remux_plan_capacity-082f1463f5b53749",
+      "bytes": 21159752
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_remux_plan_capacity-082f1463f5b53749.mp4_remux_plan_capacity.403e064b03ccf94c-cgu.0.rcgu.o",
+      "bytes": 83776
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_remux_plan_capacity-082f1463f5b53749.d",
+      "bytes": 389
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_remux_plan_capacity-af1778a02c58bde5",
+      "bytes": 20739176
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_remux_plan_capacity-af1778a02c58bde5.d",
+      "bytes": 389
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_remux_plan_capacity-af1778a02c58bde5.mp4_remux_plan_capacity.e22495cea4cb2d23-cgu.0.rcgu.o",
+      "bytes": 83840
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_remux_prefix_budget_regression-3fb4d919b9661cfc",
+      "bytes": 33966736
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_remux_prefix_budget_regression-3fb4d919b9661cfc.d",
+      "bytes": 444
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_remux_prefix_budget_regression-3fb4d919b9661cfc.mp4_remux_prefix_budget_regression.8df570fc2f983203-cgu.0.rcgu.o",
+      "bytes": 224840
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_remux_prefix_budget_regression-c17521943e038093",
+      "bytes": 33083952
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_remux_prefix_budget_regression-c17521943e038093.d",
+      "bytes": 444
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_remux_prefix_budget_regression-c17521943e038093.mp4_remux_prefix_budget_regression.d8fe37b142e917e0-cgu.0.rcgu.o",
+      "bytes": 227088
+    }
+  ],
+  "active_families_skipped": [],
+  "retained": "all sources, fixtures, generators, proof snapshots and raw test logs"
+}

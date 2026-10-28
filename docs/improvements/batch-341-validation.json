@@ -1,0 +1,23 @@
+{
+  "batch": 341,
+  "id": "FVID-0348",
+  "title": "Enforce three-frame working-set and pre-export packet/memory budgets in owned_xfade and clamp ADTS PCE bootstrap packet limits to max_packet_bytes and max_controlled_bytes in owned_concat, native_audio_mix::concat, and native_loudnorm",
+  "status": "accepted",
+  "source": [
+    "crates/fvid-media/src/owned_xfade.rs",
+    "crates/fvid-media/src/owned_concat.rs",
+    "src/native_audio_mix/concat.rs",
+    "src/native_loudnorm.rs"
+  ],
+  "regression": "tests/mp4_audio_metadata_admission.rs",
+  "pre_edit_snapshot": "docs/improvements/snapshots/batch-341-pre-edit",
+  "evidence": {
+    "before": "docs/improvements/evidence/batch-341-acceptance-before.txt",
+    "after": "docs/improvements/evidence/batch-341-acceptance-after.txt",
+    "related": "docs/improvements/evidence/batch-341-related-after.txt"
+  },
+  "summary": {
+    "before": "In `crates/fvid-media/src/owned_xfade.rs`, `visit_y4m_counted` retains three decoded frame buffers simultaneously (`primary.current`, `secondary.current`, and `output = current.data.clone()`), but `plan_xfade` and `write_y4m_ffv1_counted` only checked `frame_len.saturating_mul(2) > limit`, and `export_y4m_ffv1_counted` opened the atomic Matroska output file before checking `frame_len > options.max_packet_bytes` or `frame_len.saturating_mul(3) > limit`. In addition, `owned_concat::open_readers` (`crates/fvid-media/src/owned_concat.rs:77`) called `StreamReader::open` (with `DEFAULT_MAX_PACKET_BYTES`) before `restrict_packet_bytes`, `segment_packet_count` (`src/native_audio_mix/concat.rs:108`) called `StreamReader::open_with_packet_limit(input, usize::MAX)` without clamping to `options.max_packet_bytes` or `options.max_controlled_bytes` or checking `options.cancel`, and `native_loudnorm::try_plan` / `try_apply` (`src/native_loudnorm.rs`) did not clamp the ADTS first-frame PCE preflight check to `options.max_controlled_bytes` or forward `max_packet_bytes` and `max_packets` to `owned_container_loudnorm::supports_plan`.",
+    "after": "Check `frame_len.saturating_mul(3) > limit` in `plan_xfade`, `write_y4m_ffv1_counted`, and before `export_atomic` in `export_y4m_ffv1_counted`, open ADTS `StreamReader::open_with_packet_limit` with `options.max_packet_bytes.min(options.max_controlled_bytes.unwrap_or(usize::MAX))` in `owned_concat::open_readers` and `native_audio_mix::concat::segment_packet_count`, and clamp the ADTS first-frame preflight to `options.max_controlled_bytes` while forwarding `max_packet_bytes`, `max_packets`, and `cancel` in `native_loudnorm`. Twelve integration tests in `mp4_audio_metadata_admission` pass."
+  }
+}

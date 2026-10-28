@@ -19,6 +19,7 @@ struct Input {
     mask: u32,
 }
 pub(crate) fn recognizes(path: &Path, options: &CopyOptions) -> Result<bool> {
+    check(options)?;
     if !crate::owned_wave_inspect::is_wave(path).map_err(|e| e.to_string())? {
         return Ok(false);
     }
@@ -30,10 +31,10 @@ pub(crate) fn recognizes(path: &Path, options: &CopyOptions) -> Result<bool> {
     .map_err(|e| e.to_string())
 }
 fn open(path: &Path, options: &CopyOptions) -> Result<(Input, Vec<u8>)> {
+    check(options)?;
     if !crate::owned_audio_export::simple_options(options) {
         return Err("WAVE has only stream 0".into());
     }
-    check(options)?;
     admit(256 * 1024, options)?;
     let mut file = File::open(path).map_err(|e| e.to_string())?;
     let law = crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
@@ -44,19 +45,30 @@ fn open(path: &Path, options: &CopyOptions) -> Result<(Input, Vec<u8>)> {
     if !(1..=255).contains(&shape.channels) {
         return Err("owned WAVE output supports 1..255 channels".into());
     }
+    if options.max_packet_bytes < usize::from(shape.channels) {
+        return Err("G.711 channel frame exceeds byte limit".into());
+    }
     let metadata =
         crate::owned_wave_inspect::info_chunks_bytes(&mut file, &shape, options.cancel.as_ref())
             .map_err(|e| e.to_string())?;
+    let wave_meta_bytes =
+        crate::owned_wave_metadata::wave_metadata_working_bytes(metadata, options)?;
     admit(
         usize::from(shape.channels)
             .checked_mul(2048 * 9)
-            .and_then(|n| metadata.checked_mul(2).and_then(|m| n.checked_add(m)))
+            .and_then(|n| n.checked_add(wave_meta_bytes))
             .and_then(|n| n.checked_add(256 * 1024))
             .ok_or("G.711 decode reserve overflow")?,
         options,
     )?;
     let info = crate::owned_wave_inspect::info_chunks(&mut file, &shape, options.cancel.as_ref())
         .map_err(|e| e.to_string())?;
+    if options
+        .max_controlled_bytes
+        .is_some_and(|max| info.len() > max)
+    {
+        return Err("controlled memory budget exceeded: WAVE metadata limit".into());
+    }
     let format = if law == fvid_codecs::g711::Law::ALaw {
         PcmFormat::ALaw
     } else {
@@ -89,7 +101,66 @@ pub(crate) fn descriptor(
     path: &Path,
     options: &CopyOptions,
 ) -> Result<(u32, u16, u32, &'static str, u64)> {
+    descriptor_with_transform(path, None, options)
+}
+pub(crate) fn descriptor_with_transform(
+    path: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u32, &'static str, u64)> {
     let (input, _) = open(path, options)?;
+    if input.shape.sample_frames == 0 {
+        return Err("no decoded audio samples or invalid channel count (nonempty input required)".into());
+    }
+    let channels = usize::from(input.shape.channels);
+    let window = 2048.min(options.max_packet_bytes / channels);
+    if window == 0 {
+        return Err("G.711 channel frame exceeds byte limit".into());
+    }
+    let rate = input.shape.sample_rate;
+    let until = transform
+        .and_then(|t| crate::owned_adts_export::decoded_prefix(t, rate))
+        .map(|(_, end)| {
+            u64::try_from((end.as_nanos() * u128::from(rate)).div_ceil(1_000_000_000))
+                .map_err(|_| "G.711 PCM prefix overflow".to_string())
+        })
+        .transpose()?;
+    let end = until.map_or(input.shape.sample_frames, |n| {
+        n.min(input.shape.sample_frames)
+    });
+    let frames_read = options.max_packets.map_or(end, |pkts| {
+        end.min(pkts.saturating_mul(window as u64))
+    });
+    if frames_read == 0 {
+        return Err("no decoded audio samples or invalid channel count (nonempty input required)".into());
+    }
+    if let Some(transform) = transform {
+        if let Some((from, to)) = transform.interval {
+            let out_rate = u128::try_from(transform.sample_rate.unwrap_or(rate as i32))
+                .map_err(|_| "invalid output sample rate")?;
+            let output_frames = usize::try_from(
+                u128::from(frames_read)
+                    .checked_mul(out_rate)
+                    .ok_or("audio interval overflow")?
+                    .div_ceil(u128::from(rate)),
+            )
+            .map_err(|_| "audio interval overflow")?;
+            let boundary = |time: i64| -> Result<usize> {
+                usize::try_from(
+                    (time as u128)
+                        .checked_mul(out_rate)
+                        .ok_or("audio interval overflow")?
+                        .div_ceil(1_000_000),
+                )
+                .map(|n| n.min(output_frames))
+                .map_err(|_| "audio interval overflow".into())
+            };
+            let (first, last) = (boundary(from)?, boundary(to)?);
+            if last <= first {
+                return Err("no decoded audio samples".into());
+            }
+        }
+    }
     let mut file = File::open(path).map_err(|e| e.to_string())?;
     let law = crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())
         .map_err(|e| e.to_string())?
@@ -104,7 +175,7 @@ pub(crate) fn descriptor(
         input.shape.channels,
         input.mask,
         codec,
-        input.shape.sample_frames,
+        frames_read,
     ))
 }
 pub(crate) fn supports(
@@ -112,18 +183,18 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    match open(path, options) {
-        Ok((input, _)) => {
+    match descriptor_with_transform(path, Some(transform), options) {
+        Ok((_rate, channels, mask, _codec, _frames)) => {
             let target = transform
                 .channels
-                .unwrap_or(i32::from(input.shape.channels));
-            target == i32::from(input.shape.channels)
+                .unwrap_or(i32::from(channels));
+            target == i32::from(channels)
                 || (matches!(target, 1 | 2)
                     && crate::owned_pcm_channels::rematrix_layout_supported(
-                        input.shape.channels,
-                        input.mask,
+                        channels,
+                        mask,
                     ))
-                || (input.shape.channels <= 2 && (1..=8).contains(&target))
+                || (channels <= 2 && (1..=8).contains(&target))
         }
         Err(error) => error.starts_with("controlled memory budget exceeded:"),
     }
@@ -198,6 +269,7 @@ pub(crate) fn apply(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
+    check(options)?;
     if destination.symlink_metadata().is_ok() {
         return Err("destination already exists".into());
     }

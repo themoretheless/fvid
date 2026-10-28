@@ -1,0 +1,14 @@
+{
+  "batch": 366,
+  "ids": ["FVID-0373"],
+  "snapshot": "docs/improvements/snapshots/batch-366-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-366-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-366-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-366-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission audio_mix_merge_concat_native_loudnorm_and_multitrack_supports_enforce_options_before_input_count_or_args",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 33,
+  "failed": 0
+}

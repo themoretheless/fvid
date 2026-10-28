@@ -1,0 +1,24 @@
+{
+  "batch": 317,
+  "accepted_ids": [
+    "FVID-0323"
+  ],
+  "status": "accepted",
+  "problem": "Controlled-memory admission for the top-level MP4 span table occurred only after scanning the complete input.",
+  "before": "The valid padded VP9 fixture read 80032 bytes of box headers before refusing a 65536-byte budget. Exact original-source isolated probe fails the early-admission assertion.",
+  "after": "The same budget refuses before any box read or output; sufficient budget preserves all bytes and native software playback remains exact.",
+  "evidence": "evidence/mp4-relocation-admission-audit/status.json",
+  "tests_run": [
+    "cargo test --locked --offline --test mp4_relocation_admission",
+    "cargo test --locked --offline --features player --test mp4_relocation_admission --test native_mp4_relocate"
+  ],
+  "limits": "Admission checks the existing controlled-memory bookkeeping estimate; it does not claim a physical RSS limit or benchmark speedup.",
+  "capacity_follow_up": {
+    "evidence": "docs/improvements/evidence/mp4-faststart-capacity/status.json",
+    "before": "Exact-source instrumentation found 10004 entries with capacity 16384, size 32; storage plus copy buffer 589824 bytes exceeds accepted 580000-byte limit. The actual default regression on frozen source had 2 passing controls and 1 failing capacity refusal.",
+    "after": "Admit explicit amortized capacity before reserve, account actual capacity, avoid an unaccounted moov-index vector and bound order storage. The refusal now precedes complete metadata scanning; generous-budget byte copy and native playback remain valid.",
+    "results": "Default 16 passed; player 17 passed; isolated after 3 passed. No failed or newly ignored tests.",
+    "baseline_workflow": "Redundant Cargo baseline was cancelled while queued, with no child processes, after frozen exact-source actual regression proved the defect. Full Cargo after-fix tests were retained and passed.",
+    "limits": "Controlled allocation bookkeeping, not a physical RSS or throughput claim. The uncontrolled path retains its ordinary span growth."
+  }
+}

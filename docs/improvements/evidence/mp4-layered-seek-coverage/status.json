@@ -1,0 +1,11 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0396"
+  ],
+  "before": "Owned independent layered HEVC AUs with ctts PTS 0,2,1,3 reach native POC-ordered SingleView without the common MP4 PTS reorder queue. Sequential playback first exposes interval (0,2,25), then refuses non-increasing timestamps. Both new tests fail; the ordered 0,1,2,3 companion passes its assertions before the reordered case fails.",
+  "after": "Select the existing common bounded presentation/seek pipeline when a layered track has decreasing container PTS. The monotonic layer-selection route remains unchanged. Two focused and 26 related player tests pass: four exact oracle-matched frames at 25Hz/160ms, ten seeks per file matching sequential RGB/intervals, rewind and repeated EOF, layered HDR/IRAP/metadata navigation and mixed-description controls.",
+  "fixture_regeneration": "Both MP4 hashes reproduce independently using the owned generator; no FFmpeg/network or private media.",
+  "harness_correction": "The first additional oracle assertion incorrectly compared one repeated seed picture with the complete three-picture seed oracle. The final assertion checks exact 6144-byte first-picture pixels; the failed harness log is retained.",
+  "limits": "Player/software path qualified. No hardware, GUI, performance or RSS claim. Direct LayeredMp4VideoReader retains its documented codec POC ordering; the common NativeReader presents container PTS."
+}

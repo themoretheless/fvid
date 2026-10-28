@@ -2,10 +2,36 @@
 use fvid_media_info::{MediaInfo, StreamInfo};
 use std::path::Path;
 pub fn probe_flac(path: &Path) -> Result<MediaInfo, String> {
+    probe_flac_with_options(path, &Default::default())
+}
+
+pub fn probe_flac_with_options(
+    path: &Path,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo, String> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
     if !crate::owned_raw_flac::recognizes(path)? {
         return Err("input does not have a bare FLAC audio signature".into());
     }
-    let source = crate::owned_raw_flac::open(path, &Default::default())?;
+    let source = crate::owned_raw_flac::open(path, options)?;
+    if options
+        .max_packets
+        .is_some_and(|max| (source.frames.len() as u64) > max)
+    {
+        return Err("FLAC packet count exceeds packet limit".into());
+    }
     let comments = crate::owned_flac_layout::vorbis_comments(source.metadata_blocks())
         .map_err(|e| e.to_string())?;
     let (metadata, stream_metadata) = crate::owned_flac_layout::probe_metadata_from_entries(
