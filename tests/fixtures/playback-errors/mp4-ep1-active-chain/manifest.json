@@ -1,0 +1,39 @@
+{
+  "cases": [
+    {
+      "name": "ld-sbr-mono-eight-mono",
+      "video": "mono-eight-mono.mp4",
+      "equivalent": "unused-tail-config.mp4",
+      "gap": "active-gap.mp4",
+      "malformed": "missing-active-tail.mp4",
+      "controls": [
+        "control-0.mp4",
+        "control-1.mp4"
+      ],
+      "golden": [
+        "control-0.f32le",
+        "control-1.f32le"
+      ],
+      "active": [
+        4,
+        27,
+        4
+      ],
+      "channels": [
+        1,
+        8,
+        1
+      ],
+      "frames": [
+        5760,
+        6144,
+        5760
+      ],
+      "edges": [
+        5760,
+        11904
+      ]
+    }
+  ],
+  "provenance": "Own LD-SBR mono/8-channel/mono epochs; static canonical dpnd union, four-stream active prefix then 27 streams then four. Tail tracks only have middle-epoch AUs. Independent scalar native PCM, exact bits and rational per-track clocks. No private media, external codec, process or network."
+}

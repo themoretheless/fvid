@@ -15,6 +15,7 @@ struct Stream {
     timescale: u32,
     configuration: Vec<u8>,
     descriptions: Vec<([u8; 4], Vec<u8>)>,
+    used_descriptions: Vec<bool>,
     samples: Vec<((i64, u32), usize)>,
 }
 pub struct Group {
@@ -250,6 +251,7 @@ impl Group {
                 .checked_mul(std::mem::size_of::<((i64, u32), usize)>())
                 .ok_or_else(|| invalid("EP1 MP4 memory estimate overflow"))?)?;
             add(track.configuration.len())?;
+            add(track.sample_descriptions.len())?;
             add(track
                 .sample_descriptions
                 .len()
@@ -323,6 +325,11 @@ impl Group {
             for description in &track.sample_descriptions {
                 descriptions.push((description.codec, description.configuration.clone()));
             }
+            let mut used_descriptions = Vec::new();
+            used_descriptions
+                .try_reserve_exact(descriptions.len())
+                .map_err(|_| invalid("EP1 MP4 description allocation failed"))?;
+            used_descriptions.resize(descriptions.len(), false);
             let mut samples = Vec::new();
             samples
                 .try_reserve_exact(track.samples.len())
@@ -333,6 +340,14 @@ impl Group {
                     .samples
                     .get(i)
                     .ok_or_else(|| invalid("EP1 MP4 sample index out of range"))?;
+                let slot = sample
+                    .description_index
+                    .checked_sub(1)
+                    .ok_or_else(|| invalid("EP1 MP4 zero sample description"))?
+                    as usize;
+                *used_descriptions
+                    .get_mut(slot)
+                    .ok_or_else(|| invalid("EP1 MP4 unknown sample description"))? = true;
                 if checked_description != Some(sample.description_index) {
                     let setup = track
                         .description_for_sample(i)
@@ -373,6 +388,7 @@ impl Group {
                 timescale: track.timescale,
                 configuration: track.configuration.clone(),
                 descriptions,
+                used_descriptions,
                 samples,
             });
             let mut next = None;
@@ -457,6 +473,7 @@ impl Group {
                 .separate_esc,
         )
     }
+    /// Maximum stored chain width; each frame can select a shorter active prefix.
     pub fn stream_count(&self) -> usize {
         self.streams.len()
     }
@@ -467,6 +484,9 @@ impl Group {
             .checked_mul(std::mem::size_of::<Stream>())
             .ok_or_else(|| invalid("EP1 MP4 retained payload size overflow"))?;
         for stream in &self.streams {
+            total = total
+                .checked_add(stream.used_descriptions.capacity())
+                .ok_or_else(|| invalid("EP1 MP4 retained payload size overflow"))?;
             total = total
                 .checked_add(
                     stream
@@ -494,9 +514,10 @@ impl Group {
         }
         Ok(total)
     }
-    /// Read the complete dependency group at the selected root sample's exact
-    /// rational source time. A missing or differently timed AU is never padded
-    /// or substituted. No decoder state is touched by partial I/O failure.
+    /// Read the active dependency prefix at the selected root's exact time.
+    /// A tail which never uses the root's active ASC may be absent. Missing AUs
+    /// from a stream using that ASC, clock mismatches and active chain gaps
+    /// refuse; no padding or substitution changes decoder input or history.
     pub fn read_frame<R: Read + Seek>(
         &self,
         reader: &mut Mp4Reader<R>,
@@ -538,6 +559,7 @@ impl Group {
         output
             .try_reserve_exact(self.streams.len())
             .map_err(|_| invalid("EP1 MP4 AU table allocation failed"))?;
+        let mut inactive_tail = false;
         for stream in &self.streams {
             check().map_err(|e| invalid(&e.to_string()))?;
             let track = reader
@@ -559,10 +581,42 @@ impl Group {
                     "EP1 MP4 group belongs to different track configuration",
                 ));
             }
-            let found = stream
-                .samples
-                .binary_search_by_key(&time, |entry| entry.0)
-                .map_err(|_| invalid("EP1 MP4 missing simultaneous ESC access unit"))?;
+            let found = match stream.samples.binary_search_by_key(&time, |entry| entry.0) {
+                Ok(found) => {
+                    if inactive_tail {
+                        return Err(invalid("EP1 MP4 active dependency chain has a gap"));
+                    }
+                    found
+                }
+                Err(_) => {
+                    let mut required = false;
+                    for (i, saved) in stream.descriptions.iter().enumerate() {
+                        if !stream.used_descriptions[i] {
+                            continue;
+                        }
+                        let live = track
+                            .sample_descriptions
+                            .get(i)
+                            .ok_or_else(|| invalid("EP1 MP4 unknown sample description"))?;
+                        if live.codec != saved.0 || live.configuration != saved.1 {
+                            return Err(invalid(
+                                "EP1 MP4 group belongs to different track configuration",
+                            ));
+                        }
+                        if aac_stream_descriptor(&saved.1)?.asc == root_asc {
+                            required = true;
+                        }
+                    }
+                    if required {
+                        return Err(invalid("EP1 MP4 missing simultaneous ESC access unit"));
+                    }
+                    // Only an inactive tail may disappear. The root's current
+                    // ASC has never been used by this stream; unused entries do
+                    // not turn it into a required AU for that configuration.
+                    inactive_tail = true;
+                    continue;
+                }
+            };
             let index = stream.samples[found].1;
             let sample = track
                 .samples

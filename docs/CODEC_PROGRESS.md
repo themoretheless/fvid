@@ -1,3 +1,60 @@
+## Active ESC chain width across LD-SBR layout epochs, 2026-10-28
+
+The new short own mono/8-channel/mono movie first reproduced `EP1 MP4 missing
+simultaneous ESC access unit` on its first mono frame. A static dpnd union had
+27 streams, although only its four-stream prefix supplied mono frames. The other
+23 tracks supplied AUs only during the middle 8-channel configuration.
+
+Group now records which sample descriptions are actually used. At an exact root
+timestamp, a missing tail stream may be inactive only when none of its used ASCs
+matches the root's active ASC. Unused matching table entries do not require an
+AU. A missing stream which does use the active ASC still refuses; a subsequent
+present stream after an inactive node refuses as an active-chain gap. Present
+AUs retain exact ASC, bit-boundary, dependency and rational-clock checks. Live
+used-description metadata is checked against the group's saved configurations
+before an inactive decision. Admission and retained-memory accounting include the
+new used-description table. stream_count documents maximum union width; a frame
+may return a shorter active prefix.
+
+The file binding remains a static track-reference graph. ISO/IEC 14496-14:2020
+stores ES_ID and streamDependenceFlag as zero, derives ES IDs from track IDs and
+uses dpnd references for dependencies; multiple sample descriptions represent
+ES_DescriptorUpdate operations. This milestone schedules an active prefix inside
+that binding; it does not put changing parent IDs into stored ESDescriptors.
+Primary reference: [ISO/IEC 14496-14:2020](https://www.joak.org/_media/public%3Ait%3Aiso_iec_14496-14-2020.pdf).
+
+The two acceptance variants exercise 4/27/4 active streams, 480/512/480 windows,
+native 1/8/1 output channels, exact per-track rational clocks and a 24 kHz movie
+clock. One variant adds unused mono descriptions to every tail track. Native
+PCM for all three fresh epochs agrees with the independent scalar references
+within 1e-7. AudioStream and worker capture check native PCM, exact packet clocks,
+frame-edge/repeated/EOF/past-EOF seeks and rewind after live partial playback.
+The backend capture verifies mono and 8-channel routing, including the expected
+source role masks (0x4 and 0xff). Missing required last AUs and internal
+activity gaps have specific refusal controls after valid initial mono groups.
+
+Default export retains the initial mono destination; explicit stereo export is
+also tested. Owned/public default output, equivalent variants and repeated crops
+across both epoch boundaries compare byte-for-byte on the same normalization
+path. Static control exports use an existing f32 fold while changing geometry
+uses a f64 matrix: their numerical crosscheck uses 1e-9 (observed worst difference
+4.4e-11), rather than claiming different floating-point routes are bit-identical.
+The independent native PCM checks and all prior regression checks remain intact.
+
+All nine artifacts / 334569 bytes regenerate byte-exact with process/socket
+creation forbidden and exact directory inventory. All five earlier EP1 corpora
+remain byte-identical. The 56 selected integration checks, 1623 root/media unit
+tests (29 ignored), and all-test-target compilation pass offline with
+--no-default-features --features player. Worker capture covers 186 programmes,
+including the two variable-layout activity variants. No external codec or private
+media is used; physical output is not inferred from software capture.
+
+Still open: same-ASC ESC repartitioning, grouped successive instances within one
+AU, arbitrary OD/stream-map parent updates, fragmented activity-tail variants,
+external SL sources and broader codec/physical-output conformance. This closes
+the exercised indexed MP4 active-prefix/layout changes, not the full codec-gap
+goal.
+
 ## Bidirectional ordinary/EP1 transport epochs and exact trimmed clocks, 2026-10-28
 
 A short own ordinary/EP1/ordinary movie first reproduced `EP1 requires separately

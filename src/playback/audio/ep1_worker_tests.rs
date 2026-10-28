@@ -58,7 +58,12 @@ fn check_corpus(corpus: &str) {
                 .into_iter()
                 .flatten(),
         )
-        .chain(m.get("ld_cases").and_then(|v| v.as_array()).into_iter().flatten());
+        .chain(
+            m.get("ld_cases")
+                .and_then(|v| v.as_array())
+                .into_iter()
+                .flatten(),
+        );
     for case in cases {
         let bytes = std::fs::read(root.join(case["video"].as_str().unwrap())).unwrap();
         let mut full = Vec::new();
@@ -110,8 +115,11 @@ fn check_corpus(corpus: &str) {
         assert_eq!(actual, full, "{} initial worker", case["name"]);
         check(&captured.lock().unwrap(), &full, 0, rate, stride);
         let mut seeks = vec![13i64, 0, 7, 7, (full.len() / stride) as i64, 13, 0];
-        if let Some(edges) = case.get("edges").and_then(|v|v.as_array()) {
-            for edge in edges {let edge=edge.as_i64().unwrap();seeks.extend([edge-1,edge,edge+1]);}
+        if let Some(edges) = case.get("edges").and_then(|v| v.as_array()) {
+            for edge in edges {
+                let edge = edge.as_i64().unwrap();
+                seeks.extend([edge - 1, edge, edge + 1]);
+            }
         }
         for sample in seeks {
             // Leave a live decoder and queue before applying the next seek.
@@ -163,5 +171,162 @@ fn check_corpus(corpus: &str) {
             .flat_map(|p| p.data.iter().copied())
             .collect();
         assert_eq!(actual, full, "{} worker rewind", case["name"]);
+    }
+}
+
+struct ActiveChainCapture {
+    channels: u16,
+    packets: Arc<Mutex<Vec<(crate::audio::AudioPacket, u16)>>>,
+}
+impl crate::audio::AudioBackend for ActiveChainCapture {
+    fn start(&mut self, spec: crate::audio::AudioSpec) -> Result<(), crate::audio::AudioError> {
+        self.channels = spec.channels;
+        Ok(())
+    }
+    fn reconfigure(
+        &mut self,
+        spec: crate::audio::AudioSpec,
+        router: Option<fvid_media::owned_stereo_router::StereoRouter>,
+        _: Duration,
+        _: bool,
+    ) -> Result<(), crate::audio::AudioError> {
+        assert_eq!(spec.sample_rate, 48000);
+        assert!(matches!(spec.channels, 1 | 8));
+        let router = router.expect("native AAC must retain its speaker routing");
+        assert_eq!(router.input_channels(), spec.channels);
+        assert_eq!(
+            router.source_mask(),
+            Some(if spec.channels == 1 { 4 } else { 0xff })
+        );
+        self.channels = spec.channels;
+        Ok(())
+    }
+    fn push(&mut self, p: crate::audio::AudioPacket) -> Result<(), crate::audio::AudioError> {
+        assert!(p.data.len().is_multiple_of(usize::from(self.channels) * 4));
+        self.packets.lock().unwrap().push((p, self.channels));
+        Ok(())
+    }
+    fn position(&self) -> Duration {
+        Duration::ZERO
+    }
+    fn flush(&mut self, _: Duration) -> Result<(), crate::audio::AudioError> {
+        self.packets.lock().unwrap().clear();
+        Ok(())
+    }
+    fn pause(&mut self) -> Result<(), crate::audio::AudioError> {
+        Ok(())
+    }
+    fn resume(&mut self) -> Result<(), crate::audio::AudioError> {
+        Ok(())
+    }
+    fn stop(&mut self) -> Result<(), crate::audio::AudioError> {
+        Ok(())
+    }
+}
+#[test]
+fn active_esc_chain_worker_reconfigures_native_layout_and_seeks_between_all_epochs() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/mp4-ep1-active-chain");
+    let gold: Vec<_> = ["control-0.f32le", "control-1.f32le"]
+        .iter()
+        .map(|n| std::fs::read(root.join(n)).unwrap())
+        .collect();
+    for name in ["mono-eight-mono.mp4", "unused-tail-config.mp4"] {
+        let data = std::fs::read(root.join(name)).unwrap();
+        let stream = crate::playback_mp4_audio::Mp4AudioReader::open(
+            std::io::Cursor::new(data),
+            Default::default(),
+        )
+        .unwrap();
+        let scale = stream.timescale();
+        let decoder = stream.make_decoder().unwrap();
+        let output_configuration = Some((
+            crate::audio::AudioSpec {
+                sample_rate: 48000,
+                channels: 1,
+                format: crate::audio::SampleFormat::F32,
+            },
+            stream.stereo_router().unwrap(),
+        ));
+        let captured = Arc::new(Mutex::new(Vec::new()));
+        let (_tx, commands) = sync_channel(1);
+        let (events, _) = sync_channel(1);
+        let mut worker = Worker {
+            output_configuration,
+            reconfiguration: None,
+            output_needs_restart: false,
+            duration: Arc::new(Mutex::new(None)),
+            checkpoints: Vec::new(),
+            dolby_policy: Default::default(),
+            stream: Box::new(stream),
+            decoder,
+            backend: Box::new(ActiveChainCapture {
+                channels: 1,
+                packets: captured.clone(),
+            }),
+            commands,
+            events,
+            playing: true,
+            ended: false,
+            draining: false,
+            queued_frontier: Duration::ZERO,
+            generation: 0,
+            position: Arc::new(Mutex::new(Duration::ZERO)),
+        };
+        let check = |from: usize| {
+            let mut cursor = from.min(17664);
+            for (p, channels) in captured.lock().unwrap().iter() {
+                assert_eq!(
+                    u128::from(p.pts) * u128::from(p.timebase_num) * 48000,
+                    cursor as u128 * u128::from(p.timebase_den)
+                );
+                let phase = if cursor < 5760 {
+                    0
+                } else if cursor < 11904 {
+                    1
+                } else {
+                    2
+                };
+                let origin = [0, 5760, 11904][phase];
+                let end = [5760, 11904, 17664][phase];
+                assert_eq!(*channels, [1, 8, 1][phase]);
+                let stride = usize::from(*channels) * 4;
+                let frames = p.data.len() / stride;
+                assert!(frames > 0 && cursor + frames <= end);
+                let expected = &gold[usize::from(phase == 1)]
+                    [(cursor - origin) * stride..(cursor - origin + frames) * stride];
+                for (a, b) in p.data.chunks_exact(4).zip(expected.chunks_exact(4)) {
+                    assert!(
+                        (f32::from_le_bytes(a.try_into().unwrap())
+                            - f32::from_le_bytes(b.try_into().unwrap()))
+                        .abs()
+                            < 1e-7
+                    );
+                }
+                cursor += frames;
+            }
+            assert_eq!(cursor, 17664);
+        };
+        run(&mut worker);
+        check(0);
+        for sample in [
+            5759i64, 5760, 5761, 11903, 11904, 11905, 17664, 17665, 7, 7, 0,
+        ] {
+            assert!(worker.drain_commands(Some(Command::Rewind)));
+            for _ in 0..3 {
+                assert!(!matches!(
+                    worker.decode_next().0,
+                    Some(AudioEvent::Error(_))
+                ));
+            }
+            assert!(!worker.ended);
+            let ticks = (i128::from(sample) * i128::from(scale) / 48000) as i64;
+            assert!(worker.drain_commands(Some(Command::Seek(ticks))));
+            run(&mut worker);
+            check((u128::try_from(ticks).unwrap() * 48000).div_ceil(u128::from(scale)) as usize);
+        }
+        assert!(worker.drain_commands(Some(Command::Rewind)));
+        run(&mut worker);
+        check(0);
     }
 }
