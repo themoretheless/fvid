@@ -365,14 +365,25 @@ impl Timeline {
         if scale == 0 || self.timescale == 0 {
             return Err(bad("zero MP4 OD timescale"));
         }
-        let event = self
-            .events
-            .iter()
-            .rfind(|e| {
-                i128::from(e.pts) * i128::from(scale)
-                    <= i128::from(pts) * i128::from(self.timescale)
-            })
-            .ok_or_else(|| bad("MP4 OD has no initial event at source time"))?;
-        event.state.prefix(chain)
+        self.prefix_units(
+            chain,
+            i128::from(pts) * i128::from(self.timescale),
+            i128::from(scale),
+        )
+    }
+    /// Exact common-clock coordinates, including file edit-list offsets.
+    pub fn prefix_units(&self, chain: &[u32], at: i128, event_unit: i128) -> Result<usize> {
+        if event_unit <= 0 {
+            return Err(bad("zero MP4 OD timescale"));
+        }
+        for event in self.events.iter().rev() {
+            let time = i128::from(event.pts)
+                .checked_mul(event_unit)
+                .ok_or_else(|| bad("MP4 OD edit clock overflow"))?;
+            if time <= at {
+                return event.state.prefix(chain);
+            }
+        }
+        Err(bad("MP4 OD has no initial event at source time"))
     }
 }

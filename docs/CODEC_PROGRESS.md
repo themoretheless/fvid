@@ -1,3 +1,44 @@
+## LD-SBR OD/edit clock mapping, 2026-10-29
+
+A new own LD-SBR movie reproduces `MP4 OD edit mapping is not implemented`
+on the previous implementation. The reader now compiles the relation between
+root audio and OD source clocks over every presented root window. Arithmetic
+uses checked exact common-clock coordinates, including sub-root-tick OD offsets;
+it does not round an OD event into a neighboring audio frame. Empty root windows
+schedule silence. Nonempty root windows require an active covering OD edit.
+The edit scan is linear and allocates no additional heap storage. A single
+source-clock relation also covers native decoder preroll before cropped windows.
+
+There are 76 accepted twelve-frame programmes: 480/512 samples, mono/eight-channel,
+three OD update forms, indexed/fragmented/hybrid storage, with absent or retained
+inactive ESC tails. Seventy-two use initial silence, half-frame crop and repeated
+source windows, with different root/OD edit partitions; four isolate a one-OD-tick
+CTS/edit offset without root edits. Tests verify the actual track edits and OD
+PTS, exact half-root-tick membership boundaries and unchanged source AU bytes.
+Complete owned/public exports, repeated ranges and separate transport agree;
+PCM agrees with saved independent scalar/CLDFB output within 1e-7. AudioStream
+playback, seeks around silence/crops/repeated windows/EOF/past-EOF and rewind
+preserve the complete expected PCM. The worker corpus includes all 76 cases.
+
+Sixteen explicit refusal movies cover OD silence overlapping active audio,
+uncovered tails, inconsistent repeated OD mappings and an independently edited
+root. These remain refusal tests: source-only decoding cannot yet select different
+membership for different presentations of the same source AU. That requires
+presentation-context dispatch, not a choice of the first occurrence.
+
+All 105 new artifacts / 2857317 bytes regenerate byte-exact with process and
+socket access forbidden; all thirteen earlier EP1 corpora remain byte-exact.
+Ordinary tests use saved own media without FFmpeg or network. Four new acceptance/
+refusal checks, six previous OD checks and 89 MP4 integration regressions pass
+(99 integration checks). Root/media unit suites pass: 1623 tests, 29 ignored,
+including captured worker navigation for 1966 programmes. Offline all-test
+compilation passes with `--no-default-features --features player`; the new
+integration binary has no FFmpeg/libav linkage. Playback qualification here
+uses AudioStream and captured worker output; physical-device listening and full
+LD-SBR conformance remain unproven. General presentation-dependent OD membership,
+URL/OCI/IPMP, multiple OD controllers, root deactivation and live OD refresh
+remain open. The codec-gap goal is still active.
+
 ## Same-ASC LD-SBR membership through MP4 OD events, 2026-10-29
 
 The own indexed mono LD-SBR reproducer failed at frame 0 before this change
