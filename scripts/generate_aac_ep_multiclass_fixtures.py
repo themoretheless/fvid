@@ -14,7 +14,7 @@ OUT=ROOT/'tests/fixtures/playback-errors/aac-ep-multiclass'
 PROFILES=[(0,0),(1,0)]+[(2,s)for s in range(4)]
 def window(n,h):return 3 if n<=2 else len(h)if n<=16 else 28
 def interleave(x,y,w):return ''.join(stage(list(x),list(y),w))
-def specs(number,family,kind,switch,mode):
+def specs(number,family,kind,switch,mode,rs_group=False):
     sets=[]
     for selected,count in enumerate([number,max(1,number-1),number]):
         order=list(range(count))
@@ -33,6 +33,15 @@ def specs(number,family,kind,switch,mode):
         last=order[-1]
         if classes[last]['length'][0]!='fixed'and mode not in ['truncated','declared']:classes[last]['length']=('band',0)
         sets.append(dict(classes=classes,order=order))
+    if rs_group:
+        for selected,item in enumerate(sets):
+            order=item['order']
+            for position,k in enumerate(order):
+                c=item['classes'][k]
+                c['fec']=1 if position==len(order)-1 or number==7 and position%3==2 else 2
+                c['rate']=(120 if selected==2 and position<3 else 2+selected+position//3)if number==7 else 2+selected
+                c['rate_escape']=False
+                c['crc']=[8,16,24,32][k%4];c['crc_escape']=False
     result=field(3,8)+field(kind,2)+'001'+'001'
     for s in sets:
         result+=field(len(s['classes']),6)
@@ -57,7 +66,7 @@ def partition(message,classes,family):
     assert at==len(message),(len(message),at,classes)
     return result
 
-def generate():
+def generate(rs_groups=False):
     files={};cases=[];malformed=[];blob=bytearray();plain_blob=bytearray()
     core=eld(True,[(n,24000,c,'base',0,0,False)for n in [480,512]for c in [1,2]])
     ldroot=ROOT/'tests/fixtures/playback-errors/aac-eld-sbr';lm=json.loads((ldroot/'manifest.json').read_text());lp=(ldroot/'packets.bin').read_bytes()
@@ -73,8 +82,10 @@ def generate():
             modes +=[(7,'mixed',2,4,v)for v in ['clean','corrected','declared','bad-crc','truncated']]
             modes +=[(3,'chain',t,s,'chain-corrected')for t,s in PROFILES]
             modes +=[(3,'mixed',t,s,v)for t,s in PROFILES for v in ['corrected','declared','bad-crc','truncated']]
+            if rs_groups:
+                modes=[(count,'rs',t,s,v)for count in [2,7]for t,s in [(0,0),(1,0),(2,0),(2,1),(2,3)]for v in ['clean','corrected','declared','bad-crc','truncated']]
             for count,family,kind,switch,mode in modes:
-                name=f'n{n}-c{channels}-ld{int(ld)}-classes{count}-{family}-i{kind}-s{switch}-{mode}';sets,ep=specs(count,family,kind,switch,mode);asc=packed(prefix+ep);files[name+'.asc']=asc;packets=[];frames=[]
+                name=f'n{n}-c{channels}-ld{int(ld)}-classes{count}-{family}-i{kind}-s{switch}-{mode}';sets,ep=specs(count,family,kind,switch,mode,rs_groups);asc=packed(prefix+ep);files[name+'.asc']=asc;packets=[];frames=[]
                 for i,row in enumerate(original['frames']):
                     a=row['offset'];raw=source[a:a+row['bytes']];message=''.join(f'{v:08b}'for v in raw);selected=i%3;s=sets[selected];classes=[dict(c)for c in s['classes']];order=s['order']
                     for k,c in enumerate(classes):
@@ -92,6 +103,15 @@ def generate():
                     for k,data in zip(indices,srcpc):coded[k]=data
                     for k,c in enumerate(classes):
                         if c['fec']and parts[k]:coded[k]=''.join(f'{v:08b}'for v in encode(packed(payloads[k]),c['rate']))
+                    if rs_groups:
+                        coded=['']*len(classes);members=[]
+                        for k in order:
+                            members.append(k)
+                            if classes[k]['fec']==1:
+                                joined=''.join(payloads[j]for j in members)
+                                coded[members[0]]=''.join(f'{v:08b}'for v in encode(packed(joined),classes[k]['rate']))if joined else ''
+                                members=[]
+                        assert not members
                     if mode=='corrected':
                         for k,c in enumerate(classes):
                             if coded[k]and(c['fec']or c['rate']==24):coded[k]=str(1-int(coded[k][0]))+coded[k][1:]
@@ -99,7 +119,8 @@ def generate():
                         assert len(parts[0])==8 and classes[0]['rate']==1 and classes[0]['crc']==0
                         coded[0]=coded[0][:-1]+str(1-int(coded[0][-1]))
                     if mode=='truncated'and i==3:
-                        assert len(coded[order[-1]])>=8;coded[order[-1]]=coded[order[-1]][:-8]
+                        last=order[0]if rs_groups else order[-1]
+                        assert len(coded[last])>=8;coded[last]=coded[last][:-8]
                     make=lambda stuff:''.join((field(len(parts[k]),classes[k]['length'][1])if classes[k]['length'][0]=='band'and classes[k]['length'][1]else '')+(field(classes[k]['rate_code'],3)if classes[k]['rate_escape']else '')+(field(classes[k]['crc_code'],3)if classes[k]['crc_escape']else '')for k in order)+field(stuff,3)
                     selector=header(field(selected,2));h=header(make(0));stuff=(-len(selector)-len(h)-sum(map(len,coded)))%8;h=header(make(stuff))
                     if mode=='corrected':selector=str(1-int(selector[0]))+selector[1:];h=h[:-1]+str(1-int(h[-1]))

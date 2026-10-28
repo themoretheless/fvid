@@ -1,5 +1,54 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## EP2 grouped shortened Reed-Solomon recovery, 2026-10-28
+
+The owned EP2 assembler now combines successive FEC=2 members with their
+terminating FEC=1 member before RS geometry and recursive interleaving. Each
+nonempty member contributes its own information and CRC; zero-length members
+contribute neither CRC nor parity. Recovered group information is split at
+member boundaries, each CRC is checked, and raw bits return to the original
+output slots. The group is one interleaving stage. Multiple independent groups
+can coexist with standalone classes. An until-end final member is inferred from
+the complete group's encoded size. No new retained decoder state is introduced.
+
+The implementation follows ISO/IEC 14496-3:2009 sections 1.8.3.1 and 1.8.4.7:
+FEC=2 continues a group, FEC=1 terminates it, and member correction capabilities
+must agree. This milestone requires equal member interleave switches and
+byte-aligned information/CRCs. Unequal switches remain an explicit refusal;
+escaped RS rates, source-frame concatenation, EP1/EP3 association and other
+codec tools are not claimed here.
+
+`scripts/generate_aac_ep_rs_group_fixtures.py` uses the shared owned fixture
+writer with an explicit group mode. Its 240 acceptance and 160 negative sources
+cover 480/512 ELD and LD-SBR, mono/stereo, natural/cyclic/reversed transmission
+orders, zero members, fixed/in-band/until-end lengths, independent groups and
+standalone RS classes, interleave modes 0/1/2 (switches 0/1/3), corrected wire
+errors and per-member CRCs. Correction capability 120 forces groups to span multiple shortened RS
+codewords in the high-protection controls. Saved synthetic MP4
+and Matroska movies contain no private media. CRC controls recompute valid RS
+parity around a wrong member CRC; declared truncations are cut before
+interleaving. All negative cases first decode three good packets.
+
+`tests/aac_ep_rs_group_playback.rs` enables native complete PCM and exact raw-AU
+acceptance, public/owned export, both containers and repeated ranges,
+AudioStream playback/drain, rewind, repeated/frame-edge/EOF seek, checkpoints
+and error rollback. Saved PCM comes from the independently authored ELD/LD-SBR
+sources. Rebuilding the original HEAD assembler with this acceptance test fails
+at the exact `EP RS concatenated class routing is not yet implemented` refusal,
+not an unrelated codec error. A separate transport unit test covers multiple
+groups, exact parity geometry, zero groups and malformed group boundaries.
+
+Qualification: 559 media unit tests (one ignored), 1,052 root library tests
+(26 ignored), and 62 ELD/CLDFB/LD-SBR/EP integration tests passed: 1,673 total,
+zero failures, 27 ignored. All seven grouped-RS acceptance tests passed over
+240 valid and 160 negative sources. The original multiclass corpus and the new
+corpus regenerate byte-identically with process/socket creation forbidden.
+Tests are offline with `--no-default-features --features player`; the test
+binary has no FFmpeg/libav linkage. This qualifies saved PCM and navigation,
+not physical speakers, throughput or universal EP/codec coverage.
+
+Primary definition: [ISO/IEC 14496-3:2009, sections 1.8.3.1 and 1.8.4.7](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+
 ## EP2 optional classes and large setup playback, 2026-10-28
 
 Owned EP2 recovery derives wire sets from optional descriptors. Each original

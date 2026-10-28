@@ -35,11 +35,6 @@ pub(super) fn validate(config: &Config) -> Result<()> {
             if c.fec > 2 {
                 return Err(invalid("reserved EP FEC type"));
             }
-            if c.fec == 2 {
-                return Err(invalid(
-                    "EP RS concatenated class routing is not yet implemented",
-                ));
-            }
             match (config.interleave, c.interleave) {
                 (0 | 1, None) | (2, Some(0..=3)) => (),
                 _ => return Err(invalid("invalid EP class interleave switch")),
@@ -47,7 +42,7 @@ pub(super) fn validate(config: &Config) -> Result<()> {
             if c.fec != 0 && c.interleave == Some(2) {
                 return Err(invalid("reserved RS intraclass interleave mode"));
             }
-            if c.fec == 1 && c.rate.is_none() {
+            if c.fec != 0 && c.rate.is_none() {
                 return Err(invalid(
                     "EP RS escaped correction rate is not yet implemented",
                 ));
@@ -129,6 +124,65 @@ struct Parameter<'a> {
     length: Option<usize>,
     rate: u8,
     crc: u8,
+    members: Vec<Parameter<'a>>,
+}
+// ISO 1.8.4.7: successive FEC=2 classes and the terminating FEC=1
+// class are one RS information stream, including each member's own CRC.
+// Group before computing parity geometry or applying the recursive interleaver.
+fn rs_groups(parameters: Vec<Parameter<'_>>) -> Result<Vec<Parameter<'_>>> {
+    let mut result = Vec::new();
+    let mut input = parameters.into_iter();
+    while let Some(first) = input.next() {
+        if first.class.fec != 2 {
+            result.push(first);
+            continue;
+        }
+        let mut group = Parameter {
+            class: first.class,
+            output: first.output,
+            length: Some(0),
+            rate: first.rate,
+            crc: 0,
+            members: vec![first],
+        };
+        loop {
+            let member = input
+                .next()
+                .ok_or_else(|| invalid("unterminated EP RS class group"))?;
+            if member.class.fec == 0 {
+                return Err(invalid("EP RS class group ends in SRCPC class"));
+            }
+            if member.rate != group.rate {
+                return Err(invalid("EP RS class group correction rates differ"));
+            }
+            if member.class.interleave != group.class.interleave {
+                return Err(invalid("EP RS class group interleave switches differ"));
+            }
+            let last = member.class.fec == 1;
+            group.members.push(member);
+            if last {
+                break;
+            }
+        }
+        let mut total = Some(0usize);
+        for member in &group.members {
+            if member.crc % 8 != 0 || member.length.is_some_and(|n| n % 8 != 0) {
+                return Err(invalid(
+                    "EP RS raw-AU mapping requires octet-aligned information and CRC",
+                ));
+            }
+            total = match (total, member.length) {
+                (Some(sum), Some(n)) => Some(
+                    sum.checked_add(n + if n == 0 { 0 } else { usize::from(member.crc) })
+                        .ok_or_else(|| invalid("EP RS class length overflow"))?,
+                ),
+                _ => None,
+            };
+        }
+        group.length = total;
+        result.push(group);
+    }
+    Ok(result)
 }
 fn field(header: &[u8], at: &mut usize, n: usize) -> usize {
     let value = header[*at..*at + n]
@@ -145,7 +199,7 @@ fn size(p: &Parameter<'_>, prefix: &[srcpc::Section], n: usize) -> Result<usize>
     let information = n
         .checked_add(usize::from(p.crc))
         .ok_or_else(|| invalid("EP class length overflow"))?;
-    if p.class.fec == 1 {
+    if p.class.fec != 0 {
         if n % 8 != 0 || p.crc % 8 != 0 {
             return Err(invalid(
                 "EP RS raw-AU mapping requires octet-aligned information and CRC",
@@ -164,7 +218,7 @@ fn size(p: &Parameter<'_>, prefix: &[srcpc::Section], n: usize) -> Result<usize>
     Ok(*srcpc::encoded_lengths(&sections)?.last().unwrap())
 }
 fn length_error(parameters: &[Parameter<'_>]) -> crate::owned_aac::Error {
-    invalid(if parameters.last().is_some_and(|p| p.class.fec == 1) {
+    invalid(if parameters.last().is_some_and(|p| p.class.fec != 0) {
         "EP RS class/packet length mismatch"
     } else {
         "EP class/packet length mismatch"
@@ -182,7 +236,7 @@ fn lengths(parameters: &mut [Parameter<'_>], total: usize) -> Result<Vec<usize>>
             let remaining = total
                 .checked_sub(used)
                 .ok_or_else(|| length_error(parameters))?;
-            let unit = if p.class.fec == 1 { 8 } else { 1 };
+            let unit = if p.class.fec != 0 { 8 } else { 1 };
             let mut low = 0;
             let mut high = remaining / unit;
             while low < high {
@@ -221,7 +275,7 @@ fn undo(bits: &[u8], p: &Parameter<'_>, count: usize, mode: u8) -> Result<(Vec<u
     if count == 0 {
         return Ok((vec![], bits.to_vec()));
     }
-    if p.class.fec == 1 {
+    if p.class.fec != 0 {
         stage::split_octet_stage(bits, count)
     } else {
         let width = if mode == 1 || p.class.interleave == Some(2) {
@@ -354,6 +408,7 @@ pub(super) fn decode(config: &Config, packet: &[u8]) -> Result<Vec<u8>> {
             length,
             rate,
             crc,
+            members: Vec::new(),
         });
     }
     let stuffing = if config.stuffing {
@@ -366,6 +421,7 @@ pub(super) fn decode(config: &Config, packet: &[u8]) -> Result<Vec<u8>> {
             .checked_sub(stuffing)
             .ok_or_else(|| invalid("truncated EP stuffing/header"))?,
     );
+    let mut parameters = rs_groups(parameters)?;
     let sizes = lengths(&mut parameters, body.len())?;
     let coded = split_body(body, &parameters, &sizes, config.interleave)?;
     let srcpc_indices: Vec<_> = parameters
@@ -396,12 +452,36 @@ pub(super) fn decode(config: &Config, packet: &[u8]) -> Result<Vec<u8>> {
         output[p.output] = recovered.information[..p.length.unwrap()].to_vec();
     }
     for (i, p) in parameters.iter().enumerate() {
-        if p.class.fec == 1 && p.length != Some(0) {
+        if p.class.fec != 0 && p.length != Some(0) {
             let raw = decode_rs_class(&coded[i], p.length, p.rate, p.crc)?;
-            output[p.output] = raw
+            let bits: Vec<_> = raw
                 .iter()
                 .flat_map(|&b| (0..8).rev().map(move |i| (b >> i) & 1))
                 .collect();
+            if p.members.is_empty() {
+                output[p.output] = bits;
+            } else {
+                let mut at = 0usize;
+                for member in &p.members {
+                    let n = member
+                        .length
+                        .unwrap_or_else(|| bits.len().saturating_sub(at + usize::from(member.crc)));
+                    let width = if n == 0 { 0 } else { usize::from(member.crc) };
+                    let end = at
+                        .checked_add(n)
+                        .and_then(|n| n.checked_add(width))
+                        .filter(|&n| n <= bits.len())
+                        .ok_or_else(|| invalid("EP RS class/packet length mismatch"))?;
+                    if !aac_ep_crc::verify(&bits[at..end], width as u8)? {
+                        return Err(invalid("EP class CRC mismatch"));
+                    }
+                    output[member.output] = bits[at..at + n].to_vec();
+                    at = end;
+                }
+                if at != bits.len() {
+                    return Err(invalid("EP RS class/packet length mismatch"));
+                }
+            }
         }
     }
     let total = output
@@ -446,6 +526,90 @@ mod optional_tests {
             frames: 1,
             header: None,
         }
+    }
+    #[test]
+    fn rs_group_geometry_and_malformed_boundaries() {
+        fn parameters(classes: &[Class]) -> Vec<Parameter<'_>> {
+            classes
+                .iter()
+                .enumerate()
+                .map(|(output, class)| Parameter {
+                    class,
+                    output,
+                    length: match class.length {
+                        Length::Fixed(n) => Some(usize::from(n)),
+                        _ => None,
+                    },
+                    rate: class.rate.unwrap(),
+                    crc: class.crc.unwrap(),
+                    members: vec![],
+                })
+                .collect()
+        }
+        let mut a = class(false);
+        a.fec = 2;
+        a.rate = Some(4);
+        a.crc = Some(8);
+        let mut b = a.clone();
+        b.fec = 1;
+        b.crc = Some(16);
+        let source = vec![a.clone(), b.clone(), class(false), a.clone(), b.clone()];
+        let grouped = rs_groups(parameters(&source)).unwrap();
+        assert_eq!(grouped.len(), 3);
+        assert_eq!(grouped[0].length, Some(40));
+        assert_eq!(grouped[0].members.len(), 2);
+        assert_eq!(grouped[1].class.fec, 0);
+        assert_eq!(
+            grouped[2]
+                .members
+                .iter()
+                .map(|m| m.output)
+                .collect::<Vec<_>>(),
+            vec![3, 4]
+        );
+        assert_eq!(size(&grouped[0], &[], 40).unwrap(), (5 + 8) * 8);
+        let cases = [
+            (vec![a.clone()], "unterminated EP RS class group"),
+            (
+                vec![a.clone(), class(false)],
+                "EP RS class group ends in SRCPC class",
+            ),
+            (
+                {
+                    let mut c = b.clone();
+                    c.rate = Some(3);
+                    vec![a.clone(), c]
+                },
+                "EP RS class group correction rates differ",
+            ),
+            (
+                {
+                    let mut c = b.clone();
+                    c.interleave = Some(1);
+                    vec![a.clone(), c]
+                },
+                "EP RS class group interleave switches differ",
+            ),
+            (
+                {
+                    let mut c = b.clone();
+                    c.crc = Some(6);
+                    vec![a.clone(), c]
+                },
+                "octet-aligned information and CRC",
+            ),
+        ];
+        for (classes, expected) in cases {
+            let error = rs_groups(parameters(&classes)).err().unwrap().to_string();
+            assert!(error.contains(expected), "{error}");
+        }
+        let mut empty = vec![a, b];
+        for c in &mut empty {
+            c.length = Length::Fixed(0);
+        }
+        let grouped = rs_groups(parameters(&empty)).unwrap();
+        assert_eq!(grouped[0].length, Some(0));
+        assert_eq!(size(&grouped[0], &[], 0).unwrap(), 0);
     }
     fn oracle_header(information: &str) -> Vec<u8> {
         let m: serde_json::Value = serde_json::from_str(include_str!(
