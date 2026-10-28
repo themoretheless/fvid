@@ -533,6 +533,23 @@ impl Group {
         &self,
         reader: &mut Mp4Reader<R>,
         root_sample: usize,
+        check: impl FnMut() -> std::result::Result<(), E>,
+    ) -> Result<Vec<AccessUnit>> {
+        self.read_frame_context(reader, root_sample, None, check)
+    }
+    pub fn read_frame_in_edit<R: Read + Seek>(
+        &self, reader: &mut Mp4Reader<R>, root_sample: usize, edit: Option<usize>,
+    ) -> Result<Vec<AccessUnit>> {
+        self.read_frame_in_edit_checked(reader, root_sample, edit, || Ok::<(),std::convert::Infallible>(()))
+    }
+    pub fn read_frame_in_edit_checked<R: Read + Seek, E: std::fmt::Display>(
+        &self, reader: &mut Mp4Reader<R>, root_sample: usize, edit: Option<usize>,
+        check: impl FnMut() -> std::result::Result<(), E>,
+    ) -> Result<Vec<AccessUnit>> {
+        self.read_frame_context(reader, root_sample, Some(edit), check)
+    }
+    fn read_frame_context<R: Read + Seek, E: std::fmt::Display>(
+        &self, reader: &mut Mp4Reader<R>, root_sample: usize, context: Option<Option<usize>>,
         mut check: impl FnMut() -> std::result::Result<(), E>,
     ) -> Result<Vec<AccessUnit>> {
         check().map_err(|e| invalid(&e.to_string()))?;
@@ -558,7 +575,10 @@ impl Group {
         let time = key(stamp.pts, root.timescale);
         let root_scale = root.timescale;
         let chain:Vec<_> = self.streams.iter().map(|s|s.id).collect();
-        let od_width=reader.object_descriptor_prefix(&chain,stamp.pts,root_scale).map_err(|e|invalid(&e.to_string()))?;
+        let od_width = if let Some(edit) = context {
+            reader.object_descriptor_prefix_in_edit(&chain, stamp.pts, root_scale, edit)
+        } else { reader.object_descriptor_prefix(&chain,stamp.pts,root_scale) }
+            .map_err(|e|invalid(&e.to_string()))?;
         let mut output = Vec::new();
         output
             .try_reserve_exact(self.streams.len())

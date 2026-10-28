@@ -112,6 +112,31 @@ impl<R: Read + Seek> Mp4Reader<R> {
         pts: i64,
         scale: u32,
     ) -> Result<Option<usize>> {
+        self.object_descriptor_prefix_context(chain, pts, scale, None)
+    }
+    /// Select the OD state for a specific presentation edit. None names the
+    /// implicit unedited root; it is distinct from omitting presentation context.
+    pub fn object_descriptor_prefix_in_edit(
+        &self,
+        chain: &[u32],
+        pts: i64,
+        scale: u32,
+        edit: Option<usize>,
+    ) -> Result<Option<usize>> {
+        self.object_descriptor_prefix_context(chain, pts, scale, Some(edit))
+    }
+    pub fn has_object_descriptor(&self, root: u32) -> bool {
+        self.object_timelines
+            .iter()
+            .any(|t| t.references.contains(&root))
+    }
+    fn object_descriptor_prefix_context(
+        &self,
+        chain: &[u32],
+        pts: i64,
+        scale: u32,
+        context: Option<Option<usize>>,
+    ) -> Result<Option<usize>> {
         let Some(root) = chain.first() else {
             return Err(invalid("empty MP4 OD programme chain"));
         };
@@ -135,6 +160,9 @@ impl<R: Read + Seek> Mp4Reader<R> {
             .iter()
             .find(|t| t.id == timeline.track_id)
             .ok_or_else(|| invalid("MP4 OD controller track is unavailable"))?;
+        if root.edits.is_empty() && context.is_some_and(|edit| edit.is_some()) {
+            return Err(invalid("MP4 OD root edit context is unavailable"));
+        }
         if root.edits.is_empty() && controller.edits.is_empty() {
             return timeline
                 .prefix(chain, pts, scale)
@@ -148,7 +176,11 @@ impl<R: Read + Seek> Mp4Reader<R> {
         // A constant source-clock relation also applies during decoder preroll.
         // Incompatible repeated presentations require presentation-context dispatch;
         // never guess membership from whichever occurrence happens to come first.
-        let offset = od_edit_relation(root, controller, self.movie_timescale)?;
+        let offset = if let Some(edit) = context {
+            od_edit_offset_at(root, controller, self.movie_timescale, pts, scale, edit)?
+        } else {
+            od_edit_relation(root, controller, self.movie_timescale)?
+        };
         let root_unit = i128::from(timeline.timescale) * i128::from(self.movie_timescale);
         let event_unit = i128::from(scale) * i128::from(self.movie_timescale);
         let (mut a, mut b) = (root.timescale, scale);
@@ -179,12 +211,6 @@ impl<R: Read + Seek> Mp4Reader<R> {
 /// Compile a single source-clock relation over every presented root window.
 /// Empty root edits have no AU; nonempty root windows require an OD mapping.
 fn od_edit_relation(root: &Track, controller: &Track, movie_scale: u32) -> Result<i128> {
-    #[derive(Clone, Copy)]
-    struct Span {
-        start: i128,
-        end: i128,
-        affine: Option<i128>,
-    }
     let overflow = || invalid("MP4 OD edit clock overflow");
     let r = i128::from(root.timescale);
     let o = i128::from(controller.timescale);
@@ -193,58 +219,10 @@ fn od_edit_relation(root: &Track, controller: &Track, movie_scale: u32) -> Resul
         return Err(invalid("zero MP4 OD edit clock"));
     }
     let movie_unit = r * o;
-    fn spans(
-        track: &Track,
-        unit: i128,
-        movie_unit: i128,
-    ) -> impl Iterator<Item = Result<Span>> + '_ {
-        let default = track
-            .edits
-            .is_empty()
-            .then(|| {
-                Ok(Span {
-                    start: 0,
-                    end: i128::from(track.duration)
-                        .checked_mul(unit)
-                        .ok_or_else(|| invalid("MP4 OD edit clock overflow"))?,
-                    affine: Some(0),
-                })
-            })
-            .into_iter();
-        let edits = track.edits.iter().scan(0i128, move |start, edit| {
-            Some((|| {
-                let end = i128::from(edit.duration)
-                    .checked_mul(movie_unit)
-                    .and_then(|n| start.checked_add(n))
-                    .ok_or_else(|| invalid("MP4 OD edit clock overflow"))?;
-                if end <= *start {
-                    return Err(invalid("empty MP4 OD edit"));
-                }
-                let affine = match edit.media_time {
-                    -1 => None,
-                    n if n >= 0 => Some(
-                        i128::from(n)
-                            .checked_mul(unit)
-                            .and_then(|n| n.checked_sub(*start))
-                            .ok_or_else(|| invalid("MP4 OD edit clock overflow"))?,
-                    ),
-                    _ => return Err(invalid("invalid MP4 OD media edit time")),
-                };
-                let span = Span {
-                    start: *start,
-                    end,
-                    affine,
-                };
-                *start = end;
-                Ok(span)
-            })())
-        });
-        default.chain(edits)
-    }
-    let mut controllers = spans(controller, r * m, movie_unit);
+    let mut controllers = od_edit_spans(controller, r * m, movie_unit);
     let mut current = controllers.next().transpose()?;
     let mut relation = None;
-    for root in spans(root, o * m, movie_unit) {
+    for root in od_edit_spans(root, o * m, movie_unit) {
         let root = root?;
         let Some(root_affine) = root.affine else {
             continue;
@@ -272,4 +250,139 @@ fn od_edit_relation(root: &Track, controller: &Track, movie_scale: u32) -> Resul
         }
     }
     relation.ok_or_else(|| invalid("MP4 OD has no active audio edit"))
+}
+
+#[derive(Clone, Copy)]
+struct OdEditSpan {
+    start: i128,
+    end: i128,
+    affine: Option<i128>,
+}
+
+fn od_edit_spans(
+    track: &Track,
+    unit: i128,
+    movie_unit: i128,
+) -> impl Iterator<Item = Result<OdEditSpan>> + '_ {
+    let default = track
+        .edits
+        .is_empty()
+        .then(|| {
+            Ok(OdEditSpan {
+                start: 0,
+                end: i128::from(track.duration)
+                    .checked_mul(unit)
+                    .ok_or_else(|| invalid("MP4 OD edit clock overflow"))?,
+                affine: Some(0),
+            })
+        })
+        .into_iter();
+    let edits = track.edits.iter().scan(0i128, move |start, edit| {
+        Some((|| {
+            let end = i128::from(edit.duration)
+                .checked_mul(movie_unit)
+                .and_then(|n| start.checked_add(n))
+                .ok_or_else(|| invalid("MP4 OD edit clock overflow"))?;
+            if end <= *start {
+                return Err(invalid("empty MP4 OD edit"));
+            }
+            let affine = match edit.media_time {
+                -1 => None,
+                n if n >= 0 => Some(
+                    i128::from(n)
+                        .checked_mul(unit)
+                        .and_then(|n| n.checked_sub(*start))
+                        .ok_or_else(|| invalid("MP4 OD edit clock overflow"))?,
+                ),
+                _ => return Err(invalid("invalid MP4 OD media edit time")),
+            };
+            let span = OdEditSpan {
+                start: *start,
+                end,
+                affine,
+            };
+            *start = end;
+            Ok(span)
+        })())
+    });
+    default.chain(edits)
+}
+
+fn od_edit_offset_at(
+    root: &Track,
+    controller: &Track,
+    movie_scale: u32,
+    pts: i64,
+    scale: u32,
+    edit: Option<usize>,
+) -> Result<i128> {
+    let fail = || invalid("MP4 OD edit clock overflow");
+    let (r, o, m) = (
+        i128::from(root.timescale),
+        i128::from(controller.timescale),
+        i128::from(movie_scale),
+    );
+    if r == 0 || o == 0 || m == 0 || scale == 0 {
+        return Err(invalid("zero MP4 OD edit clock"));
+    }
+    if root.edits.is_empty() != edit.is_none() {
+        return Err(invalid("MP4 OD root edit context is unavailable"));
+    }
+    let mut selected_root = None;
+    for (index, span) in od_edit_spans(root, o * m, r * o).enumerate() {
+        let span = span?;
+        if index == edit.unwrap_or(0) {
+            selected_root = Some(span);
+            break;
+        }
+    }
+    let root = selected_root.ok_or_else(|| invalid("MP4 OD root edit context is unavailable"))?;
+    let affine = root
+        .affine
+        .ok_or_else(|| invalid("MP4 OD root edit is empty"))?;
+    // Coordinates are scaled by the query clock so fractional root ticks
+    // remain exact. Clamp only the *edit selection*, never the OD source time:
+    // decoder preroll/lookahead extrapolates the boundary edit's own mapping.
+    let q = i128::from(scale);
+    let source = i128::from(pts)
+        .checked_mul(o * m)
+        .and_then(|n| n.checked_mul(r))
+        .ok_or_else(fail)?;
+    let movie = source
+        .checked_sub(affine.checked_mul(q).ok_or_else(fail)?)
+        .ok_or_else(fail)?;
+    let first = root.start.checked_mul(q).ok_or_else(fail)?;
+    let last = root.end.checked_mul(q).ok_or_else(fail)?;
+    let after = movie >= last;
+    let anchor = movie.max(first).min(last);
+    let mut covered = root.start;
+    let mut selected = None;
+    for od in od_edit_spans(controller, r * m, r * o) {
+        let od = od?;
+        let begin = od.start.max(root.start);
+        let end = od.end.min(root.end);
+        if begin >= end {
+            continue;
+        }
+        if begin != covered {
+            return Err(invalid("MP4 OD edit leaves active audio uncovered"));
+        }
+        let od_affine = od
+            .affine
+            .ok_or_else(|| invalid("MP4 OD empty edit overlaps active audio"))?;
+        let start = begin.checked_mul(q).ok_or_else(fail)?;
+        let end_scaled = end.checked_mul(q).ok_or_else(fail)?;
+        if if after {
+            start < anchor && anchor <= end_scaled
+        } else {
+            start <= anchor && anchor < end_scaled
+        } {
+            selected = Some(od_affine.checked_sub(affine).ok_or_else(fail)?);
+        }
+        covered = end;
+    }
+    if covered != root.end {
+        return Err(invalid("MP4 OD edit leaves active audio uncovered"));
+    }
+    selected.ok_or_else(|| invalid("MP4 OD edit context has no source mapping"))
 }

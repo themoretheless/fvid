@@ -1,11 +1,11 @@
 fn mp4_decode_source_packet<R:std::io::Read+std::io::Seek>(
     reader:&mut Mp4TimelineReader<R>, index:usize, sample:usize,
     decoder:&mut Mp4TimelineDecoder, group:Option<&Mp4Ep1Group>, packet:&mut Vec<u8>,
-    pts:u64,duration:u64,control:&DecodeProgress<'_>,
+    pts:u64,duration:u64,edit:Option<usize>,control:&DecodeProgress<'_>,
 )->Result<(Option<Vec<Mp4PcmScalar>>,usize)> {
     control.check()?;
     if let Some(group)=group && group.requires_esc(reader.tracks(),sample)? {
-        let units=group.read_frame_checked(reader,sample,||control.check())?;
+        let units=group.read_frame_in_edit_checked(reader,sample,edit,||control.check())?;
         let bytes=units.iter().try_fold(0usize,|n,u|n.checked_add(u.data.len()).ok_or_else(||invalid("EP1 MP4 group byte count overflow")))?;
         let input:Vec<_>=units.iter().map(|u|u.borrowed()).collect();
         control.check()?;
@@ -129,8 +129,11 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
         Option<u64>,
         Mp4AacCheckpoint,
         std::collections::VecDeque<(u64, u64)>,
+        Option<usize>,
     )> = None;
-    for segment in segments {
+    let contextual_od = reader.has_object_descriptor(track.id);
+    for (edit_index, segment) in segments.into_iter().enumerate() {
+        let root_edit = (!track.edits.is_empty()).then_some(edit_index);
         control.check()?;
         if control.packet_limit_reached() {
             break;
@@ -169,8 +172,9 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
         let mut first_sample = 0;
         let mut expected = None;
         let mut pending_window = std::collections::VecDeque::new();
-        if let Some((index, description, start, previous, state, pending)) = &checkpoint
+        if let Some((index, description, start, previous, state, pending, saved_edit)) = &checkpoint
             && *start <= from
+            && (!contextual_od || *saved_edit == root_edit)
         {
             decoder = make_decoder(*description)?;
             if decoder.restore_checkpoint(state)? {
@@ -227,7 +231,7 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
                         > from
                 {
                     if let Some(state) = decoder.checkpoint() {
-                        checkpoint = Some((sample_index, active_description, start, expected, state, pending_window.clone()));
+                        checkpoint = Some((sample_index, active_description, start, expected, state, pending_window.clone(), root_edit));
                     }
                     captured = true;
                 }
@@ -236,7 +240,7 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
                         .checked_add(duration)
                         .ok_or_else(|| invalid("audio timestamp overflow"))?,
                 );
-                let (samples,bytes)=mp4_decode_source_packet(&mut reader,index,sample_index,&mut decoder,ep1_group.as_ref(),&mut packet,start,duration,control)?;
+                let (samples,bytes)=mp4_decode_source_packet(&mut reader,index,sample_index,&mut decoder,ep1_group.as_ref(),&mut packet,start,duration,root_edit,control)?;
                 control.packet(bytes)?;
                 sample_index += 1;
                 if decoder.delayed() {
@@ -319,7 +323,7 @@ fn negotiate_mp4_description_ps<R: std::io::Read + std::io::Seek>(
             continue;
         }
         let result=if let Some(group)=&ep1_group && group.requires_esc(reader.tracks(),sample)? {
-            let units=group.read_frame_checked(reader,sample,||check())?;
+            let units=group.read_frame_in_edit_checked(reader,sample,reader.tracks()[index].edits.iter().position(|e|e.media_time>=0),||check())?;
             let input:Vec<_>=units.iter().map(|u|u.borrowed()).collect();
             probe.read_esc(&input)
         } else {reader.read_packet(index,sample,&mut packet)?;probe.read(&packet)};

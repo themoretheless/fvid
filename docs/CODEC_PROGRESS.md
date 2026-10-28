@@ -1,3 +1,48 @@
+## Presentation-context OD dispatch for repeated LD-SBR sources, 2026-10-29
+
+The own repeated-source movie first reproduced `MP4 OD edits require
+presentation-dependent membership` in the previous export pipeline. Root and OD
+edits now reach the EP1 reader with the current root edit identity. The exact
+mapping selects the OD source domain belonging to that showing, including
+boundary-edit extrapolation for decoder preroll/lookahead. Coverage and empty
+OD-window checks remain strict; time is never rounded into another frame.
+The source-only API still refuses ambiguous edit relations instead of guessing
+an occurrence. The new explicit-context API distinguishes an implicit unedited
+root from omitted context, and rejects missing or empty root edit identities.
+
+Both shared PCM export paths and player AudioStream dispatch propagate the edit
+identity. Export checkpoints are keyed by that identity for OD-controlled audio.
+Generic worker checkpoints currently carry only source identity, so edited OD
+streams do not expose that checkpoint optimization; they rebuild decoder history
+through the selected edit's preroll. Static/non-OD checkpoint behavior is retained.
+
+There are 144 accepted twelve-frame LD-SBR programmes: 480/512 core samples,
+mono/eight-channel, core/double output rate (24/48 kHz), three OD command forms,
+indexed/fragmented/hybrid storage, with absent or retained inactive tails. An
+initial silence precedes two showings of the same source. Each showing has its
+own OD source domain and object ID (2 then 3); six real OD AUs, differently split
+edits and a one-OD-tick CTS offset are inspected. Exact fractional membership
+boundaries and unchanged source AU bytes are checked in both showings. Complete
+owned/public PCM, repeated ranges, independent scalar/CLDFB PCM, separate controls,
+playback/seek/EOF/rewind and second-showing WAVE crop/gain/32-kHz resampling pass.
+
+Twenty-four wrong-second-context movies declare extra active members only in the
+second showing. The first showing remains byte-exact, while the second produces
+the specific missing simultaneous ESC AU error. Direct contextual queries prove
+the different widths; retry/checkpoint replay preserves native decoder state.
+These are refusal regressions, distinct from the 144 accepted programmes.
+
+All 185 new artifacts / 6248972 bytes regenerate byte-exact with process and
+socket creation forbidden; all fourteen earlier EP1 corpora remain byte-exact.
+Ordinary tests use saved own media without FFmpeg or network. Five new checks,
+ten previous OD checks and 89 MP4 integration checks pass (104 integration tests).
+Root/media unit suites pass: 1623 tests, 29 ignored, including captured worker
+navigation across 2110 programmes. All-test compilation passes offline with
+`--no-default-features --features player`; the new integration binary has no
+FFmpeg/libav linkage. Physical-device output, full LD-SBR conformance, arbitrary OD dependency graphs,
+URL/OCI/IPMP, multiple controllers, root deactivation/general scene composition
+and live OD refresh remain open. The codec-gap goal remains active.
+
 ## LD-SBR OD/edit clock mapping, 2026-10-29
 
 A new own LD-SBR movie reproduces `MP4 OD edit mapping is not implemented`

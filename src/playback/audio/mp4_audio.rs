@@ -293,7 +293,8 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 // A valid LC-only block has no SBR fill. It remains on normal
                 // AAC dispatch; subsequent extension runs can still be probed.
                 let result=if let Some(group)=&ep1_group && group.requires_esc(demuxer.tracks(),sample)? {
-                    let units=group.read_frame(&mut demuxer,sample)?;
+                    let edit=demuxer.tracks()[index].edits.iter().position(|e|e.media_time>=0);
+                    let units=group.read_frame_in_edit(&mut demuxer,sample,edit)?;
                     let input:Vec<_>=units.iter().map(|u|u.borrowed()).collect();probe.read_esc(&input)
                 }else{probe.read(&payload)};
                 if let Err(error) = result {
@@ -352,6 +353,16 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         })
     }
 
+    fn od_edit_context(&self) -> Option<usize> {
+        if self.track().edits.is_empty() { return None; }
+        if let Some(timeline)=&self.variable_edits {
+            return timeline.active.or_else(||timeline.locate());
+        }
+        if let Some(timeline)=&self.timeline {
+            return timeline.locate(self.edit_cursor.get()).map(|(index,_)|index);
+        }
+        Some(0)
+    }
     fn clock_point(&self,index:usize)->Result<EditTime> {
         if let Some(clock)=&self.clock {clock.point(self.track(),index)}else{EditTime::signed_ticks(self.track().samples.get(index).ok_or_else(||invalid("missing MP4 source point"))?.pts,self.track().timescale)}
     }
@@ -544,7 +555,8 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                         self.demuxer
                             .read_packet(self.track_index, i, &mut payload)?;
                         let result=if let Some(group)=&self.ep1_group && group.requires_esc(self.demuxer.tracks(),i)? {
-                            let units=group.read_frame(&mut self.demuxer,i)?;
+                            let edit=self.od_edit_context();
+                            let units=group.read_frame_in_edit(&mut self.demuxer,i,edit)?;
                             let input:Vec<_>=units.iter().map(|u|u.borrowed()).collect();probe.read_esc(&input)
                         }else{probe.read(&payload)};
                         if let Err(error) = result {
@@ -838,7 +850,8 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         let Some(group)=&self.ep1_group else {return decoder.decode_packet(&packet.data,stamp,packet.duration.max(0)as u64);};
         let index=group.sample_at_source_time(packet.pts)?;
         if !group.requires_esc(self.demuxer.tracks(),index)? {return decoder.decode_packet(&packet.data,stamp,packet.duration.max(0)as u64);}
-        let units=group.read_frame(&mut self.demuxer,index)?;
+        let edit=self.od_edit_context();
+        let units=group.read_frame_in_edit(&mut self.demuxer,index,edit)?;
         let root=units.first().ok_or_else(||invalid("empty EP1 MP4 group"))?;
         if root.data!=packet.data || root.duration!=packet.duration.max(0)as u64 {return Err(invalid("EP1 MP4 root packet disagrees with indexed AU"));}
         let input:Vec<_>=units.iter().map(|u|u.borrowed()).collect();
@@ -937,6 +950,10 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
 
     fn preroll_target(&self)->Option<i64> {
+        // Generic worker checkpoints carry source identity only. An edited OD
+        // stream can assign another programme to the same source occurrence.
+        if !self.track().edits.is_empty() && self.demuxer.has_object_descriptor(self.track().id) {return None;}
+
         if self.clock_mode.get() && let Some(clock)=&self.clock {
             if self.setup().codec!=*b"mp4a" {return None;}
             return self.clock_target().ok().and_then(|t|clock.at_time(self.track(),t).ok()).and_then(|n|i64::try_from(n).ok());

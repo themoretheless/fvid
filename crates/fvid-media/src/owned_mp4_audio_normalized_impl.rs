@@ -247,7 +247,8 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
     };
     let mut opening_decoder = Some(decoder);
     let mut packet = Vec::new();
-    for segment in timeline.segments {
+    for (edit_index, segment) in timeline.segments.into_iter().enumerate() {
+        let root_edit = (!track.edits.is_empty()).then_some(edit_index);
         control.check()?;
         if control.packet_limit_reached() {
             break;
@@ -351,7 +352,7 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
                     (declared_start,declared_duration,u64::try_from(frames).map_err(|_|invalid("MP4 native frame count overflow"))?)
                 };
                 let (samples,bytes)=if ep1_group.is_some() {
-                    mp4_decode_source_packet(&mut reader,index,sample_index,&mut decoder,ep1_group.as_ref(),&mut packet,native_cursor,frames,control)?
+                    mp4_decode_source_packet(&mut reader,index,sample_index,&mut decoder,ep1_group.as_ref(),&mut packet,native_cursor,frames,root_edit,control)?
                 } else {(decoder.decode_timed(&packet,native_cursor,frames)?,packet.len())};
                 native_cursor = native_cursor
                     .checked_add(frames)

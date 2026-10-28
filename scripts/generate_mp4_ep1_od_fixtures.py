@@ -90,7 +90,7 @@ def fragmented(source,n,hybrid=False):
         for size in sizes:raw.append(source[offset:offset+size]);offset+=size
         pads=[tables[b'padb'][8+i//2]>>(4 if i%2==0 else 0)&7 for i in range(count)]if b'padb'in tables else[0]*count
         step=int.from_bytes(tables[b'stts'][12:16],'big');cts=int.from_bytes(tables[b'ctts'][12:16],'big')if b'ctts'in tables else 0
-        phases={i:dict(raw=raw[i*4:i*4+4],pads=pads[i*4:i*4+4],dts=i*4*step)for i in range(3)}if handler==b'soun'and count==12 else{i:dict(raw=[raw[i]],pads=[0],dts=i*step)for i in range(3)}if handler==b'odsm'else{1:dict(raw=raw,pads=pads,dts=0)}
+        phases={i:dict(raw=raw[i*4:i*4+4],pads=pads[i*4:i*4+4],dts=i*4*step)for i in range(3)}if handler==b'soun'and count==12 else{i:dict(raw=[raw[i]],pads=[0],dts=i*step)for i in range(count)}if handler==b'odsm'else{1:dict(raw=raw,pads=pads,dts=0)}
         tracks.append(dict(id=ident,step=step,cts=cts,phases=phases));defaults.append(box(b'trex',word(0,ident,1,7,7,0)))
         initial=phases.get(0)if hybrid else None
         def rewrite(t,p):
@@ -109,7 +109,7 @@ def fragmented(source,n,hybrid=False):
             return box(t,p)
         moov.append(box(tag,b''.join(rewrite(t,p)for t,p in boxes(body))))
     result=prefix+box(b'moov',b''.join(moov)+box(b'mvex',b''.join(defaults)))
-    for epoch in range(1 if hybrid else 0,3):
+    for epoch in range(1 if hybrid else 0,1+max(max(t['phases'])for t in tracks)):
         active=[(t,t['phases'][epoch])for t in tracks if epoch in t['phases']]
         def moof(base):
             offset=base;traf=[]

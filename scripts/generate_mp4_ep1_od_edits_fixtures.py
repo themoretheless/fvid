@@ -5,8 +5,9 @@ from generate_mp4_ep1_epochs_fixtures import eld_control
 from generate_mp4_ep1_fixtures import SOURCE,word
 from generate_he_aac_packet_fixtures import box,boxes
 OUT=SOURCE/'mp4-ep1-od-edits'
-def edited(source,n,repeated=True,variant=None):
+def edited(source,n,repeated=True,variant=None,od_replays=False):
     windows=[(n//2,None),(6*n,n//2),(6*n,3*n)]if repeated else[(12*n,0)]
+    if od_replays:windows=[(n//2,None),(12*n,0),(12*n,0)]
     total=sum(d for d,_ in windows)
     oldscale=int.from_bytes(dict(boxes(dict(boxes(source))[b'moov']))[b'mvhd'][12:16],'big')
     root_id=None
@@ -21,6 +22,7 @@ def edited(source,n,repeated=True,variant=None):
         od=ident==100;rows=[]
         for index,(duration,start)in enumerate(windows):
             media=-1 if start is None else start*(3 if od else 1)+(1 if od else 0)
+            if od and od_replays and index==2:media+=36*n
             if od and variant=='empty'and index==1:media=-1
             if od and variant=='divergent'and index==2:media+=1
             if od and variant=='short'and index==len(windows)-1:duration-=1
