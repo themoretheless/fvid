@@ -1,3 +1,38 @@
+## LD-SBR actual platform-output qualification, 2026-10-29
+
+The example now has a distinct `--play-device` mode. Unlike the existing `--play`
+mode's silent modelled device, it creates PlatformBackend on the real audio
+thread, waits for device initialization, then runs full playback, quarter seek,
+60-percent seek (inside the second OD showing here) and rewind. Generation-tagged
+EOF events, callback-derived final position and actual backend drain must finish;
+start and drain failures/timeouts return errors. `--check-device` remains the
+separate open-without-PCM probe. This diagnostic mode is not an ordinary test and
+does not make CI depend on an output device.
+
+Four own synthetic OD-context movies passed all sixteen phases on this macOS
+host: mono/48 kHz indexed, mono/24 kHz hybrid, eight-channel/48 kHz fragmented,
+and eight-channel/24 kHz indexed, covering 480/512 source frames. Full-pass wall
+times were 0.503..0.550 seconds for 0.490..0.523-second presentations. Every phase
+ended at the source presentation duration without a device/drain error. The
+observed default output after the runs was an Apple Bluetooth device, two output
+channels at nominal 48 kHz. Eight-channel source playback uses the normal stereo
+router; it does not qualify eight physical speakers. These observations establish
+actual OS output/callback/drain/navigation on this host, not subjective listening,
+speaker wiring, all devices/platforms or full LD-SBR numerical conformance.
+
+The per-case input hashes and measured phase results are saved in
+[the device report](validation/ld-sbr-device-2026-10-29.json). Reproduce with:
+
+```sh
+cargo --config 'profile.dev.package.fvid-media.opt-level=2' run --offline --no-default-features --features player --example audio_probe -- --play-device tests/fixtures/playback-errors/mp4-ep1-od-context/n480-c1-snapshots-indexed.mp4
+```
+
+The changed example compiles offline; its exercised binary has no FFmpeg/libav
+linkage. No codec or ordinary-test behavior changes in this qualification step.
+Known ELD extension-tool refusals, broader codec/profile conformance and the
+remaining OD/scene/streaming restrictions still require work. The full codec-gap
+goal remains active.
+
 ## Presentation-context OD dispatch for repeated LD-SBR sources, 2026-10-29
 
 The own repeated-source movie first reproduced `MP4 OD edits require

@@ -1,15 +1,16 @@
 //! Decode a file's audio track and report what the playback pipeline sees.
-//! Usage: audio_probe [--play] [--pcm FILE] [--packets COUNT] INPUT
+//! Usage: audio_probe [--play | --play-device | --check-device] [--pcm FILE] [--packets COUNT] INPUT
 //!
 //! `--pcm` appends the decoded interleaved f32 bytes to FILE, which is how a
 //! decoder's output gets compared byte for byte with a reference renderer of the
 //! same track.
 //!
-//! Without `--play` this only decodes, so it needs no audio device. With it the
-//! file runs through the real audio thread and a silent modelled device, which
-//! is how the queue pacing gets checked: an unpaced worker drains the whole
-//! track into the backend ring in milliseconds instead of taking the track's
-//! own duration.
+//! By default this only decodes and needs no audio device. `--play` runs the
+//! real worker against a silent modelled device to check queue pacing.
+//! `--check-device` opens the platform backend without sending PCM.
+//! `--play-device` sends PCM to the actual default output and checks full
+//! playback, two seeks and rewind through device drain. It does not certify
+//! listening quality or speaker wiring.
 mod harness;
 
 use harness::{Counters, Device};
@@ -66,6 +67,80 @@ fn play_through_device(path: &str) -> Result<(), Box<dyn std::error::Error>> {
             "thread outran the ring"
         }
     );
+    Ok(())
+}
+
+/// Exercise the actual platform output backend. This verifies device callback
+/// progress and drain/navigation; it cannot certify listening or speaker wiring.
+fn play_platform_device(path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    use fvid::audio_thread::{AudioEvent, AudioPlayback};
+    let stream = harness::open_stream(path).ok_or("no decodable audio track")?;
+    let rate = stream.sample_rate();
+    let channels = stream.channels();
+    let mut playback =
+        AudioPlayback::start(stream, || Box::new(fvid::audio::PlatformBackend::new()));
+    let started = Instant::now();
+    loop {
+        match playback.poll() {
+            Some(AudioEvent::Started) => break,
+            Some(AudioEvent::Error(e)) => return Err(e.into()),
+            _ if started.elapsed() > Duration::from_secs(10) => {
+                return Err("platform device start timed out".into())
+            }
+            _ => std::thread::sleep(Duration::from_millis(2)),
+        }
+    }
+    let duration = playback
+        .duration()
+        .ok_or("device probe requires a known source duration")?;
+    if duration.is_zero() {
+        return Err("device probe requires nonempty audio".into());
+    }
+    println!(
+        "platform_device=started source_channels={channels} rate={rate} duration={:.6}",
+        duration.as_secs_f64()
+    );
+    for phase in ["full", "seek-quarter", "seek-second-showing", "rewind"] {
+        let from = match phase {
+            "seek-quarter" => {
+                let at = duration / 4;
+                playback.seek(at);
+                at
+            }
+            "seek-second-showing" => {
+                let at = duration.mul_f64(0.6);
+                playback.seek(at);
+                at
+            }
+            "rewind" => {
+                playback.rewind();
+                Duration::ZERO
+            }
+            _ => Duration::ZERO,
+        };
+        let generation = playback.generation();
+        playback.play();
+        let started = Instant::now();
+        loop {
+            match playback.poll() {
+                Some(AudioEvent::Error(e)) => return Err(format!("{phase}: {e}").into()),
+                Some(AudioEvent::Ended(g)) if g == generation => break,
+                _ if started.elapsed()
+                    > duration.saturating_sub(from) + Duration::from_secs(10) =>
+                {
+                    return Err(format!("{phase}: platform device drain timed out").into())
+                }
+                _ => std::thread::sleep(Duration::from_millis(2)),
+            }
+        }
+        let position = playback.position();
+        if position + Duration::from_secs_f64(1.0 / f64::from(rate)) < duration {
+            return Err(
+                format!("{phase}: device stopped early at {position:?} of {duration:?}").into(),
+            );
+        }
+        println!("phase={phase} generation={generation} from={:.6} position={:.6} wall={:.6} device_drain=complete", from.as_secs_f64(), position.as_secs_f64(), started.elapsed().as_secs_f64());
+    }
     Ok(())
 }
 
@@ -221,6 +296,7 @@ fn probe(
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut play = false;
     let mut check_device = false;
+    let mut play_device = false;
     let mut pcm = None;
     let mut path = None;
     let mut packet_limit = usize::MAX;
@@ -229,14 +305,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         match arg.as_str() {
             "--play" => play = true,
             "--check-device" => check_device = true,
+            "--play-device" => play_device = true,
             "--pcm" => pcm = Some(args.next().ok_or("--pcm needs a path")?),
             "--packets" => packet_limit = args.next().ok_or("--packets needs a count")?.parse()?,
             _ if path.is_none() => path = Some(arg),
             other => return Err(format!("unexpected argument: {other}").into()),
         }
     }
-    let path = path.ok_or("usage: audio_probe [--play] [--pcm FILE] [--packets COUNT] INPUT")?;
-    if check_device {
+    let path = path.ok_or("usage: audio_probe [--play | --play-device | --check-device] [--pcm FILE] [--packets COUNT] INPUT")?;
+    if play_device {
+        play_platform_device(&path)
+    } else if check_device {
         use fvid::audio::AudioBackend;
         let stream = harness::open_stream(&path).ok_or("no decodable audio track")?;
         let mut backend = fvid::audio::PlatformBackend::new();
