@@ -25,6 +25,8 @@ def generate():
             bad_index=5 if base['name'].endswith('header-switch')else 3
             for index,original in enumerate(base['frames']):
                 row=copy.deepcopy(original)
+                logical_bits=sum(len(p['bits'])for p in row['esc'])
+                row['esc'][-1]['bits']+='0'*(-logical_bits%8)
                 if variant!='clean'and index==bad_index:
                     if variant=='short-control':next(p for p in row['esc']if p['category']==9)['bits']=''
                     if variant=='short-values':
@@ -36,7 +38,7 @@ def generate():
                 for item in row['esc']:
                     raw=packed(item['bits']);instances.append(dict(category=item['category'],offset=len(information),bytes=len(raw),bits=len(item['bits'])));information.extend(raw)
                 raw=source['packets.bin'][original['offset']:original['offset']+original['bytes']]
-                rows.append(dict(offset=len(blob),bytes=len(packet),plain_offset=len(plain),plain_bytes=len(raw),choice=choice,instances=instances))
+                rows.append(dict(offset=len(blob),bytes=len(packet),plain_offset=len(plain),plain_bytes=len(raw),choice=choice,instances=instances,logical_bits=logical_bits))
                 blob.extend(packet);plain.extend(raw)
             case=dict(name=name,n=base['n'],rate=base['rate'],channels=base['channels'],configuration=base['configuration'],flags=base.get('resilience',0),asc=asc.hex(),plain_asc=base['asc'],frames=rows,source_frames=1,container_rate=base['rate'],container_frame_samples=base['container_frame_samples'],samples=base['samples'],pcm_offset=0,slots=base['slots'],bands=base['bands'],video=name+'.mp4',matroska=name+'.mka')
             movie(case,packets)

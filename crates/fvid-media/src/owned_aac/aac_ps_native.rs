@@ -41,6 +41,7 @@ pub struct NativePsAacDecoder {
     config: AacConfig,
     protection: Option<super::aac_ep::Config>,
     direct_mapping: bool,
+    separate_esc: bool,
     packet_pcm: Option<Frame>,
     packet_sources: u8,
     initial_program: Option<aac_pce::ProgramConfig>,
@@ -146,6 +147,7 @@ impl NativePsAacDecoder {
         Ok(Self {
             protection: parsed.protection,
             direct_mapping: parsed.direct_mapping,
+            separate_esc: parsed.separate_esc,
             packet_pcm: None,
             packet_sources: 0,
             config: parsed.core,
@@ -189,7 +191,8 @@ impl NativePsAacDecoder {
         }
     }
     pub fn restore(&mut self, checkpoint: &Checkpoint) -> Result<()> {
-        if self.config != checkpoint.state.config
+        if self.separate_esc != checkpoint.state.separate_esc
+            || self.config != checkpoint.state.config
             || self.direct_mapping != checkpoint.state.direct_mapping
             || self.protection != checkpoint.state.protection
             || self.initial_program != checkpoint.state.initial_program
@@ -280,6 +283,7 @@ impl NativePsAacDecoder {
     /// Frame identity always refers to the original packet, including EOF.
     /// Malformed trailing syntax rolls back core, extension and pending PCM.
     pub fn decode(&mut self, packet: &[u8]) -> Result<Option<Frame>> {
+        if self.separate_esc {return Err(invalid("EP1 requires separately associated ESC access units"));}
         let Some(ep) = &self.protection else {
             return self.decode_unprotected(packet);
         };
@@ -302,6 +306,13 @@ impl NativePsAacDecoder {
         }
         *self = trial;
         Ok(output)
+    }
+    /// A complete EP1 frame, with transport dependency and time validation.
+    pub fn decode_esc(&mut self, units: &[super::aac_ep1::AccessUnit<'_>]) -> Result<Option<Frame>> {
+        if !self.separate_esc {return Err(invalid("ESC access-unit input requires epConfig=1"));}
+        let frame = super::aac_ep1::associate(units)?;
+        let bytes = super::aac_esc::reassemble_er_with_sbr(&self.config, self.program.as_ref(), &frame.payload, &[self.extension.current_sbr_header().cloned()])?;
+        self.decode_unprotected(&bytes)
     }
     fn decode_unprotected(&mut self, packet: &[u8]) -> Result<Option<Frame>> {
         let mut trial = self.clone();
@@ -830,6 +841,7 @@ pub struct InBandPsProbe {
     config: AacConfig,
     protection: Option<super::aac_ep::Config>,
     direct_mapping: bool,
+    separate_esc: bool,
     requires_in_band: bool,
     initial_program: Option<aac_pce::ProgramConfig>,
     program: Option<aac_pce::ProgramConfig>,
@@ -860,6 +872,7 @@ impl InBandPsProbe {
             requires_in_band: parsed.ps_present != Some(true),
             protection: parsed.protection,
             direct_mapping: parsed.direct_mapping,
+            separate_esc: parsed.separate_esc,
             config: parsed.core,
             initial_program: parsed.program.clone(),
             program: parsed.program,
@@ -890,6 +903,7 @@ impl InBandPsProbe {
     /// A packet without SBR fill is valid for discovery, but does not claim PS.
     /// Syntax errors never commit partial headers, histories or presence flags.
     pub fn read(&mut self, packet: &[u8]) -> Result<bool> {
+        if self.separate_esc {return Err(invalid("EP1 requires separately associated ESC access units"));}
         let Some(ep) = &self.protection else {
             return self.read_unprotected(packet);
         };
@@ -902,6 +916,13 @@ impl InBandPsProbe {
         let seen = trial.seen;
         *self = trial;
         Ok(seen)
+    }
+    /// Validate discovery on all ESC streams in one EP1 source frame.
+    pub fn read_esc(&mut self, units: &[super::aac_ep1::AccessUnit<'_>]) -> Result<bool> {
+        if !self.separate_esc {return Err(invalid("ESC access-unit input requires epConfig=1"));}
+        let frame = super::aac_ep1::associate(units)?;
+        let bytes = super::aac_esc::reassemble_er_with_sbr(&self.config, self.program.as_ref(), &frame.payload, &[self.sbr.current_header().cloned()])?;
+        self.read_unprotected(&bytes)
     }
     fn read_unprotected(&mut self, packet: &[u8]) -> Result<bool> {
         let mut trial = self.clone();

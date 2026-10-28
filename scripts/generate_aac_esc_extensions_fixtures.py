@@ -30,7 +30,9 @@ def sources():
         base=next(c for c in m['cases']if c['name']==name);frames=[]
         for row in base['frames']:
             parts=[dict(category=p['category'],bits=''.join(str((info[p['offset']+i//8]>>(7-i%8))&1)for i in range(p['bits'])))for p in row['instances']]
-            count=sum(len(p['bits'])for p in parts);packet=raw[row['plain_offset']:row['plain_offset']+row['plain_bytes']];bits=''.join(f'{b:08b}'for b in packet)
+            total=sum(len(p['bits'])for p in parts);count=row.get('logical_bits',total)
+            if total!=count:parts[-1]['bits']=parts[-1]['bits'][:len(parts[-1]['bits'])-(total-count)]
+            packet=raw[row['plain_offset']:row['plain_offset']+row['plain_bytes']];bits=''.join(f'{b:08b}'for b in packet)
             assert set(bits[count:])<=set('0')and len(bits)-count<8
             frames.append(dict(wire=bits[:count],esc=parts))
         setup=field(31,5)+field(7,6)+frequency(24000)+field(base['configuration'],4)+field(base['n']==480,1)+'000'+'111'+header(0,True)*groups+'0000'

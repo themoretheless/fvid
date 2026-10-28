@@ -1,3 +1,73 @@
+## EP1 native separate-ESC input, 2026-10-28
+
+ASC parsing now retains epConfig=1 as `separate_esc`, independently of EP2
+protection and EP3 direct mapping. The new `aac_ep1::AccessUnit` carries a
+stream ID, dependency, exact bit length and source clock. `associate` validates
+a complete dependency chain and equal rational source times, then supplies
+exact ESC instances in dependency order. Transport padding outside bit_len is
+ignored; logical AAC alignment inside the final ESC remains checked normally.
+This follows ISO/IEC 14496-3:2009 sections 1.6.3.6 and 4.5.2.4.2:
+https://ossrs.io/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf
+
+Native AAC, native PS and PS discovery expose `decode_esc` / `read_esc` paths.
+Existing owned ESC parsers supply ER-LC/LTP/LD, ELD, ordinary SBR and LD-SBR
+syntax; synthesis alone commits histories. Byte packet entrypoints explicitly
+refuse EP1 input, and restoring between otherwise equivalent EP0/EP1 decoders
+is forbidden. This prevents silently interpreting one partial ESC as a raw AU.
+
+The synthetic corpus contains 96 ordinary and 24 PS streams. It covers
+480/512/960/1024 cores, AOT17/19/23/39, resilience/prediction, multichannel
+layouts, SBR/LD-SBR and explicit/sync/in-band PS. Individual ESC AUs arrive in
+rotated/reversed order with unequal but equivalent clocks and deliberately
+nonzero unused bits outside their bit boundary. Native AAC returns signed root timestamps and
+caller durations; PS retains its delayed original source index for the caller
+to associate with the input clock. Ordinary PCM matches independent saved
+sparse-core/QMF/CLDFB gold; PS uses independent sparse core PCM through the
+separately qualified owned SBR/PS component pipeline, plus normal raw-AU
+composition checks and delayed source identity/EOF checks.
+
+Duplicate/missing streams, multiple roots, forks, cycles, disconnected cycles,
+wrong bit storage and mismatched source times refuse before synthesis. Late
+standard-SBR/LD-SBR CRC errors also preserve prior histories, pending PS PCM
+and discovery state; a valid retry agrees exactly with a pristine decoder.
+Checkpoints, reset and public/owned decoder parity are checked separately.
+The ten native integration checks pass offline. All 480 files / 11,321,038
+bytes regenerate identically with process/socket creation forbidden.
+
+A newly reproduced shared ESC bug accepted missing final logical AAC alignment
+and silently supplied zero bits. `Reader::finish` now requires those bits.
+Eight short EP3 MP4/Matroska controls carry valid FEC but omit exactly the
+required final AAC alignment. Recovery succeeds, then native/public exports
+and both player bridges report `incomplete AAC ESC alignment bits`. A valid
+retry preserves the previous decoder history. The pre-fix native reproducer
+accepted the same missing-alignment source instead of refusing it.
+
+The stricter rule exposed omitted AAC alignment in the old standalone ELD
+and LD-SBR EP3 fixture wrappers. Their generators now assign it to the last
+ESC; intermediate traces still exclude it before appending further syntax.
+The 116 ELD and 258 LD-SBR source corpora, and their fractional-RS derivative,
+were regenerated. Independent PCM remains byte-identical. The extension
+corpus remains fully byte-identical after removing final AAC alignment before
+composing its appended metadata records. Saved logical_bits metadata keeps
+that composition explicit.
+
+Final qualification passes 98 selected integration checks across EP1, ELD,
+LD-SBR/header history, ER-LC/LTP/LD predictors, large HCR, extensions, standard
+SBR/PS and fractional RS, plus 1,614 root/media unit tests (27 ignored).
+The new integration executable has no FFmpeg/libav linkage. The refreshed
+ELD, LD-SBR and RS corpora also regenerate exactly with process/network
+creation forbidden.
+
+**Still open:** this is the native transport-facing input, not EP1 MP4/Systems
+or Matroska routing in the player. Saved short MP4/Matroska files deliberately
+use epConfig=0 logical projections as references. They do not qualify EP1
+container playback or seeking. Resolving container stream dependencies,
+extracting the transport's exact AU bit boundaries, synchronized input queues
+and player navigation remain required before claiming full EP1 support.
+The current ESDS ASC extractor discards ES_ID/dependency and SL configuration;
+retaining those fields is the first required MP4 routing step.
+Other AAC rendering extensions and the overall codec-gap objective remain open.
+
 ## EP3 standard ER SBR category 9, 2026-10-28
 
 Owned ER-LC/LTP ESC reconstruction now parses EXT_SBR_DATA in category 9.

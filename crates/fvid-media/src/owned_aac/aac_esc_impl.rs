@@ -291,6 +291,9 @@ impl Reader {
             .ok_or_else(|| invalid("AAC ESC payload length overflow"))?;
         for (index, instance) in self.instances.iter().enumerate() {
             let remaining = instance.bits - instance.position;
+            if index + 1 == self.instances.len() && remaining < (8 - count % 8) % 8 {
+                return Err(invalid("incomplete AAC ESC alignment bits"));
+            }
             // Only the last instance may carry final byte_alignment bits.
             if remaining > 0 {
                 if index + 1 != self.instances.len() || remaining != (8 - count % 8) % 8 {

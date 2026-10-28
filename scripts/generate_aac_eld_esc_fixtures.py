@@ -1,5 +1,5 @@
 """Own ELD ESC semantic reconstruction and EP3 movies; explicit/offline."""
-import json
+import copy,json
 from pathlib import Path
 from generate_aac_eld_fixtures import generate as eld,mkv,specifications
 from generate_he_aac_packet_fixtures import field,frequency,packed,video_fixture
@@ -47,7 +47,10 @@ def generate():
         variants=['clean']+(['short-side','crc']if base['rate']==24000 and base['configuration']in[1,2]and(base['tool']=='base'or base['flags']==7)else [])
         for variant in variants:
             rows=[];packets=[]
-            for index,row in enumerate(base['frames']):
+            for index,source_row in enumerate(base['frames']):
+                row=copy.deepcopy(source_row)
+                logical_bits=sum(len(p['bits'])for p in row['esc'])
+                row['esc'][-1]['bits']+='0'*(-sum(len(p['bits'])for p in row['esc'])%8)
                 instances=[]
                 for instance in row['esc']:
                     data=packed(instance['bits'])
@@ -56,7 +59,7 @@ def generate():
                 original=originals['packets.bin'][row['offset']:row['offset']+row['bytes']]
                 packet,selected=protect(row,patterns,orders,variant if variant!='clean'and index==3 else None)
                 packets.append(packet)
-                rows.append(dict(instances=instances,plain_offset=len(raw),plain_bytes=len(original),offset=len(protected),bytes=len(packet),choice=selected))
+                rows.append(dict(instances=instances,plain_offset=len(raw),plain_bytes=len(original),offset=len(protected),bytes=len(packet),choice=selected,logical_bits=logical_bits))
                 raw.extend(original);protected.extend(packet)
             name=base['name']+(''if variant=='clean'else '-'+variant)
             movie_case=dict(name=name,asc=asc.hex(),frames=[dict(offset=r['offset'],bytes=r['bytes'])for r in rows],container_rate=base['rate'],container_frame_samples=base['n'],samples=base['n']*len(rows),pcm_offset=0,slots=base['n']//32,bands=32)

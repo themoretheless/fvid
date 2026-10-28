@@ -362,8 +362,16 @@ fn semantic_esc_mapping_recovers_exact_logical_aus_and_respects_each_bit_boundar
                 .to_string()
                 .contains("truncated or oversized bit field")
         );
+        let count = frame.classes.iter().map(|c| c.bits.len()).sum::<usize>();
+        let padding = count - row["logical_bits"].as_u64().unwrap() as usize;
         let mut bad = frame.clone();
-        bad.classes.push(bad.classes.last().unwrap().clone());
+        // Keep the concatenated logical bits valid: only the surplus ESC
+        // boundary changes, by moving final AAC alignment into that class.
+        let mut extra = bad.classes.last().unwrap().clone();
+        let last = bad.classes.last_mut().unwrap();
+        extra.bits = last.bits.split_off(last.bits.len() - padding);
+        extra.class_index = bad.classes.len();
+        bad.classes.push(extra);
         assert!(
             reassemble_eld_core(&parsed.core, &bad)
                 .unwrap_err()
@@ -371,14 +379,7 @@ fn semantic_esc_mapping_recovers_exact_logical_aus_and_respects_each_bit_boundar
                 .contains("unconsumed AAC ESC instances")
         );
         let mut aligned = frame.clone();
-        let count = frame.classes.iter().map(|c| c.bits.len()).sum::<usize>();
-        let padding = (8 - count % 8) % 8;
-        aligned
-            .classes
-            .last_mut()
-            .unwrap()
-            .bits
-            .extend(vec![0; padding]);
+        assert!(padding < 8);
         assert_eq!(
             reassemble_eld_core(&parsed.core, &aligned).unwrap(),
             reassemble_eld_core(&parsed.core, &frame).unwrap()
