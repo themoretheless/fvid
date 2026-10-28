@@ -456,6 +456,40 @@ pub(crate) fn read_er_extensions(
     read_extension_bytes(bits, bits.remaining()/8, true, sbr)
 }
 
+/// Shared DRC syntax; evaluation is optional and default decoding preserves
+/// original dynamics. Both logical and separated ESC payloads use these fields.
+pub(crate) fn read_dynamic_range(mut read: impl FnMut(u8) -> Result<u32>) -> Result<()> {
+    if read(1)? != 0 {
+        read(4)?;
+        read(4)?;
+    }
+    if read(1)? != 0 {
+        loop {
+            read(7)?;
+            if read(1)? == 0 {
+                break;
+            }
+        }
+    }
+    let bands = if read(1)? != 0 {
+        let bands = read(4)? as usize + 1;
+        read(4)?;
+        for _ in 0..bands {
+            read(8)?;
+        }
+        bands
+    } else {
+        1
+    };
+    if read(1)? != 0 {
+        read(7)?;
+        read(1)?;
+    }
+    for _ in 0..bands {
+        read(8)?;
+    }
+    Ok(())
+}
 fn read_extension_bytes(
     bits: &mut super::bits::BitReader<'_>,
     count: usize,
@@ -510,31 +544,7 @@ fn read_extension_bytes(
                 }
                 input.skip(length * 8)?;
             }
-            11 => {
-                // ISO 14496-3 tables 4.58/4.59. DRC evaluation is optional
-                // (4.5.2.7.2); default decoding preserves original dynamics.
-                if read(&mut input, 1)? != 0 {
-                    read(&mut input, 4)?; // PCE instance tag
-                    read(&mut input, 4)?; // reserved
-                }
-                if read(&mut input, 1)? != 0 {
-                    loop {
-                        read(&mut input, 7)?; // excluded channel mask
-                        if read(&mut input, 1)? == 0 { break; }
-                    }
-                }
-                let bands = if read(&mut input, 1)? != 0 {
-                    let bands = read(&mut input, 4)? as usize + 1;
-                    read(&mut input, 4)?; // interpolation scheme
-                    for _ in 0..bands { read(&mut input, 8)?; }
-                    bands
-                } else { 1 };
-                if read(&mut input, 1)? != 0 {
-                    read(&mut input, 7)?; // program reference level
-                    read(&mut input, 1)?; // reserved
-                }
-                for _ in 0..bands { read(&mut input, 8)?; } // sign + gain
-            }
+            11 => read_dynamic_range(|width| read(&mut input, width))?,
             kind @ (13 | 14) => {
                 sbr_started=true;
                 let start = input.position();

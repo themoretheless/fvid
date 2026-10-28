@@ -1,5 +1,59 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## EP3 extension categories 5..8, 2026-10-28
+
+ER LC/LTP/LD and ELD reconstruction now consumes the non-SBR extended payload
+after the main syntax (and after ELD's existing LD-SBR instances). Category 5
+provides extension type/version, 6 provides DRC syntax, 7 fill/compatible opaque
+data, and 8 ancillary length parts and bytes. Whole-byte extension area bounds
+are derived after the consumed main payload; final AAC alignment stays outside
+that area and is still checked for zero bits. Each field/skip also remains
+bounded by its own category. Missing or surplus category bits cannot be borrowed
+from the next instance to complete a malformed record.
+
+Logical payloads and ESC payloads now share the same DRC field parser, including
+PCE tags, excluded-channel continuation masks, all 16 bands and program-reference
+fields. DRC evaluation retains the existing default policy preserving original
+dynamics. Ancillary zero/short lengths and 255-byte continuation escapes are
+supported, as are compatible unknown versions/types and fill syntax. Recognized
+SBR/MPEG-Surround extension tools keep explicit refusals until their own mapping
+is implemented; ER SBR CRC remains forbidden.
+
+The offline `generate_aac_esc_extensions_fixtures.py` corpus contains 72 valid
+movies across eight independent-reference sources: ER-LC mono/5.1, ER-LTP
+mono/stereo with all resilience tools enabled, LD mono/stereo, and ELD mono/7.1
+with double-rate CRC-protected LD-SBR. Nine metadata variants cover fill, zero/
+7/255/510-byte ANC, unknown versions, DRC, chained records and every compatible
+reserved type in 3..10/15. Complete logical AUs and original class bits are saved;
+existing own scalar core/prediction/TNS/CLDFB PCM remains the numerical oracle.
+
+The 64 malformed movies isolate short type/DRC classes, invalid fill nibble/byte,
+ANC lengths, category-boundary spill and final alignment. Sixteen spill controls
+are independently decoded as valid logical audio with the same PCM, while their
+EP3 category partition must fail with `AAC ESC extension exceeds category boundary`.
+These passing refusal controls prove the specific dependency-boundary failure;
+separate positive movies provide intended playback acceptance. Checkpoints and
+both container bridges require the same specific errors during opening/decoding.
+A frozen pre-change executable rejects the complete positive source with
+`unconsumed AAC ESC instances`.
+
+All 11 new checks passed offline with `--no-default-features --features player`,
+including exact reconstruction, independent finite PCM, MP4/Matroska exports and
+intervals, EOF/rewind/repeated/frame-edge/negative/past-EOF player navigation,
+checkpoint identity, malformed rollback, mono discovery and PS candidate transport.
+The 31 existing extension/ER-LC/LD-SBR integration checks also passed, together
+with 1,052 root unit tests (26 ignored) and 562 media unit tests (one ignored).
+The linked executable has no FFmpeg/libav dynamic dependencies. All 356 files /
+7,419,982 bytes regenerated identically with process/network creation forbidden;
+ordinary tests consume saved assets without generation.
+
+Normative mapping: ISO/IEC 14496-3 table 4.149,
+[extended-payload category assignment](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+ER SBR category 9, EP1 stream association, separate ELD extension tools, wider
+PCE/layout and multi-AU/protection combinations remain open. The full codec goal
+is not complete; this milestone supplies syntax/transport metadata acceptance.
+
+
 ## EP3 large independent HCR regions, 2026-10-28
 
 The four large independent-window ER-LTP HCR sources excluded from the preceding

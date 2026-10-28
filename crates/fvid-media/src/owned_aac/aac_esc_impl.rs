@@ -108,6 +108,127 @@ impl Reader {
         source.position = end;
         Ok(output)
     }
+    fn extension_field(
+        &mut self,
+        category: usize,
+        width: u8,
+        remaining: &mut usize,
+    ) -> Result<u32> {
+        if usize::from(width) > *remaining {
+            return Err(invalid("AAC extension exceeds fill payload"));
+        }
+        let value = self.read(category, |bits| bits.read(width))?;
+        *remaining -= usize::from(width);
+        Ok(value)
+    }
+    fn extension_skip(
+        &mut self,
+        category: usize,
+        count: usize,
+        remaining: &mut usize,
+    ) -> Result<()> {
+        if count > *remaining {
+            return Err(invalid("AAC extension exceeds fill payload"));
+        }
+        self.read(category, |bits| {
+            if count > bits.remaining() {
+                return Err(invalid("AAC ESC extension exceeds category boundary"));
+            }
+            bits.skip(count)
+        })?;
+        *remaining -= count;
+        Ok(())
+    }
+    fn opaque_extension(&mut self, remaining: &mut usize) -> Result<()> {
+        if *remaining != 0 {
+            self.allocate(7)?;
+            self.extension_skip(7, *remaining, remaining)?;
+        }
+        Ok(())
+    }
+    /// ER extension_payload records occupy whole bytes after the main payload;
+    /// final AAC byte_alignment remains outside that area and in the last ESC.
+    fn extensions(&mut self) -> Result<()> {
+        if self.next == self.instances.len() {
+            return Ok(());
+        }
+        if self.instances[..self.next]
+            .iter()
+            .any(|i| i.bits != i.position)
+        {
+            return Err(invalid("unconsumed AAC ESC information bits"));
+        }
+        let core = self
+            .spans
+            .iter()
+            .try_fold(0usize, |sum, span| sum.checked_add(span.end - span.start))
+            .ok_or_else(|| invalid("AAC ESC payload length overflow"))?;
+        let rest = self.instances[self.next..]
+            .iter()
+            .try_fold(0usize, |sum, i| sum.checked_add(i.bits))
+            .ok_or_else(|| invalid("AAC ESC payload length overflow"))?;
+        if core.checked_add(rest).is_none_or(|n| n % 8 != 0) {
+            return Err(invalid("AAC ESC extended payload is not byte aligned"));
+        }
+        let mut remaining = rest / 8 * 8;
+        while remaining != 0 {
+            self.current[5..9].fill(None);
+            self.allocate(5)?;
+            let kind = self.extension_field(5, 4, &mut remaining)?;
+            match kind {
+                0 => self.opaque_extension(&mut remaining)?,
+                1 => {
+                    self.allocate(7)?;
+                    if self.extension_field(7, 4, &mut remaining)? != 0 {
+                        return Err(invalid("invalid AAC fill-data nibble"));
+                    }
+                    while remaining != 0 {
+                        if self.extension_field(7, 8, &mut remaining)? != 0xa5 {
+                            return Err(invalid("invalid AAC fill-data byte"));
+                        }
+                    }
+                }
+                2 => {
+                    if self.extension_field(5, 4, &mut remaining)? != 0 {
+                        self.opaque_extension(&mut remaining)?;
+                        continue;
+                    }
+                    self.allocate(8)?;
+                    let mut length = 0usize;
+                    loop {
+                        let part = self.extension_field(8, 8, &mut remaining)? as usize;
+                        length = length
+                            .checked_add(part)
+                            .ok_or_else(|| invalid("AAC ancillary data length overflow"))?;
+                        if part != 255 {
+                            break;
+                        }
+                    }
+                    if length > remaining / 8 {
+                        return Err(invalid("AAC ancillary data exceeds fill payload"));
+                    }
+                    self.extension_skip(8, length * 8, &mut remaining)?;
+                }
+                11 => {
+                    self.allocate(6)?;
+                    super::aac_pce::read_dynamic_range(|width| {
+                        self.extension_field(6, width, &mut remaining)
+                    })?;
+                }
+                12 => {
+                    return Err(unsupported("AAC fill extension tool is not implemented"));
+                }
+                13 => {
+                    return Err(unsupported(
+                        "AAC ESC SBR category mapping is not yet implemented",
+                    ));
+                }
+                14 => return Err(invalid("ER AAC SBR CRC is forbidden")),
+                _ => self.opaque_extension(&mut remaining)?,
+            }
+        }
+        Ok(())
+    }
     fn finish(self) -> Result<Vec<u8>> {
         if self.next != self.instances.len() {
             return Err(invalid("unconsumed AAC ESC instances"));
@@ -230,6 +351,7 @@ pub fn reassemble_er(
             super::aac_channel::ChannelData::read_er_esc(&mut reader, config, None, false, false)?;
         }
     }
+    reader.extensions()?;
     reader.finish()
 }
 /// Restore ELD with optional current LD-SBR context. Header history is read
@@ -304,5 +426,6 @@ pub fn reassemble_eld(
             })?;
         }
     }
+    reader.extensions()?;
     reader.finish()
 }
