@@ -116,13 +116,13 @@ def unused_first_description(source):
         return box(tag,p)
     return b''.join(rewrite(t,p)for t,p in boxes(source))
 
-def eld_control(n,configuration,crc=True,dual=True,case_name=None):
+def eld_control(n,configuration,crc=True,dual=True,case_name=None,frame_count=6):
     from generate_he_aac_packet_fixtures import packed,field,frequency
     from generate_aac_sbr_dsp_fixtures import header
     parent=SOURCE/'aac-eld-esc-sbr';m=json.loads((parent/'manifest.json').read_bytes())
     name=case_name or f'n{n}-c{configuration}-x{2 if dual else 1}-crc{int(crc)}';base=next(c for c in m['cases']if c['name']==name)
     info=(parent/'instances.bin').read_bytes();blob=bytearray();rows=[]
-    for index,row in enumerate(base['frames'][:6]):
+    for index,row in enumerate(base['frames'][:frame_count]):
         parts=[]
         for p in row['instances']:
             bits=''.join(f'{v:08b}'for v in info[p['offset']:p['offset']+p['bytes']])[:p['bits']]
@@ -141,8 +141,8 @@ def eld_control(n,configuration,crc=True,dual=True,case_name=None):
     setup=field(31,5)+field(7,6)+frequency(24000)+field(configuration,4)+field(n==480,1)+field(base['flags'],3)+'1'+str(int(dual))+str(int(crc))+header(0,True)*groups+'0000'
     assert packed(setup+'00').hex()==base['plain_asc']
     seed=(parent/base['video']).read_bytes();fixture=dict(base,asc=packed(setup+'01').hex(),frames=rows)
-    movie=make_movie(fixture,seed,blob,allow_empty=True,frame_count=6,file_dependencies=True)
-    gold=(parent/(name+'.f32le')).read_bytes()[:6*base['container_frame_samples']*base['channels']*4]
+    movie=make_movie(fixture,seed,blob,allow_empty=True,frame_count=frame_count,file_dependencies=True)
+    gold=(parent/(name+'.f32le')).read_bytes()[:frame_count*base['container_frame_samples']*base['channels']*4]
     return movie,gold,len(rows[0]['units']),base['channels']
 
 def generate():

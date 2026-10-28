@@ -1,3 +1,55 @@
+## Same-ASC LD-SBR membership through MP4 OD events, 2026-10-29
+
+The own indexed mono LD-SBR reproducer failed at frame 0 before this change
+with `EP1 MP4 missing simultaneous ESC access unit`. An ASC alone cannot tell
+an inactive dependency from a lost AU. The reader now indexes explicit file
+Object Descriptor events reachable through `iods` ES_ID_Inc references and
+`mpod` ES_ID_Ref tables; the EP1 reader selects the declared dependency prefix
+at the exact rational source time. Missing active AUs still refuse, and orphan
+OD tracks do not relax the existing static-membership checks.
+
+The own parser implements file ObjectDescriptorUpdate, ObjectDescriptorRemove,
+ESDUpdate and ESRemoveRef. ESDUpdate descriptors begin immediately after the
+10-bit object ID, with final bit alignment. Tests cover unaligned descriptors,
+four-byte expandable lengths and reversed reference lists. A complete command
+AU applies atomically; malformed late commands cannot commit an earlier update.
+Immutable indexed state supports navigation without changing codec history.
+Retained timelines, event snapshots and references enter the reader's index
+accounting; indexing checks the existing configurable metadata budget.
+
+There are 72 twelve-frame programmes: 480/512 core samples, mono/eight-channel,
+three update forms, indexed/fragmented/hybrid storage, each with either absent
+inactive tails or physically retained inactive data. Every programme keeps the
+same ASC while changing physical grouping 1 -> 4/27 -> 1. Complete native PCM
+matches saved independent scalar/CLDFB references; exact logical AU bits, sample
+offsets, fragment defaults/overrides and 72-kHz OD clock boundaries are checked.
+Six acceptance tests cover continuous decoding and checkpoint replay, public
+and owned PCM/ranges, WAVE crop/gain/resampling, AudioStream playback,
+frame-edge/repeated/EOF/past-EOF seek and rewind. Another 130 malformed files
+exercise specific parser/selection/missing-AU failures, atomic OD state and
+codec retry/history preservation. Worker capture includes these 72 programmes.
+
+All 207 new artifacts / 4014350 bytes regenerate byte-exact with process and
+socket access forbidden; all twelve prior EP1 corpora remain byte-exact.
+Ordinary tests read saved own synthetic media without FFmpeg or network.
+Root/media unit suites pass: 1623 tests, 29 ignored, including worker capture
+of 1890 programmes. All-test compilation passes offline with
+`--no-default-features --features player`; 27 additional MP4 container checks
+pass. All 123 previous selected AAC/ESC/MP4 integration checks and six new
+OD checks pass (156 integration checks including the container gate). The new
+integration binary has no FFmpeg/libav linkage.
+
+Wire references: [ISO/IEC 14496-14:2020](https://www.iso.org/standard/79110.html),
+file OD references and Systems stream bindings; [GPAC OD command source](https://github.com/gpac/gpac/blob/master/src/odf/odf_command.c),
+used to crosscheck bit alignment, without copying implementation.
+
+This qualifies the exercised LD-SBR transport and software playback/seek slice.
+It does not establish complete LD-SBR conformance or physical-device output.
+OD edit mapping, URL/OCI/IPMP descriptors, multiple controlling OD streams,
+root deactivation/general scene semantics and live OD refresh remain unsupported.
+Earlier dated sections below are historical qualification records, not a current
+aggregate list of open gaps.
+
 ## Grouped PS discovery, PCE and ancillary/DRC transport, 2026-10-28
 
 The own grouped PS MP4 `sbr-ps-aot17-1024-24000-explicit-whole-indexed`

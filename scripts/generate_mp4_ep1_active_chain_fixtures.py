@@ -12,7 +12,7 @@ def streams(movie):
         if md[b'hdlr'][8:12]!=b'soun':continue
         ident=int.from_bytes(children[b'tkhd'][12:16],'big');parent=None
         if b'tref'in children:parent=int.from_bytes(dict(boxes(children[b'tref']))[b'dpnd'],'big')
-        tables=dict(boxes(dict(boxes(md[b'minf']))[b'stbl']));count=int.from_bytes(tables[b'stsz'][8:12],'big');assert count in [3,6]
+        tables=dict(boxes(dict(boxes(md[b'minf']))[b'stbl']));count=int.from_bytes(tables[b'stsz'][8:12],'big');assert count in [3,6,12,16]
         offset=int.from_bytes(tables[b'stco'][8:12],'big');raw=[]
         for i in range(count):
             size=int.from_bytes(tables[b'stsz'][12+4*i:16+4*i],'big');raw.append(movie[offset:offset+size]);offset+=size

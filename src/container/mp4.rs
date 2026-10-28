@@ -6,11 +6,13 @@ use crate::color::hdr::{ColourDescription, HdrMetadata};
 use crate::{container::FileTags, invalid, unsupported, Result};
 use std::io::{Read, Seek, SeekFrom};
 use std::ops::Range;
+use fvid_media::owned_mp4_od as od;
 
 use crate::buffer;
 use super::reduce_ratio;
 use crate::codec::config::{aac_specific_config as mp4_aac_specific_config,AudioSpecificConfig as Mp4AudioSpecificConfig};
 include!("../../crates/fvid-media/src/owned_mp4_impl.rs");
+include!("../../crates/fvid-media/src/owned_mp4_od_index_impl.rs");
 
 #[cfg(test)]
 mod tests {

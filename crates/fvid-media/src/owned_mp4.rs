@@ -3,6 +3,7 @@
 //! Container parsing does not validate codec payloads or implement playback.
 #![forbid(unsafe_code)]
 use crate::owned_file_tags::FileTags;
+use crate::owned_mp4_od as od;
 use crate::owned_matroska::{ColourDescription, HdrMetadata};
 use std::io::{Read, Seek, SeekFrom};
 use std::ops::Range;
@@ -72,6 +73,7 @@ pub(crate) fn reduce_ratio(numerator: u64, denominator: u64) -> (u32, u32) {
 use crate::owned_codec_config::aac_specific_config as mp4_aac_specific_config;
 use crate::owned_aac::config::AudioSpecificConfig as Mp4AudioSpecificConfig;
 include!("owned_mp4_impl.rs");
+include!("owned_mp4_od_index_impl.rs");
 
 #[cfg(test)]
 mod admission_tests {

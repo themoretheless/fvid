@@ -184,6 +184,8 @@ impl SampleDescription {
 pub struct Track {
     /// MPEG-4 file dependencies from trak/tref/dpnd (track IDs, not stored ES_ID).
     pub dependencies: Vec<u32>,
+    /// File reference table used by this OD stream (trak/tref/mpod).
+    pub od_references: Vec<u32>,
     pub sample_descriptions: Vec<SampleDescription>,
     pub id: u32,
     pub handler: [u8; 4],
@@ -237,6 +239,7 @@ impl Track {
             .ok_or_else(|| invalid("MP4 decoder description index is out of range"))?;
         Ok(Self {
             dependencies: self.dependencies.clone(),
+            od_references: self.od_references.clone(),
             sample_descriptions: Vec::new(), id: self.id, handler: self.handler,
             codec: d.codec, name: String::new(), language: String::new(),
             timescale: self.timescale, duration: self.duration,
@@ -338,6 +341,8 @@ pub struct Mp4Reader<R> {
     /// leaves empty.
     tags: FileTags,
     movie_timescale: u32,
+    initial_object_tracks: Vec<u32>,
+    object_timelines: Vec<od::Timeline>,
     limits: Limits,
     /// Byte position the reader was left at by the last packet read, or
     /// `u64::MAX` when unknown (open, rewind or a failed read).
@@ -577,6 +582,8 @@ impl<R: Read + Seek> Mp4Reader<R> {
                 "fragmented MP4 states no fragments: it is an init segment without media",
             ));
         }
+        let initial_object_tracks = optional(&movie,b"iods")?.map(|data|od::initial_tracks(data,limits.tracks))
+            .transpose().map_err(|e|invalid(&e))?.unwrap_or_default();
         let (movie_timescale, movie_duration) = media_time(required(&movie, b"mvhd")?)?;
         let mut tracks = Vec::new();
         let mut track_header_flags = Vec::new();
@@ -633,7 +640,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
         let udta = optional(&movie, b"udta")?;
         let chapters = read_chpl(udta, movie_timescale, movie_duration);
         let tags = read_tags(udta);
-        Ok(Self {
+        let mut indexed = Self {
             reader,
             tracks,
             track_header_flags,
@@ -642,9 +649,13 @@ impl<R: Read + Seek> Mp4Reader<R> {
             chapters,
             tags,
             movie_timescale,
+            initial_object_tracks,
+            object_timelines: Vec::new(),
             limits,
             position: u64::MAX,
-        })
+        };
+        indexed.index_object_descriptors()?;
+        Ok(indexed)
     }
     /// The stored tkhd flags for an indexed track, without the version byte.
     pub fn track_header_flags(&self, index: usize) -> Option<u32> {
@@ -694,6 +705,9 @@ impl<R: Read + Seek> Mp4Reader<R> {
             Ok(())
         }
         let mut total = 0;
+        add(&mut total,self.initial_object_tracks.capacity(),4)?;
+        add(&mut total,self.object_timelines.capacity(),std::mem::size_of::<od::Timeline>())?;
+        for timeline in &self.object_timelines { add(&mut total,timeline.heap_bytes().map_err(|e|invalid(&e))?,1)?; }
         add(&mut total, self.sample_padding.capacity(), std::mem::size_of::<Option<SamplePadding>>())?;
         for padding in self.sample_padding.iter().flatten() { add(&mut total,padding.packed.capacity(),1)?; }
         add(&mut total, self.track_header_flags.capacity(), std::mem::size_of::<u32>())?;
@@ -734,6 +748,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
         }
         for track in &self.tracks {
             add(&mut total,track.dependencies.capacity(),std::mem::size_of::<u32>())?;
+            add(&mut total,track.od_references.capacity(),std::mem::size_of::<u32>())?;
             add(&mut total, track.name.capacity(), 1)?;
             add(&mut total, track.language.capacity(), 1)?;
             add(&mut total, track.configuration.capacity(), 1)?;
@@ -1245,8 +1260,14 @@ fn parse_track(
     }
     let entry = entries[0];
     let mut dependencies = Vec::new();
+    let mut od_references = Vec::new();
     if let Some(tref) = optional(&track, b"tref")? {
         let references = atoms(tref)?;
+        if let Some(mpod)=optional(&references,b"mpod")? {
+            if handler!=*b"odsm"||!mpod.len().is_multiple_of(4)||mpod.len()/4>usize::from(u16::MAX){return Err(invalid("invalid MP4 mpod reference table"));}
+            od_references.try_reserve_exact(mpod.len()/4).map_err(|_|invalid("MP4 OD reference allocation failed"))?;
+            for at in (0..mpod.len()).step_by(4){let id=u32be(mpod,at)?;if id==0{return Err(invalid("zero MP4 mpod track ID"));}od_references.push(id);}
+        }
         if let Some(dpnd) = optional(&references, b"dpnd")? {
             if !dpnd.len().is_multiple_of(4) {
                 return Err(invalid("invalid MP4 dpnd table length"));
@@ -1262,6 +1283,7 @@ fn parse_track(
     }
     let mut result = Track {
         dependencies,
+        od_references,
         sample_descriptions: Vec::new(),
         id,
         handler,
@@ -1427,6 +1449,7 @@ fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<Skip
                 }),
             )
         }
+        (b"odsm", b"mp4s") => (8,Some(b"esds")),
         (b"soun", b"mp4a") => {
             match u16be(entry.data, 8)? {
                 0 => {

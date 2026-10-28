@@ -245,6 +245,7 @@ impl Group {
             if !member {
                 continue;
             }
+            add(std::mem::size_of::<u32>())?;
             add(track
                 .samples
                 .len()
@@ -515,8 +516,9 @@ impl Group {
         Ok(total)
     }
     /// Read the active dependency prefix at the selected root's exact time.
-    /// A tail which never uses the root's active ASC may be absent. Missing AUs
-    /// from a stream using that ASC, clock mismatches and active chain gaps
+    /// Reachable OD events explicitly select the active prefix when present.
+    /// Otherwise a tail which never uses the root's active ASC may be absent.
+    /// Missing active AUs, clock mismatches and active chain gaps
     /// refuse; no padding or substitution changes decoder input or history.
     pub fn read_frame<R: Read + Seek>(
         &self,
@@ -555,12 +557,15 @@ impl Group {
             .to_vec();
         let time = key(stamp.pts, root.timescale);
         let root_scale = root.timescale;
+        let chain:Vec<_> = self.streams.iter().map(|s|s.id).collect();
+        let od_width=reader.object_descriptor_prefix(&chain,stamp.pts,root_scale).map_err(|e|invalid(&e.to_string()))?;
         let mut output = Vec::new();
         output
             .try_reserve_exact(self.streams.len())
             .map_err(|_| invalid("EP1 MP4 AU table allocation failed"))?;
         let mut inactive_tail = false;
-        for stream in &self.streams {
+        for (ordinal,stream) in self.streams.iter().enumerate() {
+            if od_width.is_some_and(|width|ordinal>=width){break;}
             check().map_err(|e| invalid(&e.to_string()))?;
             let track = reader
                 .tracks()
@@ -607,7 +612,7 @@ impl Group {
                             required = true;
                         }
                     }
-                    if required {
+                    if required || od_width.is_some() {
                         return Err(invalid("EP1 MP4 missing simultaneous ESC access unit"));
                     }
                     // Only an inactive tail may disappear. The root's current
