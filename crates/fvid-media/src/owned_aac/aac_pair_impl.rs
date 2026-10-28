@@ -258,22 +258,41 @@ impl ChannelPair {
         let right=ChannelData::read_eld(&mut cursor,config,Some(&info),true)?;
         *bits=cursor;Ok(Self{left,right,mid_side,explicit_mask})
     }
-    pub(crate) fn read_er_lc_esc(
+    pub(crate) fn read_er_esc(
         reader: &mut super::aac_esc::Reader,
         config: &AacConfig,
     ) -> Result<Self> {
         reader.common()?;
-        let common = reader.read(0, |b| {
+        let (common, deferred) = reader.read(0, |b| {
             b.read(4)?;
-            Ok(if b.bit()? {
-                Some(BandTables::for_config(config)?.read_ics(b)?)
-            } else {
-                None
-            })
+            if !b.bit()? {
+                return Ok((None, false));
+            }
+            let tables = BandTables::for_config(config)?;
+            let (info, present) = match config.object_type {
+                19 => {
+                    let header = super::aac_ltp_syntax::LtpIcsInfo::read_er_common(
+                        b,
+                        (
+                            (tables.long.len() - 1) as u8,
+                            (tables.short.len() - 1) as u8,
+                        ),
+                        config.frame_samples,
+                    )?;
+                    (header.info, header.predictor_present)
+                }
+                23 => {
+                    let (info, _, present) =
+                        super::aac_ld_syntax::read_ics(b, (tables.long.len() - 1) as u8, true)?;
+                    (info, present)
+                }
+                _ => (tables.read_ics(b)?, false),
+            };
+            Ok((Some(info), present))
         })?;
         let (explicit_mask, mid_side) = reader.read(0, |b| Self::read_mask(b, common.as_ref()))?;
-        let left = ChannelData::read_er_lc_esc(reader, config, common.as_ref(), true)?;
-        let right = ChannelData::read_er_lc_esc(reader, config, common.as_ref(), true)?;
+        let left = ChannelData::read_er_esc(reader, config, common.as_ref(), true, deferred)?;
+        let right = ChannelData::read_er_esc(reader, config, common.as_ref(), true, deferred)?;
         Ok(Self {
             left,
             right,

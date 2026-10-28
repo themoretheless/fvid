@@ -258,21 +258,63 @@ impl ChannelData {
             pair,
         )
     }
-    pub(crate) fn read_er_lc_esc(
+    pub(crate) fn read_er_esc(
         reader: &mut super::aac_esc::Reader,
         config: &AacConfig,
         common: Option<&IcsInfo>,
         pair: bool,
+        deferred_prediction: bool,
     ) -> Result<Self> {
         reader.channel(config.scalefactor_data_resilience)?;
         if !pair {
             reader.read(1, |b| b.read(4))?;
         }
         let tables = BandTables::for_config(config)?;
+        if deferred_prediction {
+            let info = common.ok_or_else(|| invalid("ER ESC predictor requires common window"))?;
+            reader.read(1, |b| {
+                if b.bit()? {
+                    match config.object_type {
+                        19 => {
+                            super::aac_ltp_syntax::LtpData::read(
+                                b,
+                                info.sequence,
+                                info.max_sfb,
+                                config.frame_samples,
+                            )?;
+                        }
+                        23 => {
+                            super::aac_ld_syntax::read_data(b, info.max_sfb)?;
+                        }
+                        _ => return Err(invalid("unexpected ER ESC predictor profile")),
+                    }
+                }
+                Ok(())
+            })?;
+        }
         let gain = reader.read(1, |b| Ok(b.read(8)? as u8))?;
         let info = match common {
             Some(info) => info.clone(),
-            None => reader.read(1, |b| tables.read_ics(b))?,
+            None => reader.read(1, |b| {
+                Ok(match config.object_type {
+                    19 => {
+                        super::aac_ltp_syntax::LtpIcsInfo::read(
+                            b,
+                            (
+                                (tables.long.len() - 1) as u8,
+                                (tables.short.len() - 1) as u8,
+                            ),
+                            config.frame_samples,
+                            false,
+                        )?
+                        .info
+                    }
+                    23 => {
+                        super::aac_ld_syntax::read_ics(b, (tables.long.len() - 1) as u8, false)?.0
+                    }
+                    _ => tables.read_ics(b)?,
+                })
+            })?,
         };
         Self::read_payload_input(
             &mut super::aac_esc::ChannelInput::Categories(reader),

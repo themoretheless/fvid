@@ -137,7 +137,7 @@ impl AacConfig {
                     b.skip(used)?;
                     Some(ep)
                 }
-                3 if object_type == 17 => {
+                3 => {
                     let (ep, used) = super::aac_ep::Config::read_prefix(b.source_bytes(), b.position())?;
                     b.skip(used)?;
                     if !b.bit()? {return Err(invalid("reserved AAC EP3 directMapping value"));}

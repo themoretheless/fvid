@@ -182,10 +182,22 @@ pub fn reassemble_er_lc(
     if config.object_type != 17 {
         return Err(invalid("ER-LC ESC mapping requires AOT17"));
     }
+    reassemble_er(config, program, frame)
+}
+/// Restore ER LC/LTP/LD main syntax, including deferred channel predictors.
+/// Parsing records original spans; only normal decoding updates LTP history.
+pub fn reassemble_er(
+    config: &AacConfig,
+    program: Option<&super::aac_pce::ProgramConfig>,
+    frame: &RecoveredFrame,
+) -> Result<Vec<u8>> {
+    if !matches!(config.object_type, 17 | 19 | 23) {
+        return Err(invalid("ER ESC mapping requires AOT17/19/23"));
+    }
     let configured: Vec<u8>;
     let kinds: &[u8] = match config.channel_configuration {
         0 => {
-            let program = program.ok_or_else(|| invalid("missing ER-LC ESC PCE layout"))?;
+            let program = program.ok_or_else(|| invalid("missing ER ESC PCE layout"))?;
             configured = program
                 .elements
                 .iter()
@@ -208,14 +220,14 @@ pub fn reassemble_er_lc(
         7 | 12 => &[0, 1, 1, 1, 3],
         11 => &[0, 1, 1, 0, 3],
         14 => &[0, 1, 1, 3, 1],
-        _ => return Err(invalid("unsupported ER-LC ESC layout")),
+        _ => return Err(invalid("unsupported ER ESC layout")),
     };
     let mut reader = Reader::new(frame)?;
     for &kind in kinds {
         if kind == 1 {
-            super::aac_pair::ChannelPair::read_er_lc_esc(&mut reader, config)?;
+            super::aac_pair::ChannelPair::read_er_esc(&mut reader, config)?;
         } else {
-            super::aac_channel::ChannelData::read_er_lc_esc(&mut reader, config, None, false)?;
+            super::aac_channel::ChannelData::read_er_esc(&mut reader, config, None, false, false)?;
         }
     }
     reader.finish()

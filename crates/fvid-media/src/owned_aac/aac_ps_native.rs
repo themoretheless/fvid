@@ -1152,6 +1152,6 @@ fn protected_units(
 ) -> Result<Vec<Vec<u8>>> {
     if !direct_mapping { return ep.decode_raw_access_units(packet); }
     ep.decode_class_frames(packet)?.iter().map(|frame| {
-        super::aac_esc::reassemble_er_lc(config, program, frame)
+        super::aac_esc::reassemble_er(config, program, frame)
     }).collect()
 }

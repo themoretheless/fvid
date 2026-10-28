@@ -31,7 +31,7 @@ class Oracle(BaseOracle):
                 value=spectra[0][k]-a*prior;spectra[0][k]=f32(value);prior=value
         return super().run(seq,shape,[[v/1024 for v in row] for row in spectra],False,lag,coefficient,used)
 
-def channel(seq,books,values,info='',flags=0,scale_values=None,tns=None,mutation=None):
+def channel(seq,books,values,info='',flags=0,scale_values=None,tns=None,mutation=None,categories=False):
     section=bool(flags&4);rvlc=bool(flags&2);hcr=bool(flags&1)
     q=[r[:] for r in values]
     if mutation=='virtual-lav':q[0][0]=32
@@ -53,9 +53,15 @@ def channel(seq,books,values,info='',flags=0,scale_values=None,tns=None,mutation
             dim=4 if book<=4 else 2
             for row in q:
                 for k in range(4*band,4*band+4,dim):data+=cw(book,row[k:k+dim])
-    body=field(140,8)+info+sections+header+'0'+field(tns is not None,1)+'0'+spectral_header+rvdata
-    if tns is not None:body+=field(1,2)+'0'+field(47,6)+field(1,5)+field(tns,1)+'0'+'001'
-    return body+data
+    side=field(140,8)+info+sections+header+'0'+field(tns is not None,1)+'0'+spectral_header
+    tns_data=(field(1,2)+'0'+field(47,6)+field(1,5)+field(tns,1)+'0'+'001')if tns is not None else ''
+    if categories:
+        result=[dict(category=1,bits=side)]
+        if rvlc:result.append(dict(category=2,bits=rvdata))
+        if tns is not None:result.append(dict(category=3,bits=tns_data))
+        result.append(dict(category=4,bits=data))
+        return result
+    return side+rvdata+tns_data+data
 
 def large_cpe_cases(blob,gold):
     from generate_aac_hcr_fixtures import reorder,PRIORITY

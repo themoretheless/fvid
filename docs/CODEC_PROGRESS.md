@@ -1,5 +1,64 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## ER AAC-LTP/LD EP3 predictors and resilience, 2026-10-28
+
+AOT19 and AOT23 now admit epConfig=3/directMapping=1 and restore their main
+payload through the shared bounded ESC reader. Common CPE headers and masks
+stay in category 0; each deferred predictor is parsed from its own category 1
+before that channel's gain and payload. Independent-window predictors remain
+inside their own ICS header. The existing LTP/LD ICS and predictor syntax
+parsers validate these spans; reconstruction itself does not alter predictor
+history. Normal transactional synthesis alone commits reconstructed source AUs.
+The public ER-LC helper remains available with its AOT17 guard, forwarding to
+the general ER helper. ELD keeps its separate LD-SBR reconstruction path.
+
+Native decoding, mono PS discovery and PS candidate transport recovery use the
+same ER semantic reconstruction. Reserved directMapping remains invalid;
+checkpoint identity continues to distinguish raw EP2 from semantic EP3.
+This extends main-payload support, not the unimplemented extended-payload ESC
+categories or separate elementary-stream EP1 association.
+
+The explicit offline `generate_aac_er_predictive_esc_fixtures.py` corpus has
+160 acceptance movies: 90 ER-LTP and 70 ER-LD. It covers 960/1024 and 480/512,
+mono/stereo, independent/common windows, MS modes 0/1/2, all eight resilience
+flag combinations, virtual books, RVLC escapes, HCR, TNS, long/start/short/stop
+transitions, sine/KBD or LD low-overlap windows, LD lag update/reuse/absence and
+independent deferred predictor activity. Logical fields are independently traced,
+then checked byte-for-byte against the existing own source packets. Numerical
+references retain the independent sparse cosine/window/prediction/TNS oracles.
+The shared generator's optional category output is checked against its ordinary
+channel spelling for every traced resilience source.
+
+There are 110 malformed movie controls for bounded side/predictor or spectrum
+truncation, EP CRC, final alignment and an ER-LTP lag exceeding two frames.
+HCR spectrum truncation specifically requires `truncated AAC HCR spectral region`,
+not a generic bit-field error. The first negative run exposed that inaccurate
+expectation; the intended HCR failure was verified and the generator corrected.
+All 864 files / 17,837,502 bytes regenerated identically with process/network
+creation forbidden; ordinary tests only read saved assets.
+
+Frozen pre-change executables reject the same complete positive AOT19 and AOT23
+ASCs with the old epConfig-not-implemented errors. New checks restore every class
+bit and complete logical AU, compare finite independent PCM, validate checkpoints,
+EP2/EP3 identity and reserved mapping, exports/intervals in MP4/Matroska, native
+player audio-stream EOF/rewind/repeated/frame-edge/negative/past-EOF navigation,
+malformed rollback and exact errors during opening or decoding. Mono AOT19
+PS discovery/candidates also exercise all resilience combinations without
+claiming that these main-only sources contain PS audio.
+
+Qualification passed offline with `--no-default-features --features player`:
+all nine new checks and 40 existing ER-LC/ELD/LTP/LD integration checks,
+1,052 root unit tests (26 ignored) and 562 media unit tests (one ignored).
+The new linked integration executable has no FFmpeg/libav dynamic dependencies.
+
+Normative mapping: ISO/IEC 14496-3 tables 4.94/4.95/4.148,
+[ER channel-dependent predictor assignment](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+The four existing large independent HCR-region sources remain outside this new
+EP3 corpus, as do wider PCE/layout and multi-AU/protection cross-products.
+Those qualification gaps, extended-payload categories and EP1 remain open;
+the full codec goal is not complete.
+
+
 ## ER AAC-LC EP3 main-payload reconstruction, 2026-10-28
 
 AOT17 now admits epConfig=3 with directMapping=1 and reconstructs its main
