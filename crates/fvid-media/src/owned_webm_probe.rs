@@ -6,7 +6,44 @@ pub fn probe_webm(path: &Path) -> Result<MediaInfo, String> {
     try_probe_webm(path)?.ok_or_else(|| "Matroska probe requires supported content encoding and block lacing".into())
 }
 pub fn probe_webm_with_packet_limit(path: &Path, packet_bytes: usize) -> Result<MediaInfo, String> {
-    try_probe_webm_with_packet_limit(path, packet_bytes)?.ok_or_else(|| "Matroska probe requires supported content encoding and block lacing".into())
+    probe_webm_with_packet_and_memory_limit(path, packet_bytes, None)
+}
+pub fn probe_webm_with_packet_and_memory_limit(
+    path: &Path,
+    packet_bytes: usize,
+    max_controlled_bytes: Option<usize>,
+) -> Result<MediaInfo, String> {
+    try_probe_webm_with_packet_and_memory_limit(path, packet_bytes, max_controlled_bytes)?
+        .ok_or_else(|| "Matroska probe requires supported content encoding and block lacing".into())
+}
+pub fn probe_webm_with_options(
+    path: &Path,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo, String> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    try_probe_webm_with_limits(
+        path,
+        options.max_packet_bytes,
+        options.max_controlled_bytes,
+        options.max_packets,
+    )?
+    .ok_or_else(|| "Matroska probe requires supported content encoding and block lacing".into())
 }
 /// None marks content encodings or block lacing that need parser support; malformed
 /// container data stays an error and cannot request a fallback.
@@ -14,24 +51,74 @@ pub fn try_probe_webm(path: &Path) -> Result<Option<MediaInfo>, String> {
     try_probe_webm_with_packet_limit(path, Limits::default().packet_bytes)
 }
 pub fn try_probe_webm_with_packet_limit(path: &Path, packet_bytes: usize) -> Result<Option<MediaInfo>, String> {
+    try_probe_webm_with_packet_and_memory_limit(path, packet_bytes, None)
+}
+pub fn try_probe_webm_with_packet_and_memory_limit(
+    path: &Path,
+    packet_bytes: usize,
+    max_controlled_bytes: Option<usize>,
+) -> Result<Option<MediaInfo>, String> {
+    try_probe_webm_with_limits(path, packet_bytes, max_controlled_bytes, None)
+}
+fn try_probe_webm_with_limits(
+    path: &Path,
+    packet_bytes: usize,
+    max_controlled_bytes: Option<usize>,
+    max_packets: Option<u64>,
+) -> Result<Option<MediaInfo>, String> {
     if packet_bytes == 0 {
         return Err("packet byte limit must be positive".into());
     }
+    if max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    let mut limits = Limits {
+        packet_bytes,
+        ..Limits::default()
+    };
+    if let Some(max_pkts) = max_packets {
+        limits.packets = limits.packets.min(usize::try_from(max_pkts).unwrap_or(usize::MAX));
+    }
+    let memory_packets = max_controlled_bytes
+        .map(|bytes| bytes / std::mem::size_of::<crate::owned_webm::Packet>());
+    if let Some(maximum) = memory_packets {
+        limits.packets = limits.packets.min(maximum);
+    }
+    let map_packet_limit = |error: crate::owned_webm::Error| {
+        if memory_packets
+            .is_some_and(|max| max < Limits::default().packets && max_packets.is_none_or(|p| (max as u64) <= p))
+            && error
+                .to_string()
+                .contains("WebM packet count exceeds limit")
+        {
+            "controlled memory budget exceeded: Matroska packet index limit".to_owned()
+        } else {
+            error.to_string()
+        }
+    };
     let mut reader = match WebmReader::open(
         BufReader::new(File::open(path).map_err(|e| e.to_string())?),
-        Limits {
-            packet_bytes,
-            ..Limits::default()
-        },
+        limits,
     ) {
         Ok(reader) => reader,
         Err(error) if error.is_unsupported() => return Ok(None),
-        Err(error) => return Err(error.to_string()),
+        Err(error) => return Err(map_packet_limit(error)),
     };
     match reader.scan_all() {
         Ok(()) => {},
         Err(error) if error.is_unsupported() => return Ok(None),
-        Err(error) => return Err(error.to_string()),
+        Err(error) => return Err(map_packet_limit(error)),
+    }
+    if let Some(limit) = max_controlled_bytes {
+        let index_bytes = reader
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?;
+        if index_bytes > limit {
+            return Err("controlled memory budget exceeded: Matroska index payload limit".into());
+        }
     }
     let checked = |n: u64| {
         i64::try_from(n).map_err(|_| "Matroska metadata timestamp exceeds API range".to_string())

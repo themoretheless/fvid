@@ -3,8 +3,24 @@ use fvid_control::{CopyOptions, ProgressHook};
 use fvid_media_info::{LoudnormStats, MediaPlan, PlanStep};
 use std::path::Path;
 type Result<T> = std::result::Result<T, String>;
+fn check_options(options: &CopyOptions) -> Result<()> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)
+}
 fn policies(options: &CopyOptions) -> bool {
-    crate::owned_audio_export::single_audio_options(options)
+    check_options(options).is_ok()
+        && crate::owned_audio_export::single_audio_options(options)
         && options.metadata_set.len() + options.metadata_delete.len() <= 64
         && !options
             .metadata_set
@@ -41,6 +57,7 @@ pub fn apply(
     dual_pass: bool,
     options: &CopyOptions,
 ) -> Result<LoudnormStats> {
+    check_options(options)?;
     if !policies(options) {
         return Err(
             "owned container loudnorm requires one audio stream and valid WAVE INFO metadata edits"
@@ -54,6 +71,8 @@ pub fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
+    crate::owned_adts_export::check_wave_metadata_budget(options)?;
+    let _ = crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options)?;
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     // Read-only configuration/policy preflight; actual packet failures propagate
     // once execution starts, without retry through the legacy backend.
@@ -94,6 +113,7 @@ pub fn plan_loudnorm(
     dual_pass: bool,
     options: &CopyOptions,
 ) -> Result<MediaPlan> {
+    check_options(options)?;
     if !policies(options) {
         return Err(
             "owned container loudnorm requires one audio stream and valid WAVE INFO metadata edits"
@@ -101,6 +121,8 @@ pub fn plan_loudnorm(
         );
     }
     let resolved = crate::owned_loudnorm::validate_request(args)?;
+    crate::owned_adts_export::check_wave_metadata_budget(options)?;
+    let _ = crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options)?;
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     let mut plan = crate::owned_container_loudness::plan_loudness(source, &decode_options)?;
     plan.command = "loudnorm".into();

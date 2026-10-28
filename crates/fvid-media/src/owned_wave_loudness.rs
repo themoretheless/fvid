@@ -27,7 +27,8 @@ pub fn qualified_rate(rate: u32) -> bool {
     )
 }
 fn policies(options: &CopyOptions) -> bool {
-    (options.streams.is_empty() || options.streams == [0])
+    check_options(options).is_ok()
+        && (options.streams.is_empty() || options.streams == [0])
         && options.metadata_set.is_empty()
         && options.metadata_delete.is_empty()
         && options.stream_metadata_set.is_empty()
@@ -36,6 +37,21 @@ fn policies(options: &CopyOptions) -> bool {
 fn check(options: &CopyOptions) -> Result<()> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
+    }
+    crate::owned_budget::check_rss_budget(options)
+}
+fn check_options(options: &CopyOptions) -> Result<()> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
     }
     crate::owned_budget::check_rss_budget(options)
 }
@@ -64,7 +80,7 @@ pub(crate) fn weights(info: &crate::owned_wave_inspect::WaveInfo) -> Result<Vec<
 pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
     policies(options)
         && File::open(source).is_ok_and(|mut file| {
-            crate::owned_wave_inspect::inspect(&mut file, None)
+            crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref())
                 .is_ok_and(|info| qualified_rate(info.sample_rate) && weights(&info).is_ok())
         })
 }
@@ -76,10 +92,10 @@ struct Input {
     size: usize,
 }
 fn preflight(source: &Path, options: &CopyOptions) -> Result<Input> {
+    check_options(options)?;
     if !policies(options) {
         return Err("owned WAVE loudness requires stream 0 and no metadata edits".into());
     }
-    check(options)?;
     let mut file = File::open(source).map_err(|e| e.to_string())?;
     let info = crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref())
         .map_err(|e| e.to_string())?;
@@ -147,7 +163,10 @@ fn preflight(source: &Path, options: &CopyOptions) -> Result<Input> {
 /// True peak uses the owned Annex-2 FIR at >=48 kHz and sinc FIR below. Transient peaks may differ
 /// from another implementation's interpolation filter; bit equivalence is not promised.
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
-    if crate::owned_container_loudness::recognizes(source)? { return crate::owned_container_loudness::measure_loudness(source,options); }
+    check_options(options)?;
+    if crate::owned_container_loudness::recognizes_with_options(source, options)? {
+        return crate::owned_container_loudness::measure_loudness(source, options);
+    }
     if crate::owned_adts_export::recognizes(source)? {
         return crate::owned_adts_loudness::measure_loudness(source, options);
     }
@@ -264,15 +283,41 @@ pub(crate) fn measure_for_normalization(
     })
 }
 pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
-    if crate::owned_container_loudness::recognizes(source)? { return crate::owned_container_loudness::plan_loudness(source,options); }
+    check_options(options)?;
+    if crate::owned_container_loudness::recognizes_with_options(source, options)? {
+        return crate::owned_container_loudness::plan_loudness(source, options);
+    }
     if crate::owned_adts_export::recognizes(source)? {
         return crate::owned_adts_loudness::plan_loudness(source, options);
     }
     let input = preflight(source, options)?;
+    let mut notes = vec![
+        "backend: owned WAVE; no external decoder or filter".into(),
+        "metadata-only plan; PCM numeric validity and signal measurements are checked during execution".into(),
+    ];
+    if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        || options.max_packets.is_some()
+        || options.max_controlled_bytes.is_some()
+        || options.max_rss_bytes.is_some()
+    {
+        notes.push(format!(
+            "encoded packet limit: {} bytes; packet work limit: {} packets; controlled memory limit: {} bytes; RSS limit: {} bytes",
+            options.max_packet_bytes,
+            options
+                .max_packets
+                .map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options
+                .max_controlled_bytes
+                .map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options
+                .max_rss_bytes
+                .map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+        ));
+    }
     Ok(MediaPlan{command:"loudness".into(),input:source.into(),inputs:vec![source.into()],streams:vec![PlanStream{index:0,media_type:"audio".into(),codec:input.info.codec(),disposition:"analyze".into()}],
         steps:vec![PlanStep{action:"read".into(),detail:format!("read {} PCM bytes at {} Hz in aligned blocks of at most {} bytes",input.size,input.info.sample_rate,input.capacity)},
         PlanStep{action:"analyze".into(),detail:"owned K-weighting, integrated loudness gating, loudness-range percentiles and owned true-peak FIR; no output file".into()}],graph:None,
-        notes:vec!["backend: owned WAVE; no external decoder or filter".into(),"metadata-only plan; PCM numeric validity and signal measurements are checked during execution".into()]})
+        notes})
 }
 
 #[cfg(test)]

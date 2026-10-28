@@ -304,3 +304,184 @@ fn raw_flac_and_mp3_export_supports_preserve_budget_policy_and_rematrix_admissio
         .expect("2ch MP3 supports 2->6 upmix");
     assert_eq!(mp3_stats.channels, 6);
 }
+
+#[test]
+fn wave_and_g711_empty_streams_and_empty_intervals_rejected_across_decode_trim_loudness_loudnorm_and_concat_plans() {
+    let dir = temp_dir("wave-g711-empty-plan");
+    let alaw_valid = fixture_path("g711-alaw-48k-mono.wav");
+    let alaw_empty = fixture_path("g711-alaw-empty.wav");
+    let pcm_valid = fixture_path("wave-24in32-valid.wav");
+    let pcm_empty = fixture_path("wave-pcm-empty.wav");
+    let out = dir.0.join("out.wav");
+
+    let controlled_opts = CopyOptions {
+        max_controlled_bytes: Some(16 * 1024 * 1024),
+        ..Default::default()
+    };
+
+    // 1. Empty G.711 WAVE and empty PCM WAVE must be rejected by plan_decode_audio, plan_trim,
+    //    plan_loudness, plan_normalize_loudness, plan_loudnorm, and sample-domain plan_concat,
+    //    matching execution.
+    for empty in [&alaw_empty, &pcm_empty] {
+        assert!(
+            decode_audio(empty, &out, &CopyOptions::default()).is_err(),
+            "decode_audio must reject empty {}",
+            empty.display()
+        );
+        assert!(
+            plan_decode_audio(empty, &AudioDecodeTransform::default(), &CopyOptions::default()).is_err(),
+            "fvid_media::plan_decode_audio must reject empty {}",
+            empty.display()
+        );
+        assert!(
+            plan_decode_audio(empty, &AudioDecodeTransform::default(), &controlled_opts).is_err(),
+            "controlled fvid_media::plan_decode_audio must reject empty {}",
+            empty.display()
+        );
+        assert!(
+            fvid::media::plan_decode_audio(empty, &AudioDecodeTransform::default(), &CopyOptions::default()).is_err(),
+            "fvid::media::plan_decode_audio must reject empty {}",
+            empty.display()
+        );
+        assert!(
+            fvid::media::plan_decode_audio(empty, &AudioDecodeTransform::default(), &controlled_opts).is_err(),
+            "controlled fvid::media::plan_decode_audio must reject empty {}",
+            empty.display()
+        );
+        assert!(
+            fvid_media::plan_trim(empty, 0, 5_000, &CopyOptions::default()).is_err(),
+            "fvid_media::plan_trim must reject empty {}",
+            empty.display()
+        );
+        assert!(
+            fvid::media::plan_trim(empty, 0, 5_000, &CopyOptions::default()).is_err(),
+            "fvid::media::plan_trim must reject empty {}",
+            empty.display()
+        );
+        assert!(
+            fvid_media::plan_loudness(empty, &CopyOptions::default()).is_err(),
+            "fvid_media::plan_loudness must reject empty {}",
+            empty.display()
+        );
+        assert!(
+            fvid::media::plan_loudness(empty, &CopyOptions::default()).is_err(),
+            "fvid::media::plan_loudness must reject empty {}",
+            empty.display()
+        );
+        assert!(
+            fvid::media::plan_loudness(empty, &controlled_opts).is_err(),
+            "controlled fvid::media::plan_loudness must reject empty {}",
+            empty.display()
+        );
+        assert!(
+            fvid_media::plan_loudnorm(empty, None, false, &CopyOptions::default()).is_err(),
+            "fvid_media::plan_loudnorm must reject empty {}",
+            empty.display()
+        );
+        assert!(
+            fvid::media::plan_loudnorm(empty, None, false, &CopyOptions::default()).is_err(),
+            "fvid::media::plan_loudnorm must reject empty {}",
+            empty.display()
+        );
+        assert!(
+            fvid::media::plan_loudnorm(empty, None, false, &controlled_opts).is_err(),
+            "controlled fvid::media::plan_loudnorm must reject empty {}",
+            empty.display()
+        );
+    }
+
+    // Sample-domain concat (G.711 + PCM WAVE) must reject empty segments in plan_concat just like concat does.
+    let concat_inputs = vec![alaw_valid.clone(), alaw_empty.clone()];
+    assert!(
+        fvid::media::concat(&concat_inputs, &out, &CopyOptions::default()).is_err(),
+        "concat must reject empty G.711 WAVE segment"
+    );
+    assert!(
+        fvid::media::plan_concat(&concat_inputs, &CopyOptions::default()).is_err(),
+        "plan_concat must reject empty G.711 WAVE segment"
+    );
+
+    // 2. Out-of-range intervals (and intervals beyond the active max_packets prefix) on valid 10ms
+    //    G.711 WAVE and PCM WAVE must be rejected by plan_decode_audio and plan_trim just like execution.
+    let past_eof_transform = AudioDecodeTransform {
+        interval: Some((20_000, 30_000)),
+        ..Default::default()
+    };
+    for valid in [&alaw_valid, &pcm_valid] {
+        assert!(
+            decode_audio_transformed(valid, &out, past_eof_transform, &CopyOptions::default()).is_err(),
+            "decode_audio_transformed must reject past-EOF interval on {}",
+            valid.display()
+        );
+        assert!(
+            plan_decode_audio(valid, &past_eof_transform, &CopyOptions::default()).is_err(),
+            "fvid_media::plan_decode_audio must reject past-EOF interval on {}",
+            valid.display()
+        );
+        assert!(
+            plan_decode_audio(valid, &past_eof_transform, &controlled_opts).is_err(),
+            "controlled fvid_media::plan_decode_audio must reject past-EOF interval on {}",
+            valid.display()
+        );
+        assert!(
+            fvid::media::plan_decode_audio(valid, &past_eof_transform, &CopyOptions::default()).is_err(),
+            "fvid::media::plan_decode_audio must reject past-EOF interval on {}",
+            valid.display()
+        );
+        assert!(
+            fvid::media::plan_decode_audio(valid, &past_eof_transform, &controlled_opts).is_err(),
+            "controlled fvid::media::plan_decode_audio must reject past-EOF interval on {}",
+            valid.display()
+        );
+        assert!(
+            fvid_media::plan_trim(valid, 20_000, 30_000, &CopyOptions::default()).is_err(),
+            "fvid_media::plan_trim must reject past-EOF interval on {}",
+            valid.display()
+        );
+        assert!(
+            fvid::media::plan_trim(valid, 20_000, 30_000, &CopyOptions::default()).is_err(),
+            "fvid::media::plan_trim must reject past-EOF interval on {}",
+            valid.display()
+        );
+
+        // Positive control: in-range interval [2_000, 8_000) us on the 10ms (480-sample) inputs succeeds.
+        let valid_transform = AudioDecodeTransform {
+            interval: Some((2_000, 8_000)),
+            ..Default::default()
+        };
+        plan_decode_audio(valid, &valid_transform, &CopyOptions::default())
+            .expect("in-range interval plan must succeed");
+        fvid::media::plan_decode_audio(valid, &valid_transform, &controlled_opts)
+            .expect("controlled in-range interval plan must succeed");
+    }
+
+    // 3. When max_packets + max_packet_bytes limits the decoded prefix to 1ms (48 frames at 48 kHz),
+    //    an interval [2_000, 8_000) us lies completely after the 1-packet prefix and produces 0 samples.
+    let one_ms_prefix_opts = CopyOptions {
+        max_packet_bytes: 192, // 48 frames of 4-byte PCM or 192 frames of 1-byte G.711 (4ms)
+        max_packets: Some(1),
+        max_controlled_bytes: Some(16 * 1024 * 1024),
+        ..Default::default()
+    };
+    let after_prefix_transform = AudioDecodeTransform {
+        interval: Some((5_000, 8_000)),
+        ..Default::default()
+    };
+    for valid in [&alaw_valid, &pcm_valid] {
+        assert!(
+            decode_audio_transformed(valid, &out, after_prefix_transform, &one_ms_prefix_opts).is_err(),
+            "decode_audio_transformed must reject interval after max_packets prefix on {}",
+            valid.display()
+        );
+        assert!(
+            plan_decode_audio(valid, &after_prefix_transform, &one_ms_prefix_opts).is_err(),
+            "plan_decode_audio must reject interval after max_packets prefix on {}",
+            valid.display()
+        );
+        assert!(
+            fvid::media::plan_decode_audio(valid, &after_prefix_transform, &one_ms_prefix_opts).is_err(),
+            "fvid::media::plan_decode_audio must reject interval after max_packets prefix on {}",
+            valid.display()
+        );
+    }
+}

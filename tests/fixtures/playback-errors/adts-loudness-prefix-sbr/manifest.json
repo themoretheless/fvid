@@ -1,0 +1,9 @@
+{
+  "batch_id": "FVID-0277",
+  "generator": "scripts/generate_adts_loudness_prefix_sbr.py",
+  "provenance": "100% synthetic ADTS fixtures: sbr-11k-to-22k.aac (11025 Hz core clock with implicit SBR expanding to 22050 Hz) and lc-then-ps-24k.aac (8-byte mono LC packet 0 followed by 35-byte SBR+PS packet 1); no FFmpeg, network, or private media.",
+  "sha256": {
+    "lc-then-ps-24k.aac": "b12b44267fd7c319c5e53422501da4c61edbd14447eaa382343e923b0302cb5f",
+    "sbr-11k-to-22k.aac": "0f7890839d300911cf8759902f8b19f0e0d7373fa55bc0d049925beed7227fa1"
+  }
+}

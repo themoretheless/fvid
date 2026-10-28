@@ -269,3 +269,185 @@ fn loudnorm_and_plan_loudnorm_support_matroska_output_and_container_stream_metad
     );
     assert!(!bad_mka.exists());
 }
+
+#[test]
+fn loudnorm_cli_and_plan_loudnorm_validate_positional_paths_and_optional_destination() {
+    let dir = TempDir::new("loudnorm-plan-dest");
+    let wav = fixture("tone-tagged-48k.wav");
+    let mp3 = fixture("tone-tagged-48k.mp3");
+
+    // 1. `plan loudnorm INPUT OUTPUT.mka` and `plan loudnorm INPUT OUTPUT.wav` must succeed
+    //    and match the single-input plan.
+    let plan_single = Command::new(bin_path())
+        .args([
+            "media",
+            "plan",
+            "loudnorm",
+            mp3.to_str().unwrap(),
+            "--dual-pass",
+            "--metadata",
+            "title=Planned MKA",
+            "--stream-metadata",
+            "0:language=eng",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        plan_single.status.success(),
+        "single-arg plan loudnorm failed: {}",
+        String::from_utf8_lossy(&plan_single.stderr)
+    );
+    let plan_single_json: serde_json::Value = serde_json::from_slice(&plan_single.stdout).unwrap();
+
+    let plan_two_mka = Command::new(bin_path())
+        .args([
+            "media",
+            "plan",
+            "loudnorm",
+            mp3.to_str().unwrap(),
+            "planned-out.mka",
+            "--dual-pass",
+            "--metadata",
+            "title=Planned MKA",
+            "--stream-metadata",
+            "0:language=eng",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        plan_two_mka.status.success(),
+        "two-arg plan loudnorm INPUT OUTPUT.mka failed: {}",
+        String::from_utf8_lossy(&plan_two_mka.stderr)
+    );
+    let plan_two_mka_json: serde_json::Value =
+        serde_json::from_slice(&plan_two_mka.stdout).unwrap();
+    assert_eq!(plan_single_json, plan_two_mka_json);
+
+    let plan_two_wav = Command::new(bin_path())
+        .args([
+            "media",
+            "plan",
+            "loudnorm",
+            wav.to_str().unwrap(),
+            "planned-out.wav",
+            "--metadata",
+            "title=Planned WAV",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        plan_two_wav.status.success(),
+        "two-arg plan loudnorm INPUT OUTPUT.wav failed: {}",
+        String::from_utf8_lossy(&plan_two_wav.stderr)
+    );
+
+    // 2. When `OUTPUT.wav` is supplied to `plan loudnorm`, `.wav`-incompatible metadata mutations
+    //    (`--stream-metadata`, `--stream-metadata-delete`, or non-RIFF-INFO container keys) must be refused!
+    let plan_wav_stream_meta = Command::new(bin_path())
+        .args([
+            "media",
+            "plan",
+            "loudnorm",
+            wav.to_str().unwrap(),
+            "planned-out.wav",
+            "--stream-metadata",
+            "0:title=NotAllowedOnWav",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        !plan_wav_stream_meta.status.success(),
+        "plan loudnorm INPUT OUTPUT.wav must reject --stream-metadata"
+    );
+    let err = String::from_utf8_lossy(&plan_wav_stream_meta.stderr);
+    assert!(
+        err.contains("loudnorm to .wav does not support stream metadata mutations"),
+        "unexpected error for plan loudnorm OUTPUT.wav --stream-metadata: {err}"
+    );
+
+    let plan_wav_custom_key = Command::new(bin_path())
+        .args([
+            "media",
+            "plan",
+            "loudnorm",
+            wav.to_str().unwrap(),
+            "planned-out.wav",
+            "--metadata",
+            "CUSTOM_MKA_ONLY_KEY=val",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        !plan_wav_custom_key.status.success(),
+        "plan loudnorm INPUT OUTPUT.wav must reject non-RIFF-INFO metadata key"
+    );
+
+    // 3. Unsupported destination extension (`.mp3`) and extra positional arguments must be refused
+    //    on both `plan loudnorm` and `loudnorm`.
+    for args in [
+        vec![
+            "media",
+            "plan",
+            "loudnorm",
+            wav.to_str().unwrap(),
+            "planned-out.mp3",
+        ],
+        vec![
+            "media",
+            "loudnorm",
+            wav.to_str().unwrap(),
+            dir.0.join("out.mp3").to_str().unwrap(),
+        ],
+    ] {
+        let out = Command::new(bin_path()).args(&args).output().unwrap();
+        assert!(!out.status.success(), "expected failure for {args:?}");
+        let err = String::from_utf8_lossy(&out.stderr);
+        assert!(
+            err.contains("loudnorm requires OUTPUT.wav, OUTPUT.mka or OUTPUT.mkv"),
+            "unexpected error for {args:?}: {err}"
+        );
+    }
+
+    // 4. Missing positional arguments (e.g. `loudnorm INPUT --quiet` or `plan loudnorm --quiet`)
+    //    and extra positional arguments (`loudnorm INPUT OUTPUT.wav EXTRA.wav`,
+    //    `plan loudnorm INPUT OUTPUT.wav EXTRA.wav`) must be rejected with clear usage errors.
+    for args in [
+        vec!["media", "loudnorm", "--quiet"],
+        vec!["media", "loudnorm", wav.to_str().unwrap(), "--quiet"],
+        vec![
+            "media",
+            "loudnorm",
+            wav.to_str().unwrap(),
+            dir.0.join("out1.wav").to_str().unwrap(),
+            dir.0.join("out2.wav").to_str().unwrap(),
+        ],
+    ] {
+        let out = Command::new(bin_path()).args(&args).output().unwrap();
+        assert!(!out.status.success(), "expected failure for {args:?}");
+        let err = String::from_utf8_lossy(&out.stderr);
+        assert!(
+            err.contains("loudnorm requires"),
+            "unexpected error for {args:?}: {err}"
+        );
+    }
+
+    for args in [
+        vec!["media", "plan", "loudnorm", "--quiet"],
+        vec![
+            "media",
+            "plan",
+            "loudnorm",
+            wav.to_str().unwrap(),
+            "out1.wav",
+            "out2.wav",
+        ],
+    ] {
+        let out = Command::new(bin_path()).args(&args).output().unwrap();
+        assert!(!out.status.success(), "expected failure for {args:?}");
+        let err = String::from_utf8_lossy(&out.stderr);
+        assert!(
+            err.contains("plan loudnorm requires INPUT"),
+            "unexpected error for {args:?}: {err}"
+        );
+    }
+}

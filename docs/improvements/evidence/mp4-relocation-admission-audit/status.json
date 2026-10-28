@@ -1,0 +1,17 @@
+{
+  "status": "verified",
+  "problem": "MP4 relocation admits metadata memory only after scanning and allocating all top-level spans",
+  "before": "80032 header bytes read before controlled memory budget exceeded",
+  "after_isolated": "0 header bytes read with same 65536-byte limit",
+  "pending": [],
+  "source_sha256": "6925de4763fb8b47e1d91a3ae3528ba91ec5571b5f29304a0a321220b5e383b7",
+  "cargo_log": "/private/tmp/fvid-relocation-admission-audit/cargo.log",
+  "player_log": "/private/tmp/fvid-relocation-admission-audit/player.log",
+  "verification": {
+    "default": "2 passed",
+    "player": "3 passed",
+    "related_native_mp4_relocate": "4 passed",
+    "fixture_playback": "3 exact RGB frames, exact intervals, repeated EOF and rewind over two passes",
+    "build": "Cargo default and player test configurations built successfully"
+  }
+}

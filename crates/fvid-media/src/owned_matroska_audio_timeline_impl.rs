@@ -12,7 +12,8 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
     reader.scan_all()?;
     let index = matroska_audio_index(&reader, selected)?;
     let track = reader.tracks[index].clone();
-    let in_band_ps = negotiate_matroska_ps(&mut reader, index, || control.check())?;
+    let max_packets = control.packet_limit();
+    let in_band_ps = negotiate_matroska_ps_with_interval(&mut reader, index, interval, max_packets, || control.check())?;
     let mut decoder = if in_band_ps { MatroskaTimelineDecoder::with_in_band_ps(&track)? } else { MatroskaTimelineDecoder::from_matroska(&track)? };
     let rate = decoder.sample_rate();
     let channels = decoder.channels();
@@ -217,17 +218,101 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
     Ok(stats)
 }
 
+pub(crate) fn matroska_active_track_packets<R: std::io::Read + std::io::Seek>(
+    reader: &MatroskaTimelineReader<R>,
+    index: usize,
+    interval: Option<(Duration, Duration)>,
+    max_packets: Option<u64>,
+) -> usize {
+    let limit = max_packets
+        .map(|m| usize::try_from(m).unwrap_or(usize::MAX))
+        .unwrap_or(usize::MAX);
+    let Some(track) = reader.tracks.get(index) else {
+        return 0;
+    };
+    let track_number = track.number;
+    let total_track_packets = reader
+        .packets
+        .iter()
+        .filter(|p| p.track == track_number)
+        .count();
+    let Some((_, end)) = interval else {
+        return total_track_packets.min(limit);
+    };
+    if reader.zlib_tracks_contains(track_number)
+        || reader
+            .track_timestamp_scale(track_number)
+            .is_some_and(|scale| scale != 1.0)
+        || reader
+            .packets
+            .iter()
+            .any(|p| p.track == track_number && p.discard_padding_ns != 0)
+    {
+        return total_track_packets.min(limit);
+    }
+    let Some(first_pts_ns) = reader
+        .packets
+        .iter()
+        .find(|p| p.track == track_number)
+        .map(|p| p.pts_ns)
+    else {
+        return 0;
+    };
+    if first_pts_ns < 0 {
+        return total_track_packets.min(limit);
+    }
+    let mut prev_pts = first_pts_ns;
+    for packet in reader.packets.iter().filter(|p| p.track == track_number) {
+        if packet.pts_ns < prev_pts {
+            return total_track_packets.min(limit);
+        }
+        prev_pts = packet.pts_ns;
+    }
+    let end_ns = i128::try_from(end.as_nanos()).unwrap_or(i128::MAX);
+    let delay_ns = i128::from(track.codec_delay_ns);
+    let scale_ns = i128::from(reader.timestamp_scale_ns().max(1));
+    let cutoff_pts_ns = end_ns
+        .saturating_add(i128::from(first_pts_ns))
+        .saturating_add(delay_ns)
+        .saturating_add(scale_ns);
+    let extra_lookahead = if track.codec == "A_AAC" { 2usize } else { 0usize };
+    let mut count = 0usize;
+    for packet in reader.packets.iter().filter(|p| p.track == track_number) {
+        if i128::from(packet.pts_ns) < cutoff_pts_ns {
+            count += 1;
+        } else {
+            break;
+        }
+    }
+    count
+        .saturating_add(extra_lookahead)
+        .min(total_track_packets)
+        .min(limit)
+}
+
 pub(crate) fn negotiate_matroska_ps<R: std::io::Read + std::io::Seek>(
-    reader: &mut MatroskaTimelineReader<R>, index: usize, mut check: impl FnMut() -> Result<()>,
+    reader: &mut MatroskaTimelineReader<R>, index: usize, max_packets: Option<u64>, check: impl FnMut() -> Result<()>,
+) -> Result<bool> {
+    negotiate_matroska_ps_with_interval(reader, index, None, max_packets, check)
+}
+
+pub(crate) fn negotiate_matroska_ps_with_interval<R: std::io::Read + std::io::Seek>(
+    reader: &mut MatroskaTimelineReader<R>, index: usize, interval: Option<(Duration, Duration)>, max_packets: Option<u64>, mut check: impl FnMut() -> Result<()>,
 ) -> Result<bool> {
     let track = reader.tracks[index].clone();
     if track.codec != "A_AAC" { return Ok(false); }
     let Ok(rate) = u32::try_from(track.sample_rate) else { return Ok(false); };
     let Ok(mut probe) = InBandPsProbe::new(&track.codec_private, rate) else { return Ok(false); };
     reader.scan_all()?;
+    let active_limit = matroska_active_track_packets(reader, index, interval, max_packets);
+    let mut track_packets = 0usize;
     for packet_index in 0..reader.packets.len() {
         check()?;
         if reader.packets[packet_index].track != track.number { continue; }
+        if track_packets >= active_limit {
+            break;
+        }
+        track_packets += 1;
         let packet = reader.read_packet(packet_index)?;
         if probe.read(&packet).is_err() { probe.reset(); continue; }
         if probe.ps_detected() { return Ok(true); }

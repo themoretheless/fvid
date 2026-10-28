@@ -591,6 +591,35 @@ impl Flac {
             .map(|at| at.pts + u64::from(at.samples))
             .unwrap_or(0)
     }
+
+    /// Largest encoded frame size within the active decode prefix.
+    pub fn max_packet_size_in_prefix(
+        &self,
+        until: Option<std::time::Duration>,
+        max_packets: Option<u64>,
+    ) -> usize {
+        let to = match until {
+            Some(at) => u64::try_from(
+                (at.as_nanos() * u128::from(self.sample_rate)).div_ceil(1_000_000_000),
+            )
+            .unwrap_or(u64::MAX)
+            .min(self.samples()),
+            None => self.samples(),
+        };
+        let mut packets = 0u64;
+        let mut max_size = 0usize;
+        for frame in &self.frames {
+            if frame.pts >= to {
+                break;
+            }
+            if max_packets.is_some_and(|max| packets >= max) {
+                break;
+            }
+            packets += 1;
+            max_size = max_size.max(frame.size);
+        }
+        max_size
+    }
 }
 
 #[cfg(test)]

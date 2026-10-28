@@ -100,6 +100,116 @@ pub fn write_processed<W: Write + Seek>(
     )
 }
 
+/// Validate first-frame presence, geometry, and filter sample planes without writing output.
+pub(crate) fn validate_first_frame(
+    source: &Path,
+    geometry: &VideoGeometry,
+    filters: &PixelFilters,
+    processed: bool,
+) -> Result<()> {
+    if !eligible(source)? {
+        return Err(invalid("unsupported owned planar lossless source"));
+    }
+    let mut webm = if is_source(source)? {
+        None
+    } else {
+        Some(crate::container::webm::WebmReader::open(
+            BufReader::new(File::open(source)?),
+            Default::default(),
+        )?)
+    };
+    if let Some(input) = webm.as_mut() {
+        input.scan_all()?;
+    }
+    let video_index = webm
+        .as_ref()
+        .and_then(|r| r.tracks.iter().position(|t| t.kind == 1))
+        .unwrap_or(0);
+    let mut reader = NativeReader::software(BufReader::new(File::open(source)?), usize::MAX)?;
+    let first = reader
+        .read_frame_raw()?
+        .ok_or_else(|| invalid("input has no video frames"))?;
+    let [w, h] = reader.dimensions();
+    let rotation = reader.rotation();
+    let source_colour = reader.colour();
+    filters.configure_vignette_source(&reader, geometry)?;
+    let source_full_range = source_colour.full_range;
+    let bake_rotation = processed || !geometry.is_identity() || !filters.is_empty();
+    let (coded_w, coded_h) = if matches!(rotation, 90 | 270) {
+        (h, w)
+    } else {
+        (w, h)
+    };
+    let crop = webm
+        .as_ref()
+        .map(|r| r.tracks[video_index].crop)
+        .unwrap_or([0; 4]);
+    let crop = crop
+        .map(usize::try_from)
+        .into_iter()
+        .collect::<std::result::Result<Vec<_>, _>>()
+        .map_err(|_| invalid("stored crop overflow"))?;
+    let crop: [usize; 4] = crop.try_into().unwrap();
+    let visible_w = coded_w
+        .checked_sub(crop[0])
+        .and_then(|n| n.checked_sub(crop[2]))
+        .filter(|&n| n > 0)
+        .ok_or_else(|| invalid("stored crop removes picture width"))?;
+    let visible_h = coded_h
+        .checked_sub(crop[1])
+        .and_then(|n| n.checked_sub(crop[3]))
+        .filter(|&n| n > 0)
+        .ok_or_else(|| invalid("stored crop removes picture height"))?;
+    let (display_w, display_h) = if matches!(rotation, 90 | 270) {
+        (visible_h, visible_w)
+    } else {
+        (visible_w, visible_h)
+    };
+    let depth = match &first {
+        RawFrame::Planar(p) => p.depth,
+        RawFrame::Avc { picture, .. } => picture.bit_depth,
+        RawFrame::Planar8(_) | RawFrame::Yuv { .. } => 8,
+        _ => return Err(invalid("expected planar sample planes")),
+    };
+    let mut samples = if bake_rotation && crop != [0; 4] {
+        let clipped = VideoGeometry {
+            crop: Some([crop[0], crop[1], visible_w, visible_h]),
+            ..Default::default()
+        }
+        .apply_media(&first, coded_w, coded_h)?;
+        let colour = match &first {
+            RawFrame::Avc { colour, .. } => *colour,
+            RawFrame::Planar(p) => p.colour,
+            RawFrame::Planar8(p) => p.colour,
+            _ => Default::default(),
+        };
+        let clipped = RawFrame::Planar(std::sync::Arc::new(
+            crate::playback_native::PackedPlanar::new(clipped, depth, colour)?,
+        ));
+        geometry.apply_display_media(&clipped, display_w, display_h, rotation)?
+    } else if bake_rotation {
+        geometry.apply_display_media(&first, w, h, rotation)?
+    } else {
+        geometry.apply(&first, coded_w, coded_h)?
+    };
+    if !processed {
+        filters.apply_colour_clock(
+            &mut samples,
+            depth,
+            source_full_range,
+            source_colour.matrix,
+            0,
+            reader
+                .frame_interval()
+                .map(|(start, _, scale)| start as f64 / scale as f64),
+            crate::native_pixels::frame_clock(&reader)?,
+        )?;
+    }
+    u32::try_from(samples.width).map_err(|_| invalid("FFV1 width overflow"))?;
+    u32::try_from(samples.height).map_err(|_| invalid("FFV1 height overflow"))?;
+    Ok(())
+}
+
 /// Decode every source frame, then encode selected frames with original clocks.
 #[expect(clippy::too_many_arguments, reason = "Preserve the public export/filter entrypoint signature for existing callers")]
 pub fn write_selected<W: Write + Seek>(

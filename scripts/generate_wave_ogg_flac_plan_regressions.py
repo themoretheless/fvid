@@ -222,6 +222,14 @@ def generate() -> dict[str, bytes]:
         channel_mask=0x4,
         pcm_bytes=bad_pcm_bytes,
     )
+    wave_pcm_empty = make_wave_extensible_int(
+        sample_rate=48_000,
+        channels=1,
+        bits_per_sample=32,
+        valid_bits=24,
+        channel_mask=0x4,
+        pcm_bytes=b"",
+    )
 
     # 2. G.711 A-law and mu-law WAVE inputs at 48 kHz (mono) for plan_decode_audio / plan_mix_audio / plan_merge_audio.
     codes_alaw = bytes((i * 17 + 0x55) & 0xFF for i in range(480))
@@ -298,6 +306,7 @@ def generate() -> dict[str, bytes]:
         "video.mkv": owned_eof()["video.mkv"],
         "wave-24in32-valid.wav": wave_24in32_valid,
         "wave-24in32-nonzero-padding.wav": wave_24in32_nonzero_padding,
+        "wave-pcm-empty.wav": wave_pcm_empty,
         "g711-alaw-48k-mono.wav": g711_alaw_48k,
         "g711-mulaw-48k-mono.wav": g711_mulaw_48k,
         "g711-alaw-empty.wav": g711_alaw_empty,

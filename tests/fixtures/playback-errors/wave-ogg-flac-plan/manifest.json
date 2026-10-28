@@ -6,6 +6,7 @@
     "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
     "wave-24in32-valid.wav": "2c382a0fae6541d3a48a5252d75811f675cc09352bd32f9b43dc6c337ee6de06",
     "wave-24in32-nonzero-padding.wav": "357e9cf19e57270ffab676ee1cada8a498c95070ff88105ac45886300b6c796d",
+    "wave-pcm-empty.wav": "c8512a20d77ab876c70aaa41b7b0f6dbce46d70a9a5e677800dfb2520948417b",
     "g711-alaw-48k-mono.wav": "b8dedcf36fd7fb855fa378fa3fd2421146df5f21f01a59b7a1b75cc4e13692ac",
     "g711-mulaw-48k-mono.wav": "82c3c70eb3362b0511b157ed462d858a05d6762f9569572d5272af051b5a101c",
     "g711-alaw-empty.wav": "1470703f253ba39c5f1eb285bc67ea7ceef05d570dc7ab4b3123fa99bff6f86e",

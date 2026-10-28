@@ -1,0 +1,25 @@
+{
+  "batch": 316,
+  "ids": [
+    "FVID-0325"
+  ],
+  "summary": "Enforce controlled-memory budget (max_controlled_bytes) against output WAVE INFO and Matroska metadata and PCM muxer working buffers across mix-audio, merge-audio, sample-domain concat, decode-audio, trim, normalize-loudness, and loudnorm plans and execution",
+  "snapshots": [
+    "docs/improvements/snapshots/batch-316-pre-edit/src/native_audio_mix.rs",
+    "docs/improvements/snapshots/batch-316-pre-edit/src/native_audio_mix/concat.rs",
+    "docs/improvements/snapshots/batch-316-pre-edit/src/native_export/pcm_matroska.rs",
+    "docs/improvements/snapshots/batch-316-pre-edit/src/media.rs",
+    "docs/improvements/snapshots/batch-316-pre-edit/src/native_plan.rs",
+    "docs/improvements/snapshots/batch-316-pre-edit/src/native_loudnorm.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-316-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-316-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-316-related-after.txt"
+  },
+  "tests_run": [
+    "cargo test --test audio_budget_controls_regressions",
+    "cargo test --test audio_wave_metadata_mix_controls_regressions --test audio_mix_merge_concat_metadata_regressions --test audio_sample_concat_metadata_preservation_regressions --test audio_sample_concat_wave_metadata_regressions"
+  ],
+  "status": "accepted"
+}

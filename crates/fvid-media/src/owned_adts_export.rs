@@ -12,6 +12,30 @@ use std::{
 };
 type Result<T> = std::result::Result<T, String>;
 
+pub(crate) fn check_wave_metadata_budget(options: &CopyOptions) -> Result<()> {
+    let Some(max) = options.max_controlled_bytes else {
+        return Ok(());
+    };
+    if options.metadata_set.is_empty() && options.metadata_delete.is_empty() {
+        return Ok(());
+    }
+    let assignments = options.metadata_set.iter().try_fold(0usize, |sum, (_, v)| {
+        sum.checked_add(v.len().saturating_add(10))
+            .ok_or("WAVE metadata estimate overflow")
+    })?;
+    let estimate = assignments
+        .checked_add(12)
+        .and_then(|n| n.checked_mul(8))
+        .and_then(|n| n.checked_add(16384))
+        .ok_or("WAVE metadata estimate overflow")?;
+    if estimate > max {
+        return Err(format!(
+            "controlled memory budget exceeded: need {estimate} bytes, limit {max}"
+        ));
+    }
+    Ok(())
+}
+
 // The PCM phase cannot apply container tags. Build its policy directly rather
 // than cloning potentially unbounded tag strings and discarding them afterward.
 pub(crate) fn pcm_decode_options(options: &CopyOptions) -> CopyOptions {
@@ -49,12 +73,23 @@ pub(crate) fn supports(
 ) -> bool {
     let qualify = || -> Result<()> {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-            return Err("cancelled".into());
+            return Err("media operation cancelled".into());
+        }
+        if options.max_packet_bytes == 0 {
+            return Err("packet byte limit must be positive".into());
+        }
+        if options.max_packets == Some(0) {
+            return Err("packet work limit requires at least one packet".into());
+        }
+        if options.max_controlled_bytes == Some(0) {
+            return Err("controlled memory limit must be positive".into());
         }
         crate::owned_budget::check_rss_budget(options)?;
         let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
             BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-            options.max_packet_bytes,
+            options
+                .max_packet_bytes
+                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
         )
         .map_err(|e| e.to_string())?;
         let config = reader.configuration();
@@ -75,7 +110,7 @@ pub(crate) fn supports(
         let output=transform.channels.unwrap_or(i32::from(stats.channels));
         if output!=i32::from(stats.channels){
             if matches!(output,1|2){
-                if crate::owned_aac_export_routing::router(source,stats.sample_rate,stats.channels,options)?.is_none(){return Err("AAC speaker routing is absent".into());}
+                if crate::owned_aac_export_routing::router_for_decode(source,stats.sample_rate,stats.channels,Some(transform),&probe)?.is_none(){return Err("AAC speaker routing is absent".into());}
             }else{
                 let mask=if config.channels==1&&stats.channels==2{3}else{crate::owned_aac::NativeAacDecoder::new(&asc).map_err(|e|e.to_string())?.channel_mask()};
                 if stats.channels>2||!(1..=8).contains(&output)||!crate::owned_pcm_channels::standard_mask(stats.channels).is_some_and(|m|m==u64::from(mask)){return Err("unsupported channel conversion".into());}
@@ -179,13 +214,22 @@ pub(crate) fn apply(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
-    if destination.symlink_metadata().is_ok() {
-        return Err("output already exists".into());
-    }
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
     crate::owned_budget::check_rss_budget(options)?;
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
     let prefix = transform.interval.map(|(_, to)| {
         (
             std::time::Duration::ZERO,
@@ -247,10 +291,21 @@ fn decode_to_wave_with_rate(
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
     crate::owned_budget::check_rss_budget(options)?;
     let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        options.max_packet_bytes,
+        options
+            .max_packet_bytes
+            .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
     )
     .map_err(|e| e.to_string())?;
     let config = reader.configuration();

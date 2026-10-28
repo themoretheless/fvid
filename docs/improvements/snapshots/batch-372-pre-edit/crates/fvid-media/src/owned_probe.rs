@@ -1,0 +1,802 @@
+//! Metadata inspection through owned container parsers.
+use fvid_media_info::{MediaInfo, StreamInfo};
+use std::{
+    collections::BTreeMap,
+    fs::File,
+    io::{Read, Seek, SeekFrom},
+    path::Path,
+};
+
+/// Inspect media through the owned parsers available in this library.
+/// Additional container parsers are being moved here from the native frontend.
+pub fn probe(path: &Path) -> Result<MediaInfo, String> {
+    probe_as(path, None)
+}
+
+pub fn probe_with_options(
+    path: &Path,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo, String> {
+    probe_as_with_options(path, None, options)
+}
+
+/// Inspect owned MP4/MOV, Matroska/WebM, WAVE, bare MPEG audio/FLAC, ADTS or Y4M.
+/// Format hints never override the signature or bypass container validation.
+pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo, String> {
+    probe_as_with_options(path, format, &Default::default())
+}
+
+pub fn probe_as_with_options(
+    path: &Path,
+    format: Option<&str>,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo, String> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    match format {
+        Some("mov" | "mp4" | "m4a" | "3gp" | "3g2" | "mj2" | "mov,mp4,m4a,3gp,3g2,mj2") => {
+            return crate::owned_mp4_probe::mp4_with_options(path, options);
+        }
+        Some("webm" | "matroska" | "matroska,webm") => {
+            return crate::owned_webm_probe::probe_webm_with_options(path, options);
+        }
+        Some("wav") => return probe_wave_with_options(path, options).map_err(|e| e.to_string()),
+        Some("aac") => return probe_adts_with_options(path, options),
+        Some("flac") => return crate::owned_flac_probe::probe_flac_with_options(path, options),
+        Some("mp1" | "mp2" | "mp3" | "mpeg_audio") => {
+            return crate::owned_mpeg_probe::probe_mpeg_with_options(path, options);
+        }
+        Some("ogg" | "opus") => return probe_ogg_with_options(path, options),
+        Some("y4m" | "yuv4mpegpipe") => {
+            return crate::owned_y4m_probe::probe_y4m_with_options(path, options);
+        }
+        Some(_) => return Err("format has no owned media-library probe yet".into()),
+        None => {}
+    }
+    if crate::owned_wave_inspect::is_wave(path).map_err(|e| e.to_string())? {
+        return probe_wave_with_options(path, options).map_err(|e| e.to_string());
+    }
+    let mut signature = [0; 9];
+    let mut signature_file = File::open(path).map_err(|e| e.to_string())?;
+    let read = signature_file
+        .read(&mut signature)
+        .map_err(|e| e.to_string())?;
+    if read == 9 && &signature == b"YUV4MPEG2" {
+        return crate::owned_y4m_probe::probe_y4m_with_options(path, options);
+    }
+    if read >= 8 && crate::owned_mp4::recognizes_prefix(&signature[..8]) {
+        return crate::owned_mp4_probe::mp4_with_options(path, options);
+    }
+    if read >= 4 && signature[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
+        return crate::owned_webm_probe::probe_webm_with_options(path, options);
+    }
+    if read >= 4 && signature.starts_with(b"fLaC") {
+        return crate::owned_flac_probe::probe_flac_with_options(path, options);
+    }
+    if read >= 4 && signature.starts_with(b"OggS") {
+        return probe_ogg_with_options(path, options);
+    }
+    if read >= 4 && crate::owned_mpeg_audio::has_signature(&signature[..read]) {
+        return crate::owned_mpeg_probe::probe_mpeg_with_options(path, options);
+    }
+    if read >= 7 && crate::owned_aac::adts::header(&signature[..7]).is_some() {
+        return probe_adts_with_options(path, options);
+    }
+    Err("container has no owned media-library probe yet".into())
+}
+
+/// Select owned MP4 inspection before the remaining legacy container paths.
+/// A hint selects the parser even for malformed input; without a hint the
+/// opening atom selects it. Explicit hints for other formats are preserved.
+pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    if let Some(hint) = format {
+        if !matches!(
+            hint,
+            "mov" | "mp4" | "m4a" | "3gp" | "3g2" | "mj2" | "mov,mp4,m4a,3gp,3g2,mj2"
+        ) {
+            return Ok(None);
+        }
+    } else {
+        let mut prefix = [0; 8];
+        let mut file = File::open(path).map_err(|e| e.to_string())?;
+        match file.read_exact(&mut prefix) {
+            Ok(()) if crate::owned_mp4::recognizes_prefix(&prefix) => {}
+            Ok(()) => return Ok(None),
+            Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => return Ok(None),
+            Err(e) => return Err(e.to_string()),
+        }
+    }
+    crate::owned_mp4_probe::try_probe_mp4(path)
+}
+
+pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    if let Some(hint) = format {
+        if !matches!(hint, "webm" | "matroska" | "matroska,webm") {
+            return Ok(None);
+        }
+    } else {
+        let mut prefix = [0; 4];
+        let mut file = File::open(path).map_err(|e| e.to_string())?;
+        match file.read_exact(&mut prefix) {
+            Ok(()) if prefix == [0x1a, 0x45, 0xdf, 0xa3] => {}
+            Ok(()) => return Ok(None),
+            Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => return Ok(None),
+            Err(e) => return Err(e.to_string()),
+        }
+    }
+    crate::owned_webm_probe::try_probe_webm(path)
+}
+
+/// Select supported AAC-LC ADTS framing before legacy inspection. Once a
+/// supported header selects this parser, packet errors cannot trigger fallback.
+pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    if format.is_some_and(|hint| hint != "aac") {
+        return Ok(None);
+    }
+    let mut prefix = [0; 7];
+    let mut file = File::open(path).map_err(|e| e.to_string())?;
+    match file.read_exact(&mut prefix) {
+        Ok(()) => {}
+        Err(error) if error.kind() == std::io::ErrorKind::UnexpectedEof => return Ok(None),
+        Err(error) => return Err(error.to_string()),
+    }
+    let Some(header) = crate::owned_aac::adts::header(&prefix) else {
+        return Ok(None);
+    };
+    if header.asc[0] >> 3 != 2 {
+        return Ok(None);
+    }
+    probe_adts(path).map(Some)
+}
+
+/// Count AAC-LC ADTS packets using owned framing, without decoding PCM.
+/// The streaming reader retains only one bounded ADTS packet at a time.
+pub fn probe_adts(path: &Path) -> Result<MediaInfo, String> {
+    probe_adts_with_options(path, &Default::default())
+}
+
+pub fn probe_adts_with_options(
+    path: &Path,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo, String> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    let file = File::open(path).map_err(|e| e.to_string())?;
+    let mut reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+        std::io::BufReader::new(file),
+        options
+            .max_packet_bytes
+            .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+    )
+    .map_err(|e| e.to_string())?;
+    let config = reader.configuration();
+    let mut frames = 0u64;
+    let mut packets = 0u64;
+    while reader.next_packet().map_err(|e| e.to_string())?.is_some() {
+        if options
+            .cancel
+            .as_ref()
+            .is_some_and(fvid_control::CancelFlag::is_cancelled)
+        {
+            return Err("media operation cancelled".into());
+        }
+        packets = packets.checked_add(1).ok_or("AAC packet count overflow")?;
+        if options.max_packets.is_some_and(|max| packets > max) {
+            return Err("ADTS packet count exceeds packet limit".into());
+        }
+        frames = frames.checked_add(1024).ok_or("AAC duration overflow")?;
+    }
+    let duration = i64::try_from(frames).map_err(|_| "AAC duration exceeds API range")?;
+    let duration_us =
+        i64::try_from(u128::from(frames) * 1_000_000 / u128::from(config.sample_rate))
+            .map_err(|_| "AAC duration exceeds API range")?;
+    Ok(MediaInfo {
+        path: path.into(),
+        format: "aac".into(),
+        start_us: Some(0),
+        duration_us: Some(duration_us),
+        bit_rate: None,
+        metadata: BTreeMap::new(),
+        chapters: Vec::new(),
+        streams: vec![StreamInfo {
+            index: 0,
+            media_type: "audio".into(),
+            codec: "aac".into(),
+            time_base: [1, config.sample_rate as i32],
+            start: Some(0),
+            duration: Some(duration),
+            bit_rate: None,
+            average_frame_rate: [0, 1],
+            profile: Some("LC".into()),
+            level: None,
+            disposition: 0,
+            metadata: BTreeMap::new(),
+            width: 0,
+            height: 0,
+            pixel_format: -1,
+            sample_rate: config.sample_rate as i32,
+            channels: i32::from(config.channels),
+            video_delay: 0,
+            extradata_bytes: 2,
+        }],
+    })
+}
+
+/// Inspect supported uncompressed or G.711 RIFF/WAVE without loading its sample payload.
+pub fn probe_wave(path: &Path) -> std::io::Result<MediaInfo> {
+    probe_wave_with_options(path, &Default::default())
+}
+
+pub fn probe_wave_with_options(
+    path: &Path,
+    options: &fvid_control::CopyOptions,
+) -> std::io::Result<MediaInfo> {
+    let invalid = |message| std::io::Error::new(std::io::ErrorKind::InvalidData, message);
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::Interrupted,
+            "media operation cancelled",
+        ));
+    }
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    crate::owned_budget::check_rss_budget(options)
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
+    let mut file = File::open(path)?;
+    let law = crate::owned_wave_inspect::g711_law(&mut file, options.cancel.as_ref())?;
+    let wave = crate::owned_wave_inspect::inspect_probe(&mut file)?;
+    if options.max_packet_bytes < usize::from(wave.block) {
+        return Err(invalid(
+            "packet byte limit is smaller than one PCM sample frame",
+        ));
+    }
+    let rate = i32::try_from(wave.sample_rate)
+        .map_err(|_| invalid("WAVE sample rate exceeds metadata range"))?;
+    let duration =
+        i64::try_from(wave.sample_frames).map_err(|_| invalid("WAVE duration overflow"))?;
+    let duration_us =
+        i64::try_from(u128::from(wave.sample_frames) * 1_000_000 / u128::from(wave.sample_rate))
+            .map_err(|_| invalid("WAVE duration overflow"))?;
+    let mut metadata = BTreeMap::new();
+    let mut total_info_bytes = 0usize;
+    let mut at = 12;
+    while at < wave.end {
+        if options
+            .cancel
+            .as_ref()
+            .is_some_and(fvid_control::CancelFlag::is_cancelled)
+        {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::Interrupted,
+                "media operation cancelled",
+            ));
+        }
+        file.seek(SeekFrom::Start(at))?;
+        let mut header = [0; 8];
+        file.read_exact(&mut header)?;
+        let size = u32::from_le_bytes(header[4..].try_into().unwrap());
+        if &header[..4] == b"LIST" {
+            let mut kind = [0; 4];
+            file.read_exact(&mut kind)?;
+            if &kind != b"INFO" {
+                at += 8 + u64::from(size) + u64::from(size & 1);
+                continue;
+            }
+            let mut cursor = at + 12;
+            let end = at + 8 + u64::from(size);
+            while cursor < end {
+                if end - cursor < 8 {
+                    return Err(invalid("truncated WAVE INFO entry"));
+                }
+                file.seek(SeekFrom::Start(cursor))?;
+                file.read_exact(&mut header)?;
+                let length = u32::from_le_bytes(header[4..].try_into().unwrap());
+                let next = cursor + 8 + u64::from(length) + u64::from(length & 1);
+                if next > end {
+                    return Err(invalid("WAVE INFO entry exceeds LIST"));
+                }
+                // Avoid allocating unbounded metadata strings from an untrusted file.
+                if length > 1_048_576 {
+                    return Err(invalid("WAVE INFO entry is too large"));
+                }
+                let entry_bytes = length as usize;
+                total_info_bytes = total_info_bytes.saturating_add(entry_bytes);
+                if let Some(limit) = options.max_controlled_bytes
+                    && total_info_bytes.saturating_mul(2) > limit
+                {
+                    return Err(std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        format!(
+                            "controlled memory budget exceeded: WAVE INFO metadata need {} bytes, limit {limit}",
+                            total_info_bytes.saturating_mul(2)
+                        ),
+                    ));
+                }
+                let mut bytes = vec![0; entry_bytes];
+                file.read_exact(&mut bytes)?;
+                let key = match &header[..4] {
+                    b"INAM" => "title",
+                    b"IART" => "artist",
+                    b"ICMT" => "comment",
+                    b"ICRD" => "date",
+                    b"IPRD" => "album",
+                    b"IGNR" => "genre",
+                    b"ICOP" => "copyright",
+                    b"ISFT" => "encoder",
+                    b"ITRK" => "track",
+                    _ => std::str::from_utf8(&header[..4])
+                        .map_err(|_| invalid("invalid WAVE INFO tag"))?,
+                };
+                let text = String::from_utf8_lossy(&bytes)
+                    .trim_end_matches('\0')
+                    .to_owned();
+                metadata.insert(key.to_owned(), text);
+                cursor = next;
+            }
+        }
+        at += 8 + u64::from(size) + u64::from(size & 1);
+    }
+    let codec = match law {
+        Some(fvid_codecs::g711::Law::ALaw) => "pcm_alaw".into(),
+        Some(fvid_codecs::g711::Law::MuLaw) => "pcm_mulaw".into(),
+        None => wave.codec(),
+    };
+    let bit_rate = i64::from(wave.sample_rate) * i64::from(wave.block) * 8;
+    Ok(MediaInfo {
+        path: path.into(),
+        format: "wav".into(),
+        start_us: Some(0),
+        duration_us: Some(duration_us),
+        bit_rate: Some(bit_rate),
+        metadata,
+        chapters: Vec::new(),
+        streams: vec![StreamInfo {
+            index: 0,
+            media_type: "audio".into(),
+            codec,
+            time_base: [1, rate],
+            start: Some(0),
+            duration: Some(duration),
+            bit_rate: Some(bit_rate),
+            average_frame_rate: [0, 0],
+            profile: None,
+            level: None,
+            disposition: 0,
+            metadata: BTreeMap::new(),
+            width: 0,
+            height: 0,
+            pixel_format: -1,
+            sample_rate: rate,
+            channels: i32::from(wave.channels),
+            video_delay: 0,
+            extradata_bytes: 0,
+        }],
+    })
+}
+
+/// Inspect Ogg Opus, Vorbis, and chained Joint Vorbis/Opus bitstreams without decoding PCM.
+pub fn probe_ogg(path: &Path) -> Result<MediaInfo, String> {
+    probe_ogg_with_options(path, &Default::default())
+}
+
+pub fn probe_ogg_with_options(
+    path: &Path,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo, String> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    if !crate::owned_ogg_opus_export::recognizes(path)? {
+        return Err("input does not have an Ogg signature".into());
+    }
+    let mut file = File::open(path).map_err(|e| e.to_string())?;
+    let (limits, _) = crate::owned_ogg_opus_export::preflight(&mut file, options)?;
+    if options
+        .max_packets
+        .is_some_and(|max| (limits.packets as u64) > max)
+    {
+        return Err("Ogg packet count exceeds packet limit".into());
+    }
+    let mut bytes = Vec::with_capacity(limits.file_bytes);
+    crate::owned_ogg_opus_export::CheckedRead {
+        input: std::io::BufReader::new(file),
+        options,
+    }
+    .read_to_end(&mut bytes)
+    .map_err(|e| e.to_string())?;
+    let ogg = crate::owned_ogg::Ogg::parse(&bytes, &limits).map_err(|e| e.to_string())?;
+    if ogg
+        .chains()
+        .iter()
+        .flat_map(|chain| &chain.packets)
+        .any(|packet| packet.data.len() > options.max_packet_bytes)
+    {
+        return Err("Ogg compressed packet exceeds byte limit".into());
+    }
+    let catalog = crate::owned_ogg_audio_catalog::from_ogg(&ogg).map_err(|e| e.to_string())?;
+    if catalog.is_empty() {
+        return Err("Ogg file has no supported audio streams".into());
+    }
+    let mut streams = Vec::with_capacity(catalog.len());
+    let mut max_duration_us = 0i64;
+    let mut file_metadata = BTreeMap::new();
+    for (nth, entry) in catalog.into_iter().enumerate() {
+        let joint = crate::owned_ogg_audio_catalog::needs_joint_program(&ogg, nth)
+            .map_err(|e| e.to_string())?;
+        let (codec, rate, channels, duration, extradata_bytes) = if joint {
+            let program = crate::owned_ogg_audio_program::Program::from_ogg(ogg.clone(), nth)
+                .map_err(|e| e.to_string())?;
+            (
+                "vorbis_opus",
+                program.sample_rate(),
+                program.channels(),
+                program.end_samples(),
+                0usize,
+            )
+        } else {
+            match entry.coding {
+                crate::owned_ogg::Coding::Opus => {
+                    let program = crate::owned_ogg_opus::Program::open_source_track(
+                        std::io::Cursor::new(&bytes),
+                        limits,
+                        Some(entry.source_index),
+                    )
+                    .map_err(|e| e.to_string())?;
+                    (
+                        "opus",
+                        48_000,
+                        program.channels(),
+                        program.end_samples(),
+                        program.extra_data().len(),
+                    )
+                }
+                crate::owned_ogg::Coding::Vorbis => {
+                    let program = crate::owned_ogg_vorbis::Program::open_source_track(
+                        std::io::Cursor::new(&bytes),
+                        limits,
+                        Some(entry.source_index),
+                    )
+                    .map_err(|e| e.to_string())?;
+                    (
+                        "vorbis",
+                        program.sample_rate(),
+                        program.channels(),
+                        program.end_samples(),
+                        program.extra_data().len(),
+                    )
+                }
+                _ => return Err("unsupported Ogg audio stream coding".into()),
+            }
+        };
+        let duration_us = i64::try_from(
+            u128::from(duration.max(0) as u64) * 1_000_000 / u128::from(rate),
+        )
+        .map_err(|_| "Ogg duration exceeds API range")?;
+        max_duration_us = max_duration_us.max(duration_us);
+        let tags = ogg
+            .chains()
+            .get(entry.source_index)
+            .and_then(|chain| {
+                let raw = &chain.packets.get(1)?.data;
+                let bytes = match chain.coding {
+                    crate::owned_ogg::Coding::Opus => raw.clone(),
+                    crate::owned_ogg::Coding::Vorbis => {
+                        let payload = raw.strip_prefix(b"\x03vorbis")?;
+                        let mut v = b"OpusTags".to_vec();
+                        v.extend_from_slice(payload);
+                        v
+                    }
+                    _ => return None,
+                };
+                fvid_opus::OpusTags::parse(&bytes).ok()
+            });
+        let (track_container_meta, mut stream_meta) = match tags.as_ref() {
+            Some(t) => crate::owned_flac_layout::probe_metadata_from_entries(
+                t.comments.iter().filter_map(|c| c.split_once('=')),
+            ),
+            None => (BTreeMap::new(), BTreeMap::new()),
+        };
+        if nth == 0 {
+            file_metadata = track_container_meta;
+        }
+        if !entry.audio.name.is_empty() {
+            stream_meta.insert("title".into(), entry.audio.name.clone());
+            if nth == 0 {
+                file_metadata.insert("title".into(), entry.audio.name);
+            }
+        }
+        if !entry.audio.language.is_empty() {
+            stream_meta.insert("language".into(), entry.audio.language);
+        }
+        streams.push(StreamInfo {
+            index: entry.source_index,
+            media_type: "audio".into(),
+            codec: codec.into(),
+            time_base: [1, rate as i32],
+            start: Some(0),
+            duration: Some(duration),
+            bit_rate: None,
+            average_frame_rate: [0, 1],
+            profile: None,
+            level: None,
+            disposition: 0,
+            metadata: stream_meta,
+            width: 0,
+            height: 0,
+            pixel_format: -1,
+            sample_rate: rate as i32,
+            channels: i32::from(channels),
+            video_delay: 0,
+            extradata_bytes,
+        });
+    }
+    Ok(MediaInfo {
+        path: path.into(),
+        format: "ogg".into(),
+        start_us: Some(0),
+        duration_us: Some(max_duration_us),
+        bit_rate: None,
+        metadata: file_metadata,
+        chapters: Vec::new(),
+        streams,
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn public_mp4_probe_keeps_owned_metadata_and_explicit_gap_selection() {
+        let fixtures = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors");
+        for (name, codec) in [
+            ("pcm32-precision-edits.mov", "pcm_s32le"),
+            ("pcm64-precision-edits.mov", "pcm_f64le"),
+            ("ima4-ramp-edits.mov", "adpcm_ima_qt"),
+            ("ima-wav-stereo-edits.mov", "adpcm_ima_wav"),
+            ("ms-adpcm-stereo-edits.mov", "adpcm_ms"),
+        ] {
+            let path = fixtures.join(name);
+            let owned = super::try_mp4_as(&path, None).unwrap().unwrap();
+            assert_eq!(owned.streams[0].codec, codec);
+            for hint in [None, Some("mov"), Some("mp4"), Some("3gp")] {
+                let actual = crate::probe_as(&path, hint).unwrap();
+                assert_eq!(
+                    serde_json::to_value(actual).unwrap(),
+                    serde_json::to_value(&owned).unwrap()
+                );
+            }
+            assert!(super::try_mp4_as(&path, Some("aac")).unwrap().is_none());
+        }
+        let unknown = fixtures.join("probe-unknown-entry.mov");
+        assert!(super::try_mp4_as(&unknown, None).unwrap().is_none());
+        assert!(crate::owned_mp4_probe::probe_mp4(&unknown).is_err());
+        let mixed = fixtures.join("probe-mixed-unknown-entry.mov");
+        let reader =
+            crate::owned_mp4::Mp4Reader::open(std::fs::File::open(&mixed).unwrap(), Default::default())
+                .unwrap();
+        assert_eq!(reader.tracks().len(), 1);
+        assert_eq!(reader.refused().len(), 1);
+        assert!(super::try_mp4_as(&mixed, None).unwrap().is_none());
+        let broken = fixtures.join("probe-mdat-beyond-file.mov");
+        let expected = crate::owned_mp4_probe::probe_mp4(&broken).unwrap_err();
+        assert!(expected.contains("Invalid MP4 box") && expected.contains("mdat"));
+        for hint in [None, Some("mov")] {
+            assert_eq!(super::try_mp4_as(&broken, hint).unwrap_err(), expected);
+            assert_eq!(crate::probe_as(&broken, hint).unwrap_err(), expected);
+        }
+    }
+
+    #[test]
+    fn public_adts_probe_and_reader_use_owned_synthetic_packets() {
+        let fixtures =
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures");
+        for name in [
+            "aac-mono-44k.aac",
+            "aac-stereo.aac",
+            "aac-51-active.aac",
+            "aac-96k.aac",
+            "aac-pce-wide8.aac",
+        ] {
+            let source = fixtures.join("audio").join(name);
+            let bytes = std::fs::read(&source).unwrap();
+            let indexed = crate::owned_aac::adts::Aac::parse(&bytes, &Default::default()).unwrap();
+            let mut streamed =
+                crate::owned_aac::adts::StreamReader::open(bytes.as_slice()).unwrap();
+            assert_eq!(
+                streamed.audio_specific_config(),
+                indexed.configuration.as_slice()
+            );
+            for index in 0..indexed.packets() {
+                assert_eq!(
+                    streamed.next_packet().unwrap().unwrap(),
+                    indexed.packet(index)
+                );
+            }
+            assert!(streamed.next_packet().unwrap().is_none());
+            let expected = super::probe_adts(&source).unwrap();
+            assert_eq!(expected.streams[0].duration, Some(indexed.samples() as i64));
+            for actual in [
+                crate::probe(&source).unwrap(),
+                crate::probe_as(&source, Some("aac")).unwrap(),
+            ] {
+                assert_eq!(
+                    serde_json::to_value(actual).unwrap(),
+                    serde_json::to_value(&expected).unwrap()
+                );
+            }
+        }
+        let truncated = fixtures.join("playback-errors/aac-packet-prefix.aac");
+        assert!(
+            super::probe_adts(&truncated)
+                .unwrap_err()
+                .contains("fill whole buffer")
+        );
+        let expected = super::probe_adts(&truncated).unwrap_err();
+        assert_eq!(crate::probe(&truncated).unwrap_err(), expected);
+        assert_eq!(crate::probe_as(&truncated, Some("aac")).unwrap_err(), expected);
+        assert!(
+            super::try_adts_as(&fixtures.join("audio/aac-mono-44k.aac"), Some("wav"))
+                .unwrap()
+                .is_none()
+        );
+        let mono = fixtures.join("audio/aac-mono-44k.aac");
+        let info = super::probe_adts(&mono).unwrap();
+        assert_eq!(
+            (
+                info.streams[0].duration,
+                info.streams[0].channels,
+                info.streams[0].sample_rate
+            ),
+            (Some(7168), 1, 44100)
+        );
+    }
+
+    #[test]
+    fn public_probe_preserves_integer_storage_and_valid_bits() {
+        let dir = std::env::temp_dir().join(format!("fvid-probe-precision-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        for bits in [8, 16, 24, 32] {
+            let path = dir.join(format!("pcm-{bits}.wav"));
+            let _ = std::fs::remove_file(&path);
+            crate::owned_wav_file::write_wav_integer_le(
+                &path,
+                44100,
+                2,
+                bits,
+                &vec![0; 441 * 2 * usize::from(bits / 8)],
+                3,
+            )
+            .unwrap();
+            if bits == 32 {
+                // Extensible PCM stores 24 valid bits in a 32-bit word.
+                let mut bytes = std::fs::read(&path).unwrap();
+                assert_eq!(&bytes[12..16], b"fmt ");
+                assert_eq!(
+                    u16::from_le_bytes(bytes[20..22].try_into().unwrap()),
+                    0xfffe
+                );
+                bytes[38..40].copy_from_slice(&24u16.to_le_bytes());
+                std::fs::write(&path, bytes).unwrap();
+            }
+            let expected = super::probe_wave(&path).unwrap();
+            assert_eq!(expected.duration_us, Some(10000));
+            assert_eq!(expected.streams[0].duration, Some(441));
+            assert_eq!(expected.streams[0].channels, 2);
+            assert_eq!(
+                expected.streams[0].bit_rate,
+                Some(44100 * 2 * i64::from(bits))
+            );
+            assert_eq!(
+                expected.streams[0].codec,
+                if bits == 8 {
+                    "pcm_u8".into()
+                } else {
+                    format!("pcm_s{bits}le")
+                }
+            );
+            for actual in [
+                crate::probe(&path).unwrap(),
+                crate::probe_as(&path, Some("wav")).unwrap(),
+            ] {
+                assert_eq!(
+                    serde_json::to_value(actual).unwrap(),
+                    serde_json::to_value(&expected).unwrap()
+                );
+            }
+            std::fs::remove_file(path).unwrap();
+        }
+        std::fs::remove_dir(dir).unwrap();
+    }
+
+    #[test]
+    fn own_float_wave_probe() {
+        let path =
+            std::env::temp_dir().join(format!("fvid-own-wave-probe-{}.wav", std::process::id()));
+        let _ = std::fs::remove_file(&path);
+        crate::owned_wav_file::write_wav_f32le(&path, 48000, 2, &[0.0; 960]).unwrap();
+        let info = super::probe_wave(&path).unwrap();
+
+        assert_eq!(info.duration_us, Some(10000));
+        assert_eq!(info.streams[0].duration, Some(480));
+        assert_eq!(info.streams[0].codec, "pcm_f32le");
+        assert_eq!(info.streams[0].bit_rate, Some(3072000));
+        // An INFO list after the audio payload must survive native probing.
+        let mut bytes = std::fs::read(&path).unwrap();
+        bytes.extend_from_slice(b"LIST");
+        bytes.extend_from_slice(&18u32.to_le_bytes());
+        bytes.extend_from_slice(b"INFOINAM");
+        bytes.extend_from_slice(&6u32.to_le_bytes());
+        bytes.extend_from_slice(b"test!\0");
+        let size = u32::try_from(bytes.len() - 8).unwrap();
+        bytes[4..8].copy_from_slice(&size.to_le_bytes());
+        std::fs::write(&path, bytes).unwrap();
+        let info = super::probe_wave(&path).unwrap();
+        assert_eq!(
+            info.metadata.get("title").map(String::as_str),
+            Some("test!")
+        );
+        for actual in [
+            crate::probe(&path).unwrap(),
+            crate::probe_as(&path, Some("wav")).unwrap(),
+            super::probe_as(&path, None).unwrap(),
+        ] {
+            assert_eq!(
+                serde_json::to_value(actual).unwrap(),
+                serde_json::to_value(&info).unwrap()
+            );
+        }
+        assert!(super::probe_as(&path, Some("aac")).is_err());
+        std::fs::remove_file(path).unwrap();
+    }
+}

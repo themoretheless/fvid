@@ -226,4 +226,573 @@ fn loudness_and_normalize_loudness_plan_cli_and_api_regressions() {
         !exec_missing_out.status.success(),
         "normalize-loudness execution without OUTPUT must fail"
     );
+
+    // 5. CLI `plan mix-audio` and `plan merge-audio` accept an optional leading destination path
+    //    `[OUTPUT.wav|OUTPUT.mka|OUTPUT.mkv] INPUT INPUT...` or `--output-format wav|mka|mkv|matroska`,
+    //    and validate destination-specific metadata rules:
+    //    - `.wav` / `--output-format wav` rejects `--stream-metadata` and non-RIFF-INFO container keys
+    //    - `.mka` / `.mkv` / `--output-format mka|mkv` accepts Matroska container and stream 0 metadata
+    //    - unsupported destination extensions (e.g. `.mp3`) are rejected cleanly.
+    for ok_mix_merge_args in [
+        vec![
+            "media",
+            "plan",
+            "mix-audio",
+            "planned-mix.mka",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+            "--metadata",
+            "CUSTOM_MIX_TAG=MixVal",
+            "--stream-metadata",
+            "0:title=MixTrackZero",
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "plan",
+            "mix-audio",
+            "--output-format",
+            "wav",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+            "--metadata",
+            "title=ValidWavMixTitle",
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "plan",
+            "merge-audio",
+            "planned-merge.mka",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+            "--metadata",
+            "CUSTOM_MERGE_TAG=MergeVal",
+            "--stream-metadata",
+            "0:title=MergeTrackZero",
+            "--quiet",
+        ],
+        vec![
+            "media",
+            "plan",
+            "merge-audio",
+            "--output-format",
+            "wav",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+            "--metadata",
+            "title=ValidWavMergeTitle",
+            "--quiet",
+        ],
+    ] {
+        let out = Command::new(bin_path())
+            .args(&ok_mix_merge_args)
+            .output()
+            .unwrap();
+        assert!(
+            out.status.success(),
+            "expected success for {:?}: {}",
+            ok_mix_merge_args,
+            String::from_utf8_lossy(&out.stderr)
+        );
+    }
+
+    for bad_mix_merge_args in [
+        vec![
+            "media",
+            "plan",
+            "mix-audio",
+            "planned-mix.wav",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+            "--stream-metadata",
+            "0:title=BadOnWavMix",
+        ],
+        vec![
+            "media",
+            "plan",
+            "mix-audio",
+            "--output-format",
+            "wav",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+            "--metadata",
+            "CUSTOM_NON_RIFF=BadOnWavMix",
+        ],
+        vec![
+            "media",
+            "plan",
+            "mix-audio",
+            "planned-mix.mp3",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+        ],
+        vec![
+            "media",
+            "plan",
+            "merge-audio",
+            "planned-merge.wav",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+            "--stream-metadata",
+            "0:title=BadOnWavMerge",
+        ],
+        vec![
+            "media",
+            "plan",
+            "merge-audio",
+            "--output-format",
+            "wav",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+            "--metadata",
+            "CUSTOM_NON_RIFF=BadOnWavMerge",
+        ],
+        vec![
+            "media",
+            "plan",
+            "merge-audio",
+            "planned-merge.mp3",
+            wav.to_str().unwrap(),
+            mka.to_str().unwrap(),
+        ],
+    ] {
+        let out = Command::new(bin_path())
+            .args(&bad_mix_merge_args)
+            .output()
+            .unwrap();
+        assert!(
+            !out.status.success(),
+            "expected failure for {:?}: {}",
+            bad_mix_merge_args,
+            String::from_utf8_lossy(&out.stderr)
+        );
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(
+            !stderr.contains("requires cargo build --release --features media"),
+            "unexpected feature-gate fallback for {:?}: {stderr}",
+            bad_mix_merge_args
+        );
+    }
 }
+
+#[test]
+fn cli_plan_remux_trim_decode_audio_normalize_loudnorm_and_convert_subtitles_accept_output_format() {
+    let dir = fixture_dir();
+    let wav = dir.join("stereo.wav");
+    let mka = dir.join("stereo-pcm.mka");
+    let y4m = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/lossless-plan/source-8x4.y4m");
+    let temp = std::env::temp_dir().join(format!(
+        "fvid-batch306-output-format-{}",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_dir_all(&temp);
+    std::fs::create_dir_all(&temp).unwrap();
+    let srt = temp.join("cues.srt");
+    std::fs::write(&srt, "1\n00:00:00,000 --> 00:00:00,200\nSub\n").unwrap();
+    let out_y4m = temp.join("trimmed.y4m");
+
+    // 1. Valid `--output-format` and `plan trim INPUT OUTPUT.y4m` succeed without creating files.
+    for (expected_cmd, args) in [
+        (
+            "remux",
+            vec![
+                "media",
+                "plan",
+                "remux",
+                wav.to_str().unwrap(),
+                "--output-format",
+                "wav",
+                "--metadata",
+                "title=ValidWavTitle",
+            ],
+        ),
+        (
+            "remux",
+            vec![
+                "media",
+                "plan",
+                "remux",
+                mka.to_str().unwrap(),
+                "--output-format",
+                "mka",
+            ],
+        ),
+        (
+            "decode-audio",
+            vec![
+                "media",
+                "plan",
+                "decode-audio",
+                wav.to_str().unwrap(),
+                "--output-format",
+                "f32le",
+            ],
+        ),
+        (
+            "decode-audio",
+            vec![
+                "media",
+                "plan",
+                "decode-audio",
+                wav.to_str().unwrap(),
+                "--output-format",
+                "mka",
+                "--stream-metadata",
+                "0:title=TrackZero",
+            ],
+        ),
+        (
+            "trim",
+            vec![
+                "media",
+                "plan",
+                "trim",
+                wav.to_str().unwrap(),
+                "--from",
+                "0",
+                "--to",
+                "0.05",
+                "--output-format",
+                "wav",
+                "--metadata",
+                "title=ValidWavTrim",
+            ],
+        ),
+        (
+            "trim-pcm",
+            vec![
+                "media",
+                "plan",
+                "trim-pcm",
+                wav.to_str().unwrap(),
+                "--from",
+                "0",
+                "--to",
+                "0.05",
+                "--output-format",
+                "wav",
+                "--metadata",
+                "title=ValidWavTrimPcm",
+            ],
+        ),
+        (
+            "trim",
+            vec![
+                "media",
+                "plan",
+                "trim",
+                y4m.to_str().unwrap(),
+                out_y4m.to_str().unwrap(),
+                "--from",
+                "0",
+                "--to",
+                "0.04",
+            ],
+        ),
+        (
+            "normalize-loudness",
+            vec![
+                "media",
+                "plan",
+                "normalize-loudness",
+                wav.to_str().unwrap(),
+                "--output-format",
+                "mka",
+                "--stream-metadata",
+                "0:title=NormTrack",
+            ],
+        ),
+        (
+            "loudnorm",
+            vec![
+                "media",
+                "plan",
+                "loudnorm",
+                wav.to_str().unwrap(),
+                "--output-format",
+                "mka",
+                "--stream-metadata",
+                "0:title=LoudnormTrack",
+            ],
+        ),
+        (
+            "convert-subtitles",
+            vec![
+                "media",
+                "plan",
+                "convert-subtitles",
+                srt.to_str().unwrap(),
+                "--output-format",
+                "matroska",
+            ],
+        ),
+        (
+            "convert-subtitles",
+            vec![
+                "media",
+                "plan",
+                "convert-subtitles",
+                srt.to_str().unwrap(),
+                "--output-format",
+                "mkv",
+            ],
+        ),
+    ] {
+        let res = Command::new(bin_path()).args(&args).output().unwrap();
+        assert!(
+            res.status.success(),
+            "expected success for {args:?}, stderr: {}",
+            String::from_utf8_lossy(&res.stderr)
+        );
+        let plan: serde_json::Value = serde_json::from_slice(&res.stdout).unwrap();
+        assert_eq!(plan["command"], expected_cmd, "unexpected command for {args:?}");
+        assert!(!out_y4m.exists());
+    }
+
+    // 2. Destination-incompatible metadata or unsupported `--output-format` values are rejected cleanly.
+    for bad_args in [
+        vec![
+            "media",
+            "plan",
+            "remux",
+            wav.to_str().unwrap(),
+            "--output-format",
+            "wav",
+            "--stream-metadata",
+            "0:title=BadOnWav",
+        ],
+        vec![
+            "media",
+            "plan",
+            "remux",
+            wav.to_str().unwrap(),
+            "--output-format",
+            "mp4",
+            "--metadata",
+            "title=BadOnMp4",
+        ],
+        vec![
+            "media",
+            "plan",
+            "remux",
+            wav.to_str().unwrap(),
+            "--output-format",
+            "mp3",
+        ],
+        vec![
+            "media",
+            "plan",
+            "decode-audio",
+            wav.to_str().unwrap(),
+            "--output-format",
+            "f32le",
+            "--metadata",
+            "title=BadOnF32le",
+        ],
+        vec![
+            "media",
+            "plan",
+            "decode-audio",
+            wav.to_str().unwrap(),
+            "--output-format",
+            "wav",
+            "--stream-metadata",
+            "0:title=BadOnWav",
+        ],
+        vec![
+            "media",
+            "plan",
+            "decode-audio",
+            wav.to_str().unwrap(),
+            "--output-format",
+            "mp3",
+        ],
+        vec![
+            "media",
+            "plan",
+            "trim",
+            wav.to_str().unwrap(),
+            "--from",
+            "0",
+            "--to",
+            "0.05",
+            "--output-format",
+            "f32le",
+            "--metadata",
+            "title=BadOnF32le",
+        ],
+        vec![
+            "media",
+            "plan",
+            "trim-pcm",
+            wav.to_str().unwrap(),
+            "--from",
+            "0",
+            "--to",
+            "0.05",
+            "--output-format",
+            "mka",
+        ],
+        vec![
+            "media",
+            "plan",
+            "normalize-loudness",
+            wav.to_str().unwrap(),
+            "--output-format",
+            "wav",
+            "--stream-metadata",
+            "0:title=BadOnWav",
+        ],
+        vec![
+            "media",
+            "plan",
+            "normalize-loudness",
+            wav.to_str().unwrap(),
+            "--output-format",
+            "mp3",
+        ],
+        vec![
+            "media",
+            "plan",
+            "loudnorm",
+            wav.to_str().unwrap(),
+            "--output-format",
+            "wav",
+            "--stream-metadata",
+            "0:title=BadOnWav",
+        ],
+        vec![
+            "media",
+            "plan",
+            "loudnorm",
+            wav.to_str().unwrap(),
+            "--output-format",
+            "mp3",
+        ],
+        vec![
+            "media",
+            "plan",
+            "convert-subtitles",
+            srt.to_str().unwrap(),
+            "--output-format",
+            "mp4",
+        ],
+    ] {
+        let res = Command::new(bin_path()).args(&bad_args).output().unwrap();
+        assert!(!res.status.success(), "expected failure for {bad_args:?}");
+        let err = String::from_utf8_lossy(&res.stderr);
+        assert!(
+            !err.contains("requires cargo build --release --features media"),
+            "unexpected feature-gate error for {bad_args:?}: {err}"
+        );
+    }
+
+    let _ = std::fs::remove_dir_all(&temp);
+}
+
+#[test]
+fn plan_loudnorm_enforces_early_memory_budget_admission_and_destination_metadata_validation() {
+    let dir = fixture_dir();
+    let wav = dir.join("stereo.wav");
+    let mka = dir.join("stereo-pcm.mka");
+
+    // 1. Tight `max_controlled_bytes` (`Some(8)`) must be rejected during read-only
+    //    `fvid::media::plan_loudnorm` on WAVE and Matroska inputs, whereas a sufficient
+    //    budget (`16 MiB` / `--max-memory-mib 16`) succeeds and records the budget note.
+    let tight = fvid::media::CopyOptions {
+        max_controlled_bytes: Some(8),
+        ..Default::default()
+    };
+    for source in [&wav, &mka] {
+        let err = fvid::media::plan_loudnorm(source, None, false, &tight)
+            .expect_err("tight max_controlled_bytes must fail during plan_loudnorm");
+        assert!(
+            err.contains("controlled memory budget exceeded"),
+            "unexpected error for {}: {err}",
+            source.display()
+        );
+    }
+
+    let ok_mem = fvid::media::CopyOptions {
+        max_controlled_bytes: Some(16 * 1024 * 1024),
+        ..Default::default()
+    };
+    for source in [&wav, &mka] {
+        let plan = fvid::media::plan_loudnorm(source, None, false, &ok_mem)
+            .expect("16 MiB budget must succeed during plan_loudnorm");
+        assert!(
+            plan.notes
+                .iter()
+                .any(|n| n.contains("controlled memory limit: 16777216 bytes")),
+            "expected controlled memory limit note in plan for {}: {:?}",
+            source.display(),
+            plan.notes
+        );
+
+        let cli = Command::new(bin_path())
+            .args([
+                "media",
+                "plan",
+                "loudnorm",
+                source.to_str().unwrap(),
+                "--max-memory-mib",
+                "16",
+            ])
+            .output()
+            .unwrap();
+        assert!(
+            cli.status.success(),
+            "CLI plan loudnorm --max-memory-mib 16 failed for {}: {}",
+            source.display(),
+            String::from_utf8_lossy(&cli.stderr)
+        );
+        let cli_json: serde_json::Value = serde_json::from_slice(&cli.stdout).unwrap();
+        assert!(
+            cli_json["notes"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|n| n
+                    .as_str()
+                    .unwrap_or("")
+                    .contains("controlled memory limit: 16777216 bytes")),
+            "expected controlled memory limit note in CLI plan for {}: {}",
+            source.display(),
+            cli_json
+        );
+    }
+
+    // 2. `plan loudnorm` with `.mka`/`.mkv` or `--output-format mka|mkv` must reject
+    //    invalid Matroska stream metadata even when container metadata is valid RIFF INFO.
+    for bad_args in [
+        vec![
+            "media",
+            "plan",
+            "loudnorm",
+            wav.to_str().unwrap(),
+            "planned.mka",
+            "--metadata",
+            "title=ValidRiffTag",
+            "--stream-metadata",
+            "0:rotate=90",
+        ],
+        vec![
+            "media",
+            "plan",
+            "loudnorm",
+            wav.to_str().unwrap(),
+            "--output-format",
+            "mka",
+            "--metadata",
+            "title=ValidRiffTag",
+            "--stream-metadata",
+            "1:title=WrongTrack",
+        ],
+    ] {
+        let res = Command::new(bin_path()).args(&bad_args).output().unwrap();
+        assert!(!res.status.success(), "expected failure for {bad_args:?}");
+    }
+}
+

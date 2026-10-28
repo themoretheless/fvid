@@ -1,0 +1,24 @@
+{
+  "batch": 306,
+  "accepted": [
+    "FVID-0313"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-306-pre-edit/src/media_cli.rs",
+    "docs/improvements/snapshots/batch-306-pre-edit/src/owned_loudnorm_cli.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-306-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-306-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-306-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/loudness-normalize-plan-cli/stereo.wav",
+    "tests/fixtures/playback-errors/loudness-normalize-plan-cli/stereo-pcm.mka",
+    "tests/fixtures/playback-errors/lossless-plan/source-8x4.y4m"
+  ],
+  "tests": [
+    "tests/loudness_normalize_plan_cli_regressions.rs",
+    "tests/remux_concat_controls_regressions.rs"
+  ]
+}

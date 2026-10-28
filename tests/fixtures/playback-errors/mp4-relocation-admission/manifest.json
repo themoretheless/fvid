@@ -1,0 +1,6 @@
+{
+  "file": "many-boxes.mp4",
+  "sha256": "bdd977339cc32e3c9a4b8f5ee0799f8a146abccd2d20b19b3cd2cbeb3b899976",
+  "source": "tests/fixtures/playback-errors/mp4-signed-offset/positive.mp4",
+  "construction": "Append 10000 empty free boxes without moving encoded samples or changing fragment offsets"
+}

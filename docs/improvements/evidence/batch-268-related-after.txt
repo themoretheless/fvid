@@ -1,0 +1,39 @@
+
+running 3 tests
+test y4m_trim_and_concat_enforce_packet_budget_before_packet_work_limit ... ok
+test lossless_export_and_planning_validate_zero_packet_bytes_and_policy_across_y4m_mp4_and_matroska ... ok
+test lossless_planning_enforces_encoded_ffv1_packet_bytes_and_zero_packet_work_limit ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+
+running 3 tests
+test mismatched_rates_range_empty_segment_and_cancel_never_publish ... ok
+test interval_trim_matches_full_decode_presentation_frames ... ok
+test avc_hevc_concat_preserves_exported_samples_and_cli_api_agree ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.97s
+
+
+running 1 test
+test y4m_concat_trim_export_and_burn_xfade_honor_budgets_and_metadata_controls ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+
+running 3 tests
+test plan_concat_y4m_and_plan_trim_y4m_enforce_packet_bytes_and_nonzero_packets ... ok
+test y4m_export_concat_and_trim_enforce_compressed_video_packet_budget_and_selection ... ok
+test cli_y4m_and_native_commands_reject_zero_packet_bytes_and_zero_rss_mib ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+
+running 4 tests
+test plan_concat_y4m_and_plan_trim_y4m_enforce_cancellation_and_segment_compatibility ... ok
+test subtitle_burn_checks_cancellation_first_and_prioritizes_single_track_refusal_over_unselected_packets ... ok
+test xfade_validates_pixel_aspect_compatibility_between_primary_and_secondary_inputs ... ok
+test y4m_export_concat_and_trim_scope_packet_budget_to_selected_track_and_decoded_frame ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+

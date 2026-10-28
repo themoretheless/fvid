@@ -1,0 +1,35 @@
+{
+  "status": "verified-extension-FVID-0328",
+  "not_counted": true,
+  "counting": "same FVID-0328; no additional ID",
+  "source_sha256": "31dcd6e8748aabbcd7254d3695a13e9e0a3dd329777e020a01bc7b90f7e5497e",
+  "session": 67514,
+  "log": "/private/tmp/fvid-discarded-sync-before.log",
+  "hypothesis": "Global first-video-sync gate rejects selected AAC because an unselected video track has an empty stss table",
+  "controls": "Selected video and default all-track copy must continue refusing without declared initial sync",
+  "observation": {
+    "cargo_pid": 80556,
+    "rustc_pid": 80561,
+    "state": "S",
+    "cpu_time": "7.42 seconds",
+    "elapsed_wall": "2 hours; cause unproven, not sufficient to infer terminal/hung process",
+    "sample_session": 65316,
+    "sample_status": "sampling completed; symbol processing pending",
+    "resolved": "Original build completed without restart; Cargo measured 2m42s; original regression ran and failed specifically on selected audio admission"
+  },
+  "before": "1 passed, 1 failed: selected audio rejected by discarded video sync gate; selected video/all-track refusal control passed",
+  "default_session": null,
+  "after_source_sha256": "7e111c608cc447718f7cf6d6b93ba7b5021c0806b30f37a3cf1f2f813d9f2392",
+  "player_session": null,
+  "default_log": "/private/tmp/fvid-discarded-sync-default-after.log",
+  "player_log": "/private/tmp/fvid-discarded-sync-player-after.log",
+  "verified_inputs": {
+    "src/container/mp4_concat.rs": "7e111c608cc447718f7cf6d6b93ba7b5021c0806b30f37a3cf1f2f813d9f2392",
+    "tests/mp4_concat_discarded_sync.rs": "b7486d1dd88370b4b05ebeb6331a94c46911db0ac65d3d85212c0fbc74a6961d",
+    "scripts/generate_mp4_concat_discarded_sync.py": "9be3e0691d2e4b6c301cced673204db0511652bb9087690f860ab3a5dfd989ae",
+    "tests/fixtures/playback-errors/mp4-concat-discarded-sync/unmarked-video-sync.mp4": "c031b73d547311be91ffd8e54cae7c60033f9e594a0893f53d1d6fc315627899"
+  },
+  "wait": "Both Cargo handles live; shared build lock held by live foreign Cargo PID 84445, child rustc PID 84448; no restart or interruption",
+  "default_result": "3 focused + 5 related passed; 0 failed and 0 ignored",
+  "player_result": "3 focused + 12 related passed; 0 failed and 0 ignored"
+}

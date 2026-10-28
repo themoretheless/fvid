@@ -46,6 +46,9 @@ impl ShuffleFrames {
             filled: 0,
         })
     }
+    pub(crate) fn group_len(&self) -> usize {
+        self.mapping.len()
+    }
     pub(crate) fn push(
         &mut self,
         data: &[u8],

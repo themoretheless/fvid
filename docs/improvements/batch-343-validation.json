@@ -1,0 +1,15 @@
+{
+  "batch": 343,
+  "status": "accepted",
+  "counted_improvements": 1,
+  "ids": [
+    "FVID-0350"
+  ],
+  "pre_edit_snapshots": "docs/improvements/snapshots/batch-343-pre-edit",
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-343-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-343-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-343-related-after.txt"
+  },
+  "summary": "Add owned_ffv1_export::supports_with_options forwarding CopyOptions cancellation, packet-byte, packet-count, and controlled-memory ceilings into input_limited, presentation_durations, and decode_webm, wire it through owned_lossless, owned_mp4_multitrack_export, and owned_subtitle_burn, and replace unbudgeted try_webm calls in owned_webm_multitrack_export::plan_selection, supports, and try_export with options-bounded decode_webm."
+}

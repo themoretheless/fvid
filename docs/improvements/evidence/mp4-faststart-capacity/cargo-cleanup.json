@@ -1,0 +1,170 @@
+{
+  "deleted_inactive_test_artifacts": [
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-4c4eb13fbd73bdae",
+      "bytes": 1473032
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-4c4eb13fbd73bdae.d",
+      "bytes": 533
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-4c4eb13fbd73bdae.mp4_relocation_admission.77ad3293afe5c72f-cgu.0.rcgu.o",
+      "bytes": 491600
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a",
+      "bytes": 11359576
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a.mp4_relocation_admission.c14708a77d4c1497-cgu.07.rcgu.o",
+      "bytes": 549440
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a.mp4_relocation_admission.c14708a77d4c1497-cgu.15.rcgu.o",
+      "bytes": 614344
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a.mp4_relocation_admission.c14708a77d4c1497-cgu.09.rcgu.o",
+      "bytes": 351088
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a.mp4_relocation_admission.c14708a77d4c1497-cgu.05.rcgu.o",
+      "bytes": 453400
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a.mp4_relocation_admission.c14708a77d4c1497-cgu.01.rcgu.o",
+      "bytes": 545536
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a.mp4_relocation_admission.c14708a77d4c1497-cgu.13.rcgu.o",
+      "bytes": 224112
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a.mp4_relocation_admission.c14708a77d4c1497-cgu.11.rcgu.o",
+      "bytes": 341464
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a.mp4_relocation_admission.c14708a77d4c1497-cgu.03.rcgu.o",
+      "bytes": 362304
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a.mp4_relocation_admission.c14708a77d4c1497-cgu.06.rcgu.o",
+      "bytes": 488232
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a.mp4_relocation_admission.c14708a77d4c1497-cgu.14.rcgu.o",
+      "bytes": 344888
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a.d",
+      "bytes": 533
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a.mp4_relocation_admission.c14708a77d4c1497-cgu.08.rcgu.o",
+      "bytes": 661696
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a.mp4_relocation_admission.c14708a77d4c1497-cgu.04.rcgu.o",
+      "bytes": 616952
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a.mp4_relocation_admission.c14708a77d4c1497-cgu.00.rcgu.o",
+      "bytes": 447008
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a.mp4_relocation_admission.c14708a77d4c1497-cgu.12.rcgu.o",
+      "bytes": 379584
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a.mp4_relocation_admission.c14708a77d4c1497-cgu.10.rcgu.o",
+      "bytes": 445232
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_relocation_admission-46032b436b2f347a.mp4_relocation_admission.c14708a77d4c1497-cgu.02.rcgu.o",
+      "bytes": 577872
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_media_control-e1271b742338e817",
+      "bytes": 16166856
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_media_control-e1271b742338e817.d",
+      "bytes": 687
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_media_control-e1271b742338e817.native_media_control.37addf84d590f3b5-cgu.1.rcgu.o",
+      "bytes": 401488
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_media_control-e1271b742338e817.native_media_control.37addf84d590f3b5-cgu.0.rcgu.o",
+      "bytes": 534472
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_media_control-7ba89db3047d03d8",
+      "bytes": 16583288
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_media_control-7ba89db3047d03d8.native_media_control.c2777ee063da9814-cgu.1.rcgu.o",
+      "bytes": 402432
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_media_control-7ba89db3047d03d8.d",
+      "bytes": 687
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_media_control-7ba89db3047d03d8.native_media_control.c2777ee063da9814-cgu.0.rcgu.o",
+      "bytes": 522544
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_mp4_relocate-957d9a6dc755d573",
+      "bytes": 6952600
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_mp4_relocate-957d9a6dc755d573.native_mp4_relocate.7ac9aae23629405-cgu.3.rcgu.o",
+      "bytes": 434400
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_mp4_relocate-957d9a6dc755d573.native_mp4_relocate.7ac9aae23629405-cgu.1.rcgu.o",
+      "bytes": 268712
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_mp4_relocate-957d9a6dc755d573.d",
+      "bytes": 1227
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_mp4_relocate-957d9a6dc755d573.native_mp4_relocate.7ac9aae23629405-cgu.2.rcgu.o",
+      "bytes": 334880
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_mp4_relocate-957d9a6dc755d573.native_mp4_relocate.7ac9aae23629405-cgu.0.rcgu.o",
+      "bytes": 443296
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_mp4_relocate-a288c24930fc3702",
+      "bytes": 7175336
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_mp4_relocate-a288c24930fc3702.native_mp4_relocate.1e8c25d7ce4913d5-cgu.3.rcgu.o",
+      "bytes": 416376
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_mp4_relocate-a288c24930fc3702.native_mp4_relocate.1e8c25d7ce4913d5-cgu.1.rcgu.o",
+      "bytes": 268936
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_mp4_relocate-a288c24930fc3702.d",
+      "bytes": 1227
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_mp4_relocate-a288c24930fc3702.native_mp4_relocate.1e8c25d7ce4913d5-cgu.2.rcgu.o",
+      "bytes": 364216
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_mp4_relocate-a288c24930fc3702.native_mp4_relocate.1e8c25d7ce4913d5-cgu.0.rcgu.o",
+      "bytes": 422024
+    }
+  ],
+  "active_families_skipped": [],
+  "preserved": "all source, fixtures, generators and raw proof logs; shared libraries and unrelated build artifacts untouched"
+}

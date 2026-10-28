@@ -1,0 +1,44 @@
+{
+  "batch": 323,
+  "validated_at": "2026-10-25T23:08:00+04:00",
+  "improvements": [
+    {
+      "id": "FVID-0330",
+      "title": "Enforce controlled-memory budget (max_controlled_bytes) against Matroska container/stream/chapter metadata working sets and multi-frame temporal and overlay working sets across transcode_lossless, xfade, and burn_subtitles",
+      "source_files": [
+        "crates/fvid-media/src/owned_lossless.rs",
+        "crates/fvid-media/src/owned_ffv1_export.rs",
+        "crates/fvid-media/src/owned_matroska.rs",
+        "crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+        "crates/fvid-media/src/owned_webm_multitrack_export.rs",
+        "crates/fvid-media/src/owned_subtitle_burn.rs",
+        "crates/fvid-media/src/owned_xfade.rs",
+        "crates/fvid-media/src/owned_video_decode.rs",
+        "crates/fvid-media/src/owned_shuffleframes.rs",
+        "crates/fvid-media/src/owned_tmix.rs"
+      ],
+      "regression_files": [
+        "tests/lossless_plan_regressions.rs"
+      ],
+      "pre_edit_snapshot": "docs/improvements/snapshots/batch-323-pre-edit",
+      "pre_fix_evidence": "docs/improvements/evidence/batch-323-acceptance-before.txt",
+      "post_fix_evidence": "docs/improvements/evidence/batch-323-acceptance-after.txt",
+      "related_evidence": "docs/improvements/evidence/batch-323-related-after.txt",
+      "status": "accepted"
+    }
+  ],
+  "commands": [
+    {
+      "command": "cargo test --test lossless_plan_regressions lossless_xfade_and_subtitle_burn_enforce_controlled_memory_for_matroska_metadata_and_temporal_working_sets -- --nocapture",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "command": "cargo test --test lossless_plan_regressions -- --nocapture",
+      "passed": 17,
+      "failed": 0,
+      "ignored": 0
+    }
+  ]
+}

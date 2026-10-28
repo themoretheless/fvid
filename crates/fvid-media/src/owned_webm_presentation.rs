@@ -20,7 +20,20 @@ pub(crate) struct Presentation {
     pending_field: Option<usize>,
 }
 impl Presentation {
-    pub fn new<R: Read + Seek>(reader: &WebmReader<R>, track: u64) -> Result<Self> {
+    pub fn new<R: Read + Seek>(
+        reader: &WebmReader<R>,
+        track: u64,
+        options: Option<&CopyOptions>,
+    ) -> Result<Self> {
+        if let Some(limit) = options
+            .and_then(|o| o.max_controlled_bytes)
+            .filter(|&limit| limit > 0)
+            && reader.packets.len().saturating_mul(std::mem::size_of::<i64>()) > limit
+        {
+            return Err(
+                "controlled memory budget exceeded: Matroska presentation timestamp table".into(),
+            );
+        }
         let mut future = Vec::new();
         future.try_reserve_exact(reader.packets.len()).map_err(|e|e.to_string())?;
         let mut minimum = i64::MAX;
@@ -39,6 +52,9 @@ impl Presentation {
         loop {
             if options.and_then(|o|o.cancel.as_ref()).is_some_and(fvid_control::CancelFlag::is_cancelled) {
                 return Err("media operation cancelled".into());
+            }
+            if let Some(o) = options {
+                crate::owned_budget::check_rss_budget(o)?;
             }
             if let Some((index, frame)) = self.queue.iter().enumerate().min_by_key(|(_,f)|(f.pts,f.index)) {
                 if self.index == reader.packets.len() || frame.pts <= self.future[self.index] {
@@ -66,6 +82,15 @@ impl Presentation {
                 return Err("FFV1 input packet count exceeds limit".into());
             }
             self.consumed = self.consumed.checked_add(1).ok_or("FFV1 input packet count overflow")?;
+            if let Some(options) = options {
+                if reader
+                    .packet_payload_size(index)
+                    .map_err(|e| e.to_string())?
+                    > options.max_packet_bytes
+                {
+                    return Err("WebM packet exceeds budget or has empty lace frame".into());
+                }
+            }
             let packet = reader.read_packet(index).map_err(|e|e.to_string())?;
             let decoded = decoder.decode(&packet)?;
             if decoder.has_pending_field() { self.pending_field.get_or_insert(index); }
@@ -84,6 +109,23 @@ impl Presentation {
                     .or_else(||inferred.and_then(|v|v[index])))
             };
             if p.invisible { continue; }
+            if let Some(limit) = options
+                .and_then(|o| o.max_controlled_bytes)
+                .filter(|&limit| limit > 0)
+            {
+                let frame_bytes = decoded
+                    .frame
+                    .data
+                    .len()
+                    .saturating_add(decoded.alpha.as_ref().map_or(0, Vec::len));
+                let queued_bytes = self.queue.iter().fold(frame_bytes, |acc, f| {
+                    acc.saturating_add(f.decoded.frame.data.len())
+                        .saturating_add(f.decoded.alpha.as_ref().map_or(0, Vec::len))
+                });
+                if queued_bytes > limit {
+                    return Err("video frame exceeds controlled memory budget".into());
+                }
+            }
             self.queue.try_reserve(1).map_err(|e|e.to_string())?;
             self.queue.push(Frame {
                 decoded, pts, duration,

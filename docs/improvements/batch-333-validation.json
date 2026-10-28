@@ -1,0 +1,37 @@
+{
+  "batch": 333,
+  "accepted": [
+    "FVID-0340"
+  ],
+  "commands": [
+    {
+      "phase": "acceptance_before_fix",
+      "command": "cargo test --test mp4_audio_metadata_admission native_plan_audio_trim_and_decode_entrypoints_enforce_mp4_metadata_and_matroska_packet_index_budgets -- --exact",
+      "exit_code": 101,
+      "log": "docs/improvements/evidence/batch-333-acceptance-before.txt",
+      "summary": "native_plan_audio_trim_and_decode_entrypoints_enforce_mp4_metadata_and_matroska_packet_index_budgets fails before fix: decode_audio_with_options, trim_audio_with_options, trim_aac_with_options, and audio_trim_selection_with_options invoke un-clamped Mp4Reader::open_indexed / native_probe::probe before controlled-memory admission."
+    },
+    {
+      "phase": "acceptance_after_fix",
+      "command": "cargo test --test mp4_audio_metadata_admission",
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-333-acceptance-after.txt",
+      "summary": "All 8 tests in mp4_audio_metadata_admission pass."
+    },
+    {
+      "phase": "related_regressions_after_fix",
+      "command": "cargo test --test mp4_metadata_admission",
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-333-related-after.txt",
+      "summary": "All 9 tests in mp4_metadata_admission pass."
+    }
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-333-pre-edit/src/media_probe.rs",
+    "docs/improvements/snapshots/batch-333-pre-edit/src/native_plan.rs",
+    "docs/improvements/snapshots/batch-333-pre-edit/src/native_media.rs",
+    "docs/improvements/snapshots/batch-333-pre-edit/src/native_export.rs",
+    "docs/improvements/snapshots/batch-333-pre-edit/src/owned_mp4_probe.rs",
+    "docs/improvements/snapshots/batch-333-pre-edit/src/owned_mp4_probe_impl.rs"
+  ]
+}

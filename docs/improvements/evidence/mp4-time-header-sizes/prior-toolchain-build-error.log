@@ -1,0 +1,186 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.24
+   Compiling autocfg v1.5.1
+   Compiling libm v0.2.16
+   Compiling serde_core v1.0.229
+   Compiling libc v0.2.189
+   Compiling zmij v1.0.23
+   Compiling serde v1.0.229
+   Compiling serde_json v1.0.151
+   Compiling bitflags v2.13.2
+   Compiling typenum v1.20.1
+   Compiling itoa v1.0.18
+   Compiling ttf-parser v0.25.1
+   Compiling memchr v2.8.3
+   Compiling thiserror v2.0.20
+   Compiling log v0.4.34
+   Compiling fvid-cpu v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-cpu)
+   Compiling foldhash v0.2.0
+   Compiling fvid-media v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media)
+   Compiling num-traits v0.2.19
+   Compiling lazy_static v1.5.0
+   Compiling zerocopy v0.8.57
+   Compiling ab_glyph_rasterizer v0.1.10
+   Compiling adler2 v2.0.1
+   Compiling fvid-control v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-control)
+   Compiling smallvec v1.16.1
+   Compiling cfg-if v1.0.4
+   Compiling bytemuck v1.25.2
+   Compiling hybrid-array v0.4.15
+   Compiling fvid-codecs v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-codecs)
+   Compiling owned_ttf_parser v0.25.1
+   Compiling ab_glyph v0.2.32
+   Compiling crypto-common v0.2.2
+   Compiling block-buffer v0.12.1
+   Compiling miniz_oxide v0.8.9
+   Compiling hashbrown v0.17.1
+   Compiling fvid v0.1.0 (/Users/themoretheless/Documents/Sources/fvid)
+   Compiling cfg_aliases v0.2.2
+   Compiling const-oid v0.10.2
+   Compiling epaint_default_fonts v0.36.2
+   Compiling fvid-opus v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-opus)
+   Compiling equivalent v1.0.2
+   Compiling digest v0.11.3
+   Compiling naga v30.0.1
+   Compiling unicode-width v0.2.2
+   Compiling indexmap v2.14.2
+   Compiling bit-vec v0.9.1
+   Compiling regex-lite v0.1.9
+   Compiling rustc-hash v1.1.0
+   Compiling bit-set v0.10.0
+   Compiling codespan-reporting v0.13.1
+   Compiling spirv v0.4.0+sdk-1.4.341.0
+   Compiling once_cell v1.21.4
+   Compiling arrayvec v0.7.8
+   Compiling airbug v0.6.2 (https://github.com/themoretheless/airbug?branch=release#06b74ea5)
+   Compiling pollster v0.4.0
+   Compiling cpufeatures v0.3.1
+   Compiling sha2 v0.11.0
+   Compiling num-complex v0.4.6
+   Compiling symphonia-core v0.6.1
+   Compiling syn v3.0.5
+   Compiling syn v2.0.119
+   Compiling symphonia-bundle-mp3 v0.6.1
+   Compiling symphonia-metadata v0.6.1
+warning: unreachable pattern
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+492 |                         _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |                         ^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+482 | ...   merge_order::Selection::Initial(i)=>{
+    |       ---------------------------------- matches some of the same values
+...
+486 | ...   merge_order::Selection::ViewSynthesis=>return Ok(Resolved::ViewSynthesis),
+    |       ------------------------------------- matches some of the same values
+487 | ...   merge_order::Selection::Texture=>return Ok(Resolved::Texture),
+    |       ------------------------------- matches some of the same values
+488 | ...   merge_order::Selection::InterView=>{selected_iv=1;(special.inter_view.copied().ok_or_else(||invalid("missing selected HEVC IV...
+    |       --------------------------------- matches some of the same values
+...
+492 | ...   _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |       ^ ...and 3 other patterns collectively make this unreachable
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+   Compiling symphonia v0.6.1
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.20
+   Compiling zerocopy-derive v0.8.57
+   Compiling airbug-bench-macros v0.8.0 (https://github.com/themoretheless/airbug?branch=release#06b74ea5)
+warning: function `intra_plane` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/avc_deblock.rs:184:15
+    |
+184 | pub(super) fn intra_plane(
+    |               ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `read_inter_coefficients_422` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_inter_coefficients.rs:34:15
+   |
+34 | pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,pattern:u8,transform8:bool,neighbours:CoefficientNeighbours,chroma...
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `candidates` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_mv.rs:78:4
+   |
+78 | fn candidates(n: Neighbours) -> Result<[Neighbour; 3]> {
+   |    ^^^^^^^^^^
+
+warning: function `inverse2` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:190:4
+    |
+190 | fn inverse2(input: &[i32], output: &mut [i32]) {
+    |    ^^^^^^^^
+
+warning: function `inverse4` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:218:15
+    |
+218 | inverse_size!(inverse4, inverse2, 4);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse8` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:219:15
+    |
+219 | inverse_size!(inverse8, inverse4, 8);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse16` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:220:15
+    |
+220 | inverse_size!(inverse16, inverse8, 16);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse32` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:221:15
+    |
+221 | inverse_size!(inverse32, inverse16, 32);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: enum `RunKind` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:420:17
+    |
+420 | pub(crate) enum RunKind {
+    |                 ^^^^^^^
+
+warning: struct `Run` is never constructed
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:425:19
+    |
+425 | pub(crate) struct Run {
+    |                   ^^^
+
+warning: function `expand_runs` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:431:15
+    |
+431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run]) -> Result<Vec<u8>> {
+    |               ^^^^^^^^^^^
+
+   Compiling naga-types v30.0.1
+   Compiling fvid-media-info v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media-info)
+   Compiling airbug-bench v0.8.0 (https://github.com/themoretheless/airbug?branch=release#06b74ea5)
+error[E0514]: found crate `serde` compiled by an incompatible version of rustc
+ --> crates/fvid-media-info/src/lib.rs:6:5
+  |
+6 | use serde::Serialize;
+  |     ^^^^^
+  |
+  = note: the following crate versions were found:
+          crate `serde` compiled by <unknown rustc version>: /Users/themoretheless/Documents/Sources/fvid/target/debug/deps/libserde-0f8f5cb3bf8e4266.rmeta
+  = help: please recompile that crate using this compiler (rustc 1.98.1 (48a229cea 2026-09-01)) (consider running `cargo clean` first)
+
+For more information about this error, try `rustc --explain E0514`.
+error: could not compile `fvid-media-info` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+warning: `fvid-codecs` (lib) generated 12 warnings

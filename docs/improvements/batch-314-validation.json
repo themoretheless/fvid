@@ -1,0 +1,19 @@
+{
+  "batch": 314,
+  "ids": [
+    "FVID-0321"
+  ],
+  "summary": "Enforce controlled-memory budget (max_controlled_bytes) against MP4/Matroska encoded packets and transformed Y4M output frames across export-y4m, trim_y4m, and concat_y4m plans and execution",
+  "snapshots": [
+    "docs/improvements/snapshots/batch-314-pre-edit/src/native_export.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-314-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-314-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-314-related-after.txt"
+  },
+  "tests_run": [
+    "cargo test --test remux_concat_controls_regressions"
+  ],
+  "status": "accepted"
+}

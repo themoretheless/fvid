@@ -415,13 +415,23 @@ impl<R: std::io::Read> StreamReader<R> {
 
     pub fn audio_specific_config(&self) -> &[u8] {&self.asc}
 
+    pub fn restrict_packet_bytes(&mut self, max_packet_bytes: usize) {
+        self.max_packet_bytes = max_packet_bytes;
+    }
+
     /// Return the raw AAC block, excluding ADTS header/CRC. An error terminates
     /// this reader; callers must not publish partially decoded output as success.
     pub fn next_packet(&mut self) -> Result<Option<Vec<u8>>> {
         if self.finished {
             return Ok(None);
         }
-        if let Some(packet)=self.pending.pop_front() {return Ok(Some(packet));}
+        if let Some(packet)=self.pending.pop_front() {
+            if packet.len() > self.max_packet_bytes {
+                self.finished = true;
+                return Err(invalid("ADTS packet exceeds budget"));
+            }
+            return Ok(Some(packet));
+        }
         self.finished = true;
         let (next, fixed) = if let Some(header) = self.first.take() {
             header

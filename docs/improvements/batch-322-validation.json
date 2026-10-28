@@ -1,0 +1,25 @@
+{
+  "batch": 322,
+  "ids": [
+    "FVID-0329"
+  ],
+  "summary": "Enforce controlled-memory budget (max_controlled_bytes) against output WAVE INFO metadata in fvid-media loudnorm and decode-audio plans and execution and against Matroska container/stream/chapter metadata in compressed MP4-to-Matroska concat",
+  "snapshots": [
+    "docs/improvements/snapshots/batch-322-pre-edit/crates/fvid-media/src/owned_loudnorm.rs",
+    "docs/improvements/snapshots/batch-322-pre-edit/crates/fvid-media/src/owned_adts_export.rs",
+    "docs/improvements/snapshots/batch-322-pre-edit/crates/fvid-media/src/owned_audio_plan.rs",
+    "docs/improvements/snapshots/batch-322-pre-edit/crates/fvid-media/src/owned_container_loudnorm.rs",
+    "docs/improvements/snapshots/batch-322-pre-edit/crates/fvid-media/src/owned_adts_loudnorm.rs",
+    "docs/improvements/snapshots/batch-322-pre-edit/src/container/mp4_concat.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-322-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-322-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-322-related-after.txt"
+  },
+  "tests_run": [
+    "cargo test --test audio_budget_controls_regressions fvid_media_loudnorm_decode_audio_and_mp4_concat_enforce_controlled_memory_for_metadata_working_sets",
+    "cargo test --test audio_budget_controls_regressions --test mp4_concat_retained_plans"
+  ],
+  "status": "accepted"
+}

@@ -1,0 +1,16 @@
+{
+  "batch": 378,
+  "ids": [
+    "FVID-0385"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-378-pre-edit/crates/fvid-media/src/owned_audio_plan.rs",
+  "before_evidence": "docs/improvements/evidence/batch-378-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-378-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-378-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission mp4_matroska_and_adts_plan_decode_and_supports_enforce_source_metadata_budget_and_nonempty_interval_prefix",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 45,
+  "failed": 0
+}

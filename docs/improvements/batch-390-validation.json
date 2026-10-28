@@ -1,0 +1,20 @@
+{
+  "batch": 390,
+  "accepted_ids": [
+    "FVID-0396"
+  ],
+  "status": "accepted",
+  "summary": "Honor MP4 presentation order for independent layered HEVC access units",
+  "source_files": [
+    "src/playback/video/mp4_dispatch.rs"
+  ],
+  "regression": "tests/mp4_layered_seek_coverage.rs",
+  "evidence": "docs/improvements/evidence/mp4-layered-seek-coverage/status.json",
+  "before": "Owned independent layered HEVC AUs with ctts PTS 0,2,1,3 reach native POC-ordered SingleView without the common MP4 PTS reorder queue. Sequential playback first exposes interval (0,2,25), then refuses non-increasing timestamps. Both new tests fail; the ordered 0,1,2,3 companion passes its assertions before the reordered case fails.",
+  "after": "Select the existing common bounded presentation/seek pipeline when a layered track has decreasing container PTS. The monotonic layer-selection route remains unchanged. Two focused and 26 related player tests pass: four exact oracle-matched frames at 25Hz/160ms, ten seeks per file matching sequential RGB/intervals, rewind and repeated EOF, layered HDR/IRAP/metadata navigation and mixed-description controls.",
+  "tests_run": [
+    "cargo test --locked --offline --features player --test mp4_layered_seek_coverage --test hevc_layered_playback --test hevc_inband_layered_dispatch --test mixed_layered_descriptions --test mp4_zero_default_duration"
+  ],
+  "results": "28 passed; 0 failed; 0 ignored.",
+  "independence": "One common-player container-vs-codec ordering cause; ordered/reordered inputs, frames, seek positions and decoder-route reuse count once."
+}

@@ -1,0 +1,9 @@
+{
+  "batch_id": "FVID-0280",
+  "generator": "scripts/generate_matroska_interval_prefix_budget.py",
+  "provenance": "100% synthetic Matroska A_AAC and A_PCM/INT/LIT fixtures with small early packets and an oversized or in-band PS packet after the presentation interval end; no FFmpeg, network, or private media.",
+  "sha256": {
+    "matroska-aac-mono-then-ps.mka": "e8a2821dc9732de125638f8e3a39a4c72254d4402364fb7c7791baa4e4a1742d",
+    "matroska-pcm-small-then-large.mka": "f7251f54dcd15e2b915419dffbbdb7ecd7ede42093245e44fa26807bbeeac57c"
+  }
+}

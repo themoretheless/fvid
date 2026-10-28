@@ -1,0 +1,8 @@
+{
+  "identity": "89928 74975 Sun Oct 25 22:50:02 2026     /Users/themoretheless/.rustup/toolchains/1.98.1-aarch64-apple-darwin/bin/cargo test --locked --offline --test mp4_relocation_admission span_capacity_growth_is_admitted_before_allocation -- --exact",
+  "time_utc": "2026-10-25T18:54:28.768010+00:00",
+  "signal": "SIGINT",
+  "reason": "Intentional switch of redundant queued baseline to frozen exact-source actual regression: 2 controls pass, capacity refusal fails. No restart due to observation timeout. Full Cargo after-fix tests remain mandatory.",
+  "children": [],
+  "unaffected": "Live player qualification and all foreign processes"
+}

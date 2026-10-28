@@ -1,0 +1,24 @@
+{
+  "batch": 268,
+  "accepted": [
+    "FVID-0275"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-268-pre-edit/src/native_export.rs",
+    "docs/improvements/snapshots/batch-268-pre-edit/src/native_plan.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-268-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-268-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-268-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/y4m-prefix-budget/ffv1-one-frame.mkv",
+    "tests/fixtures/playback-errors/y4m-prefix-budget/ffv1-two-frames-tail-oversized.mkv",
+    "tests/fixtures/playback-errors/y4m-prefix-budget/avc-two-frames-tail-oversized.mp4"
+  ],
+  "tests": [
+    "tests/y4m_prefix_budget_regression.rs",
+    "scripts/test_y4m_prefix_budget.py"
+  ]
+}

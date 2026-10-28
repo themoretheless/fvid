@@ -1,0 +1,33 @@
+{
+  "deleted_inactive_test_executables": [
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-138bfcb5717a9ee0",
+      "bytes": 33361264
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_compatibility-86bfb01096c200e9",
+      "bytes": 30854640
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_retained_plans-925bc2e480ad6163",
+      "bytes": 20999816
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_retained_plans-9d06920e1c1fdc63",
+      "bytes": 20553544
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_clock-4801bcd6b38714cb",
+      "bytes": 13479640
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_concat_selected_clock-442a15115cedf396",
+      "bytes": 4052568
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/native_mp4_concat-ca6aaa032ad58a97",
+      "bytes": 32260208
+    }
+  ],
+  "preserved": "synthetic fixtures, generators, source snapshots, regressions and all evidence"
+}

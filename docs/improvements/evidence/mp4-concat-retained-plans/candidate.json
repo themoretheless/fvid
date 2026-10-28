@@ -1,0 +1,17 @@
+{
+  "status": "accepted",
+  "not_counted": false,
+  "source_sha256": "5448efdd63f2d6bfc68625d20ca711a4a1d0f399862cd661b0c13314ea130a17",
+  "running_session": 33466,
+  "runtime_pid": 51763,
+  "observation": "macOS sample reports _dyld_start, physical footprint 96K; no test body has started",
+  "log": "/private/tmp/fvid-concat-retained-before.log",
+  "fixture": "tests/fixtures/playback-errors/mp4-concat-retained-plans/two-tracks.m4a",
+  "before": "1 passed, 1 failed: selecting track 0 admitted a 40 KiB budget despite retaining the 512-packet track 1 plan for each segment",
+  "after_source_sha256": "8ba76c9bfc306f7af276fe291830d4e67b2cc6bb821eb8b3108212332b065d21",
+  "active_sessions": {},
+  "focused": "3 passed, 0 failed, 0 ignored; includes four-packet selected concat and owned AAC PCM decoding",
+  "test_sha256": "59d1ea95ffbf96380c892d856cf85577cdffd1aa59ae9bb2ff0796aaf92ba29e",
+  "related": "6 passed, 0 failed, 0 ignored; AVC/HEVC frame parity, AAC priming, cancellation, CLI and publication",
+  "accepted_id": "FVID-0324"
+}

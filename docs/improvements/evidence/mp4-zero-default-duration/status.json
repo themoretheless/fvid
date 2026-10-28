@@ -1,0 +1,10 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0395"
+  ],
+  "before": "1 control passed; both root and owned parser regressions failed: expected DTS/PTS 0,0,1 and durations 0,1,1; actual 0,1,2 and durations 1,1,1.",
+  "after": "3 focused plus 4 related no-default-feature tests; 4 focused plus 8 related player tests passed. Zero failures or ignored tests. Native software playback has 40ms duration, exact neutral RGB, two presentation intervals, repeated EOF, rewind and six seeks.",
+  "fixture_regeneration": "All five media hashes match independent regeneration without FFmpeg/network.",
+  "limits": "No performance or aggregate memory claim. Zero-duration frames sharing a PTS use the existing presentation grouping policy."
+}

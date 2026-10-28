@@ -1,0 +1,22 @@
+{
+  "batch": 251,
+  "id": "FVID-0258",
+  "title": "Enforce packet-byte budget and container-specific policy diagnostics across Matroska/MP4 remux and non-WAVE concat planning and execution",
+  "status": "accepted",
+  "pre_edit_snapshot": "docs/improvements/snapshots/batch-251-pre-edit",
+  "fixtures": {
+    "generator": "scripts/generate_remux_concat_policy_parity_regressions.py",
+    "unit_test": "scripts/test_remux_concat_policy_parity_regressions.py",
+    "manifest": "tests/fixtures/playback-errors/remux-concat-policy-parity/manifest.json"
+  },
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-251-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-251-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-251-related-after.txt"
+  },
+  "commands": [
+    "python3 -m unittest scripts/test_remux_concat_policy_parity_regressions.py",
+    "cargo test --test remux_concat_policy_parity_regressions",
+    "cargo test --test concat_trim_budget_parity_regressions"
+  ]
+}

@@ -17,12 +17,27 @@ pub fn concat(
     destination: &Path,
     options: &CopyOptions,
 ) -> Result<CopyStats, String> {
-    crate::owned_budget::check_rss_budget(options)?;
-    if !supports(sources, destination, options) {
-        return crate::owned_wave_remux::concat(sources, destination, options);
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
     }
     if options.max_packets == Some(0) {
-        return Err("Matroska AAC output requires at least one packet".into());
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    if !supports(sources, destination, options) {
+        if sources
+            .first()
+            .is_some_and(|p| !crate::owned_wave_inspect::is_wave(p).unwrap_or(false))
+        {
+            return Err("request is not an owned ADTS Matroska concat".into());
+        }
+        return crate::owned_wave_remux::concat(sources, destination, options);
     }
     let readers = open_readers(sources, options)?;
     let mut stats = crate::owned_matroska_remux::publish(destination, options, |output| {
@@ -44,6 +59,18 @@ fn open_readers(
     sources: &[PathBuf],
     options: &CopyOptions,
 ) -> Result<Vec<crate::owned_aac::adts::StreamReader<BufReader<File>>>, String> {
+    let meta_bytes = crate::owned_matroska::estimate_adts_matroska_metadata_bytes(Some(options))
+        .map_err(|e| e.to_string())?;
+    if options.max_controlled_bytes.is_some_and(|limit| {
+        sources
+            .len()
+            .saturating_mul(8192)
+            .saturating_add(16384)
+            .saturating_add(meta_bytes)
+            > limit
+    }) {
+        return Err("controlled memory budget exceeded".into());
+    }
     let mut readers = Vec::with_capacity(sources.len());
     for source in sources {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
@@ -53,13 +80,14 @@ fn open_readers(
         if !file.metadata().map_err(|e| e.to_string())?.is_file() {
             return Err("ADTS concat requires regular files".into());
         }
-        readers.push(
-            crate::owned_aac::adts::StreamReader::open_with_packet_limit(
-                BufReader::new(file),
-                options.max_packet_bytes,
-            )
-            .map_err(|e| e.to_string())?,
-        );
+        let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+            BufReader::new(file),
+            options
+                .max_packet_bytes
+                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+        )
+        .map_err(|e| e.to_string())?;
+        readers.push(reader);
     }
     Ok(readers)
 }
@@ -70,16 +98,36 @@ pub fn plan_concat(
     options: &CopyOptions,
 ) -> Result<fvid_media_info::MediaPlan, String> {
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
-    crate::owned_budget::check_rss_budget(options)?;
-    if !supports(sources, Path::new("planned.mka"), options) {
-        return crate::owned_wave_plan::plan_concat(sources, options);
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
     }
     if options.max_packets == Some(0) {
-        return Err("Matroska AAC output requires at least one packet".into());
+        return Err("packet work limit requires at least one packet".into());
     }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    if !supports(sources, Path::new("planned.mka"), options) {
+        if sources
+            .first()
+            .is_some_and(|p| !crate::owned_wave_inspect::is_wave(p).unwrap_or(false))
+        {
+            return Err("request is not an owned ADTS Matroska concat".into());
+        }
+        return crate::owned_wave_plan::plan_concat(sources, options);
+    }
+    let meta_bytes = crate::owned_matroska::estimate_adts_matroska_metadata_bytes(Some(options))
+        .map_err(|e| e.to_string())?;
+    let base_bytes = sources.len().saturating_mul(8192).saturating_add(16384);
     let mut sequence = crate::owned_aac::adts::SequenceReader::new(open_readers(sources, options)?)
         .map_err(|e| e.to_string())?;
     let config = sequence.configuration();
+    let asc = sequence.audio_specific_config().to_vec();
+    let mut negotiated_rate = None;
     let mut packets = 0u64;
     let mut bytes = 0u64;
     loop {
@@ -93,18 +141,32 @@ pub fn plan_concat(
         let Some(packet) = sequence.next_packet().map_err(|e| e.to_string())? else {
             break;
         };
+        if negotiated_rate.is_none() {
+            negotiated_rate = crate::owned_aac::adts::probe_output_rate(&packet, &asc)
+                .map_err(|e| e.to_string())?;
+        }
         packets = packets.checked_add(1).ok_or("ADTS packet count overflow")?;
+        if options.max_controlled_bytes.is_some_and(|limit| {
+            base_bytes
+                .saturating_add((packets as usize).saturating_mul(32))
+                .saturating_add(meta_bytes)
+                .saturating_add(packet.len())
+                > limit
+        }) {
+            return Err("controlled memory budget exceeded".into());
+        }
         bytes = bytes
             .checked_add(packet.len() as u64)
             .ok_or("ADTS payload count overflow")?;
     }
+    let output_rate = negotiated_rate.unwrap_or(config.sample_rate);
     let mut steps = vec![
         PlanStep {
             action: "concat".into(),
             detail: format!(
                 "copy {packets} unchanged AAC packets, {bytes} payload bytes across {} segments; {} Hz, {} channels",
                 sources.len(),
-                config.sample_rate,
+                output_rate,
                 config.channels
             ),
         },
@@ -127,6 +189,30 @@ pub fn plan_concat(
         action: "publish".into(),
         detail: "publish completed output without overwriting; remove temporary output on failure or cancellation".into(),
     });
+    let mut notes = vec![
+        "backend: owned ADTS/Matroska; no external demuxer or muxer".into(),
+        "output must be .mkv or .mka; destination/publication checked during execution".into(),
+        "identical AAC configurations required; packet byte limit excludes ADTS headers".into(),
+    ];
+    if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        || options.max_packets.is_some()
+        || options.max_controlled_bytes.is_some()
+        || options.max_rss_bytes.is_some()
+    {
+        notes.push(format!(
+            "encoded packet limit: {} bytes; packet work limit: {} packets; controlled memory limit: {} bytes; RSS limit: {} bytes",
+            options.max_packet_bytes,
+            options
+                .max_packets
+                .map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options
+                .max_controlled_bytes
+                .map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options
+                .max_rss_bytes
+                .map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+        ));
+    }
     Ok(MediaPlan {
         command: "concat".into(),
         input: sources[0].clone(),
@@ -139,10 +225,6 @@ pub fn plan_concat(
         }],
         steps,
         graph: None,
-        notes: vec![
-            "backend: owned ADTS/Matroska; no external demuxer or muxer".into(),
-            "output must be .mkv or .mka; destination/publication checked during execution".into(),
-            "identical AAC configurations required; packet byte limit excludes ADTS headers".into(),
-        ],
+        notes,
     })
 }

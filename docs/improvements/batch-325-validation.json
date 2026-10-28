@@ -1,0 +1,40 @@
+{
+  "batch": 325,
+  "accepted_ids": [
+    "FVID-0332"
+  ],
+  "status": "accepted",
+  "summary": "Propagate controlled-memory ceilings to MP4 parser metadata admission in remux and concat",
+  "before": "A valid 40ms AVC file with 1MiB of moov/free padding was accepted by owned remux planning under a 64KiB controlled-memory ceiling. Direct parser metadata admission correctly refused at 64KiB; small input at 64KiB and padded input at 2MiB passed. Original suite: 2 controls passed, 1 acceptance failed.",
+  "after": "Clamp parser metadata_bytes to the configured controlled ceiling in owned remux, native concat, native route inspection and MP4 planning/preflight. Preserve typed unsupported errors internally so recognized metadata/resource failures reach the owned route and keep their budget explanation; unknown sample entries retain refusal/fallback eligibility. Existing public interfaces remain compatible; route inspection adds an optional-memory helper.",
+  "source_files": [
+    "crates/fvid-media/src/owned_mp4_remux.rs",
+    "src/container/mp4_concat.rs",
+    "src/native_export.rs",
+    "src/native_plan.rs",
+    "src/media.rs"
+  ],
+  "regression": "tests/mp4_metadata_admission.rs",
+  "evidence": "docs/improvements/evidence/mp4-metadata-admission/status.json",
+  "results": "Player: 7 focused + 12 related passed. Default: 6 focused + 6 related passed. All 0 failed, 0 ignored. Existing destination and temporary-output cleanup, unsupported entry control, native RGB, 40ms duration, repeated EOF, rewind and five seeks pass.",
+  "tests_run": [
+    "cargo test --locked --offline --features player --test mp4_metadata_admission --test mp4_remux_prefix_budget_regression --test mp4_concat_selected_compatibility --test mp4_remux_plan_capacity",
+    "cargo test --locked --offline --test mp4_metadata_admission --test mp4_remux_prefix_budget_regression --test mp4_remux_plan_capacity"
+  ],
+  "independence": "This concerns raw input moov/fragment allocation admission before parsing, not retained output tags/chapters or generated MP4 output indexes covered by FVID-0326/FVID-0329. Route and file variants count together once.",
+  "limits": "Parser metadata admission only: this does not prove physical RSS bounds or complete aggregate accounting of all parser/decoder allocations. No performance claim.",
+  "audio_follow_up": {
+    "evidence": "docs/improvements/evidence/mp4-audio-metadata-admission/status.json",
+    "regression": "tests/mp4_audio_metadata_admission.rs",
+    "source_files": [
+      "crates/fvid-media/src/owned_mp4_audio_export.rs",
+      "crates/fvid-media/src/owned_mp4_audio.rs",
+      "crates/fvid-media/src/owned_wave_metadata.rs",
+      "src/native_media.rs"
+    ],
+    "before": "Geometry and decode plan admitted legal 2MiB moov padding under 1MiB controlled memory; small/ample controls passed (2 failed, 1 passed).",
+    "after": "Carry metadata ceilings through MP4 audio export, scalar decoders, WAVE source metadata and option-aware native probes. Legacy unconfigured AAC probe keeps its interface and default ceiling. Root/library decode refuses before output; ample budget decodes exactly 136 mono frames at 8kHz with byte-identical format and PCM data to unpadded input.",
+    "results": "Default 14 passed; player 15 passed; no failures or newly ignored tests. Initial test Debug-bound compile error was corrected with explicit match without altering refusal assertions.",
+    "counting": "Additional route completion of FVID-0332 only"
+  }
+}

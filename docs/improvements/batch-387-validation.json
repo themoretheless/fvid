@@ -1,0 +1,16 @@
+{
+  "batch": 387,
+  "ids": [
+    "FVID-0394"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-387-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-387-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-387-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-387-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission mp4_and_adts_matroska_remux_and_concat_charge_simultaneous_plan_cue_and_packet_working_sets -- --exact",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 54,
+  "failed": 0
+}

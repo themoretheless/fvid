@@ -12,43 +12,56 @@ pub(crate) fn matroska_descriptor(
     source: &Path,
     options: &CopyOptions,
 ) -> Result<Option<(usize, u32, u16, u32, String, String)>> {
+    matroska_descriptor_for_decode(source, None, options)
+}
+
+pub(crate) fn matroska_descriptor_for_decode(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<Option<(usize, u32, u16, u32, String, String)>> {
     let mut file = File::open(source).map_err(|e| e.to_string())?;
     let mut prefix = [0; 4];
     if file.read_exact(&mut prefix).is_err() || prefix != [0x1a, 0x45, 0xdf, 0xa3] {
         return Ok(None);
     }
-    let reader = crate::owned_webm::WebmReader::open(
+    let reader = crate::owned_matroska_audio::open_audio_reader(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        Default::default(),
+        options,
+        options.max_packet_bytes,
     )
     .map_err(|e| e.to_string())?;
-    let selected = options.streams.first().copied();
+    let selected = match options.streams.as_slice() {
+        [] => None,
+        [index] => Some(*index),
+        _ => return Err("select exactly one audio stream".into()),
+    };
     let index = crate::owned_matroska_audio::matroska_audio_index(&reader, selected)
         .map_err(|e| e.to_string())?;
     let source_codec = reader.tracks[index].codec.clone();
     drop(reader);
     let (rate, channels, mask, codec, precision) = match source_codec.as_str() {
         "A_FLAC" => {
-            let (rate,channels)=crate::owned_matroska_flac_export::geometry(source,options)?;
+            let (rate,channels)=crate::owned_matroska_flac_export::geometry_for_decode(source,transform,options)?;
             (rate,channels,crate::owned_matroska_flac_export::channel_mask(source,options)?,"flac".into(),"float32".into())
         }
         "A_AAC" => {
             let (rate, channels, mask) =
-                crate::owned_matroska_aac_export::geometry(source, options)?;
+                crate::owned_matroska_aac_export::geometry_for_decode(source, transform, options)?;
             (rate, channels, mask, "aac".into(), "float32".into())
         }
         "A_OPUS" => {
             let (rate, channels, mask) =
-                crate::owned_matroska_opus_export::geometry_with_mask(source, options)?;
+                crate::owned_matroska_opus_export::geometry_with_mask_for_decode(source, transform, options)?;
             (rate, channels, mask, "opus".into(), "float32".into())
         }
         "A_MPEG/L1" | "A_MPEG/L2" | "A_MPEG/L3" => {
-            let (rate, channels) = crate::owned_matroska_mp3_export::geometry(source, options)?;
+            let (rate, channels) = crate::owned_matroska_mp3_export::geometry_for_decode(source, transform, options)?;
             (rate, channels, crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
              match source_codec.as_str() { "A_MPEG/L1" => "mp1", "A_MPEG/L2" => "mp2", _=>"mp3" }.into(), "float32".into())
         }
         "A_ALAC" => {
-            let (rate, channels,mask) = crate::owned_matroska_alac_export::geometry_with_mask(source, options)?;
+            let (rate, channels,mask) = crate::owned_matroska_alac_export::geometry_with_mask_for_decode(source, transform, options)?;
             (
                 rate,
                 channels,
@@ -58,7 +71,7 @@ pub(crate) fn matroska_descriptor(
             )
         }
         "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE" => {
-            let (rate, channels) = crate::owned_matroska_pcm_export::geometry(source, options)?;
+            let (rate, channels) = crate::owned_matroska_pcm_export::geometry_for_decode(source, transform, options)?;
             let mask = if channels <= 2 {
                 crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32
             } else {
@@ -120,27 +133,59 @@ pub(crate) fn source_descriptor(source: &Path, options: &CopyOptions) -> Result<
 }
 fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
     transform: Option<&AudioDecodeTransform>) -> Result<AudioDescriptor> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
     let adts = crate::owned_adts_export::recognizes(source)?;
     let raw_flac = !adts && crate::owned_raw_flac::recognizes(source)?;
     let raw_encoded_audio = raw_flac || (!adts && crate::owned_raw_mp3::recognizes(source)?);
     let mp4 = crate::owned_mp4_audio_export::recognizes(source, options)?;
-    let matroska = matroska_descriptor(source, options)?;
+    let matroska = matroska_descriptor_for_decode(source, transform.copied(), options)?;
     let is_matroska = matroska.is_some();
     let ogg = crate::owned_ogg_opus_export::recognizes(source)?;
     let g711_wave = crate::owned_g711_wave_export::recognizes(source, options)?;
     let mut stream_index = 0;
     let (rate, channels, mask, codec, precision) = if g711_wave {
         let (rate, channels, mask, codec, _) =
-            crate::owned_g711_wave_export::descriptor(source, options)?;
+            crate::owned_g711_wave_export::descriptor_with_transform(
+                source,
+                transform.copied(),
+                options,
+            )?;
         (rate, channels, mask, codec.to_owned(), "float32".to_owned())
     } else if ogg {
         let (index, rate, channels, mask, codec) =
-            crate::owned_ogg_audio_export::descriptor(source, options)?;
+            crate::owned_ogg_audio_export::descriptor_for_decode(
+                source,
+                transform.copied(),
+                options,
+            )?;
         stream_index = index;
         (rate, channels, mask, codec.to_owned(), "float32".to_owned())
     } else if mp4 {
         let (index, rate, channels, mask, codec) =
-            crate::owned_mp4_audio_export::descriptor(source, options)?;
+            crate::owned_mp4_audio_export::descriptor_for_decode(source, transform.copied(), options)?;
+        if transform.is_some_and(|t| t.interval.is_some()) {
+            let _ = crate::owned_mp4_audio_export::geometry_for_decode(
+                source,
+                transform.copied(),
+                options,
+            )?;
+        }
         stream_index = index;
         let precision = if codec.starts_with("pcm_") {
             "float64"
@@ -152,10 +197,14 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         stream_index = index;
         (rate, channels, mask, codec, precision)
     } else if raw_flac {
-        let (rate,channels,mask)=crate::owned_raw_flac::descriptor(source,options)?;
-        (rate,channels,mask,"flac".to_owned(),"float32".to_owned())
+        let _ = crate::owned_raw_flac::source_info(source, options)?;
+        let (rate, channels, mask) =
+            crate::owned_raw_flac::descriptor_with_transform(source, transform.copied(), options)?;
+        (rate, channels, mask, "flac".to_owned(), "float32".to_owned())
     } else if raw_encoded_audio {
-        let (rate, channels, raw_codec) = crate::owned_raw_mp3::descriptor(source, options)?;
+        let _ = crate::owned_raw_mp3::source_info(source, options)?;
+        let (rate, channels, raw_codec) =
+            crate::owned_raw_mp3::descriptor_with_transform(source, transform.copied(), options)?;
         (rate, channels, crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
          raw_codec.to_owned(), "float32".to_owned())
     } else if adts {
@@ -164,16 +213,22 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         }
         let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
             BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-            options.max_packet_bytes,
+            options
+                .max_packet_bytes
+                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
         )
         .map_err(|e| e.to_string())?;
         let config = reader.configuration();
         let prefix = transform.and_then(|transform|
             crate::owned_adts_export::decoded_prefix(*transform, config.sample_rate));
         drop(reader);
-        let (rate, channels, mask) = crate::owned_aac::stream::adts_prefix_info(
-            BufReader::new(File::open(source).map_err(|e| e.to_string())?), prefix, options)
-            .map_err(|e| e.to_string())?;
+        let (rate, channels, mask) = crate::owned_aac::stream::adts_prefix_info_for_transform(
+            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+            prefix,
+            transform.copied(),
+            options,
+        )
+        .map_err(|e| e.to_string())?;
         (
             rate,
             channels,
@@ -188,22 +243,58 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         let mut file = File::open(source).map_err(|e| e.to_string())?;
         let info = crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref())
             .map_err(|e| e.to_string())?;
+        if info.sample_frames == 0 || !(1..=255).contains(&info.channels) {
+            return Err("no decoded audio samples or invalid channel count (nonempty input required)".into());
+        }
+        let frame_bytes = usize::from(info.block);
+        if frame_bytes == 0 {
+            return Err("PCM packet limit cannot hold one sample frame".into());
+        }
+        let capacity =
+            (4096 * frame_bytes).min(options.max_packet_bytes / frame_bytes * frame_bytes);
+        if capacity == 0 {
+            return Err("PCM packet limit cannot hold one sample frame".into());
+        }
+        let full_size = usize::try_from(info.data_bytes)
+            .map_err(|_| "WAVE PCM payload exceeds address space")?;
+        let limit = options
+            .max_packets
+            .map(|packets| u128::from(packets) * capacity as u128)
+            .unwrap_or(full_size as u128);
+        let size = (full_size as u128).min(limit) as usize;
+        if size == 0 {
+            return Err("packet limit leaves no decoded audio samples".into());
+        }
+        if let Some(transform) = transform {
+            if let Some((from, to)) = transform.interval {
+                let frames_read = size / frame_bytes;
+                let out_rate =
+                    u128::try_from(transform.sample_rate.unwrap_or(info.sample_rate as i32))
+                        .map_err(|_| "invalid output sample rate")?;
+                let output_frames = usize::try_from(
+                    (frames_read as u128)
+                        .checked_mul(out_rate)
+                        .ok_or("audio interval overflow")?
+                        .div_ceil(u128::from(info.sample_rate)),
+                )
+                .map_err(|_| "audio interval overflow")?;
+                let boundary = |time: i64| -> Result<usize> {
+                    usize::try_from(
+                        (time as u128)
+                            .checked_mul(out_rate)
+                            .ok_or("audio interval overflow")?
+                            .div_ceil(1_000_000),
+                    )
+                    .map(|n| n.min(output_frames))
+                    .map_err(|_| "audio interval overflow".into())
+                };
+                let (first, last) = (boundary(from)?, boundary(to)?);
+                if last <= first {
+                    return Err("no decoded audio samples".into());
+                }
+            }
+        }
         if let Some(max) = options.max_controlled_bytes {
-            let frame_bytes = usize::from(info.block);
-            if frame_bytes == 0 {
-                return Err("PCM packet limit cannot hold one sample frame".into());
-            }
-            let capacity = (4096 * frame_bytes).min(options.max_packet_bytes / frame_bytes * frame_bytes);
-            if capacity == 0 {
-                return Err("PCM packet limit cannot hold one sample frame".into());
-            }
-            let full_size = usize::try_from(info.data_bytes)
-                .map_err(|_| "WAVE PCM payload exceeds address space")?;
-            let limit = options
-                .max_packets
-                .map(|packets| u128::from(packets) * capacity as u128)
-                .unwrap_or(full_size as u128);
-            let size = (full_size as u128).min(limit) as usize;
             let metadata = crate::owned_wave_inspect::info_chunks_bytes(
                 &mut file,
                 &info,
@@ -258,13 +349,14 @@ pub fn plan_decode_audio(
         return Err("media operation cancelled".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
+    crate::owned_adts_export::check_wave_metadata_budget(options)?;
     let AudioDescriptor {
         rate, channels, mask, codec, precision, stream_index,
         adts, mp4, is_matroska, raw_encoded_audio, ogg, g711_wave,
     } = source_descriptor_for_decode(source, options, Some(transform))?;
     let mp4_target=if mp4 {crate::owned_mp4_audio_export::normalization_target(source,*transform,options,rate,channels,mask)?}else{None};
     let output_channels = transform.channels.unwrap_or(i32::from(channels));
-    let aac_fold=mp4_target.is_none()&&codec=="aac"&&output_channels!=i32::from(channels)&&matches!(output_channels,1|2)&&crate::owned_aac_export_routing::router(source,rate,channels,options)?.is_some();
+    let aac_fold=mp4_target.is_none()&&codec=="aac"&&output_channels!=i32::from(channels)&&matches!(output_channels,1|2)&&crate::owned_aac_export_routing::router_for_decode(source,rate,channels,Some(*transform),options)?.is_some();
     if mp4_target.is_none() && output_channels != i32::from(channels) && !aac_fold {
         if !((channels <= 8 && matches!(output_channels, 1 | 2))
             || (channels <= 2 && (1..=8).contains(&output_channels)))
@@ -324,5 +416,31 @@ pub fn plan_decode_audio(
         });
     }
     steps.push(PlanStep{action:"write".into(),detail:format!("owned .wav writer; preserve {precision} precision; publish without overwriting; cleanup on failure")});
-    Ok(MediaPlan{command:"decode-audio".into(),input:source.into(),inputs:vec![source.into()],streams:vec![PlanStream{index:stream_index,media_type:"audio".into(),codec,disposition:"decode".into()}],steps,graph:None,notes:vec!["backend: owned fvid-media; no external demuxer, codec, resampler or muxer".into(),if adts {"read-only ADTS prefix negotiation checks the output clock and decoder admission without emitting progress; packet payloads and publication are revalidated during execution".into()} else {"read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution".into()},if adts || mp4 || is_matroska || raw_encoded_audio || ogg || g711_wave {"packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded".into()} else {"packet limits apply to frame-aligned WAVE I/O blocks of at most 4096 sample frames".into()}]})
+    let mut notes = vec![
+        "backend: owned fvid-media; no external demuxer, codec, resampler or muxer".into(),
+        if adts {
+            "read-only ADTS prefix negotiation checks the output clock and decoder admission without emitting progress; packet payloads and publication are revalidated during execution".into()
+        } else {
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution".into()
+        },
+        if adts || mp4 || is_matroska || raw_encoded_audio || ogg || g711_wave {
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded".into()
+        } else {
+            "packet limits apply to frame-aligned WAVE I/O blocks of at most 4096 sample frames".into()
+        },
+    ];
+    if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        || options.max_packets.is_some()
+        || options.max_controlled_bytes.is_some()
+        || options.max_rss_bytes.is_some()
+    {
+        notes.push(format!(
+            "encoded packet limit: {} bytes; packet work limit: {} packets; controlled memory limit: {} bytes; RSS limit: {} bytes",
+            options.max_packet_bytes,
+            options.max_packets.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options.max_controlled_bytes.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options.max_rss_bytes.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+        ));
+    }
+    Ok(MediaPlan{command:"decode-audio".into(),input:source.into(),inputs:vec![source.into()],streams:vec![PlanStream{index:stream_index,media_type:"audio".into(),codec,disposition:"decode".into()}],steps,graph:None,notes})
 }

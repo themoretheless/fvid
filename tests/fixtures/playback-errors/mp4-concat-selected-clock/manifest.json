@@ -1,0 +1,6 @@
+{
+  "file": "video-and-long-audio.mp4",
+  "sha256": "4c30293a8ed0b9044597f5a9097499791df20dd3c1b83eb850ecc09cd1a5603c",
+  "video_source": "tests/fixtures/playback-errors/avc-444-pcm-deblock/y8-c8-o12-12-m1-e0.mp4",
+  "provenance": "Owned PCM AVC fixture and own AAC pulse syntax; original video byte offsets preserved. Selecting only the short video should concatenate with 40ms cadence."
+}

@@ -274,7 +274,13 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                 let topology =
                     crate::codec::hevc_vps::Vps::parse_layered_metadata(&nal, budget / 2)?;
                 if topology.layers.effective_max_layers() > 1 {
-                    if vpsless {
+                    // Native layer output follows codec POC. Container PTS can
+                    // reorder independent access units across sequence resets;
+                    // the common reader retains the bounded PTS queue and seek
+                    // coverage required for that presentation order.
+                    let reordered = demuxer.tracks()[index].samples.expanded()
+                        .is_some_and(|samples| samples.windows(2).any(|pair| pair[0].pts > pair[1].pts));
+                    if vpsless || reordered {
                         return Ok(Self {
                             source: Source::Single(Box::new(
                                 SingleLayerMp4VideoReader::from_demuxer_with_hardware(

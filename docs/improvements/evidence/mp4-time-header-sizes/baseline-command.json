@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/Users/themoretheless/.rustup/toolchains/1.98.1-aarch64-apple-darwin/bin/cargo",
+    "test",
+    "--manifest-path",
+    "/Users/themoretheless/Documents/Sources/fvid/Cargo.toml",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--test",
+    "mp4_time_header_sizes"
+  ],
+  "target_dir": "/private/tmp/fvid-time-sizes-target-20261029",
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+}

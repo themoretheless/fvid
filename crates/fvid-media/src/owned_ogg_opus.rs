@@ -369,6 +369,29 @@ impl Program {
             .get(self.cursor)
             .map(|s| self.ogg.chains()[s.chain].packets[s.index].data.len())
     }
+    pub(crate) fn max_packet_size_in_prefix(
+        &self,
+        until: Option<u64>,
+        max_packets: Option<u64>,
+    ) -> usize {
+        let mut maximum = 0;
+        for (packets, stamp) in self.stamps.iter().enumerate() {
+            if max_packets.is_some_and(|limit| packets as u64 >= limit) {
+                break;
+            }
+            if until.is_some_and(|end| {
+                let start = stamp.pts.max(stamp.start);
+                start >= 0 && start as u64 >= end
+            }) {
+                break;
+            }
+            maximum = maximum.max(self.ogg.chains()[stamp.chain].packets[stamp.index].data.len());
+        }
+        maximum
+    }
+    pub(crate) fn packet_count(&self) -> usize {
+        self.stamps.len()
+    }
     pub(crate) fn next_presentation_start(&self) -> Option<i64> {
         self.stamps.get(self.cursor).map(|s| s.pts.max(s.start))
     }

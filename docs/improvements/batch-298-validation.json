@@ -1,0 +1,22 @@
+{
+  "batch": 298,
+  "accepted": [
+    "FVID-0305"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-298-pre-edit/src/media.rs",
+    "docs/improvements/snapshots/batch-298-pre-edit/src/media_cli.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-298-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-298-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-298-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/adts-matroska-audio-metadata/adts-seg-a-48k.aac",
+    "tests/fixtures/playback-errors/adts-matroska-audio-metadata/pcm-source-48k.wav"
+  ],
+  "tests": [
+    "tests/adts_matroska_audio_metadata_regressions.rs"
+  ]
+}

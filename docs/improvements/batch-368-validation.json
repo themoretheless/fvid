@@ -1,0 +1,16 @@
+{
+  "batch": 368,
+  "ids": [
+    "FVID-0375"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-368-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-368-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-368-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-368-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission native_export_native_plan_and_video_decode_enforce_options_before_extension_input_count_or_interval_checks",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 35,
+  "failed": 0
+}

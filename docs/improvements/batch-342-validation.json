@@ -1,0 +1,26 @@
+{
+  "batch": 342,
+  "id": "FVID-0349",
+  "title": "Forward CopyOptions cancellation and packet-byte ceilings across WAVE loudnorm, loudness, and remux supports/recognizes checks, owned_loudnorm::plan_loudnorm WAVE probing, and trailing-segment geometry validation in validate_concat_segments_with_options",
+  "status": "accepted",
+  "source": [
+    "crates/fvid-media/src/owned_container_loudness.rs",
+    "crates/fvid-media/src/owned_wave_loudness.rs",
+    "crates/fvid-media/src/owned_loudnorm.rs",
+    "crates/fvid-media/src/owned_wave_remux.rs",
+    "src/native_loudnorm.rs",
+    "src/native_audio_mix.rs",
+    "src/native_audio_mix/concat.rs"
+  ],
+  "regression": "tests/mp4_audio_metadata_admission.rs",
+  "pre_edit_snapshot": "docs/improvements/snapshots/batch-342-pre-edit",
+  "evidence": {
+    "before": "docs/improvements/evidence/batch-342-acceptance-before.txt",
+    "after": "docs/improvements/evidence/batch-342-acceptance-after.txt",
+    "related": "docs/improvements/evidence/batch-342-related-after.txt"
+  },
+  "summary": {
+    "before": "In `crates/fvid-media/src/owned_container_loudness.rs`, `recognizes_standalone_audio` and `recognizes` passed `&Default::default()` to `owned_g711_wave_export::recognizes` (ignoring `options.cancel`), and `owned_wave_loudness::supports`, `owned_loudnorm::supports`, `owned_loudnorm::supports_dual`, and `owned_wave_remux::supports` passed `None` instead of `options.cancel.as_ref()` to `owned_wave_inspect::inspect`. In addition, `owned_loudnorm::plan_loudnorm` (`crates/fvid-media/src/owned_loudnorm.rs:288`) called `owned_probe::probe_wave(source)` instead of `probe_wave_with_options(source, options)`, and `validate_concat_segments_with_options` (`src/native_audio_mix/concat.rs:158-167`) omitted `default_probe.max_packet_bytes = options.max_packet_bytes`, allowing trailing concat segments skipped by the first loop when `max_packets` was exhausted by earlier segments to bypass `max_packet_bytes` during the second-loop `eligible_with_options` check.",
+    "after": "Add `recognizes_standalone_audio_with_options` and `recognizes_with_options` (`crates/fvid-media/src/owned_container_loudness.rs`) and wire them into `owned_wave_loudness`, `owned_loudnorm`, `native_loudnorm`, and `native_audio_mix`, pass `options.cancel.as_ref()` to `owned_wave_inspect::inspect` in `owned_wave_loudness::supports`, `owned_loudnorm::supports`, `owned_loudnorm::supports_dual`, and `owned_wave_remux::supports`, call `probe_wave_with_options(source, options)` in `owned_loudnorm::plan_loudnorm`, and copy `options.max_packet_bytes` into `default_probe` in `validate_concat_segments_with_options`. Thirteen integration tests in `mp4_audio_metadata_admission` pass."
+  }
+}

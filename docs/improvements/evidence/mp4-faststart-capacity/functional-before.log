@@ -1,0 +1,20 @@
+
+running 3 tests
+test regression::metadata_budget_refuses_before_scanning_or_publishing ... ok
+test regression::sufficient_budget_preserves_all_fragment_bytes ... ok
+test regression::span_capacity_growth_is_admitted_before_allocation ... FAILED
+
+failures:
+
+---- regression::span_capacity_growth_is_admitted_before_allocation stdout ----
+
+thread 'regression::span_capacity_growth_is_admitted_before_allocation' (65893912) panicked at /Users/themoretheless/Documents/Sources/fvid/tests/mp4_relocation_admission.rs:79:10:
+called `Result::unwrap_err()` on an `Ok` value: ProgressEvent { packets: 0, payload_bytes: 12426, done: false }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    regression::span_capacity_growth_is_admitted_before_allocation
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

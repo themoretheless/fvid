@@ -1,0 +1,9 @@
+{
+  "batch_id": "FVID-0254",
+  "generator": "scripts/generate_mp4_matroska_budget_parity_regressions.py",
+  "sha256": {
+    "aac-48k-mono.aac": "908b15fff1601da22f60901535cac012f88bbc476892817f3c662bd8dd887b1c",
+    "avc-32x16.mp4": "a990d341850ee995966163a73caafdec1e87f559673a3bb082f6a87066d134ab",
+    "pcm-48k-mono.wav": "ac669276accd1ca5fa1a74e0811cac118664f80a4c5daa3cc238e00bb6313e3d"
+  }
+}

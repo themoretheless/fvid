@@ -1,0 +1,26 @@
+{
+  "batch": 340,
+  "id": "FVID-0347",
+  "title": "Forward CopyOptions across native_probe::try_probe_as_with_options, extract_source_pcm_metadata_with_interval_packet_and_memory_limit, and decode_source_to_f32le_with_options for WAVE, Y4M, FLAC, MPEG, Ogg, and ADTS sources",
+  "status": "accepted",
+  "source": [
+    "src/media_probe.rs",
+    "src/native_export/pcm_matroska.rs",
+    "src/native_audio_mix.rs",
+    "crates/fvid-media/src/owned_probe.rs",
+    "crates/fvid-media/src/owned_flac_probe.rs",
+    "crates/fvid-media/src/owned_mpeg_probe.rs",
+    "crates/fvid-media/src/owned_y4m_probe.rs"
+  ],
+  "regression": "tests/mp4_audio_metadata_admission.rs",
+  "pre_edit_snapshot": "docs/improvements/snapshots/batch-340-pre-edit",
+  "evidence": {
+    "before": "docs/improvements/evidence/batch-340-acceptance-before.txt",
+    "after": "docs/improvements/evidence/batch-340-acceptance-after.txt",
+    "related": "docs/improvements/evidence/batch-340-related-after.txt"
+  },
+  "summary": {
+    "before": "In `src/media_probe.rs`, `try_probe_as_with_options` forwarded `options` only for MP4 and Matroska/WebM and called `wave`, `try_y4m`, `probe_flac`, `probe_mpeg`, `probe_ogg`, and `probe_adts` with default `CopyOptions`, so callers such as `is_single_stream_fvid_media_audio_with_options` (`src/native_audio_mix.rs`), `eligible_with_options`, and `validate_concat_segments_with_options` (`src/native_audio_mix/concat.rs`) bypassed `max_controlled_bytes`, `max_packet_bytes`, and `max_packets` during container probing of WAVE, Y4M, FLAC, MPEG, Ogg, and ADTS inputs (turning controlled-memory budget exhaustion on trailing Ogg/FLAC/MP3 concat segments into `Ok(false)` instead of `Err(\"controlled memory budget exceeded...\")`). In addition, `extract_source_pcm_metadata_with_interval_packet_and_memory_limit` (`src/native_export/pcm_matroska.rs:157,374`) called `crate::media::probe(source)` without options on WAVE and standalone audio formats, and `decode_source_to_f32le_with_options` (`src/native_audio_mix.rs:272`) omitted `spool_opts.max_controlled_bytes` when converting spooled WAVE PCM to `.f32le`.",
+    "after": "Forward `options` through `native_probe::try_probe_as_with_options` (`src/media_probe.rs`) into `probe_wave_with_options`, `try_y4m_with_options`, `probe_flac_with_options`, `probe_mpeg_with_options`, `probe_ogg_with_options`, and `probe_adts_with_options`, use `native_probe::probe_with_options` / `try_probe_as_with_options` in `extract_source_pcm_metadata_with_interval_packet_and_memory_limit` (`src/native_export/pcm_matroska.rs`), and propagate `max_controlled_bytes` in `decode_source_to_f32le_with_options` (`src/native_audio_mix.rs`). Eleven integration tests in `mp4_audio_metadata_admission` pass."
+  }
+}

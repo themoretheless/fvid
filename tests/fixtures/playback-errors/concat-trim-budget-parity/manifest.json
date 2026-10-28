@@ -1,0 +1,30 @@
+{
+  "suite": "concat-trim-budget-parity",
+  "improvement_id": "FVID-0257",
+  "fixtures": [
+    {
+      "name": "wave-stereo-s16-48khz.wav",
+      "bytes": 236,
+      "sha256": "f1f1acb73c3c2da214fbfc5b7f966b594989d49801318efb302b3b8d4e318850",
+      "purpose": "48 kHz stereo 16-bit PCM WAVE (frame_bytes = 4) for sample-domain concat and trim budget parity"
+    },
+    {
+      "name": "wave-stereo-f32-48khz.wav",
+      "bytes": 428,
+      "sha256": "07e0944d6038c5d6a03a4d04f15926ab445392f197bd21a12e562e9e8cbf6d1d",
+      "purpose": "48 kHz stereo 32-bit float PCM WAVE (frame_bytes = 8) for mixed-precision sample-domain concat budget parity"
+    },
+    {
+      "name": "ogg-opus-mono-48khz.ogg",
+      "bytes": 129,
+      "sha256": "f8f05df30ab2aece8deb37b968f5916c56ffed972dbe394ffe39548574e0ca4a",
+      "purpose": "48 kHz mono Ogg Opus (4-byte encoded packet) for concat and trim budget and error parity"
+    },
+    {
+      "name": "mp4-aac-mono-48khz.m4a",
+      "bytes": 618,
+      "sha256": "724b29dc7762b6790bfcdd6e9dfd2b9873163ff54d49e358ee89ce4261eef97c",
+      "purpose": "48 kHz mono AAC-LC MP4 (6-byte encoded packets) for mixed-codec sample-domain concat budget parity"
+    }
+  ]
+}

@@ -74,6 +74,24 @@ fn prepare_selected(
     options: Option<&fvid_control::CopyOptions>,
     video_only: bool,
 ) -> Result<Option<Temporary>> {
+    if options
+        .and_then(|o| o.cancel.as_ref())
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.is_some_and(|o| o.max_packet_bytes == 0) {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.is_some_and(|o| o.max_packets == Some(0)) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.is_some_and(|o| o.max_controlled_bytes == Some(0)) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    if let Some(options) = options {
+        crate::owned_budget::check_rss_budget(options)?;
+    }
     let mut file = File::open(source).map_err(|e| e.to_string())?;
     let mut prefix = [0; 8];
     if file.read(&mut prefix).map_err(|e| e.to_string())? != 8
@@ -81,16 +99,18 @@ fn prepare_selected(
     {
         return Ok(None);
     }
-    if options.is_some_and(|o| o.max_controlled_bytes.is_some()) {
-        return Ok(None);
-    }
-    if let Some(options) = options {
-        crate::owned_budget::check_rss_budget(options)?;
-    }
     let reader = match crate::owned_mp4::Mp4Reader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         crate::owned_mp4::Limits {
-            packet_bytes: options.map_or(32 << 20, |o| o.max_packet_bytes),
+            packet_bytes: options.map_or(32 << 20, |o| {
+                o.max_controlled_bytes
+                    .map_or(o.max_packet_bytes, |limit| o.max_packet_bytes.min(limit))
+            }),
+            metadata_bytes: crate::owned_mp4::Limits::default().metadata_bytes.min(
+                options
+                    .and_then(|o| o.max_controlled_bytes)
+                    .unwrap_or(usize::MAX),
+            ),
             ..Default::default()
         },
     ) {
@@ -109,6 +129,16 @@ fn prepare_selected(
     let track = &reader.tracks()[index];
     if !matches!(track.rotation, 0 | 90 | 180 | 270) {
         return Ok(None);
+    }
+    if let Some(limit) = options
+        .and_then(|o| o.max_controlled_bytes)
+        .filter(|&limit| limit > 0)
+        && reader
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?
+            > limit
+    {
+        return Err("controlled memory budget exceeded: MP4 index and metadata".into());
     }
     let aspect = track.pixel_aspect;
     let file_metadata = mkv::FileMetadata::from_mp4(&reader);
@@ -141,6 +171,12 @@ fn prepare_selected(
             }
             if let Some(options) = options {
                 crate::owned_budget::check_rss_budget(options)?;
+                if options
+                    .max_controlled_bytes
+                    .is_some_and(|limit| pixels.len() > limit)
+                {
+                    return Err("MP4 video frame exceeds controlled memory budget".into());
+                }
             }
             let current = (
                 frame.size,
@@ -202,6 +238,12 @@ fn prepare_selected(
             };
             if options.is_some_and(|o| packet.len() > o.max_packet_bytes) {
                 return Err("encoded FFV1 packet exceeds byte limit".into());
+            }
+            if options
+                .and_then(|o| o.max_controlled_bytes)
+                .is_some_and(|limit| packet.len() > limit)
+            {
+                return Err("encoded FFV1 packet exceeds controlled memory budget".into());
             }
             writer
                 .as_mut()

@@ -1,0 +1,16 @@
+{
+  "batch": 360,
+  "ids": [
+    "FVID-0367"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-360-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-360-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-360-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-360-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission native_pcm_loudness_normalize_and_audio_source_info_enforce_zero_limits -- --nocapture",
+    "cargo test --test mp4_audio_metadata_admission -- --nocapture"
+  ],
+  "passed": 27,
+  "failed": 0
+}

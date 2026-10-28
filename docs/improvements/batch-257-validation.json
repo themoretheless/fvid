@@ -1,0 +1,24 @@
+{
+  "batch": 257,
+  "ids": [
+    "FVID-0264"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-257-pre-edit",
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-257-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-257-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-257-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/matroska-mp4-audio-budget-parity/multitrack-vp9-aac.mkv",
+    "tests/fixtures/playback-errors/matroska-mp4-audio-budget-parity/multitrack-vp9-aac-alt.mkv",
+    "tests/fixtures/playback-errors/matroska-mp4-audio-budget-parity/multitrack-vp9-pcm.mkv",
+    "tests/fixtures/playback-errors/matroska-mp4-audio-budget-parity/multitrack-avc-aac.mp4"
+  ],
+  "generator": "scripts/generate_matroska_mp4_audio_budget_parity_regressions.py",
+  "generator_tests": "scripts/test_matroska_mp4_audio_budget_parity_regressions.py",
+  "regression_tests": [
+    "tests/matroska_mp4_audio_budget_parity_regressions.rs"
+  ],
+  "summary": "Scope Matroska and MP4 audio export, planning, loudness measurement, loudnorm, metadata extraction, and mix-audio/merge-audio packet-byte budgets to the selected audio track instead of failing on unselected companion video packets."
+}

@@ -1,0 +1,7 @@
+{
+  "change": "Set mvhd next_track_id from 2 to unused ID 3 after adding track 2",
+  "bytes_changed": 1,
+  "scope": "Only next_track_id hint changed; track headers, timing tables, packet data and byte offsets identical",
+  "verification": "Final fixture passes both default timing and player playback/seek/EOF acceptance",
+  "new_sha256": "4c30293a8ed0b9044597f5a9097499791df20dd3c1b83eb850ecc09cd1a5603c"
+}

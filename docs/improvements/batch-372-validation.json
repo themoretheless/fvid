@@ -1,0 +1,16 @@
+{
+  "batch": 372,
+  "ids": [
+    "FVID-0379"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-372-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-372-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-372-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-372-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission remux_adts_concat_mp4_relocate_and_matroska_copy_enforce_canonical_option_order",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 39,
+  "failed": 0
+}

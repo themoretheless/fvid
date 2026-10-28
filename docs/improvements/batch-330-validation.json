@@ -1,0 +1,36 @@
+{
+  "batch": 330,
+  "accepted": [
+    {
+      "id": "FVID-0337",
+      "title": "Propagate controlled-memory Matroska packet-index and metadata ceilings (max_controlled_bytes / size_of::<Packet>()) across Matroska identity remux, Matroska subtitle conversion, sample-domain audio concat, and multitrack MP4 export",
+      "source_files": [
+        "crates/fvid-media/src/owned_matroska_copy.rs",
+        "crates/fvid-media/src/owned_matroska_copy_impl.rs",
+        "crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+        "crates/fvid-media/src/owned_subtitle_impl.rs",
+        "src/container/matroska_copy.rs",
+        "src/native_audio_mix/concat.rs",
+        "src/native_subtitle.rs"
+      ],
+      "regression_files": [
+        "tests/mp4_metadata_admission.rs"
+      ],
+      "snapshots": [
+        "docs/improvements/snapshots/batch-330-pre-edit/crates/fvid-media/src/owned_matroska_copy.rs",
+        "docs/improvements/snapshots/batch-330-pre-edit/crates/fvid-media/src/owned_matroska_copy_impl.rs",
+        "docs/improvements/snapshots/batch-330-pre-edit/crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+        "docs/improvements/snapshots/batch-330-pre-edit/crates/fvid-media/src/owned_subtitle_impl.rs",
+        "docs/improvements/snapshots/batch-330-pre-edit/src/matroska_copy.rs",
+        "docs/improvements/snapshots/batch-330-pre-edit/src/native_audio_mix/concat.rs",
+        "docs/improvements/snapshots/batch-330-pre-edit/src/native_subtitle.rs"
+      ],
+      "evidence": {
+        "acceptance_before": "docs/improvements/evidence/batch-330-acceptance-before.txt",
+        "acceptance_after": "docs/improvements/evidence/batch-330-acceptance-after.txt",
+        "related_after": "docs/improvements/evidence/batch-330-related-after.txt"
+      },
+      "summary": "Clamps Matroska Limits::packets to max_controlled_bytes / size_of::<Packet>() and maps clamped packet-count refusals to \"controlled memory budget exceeded: Matroska packet index limit\" in owned_matroska_copy_impl::inspect_with_packet_and_memory_limits, owned_subtitle_impl::try_plan_with_controls and try_convert_matroska_inner, native_audio_mix::concat::segment_packet_count, and owned_mp4_multitrack_export::try_export, and forwards options.max_controlled_bytes to extract_source_pcm_metadata_with_interval_packet_and_memory_limit in concat_audio_with_options."
+    }
+  ]
+}

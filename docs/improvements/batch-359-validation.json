@@ -1,0 +1,16 @@
+{
+  "batch": 359,
+  "ids": [
+    "FVID-0366"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-359-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-359-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-359-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-359-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission raw_pcm_stream_decoders_enforce_zero_limits -- --nocapture",
+    "cargo test --test mp4_audio_metadata_admission -- --nocapture"
+  ],
+  "passed": 26,
+  "failed": 0
+}

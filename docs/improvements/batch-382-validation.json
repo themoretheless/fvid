@@ -1,0 +1,16 @@
+{
+  "batch": 382,
+  "ids": [
+    "FVID-0389"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-382-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-382-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-382-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-382-related-after.txt",
+  "commands": [
+    "cargo test --locked --offline --test mp4_audio_metadata_admission mp4_probe_remux_concat_video_decode_and_native_source_info_enforce_estimated_index_payload_budget -- --exact --nocapture",
+    "cargo test --locked --offline --test mp4_audio_metadata_admission"
+  ],
+  "passed": 49,
+  "failed": 0
+}

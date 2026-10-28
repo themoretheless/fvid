@@ -1,0 +1,10 @@
+{
+  "batch_id": "FVID-0276",
+  "generator": "scripts/generate_aac_source_info_prefix_budget.py",
+  "provenance": "100% synthetic mono AAC-LC / HE-AACv2 fixtures where packet 0 is an 8-byte mono AAC pulse block and packet 1 is a 35-byte SBR+PS block; no FFmpeg, network, or private media.",
+  "sha256": {
+    "mono-then-ps.aac": "b12b44267fd7c319c5e53422501da4c61edbd14447eaa382343e923b0302cb5f",
+    "mono-then-ps.m4a": "6a4eed7f3cfff8eae1a92c4545d8c8581ce099fb143c2ec0b8466a4e62db80d1",
+    "mono-then-ps.mka": "c6b19d2995298e98931b11938984f158c08be9bea61b659eb4f56a9db0580be7"
+  }
+}

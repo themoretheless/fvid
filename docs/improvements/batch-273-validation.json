@@ -1,0 +1,37 @@
+{
+  "batch": 273,
+  "accepted": [
+    "FVID-0280"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-273-pre-edit/crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs",
+    "docs/improvements/snapshots/batch-273-pre-edit/crates/fvid-media/src/owned_matroska_audio.rs",
+    "docs/improvements/snapshots/batch-273-pre-edit/crates/fvid-media/src/owned_matroska_pcm.rs",
+    "docs/improvements/snapshots/batch-273-pre-edit/crates/fvid-media/src/owned_matroska_aac_export.rs",
+    "docs/improvements/snapshots/batch-273-pre-edit/crates/fvid-media/src/owned_matroska_flac_export.rs",
+    "docs/improvements/snapshots/batch-273-pre-edit/crates/fvid-media/src/owned_matroska_opus_export.rs",
+    "docs/improvements/snapshots/batch-273-pre-edit/crates/fvid-media/src/owned_matroska_alac_export.rs",
+    "docs/improvements/snapshots/batch-273-pre-edit/crates/fvid-media/src/owned_matroska_mp3_export.rs",
+    "docs/improvements/snapshots/batch-273-pre-edit/crates/fvid-media/src/owned_matroska_pcm_export.rs",
+    "docs/improvements/snapshots/batch-273-pre-edit/crates/fvid-media/src/owned_audio_plan.rs",
+    "docs/improvements/snapshots/batch-273-pre-edit/crates/fvid-media/src/owned_aac_export_routing.rs",
+    "docs/improvements/snapshots/batch-273-pre-edit/crates/fvid-media/src/owned_wave_metadata.rs",
+    "docs/improvements/snapshots/batch-273-pre-edit/src/native_media.rs",
+    "docs/improvements/snapshots/batch-273-pre-edit/src/native_plan.rs",
+    "docs/improvements/snapshots/batch-273-pre-edit/src/native_export.rs",
+    "docs/improvements/snapshots/batch-273-pre-edit/src/native_export/pcm_matroska.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-273-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-273-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-273-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/matroska-interval-prefix-budget/matroska-aac-mono-then-ps.mka",
+    "tests/fixtures/playback-errors/matroska-interval-prefix-budget/matroska-pcm-small-then-large.mka"
+  ],
+  "tests": [
+    "tests/matroska_interval_prefix_budget_regression.rs",
+    "scripts/test_matroska_interval_prefix_budget.py"
+  ]
+}

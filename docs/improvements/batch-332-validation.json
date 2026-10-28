@@ -1,0 +1,36 @@
+{
+  "batch": 332,
+  "accepted": [
+    "FVID-0339"
+  ],
+  "commands": [
+    {
+      "phase": "acceptance_before_fix",
+      "command": "cargo test --test subtitle_convert_burn_budget_parity_regressions -- --nocapture",
+      "exit_code": 101,
+      "log": "docs/improvements/evidence/batch-332-acceptance-before.txt",
+      "summary": "burn_subtitles_and_mp4_decode_enforce_controlled_memory_for_srt_cues_and_decode_loop_frames fails before fix: plan_burn_subtitles(y4m) accepts a 24 KiB SRT file (~600 cues) under a 32 KiB controlled memory budget because owned_subtitle_burn::prepare only enforces a hardcoded 1 MiB ceiling without checking options.max_controlled_bytes."
+    },
+    {
+      "phase": "acceptance_after_fix",
+      "command": "cargo test --test subtitle_convert_burn_budget_parity_regressions -- --nocapture",
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-332-acceptance-after.txt",
+      "summary": "All 5 tests in subtitle_convert_burn_budget_parity_regressions pass."
+    },
+    {
+      "phase": "related_regressions_after_fix",
+      "command": "cargo test --test mp4_metadata_admission -- --nocapture",
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-332-related-after.txt",
+      "summary": "All 9 tests in mp4_metadata_admission pass."
+    }
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-332-pre-edit/crates/fvid-media/src/owned_subtitle_burn.rs",
+    "docs/improvements/snapshots/batch-332-pre-edit/crates/fvid-media/src/owned_mp4_video_decode.rs",
+    "docs/improvements/snapshots/batch-332-pre-edit/crates/fvid-media/src/owned_webm_presentation.rs",
+    "docs/improvements/snapshots/batch-332-pre-edit/crates/fvid-media/src/owned_webm_codec.rs",
+    "docs/improvements/snapshots/batch-332-pre-edit/crates/fvid-media/src/owned_video_decode.rs"
+  ]
+}

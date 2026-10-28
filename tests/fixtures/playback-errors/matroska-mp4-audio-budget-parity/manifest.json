@@ -1,0 +1,25 @@
+{
+  "generator": "scripts/generate_matroska_mp4_audio_budget_parity_regressions.py",
+  "fixtures": [
+    {
+      "name": "multitrack-vp9-aac.mkv",
+      "bytes": 2324,
+      "sha256": "f7102b98b9ba9310dfed43ba8fe3ff5951ef88828542437dcbf907a6953bc09f"
+    },
+    {
+      "name": "multitrack-vp9-aac-alt.mkv",
+      "bytes": 2323,
+      "sha256": "562153cc54c497dcc61ff71ce3d0a37674532e91265f2778132f6fe0a391cd5d"
+    },
+    {
+      "name": "multitrack-vp9-pcm.mkv",
+      "bytes": 2304,
+      "sha256": "57a81c00b3283900008f088535b73450ff89e910abb813d7ef3295e45eef2ac8"
+    },
+    {
+      "name": "multitrack-avc-aac.mp4",
+      "bytes": 2716,
+      "sha256": "3f953533bed5d31f582dfc515617ff21f032fc24e98253c50530042110a9bd90"
+    }
+  ]
+}

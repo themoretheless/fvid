@@ -22,6 +22,24 @@ pub(crate) fn decode_presented(
     mut visit: Option<&mut Visitor<'_>>,
     options: Option<&fvid_control::CopyOptions>,
 ) -> Result<Option<DecodeStats>> {
+    if options
+        .and_then(|o| o.cancel.as_ref())
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.is_some_and(|o| o.max_packet_bytes == 0) {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.is_some_and(|o| o.max_packets == Some(0)) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.is_some_and(|o| o.max_controlled_bytes == Some(0)) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    if let Some(options) = options {
+        crate::owned_budget::check_rss_budget(options)?;
+    }
     if transform
         .input_format
         .as_deref()
@@ -32,7 +50,15 @@ pub(crate) fn decode_presented(
     let mut reader = match crate::owned_mp4::Mp4Reader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         crate::owned_mp4::Limits {
-            packet_bytes: options.map_or(32 << 20, |o| o.max_packet_bytes),
+            packet_bytes: options.map_or(32 << 20, |o| {
+                o.max_controlled_bytes
+                    .map_or(o.max_packet_bytes, |limit| o.max_packet_bytes.min(limit))
+            }),
+            metadata_bytes: crate::owned_mp4::Limits::default().metadata_bytes.min(
+                options
+                    .and_then(|o| o.max_controlled_bytes)
+                    .unwrap_or(usize::MAX),
+            ),
             ..Default::default()
         },
     ) {
@@ -90,12 +116,42 @@ pub(crate) fn decode_presented(
         decode_errors: 0,
     };
     let mut frames = Vec::new();
+    if let Some(limit) = options
+        .and_then(|o| o.max_controlled_bytes)
+        .filter(|&limit| limit > 0)
+    {
+        let index_bytes = reader
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?;
+        let table_bytes = samples
+            .checked_mul(std::mem::size_of::<FrameMetadata>())
+            .and_then(|n| n.checked_add(index_bytes))
+            .ok_or("MP4 presentation metadata memory overflow")?;
+        if table_bytes > limit {
+            return Err(
+                "controlled memory budget exceeded: MP4 presentation metadata table".into(),
+            );
+        }
+    }
     frames
         .try_reserve_exact(samples)
         .map_err(|_| "MP4 presentation metadata allocation failed")?;
+    let check_decoded_pixels = |pixels: &[u8]| -> Result<()> {
+        if let Some(limit) = options
+            .and_then(|o| o.max_controlled_bytes)
+            .filter(|&limit| limit > 0)
+            && pixels.len() > limit
+        {
+            return Err("MP4 video frame exceeds controlled memory budget".into());
+        }
+        Ok(())
+    };
+    let decoder_budget = options
+        .and_then(|o| o.max_controlled_bytes)
+        .unwrap_or(usize::MAX);
     let mut packet = Vec::new();
     if avc {
-        let mut decoder = match AvcDecoder::new(&configuration, usize::MAX) {
+        let mut decoder = match AvcDecoder::new(&configuration, decoder_budget) {
             Ok(value) => value,
             Err(Error::Unsupported(_)) => return Ok(None),
             Err(error) => return Err(error.to_string()),
@@ -162,7 +218,9 @@ pub(crate) fn decode_presented(
                 let mut sub = sub;
                 if let Some(spool) = spool.as_mut() {
                     pixels = pack_avc_format(&picture, rgb)?;
+                    check_decoded_pixels(&pixels)?;
                     rotate_packed(&mut size, &mut sub, output_depth, chroma == 0, rgb, rotation, Some(&mut pixels))?;
+                    check_decoded_pixels(&pixels)?;
                     let current = (size, output_depth, sub, chroma == 0, rgb);
                     if storage_format.is_some_and(|previous| previous != current) {
                         return Ok(None);
@@ -204,7 +262,7 @@ pub(crate) fn decode_presented(
         if configuration.is_empty() {
             return Err("MP4 AV1 configuration is absent".into());
         }
-        let mut decoder = match Av1Decoder::from_configuration(&configuration, usize::MAX) {
+        let mut decoder = match Av1Decoder::from_configuration(&configuration, decoder_budget) {
             Ok(value) => value,
             Err(Error::Unsupported(_)) => return Ok(None),
             Err(error) => return Err(error.to_string()),
@@ -230,7 +288,9 @@ pub(crate) fn decode_presented(
             let mut sub = decoded.color.subsampling;
             if let Some(spool) = spool.as_mut() {
                 pixels = crate::owned_webm_codec::pack_av1(&decoded)?.frame.data;
+                check_decoded_pixels(&pixels)?;
                 rotate_packed(&mut size, &mut sub, picture.depth, decoded.color.monochrome, rgb, rotation, Some(&mut pixels))?;
+                check_decoded_pixels(&pixels)?;
                 let current = (size, picture.depth, sub, decoded.color.monochrome, rgb);
                 if storage_format.is_some_and(|previous| previous != current) {
                     return Ok(None);
@@ -286,7 +346,7 @@ pub(crate) fn decode_presented(
             || usize::from(u16::from_be_bytes([configuration[10], configuration[11]])) != configuration.len() - 12 {
             return Err("invalid MP4 VP9 configuration".into());
         }
-        let mut decoder = fvid_codecs::codec::vp9_decoder::Decoder::new(usize::MAX);
+        let mut decoder = fvid_codecs::codec::vp9_decoder::Decoder::new(decoder_budget);
         for sample in 0..samples {
             check_options(options, sample)?;
             let timing = reader.tracks()[index].samples.get(sample).ok_or("missing MP4 VP9 sample timing")?;
@@ -312,7 +372,9 @@ pub(crate) fn decode_presented(
                     let planes = p.planes.each_ref().map(|p| (p.width, p.height, p.samples.as_slice()));
                     pixels = if rgb { crate::owned_frame::pack_gbr(p.size, p.depth, planes)?.data }
                         else { crate::owned_webm_codec::pack(p.size, p.depth, planes, p.subsampling, false)?.frame.data };
+                    check_decoded_pixels(&pixels)?;
                     rotate_packed(&mut size, &mut sub, p.depth, false, rgb, rotation, Some(&mut pixels))?;
+                    check_decoded_pixels(&pixels)?;
                     let current = (size, p.depth, sub, false, rgb);
                     if storage_format.is_some_and(|previous| previous != current) { return Ok(None); }
                     storage_format = Some(current);
@@ -329,7 +391,7 @@ pub(crate) fn decode_presented(
             }
         }
     } else {
-        let mut decoder = match HevcDecoder::from_configuration(&configuration, usize::MAX) {
+        let mut decoder = match HevcDecoder::from_configuration(&configuration, decoder_budget) {
             Ok(value) => value,
             Err(Error::Unsupported(_)) => return Ok(None),
             Err(error) => return Err(error.to_string()),
@@ -379,7 +441,9 @@ pub(crate) fn decode_presented(
                 };
                 if let Some(spool) = spool.as_mut() {
                     pixels = pack_hevc(picture, sub, chroma == 0, rgb)?;
+                    check_decoded_pixels(&pixels)?;
                     rotate_packed(&mut size, &mut sub, output_depth, chroma == 0, rgb, rotation, Some(&mut pixels))?;
+                    check_decoded_pixels(&pixels)?;
                     let current = (size, output_depth, sub, chroma == 0, rgb);
                     if storage_format.is_some_and(|previous| previous != current) {
                         return Ok(None);

@@ -41,7 +41,7 @@ fn owned_plans_match_cli_and_public_api_without_changing_inputs() {
                 expected
             );
             let options = fvid::media::CopyOptions {
-                streams: vec![0],
+                streams: vec![99],
                 ..Default::default()
             };
             assert!(fvid::media::plan_remux(&path, &options).is_err());
@@ -50,7 +50,7 @@ fn owned_plans_match_cli_and_public_api_without_changing_inputs() {
         let output = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
             .args(["media", "plan", "remux"])
             .arg(&path)
-            .args(["--streams", "0"])
+            .args(["--streams", "99"])
             .output()
             .unwrap();
         assert!(!output.status.success());

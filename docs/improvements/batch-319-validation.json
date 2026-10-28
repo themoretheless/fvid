@@ -1,0 +1,26 @@
+{
+  "batch": 319,
+  "ids": [
+    "FVID-0326"
+  ],
+  "summary": "Enforce controlled-memory budget (max_controlled_bytes) against Matroska container/stream metadata working sets and MP4 sample-index (sizes/stsz/moov) working sets across ADTS and MP4-to-Matroska remux, plan_remux, concat, and plan_concat",
+  "snapshots": [
+    "docs/improvements/snapshots/batch-319-pre-edit/crates/fvid-media/src/owned_matroska_adts_impl.rs",
+    "docs/improvements/snapshots/batch-319-pre-edit/crates/fvid-media/src/owned_adts_remux.rs",
+    "docs/improvements/snapshots/batch-319-pre-edit/crates/fvid-media/src/owned_concat.rs",
+    "docs/improvements/snapshots/batch-319-pre-edit/crates/fvid-media/src/owned_mp4_remux.rs",
+    "docs/improvements/snapshots/batch-319-pre-edit/src/container/mp4_write.rs",
+    "docs/improvements/snapshots/batch-319-pre-edit/src/native_export.rs",
+    "docs/improvements/snapshots/batch-319-pre-edit/src/native_plan.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-319-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-319-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-319-related-after.txt"
+  },
+  "tests_run": [
+    "cargo test --test remux_concat_controls_regressions adts_and_mp4_to_matroska_remux_and_concat_enforce_controlled_memory_for_metadata_and_sample_tables",
+    "cargo test --test remux_concat_controls_regressions"
+  ],
+  "status": "accepted"
+}

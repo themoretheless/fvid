@@ -1,0 +1,16 @@
+{
+  "batch": 384,
+  "ids": [
+    "FVID-0391"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-384-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-384-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-384-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-384-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission pcm_matroska_all_canonical_file_tags_and_mp4_relocate_index_payload_budget_are_enforced -- --exact --nocapture",
+    "cargo test --test mp4_audio_metadata_admission -- --nocapture"
+  ],
+  "passed": 51,
+  "failed": 0
+}

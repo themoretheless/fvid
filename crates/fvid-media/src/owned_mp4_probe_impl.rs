@@ -47,7 +47,23 @@ fn mp4_payload_rate(samples: impl Iterator<Item = Option<(u32, u32)>>, scale: u3
 }
 
 pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
-    try_mp4(path)?.ok_or_else(|| {
+    mp4_with_metadata_limit(path, None)
+}
+
+pub(crate) fn mp4_with_metadata_limit(
+    path: &Path,
+    max_controlled_bytes: Option<usize>,
+) -> Result<MediaInfo> {
+    try_mp4_with_metadata_limit(path, max_controlled_bytes)?.ok_or_else(|| {
+        "native MP4 probe cannot yet describe every sample entry in this file".into()
+    })
+}
+
+pub(crate) fn mp4_with_options(
+    path: &Path,
+    options: &fvid_control::CopyOptions,
+) -> Result<MediaInfo> {
+    try_mp4_with_options(path, options)?.ok_or_else(|| {
         "native MP4 probe cannot yet describe every sample entry in this file".into()
     })
 }
@@ -55,9 +71,52 @@ pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
 // None denotes valid tracks whose sample entries are not represented yet.
 // Parser errors remain errors, rather than requesting a permissive fallback.
 pub(crate) fn try_mp4(path: &Path) -> Result<Option<MediaInfo>> {
+    try_mp4_with_metadata_limit(path, None)
+}
+
+pub(crate) fn try_mp4_with_metadata_limit(
+    path: &Path,
+    max_controlled_bytes: Option<usize>,
+) -> Result<Option<MediaInfo>> {
+    let mut options = fvid_control::CopyOptions::default();
+    options.max_controlled_bytes = max_controlled_bytes;
+    try_mp4_with_options(path, &options)
+}
+
+pub(crate) fn try_mp4_with_options(
+    path: &Path,
+    options: &fvid_control::CopyOptions,
+) -> Result<Option<MediaInfo>> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    owned_budget::check_rss_budget(options)?;
     let file = File::open(path).map_err(|e| e.to_string())?;
     let file_bytes = file.metadata().map_err(|e| e.to_string())?.len();
-    let reader = match Mp4ProbeReader::open(BufReader::new(file), Default::default()) {
+    let limits = Mp4ProbeLimits {
+        metadata_bytes: Mp4ProbeLimits::default()
+            .metadata_bytes
+            .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+        packet_bytes: Mp4ProbeLimits::default()
+            .packet_bytes
+            .min(options.max_packet_bytes)
+            .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+        ..Mp4ProbeLimits::default()
+    };
+    let reader = match Mp4ProbeReader::open(BufReader::new(file), limits) {
         Ok(reader) => reader,
         Err(error) if mp4_unrepresented_error(&error) => return Ok(None),
         Err(error) => return Err(error.to_string()),
@@ -66,6 +125,35 @@ pub(crate) fn try_mp4(path: &Path) -> Result<Option<MediaInfo>> {
     // original stream positions. Do not return an incomplete/reindexed inventory.
     if !reader.refused().is_empty() {
         return Ok(None);
+    }
+    if let Some(mem_limit) = options.max_controlled_bytes
+        && reader
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?
+            > mem_limit
+    {
+        return Err("controlled memory budget exceeded".into());
+    }
+    let max_samples = options.max_packets.map_or(usize::MAX, |max| {
+        usize::try_from(max).unwrap_or(usize::MAX)
+    });
+    for track in reader.tracks() {
+        if (0..track.samples.len().min(max_samples)).any(|i| {
+            track.samples.get(i).is_some_and(|sample| {
+                usize::try_from(sample.size).unwrap_or(usize::MAX) > options.max_packet_bytes
+            })
+        }) {
+            return Err("MP4 packet exceeds budget".into());
+        }
+        if let Some(mem_limit) = options.max_controlled_bytes
+            && (0..track.samples.len().min(max_samples)).any(|i| {
+                track.samples.get(i).is_some_and(|sample| {
+                    usize::try_from(sample.size).unwrap_or(usize::MAX) > mem_limit
+                })
+            })
+        {
+            return Err("controlled memory budget exceeded".into());
+        }
     }
     let mut streams = Vec::new();
     let mut duration_us = None::<i64>;
@@ -236,6 +324,12 @@ pub(crate) fn try_mp4(path: &Path) -> Result<Option<MediaInfo>> {
             })
         })
         .collect::<Result<Vec<_>>>()?;
+    let mut metadata = tags(reader.tags());
+    if !reader.encoder().is_empty() {
+        metadata
+            .entry("encoder".into())
+            .or_insert_with(|| reader.encoder().to_owned());
+    }
     Ok(Some(MediaInfo {
         path: path.to_path_buf(),
         format: "mov,mp4,m4a,3gp,3g2,mj2".into(),
@@ -246,7 +340,7 @@ pub(crate) fn try_mp4(path: &Path) -> Result<Option<MediaInfo>> {
             .and_then(|duration| {
                 i64::try_from(u128::from(file_bytes) * 8 * 1_000_000 / duration as u128).ok()
             }),
-        metadata: tags(reader.tags()),
+        metadata,
         chapters,
         streams,
     }))

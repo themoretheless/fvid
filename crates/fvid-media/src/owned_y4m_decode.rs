@@ -610,7 +610,6 @@ pub(crate) fn apply_pixel_filters_clock(
     history: Option<&crate::owned_pixel_context::PixelContext>,
 ) -> Result<()> {
     if transform.unsharp.is_some()
-        || transform.unsharp.is_some()
         || transform.eq.is_some()
         || transform.hue.is_some()
         || transform.colorize.is_some()
@@ -1004,7 +1003,16 @@ pub fn decode_reader_transformed(
     source: impl BufRead,
     transform: &DecodeTransform,
 ) -> Result<DecodeStats> {
-    decode_reader_frames(source, transform, None, None).map(|(stats, _)| stats)
+    let (stats, consumed) = decode_reader_frames(source, transform, None, None)?;
+    if consumed == 0
+        || (stats.video_frames == 0
+            && (transform.framestep.is_some()
+                || transform.shuffleframes.is_some()
+                || transform.reverse.is_some()))
+    {
+        return Err("input has no decoded video frames".into());
+    }
+    Ok(stats)
 }
 
 /// Deliver transformed planar frames without retaining the video. Timestamps

@@ -1,0 +1,16 @@
+{
+  "batch": 370,
+  "ids": [
+    "FVID-0377"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-370-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-370-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-370-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-370-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission native_pcm_native_media_and_owned_remux_video_bridge_burn_and_xfade_enforce_canonical_option_order -- --exact",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 37,
+  "failed": 0
+}

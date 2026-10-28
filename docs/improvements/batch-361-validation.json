@@ -1,0 +1,16 @@
+{
+  "batch": 361,
+  "ids": [
+    "FVID-0368"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-361-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-361-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-361-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-361-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission native_audio_trim_mix_merge_and_source_admission_enforce_zero_limits -- --exact",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 28,
+  "failed": 0
+}

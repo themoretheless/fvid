@@ -1,0 +1,20 @@
+{
+  "ordered.mp4": {
+    "sha256": "3f44b666315a90e824e48f9762e5c21eba60bce74a7bd44789796dff4b839a3d",
+    "presentation_order": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "reordered.mp4": {
+    "sha256": "c3154ec61e0b5fa4f85a30e51f0ed976fcb32661249aa08a755cb4f029d75ab6",
+    "presentation_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "batch": 290,
+  "accepted": [
+    "FVID-0297"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-290-pre-edit/src/owned_loudnorm_cli.rs",
+    "docs/improvements/snapshots/batch-290-pre-edit/src/media_cli.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-290-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-290-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-290-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/loudnorm-matroska-metadata/tone-tagged-48k.wav",
+    "tests/fixtures/playback-errors/loudnorm-matroska-metadata/tone-tagged-48k.mp3"
+  ],
+  "tests": [
+    "tests/loudnorm_matroska_metadata_regressions.rs",
+    "scripts/test_loudnorm_matroska_metadata_regressions.py"
+  ]
+}

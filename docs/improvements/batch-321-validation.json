@@ -1,0 +1,27 @@
+{
+  "batch": 321,
+  "accepted_ids": [
+    "FVID-0328"
+  ],
+  "status": "accepted",
+  "summary": "Compare selected MP4 concat track configurations without rejecting discarded AAC differences or absence",
+  "before": "Two valid 40 ms AVC/AAC fixtures admit matching pairs at either AAC clock and correctly refuse incompatible selected audio, but concatenating their identical selected video fails solely because discarded AAC clocks differ (2 controls passed, 1 acceptance failed).",
+  "after": "Compare the resolved selected sets and only their track configurations; transport priming only for selected tracks so discarded track absence is safe in either segment order. Default all-track selection retains compatibility checks.",
+  "evidence": "docs/improvements/evidence/mp4-concat-selected-compatibility/status.json",
+  "dependency": "FVID-0327 selected-track presentation clock",
+  "tests_run": [
+    "cargo test --locked --offline --features player --test mp4_concat_selected_compatibility --test native_mp4_concat --test mp4_concat_selected_clock --test mp4_concat_retained_plans",
+    "cargo test --locked --offline --test mp4_concat_selected_compatibility --test mp4_concat_selected_clock --test mp4_concat_retained_plans"
+  ],
+  "results": "Player: 6 focused + 11 related passed. Default: 5 focused + 4 related passed. All 0 failed and 0 ignored. Public plan/concat selects only video. Native acceptance verifies RGB, 80ms duration, repeated EOF, rewind and six seek positions over four input permutations.",
+  "limits": "Existing supported-codec/parser admission remains in force; this does not claim arbitrary unsupported discarded formats. Configuration and presence variants count together as one problem.",
+  "discarded_video_sync_follow_up": {
+    "source": "src/container/mp4_concat.rs",
+    "regression": "tests/mp4_concat_discarded_sync.rs",
+    "evidence": "docs/improvements/evidence/mp4-concat-discarded-sync/status.json",
+    "before": "Selected AAC rejected because unselected video had no declared first sync sample; selected video/all-track refusal passed.",
+    "after": "Sync admission inspects selected tracks only. Source selected AAC decodes 2048 samples; public concat preserves four exact AAC packets and decodes 4096 mono samples at 48kHz. Video/all-track refusal controls remain unchanged.",
+    "results": "Default 3 focused + 5 related; player 3 focused + 12 related passed",
+    "counted_as": "FVID-0328, no new ID"
+  }
+}

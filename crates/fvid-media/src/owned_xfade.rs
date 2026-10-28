@@ -4,7 +4,12 @@ use crate::{owned_frame::GeometryFrame, owned_overlay::validate_frame};
 use std::io::BufRead;
 
 fn default_policy(options: &fvid_control::CopyOptions) -> bool {
-    crate::owned_lossless::policy(options, true)
+    !options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+        && crate::owned_budget::check_rss_budget(options).is_ok()
+        && crate::owned_lossless::policy(options, true)
         && crate::owned_lossless::metadata(options).is_ok()
 }
 /// Admit the same inputs and policy as execution before building a native plan.
@@ -46,8 +51,29 @@ pub fn plan_xfade(
     {
         return Err("media operation cancelled".into());
     }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    crate::owned_lossless::metadata(options)?;
     if transition != "fade" || !default_policy(options) {
         return Err("cross-fade plan is not supported by the owned backend".into());
+    }
+    crate::owned_lossless::check_options_matroska_metadata_budget(options)?;
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
     }
     let timeline = FadeTimeline::new(offset_us, duration_us)?;
     let mut primary =
@@ -66,39 +92,55 @@ pub fn plan_xfade(
     }
     crate::owned_budget::check_rss_budget(options)?;
     crate::owned_lossless::metadata(options)?;
-    if options.max_packets.is_some()
-        || options.max_packet_bytes != fvid_control::CopyOptions::default().max_packet_bytes
+    let frame_len = header.frame_len()?;
+    if frame_len > options.max_packet_bytes {
+        return Err("Y4M frame byte length exceeds packet byte limit".into());
+    }
+    if options
+        .max_controlled_bytes
+        .is_some_and(|limit| frame_len.saturating_mul(3) > limit)
     {
-        if header.frame_len()? > options.max_packet_bytes {
-            return Err("Y4M frame byte length exceeds packet byte limit".into());
-        }
-        let main_reader =
-            std::io::BufReader::new(std::fs::File::open(main).map_err(|e| e.to_string())?);
-        let other_reader =
-            std::io::BufReader::new(std::fs::File::open(other).map_err(|e| e.to_string())?);
-        visit_y4m_counted(
-            main_reader,
-            other_reader,
-            &header,
-            timeline,
-            options.max_packets,
-            |frame, _, _| {
-                if options
-                    .cancel
-                    .as_ref()
-                    .is_some_and(fvid_control::CancelFlag::is_cancelled)
-                {
-                    return Err("media operation cancelled".into());
-                }
-                crate::owned_budget::check_rss_budget(options)?;
+        return Err("cross-fade frame exceeds controlled memory budget".into());
+    }
+    let encode_packets =
+        options.max_packet_bytes != fvid_control::CopyOptions::default().max_packet_bytes
+            || options.max_controlled_bytes.is_some();
+    let main_reader =
+        std::io::BufReader::new(std::fs::File::open(main).map_err(|e| e.to_string())?);
+    let other_reader =
+        std::io::BufReader::new(std::fs::File::open(other).map_err(|e| e.to_string())?);
+    visit_y4m_counted(
+        main_reader,
+        other_reader,
+        &header,
+        timeline,
+        options.max_packets,
+        |frame, _, _| {
+            if options
+                .cancel
+                .as_ref()
+                .is_some_and(fvid_control::CancelFlag::is_cancelled)
+            {
+                return Err("media operation cancelled".into());
+            }
+            crate::owned_budget::check_rss_budget(options)?;
+            if encode_packets {
                 let packet = crate::owned_ffv1_encoder::encode(frame, header.depth())?;
                 if packet.len() > options.max_packet_bytes {
                     return Err("encoded cross-fade packet exceeds byte limit".into());
                 }
-                Ok(())
-            },
-        )?;
-    }
+                if options
+                    .max_controlled_bytes
+                    .is_some_and(|limit| packet.len() > limit)
+                {
+                    return Err(
+                        "encoded cross-fade packet exceeds controlled memory budget".into(),
+                    );
+                }
+            }
+            Ok(())
+        },
+    )?;
     let mut steps = vec![
         PlanStep {
             action: "decode".into(),
@@ -137,11 +179,15 @@ pub fn plan_xfade(
     ];
     if options.max_packet_bytes != fvid_control::CopyOptions::default().max_packet_bytes
         || options.max_packets.is_some()
+        || options.max_controlled_bytes.is_some()
         || options.max_rss_bytes.is_some()
     {
         notes.push(format!(
-            "encoded packet limit: {} bytes; packet work limit: {:?}; RSS limit: {:?} bytes",
-            options.max_packet_bytes, options.max_packets, options.max_rss_bytes
+            "encoded packet limit: {} bytes; packet work limit: {:?}; controlled memory limit: {:?} bytes; RSS limit: {:?} bytes",
+            options.max_packet_bytes,
+            options.max_packets,
+            options.max_controlled_bytes,
+            options.max_rss_bytes
         ));
     }
     Ok(MediaPlan {
@@ -203,6 +249,50 @@ pub fn xfade_video(
     offset_us: i64,
     options: &fvid_control::CopyOptions,
 ) -> Result<fvid_media_info::LosslessStats, String> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    if destination
+        .extension()
+        .and_then(|e| e.to_str())
+        .is_none_or(|e| !e.eq_ignore_ascii_case("mkv"))
+    {
+        return Err("owned FFV1 export requires .mkv".into());
+    }
+    crate::owned_lossless::metadata(options)?;
+    if transition != "fade" || !default_policy(options) {
+        return Err("cross-fade request is not supported by the owned backend".into());
+    }
+    crate::owned_lossless::check_options_matroska_metadata_budget(options)?;
+    FadeTimeline::new(offset_us, duration_us)?;
+    let mut primary =
+        std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
+    let mut bytes = Vec::new();
+    if !line(&mut primary, &mut bytes)? {
+        return Err("empty cross-fade primary source".into());
+    }
+    let header = Header::parse(&bytes)?;
+    let secondary = SecondaryReader::new(
+        std::io::BufReader::new(std::fs::File::open(other).map_err(|e| e.to_string())?),
+        &header,
+    )?;
+    if header.frame_rate()? != secondary.header.frame_rate()? {
+        return Err("cross-fade inputs require matching frame rates".into());
+    }
     try_xfade_video(
         source,
         other,
@@ -235,11 +325,14 @@ impl<R: BufRead> SecondaryReader<R> {
         }
         let header = Header::parse(&bytes)?;
         header.frame_rate()?;
+        let (p_num, p_den) = primary.pixel_aspect()?;
+        let (s_num, s_den) = header.pixel_aspect()?;
         if header.width != primary.width
             || header.height != primary.height
             || header.format != primary.format
             || header.depth() != primary.depth()
             || header.full_range()? != primary.full_range()?
+            || u64::from(p_num) * u64::from(s_den) != u64::from(s_num) * u64::from(p_den)
         {
             return Err("cross-fade inputs require matching geometry, format and range".into());
         }
@@ -453,6 +546,23 @@ fn write_y4m_ffv1_counted<W: std::io::Write + std::io::Seek>(
     options: &fvid_control::CopyOptions,
 ) -> Result<(u64, u64, fvid_control::ProgressEvent), String> {
     use crate::owned_matroska::{ColourDescription, PacketWriter, VideoMetadata};
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
     let width = u32::try_from(header.width).map_err(|_| "cross-fade width overflow")?;
     let height = u32::try_from(header.height).map_err(|_| "cross-fade height overflow")?;
     let metadata = VideoMetadata {
@@ -464,7 +574,16 @@ fn write_y4m_ffv1_counted<W: std::io::Write + std::io::Seek>(
         }),
         ..Default::default()
     };
-    crate::owned_budget::check_rss_budget(options)?;
+    let frame_len = header.frame_len()?;
+    if frame_len > options.max_packet_bytes {
+        return Err("Y4M frame byte length exceeds packet byte limit".into());
+    }
+    if options
+        .max_controlled_bytes
+        .is_some_and(|limit| frame_len.saturating_mul(3) > limit)
+    {
+        return Err("cross-fade frame exceeds controlled memory budget".into());
+    }
     let file_metadata = crate::owned_lossless::metadata(options)?;
     let mut text_tags = std::collections::BTreeMap::new();
     for (key, value) in &options.metadata_set {
@@ -494,6 +613,17 @@ fn write_y4m_ffv1_counted<W: std::io::Write + std::io::Seek>(
     for (_, key) in &options.stream_metadata_delete {
         track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
         crate::owned_ffv1_export::edit_track_description(&mut description, key, "");
+    }
+    if let Some(limit) = options.max_controlled_bytes {
+        if crate::owned_lossless::estimate_matroska_metadata_working_bytes(
+            &file_metadata,
+            &text_tags,
+            &track_tags,
+            Some(&description),
+        ) > limit
+        {
+            return Err("Matroska metadata working set exceeds controlled memory budget".into());
+        }
     }
     let mut writer = PacketWriter::new_ffv1_with_track_description(
         output,
@@ -525,12 +655,18 @@ fn write_y4m_ffv1_counted<W: std::io::Write + std::io::Seek>(
                 .as_ref()
                 .is_some_and(|flag| flag.is_cancelled())
             {
-                return Err("operation cancelled".into());
+                return Err("media operation cancelled".into());
             }
             crate::owned_budget::check_rss_budget(options)?;
             let packet = crate::owned_ffv1_encoder::encode(frame, header.depth())?;
             if packet.len() > options.max_packet_bytes {
                 return Err("encoded cross-fade packet exceeds byte limit".into());
+            }
+            if options
+                .max_controlled_bytes
+                .is_some_and(|limit| packet.len() > limit)
+            {
+                return Err("encoded cross-fade packet exceeds controlled memory budget".into());
             }
             writer
                 .write_packet(0, pts, duration, true, &packet)
@@ -577,6 +713,15 @@ fn export_y4m_ffv1_counted(
     options: &fvid_control::CopyOptions,
 ) -> Result<(u64, u64), String> {
     use std::{fs::File, io::BufReader};
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
     let timeline = FadeTimeline::new(offset_us, duration_us)?;
     let mut probe = BufReader::new(File::open(main).map_err(|e| e.to_string())?);
     let mut bytes = Vec::new();
@@ -584,6 +729,19 @@ fn export_y4m_ffv1_counted(
         return Err("empty cross-fade primary source".into());
     }
     let header = Header::parse(&bytes)?;
+    crate::owned_budget::check_rss_budget(options)?;
+    crate::owned_lossless::metadata(options)?;
+    crate::owned_lossless::check_options_matroska_metadata_budget(options)?;
+    let frame_len = header.frame_len()?;
+    if frame_len > options.max_packet_bytes {
+        return Err("Y4M frame byte length exceeds packet byte limit".into());
+    }
+    if options
+        .max_controlled_bytes
+        .is_some_and(|limit| frame_len.saturating_mul(3) > limit)
+    {
+        return Err("cross-fade frame exceeds controlled memory budget".into());
+    }
     let input = BufReader::new(File::open(main).map_err(|e| e.to_string())?);
     let other = BufReader::new(File::open(other).map_err(|e| e.to_string())?);
     let (stats, _, decoded_frames) = crate::owned_matroska::export_atomic(

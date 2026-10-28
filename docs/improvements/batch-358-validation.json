@@ -1,0 +1,16 @@
+{
+  "batch": 358,
+  "ids": [
+    "FVID-0365"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-358-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-358-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-358-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-358-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission audio_export_plan_source_geometry_and_adts_concat_enforce_zero_limits -- --nocapture",
+    "cargo test --test mp4_audio_metadata_admission -- --nocapture"
+  ],
+  "passed": 25,
+  "failed": 0
+}

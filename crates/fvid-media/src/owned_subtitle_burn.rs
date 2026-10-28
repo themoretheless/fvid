@@ -21,24 +21,72 @@ fn prepare(
         }
         let header = y4m::Header::parse(&line)?;
         header.frame_rate()?;
+        let frame_len = header.frame_len()?;
+        if frame_len > options.max_packet_bytes {
+            return Err("Y4M frame byte length exceeds packet byte limit".into());
+        }
+        let mask_bytes = header.width.saturating_mul(header.height);
+        if options
+            .max_controlled_bytes
+            .is_some_and(|limit| frame_len.saturating_add(mask_bytes) > limit)
+        {
+            return Err("subtitle burn frame exceeds controlled memory budget".into());
+        }
         header
     } else {
         if crate::owned_mp4_video_bridge::recognizes(source) {
             bridge = crate::owned_mp4_video_bridge::prepare(source, Some(options))?;
         }
         let container_source = bridge.as_ref().map_or(source, |t| t.path.as_path());
-        let reader = crate::owned_webm::WebmReader::open(
+        let mut limits = crate::owned_webm::Limits::default();
+        let effective_packet_limit = options
+            .max_controlled_bytes
+            .map_or(options.max_packet_bytes, |limit| {
+                options.max_packet_bytes.min(limit)
+            });
+        limits.packet_bytes = limits.packet_bytes.min(effective_packet_limit);
+        let memory_packets = options
+            .max_controlled_bytes
+            .map(|bytes| bytes / std::mem::size_of::<crate::owned_webm::Packet>());
+        if let Some(maximum) = memory_packets {
+            limits.packets = limits.packets.min(maximum);
+        }
+        let map_packet_limit = |error: crate::owned_webm::Error| {
+            if memory_packets.is_some_and(|max| max < crate::owned_webm::Limits::default().packets)
+                && error
+                    .to_string()
+                    .contains("WebM packet count exceeds limit")
+            {
+                "controlled memory budget exceeded: Matroska packet index limit".to_owned()
+            } else {
+                error.to_string()
+            }
+        };
+        let mut reader = crate::owned_webm::WebmReader::open(
             BufReader::new(File::open(container_source).map_err(|e| e.to_string())?),
-            Default::default(),
+            limits,
         )
-        .map_err(|e| e.to_string())?;
+        .map_err(map_packet_limit)?;
+        if let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0)
+            && reader
+                .estimated_index_payload_bytes()
+                .map_err(|e| e.to_string())?
+                > limit
+        {
+            return Err("controlled memory budget exceeded: Matroska index and metadata".into());
+        }
+        reader.restrict_packet_bytes(effective_packet_limit);
         let track = reader
             .tracks
             .first()
             .ok_or("subtitle burn source has no video")?;
         if reader.tracks.len() != 1
             || track.kind != 1
-            || !crate::owned_ffv1_export::supports(container_source, &Default::default())
+            || !crate::owned_ffv1_export::supports_with_options(
+                container_source,
+                &Default::default(),
+                Some(options),
+            )
         {
             return Err(
                 "owned subtitle burn requires Y4M or supported single-track Matroska/MP4 video"
@@ -49,6 +97,13 @@ fn prepare(
         if matches!(track.rotation, 90 | 270) {
             std::mem::swap(&mut width, &mut height);
         }
+        let mask_bytes = (width as usize).saturating_mul(height as usize);
+        if options
+            .max_controlled_bytes
+            .is_some_and(|limit| mask_bytes.saturating_mul(2) > limit)
+        {
+            return Err("subtitle burn frame exceeds controlled memory budget".into());
+        }
         y4m::Header::parse(
             format!(
                 "YUV4MPEG2 W{} H{} F25:1 Ip C420\n",
@@ -57,37 +112,86 @@ fn prepare(
             .as_bytes(),
         )?
     };
-    if std::fs::metadata(subs).map_err(|e| e.to_string())?.len() > 1 << 20 {
+    let subs_len = std::fs::metadata(subs).map_err(|e| e.to_string())?.len();
+    if subs_len > 1 << 20 {
         return Err("subtitle text exceeds 1 MiB".into());
+    }
+    let subs_bytes = usize::try_from(subs_len).map_err(|_| "subtitle text exceeds 1 MiB")?;
+    if let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0)
+        && subs_bytes.saturating_mul(3) > limit
+    {
+        return Err("controlled memory budget exceeded: subtitle burn SRT working set".into());
     }
     let text = std::fs::read_to_string(subs).map_err(|e| e.to_string())?;
     if !text.contains("-->") {
         return Err("owned burn-in currently requires plain SRT".into());
     }
     let cues = crate::owned_play_controls::parse_subtitle_text(&text)?;
+    if let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0) {
+        let cues_bytes = cues
+            .iter()
+            .fold(
+                cues.len()
+                    .saturating_mul(std::mem::size_of::<crate::owned_play_controls::SubtitleCue>()),
+                |acc, cue| acc.saturating_add(cue.text.len()),
+            )
+            .saturating_add(text.len());
+        if cues_bytes > limit {
+            return Err("controlled memory budget exceeded: subtitle burn SRT working set".into());
+        }
+    }
     Ok((header, cues, bridge))
 }
 fn policy(options: &CopyOptions) -> Result<()> {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
     if !crate::owned_lossless::policy(options, true) {
         return Err(
             "owned subtitle burn-in does not implement requested metadata/memory policy".into(),
         );
     }
     crate::owned_lossless::metadata(options)?;
-    crate::owned_budget::check_rss_budget(options)
+    crate::owned_lossless::check_options_matroska_metadata_budget(options)
 }
 pub fn supports(source: &Path, subs: &Path, options: &CopyOptions) -> bool {
-    (options.streams.is_empty() || options.streams == [0])
+    !options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+        && (options.streams.is_empty() || options.streams == [0])
         && options.max_packet_bytes != 0
-        && options.max_controlled_bytes.is_none()
+        && options.max_packets != Some(0)
+        && options.max_controlled_bytes != Some(0)
+        && crate::owned_budget::check_rss_budget(options).is_ok()
         && crate::owned_lossless::policy(options, true)
         && crate::owned_lossless::metadata(options).is_ok()
         && (crate::owned_y4m_decode::supports(source)
-            || crate::owned_ffv1_export::supports(source, &Default::default())
+            || crate::owned_ffv1_export::supports_with_options(
+                source,
+                &Default::default(),
+                Some(options),
+            )
             || match crate::owned_mp4_video_bridge::prepare(source, Some(options)) {
-                Ok(Some(temporary)) => {
-                    crate::owned_ffv1_export::supports(&temporary.path, &Default::default())
-                }
+                Ok(Some(temporary)) => crate::owned_ffv1_export::supports_with_options(
+                    &temporary.path,
+                    &Default::default(),
+                    Some(options),
+                ),
                 Err(_) if crate::owned_mp4_video_bridge::recognizes(source) => true,
                 _ => false,
             })
@@ -115,47 +219,184 @@ pub fn plan_burn_subtitles(
         crate::owned_text_raster::rasterize(&cue.text, header.width, header.height, font_size)?;
     }
     if crate::owned_y4m_decode::supports(source) {
-        if options.max_packets.is_some()
-            || options.max_packet_bytes != CopyOptions::default().max_packet_bytes
-        {
-            let mut reader = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
-            let mut visit = |h: &y4m::Header, _: &[u8], _: u64, _: u64| {
+        let encode_packets =
+            options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+                || options.max_controlled_bytes.is_some();
+        let mut reader = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
+        let mut visit = |h: &y4m::Header, bytes: &[u8], pts: u64, _: u64| {
+            if options
+                .cancel
+                .as_ref()
+                .is_some_and(fvid_control::CancelFlag::is_cancelled)
+            {
+                return Err("media operation cancelled".into());
+            }
+            crate::owned_budget::check_rss_budget(options)?;
+            let frame_len = h.frame_len()?;
+            if frame_len > options.max_packet_bytes {
+                return Err("Y4M frame byte length exceeds packet byte limit".into());
+            }
+            let mask_bytes = h.width.saturating_mul(h.height);
+            if options
+                .max_controlled_bytes
+                .is_some_and(|limit| frame_len.saturating_add(mask_bytes) > limit)
+            {
+                return Err("subtitle burn frame exceeds controlled memory budget".into());
+            }
+            if encode_packets {
+                let (sx, sy) = h.format.subsampling();
+                let mut frame = crate::owned_frame::GeometryFrame {
+                    width: h.width,
+                    height: h.height,
+                    subsampling: Some([sx, sy]),
+                    data: bytes.to_vec(),
+                };
+                let text = cues
+                    .iter()
+                    .filter(|cue| {
+                        cue.start_us >= 0
+                            && pts as u128 >= cue.start_us as u128 * 1000
+                            && (pts as u128) < cue.end_us as u128 * 1000
+                    })
+                    .map(|cue| cue.text.as_str())
+                    .collect::<Vec<_>>()
+                    .join("\n");
+                if !text.is_empty() {
+                    let mask =
+                        crate::owned_text_raster::rasterize(&text, h.width, h.height, font_size)?;
+                    crate::owned_text_raster::composite_white(
+                        &mut frame,
+                        h.depth(),
+                        h.full_range()?,
+                        &mask,
+                    )?;
+                }
+                let packet = crate::owned_ffv1_encoder::encode(&frame, h.depth())?;
+                if packet.len() > options.max_packet_bytes {
+                    return Err("subtitle burn packet exceeds byte limit".into());
+                }
                 if options
-                    .cancel
-                    .as_ref()
-                    .is_some_and(fvid_control::CancelFlag::is_cancelled)
+                    .max_controlled_bytes
+                    .is_some_and(|limit| packet.len() > limit)
                 {
-                    return Err("media operation cancelled".into());
+                    return Err("subtitle burn packet exceeds controlled memory budget".into());
                 }
-                crate::owned_budget::check_rss_budget(options)?;
-                if h.frame_len()? > options.max_packet_bytes {
-                    return Err("Y4M frame byte length exceeds packet byte limit".into());
-                }
-                Ok(())
-            };
-            crate::owned_y4m_decode::visit_reader_transformed_counted(
-                &mut reader,
-                &Default::default(),
-                options.max_packets,
-                &mut visit,
-            )?;
+            }
+            Ok(())
+        };
+        let (stats, _) = crate::owned_y4m_decode::visit_reader_transformed_counted(
+            &mut reader,
+            &Default::default(),
+            options.max_packets,
+            &mut visit,
+        )?;
+        if stats.video_frames == 0 {
+            return Err("subtitle burn input has no video frames".into());
         }
-    } else if options.max_packets.is_some()
-        || options.max_packet_bytes != CopyOptions::default().max_packet_bytes
-    {
+    } else {
         let container_source = bridge.as_ref().map_or(source, |t| t.path.as_path());
+        crate::owned_lossless::check_source_matroska_metadata_budget(
+            container_source,
+            None,
+            options,
+        )?;
         let mut stage = options.clone();
         stage.streams.clear();
         stage.stream_metadata_set.clear();
         stage.stream_metadata_delete.clear();
-        crate::owned_video_decode::decode_webm(
+        let encode_packets =
+            options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+                || options.max_controlled_bytes.is_some();
+        let mut selected_frames = 0u64;
+        let mut inspect = |view: crate::owned_video_decode::FrameView<'_>| -> Result<()> {
+            selected_frames += 1;
+            crate::owned_budget::check_rss_budget(options)?;
+            let mask_bytes = (view.width as usize).saturating_mul(view.height as usize);
+            if options
+                .max_controlled_bytes
+                .is_some_and(|limit| view.pixels.len().saturating_add(mask_bytes) > limit)
+            {
+                return Err("subtitle burn frame exceeds controlled memory budget".into());
+            }
+            if !encode_packets {
+                return Ok(());
+            }
+            let mut data = crate::owned_frame::buffer(view.pixels.len())?;
+            data.copy_from_slice(view.pixels);
+            let mut working = crate::owned_frame::GeometryFrame {
+                width: view.width as usize,
+                height: view.height as usize,
+                subsampling: view.subsampling,
+                data,
+            };
+            let text = active_text(&cues, view.pts_ns);
+            if !text.is_empty() {
+                let mask = crate::owned_text_raster::rasterize(
+                    &text,
+                    working.width,
+                    working.height,
+                    font_size,
+                )?;
+                crate::owned_text_raster::composite_white(
+                    &mut working,
+                    view.depth,
+                    view.full_range,
+                    &mask,
+                )?;
+            }
+            let packet = if view.monochrome {
+                let samples = working
+                    .width
+                    .checked_mul(working.height)
+                    .and_then(|v| v.checked_mul(if view.depth == 8 { 1 } else { 2 }))
+                    .ok_or("FFV1 gray size overflow")?;
+                match view.alpha {
+                    Some(alpha) => crate::owned_ffv1_encoder::encode_gray_with_alpha(
+                        working.width,
+                        working.height,
+                        &working.data[..samples],
+                        alpha,
+                        view.depth,
+                    )?,
+                    None => crate::owned_ffv1_encoder::encode_gray(
+                        working.width,
+                        working.height,
+                        &working.data[..samples],
+                        view.depth,
+                    )?,
+                }
+            } else {
+                match view.alpha {
+                    Some(alpha) => {
+                        crate::owned_ffv1_encoder::encode_with_alpha(&working, view.depth, alpha)?
+                    }
+                    None => crate::owned_ffv1_encoder::encode(&working, view.depth)?,
+                }
+            };
+            if packet.len() > options.max_packet_bytes {
+                return Err("encoded FFV1 packet exceeds byte limit".into());
+            }
+            if options
+                .max_controlled_bytes
+                .is_some_and(|limit| packet.len() > limit)
+            {
+                return Err("subtitle burn packet exceeds controlled memory budget".into());
+            }
+            Ok(())
+        };
+        let result = crate::owned_video_decode::decode_webm(
             container_source,
             &Default::default(),
-            None,
+            Some(&mut inspect),
             Some(&stage),
         )?;
+        drop(inspect);
+        result.ok_or("unsupported owned FFV1 export capability")?;
+        if selected_frames == 0 {
+            return Err("Matroska has no selected frames".into());
+        }
     }
-    let info = crate::owned_probe::probe(source)?;
+    let info = crate::owned_probe::probe_with_options(source, options)?;
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
     let streams = info
         .streams
@@ -203,11 +444,15 @@ pub fn plan_burn_subtitles(
     ];
     if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
         || options.max_packets.is_some()
+        || options.max_controlled_bytes.is_some()
         || options.max_rss_bytes.is_some()
     {
         notes.push(format!(
-            "encoded packet limit: {} bytes; packet work limit: {:?}; RSS limit: {:?} bytes",
-            options.max_packet_bytes, options.max_packets, options.max_rss_bytes
+            "encoded packet limit: {} bytes; packet work limit: {:?}; controlled memory limit: {:?} bytes; RSS limit: {:?} bytes",
+            options.max_packet_bytes,
+            options.max_packets,
+            options.max_controlled_bytes,
+            options.max_rss_bytes
         ));
     }
     Ok(MediaPlan {
@@ -227,12 +472,31 @@ pub fn burn_subtitles(
     options: &CopyOptions,
 ) -> Result<fvid_media_info::LosslessStats> {
     policy(options)?;
+    if destination
+        .extension()
+        .and_then(|e| e.to_str())
+        .is_none_or(|e| !e.eq_ignore_ascii_case("mkv"))
+    {
+        return Err("owned FFV1 export requires .mkv".into());
+    }
     let (header, cues, bridge) = prepare(source, subs, options)?;
     let font_size = (header.height as f32 / 18.0).clamp(12.0, 64.0);
     if !crate::owned_y4m_decode::supports(source) {
         let container_source = bridge.as_ref().map_or(source, |t| t.path.as_path());
+        crate::owned_lossless::check_source_matroska_metadata_budget(
+            container_source,
+            None,
+            options,
+        )?;
         let mut process =
             |frame: &mut crate::owned_frame::GeometryFrame, depth, pts, full_range| -> Result<()> {
+                let mask_bytes = frame.width.saturating_mul(frame.height);
+                if options
+                    .max_controlled_bytes
+                    .is_some_and(|limit| frame.data.len().saturating_add(mask_bytes) > limit)
+                {
+                    return Err("subtitle burn frame exceeds controlled memory budget".into());
+                }
                 let text = active_text(&cues, pts);
                 if !text.is_empty() {
                     let mask = crate::owned_text_raster::rasterize(
@@ -297,6 +561,16 @@ pub fn burn_subtitles(
         track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
         crate::owned_ffv1_export::edit_track_description(&mut description, key, "");
     }
+    if let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0)
+        && crate::owned_lossless::estimate_matroska_metadata_working_bytes(
+            &file_metadata,
+            &text_tags,
+            &track_tags,
+            Some(&description),
+        ) > limit
+    {
+        return Err("Matroska metadata working set exceeds controlled memory budget".into());
+    }
     let input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
     let (stats, event, consumed) = mkv::export_atomic(
         destination,
@@ -335,9 +609,20 @@ pub fn burn_subtitles(
                 options.max_packets,
                 &mut |h, bytes, pts, duration| {
                     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-                        return Err("operation cancelled".into());
+                        return Err("media operation cancelled".into());
                     }
                     crate::owned_budget::check_rss_budget(options)?;
+                    let frame_len = h.frame_len()?;
+                    if frame_len > options.max_packet_bytes {
+                        return Err("Y4M frame byte length exceeds packet byte limit".into());
+                    }
+                    let mask_bytes = h.width.saturating_mul(h.height);
+                    if options
+                        .max_controlled_bytes
+                        .is_some_and(|limit| frame_len.saturating_add(mask_bytes) > limit)
+                    {
+                        return Err("subtitle burn frame exceeds controlled memory budget".into());
+                    }
                     let (sx, sy) = h.format.subsampling();
                     let mut frame = crate::owned_frame::GeometryFrame {
                         width: h.width,
@@ -370,6 +655,14 @@ pub fn burn_subtitles(
                     if packet.len() > options.max_packet_bytes {
                         return Err("subtitle burn packet exceeds byte limit".into());
                     }
+                    if options
+                        .max_controlled_bytes
+                        .is_some_and(|limit| packet.len() > limit)
+                    {
+                        return Err(
+                            "subtitle burn packet exceeds controlled memory budget".into(),
+                        );
+                    }
                     writer
                         .write_packet(0, pts, duration, true, &packet)
                         .map_err(|e| e.to_string())?;
@@ -382,6 +675,9 @@ pub fn burn_subtitles(
                 },
             )
             .map_err(mkv::Error)?;
+            if stats.video_frames == 0 {
+                return Err(mkv::Error("subtitle burn input has no video frames".into()));
+            }
             writer.finish()?;
             Ok((stats, event, consumed))
         },

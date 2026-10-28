@@ -1,0 +1,11 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0398"
+  ],
+  "before": "Both wrappers accept nonzero reserved FullBox flags in mvhd/mdhd v0/v1. The original forced refusal test reports all eight low/high-bit companions accepted; zero-flag v0/v1 controls pass exact clocks, packet bytes and packet-budget checks. Original result: 1 passed, 1 failed.",
+  "after": "Validate reserved flags in shared media_time before consuming time fields, preserving version checks and the specific invalid-input error. Core: 2 focused plus 5 related tests pass. Player: 4 focused plus 12 related tests pass, distinguishing malformed-input refusal before decoding from successful v0/v1 native RGB playback, 60ms duration, seek, rewind and repeated EOF. No failures or ignored tests.",
+  "fixture_regeneration": "All eleven media hashes reproduce independently; owned generator needs no FFmpeg/network.",
+  "reference": "ISO/IEC 14496-12:2015 sections 8.2.2.2 and 8.4.2.2 define zero flags for movie and media time headers.",
+  "limits": "No GUI, hardware, performance or physical-memory claim. Only time-header reserved flags are covered."
+}

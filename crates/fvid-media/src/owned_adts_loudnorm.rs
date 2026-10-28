@@ -3,8 +3,24 @@ use fvid_control::{CopyOptions, ProgressHook};
 use fvid_media_info::{LoudnormStats, MediaPlan, PlanStep};
 use std::path::Path;
 type Result<T> = std::result::Result<T, String>;
+fn check_options(options: &CopyOptions) -> Result<()> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)
+}
 fn policies(options: &CopyOptions) -> bool {
-    crate::owned_audio_export::simple_options(options)
+    check_options(options).is_ok()
+        && crate::owned_audio_export::simple_options(options)
         && options.metadata_set.len() + options.metadata_delete.len() <= 64
         && !options
             .metadata_set
@@ -41,6 +57,7 @@ pub fn apply(
     dual_pass: bool,
     options: &CopyOptions,
 ) -> Result<LoudnormStats> {
+    check_options(options)?;
     if !policies(options) {
         return Err("owned ADTS loudnorm requires stream 0 and valid WAVE INFO metadata edits".into());
     }
@@ -51,11 +68,17 @@ pub fn apply(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
+    crate::owned_adts_export::check_wave_metadata_budget(options)?;
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     // Read-only configuration/policy preflight; actual packet failures propagate
     // once execution starts, without retry through the legacy backend.
-    crate::owned_adts_loudness::validate_configuration(source, &decode_options)?;
-    let spool = crate::owned_adts_export::decode_to_wave(source, None, &decode_options)?;
+    crate::owned_adts_loudness::validate_header_configuration(source, &decode_options)?;
+    let spool = crate::owned_adts_export::decode_to_wave(source, None, options)?;
+    if !crate::owned_wave_loudness::qualified_rate(spool.stats.sample_rate) {
+        return Err(
+            "owned AAC true-peak measurement requires a qualified standard PCM rate".into(),
+        );
+    }
     let mut pcm_options = options.clone();
     pcm_options.max_packets = None;
     pcm_options.max_packet_bytes = CopyOptions::default().max_packet_bytes;
@@ -90,10 +113,13 @@ pub fn plan_loudnorm(
     dual_pass: bool,
     options: &CopyOptions,
 ) -> Result<MediaPlan> {
+    check_options(options)?;
     if !policies(options) {
         return Err("owned ADTS loudnorm requires stream 0 and valid WAVE INFO metadata edits".into());
     }
     let resolved = crate::owned_loudnorm::validate_request(args)?;
+    crate::owned_adts_export::check_wave_metadata_budget(options)?;
+    let _ = crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options)?;
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     let mut plan = crate::owned_adts_loudness::plan_loudness(source, &decode_options)?;
     plan.command = "loudnorm".into();

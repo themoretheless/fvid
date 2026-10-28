@@ -1,0 +1,10 @@
+{
+  "batch_id": "FVID-0250",
+  "sha256": {
+    "adts-mono-48k.aac": "f5fde04b21dcbee2e8906362ade9d849974ccff90ede07dad2cab013fde9f269",
+    "matroska-flac-48k.mka": "e26049ecdcf9d42f67d17d379f6bf9bfb846870fdea816e8271455eb2b9dab8e",
+    "matroska-pcm-48k.mka": "024ddb8d927c51542bf5f7d3dee637807286809f5a04d0df3efda66374999227",
+    "mp4-pcm-48k.m4a": "64aba9f1eafab4e48b90f73892ae1516c69d0cf2b6e6b73ce9ced76b32537796",
+    "stereo-48k.wav": "0854c7c49b45ad55e4da5b5561f39210ea5d7d279ccf5d571ef2088e903a4521"
+  }
+}

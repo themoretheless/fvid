@@ -1,0 +1,97 @@
+--- pre-fix
++++ post-fix
+@@ -98,16 +98,18 @@
+         if !mp4_matroska::eligible(&reader) {
+             return Ok(None);
+         }
+-        if let Some(first) = segments.first()
+-            && (reader.tracks().len() != first.reader.tracks().len()
+-                || !reader
+-                    .tracks()
+-                    .iter()
+-                    .zip(first.reader.tracks())
+-                    .all(|(a, b)| compatible(a, b)))
++        let selected_tracks = mp4_matroska::selection(reader.tracks().len(), &options.streams)?;
++        if let Some(first) = segments.first() {
++            let first_selected =
++                mp4_matroska::selection(first.reader.tracks().len(), &options.streams)?;
++            if selected_tracks != first_selected
++                || selected_tracks.iter().any(|&track| {
++                    !compatible(&reader.tracks()[track], &first.reader.tracks()[track])
++                })
+             {
+                 return Ok(None);
+             }
++        }
+         if reader
+             .tracks()
+             .iter()
+@@ -115,7 +117,6 @@
+         {
+             return Ok(None);
+         }
+-        let selected_tracks = mp4_matroska::selection(reader.tracks().len(), &options.streams)?;
+         let mut plans = reader
+             .tracks()
+             .iter()
+@@ -144,7 +145,8 @@
+         if duration == 0 {
+             return Err(invalid("concat segment has no presented media"));
+         }
+-        for (track, plan) in plans.iter_mut().enumerate() {
++        for &track in &selected_tracks {
++            let plan = &mut plans[track];
+             let local_delay = plan.options.codec_delay_ns;
+             let global_delay = segments.first().map_or(local_delay, |first| {
+                 first.plans[track].options.codec_delay_ns
+@@ -167,7 +169,49 @@
+     }
+     let selected = mp4_matroska::selection(segments[0].reader.tracks().len(), &options.streams)?;
+     if let Some(mem_limit) = options.max_controlled_bytes {
+-        let mut plan_bytes = segments.len().saturating_mul(8192).saturating_add(16384);
++        let mut raw_meta_bytes = 0usize;
++        let first_tags = segments[0].reader.tags();
++        for v in [
++            &first_tags.title,
++            &first_tags.artist,
++            &first_tags.album,
++            &first_tags.comment,
++            &first_tags.date,
++        ] {
++            if !v.is_empty() {
++                raw_meta_bytes = raw_meta_bytes.saturating_add(v.len()).saturating_add(32);
++            }
++        }
++        let enc = segments[0].reader.encoder().trim();
++        if !enc.is_empty() && enc.len() <= 1024 {
++            raw_meta_bytes = raw_meta_bytes.saturating_add(enc.len()).saturating_add(32);
++        }
++        for (k, v) in &options.metadata_set {
++            raw_meta_bytes = raw_meta_bytes
++                .saturating_add(k.len())
++                .saturating_add(v.len())
++                .saturating_add(32);
++        }
++        for (_, k, v) in &options.stream_metadata_set {
++            raw_meta_bytes = raw_meta_bytes
++                .saturating_add(k.len())
++                .saturating_add(v.len())
++                .saturating_add(32);
++        }
++        for segment in &segments {
++            for chapter in segment.reader.chapters() {
++                if chapter.start_ns < segment.duration {
++                    raw_meta_bytes = raw_meta_bytes
++                        .saturating_add(chapter.title.len())
++                        .saturating_add(64);
++                }
++            }
++        }
++        let mut plan_bytes = segments
++            .len()
++            .saturating_mul(8192)
++            .saturating_add(16384)
++            .saturating_add(raw_meta_bytes.saturating_mul(8));
+         for segment in &segments {
+             // Plans for unselected tracks are retained too: stream selection
+             // controls output, not ownership of the segment's timing tables.

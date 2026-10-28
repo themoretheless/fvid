@@ -1,0 +1,20 @@
+{
+  "batch": 313,
+  "ids": [
+    "FVID-0320"
+  ],
+  "summary": "Route CLI WAVE trim and plan trim to non-.wav destinations (.f32le, .mka, .mkv) through decode-audio and validate Matroska destination metadata in decode-audio and trim CLI/plan routes",
+  "snapshots": [
+    "docs/improvements/snapshots/batch-313-pre-edit/src/media_cli.rs",
+    "docs/improvements/snapshots/batch-313-pre-edit/src/media.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-313-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-313-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-313-related-after.txt"
+  },
+  "tests_run": [
+    "cargo test --test decode_trim_wave_budget_parity_regressions"
+  ],
+  "status": "accepted"
+}

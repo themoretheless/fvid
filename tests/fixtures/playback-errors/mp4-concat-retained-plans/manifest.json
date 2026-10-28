@@ -1,0 +1,5 @@
+{
+  "file": "two-tracks.m4a",
+  "sha256": "8fff60cb7a36b76e64cba24cbefc210bd5061f7816382c3531125c46e72acc15",
+  "provenance": "Owned synthetic mono 48kHz AAC pulse, 2 and 512 samples on separate tracks; no FFmpeg or private media."
+}

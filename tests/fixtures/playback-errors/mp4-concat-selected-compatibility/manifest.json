@@ -1,0 +1,9 @@
+{
+  "sha256": {
+    "video-audio-48000.mp4": "181efc356b1fb48ee79597da2d62b48ffaa6b185c2f2b068c9d0469740954fad",
+    "video-audio-44100.mp4": "4169f33653448353d2d23b3d0c37b1db1e64ec0a03e8dad41c6f6f766c57eeb0",
+    "video-only.mp4": "ebe51454ad98968ac15839950c609594e10bb61c399a24ed2275fad54a6157d9"
+  },
+  "video_source": "tests/fixtures/playback-errors/avc-444-pcm-deblock/y8-c8-o12-12-m1-e0.mp4",
+  "provenance": "Own PCM-coded AVC and AAC-LC pulse syntax. Video configuration and bytes identical. AAC sample entry and AudioSpecificConfig correctly state 48kHz vs 44.1kHz."
+}

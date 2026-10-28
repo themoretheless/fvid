@@ -7,7 +7,12 @@ use std::{
 };
 type Result<T> = std::result::Result<T, String>;
 fn policies(options: &CopyOptions) -> bool {
-    (options.streams.is_empty() || options.streams == [0])
+    !options.cancel.as_ref().is_some_and(|c| c.is_cancelled())
+        && options.max_packet_bytes > 0
+        && options.max_packets != Some(0)
+        && options.max_controlled_bytes != Some(0)
+        && crate::owned_budget::check_rss_budget(options).is_ok()
+        && (options.streams.is_empty() || options.streams == [0])
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
         && options
@@ -19,11 +24,27 @@ fn policies(options: &CopyOptions) -> bool {
             .iter()
             .all(|key| crate::owned_wave_metadata::tag_for_key(key).is_ok())
 }
+fn check_options(options: &CopyOptions) -> Result<()> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)
+}
 pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
     destination.extension().and_then(|s| s.to_str()) == Some("wav")
         && policies(options)
-        && std::fs::File::open(source)
-            .is_ok_and(|mut file| crate::owned_wave_inspect::inspect(&mut file, None).is_ok())
+        && std::fs::File::open(source).is_ok_and(|mut file| {
+            crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref()).is_ok()
+        })
 }
 /// Packet limits count frame-aligned I/O blocks, at most 4096 sample frames.
 /// No samples are decoded, resampled or requantized, including non-finite floats.
@@ -53,6 +74,7 @@ pub fn trim(
     to: i64,
     options: &CopyOptions,
 ) -> Result<CopyStats> {
+    check_options(options)?;
     if supports(source, destination, options) {
         return copy_wave(source, destination, Some((from, to)), options).map(|(stats, _)| stats);
     }
@@ -60,7 +82,9 @@ pub fn trim(
         interval: Some((from, to)),
         ..Default::default()
     };
-    if crate::owned_audio_export::supports(source, destination, transform, options) {
+    if !crate::owned_wave_inspect::is_wave(source).unwrap_or(false)
+        || crate::owned_g711_wave_export::recognizes(source, options).unwrap_or(false)
+    {
         let stats = crate::owned_audio_export::decode_audio_transformed(
             source,
             destination,
@@ -88,6 +112,7 @@ pub fn concat(
     destination: &Path,
     options: &CopyOptions,
 ) -> Result<CopyStats> {
+    check_options(options)?;
     if !(2..=256).contains(&sources.len()) {
         return Err("concat requires 2..=256 inputs".into());
     }
@@ -118,6 +143,7 @@ pub(crate) fn inspect_copy(
     interval: Option<(i64, i64)>,
     options: &CopyOptions,
 ) -> Result<(CopyStats, u64, crate::owned_wave_inspect::WaveInfo)> {
+    check_options(options)?;
     if !(1..=256).contains(&sources.len()) {
         return Err("WAVE plan requires 1..=256 inputs".into());
     }
@@ -129,6 +155,15 @@ fn copy_waves(
     interval: Option<(i64, i64)>,
     options: &CopyOptions,
 ) -> Result<(CopyStats, u64, crate::owned_wave_inspect::WaveInfo)> {
+    let check = || check_options(options);
+    let emit = |event| {
+        if destination.is_some() {
+            if let Some(hook) = &options.progress {
+                hook.emit(event);
+            }
+        }
+    };
+    check()?;
     if interval.is_some_and(|(from, to)| from < 0 || to <= from) {
         return Err("PCM interval requires 0 <= from < to".into());
     }
@@ -145,20 +180,6 @@ fn copy_waves(
     {
         return Err("invalid WAVE metadata mutations".into());
     }
-    let check = || -> Result<()> {
-        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-            return Err("media operation cancelled".into());
-        }
-        crate::owned_budget::check_rss_budget(options)
-    };
-    let emit = |event| {
-        if destination.is_some() {
-            if let Some(hook) = &options.progress {
-                hook.emit(event);
-            }
-        }
-    };
-    check()?;
     if destination.is_some_and(|path| path.symlink_metadata().is_ok()) {
         return Err("output already exists".into());
     }

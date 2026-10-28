@@ -12,6 +12,15 @@ pub(crate) fn check(options: &CopyOptions) -> Result<()> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
     crate::owned_budget::check_rss_budget(options)
 }
 pub(crate) fn admit(need: usize, options: &CopyOptions) -> Result<()> {
@@ -46,12 +55,7 @@ pub(crate) fn preflight(
     let mut streams = 0usize;
     let mut pages = 0usize;
     while at < length {
-        if pages % 256 == 0 {
-            check(options)?;
-        }
-        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-            return Err("media operation cancelled".into());
-        }
+        check(options)?;
         let mut header = [0; 27];
         file.read_exact(&mut header).map_err(|e| e.to_string())?;
         if &header[..4] != b"OggS" || header[4] != 0 {
@@ -102,7 +106,52 @@ impl Read for CheckedRead<'_> {
         self.input.read(bytes)
     }
 }
+pub(crate) fn check_nonempty_interval_prefix(
+    transform: Option<AudioDecodeTransform>,
+    rate: u32,
+    frames_read: u64,
+) -> Result<()> {
+    if let Some(transform) = transform {
+        if let Some((from, to)) = transform.interval {
+            if frames_read == 0 {
+                return Err("no decoded audio samples".into());
+            }
+            let out_rate = u128::try_from(transform.sample_rate.unwrap_or(rate as i32))
+                .map_err(|_| "invalid output sample rate")?;
+            let output_frames = usize::try_from(
+                u128::from(frames_read)
+                    .checked_mul(out_rate)
+                    .ok_or("audio interval overflow")?
+                    .div_ceil(u128::from(rate)),
+            )
+            .map_err(|_| "audio interval overflow")?;
+            let boundary = |time: i64| -> Result<usize> {
+                usize::try_from(
+                    (time as u128)
+                        .checked_mul(out_rate)
+                        .ok_or("audio interval overflow")?
+                        .div_ceil(1_000_000),
+                )
+                .map(|n| n.min(output_frames))
+                .map_err(|_| "audio interval overflow".into())
+            };
+            let (first, last) = (boundary(from)?, boundary(to)?);
+            if last <= first {
+                return Err("no decoded audio samples".into());
+            }
+        }
+    }
+    Ok(())
+}
 pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<Program> {
+    open_with_transform(source, None, options)
+}
+pub(crate) fn open_with_transform(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<Program> {
+    check(options)?;
     let selected = match options.streams.as_slice() {
         [] => None,
         [index] => Some(*index),
@@ -119,15 +168,32 @@ pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<Program> {
         selected,
     )
     .map_err(|e| e.to_string())?;
+    let info = source_info(&program, options)?;
+    let wave_meta_bytes =
+        crate::owned_wave_metadata::wave_metadata_working_bytes(info.len(), options)?;
     let decoder = program
         .decoder_admission_bytes()
         .map_err(|e| e.to_string())?;
     let estimate = decoder
         .checked_mul(2)
         .and_then(|n| n.checked_add(index))
+        .and_then(|n| n.checked_add(wave_meta_bytes))
         .and_then(|n| n.checked_add(usize::from(program.channels()) * 5760 * 8 + 64 * 1024))
         .ok_or("Ogg decoder admission overflow")?;
     admit(estimate, options)?;
+    let until = transform
+        .and_then(|t| crate::owned_adts_export::decoded_prefix(t, 48000))
+        .map(|(_, end)| {
+            u64::try_from((end.as_nanos() * 48000).div_ceil(1_000_000_000))
+                .map_err(|_| "Opus prefix duration overflow".to_string())
+        })
+        .transpose()?;
+    if program.max_packet_size_in_prefix(until, options.max_packets) > options.max_packet_bytes {
+        return Err("Opus compressed packet exceeds byte limit".into());
+    }
+    let total_samples = u64::try_from(program.end_samples().max(0)).unwrap_or(0);
+    let prefix_samples = until.map_or(total_samples, |end| end.min(total_samples));
+    check_nonempty_interval_prefix(transform, 48000, prefix_samples)?;
     check(options)?;
     Ok(program)
 }
@@ -136,15 +202,19 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    match open(source, options) {
+    match open_with_transform(source, Some(transform), options) {
         Ok(program) => {
             let target = transform.channels.unwrap_or(i32::from(program.channels()));
+            let mask = program.output_channel_mask().unwrap_or(0);
             target == i32::from(program.channels())
-                || (crate::owned_pcm_channels::rematrix_layout_supported(
-                    program.channels(),
-                    program.output_channel_mask().unwrap_or(0),
-                ) && ((program.channels() <= 8 && matches!(target, 1 | 2))
-                    || (program.channels() <= 2 && (1..=8).contains(&target))))
+                || (((program.channels() <= 8 && matches!(target, 1 | 2))
+                    || (program.channels() <= 2 && (1..=8).contains(&target)))
+                    && ((program.channels() <= 2 && mask == 0)
+                        || (mask != 0
+                            && crate::owned_pcm_channels::rematrix_layout_supported(
+                                program.channels(),
+                                mask,
+                            ))))
         }
         Err(e) => e.starts_with("controlled memory budget exceeded:"),
     }
@@ -169,12 +239,7 @@ fn decode(
         channels: program.channels(),
     };
     loop {
-        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-            return Err("media operation cancelled".into());
-        }
-        if event.packets % 256 == 0 {
-            check(options)?;
-        }
+        check(options)?;
         if options
             .max_packets
             .is_some_and(|limit| event.packets >= limit)
@@ -215,9 +280,7 @@ fn decode(
                 if let Some(hook) = &options.progress {
                     hook.emit(event);
                 }
-                if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-                    return Err("media operation cancelled".into());
-                }
+                check(options)?;
                 if let Some(mut pcm) = program
                     .present_decoded(
                         AudioPacket {
@@ -248,12 +311,38 @@ fn decode(
     }
     Ok(stats)
 }
-fn source_info(program: &Program) -> Result<Vec<u8>> {
+fn source_info(program: &Program, options: &CopyOptions) -> Result<Vec<u8>> {
     let tags = program.source_tags().map_err(|e| e.to_string())?;
-    info_for_tags(&tags)
+    let info = info_for_tags(&tags)?;
+    let wave_meta_bytes =
+        crate::owned_wave_metadata::wave_metadata_working_bytes(info.len(), options)?;
+    if options
+        .max_controlled_bytes
+        .is_some_and(|max| wave_meta_bytes > max)
+    {
+        return Err("controlled memory budget exceeded: WAVE metadata limit".into());
+    }
+    Ok(info)
 }
 pub(crate) fn info_for_tags(tags: &fvid_opus::OpusTags) -> Result<Vec<u8>> {
     let mut entries = Vec::new();
+    for comment in &tags.comments {
+        let Some((key, value)) = comment.split_once('=') else {
+            continue;
+        };
+        if value.is_empty() || value.contains('\0') {
+            continue;
+        }
+        if key.len() == 4
+            && !matches!(
+                key.to_ascii_uppercase().as_str(),
+                "DATE"
+            )
+            && crate::owned_wave_metadata::tag_for_key(key).is_ok()
+        {
+            entries.push((key.to_string(), value.to_string()));
+        }
+    }
     for (source, target) in [
         ("TITLE", "title"),
         ("ARTIST", "artist"),
@@ -306,7 +395,7 @@ pub(crate) fn decode_to_wave(
     let mut program = open(source, options)?;
     let channels = program.channels();
     let mask = program.output_channel_mask().unwrap_or(0);
-    let info = source_info(&program)?;
+    let info = source_info(&program, options)?;
     let spool = crate::owned_adts_export::spool_decoded(
         48000,
         channels,
@@ -324,14 +413,14 @@ pub(crate) fn apply(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
+    check(options)?;
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    check(options)?;
-    let mut program = open(source, options)?;
+    let mut program = open_with_transform(source, Some(transform), options)?;
     let channels = program.channels();
     let mask = program.output_channel_mask().unwrap_or(0);
-    let info = source_info(&program)?;
+    let info = source_info(&program, options)?;
     let until = crate::owned_adts_export::decoded_prefix(transform, 48000)
         .map(|(_, end)| {
             u64::try_from((end.as_nanos() * 48000).div_ceil(1_000_000_000))

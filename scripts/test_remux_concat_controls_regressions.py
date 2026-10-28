@@ -28,6 +28,11 @@ class RemuxConcatControlsFixtureTests(unittest.TestCase):
                     hashlib.sha256(data).hexdigest(),
                 )
 
+    def test_corrupt_adts_fixture_has_valid_prefix_and_truncated_second_frame(self) -> None:
+        raw = (OUT / "adts-corrupt-second-packet.aac").read_bytes()
+        self.assertEqual(raw[:2], b"\xff\xf1")
+        self.assertTrue(raw.endswith(b"\xde\xad"))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,7 @@
+{
+  "status": "confirmed-defect-unfixed-active-draft",
+  "accepted_ids": [],
+  "before": "Original regression: one healthy control passed, twelve malformed header-size companions admitted by both parsers, one forced refusal test failed.",
+  "implementation": "No production fix applied; excluded from accepted integration until fixed and qualified.",
+  "qualification_target": "/private/tmp/fvid-time-sizes-target-20261029"
+}

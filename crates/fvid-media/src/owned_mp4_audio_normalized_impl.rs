@@ -142,6 +142,9 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
             "unsupported MP4 normalization destination geometry",
         ));
     }
+    // Validate routing before caller-owned output, including configurations reached
+    // within the requested prefix. A failed file export never publishes a spool.
+    let active_samples = mp4_active_samples(&track, interval, control.packet_limit());
     let mut opaque_identity=false;
     if destination==0 && target.is_none() {
         let first=track.decoder_setup(initial_description)?;
@@ -149,7 +152,7 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
             let positions=mp4_opaque_positions(&first.configuration).map_err(|e|invalid(&e))?;
             opaque_identity=positions.as_ref().is_some_and(|p|p.len()==usize::from(channels));
             for i in 0..track.sample_descriptions.len() {
-                if !(0..track.samples.len()).any(|n|track.samples.get(n).is_some_and(|s|s.description_index as usize==i+1)) {continue;}
+                if !(0..active_samples).any(|n|track.samples.get(n).is_some_and(|s|s.description_index as usize==i+1)) {continue;}
                 let setup=track.decoder_setup((i+1)as u32)?;
                 if setup.codec!=*b"mp4a" || setup.channels!=channels || mp4_opaque_positions(&setup.configuration).map_err(|e|invalid(&e))?!=positions {opaque_identity=false;break;}
             }
@@ -192,11 +195,9 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
         )
         .map_err(|e| invalid(&e))
     };
-    // Validate routing before caller-owned output, including configurations reached
-    // after the requested prefix. A failed file export never publishes a spool.
     for i in 0..track.sample_descriptions.len() {
         control.check()?;
-        if (0..track.samples.len()).any(|n| {
+        if (0..active_samples).any(|n| {
             track
                 .samples
                 .get(n)

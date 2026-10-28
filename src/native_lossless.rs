@@ -89,6 +89,72 @@ pub fn write_mp4_processed<W: Write + Seek>(
     )
 }
 
+/// Validate first-frame presence, geometry, and filter sample planes on MP4 input without writing output.
+pub(crate) fn validate_first_mp4_frame(
+    source: &Path,
+    geometry: &crate::native_geometry::VideoGeometry,
+    filters: &crate::native_pixels::PixelFilters,
+    processed: bool,
+) -> Result<()> {
+    let input = Mp4Reader::open(BufReader::new(File::open(source)?), Default::default())?;
+    if !mp4_matroska::eligible(&input)
+        || input
+            .tracks()
+            .iter()
+            .filter(|t| t.handler == *b"vide")
+            .count()
+            != 1
+    {
+        return Err(invalid(
+            "owned FFV1 export requires one AVC/HEVC video and supported AAC companion tracks",
+        ));
+    }
+    let tracks = input.tracks().to_vec();
+    let video = tracks.iter().position(|t| t.handler == *b"vide").unwrap();
+    for t in &tracks {
+        mp4_matroska::plan(t, input.movie_timescale(), None)?;
+    }
+    let mut reader = NativeReader::software(BufReader::new(File::open(source)?), usize::MAX)?;
+    let first = reader
+        .read_frame_raw()?
+        .ok_or_else(|| invalid("input has no decoded video frames"))?;
+    let source_colour = reader.colour();
+    filters.configure_vignette_source(&reader, geometry)?;
+    let source_full_range = source_colour.full_range;
+    let bake_rotation = processed || !geometry.is_identity() || !filters.is_empty();
+    let display = reader.dimensions();
+    let (w, h, depth) = match &first {
+        RawFrame::Avc { picture, .. } => {
+            let (w, h) = picture.dimensions();
+            (w, h, picture.bit_depth)
+        }
+        RawFrame::Planar8(p) => (p.width, p.height, 8),
+        RawFrame::Planar(p) => (p.frame.width, p.frame.height, p.depth),
+        _ => return Err(invalid("unexpected FFV1 input picture type")),
+    };
+    let mut samples = if bake_rotation {
+        geometry.apply_display_media(&first, display[0], display[1], tracks[video].rotation)?
+    } else {
+        geometry.apply(&first, w, h)?
+    };
+    if !processed {
+        filters.apply_colour_clock(
+            &mut samples,
+            depth,
+            source_full_range,
+            source_colour.matrix,
+            0,
+            reader
+                .frame_interval()
+                .map(|(start, _, scale)| start as f64 / scale as f64),
+            crate::native_pixels::frame_clock(&reader)?,
+        )?;
+    }
+    u32::try_from(samples.width).map_err(|_| invalid("FFV1 output width overflow"))?;
+    u32::try_from(samples.height).map_err(|_| invalid("FFV1 output height overflow"))?;
+    Ok(())
+}
+
 #[expect(clippy::too_many_arguments, reason = "Preserve the public export/filter entrypoint signature for existing callers")]
 pub fn write_mp4_selected<W: Write + Seek>(
     source: &Path, output: &mut W,

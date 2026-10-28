@@ -1,0 +1,16 @@
+{
+  "batch": 373,
+  "ids": [
+    "FVID-0380"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-373-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-373-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-373-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-373-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission decode_audio_to_f32le_and_loudnorm_try_plan_preserve_rss_and_canonical_option_order -- --nocapture",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 40,
+  "failed": 0
+}

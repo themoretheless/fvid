@@ -1,0 +1,27 @@
+{
+  "batch": 265,
+  "accepted": [
+    "FVID-0272"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-265-pre-edit/crates/fvid-media/src/owned_mp4_matroska_impl.rs",
+    "docs/improvements/snapshots/batch-265-pre-edit/crates/fvid-media/src/owned_mp4_remux.rs",
+    "docs/improvements/snapshots/batch-265-pre-edit/src/container/matroska_write.rs",
+    "docs/improvements/snapshots/batch-265-pre-edit/src/container/mp4_concat.rs",
+    "docs/improvements/snapshots/batch-265-pre-edit/src/native_export.rs",
+    "docs/improvements/snapshots/batch-265-pre-edit/src/native_plan.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-265-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-265-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-265-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/mp4-matroska-encoder-concat-prefix/segment-a.m4a",
+    "tests/fixtures/playback-errors/mp4-matroska-encoder-concat-prefix/segment-b.m4a"
+  ],
+  "tests": [
+    "tests/mp4_matroska_encoder_concat_prefix_regression.rs",
+    "scripts/test_mp4_matroska_encoder_concat_prefix.py"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "batch": 328,
+  "accepted": [
+    {
+      "id": "FVID-0335",
+      "title": "Propagate controlled-memory ceilings (max_controlled_bytes) and budget-error qualification across MP4 and Matroska audio loudness, loudnorm, mix, merge, sample-domain concat, spatial AAC routing, and Matroska PCM metadata extraction",
+      "source_files": [
+        "crates/fvid-media/src/owned_aac_export_routing.rs",
+        "crates/fvid-media/src/owned_audio_plan.rs",
+        "crates/fvid-media/src/owned_mp4_audio.rs",
+        "crates/fvid-media/src/owned_mp4_audio_export.rs",
+        "crates/fvid-media/src/owned_wave_metadata.rs",
+        "src/native_audio_mix.rs",
+        "src/native_audio_mix/concat.rs",
+        "src/native_export/pcm_matroska.rs",
+        "src/native_loudnorm.rs"
+      ],
+      "regression_files": [
+        "tests/mp4_audio_metadata_admission.rs"
+      ],
+      "snapshots": [
+        "docs/improvements/snapshots/batch-328-pre-edit/owned_aac_export_routing.rs",
+        "docs/improvements/snapshots/batch-328-pre-edit/owned_audio_plan.rs",
+        "docs/improvements/snapshots/batch-328-pre-edit/owned_mp4_audio.rs",
+        "docs/improvements/snapshots/batch-328-pre-edit/owned_mp4_audio_export.rs",
+        "docs/improvements/snapshots/batch-328-pre-edit/owned_wave_metadata.rs",
+        "docs/improvements/snapshots/batch-328-pre-edit/native_audio_mix.rs",
+        "docs/improvements/snapshots/batch-328-pre-edit/native_audio_mix_concat.rs",
+        "docs/improvements/snapshots/batch-328-pre-edit/pcm_matroska.rs",
+        "docs/improvements/snapshots/batch-328-pre-edit/native_loudnorm.rs"
+      ],
+      "evidence": {
+        "acceptance_before": "docs/improvements/evidence/batch-328-acceptance-before.txt",
+        "acceptance_after": "docs/improvements/evidence/batch-328-acceptance-after.txt",
+        "related_after": "docs/improvements/evidence/batch-328-related-after.txt"
+      },
+      "summary": "Clamps MP4 Limits::metadata_bytes and Matroska Limits::packets to options.max_controlled_bytes across owned_aac_export_routing::router_for_decode, owned_audio_plan::matroska_descriptor_for_decode, extract_source_pcm_metadata_with_interval_packet_and_memory_limit, validate_and_inspect_source_with_options, segment_packet_count, validate_concat_segments_with_options, and native_loudnorm::try_plan/try_apply, and prefixes clamped MP4 metadata budget errors with 'controlled memory budget exceeded: ' so owned loudness, loudnorm, audio export, and plan qualification preserve budget refusals instead of returning false."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "batch": 308,
+  "accepted": [
+    "FVID-0315"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-308-pre-edit/src/media_cli.rs",
+    "docs/improvements/snapshots/batch-308-pre-edit/src/native_plan.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-308-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-308-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-308-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/lossless-plan/source-8x4.y4m",
+    "tests/fixtures/playback-errors/remux-concat-controls/pcm-48k-a.wav",
+    "tests/fixtures/playback-errors/remux-concat-controls/mp4-aac-48k-a.m4a"
+  ],
+  "tests": [
+    "tests/remux_concat_controls_regressions.rs"
+  ]
+}

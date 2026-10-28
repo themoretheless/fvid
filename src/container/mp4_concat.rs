@@ -52,9 +52,29 @@ pub fn open_with_packet_limit(
     cancel: Option<&CancelFlag>,
     max_packet_bytes: usize,
 ) -> Result<Option<Vec<Segment<BufReader<File>>>>> {
+    let mut options = fvid_media::CopyOptions::default();
+    options.cancel = cancel.cloned();
+    options.max_packet_bytes = max_packet_bytes;
+    open_with_options(sources, &options)
+}
+
+pub fn open_with_options(
+    sources: &[PathBuf],
+    options: &fvid_media::CopyOptions,
+) -> Result<Option<Vec<Segment<BufReader<File>>>>> {
+    let cancel = options.cancel.as_ref();
+    check(cancel)?;
+    let max_packet_bytes = options.max_packet_bytes;
     if max_packet_bytes == 0 {
         return Err(invalid("packet byte limit must be positive"));
     }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
     if !(2..=256).contains(&sources.len()) {
         return Err(invalid("concat requires 2..=256 inputs"));
     }
@@ -74,25 +94,32 @@ pub fn open_with_packet_limit(
         }
         file.rewind()?;
         let mut limits = super::mp4::Limits::default();
-        limits.packet_bytes = limits.packet_bytes.min(max_packet_bytes);
-        let reader = Mp4Reader::open(BufReader::new(file), limits)?;
+        if let Some(limit) = options.max_controlled_bytes {
+            limits.metadata_bytes = limits.metadata_bytes.min(limit);
+        }
+        let mut reader = Mp4Reader::open(BufReader::new(file), limits)?;
+        reader.restrict_packet_bytes(
+            max_packet_bytes.min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+        );
         if !mp4_matroska::eligible(&reader) {
             return Ok(None);
         }
-        if let Some(first) = segments.first()
-            && (reader.tracks().len() != first.reader.tracks().len()
-                || !reader
-                    .tracks()
-                    .iter()
-                    .zip(first.reader.tracks())
-                    .all(|(a, b)| compatible(a, b)))
+        let selected_tracks = mp4_matroska::selection(reader.tracks().len(), &options.streams)?;
+        if let Some(first) = segments.first() {
+            let first_selected =
+                mp4_matroska::selection(first.reader.tracks().len(), &options.streams)?;
+            if selected_tracks != first_selected
+                || selected_tracks.iter().any(|&track| {
+                    !compatible(&reader.tracks()[track], &first.reader.tracks()[track])
+                })
             {
                 return Ok(None);
             }
-        if reader
-            .tracks()
-            .iter()
-            .any(|t| t.handler == *b"vide" && !t.samples.get(0).is_some_and(|s| s.sync))
+        }
+        if selected_tracks.iter().any(|&index| {
+            let track = &reader.tracks()[index];
+            track.handler == *b"vide" && !track.samples.get(0).is_some_and(|s| s.sync)
+        })
         {
             return Ok(None);
         }
@@ -102,7 +129,10 @@ pub fn open_with_packet_limit(
             .map(|t| mp4_matroska::plan(t, reader.movie_timescale(), cancel))
             .collect::<Result<Vec<_>>>()?;
         let mut duration = 0;
-        for p in &plans {
+        // Only output tracks determine the selected segment's end. A longer
+        // discarded track must not insert silence or a frozen-video gap.
+        for &track in &selected_tracks {
+            let p = &plans[track];
             for packet in &p.packets {
                 if packet.options.invisible {
                     continue;
@@ -121,7 +151,8 @@ pub fn open_with_packet_limit(
         if duration == 0 {
             return Err(invalid("concat segment has no presented media"));
         }
-        for (track, plan) in plans.iter_mut().enumerate() {
+        for &track in &selected_tracks {
+            let plan = &mut plans[track];
             let local_delay = plan.options.codec_delay_ns;
             let global_delay = segments.first().map_or(local_delay, |first| {
                 first.plans[track].options.codec_delay_ns
@@ -141,6 +172,98 @@ pub fn open_with_packet_limit(
             duration,
         });
         offset = next;
+    }
+    let selected = mp4_matroska::selection(segments[0].reader.tracks().len(), &options.streams)?;
+    if let Some(mem_limit) = options.max_controlled_bytes {
+        let mut raw_meta_bytes = 0usize;
+        let first_tags = segments[0].reader.tags();
+        for (_, v) in first_tags.entries() {
+            if !v.is_empty() {
+                raw_meta_bytes = raw_meta_bytes.saturating_add(v.len()).saturating_add(32);
+            }
+        }
+        let enc = segments[0].reader.encoder().trim();
+        if !enc.is_empty() && enc.len() <= 1024 {
+            raw_meta_bytes = raw_meta_bytes.saturating_add(enc.len()).saturating_add(32);
+        }
+        for (k, v) in &options.metadata_set {
+            raw_meta_bytes = raw_meta_bytes
+                .saturating_add(k.len())
+                .saturating_add(v.len())
+                .saturating_add(32);
+        }
+        for (_, k, v) in &options.stream_metadata_set {
+            raw_meta_bytes = raw_meta_bytes
+                .saturating_add(k.len())
+                .saturating_add(v.len())
+                .saturating_add(32);
+        }
+        for segment in &segments {
+            for chapter in segment.reader.chapters() {
+                if chapter.start_ns < segment.duration {
+                    raw_meta_bytes = raw_meta_bytes
+                        .saturating_add(chapter.title.len())
+                        .saturating_add(64);
+                }
+            }
+        }
+        let mut plan_bytes = segments
+            .len()
+            .saturating_mul(8192)
+            .saturating_add(16384)
+            .saturating_add(raw_meta_bytes.saturating_mul(8));
+        for segment in &segments {
+            plan_bytes = plan_bytes
+                .checked_add(segment.reader.estimated_index_payload_bytes()?)
+                .ok_or_else(|| invalid("MP4 concat packet plan memory overflow"))?;
+            // Plans for unselected tracks are retained too: stream selection
+            // controls output, not ownership of the segment's timing tables.
+            for plan in &segment.plans {
+                plan_bytes = plan
+                    .packets
+                    .capacity()
+                    .checked_mul(std::mem::size_of::<mp4_matroska::PacketTime>())
+                    .and_then(|n| plan_bytes.checked_add(n))
+                    .ok_or_else(|| invalid("MP4 concat packet plan memory overflow"))?;
+            }
+        }
+        if plan_bytes > mem_limit {
+            return Err(invalid("controlled memory budget exceeded"));
+        }
+    }
+    let mut packets = 0u64;
+    'segments: for segment in &segments {
+        let mut queue = BinaryHeap::new();
+        for (pos, &source_track) in selected.iter().enumerate() {
+            if let Some(packet) = segment.plans[source_track].packets.first() {
+                queue.push(Reverse((packet.dts, pos, source_track, 0usize)));
+            }
+        }
+        while let Some(Reverse((_, pos, source_track, index))) = queue.pop() {
+            check(cancel)?;
+            if options.max_packets.is_some_and(|limit| packets >= limit) {
+                break 'segments;
+            }
+            let sample = segment.reader.tracks()[source_track]
+                .samples
+                .get(index)
+                .ok_or_else(|| invalid("missing MP4 sample"))?;
+            if (sample.size as usize) > max_packet_bytes {
+                return Err(invalid("MP4 packet exceeds budget"));
+            }
+            if options
+                .max_controlled_bytes
+                .is_some_and(|limit| (sample.size as usize).saturating_add(16384) > limit)
+            {
+                return Err(invalid("controlled memory budget exceeded"));
+            }
+            packets = packets
+                .checked_add(1)
+                .ok_or_else(|| invalid("concat packet count overflow"))?;
+            if let Some(packet) = segment.plans[source_track].packets.get(index + 1) {
+                queue.push(Reverse((packet.dts, pos, source_track, index + 1)));
+            }
+        }
     }
     Ok(Some(segments))
 }
@@ -207,6 +330,16 @@ pub fn write_with_options<R: Read + Seek, W: Write + Seek>(
     let progress = options.progress.as_ref();
     let max_packets = options.max_packets;
     check(cancel)?;
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if max_packets == Some(0) {
+        return Err(invalid("Matroska output requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
     let first = segments
         .first()
         .ok_or_else(|| invalid("concat requires input segments"))?;
@@ -219,6 +352,10 @@ pub fn write_with_options<R: Read + Seek, W: Write + Seek>(
     }
     let mut metadata = FileMetadata::from_mp4(&first.reader);
     let mut text = std::collections::BTreeMap::new();
+    let encoder = first.reader.encoder().trim();
+    if !encoder.is_empty() && encoder.len() <= 1024 && !encoder.contains('\0') {
+        text.insert("ENCODER".into(), encoder.to_owned());
+    }
     for (key, value) in &options.metadata_set {
         let key = key.trim();
         if key.is_empty()
@@ -345,11 +482,15 @@ pub fn write_with_options<R: Read + Seek, W: Write + Seek>(
         }
         while let Some(Reverse((_, pos, source_track, index))) = queue.pop() {
             check(cancel)?;
+            fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
             if max_packets.is_some_and(|limit| writer.event().packets >= limit) {
                 break 'segments;
             }
             let packet = &segment.plans[source_track].packets[index];
             segment.reader.read_packet(source_track, index, &mut payload)?;
+            if payload.len() > options.max_packet_bytes {
+                return Err(invalid("MP4 packet exceeds budget"));
+            }
             let pts = u64::try_from(
                 i128::from(segment.offset)
                     + i128::from(packet.pts)

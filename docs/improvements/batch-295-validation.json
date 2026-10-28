@@ -1,0 +1,24 @@
+{
+  "batch": 295,
+  "accepted": [
+    "FVID-0302"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-295-pre-edit/src/media.rs",
+    "docs/improvements/snapshots/batch-295-pre-edit/src/media_cli.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-295-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-295-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-295-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/mix-merge-prefix-budget-wave-info/prefix-a.flac",
+    "tests/fixtures/playback-errors/mix-merge-prefix-budget-wave-info/prefix-b.flac",
+    "tests/fixtures/playback-errors/mix-merge-prefix-budget-wave-info/fourcc-tags.opus",
+    "tests/fixtures/playback-errors/mix-merge-prefix-budget-wave-info/fourcc-tags.mp3"
+  ],
+  "tests": [
+    "tests/mix_merge_prefix_budget_wave_info_regressions.rs"
+  ]
+}

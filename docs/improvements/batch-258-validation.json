@@ -1,0 +1,31 @@
+{
+  "batch": 258,
+  "accepted": [
+    "FVID-0265"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-258-pre-edit/crates/fvid-media/src/owned_ogg_audio_export.rs",
+    "docs/improvements/snapshots/batch-258-pre-edit/crates/fvid-media/src/owned_ogg_opus_export.rs",
+    "docs/improvements/snapshots/batch-258-pre-edit/crates/fvid-media/src/owned_ogg_vorbis_export.rs",
+    "docs/improvements/snapshots/batch-258-pre-edit/crates/fvid-media/src/owned_ogg_joint_export.rs",
+    "docs/improvements/snapshots/batch-258-pre-edit/crates/fvid-media/src/owned_ogg_opus.rs",
+    "docs/improvements/snapshots/batch-258-pre-edit/crates/fvid-media/src/owned_ogg_vorbis.rs",
+    "docs/improvements/snapshots/batch-258-pre-edit/crates/fvid-media/src/owned_ogg_audio_program.rs",
+    "docs/improvements/snapshots/batch-258-pre-edit/crates/fvid-media/src/owned_audio_plan.rs",
+    "docs/improvements/snapshots/batch-258-pre-edit/crates/fvid-media/src/owned_container_loudness.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-258-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-258-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-258-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/ogg-audio-selection-budget/skeleton-plus-opus.ogg",
+    "tests/fixtures/playback-errors/ogg-audio-selection-budget/discrete-family255-stereo.opus",
+    "tests/fixtures/playback-errors/ogg-audio-selection-budget/prefix-budget.opus"
+  ],
+  "tests": [
+    "tests/ogg_audio_selection_budget_regressions.rs",
+    "scripts/test_ogg_audio_selection_budget_regressions.py"
+  ]
+}

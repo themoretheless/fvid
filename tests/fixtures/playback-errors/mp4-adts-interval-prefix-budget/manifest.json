@@ -1,0 +1,14 @@
+{
+  "generator": "scripts/generate_mp4_adts_interval_prefix_budget.py",
+  "batch_id": "FVID-0279",
+  "files": {
+    "mp4-mono-then-ps.m4a": {
+      "bytes": 620,
+      "sha256": "6a4eed7f3cfff8eae1a92c4545d8c8581ce099fb143c2ec0b8466a4e62db80d1"
+    },
+    "adts-small-then-large.aac": {
+      "bytes": 53,
+      "sha256": "fc79111ad2bb8e742d0ec21650da50f0e0013b481fc1f1a5af037138f686e5e8"
+    }
+  }
+}

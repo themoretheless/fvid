@@ -1,0 +1,28 @@
+{
+  "batch": 271,
+  "accepted": [
+    "FVID-0278"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-271-pre-edit/crates/fvid-media/src/owned_aac/adts_impl.rs",
+    "docs/improvements/snapshots/batch-271-pre-edit/crates/fvid-media/src/owned_adts_remux.rs",
+    "docs/improvements/snapshots/batch-271-pre-edit/crates/fvid-media/src/owned_concat.rs",
+    "docs/improvements/snapshots/batch-271-pre-edit/src/native_plan.rs",
+    "docs/improvements/snapshots/batch-271-pre-edit/src/native_export.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-271-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-271-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-271-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/adts-concat-remux-prefix-budget/seg-a-small.aac",
+    "tests/fixtures/playback-errors/adts-concat-remux-prefix-budget/seg-b-large.aac",
+    "tests/fixtures/playback-errors/adts-concat-remux-prefix-budget/seg-c-invalid-rate.aac",
+    "tests/fixtures/playback-errors/adts-concat-remux-prefix-budget/sbr-24k-to-48k.aac"
+  ],
+  "tests": [
+    "tests/adts_concat_remux_prefix_budget_regression.rs",
+    "scripts/test_adts_concat_remux_prefix_budget.py"
+  ]
+}

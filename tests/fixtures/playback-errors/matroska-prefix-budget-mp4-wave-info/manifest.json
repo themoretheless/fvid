@@ -1,0 +1,10 @@
+{
+  "batch_id": "FVID-0269",
+  "generator": "scripts/generate_matroska_prefix_budget_mp4_wave_info_regressions.py",
+  "provenance": "100% synthetic Matroska A_FLAC (11B + 393B packets), Matroska A_PCM/INT/LIT (16B + 128B packets), and MP4 AAC with iTunes \u00a9nam/\u00a9too tags; no FFmpeg, network, or private media.",
+  "sha256": {
+    "prefix-flac.mka": "aafef626f457256428c005b661f64a4471b3d27f8b6b0228feb590ca4d77b38f",
+    "prefix-pcm.mka": "6b808d36e4c67af614ff0d3a723ba2640e4cfb395666f7524267177af0b35a76",
+    "tagged-encoder.m4a": "6b7a747ee6da7c6f9be559aad526bb079998d13604dee5d6e8809290679e5c94"
+  }
+}

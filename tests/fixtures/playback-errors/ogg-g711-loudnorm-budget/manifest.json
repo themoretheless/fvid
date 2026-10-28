@@ -1,0 +1,24 @@
+{
+  "suite": "ogg-g711-loudnorm-budget",
+  "improvement_id": "FVID-0256",
+  "fixtures": [
+    {
+      "name": "ogg-opus-mono-4byte-pkt.ogg",
+      "bytes": 127,
+      "sha256": "30303460f73eb0262a009986d55da1fcbb56fa4a95b10e08cfd0385401cc3f33",
+      "purpose": "48 kHz mono Ogg Opus with a 4-byte encoded audio packet for packet-byte budget and stream-selection parity across plan/decode/loudness/loudnorm"
+    },
+    {
+      "name": "wave-stereo-alaw-8khz.wav",
+      "bytes": 60,
+      "sha256": "0bb17abcf06428a6baf502e70107038d71771ba87d89a491238ad4bcfdd44152",
+      "purpose": "8 kHz stereo G.711 A-law WAVE (2 bytes per channel frame) for packet-byte budget and stream-selection parity across plan/decode/loudness/loudnorm"
+    },
+    {
+      "name": "adts-mono-6byte-pkt.aac",
+      "bytes": 13,
+      "sha256": "908b15fff1601da22f60901535cac012f88bbc476892817f3c662bd8dd887b1c",
+      "purpose": "48 kHz mono AAC-LC ADTS with a 6-byte payload for loudnorm/loudness stream-selection parity"
+    }
+  ]
+}

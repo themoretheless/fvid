@@ -1,0 +1,32 @@
+Analysis of sampling mp4_concat_retained_plans-9d06920e1c1fdc63 (pid 51763) every 1 millisecond
+Process:         mp4_concat_retained_plans-9d06920e1c1fdc63 [51763]
+Path:            /Users/USER/Documents/*/mp4_concat_retained_plans-9d06920e1c1fdc63
+Load Address:    0x104658000
+Identifier:      mp4_concat_retained_plans-9d06920e1c1fdc63
+Version:         ???
+Code Type:       ARM64
+Parent Process:  cargo [51274]
+Target Type:     live task
+
+Date/Time:       2026-10-25 19:40:23.278 +0400
+Launch Time:     2026-10-25 19:40:05.929 +0400
+OS Version:      macOS 26.7.2 (25G325)
+Report Version:  7
+Analysis Tool:   /usr/bin/sample
+
+Physical footprint:         96K
+Physical footprint (peak):  96K
+Idle exit:                  untracked
+----
+
+Call graph:
+    800 Thread_65393373: Main Thread   DispatchQueue_<multiple>
+      800 _dyld_start  (in dyld) + 0  [0x104c0c9c0]
+
+Total number in stack (recursive counted multiple, when >=5):
+
+Sort by top of stack, same collapsed (when >= 5):
+        _dyld_start  (in dyld)        800
+
+Binary images description not available
+

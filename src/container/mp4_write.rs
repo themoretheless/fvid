@@ -189,15 +189,26 @@ pub fn write_adts_aac_reader_controlled<R: std::io::Read, W: Write + std::io::Se
 
 /// Copy at most `max_packets` ADTS packets into MP4 without reading past the cap.
 pub fn write_adts_aac_reader_limited<R: std::io::Read, W: Write + std::io::Seek>(
-    mut reader: super::adts::StreamReader<R>,
+    reader: super::adts::StreamReader<R>,
     output: &mut W,
     cancel: Option<&fvid_control::CancelFlag>,
     progress: Option<&fvid_control::ProgressHook>,
     max_packets: Option<u64>,
 ) -> Result<fvid_control::ProgressEvent> {
+    write_adts_aac_reader_with_limits(reader, output, cancel, progress, max_packets, None)
+}
+
+pub fn write_adts_aac_reader_with_limits<R: std::io::Read, W: Write + std::io::Seek>(
+    mut reader: super::adts::StreamReader<R>,
+    output: &mut W,
+    cancel: Option<&fvid_control::CancelFlag>,
+    progress: Option<&fvid_control::ProgressHook>,
+    max_packets: Option<u64>,
+    max_controlled_bytes: Option<usize>,
+) -> Result<fvid_control::ProgressEvent> {
     let config = reader.configuration();
     let asc = reader.audio_specific_config().to_vec();
-    write_aac_packets(config, &asc, || reader.next_packet(), output, cancel, progress, max_packets)
+    write_aac_packets(config, &asc, || reader.next_packet(), output, cancel, progress, max_packets, max_controlled_bytes)
 }
 
 /// Concatenate independently framed ADTS streams; a truncated input cannot
@@ -215,17 +226,28 @@ pub fn concat_adts_readers_limited<R: std::io::Read, W: Write + std::io::Seek>(
     cancel: Option<&fvid_control::CancelFlag>, progress: Option<&fvid_control::ProgressHook>,
     max_packets: Option<u64>,
 ) -> Result<fvid_control::ProgressEvent> {
-    let mut sequence=super::adts::SequenceReader::new(readers)?;
-    let asc = sequence.audio_specific_config().to_vec();
-    write_aac_packets(sequence.configuration(), &asc, || sequence.next_packet(), output, cancel, progress, max_packets)
+    concat_adts_readers_with_limits(readers, output, cancel, progress, max_packets, None)
 }
 
+pub fn concat_adts_readers_with_limits<R: std::io::Read, W: Write + std::io::Seek>(
+    readers: Vec<super::adts::StreamReader<R>>, output: &mut W,
+    cancel: Option<&fvid_control::CancelFlag>, progress: Option<&fvid_control::ProgressHook>,
+    max_packets: Option<u64>,
+    max_controlled_bytes: Option<usize>,
+) -> Result<fvid_control::ProgressEvent> {
+    let mut sequence=super::adts::SequenceReader::new(readers)?;
+    let asc = sequence.audio_specific_config().to_vec();
+    write_aac_packets(sequence.configuration(), &asc, || sequence.next_packet(), output, cancel, progress, max_packets, max_controlled_bytes)
+}
+
+#[allow(clippy::too_many_arguments)]
 fn write_aac_packets<W: Write + std::io::Seek>(
     mut config: super::adts::Header,
     asc: &[u8],
     mut next_packet: impl FnMut() -> Result<Option<Vec<u8>>>, output: &mut W,
     cancel: Option<&fvid_control::CancelFlag>, progress: Option<&fvid_control::ProgressHook>,
     max_packets: Option<u64>,
+    max_controlled_bytes: Option<usize>,
 ) -> Result<fvid_control::ProgressEvent> {
     let check = || -> Result<()> {
         if cancel.is_some_and(|flag| flag.is_cancelled()) {
@@ -269,6 +291,12 @@ fn write_aac_packets<W: Write + std::io::Seek>(
         };
         if sizes.len() >= super::mp4::Limits::default().samples {
             return Err(invalid("AAC remux sample index exceeds limit"));
+        }
+        let next_packets = sizes.len().saturating_add(1);
+        if max_controlled_bytes.is_some_and(|limit| {
+            next_packets.saturating_mul(32).saturating_add(16384) > limit
+        }) {
+            return Err(invalid("controlled memory budget exceeded"));
         }
         if !discovered {
             if let Some(rate) = super::adts::probe_output_rate(&packet, asc)? {

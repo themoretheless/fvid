@@ -1,0 +1,16 @@
+{
+  "batch": 369,
+  "ids": [
+    "FVID-0376"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-369-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-369-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-369-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-369-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission media_entrypoints_matroska_probe_and_subtitle_conversion_enforce_options_and_memory_packet_bounds -- --nocapture",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 36,
+  "failed": 0
+}

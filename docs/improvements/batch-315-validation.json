@@ -1,0 +1,26 @@
+{
+  "batch": 315,
+  "ids": [
+    "FVID-0322"
+  ],
+  "summary": "Enforce controlled-memory budget (max_controlled_bytes) against encoded FFV1 packets, subtitle burn rasterization masks, and multitrack MP4/WebM companion packets across owned lossless, xfade, and subtitle burn plans and exports",
+  "snapshots": [
+    "docs/improvements/snapshots/batch-315-pre-edit/crates/fvid-media/src/owned_lossless.rs",
+    "docs/improvements/snapshots/batch-315-pre-edit/crates/fvid-media/src/owned_ffv1_export.rs",
+    "docs/improvements/snapshots/batch-315-pre-edit/crates/fvid-media/src/owned_mp4_video_bridge.rs",
+    "docs/improvements/snapshots/batch-315-pre-edit/crates/fvid-media/src/owned_mp4_multitrack_export.rs",
+    "docs/improvements/snapshots/batch-315-pre-edit/crates/fvid-media/src/owned_webm_multitrack_export.rs",
+    "docs/improvements/snapshots/batch-315-pre-edit/crates/fvid-media/src/owned_webm_pcm_window.rs",
+    "docs/improvements/snapshots/batch-315-pre-edit/crates/fvid-media/src/owned_subtitle_burn.rs",
+    "docs/improvements/snapshots/batch-315-pre-edit/crates/fvid-media/src/owned_xfade.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-315-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-315-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-315-related-after.txt"
+  },
+  "tests_run": [
+    "cargo test --test lossless_plan_regressions"
+  ],
+  "status": "accepted"
+}

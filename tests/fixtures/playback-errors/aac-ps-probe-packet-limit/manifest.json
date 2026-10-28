@@ -1,0 +1,9 @@
+{
+  "batch_id": "FVID-0271",
+  "generator": "scripts/generate_aac_ps_probe_packet_limit.py",
+  "provenance": "100% synthetic mono AAC-LC 48 kHz MP4 and Matroska fixtures with an 8-byte packet 0 and a 48-byte packet 1; no FFmpeg, network, or private media.",
+  "sha256": {
+    "prefix-mono-aac.m4a": "5f8477223d0fb1d5fff1100a6da94baeea9e656c5b389f73f819dac36c53a27a",
+    "prefix-mono-aac.mka": "8bcc5ac8da714ac8362601d05a0b95cb5b39b1a4bac634842dc90db1aa30b0a8"
+  }
+}

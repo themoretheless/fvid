@@ -1,0 +1,16 @@
+{
+  "batch": 376,
+  "ids": [
+    "FVID-0383"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-376-pre-edit/crates/fvid-media/src/owned_matroska_pcm.rs",
+  "before_evidence": "docs/improvements/evidence/batch-376-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-376-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-376-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission matroska_pcm_f64_codec_check_and_stream_selection_enforce_kind_and_cardinality",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 43,
+  "failed": 0
+}

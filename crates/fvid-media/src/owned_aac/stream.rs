@@ -33,6 +33,15 @@ impl DecodeProgress<'_> {
         {
             return Err(invalid("media operation cancelled"));
         }
+        if self.options.max_packet_bytes == 0 {
+            return Err(invalid("packet byte limit must be positive"));
+        }
+        if self.options.max_packets == Some(0) {
+            return Err(invalid("packet work limit requires at least one packet"));
+        }
+        if self.options.max_controlled_bytes == Some(0) {
+            return Err(invalid("controlled memory limit must be positive"));
+        }
         crate::owned_budget::check_rss_budget(self.options).map_err(Error)
     }
     fn packet_limit_reached(&self) -> bool {
@@ -149,7 +158,11 @@ pub(crate) fn check_adts_decode_admission(asc: &[u8], options: &CopyOptions) -> 
     } else {
         config.output_sample_rate()
     };
-    let estimated = decode_config_admission_bytes(asc, rate)?;
+    let wave_meta_bytes = crate::owned_wave_metadata::wave_metadata_working_bytes(0, options)
+        .map_err(|e| invalid(&e))?;
+    let estimated = decode_config_admission_bytes(asc, rate)?
+        .checked_add(wave_meta_bytes)
+        .ok_or_else(|| invalid("AAC memory estimate overflow"))?;
     if options
         .max_controlled_bytes
         .is_some_and(|limit| estimated > limit)
@@ -198,6 +211,15 @@ pub fn decode_adts_pcm<R: Read>(
     interval: Option<(Duration, Duration)>,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
+    let mut control = DecodeProgress {
+        options,
+        event: ProgressEvent {
+            packets: 0,
+            payload_bytes: 0,
+            done: false,
+        },
+    };
+    control.check()?;
     if !(options.streams.is_empty() || options.streams == [0]) {
         return Err(invalid("ADTS has only stream 0"));
     }
@@ -211,15 +233,6 @@ pub fn decode_adts_pcm<R: Read>(
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("audio interval requires from < to"));
     }
-    let mut control = DecodeProgress {
-        options,
-        event: ProgressEvent {
-            packets: 0,
-            payload_bytes: 0,
-            done: false,
-        },
-    };
-    control.check()?;
     if let Some(progress) = &options.progress {
         progress.emit(control.event);
     }
@@ -227,7 +240,12 @@ pub fn decode_adts_pcm<R: Read>(
     if control.packet_limit_reached() {
         return Err(invalid("audio interval contains no samples"));
     }
-    let reader = AdtsStreamReader::open_with_packet_limit(source, options.max_packet_bytes)?;
+    let reader = AdtsStreamReader::open_with_packet_limit(
+        source,
+        options
+            .max_packet_bytes
+            .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+    )?;
     decode_adts_aac_reader_controlled(reader, output, interval, &mut control)
 }
 /// Read-only clock/layout negotiation for file plans and loudness admission.
@@ -236,6 +254,15 @@ pub fn decode_adts_pcm<R: Read>(
 pub(crate) fn adts_prefix_info<R: Read>(
     source: R,
     interval: Option<(Duration, Duration)>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u32)> {
+    adts_prefix_info_for_transform(source, interval, None, options)
+}
+
+pub(crate) fn adts_prefix_info_for_transform<R: Read>(
+    source: R,
+    interval: Option<(Duration, Duration)>,
+    transform: Option<fvid_media_info::AudioDecodeTransform>,
     options: &CopyOptions,
 ) -> Result<(u32, u16, u32)> {
     let mut quiet = crate::owned_adts_export::pcm_decode_options(options);
@@ -252,13 +279,27 @@ pub(crate) fn adts_prefix_info<R: Read>(
     if control.packet_limit_reached() {
         return Err(invalid("audio interval contains no samples"));
     }
-    let reader = AdtsStreamReader::open_with_packet_limit(source, quiet.max_packet_bytes)?;
+    let reader = AdtsStreamReader::open_with_packet_limit(
+        source,
+        quiet
+            .max_packet_bytes
+            .min(quiet.max_controlled_bytes.unwrap_or(usize::MAX)),
+    )?;
+    check_adts_decode_admission(reader.audio_specific_config(), options)?;
     let negotiated = negotiate_adts_aac_reader(reader, interval, &mut control)?;
-    Ok((
-        negotiated.sample_rate(),
-        negotiated.channels(),
-        negotiated.channel_mask(),
-    ))
+    let rate = negotiated.sample_rate();
+    let channels = negotiated.channels();
+    let mask = negotiated.channel_mask();
+    if transform.is_some_and(|t| t.interval.is_some()) {
+        let stats = negotiated.decode(&mut std::io::sink(), &mut control)?;
+        crate::owned_ogg_opus_export::check_nonempty_interval_prefix(
+            transform,
+            stats.sample_rate,
+            stats.sample_frames,
+        )
+        .map_err(|e| invalid(&e))?;
+    }
+    Ok((rate, channels, mask))
 }
 include!("stream_impl.rs");
 

@@ -1,0 +1,28 @@
+{
+  "batch": 256,
+  "ids": [
+    "FVID-0263"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-256-pre-edit",
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-256-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-256-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-256-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/y4m-xfade-subburn-budget-parity/multitrack-ffv1-aac.mkv",
+    "tests/fixtures/playback-errors/y4m-xfade-subburn-budget-parity/multitrack-avc-aac.mp4",
+    "tests/fixtures/playback-errors/y4m-xfade-subburn-budget-parity/seg-4x4-25fps-par1x1.y4m",
+    "tests/fixtures/playback-errors/y4m-xfade-subburn-budget-parity/seg-4x4-50fps-par1x1.y4m",
+    "tests/fixtures/playback-errors/y4m-xfade-subburn-budget-parity/seg-4x4-25fps-par2x1.y4m",
+    "tests/fixtures/playback-errors/y4m-xfade-subburn-budget-parity/seg-4x4-25fps-par2x2.y4m",
+    "tests/fixtures/playback-errors/y4m-xfade-subburn-budget-parity/seg-2x4-25fps-par1x1.y4m",
+    "tests/fixtures/playback-errors/y4m-xfade-subburn-budget-parity/cues.srt"
+  ],
+  "generator": "scripts/generate_y4m_xfade_subburn_budget_parity_regressions.py",
+  "generator_tests": "scripts/test_y4m_xfade_subburn_budget_parity_regressions.py",
+  "regression_tests": [
+    "tests/y4m_xfade_subburn_budget_parity_regressions.rs"
+  ],
+  "summary": "Scope Y4M export/concat/trim packet-byte budgets to the selected video track and output Y4M frame size, validate pre-cancelled CancelFlag and segment compatibility in Y4M concat/trim planners, enforce reduced pixel aspect ratio parity in xfade SecondaryReader::new, and check cancellation and single-track container admission before packet-byte indexing in owned subtitle burn-in."
+}

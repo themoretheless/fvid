@@ -1,0 +1,35 @@
+{
+  "batch": 266,
+  "accepted": [
+    "FVID-0273"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-266-pre-edit/crates/fvid-media/src/owned_aac_export_routing.rs",
+    "docs/improvements/snapshots/batch-266-pre-edit/crates/fvid-media/src/owned_mp4_audio.rs",
+    "docs/improvements/snapshots/batch-266-pre-edit/crates/fvid-media/src/owned_mp4_audio_export.rs",
+    "docs/improvements/snapshots/batch-266-pre-edit/crates/fvid-media/src/owned_mp4_impl.rs",
+    "docs/improvements/snapshots/batch-266-pre-edit/crates/fvid-media/src/owned_wave_metadata.rs",
+    "docs/improvements/snapshots/batch-266-pre-edit/src/media.rs",
+    "docs/improvements/snapshots/batch-266-pre-edit/src/native_audio_mix.rs",
+    "docs/improvements/snapshots/batch-266-pre-edit/src/native_audio_mix/concat.rs",
+    "docs/improvements/snapshots/batch-266-pre-edit/src/native_export.rs",
+    "docs/improvements/snapshots/batch-266-pre-edit/src/native_export/pcm_matroska.rs",
+    "docs/improvements/snapshots/batch-266-pre-edit/src/native_loudnorm.rs",
+    "docs/improvements/snapshots/batch-266-pre-edit/src/native_plan.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-266-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-266-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-266-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/audio-concat-packet-prefix-budget/seg-a-small.m4a",
+    "tests/fixtures/playback-errors/audio-concat-packet-prefix-budget/seg-b-mixed.m4a",
+    "tests/fixtures/playback-errors/audio-concat-packet-prefix-budget/seg-a-small.mka",
+    "tests/fixtures/playback-errors/audio-concat-packet-prefix-budget/seg-b-mixed.mka"
+  ],
+  "tests": [
+    "tests/audio_concat_packet_prefix_budget_regression.rs",
+    "scripts/test_audio_concat_packet_prefix_budget.py"
+  ]
+}

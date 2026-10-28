@@ -1,0 +1,21 @@
+{
+  "batch": 392,
+  "accepted_ids": [
+    "FVID-0398"
+  ],
+  "status": "accepted",
+  "summary": "Reject reserved flags in MP4 movie/media time headers",
+  "source_files": [
+    "crates/fvid-media/src/owned_mp4_impl.rs"
+  ],
+  "regression": "tests/mp4_time_header_flags.rs",
+  "evidence": "docs/improvements/evidence/mp4-time-header-flags/status.json",
+  "before": "Both wrappers accept nonzero reserved FullBox flags in mvhd/mdhd v0/v1. The original forced refusal test reports all eight low/high-bit companions accepted; zero-flag v0/v1 controls pass exact clocks, packet bytes and packet-budget checks. Original result: 1 passed, 1 failed.",
+  "after": "Validate reserved flags in shared media_time before consuming time fields, preserving version checks and the specific invalid-input error. Core: 2 focused plus 5 related tests pass. Player: 4 focused plus 12 related tests pass, distinguishing malformed-input refusal before decoding from successful v0/v1 native RGB playback, 60ms duration, seek, rewind and repeated EOF. No failures or ignored tests.",
+  "tests_run": [
+    "cargo test --locked --offline --features player --test mp4_time_header_flags --test mp4_unknown_duration --test mp4_tfhd_defaults --test mp4_hybrid_fragments",
+    "cargo test --locked --offline --no-default-features --test mp4_time_header_flags --test mp4_unknown_duration --test mp4_tfhd_defaults"
+  ],
+  "results": "7 core and 16 player tests passed; 0 failed/ignored.",
+  "independence": "One missing FullBox flag check in the shared time-header parser. Header/version/bit variants and tests count once."
+}

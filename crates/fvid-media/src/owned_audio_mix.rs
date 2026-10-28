@@ -12,10 +12,25 @@ pub fn mix_audio(
     destination: &Path,
     options: &MixAudioOptions,
 ) -> Result<MixAudioStats> {
-    mix_with_decoder(sources, destination, options, decode_owned_audio)
+    mix_audio_with_controls(sources, destination, options, &Default::default())
+}
+pub fn mix_audio_with_controls(
+    sources: &[PathBuf],
+    destination: &Path,
+    options: &MixAudioOptions,
+    controls: &fvid_control::CopyOptions,
+) -> Result<MixAudioStats> {
+    mix_with_controls(sources, destination, options, controls)
 }
 pub fn merge_audio(sources: &[PathBuf], destination: &Path) -> Result<MergeAudioStats> {
-    merge_with_decoder(sources, destination, decode_owned_audio)
+    merge_audio_with_controls(sources, destination, &Default::default())
+}
+pub fn merge_audio_with_controls(
+    sources: &[PathBuf],
+    destination: &Path,
+    controls: &fvid_control::CopyOptions,
+) -> Result<MergeAudioStats> {
+    merge_with_controls(sources, destination, controls)
 }
 
 /// Build a read-only plan from the same owned decoder configuration as execution.
@@ -23,6 +38,14 @@ pub fn plan_mix_audio(
     sources: &[PathBuf],
     options: &MixAudioOptions,
 ) -> Result<fvid_media_info::MediaPlan> {
+    plan_mix_audio_with_controls(sources, options, &Default::default())
+}
+pub fn plan_mix_audio_with_controls(
+    sources: &[PathBuf],
+    options: &MixAudioOptions,
+    controls: &fvid_control::CopyOptions,
+) -> Result<fvid_media_info::MediaPlan> {
+    validate_mix_controls(controls)?;
     if !(2..=16).contains(&sources.len()) {
         return Err("mix-audio requires 2..=16 inputs".into());
     }
@@ -31,7 +54,7 @@ pub fn plan_mix_audio(
     if !sum.is_finite() || sum <= 0.0 {
         return Err("mix-audio weight sum must be finite and > 0".into());
     }
-    audio_plan(
+    audio_plan_with_controls(
         sources,
         false,
         format!(
@@ -39,40 +62,113 @@ pub fn plan_mix_audio(
             options.duration.as_str(),
             options.normalize
         ),
+        controls,
     )
 }
 pub fn plan_merge_audio(sources: &[PathBuf]) -> Result<fvid_media_info::MediaPlan> {
+    plan_merge_audio_with_controls(sources, &Default::default())
+}
+pub fn plan_merge_audio_with_controls(
+    sources: &[PathBuf],
+    controls: &fvid_control::CopyOptions,
+) -> Result<fvid_media_info::MediaPlan> {
+    validate_mix_controls(controls)?;
     if sources.len() != 2 {
         return Err("merge-audio v1 requires exactly two inputs".into());
     }
-    audio_plan(
+    audio_plan_with_controls(
         sources,
         true,
         "concatenate channel vectors, shortest input duration".into(),
+        controls,
     )
 }
-fn audio_plan(
+fn validate_mix_controls(controls: &fvid_control::CopyOptions) -> Result<()> {
+    if controls.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if controls.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if controls.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if controls.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(controls)?;
+    if controls.streams.len() > 1
+        || !controls.metadata_set.is_empty()
+        || !controls.metadata_delete.is_empty()
+        || !controls.stream_metadata_set.is_empty()
+        || !controls.stream_metadata_delete.is_empty()
+    {
+        return Err(
+            "owned audio mix/merge does not support stream selection or metadata mutations".into(),
+        );
+    }
+    Ok(())
+}
+fn audio_plan_with_controls(
     sources: &[PathBuf],
     merge: bool,
     detail: String,
+    controls: &fvid_control::CopyOptions,
 ) -> Result<fvid_media_info::MediaPlan> {
     use fvid_media_info::{MediaPlan, PlanStep};
+    validate_mix_controls(controls)?;
     let mut geometry = None;
+    let mut min_frames: Option<u64> = None;
+    let mut total_input_pcm_bytes = 0u128;
+    let mut total_out_channels = 0u32;
     for source in sources {
-        let info = crate::owned_audio_plan::source_descriptor(source, &Default::default())?;
-        if crate::owned_g711_wave_export::recognizes(source, &Default::default())? {
-            if crate::owned_g711_wave_export::descriptor(source, &Default::default())?.4 == 0 {
+        validate_mix_controls(controls)?;
+        let info = crate::owned_audio_plan::source_descriptor(source, controls)?;
+        if crate::owned_g711_wave_export::recognizes(source, controls)? {
+            let g711_frames = crate::owned_g711_wave_export::descriptor(source, controls)?.4;
+            if g711_frames == 0 {
                 return Err("audio mix/merge requires nonempty owned audio inputs".into());
             }
+            let decoded_bytes = u128::from(g711_frames)
+                .saturating_mul(u128::from(info.channels))
+                .saturating_mul(4);
+            total_input_pcm_bytes = total_input_pcm_bytes.saturating_add(decoded_bytes);
+            min_frames = Some(min_frames.map_or(g711_frames, |m| m.min(g711_frames)));
         } else if crate::owned_wave_inspect::is_wave(source).map_err(|e| e.to_string())? {
             let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
-            if crate::owned_wave_inspect::inspect(&mut file, None)
-                .map_err(|e| e.to_string())?
-                .sample_frames
-                == 0
-            {
+            let wave_info = crate::owned_wave_inspect::inspect(&mut file, controls.cancel.as_ref())
+                .map_err(|e| e.to_string())?;
+            if wave_info.sample_frames == 0 {
                 return Err("audio mix/merge requires nonempty owned audio inputs".into());
             }
+            let frame_bytes = usize::from(wave_info.block);
+            let capacity = (4096 * frame_bytes).min(controls.max_packet_bytes / frame_bytes * frame_bytes);
+            if capacity == 0 {
+                return Err("PCM packet limit cannot hold one sample frame".into());
+            }
+            let full_size = usize::try_from(wave_info.data_bytes)
+                .map_err(|_| "WAVE PCM payload exceeds address space")?;
+            let limit = controls
+                .max_packets
+                .map(|packets| u128::from(packets) * capacity as u128)
+                .unwrap_or(full_size as u128);
+            let size = (full_size as u128).min(limit) as usize;
+            if size == 0 {
+                return Err("packet limit leaves no decoded audio samples".into());
+            }
+            if let Some(max_bytes) = controls.max_controlled_bytes {
+                if size > max_bytes {
+                    return Err("controlled memory budget exceeded by WAVE PCM input".into());
+                }
+            }
+            let wave_frames = (size / frame_bytes) as u64;
+            let decoded_bytes = u128::from(wave_frames)
+                .saturating_mul(u128::from(info.channels))
+                .saturating_mul(4);
+            total_input_pcm_bytes = total_input_pcm_bytes.saturating_add(decoded_bytes);
+            min_frames = Some(min_frames.map_or(wave_frames, |m| m.min(wave_frames)));
+        } else {
+            crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), controls)?;
         }
         if !(1..=255).contains(&info.channels) {
             return Err("audio mix/merge requires nonempty owned audio inputs".into());
@@ -83,6 +179,22 @@ fn audio_plan(
             }
         } else {
             geometry = Some((info.rate, info.channels));
+        }
+        total_out_channels = if merge {
+            total_out_channels.saturating_add(u32::from(info.channels))
+        } else {
+            u32::from(info.channels)
+        };
+    }
+    if let (Some(frames), Some(max_bytes)) = (min_frames, controls.max_controlled_bytes) {
+        let out_bytes = u128::from(frames) * u128::from(total_out_channels) * 4;
+        let working_bytes = if merge {
+            total_input_pcm_bytes.saturating_add(out_bytes.saturating_mul(2))
+        } else {
+            total_input_pcm_bytes.saturating_add(out_bytes)
+        };
+        if working_bytes > max_bytes as u128 {
+            return Err("controlled memory budget exceeded by audio mix/merge output buffer".into());
         }
     }
     Ok(MediaPlan {
@@ -112,15 +224,60 @@ fn audio_plan(
 /// Decode through the same owned file-export pipeline used by decode_audio.
 /// The private spool is removed on success and error; it is never published.
 pub(crate) fn decode_owned_audio(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
-    if crate::owned_wave_inspect::is_wave(source).map_err(|e| e.to_string())? {
-        if let Ok(decoded) = decode_float_wave(source) {
-            return Ok(decoded);
+    decode_owned_audio_with_controls(source, &Default::default())
+}
+pub(crate) fn decode_owned_audio_with_controls(
+    source: &Path,
+    controls: &fvid_control::CopyOptions,
+) -> Result<(AudioDecodeStats, Vec<u8>)> {
+    validate_mix_controls(controls)?;
+    if crate::owned_wave_inspect::is_wave(source).map_err(|e| e.to_string())?
+        && !crate::owned_g711_wave_export::recognizes(source, controls)?
+    {
+        let mut wave_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+        let wave_info =
+            crate::owned_wave_inspect::inspect(&mut wave_file, controls.cancel.as_ref())
+                .map_err(|e| e.to_string())?;
+        if wave_info.float && wave_info.bits_per_sample == 32 {
+            return read_float_wave_with_admission(
+                source,
+                Some(32),
+                controls.cancel.as_ref(),
+                controls.max_packet_bytes,
+                controls.max_packets,
+                |_, _, size| {
+                    if let Some(limit) = controls.max_controlled_bytes {
+                        if size > limit {
+                            return Err(
+                                "controlled memory budget exceeded by WAVE PCM input".into()
+                            );
+                        }
+                    }
+                    Ok(())
+                },
+                |_| crate::owned_budget::check_rss_budget(controls),
+            );
         }
     }
     let spool = crate::owned_adts_export::Spool::create()?;
     let wave = spool.0.join("decoded.wav");
-    crate::owned_audio_export::decode_audio(source, &wave, &Default::default())?;
-    decode_float_wave(&wave)
+    crate::owned_audio_export::decode_audio(source, &wave, controls)?;
+    read_float_wave_with_admission(
+        &wave,
+        Some(32),
+        controls.cancel.as_ref(),
+        usize::MAX,
+        None,
+        |_, _, size| {
+            if let Some(limit) = controls.max_controlled_bytes {
+                if size > limit {
+                    return Err("controlled memory budget exceeded by decoded PCM input".into());
+                }
+            }
+            Ok(())
+        },
+        |_| crate::owned_budget::check_rss_budget(controls),
+    )
 }
 
 pub(crate) fn decode_float_wave(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
@@ -301,9 +458,38 @@ pub(crate) fn mix_with_decoder(
     options: &MixAudioOptions,
     decoder: Decoder,
 ) -> Result<MixAudioStats> {
+    mix_with_controls_and_decoder(sources, destination, options, &Default::default(), |p, _| {
+        decoder(p)
+    })
+}
+fn mix_with_controls(
+    sources: &[PathBuf],
+    destination: &Path,
+    options: &MixAudioOptions,
+    controls: &fvid_control::CopyOptions,
+) -> Result<MixAudioStats> {
+    mix_with_controls_and_decoder(
+        sources,
+        destination,
+        options,
+        controls,
+        decode_owned_audio_with_controls,
+    )
+}
+fn mix_with_controls_and_decoder<D>(
+    sources: &[PathBuf],
+    destination: &Path,
+    options: &MixAudioOptions,
+    controls: &fvid_control::CopyOptions,
+    decoder: D,
+) -> Result<MixAudioStats>
+where
+    D: Fn(&Path, &fvid_control::CopyOptions) -> Result<(AudioDecodeStats, Vec<u8>)> + Sync,
+{
     if !cfg!(target_endian = "little") {
         return Err("PCM export requires little-endian host".into());
     }
+    validate_mix_controls(controls)?;
     if !(2..=16).contains(&sources.len()) {
         return Err("mix-audio requires 2..=16 inputs".into());
     }
@@ -321,13 +507,14 @@ pub(crate) fn mix_with_decoder(
     let decoded = std::thread::scope(|scope| {
         let handles: Vec<_> = sources
             .iter()
-            .map(|source| scope.spawn(|| decoder(source)))
+            .map(|source| scope.spawn(|| decoder(source, controls)))
             .collect();
         handles
             .into_iter()
             .map(|handle| handle.join().expect("mix-audio decode worker"))
             .collect::<Result<Vec<_>>>()
     })?;
+    validate_mix_controls(controls)?;
 
     let (stats0, _) = &decoded[0];
     for (stats, _) in &decoded[1..] {
@@ -353,24 +540,40 @@ pub(crate) fn mix_with_decoder(
         .min()
         .unwrap_or(0);
     let samples = frames * channels;
+    if let Some(limit) = controls.max_controlled_bytes {
+        let input_pcm_bytes = decoded
+            .iter()
+            .fold(0usize, |sum, (_, pcm)| sum.saturating_add(pcm.len()));
+        if input_pcm_bytes.saturating_add(samples.saturating_mul(4)) > limit {
+            return Err("controlled memory budget exceeded by audio mix output buffer".into());
+        }
+    }
     let scales: Vec<f32> = weights
         .iter()
         .map(|&w| if options.normalize { w / weight_sum } else { w })
         .collect();
-    let mut out = vec![0f32; samples];
+    let mut out = Vec::new();
+    out.try_reserve_exact(samples)
+        .map_err(|_| "cannot allocate audio mix output buffer".to_string())?;
+    out.resize(samples, 0.0);
     // Match FFmpeg amix fmac into an f32 buffer: each input is scaled in f64-wide
     // expression then stored back to f32 (N=2 coincides with pure f32; N>2 needs this).
     for (pcm, &scale) in decoded.iter().map(|(_, pcm)| pcm).zip(scales.iter()) {
+        validate_mix_controls(controls)?;
         let src = pcm
             .chunks_exact(4)
             .take(samples)
             .map(|sample| f32::from_le_bytes(sample.try_into().unwrap()));
         let scale = f64::from(scale);
-        for (dst, sample) in out.iter_mut().zip(src) {
+        for (idx, (dst, sample)) in out.iter_mut().zip(src).enumerate() {
+            if idx % 4096 == 0 {
+                validate_mix_controls(controls)?;
+            }
             *dst = (f64::from(*dst) + f64::from(sample) * scale) as f32;
         }
     }
 
+    validate_mix_controls(controls)?;
     write_wav_f32le(destination, stats0.sample_rate, stats0.channels, &out)?;
     Ok(MixAudioStats {
         backend: "native decode + amix-compatible float mix",
@@ -414,9 +617,33 @@ pub(crate) fn merge_with_decoder(
     destination: &Path,
     decoder: Decoder,
 ) -> Result<MergeAudioStats> {
+    merge_with_controls_and_decoder(sources, destination, &Default::default(), |p, _| decoder(p))
+}
+fn merge_with_controls(
+    sources: &[PathBuf],
+    destination: &Path,
+    controls: &fvid_control::CopyOptions,
+) -> Result<MergeAudioStats> {
+    merge_with_controls_and_decoder(
+        sources,
+        destination,
+        controls,
+        decode_owned_audio_with_controls,
+    )
+}
+fn merge_with_controls_and_decoder<D>(
+    sources: &[PathBuf],
+    destination: &Path,
+    controls: &fvid_control::CopyOptions,
+    decoder: D,
+) -> Result<MergeAudioStats>
+where
+    D: Fn(&Path, &fvid_control::CopyOptions) -> Result<(AudioDecodeStats, Vec<u8>)> + Sync,
+{
     if !cfg!(target_endian = "little") {
         return Err("PCM export requires little-endian host".into());
     }
+    validate_mix_controls(controls)?;
     if sources.len() != 2 {
         return Err("merge-audio v1 requires exactly two inputs".into());
     }
@@ -424,8 +651,8 @@ pub(crate) fn merge_with_decoder(
         return Err("merge-audio requires a .wav output".into());
     }
     let (decoded_a, decoded_b) = std::thread::scope(|scope| {
-        let left = scope.spawn(|| decoder(&sources[0]));
-        let right = scope.spawn(|| decoder(&sources[1]));
+        let left = scope.spawn(|| decoder(&sources[0], controls));
+        let right = scope.spawn(|| decoder(&sources[1], controls));
         (
             left.join().expect("merge-audio decode worker"),
             right.join().expect("merge-audio decode worker"),
@@ -433,6 +660,7 @@ pub(crate) fn merge_with_decoder(
     });
     let (stats_a, pcm_a) = decoded_a?;
     let (stats_b, pcm_b) = decoded_b?;
+    validate_mix_controls(controls)?;
     if stats_a.sample_rate != stats_b.sample_rate {
         return Err("merge-audio inputs must share sample rate".into());
     }
@@ -451,6 +679,13 @@ pub(crate) fn merge_with_decoder(
     if out_ch > 64 {
         return Err("merge-audio output exceeds 64 channels".into());
     }
+    if let Some(limit) = controls.max_controlled_bytes {
+        let input_pcm_bytes = pcm_a.len().saturating_add(pcm_b.len());
+        let out_bytes = frames.saturating_mul(out_ch).saturating_mul(4);
+        if input_pcm_bytes.saturating_add(out_bytes.saturating_mul(2)) > limit {
+            return Err("controlled memory budget exceeded by audio merge output buffer".into());
+        }
+    }
     let a: Vec<_> = pcm_a
         .chunks_exact(4)
         .take(frames * ch_a)
@@ -461,12 +696,22 @@ pub(crate) fn merge_with_decoder(
         .take(frames * ch_b)
         .map(|v| f32::from_le_bytes(v.try_into().unwrap()))
         .collect();
-    let mut out = vec![0f32; frames * out_ch];
+    let total_samples = frames
+        .checked_mul(out_ch)
+        .ok_or("merge-audio sample count overflow")?;
+    let mut out = Vec::new();
+    out.try_reserve_exact(total_samples)
+        .map_err(|_| "cannot allocate audio merge output buffer".to_string())?;
+    out.resize(total_samples, 0.0);
     for frame in 0..frames {
+        if frame % 4096 == 0 {
+            validate_mix_controls(controls)?;
+        }
         let dst = &mut out[frame * out_ch..(frame + 1) * out_ch];
         dst[..ch_a].copy_from_slice(&a[frame * ch_a..(frame + 1) * ch_a]);
         dst[ch_a..].copy_from_slice(&b[frame * ch_b..(frame + 1) * ch_b]);
     }
+    validate_mix_controls(controls)?;
     write_wav_f32le(destination, stats_a.sample_rate, out_ch as i32, &out)?;
     Ok(MergeAudioStats {
         backend: "native decode + amerge-compatible channel merge",

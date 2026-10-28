@@ -1,0 +1,14 @@
+{
+  "batch": 365,
+  "ids": ["FVID-0372"],
+  "snapshot": "docs/improvements/snapshots/batch-365-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-365-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-365-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-365-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission owned_loudness_loudnorm_audio_export_supports_and_ogg_y4m_probe_enforce_options_before_policy_or_io",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 32,
+  "failed": 0
+}

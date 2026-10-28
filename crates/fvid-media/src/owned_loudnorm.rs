@@ -106,8 +106,25 @@ fn parse(args: &str) -> Result<Parameters> {
     })
 }
 
+fn check_options(options: &CopyOptions) -> Result<()> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
+    crate::owned_budget::check_rss_budget(options)
+}
+
 fn policies(options: &CopyOptions) -> bool {
-    crate::owned_audio_export::simple_options(options)
+    check_options(options).is_ok()
+        && crate::owned_audio_export::simple_options(options)
         && options.metadata_set.len() + options.metadata_delete.len() <= 64
         && !options
             .metadata_set
@@ -126,8 +143,10 @@ pub(crate) fn supports(
             let pcm_options = crate::owned_adts_export::pcm_decode_options(options);
             (params.print == Print::None || crate::owned_wave_loudness::supports(source, &pcm_options))
                 && std::fs::File::open(source).is_ok_and(|mut file| {
-                    crate::owned_wave_inspect::inspect(&mut file, None)
-                        .is_ok_and(|info| params.gain.is_some() || dynamic_input(&info))
+                    crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref()).is_ok_and(|info| {
+                        info.sample_frames > 0
+                            && (params.gain.is_some() || dynamic_input(&info))
+                    })
                 })
         })
 }
@@ -172,12 +191,16 @@ pub fn plan_loudnorm(
     dual_pass: bool,
     options: &CopyOptions,
 ) -> Result<fvid_media_info::MediaPlan> {
-    if crate::owned_container_loudness::recognizes(source)? { return crate::owned_container_loudnorm::plan_loudnorm(source,args,dual_pass,options); }
+    check_options(options)?;
+    if crate::owned_container_loudness::recognizes_with_options(source, options)? {
+        return crate::owned_container_loudnorm::plan_loudnorm(source, args, dual_pass, options);
+    }
     if crate::owned_adts_export::recognizes(source)? {
         return crate::owned_adts_loudnorm::plan_loudnorm(source, args, dual_pass, options);
     }
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
     let resolved = validate_request(args)?;
+    let params = parse(&resolved)?;
     if !supports_request(
         source,
         Path::new("output.wav"),
@@ -187,8 +210,93 @@ pub fn plan_loudnorm(
     ) {
         return Err("request has no owned WAVE loudnorm route".into());
     }
-    let info = crate::owned_probe::probe_wave(source).map_err(|e| e.to_string())?;
+    let mut wave_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    let wave_info = crate::owned_wave_inspect::inspect(&mut wave_file, options.cancel.as_ref())
+        .map_err(|e| e.to_string())?;
+    if wave_info.sample_frames == 0 {
+        return Err("no decoded audio samples or invalid channel count".into());
+    }
+    let frame_bytes = usize::from(wave_info.block);
+    let capacity = if frame_bytes == 0 {
+        0
+    } else {
+        (4096 * frame_bytes).min(options.max_packet_bytes / frame_bytes * frame_bytes)
+    };
+    if capacity == 0 {
+        return Err("PCM packet limit cannot hold one sample frame".into());
+    }
+    let size = (u128::from(wave_info.data_bytes)).min(
+        options
+            .max_packets
+            .map(|n| u128::from(n) * capacity as u128)
+            .unwrap_or(u128::from(wave_info.data_bytes)),
+    ) as usize;
+    if size == 0 {
+        return Err("packet limit leaves no decoded audio samples".into());
+    }
     let report = report_requested(Some(&resolved))?;
+    if dual_pass || report {
+        let decode_options = crate::owned_adts_export::pcm_decode_options(options);
+        crate::owned_wave_loudness::plan_loudness(source, &decode_options)?;
+    }
+    if let Some(limit) = options.max_controlled_bytes {
+        let metadata_bytes = crate::owned_wave_inspect::info_chunks_bytes(
+            &mut wave_file,
+            &wave_info,
+            options.cancel.as_ref(),
+        )
+        .map_err(|e| e.to_string())?;
+        let assignments = options.metadata_set.iter().try_fold(0u128, |sum, (_, v)| {
+            sum.checked_add(v.len() as u128 + 10)
+                .ok_or("loudnorm metadata estimate overflow")
+        })?;
+        let metadata_working = 8 * (metadata_bytes as u128 + assignments + 12);
+        let width = usize::from(wave_info.bits_per_sample / 8).max(1);
+        let frames = size / frame_bytes;
+        let report_bytes = if params.print == Print::None {
+            0
+        } else {
+            usize::try_from(report_memory(
+                wave_info.sample_rate,
+                frames as u64,
+                wave_info.channels,
+            ))
+            .map_err(|_| "loudnorm report memory overflow")?
+        };
+        let estimate = if params.gain.is_some() {
+            let output = (size / width)
+                .checked_mul(4)
+                .ok_or("loudnorm output size overflow")?;
+            (size.checked_add(output)
+                .and_then(|n| n.checked_add(report_bytes))
+                .ok_or("loudnorm memory size overflow")? as u128)
+                .checked_add(metadata_working)
+                .ok_or("loudnorm memory size overflow")?
+        } else {
+            let samples = usize::try_from(
+                (frames as u128 * 192000).div_ceil(u128::from(wave_info.sample_rate))
+                    * u128::from(wave_info.channels),
+            )
+            .map_err(|_| "loudnorm output size overflow")?;
+            (size as u128)
+                + samples as u128 * 12
+                + 192000 * 34 / 10 * 8
+                + 512 * 1024
+                + 2 * frames.min(4096) as u128 * u128::from(wave_info.channels) * 8
+                + samples as u128 / u128::from(wave_info.channels) * 8
+                + (samples as u128 / u128::from(wave_info.channels)).div_ceil(19200) * (40 + 1024)
+                + 19200 * u128::from(wave_info.channels) * 8
+                + report_bytes as u128
+                + metadata_working
+        };
+        if estimate > limit as u128 {
+            return Err(format!(
+                "controlled memory budget exceeded: need {estimate} bytes"
+            ));
+        }
+    }
+    let info = crate::owned_probe::probe_wave_with_options(source, options)
+        .map_err(|e| e.to_string())?;
     let mut steps = vec![PlanStep {
         action: "decode".into(),
         detail: "owned WAVE reader retaining PCM precision and speaker layout for f64 processing"
@@ -221,6 +329,19 @@ pub fn plan_loudnorm(
             "read at most {maximum} original WAVE PCM blocks per pass"
         ));
     }
+    if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        || options.max_packets.is_some()
+        || options.max_controlled_bytes.is_some()
+        || options.max_rss_bytes.is_some()
+    {
+        notes.push(format!(
+            "encoded packet limit: {} bytes; packet work limit: {} packets; controlled memory limit: {} bytes; RSS limit: {} bytes",
+            options.max_packet_bytes,
+            options.max_packets.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options.max_controlled_bytes.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+            options.max_rss_bytes.map_or_else(|| "unbounded".to_owned(), |n| n.to_string()),
+        ));
+    }
     Ok(MediaPlan {
         command: "loudnorm".into(),
         input: source.into(),
@@ -243,7 +364,10 @@ pub fn apply_loudnorm(
     args: Option<&str>,
     options: &CopyOptions,
 ) -> Result<LoudnormStats> {
-    if crate::owned_container_loudness::recognizes(source)? { return crate::owned_container_loudnorm::apply(source,destination,args,false,options); }
+    check_options(options)?;
+    if crate::owned_container_loudness::recognizes_with_options(source, options)? {
+        return crate::owned_container_loudnorm::apply(source, destination, args, false, options);
+    }
     if crate::owned_adts_export::recognizes(source)? {
         return crate::owned_adts_loudnorm::apply(source, destination, args, false, options);
     }
@@ -270,7 +394,10 @@ pub fn apply_loudnorm_dual(
     args: Option<&str>,
     options: &CopyOptions,
 ) -> Result<LoudnormStats> {
-    if crate::owned_container_loudness::recognizes(source)? { return crate::owned_container_loudnorm::apply(source,destination,args,true,options); }
+    check_options(options)?;
+    if crate::owned_container_loudness::recognizes_with_options(source, options)? {
+        return crate::owned_container_loudnorm::apply(source, destination, args, true, options);
+    }
     if crate::owned_adts_export::recognizes(source)? {
         return crate::owned_adts_loudnorm::apply(source, destination, args, true, options);
     }
@@ -319,6 +446,10 @@ pub(crate) fn supports_dual(
             source,
             &crate::owned_adts_export::pcm_decode_options(options),
         )
+        && std::fs::File::open(source).is_ok_and(|mut file| {
+            crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref())
+                .is_ok_and(|info| info.sample_frames > 0)
+        })
 }
 fn apply_resolved(
     source: &Path,
@@ -332,18 +463,13 @@ fn apply_resolved(
         return apply_dynamic(source, destination, args, params, options, measurement);
     }
     let gain = params.gain.unwrap();
+    let check = || check_options(options);
+    check()?;
     if !policies(options) || destination.extension().and_then(|s| s.to_str()) != Some("wav") {
         return Err(
             "owned linear loudnorm requires WAVE output, stream 0 and no metadata edits".into(),
         );
     }
-    let check = || {
-        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-            return Err("media operation cancelled".to_owned());
-        }
-        crate::owned_budget::check_rss_budget(options)
-    };
-    check()?;
     let mut event = ProgressEvent {
         packets: 0,
         payload_bytes: 0,
@@ -362,10 +488,25 @@ fn apply_resolved(
         options.cancel.as_ref(),
         options.max_packet_bytes,
         options.max_packets,
-        |_, info, size| {
+        |file, info, size| {
             width = usize::from(info.bits_per_sample / 8);
             float = info.float;
             mask = info.channel_mask;
+            let metadata_bytes = crate::owned_wave_inspect::info_chunks_bytes(
+                file,
+                info,
+                options.cancel.as_ref(),
+            )
+            .map_err(|e| e.to_string())?;
+            let assignments = options.metadata_set.iter().try_fold(0usize, |sum, (_, v)| {
+                sum.checked_add(v.len().saturating_add(10))
+                    .ok_or("loudnorm metadata size overflow")
+            })?;
+            let metadata_working = metadata_bytes
+                .checked_add(assignments)
+                .and_then(|n| n.checked_add(12))
+                .and_then(|n| n.checked_mul(8))
+                .ok_or("loudnorm metadata size overflow")?;
             let output = (size / width)
                 .checked_mul(4)
                 .ok_or("loudnorm output size overflow")?;
@@ -382,6 +523,7 @@ fn apply_resolved(
             let estimate = size
                 .checked_add(output)
                 .and_then(|n| n.checked_add(report_bytes))
+                .and_then(|n| n.checked_add(metadata_working))
                 .ok_or("loudnorm memory size overflow")?;
             if options
                 .max_controlled_bytes
@@ -503,16 +645,11 @@ fn apply_dynamic(
     measurement: Option<&crate::owned_wave_loudness::NormalizationMeasurement>,
 ) -> Result<LoudnormStats> {
     use std::io::Write;
+    let check = || check_options(options);
+    check()?;
     if !policies(options) || destination.extension().and_then(|s| s.to_str()) != Some("wav") {
         return Err("owned loudnorm requires WAVE output, stream 0 and no metadata edits".into());
     }
-    let check = || {
-        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-            return Err("media operation cancelled".to_owned());
-        }
-        crate::owned_budget::check_rss_budget(options)
-    };
-    check()?;
     let mut event = ProgressEvent {
         packets: 0,
         payload_bytes: 0,
@@ -533,7 +670,7 @@ fn apply_dynamic(
         options.cancel.as_ref(),
         options.max_packet_bytes,
         options.max_packets,
-        |_, info, size| {
+        |file, info, size| {
             if !dynamic_input(info) {
                 return Err(
                     "owned dynamic loudnorm requires a qualified rate and speaker layout".into(),
@@ -546,7 +683,23 @@ fn apply_dynamic(
             if params.dual_mono && info.channels == 1 {
                 weights[0] *= 2.;
             }
+            let metadata_bytes = crate::owned_wave_inspect::info_chunks_bytes(
+                file,
+                info,
+                options.cancel.as_ref(),
+            )
+            .map_err(|e| e.to_string())?;
+            let assignments = options.metadata_set.iter().try_fold(0u128, |sum, (_, v)| {
+                sum.checked_add(v.len() as u128 + 10)
+                    .ok_or("loudnorm metadata estimate overflow")
+            })?;
+            let metadata_working = 8 * (metadata_bytes as u128 + assignments + 12);
             let frames = size / usize::from(info.block);
+            let report_bytes = if params.print == Print::None {
+                0
+            } else {
+                report_memory(info.sample_rate, frames as u64, info.channels)
+            };
             samples = usize::try_from(
                 (frames as u128 * 192000).div_ceil(u128::from(info.sample_rate))
                     * u128::from(info.channels),
@@ -563,7 +716,9 @@ fn apply_dynamic(
                 // Four anchor vectors plus both meter histograms (every block
                 // may occupy a distinct bin; 512 bytes per tree node/scratch).
                 + (samples as u128 / u128::from(info.channels)).div_ceil(19200) * (40 + 1024)
-                + 19200 * u128::from(info.channels) * 8;
+                + 19200 * u128::from(info.channels) * 8
+                + report_bytes
+                + metadata_working;
             if options
                 .max_controlled_bytes
                 .is_some_and(|limit| estimate > limit as u128)

@@ -1,0 +1,32 @@
+{
+  "batch": 264,
+  "accepted": [
+    "FVID-0271"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-264-pre-edit/crates/fvid-media/src/owned_aac_export_routing.rs",
+    "docs/improvements/snapshots/batch-264-pre-edit/crates/fvid-media/src/owned_matroska_aac_export.rs",
+    "docs/improvements/snapshots/batch-264-pre-edit/crates/fvid-media/src/owned_matroska_audio.rs",
+    "docs/improvements/snapshots/batch-264-pre-edit/crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs",
+    "docs/improvements/snapshots/batch-264-pre-edit/crates/fvid-media/src/owned_mp4_audio.rs",
+    "docs/improvements/snapshots/batch-264-pre-edit/crates/fvid-media/src/owned_mp4_audio_export.rs",
+    "docs/improvements/snapshots/batch-264-pre-edit/crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs",
+    "docs/improvements/snapshots/batch-264-pre-edit/crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs",
+    "docs/improvements/snapshots/batch-264-pre-edit/src/native_export.rs",
+    "docs/improvements/snapshots/batch-264-pre-edit/src/native_media.rs",
+    "docs/improvements/snapshots/batch-264-pre-edit/src/native_pcm/loudness.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-264-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-264-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-264-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/aac-ps-probe-packet-limit/prefix-mono-aac.m4a",
+    "tests/fixtures/playback-errors/aac-ps-probe-packet-limit/prefix-mono-aac.mka"
+  ],
+  "tests": [
+    "tests/aac_ps_probe_packet_limit_regression.rs",
+    "scripts/test_aac_ps_probe_packet_limit.py"
+  ]
+}

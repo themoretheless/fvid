@@ -64,6 +64,23 @@ impl FileTags {
     pub fn supports_key(name: &str) -> bool {
         Self::default().field(name).is_some()
     }
+    pub fn entries(&self) -> [(&'static str, &str); 13] {
+        [
+            ("TITLE", self.title.as_str()),
+            ("ARTIST", self.artist.as_str()),
+            ("ALBUM", self.album.as_str()),
+            ("GENRE", self.genre.as_str()),
+            ("DATE", self.date.as_str()),
+            ("COMMENT", self.comment.as_str()),
+            ("PART_NUMBER", self.track.as_str()),
+            ("ALBUM_ARTIST", self.album_artist.as_str()),
+            ("DISCNUMBER", self.disc.as_str()),
+            ("PUBLISHER", self.publisher.as_str()),
+            ("COPYRIGHT", self.copyright.as_str()),
+            ("DESCRIPTION", self.description.as_str()),
+            ("RATING", self.rating.as_str()),
+        ]
+    }
     fn field(&mut self, name: &str) -> Option<&mut String> {
         Some(match name.to_ascii_uppercase().as_str() {
             "TITLE" => &mut self.title,

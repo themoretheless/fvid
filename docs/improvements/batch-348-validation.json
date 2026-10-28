@@ -1,0 +1,15 @@
+{
+  "batch": 348,
+  "ids": [
+    "FVID-0355"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-348-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-348-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-348-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-348-related-after.txt",
+  "commands": [
+    "cargo test --locked --offline --no-default-features --test mp4_metadata_admission"
+  ],
+  "passed": 15,
+  "failed": 0
+}

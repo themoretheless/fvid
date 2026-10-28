@@ -14,6 +14,15 @@ fn check(options: &CopyOptions) -> Result<()> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
+    if options.max_packet_bytes == 0 {
+        return Err("packet byte limit must be positive".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("packet work limit requires at least one packet".into());
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err("controlled memory limit must be positive".into());
+    }
     crate::owned_budget::check_rss_budget(options)
 }
 pub(crate) fn recognizes(source: &Path) -> Result<bool> {
@@ -23,6 +32,24 @@ pub(crate) fn recognizes(source: &Path) -> Result<bool> {
     Ok(head[..count].starts_with(b"fLaC"))
 }
 pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<Flac> {
+    open_with_transform(source, None, options)
+}
+pub(crate) fn open_with_transform(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<Flac> {
+    open_with_interval(
+        source,
+        transform.map(|transform| (transform, None)),
+        options,
+    )
+}
+fn open_with_interval(
+    source: &Path,
+    window: Option<(AudioDecodeTransform, Option<(Duration, Duration)>)>,
+    options: &CopyOptions,
+) -> Result<Flac> {
     check(options)?;
     if !crate::owned_audio_export::simple_options(options) {
         return Err("raw FLAC has only stream 0".into());
@@ -56,6 +83,15 @@ pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<Flac> {
         }
         bytes.extend_from_slice(&chunk[..n]);
     }
+    let prefix_bounded = options.max_packets.is_some()
+        || window.is_some_and(|(transform, interval)| {
+            interval.is_some() || transform.interval.is_some()
+        });
+    let parse_packet_bytes = if prefix_bounded {
+        usize::MAX
+    } else {
+        options.max_packet_bytes
+    };
     let parsed = Flac::parse_owned_controlled(
         bytes,
         &Limits {
@@ -63,13 +99,90 @@ pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<Flac> {
             packets: usize::MAX,
         },
         options.max_controlled_bytes,
-        options.max_packet_bytes,
+        parse_packet_bytes,
     )
     .map_err(|e| e.to_string())?;
+    let until = match window {
+        Some((_transform, Some((_from, to)))) => Some(to),
+        Some((transform, None)) => crate::owned_adts_export::decoded_prefix(
+            transform,
+            parsed.sample_rate,
+        )
+        .map(|(_from, to)| to),
+        None => None,
+    };
+    if parsed.max_packet_size_in_prefix(until, options.max_packets) > options.max_packet_bytes {
+        return Err("FLAC packet bytes exceed limit".into());
+    }
+    if let Some(max) = options.max_controlled_bytes {
+        let to = match until {
+            Some(at) => u64::try_from(
+                (at.as_nanos() * u128::from(parsed.sample_rate)).div_ceil(1_000_000_000),
+            )
+            .unwrap_or(u64::MAX)
+            .min(parsed.samples()),
+            None => parsed.samples(),
+        };
+        let mut packets = 0u64;
+        let mut max_frame_samples = 0usize;
+        for frame in &parsed.frames {
+            if frame.pts >= to {
+                break;
+            }
+            if options.max_packets.is_some_and(|limit| packets >= limit) {
+                break;
+            }
+            packets += 1;
+            max_frame_samples = max_frame_samples.max(frame.samples as usize);
+        }
+        let pcm_bytes = max_frame_samples
+            .checked_mul(usize::from(parsed.channels))
+            .and_then(|n| n.checked_mul(std::mem::size_of::<f32>()))
+            .ok_or("FLAC float allocation overflow")?;
+        let index_bytes = parsed
+            .frames
+            .capacity()
+            .checked_mul(std::mem::size_of::<crate::owned_flac::Frame>())
+            .ok_or("FLAC index allocation overflow")?;
+        let info = crate::owned_flac_layout::wave_info_from_extra(parsed.metadata_blocks())?;
+        let wave_meta_bytes =
+            crate::owned_wave_metadata::wave_metadata_working_bytes(info.len(), options)?;
+        let total = size
+            .checked_add(crate::owned_flac_decoder::FlacDecoder::DECODE_ADMISSION_BYTES)
+            .and_then(|n| n.checked_add(index_bytes))
+            .and_then(|n| n.checked_add(pcm_bytes))
+            .and_then(|n| n.checked_add(wave_meta_bytes))
+            .ok_or("FLAC allocation estimate overflow")?;
+        if total > max {
+            return Err("controlled memory budget exceeded: FLAC decoded PCM".into());
+        }
+    }
+    if let Some((transform, None)) = window {
+        let to = match until {
+            Some(at) => u64::try_from(
+                (at.as_nanos() * u128::from(parsed.sample_rate)).div_ceil(1_000_000_000),
+            )
+            .unwrap_or(u64::MAX)
+            .min(parsed.samples()),
+            None => parsed.samples(),
+        };
+        crate::owned_ogg_opus_export::check_nonempty_interval_prefix(
+            Some(transform),
+            parsed.sample_rate,
+            to,
+        )?;
+    }
     Ok(parsed)
 }
 pub(crate) fn descriptor(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32)> {
-    let p = open(source, options)?;
+    descriptor_with_transform(source, None, options)
+}
+pub(crate) fn descriptor_with_transform(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u32)> {
+    let p = open_with_transform(source, transform, options)?;
     if p.samples() == 0 {
         return Err("FLAC stream contains no audible samples".into());
     }
@@ -87,7 +200,7 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    match descriptor(source, options) {
+    match descriptor_with_transform(source, Some(transform), options) {
         Ok((_rate, channels, mask)) => {
             let target = transform.channels.unwrap_or(i32::from(channels));
             target == i32::from(channels)
@@ -119,6 +232,7 @@ fn decode_raw_checked(
     interval: Option<(Duration, Duration)>,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
+    check(options)?;
     if !options.metadata_set.is_empty()
         || !options.metadata_delete.is_empty()
         || !options.stream_metadata_set.is_empty()
@@ -129,7 +243,13 @@ fn decode_raw_checked(
     if interval.is_some_and(|(a, b)| a >= b) {
         return Err("audio interval requires from < to".into());
     }
-    let parsed = open(source, options)?;
+    let file_bytes = usize::try_from(std::fs::metadata(source).map_err(|e| e.to_string())?.len())
+        .map_err(|_| "FLAC input size overflow")?;
+    let parsed = open_with_interval(
+        source,
+        Some((AudioDecodeTransform::default(), interval)),
+        options,
+    )?;
     let rate = parsed.sample_rate;
     let channels = parsed.channels;
     let boundary = |at: Duration| -> Result<u64> {
@@ -188,6 +308,26 @@ fn decode_raw_checked(
             break;
         }
         let decoded = fvid_codecs::flac::decode(packet, config).map_err(|e| e.to_string())?;
+        if let Some(max) = options.max_controlled_bytes {
+            let pcm_bytes = decoded
+                .samples
+                .len()
+                .checked_mul(std::mem::size_of::<f32>())
+                .ok_or("FLAC float allocation overflow")?;
+            let index_bytes = parsed
+                .frames
+                .capacity()
+                .checked_mul(std::mem::size_of::<crate::owned_flac::Frame>())
+                .ok_or("FLAC index allocation overflow")?;
+            let total = file_bytes
+                .checked_add(crate::owned_flac_decoder::FlacDecoder::DECODE_ADMISSION_BYTES)
+                .and_then(|n| n.checked_add(index_bytes))
+                .and_then(|n| n.checked_add(pcm_bytes))
+                .ok_or("FLAC allocation estimate overflow")?;
+            if total > max {
+                return Err("controlled memory budget exceeded: FLAC decoded PCM".into());
+            }
+        }
         let scale = (1u64 << (config.bits - 1)) as f64;
         let mut pcm = Vec::new();
         pcm.try_reserve_exact(decoded.samples.len())
@@ -216,8 +356,19 @@ fn decode_raw_checked(
     Ok(stats)
 }
 pub(crate) fn source_info(source: &Path, options: &CopyOptions) -> Result<Vec<u8>> {
-    let parsed = open(source, &crate::owned_adts_export::pcm_decode_options(options))?;
-    crate::owned_flac_layout::wave_info_from_extra(parsed.metadata_blocks())
+    let mut inspect_opts = crate::owned_adts_export::pcm_decode_options(options);
+    inspect_opts.max_packets = None;
+    inspect_opts.max_packet_bytes = usize::MAX;
+    let parsed = open(source, &inspect_opts)?;
+    let info = crate::owned_flac_layout::wave_info_from_extra(parsed.metadata_blocks())?;
+    if let Some(max) = options.max_controlled_bytes {
+        let wave_meta_bytes =
+            crate::owned_wave_metadata::wave_metadata_working_bytes(info.len(), options)?;
+        if wave_meta_bytes > max {
+            return Err("controlled memory budget exceeded: WAVE metadata limit".into());
+        }
+    }
+    Ok(info)
 }
 pub(crate) fn apply(
     source: &Path,
@@ -225,11 +376,11 @@ pub(crate) fn apply(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<ExportStats> {
+    check(options)?;
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    check(options)?;
-    let (rate, channels, mask) = descriptor(source, options)?;
+    let (rate, channels, mask) = descriptor_with_transform(source, Some(transform), options)?;
     let info = source_info(source, options)?;
     let spool = crate::owned_adts_export::spool_decoded(
         rate,

@@ -1,0 +1,9 @@
+{
+  "batch_id": "FVID-0252",
+  "sha256": {
+    "lossless-foreground.y4m": "a2a952eb3ea7b59800235b5eea865cbdaea313456146a0daa5687520bae6179f",
+    "lossless-primary.y4m": "8a1774219b343503757321ee11a32050203c7808464dcf98ba051b0eead7ef1b",
+    "multitrack-avc-aac.mp4": "ab358eac90b5deba0ff02665249ab3e6e078b7c64955c47ed1155b5fee1e8fa5",
+    "multitrack-ffv1-aac.mkv": "6afd3b6919226db325ff0b55de7bc0dd59e2ae00083c8b053bf587a6f2c0e8f8"
+  }
+}

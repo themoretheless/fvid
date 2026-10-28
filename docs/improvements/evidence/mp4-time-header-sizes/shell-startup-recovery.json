@@ -1,0 +1,8 @@
+{
+  "terminated_own_shell_pids": [
+    43464,
+    44562,
+    45066
+  ],
+  "reason": "Shell snapshot initialization stalled before command execution; no children, no fixture/test files, and no baseline log existed. Switching to login=false and explicit working directory. Foreign processes preserved."
+}

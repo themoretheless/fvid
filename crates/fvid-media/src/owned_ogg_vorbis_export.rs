@@ -11,6 +11,13 @@ use std::{
 };
 type Result<T> = std::result::Result<T, String>;
 pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<(Program, Vec<u8>)> {
+    open_with_transform(source, None, options)
+}
+pub(crate) fn open_with_transform(
+    source: &Path,
+    transform: Option<AudioDecodeTransform>,
+    options: &CopyOptions,
+) -> Result<(Program, Vec<u8>)> {
     check(options)?;
     let mut file = File::open(source).map_err(|e| e.to_string())?;
     let (limits, index) = preflight(&mut file, options)?;
@@ -69,17 +76,6 @@ pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<(Program, Vec
                 .ok_or("Vorbis decoder reserve overflow")?,
         );
     }
-    admit(
-        index
-            .checked_add(
-                reserve
-                    .checked_mul(2)
-                    .ok_or("Vorbis state reserve overflow")?,
-            )
-            .and_then(|n| n.checked_add(512 * 1024))
-            .ok_or("Vorbis export reserve overflow")?,
-        options,
-    )?;
     let comment = &ogg.chains()[first].packets[1].data;
     if !comment.starts_with(b"\x03vorbis") {
         return Err("missing Vorbis comment header".into());
@@ -88,6 +84,26 @@ pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<(Program, Vec
     tagged.extend_from_slice(&comment[7..]);
     let tags = fvid_opus::OpusTags::parse(&tagged).map_err(|e| e.to_string())?;
     let info = crate::owned_ogg_opus_export::info_for_tags(&tags)?;
+    let wave_meta_bytes =
+        crate::owned_wave_metadata::wave_metadata_working_bytes(info.len(), options)?;
+    if options
+        .max_controlled_bytes
+        .is_some_and(|max| wave_meta_bytes > max)
+    {
+        return Err("controlled memory budget exceeded: WAVE metadata limit".into());
+    }
+    admit(
+        index
+            .checked_add(
+                reserve
+                    .checked_mul(2)
+                    .ok_or("Vorbis state reserve overflow")?,
+            )
+            .and_then(|n| n.checked_add(wave_meta_bytes))
+            .and_then(|n| n.checked_add(512 * 1024))
+            .ok_or("Vorbis export reserve overflow")?,
+        options,
+    )?;
     drop(ogg);
     let program = Program::open_source_track(
         CheckedRead {
@@ -98,6 +114,20 @@ pub(crate) fn open(source: &Path, options: &CopyOptions) -> Result<(Program, Vec
         selection,
     )
     .map_err(|e| e.to_string())?;
+    let rate = program.sample_rate();
+    let until = transform
+        .and_then(|t| crate::owned_adts_export::decoded_prefix(t, rate))
+        .map(|(_, end)| {
+            u64::try_from((end.as_nanos() * u128::from(rate)).div_ceil(1_000_000_000))
+                .map_err(|_| "Vorbis prefix overflow".to_string())
+        })
+        .transpose()?;
+    if program.max_packet_size_in_prefix(until, options.max_packets) > options.max_packet_bytes {
+        return Err("Vorbis compressed packet exceeds byte limit".into());
+    }
+    let total_samples = u64::try_from(program.end_samples().max(0)).unwrap_or(0);
+    let prefix_samples = until.map_or(total_samples, |end| end.min(total_samples));
+    crate::owned_ogg_opus_export::check_nonempty_interval_prefix(transform, rate, prefix_samples)?;
     check(options)?;
     Ok((program, info))
 }
@@ -106,7 +136,7 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    match open(source, options) {
+    match open_with_transform(source, Some(transform), options) {
         Ok((p, _)) => {
             let target = transform.channels.unwrap_or(i32::from(p.channels()));
             target == i32::from(p.channels())
@@ -260,7 +290,10 @@ fn write_pcm(
         .min(until.map_or(usize::MAX, |end| end.saturating_sub(pcm.pts) as usize));
     pcm.data.truncate(frames * width);
     let mut frame = [0u8; 255 * 4];
-    for bytes in pcm.data.chunks_exact_mut(width) {
+    for (frame_index, bytes) in pcm.data.chunks_exact_mut(width).enumerate() {
+        if frame_index % 4096 == 0 {
+            check(options)?;
+        }
         frame[..width].copy_from_slice(bytes);
         for (to, &from) in permutation.iter().enumerate() {
             bytes[to * 4..to * 4 + 4].copy_from_slice(&frame[from * 4..from * 4 + 4]);
@@ -296,11 +329,11 @@ pub(crate) fn apply(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
+    check(options)?;
     if destination.symlink_metadata().is_ok() {
         return Err("destination already exists".into());
     }
-    check(options)?;
-    let (mut program, info) = open(source, options)?;
+    let (mut program, info) = open_with_transform(source, Some(transform), options)?;
     let rate = program.sample_rate();
     let channels = program.channels();
     let until = crate::owned_adts_export::decoded_prefix(transform, rate)

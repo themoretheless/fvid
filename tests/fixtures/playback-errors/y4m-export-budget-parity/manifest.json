@@ -1,0 +1,9 @@
+{
+  "batch_id": "FVID-0253",
+  "generator": "scripts/generate_y4m_export_budget_parity_regressions.py",
+  "sha256": {
+    "avc-32x16.mkv": "a165fd9cb634f488a56f8bd4fa222b1099074a39abe5f59d9fabb18a7cab5272",
+    "avc-32x16.mp4": "a990d341850ee995966163a73caafdec1e87f559673a3bb082f6a87066d134ab",
+    "video-32x16.y4m": "7eea8c38495251211e9efe219a6248dc04f35af4b696a45fd12e9afb478f688b"
+  }
+}

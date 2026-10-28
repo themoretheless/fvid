@@ -41,6 +41,19 @@ pub fn normalize_file_with_options(
     options: &fvid_media::CopyOptions,
     progress: Option<&NormalizationProgressHook>,
 ) -> Result<NormalizeReport> {
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err(invalid("media operation cancelled"));
+    }
+    if options.max_packet_bytes == 0 {
+        return Err(invalid("packet byte limit must be positive"));
+    }
+    if options.max_packets == Some(0) {
+        return Err(invalid("packet work limit requires at least one packet"));
+    }
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
     target.validate().map_err(|e| invalid(&e))?;
     let ext = destination.extension().and_then(|s| s.to_str());
     if !matches!(ext, Some("wav" | "mka" | "mkv")) {
@@ -83,7 +96,7 @@ pub fn normalize_file_with_options(
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
         && (super::is_wave(source)?
-            || crate::native_media::audio_source_info_selected(source, selected).is_ok());
+            || crate::native_media::audio_source_info_selected_with_options(source, selected, options).is_ok());
     let sample_frames = if use_native_export {
         let mut export_options = options.clone();
         export_options.progress = export_hook;

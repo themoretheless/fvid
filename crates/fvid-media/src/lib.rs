@@ -116,7 +116,10 @@ pub mod owned_pcm_channels;
 pub mod owned_stereo_router;
 
 pub mod owned_audio_mix;
-pub use owned_audio_mix::{mix_audio, merge_audio, plan_mix_audio, plan_merge_audio};
+pub use owned_audio_mix::{
+    merge_audio, merge_audio_with_controls, mix_audio, mix_audio_with_controls, plan_merge_audio,
+    plan_merge_audio_with_controls, plan_mix_audio, plan_mix_audio_with_controls,
+};
 
 pub mod owned_audio_export;
 pub mod owned_audio_plan;

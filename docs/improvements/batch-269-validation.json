@@ -1,0 +1,31 @@
+{
+  "batch": 269,
+  "accepted": [
+    "FVID-0276"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-269-pre-edit/src/native_media.rs",
+    "docs/improvements/snapshots/batch-269-pre-edit/src/native_plan.rs",
+    "docs/improvements/snapshots/batch-269-pre-edit/src/native_pcm/loudness.rs",
+    "docs/improvements/snapshots/batch-269-pre-edit/src/native_pcm/normalize.rs",
+    "docs/improvements/snapshots/batch-269-pre-edit/src/native_loudnorm.rs",
+    "docs/improvements/snapshots/batch-269-pre-edit/src/native_audio_mix.rs",
+    "docs/improvements/snapshots/batch-269-pre-edit/src/native_audio_mix/concat.rs",
+    "docs/improvements/snapshots/batch-269-pre-edit/src/native_export.rs",
+    "docs/improvements/snapshots/batch-269-pre-edit/src/media.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-269-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-269-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-269-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/aac-source-info-prefix-budget/mono-then-ps.m4a",
+    "tests/fixtures/playback-errors/aac-source-info-prefix-budget/mono-then-ps.mka",
+    "tests/fixtures/playback-errors/aac-source-info-prefix-budget/mono-then-ps.aac"
+  ],
+  "tests": [
+    "tests/aac_source_info_prefix_budget_regression.rs",
+    "scripts/test_aac_source_info_prefix_budget.py"
+  ]
+}

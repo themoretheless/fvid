@@ -1,0 +1,23 @@
+{
+  "batch": 335,
+  "accepted": [
+    {
+      "id": "FVID-0342",
+      "title": "Propagate controlled-memory Matroska packet-index and MP4 metadata ceilings across owned_webm_probe::probe_webm_with_packet_and_memory_limit, owned_remux_plan::plan_remux, native_plan::remux_with_options, and native_plan::concat_mp4_matroska_with_options",
+      "source": "crates/fvid-media/src/owned_webm_probe.rs",
+      "regression": "tests/mp4_metadata_admission.rs",
+      "snapshots": [
+        "docs/improvements/snapshots/batch-335-pre-edit/crates/fvid-media/src/owned_webm_probe.rs",
+        "docs/improvements/snapshots/batch-335-pre-edit/crates/fvid-media/src/owned_remux_plan.rs",
+        "docs/improvements/snapshots/batch-335-pre-edit/src/native_plan.rs"
+      ],
+      "evidence": {
+        "acceptance_before": "docs/improvements/evidence/batch-335-acceptance-before.txt",
+        "acceptance_after": "docs/improvements/evidence/batch-335-acceptance-after.txt",
+        "related_after": "docs/improvements/evidence/batch-335-related-after.txt"
+      },
+      "before": "In `owned_webm_probe::try_probe_webm_with_packet_limit` (`crates/fvid-media/src/owned_webm_probe.rs`), `WebmReader::open` and `scan_all()` used `Limits::default().packets` without a `max_controlled_bytes` parameter, and `owned_remux_plan::plan_remux` (`crates/fvid-media/src/owned_remux_plan.rs`) and `native_plan::remux_with_options` (`src/native_plan.rs`) called `probe_webm_with_packet_limit` / `matroska_with_packet_limit` with `options.max_packet_bytes.min(options.max_controlled_bytes.unwrap_or(usize::MAX))` and `native_probe::probe(source)` without `options`, while `native_plan::concat_mp4_matroska_with_options` called `crate::media::probe` / `crate::native_probe::probe` without `options`.",
+      "after": "Add `probe_webm_with_packet_and_memory_limit` and `try_probe_webm_with_packet_and_memory_limit` in `crates/fvid-media/src/owned_webm_probe.rs` clamping `Limits::packets` to `max_controlled_bytes / size_of::<Packet>()` and mapping clamped packet-count refusals to `\"controlled memory budget exceeded: Matroska packet index limit\"`, and propagate `options` across `owned_remux_plan::plan_remux`, `native_plan::remux_with_options`, and `native_plan::concat_mp4_matroska_with_options`. Nine integration tests in `mp4_metadata_admission` and nine in `mp4_audio_metadata_admission` pass."
+    }
+  ]
+}

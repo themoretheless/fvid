@@ -1,0 +1,20 @@
+{
+  "batch_id": "FVID-0262",
+  "files": [
+    "rot90-par1x2.mkv",
+    "upright-444.y4m",
+    "upright-fullrange.y4m",
+    "upright-par1x1-4x4.y4m",
+    "upright-par1x2.y4m",
+    "upright-par2x1.y4m"
+  ],
+  "generator": "scripts/generate_overlay_aspect_plan_parity_regressions.py",
+  "sha256": {
+    "rot90-par1x2.mkv": "7b05886d00eab14ac605e00cb53899eb00be7a5103e494d4eb6fed65dda1ac02",
+    "upright-444.y4m": "5359bd92ee8e0e7281f42d194624cc62d531f87d246ae0c4fcf01454e0acb470",
+    "upright-fullrange.y4m": "a57cd8b30a93775e07a682e8e6039f9ac759cf56b09811e41146f32963028509",
+    "upright-par1x1-4x4.y4m": "d72960bb3070b83dc09db95514c39574d8e0e27a2892c3dfa616ee7901786fc0",
+    "upright-par1x2.y4m": "f92e9c504e62a23d918b3c902ad28579653cbe570df6e5d4f7994fda42357dc7",
+    "upright-par2x1.y4m": "71e888df37396cf7a83db6d7a7a30022d512ff1784b6dd2b0a3be0202f1676f6"
+  }
+}

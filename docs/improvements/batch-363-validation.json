@@ -1,0 +1,14 @@
+{
+  "batch": 363,
+  "ids": ["FVID-0370"],
+  "snapshot": "docs/improvements/snapshots/batch-363-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-363-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-363-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-363-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission owned_lossless_supports_ffv1_export_and_mp4_video_decode_enforce_zero_limits_and_preserve_plan_budgets -- --exact",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 30,
+  "failed": 0
+}

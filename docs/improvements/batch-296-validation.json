@@ -1,0 +1,23 @@
+{
+  "batch": 296,
+  "accepted": [
+    "FVID-0303"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-296-pre-edit/src/media_cli.rs",
+    "docs/improvements/snapshots/batch-296-pre-edit/src/native_export.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-296-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-296-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-296-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/lossless-plan/source-8x4.y4m",
+    "tests/fixtures/playback-errors/lossless-plan/zero-frames-8x4.y4m",
+    "tests/fixtures/playback-errors/subtitle-burn.srt"
+  ],
+  "tests": [
+    "tests/lossless_plan_regressions.rs"
+  ]
+}

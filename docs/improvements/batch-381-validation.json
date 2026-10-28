@@ -1,0 +1,16 @@
+{
+  "batch": 381,
+  "ids": [
+    "FVID-0388"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-381-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-381-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-381-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-381-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission matroska_lossless_multitrack_video_decode_and_subtitle_burn_enforce_estimated_index_payload_budget -- --exact",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 48,
+  "failed": 0
+}

@@ -1,0 +1,26 @@
+{
+  "batch": 309,
+  "accepted": [
+    "FVID-0316"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-309-pre-edit/crates/fvid-media/src/owned_lossless.rs",
+    "docs/improvements/snapshots/batch-309-pre-edit/crates/fvid-media/src/owned_matroska.rs",
+    "docs/improvements/snapshots/batch-309-pre-edit/crates/fvid-media/src/owned_mp4_video_bridge.rs",
+    "docs/improvements/snapshots/batch-309-pre-edit/crates/fvid-media/src/owned_video_decode.rs",
+    "docs/improvements/snapshots/batch-309-pre-edit/crates/fvid-media/src/owned_xfade.rs",
+    "docs/improvements/snapshots/batch-309-pre-edit/crates/fvid-media/src/owned_subtitle_burn.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-309-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-309-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-309-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/lossless-plan/source-8x4.y4m",
+    "tests/fixtures/playback-errors/subtitle-burn.srt"
+  ],
+  "tests": [
+    "tests/lossless_plan_regressions.rs"
+  ]
+}

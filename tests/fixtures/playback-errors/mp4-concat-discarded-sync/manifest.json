@@ -1,0 +1,5 @@
+{
+  "file": "unmarked-video-sync.mp4",
+  "sha256": "c031b73d547311be91ffd8e54cae7c60033f9e594a0893f53d1d6fc315627899",
+  "provenance": "Owned PCM AVC bytes with empty stss (no declared video sync point), plus own 48kHz mono AAC pulse syntax. Only selected audio needs concatenation. Video selection must preserve existing sync-point refusal."
+}

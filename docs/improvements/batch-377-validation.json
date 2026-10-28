@@ -1,0 +1,16 @@
+{
+  "batch": 377,
+  "ids": [
+    "FVID-0384"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-377-pre-edit/crates/fvid-media/src/owned_ogg_opus_export.rs",
+  "before_evidence": "docs/improvements/evidence/batch-377-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-377-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-377-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission ogg_opus_plan_decode_and_supports_enforce_wave_metadata_budget_and_nonempty_interval_prefix",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 44,
+  "failed": 0
+}

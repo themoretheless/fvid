@@ -1,6 +1,6 @@
 //! Byte-preserving validated Matroska identity copy, including unindexed metadata.
 pub use crate::owned_ebml::{Error, Result};
-use crate::owned_webm::{Limits, WebmReader};
+use crate::owned_webm::{Limits, Packet, WebmReader};
 use fvid_control::{CancelFlag, ProgressEvent, ProgressHook};
 use std::io::{Read, Seek, SeekFrom, Write};
 fn invalid(message: &str) -> Error {

@@ -1,0 +1,9 @@
+{
+  "batch_id": "FVID-0270",
+  "generator": "scripts/generate_mp4_audio_max_packets_budget.py",
+  "provenance": "100% synthetic unedited MP4 sowt PCM (16B packet 0 + 256B packet 1); no FFmpeg, network, or private media.",
+  "sha256": {
+    "prefix-elst-sowt.m4a": "6864f3c52cd7f7b41dadcc612615e439cad5611b7b9b70e92b9e182c21c12e31",
+    "prefix-sowt.m4a": "a183c07aa7bed636eae9343c6469548ba2eeb341cef80401d117a59ce03bbb7f"
+  }
+}

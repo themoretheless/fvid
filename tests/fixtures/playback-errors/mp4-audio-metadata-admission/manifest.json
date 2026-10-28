@@ -1,0 +1,7 @@
+{
+  "sha256": {
+    "small.m4a": "a183c07aa7bed636eae9343c6469548ba2eeb341cef80401d117a59ce03bbb7f",
+    "padded.m4a": "893ce98e126be1ea46a63fa87539a04dd65a467bb3fec905eba561bf2dabd3e1"
+  },
+  "provenance": "Owned 136 signed PCM samples at 8kHz mono, 17ms duration. Legal 2MiB moov/free padding does not move any encoded media. No private audio, video, codec parameters, FFmpeg or network."
+}

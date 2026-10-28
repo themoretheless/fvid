@@ -1,0 +1,25 @@
+{
+  "batch": 282,
+  "accepted": [
+    "FVID-0289"
+  ],
+  "snapshots": [
+    "docs/improvements/snapshots/batch-282-pre-edit/src/native_lossless_y4m.rs",
+    "docs/improvements/snapshots/batch-282-pre-edit/src/native_lossless.rs",
+    "docs/improvements/snapshots/batch-282-pre-edit/src/native_plan.rs"
+  ],
+  "evidence": {
+    "acceptance_before": "docs/improvements/evidence/batch-282-acceptance-before.txt",
+    "acceptance_after": "docs/improvements/evidence/batch-282-acceptance-after.txt",
+    "related_after": "docs/improvements/evidence/batch-282-related-after.txt"
+  },
+  "fixtures": [
+    "tests/fixtures/playback-errors/lossless-plan/zero-frames-8x4.y4m",
+    "tests/fixtures/playback-errors/lossless-plan/two-frames-8x4.y4m",
+    "tests/fixtures/playback-errors/lossless-plan/rotated-90-4x2-dar-2x1.mp4"
+  ],
+  "tests": [
+    "tests/lossless_plan_regressions.rs",
+    "scripts/test_lossless_plan_regressions.py"
+  ]
+}

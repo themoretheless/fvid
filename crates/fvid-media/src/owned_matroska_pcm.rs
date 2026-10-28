@@ -69,6 +69,15 @@ mod precise {
         interval: Option<(Duration, Duration)>,
         options: &CopyOptions,
     ) -> Result<AudioDecodeStats> {
+        let mut control = DecodeProgress {
+            options,
+            event: fvid_control::ProgressEvent {
+                packets: 0,
+                payload_bytes: 0,
+                done: false,
+            },
+        };
+        control.check()?;
         if !options.metadata_set.is_empty()
             || !options.metadata_delete.is_empty()
             || !options.stream_metadata_set.is_empty()
@@ -81,15 +90,6 @@ mod precise {
             [i] => Some(*i),
             _ => return Err(invalid("select exactly one audio stream")),
         };
-        let mut control = DecodeProgress {
-            options,
-            event: fvid_control::ProgressEvent {
-                packets: 0,
-                payload_bytes: 0,
-                done: false,
-            },
-        };
-        control.check()?;
         if let Some(hook) = &options.progress {
             hook.emit(control.event);
         }
@@ -100,7 +100,15 @@ mod precise {
             options.max_packet_bytes,
         )?;
         let index = matroska_audio_index(&reader, selected)?;
-        crate::owned_matroska_audio::admit_audio_reader(&mut reader, index, options)?;
+        if !matches!(
+            reader.tracks[index].codec.as_str(),
+            "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE"
+        ) {
+            return Err(invalid(
+                "selected Matroska audio stream has a different codec",
+            ));
+        }
+        crate::owned_matroska_audio::admit_audio_reader_with_interval(&mut reader, index, interval, options)?;
         decode_matroska_audio_reader_controlled(reader, output, interval, selected, &mut control)
     }
     include!("owned_matroska_audio_timeline_impl.rs");
