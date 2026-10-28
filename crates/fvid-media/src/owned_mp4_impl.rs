@@ -182,6 +182,8 @@ impl SampleDescription {
 }
 #[derive(Clone, Debug)]
 pub struct Track {
+    /// MPEG-4 file dependencies from trak/tref/dpnd (track IDs, not stored ES_ID).
+    pub dependencies: Vec<u32>,
     pub sample_descriptions: Vec<SampleDescription>,
     pub id: u32,
     pub handler: [u8; 4],
@@ -234,6 +236,7 @@ impl Track {
             .and_then(|i| self.sample_descriptions.get(i as usize))
             .ok_or_else(|| invalid("MP4 decoder description index is out of range"))?;
         Ok(Self {
+            dependencies: self.dependencies.clone(),
             sample_descriptions: Vec::new(), id: self.id, handler: self.handler,
             codec: d.codec, name: String::new(), language: String::new(),
             timescale: self.timescale, duration: self.duration,
@@ -730,6 +733,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             add(&mut total, text.capacity(), 1)?;
         }
         for track in &self.tracks {
+            add(&mut total,track.dependencies.capacity(),std::mem::size_of::<u32>())?;
             add(&mut total, track.name.capacity(), 1)?;
             add(&mut total, track.language.capacity(), 1)?;
             add(&mut total, track.configuration.capacity(), 1)?;
@@ -1240,7 +1244,24 @@ fn parse_track(
         return Err(invalid("invalid sample description count"));
     }
     let entry = entries[0];
+    let mut dependencies = Vec::new();
+    if let Some(tref) = optional(&track, b"tref")? {
+        let references = atoms(tref)?;
+        if let Some(dpnd) = optional(&references, b"dpnd")? {
+            if !dpnd.len().is_multiple_of(4) {
+                return Err(invalid("invalid MP4 dpnd table length"));
+            }
+            dependencies.try_reserve_exact(dpnd.len() / 4)
+                .map_err(|_| invalid("MP4 dependency allocation failed"))?;
+            for at in (0..dpnd.len()).step_by(4) {
+                let id = u32be(dpnd, at)?;
+                if id == 0 { return Err(invalid("zero MP4 dependency track ID")); }
+                dependencies.push(id);
+            }
+        }
+    }
     let mut result = Track {
+        dependencies,
         sample_descriptions: Vec::new(),
         id,
         handler,

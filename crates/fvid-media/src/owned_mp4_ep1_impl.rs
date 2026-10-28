@@ -42,13 +42,61 @@ impl AccessUnit {
         }
     }
 }
+#[derive(Clone, Copy)]
+struct Binding {
+    id: u16,
+    parent: Option<u16>,
+    file: bool,
+}
+fn binding(track: &Track) -> Result<Binding> {
+    let d = aac_stream_descriptor(&track.configuration)?;
+    let canonical = d.es_id == 0 && d.depends_on.is_none() && d.ocr_es_id.is_none();
+    if canonical || !track.dependencies.is_empty() {
+        if !canonical {
+            return Err(invalid("EP1 MP4 mixes descriptor dependencies with dpnd"));
+        }
+        if track.dependencies.len() > 1 {
+            return Err(invalid(
+                "EP1 MP4 multiple dependency parents are not supported",
+            ));
+        }
+        let id = u16::try_from(track.id)
+            .ok()
+            .filter(|id| *id != 0)
+            .ok_or_else(|| invalid("EP1 MP4 elementary track ID exceeds ES identifier range"))?;
+        let parent = track
+            .dependencies
+            .first()
+            .map(|id| {
+                u16::try_from(*id)
+                    .map_err(|_| invalid("EP1 MP4 dependency ID exceeds ES identifier range"))
+            })
+            .transpose()?;
+        if parent == Some(id) {
+            return Err(invalid("EP1 MP4 self dependency"));
+        }
+        Ok(Binding {
+            id,
+            parent,
+            file: true,
+        })
+    } else {
+        // Compatibility with already supported noncanonical descriptor-carried
+        // stream metadata; never override a file's authoritative dpnd binding.
+        Ok(Binding {
+            id: d.es_id,
+            parent: d.depends_on,
+            file: false,
+        })
+    }
+}
 impl Group {
     pub fn dependent_track(track: &Track) -> bool {
         if track.handler != *b"soun" || track.codec != *b"mp4a" {
             return false;
         }
         aac_stream_descriptor(&track.configuration).is_ok_and(|d| {
-            d.depends_on.is_some()
+            (d.depends_on.is_some() || !track.dependencies.is_empty())
                 && AudioSpecificConfig::parse(d.asc).is_ok_and(|p| p.separate_esc)
         })
     }
@@ -67,14 +115,8 @@ impl Group {
             if track.handler != *b"soun" {
                 continue;
             }
-            if track.codec == *b"mp4a" {
-                if let Ok(d) = aac_stream_descriptor(&track.configuration) {
-                    if d.depends_on.is_some()
-                        && AudioSpecificConfig::parse(d.asc).is_ok_and(|p| p.separate_esc)
-                    {
-                        continue;
-                    }
-                }
+            if Self::dependent_track(track) {
+                continue;
             }
             indices.push(index);
         }
@@ -114,6 +156,7 @@ impl Group {
         if !AudioSpecificConfig::parse(d.asc)?.separate_esc {
             return Ok(0);
         }
+        let root_binding = binding(source)?;
         let mut total = 0usize;
         let mut add = |n: usize| -> Result<()> {
             total = total
@@ -126,12 +169,20 @@ impl Group {
                 continue;
             }
             let mut member = index == root;
-            let mut parent = aac_stream_descriptor(&track.configuration)?.depends_on;
+            let descriptor = aac_stream_descriptor(&track.configuration)?;
+            if !AudioSpecificConfig::parse(descriptor.asc)?.separate_esc {
+                continue;
+            }
+            let own_binding = binding(track)?;
+            if own_binding.file != root_binding.file {
+                continue;
+            }
+            let mut parent = own_binding.parent;
             for _ in 0..tracks.len() {
                 let Some(id) = parent else {
                     break;
                 };
-                if id == d.es_id {
+                if id == root_binding.id {
                     member = true;
                     break;
                 }
@@ -140,9 +191,13 @@ impl Group {
                     .iter()
                     .filter(|t| t.codec == *b"mp4a" && t.handler == *b"soun")
                 {
-                    let candidate = aac_stream_descriptor(&candidate.configuration)?;
-                    if candidate.es_id == id {
-                        found = Some(candidate.depends_on);
+                    let descriptor = aac_stream_descriptor(&candidate.configuration)?;
+                    if !AudioSpecificConfig::parse(descriptor.asc)?.separate_esc {
+                        continue;
+                    }
+                    let candidate = binding(candidate)?;
+                    if candidate.file == root_binding.file && candidate.id == id {
+                        found = Some(candidate.parent);
                         break;
                     }
                 }
@@ -185,7 +240,8 @@ impl Group {
             return Err(invalid("EP1 MP4 root is not MPEG-4 audio"));
         }
         let descriptor = aac_stream_descriptor(&track.configuration)?;
-        if descriptor.depends_on.is_some() {
+        let root_binding = binding(track)?;
+        if root_binding.parent.is_some() {
             return Err(invalid("EP1 MP4 selected track is not a root ES"));
         }
         if !AudioSpecificConfig::parse(descriptor.asc)?.separate_esc {
@@ -200,6 +256,10 @@ impl Group {
                 .ensure_constant_description()
                 .map_err(|e| invalid(&e.to_string()))?;
             let d = aac_stream_descriptor(&track.configuration)?;
+            let current = binding(track)?;
+            if current.file != root_binding.file {
+                return Err(invalid("EP1 MP4 mixes file and stream dependency bindings"));
+            }
             if d.url.is_some() {
                 return Err(invalid(
                     "EP1 MP4 external ES URL requires an external source",
@@ -214,7 +274,7 @@ impl Group {
             if track.timescale == 0 {
                 return Err(invalid("EP1 MP4 zero source timescale"));
             }
-            if streams.iter().any(|s: &Stream| s.es_id == d.es_id) {
+            if streams.iter().any(|s: &Stream| s.es_id == current.id) {
                 return Err(invalid("EP1 MP4 repeated or cyclic ES ID"));
             }
             let mut samples = Vec::new();
@@ -238,8 +298,8 @@ impl Group {
             streams.push(Stream {
                 index: at,
                 id: track.id,
-                es_id: d.es_id,
-                parent: d.depends_on,
+                es_id: current.id,
+                parent: current.parent,
                 timescale: track.timescale,
                 configuration: track.configuration.clone(),
                 samples,
@@ -250,10 +310,24 @@ impl Group {
                     continue;
                 }
                 let child = aac_stream_descriptor(&candidate.configuration)?;
-                if child.es_id == d.es_id && index != at {
+                if !AudioSpecificConfig::parse(child.asc).is_ok_and(|p| p.separate_esc)
+                    && !candidate.dependencies.contains(&track.id)
+                    && child.depends_on != Some(current.id)
+                {
+                    continue;
+                }
+                let child = binding(candidate)?;
+                if child.file
+                    && child
+                        .parent
+                        .is_some_and(|id| !tracks.iter().any(|t| t.id == u32::from(id)))
+                {
+                    return Err(invalid("EP1 MP4 missing dependency track"));
+                }
+                if child.id == current.id && child.file == current.file && index != at {
                     return Err(invalid("EP1 MP4 duplicate ES ID"));
                 }
-                if child.depends_on == Some(d.es_id) {
+                if child.parent == Some(current.id) {
                     if next.replace(index).is_some() {
                         return Err(invalid("EP1 MP4 forked ES dependency"));
                     }
@@ -331,6 +405,12 @@ impl Group {
                 .tracks()
                 .get(stream.index)
                 .ok_or_else(|| invalid("EP1 MP4 stream track index out of range"))?;
+            let current = binding(track)?;
+            if current.id != stream.es_id || current.parent != stream.parent {
+                return Err(invalid(
+                    "EP1 MP4 group belongs to different track configuration",
+                ));
+            }
             if track.id != stream.id
                 || track.timescale != stream.timescale
                 || track.configuration != stream.configuration

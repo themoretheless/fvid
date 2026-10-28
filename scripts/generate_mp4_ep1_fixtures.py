@@ -5,7 +5,7 @@ from generate_he_aac_packet_fixtures import box,boxes
 from generate_aac_esds_stream_fixtures import descriptor
 ROOT=Path(__file__).resolve().parents[1];SOURCE=ROOT/'tests/fixtures/playback-errors';OUT=SOURCE/'mp4-ep1'
 def word(*values):return b''.join(struct.pack('>I',v)for v in values)
-def make_movie(base,source,units,mode=None,allow_empty=False):
+def make_movie(base,source,units,mode=None,allow_empty=False,frame_count=3,file_dependencies=False):
     original=dict(boxes(source));moov=list(boxes(original[b'moov']));tracks=[];audio=None
     for tag,body in moov:
         if tag!=b'trak':continue
@@ -15,9 +15,9 @@ def make_movie(base,source,units,mode=None,allow_empty=False):
     assert audio is not None
     movie_scale=int.from_bytes(next(p for t,p in moov if t==b'mvhd')[12:16],'big')
     parts=list(boxes(source));assert parts[-1][0]==b'moov'
-    prefix=b''.join(box(t,p)for t,p in parts[:-1]);media=bytearray();rows=base['frames'][:3]
+    prefix=b''.join(box(t,p)for t,p in parts[:-1]);media=bytearray();rows=base['frames'][:frame_count]
     order=[u['stream_id']for u in rows[0]['units']];root=next(u['stream_id']for u in rows[0]['units']if u['depends_on']is None)
-    asc=bytes.fromhex(base['asc']);skipped=False
+    asc=bytes.fromhex(base['asc']);skipped=False;track_ids={sid:i+2 for i,sid in enumerate(order)}
     for ordinal,sid in enumerate(order):
         selected=[next(u for u in frame['units']if u['stream_id']==sid)for frame in rows]
         assert all(u['depends_on']==selected[0]['depends_on']for u in selected)
@@ -28,7 +28,7 @@ def make_movie(base,source,units,mode=None,allow_empty=False):
         parent=selected[0]['depends_on']
         if mode=='fork' and ordinal==1:parent=root
         esid=root if mode=='duplicate'and ordinal==0 else sid
-        head=struct.pack('>H',esid)+bytes([128 if parent is not None else 0])+(struct.pack('>H',parent)if parent is not None else b'')
+        head=bytes(3)if file_dependencies else struct.pack('>H',esid)+bytes([128 if parent is not None else 0])+(struct.pack('>H',parent)if parent is not None else b'')
         esds=bytes(4)+descriptor(3,head+descriptor(4,b'\x40\x14'+bytes(11)+descriptor(5,asc))+descriptor(6,b'\x02'))
         raw=[units[u['offset']:u['offset']+u['bytes']]for u in selected];assert allow_empty or all(raw)
         offset=len(prefix)+8+len(media);media.extend(b''.join(raw))
@@ -42,7 +42,7 @@ def make_movie(base,source,units,mode=None,allow_empty=False):
                     body+=box(b'padb',word(0,count)+packed)
                     if mode=='signed':body+=box(b'ctts',word(0x01000000,1,count,(-37*(scale//24000))&0xffffffff))
                     if omit:body+=box(b'ctts',word(0,1,count,step))
-            elif tag==b'tkhd':body=body[:12]+word(ordinal+2)+body[16:20]+word(3 if mode=='edits'and sid==root else (3*base['n']*movie_scale+23999)//24000)+body[24:]
+            elif tag==b'tkhd':body=body[:12]+word(ordinal+2)+body[16:20]+word(3 if mode=='edits'and sid==root else (len(rows)*base['n']*movie_scale+23999)//24000)+body[24:]
             elif tag==b'mdhd':body=body[:12]+word(scale,count*step)+body[20:]
             elif tag==b'stsd':body=body[:8]+b''.join(rewrite(t,p)for t,p in boxes(body[8:]))
             elif tag==b'mp4a':body=body[:28]+b''.join(rewrite(t,p)for t,p in boxes(body[28:]))
@@ -50,6 +50,7 @@ def make_movie(base,source,units,mode=None,allow_empty=False):
             elif tag in tables:body=tables[tag]
             return box(tag,body)
         track_body=b''.join(rewrite(t,p)for t,p in boxes(audio)if t!=b'edts')
+        if file_dependencies and parent is not None:track_body+=box(b'tref',box(b'dpnd',word(track_ids[parent])))
         if mode=='edits' and sid==root:
             track_body+=box(b'edts',box(b'elst',word(0,3,1,0xffffffff,0x10000,1,7*scale//1000,0x10000,1,scale//1000,0x10000)))
         tracks.append(box(b'trak',track_body))

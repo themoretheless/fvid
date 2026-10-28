@@ -1,0 +1,3451 @@
+{
+  "cases": [
+    {
+      "name": "sbr-ps-aot17-1024-24000-explicit-indexed",
+      "video": "sbr-ps-aot17-1024-24000-explicit-indexed.mp4",
+      "signal": "explicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "indexed",
+      "plain_asc": "eb0b4400",
+      "asc": "eb0b4420",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-24000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-1024-24000-explicit-fragmented",
+      "video": "sbr-ps-aot17-1024-24000-explicit-fragmented.mp4",
+      "signal": "explicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "fragmented",
+      "plain_asc": "eb0b4400",
+      "asc": "eb0b4420",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-24000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-1024-24000-explicit-edits",
+      "video": "sbr-ps-aot17-1024-24000-explicit-edits.mp4",
+      "signal": "explicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "edits",
+      "plain_asc": "eb0b4400",
+      "asc": "eb0b4420",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-24000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-1024-24000-sync-indexed",
+      "video": "sbr-ps-aot17-1024-24000-sync-indexed.mp4",
+      "signal": "sync",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "indexed",
+      "plain_asc": "8b0815b96d5220",
+      "asc": "8b0855b96d5220",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-24000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-1024-24000-sync-fragmented",
+      "video": "sbr-ps-aot17-1024-24000-sync-fragmented.mp4",
+      "signal": "sync",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "fragmented",
+      "plain_asc": "8b0815b96d5220",
+      "asc": "8b0855b96d5220",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-24000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-1024-24000-sync-edits",
+      "video": "sbr-ps-aot17-1024-24000-sync-edits.mp4",
+      "signal": "sync",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "edits",
+      "plain_asc": "8b0815b96d5220",
+      "asc": "8b0855b96d5220",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-24000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-1024-24000-implicit-indexed",
+      "video": "sbr-ps-aot17-1024-24000-implicit-indexed.mp4",
+      "signal": "implicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "indexed",
+      "plain_asc": "8b0815b96c",
+      "asc": "8b0855b96c",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-24000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-1024-24000-implicit-fragmented",
+      "video": "sbr-ps-aot17-1024-24000-implicit-fragmented.mp4",
+      "signal": "implicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "fragmented",
+      "plain_asc": "8b0815b96c",
+      "asc": "8b0855b96c",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-24000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-1024-24000-implicit-edits",
+      "video": "sbr-ps-aot17-1024-24000-implicit-edits.mp4",
+      "signal": "implicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "edits",
+      "plain_asc": "8b0815b96c",
+      "asc": "8b0855b96c",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-24000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-1024-48000-explicit-indexed",
+      "video": "sbr-ps-aot17-1024-48000-explicit-indexed.mp4",
+      "signal": "explicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "indexed",
+      "plain_asc": "eb09c400",
+      "asc": "eb09c420",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-48000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-1024-48000-explicit-fragmented",
+      "video": "sbr-ps-aot17-1024-48000-explicit-fragmented.mp4",
+      "signal": "explicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "fragmented",
+      "plain_asc": "eb09c400",
+      "asc": "eb09c420",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-48000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-1024-48000-explicit-edits",
+      "video": "sbr-ps-aot17-1024-48000-explicit-edits.mp4",
+      "signal": "explicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "edits",
+      "plain_asc": "eb09c400",
+      "asc": "eb09c420",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-48000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-1024-48000-sync-indexed",
+      "video": "sbr-ps-aot17-1024-48000-sync-indexed.mp4",
+      "signal": "sync",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "indexed",
+      "plain_asc": "8b0815b9675220",
+      "asc": "8b0855b9675220",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-48000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-1024-48000-sync-fragmented",
+      "video": "sbr-ps-aot17-1024-48000-sync-fragmented.mp4",
+      "signal": "sync",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "fragmented",
+      "plain_asc": "8b0815b9675220",
+      "asc": "8b0855b9675220",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-48000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-1024-48000-sync-edits",
+      "video": "sbr-ps-aot17-1024-48000-sync-edits.mp4",
+      "signal": "sync",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "edits",
+      "plain_asc": "8b0815b9675220",
+      "asc": "8b0855b9675220",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-48000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-1024-48000-implicit-indexed",
+      "video": "sbr-ps-aot17-1024-48000-implicit-indexed.mp4",
+      "signal": "implicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "indexed",
+      "plain_asc": "8b0815b966",
+      "asc": "8b0855b966",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-48000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-1024-48000-implicit-fragmented",
+      "video": "sbr-ps-aot17-1024-48000-implicit-fragmented.mp4",
+      "signal": "implicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "fragmented",
+      "plain_asc": "8b0815b966",
+      "asc": "8b0855b966",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-48000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-1024-48000-implicit-edits",
+      "video": "sbr-ps-aot17-1024-48000-implicit-edits.mp4",
+      "signal": "implicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "edits",
+      "plain_asc": "8b0815b966",
+      "asc": "8b0855b966",
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-1024-48000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-24000-explicit-indexed",
+      "video": "sbr-ps-aot17-960-24000-explicit-indexed.mp4",
+      "signal": "explicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "indexed",
+      "plain_asc": "eb0b4600",
+      "asc": "eb0b4620",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-24000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-24000-explicit-fragmented",
+      "video": "sbr-ps-aot17-960-24000-explicit-fragmented.mp4",
+      "signal": "explicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "fragmented",
+      "plain_asc": "eb0b4600",
+      "asc": "eb0b4620",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-24000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-24000-explicit-edits",
+      "video": "sbr-ps-aot17-960-24000-explicit-edits.mp4",
+      "signal": "explicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "edits",
+      "plain_asc": "eb0b4600",
+      "asc": "eb0b4620",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-24000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-24000-sync-indexed",
+      "video": "sbr-ps-aot17-960-24000-sync-indexed.mp4",
+      "signal": "sync",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "indexed",
+      "plain_asc": "8b0c15b96d5220",
+      "asc": "8b0c55b96d5220",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-24000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-24000-sync-fragmented",
+      "video": "sbr-ps-aot17-960-24000-sync-fragmented.mp4",
+      "signal": "sync",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "fragmented",
+      "plain_asc": "8b0c15b96d5220",
+      "asc": "8b0c55b96d5220",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-24000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-24000-sync-edits",
+      "video": "sbr-ps-aot17-960-24000-sync-edits.mp4",
+      "signal": "sync",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "edits",
+      "plain_asc": "8b0c15b96d5220",
+      "asc": "8b0c55b96d5220",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-24000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-24000-implicit-indexed",
+      "video": "sbr-ps-aot17-960-24000-implicit-indexed.mp4",
+      "signal": "implicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "indexed",
+      "plain_asc": "8b0c15b96c",
+      "asc": "8b0c55b96c",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-24000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-24000-implicit-fragmented",
+      "video": "sbr-ps-aot17-960-24000-implicit-fragmented.mp4",
+      "signal": "implicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "fragmented",
+      "plain_asc": "8b0c15b96c",
+      "asc": "8b0c55b96c",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-24000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-24000-implicit-edits",
+      "video": "sbr-ps-aot17-960-24000-implicit-edits.mp4",
+      "signal": "implicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "edits",
+      "plain_asc": "8b0c15b96c",
+      "asc": "8b0c55b96c",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-24000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-48000-explicit-indexed",
+      "video": "sbr-ps-aot17-960-48000-explicit-indexed.mp4",
+      "signal": "explicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "indexed",
+      "plain_asc": "eb09c600",
+      "asc": "eb09c620",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-48000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-48000-explicit-fragmented",
+      "video": "sbr-ps-aot17-960-48000-explicit-fragmented.mp4",
+      "signal": "explicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "fragmented",
+      "plain_asc": "eb09c600",
+      "asc": "eb09c620",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-48000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-48000-explicit-edits",
+      "video": "sbr-ps-aot17-960-48000-explicit-edits.mp4",
+      "signal": "explicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "edits",
+      "plain_asc": "eb09c600",
+      "asc": "eb09c620",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-48000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-48000-sync-indexed",
+      "video": "sbr-ps-aot17-960-48000-sync-indexed.mp4",
+      "signal": "sync",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "indexed",
+      "plain_asc": "8b0c15b9675220",
+      "asc": "8b0c55b9675220",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-48000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-48000-sync-fragmented",
+      "video": "sbr-ps-aot17-960-48000-sync-fragmented.mp4",
+      "signal": "sync",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "fragmented",
+      "plain_asc": "8b0c15b9675220",
+      "asc": "8b0c55b9675220",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-48000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-48000-sync-edits",
+      "video": "sbr-ps-aot17-960-48000-sync-edits.mp4",
+      "signal": "sync",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "edits",
+      "plain_asc": "8b0c15b9675220",
+      "asc": "8b0c55b9675220",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-48000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-48000-implicit-indexed",
+      "video": "sbr-ps-aot17-960-48000-implicit-indexed.mp4",
+      "signal": "implicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "indexed",
+      "plain_asc": "8b0c15b966",
+      "asc": "8b0c55b966",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-48000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-48000-implicit-fragmented",
+      "video": "sbr-ps-aot17-960-48000-implicit-fragmented.mp4",
+      "signal": "implicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "fragmented",
+      "plain_asc": "8b0c15b966",
+      "asc": "8b0c55b966",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-48000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot17-960-48000-implicit-edits",
+      "video": "sbr-ps-aot17-960-48000-implicit-edits.mp4",
+      "signal": "implicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "edits",
+      "plain_asc": "8b0c15b966",
+      "asc": "8b0c55b966",
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot17-960-48000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 138
+        },
+        {
+          "offset": 314,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-24000-explicit-indexed",
+      "video": "sbr-ps-aot19-1024-24000-explicit-indexed.mp4",
+      "signal": "explicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "indexed",
+      "plain_asc": "eb0b4c00",
+      "asc": "eb0b4c20",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-24000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-24000-explicit-fragmented",
+      "video": "sbr-ps-aot19-1024-24000-explicit-fragmented.mp4",
+      "signal": "explicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "fragmented",
+      "plain_asc": "eb0b4c00",
+      "asc": "eb0b4c20",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-24000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-24000-explicit-edits",
+      "video": "sbr-ps-aot19-1024-24000-explicit-edits.mp4",
+      "signal": "explicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "edits",
+      "plain_asc": "eb0b4c00",
+      "asc": "eb0b4c20",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-24000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-24000-sync-indexed",
+      "video": "sbr-ps-aot19-1024-24000-sync-indexed.mp4",
+      "signal": "sync",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "indexed",
+      "plain_asc": "9b0815b96d5220",
+      "asc": "9b0855b96d5220",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-24000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-24000-sync-fragmented",
+      "video": "sbr-ps-aot19-1024-24000-sync-fragmented.mp4",
+      "signal": "sync",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "fragmented",
+      "plain_asc": "9b0815b96d5220",
+      "asc": "9b0855b96d5220",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-24000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-24000-sync-edits",
+      "video": "sbr-ps-aot19-1024-24000-sync-edits.mp4",
+      "signal": "sync",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "edits",
+      "plain_asc": "9b0815b96d5220",
+      "asc": "9b0855b96d5220",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-24000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-24000-implicit-indexed",
+      "video": "sbr-ps-aot19-1024-24000-implicit-indexed.mp4",
+      "signal": "implicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "indexed",
+      "plain_asc": "9b0815b96c",
+      "asc": "9b0855b96c",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-24000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-24000-implicit-fragmented",
+      "video": "sbr-ps-aot19-1024-24000-implicit-fragmented.mp4",
+      "signal": "implicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "fragmented",
+      "plain_asc": "9b0815b96c",
+      "asc": "9b0855b96c",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-24000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-24000-implicit-edits",
+      "video": "sbr-ps-aot19-1024-24000-implicit-edits.mp4",
+      "signal": "implicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "edits",
+      "plain_asc": "9b0815b96c",
+      "asc": "9b0855b96c",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-24000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-48000-explicit-indexed",
+      "video": "sbr-ps-aot19-1024-48000-explicit-indexed.mp4",
+      "signal": "explicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "indexed",
+      "plain_asc": "eb09cc00",
+      "asc": "eb09cc20",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-48000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-48000-explicit-fragmented",
+      "video": "sbr-ps-aot19-1024-48000-explicit-fragmented.mp4",
+      "signal": "explicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "fragmented",
+      "plain_asc": "eb09cc00",
+      "asc": "eb09cc20",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-48000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-48000-explicit-edits",
+      "video": "sbr-ps-aot19-1024-48000-explicit-edits.mp4",
+      "signal": "explicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "edits",
+      "plain_asc": "eb09cc00",
+      "asc": "eb09cc20",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-48000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-48000-sync-indexed",
+      "video": "sbr-ps-aot19-1024-48000-sync-indexed.mp4",
+      "signal": "sync",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "indexed",
+      "plain_asc": "9b0815b9675220",
+      "asc": "9b0855b9675220",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-48000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-48000-sync-fragmented",
+      "video": "sbr-ps-aot19-1024-48000-sync-fragmented.mp4",
+      "signal": "sync",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "fragmented",
+      "plain_asc": "9b0815b9675220",
+      "asc": "9b0855b9675220",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-48000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-48000-sync-edits",
+      "video": "sbr-ps-aot19-1024-48000-sync-edits.mp4",
+      "signal": "sync",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "edits",
+      "plain_asc": "9b0815b9675220",
+      "asc": "9b0855b9675220",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-48000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-48000-implicit-indexed",
+      "video": "sbr-ps-aot19-1024-48000-implicit-indexed.mp4",
+      "signal": "implicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "indexed",
+      "plain_asc": "9b0815b966",
+      "asc": "9b0855b966",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-48000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-48000-implicit-fragmented",
+      "video": "sbr-ps-aot19-1024-48000-implicit-fragmented.mp4",
+      "signal": "implicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "fragmented",
+      "plain_asc": "9b0815b966",
+      "asc": "9b0855b966",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-48000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-1024-48000-implicit-edits",
+      "video": "sbr-ps-aot19-1024-48000-implicit-edits.mp4",
+      "signal": "implicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 1024,
+      "mode": "edits",
+      "plain_asc": "9b0815b966",
+      "asc": "9b0855b966",
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-1024-48000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-24000-explicit-indexed",
+      "video": "sbr-ps-aot19-960-24000-explicit-indexed.mp4",
+      "signal": "explicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "indexed",
+      "plain_asc": "eb0b4e00",
+      "asc": "eb0b4e20",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-24000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-24000-explicit-fragmented",
+      "video": "sbr-ps-aot19-960-24000-explicit-fragmented.mp4",
+      "signal": "explicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "fragmented",
+      "plain_asc": "eb0b4e00",
+      "asc": "eb0b4e20",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-24000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-24000-explicit-edits",
+      "video": "sbr-ps-aot19-960-24000-explicit-edits.mp4",
+      "signal": "explicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "edits",
+      "plain_asc": "eb0b4e00",
+      "asc": "eb0b4e20",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-24000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-24000-sync-indexed",
+      "video": "sbr-ps-aot19-960-24000-sync-indexed.mp4",
+      "signal": "sync",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "indexed",
+      "plain_asc": "9b0c15b96d5220",
+      "asc": "9b0c55b96d5220",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-24000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-24000-sync-fragmented",
+      "video": "sbr-ps-aot19-960-24000-sync-fragmented.mp4",
+      "signal": "sync",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "fragmented",
+      "plain_asc": "9b0c15b96d5220",
+      "asc": "9b0c55b96d5220",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-24000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-24000-sync-edits",
+      "video": "sbr-ps-aot19-960-24000-sync-edits.mp4",
+      "signal": "sync",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "edits",
+      "plain_asc": "9b0c15b96d5220",
+      "asc": "9b0c55b96d5220",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-24000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-24000-implicit-indexed",
+      "video": "sbr-ps-aot19-960-24000-implicit-indexed.mp4",
+      "signal": "implicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "indexed",
+      "plain_asc": "9b0c15b96c",
+      "asc": "9b0c55b96c",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-24000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-24000-implicit-fragmented",
+      "video": "sbr-ps-aot19-960-24000-implicit-fragmented.mp4",
+      "signal": "implicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "fragmented",
+      "plain_asc": "9b0c15b96c",
+      "asc": "9b0c55b96c",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-24000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-24000-implicit-edits",
+      "video": "sbr-ps-aot19-960-24000-implicit-edits.mp4",
+      "signal": "implicit",
+      "rate": 24000,
+      "channels": 2,
+      "n": 960,
+      "mode": "edits",
+      "plain_asc": "9b0c15b96c",
+      "asc": "9b0c55b96c",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-24000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-48000-explicit-indexed",
+      "video": "sbr-ps-aot19-960-48000-explicit-indexed.mp4",
+      "signal": "explicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "indexed",
+      "plain_asc": "eb09ce00",
+      "asc": "eb09ce20",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-48000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-48000-explicit-fragmented",
+      "video": "sbr-ps-aot19-960-48000-explicit-fragmented.mp4",
+      "signal": "explicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "fragmented",
+      "plain_asc": "eb09ce00",
+      "asc": "eb09ce20",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-48000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-48000-explicit-edits",
+      "video": "sbr-ps-aot19-960-48000-explicit-edits.mp4",
+      "signal": "explicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "edits",
+      "plain_asc": "eb09ce00",
+      "asc": "eb09ce20",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-48000-explicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-48000-sync-indexed",
+      "video": "sbr-ps-aot19-960-48000-sync-indexed.mp4",
+      "signal": "sync",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "indexed",
+      "plain_asc": "9b0c15b9675220",
+      "asc": "9b0c55b9675220",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-48000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-48000-sync-fragmented",
+      "video": "sbr-ps-aot19-960-48000-sync-fragmented.mp4",
+      "signal": "sync",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "fragmented",
+      "plain_asc": "9b0c15b9675220",
+      "asc": "9b0c55b9675220",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-48000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-48000-sync-edits",
+      "video": "sbr-ps-aot19-960-48000-sync-edits.mp4",
+      "signal": "sync",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "edits",
+      "plain_asc": "9b0c15b9675220",
+      "asc": "9b0c55b9675220",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-48000-sync.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-48000-implicit-indexed",
+      "video": "sbr-ps-aot19-960-48000-implicit-indexed.mp4",
+      "signal": "implicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "indexed",
+      "plain_asc": "9b0c15b966",
+      "asc": "9b0c55b966",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-48000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-48000-implicit-fragmented",
+      "video": "sbr-ps-aot19-960-48000-implicit-fragmented.mp4",
+      "signal": "implicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "fragmented",
+      "plain_asc": "9b0c15b966",
+      "asc": "9b0c55b966",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-48000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    },
+    {
+      "name": "sbr-ps-aot19-960-48000-implicit-edits",
+      "video": "sbr-ps-aot19-960-48000-implicit-edits.mp4",
+      "signal": "implicit",
+      "rate": 48000,
+      "channels": 2,
+      "n": 960,
+      "mode": "edits",
+      "plain_asc": "9b0c15b966",
+      "asc": "9b0c55b966",
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "payloads": [
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc",
+        "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+        "d0380000000052ccc087fc",
+        "d0380000000052ccc097fc"
+      ],
+      "logical": "sbr-ps-aot19-960-48000-implicit.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138
+        },
+        {
+          "offset": 138,
+          "bytes": 19
+        },
+        {
+          "offset": 157,
+          "bytes": 19
+        },
+        {
+          "offset": 176,
+          "bytes": 140
+        },
+        {
+          "offset": 316,
+          "bytes": 21
+        },
+        {
+          "offset": 337,
+          "bytes": 21
+        }
+      ]
+    }
+  ],
+  "ld_cases": [
+    {
+      "name": "eld-n480-c1-x2-crc1-file-indexed",
+      "video": "eld-n480-c1-x2-crc1-file-indexed.mp4",
+      "golden": "eld-n480-c1-x2-crc1-file.f32le",
+      "channels": 1,
+      "rate": 48000
+    },
+    {
+      "name": "eld-n480-c1-x2-crc1-file-fragmented",
+      "video": "eld-n480-c1-x2-crc1-file-fragmented.mp4",
+      "golden": "eld-n480-c1-x2-crc1-file.f32le",
+      "channels": 1,
+      "rate": 48000
+    },
+    {
+      "name": "eld-n512-c7-x2-crc1-file-indexed",
+      "video": "eld-n512-c7-x2-crc1-file-indexed.mp4",
+      "golden": "eld-n512-c7-x2-crc1-file.f32le",
+      "channels": 8,
+      "rate": 48000
+    },
+    {
+      "name": "eld-n512-c7-x2-crc1-file-fragmented",
+      "video": "eld-n512-c7-x2-crc1-file-fragmented.mp4",
+      "golden": "eld-n512-c7-x2-crc1-file.f32le",
+      "channels": 8,
+      "rate": 48000
+    }
+  ],
+  "malformed": [
+    {
+      "video": "invalid-dpnd-length.mp4",
+      "error": "invalid MP4 dpnd table length",
+      "parser": true
+    },
+    {
+      "video": "invalid-dpnd-zero.mp4",
+      "error": "zero MP4 dependency track ID",
+      "parser": true
+    },
+    {
+      "video": "invalid-dpnd-duplicate.mp4",
+      "error": "duplicate MP4 singleton box",
+      "parser": true
+    },
+    {
+      "video": "invalid-dpnd-missing.mp4",
+      "error": "EP1 MP4 missing dependency track",
+      "parser": false
+    },
+    {
+      "video": "invalid-dpnd-self.mp4",
+      "error": "EP1 MP4 self dependency",
+      "parser": false
+    },
+    {
+      "video": "invalid-dpnd-multiple.mp4",
+      "error": "EP1 MP4 multiple dependency parents are not supported",
+      "parser": false
+    }
+  ],
+  "provenance": "Own ISO MP4 dpnd bindings with stored ES_ID zero, AVC video, ER-LC/LTP core and SBR/PS payloads with real EP1 ESC tracks. Raw unprotected AUs qualify transport equivalence; independent core PCM permits a separate shared PS-stage crosscheck, not an independent PS DSP oracle. 960/1024, 24/48 kHz, explicit/sync/implicit signals, six frames with changed headers. No foreign codec, private media, process or network."
+}

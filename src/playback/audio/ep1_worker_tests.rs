@@ -37,6 +37,7 @@ fn run(worker: &mut Worker) {
 fn ep1_worker_queues_exact_pcm_after_partial_playback_seek_rewind_and_edits() {
     check_corpus("mp4-ep1");
     check_corpus("mp4-ep1-empty");
+    check_corpus("mp4-ep1-ps");
 }
 fn check_corpus(corpus: &str) {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -54,7 +55,8 @@ fn check_corpus(corpus: &str) {
                 .and_then(|v| v.as_array())
                 .into_iter()
                 .flatten(),
-        );
+        )
+        .chain(m.get("ld_cases").and_then(|v| v.as_array()).into_iter().flatten());
     for case in cases {
         let bytes = std::fs::read(root.join(case["video"].as_str().unwrap())).unwrap();
         let mut full = Vec::new();
@@ -111,7 +113,7 @@ fn check_corpus(corpus: &str) {
             let prefix = if case["name"].as_str().unwrap().ends_with("-edits") {
                 4
             } else {
-                1
+                2
             };
             for _ in 0..prefix {
                 assert!(!matches!(

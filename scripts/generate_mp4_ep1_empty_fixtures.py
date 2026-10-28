@@ -9,7 +9,7 @@ def fragmented(source,mode):
         if tag!=b'trak':newmoov.append(box(tag,body));continue
         mdia=dict(boxes(body))[b'mdia'];md=dict(boxes(mdia));handler=md[b'hdlr'][8:12]
         if handler!=b'soun':newmoov.append(box(tag,body));continue
-        track_id=int.from_bytes(dict(boxes(body))[b'tkhd'][12:16],'big');stbl=dict(boxes(dict(boxes(md[b'minf']))[b'stbl']));count=int.from_bytes(stbl[b'stsz'][8:12],'big');assert count==3
+        track_id=int.from_bytes(dict(boxes(body))[b'tkhd'][12:16],'big');stbl=dict(boxes(dict(boxes(md[b'minf']))[b'stbl']));count=int.from_bytes(stbl[b'stsz'][8:12],'big');assert count>0
         sizes=[int.from_bytes(stbl[b'stsz'][12+4*i:16+4*i],'big')for i in range(count)];offset=int.from_bytes(stbl[b'stco'][8:12],'big');raw=[]
         for size in sizes:raw.append(source[offset:offset+size]);offset+=size
         step=int.from_bytes(stbl[b'stts'][12:16],'big');padb=stbl[b'padb'][8:];padding=[((padb[i//2]>>(4 if i%2==0 else 0))&7)for i in range(count)]
@@ -32,7 +32,7 @@ def fragmented(source,mode):
             for raw,pad in zip(track['raw'],track['padding']):
                 if mode=='padding-empty' and not raw and not bad:pad=1;bad=True
                 entries+=(word(len(raw))if not inherited else b'')+word(pad<<17)
-            trun=box(b'trun',word(0x401|(0 if inherited else 0x200),3,offset)+entries)
+            trun=box(b'trun',word(0x401|(0 if inherited else 0x200),len(track['raw']),offset)+entries)
             traf.append(box(b'traf',tfhd+box(b'tfdt',word(0,0))+trun));offset+=sum(map(len,track['raw']))
         return box(b'moof',box(b'mfhd',word(0,1))+b''.join(traf))
     probe=moof(0);payload=b''.join(raw for t in tracks for raw in t['raw'])

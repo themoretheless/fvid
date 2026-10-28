@@ -1,3 +1,50 @@
+## ISO MP4 dependency binding, PS and LD-SBR navigation, 2026-10-28
+
+The new canonical MP4 corpus first reproduced `select exactly one audio stream`:
+all stored ES_ID fields were zero and the parser ignored trak/tref/dpnd.
+The shared root/media parser now retains dependency track IDs, preserves them in
+decoder headers and accounts for their allocated storage in index admission.
+EP1 grouping derives ES identifiers from actual track IDs, resolves dpnd parents,
+and validates the binding again when reading. Zero/misaligned/duplicate tables,
+missing/self dependencies and multiple-parent graphs have specific refusal tests.
+Multiple-parent refusal is not playback acceptance.
+
+This follows ISO/IEC 14496-14 sections 3.1.2, 3.2 and 5.2: stored ES_ID and
+streamDependenceFlag are zero; file dependencies use dpnd, and elementary track
+IDs supply ES identifiers. Primary reference:
+https://ossrs.io/lts/zh-cn/assets/files/ISO_IEC_14496-14-MP4-2003-9a3eb04879ded495406399602ff2e587.pdf
+Earlier mp4-ep1 and mp4-ep1-empty fixtures carry dependencies in noncanonical
+ESDescriptor fields. They remain explicit compatibility tests, not proof of ISO
+file binding. Authoritative dpnd cannot be mixed with those descriptor bindings.
+
+The new 72-programme PS matrix covers AOT17/19, 960/1024, 24/48 kHz,
+explicit/sync/implicit signaling, indexed/fragments/edit lists, changed SBR
+headers and active LTP history. Full PCM, exact interval export, WAV/gain,
+delayed source identity, checkpoint rollback, final EOF frame, repeated/frame-edge
+seek and rewind pass through native groups, owned/public export and AudioStream.
+Four additional canonical LD-SBR programmes cover mono/8 channels and indexed/
+fragmented MP4, six AUs including empty ESCs, independent PCM, playback and
+frame-edge/repeated/EOF/rewind navigation. Worker capture includes these four,
+all 72 PS programmes and the previous 20 programmes: 96 complete programmes,
+with exact queued PCM and rational clocks after partial playback and seeks.
+
+PS transport acceptance uses unprotected AUs as the equivalent decoder baseline.
+An independent core PCM oracle plus the separate owned PS synthesis stage
+crosschecks output, but the PS DSP itself has no independent oracle here.
+LD-SBR output uses the existing independent scalar reference. No physical-device
+listening or external conformance corpus is inferred from software capture.
+
+The 113 new artifacts / 956213 bytes regenerate byte-exact with process/socket
+creation forbidden. Both earlier corpora remain byte-identical. Ordinary tests
+read checked-in synthetic assets only; no FFmpeg/network. The PS test executable
+has no FFmpeg/libav linkage. 72 distinct selected integration checks and 1622
+root/media unit tests pass offline (29 unit tests ignored).
+
+Still open: changing dependent sample descriptions, external SL/clock bindings,
+physical output qualification and broader codec combinations. This closes the
+exercised canonical MP4 EP1 PS/LD-SBR transport/navigation milestone; it does not
+assert that every codec gap or all LD-SBR conformance is complete.
+
 ## Explicit empty ESC AUs in indexed and fragmented MP4, 2026-10-28
 
 The shared MP4 index now retains zero-sized samples when their selected sample
