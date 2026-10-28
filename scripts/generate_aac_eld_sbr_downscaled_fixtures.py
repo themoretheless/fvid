@@ -19,13 +19,13 @@ def core_pcm(n,cfg,factor,tool='base',flags=0,ms=0):
     data=core_data(n,cfg,factor,tool,flags,ms)
     case=json.loads(data['manifest.json'])['cases'][0];raw=data[case['name']+'.f32le']
     return struct.unpack('<'+'f'*(len(raw)//4),raw)
-def generate():
+def generate(factors=(2,4), high_rates=(48000,)):
     parent=SOURCE/'aac-eld-sbr';manifest=json.loads((parent/'manifest.json').read_bytes());blob=(parent/'packets.bin').read_bytes()
     noise=[complex(*struct.unpack_from('<dd',(SOURCE/'aac-sbr-noise-protocol.f64le').read_bytes(),i*16))for i in range(512)]
     files={};cases=[];exports=[];output=bytearray()
     selected=manifest['cases']
     for base in selected:
-      for factor in [2,4]:
+      for factor in factors:
         n=base['n'];cfg=base['configuration'];channels=base['channels'];tool=base.get('core_tool','base');flags=base.get('resilience',0);ms=2 if tool=='ms-all'else 1 if tool in ['pns','correlated-pns','intensity','tns']else 0
         mode='base'if tool!='base'else base['name'].split('-c'+str(cfg)+'-',1)[1]
         if mode.startswith('x'):mode='base'
@@ -57,26 +57,31 @@ def generate():
     # final two-band patch discarded by the protocol. This exercises analysis8.
     from generate_aac_sbr_dsp_fixtures import header
     from generate_he_aac_packet_fixtures import field,frequency
-    _,high,low,_=tables(5,10,0,False,0,0)
-    h=header(0,True);h=h[:1]+field(0,4)+field(14,4)+h[9:]
-    for n in [480,512]:
-      for cfg in [1,2]:
-       for factor in [2,4]:
-        source=core(True,[(n,48000,cfg,'base',0,0,False)],output_samples=n//factor,synthesis_window=short_window)
-        base=json.loads(source['manifest.json'])['cases'][0];raw=source[base['name']+'.f32le'];channels=base['channels'];pcm=struct.unpack('<'+'f'*(len(raw)//4),raw)
-        rows=[reconstruct([[v*32768 for v in row[:5]]for row in analysis([v*factor for v in pcm[ch::channels]],32//factor)],n//32,noise,geometry=(5,10,[1,2,3,None,None]))for ch in range(channels)]
-        for double in [False,True]:
-            rate=48000*(1+double)//factor;bands=(64 if double else 32)//factor;name=f'n{n}-r48000-c{cfg}-x{1+double}-ds{factor}'
-            asc=packed(field(31,5)+field(7,6)+frequency(48000)+field(cfg,4)+field(n==480,1)+'000'+'1'+field(double,1)+'1'+h+extension(48000//factor,True)+'0000'+'00')
-            frames=[];packets=[]
-            for i,row in enumerate(base['frames']):
-                packet=packed(row['bits']+sbr_bits(channels,len(high)-1,len(low)-1,n//32,i,True));frames.append(dict(offset=len(output),bytes=len(packet),end_bits=len(row['bits']+sbr_bits(channels,len(high)-1,len(low)-1,n//32,i,True))));output.extend(packet);packets.append(packet)
-            planar=[[v/32768 for v in synthesis(r,bands)]for r in rows];golden=b''.join(struct.pack('<'+'f'*channels,*(p[i]for p in planar))for i in range(len(planar[0])))
-            case=dict(base,name=name,asc=asc.hex(),frames=frames,rate=rate,container_rate=rate,container_frame_samples=n*(1+double)//factor,samples=len(planar[0]),factor=factor,source_rate=48000*(1+double),out_n=n*(1+double)//factor,video=name+'.mp4',matroska=name+'.mka',golden=name+'.f32le',short_analysis8=factor==4)
-            files[case['golden']]=golden;files[case['video']]=video_fixture([case],output,channels,filename=case['video'],write=False)['data'];files[case['matroska']]=mkv(asc,packets,rate,case['out_n'],channels);cases.append(case)
+    for core_rate in high_rates:
+     kx,stop,start,patch_sources=(5,10,0,[1,2,3,None,None])if core_rate==48000 else (4,8,3,[2,3,None,None])
+     _,high,low,_=tables(kx,stop,0,False,0,0)
+     h=header(0,True);h=h[:1]+field(start,4)+field(14,4)+h[9:]
+     for n in [480,512]:
+       for cfg in [1,2]:
+        for factor in factors:
+         source=core(True,[(n,core_rate,cfg,'base',0,0,False)],output_samples=n//factor,synthesis_window=short_window)
+         base=json.loads(source['manifest.json'])['cases'][0];raw=source[base['name']+'.f32le'];channels=base['channels'];pcm=struct.unpack('<'+'f'*(len(raw)//4),raw)
+         use_full=kx>32//factor
+         full=core(True,[(n,core_rate,cfg,'base',0,0,False)])if use_full else None
+         raw_full=full[base['name']+'.f32le']if use_full else None;nominal=struct.unpack('<'+'f'*(len(raw_full)//4),raw_full)if use_full else None
+         rows=[reconstruct([[v*32768 for v in row[:kx]]for row in analysis(nominal[ch::channels]if use_full else [v*factor for v in pcm[ch::channels]],32 if use_full else 32//factor)],n//32,noise,geometry=(kx,stop,patch_sources))for ch in range(channels)]
+         for double in [False,True]:
+             rate=core_rate*(1+double)//factor;bands=(64 if double else 32)//factor;name=f'n{n}-r{core_rate}-c{cfg}-x{1+double}-ds{factor}'
+             asc=packed(field(31,5)+field(7,6)+frequency(core_rate)+field(cfg,4)+field(n==480,1)+'000'+'1'+field(double,1)+'1'+h+extension(core_rate//factor,True)+'0000'+'00')
+             frames=[];packets=[]
+             for i,row in enumerate(base['frames']):
+                 packet=packed(row['bits']+sbr_bits(channels,len(high)-1,len(low)-1,n//32,i,True));frames.append(dict(offset=len(output),bytes=len(packet),end_bits=len(row['bits']+sbr_bits(channels,len(high)-1,len(low)-1,n//32,i,True))));output.extend(packet);packets.append(packet)
+             planar=[[v/32768 for v in synthesis(r,bands)]for r in rows];golden=b''.join(struct.pack('<'+'f'*channels,*(p[i]for p in planar))for i in range(len(planar[0])))
+             case=dict(base,name=name,asc=asc.hex(),frames=frames,rate=rate,container_rate=rate,container_frame_samples=n*(1+double)//factor,samples=len(planar[0]),factor=factor,source_rate=core_rate*(1+double),out_n=n*(1+double)//factor,video=name+'.mp4',matroska=name+'.mka',golden=name+'.f32le',short_analysis8=factor==4)
+             files[case['golden']]=golden;files[case['video']]=video_fixture([case],output,channels,filename=case['video'],write=False)['data'];files[case['matroska']]=mkv(asc,packets,rate,case['out_n'],channels);cases.append(case)
     from generate_mp4_ep1_grouped_ps_fixtures import replace_asc
     ep=json.loads((SOURCE/'aac-eld-esc-sbr'/'manifest.json').read_bytes());ep_blob=(SOURCE/'aac-eld-esc-sbr'/'packets.bin').read_bytes()
-    for base in [c for c in cases if not c.get('short_analysis8',False) and '-r48000-'not in c['name']]:
+    for base in [c for c in cases if 'short_analysis8'not in c]:
         stem=base['name'].rsplit('-ds',1)[0];protected=next(c for c in ep['cases']if c['name']==stem)
         head,tail=prefix(protected['asc']);asc=packed(head+extension(24000//base['factor'],True)+tail)
         frames=[];packets=[]

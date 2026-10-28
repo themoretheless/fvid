@@ -92,7 +92,7 @@ impl Decoder {
         configuration: u8,
         factor: usize,
     ) -> Result<Self> {
-        if !matches!(factor, 1 | 2 | 4) || !core_rate.is_multiple_of(factor as u32) {
+        if !matches!(factor, 1 | 2 | 4 | 8) || !core_rate.is_multiple_of(factor as u32) {
             return Err(invalid("invalid LD-SBR downscale factor"));
         }
         let kinds = elements(configuration)?;

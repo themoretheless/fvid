@@ -1,0 +1,149 @@
+{
+  "cases": [
+    {
+      "name": "core-n480-c1-ds8",
+      "n": 480,
+      "rate": 3000,
+      "configuration": 1,
+      "mask": 4,
+      "tool": "base",
+      "flags": 0,
+      "asc": "f8ec3034f000bb8000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 7
+        },
+        {
+          "offset": 7,
+          "bytes": 7
+        },
+        {
+          "offset": 14,
+          "bytes": 7
+        },
+        {
+          "offset": 21,
+          "bytes": 7
+        },
+        {
+          "offset": 28,
+          "bytes": 7
+        },
+        {
+          "offset": 35,
+          "bytes": 7
+        },
+        {
+          "offset": 42,
+          "bytes": 7
+        },
+        {
+          "offset": 49,
+          "bytes": 5
+        },
+        {
+          "offset": 54,
+          "bytes": 5
+        },
+        {
+          "offset": 59,
+          "bytes": 5
+        },
+        {
+          "offset": 64,
+          "bytes": 5
+        },
+        {
+          "offset": 69,
+          "bytes": 5
+        }
+      ],
+      "container_rate": 3000,
+      "container_frame_samples": 60,
+      "samples": 720,
+      "pcm_offset": 0,
+      "slots": 7,
+      "bands": 32,
+      "video": "core-n480-c1-ds8.mp4",
+      "matroska": "core-n480-c1-ds8.mka",
+      "golden": "core-n480-c1-ds8.f32le",
+      "out_n": 60,
+      "source_rate": 24000
+    },
+    {
+      "name": "core-n512-c2-ds8",
+      "n": 512,
+      "rate": 3000,
+      "configuration": 2,
+      "mask": 3,
+      "tool": "base",
+      "flags": 0,
+      "asc": "f8ec4034f000bb8000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 74,
+          "bytes": 13
+        },
+        {
+          "offset": 87,
+          "bytes": 13
+        },
+        {
+          "offset": 100,
+          "bytes": 13
+        },
+        {
+          "offset": 113,
+          "bytes": 13
+        },
+        {
+          "offset": 126,
+          "bytes": 13
+        },
+        {
+          "offset": 139,
+          "bytes": 13
+        },
+        {
+          "offset": 152,
+          "bytes": 13
+        },
+        {
+          "offset": 165,
+          "bytes": 9
+        },
+        {
+          "offset": 174,
+          "bytes": 9
+        },
+        {
+          "offset": 183,
+          "bytes": 9
+        },
+        {
+          "offset": 192,
+          "bytes": 9
+        },
+        {
+          "offset": 201,
+          "bytes": 9
+        }
+      ],
+      "container_rate": 3000,
+      "container_frame_samples": 64,
+      "samples": 768,
+      "pcm_offset": 0,
+      "slots": 8,
+      "bands": 32,
+      "video": "core-n512-c2-ds8.mp4",
+      "matroska": "core-n512-c2-ds8.mka",
+      "golden": "core-n512-c2-ds8.f32le",
+      "out_n": 64,
+      "source_rate": 24000
+    }
+  ],
+  "provenance": "Own full-spectrum core packets, direct short cosine and independently dense-solved windows. No LD-SBR, private media, codec implementation, process or network."
+}

@@ -56,6 +56,11 @@ fn ep1_worker_queues_exact_pcm_after_partial_playback_seek_rewind_and_edits() {
 fn downscaled_ld_sbr_worker_keeps_exact_pcm_and_timestamps_through_navigation() {
     check_corpus("aac-eld-sbr-downscaled");
 }
+#[test]
+fn eighth_ld_sbr_worker_keeps_exact_pcm_and_timestamps_through_navigation() {
+    check_corpus("aac-eld-sbr-eighth");
+    check_corpus("aac-eld-sbr-eighth/core");
+}
 fn check_corpus(corpus: &str) {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests/fixtures/playback-errors")
