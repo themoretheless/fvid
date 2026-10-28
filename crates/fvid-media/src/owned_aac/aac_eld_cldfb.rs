@@ -1,6 +1,6 @@
 //! Owned low-delay complex filterbanks, ISO 14496-3 / GOST 53556.4 §6.19.4.
 //! Legacy columns consume 32 core samples and emit 32 or 64. Explicit
-//! centered adaptation supports 8/16/32 analysis and 8/16/32/64 synthesis.
+//! centered adaptation supports 4/8/16/32 analysis and 4/8/16/32/64 synthesis.
 use super::{
     Result, aac_eld_cldfb_window::WINDOW, aac_sbr_qmf::Complex, invalid, memory::Footprint,
 };
@@ -86,8 +86,8 @@ impl Default for Analysis {
 impl Analysis {
     /// Explicit centered, downscaled analysis. Legacy analysis remains the default.
     pub fn new_downscaled(factor: usize) -> Result<Self> {
-        if !matches!(factor, 1 | 2 | 4) {
-            return Err(invalid("ELD CLDFB analysis requires factor 1, 2 or 4"));
+        if !matches!(factor, 1 | 2 | 4 | 8) {
+            return Err(invalid("ELD CLDFB analysis requires factor 1, 2, 4 or 8"));
         }
         let bands = 32 / factor;
         Ok(Self {
@@ -169,7 +169,7 @@ pub struct Synthesis {
 impl Synthesis {
     /// Adapted synthesis uses the nominal 64-band normalization at every size.
     pub fn new_downscaled(original_bands: usize, factor: usize) -> Result<Self> {
-        if !matches!(original_bands, 32 | 64) || !matches!(factor, 1 | 2 | 4) {
+        if !matches!(original_bands, 32 | 64) || !matches!(factor, 1 | 2 | 4 | 8) {
             return Err(invalid("invalid downscaled ELD CLDFB synthesis geometry"));
         }
         let bands = original_bands / factor;
@@ -288,8 +288,8 @@ fn centered_window(b: usize, i: usize) -> f64 {
     0.5 * (WINDOW[at] + WINDOW[at + 1])
 }
 fn adapted_analysis_matrix(b: usize) -> &'static Vec<[Complex; 64]> {
-    static M: [OnceLock<Vec<[Complex; 64]>>; 3] = [const { OnceLock::new() }; 3];
-    M[b.ilog2() as usize - 3].get_or_init(|| {
+    static M: [OnceLock<Vec<[Complex; 64]>>; 4] = [const { OnceLock::new() }; 4];
+    M[b.ilog2() as usize - 2].get_or_init(|| {
         (0..b)
             .map(|k| {
                 std::array::from_fn(|n| {
@@ -311,8 +311,8 @@ fn adapted_analysis_matrix(b: usize) -> &'static Vec<[Complex; 64]> {
     })
 }
 fn adapted_synthesis_matrix(b: usize) -> &'static Vec<Vec<Complex>> {
-    static M: [OnceLock<Vec<Vec<Complex>>>; 4] = [const { OnceLock::new() }; 4];
-    M[b.ilog2() as usize - 3].get_or_init(|| {
+    static M: [OnceLock<Vec<Vec<Complex>>>; 5] = [const { OnceLock::new() }; 5];
+    M[b.ilog2() as usize - 2].get_or_init(|| {
         (0..2 * b)
             .map(|n| {
                 (0..b)

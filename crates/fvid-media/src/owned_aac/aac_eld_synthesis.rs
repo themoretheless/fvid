@@ -54,7 +54,7 @@ impl EldSynthesis {
     /// Decode the low-frequency spectrum with a short ELD filterbank. The
     /// nominal source transform still determines spectral level normalization.
     pub fn new_downscaled(source_samples: usize, factor: u8) -> Result<Self> {
-        if !matches!(source_samples, 480 | 512) || !matches!(factor, 2 | 4) {
+        if !matches!(source_samples, 480 | 512) || !matches!(factor, 2 | 4 | 8) {
             return Err(invalid("unsupported AAC ELD downscale factor"));
         }
         let n = source_samples / usize::from(factor);

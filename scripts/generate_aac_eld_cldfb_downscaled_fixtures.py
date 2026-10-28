@@ -41,9 +41,9 @@ def synthesis(rows, b):
 def pack(values, kind='d'):
     return struct.pack('<'+kind*len(values), *values)
 
-def generate():
+def generate(analysis_bands=(8,16,32),synthesis_bands=(8,16,32,64)):
     files = {}; cases = []
-    for b in [8,16,32]:
+    for b in analysis_bands:
         for signal in ['boundary', 'dense', 'tones']:
             name = f'a{b}-{signal}'
             pcm = [0.0]*(37*b)
@@ -57,7 +57,7 @@ def generate():
             files[name+'.f32le'] = raw
             files[name+'.qmf.f64le'] = pack([x for row in rows for v in row for x in [v.real,v.imag]])
             cases.append(dict(name=name,kind='analysis',bands=b,rows=len(rows)))
-    for b in [8,16,32,64]:
+    for b in synthesis_bands:
         name=f's{b}-complex'
         rows=[[complex(math.sin(.37*(t+1)*(k+1)),math.cos(.13*(t+2)*(k+3))) for k in range(64)] for t in range(37)]
         files[name+'.qmf.f64le']=pack([x for row in rows for v in row for x in [v.real,v.imag]])

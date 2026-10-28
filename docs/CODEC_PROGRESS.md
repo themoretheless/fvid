@@ -1,3 +1,60 @@
+## Factor-eight ELD/LD-SBR adaptation, 2026-10-29
+
+A new own nonzero mono movie declares a 3-kHz LD-SBR output from a nominal
+24-kHz source. Before this change the native explicit-output constructor failed
+with `AAC output clock disagrees with configuration`, and the player selected
+24 kHz / 512 samples instead of the declared 3 kHz / 64 samples. The new
+acceptance test reproduces that exact constructor failure before the fix.
+
+Exact downscaleInfo/output-clock negotiation now also admits factor 8. Own
+IMDCT plans add 60/64 lengths and short-window interpolation uses independent
+15/16-point segments. Centered CLDFB adds 4-band analysis/synthesis; the immutable
+matrix cache is indexed across all admitted widths. The previous full companion
+continues to supply coded LF above the short analysis width, including LFE. No
+new resampler or foreign decoder is introduced, and this is not a throughput or
+memory-reduction claim. Unsupported factors still fail explicit negotiation.
+
+The 258 saved LD-SBR source programmes each have ordinary, EP3 and EP1 factor-
+eight variants. Sixteen further 48/96-kHz core programmes exercise crossover
+above the short width and genuine 4-band analysis plus HF reconstruction. Two
+bare ELD core movies independently qualify factor-eight playback without SBR.
+There are 792 accepted programmes total. All saved source AUs are asserted
+unchanged. A separate four-case CLDFB corpus uses direct convolution/modulated-
+column superposition; dense-solved windows and direct cosine reconstruction
+supply independent PCM, rather than the production spline solver or FFT.
+Shared qualification code runs the same exact-frame/EOF/repeated seek, rewind,
+checkpoint, malformed-packet rollback, exports, interval and WAVE-transform
+checks for both the previous and new downscale corpora.
+
+All seven new integration checks and 31 selected prior ELD/LD-SBR checks pass
+(38 unique checks). The complete root/media suites pass 1627 unit tests, with
+29 existing ignored tests. Worker navigation covers 5129 programmes. Both old
+and new PCM oracles are explicitly required to be nonzero. Offline all-test
+compilation with the player feature passes. [The test report](validation/aac-eld-eighth-tests-2026-10-29.json)
+records the before-fix diagnostic, qualified checks and timings.
+
+All 1617 new artifacts (10464136 bytes) regenerate byte-exact while process and
+socket creation are forbidden; [hashes and generation measurements](validation/aac-eld-eighth-generation-2026-10-29.json)
+are saved. Generalizing the generator preserves all 3146 previous factor-2/4
+artifacts (33802643 bytes), as [the preservation report](validation/aac-eld-eighth-preservation-2026-10-29.json)
+records. Ordinary tests read saved fixtures and never generate them.
+
+Eight actual PlatformBackend source cases pass all 32 full/quarter-seek/
+60-percent-seek/rewind phases at 3–24 kHz, including EP3/EP1 and bare core.
+[The device report](validation/aac-eld-eighth-device-2026-10-29.json) records hashes,
+positions and drain measurements. The exercised binary has no FFmpeg/libav
+linkage. Eight-channel sources use normal stereo routing; subjective listening
+and physical eight-speaker output are not established.
+
+This additional own mode follows the integer band/window geometry of the
+[published downscaled ELD/CLDFB construction](https://data.epo.org/publication-server/rest/v1.2/patents/EP4231287NWA1/document.pdf).
+[FDK's public encoder documentation](https://android.googlesource.com/platform/external/aac/+/master/libAACenc/include/aacenc_lib.h)
+limits that implementation to factors 2/4; it is not evidence for factor-eight
+conformance. No foreign codec implementation was copied. The own numerical,
+regression and device evidence is not a formal ISO conformance certificate.
+Other adaptation ratios and SAOC/LD MPEG Surround remain open; the broader
+codec-gap goal stays active.
+
 ## Centered downscaled LD-SBR reconstruction and navigation, 2026-10-29
 
 Own nonzero MP4/Matroska movies reproduce the missing adapted LD-SBR output:
