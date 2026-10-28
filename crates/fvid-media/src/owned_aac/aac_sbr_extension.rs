@@ -39,7 +39,9 @@ impl State {
         *self = Self::default();
     }
 
-    pub(crate) fn current_header(&self) -> Option<&Header> { self.header.as_ref() }
+    pub fn current_header(&self) -> Option<&Header> { self.header.as_ref() }
+    /// Syntax-only snapshot; synthesis and coefficient history remain decoder-owned.
+    pub fn with_header(header: Option<Header>) -> Self { Self { header, format: None } }
     pub(crate) fn with_low_delay_header(header: Header) -> Self {
         Self {
             header: Some(header),

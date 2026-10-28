@@ -283,13 +283,15 @@ impl NativePsAacDecoder {
         let Some(ep) = &self.protection else {
             return self.decode_unprotected(packet);
         };
-        let units = protected_units(&self.config, self.program.as_ref(), ep, self.direct_mapping, packet)?;
+        let units = protected_units(ep, self.direct_mapping, packet)?;
         if units.len() == 1 {
-            return self.decode_unprotected(&units[0]);
+            let unit = units[0].materialize(&self.config, self.program.as_ref(), self.extension.current_sbr_header())?;
+            return self.decode_unprotected(&unit);
         }
         let mut trial = self.clone();
         let mut output = None;
         for unit in units {
+            let unit = unit.materialize(&trial.config, trial.program.as_ref(), trial.extension.current_sbr_header())?;
             if let Some(frame) = trial.decode_unprotected(&unit)? {
                 if let Some(packet) = trial.collect_source(frame)? {
                     if output.replace(packet).is_some() {
@@ -891,9 +893,10 @@ impl InBandPsProbe {
         let Some(ep) = &self.protection else {
             return self.read_unprotected(packet);
         };
-        let units = protected_units(&self.config, self.program.as_ref(), ep, self.direct_mapping, packet)?;
+        let units = protected_units(ep, self.direct_mapping, packet)?;
         let mut trial = self.clone();
         for unit in units {
+            let unit = unit.materialize(&trial.config, trial.program.as_ref(), trial.sbr.current_header())?;
             trial.read_unprotected(&unit)?;
         }
         let seen = trial.seen;
@@ -1143,15 +1146,40 @@ fn validate_coupling_target(target: &Target, tag: u8) -> Result<()> {
 
 /// Discovery and PS decoding must interpret EP3 classes exactly as the ordinary
 /// decoder does. Their concatenation is not necessarily a byte-aligned raw AU.
+enum ProtectedUnit {
+    Raw(Vec<u8>),
+    Esc(super::aac_ep::RecoveredFrame),
+}
+impl ProtectedUnit {
+    fn materialize<'a>(
+        &'a self,
+        config: &AacConfig,
+        program: Option<&aac_pce::ProgramConfig>,
+        header: Option<&super::aac_sbr_header::Header>,
+    ) -> Result<std::borrow::Cow<'a, [u8]>> {
+        match self {
+            Self::Raw(bytes) => Ok(std::borrow::Cow::Borrowed(bytes)),
+            Self::Esc(frame) => Ok(std::borrow::Cow::Owned(
+                super::aac_esc::reassemble_er_with_sbr(config, program, frame, &[header.cloned()])?,
+            )),
+        }
+    }
+}
 fn protected_units(
-    config: &AacConfig,
-    program: Option<&aac_pce::ProgramConfig>,
     ep: &super::aac_ep::Config,
     direct_mapping: bool,
     packet: &[u8],
-) -> Result<Vec<Vec<u8>>> {
-    if !direct_mapping { return ep.decode_raw_access_units(packet); }
-    ep.decode_class_frames(packet)?.iter().map(|frame| {
-        super::aac_esc::reassemble_er(config, program, frame)
-    }).collect()
+) -> Result<Vec<ProtectedUnit>> {
+    if !direct_mapping {
+        return Ok(ep
+            .decode_raw_access_units(packet)?
+            .into_iter()
+            .map(ProtectedUnit::Raw)
+            .collect());
+    }
+    Ok(ep
+        .decode_class_frames(packet)?
+        .into_iter()
+        .map(ProtectedUnit::Esc)
+        .collect())
 }

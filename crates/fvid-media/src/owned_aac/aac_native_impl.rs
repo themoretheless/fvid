@@ -588,7 +588,12 @@ impl NativeAacDecoder {
             ProtectedSource::Raw(bytes) => Ok(std::borrow::Cow::Borrowed(bytes)),
             ProtectedSource::Esc(frame) => Ok(std::borrow::Cow::Owned(
                 if matches!(self.config.object_type,17|19|23) {
-                    super::aac_esc::reassemble_er(&self.config, self.program.as_ref(), frame)?
+                    let headers = self.sbr_elements.iter()
+                        .map(|element| element.as_ref().and_then(|e| e.stream.current_header().cloned()))
+                        .collect::<Vec<_>>();
+                    super::aac_esc::reassemble_er_with_sbr(
+                        &self.config, self.program.as_ref(), frame, &headers,
+                    )?
                 } else {
                     super::aac_esc::reassemble_eld(&self.config, frame, self.eld_sbr.as_ref())?
                 },

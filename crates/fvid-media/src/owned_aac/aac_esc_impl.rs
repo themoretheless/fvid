@@ -1,3 +1,26 @@
+struct ErSbrContext<'a> {
+    kinds: &'a [u8],
+    headers: &'a [Option<SbrHeader>],
+    rate: u32,
+    slots: u8,
+}
+impl ErSbrContext<'_> {
+    fn group(&self, ordinal: usize) -> Result<(usize, Option<SbrHeader>)> {
+        let mut offset = 0;
+        let mut group = 0;
+        for &kind in self.kinds {
+            let width = if kind == 1 { 2 } else { 1 };
+            if kind != 3 {
+                if group == ordinal {
+                    return Ok((width, self.headers.get(offset).cloned().flatten()));
+                }
+                group += 1;
+            }
+            offset += width;
+        }
+        Err(invalid("excess ER AAC SBR element"))
+    }
+}
 struct Instance {
     bytes: Vec<u8>,
     bits: usize,
@@ -148,7 +171,7 @@ impl Reader {
     }
     /// ER extension_payload records occupy whole bytes after the main payload;
     /// final AAC byte_alignment remains outside that area and in the last ESC.
-    fn extensions(&mut self) -> Result<()> {
+    fn extensions(&mut self, sbr: Option<&ErSbrContext<'_>>) -> Result<()> {
         if self.next == self.instances.len() {
             return Ok(());
         }
@@ -171,10 +194,17 @@ impl Reader {
             return Err(invalid("AAC ESC extended payload is not byte aligned"));
         }
         let mut remaining = rest / 8 * 8;
+        let mut sbr_index = 0;
         while remaining != 0 {
             self.current[5..9].fill(None);
             self.allocate(5)?;
             let kind = self.extension_field(5, 4, &mut remaining)?;
+            if kind == 14 {
+                return Err(invalid("ER AAC SBR CRC is forbidden"));
+            }
+            if sbr_index != 0 && kind != 13 {
+                return Err(invalid("ER AAC extensions must precede SBR"));
+            }
             match kind {
                 0 => self.opaque_extension(&mut remaining)?,
                 1 => {
@@ -219,13 +249,34 @@ impl Reader {
                     return Err(unsupported("AAC fill extension tool is not implemented"));
                 }
                 13 => {
-                    return Err(unsupported(
-                        "AAC ESC SBR category mapping is not yet implemented",
-                    ));
+                    let context = sbr.ok_or_else(|| {
+                        unsupported("AAC ESC SBR category mapping is not yet implemented")
+                    })?;
+                    let (channels, header) = context.group(sbr_index)?;
+                    self.allocate(9)?;
+                    let source = &self.instances[self.current[9].unwrap()];
+                    let available = remaining.min(source.bits - source.position);
+                    let (used, exact) = self.read_sbr(9, |bits| {
+                        let start = bits.position();
+                        let end = start + available;
+                        let mut syntax = SbrSyntax::with_header(header);
+                        syntax.read(bits, end, false, context.rate, context.slots, channels)?;
+                        Ok((bits.position() - start, bits.position() == end))
+                    })?;
+                    if !exact {
+                        return Err(invalid("unconsumed ER SBR ESC information bits"));
+                    }
+                    remaining -= used;
+                    sbr_index += 1;
                 }
                 14 => return Err(invalid("ER AAC SBR CRC is forbidden")),
                 _ => self.opaque_extension(&mut remaining)?,
             }
+        }
+        if sbr_index != 0
+            && sbr.is_some_and(|c| c.kinds.iter().filter(|&&k| k != 3).count() != sbr_index)
+        {
+            return Err(invalid("missing ER AAC SBR element"));
         }
         Ok(())
     }
@@ -307,10 +358,23 @@ pub fn reassemble_er_lc(
 }
 /// Restore ER LC/LTP/LD main syntax, including deferred channel predictors.
 /// Parsing records original spans; only normal decoding updates LTP history.
+/// No prior SBR headers are assumed; use `reassemble_er_with_sbr` for continuation.
 pub fn reassemble_er(
     config: &AacConfig,
     program: Option<&super::aac_pce::ProgramConfig>,
     frame: &RecoveredFrame,
+) -> Result<Vec<u8>> {
+    reassemble_er_with_sbr(config, program, frame, &[])
+}
+
+/// Reconstruct with immutable current headers indexed by coded channel offset.
+/// A CPE uses its first channel slot; LFE advances the offset but has no SBR.
+/// This parser does not commit synthesis, coefficient or header history.
+pub fn reassemble_er_with_sbr(
+    config: &AacConfig,
+    program: Option<&super::aac_pce::ProgramConfig>,
+    frame: &RecoveredFrame,
+    headers: &[Option<SbrHeader>],
 ) -> Result<Vec<u8>> {
     if !matches!(config.object_type, 17 | 19 | 23) {
         return Err(invalid("ER ESC mapping requires AOT17/19/23"));
@@ -351,7 +415,16 @@ pub fn reassemble_er(
             super::aac_channel::ChannelData::read_er_esc(&mut reader, config, None, false, false)?;
         }
     }
-    reader.extensions()?;
+    let context = ErSbrContext {
+        kinds,
+        headers,
+        rate: config
+            .sample_rate
+            .checked_mul(2)
+            .ok_or_else(|| invalid("SBR frequency overflow"))?,
+        slots: (config.frame_samples / 64) as u8,
+    };
+    reader.extensions(matches!(config.object_type, 17 | 19).then_some(&context))?;
     reader.finish()
 }
 /// Restore ELD with optional current LD-SBR context. Header history is read
@@ -426,6 +499,6 @@ pub fn reassemble_eld(
             })?;
         }
     }
-    reader.extensions()?;
+    reader.extensions(None)?;
     reader.finish()
 }

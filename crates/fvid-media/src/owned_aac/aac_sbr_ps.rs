@@ -54,6 +54,7 @@ pub struct Frame {
     pub pcm: [Vec<f64>; 2],
 }
 impl Decoder {
+    pub fn current_sbr_header(&self) -> Option<&super::aac_sbr_header::Header> { self.sbr.current_header() }
     pub fn reset(&mut self) {
         *self = Self::default();
     }

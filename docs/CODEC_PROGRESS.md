@@ -1,3 +1,47 @@
+## EP3 standard ER SBR category 9, 2026-10-28
+
+Owned ER-LC/LTP ESC reconstruction now parses EXT_SBR_DATA in category 9.
+Each class is bounded independently, with AAC alignment outside the SBR body.
+The syntax-only reader uses the current header for that coded channel offset;
+LFE advances that offset but does not consume an SBR group. Missing/excess
+SBR groups, extensions after SBR, forbidden ER SBR CRC and unconsumed class
+bits retain explicit errors. Native synthesis alone commits actual histories.
+The previous category-9 branch explicitly refused these standard ER SBR AUs.
+
+Native AAC, PS decoding and PS discovery now materialize each EP3 source AU
+immediately before decoding it. This matters when a packet's first source
+introduces a header and its second omits it: reconstructing the whole packet
+up front loses that header. Multi-source PS still commits the full packet
+atomically, including pending PCM, source identity and presence state.
+
+The offline `aac-esc-sbr` corpus contains 88 ordinary SBR sources, 24 PS
+sources, 24 ordinary SBR and 24 PS multi-source movies, plus 88 malformed
+single-source movies and 48 late-child malformed multi-source movies, each
+saved in MP4 and Matroska. AOT17/19, 960/1024 cores, 24/48 kHz output,
+explicit/sync/in-band PS, mono through eight channels, separate CPE groups,
+LFE, header omission, 2/3/7 source AUs and sequential/recursive SRCPC are covered.
+
+The ordinary sources use existing independently calculated direct-QMF PCM.
+PS sources feed independent sparse core PCM through the separately exercised
+owned SBR/PS component pipeline. Multi-source composition is compared against
+normal source-AU decoding; that comparison is not a new independent DSP oracle.
+A stale-context control specifically fails with `missing initial SBR header`
+on a valid second child. Late ER-SBR-CRC failures roll back all preceding
+children, both in decoder and PS discovery; a valid retry matches reference PCM.
+Player checks cover complete playback, EOF, rewind, repeated/backwards seek,
+frame and internal source-AU edges, negative and past-EOF targets in both
+containers. Returned seek positions through EOF equal the requested clamped
+timestamp; matching PCM alone does not qualify an arbitrary landing point.
+
+The eleven new integration checks and 38 existing ER-LC, LD-SBR, extension
+and EP2/PS checks pass offline with the player feature. Root and media
+libraries pass 1,614 unit tests (27 ignored). The player integration binary
+has no FFmpeg/libav dynamic linkage.
+
+All 800 files / 12,998,426 bytes regenerate identically with process/socket
+creation forbidden. Ordinary tests only read saved fixtures. EP1, other AAC
+rendering extensions and the broader codec-gap objective remain open.
+
 ## LD-SBR header-epoch playback acceptance, 2026-10-28
 
 The ordinary LD-SBR corpus now saves its two independently calculated
