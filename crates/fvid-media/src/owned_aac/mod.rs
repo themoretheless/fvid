@@ -35,6 +35,7 @@ pub mod aac_coupling;
 pub mod aac_imdct;
 pub mod aac_ld_synthesis;
 pub mod aac_eld_synthesis;
+pub mod aac_eld_downscale_window;
 mod aac_eld_windows;
 pub mod aac_ld_bands;
 pub mod aac_ld_ltp;

@@ -1,3 +1,59 @@
+## Native short ELD core transforms and declared low-rate output, 2026-10-29
+
+A new own ELD movie declares a 12-kHz output and downscaleInfo on a 24-kHz,
+512-sample source. The previous native explicit-output constructor refused it
+with `AAC output clock disagrees with configuration`; the previous file reader
+instead fell back to full-rate 24-kHz/512-sample decoding. The new supported
+core modes honor exact advertised factors 2/4: 256/240/128/120 output samples,
+with the source entropy/TNS geometry and core packet clock retained. Default
+`NativeAacDecoder::new` still reconstructs at the nominal full rate. Unadvertised ELD
+downscale rates and downscaled LD-SBR remain refused by explicit-output negotiation.
+
+The own short filterbank uses an independently solved not-a-knot cubic window
+for each 128-value segment of the normative 512 reference. Half-sample-centered
+evaluation does not mix discontinuities or the leading zero region. The 240/120
+windows also use that reference, rather than decimating the 480 window. The
+inverse transform is genuinely short; source-level normalization is retained and
+TNS runs before the high-frequency spectrum is discarded. The own IMDCT adds
+240-point support and passes the existing direct-cosine/transpose checks.
+
+There are 109 ordinary, 109 matching EP3 and 109 whole-group EP1 twelve-frame
+programmes. They use the eligible factor-2/4 cases of the existing 60 core
+controls: 480/512 geometry, layouts, resilience, PNS/MS/intensity/TNS and high-
+spectrum controls. Independent generation uses a dense pivoted spline solve,
+Hermite evaluation and direct short cosine/overlap arithmetic, not the production
+Thomas solve or FFT. Every encoded source AU is asserted identical to its saved
+nominal-source control. Four saved window arrays agree within 2e-12; PCM agrees
+within 1e-7. Six integration checks cover checkpoint/reset and cross-mode refusal,
+smaller retained native payload, owned/public MP4/Matroska and repeated exact
+ranges, typed EP1, playback/frame-edge/repeated/EOF/past-EOF seek/rewind and WAVE
+crop/gain/stereo/32-kHz resampling. This is not an RSS or throughput benchmark.
+
+All 660 artifacts / 5482463 bytes regenerate byte-exact with process/socket
+creation forbidden. The generalized core generator preserves the saved 242-file
+core corpus, plus the saved LD-SBR/EP3 corpora (1038, 524 and 1236 artifacts) and
+the 685-file downscaleInfo corpus. The LD-SBR audit uses its saved generation
+mode `include_header_switch=True`. Ordinary tests need no FFmpeg or network.
+Root/media suites pass: 1625 tests, 29 ignored; captured worker navigation covers
+2773 programmes. All 64 previous selected ELD/OD integration checks and six new
+checks pass (70 integration tests). Offline all-test compilation passes with
+`--no-default-features --features player`.
+
+Six actual PlatformBackend cases cover all four short transform lengths plus
+EP3 and EP1, at 12/24 kHz and mono/stereo/eight-channel source layouts. All 24
+full/quarter-seek/60-percent-seek/rewind phases drain to their expected end
+position. Input hashes and phase measurements are in
+[the device report](validation/aac-eld-short-device-2026-10-29.json). The exercised
+binary has no FFmpeg/libav linkage. Eight-channel sources use normal stereo
+routing; subjective listening and eight physical speakers are not established.
+
+Reference construction: [published downscaled ELD window and CLDFB description](https://data.epo.org/publication-server/rest/v1.2/patents/EP4231287NWA1/document.pdf),
+sections A.0/A.1. The spline/FFT implementation is own code. Numerical/regression
+and device evidence here is not an official codec conformance certificate.
+Downscaled LD-SBR analysis/synthesis CLDFB, other adaptation factors, SAOC/LD
+MPEG Surround and broader codec gaps remain open. The full codec-gap goal stays
+active.
+
 ## ELD downscaleInfo parsing with full-rate reconstruction, 2026-10-29
 
 The new own mono ELD movie reproduced `AAC ELD extension tool is not yet

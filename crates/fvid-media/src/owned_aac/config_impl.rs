@@ -231,10 +231,15 @@ impl AudioSpecificConfig {
     pub fn output_sample_rate(&self) -> u32 {
         self.extension_sample_rate.unwrap_or(self.core.sample_rate)
     }
-    /// Resolve a container output clock without turning an explicit SBR=false
-    /// into implicit signalling. Unspecified SBR may use double core rate.
+    /// Supported native ELD-core output adaptation, separate from LD-SBR.
+    pub fn eld_core_downscale_factor(&self, declared:u32) -> Option<u8> {
+        if self.core.object_type!=39 || self.eld_sbr.is_some() || declared==0
+            || self.eld_downscale_sample_rate!=Some(declared) || self.core.sample_rate%declared!=0 {return None;}
+        match self.core.sample_rate/declared {2=>Some(2),4=>Some(4),_=>None}
+    }
+    /// Resolve explicit output clocks without guessing SBR or downscale modes.
     pub fn resolve_output_rate(&self, declared: u32) -> Result<u32> {
-        if declared == self.output_sample_rate() {
+        if declared == self.output_sample_rate() || self.eld_core_downscale_factor(declared).is_some() {
             return Ok(declared);
         }
         if self.sbr_present.is_none() && self.core.sample_rate.checked_mul(2) == Some(declared) {

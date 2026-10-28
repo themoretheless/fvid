@@ -231,6 +231,7 @@ pub struct NativeAacDecoder {
     ld_synthesis: Vec<super::aac_ld_channel::LdChannel>,
     eld_synthesis: Vec<super::aac_eld_synthesis::EldSynthesis>,
     eld_sbr: Option<super::aac_eld_sbr::Decoder>,
+    eld_downscale_factor: u8,
     protection: Option<super::aac_ep::Config>,
     direct_mapping: bool,
     separate_esc: bool,
@@ -267,6 +268,7 @@ pub struct AacCheckpoint {
     ld_synthesis: Vec<super::aac_ld_channel::LdChannelCheckpoint>,
     eld_synthesis: Vec<super::aac_eld_synthesis::EldHistory>,
     eld_sbr: Option<super::aac_eld_sbr::Decoder>,
+    eld_downscale_factor: u8,
     protection: Option<super::aac_ep::Config>,
     direct_mapping: bool,
     separate_esc: bool,
@@ -300,6 +302,9 @@ impl NativeAacDecoder {
         Self::from_parsed(AudioSpecificConfig::parse(asc)?)
     }
     fn from_parsed(parsed: AudioSpecificConfig) -> Result<Self> {
+        Self::from_parsed_downscaled(parsed,1)
+    }
+    fn from_parsed_downscaled(parsed:AudioSpecificConfig,eld_downscale_factor:u8)->Result<Self> {
         if parsed.ps_present == Some(true) {
             return Err(unsupported("AAC parametric stereo synthesis is not yet implemented"));
         }
@@ -366,7 +371,7 @@ impl NativeAacDecoder {
             LongSineSynthesis::new(config.frame_samples as usize).map_err(Error::from)?;
             usize::from(config.channels)
         ] };
-        let eld_synthesis=if config.object_type==39 {vec![super::aac_eld_synthesis::EldSynthesis::new(config.frame_samples as usize)?;usize::from(config.channels)]}else{Vec::new()};
+        let eld_synthesis=if config.object_type==39 {vec![if eld_downscale_factor==1 {super::aac_eld_synthesis::EldSynthesis::new(config.frame_samples as usize)?}else{super::aac_eld_synthesis::EldSynthesis::new_downscaled(config.frame_samples as usize,eld_downscale_factor)?};usize::from(config.channels)]}else{Vec::new()};
         let ld_synthesis=if config.object_type==23 {vec![super::aac_ld_channel::LdChannel::new(config.frame_samples as usize)?;usize::from(config.channels)]}else{Vec::new()};
         let ltp_synthesis = if matches!(config.object_type,4|19) {
             vec![super::aac_ltp_channel::LtpChannel::new(config.frame_samples as usize)?; usize::from(config.channels)]
@@ -386,7 +391,7 @@ impl NativeAacDecoder {
         Ok(Self {
             main_prediction,
             config,
-            protection, direct_mapping, separate_esc, eld_sbr, eld_synthesis, ld_synthesis, synthesis, ssr_synthesis, ltp_synthesis, ltp_coupling_synthesis,
+            protection, direct_mapping, separate_esc, eld_sbr, eld_downscale_factor, eld_synthesis, ld_synthesis, synthesis, ssr_synthesis, ltp_synthesis, ltp_coupling_synthesis,
             ssr_coupling_synthesis, ssr_alignment:None, ssr_alignment_tags:Vec::new(), ssr_pending_duration:Default::default(), ssr_fixed_clock:false,ssr_source_alignment:false,
             coupling_synthesis:vec![None;16],
             noise: NoiseState::default(),
@@ -403,10 +408,12 @@ impl NativeAacDecoder {
     /// Decode at a fixed container clock. Unspecified SBR presence may be
     /// discovered from FIL even when the output clock equals the core rate;
     /// discovery must not change this hint. Explicit disable flags are honored.
+    /// An exact ELD-core downscaleInfo hint selects the supported short filterbank.
     pub fn new_with_output_rate(asc:&[u8], output_rate:u32) -> Result<Self> {
         let parsed=AudioSpecificConfig::parse(asc)?;
         parsed.resolve_output_rate(output_rate)?;
-        let mut decoder=Self::new(asc)?;
+        let factor=parsed.eld_core_downscale_factor(output_rate).unwrap_or(1);
+        let mut decoder=Self::from_parsed_downscaled(parsed.clone(),factor)?;
         if decoder.sample_rate()!=output_rate {
             if !sbr_layout(&parsed)? {
                 return Err(unsupported("implicit SBR AAC coupling synthesis is not yet implemented"));
@@ -438,6 +445,7 @@ impl NativeAacDecoder {
         usize::from(self.config.channels) + 16
     }
     pub fn sample_rate(&self) -> u32 {
+        if self.eld_downscale_factor!=1 {return self.config.sample_rate/u32::from(self.eld_downscale_factor);}
         self.eld_sbr.as_ref().map_or(self.sbr_rate.unwrap_or(self.config.sample_rate),|ld|ld.output_rate())
     }
     pub fn core_frame_samples(&self) -> u16 { self.config.frame_samples }
@@ -463,7 +471,7 @@ impl NativeAacDecoder {
     }
     pub fn checkpoint(&self) -> AacCheckpoint {
         AacCheckpoint {separate_esc:self.separate_esc,direct_mapping:self.direct_mapping,protection:self.protection.clone(),main_prediction:self.main_prediction.clone(),config:self.config.clone(),initial_program:self.initial_program.clone(),program:self.program.clone(),
-            eld_synthesis:self.eld_synthesis.iter().map(super::aac_eld_synthesis::EldSynthesis::checkpoint).collect(),eld_sbr:self.eld_sbr.clone(),
+            eld_synthesis:self.eld_synthesis.iter().map(super::aac_eld_synthesis::EldSynthesis::checkpoint).collect(),eld_sbr:self.eld_sbr.clone(),eld_downscale_factor:self.eld_downscale_factor,
             ld_synthesis:self.ld_synthesis.iter().map(super::aac_ld_channel::LdChannel::checkpoint).collect(),
             synthesis:self.synthesis.clone(),ltp_coupling_synthesis:self.ltp_coupling_synthesis.iter().map(|s|s.as_ref().map(super::aac_ltp_channel::LtpChannel::checkpoint)).collect(),ltp_synthesis:self.ltp_synthesis.iter().map(super::aac_ltp_channel::LtpChannel::checkpoint).collect(),ssr_synthesis:self.ssr_synthesis.clone(),ssr_coupling_synthesis:self.ssr_coupling_synthesis.clone(),ssr_alignment:self.ssr_alignment.clone(),ssr_alignment_tags:self.ssr_alignment_tags.clone(),ssr_pending_duration:self.ssr_pending_duration.clone(),ssr_fixed_clock:self.ssr_fixed_clock,ssr_source_alignment:self.ssr_source_alignment,coupling_synthesis:self.coupling_synthesis.clone(),noise:self.noise.clone(),
             mapping:self.mapping.clone(),channel_mask:self.channel_mask,
@@ -471,6 +479,7 @@ impl NativeAacDecoder {
     }
     /// Restore without changing the decoder if configuration/layout differs.
     pub fn restore(&mut self, state:&AacCheckpoint) -> Result<()> {
+        if self.eld_downscale_factor!=state.eld_downscale_factor {return Err(invalid("AAC ELD checkpoint output geometry mismatch"));}
         if self.separate_esc!=state.separate_esc || self.protection!=state.protection || self.direct_mapping!=state.direct_mapping {return Err(invalid("AAC EP checkpoint configuration mismatch"));}
         if self.config!=state.config || self.initial_program!=state.initial_program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask || self.detect_sbr!=state.detect_sbr || self.sbr_detection_rate!=state.sbr_detection_rate || (!self.detect_sbr && self.sbr_rate!=state.sbr_rate) {
             return Err(invalid("AAC checkpoint configuration mismatch"));

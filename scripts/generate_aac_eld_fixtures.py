@@ -64,11 +64,15 @@ def specifications():
     specs += [(n,24000,2,t,0,1,False)for n in [512,480]for t in ['pns','correlated-pns','intensity','tns']]
     return specs
 
-def generate(include_payload_bits=False, specs=None, include_category_bits=False):
+def generate(include_payload_bits=False, specs=None, include_category_bits=False, output_samples=None, synthesis_window=None):
     files={};cases=[];blob=bytearray()
     for n,rate,configuration,tool,flags,ms,high in (specifications() if specs is None else specs):
-        elements,mapping,mask=LAYOUTS[configuration];channels=len(mapping);w=window(n)
-        overlap=[[0.]*(3*n)for _ in mapping];noise=Noise();pcm=[];rows=[];packets=[]
+        elements,mapping,mask=LAYOUTS[configuration];channels=len(mapping)
+        sn=n if output_samples is None else output_samples
+        assert sn>0 and n%sn==0 and rate*sn%n==0
+        output_rate=rate*sn//n
+        w=window(sn)if synthesis_window is None else synthesis_window(sn)
+        overlap=[[0.]*(3*sn)for _ in mapping];noise=Noise();pcm=[];rows=[];packets=[]
         count,last=geometry(n,max(22050,min(48000,rate)))if high else(2,4)
         offsets=[0,4]if count==2 else [0]+[4*i for i in range(1,count)]+[n]
         # Only the first and final bands carry coefficients. Their exact last
@@ -78,7 +82,7 @@ def generate(include_payload_bits=False, specs=None, include_category_bits=False
             offsets=[0]+[4*i for i in range(1,count-1)]+[last,n]
         if not high:offsets=[0,4,8]
         positions=(0,1,2,3,last,last+1,last+2,last+3)
-        cos=cosines(n,positions)
+        cos=cosines(sn,positions)
         for frame in range(12):
             bits='';spectra=[];ch=0;instances=[]
             for element in elements:
@@ -143,20 +147,20 @@ def generate(include_payload_bits=False, specs=None, include_category_bits=False
             if include_category_bits:rows[-1]['esc']=instances
             outputs=[]
             for c,spectrum in enumerate(spectra):
-                values=[spectrum.get(k,0.)for k in positions]
+                values=[spectrum.get(k,0.)if k<sn else 0. for k in positions]
                 transformed=[-sum(v*x for v,x in zip(values,row))/n for row in cos]
-                accumulated=[x*w[i]+(overlap[c][i]if i<3*n else 0.)for i,x in enumerate(transformed)]
-                outputs.append(accumulated[:n]);overlap[c]=accumulated[n:]
-            for i in range(n):
+                accumulated=[x*w[i]+(overlap[c][i]if i<3*sn else 0.)for i,x in enumerate(transformed)]
+                outputs.append(accumulated[:sn]);overlap[c]=accumulated[sn:]
+            for i in range(sn):
                 row=[0.]*channels
                 for c,target in enumerate(mapping):row[target]=outputs[c][i]/32768
                 pcm.append(struct.pack('<'+'f'*channels,*row))
         name=f'n{n}-c{configuration}'if tool=='base'else f'n{n}-r{rate}-c{configuration}-{tool}-f{flags}'
         config=asc(n,configuration,rate,flags);files[name+'.asc']=config;files[name+'.f32le']=b''.join(pcm)
-        case=dict(name=name,n=n,rate=rate,configuration=configuration,mask=mask,tool=tool,flags=flags,asc=config.hex(),channels=channels,frames=rows,container_rate=rate,container_frame_samples=n,samples=12*n,pcm_offset=0,slots=n//64,bands=32)
+        case=dict(name=name,n=n,rate=output_rate,configuration=configuration,mask=mask,tool=tool,flags=flags,asc=config.hex(),channels=channels,frames=rows,container_rate=output_rate,container_frame_samples=sn,samples=12*sn,pcm_offset=0,slots=n//64,bands=32)
         movie=video_fixture([case],blob,channels,filename=name+'.mp4',write=False)
         files[name+'.mp4']=movie.pop('data');case['video']=name+'.mp4'
-        files[name+'.mka']=mkv(config,packets,rate,n,channels);case['matroska']=name+'.mka'
+        files[name+'.mka']=mkv(config,packets,output_rate,sn,channels);case['matroska']=name+'.mka'
         cases.append(case)
     files['packets.bin']=bytes(blob)
     files['manifest.json']=(json.dumps(dict(cases=cases,provenance='Own ELD header/entropy writer, fixed layout ordering, PNS/MS/intensity/TNS arithmetic and independent direct cosine + normative 4N window + three-block overlap. Nonzero/decay frames; no private media, external decoder, subprocess or network.'),indent=2)+'\n').encode()
