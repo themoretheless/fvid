@@ -1,5 +1,62 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## EP3 LD-SBR ESC 9/10, 2026-10-28
+
+The owned ELD EP3 path now also reconstructs low-delay SBR categories 9 and 10.
+Category 9 contains CRC/header, grids and delta flags; category 10 contains
+inverse filtering, envelope/noise words, harmonics and extension data. Logical
+and separated syntax share the same SBR prefix/tail parser. Both frontend and
+backend use exact bit bounds and preserve original inter-element bit positions;
+LFE has no LD-SBR instances and retains its independent upsampler.
+
+Reconstruction reads current headers from the existing LD-SBR decoder, with
+explicit core geometry validation. It does not mutate SBR/PNS/synthesis history.
+Only the normal transactional decoder commits the reconstructed AU. Current
+headers are obtained separately before each source AU, including within an EP
+packet containing multiple AUs. Raw EP2 sources retain borrowed byte access.
+An error or timestamp overflow in any later child restores the whole original
+packet checkpoint and emits no partial packet PCM.
+
+The new offline `generate_aac_eld_esc_sbr_fixtures.py` corpus contains 258
+nonzero/decay sources with independent scalar/CLDFB PCM, 48 transport composition
+controls and 28 malformed controls, each with MP4/Matroska variants. Numerical
+coverage retains the existing layouts, LFE, 480/512 cores, single/double output
+rate, CRC on/off, resilience and stereo tools, grids, coupling, inverse filtering,
+smoothing and harmonics. Two new two-envelope sequences change header amplitude
+resolution at frames 4/8 and omit it between updates; an initial-header shortcut
+cannot parse those intervening values correctly.
+
+The 48 composition controls repeat valid plain source AUs with fixed EP class
+lengths, 2..7 AUs per packet and original packet clocks. Their reference is the
+ordered plain-AU decode, isolating transport composition; they do not replace
+independent numerical references. Four late controls fail in the last child of
+the second seven-source packet. Other malformed controls independently isolate
+empty category 9, one-bit category 10, LD-SBR CRC and EP class CRC after valid
+prefixes, with header-switch negatives occurring after the changed header.
+Protection recovery itself succeeds for the category/SBR negatives.
+
+The ten integration tests verify full independent PCM, class information,
+current-header reconstruction, public/owned exports, repeated ranges, signed
+clocks, overflow/late-error rollback, real AudioStream playback/EOF/rewind,
+negative/repeated/source-edge/packet-edge/past-EOF seeks, and reset/restore while
+the current header differs from ASC. Both exports and player bridges preserve
+precise category/CRC errors. The earlier constructor refusal on the same new
+header-switch ASC was reproduced using a frozen pre-fix decoder. Its old refusal
+test now rejects a physically missing SBR-instance sequence instead of valid
+EP3 LD-SBR admission.
+
+The generator reproduces all 1,236 new files (35,672,795 bytes), and all 1,030
+legacy LD-SBR files remain byte-identical, with process/socket creation forbidden.
+Ordinary tests only read saved fixtures and require no FFmpeg/network. All ten
+new integration tests, 562 media unit tests (one ignored), 1,052 root unit tests
+(26 ignored), and 41 previous ELD/LD-SBR/EP2/PS integration tests pass in this
+checkout. The test binary has no FFmpeg/libav linkage. This is software
+PCM/navigation qualification, not physical audio-device or 60 fps qualification. EP1 stream association, other ER-core EP3 mappings, further
+extension categories/tools and generic protection alignment edges remain open;
+the broad codec-gap objective is not closed.
+
+Primary definition: [ISO/IEC 14496-3:2009](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf), sections 4.5.2.4/4.6.19 and table 4.149.
+
 ## EP3 direct ESC mapping for ELD core, 2026-10-28
 
 Native AAC-ELD now accepts epConfig=3 with directMapping=1 for core-only
@@ -41,8 +98,9 @@ intervals, signed packet clocks, checkpoint replay, rollback, real AudioStream
 playback, EOF, rewind and negative/repeated/frame-edge/past-EOF seeks. Malformed
 controls fail after three valid frames: a CRC error, or a seven-bit side instance
 with valid FEC/CRC that fails exactly at global_gain. Both owned/public exports
-and player bridges preserve those errors. A ninth, separately named refusal
-test records the still-unsupported LD-SBR ESC 9/10 mapping.
+and player bridges preserve those errors. The ninth test initially recorded the
+LD-SBR ESC 9/10 constructor refusal. The subsequent milestone above replaces it
+with acceptance and retains an exact refusal for missing SBR instances.
 
 Qualification passes 562 media unit tests (one ignored), 1,052 root unit tests
 (26 ignored), and 29 existing ELD/LD-SBR/ER-PS/LTP-PS/Main-PS/SSR-PS integration

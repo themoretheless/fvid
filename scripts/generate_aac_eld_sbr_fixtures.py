@@ -23,13 +23,13 @@ def analysis(pcm,c,bands=10):
     return [[sum(pcm[t*32+31-lag]*w[lag]for lag in range(min(320,t*32+32)))*32768 for w in weights]for t in range(len(pcm)//32)]
 
 def grid(mode,slots,frame):
-    coarse=mode=='coarse';fine=mode!='low'
+    coarse=mode=='coarse'or mode=='header-switch'and 4<=frame<8;fine=mode!='low'
     if mode.startswith('transient'):
         position=(frame+(8 if mode.endswith('8')else 0))%slots
         borders=[0,position+4]if position<2 else [0,position]+([position+4]if position<=9 or position==10 and slots==16 else [])
         borders.append(slots);count=len(borders)-1
         return '1'+field(position,4)+field(fine,1)*count,borders,0 if position<2 else 1,False,fine
-    count={'two':2,'four':4}.get(mode,1)
+    count={'two':2,'four':4,'header-switch':2}.get(mode,1)
     # FIXFIX borders use nearest integer placement, including 15-slot frames.
     borders=[i*((slots+count//2)//count)for i in range(count)]+[slots]
     return '0'+field({1:0,2:1,4:2}[count],2)+(field(coarse,1)if count==1 else '')+field(fine,1),borders,None,coarse,fine
@@ -92,7 +92,7 @@ def reconstruct(low,slots,noise,mode='base',channel=0):
                 gain_history=[gain[:]]+gain_history[:3];noise_history=[q[:]]+noise_history[:3]
     return output
 
-def sbr_bits(channels,nhigh,nlow,slots,frame,protected,mode='base'):
+def sbr_bits(channels,nhigh,nlow,slots,frame,protected,mode='base',categories=False):
     coupled=channels==2 and mode.startswith('coupled')
     syntax,borders,_,coarse,fine=grid(mode,slots,frame)
     count=len(borders)-1;nq=1 if count==1 else 2
@@ -106,14 +106,19 @@ def sbr_bits(channels,nhigh,nlow,slots,frame,protected,mode='base'):
         bands=nhigh if fine else nlow
         envelopes.append(''.join(entropy_row(([0]*bands if temporal else [e]+[0]*(bands-1)),temporal,coarse,balance,False)for _ in range(count)))
         noises.append(''.join(entropy_row([0 if temporal else q],temporal,False,balance,True)for _ in range(nq)))
-    data='0'+(field(coupled,1)if channels==2 else '')+syntax*(1 if coupled else channels)+flags*channels+field(frame%4 if mode=='invf'else 0,2)*(1 if coupled else channels)
+    controls='0'+(field(coupled,1)if channels==2 else '')+syntax*(1 if coupled else channels)+flags*channels
+    data=field(frame%4 if mode=='invf'else 0,2)*(1 if coupled else channels)
     data+=(''.join(a+b for a,b in zip(envelopes,noises))if coupled else ''.join(envelopes)+''.join(noises))+('1'+'1'*nhigh if mode=='harmonic'and frame%3!=2 else '0')*channels+'0'
-    present=mode=='header'and frame in [0,4,8]
-    body=field(present,1)+(header(0,True)if present else '')+data
-    return (field(crc(body),10)if protected else '')+body
+    present=(mode=='header'and frame in [0,4,8])or(mode=='header-switch'and frame in [4,8])
+    h=header(0,True)
+    if mode=='header-switch':h=field(4<=frame<8,1)+h[1:]
+    prefix=field(present,1)+(h if present else '')+controls
+    check=field(crc(prefix+data),10)if protected else ''
+    if categories:return [dict(category=9,bits=check+prefix),dict(category=10,bits=data)]
+    return check+prefix+data
 
-def generate():
-    core=core_generate(True,[(n,24000,c,'base',0,0,False)for n in [512,480]for c in LAYOUTS]);manifest=json.loads(core['manifest.json']);c=window()
+def generate(include_category_bits=False, include_header_switch=False):
+    core=core_generate(True,[(n,24000,c,'base',0,0,False)for n in [512,480]for c in LAYOUTS],include_category_bits);manifest=json.loads(core['manifest.json']);c=window()
     noise=[complex(*struct.unpack_from('<dd',(ROOT/'tests/fixtures/playback-errors/aac-sbr-noise-protocol.f64le').read_bytes(),i*16))for i in range(512)]
     _,high,low,_=tables(10,27,0,False,0,0);nhigh=len(high)-1;nlow=len(low)-1
     files={};cases=[];blob=bytearray()
@@ -130,12 +135,15 @@ def generate():
             pcm=b''.join(struct.pack('<'+'f'*channels,*(p[i]for p in planar))for i in range(len(planar[0])))
             for protected in [False,True]:
                 name=f'n{n}-c{configuration}-x{1+double}-crc{int(protected)}'
-                config=packed(field(31,5)+field(7,6)+frequency(24000)+field(configuration,4)+field(n==480,1)+'000'+'1'+field(double,1)+field(protected,1)+header(0,True)*sum(e!=3 for e in elements)+'0000'+'00')
+                config_bits=field(31,5)+field(7,6)+frequency(24000)+field(configuration,4)+field(n==480,1)+'000'+'1'+field(double,1)+field(protected,1)+header(0,True)*sum(e!=3 for e in elements)+'0000'+'00'
+                config=packed(config_bits)
                 frames=[];packets=[]
                 for i,row in enumerate(base['frames']):
                     bits=row['bits']+''.join(sbr_bits(2 if e==1 else 1,nhigh,nlow,n//32,i,protected)for e in elements if e!=3)
                     packet=packed(bits);frames.append(dict(offset=len(blob),bytes=len(packet)));blob.extend(packet);packets.append(packet)
+                    if include_category_bits:frames[-1]['esc']=row['esc']+sum((sbr_bits(2 if e==1 else 1,nhigh,nlow,n//32,i,protected,categories=True)for e in elements if e!=3),[])
                 case=dict(name=name,n=n,rate=rate,configuration=configuration,mask=base['mask'],asc=config.hex(),channels=channels,frames=frames,container_rate=rate,container_frame_samples=n*(1+double),samples=len(planar[0]),pcm_offset=0,slots=n//32,bands=bands)
+                if include_category_bits:case['asc_bits']=config_bits
                 files[name+'.asc']=config;files[name+'.f32le']=pcm
                 files[name+'.mp4']=video_fixture([case],blob,channels,filename=name+'.mp4',write=False)['data'];case['video']=name+'.mp4'
                 files[name+'.mka']=mkv(config,packets,rate,n*(1+double),channels);case['matroska']=name+'.mka';cases.append(case)
@@ -143,14 +151,17 @@ def generate():
         base=next(b for b in manifest['cases']if b['n']==n and b['configuration']==2)
         original=list(struct.unpack('<'+'f'*(len(core[base['name']+'.f32le'])//4),core[base['name']+'.f32le']))
         lows=[analysis(original[ch::2],c)for ch in range(2)]
-        for mode in ['two','four','coarse','low','transient0','transient8','coupled','coupled-pan','invf','smoothing','harmonic','header']:
+        for mode in ['two','four','coarse','low','transient0','transient8','coupled','coupled-pan','invf','smoothing','harmonic','header']+(['header-switch']if include_header_switch else []):
             name=f'n{n}-c2-{mode}'
-            config=packed(field(31,5)+field(7,6)+frequency(24000)+field(2,4)+field(n==480,1)+'000'+'111'+header(0,mode!='smoothing')+'0000'+'00')
+            config_bits=field(31,5)+field(7,6)+frequency(24000)+field(2,4)+field(n==480,1)+'000'+'111'+header(0,mode!='smoothing')+'0000'+'00'
+            config=packed(config_bits)
             planar=[[v/32768 for v in synthesis(reconstruct(low,n//32,noise,mode,ch),64,c)]for ch,low in enumerate(lows)]
             frames=[];packets=[]
             for i,row in enumerate(base['frames']):
                 packet=packed(row['bits']+sbr_bits(2,nhigh,nlow,n//32,i,True,mode));frames.append(dict(offset=len(blob),bytes=len(packet)));blob.extend(packet);packets.append(packet)
+                if include_category_bits:frames[-1]['esc']=row['esc']+sbr_bits(2,nhigh,nlow,n//32,i,True,mode,True)
             case=dict(name=name,n=n,rate=48000,configuration=2,mask=3,asc=config.hex(),channels=2,frames=frames,container_rate=48000,container_frame_samples=n*2,samples=len(planar[0]),pcm_offset=0,slots=n//32,bands=64)
+            if include_category_bits:case['asc_bits']=config_bits
             files[name+'.asc']=config;files[name+'.f32le']=b''.join(struct.pack('<ff',*r)for r in zip(*planar))
             files[name+'.mp4']=video_fixture([case],blob,2,filename=name+'.mp4',write=False)['data'];case['video']=name+'.mp4'
             files[name+'.mka']=mkv(config,packets,48000,n*2,2);case['matroska']=name+'.mka';cases.append(case)
@@ -160,7 +171,7 @@ def generate():
            for n in [480,512] for configuration in [1,2] for flags in range(1,8)]
     specs += [(n,24000,2,tool,0,ms,False) for n in [480,512]
               for tool,ms in [('ms-all',2),('pns',1),('correlated-pns',1),('intensity',1),('tns',1)]]
-    tools=core_generate(True,specs)
+    tools=core_generate(True,specs,include_category_bits)
     for base in json.loads(tools['manifest.json'])['cases']:
         n=base['n'];channels=base['channels'];configuration=base['configuration']
         original=list(struct.unpack('<'+'f'*(len(tools[base['name']+'.f32le'])//4),tools[base['name']+'.f32le']))
@@ -171,12 +182,15 @@ def generate():
             pcm=b''.join(struct.pack('<'+'f'*channels,*(p[i]for p in planar))for i in range(len(planar[0])))
             for protected in [False,True]:
                 name=f"{base['name']}-x{1+double}-crc{int(protected)}"
-                config=packed(field(31,5)+field(7,6)+frequency(24000)+field(configuration,4)+field(n==480,1)+field(base['flags'],3)+'1'+field(double,1)+field(protected,1)+header(0,True)+'0000'+'00')
+                config_bits=field(31,5)+field(7,6)+frequency(24000)+field(configuration,4)+field(n==480,1)+field(base['flags'],3)+'1'+field(double,1)+field(protected,1)+header(0,True)+'0000'+'00'
+                config=packed(config_bits)
                 frames=[];packets=[]
                 for i,row in enumerate(base['frames']):
                     packet=packed(row['bits']+sbr_bits(channels,nhigh,nlow,n//32,i,protected))
                     frames.append(dict(offset=len(blob),bytes=len(packet)));blob.extend(packet);packets.append(packet)
+                    if include_category_bits:frames[-1]['esc']=row['esc']+sbr_bits(channels,nhigh,nlow,n//32,i,protected,categories=True)
                 case=dict(name=name,n=n,rate=rate,configuration=configuration,mask=base['mask'],asc=config.hex(),channels=channels,frames=frames,container_rate=rate,container_frame_samples=n*(1+double),samples=len(planar[0]),pcm_offset=0,slots=n//32,bands=bands,core_tool=base['tool'],resilience=base['flags'])
+                if include_category_bits:case['asc_bits']=config_bits
                 files[name+'.asc']=config;files[name+'.f32le']=pcm
                 files[name+'.mp4']=video_fixture([case],blob,channels,filename=name+'.mp4',write=False)['data'];case['video']=name+'.mp4'
                 files[name+'.mka']=mkv(config,packets,rate,n*(1+double),channels);case['matroska']=name+'.mka';cases.append(case)

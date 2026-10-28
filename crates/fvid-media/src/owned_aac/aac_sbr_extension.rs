@@ -39,6 +39,7 @@ impl State {
         *self = Self::default();
     }
 
+    pub(crate) fn current_header(&self) -> Option<&Header> { self.header.as_ref() }
     pub(crate) fn with_low_delay_header(header: Header) -> Self {
         Self {
             header: Some(header),

@@ -221,6 +221,10 @@ pub struct AacFrame {
     pub pts: i64,
     pub duration: u64,
 }
+enum ProtectedSource {
+    Raw(Vec<u8>),
+    Esc(super::aac_ep::RecoveredFrame),
+}
 pub struct NativeAacDecoder {
     config: AacConfig,
     synthesis: Vec<LongSineSynthesis>,
@@ -298,7 +302,6 @@ impl NativeAacDecoder {
             return Err(unsupported("AAC parametric stereo synthesis is not yet implemented"));
         }
         if let Some(ep)=&parsed.protection {ep.validate_raw_access_unit()?;}
-        if parsed.direct_mapping && parsed.eld_sbr.is_some() {return Err(unsupported("ELD LD-SBR ESC 9/10 mapping is not yet implemented"));}
         let direct_mapping=parsed.direct_mapping;
         let protection=parsed.protection.clone();
         let eld_sbr=parsed.eld_sbr.clone().map(|config|super::aac_eld_sbr::Decoder::new(config,parsed.core.sample_rate,parsed.core.frame_samples,parsed.core.channel_configuration)).transpose()?;
@@ -548,16 +551,14 @@ impl NativeAacDecoder {
         let Some(ep) = self.protection.as_ref() else {
             return self.decode_unprotected_timed_in_clock(packet, pts, duration, source_timescale);
         };
-        let units = if self.direct_mapping {
-            ep.decode_class_frames(packet)?
-                .iter()
-                .map(|frame| super::aac_esc::reassemble_eld_core(&self.config, frame))
-                .collect::<Result<Vec<_>>>()?
+        let units: Vec<ProtectedSource> = if self.direct_mapping {
+            ep.decode_class_frames(packet)?.into_iter().map(ProtectedSource::Esc).collect()
         } else {
-            ep.decode_raw_access_units(packet)?
+            ep.decode_raw_access_units(packet)?.into_iter().map(ProtectedSource::Raw).collect()
         };
         if units.len() == 1 {
-            return self.decode_unprotected_timed_in_clock(&units[0], pts, duration, source_timescale);
+            let unit=self.materialize_protected_source(&units[0])?;
+            return self.decode_unprotected_timed_in_clock(&unit, pts, duration, source_timescale);
         }
         let saved = self.checkpoint();
         let result = (|| {
@@ -568,7 +569,8 @@ impl NativeAacDecoder {
                 let end = u128::from(duration) * (index + 1) as u128 / count;
                 let at = i64::try_from(i128::from(pts) + start as i128)
                     .map_err(|_| invalid("AAC concatenated frame timestamp overflow"))?;
-                let frame = self.decode_unprotected_timed_in_clock(unit, at, (end-start) as u64, source_timescale)?
+                let unit=self.materialize_protected_source(unit)?;
+                let frame = self.decode_unprotected_timed_in_clock(&unit, at, (end-start) as u64, source_timescale)?
                     .ok_or_else(|| invalid("delayed AAC output inside an EP concatenated frame"))?;
                 samples.try_reserve(frame.samples.len()).map_err(|_| invalid("AAC concatenated PCM allocation failed"))?;
                 samples.extend(frame.samples);
@@ -577,6 +579,17 @@ impl NativeAacDecoder {
         })();
         if result.is_err() { self.restore(&saved)?; }
         result
+    }
+    fn materialize_protected_source<'a>(
+        &self,
+        source: &'a ProtectedSource,
+    ) -> Result<std::borrow::Cow<'a, [u8]>> {
+        match source {
+            ProtectedSource::Raw(bytes) => Ok(std::borrow::Cow::Borrowed(bytes)),
+            ProtectedSource::Esc(frame) => Ok(std::borrow::Cow::Owned(
+                super::aac_esc::reassemble_eld(&self.config, frame, self.eld_sbr.as_ref())?,
+            )),
+        }
     }
     fn decode_unprotected_timed_in_clock(&mut self, packet: &[u8], pts:i64, duration:u64, source_timescale:u32) -> Result<Option<AacFrame>> {
         if self.config.object_type==39 {return self.decode_eld_timed(packet,pts,duration);}

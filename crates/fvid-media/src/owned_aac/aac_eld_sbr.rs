@@ -113,6 +113,31 @@ impl Decoder {
             lfe,
         })
     }
+    /// Current headers for syntax-only ESC reconstruction. Native synthesis
+    /// commits these only after a complete valid decoded frame.
+    pub fn esc_headers(
+        &self,
+        core_rate: u32,
+        frame_samples: u16,
+        configuration: u8,
+    ) -> Result<Vec<Header>> {
+        if self.core_rate != core_rate
+            || u16::from(self.slots) * 32 != frame_samples
+            || self.configuration != configuration
+        {
+            return Err(invalid("LD-SBR ESC context geometry mismatch"));
+        }
+        self.groups
+            .iter()
+            .map(|group| {
+                group
+                    .stream
+                    .current_low_delay_header()
+                    .cloned()
+                    .ok_or_else(|| invalid("missing low-delay SBR configuration header"))
+            })
+            .collect()
+    }
     pub fn initial_config(&self) -> &Config {
         &self.config
     }

@@ -11,7 +11,7 @@ struct Span {
 pub(crate) struct Reader {
     instances: Vec<Instance>,
     next: usize,
-    current: [Option<usize>; 5],
+    current: [Option<usize>; 11],
     spans: Vec<Span>,
 }
 impl Reader {
@@ -34,7 +34,7 @@ impl Reader {
         Ok(Self {
             instances,
             next: 0,
-            current: [None; 5],
+            current: [None; 11],
             spans: Vec::new(),
         })
     }
@@ -45,6 +45,32 @@ impl Reader {
         self.current[category] = Some(self.next);
         self.next += 1;
         Ok(())
+    }
+    fn sbr(&mut self) -> Result<()> {
+        self.allocate(9)?;
+        self.allocate(10)
+    }
+    fn read_sbr<T>(
+        &mut self,
+        category: usize,
+        f: impl FnOnce(&mut SbrBitReader<'_>) -> SbrResult<T>,
+    ) -> Result<T> {
+        let index =
+            self.current[category].ok_or_else(|| invalid("unassigned LD-SBR ESC category"))?;
+        let source = &mut self.instances[index];
+        let mut bits = SbrBitReader::with_bit_len(&source.bytes, source.bits)
+            .map_err(|e| invalid(&e.to_string()))?;
+        bits.skip(source.position)
+            .map_err(|e| invalid(&e.to_string()))?;
+        let output = f(&mut bits).map_err(|e| invalid(&e.to_string()))?;
+        let end = bits.position();
+        self.spans.push(Span {
+            instance: index,
+            start: source.position,
+            end,
+        });
+        source.position = end;
+        Ok(output)
     }
     pub(crate) fn common(&mut self) -> Result<()> {
         self.allocate(0)
@@ -141,8 +167,17 @@ impl ChannelInput<'_, '_> {
 }
 /// Restore a core-only ELD logical AU from ordered ESC instances. This parses
 /// syntax using the shared channel readers; PCM/history are decoded only once
-/// by the normal transactional ELD decoder. LD-SBR ESC 9/10 is separate work.
+/// by the normal transactional ELD decoder.
 pub fn reassemble_eld_core(config: &AacConfig, frame: &RecoveredFrame) -> Result<Vec<u8>> {
+    reassemble_eld(config, frame, None)
+}
+/// Restore ELD with optional current LD-SBR context. Header history is read
+/// immutably here; the normal decoder alone commits the reconstructed packet.
+pub fn reassemble_eld(
+    config: &AacConfig,
+    frame: &RecoveredFrame,
+    sbr: Option<&SbrDecoder>,
+) -> Result<Vec<u8>> {
     if config.object_type != 39 {
         return Err(invalid("ELD ESC mapping requires AOT39"));
     }
@@ -164,6 +199,48 @@ pub fn reassemble_eld_core(config: &AacConfig, frame: &RecoveredFrame) -> Result
             super::aac_pair::ChannelPair::read_eld_esc(&mut reader, config)?;
         } else {
             super::aac_channel::ChannelData::read_eld_esc(&mut reader, config, None, false)?;
+        }
+    }
+    if let Some(sbr) = sbr {
+        let headers = sbr.esc_headers(
+            config.sample_rate,
+            config.frame_samples,
+            config.channel_configuration,
+        )?;
+        let rate = config
+            .sample_rate
+            .checked_mul(2)
+            .ok_or_else(|| invalid("LD-SBR ESC frequency overflow"))?;
+        let slots = (config.frame_samples / 32) as u8;
+        let mut headers = headers.into_iter();
+        for &kind in kinds.iter().filter(|&&kind| kind != 3) {
+            let header = headers
+                .next()
+                .ok_or_else(|| invalid("missing LD-SBR ESC header"))?;
+            reader.sbr()?;
+            let prefix = reader.read_sbr(9, |bits| {
+                if sbr.initial_config().crc {
+                    bits.read(10)?;
+                }
+                let end = bits.position() + bits.remaining();
+                let header = if bits.bit()? {
+                    SbrHeader::read(bits, end)?
+                } else {
+                    header
+                };
+                SbrData::read_low_delay_prefix(
+                    bits,
+                    end,
+                    &header,
+                    rate,
+                    slots,
+                    if kind == 1 { 2 } else { 1 },
+                )
+            })?;
+            reader.read_sbr(10, |bits| {
+                let end = bits.position() + bits.remaining();
+                prefix.finish(bits, end)
+            })?;
         }
     }
     reader.finish()

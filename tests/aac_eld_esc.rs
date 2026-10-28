@@ -550,7 +550,7 @@ fn own_malformed_ep3_movies_fail_at_crc_or_the_bounded_side_instance_and_roll_ba
 }
 
 #[test]
-fn ld_sbr_esc_9_10_mapping_still_has_an_explicit_refusal() {
+fn missing_ld_sbr_esc_instances_remain_an_explicit_error() {
     use fvid_media::owned_aac::{NativeAacDecoder as Owned, config::AudioSpecificConfig};
     let m = manifest();
     let case = m["cases"]
@@ -562,6 +562,11 @@ fn ld_sbr_esc_9_10_mapping_still_has_an_explicit_refusal() {
     let asc = hex(case["ld_sbr_asc"].as_str().unwrap());
     let parsed = AudioSpecificConfig::parse(&asc).unwrap();
     assert!(parsed.direct_mapping && parsed.eld_sbr.is_some());
-    let error = Owned::new(&asc).err().unwrap().to_string();
-    assert!(error.contains("ELD LD-SBR ESC 9/10 mapping is not yet implemented"));
+    let mut d = Owned::new(&asc).unwrap();
+    let blob = std::fs::read(root().join("packets.bin")).unwrap();
+    let error = d
+        .decode(packet(&blob, &case["frames"][0]))
+        .unwrap_err()
+        .to_string();
+    assert!(error.contains("missing AAC ESC instance"));
 }

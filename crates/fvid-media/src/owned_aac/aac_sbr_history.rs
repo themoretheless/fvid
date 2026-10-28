@@ -260,6 +260,7 @@ impl Frame {
     }
 }
 impl Stream {
+    pub(crate) fn current_low_delay_header(&self) -> Option<&super::aac_sbr_header::Header> { self.syntax.current_header() }
     pub(crate) fn with_low_delay_header(header: super::aac_sbr_header::Header) -> Self {
         Self {
             syntax: aac_sbr_extension::State::with_low_delay_header(header),
