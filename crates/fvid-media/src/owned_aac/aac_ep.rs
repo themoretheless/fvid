@@ -170,6 +170,11 @@ impl Config {
     pub fn decode_raw_access_unit(&self, packet: &[u8]) -> Result<Vec<u8>> {
         classes::decode(self, packet)
     }
+    /// Recover source AUs in source-frame order, undoing class-wise frame
+    /// concatenation before packing each original AU's alignment bits.
+    pub fn decode_raw_access_units(&self, packet: &[u8]) -> Result<Vec<Vec<u8>>> {
+        classes::decode_units(self, packet)
+    }
     pub(crate) fn visit_retained(
         &self,
         f: &mut super::memory::Footprint,

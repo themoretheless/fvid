@@ -184,6 +184,11 @@ fn sampling_frequency(b: &mut BitReader<'_>) -> Result<u32> {
     Ok(rate)
 }
 impl AudioSpecificConfig {
+    /// Core-clock samples represented by one compressed packet. EP source
+    /// concatenation changes this clock, not the core transform geometry.
+    pub fn core_packet_samples(&self) -> u32 {
+        u32::from(self.core.frame_samples) * u32::from(self.protection.as_ref().map_or(1, |ep| ep.frames))
+    }
     pub fn output_sample_rate(&self) -> u32 {
         self.extension_sample_rate.unwrap_or(self.core.sample_rate)
     }

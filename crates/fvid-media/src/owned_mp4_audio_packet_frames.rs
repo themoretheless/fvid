@@ -27,7 +27,7 @@ pub fn frames(
                 .map_err(|e| e.to_string())?;
             let parsed = crate::owned_aac::config::AudioSpecificConfig::parse(asc)
                 .map_err(|e| e.to_string())?;
-            let n = u64::from(parsed.core.frame_samples) * u64::from(rate);
+            let n = u64::from(parsed.core_packet_samples()) * u64::from(rate);
             let scale = u64::from(parsed.core.sample_rate);
             if scale == 0 || n % scale != 0 {
                 return Err("invalid MP4 AAC coded clock".into());

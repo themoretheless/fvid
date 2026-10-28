@@ -177,7 +177,7 @@ pub(super) fn presentation_samples<R: Read + std::io::Seek>(
     let aac = if track.codec == "A_AAC" {
         let config = crate::owned_aac::config::AudioSpecificConfig::parse(&track.codec_private)
             .map_err(|e| e.to_string())?;
-        let n = u64::from(config.core.frame_samples) * u64::from(rate);
+        let n = u64::from(config.core_packet_samples()) * u64::from(rate);
         let d = u64::from(config.core.sample_rate);
         if n % d != 0 {
             return Err("AAC presentation frame clock is not sample aligned".into());
@@ -243,4 +243,24 @@ pub(super) fn presentation_samples<R: Read + std::io::Seek>(
             .ok_or("audio presentation length overflow")?;
     }
     Ok(position)
+}
+
+#[cfg(test)]
+mod ep_concatenated_clock {
+    #[test]
+    fn presentation_count_includes_every_source_frame() {
+        let data = include_bytes!(
+            "../../../tests/fixtures/playback-errors/aac-ep-concatenated/eld-n512-c1-ld1-f7-srcpc-i0-mixed.mka"
+        );
+        let mut reader = crate::owned_webm::WebmReader::open(
+            std::io::Cursor::new(data.as_slice()),
+            Default::default(),
+        )
+        .unwrap();
+        reader.scan_all().unwrap();
+        assert_eq!(
+            super::presentation_samples(&mut reader, 0, 48_000, &Default::default()).unwrap(),
+            7_168
+        );
+    }
 }

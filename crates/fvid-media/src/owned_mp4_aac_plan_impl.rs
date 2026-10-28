@@ -112,7 +112,7 @@ pub(crate) fn aac_packet_plan_window(
             return Err(invalid("audio interval contains no samples"));
         }
     }
-    let scaled = u64::from(config.core.frame_samples) * u64::from(output_rate);
+    let scaled = u64::from(config.core_packet_samples()) * u64::from(output_rate);
     let core_rate = u64::from(config.core.sample_rate);
     if scaled % core_rate != 0 {
         return Err(invalid("AAC output frame clock is not sample aligned"));

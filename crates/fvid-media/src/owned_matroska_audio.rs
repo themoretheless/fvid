@@ -198,7 +198,7 @@ impl MatroskaTimelineDecoder {
             Self::Flac(d) => d.decode(data)?,
             Self::Pcm(d) => d.decode_pcm(data)?,
             Self::Alac(d) => d.decode_pcm(data)?,
-            Self::Aac(d) => return Ok(d.decode_timed(data,0,u64::from(d.core_frame_samples()))?.map(|f|f.samples)),
+            Self::Aac(d) => return Ok(d.decode_timed(data,0,u64::from(d.core_packet_samples()))?.map(|f|f.samples)),
             Self::Opus(d) => d.decode(data).map_err(|e| invalid(&e))?,
         };
         Ok(Some(samples))

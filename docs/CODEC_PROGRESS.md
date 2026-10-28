@@ -1,5 +1,87 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## EP2 concatenated source frames, 2026-10-28
+
+The EP2 assembler now restores two through seven source AUs from one protected
+frame. Fixed source-class parameters are restructured before CRC/FEC decoding:
+a concatenated class becomes one N-times-long class; an independent class
+becomes N adjacent classes. Existing SRCPC chains, RS protection and recursive
+interleaving operate on those restructured classes. Recovery then transposes
+class-major data back into source-frame order and packs each original AU
+separately, including bit-class boundaries. Original descriptors are retained;
+expanded parameters are temporary and can reach 441 entries (63 classes × 7).
+No escaped length/rate/CRC parameters are allowed in this mode, as required by
+ISO 1.8.4.4. Reserved frame counts remain errors.
+
+`Config::decode_raw_access_units()` returns the ordered source units. The old
+singular API remains explicit: it refuses multiple units and points callers to
+the plural API. Single-source recovery retains its existing behavior. Native
+AAC decodes each recovered source AU through the same owned core/SBR pipeline,
+returns one contiguous PCM frame with the original transport PTS/duration, and
+restores the complete packet-boundary checkpoint if any child fails. Child
+clock boundaries are computed with wide integer arithmetic. Timestamp overflow
+after a successful child must also restore history. MP4 coded sample counts now
+multiply core geometry by the number of source frames; playback cannot crop an
+N-source packet to one source frame by its inferred clock.
+
+ASC and native decoders expose `core_packet_samples()` for transport clocks;
+`core_frame_samples()` retains the single-source DSP geometry. All existing
+AAC packet-clock consumers use the packet value, including compressed/PCM
+companion windows, Matroska export and MP4-to-Matroska planning. The first
+implementation exposed a second exact failure on the same valid movie:
+`AAC edit exceeds packet index` during remux, because the plan still counted
+one core frame. Its regression now remuxes all 84 profile/frame-count pairs,
+compares PCM, and checks remuxed playback/seek. Two media unit regressions
+require a seven-source LD-SBR packet to contain 7,168 output samples and its
+7–35 ms companion window to retain exactly 1,344 samples with correct delay
+and tail padding. Transform geometry remains unchanged.
+
+`scripts/generate_aac_ep_concatenated_fixtures.py` saves 1,263 acceptance sources,
+132 malformed controls and three forbidden-escape configurations in short
+MP4/Matroska movies. Sources include 480/512 ELD, mono/stereo LD-SBR ×2, ER-LC,
+ER-LTP and ER-LD at 480/512/960/1024 core frame sizes. Every frame count 2..7,
+all joined/all independent/mixed class flags, bit-class continuous SRCPC,
+RS/mixed classes, all three interleave modes, zero classes and source-class
+permutations are exercised. The 63-class/seven-source case verifies 441
+expanded independent classes without widening the original descriptor table.
+
+The source frames are padded only by valid ER EXT_FILL to fixed lengths. The
+original pre-fix binary decodes all 14 padded source sequences to the saved
+independent PCM, while refusing the corresponding concatenated setups at the
+exact old `EP concatenated frame routing is not yet implemented` error. Thus
+the reproducer does not depend on unrelated invalid AAC padding. Normal tests
+read saved assets; explicit generation needs no foreign codec, process or
+network and reproduces all 4,160 files (20,335,425 bytes) byte-for-byte with
+process/socket creation forbidden.
+
+`tests/aac_ep_concatenated_playback.rs` verifies exact per-source AU recovery,
+complete independent PCM, native reset, full core metadata, MP4 packet clocks,
+public/owned container export and ranges, playback/drain, rewind, repeated seek
+at internal source boundaries, whole-packet boundaries and EOF. CRC and declared
+truncation controls isolate transport failures. Another movie has valid EP
+protection around a wrong alignment bit in the final AAC child: transport
+recovery must succeed before the exact AAC error, and the following good packet
+must match checkpoint replay. Saved invalid configurations separately test the
+normative escape restriction. None is counted as successful playback.
+
+This is owned PCM/navigation qualification, not physical speaker output or a
+throughput benchmark. Broader tool combinations, EP1/EP3 mappings and remaining
+ELD extensions still require implementation or qualification; the codec-gap
+goal is not complete.
+
+Qualification: 561 media unit tests (one ignored), 1,052 root library tests
+(26 ignored) and 50 integration tests passed: 1,663 passed, zero failures,
+27 ignored. All eight concatenation tests pass on the final packet-clock
+implementation, alongside complete ELD/CLDFB/LD-SBR, single-source EP,
+multiclass, optional-class and RS-group regressions. The 1,040-source ER EP2
+native/reset/raw-AU regression was rerun on this same final implementation.
+Checks use offline `--no-default-features --features player`; the current
+concatenated-playback test binary has no FFmpeg/libav linkage. Build profiles
+were not changed. This is a finite qualification boundary, not universal codec
+coverage.
+
+Primary definition: [ISO/IEC 14496-3:2009, section 1.8.4.4 and Figure 1.9](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+
 ## EP2 integration for ER AAC LC, LTP and LD, 2026-10-28
 
 The shared ASC reader now parses ErrorProtectionSpecificConfig for epConfig=2

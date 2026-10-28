@@ -39,7 +39,7 @@ pub(super) fn apply<R: Read + Seek>(
         let output = config
             .resolve_output_rate(rate)
             .map_err(|e| e.to_string())?;
-        let scaled = u64::from(config.core.frame_samples) * u64::from(output);
+        let scaled = u64::from(config.core_packet_samples()) * u64::from(output);
         if scaled % u64::from(config.core.sample_rate) != 0 {
             return Err("AAC window frame clock is not sample aligned".into());
         }
@@ -157,4 +157,35 @@ pub(super) fn apply<R: Read + Seek>(
     Ok(Some(
         (audible_end - initial).saturating_sub(end.saturating_sub(begin)),
     ))
+}
+
+#[cfg(test)]
+mod ep_concatenated_clock {
+    use super::*;
+    #[test]
+    fn companion_window_uses_all_source_frames_before_delay_and_tail_padding() {
+        let data = include_bytes!(
+            "../../../tests/fixtures/playback-errors/aac-ep-concatenated/eld-n512-c1-ld1-f7-srcpc-i0-mixed.mka"
+        );
+        let mut reader =
+            WebmReader::open(std::io::Cursor::new(data.as_slice()), Default::default()).unwrap();
+        reader.scan_all().unwrap();
+        assert_eq!(
+            apply(&mut reader, 0, 0, (7_000, 35_000), &Default::default()).unwrap(),
+            Some(7_168 - (1_680 - 336))
+        );
+        assert_eq!(reader.tracks[0].codec_delay_ns, 7_000_000);
+        assert_eq!(reader.packets[0].duration_ns, Some(149_333_333));
+        assert_eq!(reader.packets[0].discard_padding_ns, 114_333_333);
+        assert_eq!(
+            super::super::pcm_window::presentation_samples(
+                &mut reader,
+                0,
+                48_000,
+                &Default::default()
+            )
+            .unwrap(),
+            1_344
+        );
+    }
 }

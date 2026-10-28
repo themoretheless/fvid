@@ -431,6 +431,10 @@ impl NativeAacDecoder {
         self.eld_sbr.as_ref().map_or(self.sbr_rate.unwrap_or(self.config.sample_rate),|ld|ld.output_rate())
     }
     pub fn core_frame_samples(&self) -> u16 { self.config.frame_samples }
+    /// Core-clock samples in a transport packet, including EP source frames.
+    pub fn core_packet_samples(&self) -> u32 {
+        u32::from(self.config.frame_samples) * u32::from(self.protection.as_ref().map_or(1, |ep| ep.frames))
+    }
     /// Packet/container adapters retain the configured SSR access-unit clock;
     /// window-sequence row counts are internal synthesis geometry.
     pub fn use_fixed_packet_clock(&mut self) {
@@ -501,7 +505,8 @@ impl NativeAacDecoder {
         if self.detect_sbr {self.sbr_rate=None;}
         self.sbr_elements.fill(None);
     }
-    /// One raw_data_block, returning interleaved normalized floating PCM.
+    /// One transport packet, returning interleaved normalized floating PCM.
+    /// An EP2 packet may restore several source raw_data_blocks in order.
     /// A malformed/unsupported packet leaves all decoding state unchanged.
     /// Untimed convenience API. An empty vector means one consumed delayed
     /// packet; callers must drain `finish` at EOF. Timed callers use decode_timed.
@@ -536,8 +541,33 @@ impl NativeAacDecoder {
     /// window in its declared clock. Zero duration retains untimed synthesis.
     pub fn decode_timed_in_clock(&mut self, packet: &[u8], pts:i64, duration:u64, source_timescale:u32) -> Result<Option<AacFrame>> {
         if source_timescale == 0 {return Err(invalid("zero AAC source timescale"));}
-        let recovered=self.protection.as_ref().map(|ep|ep.decode_raw_access_unit(packet)).transpose()?;
-        let packet=recovered.as_deref().unwrap_or(packet);
+        let Some(ep) = self.protection.as_ref() else {
+            return self.decode_unprotected_timed_in_clock(packet, pts, duration, source_timescale);
+        };
+        let units = ep.decode_raw_access_units(packet)?;
+        if units.len() == 1 {
+            return self.decode_unprotected_timed_in_clock(&units[0], pts, duration, source_timescale);
+        }
+        let saved = self.checkpoint();
+        let result = (|| {
+            let mut samples = Vec::new();
+            let count = units.len() as u128;
+            for (index, unit) in units.iter().enumerate() {
+                let start = u128::from(duration) * index as u128 / count;
+                let end = u128::from(duration) * (index + 1) as u128 / count;
+                let at = i64::try_from(i128::from(pts) + start as i128)
+                    .map_err(|_| invalid("AAC concatenated frame timestamp overflow"))?;
+                let frame = self.decode_unprotected_timed_in_clock(unit, at, (end-start) as u64, source_timescale)?
+                    .ok_or_else(|| invalid("delayed AAC output inside an EP concatenated frame"))?;
+                samples.try_reserve(frame.samples.len()).map_err(|_| invalid("AAC concatenated PCM allocation failed"))?;
+                samples.extend(frame.samples);
+            }
+            Ok(Some(AacFrame { samples, pts, duration }))
+        })();
+        if result.is_err() { self.restore(&saved)?; }
+        result
+    }
+    fn decode_unprotected_timed_in_clock(&mut self, packet: &[u8], pts:i64, duration:u64, source_timescale:u32) -> Result<Option<AacFrame>> {
         if self.config.object_type==39 {return self.decode_eld_timed(packet,pts,duration);}
         if self.config.object_type==23 {return self.decode_ld_timed(packet,pts,duration);}
         let mut ltp_coupling_synthesis=self.ltp_coupling_synthesis.clone();

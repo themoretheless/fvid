@@ -232,7 +232,7 @@ impl PacketPcmDecoder {
     pub(crate) fn decode_delayed(&mut self, packet: &[u8]) -> Result<Option<Vec<f32>>> {
         match self {
             Self::Ps(d) => Ok(d.decode(packet)?.map(|f| f.pcm)),
-            Self::Aac(d) => Ok(d.decode_timed(packet,0,u64::from(d.core_frame_samples()))?.map(|f|f.samples)),
+            Self::Aac(d) => Ok(d.decode_timed(packet,0,u64::from(d.core_packet_samples()))?.map(|f|f.samples)),
             _ => Ok(Some(self.decode(packet)?)),
         }
     }

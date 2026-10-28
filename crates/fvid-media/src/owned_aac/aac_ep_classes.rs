@@ -9,10 +9,8 @@ pub(super) fn validate(config: &Config) -> Result<()> {
     if config.interleave > 2 {
         return Err(invalid("reserved EP interleave mode"));
     }
-    if config.frames != 1 {
-        return Err(invalid(
-            "EP concatenated frame routing is not yet implemented",
-        ));
+    if !(1..=7).contains(&config.frames) {
+        return Err(invalid("reserved EP concatenated frame count"));
     }
     for set in &config.sets {
         let count = set.classes.len();
@@ -32,6 +30,13 @@ pub(super) fn validate(config: &Config) -> Result<()> {
             }
         }
         for (index, c) in set.classes.iter().enumerate() {
+            if config.frames > 1
+                && (!matches!(c.length, Length::Fixed(_)) || c.rate.is_none() || c.crc.is_none())
+            {
+                return Err(invalid(
+                    "EP concatenated frames forbid escaped class parameters",
+                ));
+            }
             if c.fec > 2 {
                 return Err(invalid("reserved EP FEC type"));
             }
@@ -346,6 +351,15 @@ fn split_body(
     Ok(coded)
 }
 pub(super) fn decode(config: &Config, packet: &[u8]) -> Result<Vec<u8>> {
+    if config.frames != 1 {
+        validate(config)?;
+        return Err(invalid(
+            "EP frame contains multiple raw access units; use decode_raw_access_units",
+        ));
+    }
+    Ok(decode_units(config, packet)?.remove(0))
+}
+pub(super) fn decode_units(config: &Config, packet: &[u8]) -> Result<Vec<Vec<u8>>> {
     validate(config)?;
     let bits = packet
         .iter()
@@ -402,14 +416,22 @@ pub(super) fn decode(config: &Config, packet: &[u8]) -> Result<Vec<u8>> {
         let crc = class
             .crc
             .unwrap_or_else(|| [0, 6, 8, 10, 12, 14, 16, 32][field(&header, &mut at, 3)]);
-        parameters.push(Parameter {
-            class,
-            output: index,
-            length,
-            rate,
-            crc,
-            members: Vec::new(),
-        });
+        let frames = usize::from(config.frames);
+        let joined = frames > 1 && class.concatenated;
+        for frame in 0..if joined { 1 } else { frames } {
+            parameters.push(Parameter {
+                class,
+                output: index * frames + frame,
+                length: if joined {
+                    length.map(|n| n * frames)
+                } else {
+                    length
+                },
+                rate,
+                crc,
+                members: Vec::new(),
+            });
+        }
     }
     let stuffing = if config.stuffing {
         field(&header, &mut at, 3)
@@ -443,7 +465,8 @@ pub(super) fn decode(config: &Config, packet: &[u8]) -> Result<Vec<u8>> {
         .collect();
     let views: Vec<_> = srcpc_indices.iter().map(|&i| coded[i].as_slice()).collect();
     let recovered = srcpc::decode_chain(&views, &sections)?;
-    let mut output = vec![vec![]; set.classes.len()];
+    let frames = usize::from(config.frames);
+    let mut output = vec![vec![]; set.classes.len() * frames];
     for (&i, recovered) in srcpc_indices.iter().zip(recovered) {
         let p = &parameters[i];
         if !aac_ep_crc::verify(&recovered.information, p.crc)? {
@@ -484,22 +507,42 @@ pub(super) fn decode(config: &Config, packet: &[u8]) -> Result<Vec<u8>> {
             }
         }
     }
-    let total = output
-        .iter()
-        .try_fold(0usize, |sum, row| sum.checked_add(row.len()))
-        .ok_or_else(|| invalid("EP raw-AU length overflow"))?;
-    if total % 8 != 0 {
-        return Err(invalid("EP raw access unit is not octet aligned"));
-    }
-    let mut raw = vec![0; total / 8];
-    let mut at = 0;
-    for row in output {
-        for b in row {
-            raw[at / 8] |= b << (7 - at % 8);
-            at += 1;
+    let mut units = Vec::with_capacity(frames);
+    for frame in 0..frames {
+        let mut pieces = Vec::with_capacity(set.classes.len());
+        for (index, class) in set.classes.iter().enumerate() {
+            if frames > 1 && class.concatenated {
+                let row = &output[index * frames];
+                if row.is_empty() {
+                    continue;
+                } // optional or zero-length class
+                let Length::Fixed(n) = class.length else {
+                    unreachable!()
+                };
+                let n = usize::from(n);
+                pieces.push(&row[frame * n..(frame + 1) * n]);
+            } else {
+                pieces.push(output[index * frames + frame].as_slice());
+            }
         }
+        let total = pieces
+            .iter()
+            .try_fold(0usize, |sum, row| sum.checked_add(row.len()))
+            .ok_or_else(|| invalid("EP raw-AU length overflow"))?;
+        if total % 8 != 0 {
+            return Err(invalid("EP raw access unit is not octet aligned"));
+        }
+        let mut raw = vec![0; total / 8];
+        let mut at = 0;
+        for row in pieces {
+            for &bit in row {
+                raw[at / 8] |= bit << (7 - at % 8);
+                at += 1;
+            }
+        }
+        units.push(raw);
     }
-    Ok(raw)
+    Ok(units)
 }
 
 #[cfg(test)]
