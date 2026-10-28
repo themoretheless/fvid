@@ -199,6 +199,7 @@ impl Config {
             au_sequence: None,
             degradation_priority: None,
             ocr: None,
+            ocr_field: None,
             decoding_timestamp: None,
             composition_timestamp: None,
             access_unit_length: None,
@@ -215,7 +216,13 @@ impl Config {
                 p.degradation_priority = Some(b.read(self.priority_length)? as u16);
             }
             if ocr_flag {
+                let start = b.position();
                 p.ocr = Some(word(&mut b, self.ocr_length)?);
+                p.ocr_field = Some(BitField {
+                    data,
+                    start,
+                    bit_len: self.ocr_length,
+                });
             }
             if start {
                 p.random_access = if self.use_random_access {
@@ -322,6 +329,8 @@ pub struct Packet<'a> {
     pub au_sequence: Option<u16>,
     pub degradation_priority: Option<u16>,
     pub ocr: Option<u64>,
+    /// Wire span for exact duplicate comparison while permitting changed OCR.
+    pub ocr_field: Option<BitField<'a>>,
     pub decoding_timestamp: Option<u64>,
     pub composition_timestamp: Option<u64>,
     /// Bytes; zero in the bitstream means unknown and is represented by None.
@@ -338,3 +347,7 @@ pub struct Payload<'a> {
     pub data: &'a [u8],
     pub bit_len: usize,
 }
+
+#[path = "owned_sl_assembly.rs"]
+mod assembly;
+pub use assembly::{AccessUnit, Assembler, Bitrate, Checkpoint, Push};

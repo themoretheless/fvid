@@ -11,7 +11,7 @@ def config(ts=32,ocr=0,au=16,bitrate=0,priority=0,aseq=0,pseq=0,flags=0xcc,durat
         scale,a,c=duration;bits+=field(scale,32)+field(a,16)+field(c,16)
     if not flags&4:bits+=field(initial[0],ts)+field(initial[1],ts)
     return packed(bits)
-def packet(c,payload,bits,cts=0,dts=None,ocr=None,aseq=0,pseq=0,priority=None,bitrate=None,start=True,end=True,idle=False,padding_only=False,header_padding=False,length_override=None):
+def packet(c,payload,bits,cts=0,dts=None,ocr=None,aseq=0,pseq=0,priority=None,bitrate=None,start=True,end=True,idle=False,padding_only=False,header_padding=False,length_override=None,rap=True):
     flags=c['flags'];padding=0 if padding_only or idle else(-bits)%8;wire=''
     if flags&128:wire+=field(start,1)
     if flags&64:wire+=field(end,1)
@@ -27,7 +27,7 @@ def packet(c,payload,bits,cts=0,dts=None,ocr=None,aseq=0,pseq=0,priority=None,bi
             if priority is not None:wire+=field(priority,c['priority'])
         if ocr is not None:wire+=field(ocr,c['ocr'])
         if start:
-            if flags&32:wire+='1'
+            if flags&32:wire+=field(rap,1)
             wire+=field(aseq,c['aseq'])
             if flags&4:wire+=field(dts is not None,1)+field(cts is not None,1)
             if c['bitrate']:wire+=field(bitrate is not None,1)

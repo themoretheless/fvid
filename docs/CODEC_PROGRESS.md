@@ -1,3 +1,42 @@
+## Stateful base SL access-unit assembly, 2026-10-28
+
+`owned_sl::Assembler` reconstructs per-ES access units across arbitrary bit
+boundaries. It checks packet/AU sequence continuity modulo the configured
+width, declared AU byte lengths, explicit and implicit boundaries and immediate
+packet retransmissions. Retransmissions may update only OCR; repeated random-
+access AUs are consumed without emitting a second AU, while equal AU sequence
+numbers without RAP remain processable. Idle/padding packets advance packet
+continuity without creating audio. Clean EOF resolves an omitted end; explicit
+unfinished AUs refuse EOF and remain retryable. Successful EOF is latched.
+
+The end-only flag regression reproduced `SL padding exceeds packet payload`
+on an identical retransmission: parsing with the already advanced implicit
+start context changed the packet header. Retransmissions now use the context
+saved before the original packet. The saved synthetic transport sequence and
+twenty fragmented ordinary/end-only AAC programs cover exact payload bits,
+per-ES checkpoint replay and independent complete PCM, including native LD-SBR.
+Their short reference movies remain logical codec projections; this is not an
+EP1 container-playback claim. Empty ESC AUs are also transported explicitly.
+
+Sequence gaps, altered duplicate payloads and premature EOF are checked as
+refusals followed by valid continuation without restoration hiding mutation.
+Explicit caller AU limits have separate refusal checks; no implicit global
+media-size cap was introduced. Wide OCR/clock/priority and up-to-255-bit bitrate
+metadata remain exact. Checkpoints retain pending fragments and packet context;
+reset and configuration/policy mismatch guards are tested.
+
+The eight new saved assets / 1,213,729 bytes regenerate exactly with process
+and socket creation forbidden; the existing 110 SL assets remain unchanged.
+Ordinary tests read saved assets, never invoke a generator or foreign codec.
+All 22 selected SL/EP1/ESDS integration checks and 1,619 root/media unit
+tests pass offline (29 unit tests ignored). The new integration executable
+has no FFmpeg/libav linkage.
+
+**Still open:** counter unwrapping and synchronized timeline state, extended SL
+descriptors, container dependency-group routing, player/export navigation and
+fragmented PS composition. Base AU assembly advances the transport layer but
+does not complete the EP1 player or the overall codec-gap objective.
+
 ## LD-SBR navigation with live decoder history, 2026-10-28
 
 The navigation acceptance now retains one decoder object across interrupted
