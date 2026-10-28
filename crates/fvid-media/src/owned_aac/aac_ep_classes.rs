@@ -1,5 +1,8 @@
-//! EP2 classes reassemble the epConfig=0 stream (14496-3 section 1.8.1).
-use super::{Class, Config, Length, Result, decode_frame_header, decode_rs_class, invalid};
+//! Exact EP class recovery and EP2 raw-AU assembly (14496-3 section 1.8.1).
+use super::{
+    Class, Config, Length, RecoveredClass, RecoveredFrame, Result, decode_frame_header,
+    decode_rs_class, invalid,
+};
 use crate::owned_aac::{aac_ep_crc, aac_ep_interleave as stage, aac_ep_rs, aac_ep_srcpc as srcpc};
 
 pub(super) fn validate(config: &Config) -> Result<()> {
@@ -360,6 +363,31 @@ pub(super) fn decode(config: &Config, packet: &[u8]) -> Result<Vec<u8>> {
     Ok(decode_units(config, packet)?.remove(0))
 }
 pub(super) fn decode_units(config: &Config, packet: &[u8]) -> Result<Vec<Vec<u8>>> {
+    decode_class_frames(config, packet)?
+        .into_iter()
+        .map(|frame| {
+            let total = frame
+                .classes
+                .iter()
+                .try_fold(0usize, |sum, row| sum.checked_add(row.bits.len()))
+                .ok_or_else(|| invalid("EP raw-AU length overflow"))?;
+            if total % 8 != 0 {
+                return Err(invalid("EP raw access unit is not octet aligned"));
+            }
+            let mut raw = vec![0; total / 8];
+            for (at, bit) in frame
+                .classes
+                .into_iter()
+                .flat_map(|row| row.bits)
+                .enumerate()
+            {
+                raw[at / 8] |= bit << (7 - at % 8);
+            }
+            Ok(raw)
+        })
+        .collect()
+}
+pub(super) fn decode_class_frames(config: &Config, packet: &[u8]) -> Result<Vec<RecoveredFrame>> {
     validate(config)?;
     let bits = packet
         .iter()
@@ -509,38 +537,31 @@ pub(super) fn decode_units(config: &Config, packet: &[u8]) -> Result<Vec<Vec<u8>
     }
     let mut units = Vec::with_capacity(frames);
     for frame in 0..frames {
-        let mut pieces = Vec::with_capacity(set.classes.len());
+        let mut classes = Vec::with_capacity(set.classes.len());
         for (index, class) in set.classes.iter().enumerate() {
-            if frames > 1 && class.concatenated {
+            if mask & (1u64 << index) == 0 {
+                continue;
+            }
+            let bits = if frames > 1 && class.concatenated {
                 let row = &output[index * frames];
-                if row.is_empty() {
-                    continue;
-                } // optional or zero-length class
                 let Length::Fixed(n) = class.length else {
                     unreachable!()
                 };
                 let n = usize::from(n);
-                pieces.push(&row[frame * n..(frame + 1) * n]);
+                row[frame * n..(frame + 1) * n].to_vec()
             } else {
-                pieces.push(output[index * frames + frame].as_slice());
-            }
+                // Each independent class belongs to exactly one source frame.
+                std::mem::take(&mut output[index * frames + frame])
+            };
+            classes.push(RecoveredClass {
+                class_index: index,
+                bits,
+            });
         }
-        let total = pieces
-            .iter()
-            .try_fold(0usize, |sum, row| sum.checked_add(row.len()))
-            .ok_or_else(|| invalid("EP raw-AU length overflow"))?;
-        if total % 8 != 0 {
-            return Err(invalid("EP raw access unit is not octet aligned"));
-        }
-        let mut raw = vec![0; total / 8];
-        let mut at = 0;
-        for row in pieces {
-            for &bit in row {
-                raw[at / 8] |= bit << (7 - at % 8);
-                at += 1;
-            }
-        }
-        units.push(raw);
+        units.push(RecoveredFrame {
+            set_index: original,
+            classes,
+        });
     }
     Ok(units)
 }

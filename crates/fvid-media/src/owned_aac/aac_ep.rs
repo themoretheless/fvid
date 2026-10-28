@@ -34,6 +34,22 @@ pub struct Config {
     pub frames: u8,
     pub header: Option<(u8, u8)>,
 }
+/// One recovered class in original output order. Information is represented
+/// as exact MSB-first bits (each value is 0 or 1), without CRC or octet padding.
+/// An absent optional class is omitted; a present zero-bit class is retained.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct RecoveredClass {
+    pub class_index: usize,
+    pub bits: Vec<u8>,
+}
+/// One source frame after FEC, CRC, interleaving and frame concatenation have
+/// been undone. These class boundaries are required for EP3's ESC mapping.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct RecoveredFrame {
+    /// Original configured set, before optional-class derivation.
+    pub set_index: usize,
+    pub classes: Vec<RecoveredClass>,
+}
 fn crc_width(code: u8) -> Result<u8> {
     match code {
         0..=16 => Ok(code),
@@ -162,6 +178,13 @@ impl Config {
     /// derived class lists are materialized, including counts exceeding u64.
     pub fn predefined_set_count(&self) -> Result<u128> {
         classes::predefined_count(self)
+    }
+    /// Recover exact class bits in source-frame and original class order.
+    /// Unlike the EP2 raw-AU API, this does not impose octet alignment on a
+    /// frame or discard the boundary between error sensitivity categories.
+    /// This is protection recovery, not an AAC ESC-to-logical-payload decoder.
+    pub fn decode_class_frames(&self, packet: &[u8]) -> Result<Vec<RecoveredFrame>> {
+        classes::decode_class_frames(self, packet)
     }
     /// EP2 output classes concatenate, after reordering, to the epConfig=0 AU.
     pub fn validate_raw_access_unit(&self) -> Result<()> {

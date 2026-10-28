@@ -1,5 +1,41 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## Exact EP class recovery for ESC mapping, 2026-10-28
+
+`Config::decode_class_frames()` now returns original predefined-set identity
+and exact, separately recovered class bits for each source frame. Class indices
+follow original output order after undoing the configured wire permutation.
+Absent optional classes are omitted; present zero-bit classes remain explicit.
+CRC/FEC, optional selection, grouped RS, recursive interleaving and 1..7 source
+frame restructuring all complete before any result is exposed. Class output
+has no invented octet padding. The existing raw-AU methods use this shared
+recovery and retain their octet-alignment requirement.
+
+This boundary is necessary for EP3: its direct mapping associates each EP class
+with a distinct error sensitivity category instance. Concatenating physical
+classes into an epConfig=0 AU would lose the semantic category boundaries.
+EP1 additionally requires dependent elementary-stream association. Neither
+EP1/EP3 AAC ASC admission nor ESC-to-logical-payload decoding is enabled by
+this API. They remain explicit refusals until that semantic parser is present.
+
+`scripts/generate_aac_ep_class_boundaries.py` authors 130 saved protection
+vectors with exact information lengths 0..64 bits, all SRCPC puncture rates,
+CRC, optional absence and present-empty classes. The four new tests check those
+vectors, class identity and exact bits on all 3,483 existing concatenated,
+optional, grouped-RS and multiclass movie sources, and precise failures on 704
+malformed protection controls. These are class-recovery acceptance checks,
+not acceptance of EP1/EP3 audio playback. The generator reproduces its saved
+49,171 bytes with subprocess and socket creation forbidden. Ordinary tests
+read saved fixtures offline. All 26 class/concatenated/optional/grouped-RS
+integration checks pass, including existing AudioStream playback/rewind/seek.
+The protected PS complete-PCM/checkpoint regression also passes. Media and root
+unit qualification passes 561 and 1,052 tests respectively (1/26 ignored).
+The class-recovery test binary has no FFmpeg/libav linkage.
+
+Primary definition: [ISO/IEC 14496-3:2009](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf), sections 1.6.3.6–1.6.3.7,
+1.8.1 and 4.5.2.4; tables 4.148–4.149 distinguish common CPE information,
+per-channel side information, RVLC, TNS, spectrum and extension instances.
+
 ## Protected ER-AAC Parametric Stereo, 2026-10-28
 
 The owned PS decoder and syntax-only presence probe now retain and recover
