@@ -442,6 +442,11 @@ fn fragmented_active_chain_preserves_storage_bits_clocks_and_effective_descripti
                 for sample in 0..count {
                     let x = reader.tracks()[index].samples.get(sample).unwrap();
                     let y = reference.tracks()[other].samples.get(sample).unwrap();
+                    if id >= 6 && sample == 0 {
+                        let factor = reader.tracks()[index].timescale / 24000;
+                        assert_eq!(x.dts, 0);
+                        assert_eq!(x.pts, i64::from(2880 * factor));
+                    }
                     let indexed = c["mode"] == "hybrid" && id <= 5 && sample < 6;
                     assert_eq!(
                         x.offset < moov_end,

@@ -12,7 +12,9 @@ middle epoch. A hybrid retains the first six samples in each prefix track's
 index; the other 23 initial indexes are empty and receive their six AUs from the
 middle fragment. Explicit tfhd description/duration fields override deliberately
 different trex defaults. Version-1 tfdt and per-row trun composition offsets
-preserve indexed DTS as well as PTS, including the delayed start of tail tracks.
+preserve indexed DTS as well as PTS, including the delayed start of tail tracks. Tail DTS=0 and PTS=2880 times the
+per-track scale factor are checked against the authored clock independently of
+the indexed parser comparison.
 Exact padding flags preserve non-byte ESCs and their nonzero excluded low bits.
 
 A structural acceptance test verifies actual moof/traf counts, empty/initial stsz
