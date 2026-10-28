@@ -4,7 +4,21 @@ fn root() -> PathBuf {
         .join("tests/fixtures/playback-errors/mp4-ep1-grouped-sbr")
 }
 fn manifest() -> serde_json::Value {
-    serde_json::from_slice(&std::fs::read(root().join("manifest.json")).unwrap()).unwrap()
+    let mut base: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(root().join("manifest.json")).unwrap()).unwrap();
+    let mut batches: serde_json::Value = serde_json::from_slice(
+        &std::fs::read(root().join("../mp4-ep1-sbr-batches/manifest.json")).unwrap(),
+    )
+    .unwrap();
+    for c in batches["cases"].as_array_mut().unwrap() {
+        c["video"] = format!("../mp4-ep1-sbr-batches/{}", c["video"].as_str().unwrap()).into();
+        for bad in c["malformed"].as_array_mut().unwrap() {
+            bad["video"] =
+                format!("../mp4-ep1-sbr-batches/{}", bad["video"].as_str().unwrap()).into();
+        }
+        base["cases"].as_array_mut().unwrap().push(c.clone());
+    }
+    base
 }
 #[test]
 fn grouped_ld_sbr_pairs_decode_to_independent_pcm() {
@@ -13,7 +27,7 @@ fn grouped_ld_sbr_pairs_decode_to_independent_pcm() {
         owned_mp4::Mp4Reader, owned_mp4_ep1::Group,
     };
     let m = manifest();
-    assert_eq!(m["cases"].as_array().unwrap().len(), 96);
+    assert_eq!(m["cases"].as_array().unwrap().len(), 176);
     for c in m["cases"].as_array().unwrap() {
         let data = std::fs::read(root().join(c["video"].as_str().unwrap())).unwrap();
         let mut reader = Mp4Reader::open_indexed(Cursor::new(data), Default::default()).unwrap();
@@ -368,6 +382,44 @@ fn ep1_pair_reassembly_is_bit_exact_and_packetization_can_change_without_dsp_res
             if i == 0 {
                 let joined = aac_ep1::associate(&input).unwrap();
                 let split = aac_ep1::associate(&reference_input).unwrap();
+                let groups = c["groups"].as_u64().unwrap() as usize;
+                let core = c["original_streams"].as_u64().unwrap() as usize - 2 * groups;
+                let mut partitions: Vec<Vec<usize>> = (0..core).map(|i| vec![i]).collect();
+                match c["mode"].as_str().unwrap() {
+                    "batch" => partitions.push((core..core + 2 * groups).collect()),
+                    "bridge" => {
+                        partitions.push(vec![core]);
+                        partitions.extend(
+                            (core + 1..core + 2 * groups - 1)
+                                .step_by(2)
+                                .map(|i| vec![i, i + 1]),
+                        );
+                        partitions.push(vec![core + 2 * groups - 1]);
+                    }
+                    mode => {
+                        for g in 0..groups {
+                            let index = core + 2 * g;
+                            if mode == "all" || g + 1 == groups {
+                                partitions.push(vec![index, index + 1]);
+                            } else {
+                                partitions.push(vec![index]);
+                                partitions.push(vec![index + 1]);
+                            }
+                        }
+                    }
+                }
+                assert_eq!(joined.payload.classes.len(), partitions.len());
+                for (actual, indices) in joined.payload.classes.iter().zip(partitions) {
+                    let expected: Vec<_> = indices
+                        .into_iter()
+                        .flat_map(|i| split.payload.classes[i].bits.iter().copied())
+                        .collect();
+                    assert!(
+                        actual.bits == expected,
+                        "{} authored AU membership",
+                        c["name"]
+                    );
+                }
                 let expected =
                     aac_esc::reassemble_eld(&parsed.core, &split.payload, Some(&context)).unwrap();
                 let actual =
@@ -404,4 +456,93 @@ fn ep1_pair_reassembly_is_bit_exact_and_packetization_can_change_without_dsp_res
             }
         }
     }
+}
+
+#[test]
+fn every_consecutive_sbr_partition_preserves_complete_native_history() {
+    use fvid_media::{
+        owned_aac::{NativeAacDecoder, aac_ep1},
+        owned_codec_config::aac_stream_descriptor,
+        owned_mp4::Mp4Reader,
+        owned_mp4_ep1::Group,
+    };
+    let mut layouts = 0;
+    // Each batch case uniquely identifies a multichannel control. All possible
+    // category-boundary masks include separate, paired, cross-element and whole
+    // SBR-region AUs; no production parser is used to decide the partition.
+    for c in manifest()["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["mode"] == "batch")
+    {
+        let bytes = std::fs::read(root().join(c["control"].as_str().unwrap())).unwrap();
+        let mut reader = Mp4Reader::open_indexed(Cursor::new(bytes), Default::default()).unwrap();
+        let selected = Group::automatic_audio_tracks(&reader).unwrap()[0];
+        let group = Group::new(reader.tracks(), selected).unwrap();
+        let asc = aac_stream_descriptor(&reader.tracks()[selected].configuration)
+            .unwrap()
+            .asc
+            .to_vec();
+        let mut baseline = NativeAacDecoder::new(&asc).unwrap();
+        let mut frames = Vec::new();
+        let mut expected = Vec::new();
+        for i in 0..6 {
+            let units = group.read_frame(&mut reader, i).unwrap();
+            let borrowed: Vec<_> = units.iter().map(|u| u.borrowed()).collect();
+            expected.push(baseline.decode_esc(&borrowed).unwrap());
+            frames.push(aac_ep1::associate(&borrowed).unwrap());
+        }
+        let sbr_count = c["groups"].as_u64().unwrap() as usize * 2;
+        let core_count = frames[0].payload.classes.len() - sbr_count;
+        for mask in 0..1usize << (sbr_count - 1) {
+            layouts += 1;
+            let mut decoder = NativeAacDecoder::new(&asc).unwrap();
+            for (i, frame) in frames.iter().enumerate() {
+                let mut parts: Vec<Vec<u8>> = frame.payload.classes[..core_count]
+                    .iter()
+                    .map(|c| c.bits.clone())
+                    .collect();
+                parts.push(Vec::new());
+                for (index, class) in frame.payload.classes[core_count..].iter().enumerate() {
+                    parts.last_mut().unwrap().extend_from_slice(&class.bits);
+                    if index + 1 < sbr_count && mask & (1 << index) != 0 {
+                        parts.push(Vec::new());
+                    }
+                }
+                let packed: Vec<Vec<u8>> = parts
+                    .iter()
+                    .map(|bits| {
+                        let mut bytes = vec![0xff; bits.len().div_ceil(8)];
+                        for (index, &bit) in bits.iter().enumerate() {
+                            let shift = 7 - index % 8;
+                            bytes[index / 8] = (bytes[index / 8] & !(1 << shift)) | (bit << shift);
+                        }
+                        bytes
+                    })
+                    .collect();
+                let input: Vec<_> = packed
+                    .iter()
+                    .zip(&parts)
+                    .enumerate()
+                    .map(|(j, (bytes, bits))| aac_ep1::AccessUnit {
+                        stream_id: j as u16 + 1,
+                        depends_on: (j > 0).then_some(j as u16),
+                        data: bytes,
+                        bit_len: bits.len(),
+                        pts: frame.pts,
+                        duration: frame.duration,
+                        timescale: frame.timescale,
+                    })
+                    .collect();
+                assert_eq!(
+                    decoder.decode_esc(&input).unwrap(),
+                    expected[i],
+                    "{} partition {mask:#x} frame {i}",
+                    c["name"]
+                );
+            }
+        }
+    }
+    assert_eq!(layouts, 1856);
 }

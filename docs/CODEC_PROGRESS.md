@@ -1,3 +1,50 @@
+## Consecutive LD-SBR elements sharing EP1 AUs, 2026-10-28
+
+The next own six-frame MP4 reproduced `missing AAC ESC instance` before this
+fix: several consecutive SBR elements shared one transported AU. The previous
+reader could continue from prefix9 to data10 but allocated a new AU for the next
+element unconditionally. The EP1 reader now continues from the exact consumed
+data position into the next prefix when that AU has remaining meaningful bits.
+An exhausted AU still advances to the next dependency-ordered stream. This also
+supports an AU holding data10 of one element plus prefix9 of the next, with
+prefix/data split on either side. No stream-count guesses, byte scans or padding
+skips choose these boundaries. EP3 remains on its strict separate-class path.
+
+A new own corpus adds 80 programmes: 480/512 core samples, configurations 3..7
+(two through four SBR elements), core/double output rate and CRC off/on. Each
+control is authored both with its entire SBR region in one AU and with AU
+boundaries crossing SBR element boundaries. Tests assert actual bit-for-bit AU
+membership against the declared partition, as well as exact reconstructed
+logical packets. All 1856 possible category-boundary partitions of these controls
+also pass six-frame native decoding with continuous history and exact PCM versus
+independent separate-transport decoder runs. This exhaustive category-boundary
+matrix does not include arbitrary splits inside a category.
+
+The existing acceptance suite now covers 176 programmes and 400 malformed
+variants. The 160 additional malformed movies cover final-data truncation, extra
+meaningful bits and late-element CRC failure, including a CRC located in the
+middle of a cross-element AU. The error leaves history intact for retry,
+checkpoint restore and subsequent frames. Full independent PCM, AudioStream
+playback, repeated/frame-edge/EOF/past-EOF seeks, rewind, public/owned exports,
+exact crops and stereo/gain/32-kHz WAVE transformations pass. Worker tests now
+capture 366 programmes with exact PCM and rational queue-clock assertions.
+
+All 241 new artifacts / 3840325 bytes regenerate byte-exact with external
+process/socket creation forbidden. The seven prior EP1 corpora remain byte-exact;
+controls and independent scalar PCM are referenced rather than duplicated.
+Ordinary tests read saved own synthetic files and require no FFmpeg/network.
+The 1623 root/media unit tests pass (29 ignored), as do 99 selected integration
+checks: seven grouped-SBR checks, 61 previous AAC/ESC checks and 31 previous MP4
+EP1 checks. All-test compilation passes offline with
+`--no-default-features --features player`. The exercised integration binary has
+no FFmpeg/libav linkage.
+
+Still open: grouping that includes core/RVLC/TNS instances, same-ASC dynamic
+physical track membership, external SL/OD changes, other codec/profile gaps and
+physical output-device qualification. The added exhaustive partition check
+qualifies the consecutive SBR region, not general arbitrary ESC grouping or
+complete LD-SBR conformance.
+
 ## EP1 grouped LD-SBR prefix/data AUs, 2026-10-28
 
 A saved own six-frame MP4 reproduced `missing AAC ESC instance` before the

@@ -72,7 +72,17 @@ impl Reader {
         Ok(())
     }
     fn sbr(&mut self) -> Result<()> {
-        self.allocate(9)?;
+        let continued = self.current[10].filter(|&index| {
+            self.grouped_sbr && self.instances[index].position < self.instances[index].bits
+        });
+        if let Some(index) = continued {
+            // The previous self-delimited data instance may be followed by the
+            // next element's prefix in the same EP1 AU. Never skip bits or infer
+            // this boundary from the number of transported streams.
+            self.current[9] = Some(index);
+        } else {
+            self.allocate(9)?;
+        }
         if self.grouped_sbr {
             self.current[10] = None;
             Ok(())
@@ -457,9 +467,9 @@ pub fn reassemble_eld(
 ) -> Result<Vec<u8>> {
     reassemble_eld_transport(config, frame, sbr, false)
 }
-/// EP1 AUs can contain adjacent LD-SBR prefix/data instances. EP3 recovered
-/// classes retain their declared separate-instance boundaries through the
-/// ordinary entrypoint above.
+/// EP1 AUs can contain successive LD-SBR prefix/data instances across elements.
+/// EP3 recovered classes retain their declared separate-instance boundaries
+/// through the ordinary entrypoint above.
 pub fn reassemble_eld_ep1(
     config: &AacConfig,
     frame: &RecoveredFrame,

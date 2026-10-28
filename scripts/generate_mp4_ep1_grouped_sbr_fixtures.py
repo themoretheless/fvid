@@ -8,18 +8,27 @@ OUT=SOURCE/'mp4-ep1-grouped-sbr'
 def grouped(source,groups,mode,mutation=None):
     original=streams(source);core=len(original)-groups*2;assert core>0
     partitions=[[i]for i in range(core)]
-    for i in range(groups):
-        pair=[core+2*i,core+2*i+1]
-        partitions.extend([pair]if mode=='all'or i==groups-1 else[[pair[0]],[pair[1]]])
+    if mode=='batch':partitions.append(list(range(core,len(original))))
+    elif mode=='bridge':
+        partitions.append([core])
+        partitions.extend([[i,i+1]for i in range(core+1,len(original)-1,2)])
+        partitions.append([len(original)-1])
+    else:
+        for i in range(groups):
+            pair=[core+2*i,core+2*i+1]
+            partitions.extend([pair]if mode=='all'or i==groups-1 else[[pair[0]],[pair[1]]])
     parts=list(boxes(source));prefix=b''.join(box(t,p)for t,p in parts[:-1]);payload=bytearray();tracks=[]
     for ordinal,indices in enumerate(partitions):
         raw=[];pads=[]
         for frame in range(6):
             bits=''.join(''.join(f'{v:08b}'for v in original[i]['raw'][frame])[:len(original[i]['raw'][frame])*8-original[i]['pads'][frame]]for i in indices)
-            if frame==1 and indices[-1]==len(original)-1:
-                if mutation=='truncate':bits=bits[:len(original[indices[0]]['raw'][frame])*8-original[indices[0]]['pads'][frame]]
-                elif mutation=='crc':bits=str(1-int(bits[0]))+bits[1:]
-                elif mutation=='extra':bits+='00000000'
+            if frame==1:
+                if mutation=='crc' and len(original)-2 in indices:
+                    offset=sum(len(original[i]['raw'][frame])*8-original[i]['pads'][frame]for i in indices if i<len(original)-2)
+                    bits=bits[:offset]+str(1-int(bits[offset]))+bits[offset+1:]
+                if indices[-1]==len(original)-1:
+                    if mutation=='truncate':bits=bits[:sum(len(original[i]['raw'][frame])*8-original[i]['pads'][frame]for i in indices[:-1])]
+                    elif mutation=='extra':bits+='00000000'
             data=bytearray(packed(bits));pad=-len(bits)%8
             if pad:data[-1]|=(1<<pad)-1
             raw.append(data);pads.append(pad)
