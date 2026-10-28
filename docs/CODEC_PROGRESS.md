@@ -1,5 +1,51 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## RS bit boundaries for LD-SBR EP2/EP3, 2026-10-28
+
+RS recovery now preserves exact information bits when a class or its CRC ends
+inside an octet. CRC is appended before FEC; octet alignment applies to the
+combined RS information word, including all members of a protected group.
+Fixed ASC lengths are consequently validated after CRC and group selection.
+Until-end inference searches lengths congruent to minus the CRC width. A group
+cannot infer fewer bits than its declared nonempty members require, including
+when its coded tail is empty.
+
+The offline `generate_aac_ep_rs_bits_fixtures.py` corpus contains 352 valid
+synthetic movies (336 EP2 and 16 EP3 LD-SBR), 56 malformed controls, and 475
+primitive vectors covering every supported CRC width and RS shortening. The
+saved corpus has 1,238 files / 5,672,692 bytes. Regeneration with process/network
+creation forbidden matched every saved file. Sources and scalar PCM references
+are synthetic; ordinary tests consume saved assets without fixture generation.
+
+Acceptance covers independent and grouped protection, fractional member/CRC
+boundaries, fixed and until-end lengths, interleaving and correctable RS errors.
+It checks exact recovered class bits, independent complete PCM, MP4/Matroska
+exports, actual player audio streams, EOF, rewind, repeated/frame-edge seeks,
+checkpoints and transactional malformed-input failures. EP3 includes changing
+LD-SBR headers. A raw byte-AU API refusal for non-byte-sized aggregate data is
+an explicit API-contract test, separate from successful exact-bit recovery.
+Malformed cases isolate class CRC, truncated FEC, invalid aggregate alignment,
+and empty grouped tails after three valid packets.
+
+Before the fix, a frozen executable reproduced the original octet-boundary
+refusal. An intermediate executable also reproduced the newly discovered empty
+group acceptance; the saved empty-tail regressions now require a precise length
+error in class recovery, exports and both player container bridges.
+
+Qualification passed offline without default features, with `player`: all ten
+new integration checks (nine together plus the focused final bridge check),
+36 existing EP/LD-SBR integration checks, 562 media unit tests (one ignored),
+and 1,052 root unit tests (26 ignored). The new integration executable has no
+FFmpeg/libav dynamic dependencies. This is native audio-stream acceptance,
+not a claim of subjective GUI/audio-device qualification.
+
+Normative basis: ISO/IEC 14496-3 sections 1.8.4.5 and 1.8.4.7,
+[CRC before FEC and concatenated RS classes](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+This closes this RS boundary gap, not universal codec conformance: EP1,
+additional ER-core EP3 mappings and extension categories, and further grouped
+multi-frame qualification remain open.
+
+
 ## EP3 LD-SBR ESC 9/10, 2026-10-28
 
 The owned ELD EP3 path now also reconstructs low-delay SBR categories 9 and 10.

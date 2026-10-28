@@ -1,7 +1,7 @@
 //! Exact EP class recovery and EP2 raw-AU assembly (14496-3 section 1.8.1).
 use super::{
     Class, Config, Length, RecoveredClass, RecoveredFrame, Result, decode_frame_header,
-    decode_rs_class, invalid,
+    decode_rs_class_bits, invalid,
 };
 use crate::owned_aac::{aac_ep_crc, aac_ep_interleave as stage, aac_ep_rs, aac_ep_srcpc as srcpc};
 
@@ -174,11 +174,6 @@ fn rs_groups(parameters: Vec<Parameter<'_>>) -> Result<Vec<Parameter<'_>>> {
         }
         let mut total = Some(0usize);
         for member in &group.members {
-            if member.crc % 8 != 0 || member.length.is_some_and(|n| n % 8 != 0) {
-                return Err(invalid(
-                    "EP RS raw-AU mapping requires octet-aligned information and CRC",
-                ));
-            }
             total = match (total, member.length) {
                 (Some(sum), Some(n)) => Some(
                     sum.checked_add(n + if n == 0 { 0 } else { usize::from(member.crc) })
@@ -186,6 +181,11 @@ fn rs_groups(parameters: Vec<Parameter<'_>>) -> Result<Vec<Parameter<'_>>> {
                 ),
                 _ => None,
             };
+        }
+        // CRC is appended before FEC. Only the complete RS information word
+        // is octet based; member and CRC boundaries can be fractional octets.
+        if total.is_some_and(|n| n % 8 != 0) {
+            return Err(invalid("EP RS information plus CRC is not octet aligned"));
         }
         group.length = total;
         result.push(group);
@@ -208,10 +208,8 @@ fn size(p: &Parameter<'_>, prefix: &[srcpc::Section], n: usize) -> Result<usize>
         .checked_add(usize::from(p.crc))
         .ok_or_else(|| invalid("EP class length overflow"))?;
     if p.class.fec != 0 {
-        if n % 8 != 0 || p.crc % 8 != 0 {
-            return Err(invalid(
-                "EP RS raw-AU mapping requires octet-aligned information and CRC",
-            ));
+        if information % 8 != 0 {
+            return Err(invalid("EP RS information plus CRC is not octet aligned"));
         }
         return aac_ep_rs::encoded_len(information / 8, p.rate)?
             .checked_mul(8)
@@ -245,21 +243,43 @@ fn lengths(parameters: &mut [Parameter<'_>], total: usize) -> Result<Vec<usize>>
                 .checked_sub(used)
                 .ok_or_else(|| length_error(parameters))?;
             let unit = if p.class.fec != 0 { 8 } else { 1 };
-            let mut low = 0;
-            let mut high = remaining / unit;
-            while low < high {
-                let middle = low + (high - low) / 2;
-                if size(p, &prefix, middle * unit)? >= remaining {
-                    high = middle;
-                } else {
-                    low = middle + 1;
+            // An until-end RS class includes its CRC in the octet count.
+            // Search data lengths congruent to -CRC, not only byte lengths.
+            let offset = if p.class.fec != 0 {
+                (8 - usize::from(p.crc) % 8) % 8
+            } else {
+                0
+            };
+            if remaining == 0 {
+                0
+            } else {
+                let mut low = 0;
+                let mut high = remaining / unit;
+                while low < high {
+                    let middle = low + (high - low) / 2;
+                    if size(p, &prefix, middle * unit + offset)? >= remaining {
+                        high = middle;
+                    } else {
+                        low = middle + 1;
+                    }
                 }
+                if size(p, &prefix, low * unit + offset)? != remaining {
+                    return Err(length_error(parameters));
+                }
+                low * unit + offset
             }
-            if size(p, &prefix, low * unit)? != remaining {
-                return Err(length_error(parameters));
-            }
-            low * unit
         };
+        let minimum = p
+            .members
+            .iter()
+            .try_fold(0usize, |sum, m| {
+                let known = m.length.unwrap_or(0);
+                sum.checked_add(known + if known == 0 { 0 } else { usize::from(m.crc) })
+            })
+            .ok_or_else(|| invalid("EP RS class length overflow"))?;
+        if n < minimum {
+            return Err(invalid("EP RS class/packet length mismatch"));
+        }
         let encoded = size(p, &prefix, n)?;
         used = used
             .checked_add(encoded)
@@ -504,11 +524,7 @@ pub(super) fn decode_class_frames(config: &Config, packet: &[u8]) -> Result<Vec<
     }
     for (i, p) in parameters.iter().enumerate() {
         if p.class.fec != 0 && p.length != Some(0) {
-            let raw = decode_rs_class(&coded[i], p.length, p.rate, p.crc)?;
-            let bits: Vec<_> = raw
-                .iter()
-                .flat_map(|&b| (0..8).rev().map(move |i| (b >> i) & 1))
-                .collect();
+            let bits = decode_rs_class_bits(&coded[i], p.length, p.rate, p.crc)?;
             if p.members.is_empty() {
                 output[p.output] = bits;
             } else {
@@ -660,7 +676,7 @@ mod optional_tests {
                     c.crc = Some(6);
                     vec![a.clone(), c]
                 },
-                "octet-aligned information and CRC",
+                "information plus CRC is not octet aligned",
             ),
         ];
         for (classes, expected) in cases {

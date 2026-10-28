@@ -121,9 +121,8 @@ impl Config {
                 } else {
                     Some(crc_width(b.read(5)? as u8)?)
                 };
-                if fec != 0 && matches!(length,Length::Fixed(n)if n%8!=0) {
-                    return Err(invalid("RS information class is not byte aligned"));
-                }
+                // Byte geometry includes CRC and may span an RS group. Defer
+                // it until selection, attributes and grouping are resolved.
                 classes.push(Class {
                     length,
                     rate,
@@ -545,30 +544,35 @@ mod tests {
     }
 }
 
-fn decode_rs_class(
+fn decode_rs_class_bits(
     bits: &[u8],
     length: Option<usize>,
     capability: u8,
     width: u8,
 ) -> Result<Vec<u8>> {
-    if bits.len() % 8 != 0 || width % 8 != 0 || length.is_some_and(|n| n % 8 != 0) {
-        return Err(invalid(
-            "EP RS raw-AU mapping requires octet-aligned information and CRC",
-        ));
+    if bits.len() % 8 != 0 {
+        return Err(invalid("EP RS coded class is not octet aligned"));
     }
     let received: Vec<_> = bits
         .chunks_exact(8)
         .map(|row| row.iter().fold(0, |v, &b| (v << 1) | b))
         .collect();
     let information = if let Some(n) = length {
-        n.checked_add(usize::from(width))
-            .ok_or_else(|| invalid("EP RS class length overflow"))?
-            / 8
+        let total = n
+            .checked_add(usize::from(width))
+            .ok_or_else(|| invalid("EP RS class length overflow"))?;
+        if total % 8 != 0 {
+            return Err(invalid("EP RS information plus CRC is not octet aligned"));
+        }
+        total / 8
     } else {
         aac_ep_rs::information_len(received.len(), capability)?
     };
+    let total = information
+        .checked_mul(8)
+        .ok_or_else(|| invalid("EP RS class length overflow"))?;
     if aac_ep_rs::encoded_len(information, capability)? != received.len()
-        || information <= usize::from(width) / 8
+        || total <= usize::from(width)
     {
         return Err(invalid("EP RS class/packet length mismatch"));
     }
@@ -581,5 +585,7 @@ fn decode_rs_class(
     if !aac_ep_crc::verify(&checked, width)? {
         return Err(invalid("EP class CRC mismatch"));
     }
-    Ok(recovered.information[..information - usize::from(width) / 8].to_vec())
+    // Class information is exact bits. CRC removal can end inside a storage
+    // byte; callers must not expose padding as information for the next class.
+    Ok(checked[..total - usize::from(width)].to_vec())
 }
