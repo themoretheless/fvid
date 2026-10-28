@@ -368,3 +368,119 @@ fn ld_sbr_header_switch_acceptance_cases_remain_in_the_playback_matrix() {
         assert!(root().join(case["matroska"].as_str().unwrap()).is_file());
     }
 }
+
+// Exercise navigation while synthesis histories are live, using the same
+// decoder object and the reader's production reset contract after every jump.
+#[cfg(feature = "player")]
+fn check_live_navigation(fixtures: PathBuf) {
+    use fvid::audio::{AudioDecode, AudioStream};
+    use std::io::Cursor;
+    fn prefix(
+        reader: &mut dyn AudioStream,
+        decoder: &mut Box<dyn AudioDecode>,
+        count: usize,
+    ) -> Vec<u8> {
+        let mut pcm = Vec::new();
+        for _ in 0..count {
+            let Some(packet) = reader.next_packet().unwrap() else {
+                break;
+            };
+            let stamp = reader.decoder_stamp(&packet);
+            if let Some(frame) = decoder
+                .decode_packet(&packet.data, stamp, packet.duration as u64)
+                .unwrap()
+            {
+                if let Some(output) = reader
+                    .present_decoded(frame.packet, frame.source_pts)
+                    .unwrap()
+                {
+                    pcm.extend(output.data);
+                }
+            }
+        }
+        pcm
+    }
+    let manifest: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(fixtures.join("manifest.json")).unwrap()).unwrap();
+    for case in manifest["cases"].as_array().unwrap() {
+        let name = case["name"].as_str().unwrap();
+        let mp4 = std::fs::read(fixtures.join(case["video"].as_str().unwrap())).unwrap();
+        let mkv = std::fs::read(fixtures.join(case["matroska"].as_str().unwrap())).unwrap();
+        let mut full = Vec::new();
+        fvid::native_media::decode_mp4_aac_pcm(&mp4, &mut full).unwrap();
+        let width = case["channels"].as_u64().unwrap() as usize * 4;
+        let frame = case["container_frame_samples"].as_i64().unwrap();
+        let mut readers: Vec<Box<dyn AudioStream>> = vec![
+            Box::new(
+                fvid::playback_mp4_audio::Mp4AudioReader::open(
+                    Cursor::new(mp4),
+                    Default::default(),
+                )
+                .unwrap(),
+            ),
+            Box::new(
+                fvid::playback_webm_audio::WebmAudioReader::open(
+                    Cursor::new(mkv),
+                    Default::default(),
+                )
+                .unwrap(),
+            ),
+        ];
+        for (container, reader) in readers.iter_mut().enumerate() {
+            let mut decoder = reader.make_decoder().unwrap();
+            let initial = prefix(reader.as_mut(), &mut decoder, 6);
+            assert!(!initial.is_empty(), "{name} initial live history");
+            assert_eq!(initial, full[..initial.len()], "{name} initial {container}");
+            // Cross both header epochs in both directions, interrupting each
+            // resumed playback after a bounded prefix. Include repeated and fractional-AU targets.
+            for target in [
+                8 * frame + 1,
+                4 * frame - 1,
+                8 * frame - 1,
+                4 * frame + 1,
+                13,
+                13,
+                0,
+            ] {
+                let ticks = (i128::from(target) * i128::from(reader.timescale())
+                    / i128::from(reader.sample_rate())) as i64;
+                let landed = reader.seek_to(ticks);
+                assert_eq!(landed, ticks, "{name} live seek position {container}");
+                reader.reset_decoder(&mut decoder).unwrap();
+                let actual = prefix(reader.as_mut(), &mut decoder, 10);
+                assert!(
+                    !actual.is_empty(),
+                    "{name} live seek emitted no PCM {container} target {target}"
+                );
+                let begin = (u128::try_from(landed).unwrap() * u128::from(reader.sample_rate()))
+                    .div_ceil(u128::from(reader.timescale())) as usize
+                    * width;
+                assert_eq!(
+                    actual,
+                    full[begin..begin + actual.len()],
+                    "{name} live seek PCM {container} target {target}"
+                );
+            }
+            reader.rewind();
+            reader.reset_decoder(&mut decoder).unwrap();
+            let actual = prefix(reader.as_mut(), &mut decoder, 4);
+            assert_eq!(
+                actual,
+                full[..actual.len()],
+                "{name} live rewind {container}"
+            );
+        }
+    }
+}
+
+#[cfg(feature = "player")]
+#[test]
+fn ld_sbr_mid_playback_navigation_resets_live_history_in_both_containers() {
+    check_live_navigation(root());
+}
+
+#[cfg(feature = "player")]
+#[test]
+fn ep3_ld_sbr_mid_playback_navigation_resets_live_history_in_both_containers() {
+    check_live_navigation(root().with_file_name("aac-eld-esc-sbr"));
+}

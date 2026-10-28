@@ -1,3 +1,28 @@
+## LD-SBR navigation with live decoder history, 2026-10-28
+
+The navigation acceptance now retains one decoder object across interrupted
+playback, forward/backward/repeated seeks and rewind. After each navigation it
+uses the reader's production `reset_decoder` contract rather than constructing
+a fresh decoder in the test. Targets straddle frames 4 and 8, including their
+header changes, and include a non-frame-aligned repeated target. Emitted PCM
+and the exact requested seek position are compared with uninterrupted decoding.
+
+Both ordinary and EP3/direct-mapping LD-SBR corpora run this matrix: 258 own
+synthetic sources each, in MP4 and Matroska. The existing independent complete
+PCM tests remain separate from this history/navigation comparison. No private
+media, new external codec, test-time generator or FFmpeg is required.
+
+All 40 selected integration checks pass, including both new live-history tests,
+ordinary/EP3 navigation, RS protection, interleaving and protection-set switching.
+The 1,614 root/media unit tests pass offline (27 ignored). The player test
+binary has no FFmpeg/libav linkage.
+
+This qualifies AudioStream navigation and synthesis history. It does not
+qualify physical audio-device output, EP1 container dependency-group routing,
+or the known separate ELD extension tools still refused in `config_impl.rs`.
+Those remaining paths must not be represented as complete LD-SBR transport
+coverage.
+
 ## Base SL configuration and bounded packet syntax, 2026-10-28
 
 The new owned `owned_sl` module parses custom and predefined base SL
