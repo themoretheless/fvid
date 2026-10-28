@@ -1,3 +1,35 @@
+## MPEG-4 Audio ES dependency and SL metadata, 2026-10-28
+
+`aac_stream_descriptor` now returns the ES_ID, dependency, OCR stream ID,
+URL bytes, stream priority, nested ASC and optional raw SL configuration.
+`aac_specific_config` delegates to this parser, preserving the existing AAC
+object/stream checks, length bounds, missing/duplicate decoder checks and the
+cleared reserved-bit compatibility. Only nested DecoderSpecificInfo supplies
+ASC; unknown sibling descriptors cannot masquerade as codec initialization.
+SL contents remain opaque here: this API does not claim SL packet parsing.
+
+A duplicated SL descriptor now fails with `duplicate SL configuration`.
+The previous extractor from the parent commit was compiled independently and
+accepted the exact saved duplicate-SL descriptor. The fixed public and owned
+parsers, MP4 audio export and actual AudioStream player all reject its short
+synthetic MP4 with that specific error. Root ES_ID zero/65535 and priority
+zero/31 movies retain unchanged AAC PCM. Metadata-only descriptors cover all
+optional ES flag combinations, long/binary URL fields, absent SL, opaque custom
+SL bytes and every truncated prefix; these do not qualify URL resolution or
+EP1 dependency routing in a container.
+
+The explicit offline generator reproduces all 19 files / 62,091 bytes with
+process/socket creation forbidden. Ordinary tests read saved fixtures only.
+All 25 selected integration checks (four new, ten EP1 and eleven SBR/PS)
+and 1,614 root/media unit tests pass (27 ignored). The new test executable
+has no FFmpeg/libav linkage. No foreign codec was introduced.
+
+**Still open:** interpret SL configuration and AU headers, retain dependency
+metadata in the selected container stream group, synchronize separate ESC AUs,
+and connect that group to player/export navigation. This metadata milestone
+advances EP1 routing; it does not complete EP1 container playback or the overall
+codec-gap objective.
+
 ## EP1 native separate-ESC input, 2026-10-28
 
 ASC parsing now retains epConfig=1 as `separate_esc`, independently of EP2
@@ -64,8 +96,9 @@ use epConfig=0 logical projections as references. They do not qualify EP1
 container playback or seeking. Resolving container stream dependencies,
 extracting the transport's exact AU bit boundaries, synchronized input queues
 and player navigation remain required before claiming full EP1 support.
-The current ESDS ASC extractor discards ES_ID/dependency and SL configuration;
-retaining those fields is the first required MP4 routing step.
+At this milestone the ESDS ASC extractor discarded ES_ID/dependency and SL
+configuration; the subsequent descriptor-retention milestone above supplies
+that metadata, while routing remains open.
 Other AAC rendering extensions and the overall codec-gap objective remain open.
 
 ## EP3 standard ER SBR category 9, 2026-10-28

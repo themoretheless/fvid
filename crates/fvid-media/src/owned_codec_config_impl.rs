@@ -246,8 +246,21 @@ fn descriptor<'a>(b: &mut Bytes<'a>) -> Result<(u8, &'a [u8])> {
     }
     unreachable!()
 }
-/// Extract the AAC AudioSpecificConfig from an esds full-box payload.
-pub fn aac_specific_config(esds: &[u8]) -> Result<&[u8]> {
+/// MPEG-4 Audio ES metadata retained for separate-stream association.
+/// SL configuration is retained verbatim; interpreting SL packet headers is
+/// a transport responsibility and is not implied by extracting this record.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct AacStreamDescriptor<'a> {
+    pub es_id: u16,
+    pub depends_on: Option<u16>,
+    pub ocr_es_id: Option<u16>,
+    pub url: Option<&'a [u8]>,
+    pub priority: u8,
+    pub asc: &'a [u8],
+    pub sl_config: Option<&'a [u8]>,
+}
+/// Extract AAC setup and ES dependency/SL metadata from an esds full box.
+pub fn aac_stream_descriptor(esds: &[u8]) -> Result<AacStreamDescriptor<'_>> {
     let mut b = Bytes::new(esds);
     if b.take(4)? != [0, 0, 0, 0] {
         return Err(invalid("unsupported esds version or flags"));
@@ -258,22 +271,35 @@ pub fn aac_specific_config(esds: &[u8]) -> Result<&[u8]> {
         return Err(invalid("expected ES descriptor"));
     }
     let mut es = Bytes::new(es);
-    es.take(2)?;
+    let es_id = es.short()? as u16;
     let flags = es.byte()?;
-    if flags & 128 != 0 {
-        es.take(2)?;
-    }
-    if flags & 64 != 0 {
+    let depends_on = if flags & 128 != 0 {
+        Some(es.short()? as u16)
+    } else {
+        None
+    };
+    let url = if flags & 64 != 0 {
         let n = usize::from(es.byte()?);
-        es.take(n)?;
-    }
-    if flags & 32 != 0 {
-        es.take(2)?;
-    }
+        Some(es.take(n)?)
+    } else {
+        None
+    };
+    let ocr_es_id = if flags & 32 != 0 {
+        Some(es.short()? as u16)
+    } else {
+        None
+    };
+    let mut sl_config = None;
     let mut asc = None;
     let mut decoder_seen = false;
     while es.at < es.data.len() {
         let (tag, data) = descriptor(&mut es)?;
+        if tag == 6 {
+            if sl_config.replace(data).is_some() {
+                return Err(invalid("duplicate SL configuration"));
+            }
+            continue;
+        }
         if tag != 4 {
             continue;
         }
@@ -291,11 +317,22 @@ pub fn aac_specific_config(esds: &[u8]) -> Result<&[u8]> {
         }
         while dc.at < dc.data.len() {
             let (tag, data) = descriptor(&mut dc)?;
-            if tag == 5
-                && asc.replace(data).is_some() {
-                    return Err(invalid("duplicate AudioSpecificConfig"));
-                }
+            if tag == 5 && asc.replace(data).is_some() {
+                return Err(invalid("duplicate AudioSpecificConfig"));
+            }
         }
     }
-    asc.ok_or_else(|| invalid("missing AudioSpecificConfig"))
+    Ok(AacStreamDescriptor {
+        es_id,
+        depends_on,
+        ocr_es_id,
+        url,
+        priority: flags & 31,
+        asc: asc.ok_or_else(|| invalid("missing AudioSpecificConfig"))?,
+        sl_config,
+    })
+}
+/// Extract only the AAC AudioSpecificConfig, preserving descriptor validation.
+pub fn aac_specific_config(esds: &[u8]) -> Result<&[u8]> {
+    Ok(aac_stream_descriptor(esds)?.asc)
 }
