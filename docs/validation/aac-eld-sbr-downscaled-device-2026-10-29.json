@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-28T23:04:56.501172+00:00",
+  "before_fix_probe": "codec=mp4a rate=48000 channels=1\npackets=2 decoded=2 frames=2048\nstamped=0.043s\naudio=0.043s first=0ns last=21.333333ms\n",
+  "cases": [
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-sbr-downscaled/n512-c1-x2-crc1-ds2.mp4",
+      "sha256": "971ad7888de17354553ac9e8b858e4cdc2ed710031c4d8118f8a07518c57e6f9",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=1 rate=24000 duration=0.256000\nphase=full generation=0 from=0.000000 position=0.256000 wall=0.279936 device_drain=complete\nphase=seek-quarter generation=1 from=0.064000 position=0.256000 wall=0.211599 device_drain=complete\nphase=seek-60-percent generation=2 from=0.153600 position=0.256000 wall=0.125326 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.256000 wall=0.281284 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-sbr-downscaled/n480-c7-x1-crc1-ds4.mka",
+      "sha256": "f6cd07da588b1052913e8f8e60d8eaa7fc28c1f05b2b2280ecc8c8837649125e",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=8 rate=6000 duration=0.240000\nphase=full generation=0 from=0.000000 position=0.240000 wall=0.259589 device_drain=complete\nphase=seek-quarter generation=1 from=0.060000 position=0.240000 wall=0.197591 device_drain=complete\nphase=seek-60-percent generation=2 from=0.144000 position=0.240000 wall=0.122624 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.240000 wall=0.262947 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-sbr-downscaled/n512-r48000-c2-x2-ds4.mp4",
+      "sha256": "ba5c69a6d184e470e0326eb988ed4fa9a9d7e0e712e5cc49f101792c2a56a604",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=2 rate=24000 duration=0.128000\nphase=full generation=0 from=0.000000 position=0.128000 wall=0.148587 device_drain=complete\nphase=seek-quarter generation=1 from=0.032000 position=0.128000 wall=0.115635 device_drain=complete\nphase=seek-60-percent generation=2 from=0.076800 position=0.128000 wall=0.072549 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.128000 wall=0.156028 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-sbr-downscaled/n480-r48000-c1-x1-ds4.mka",
+      "sha256": "59c42717f383a87d7e2c158279251ad6d4bc820b7f1fb92bf17f7fa700f8821e",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=1 rate=12000 duration=0.120000\nphase=full generation=0 from=0.000000 position=0.120000 wall=0.141587 device_drain=complete\nphase=seek-quarter generation=1 from=0.030000 position=0.120000 wall=0.112548 device_drain=complete\nphase=seek-60-percent generation=2 from=0.072000 position=0.120000 wall=0.070180 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.120000 wall=0.137234 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-sbr-downscaled/ep3-n512-c2-invf-ds2.mp4",
+      "sha256": "ca194e217a34dfafca5f71ccc5af6428b70fbfcad90d5ea08fe9e0bee414e1cb",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=2 rate=24000 duration=0.256000\nphase=full generation=0 from=0.000000 position=0.256000 wall=0.276525 device_drain=complete\nphase=seek-quarter generation=1 from=0.064000 position=0.256000 wall=0.213010 device_drain=complete\nphase=seek-60-percent generation=2 from=0.153600 position=0.256000 wall=0.124511 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.256000 wall=0.283899 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-sbr-downscaled/ep1-n480-c2-transient8-ds4.mp4",
+      "sha256": "60e173c8b05fbe5386495b62dcfdb255a88ddfbed356db8ff64ed3f2f50f9f74",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=2 rate=12000 duration=0.240000\nphase=full generation=0 from=0.000000 position=0.240000 wall=0.263514 device_drain=complete\nphase=seek-quarter generation=1 from=0.060000 position=0.240000 wall=0.206531 device_drain=complete\nphase=seek-60-percent generation=2 from=0.144000 position=0.240000 wall=0.117635 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.240000 wall=0.265121 device_drain=complete\n",
+      "stderr": ""
+    }
+  ],
+  "limits": "Actual default PlatformBackend output and drained generations; no subjective listening or physical multichannel speaker qualification.",
+  "linkage": "/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target/debug/examples/audio_probe:\n\t/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit (compatibility version 45.0.0, current version 2775.10.103)\n\t/System/Library/Frameworks/VideoToolbox.framework/Versions/A/VideoToolbox (compatibility version 1.0.0, current version 3350.77.5)\n\t/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 5027.0.69)\n\t/System/Library/Frameworks/CoreMedia.framework/Versions/A/CoreMedia (compatibility version 1.0.0, current version 3350.77.5)\n\t/System/Library/Frameworks/CoreVideo.framework/Versions/A/CoreVideo (compatibility version 1.2.0, current version 758.27.0)\n\t/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices (compatibility version 1.0.0, current version 66.0.0)\n\t/System/Library/Frameworks/CoreGraphics.framework/Versions/A/CoreGraphics (compatibility version 64.0.0, current version 2050.0.0)\n\t/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon (compatibility version 2.0.0, current version 170.0.0)\n\t/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation (compatibility version 300.0.0, current version 5027.0.69)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.0.0)\n\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)\n\t/System/Library/Frameworks/QuartzCore.framework/Versions/A/QuartzCore (compatibility version 1.2.0, current version 1223.2.2)\n\t/System/Library/Frameworks/Metal.framework/Versions/A/Metal (compatibility version 1.0.0, current version 382.5.3)\n\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)\n\t/System/Library/Frameworks/AudioUnit.framework/Versions/A/AudioUnit (compatibility version 1.0.0, current version 1.0.0)\n\t/System/Library/Frameworks/CoreAudio.framework/Versions/A/CoreAudio (compatibility version 1.0.0, current version 1.0.0)\n\t/System/Library/Frameworks/ColorSync.framework/Versions/A/ColorSync (compatibility version 1.0.0, current version 3929.0.0)\n\t/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices (compatibility version 1.0.0, current version 1226.0.0)\n"
+}

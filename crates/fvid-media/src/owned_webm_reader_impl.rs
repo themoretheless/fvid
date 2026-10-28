@@ -706,6 +706,7 @@ impl<R: Read + Seek> WebmReader<R> {
                             // or replace an explicitly stated output clock.
                             if let Ok(config) = WebmAacConfig::parse(&track.codec_private) {
                                 if config.sbr_present == Some(true)
+                                    && !u32::try_from(track.sample_rate).ok().is_some_and(|rate| config.eld_downscale_factor(rate).is_some())
                                     && (!sampling_frequency_present || track.sample_rate == 0
                                         || track.sample_rate == u64::from(config.core.sample_rate))
                                 {

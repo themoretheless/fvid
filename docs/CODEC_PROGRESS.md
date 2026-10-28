@@ -1,3 +1,68 @@
+## Centered downscaled LD-SBR reconstruction and navigation, 2026-10-29
+
+Own nonzero MP4/Matroska movies reproduce the missing adapted LD-SBR output:
+the previous player selected 48 kHz / 1024 samples for a declared 24-kHz /
+512-sample output. Explicit native output negotiation refused the same mode.
+The native decoder now honors exact downscaleInfo/output-clock pairs at core
+factors 2/4, including single- and double-rate LD-SBR. The hint describes the
+adapted core rate; double-rate output is twice that rate. Unadvertised modes
+remain refused and default native reconstruction remains nominal/full-rate.
+
+Own centered CLDFB analysis supports 8/16/32 bands, and synthesis supports
+8/16/32/64 with the nominal 64-band normalization. Short ELD core samples are
+restored to nominal spectral-domain units before analysis. Syntax, frequency
+tables, patches, noise and envelope timing retain the source clock. When coded
+crossover exceeds the short analysis width (including LFE), a separately advanced
+centered full-band companion supplies the coded LF bins. Both histories and
+core overlaps participate in reset/checkpoints, transaction rollback and retained
+memory accounting. This currently retains and executes the full companion; no
+end-to-end speedup or memory reduction is claimed for adapted LD-SBR.
+
+Matroska's legacy SBR core-clock inference now preserves a frequency that exactly
+matches the advertised adapted output, including double-rate adaptation whose
+output happens to equal the nominal core rate. The same synthetic programmes
+cover that previously failing reader path. Unknown rates do not gain a fallback.
+
+The independent oracle uses time-indexed direct convolution and modulated-column
+superposition, dense-solved short windows and direct cosine reconstruction. A
+13-case primitive corpus covers impulses at block boundaries, dense/tonal input,
+all adapted widths, split processing, reset, finite output and rejected-input
+state preservation. The encoded corpus extends all 258 saved LD-SBR programmes
+at both factors, with matching EP3 and EP1. Sixteen additional 48-kHz-core movies
+exercise real short 8-band analysis below the coded crossover. Core/SBR source
+AU bits are asserted unchanged against their saved source controls. The tests
+compare independent PCM within 1e-7 and cover MP4/Matroska exports and repeated
+crops, frame-edge/EOF/past-EOF/repeated seeks, rewind, checkpoint replay,
+truncation/alignment rollback and crop/gain/stereo/32-kHz WAVE output.
+
+There are 1048 ordinary/EP3 and 516 EP1 programmes (1564 total). All five new
+encoded integration checks, the primitive check and the previous selected ELD/OD
+checks pass: 78 integration tests altogether. Root/media pass 1625 existing unit
+tests (29 ignored), plus the new worker check. Worker navigation now covers 4337
+programmes. Offline all-test compilation with the player feature also passes.
+[The test report](validation/aac-eld-sbr-downscaled-tests-2026-10-29.json) records
+the independently executed checks.
+
+The new 27-file primitive corpus (383977 bytes) and 3146-file movie corpus
+(33802643 bytes) regenerate byte-exact with process/socket creation forbidden.
+The generalized scalar oracle also preserves all 1038 saved full-rate LD-SBR
+artifacts (27871422 bytes). [Hashes and generator measurements](validation/aac-eld-sbr-downscaled-generation-2026-10-29.json)
+are saved separately; ordinary tests only read committed data.
+
+Actual PlatformBackend output passes six source cases and all 24 full,
+quarter-seek, 60-percent-seek and rewind phases, including EP3/EP1, mono/stereo/
+eight-channel source layouts and real 8-band analysis. Hashes and measured
+positions/drain times are in [the device report](validation/aac-eld-sbr-downscaled-device-2026-10-29.json).
+The exercised binary has no FFmpeg/libav linkage. Eight-channel sources use the
+normal stereo router; subjective listening and physical eight-speaker output
+are not established.
+
+Reference construction: [published downscaled ELD window and CLDFB description](https://data.epo.org/publication-server/rest/v1.2/patents/EP4231287NWA1/document.pdf),
+sections A.0/A.1. Implementation and oracle are own code. These numerical,
+regression and device results are not an official codec conformance certificate.
+Other adaptation ratios and spatial SAOC/LD MPEG Surround remain separate open
+scope. The broader codec-gap goal stays active.
+
 ## Native short ELD core transforms and declared low-rate output, 2026-10-29
 
 A new own ELD movie declares a 12-kHz output and downscaleInfo on a 24-kHz,

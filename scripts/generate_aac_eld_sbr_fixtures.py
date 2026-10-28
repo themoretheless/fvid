@@ -34,14 +34,17 @@ def grid(mode,slots,frame):
     borders=[i*((slots+count//2)//count)for i in range(count)]+[slots]
     return '0'+field({1:0,2:1,4:2}[count],2)+(field(coarse,1)if count==1 else '')+field(fine,1),borders,None,coarse,fine
 
-def reconstruct(low,slots,noise,mode='base',channel=0):
+def reconstruct(low,slots,noise,mode='base',channel=0,geometry=None):
     source=list(range(2,10))+list(range(2,9))+[None,None]
+    kx,stop=10,27
+    if geometry is not None:kx,stop,source=geometry
+    count=stop-kx
     target=128.;ratio=.5
     if mode=='coupled-pan':
         target=256/(1+2**(2 if channel==0 else -2))
         ratio=1/(1+2**(-4 if channel==0 else 4))
     output=[];index=0;bandwidth=0.;previous_mode=0;gain_history=[];noise_history=[]
-    _,hb,_,_=tables(10,27,0,False,0,0)
+    _,hb,_,_=tables(kx,stop,0,False,0,0)
     centers={(a+b)//2 for a,b in zip(hb,hb[1:])}
     for frame,start in enumerate(range(0,len(low),slots)):
         rows=low[start:start+slots]
@@ -67,28 +70,28 @@ def reconstruct(low,slots,noise,mode='base',channel=0):
         _,borders,attack,_,_=grid(mode,slots,frame)
         for env,(first,last) in enumerate(zip(borders,borders[1:])):
             suppress=env==attack
-            energy=[sum(abs(r[b])**2 for r in hf[first:last])/(last-first)for b in range(17)]
+            energy=[sum(abs(r[b])**2 for r in hf[first:last])/(last-first)for b in range(count)]
             harmonic=mode=='harmonic'and frame%3!=2
             gain=[math.sqrt(target*(ratio/(1+ratio)if harmonic else 1 if suppress else 1/(1+ratio))/(1+e))for e in energy]
-            sine=[math.sqrt(target/(1+ratio))if harmonic and b+10 in centers else 0. for b in range(17)]
-            q=[math.sqrt(target*ratio/(1+ratio))]*17
-            maximum=min(math.sqrt((17*target+1e-12)/(sum(energy)+1e-12))*1.41254,1e5)
+            sine=[math.sqrt(target/(1+ratio))if harmonic and b+kx in centers else 0. for b in range(count)]
+            q=[math.sqrt(target*ratio/(1+ratio))]*count
+            maximum=min(math.sqrt((count*target+1e-12)/(sum(energy)+1e-12))*1.41254,1e5)
             for b,g in enumerate(gain):
                 if g>maximum:q[b]*=maximum/g;gain[b]=maximum
-            boost=min(math.sqrt((17*target+1e-12)/(sum(e*g*g+v*v+(0 if suppress or v else n*n)for e,g,n,v in zip(energy,gain,q,sine))+1e-12)),1.584893192)
+            boost=min(math.sqrt((count*target+1e-12)/(sum(e*g*g+v*v+(0 if suppress or v else n*n)for e,g,n,v in zip(energy,gain,q,sine))+1e-12)),1.584893192)
             gain=[v*boost for v in gain];q=[v*boost for v in q];sine=[v*boost for v in sine]
             if not gain_history:gain_history=[gain[:]]*4;noise_history=[q[:]]*4
             for time,(row,h) in enumerate(zip(rows[first:last],hf[first:last]),start+first):
                 adjusted=[]
-                for b in range(17):
+                for b in range(count):
                     index=(index+1)%512
                     smooth=[.33333333333333,.30150283239582,.21816949906249,.11516383427084,.03183050093751]
                     g=sum(w*v for w,v in zip(smooth,[gain[b]]+[r[b]for r in gain_history]))if mode=='smoothing'else gain[b]
                     qn=sum(w*v for w,v in zip(smooth,[q[b]]+[r[b]for r in noise_history]))if mode=='smoothing'else q[b]
                     phase=[1,1j,-1,-1j][time%4]
-                    if (b+10)%2:phase=phase.conjugate()
+                    if (b+kx)%2:phase=phase.conjugate()
                     adjusted.append(h[b]*g+(0 if suppress or sine[b]else noise[index]*qn)+sine[b]*phase)
-                output.append(row+adjusted+[0j]*37)
+                output.append(row+adjusted+[0j]*(64-stop))
                 gain_history=[gain[:]]+gain_history[:3];noise_history=[q[:]]+noise_history[:3]
     return output
 

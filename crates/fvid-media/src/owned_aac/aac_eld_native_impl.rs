@@ -34,16 +34,26 @@ impl NativeAacDecoder {
             }
         }
         let mut next = self.eld_synthesis.clone();
+        let mut full_next = self.eld_full_synthesis.clone();
+        let mut full_planar = Vec::with_capacity(channels.len());
         let mut planar = Vec::with_capacity(channels.len());
         for (slot, (channel, spectrum)) in channels.into_iter().enumerate() {
-            planar.push(
-                next[self.mapping[slot]].synthesize_pcm(&channel.apply_tns(config, spectrum)?)?,
-            );
+            let spectrum = channel.apply_tns(config, spectrum)?;
+            planar.push(next[self.mapping[slot]].synthesize_pcm(&spectrum)?);
+            if !full_next.is_empty() {
+                full_planar.push(full_next[self.mapping[slot]].synthesize_pcm(&spectrum)?);
+            }
         }
         let mut ld = self.eld_sbr.clone();
         if let Some(ld) = &mut ld {
             let end = bits.position() + bits.remaining();
-            let (output, used) = ld.process_prefix(packet, bits.position(), end, &planar)?;
+            let (output, used) = ld.process_prefix_with_full(
+                packet,
+                bits.position(),
+                end,
+                &planar,
+                (!full_planar.is_empty()).then_some(full_planar.as_slice()),
+            )?;
             bits.skip(used)?;
             planar = output;
         }
@@ -69,6 +79,7 @@ impl NativeAacDecoder {
             }
         }
         self.eld_synthesis = next;
+        self.eld_full_synthesis = full_next;
         self.eld_sbr = ld;
         self.noise = noise;
         Ok(Some(AacFrame {

@@ -370,6 +370,6 @@ fn short_eld_output_requires_an_exact_advertised_core_mode() {
         .find(|c| c["source"] == "aac-eld-sbr" && c["hint"] == 12000)
         .unwrap();
     assert!(
-        NativeAacDecoder::new_with_output_rate(&hex(c["asc"].as_str().unwrap()), 12000).is_err()
+        NativeAacDecoder::new_with_output_rate(&hex(c["asc"].as_str().unwrap()), 36000).is_err()
     );
 }

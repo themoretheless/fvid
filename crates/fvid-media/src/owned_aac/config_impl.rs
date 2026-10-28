@@ -233,13 +233,18 @@ impl AudioSpecificConfig {
     }
     /// Supported native ELD-core output adaptation, separate from LD-SBR.
     pub fn eld_core_downscale_factor(&self, declared:u32) -> Option<u8> {
-        if self.core.object_type!=39 || self.eld_sbr.is_some() || declared==0
-            || self.eld_downscale_sample_rate!=Some(declared) || self.core.sample_rate%declared!=0 {return None;}
-        match self.core.sample_rate/declared {2=>Some(2),4=>Some(4),_=>None}
+        if self.eld_sbr.is_some() {None} else {self.eld_downscale_factor(declared)}
+    }
+    /// downscaleInfo describes the adapted core clock; LD-SBR may double it.
+    pub fn eld_downscale_factor(&self, declared:u32) -> Option<u8> {
+        let hint=self.eld_downscale_sample_rate?;
+        let multiplier=if self.eld_sbr.as_ref().is_some_and(|s|s.double_rate){2}else{1};
+        if self.core.object_type!=39 || hint==0 || hint.checked_mul(multiplier)!=Some(declared) || !self.core.sample_rate.is_multiple_of(hint) {return None;}
+        match self.core.sample_rate/hint {2=>Some(2),4=>Some(4),_=>None}
     }
     /// Resolve explicit output clocks without guessing SBR or downscale modes.
     pub fn resolve_output_rate(&self, declared: u32) -> Result<u32> {
-        if declared == self.output_sample_rate() || self.eld_core_downscale_factor(declared).is_some() {
+        if declared == self.output_sample_rate() || self.eld_downscale_factor(declared).is_some() {
             return Ok(declared);
         }
         if self.sbr_present.is_none() && self.core.sample_rate.checked_mul(2) == Some(declared) {

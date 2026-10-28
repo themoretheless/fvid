@@ -1,0 +1,83 @@
+{
+  "cases": [
+    {
+      "name": "a8-boundary",
+      "kind": "analysis",
+      "bands": 8,
+      "rows": 37
+    },
+    {
+      "name": "a8-dense",
+      "kind": "analysis",
+      "bands": 8,
+      "rows": 37
+    },
+    {
+      "name": "a8-tones",
+      "kind": "analysis",
+      "bands": 8,
+      "rows": 37
+    },
+    {
+      "name": "a16-boundary",
+      "kind": "analysis",
+      "bands": 16,
+      "rows": 37
+    },
+    {
+      "name": "a16-dense",
+      "kind": "analysis",
+      "bands": 16,
+      "rows": 37
+    },
+    {
+      "name": "a16-tones",
+      "kind": "analysis",
+      "bands": 16,
+      "rows": 37
+    },
+    {
+      "name": "a32-boundary",
+      "kind": "analysis",
+      "bands": 32,
+      "rows": 37
+    },
+    {
+      "name": "a32-dense",
+      "kind": "analysis",
+      "bands": 32,
+      "rows": 37
+    },
+    {
+      "name": "a32-tones",
+      "kind": "analysis",
+      "bands": 32,
+      "rows": 37
+    },
+    {
+      "name": "s8-complex",
+      "kind": "synthesis",
+      "bands": 8,
+      "rows": 37
+    },
+    {
+      "name": "s16-complex",
+      "kind": "synthesis",
+      "bands": 16,
+      "rows": 37
+    },
+    {
+      "name": "s32-complex",
+      "kind": "synthesis",
+      "bands": 32,
+      "rows": 37
+    },
+    {
+      "name": "s64-complex",
+      "kind": "synthesis",
+      "bands": 64,
+      "rows": 37
+    }
+  ],
+  "provenance": "Own direct time convolution and modulated-column superposition; centered prototype numeric facts. Synthetic signals only; no codec implementation, process or network."
+}

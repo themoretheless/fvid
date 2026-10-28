@@ -1,0 +1,116 @@
+{
+  "date": "2026-10-29",
+  "commands": "CARGO_TARGET_DIR=<worktree-parent>/target cargo --config profile.dev.package.fvid-media.opt-level=2 test/check --offline --no-default-features --features player",
+  "results": {
+    "root_media": [
+      {
+        "passed": 1054,
+        "failed": 0,
+        "ignored": 26,
+        "seconds": 251.91
+      },
+      {
+        "passed": 571,
+        "failed": 0,
+        "ignored": 3,
+        "seconds": 1.26
+      }
+    ],
+    "new_worker": [
+      {
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 110.33
+      }
+    ],
+    "eld_compatibility": [
+      {
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 3.26
+      },
+      {
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 0.01
+      },
+      {
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 0.01
+      },
+      {
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 45.84
+      },
+      {
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 23.05
+      },
+      {
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 53.08
+      },
+      {
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 80.91
+      },
+      {
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 53.33
+      }
+    ],
+    "remaining_od_short": [
+      {
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 18.58
+      },
+      {
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 12.65
+      },
+      {
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 39.36
+      },
+      {
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 17.87
+      }
+    ],
+    "adapted": [
+      {
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 180.91
+      }
+    ]
+  },
+  "qualification": "Root/media baseline plus added worker test. Compatibility integration results precede the superseded old-corpus-count run; final adapted run uses all 1048 programmes and 516 EP1 programmes. No failed result is counted as acceptance.",
+  "programmes": 1564,
+  "worker_programmes": 4337,
+  "all_test_compilation": "cargo check --offline --no-default-features --features player --tests passed"
+}

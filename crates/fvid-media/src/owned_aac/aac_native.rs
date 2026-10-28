@@ -85,6 +85,12 @@ impl NativeAacDecoder {
             footprint.vector(&saved.eld_synthesis).map_err(|e|invalid(&e))?;
             for state in &saved.eld_synthesis {state.visit_retained(&mut footprint).map_err(|e|invalid(&e))?;}
         }
+        footprint.vector(&self.eld_full_synthesis).map_err(|e|invalid(&e))?;
+        for state in &self.eld_full_synthesis {state.visit_retained(&mut footprint).map_err(|e|invalid(&e))?;}
+        if let Some(saved)=checkpoint {
+            footprint.vector(&saved.eld_full_synthesis).map_err(|e|invalid(&e))?;
+            for state in &saved.eld_full_synthesis {state.visit_retained(&mut footprint).map_err(|e|invalid(&e))?;}
+        }
         footprint.vector(&self.ld_synthesis).map_err(|e|invalid(&e))?;
         for state in &self.ld_synthesis {state.visit_retained(&mut footprint).map_err(|e|invalid(&e))?;}
         if let Some(saved)=checkpoint {
