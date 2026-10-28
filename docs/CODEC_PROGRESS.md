@@ -1,5 +1,52 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## EP3 LD-SBR header epochs inside multi-AU packets, 2026-10-28
+
+The new `aac-eld-esc-multi-history` corpus combines semantic ESC reconstruction
+with changing LD-SBR header history inside fixed-parameter multi-AU EP packets.
+Each pair of sources sends a header, then omits it. Header amplitude precision
+alternates between pairs. Single-envelope fixed and two-envelope transient grids,
+reserved CPE nibbles, legal frequency deltas and a reserved extension-id area
+keep category 9 and 10 lengths fixed without inserting unconsumed class padding.
+Only final logical-AU alignment is appended to the final category.
+
+The synthetic core is repeated intentionally. Its changing SBR syntax is generated
+independently of the decoder, and the saved logical AUs in source order form the
+transport/semantic composition reference. This is not a new independent numerical
+DSP oracle; existing scalar LD-SBR acceptance remains required separately.
+The 276 valid movie variants (252 clean, 24 corrected) cover 480/512 stereo,
+2..7 AUs, joined/independent/mixed flags, SRCPC, independent RS with fractional
+information/CRC boundaries, grouped RS, predefined-set transmission permutations,
+and sequential/recursive/mixed interleaving. All three protection families also
+have late-child SBR-CRC, class-CRC and truncated-body controls: 18 malformed movies.
+
+A dedicated test reconstructs sources with current context, compares every logical
+byte, advances the SBR context after every source, and checks each header epoch.
+Changing only that context to the ASC initial header produces the specific
+`truncated SBR Huffman codeword` refusal on four header-omission probes. The first
+fixture draft used zero opaque extension bytes and accidentally allowed an alternate
+valid stale-header parse; nonzero opaque tail bytes remove that ambiguity while
+preserving valid reference decoding and correctly regenerated SBR/EP protection.
+Thus the negative control demonstrates the intended history dependency rather than
+an unrelated malformed stream. No production decoder changes were needed here.
+
+The ten integration checks also cover exact source/class identity, complete finite
+PCM, exports and intervals in MP4/Matroska, checkpoints, timestamp-overflow rollback,
+remux, actual player audio-stream EOF/rewind/repeated seeks, negative and past-EOF
+positions, and exact malformed failures through both player container bridges.
+The generator is explicit and offline; ordinary tests only read saved assets.
+All 844 files / 5,276,729 bytes regenerated identically with process/network creation
+forbidden. The shared generator extension leaves both earlier multi-AU corpora
+unchanged (4,160 original and 1,499 grouped files, separately audited).
+All ten integration checks passed offline with `--no-default-features --features
+player`. The linked executable contains no FFmpeg/libav dynamic dependencies.
+
+This qualifies the selected EP3 LD-SBR history/transport combinations, not all
+codec profiles, all EP3 categories, or subjective hardware audio-device output.
+EP1, other ER-core semantic mappings, additional extension categories and wider
+layout/resilience combinations remain explicit open scope.
+
+
 ## Restructured multi-AU RS groups, 2026-10-28
 
 The new `aac-ep-rs-group-concatenated` acceptance corpus qualifies RS grouping

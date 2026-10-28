@@ -17,12 +17,12 @@ def config(lengths,frames,family,kind,flagmode,escape=None):
         if selected==2:order.reverse()
         classes=[]
         for k,n in enumerate(lengths):
-            fec=(1 if k==order[-1]else 2)if family=='grouped'else 1 if family=='rs'or family=='mixed'and k in [0,count-1]else 0
+            fec=(1 if k==order[-1]else 2)if family=='grouped'else 1 if family in ['rs','rs-bits']or family=='mixed'and k in [0,count-1]else 0
             switch=([1,0,2,3][k%4]if family=='mixed'else [0,1,2,3][k%4])
             if fec and switch==2:switch=1
             joined=flagmode=='joined'or flagmode=='mixed'and k%2==0
             if family=='grouped':switch=[0,1,3][selected]
-            classes.append(dict(fec=fec,rate=(2+selected)if fec else (k*7+3+selected)%25,crc=((8-(n*frames if joined else n)%8)%8+8 if family=='grouped'else [8,16,24,32][k%4]if fec else [4,8,12,16][k%4]),terminated=fec==0 and k==order[-1],interleave=switch,length=n,joined=joined))
+            classes.append(dict(fec=fec,rate=(2+selected)if fec else (k*7+3+selected)%25,crc=((8-(n*frames if joined else n)%8)%8+8 if family in ['grouped','rs-bits']else [8,16,24,32][k%4]if fec else [4,8,12,16][k%4]),terminated=fec==0 and k==order[-1],interleave=switch,length=n,joined=joined))
         sets.append(dict(classes=classes,order=order))
     ep=field(3,8)+field(kind,2)+'001'+field(frames,3)
     for s in sets:
