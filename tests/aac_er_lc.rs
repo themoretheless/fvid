@@ -171,7 +171,7 @@ fn er_lc_player_ranges_rewind_seek_preserve_pcm_and_channels() {
     }
 }
 #[test]
-fn er_lc_unimplemented_resilience_and_malformed_videos_refuse_specific_errors() {
+fn er_lc_invalid_or_unimplemented_configurations_refuse_specific_errors() {
     let m = manifest();
     for key in ["rejected", "malformed"] {
         for c in m[key].as_array().unwrap() {

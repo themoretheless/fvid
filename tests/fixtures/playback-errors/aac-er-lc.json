@@ -3375,18 +3375,6 @@
       "error": "ER AAC LC epConfig is not yet implemented"
     },
     {
-      "asc": "8b0d08",
-      "video": {
-        "file": "aac-er-lc-rejected-960-0-2-0-synthetic.mp4",
-        "sha256": "b80cb5711d7e51ad4ef249c4157541a00eb1e2f515afeef715623d228ca1df92",
-        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
-        "asc": "8b0d08",
-        "pcm_offset": 0,
-        "samples": 11520
-      },
-      "error": "ER AAC LC epConfig is not yet implemented"
-    },
-    {
       "asc": "8b0d0c",
       "video": {
         "file": "aac-er-lc-rejected-960-0-3-0-synthetic.mp4",
@@ -3423,18 +3411,6 @@
       "error": "ER AAC LC epConfig is not yet implemented"
     },
     {
-      "asc": "8b0908",
-      "video": {
-        "file": "aac-er-lc-rejected-1024-0-2-0-synthetic.mp4",
-        "sha256": "38f60c253640abd0cf632a187b339f7082bae48f6505eb1cd317b66dae78ae6a",
-        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
-        "asc": "8b0908",
-        "pcm_offset": 0,
-        "samples": 12288
-      },
-      "error": "ER AAC LC epConfig is not yet implemented"
-    },
-    {
       "asc": "8b090c",
       "video": {
         "file": "aac-er-lc-rejected-1024-0-3-0-synthetic.mp4",
@@ -3459,7 +3435,32 @@
       "error": "AAC extensionFlag3 must be zero"
     }
   ],
-  "malformed": [],
+  "malformed": [
+    {
+      "asc": "8b0d08",
+      "video": {
+        "file": "aac-er-lc-rejected-960-0-2-0-synthetic.mp4",
+        "sha256": "b80cb5711d7e51ad4ef249c4157541a00eb1e2f515afeef715623d228ca1df92",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0d08",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "error": "truncated or oversized bit field"
+    },
+    {
+      "asc": "8b0908",
+      "video": {
+        "file": "aac-er-lc-rejected-1024-0-2-0-synthetic.mp4",
+        "sha256": "38f60c253640abd0cf632a187b339f7082bae48f6505eb1cd317b66dae78ae6a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0908",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "error": "truncated or oversized bit field"
+    }
+  ],
   "alignment": [
     {
       "video": {

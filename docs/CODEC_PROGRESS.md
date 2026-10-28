@@ -1,5 +1,60 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## EP2 integration for ER AAC LC, LTP and LD, 2026-10-28
+
+The shared ASC reader now parses ErrorProtectionSpecificConfig for epConfig=2
+in AOT17/19/23 and retains it beside the original core configuration. The
+existing extension-aware decoder recovers the epConfig=0 raw access unit before
+ER-LC/LTP/LD entropy parsing and synthesis. Frame geometry, channel mapping,
+section/HCR/RVLC resilience flags and prediction history remain core state.
+The core-only AacConfig parser still refuses protected input and directs callers
+to the extension-aware decoder; it cannot silently discard the EP requirement.
+Separate ESC-stream mappings (epConfig1/3) remain explicit refusals.
+
+The original binary reproduces the exact `ER AAC LC/LTP/LD epConfig is not yet
+implemented` refusal on the corresponding new protected synthetic inputs.
+`scripts/generate_aac_er_ep_fixtures.py` wraps 260 saved own synthetic source
+cases: ordinary ER-LC, ER-LTP, mono/stereo LD, ER-LTP resilience, HCR, RVLC and
+section resilience. Their saved independent spectra/filterbank/prediction PCM
+oracles are retained, with no private media or foreign decoder. Four protection
+variants per source yield 1,040 acceptance streams: bit-class continuous SRCPC,
+mixed SRCPC/RS with class-wise interleaving, grouped RS and corrected grouped
+RS. All three predefined sets change rates and permutations across packets;
+zero classes and until-end/fixed/in-band lengths remain exercised.
+
+The 520 negative controls recompute valid FEC around a wrong CRC in the first
+nonempty protected member, or cut declared coded data before interleaving. Each
+first decodes three valid packets; rollback controls retain byte-identical ASC.
+The output directory contains 4,943 assets (49,800,552 bytes), including short
+MP4/Matroska movies, original raw packets and exact independent PCM. Explicit
+regeneration reproduces every saved byte with process/socket creation forbidden;
+ordinary tests only read saved fixtures and require no FFmpeg or network.
+
+`tests/aac_er_ep_playback.rs` verifies exact recovered AU bytes, independent
+complete PCM, preservation of the original full core configuration, native
+reset/checkpoint accounting, public/owned container export and ranges,
+AudioStream playback/drain, rewind, repeated/frame-edge/EOF seek in both
+containers, and integrity-error rollback. The old ER-LC epConfig2 examples did
+not contain any EP config at all: they remain malformed setup refusals, now
+with the precise truncation expectation, separately from full EP2 acceptance.
+Their original generator and classification were updated together.
+
+This qualifies the saved fixed-channel core/resilience combinations; EP-protected
+PCE and SBR/PS combinations still need their own qualification. Source-frame
+concatenation, EP1/EP3 routing and broader codec tools remain open. Navigation
+checks do not establish physical output-device behavior or real-time throughput.
+
+Qualification passed 559 media unit tests (one ignored), 1,052 root library
+tests (26 ignored) and 57 integration tests across the eight source families,
+EP optional classes, RS groups and the new protected ER matrix: 1,668 passed,
+zero failures, 27 ignored. All seven new tests pass, including full navigation
+across all 1,040 streams in both containers. The original ER-LC generator also
+reproduces all 55 saved assets with process/socket creation forbidden. Tests run
+offline with `--no-default-features --features player`; the current test binary
+has no FFmpeg/libav linkage. Repository build profiles were not changed.
+
+Primary definition: [ISO/IEC 14496-3:2009, Table 1.20 and section 1.8.1](https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2009-90cda427e845cc176293bffee3f92f99.pdf).
+
 ## EP2 grouped shortened Reed-Solomon recovery, 2026-10-28
 
 The owned EP2 assembler now combines successive FEC=2 members with their

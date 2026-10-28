@@ -123,9 +123,19 @@ impl AacConfig {
         if extension_flag && b.bit()? {
             return Err(invalid("AAC extensionFlag3 must be zero"));
         }
-        if matches!(object_type,17|19|23) && b.read(2)? != 0 {
-            return Err(invalid(if object_type == 23 {"ER AAC LD epConfig is not yet implemented"} else if object_type == 19 {"ER AAC LTP epConfig is not yet implemented"} else {"ER AAC LC epConfig is not yet implemented"}));
-        }
+        let protection = if matches!(object_type,17|19|23) {
+            match b.read(2)? {
+                0 => None,
+                // EP2 output reassembles the epConfig=0 access unit for
+                // every ER core; entropy resilience remains core metadata.
+                2 => {
+                    let (ep, used) = super::aac_ep::Config::read_prefix(b.source_bytes(), b.position())?;
+                    b.skip(used)?;
+                    Some(ep)
+                }
+                _ => return Err(invalid(if object_type == 23 {"ER AAC LD epConfig is not yet implemented"} else if object_type == 19 {"ER AAC LTP epConfig is not yet implemented"} else {"ER AAC LC epConfig is not yet implemented"})),
+            }
+        } else { None };
         Ok((
             Self {
                 channel_configuration: config as u8,
@@ -140,7 +150,7 @@ impl AacConfig {
             },
             program,
             None,
-            None,
+            protection,
         ))
     }
 }
