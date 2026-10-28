@@ -1,0 +1,2975 @@
+{
+  "cases": [
+    {
+      "name": "aac-er-ltp-resilient-960-large-independent-0",
+      "aot": 19,
+      "n": 960,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-0",
+      "asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1520",
+      "ep2_asc": "9b15280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 0,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 1,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 7,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 7,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 13,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 0,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 99,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 14,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 15,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 21,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 21,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 27,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 12,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 198,
+          "bytes": 3963,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 28,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 29,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 38,
+              "bytes": 1274,
+              "bits": 10192
+            },
+            {
+              "category": 1,
+              "offset": 1312,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 1319,
+              "bytes": 10,
+              "bits": 75
+            }
+          ],
+          "plain_offset": 24,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-960-large-independent-0.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-960-large-independent-0.mp4",
+      "matroska": "aac-er-ltp-resilient-960-large-independent-0.mka",
+      "large_channel": 0,
+      "region_lengths": [
+        10192,
+        72
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-large-independent-1",
+      "aot": 19,
+      "n": 960,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-1",
+      "asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1520",
+      "ep2_asc": "9b15280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 16952,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 5362,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 5363,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 5369,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 5369,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 5375,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 6615,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 17051,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 5376,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 5377,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 5383,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 5383,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 5389,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 6627,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 17150,
+          "bytes": 3963,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 5390,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 5391,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 5398,
+              "bytes": 9,
+              "bits": 72
+            },
+            {
+              "category": 1,
+              "offset": 5407,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 5416,
+              "bytes": 1275,
+              "bits": 10195
+            }
+          ],
+          "plain_offset": 6639,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-960-large-independent-1.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-960-large-independent-1.mp4",
+      "matroska": "aac-er-ltp-resilient-960-large-independent-1.mka",
+      "large_channel": 1,
+      "region_lengths": [
+        72,
+        10192
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-large-independent-0",
+      "aot": 19,
+      "n": 1024,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-0",
+      "asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1120",
+      "ep2_asc": "9b11280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 33906,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 10725,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 10726,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 10732,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 10732,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 10738,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 13230,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 34005,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 10739,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 10740,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 10746,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 10746,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 10752,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 13242,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 34104,
+          "bytes": 3963,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 10753,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 10754,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 10763,
+              "bytes": 1274,
+              "bits": 10192
+            },
+            {
+              "category": 1,
+              "offset": 12037,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 12044,
+              "bytes": 10,
+              "bits": 75
+            }
+          ],
+          "plain_offset": 13254,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-1024-large-independent-0.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-1024-large-independent-0.mp4",
+      "matroska": "aac-er-ltp-resilient-1024-large-independent-0.mka",
+      "large_channel": 0,
+      "region_lengths": [
+        10192,
+        72
+      ]
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-large-independent-1",
+      "aot": 19,
+      "n": 1024,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-1",
+      "asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1120",
+      "ep2_asc": "9b11280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 50858,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 16087,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 16088,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 16094,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 16094,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 16100,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 19845,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 50957,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 16101,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 16102,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 16108,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 16108,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 16114,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 19857,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 51056,
+          "bytes": 3963,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 16115,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 16116,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 16123,
+              "bytes": 9,
+              "bits": 72
+            },
+            {
+              "category": 1,
+              "offset": 16132,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 16141,
+              "bytes": 1275,
+              "bits": 10195
+            }
+          ],
+          "plain_offset": 19869,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-1024-large-independent-1.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-1024-large-independent-1.mp4",
+      "matroska": "aac-er-ltp-resilient-1024-large-independent-1.mka",
+      "large_channel": 1,
+      "region_lengths": [
+        72,
+        10192
+      ]
+    }
+  ],
+  "malformed": [
+    {
+      "name": "aac-er-ltp-resilient-960-large-independent-0-short-side",
+      "aot": 19,
+      "n": 960,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-0",
+      "asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1520",
+      "ep2_asc": "9b15280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 4161,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 1329,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 1330,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 1336,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 1336,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 1342,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 1323,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 4260,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 1343,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 1344,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 1350,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 1350,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 1356,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 1335,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 4359,
+          "bytes": 3935,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 1357,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 1358,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 4,
+              "offset": 1358,
+              "bytes": 1274,
+              "bits": 10192
+            },
+            {
+              "category": 1,
+              "offset": 2632,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 2639,
+              "bytes": 10,
+              "bits": 75
+            }
+          ],
+          "plain_offset": 1347,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-960-large-independent-0.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-960-large-independent-0-short-side.mp4",
+      "matroska": "aac-er-ltp-resilient-960-large-independent-0-short-side.mka",
+      "large_channel": 0,
+      "region_lengths": [
+        10192,
+        72
+      ],
+      "good": "aac-er-ltp-resilient-960-large-independent-0",
+      "bad_index": 2,
+      "error": "truncated or oversized bit field"
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-large-independent-0-short-spectrum",
+      "aot": 19,
+      "n": 960,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-0",
+      "asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1520",
+      "ep2_asc": "9b15280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 8294,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 2649,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 2650,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 2656,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 2656,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 2662,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 2646,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 8393,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 2663,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 2664,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 2670,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 2670,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 2676,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 2658,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 8492,
+          "bytes": 138,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 2677,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 2678,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 2687,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 2687,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 2694,
+              "bytes": 10,
+              "bits": 75
+            }
+          ],
+          "plain_offset": 2670,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-960-large-independent-0.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-960-large-independent-0-short-spectrum.mp4",
+      "matroska": "aac-er-ltp-resilient-960-large-independent-0-short-spectrum.mka",
+      "large_channel": 0,
+      "region_lengths": [
+        10192,
+        72
+      ],
+      "good": "aac-er-ltp-resilient-960-large-independent-0",
+      "bad_index": 2,
+      "error": "truncated AAC HCR spectral region"
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-large-independent-0-crc",
+      "aot": 19,
+      "n": 960,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-0",
+      "asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1520",
+      "ep2_asc": "9b15280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 8630,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 2704,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 2705,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 2711,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 2711,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 2717,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 3969,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 8729,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 2718,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 2719,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 2725,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 2725,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 2731,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 3981,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 8828,
+          "bytes": 3963,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 2732,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 2733,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 2742,
+              "bytes": 1274,
+              "bits": 10192
+            },
+            {
+              "category": 1,
+              "offset": 4016,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 4023,
+              "bytes": 10,
+              "bits": 75
+            }
+          ],
+          "plain_offset": 3993,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-960-large-independent-0.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-960-large-independent-0-crc.mp4",
+      "matroska": "aac-er-ltp-resilient-960-large-independent-0-crc.mka",
+      "large_channel": 0,
+      "region_lengths": [
+        10192,
+        72
+      ],
+      "good": "aac-er-ltp-resilient-960-large-independent-0",
+      "bad_index": 2,
+      "error": "EP class CRC mismatch"
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-large-independent-0-alignment",
+      "aot": 19,
+      "n": 960,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-0",
+      "asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1520",
+      "ep2_asc": "9b15280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 12791,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 4033,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 4034,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 4040,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 4040,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 4046,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 5292,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 12890,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 4047,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 4048,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 4054,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 4054,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 4060,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 5304,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 12989,
+          "bytes": 3963,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 4061,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 4062,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 4071,
+              "bytes": 1274,
+              "bits": 10192
+            },
+            {
+              "category": 1,
+              "offset": 5345,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 5352,
+              "bytes": 10,
+              "bits": 75
+            }
+          ],
+          "plain_offset": 5316,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-960-large-independent-0.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-960-large-independent-0-alignment.mp4",
+      "matroska": "aac-er-ltp-resilient-960-large-independent-0-alignment.mka",
+      "large_channel": 0,
+      "region_lengths": [
+        10192,
+        72
+      ],
+      "good": "aac-er-ltp-resilient-960-large-independent-0",
+      "bad_index": 1,
+      "error": "nonzero AAC ESC alignment bits"
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-large-independent-1-short-side",
+      "aot": 19,
+      "n": 960,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-1",
+      "asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1520",
+      "ep2_asc": "9b15280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 21113,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 6691,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 6692,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 6698,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 6698,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 6704,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 7938,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 21212,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 6705,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 6706,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 6712,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 6712,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 6718,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 7950,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 21311,
+          "bytes": 3940,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 6719,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 6720,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 4,
+              "offset": 6720,
+              "bytes": 9,
+              "bits": 72
+            },
+            {
+              "category": 1,
+              "offset": 6729,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 6738,
+              "bytes": 1275,
+              "bits": 10195
+            }
+          ],
+          "plain_offset": 7962,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-960-large-independent-1.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-960-large-independent-1-short-side.mp4",
+      "matroska": "aac-er-ltp-resilient-960-large-independent-1-short-side.mka",
+      "large_channel": 1,
+      "region_lengths": [
+        72,
+        10192
+      ],
+      "good": "aac-er-ltp-resilient-960-large-independent-1",
+      "bad_index": 2,
+      "error": "truncated or oversized bit field"
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-large-independent-1-short-spectrum",
+      "aot": 19,
+      "n": 960,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-1",
+      "asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1520",
+      "ep2_asc": "9b15280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 25251,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 8013,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 8014,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 8020,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 8020,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 8026,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 9261,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 25350,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 8027,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 8028,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 8034,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 8034,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 8040,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 9273,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 25449,
+          "bytes": 135,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 8041,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 8042,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 8049,
+              "bytes": 9,
+              "bits": 72
+            },
+            {
+              "category": 1,
+              "offset": 8058,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 8067,
+              "bytes": 0,
+              "bits": 0
+            }
+          ],
+          "plain_offset": 9285,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-960-large-independent-1.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-960-large-independent-1-short-spectrum.mp4",
+      "matroska": "aac-er-ltp-resilient-960-large-independent-1-short-spectrum.mka",
+      "large_channel": 1,
+      "region_lengths": [
+        72,
+        10192
+      ],
+      "good": "aac-er-ltp-resilient-960-large-independent-1",
+      "bad_index": 2,
+      "error": "truncated AAC HCR spectral region"
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-large-independent-1-crc",
+      "aot": 19,
+      "n": 960,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-1",
+      "asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1520",
+      "ep2_asc": "9b15280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 25584,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 8067,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 8068,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 8074,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 8074,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 8080,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 10584,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 25683,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 8081,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 8082,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 8088,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 8088,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 8094,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 10596,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 25782,
+          "bytes": 3963,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 8095,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 8096,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 8103,
+              "bytes": 9,
+              "bits": 72
+            },
+            {
+              "category": 1,
+              "offset": 8112,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 8121,
+              "bytes": 1275,
+              "bits": 10195
+            }
+          ],
+          "plain_offset": 10608,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-960-large-independent-1.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-960-large-independent-1-crc.mp4",
+      "matroska": "aac-er-ltp-resilient-960-large-independent-1-crc.mka",
+      "large_channel": 1,
+      "region_lengths": [
+        72,
+        10192
+      ],
+      "good": "aac-er-ltp-resilient-960-large-independent-1",
+      "bad_index": 2,
+      "error": "EP class CRC mismatch"
+    },
+    {
+      "name": "aac-er-ltp-resilient-960-large-independent-1-alignment",
+      "aot": 19,
+      "n": 960,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-1",
+      "asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1520",
+      "ep2_asc": "9b15280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b152c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 29745,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 9396,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 9397,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 9403,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 9403,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 9409,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 11907,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 29844,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 9410,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 9411,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 9417,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 9417,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 9423,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 11919,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 29943,
+          "bytes": 3963,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 9424,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 9425,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 9432,
+              "bytes": 9,
+              "bits": 72
+            },
+            {
+              "category": 1,
+              "offset": 9441,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 9450,
+              "bytes": 1275,
+              "bits": 10195
+            }
+          ],
+          "plain_offset": 11931,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-960-large-independent-1.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-960-large-independent-1-alignment.mp4",
+      "matroska": "aac-er-ltp-resilient-960-large-independent-1-alignment.mka",
+      "large_channel": 1,
+      "region_lengths": [
+        72,
+        10192
+      ],
+      "good": "aac-er-ltp-resilient-960-large-independent-1",
+      "bad_index": 1,
+      "error": "nonzero AAC ESC alignment bits"
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-large-independent-0-short-side",
+      "aot": 19,
+      "n": 1024,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-0",
+      "asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1120",
+      "ep2_asc": "9b11280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 38067,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 12054,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 12055,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 12061,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 12061,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 12067,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 14553,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 38166,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 12068,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 12069,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 12075,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 12075,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 12081,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 14565,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 38265,
+          "bytes": 3935,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 12082,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 12083,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 4,
+              "offset": 12083,
+              "bytes": 1274,
+              "bits": 10192
+            },
+            {
+              "category": 1,
+              "offset": 13357,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 13364,
+              "bytes": 10,
+              "bits": 75
+            }
+          ],
+          "plain_offset": 14577,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-1024-large-independent-0.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-1024-large-independent-0-short-side.mp4",
+      "matroska": "aac-er-ltp-resilient-1024-large-independent-0-short-side.mka",
+      "large_channel": 0,
+      "region_lengths": [
+        10192,
+        72
+      ],
+      "good": "aac-er-ltp-resilient-1024-large-independent-0",
+      "bad_index": 2,
+      "error": "truncated or oversized bit field"
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-large-independent-0-short-spectrum",
+      "aot": 19,
+      "n": 1024,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-0",
+      "asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1120",
+      "ep2_asc": "9b11280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 42200,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 13374,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 13375,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 13381,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 13381,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 13387,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 15876,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 42299,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 13388,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 13389,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 13395,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 13395,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 13401,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 15888,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 42398,
+          "bytes": 138,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 13402,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 13403,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 13412,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 13412,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 13419,
+              "bytes": 10,
+              "bits": 75
+            }
+          ],
+          "plain_offset": 15900,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-1024-large-independent-0.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-1024-large-independent-0-short-spectrum.mp4",
+      "matroska": "aac-er-ltp-resilient-1024-large-independent-0-short-spectrum.mka",
+      "large_channel": 0,
+      "region_lengths": [
+        10192,
+        72
+      ],
+      "good": "aac-er-ltp-resilient-1024-large-independent-0",
+      "bad_index": 2,
+      "error": "truncated AAC HCR spectral region"
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-large-independent-0-crc",
+      "aot": 19,
+      "n": 1024,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-0",
+      "asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1120",
+      "ep2_asc": "9b11280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 42536,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 13429,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 13430,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 13436,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 13436,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 13442,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 17199,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 42635,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 13443,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 13444,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 13450,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 13450,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 13456,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 17211,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 42734,
+          "bytes": 3963,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 13457,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 13458,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 13467,
+              "bytes": 1274,
+              "bits": 10192
+            },
+            {
+              "category": 1,
+              "offset": 14741,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 14748,
+              "bytes": 10,
+              "bits": 75
+            }
+          ],
+          "plain_offset": 17223,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-1024-large-independent-0.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-1024-large-independent-0-crc.mp4",
+      "matroska": "aac-er-ltp-resilient-1024-large-independent-0-crc.mka",
+      "large_channel": 0,
+      "region_lengths": [
+        10192,
+        72
+      ],
+      "good": "aac-er-ltp-resilient-1024-large-independent-0",
+      "bad_index": 2,
+      "error": "EP class CRC mismatch"
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-large-independent-0-alignment",
+      "aot": 19,
+      "n": 1024,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-0",
+      "asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1120",
+      "ep2_asc": "9b11280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 46697,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 14758,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 14759,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 14765,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 14765,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 14771,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 18522,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 46796,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 14772,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 14773,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 14779,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 14779,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 14785,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 18534,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 46895,
+          "bytes": 3963,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 14786,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 14787,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 14796,
+              "bytes": 1274,
+              "bits": 10192
+            },
+            {
+              "category": 1,
+              "offset": 16070,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 16077,
+              "bytes": 10,
+              "bits": 75
+            }
+          ],
+          "plain_offset": 18546,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-1024-large-independent-0.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-1024-large-independent-0-alignment.mp4",
+      "matroska": "aac-er-ltp-resilient-1024-large-independent-0-alignment.mka",
+      "large_channel": 0,
+      "region_lengths": [
+        10192,
+        72
+      ],
+      "good": "aac-er-ltp-resilient-1024-large-independent-0",
+      "bad_index": 1,
+      "error": "nonzero AAC ESC alignment bits"
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-large-independent-1-short-side",
+      "aot": 19,
+      "n": 1024,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-1",
+      "asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1120",
+      "ep2_asc": "9b11280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 55019,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 17416,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 17417,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 17423,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 17423,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 17429,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 21168,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 55118,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 17430,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 17431,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 17437,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 17437,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 17443,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 21180,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 55217,
+          "bytes": 3940,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 17444,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 17445,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 4,
+              "offset": 17445,
+              "bytes": 9,
+              "bits": 72
+            },
+            {
+              "category": 1,
+              "offset": 17454,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 17463,
+              "bytes": 1275,
+              "bits": 10195
+            }
+          ],
+          "plain_offset": 21192,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-1024-large-independent-1.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-1024-large-independent-1-short-side.mp4",
+      "matroska": "aac-er-ltp-resilient-1024-large-independent-1-short-side.mka",
+      "large_channel": 1,
+      "region_lengths": [
+        72,
+        10192
+      ],
+      "good": "aac-er-ltp-resilient-1024-large-independent-1",
+      "bad_index": 2,
+      "error": "truncated or oversized bit field"
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-large-independent-1-short-spectrum",
+      "aot": 19,
+      "n": 1024,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-1",
+      "asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1120",
+      "ep2_asc": "9b11280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 59157,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 18738,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 18739,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 18745,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 18745,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 18751,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 22491,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 59256,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 18752,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 18753,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 18759,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 18759,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 18765,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 22503,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 59355,
+          "bytes": 135,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 18766,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 18767,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 18774,
+              "bytes": 9,
+              "bits": 72
+            },
+            {
+              "category": 1,
+              "offset": 18783,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 18792,
+              "bytes": 0,
+              "bits": 0
+            }
+          ],
+          "plain_offset": 22515,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-1024-large-independent-1.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-1024-large-independent-1-short-spectrum.mp4",
+      "matroska": "aac-er-ltp-resilient-1024-large-independent-1-short-spectrum.mka",
+      "large_channel": 1,
+      "region_lengths": [
+        72,
+        10192
+      ],
+      "good": "aac-er-ltp-resilient-1024-large-independent-1",
+      "bad_index": 2,
+      "error": "truncated AAC HCR spectral region"
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-large-independent-1-crc",
+      "aot": 19,
+      "n": 1024,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-1",
+      "asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1120",
+      "ep2_asc": "9b11280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 59490,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 18792,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 18793,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 18799,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 18799,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 18805,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 23814,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 59589,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 18806,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 18807,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 18813,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 18813,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 18819,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 23826,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 59688,
+          "bytes": 3963,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 18820,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 18821,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 18828,
+              "bytes": 9,
+              "bits": 72
+            },
+            {
+              "category": 1,
+              "offset": 18837,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 18846,
+              "bytes": 1275,
+              "bits": 10195
+            }
+          ],
+          "plain_offset": 23838,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-1024-large-independent-1.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-1024-large-independent-1-crc.mp4",
+      "matroska": "aac-er-ltp-resilient-1024-large-independent-1-crc.mka",
+      "large_channel": 1,
+      "region_lengths": [
+        72,
+        10192
+      ],
+      "good": "aac-er-ltp-resilient-1024-large-independent-1",
+      "bad_index": 2,
+      "error": "EP class CRC mismatch"
+    },
+    {
+      "name": "aac-er-ltp-resilient-1024-large-independent-1-alignment",
+      "aot": 19,
+      "n": 1024,
+      "channels": 2,
+      "rate": 24000,
+      "flags": 1,
+      "mode": "independent-1",
+      "asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e21",
+      "plain_asc": "9b1120",
+      "ep2_asc": "9b11280424581f0440f82207c1103e0885f04400420c4e20",
+      "reserved_asc": "9b112c0424581f0440f82207c1103e0885f04400420c4e20",
+      "frames": [
+        {
+          "offset": 63651,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 20121,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 20122,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 20128,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 20128,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 20134,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 25137,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 63750,
+          "bytes": 99,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 20135,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 20136,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 20142,
+              "bytes": 0,
+              "bits": 0
+            },
+            {
+              "category": 1,
+              "offset": 20142,
+              "bytes": 6,
+              "bits": 42
+            },
+            {
+              "category": 4,
+              "offset": 20148,
+              "bytes": 1,
+              "bits": 7
+            }
+          ],
+          "plain_offset": 25149,
+          "plain_bytes": 12
+        },
+        {
+          "offset": 63849,
+          "bytes": 3963,
+          "choice": 0,
+          "instances": [
+            {
+              "category": 0,
+              "offset": 20149,
+              "bytes": 1,
+              "bits": 5
+            },
+            {
+              "category": 1,
+              "offset": 20150,
+              "bytes": 7,
+              "bits": 54
+            },
+            {
+              "category": 4,
+              "offset": 20157,
+              "bytes": 9,
+              "bits": 72
+            },
+            {
+              "category": 1,
+              "offset": 20166,
+              "bytes": 9,
+              "bits": 66
+            },
+            {
+              "category": 4,
+              "offset": 20175,
+              "bytes": 1275,
+              "bits": 10195
+            }
+          ],
+          "plain_offset": 25161,
+          "plain_bytes": 1299
+        }
+      ],
+      "golden": "aac-er-ltp-resilient-1024-large-independent-1.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": "aac-er-ltp-resilient-1024-large-independent-1-alignment.mp4",
+      "matroska": "aac-er-ltp-resilient-1024-large-independent-1-alignment.mka",
+      "large_channel": 1,
+      "region_lengths": [
+        72,
+        10192
+      ],
+      "good": "aac-er-ltp-resilient-1024-large-independent-1",
+      "bad_index": 1,
+      "error": "nonzero AAC ESC alignment bits"
+    }
+  ],
+  "provenance": "Own saved ER-LTP/LD source bits, independent category tracing and polynomial EP protection, independent scalar prediction/filterbank/TNS numerical references. No private media, foreign codec, process or network. This corpus qualifies 10192-bit independent CPE HCR regions in EP3."
+}

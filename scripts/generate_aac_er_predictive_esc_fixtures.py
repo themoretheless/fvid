@@ -22,7 +22,32 @@ def body_parts(seq,values,info,kwargs=None,er_tns=None):
     if er_tns is not None:parts.append(dict(category=3,bits=body[side:side+19]));side+=19
     parts.append(dict(category=4,bits=body[side:]));return parts
 
+def trace_large(c,index):
+    from generate_aac_hcr_fixtures import payload,reorder,PRIORITY,cw
+    from generate_aac_main_tools_fixtures import sc
+    seq=c['frames'][index]['sequence'];parts=[dict(category=0,bits='00000')];wire='00000';regions=[]
+    offsets=[0,4,8,12,16,20,24,28,36,44,52]
+    for channel in range(2):
+        if seq!=2:
+            data='';hint=0;side=field(72,8)+ics(seq,0,False,shape=index%2)+'000'+field(0,14)+field(0,6)
+        elif channel!=c['large_channel']:
+            data,hint,_=payload(2,[[1]],[8],[[1,-1,0,1]for _ in range(8)])
+            side=field(72,8)+ics(2,1,False,shape=index%2)+field(1,4)+field(1,3)+sc(0)+'000'+field(len(data),14)+field(hint,6)
+        else:
+            q=[[8191 if(k+w+channel)%2 else -8191 for k in range(52)]for w in range(8)];words=[]
+            for band in range(10):
+                for window in range(8):
+                    for line in range(offsets[band],offsets[band+1],4):
+                        for half in range(2):words.append(dict(key=(PRIORITY[11],line,window,half),book=11,bits=cw(11,q[window][line+half*2:line+half*2+2])))
+            words.sort(key=lambda word:word['key']);data,hint,_=reorder(words);assert len(data)==10192
+            side=field(72,8)+ics(2,10,False,shape=index%2)+field(11,4)+field(7,3)+field(3,3)+sc(0)*10+'000'+field(len(data),14)+field(hint,6)
+        wire+=side+data;parts.extend([dict(category=1,bits=side),dict(category=4,bits=data)]);regions.append(len(data))
+    if seq==2:assert regions==c['frames'][index]['hcr_lengths']
+    parts[-1]['bits']+='0'*(-len(wire)%8)
+    return wire,parts
+
 def trace(stem,c,index):
+    if 'large_channel'in c:return trace_large(c,index)
     n=c['n'];mode=c.get('mode',c['name'].replace('-extension','').split('-',2 if 'flags'in c else 1)[-1]);flags=c.get('flags',0);width=c['channels'];common=mode.startswith('common');ms=int(mode[-1])if common else 0
     parts=[];wire='';row=c['frames'][index];predictors=[];infos=[];values=[];kwargs=[]
     if stem.startswith('aac-er-ltp'):
@@ -79,12 +104,12 @@ def trace(stem,c,index):
     parts[-1]['bits']+='0'*(-len(wire)%8)
     return wire,parts
 
-def generate():
+def generate(large=False):
     files={};cases=[];bad=[];blob=bytearray();plain=bytearray();instances=bytearray()
     for stem in ['aac-er-ltp','aac-er-ltp-resilient','aac-ld-ltp','aac-ld-filterbank','aac-ld-stereo']:
         source=json.loads((SOURCE/(stem+'.json')).read_text());raw=(SOURCE/(stem+'-packets.bin')).read_bytes();gold=(SOURCE/(stem+'-reference.f32le')).read_bytes()
-        for base in source['cases']:
-            if 'large_channel'in base:continue
+        for base in source['cases']+source.get('large_cpe',[]):
+            if ('large_channel'in base)!=large:continue
             name=stem+'-'+base['name'];aot,setup=prefix(bytes.fromhex(base['asc']));setup=setup[:-2]
             frames=[]
             for i,row in enumerate(base['frames']):
@@ -95,19 +120,20 @@ def generate():
             asc=packed(setup+'11'+ep+'1');files[name+'.asc']=asc
             start=base.get('reference_offset',base['frames'][0].get('reference_offset',0));size=len(frames)*base['n']*base['channels']*4;files[name+'.f32le']=gold[start:start+size];assert len(files[name+'.f32le'])==size
             mode=base.get('mode',base['name'].replace('-extension','').split('-',2 if 'flags'in base else 1)[-1]);flags=base.get('flags',0)
-            selected=(stem in ['aac-ld-ltp','aac-ld-filterbank'])or(mode in ['mono','common-2','independent']and flags in [0,7]and not base['name'].endswith('-extension'))
+            selected=large or(stem in ['aac-ld-ltp','aac-ld-filterbank'])or(mode in ['mono','common-2','independent']and flags in [0,7]and not base['name'].endswith('-extension'))
             variants=['clean']+(['short-side','short-spectrum','crc','alignment']if selected else [])
-            if selected and aot==19 and base['n']==960:variants.append('lag-overflow')
+            if selected and not large and aot==19 and base['n']==960:variants.append('lag-overflow')
             for variant in variants:
-                label=name if variant=='clean'else name+'-'+variant;rows=[];packets=[];bad_index=3
+                label=name if variant=='clean'else name+'-'+variant;rows=[];packets=[];bad_index=2 if large else 3
                 if variant in ['short-side','lag-overflow'] and any('prediction_start'in p for f in frames[3:]for p in f['esc']):bad_index=next(i for i,f in enumerate(frames)if i>=3 and any('prediction_start'in p for p in f['esc']))
-                if variant=='alignment':bad_index=next(i for i,f in enumerate(frames)if i>=3 and len(f['wire'])%8)
+                if variant=='alignment':bad_index=next(i for i,f in enumerate(frames)if i>=(1 if large else 3)and len(f['wire'])%8)
                 for i,original in enumerate(frames):
                     row=copy.deepcopy(original)
                     if i==bad_index:
                         if variant=='short-side':
                             p=next((p for p in row['esc']if 'prediction_start'in p),next(p for p in row['esc']if p['category']==1));p['bits']=p['bits'][:p.get('prediction_start',-1)+1]
-                        if variant=='short-spectrum':next(p for p in reversed(row['esc'])if p['category']==4)['bits']=''
+                        if variant=='short-spectrum':
+                            spectrum=[p for p in row['esc']if p['category']==4];spectrum[base['large_channel']if large else -1]['bits']=''
                         if variant=='alignment':p=row['esc'][-1];p['bits']=p['bits'][:-1]+'1'
                         if variant=='lag-overflow':
                             assert any('lag_start'in p for p in row['esc']),(name,i)
@@ -118,11 +144,12 @@ def generate():
                         data=packed(item['bits']);locations.append(dict(category=item['category'],offset=len(instances),bytes=len(data),bits=len(item['bits'])));instances.extend(data)
                     logical=packed(original['wire']);rows.append(dict(offset=len(blob),bytes=len(packet),choice=choice,instances=locations,plain_offset=len(plain),plain_bytes=len(logical)));blob.extend(packet);plain.extend(logical);packets.append(packet)
                 c=dict(name=label,aot=aot,n=base['n'],channels=base['channels'],rate=24000,flags=flags,mode=mode,asc=asc.hex(),plain_asc=base['asc'],ep2_asc=packed(setup+'10'+ep).hex(),reserved_asc=packed(setup+'11'+ep+'0').hex(),frames=rows,golden=name+'.f32le',container_rate=24000,container_frame_samples=base['n'],samples=len(frames)*base['n'],pcm_offset=0,slots=base['n']//64,bands=32,video=label+'.mp4',matroska=label+'.mka')
+                if large:c.update(large_channel=base['large_channel'],region_lengths=base['frames'][2]['hcr_lengths'])
                 files[c['video']]=video_fixture([c],blob,base['channels'],filename=c['video'],write=False)['data'];files[c['matroska']]=mkv(asc,packets,24000,base['n'],base['channels'])
                 if variant=='clean':cases.append(c)
                 else:c.update(good=name,bad_index=bad_index,error='AAC LTP lag exceeds two frames'if variant=='lag-overflow'else'EP class CRC mismatch'if variant=='crc'else'nonzero AAC ESC alignment bits'if variant=='alignment'else'truncated AAC HCR spectral region'if variant=='short-spectrum'and flags&1 else'truncated or oversized bit field');bad.append(c)
     files['packets.bin']=bytes(blob);files['plain-packets.bin']=bytes(plain);files['instances.bin']=bytes(instances)
-    files['manifest.json']=(json.dumps(dict(cases=cases,malformed=bad,provenance='Own saved ER-LTP/LD source bits, independent category tracing and polynomial EP protection, independent scalar prediction/filterbank/TNS numerical references. No private media, foreign codec, process or network. Large independent HCR regions remain separately qualified.'),indent=2)+'\n').encode()
+    files['manifest.json']=(json.dumps(dict(cases=cases,malformed=bad,provenance='Own saved ER-LTP/LD source bits, independent category tracing and polynomial EP protection, independent scalar prediction/filterbank/TNS numerical references. No private media, foreign codec, process or network.'+(' Large independent HCR regions remain separately qualified.'if not large else' This corpus qualifies 10192-bit independent CPE HCR regions in EP3.')),indent=2)+'\n').encode()
     return files
 if __name__=='__main__':
     OUT.mkdir(exist_ok=True)

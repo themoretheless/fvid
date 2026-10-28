@@ -1,5 +1,40 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## EP3 large independent HCR regions, 2026-10-28
+
+The four large independent-window ER-LTP HCR sources excluded from the preceding
+EP3 matrix now have their own acceptance corpus, `aac-er-esc-large-hcr`.
+It covers 960/1024 with the large region in either CPE channel. Each region is
+10,192 bits; the complete source AU remains within the pair buffer allowance.
+Independent side/spectral category construction is checked against the original
+own source bytes, with the existing scalar cosine/window PCM retained as oracle.
+No production decoder change was necessary for these cases.
+
+A focused geometry check restores the logical AU, parses it with pair context,
+and verifies all 416 escape coefficients (208 positive and 208 negative values
+of magnitude 8191). A deliberately wrong SCE context clips the same region and
+must fail specifically with `AAC HCR incomplete nonpriority codeword`. This is
+a passing refusal control demonstrating the target boundary, separate from
+actual EP3 CPE acceptance through complete PCM, exports and playback.
+
+Sixteen malformed movies isolate bounded side fields, truncation of the actual
+large spectral instance, EP CRC and final alignment after valid prefixes.
+Nine integration checks passed offline with `--no-default-features --features
+player`: exact class/logical bits, independent finite PCM, native MP4/Matroska
+exports and intervals, checkpoints/mapping identity, exact malformed failures,
+and player audio-stream EOF/rewind/repeated/frame-edge/negative/past-EOF seeks.
+The original unprotected large-HCR acceptance test also passed as a control.
+The integration executable has no FFmpeg/libav dynamic dependencies.
+
+The explicit offline generator produced 52 files / 493,799 bytes, reproduced
+byte-for-byte with process/network creation forbidden. Its default mode still
+matches every byte of the preceding 864-file / 17,837,502-byte corpus. Ordinary
+tests consume saved assets and do not generate fixtures or invoke foreign codecs.
+This closes the four-source qualification gap stated in the preceding milestone.
+Wider PCE/layout, multi-AU/protection combinations, extended-payload categories
+and EP1 association remain open; the full codec goal is not complete.
+
+
 ## ER AAC-LTP/LD EP3 predictors and resilience, 2026-10-28
 
 AOT19 and AOT23 now admit epConfig=3/directMapping=1 and restore their main
