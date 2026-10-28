@@ -1,3 +1,49 @@
+## EP1 group export through shared MP4 presentation scheduling, 2026-10-28
+
+The owned and native compatibility PCM exporters now read complete EP1 groups
+instead of decoding the root track as a byte-framed AAC packet. The existing
+ordinary/normalized presentation schedules, decoder checkpoints, preroll,
+empty edits, repeated media edits and interval trimming consume that group.
+In-band PS discovery also reads exact ESCs. One shared group implementation
+binds both demuxer wrappers; no invented packet serialization or foreign decoder
+was introduced. Automatic selection excludes dependent EP1 ESs before applying
+enabled-track preference; unrelated independent programs still need selection.
+
+The saved ordinary EP1 MP4s reproduced `EP1 requires separately associated ESC
+access units` in export before this connection. Four additional movies now
+exercise one movie-clock tick of silence followed by two repeated/reversed
+source windows, with independent edited PCM. Raw owned/native exports and
+published WAVE files match complete independent PCM, including mono/7.1 LD-SBR,
+intervals, repeated targets and interval gain. Signed source movies separately
+reproduced `negative audio timestamp`; valid negative PTS now select the
+existing signed rational normalization path. Their requested nonnegative
+presentation windows match the exact independently calculated source suffix.
+Default full-duration export of an unedited negative-PTS source with a missing
+presentation tail is not qualified by those interval checks.
+
+Controlled admission includes the group timing/configuration index and a
+conservative complete-input working-set bound before allocation/decoding.
+There is no new implicit memory limit. Explicit memory/packet limits, positive
+admission, mid-group cancellation with valid retry, cancellation hooks and
+logical AU limits have checks. Progress counts one complete source AU group
+and all of its ES payload bytes. Raw decoding never claims publication.
+
+A wider existing resampling check initially failed because its expected WAVE
+omitted the Matroska default language: actual PCM sizes matched, while export
+correctly retained literal LIST/INFO/ILNG=eng. The independent source-WAVE oracle
+now includes that literal metadata; the whole-file equality assertion remains
+unchanged and passes for Matroska ALAC and precise PCM. No resampler was changed.
+
+All 25 saved EP1 assets / 437,631 bytes regenerate exactly with process/socket
+creation forbidden. Ordinary tests only read saved assets. The 57 selected
+integration checks and 1,621 root/media unit tests pass (29 ignored).
+
+**Still open:** automatic grouped AudioStream/device playback and navigation,
+changing dependent descriptions, empty ESC MP4 samples, actual EP1 PS movie
+qualification, external-clock/SL bindings and full codec/tool coverage. Export
+scheduling acceptance does not establish these remaining playback paths or
+complete the codec-gap objective.
+
 ## Real MP4 EP1 ES groups and exact sample bit ends, 2026-10-28
 
 The shared MP4 reader now retains packed `stbl/padb` and fragment padding

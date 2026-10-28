@@ -38,14 +38,17 @@ def make_movie(base,source,units,mode=None):
                 if tag==b'stbl':
                     body+=box(b'padb',word(0,count)+packed)
                     if mode=='signed':body+=box(b'ctts',word(0x01000000,1,count,(-37*(scale//24000))&0xffffffff))
-            elif tag==b'tkhd':body=body[:12]+word(ordinal+2)+body[16:20]+word((3*base['n']*movie_scale+23999)//24000)+body[24:]
+            elif tag==b'tkhd':body=body[:12]+word(ordinal+2)+body[16:20]+word(3 if mode=='edits'and sid==root else (3*base['n']*movie_scale+23999)//24000)+body[24:]
             elif tag==b'mdhd':body=body[:12]+word(scale,count*step)+body[20:]
             elif tag==b'stsd':body=body[:8]+b''.join(rewrite(t,p)for t,p in boxes(body[8:]))
             elif tag==b'mp4a':body=body[:28]+b''.join(rewrite(t,p)for t,p in boxes(body[28:]))
             elif tag==b'esds':body=esds
             elif tag in tables:body=tables[tag]
             return box(tag,body)
-        tracks.append(box(b'trak',b''.join(rewrite(t,p)for t,p in boxes(audio)if t!=b'edts')))
+        track_body=b''.join(rewrite(t,p)for t,p in boxes(audio)if t!=b'edts')
+        if mode=='edits' and sid==root:
+            track_body+=box(b'edts',box(b'elst',word(0,3,1,0xffffffff,0x10000,1,7*scale//1000,0x10000,1,scale//1000,0x10000)))
+        tracks.append(box(b'trak',track_body))
     nontracks=[]
     for tag,body in moov:
         if tag==b'trak':continue
@@ -53,7 +56,7 @@ def make_movie(base,source,units,mode=None):
         nontracks.append(box(tag,body))
     return prefix+box(b'mdat',media)+box(b'moov',b''.join(nontracks+tracks))
 def generate():
-    parent=SOURCE/'aac-ep1';manifest=json.loads((parent/'manifest.json').read_bytes());units=(parent/'access-units.bin').read_bytes();files={};cases=[];bad=[]
+    parent=SOURCE/'aac-ep1';manifest=json.loads((parent/'manifest.json').read_bytes());units=(parent/'access-units.bin').read_bytes();files={};cases=[];bad=[];exports=[]
     names=['aac-er-lc-960-1-0-0','aac-ld-ltp-480-0','eld-n480-c1-x2-crc1','eld-n512-c7-x2-crc1']
     for base in manifest['cases']:
         if base['name']not in names:continue
@@ -62,11 +65,17 @@ def generate():
         cases.append(dict(name=name,video=name+'.mp4',golden=name+'.f32le',channels=base['channels'],rate=base['rate'],streams=len(base['frames'][0]['units']),frames=3))
         files[name+'-signed.mp4']=make_movie(base,source,units,'signed')
         cases.append(dict(name=name+'-signed',video=name+'-signed.mp4',golden=name+'.f32le',channels=base['channels'],rate=base['rate'],streams=len(base['frames'][0]['units']),frames=3))
+        files[name+'-edits.mp4']=make_movie(base,source,units,'edits')
+        pcm=(parent/base['golden']).read_bytes();stride=base['channels']*4;rate=base['rate']
+        assert rate%30==0
+        frames=rate//30
+        files[name+'-edits.f32le']=bytes(frames*stride)+pcm[7*rate//1000*stride:(7*rate//1000+frames)*stride]+pcm[rate//1000*stride:(rate//1000+frames)*stride]
+        exports.append(dict(name=name+'-edits',video=name+'-edits.mp4',golden=name+'-edits.f32le',channels=base['channels'],rate=rate,streams=len(base['frames'][0]['units']),frames=3))
         if name==names[0]:
             for mode,error in [('missing','EP1 MP4 missing simultaneous ESC access unit'),('duration','EP1 MP4 ESC source clocks disagree'),('fork','EP1 MP4 forked ES dependency'),('duplicate','EP1 MP4 duplicate ES ID')]:
                 files[mode+'.mp4']=make_movie(base,source,units,mode);bad.append(dict(video=mode+'.mp4',mode=mode,error=error))
     assert len(cases)==8
-    files['manifest.json']=(json.dumps(dict(cases=cases,malformed=bad,provenance='Own AVC video and real separate native EP1 ESC tracks; rational per-ES clocks, non-byte bit ends and deliberately nonzero excluded low bits. First three AUs and independent saved PCM. No private media, foreign codec, process or network.'),indent=2)+'\n').encode();return files
+    files['manifest.json']=(json.dumps(dict(cases=cases,exports=exports,malformed=bad,provenance='Own AVC video and real separate native EP1 ESC tracks; rational per-ES clocks, non-byte bit ends and deliberately nonzero excluded low bits. First three AUs and independent saved PCM. No private media, foreign codec, process or network.'),indent=2)+'\n').encode();return files
 if __name__=='__main__':
     OUT.mkdir(exist_ok=True)
     for name,data in generate().items():(OUT/name).write_bytes(data)

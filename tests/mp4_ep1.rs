@@ -133,3 +133,303 @@ fn missing_mistimed_forked_or_ambiguous_es_groups_have_specific_errors() {
         }
     }
 }
+#[test]
+fn ep1_mp4_exports_use_complete_dependency_groups_and_exact_intervals() {
+    use std::time::Duration;
+    let m = manifest();
+    let cases = m["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| !c["name"].as_str().unwrap().ends_with("-signed"))
+        .chain(m["exports"].as_array().unwrap());
+    for case in cases {
+        let bytes = std::fs::read(root().join(case["video"].as_str().unwrap())).unwrap();
+        let indexed = Mp4Reader::open_indexed(Cursor::new(&bytes), Default::default()).unwrap();
+        let track = selected(&indexed);
+        let golden = std::fs::read(root().join(case["golden"].as_str().unwrap())).unwrap();
+        let mut owned = Vec::new();
+        fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+            Cursor::new(&bytes),
+            &mut owned,
+            None,
+            &Default::default(),
+        )
+        .unwrap();
+        let mut public = Vec::new();
+        fvid::native_media::decode_mp4_aac_pcm(&bytes, &mut public).unwrap();
+        assert_eq!(owned, public, "{} bindings", case["name"]);
+        assert_eq!(owned.len(), golden.len());
+        let error = owned
+            .chunks_exact(4)
+            .zip(golden.chunks_exact(4))
+            .map(|(a, b)| {
+                (f32::from_le_bytes(a.try_into().unwrap())
+                    - f32::from_le_bytes(b.try_into().unwrap()))
+                .abs()
+            })
+            .fold(0f32, f32::max);
+        assert!(error < 1e-7, "{} export PCM {error}", case["name"]);
+        for (from, to) in [(1u64, 7u64), (0, 13), (35, 67), (40, 83), (1, 7)] {
+            let interval = Some((Duration::from_millis(from), Duration::from_millis(to)));
+            let rate = case["rate"].as_u64().unwrap();
+            let stride = case["channels"].as_u64().unwrap() as usize * 4;
+            let begin = ((from * rate).div_ceil(1000) as usize * stride).min(owned.len());
+            let end = ((to * rate).div_ceil(1000) as usize * stride).min(owned.len());
+            let mut range = Vec::new();
+            fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+                Cursor::new(&bytes),
+                &mut range,
+                interval,
+                &fvid_control::CopyOptions {
+                    streams: vec![track],
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+            assert_eq!(range, owned[begin..end], "{} interval", case["name"]);
+            let mut public = Vec::new();
+            fvid::native_media::decode_mp4_aac_pcm_interval(&bytes, &mut public, interval).unwrap();
+            assert_eq!(range, public);
+        }
+    }
+}
+#[test]
+fn ep1_signed_source_clocks_crop_exact_presentation_intervals() {
+    use std::time::Duration;
+    for case in manifest()["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["name"].as_str().unwrap().ends_with("-signed"))
+    {
+        let bytes = std::fs::read(root().join(case["video"].as_str().unwrap())).unwrap();
+        let golden = std::fs::read(root().join(case["golden"].as_str().unwrap())).unwrap();
+        let rate = case["rate"].as_u64().unwrap();
+        let stride = case["channels"].as_u64().unwrap() as usize * 4;
+        let skip = (37 * rate / 24000) as usize;
+        for (from, to) in [(5u64, 37u64), (0, 17), (5, 37)] {
+            let interval = Some((Duration::from_millis(from), Duration::from_millis(to)));
+            let mut owned = Vec::new();
+            fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+                Cursor::new(&bytes),
+                &mut owned,
+                interval,
+                &Default::default(),
+            )
+            .unwrap();
+            let begin = ((from * rate).div_ceil(1000) as usize + skip) * stride;
+            let end = ((to * rate).div_ceil(1000) as usize + skip) * stride;
+            let expected = &golden[begin..end];
+            assert_eq!(owned.len(), expected.len());
+            let error = owned
+                .chunks_exact(4)
+                .zip(expected.chunks_exact(4))
+                .map(|(a, b)| {
+                    (f32::from_le_bytes(a.try_into().unwrap())
+                        - f32::from_le_bytes(b.try_into().unwrap()))
+                    .abs()
+                })
+                .fold(0f32, f32::max);
+            assert!(error < 1e-7, "{} signed interval {error}", case["name"]);
+            let mut public = Vec::new();
+            fvid::native_media::decode_mp4_aac_pcm_interval(&bytes, &mut public, interval).unwrap();
+            assert_eq!(owned, public);
+        }
+    }
+}
+#[test]
+fn ep1_export_controls_admit_the_complete_group_and_count_logical_aus() {
+    use fvid_control::{CancelFlag, CopyOptions, ProgressHook};
+    use std::sync::{Arc, Mutex};
+    for case in manifest()["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| !c["name"].as_str().unwrap().ends_with("-signed"))
+    {
+        let bytes = std::fs::read(root().join(case["video"].as_str().unwrap())).unwrap();
+        let mut reader = Mp4Reader::open_indexed(Cursor::new(&bytes), Default::default()).unwrap();
+        let track = selected(&reader);
+        let group = Group::new(reader.tracks(), track).unwrap();
+        let bound = Group::admission_upper_bound(reader.tracks(), track).unwrap();
+        assert!(bound >= group.retained_payload_bytes().unwrap());
+        let mut checks = 0;
+        let error = match group.read_frame_checked(&mut reader, 0, || {
+            checks += 1;
+            if checks == 3 {
+                Err("synthetic mid-group cancellation")
+            } else {
+                Ok(())
+            }
+        }) {
+            Ok(_) => panic!("cancelled group was returned"),
+            Err(e) => e,
+        };
+        assert!(error.to_string().contains("mid-group cancellation"));
+        assert_eq!(
+            group.read_frame(&mut reader, 0).unwrap().len(),
+            group.stream_count()
+        );
+        let mut expected_bytes = 0u64;
+        for i in 0..3 {
+            expected_bytes += group
+                .read_frame(&mut reader, i)
+                .unwrap()
+                .iter()
+                .map(|u| u.data.len() as u64)
+                .sum::<u64>();
+        }
+        let events = Arc::new(Mutex::new(Vec::new()));
+        let captured = events.clone();
+        let options = CopyOptions {
+            max_controlled_bytes: Some(128 << 20),
+            progress: Some(ProgressHook::new(move |e| captured.lock().unwrap().push(e))),
+            ..Default::default()
+        };
+        let mut full = Vec::new();
+        fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+            Cursor::new(&bytes),
+            &mut full,
+            None,
+            &options,
+        )
+        .unwrap();
+        let events = events.lock().unwrap();
+        let last = events.last().unwrap();
+        assert!(events.iter().all(|e| !e.done)); // Raw decoding does not publish output.
+        assert_eq!(last.packets, 3);
+        assert_eq!(last.payload_bytes, expected_bytes);
+        drop(events);
+        let mut prefix = Vec::new();
+        fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+            Cursor::new(&bytes),
+            &mut prefix,
+            None,
+            &CopyOptions {
+                max_packets: Some(1),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        assert_eq!(prefix, full[..full.len() / 3]);
+        for options in [
+            CopyOptions {
+                max_controlled_bytes: Some(1),
+                ..Default::default()
+            },
+            CopyOptions {
+                max_packet_bytes: 1,
+                ..Default::default()
+            },
+        ] {
+            let mut output = Vec::new();
+            let error = fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+                Cursor::new(&bytes),
+                &mut output,
+                None,
+                &options,
+            )
+            .unwrap_err()
+            .to_string();
+            assert!(error.contains("budget"), "{error}");
+            assert!(output.is_empty());
+        }
+        let cancel = CancelFlag::default();
+        let hook_cancel = cancel.clone();
+        let mut output = Vec::new();
+        let error = fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+            Cursor::new(&bytes),
+            &mut output,
+            None,
+            &CopyOptions {
+                cancel: Some(cancel),
+                progress: Some(ProgressHook::new(move |e| {
+                    if e.packets == 1 {
+                        hook_cancel.cancel();
+                    }
+                })),
+                ..Default::default()
+            },
+        )
+        .unwrap_err()
+        .to_string();
+        assert!(error.contains("cancelled"), "{error}");
+    }
+}
+#[test]
+fn ep1_file_exports_preserve_group_pcm_edits_and_interval_gain() {
+    let dir = std::env::temp_dir().join(format!("fvid-ep1-file-export-{}", std::process::id()));
+    std::fs::create_dir(&dir).unwrap();
+    struct Clean(std::path::PathBuf);
+    impl Drop for Clean {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _clean = Clean(dir.clone());
+    let m = manifest();
+    let cases = m["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| !c["name"].as_str().unwrap().ends_with("-signed"))
+        .chain(m["exports"].as_array().unwrap());
+    for case in cases {
+        let source = root().join(case["video"].as_str().unwrap());
+        let gold = std::fs::read(root().join(case["golden"].as_str().unwrap())).unwrap();
+        let rate = case["rate"].as_u64().unwrap();
+        let stride = case["channels"].as_u64().unwrap() as usize * 4;
+        for interval in [false, true] {
+            let path = dir.join(format!("{}-{interval}.wav", case["name"].as_str().unwrap()));
+            let transform = if interval {
+                fvid_media_info::AudioDecodeTransform {
+                    interval: Some((1000, 17000)),
+                    volume: Some(0.5),
+                    ..Default::default()
+                }
+            } else {
+                Default::default()
+            };
+            let stats = fvid_media::decode_audio_transformed(
+                &source,
+                &path,
+                transform,
+                &fvid_control::CopyOptions {
+                    max_controlled_bytes: Some(128 << 20),
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+            let bytes = std::fs::read(path).unwrap();
+            let info =
+                fvid_media::owned_wave_inspect::inspect(&mut Cursor::new(&bytes), None).unwrap();
+            assert_eq!(stats.sample_rate, i32::try_from(rate).unwrap());
+            assert_eq!(stats.channels, case["channels"].as_u64().unwrap() as i32);
+            let expected = if interval {
+                &gold[(rate.div_ceil(1000) as usize) * stride
+                    ..((17 * rate).div_ceil(1000) as usize) * stride]
+            } else {
+                &gold[..]
+            };
+            let actual = &bytes
+                [info.data_offset as usize..info.data_offset as usize + info.data_bytes as usize];
+            assert_eq!(actual.len(), expected.len());
+            let error = actual
+                .chunks_exact(4)
+                .zip(expected.chunks_exact(4))
+                .map(|(a, b)| {
+                    (f32::from_le_bytes(a.try_into().unwrap())
+                        - f32::from_le_bytes(b.try_into().unwrap())
+                            * if interval { 0.5 } else { 1.0 })
+                    .abs()
+                })
+                .fold(0f32, f32::max);
+            assert!(
+                error < 1e-7,
+                "{} file export interval {interval}: {error}",
+                case["name"]
+            );
+        }
+    }
+}

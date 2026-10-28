@@ -1,0 +1,361 @@
+fn key(pts: i64, scale: u32) -> (i64, u32) {
+    let (mut a, mut b) = (pts.unsigned_abs(), u64::from(scale));
+    while b != 0 {
+        let rest = a % b;
+        a = b;
+        b = rest;
+    }
+    (pts / a as i64, scale / a as u32)
+}
+struct Stream {
+    index: usize,
+    id: u32,
+    es_id: u16,
+    parent: Option<u16>,
+    timescale: u32,
+    configuration: Vec<u8>,
+    samples: Vec<((i64, u32), usize)>,
+}
+pub struct Group {
+    root: usize,
+    streams: Vec<Stream>,
+}
+pub struct AccessUnit {
+    pub stream_id: u16,
+    pub depends_on: Option<u16>,
+    pub data: Vec<u8>,
+    pub bit_len: usize,
+    pub pts: i64,
+    pub duration: u64,
+    pub timescale: u32,
+}
+impl AccessUnit {
+    pub fn borrowed(&self) -> aac_ep1::AccessUnit<'_> {
+        aac_ep1::AccessUnit {
+            stream_id: self.stream_id,
+            depends_on: self.depends_on,
+            data: &self.data,
+            bit_len: self.bit_len,
+            pts: self.pts,
+            duration: self.duration,
+            timescale: self.timescale,
+        }
+    }
+}
+impl Group {
+    /// Root audio candidates only, with the same enabled-track preference as
+    /// ordinary MP4 selection. Dependent EP1 ESs are not alternative programs.
+    pub fn automatic_audio_tracks<R: Read + Seek>(reader: &Mp4Reader<R>) -> Result<Vec<usize>> {
+        let mut indices = Vec::new();
+        for (index, track) in reader.tracks().iter().enumerate() {
+            if track.handler != *b"soun" {
+                continue;
+            }
+            if track.codec == *b"mp4a" {
+                if let Ok(d) = aac_stream_descriptor(&track.configuration) {
+                    if d.depends_on.is_some()
+                        && AudioSpecificConfig::parse(d.asc).is_ok_and(|p| p.separate_esc)
+                    {
+                        continue;
+                    }
+                }
+            }
+            indices.push(index);
+        }
+        let rank = |index| match reader.track_header_flags(index).unwrap_or(0) & 3 {
+            3 => 2,
+            1 => 1,
+            _ => 0,
+        };
+        if let Some(best) = indices.iter().map(|&i| rank(i)).max() {
+            indices.retain(|&i| rank(i) == best);
+        }
+        Ok(indices)
+    }
+    pub fn for_root(tracks: &[Track], root: usize) -> Result<Option<Self>> {
+        let track = tracks
+            .get(root)
+            .ok_or_else(|| invalid("EP1 MP4 root track index out of range"))?;
+        if track.codec != *b"mp4a" {
+            return Ok(None);
+        }
+        let d = aac_stream_descriptor(&track.configuration)?;
+        if !AudioSpecificConfig::parse(d.asc)?.separate_esc {
+            return Ok(None);
+        }
+        Self::new(tracks, root).map(Some)
+    }
+    /// Conservative pre-allocation bound for this group's timing index and one
+    /// simultaneous decoded-input working set. No implicit limit is imposed.
+    pub fn admission_upper_bound(tracks: &[Track], root: usize) -> Result<usize> {
+        let source = tracks
+            .get(root)
+            .ok_or_else(|| invalid("EP1 MP4 root track index out of range"))?;
+        if source.codec != *b"mp4a" {
+            return Ok(0);
+        }
+        let d = aac_stream_descriptor(&source.configuration)?;
+        if !AudioSpecificConfig::parse(d.asc)?.separate_esc {
+            return Ok(0);
+        }
+        let mut total = 0usize;
+        let mut add = |n: usize| -> Result<()> {
+            total = total
+                .checked_add(n)
+                .ok_or_else(|| invalid("EP1 MP4 memory estimate overflow"))?;
+            Ok(())
+        };
+        for (index, track) in tracks.iter().enumerate() {
+            if track.codec != *b"mp4a" || track.handler != *b"soun" {
+                continue;
+            }
+            let mut member = index == root;
+            let mut parent = aac_stream_descriptor(&track.configuration)?.depends_on;
+            for _ in 0..tracks.len() {
+                let Some(id) = parent else {
+                    break;
+                };
+                if id == d.es_id {
+                    member = true;
+                    break;
+                }
+                let mut found = None;
+                for candidate in tracks
+                    .iter()
+                    .filter(|t| t.codec == *b"mp4a" && t.handler == *b"soun")
+                {
+                    let candidate = aac_stream_descriptor(&candidate.configuration)?;
+                    if candidate.es_id == id {
+                        found = Some(candidate.depends_on);
+                        break;
+                    }
+                }
+                let Some(next) = found else {
+                    break;
+                };
+                parent = next;
+            }
+            if !member {
+                continue;
+            }
+            add(track
+                .samples
+                .len()
+                .checked_mul(std::mem::size_of::<((i64, u32), usize)>())
+                .ok_or_else(|| invalid("EP1 MP4 memory estimate overflow"))?)?;
+            add(track.configuration.len())?;
+            add(4 * std::mem::size_of::<Stream>())?;
+            // Owned inputs, borrowed views, recovered class tables and allocation
+            // growth coexist. The existing decoder admission covers DSP/checkpoints.
+            add(1024)?;
+            let largest = (0..track.samples.len())
+                .filter_map(|i| track.samples.get(i))
+                .map(|s| s.size as usize)
+                .max()
+                .unwrap_or(0);
+            add(largest
+                .checked_mul(32)
+                .ok_or_else(|| invalid("EP1 MP4 memory estimate overflow"))?)?;
+        }
+        Ok(total)
+    }
+    /// Select a root ES explicitly. Unrelated audio tracks are not dependency
+    /// members. A fork, repeated ES ID or ambiguous AU timestamp is an error.
+    pub fn new(tracks: &[Track], root: usize) -> Result<Self> {
+        let track = tracks
+            .get(root)
+            .ok_or_else(|| invalid("EP1 MP4 root track index out of range"))?;
+        if track.handler != *b"soun" || track.codec != *b"mp4a" {
+            return Err(invalid("EP1 MP4 root is not MPEG-4 audio"));
+        }
+        let descriptor = aac_stream_descriptor(&track.configuration)?;
+        if descriptor.depends_on.is_some() {
+            return Err(invalid("EP1 MP4 selected track is not a root ES"));
+        }
+        if !AudioSpecificConfig::parse(descriptor.asc)?.separate_esc {
+            return Err(invalid("EP1 MP4 root does not declare separate ESCs"));
+        }
+        let asc = descriptor.asc;
+        let mut streams = Vec::new();
+        let mut at = root;
+        loop {
+            let track = &tracks[at];
+            track
+                .ensure_constant_description()
+                .map_err(|e| invalid(&e.to_string()))?;
+            let d = aac_stream_descriptor(&track.configuration)?;
+            if d.url.is_some() {
+                return Err(invalid(
+                    "EP1 MP4 external ES URL requires an external source",
+                ));
+            }
+            if d.sl_config != Some(&[2][..]) {
+                return Err(invalid("EP1 MP4 requires SL predefined configuration 2"));
+            }
+            if d.asc != asc {
+                return Err(invalid("EP1 MP4 dependent ASC disagrees with root"));
+            }
+            if track.timescale == 0 {
+                return Err(invalid("EP1 MP4 zero source timescale"));
+            }
+            if streams.iter().any(|s: &Stream| s.es_id == d.es_id) {
+                return Err(invalid("EP1 MP4 repeated or cyclic ES ID"));
+            }
+            let mut samples = Vec::new();
+            samples
+                .try_reserve_exact(track.samples.len())
+                .map_err(|_| invalid("EP1 MP4 timing index allocation failed"))?;
+            for i in 0..track.samples.len() {
+                let sample = track
+                    .samples
+                    .get(i)
+                    .ok_or_else(|| invalid("EP1 MP4 sample index out of range"))?;
+                samples.push((key(sample.pts, track.timescale), i));
+            }
+            samples.sort_unstable_by_key(|row| row.0);
+            if samples.windows(2).any(|rows| rows[0].0 == rows[1].0) {
+                return Err(invalid("EP1 MP4 ambiguous source timestamp"));
+            }
+            streams
+                .try_reserve(1)
+                .map_err(|_| invalid("EP1 MP4 stream table allocation failed"))?;
+            streams.push(Stream {
+                index: at,
+                id: track.id,
+                es_id: d.es_id,
+                parent: d.depends_on,
+                timescale: track.timescale,
+                configuration: track.configuration.clone(),
+                samples,
+            });
+            let mut next = None;
+            for (index, candidate) in tracks.iter().enumerate() {
+                if candidate.handler != *b"soun" || candidate.codec != *b"mp4a" {
+                    continue;
+                }
+                let child = aac_stream_descriptor(&candidate.configuration)?;
+                if child.es_id == d.es_id && index != at {
+                    return Err(invalid("EP1 MP4 duplicate ES ID"));
+                }
+                if child.depends_on == Some(d.es_id) {
+                    if next.replace(index).is_some() {
+                        return Err(invalid("EP1 MP4 forked ES dependency"));
+                    }
+                }
+            }
+            let Some(next) = next else {
+                break;
+            };
+            at = next;
+        }
+        Ok(Self { root, streams })
+    }
+    pub fn root_track(&self) -> usize {
+        self.root
+    }
+    pub fn stream_count(&self) -> usize {
+        self.streams.len()
+    }
+    pub fn retained_payload_bytes(&self) -> Result<usize> {
+        let mut total = self
+            .streams
+            .capacity()
+            .checked_mul(std::mem::size_of::<Stream>())
+            .ok_or_else(|| invalid("EP1 MP4 retained payload size overflow"))?;
+        for stream in &self.streams {
+            total = total
+                .checked_add(stream.configuration.capacity())
+                .and_then(|n| {
+                    stream
+                        .samples
+                        .capacity()
+                        .checked_mul(std::mem::size_of::<((i64, u32), usize)>())
+                        .and_then(|bytes| n.checked_add(bytes))
+                })
+                .ok_or_else(|| invalid("EP1 MP4 retained payload size overflow"))?;
+        }
+        Ok(total)
+    }
+    /// Read the complete dependency group at the selected root sample's exact
+    /// rational source time. A missing or differently timed AU is never padded
+    /// or substituted. No decoder state is touched by partial I/O failure.
+    pub fn read_frame<R: Read + Seek>(
+        &self,
+        reader: &mut Mp4Reader<R>,
+        root_sample: usize,
+    ) -> Result<Vec<AccessUnit>> {
+        self.read_frame_checked(reader, root_sample, || {
+            Ok::<(), std::convert::Infallible>(())
+        })
+    }
+    pub fn read_frame_checked<R: Read + Seek, E: std::fmt::Display>(
+        &self,
+        reader: &mut Mp4Reader<R>,
+        root_sample: usize,
+        mut check: impl FnMut() -> std::result::Result<(), E>,
+    ) -> Result<Vec<AccessUnit>> {
+        check().map_err(|e| invalid(&e.to_string()))?;
+        let root = reader
+            .tracks()
+            .get(self.root)
+            .ok_or_else(|| invalid("EP1 MP4 root track index out of range"))?;
+        let stamp = root
+            .samples
+            .get(root_sample)
+            .ok_or_else(|| invalid("EP1 MP4 root sample index out of range"))?;
+        let time = key(stamp.pts, root.timescale);
+        let root_scale = root.timescale;
+        let mut output = Vec::new();
+        output
+            .try_reserve_exact(self.streams.len())
+            .map_err(|_| invalid("EP1 MP4 AU table allocation failed"))?;
+        for stream in &self.streams {
+            check().map_err(|e| invalid(&e.to_string()))?;
+            let track = reader
+                .tracks()
+                .get(stream.index)
+                .ok_or_else(|| invalid("EP1 MP4 stream track index out of range"))?;
+            if track.id != stream.id
+                || track.timescale != stream.timescale
+                || track.configuration != stream.configuration
+                || track.samples.len() != stream.samples.len()
+            {
+                return Err(invalid(
+                    "EP1 MP4 group belongs to different track configuration",
+                ));
+            }
+            let found = stream
+                .samples
+                .binary_search_by_key(&time, |entry| entry.0)
+                .map_err(|_| invalid("EP1 MP4 missing simultaneous ESC access unit"))?;
+            let index = stream.samples[found].1;
+            let sample = track
+                .samples
+                .get(index)
+                .ok_or_else(|| invalid("EP1 MP4 sample index out of range"))?;
+            if key(sample.pts, track.timescale) != time
+                || u128::from(sample.duration) * u128::from(root_scale)
+                    != u128::from(stamp.duration) * u128::from(track.timescale)
+            {
+                return Err(invalid("EP1 MP4 ESC source clocks disagree"));
+            }
+            let bit_len = reader
+                .packet_bit_len(stream.index, index)
+                .map_err(|e| invalid(&e.to_string()))?;
+            let mut data = Vec::new();
+            reader
+                .read_packet(stream.index, index, &mut data)
+                .map_err(|e| invalid(&e.to_string()))?;
+            output.push(AccessUnit {
+                stream_id: stream.es_id,
+                depends_on: stream.parent,
+                data,
+                bit_len,
+                pts: sample.pts,
+                duration: u64::from(sample.duration),
+                timescale: stream.timescale,
+            });
+        }
+        Ok(output)
+    }
+}

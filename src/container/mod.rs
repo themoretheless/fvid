@@ -3,6 +3,7 @@ pub mod adts;
 pub mod audio_timeline;
 pub mod avi;
 pub mod mp4;
+pub mod mp4_ep1;
 pub mod mp4_relocate;
 pub mod mp4_write;
 pub mod mp4_matroska;

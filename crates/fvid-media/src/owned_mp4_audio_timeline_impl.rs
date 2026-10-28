@@ -1,3 +1,21 @@
+fn mp4_decode_source_packet<R:std::io::Read+std::io::Seek>(
+    reader:&mut Mp4TimelineReader<R>, index:usize, sample:usize,
+    decoder:&mut Mp4TimelineDecoder, group:Option<&Mp4Ep1Group>, packet:&mut Vec<u8>,
+    pts:u64,duration:u64,control:&DecodeProgress<'_>,
+)->Result<(Option<Vec<Mp4PcmScalar>>,usize)> {
+    control.check()?;
+    if let Some(group)=group {
+        let units=group.read_frame_checked(reader,sample,||control.check())?;
+        let bytes=units.iter().try_fold(0usize,|n,u|n.checked_add(u.data.len()).ok_or_else(||invalid("EP1 MP4 group byte count overflow")))?;
+        let input:Vec<_>=units.iter().map(|u|u.borrowed()).collect();
+        control.check()?;
+        Ok((decoder.decode_esc(&input)?,bytes))
+    } else {
+        reader.read_packet(index,sample,packet)?;
+        Ok((decoder.decode_timed(packet,pts,duration)?,packet.len()))
+    }
+}
+
 pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::Seek>(
     reader: Mp4TimelineReader<R>,
     output: &mut impl std::io::Write,
@@ -43,7 +61,8 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
     }
     // Detect the need for normalization before caller-owned output.
     let mut checked = initial_description;
-    let mut normalize = target.is_some() || track.timescale % rate != 0;
+    let mut normalize = target.is_some() || track.timescale % rate != 0
+        || (0..track.samples.len()).any(|i|track.samples.get(i).is_some_and(|s|s.pts<0));
     for i in 0..track.samples.len() {
         control.check()?;
         let id = track.samples.get(i).ok_or_else(|| invalid("missing audio sample"))?.description_index;
@@ -59,6 +78,7 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
         drop(initial_setup);
         return decode_mp4_audio_normalized(reader,output,interval,index,track,initial_description,ps,decoder,target,control);
     }
+    let ep1_group=Mp4Ep1Group::for_root(reader.tracks(),index)?;
     let sample_position = |ticks: u64| -> Result<u64> {
         let numerator = u128::from(ticks) * u128::from(rate);
         let denominator = u128::from(track.timescale);
@@ -216,9 +236,8 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
                         .checked_add(duration)
                         .ok_or_else(|| invalid("audio timestamp overflow"))?,
                 );
-                reader.read_packet(index, sample_index, &mut packet)?;
-                let samples = decoder.decode_timed(&packet,start,duration)?;
-                control.packet(packet.len())?;
+                let (samples,bytes)=mp4_decode_source_packet(&mut reader,index,sample_index,&mut decoder,ep1_group.as_ref(),&mut packet,start,duration,control)?;
+                control.packet(bytes)?;
                 sample_index += 1;
                 if decoder.delayed() {
                     pending_window.push_back((start, duration));
@@ -289,6 +308,7 @@ fn negotiate_mp4_description_ps<R: std::io::Read + std::io::Seek>(
     let Ok(mut probe) = InBandPsProbe::new(asc, setup.sample_rate) else { return Ok(false); };
     // Losing an initial protected SBR header can hide PS forever.
     // Preserve its error if no later PS discovery establishes dispatch.
+    let ep1_group=Mp4Ep1Group::for_root(reader.tracks(),index)?;
     let retain_probe_error = probe.requires_in_band_ps() && (setup.channels == 2 || probe.requires_ep_recovery());
     let mut first_error = None;
     let mut packet = Vec::new();
@@ -298,8 +318,12 @@ fn negotiate_mp4_description_ps<R: std::io::Read + std::io::Seek>(
             probe.reset();
             continue;
         }
-        reader.read_packet(index, sample, &mut packet)?;
-        if let Err(error) = probe.read(&packet) {
+        let result=if let Some(group)=&ep1_group {
+            let units=group.read_frame_checked(reader,sample,||check())?;
+            let input:Vec<_>=units.iter().map(|u|u.borrowed()).collect();
+            probe.read_esc(&input)
+        } else {reader.read_packet(index,sample,&mut packet)?;probe.read(&packet)};
+        if let Err(error) = result {
             first_error.get_or_insert_with(|| error.to_string());
             probe.reset();
             continue;

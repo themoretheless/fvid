@@ -73,6 +73,44 @@
       "frames": 3
     }
   ],
+  "exports": [
+    {
+      "name": "aac-er-lc-960-1-0-0-edits",
+      "video": "aac-er-lc-960-1-0-0-edits.mp4",
+      "golden": "aac-er-lc-960-1-0-0-edits.f32le",
+      "channels": 1,
+      "rate": 24000,
+      "streams": 3,
+      "frames": 3
+    },
+    {
+      "name": "aac-ld-ltp-480-0-edits",
+      "video": "aac-ld-ltp-480-0-edits.mp4",
+      "golden": "aac-ld-ltp-480-0-edits.f32le",
+      "channels": 1,
+      "rate": 24000,
+      "streams": 3,
+      "frames": 3
+    },
+    {
+      "name": "eld-n480-c1-x2-crc1-edits",
+      "video": "eld-n480-c1-x2-crc1-edits.mp4",
+      "golden": "eld-n480-c1-x2-crc1-edits.f32le",
+      "channels": 1,
+      "rate": 48000,
+      "streams": 4,
+      "frames": 3
+    },
+    {
+      "name": "eld-n512-c7-x2-crc1-edits",
+      "video": "eld-n512-c7-x2-crc1-edits.mp4",
+      "golden": "eld-n512-c7-x2-crc1-edits.f32le",
+      "channels": 8,
+      "rate": 48000,
+      "streams": 27,
+      "frames": 3
+    }
+  ],
   "malformed": [
     {
       "video": "missing.mp4",

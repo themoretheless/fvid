@@ -223,6 +223,13 @@ impl PacketPcmDecoder {
     pub(crate) fn delayed(&self) -> bool {
         matches!(self, Self::Ps(_)) || matches!(self,Self::Aac(d) if d.delayed())
     }
+    pub(crate) fn decode_esc(&mut self,units:&[crate::codec::aac_ep1::AccessUnit<'_>])->Result<Option<Vec<f32>>> {
+        match self {
+            Self::Aac(d)=>Ok(d.decode_esc(units)?.map(|f|f.samples)),
+            Self::Ps(d)=>Ok(d.decode_esc(units)?.map(|f|f.pcm)),
+            _=>Err(invalid("EP1 source requires an AAC decoder")),
+        }
+    }
     pub(crate) fn decode_timed(&mut self,packet:&[u8],pts:u64,duration:u64)->Result<Option<Vec<f32>>> {
         match self {
             Self::Aac(d)=>Ok(d.decode_timed(packet,i64::try_from(pts).map_err(|_|invalid("AAC timestamp overflow"))?,duration)?.map(|f|f.samples)),

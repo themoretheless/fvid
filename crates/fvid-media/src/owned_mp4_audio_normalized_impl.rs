@@ -130,6 +130,7 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
     target: Option<(u32, u16, u32)>,
     control: &mut DecodeProgress<'_>,
 ) -> Result<AudioDecodeStats> {
+    let ep1_group=Mp4Ep1Group::for_root(reader.tracks(),index)?;
     let (rate, channels, destination) = target.unwrap_or_else(|| {
         (
             decoder.sample_rate(),
@@ -337,23 +338,25 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
                 let declared_duration = Mp4ExportTime::ticks(u64::from(sample.duration), track.timescale)?;
                 if expected.is_some_and(|at| at != declared_start) {return Err(invalid("non-contiguous MP4 audio timeline"));}
                 expected=Some(declared_start.add(declared_duration)?);
-                reader.read_packet(index, sample_index, &mut packet)?;
+                if ep1_group.is_none() {reader.read_packet(index, sample_index, &mut packet)?;}
                 while packet_clocks.get(clock_index).is_some_and(|r|sample_index>=r.last) {clock_index+=1;}
                 let clock=packet_clocks.get(clock_index).filter(|r|sample_index>=r.first).ok_or_else(||invalid("missing MP4 packet clock run"))?;
                 let (start,duration,frames)=if clock.quantized {
                     let setup=track.description_for_sample(sample_index).ok_or_else(||invalid("missing MP4 clock description"))?;
-                    let frames=mp4_coded_packet_frames(&setup.codec,&setup.configuration,decoder.sample_rate(),setup.channels,setup.bit_depth,packet.len(),Some(&packet)).map_err(|e|invalid(&e))?;
+                    let frames=mp4_coded_packet_frames(&setup.codec,&setup.configuration,decoder.sample_rate(),setup.channels,setup.bit_depth,sample.size as usize,Some(&packet)).map_err(|e|invalid(&e))?;
                     (clock.origin.add(Mp4ExportTime::new(i128::from(native_cursor),u128::from(decoder.sample_rate()))?)?,Mp4ExportTime::new(i128::from(frames),u128::from(decoder.sample_rate()))?,frames)
                 } else {
                     let frames=declared_duration.ceil_frames(decoder.sample_rate())?;
                     if frames<=0 || Mp4ExportTime::new(frames,u128::from(decoder.sample_rate()))?!=declared_duration {return Err(invalid("MP4 audio packet clock is not sample aligned"));}
                     (declared_start,declared_duration,u64::try_from(frames).map_err(|_|invalid("MP4 native frame count overflow"))?)
                 };
-                let samples = decoder.decode_timed(&packet, native_cursor, frames)?;
+                let (samples,bytes)=if ep1_group.is_some() {
+                    mp4_decode_source_packet(&mut reader,index,sample_index,&mut decoder,ep1_group.as_ref(),&mut packet,native_cursor,frames,control)?
+                } else {(decoder.decode_timed(&packet,native_cursor,frames)?,packet.len())};
                 native_cursor = native_cursor
                     .checked_add(frames)
                     .ok_or_else(|| invalid("MP4 native clock overflow"))?;
-                control.packet(packet.len())?;
+                control.packet(bytes)?;
                 sample_index += 1;
                 if decoder.delayed() {
                     pending.push_back((start, duration));

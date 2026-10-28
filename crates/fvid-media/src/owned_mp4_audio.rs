@@ -10,6 +10,7 @@ pub(crate) enum Mp4AacCheckpoint {
 pub use crate::owned_matroska_audio::{AudioDecodeStats, Error};
 use crate::owned_matroska_audio::{DecodeProgress, invalid};
 use crate::owned_mp4::Mp4Reader as Mp4TimelineReader;
+use crate::owned_mp4_ep1::Group as Mp4Ep1Group;
 use crate::owned_mp4_audio_schedule::AudioTimeline as Mp4AudioSchedule;
 use fvid_control::CopyOptions;
 use std::{
@@ -175,6 +176,13 @@ impl Mp4TimelineDecoder {
             _ => Ok(None),
         }
     }
+    fn decode_esc(&mut self, units:&[crate::owned_aac::aac_ep1::AccessUnit<'_>])->Result<Option<Vec<f32>>> {
+        match self {
+            Self::Aac(d)=>Ok(d.decode_esc(units)?.map(|f|f.samples)),
+            Self::Ps(d)=>Ok(d.decode_esc(units)?.map(|f|f.pcm)),
+            _=>Err(invalid("EP1 source requires an AAC decoder")),
+        }
+    }
     fn decode_timed(&mut self, bytes: &[u8], pts:u64,duration:u64) -> Result<Option<Vec<f32>>> {
         let pcm = match self {
             Self::Ps(d) => return Ok(d.decode(bytes)?.map(|f| f.pcm)),
@@ -194,7 +202,7 @@ pub(crate) fn mp4_audio_index<R: Read + Seek>(
     selected: Option<usize>,
 ) -> Result<usize> {
     let indices: Vec<_> = if selected.is_none() {
-        reader.automatic_track_indices(&[*b"soun"])
+        Mp4Ep1Group::automatic_audio_tracks(reader)?
     } else {
         reader.tracks().iter().enumerate().filter_map(|(index,t)|(t.handler==*b"soun").then_some(index)).collect()
     };
@@ -306,6 +314,7 @@ pub(crate) fn admit_audio_reader_targeted<R: Read + Seek>(
         Ok(())
     };
     add(decoder)?;
+    add(Mp4Ep1Group::admission_upper_bound(reader.tracks(),index)?)?;
     add(track.sample_descriptions.len())?; // per-description in-band PS flags
     add(configuration.checked_mul(2).ok_or_else(overflow)?)?; // initial and replacement decoder headers
     if target.is_some() || track.description_for_sample(0).is_some_and(|d| d.sample_rate>0 && track.timescale%d.sample_rate!=0) || (0..track.samples.len()).any(|n|track.description_for_sample(n)!=track.description_for_sample(0)) {
@@ -538,6 +547,9 @@ mod precise {
         }
         fn finish_delayed(&mut self) -> Result<Option<Vec<f64>>> {
             Ok(None)
+        }
+        fn decode_esc(&mut self,_:&[crate::owned_aac::aac_ep1::AccessUnit<'_>])->Result<Option<Vec<f64>>> {
+            Err(invalid("precise PCM decoder cannot accept EP1 AAC"))
         }
         fn decode_timed(&mut self, bytes: &[u8], _pts:u64,_duration:u64) -> Result<Option<Vec<f64>>> {
             self.0

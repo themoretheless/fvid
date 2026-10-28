@@ -348,6 +348,7 @@ pub(crate) fn decode_mp4_aac_reader_controlled<R: std::io::Read + std::io::Seek>
 
 use crate::codec::config::aac_specific_config as mp4_probe_config;
 use crate::container::mp4::Mp4Reader as Mp4TimelineReader;
+use crate::container::mp4_ep1::Group as Mp4Ep1Group;
 use crate::native_audio_decoder::PacketPcmDecoder as Mp4TimelineDecoder;
 use crate::container::audio_timeline::AudioTimeline as Mp4AudioSchedule;
 use crate::native_audio_decoder::NativeAudioCheckpoint as Mp4AacCheckpoint;
@@ -563,7 +564,7 @@ fn audio_index(kinds: impl Iterator<Item=bool>, selected: Option<usize>) -> Resu
 }
 pub(crate) fn mp4_aac_index<R: std::io::Read + std::io::Seek>(reader: &crate::container::mp4::Mp4Reader<R>, selected: Option<usize>) -> Result<usize> {
     if selected.is_some() && !reader.refused().is_empty() { return Err(invalid("cannot select an MP4 stream while some sample entries are unindexed")); }
-    let automatic = if selected.is_none() { reader.automatic_track_indices(&[*b"soun"]) } else { Vec::new() };
+    let automatic = if selected.is_none() { Mp4Ep1Group::automatic_audio_tracks(reader)? } else { Vec::new() };
     let index = audio_index(reader.tracks().iter().enumerate().map(|(i, t)| t.handler == *b"soun" && (selected.is_some() || automatic.contains(&i))),selected)?;
     if reader.tracks()[index].description_for_sample(0).is_none_or(|d|d.codec != *b"mp4a") { return Err(invalid("selected MP4 audio stream is not AAC")); }
     Ok(index)
@@ -818,7 +819,7 @@ pub(crate) fn mp4_audio_index<R: std::io::Read + std::io::Seek>(
         ));
     }
     let automatic = if selected.is_none() {
-        reader.automatic_track_indices(&[*b"soun"])
+        Mp4Ep1Group::automatic_audio_tracks(reader)?
     } else {
         Vec::new()
     };

@@ -150,6 +150,14 @@ fn synthetic_resample_window(extension: &str) {
     )
     .unwrap();
     wave.extend_from_slice(&raw_expected);
+    if extension != "m4a" {
+        // These Matroska fixtures use the default English track language. File
+        // export preserves it; the independent WAVE oracle must contain the
+        // same literal INFO chunk as well as the complete expected PCM.
+        wave.extend_from_slice(b"LIST\x10\0\0\0INFOILNG\x04\0\0\0eng\0");
+        let riff = u32::try_from(wave.len() - 8).unwrap();
+        wave[4..8].copy_from_slice(&riff.to_le_bytes());
+    }
     std::fs::write(&reference_source, wave).unwrap();
     let transform = fvid_media_info::AudioDecodeTransform {
         interval: Some((2000, 6000)),
