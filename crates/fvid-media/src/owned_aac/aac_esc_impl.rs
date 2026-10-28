@@ -164,6 +164,7 @@ impl Reader {
             && self.next == self.instances.len()
             && previous.is_some_and(|i| self.instances[i].position == self.instances[i].bits);
         let index = self.bind(category, true)?;
+        let final_instance = index + 1 == self.instances.len();
         let source = &mut self.instances[index];
         let mut bits = BitReader::with_bit_len(&source.bytes, source.bits)?;
         bits.skip(source.position)?;
@@ -184,9 +185,19 @@ impl Reader {
             && source.bits != 0
             && previous != Some(index)
         {
-            self.next -= 1;
-            self.last = previous;
-            self.current[category] = previous;
+            let count = self
+                .spans
+                .iter()
+                .try_fold(0usize, |sum, span| sum.checked_add(span.end - span.start))
+                .ok_or_else(|| invalid("AAC ESC payload length overflow"))?;
+            // A final empty instance can still carry the grammar-required AAC
+            // alignment. Keep that declared terminal AU, including corrupt
+            // alignment values which finish() must reject rather than hide.
+            if !final_instance || source.bits != (8 - count % 8) % 8 {
+                self.next -= 1;
+                self.last = previous;
+                self.current[category] = previous;
+            }
         }
         self.spans.push(Span {
             instance: index,
@@ -236,13 +247,14 @@ impl Reader {
     }
     /// ER extension_payload records occupy whole bytes after the main payload;
     /// final AAC byte_alignment remains outside that area and in the last ESC.
-    fn extensions(&mut self, sbr: Option<&ErSbrContext<'_>>) -> Result<()> {
-        if self.next == self.instances.len() {
+    fn extensions(&mut self, sbr: Option<&ErSbrContext<'_>>, grouped: bool) -> Result<()> {
+        if !grouped && self.next == self.instances.len() {
             return Ok(());
         }
-        if self.instances[..self.next]
-            .iter()
-            .any(|i| i.bits != i.position)
+        if !grouped
+            && self.instances[..self.next]
+                .iter()
+                .any(|i| i.bits != i.position)
         {
             return Err(invalid("unconsumed AAC ESC information bits"));
         }
@@ -251,10 +263,17 @@ impl Reader {
             .iter()
             .try_fold(0usize, |sum, span| sum.checked_add(span.end - span.start))
             .ok_or_else(|| invalid("AAC ESC payload length overflow"))?;
-        let rest = self.instances[self.next..]
-            .iter()
-            .try_fold(0usize, |sum, i| sum.checked_add(i.bits))
-            .ok_or_else(|| invalid("AAC ESC payload length overflow"))?;
+        let rest = if grouped {
+            &self.instances[..]
+        } else {
+            &self.instances[self.next..]
+        }
+        .iter()
+        .try_fold(0usize, |sum, i| sum.checked_add(i.bits - i.position))
+        .ok_or_else(|| invalid("AAC ESC payload length overflow"))?;
+        if grouped && rest < 8 {
+            return Ok(());
+        }
         if core.checked_add(rest).is_none_or(|n| n % 8 != 0) {
             return Err(invalid("AAC ESC extended payload is not byte aligned"));
         }
@@ -319,8 +338,19 @@ impl Reader {
                     })?;
                     let (channels, header) = context.group(sbr_index)?;
                     self.allocate(9)?;
-                    let source = &self.instances[self.current[9].unwrap()];
-                    let available = remaining.min(source.bits - source.position);
+                    let index = self.bind(9, false)?;
+                    let source = &self.instances[index];
+                    let mut available = remaining.min(source.bits - source.position);
+                    if grouped {
+                        // An ER SBR payload occupies whole bytes including its
+                        // preceding four-bit extension ID. A grouped AU can end
+                        // after a later extension's ID; bound this semantic view
+                        // at the last complete payload-sized region in the AU.
+                        if available < 4 {
+                            return Err(invalid("truncated ER SBR ESC payload"));
+                        }
+                        available -= (available + 4) % 8;
+                    }
                     let (used, exact) = self.read_sbr(9, |bits| {
                         let start = bits.position();
                         let end = start + available;
@@ -328,7 +358,7 @@ impl Reader {
                         syntax.read(bits, end, false, context.rate, context.slots, channels)?;
                         Ok((bits.position() - start, bits.position() == end))
                     })?;
-                    if !exact {
+                    if !exact && !grouped {
                         return Err(invalid("unconsumed ER SBR ESC information bits"));
                     }
                     remaining -= used;
@@ -457,6 +487,25 @@ pub fn reassemble_er_with_sbr(
     frame: &RecoveredFrame,
     headers: &[Option<SbrHeader>],
 ) -> Result<Vec<u8>> {
+    reassemble_er_transport(config, program, frame, headers, false)
+}
+/// EP1 transports consecutive ER core and extension instances in grouped AUs.
+/// EP3 retains the separate-class entrypoint above.
+pub fn reassemble_er_ep1(
+    config: &AacConfig,
+    program: Option<&super::aac_pce::ProgramConfig>,
+    frame: &RecoveredFrame,
+    headers: &[Option<SbrHeader>],
+) -> Result<Vec<u8>> {
+    reassemble_er_transport(config, program, frame, headers, true)
+}
+fn reassemble_er_transport(
+    config: &AacConfig,
+    program: Option<&super::aac_pce::ProgramConfig>,
+    frame: &RecoveredFrame,
+    headers: &[Option<SbrHeader>],
+    grouped: bool,
+) -> Result<Vec<u8>> {
     if !matches!(config.object_type, 17 | 19 | 23) {
         return Err(invalid("ER ESC mapping requires AOT17/19/23"));
     }
@@ -489,6 +538,7 @@ pub fn reassemble_er_with_sbr(
         _ => return Err(invalid("unsupported ER ESC layout")),
     };
     let mut reader = Reader::new(frame)?;
+    reader.grouped_ep1 = grouped;
     for &kind in kinds {
         if kind == 1 {
             super::aac_pair::ChannelPair::read_er_esc(&mut reader, config)?;
@@ -505,7 +555,10 @@ pub fn reassemble_er_with_sbr(
             .ok_or_else(|| invalid("SBR frequency overflow"))?,
         slots: (config.frame_samples / 64) as u8,
     };
-    reader.extensions(matches!(config.object_type, 17 | 19).then_some(&context))?;
+    reader.extensions(
+        matches!(config.object_type, 17 | 19).then_some(&context),
+        grouped,
+    )?;
     reader.finish()
 }
 /// Restore ELD with optional current LD-SBR context. Header history is read
@@ -599,6 +652,6 @@ fn reassemble_eld_transport(
             })?;
         }
     }
-    reader.extensions(None)?;
+    reader.extensions(None, false)?;
     reader.finish()
 }

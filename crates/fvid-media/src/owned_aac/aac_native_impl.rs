@@ -605,9 +605,15 @@ impl NativeAacDecoder {
                     let headers = self.sbr_elements.iter()
                         .map(|element| element.as_ref().and_then(|e| e.stream.current_header().cloned()))
                         .collect::<Vec<_>>();
-                    super::aac_esc::reassemble_er_with_sbr(
-                        &self.config, self.program.as_ref(), frame, &headers,
-                    )?
+                    if self.separate_esc {
+                        super::aac_esc::reassemble_er_ep1(
+                            &self.config, self.program.as_ref(), frame, &headers,
+                        )?
+                    } else {
+                        super::aac_esc::reassemble_er_with_sbr(
+                            &self.config, self.program.as_ref(), frame, &headers,
+                        )?
+                    }
                 } else {
                     if self.separate_esc {
                         super::aac_esc::reassemble_eld_ep1(&self.config, frame, self.eld_sbr.as_ref())?

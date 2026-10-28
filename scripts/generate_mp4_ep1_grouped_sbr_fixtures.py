@@ -5,7 +5,7 @@ from generate_mp4_ep1_epochs_fixtures import eld_control
 from generate_mp4_ep1_active_chain_fixtures import streams
 from generate_he_aac_packet_fixtures import box,boxes,packed
 OUT=SOURCE/'mp4-ep1-grouped-sbr'
-def grouped(source,groups,mode,mutation=None,partitions=None):
+def grouped(source,groups,mode,mutation=None,partitions=None,edits=None):
     original=streams(source);core=len(original)-groups*2;assert core>0
     if partitions is None:
         assert mode!='custom'
@@ -23,8 +23,8 @@ def grouped(source,groups,mode,mutation=None,partitions=None):
     parts=list(boxes(source));prefix=b''.join(box(t,p)for t,p in parts[:-1]);payload=bytearray();tracks=[]
     for ordinal,indices in enumerate(partitions):
         raw=[];pads=[]
-        for frame in range(6):
-            bits=''.join(''.join(f'{v:08b}'for v in original[i]['raw'][frame])[:len(original[i]['raw'][frame])*8-original[i]['pads'][frame]]for i in indices)
+        for frame in range(len(original[0]['raw'])):
+            bits=''.join((edits or {}).get((frame,i),''.join(f'{v:08b}'for v in original[i]['raw'][frame])[:len(original[i]['raw'][frame])*8-original[i]['pads'][frame]])for i in indices)
             if frame==1:
                 if mutation=='crc' and len(original)-2 in indices:
                     offset=sum(len(original[i]['raw'][frame])*8-original[i]['pads'][frame]for i in indices if i<len(original)-2)
@@ -36,7 +36,7 @@ def grouped(source,groups,mode,mutation=None,partitions=None):
             if pad:data[-1]|=(1<<pad)-1
             raw.append(data);pads.append(pad)
         offset=len(prefix)+8+len(payload);payload.extend(b''.join(raw))
-        tables={b'stsz':word(0,0,6)+word(*map(len,raw)),b'stco':word(0,1,offset),b'padb':word(0,6)+bytes((pads[i]<<4)|pads[i+1]for i in range(0,6,2))}
+        tables={b'stsz':word(0,0,len(raw))+word(*map(len,raw)),b'stco':word(0,1,offset),b'padb':word(0,len(raw))+bytes((pads[i]<<4)|(pads[i+1]if i+1<len(pads)else 0)for i in range(0,len(pads),2))}
         def rewrite(t,p):
             if t in [b'mdia',b'minf',b'stbl']:p=b''.join(rewrite(k,v)for k,v in boxes(p))
             elif t in tables:p=tables[t]

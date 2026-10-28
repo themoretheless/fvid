@@ -1,3 +1,61 @@
+## Grouped EP1 ER-LC/LTP/LD core and standard SBR, 2026-10-28
+
+A saved own MP4 reproduced `missing AAC ESC instance` before the fix for
+`aac-er-lc-960-1-0-0-whole`. ER-LC/LTP/LD EP1 now selects the semantic grouped
+category reader; EP3 keeps the strict separate-class entrypoint. The ER extension
+reader includes the meaningful residue of a current grouped AU, parses each
+extension ID before its payload, and carries remaining data into the following
+extension. Standard SBR uses its grammar-delimited payload and known four-bit
+ID/whole-byte geometry, without scanning bytes or retrying failed offsets.
+Strict EP3 still requires the declared SBR class to end exactly there.
+
+A second own control exposed `unconsumed AAC ESC instances`: a final empty
+ER-LTP spectral category held only four required alignment bits. Zero-bit category
+handling now retains that declared terminal AU when its size exactly equals the
+logical AAC alignment requirement. Corrupt values are retained for explicit
+`nonzero AAC ESC alignment bits` refusal, with retry/checkpoint/history checks.
+
+The corpus has 94 native controls, stored as 282 three-frame programmes: one
+complete AU, grouped core with separate extension instances, and consecutive
+category pairs. It covers AOT17/19/23, 480/512/960/1024 source samples, native
+mono/multichannel layouts, resilience/predictors, and standard SBR with core/double
+rate and explicit/sync signaling. All have saved independent scalar PCM.
+The three-frame matrix keeps physical dependency membership stable; it does not
+silently skip later source frames with changed TNS instance membership.
+Instead, six additional single-track grouped movies retain all 76 original
+source frames (12 or 16 per programme), including TNS appearance/disappearance
+and longer predictor history. Their authored bytes match every complete logical
+reference packet exactly, and their native/export/playback PCM matches the full
+independent reference. Checkpoints replay every frame; repeated and boundary
+seeks cross the TNS/history changes, EOF/past-EOF and rewind.
+
+All 282 short programmes pass independent PCM (1e-7), bit-exact reassembly,
+authored AU membership, alternating packetization without DSP reset, owned/public
+full/range exports, stereo/gain/crop/32-kHz WAVE transforms, AudioStream playback,
+frame-edge/repeated/EOF/past-EOF seek and rewind. All 672 category-boundary masks
+of nine representative predictive/SBR controls preserve exact continuous PCM.
+There are 258 frame-1 alignment corruptions plus a dedicated frame-0 terminal
+empty-category alignment movie, with specific error and transactional replay.
+Worker capture includes all 282 short programmes, bringing its total to 1194;
+the six full sequences have separate AudioStream/navigation qualification.
+Export tests supply a 256-MiB caller budget for multichannel ER-LTP predictor
+storage; production/default memory policy is unchanged.
+
+All 736 artifacts / 12232050 bytes regenerate byte-exact with process/socket
+creation forbidden by an audit hook. All nine older EP1 corpora remain unchanged
+after generalizing the helper for three/six frames and explicit authored bit
+edits. Ordinary tests require neither FFmpeg nor network. The 1623 root/media
+unit tests pass (29 ignored), as do 108 selected integration checks: nine new ER
+checks, seven prior grouped ELD/SBR checks, 61 existing AAC/ESC checks and 31
+existing MP4 EP1 checks. All-test compilation passes offline with
+`--no-default-features --features player`; the new integration binary has no
+FFmpeg/libav linkage.
+
+Still open: grouped PS and broader ancillary/DRC/PCE extension qualification,
+variable physical MP4 dependency membership within the same ASC, external SL/OD
+updates, broader codec/profile gaps and physical output-device checks. This
+qualifies the exercised ER/core/standard-SBR grouping, not universal codec parity.
+
 ## Grouped ELD core, RVLC/HCR, TNS and LD-SBR transport, 2026-10-28
 
 Running the old decoder against a saved own six-frame MP4 reproduced
