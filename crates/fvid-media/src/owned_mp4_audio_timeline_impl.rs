@@ -287,6 +287,10 @@ fn negotiate_mp4_description_ps<R: std::io::Read + std::io::Seek>(
     if setup.codec != *b"mp4a" { return Ok(false); }
     let asc = mp4_probe_config(&setup.configuration)?;
     let Ok(mut probe) = InBandPsProbe::new(asc, setup.sample_rate) else { return Ok(false); };
+    // Losing an initial protected SBR header can hide PS forever.
+    // Preserve its error if no later PS discovery establishes dispatch.
+    let retain_probe_error = probe.requires_in_band_ps() && (setup.channels == 2 || probe.requires_ep_recovery());
+    let mut first_error = None;
     let mut packet = Vec::new();
     for sample in 0..reader.tracks()[index].samples.len() {
         check()?;
@@ -295,9 +299,14 @@ fn negotiate_mp4_description_ps<R: std::io::Read + std::io::Seek>(
             continue;
         }
         reader.read_packet(index, sample, &mut packet)?;
-        if probe.read(&packet).is_err() { probe.reset(); continue; }
+        if let Err(error) = probe.read(&packet) {
+            first_error.get_or_insert_with(|| error.to_string());
+            probe.reset();
+            continue;
+        }
         if probe.ps_detected() { return Ok(true); }
     }
+    if retain_probe_error && let Some(error) = first_error { return Err(invalid(&error)); }
     Ok(false)
 }
 

@@ -224,13 +224,22 @@ pub(crate) fn negotiate_matroska_ps<R: std::io::Read + std::io::Seek>(
     if track.codec != "A_AAC" { return Ok(false); }
     let Ok(rate) = u32::try_from(track.sample_rate) else { return Ok(false); };
     let Ok(mut probe) = InBandPsProbe::new(&track.codec_private, rate) else { return Ok(false); };
+    // Losing an initial protected SBR header can hide PS forever.
+    // Preserve its error if no later PS discovery establishes dispatch.
+    let retain_probe_error = probe.requires_in_band_ps() && (track.channels == 2 || probe.requires_ep_recovery());
+    let mut first_error = None;
     reader.scan_all()?;
     for packet_index in 0..reader.packets.len() {
         check()?;
         if reader.packets[packet_index].track != track.number { continue; }
         let packet = reader.read_packet(packet_index)?;
-        if probe.read(&packet).is_err() { probe.reset(); continue; }
+        if let Err(error) = probe.read(&packet) {
+            first_error.get_or_insert_with(|| error.to_string());
+            probe.reset();
+            continue;
+        }
         if probe.ps_detected() { return Ok(true); }
     }
+    if retain_probe_error && let Some(error) = first_error { return Err(invalid(&error)); }
     Ok(false)
 }

@@ -1,5 +1,42 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## Protected ER-AAC Parametric Stereo, 2026-10-28
+
+The owned PS decoder and syntax-only presence probe now retain and recover
+EP2 before interpreting AAC. Previously the valid protected source recovered
+its raw AU successfully but PS parsed the protection bits as AAC and failed
+with `AAC section exceeds max_sfb`. For transport packets containing two through
+seven source AUs, PS's source-AU lookahead is assembled into complete original
+transport packets. Public output/pending indices, timestamps and durations keep
+that transport identity. EOF drains the final complete aggregate. A failure in
+any child rolls back synthesis, PS/SBR state, coupling and partial packet PCM,
+even when the preceding packet became ready during that failing call.
+
+Implicit PS negotiation preserves the initial protected parsing error if no
+later PS discovery succeeds. Otherwise losing the initial SBR header could
+mask CRC failure as incompatible mono layout or unsupported SBR synthesis.
+Successful mono protected streams retain the ordinary fallback; explicit PS
+and valid later PS discovery retain their existing dispatch.
+
+`scripts/generate_aac_ep_ps_fixtures.py` saves 672 acceptance sources and 360
+malformed controls in MP4/Matroska: ER-LC/LTP, 960/1024 cores, single/double
+output rates, explicit/sync/implicit PS and 1..7 source AUs with SRCPC, RS and
+mixed-class protection. Late negatives fail in the second seven-source packet.
+Ancillary padding precedes SBR and all 24 original/padded plain sequences have
+bit-exact PCM. Scalar core references and independently authored PS payloads
+feed the established component oracle. The baseline old binary independently
+confirmed that padding was valid before protected dispatch was enabled.
+
+All eight `tests/aac_ep_ps_playback.rs` tests pass: full PCM, public/owned
+exports, repeated intervals, actual AudioStream playback/EOF/rewind/seek,
+source and packet edges, signed packet clocks, checkpoint replay, error rollback
+and protected mono fallback. Existing concatenated EP2 and plain ER-PS tests
+also pass, along with 561 media and 1,052 root unit tests. Offline generator
+controls match 2,743 new files (24,223,960 bytes), all 4,160 previous concatenated
+EP2 files and all 82 original PS files with subprocess/network creation forbidden.
+EP1/EP3, escaped RS correction rates and separate ELD extension tools remain
+open; these finite checks do not establish universal codec conformance.
+
 ## LD-SBR core-tool integration and navigation, 2026-10-28
 
 The owned LD-SBR acceptance matrix now contains 256 nonzero/decay sources

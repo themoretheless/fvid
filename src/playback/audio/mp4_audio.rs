@@ -281,14 +281,23 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         let count = track.samples.len();
         let mut in_band_ps = false;
         if let Some(mut probe) = candidate {
+            // Losing an initial protected SBR header can hide PS forever.
+            // Preserve its error if no later PS discovery establishes dispatch.
+            let retain_probe_error = probe.requires_in_band_ps() && (track.channels == 2 || probe.requires_ep_recovery());
+            let mut first_error = None;
             let mut payload = Vec::new();
             for sample in 0..count {
                 demuxer.read_packet(index, sample, &mut payload)?;
                 // A valid LC-only block has no SBR fill. It remains on normal
                 // AAC dispatch; subsequent extension runs can still be probed.
-                if probe.read(&payload).is_err() { probe.reset(); continue; }
+                if let Err(error) = probe.read(&payload) {
+                    first_error.get_or_insert_with(|| error.to_string());
+                    probe.reset();
+                    continue;
+                }
                 if probe.ps_detected() { in_band_ps = true; break; }
             }
+            if retain_probe_error && !in_band_ps && let Some(error) = first_error { return Err(invalid(&error)); }
         }
         let geometry=if let Some((_,channels,mask,layout))=&selected_geometry{Some((*channels,*mask,layout.clone()))}else{Self::dolby_geometry(&mut demuxer,index)?};
         let dolby_channels=geometry.as_ref().map(|(channels,_,_)|*channels);
@@ -511,6 +520,10 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                     && let Ok(mut probe) =
                         crate::codec::aac_ps_native::InBandPsProbe::new(asc, setup.sample_rate)
                 {
+                    // Losing an initial protected SBR header can hide PS forever.
+                    // Preserve its error if no later PS discovery establishes dispatch.
+                    let retain_probe_error = probe.requires_in_band_ps() && (setup.channels == 2 || probe.requires_ep_recovery());
+                    let mut first_error = None;
                     let mut payload = Vec::new();
                     for i in first..self.track().samples.len() {
                         if self.track().samples.get(i).unwrap().description_index as usize
@@ -521,7 +534,8 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                         }
                         self.demuxer
                             .read_packet(self.track_index, i, &mut payload)?;
-                        if probe.read(&payload).is_err() {
+                        if let Err(error) = probe.read(&payload) {
+                            first_error.get_or_insert_with(|| error.to_string());
                             probe.reset();
                             continue;
                         }
@@ -530,6 +544,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                             break;
                         }
                     }
+                    if retain_probe_error && !state.in_band_ps && let Some(error) = first_error { return Err(invalid(&error)); }
                 }
             } else if setup.codec == *b"ac-3" {
                 let mut payload = Vec::new();

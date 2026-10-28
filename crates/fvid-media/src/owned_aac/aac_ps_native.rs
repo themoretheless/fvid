@@ -39,6 +39,9 @@ struct CceState {
 #[derive(Clone)]
 pub struct NativePsAacDecoder {
     config: AacConfig,
+    protection: Option<super::aac_ep::Config>,
+    packet_pcm: Option<Frame>,
+    packet_sources: u8,
     initial_program: Option<aac_pce::ProgramConfig>,
     program: Option<aac_pce::ProgramConfig>,
     output_rate: u32,
@@ -102,6 +105,7 @@ impl NativePsAacDecoder {
         requires_in_band: bool,
     ) -> Result<Self> {
         validate_mono_program(&parsed)?;
+        if let Some(ep) = &parsed.protection { ep.validate_raw_access_unit()?; }
         let double = parsed
             .core
             .sample_rate
@@ -139,6 +143,9 @@ impl NativePsAacDecoder {
         } else {None};
         let prediction = main_prediction(&parsed.core)?;
         Ok(Self {
+            protection: parsed.protection,
+            packet_pcm: None,
+            packet_sources: 0,
             config: parsed.core,
             prediction,
             initial_program: parsed.program.clone(),
@@ -172,6 +179,7 @@ impl NativePsAacDecoder {
             .as_ref()
             .and_then(|s| s.prepared.back().map(|p| p.prepared.frame_index()))
             .or_else(|| self.extension.pending_frame_index())
+            .map(|index| index / u64::from(self.protection.as_ref().map_or(1, |ep| ep.frames)))
     }
     pub fn checkpoint(&self) -> Checkpoint {
         Checkpoint {
@@ -180,6 +188,7 @@ impl NativePsAacDecoder {
     }
     pub fn restore(&mut self, checkpoint: &Checkpoint) -> Result<()> {
         if self.config != checkpoint.state.config
+            || self.protection != checkpoint.state.protection
             || self.initial_program != checkpoint.state.initial_program
             || self.output_rate != checkpoint.state.output_rate
             || self.mode != checkpoint.state.mode
@@ -209,6 +218,35 @@ impl NativePsAacDecoder {
         self.extension.reset();
         self.cce_states.fill(None);
         self.pending_coupling = None;
+        self.packet_pcm = None;
+        self.packet_sources = 0;
+    }
+    fn collect_source(&mut self, frame: Frame) -> Result<Option<Frame>> {
+        let count = self.protection.as_ref().map_or(1, |ep| ep.frames);
+        let index = frame.frame_index / u64::from(count);
+        if frame.frame_index % u64::from(count) != u64::from(self.packet_sources) {
+            return Err(invalid("PS EP source-frame order mismatch"));
+        }
+        let packet = self.packet_pcm.get_or_insert_with(|| Frame {
+            frame_index: index,
+            sample_rate: frame.sample_rate,
+            pcm: Vec::new(),
+        });
+        if packet.frame_index != index || packet.sample_rate != frame.sample_rate {
+            return Err(invalid("PS EP output packet identity or rate mismatch"));
+        }
+        packet
+            .pcm
+            .try_reserve(frame.pcm.len())
+            .map_err(|_| invalid("PS EP PCM allocation failed"))?;
+        packet.pcm.extend(frame.pcm);
+        self.packet_sources += 1;
+        if self.packet_sources == count {
+            self.packet_sources = 0;
+            Ok(self.packet_pcm.take())
+        } else {
+            Ok(None)
+        }
     }
     fn output(&self, frame: Option<aac_sbr_ps::Frame>) -> Result<Option<Frame>> {
         let Some(frame) = frame else {
@@ -239,6 +277,28 @@ impl NativePsAacDecoder {
     /// Frame identity always refers to the original packet, including EOF.
     /// Malformed trailing syntax rolls back core, extension and pending PCM.
     pub fn decode(&mut self, packet: &[u8]) -> Result<Option<Frame>> {
+        let Some(ep) = &self.protection else {
+            return self.decode_unprotected(packet);
+        };
+        let units = ep.decode_raw_access_units(packet)?;
+        if units.len() == 1 {
+            return self.decode_unprotected(&units[0]);
+        }
+        let mut trial = self.clone();
+        let mut output = None;
+        for unit in units {
+            if let Some(frame) = trial.decode_unprotected(&unit)? {
+                if let Some(packet) = trial.collect_source(frame)? {
+                    if output.replace(packet).is_some() {
+                        return Err(invalid("excess PS EP output packets"));
+                    }
+                }
+            }
+        }
+        *self = trial;
+        Ok(output)
+    }
+    fn decode_unprotected(&mut self, packet: &[u8]) -> Result<Option<Frame>> {
         let mut trial = self.clone();
         let mut bits = BitReader::new(packet);
         let mut core = None;
@@ -717,6 +777,23 @@ impl NativePsAacDecoder {
         Ok(Some(frame))
     }
     pub fn finish(&mut self) -> Result<Option<Frame>> {
+        if self.protection.as_ref().is_none_or(|ep| ep.frames == 1) {
+            return self.finish_source();
+        }
+        let mut trial = self.clone();
+        while let Some(frame) = trial.finish_source()? {
+            if let Some(packet) = trial.collect_source(frame)? {
+                *self = trial;
+                return Ok(Some(packet));
+            }
+        }
+        if trial.packet_pcm.is_some() || trial.packet_sources != 0 {
+            return Err(invalid("incomplete PS EP output packet at EOF"));
+        }
+        *self = trial;
+        Ok(None)
+    }
+    fn finish_source(&mut self) -> Result<Option<Frame>> {
         if self.requires_in_band && !self.ps_detected() {
             return Err(invalid(
                 "in-band PS candidate reached EOF without a PS element",
@@ -746,6 +823,8 @@ impl NativePsAacDecoder {
 #[derive(Clone)]
 pub struct InBandPsProbe {
     config: AacConfig,
+    protection: Option<super::aac_ep::Config>,
+    requires_in_band: bool,
     initial_program: Option<aac_pce::ProgramConfig>,
     program: Option<aac_pce::ProgramConfig>,
     sbr: super::aac_sbr_history::Stream,
@@ -769,8 +848,11 @@ impl InBandPsProbe {
         }
         parsed.resolve_output_rate(output_rate)?;
         validate_mono_program(&parsed)?;
+        if let Some(ep) = &parsed.protection { ep.validate_raw_access_unit()?; }
         BandTables::for_config(&parsed.core)?;
         Ok(Self {
+            requires_in_band: parsed.ps_present != Some(true),
+            protection: parsed.protection,
             config: parsed.core,
             initial_program: parsed.program.clone(),
             program: parsed.program,
@@ -779,6 +861,14 @@ impl InBandPsProbe {
             source_sbr: vec![None; 16],
             seen: false,
         })
+    }
+    /// Whether syntax probing first requires EP transport recovery.
+    pub fn requires_ep_recovery(&self) -> bool {
+        self.protection.is_some()
+    }
+    /// Whether publishing stereo requires actual in-band PS discovery.
+    pub fn requires_in_band_ps(&self) -> bool {
+        self.requires_in_band
     }
     pub fn ps_detected(&self) -> bool {
         self.seen
@@ -793,6 +883,19 @@ impl InBandPsProbe {
     /// A packet without SBR fill is valid for discovery, but does not claim PS.
     /// Syntax errors never commit partial headers, histories or presence flags.
     pub fn read(&mut self, packet: &[u8]) -> Result<bool> {
+        let Some(ep) = &self.protection else {
+            return self.read_unprotected(packet);
+        };
+        let units = ep.decode_raw_access_units(packet)?;
+        let mut trial = self.clone();
+        for unit in units {
+            trial.read_unprotected(&unit)?;
+        }
+        let seen = trial.seen;
+        *self = trial;
+        Ok(seen)
+    }
+    fn read_unprotected(&mut self, packet: &[u8]) -> Result<bool> {
         let mut trial = self.clone();
         let mut bits = BitReader::new(packet);
         let mut core = false;

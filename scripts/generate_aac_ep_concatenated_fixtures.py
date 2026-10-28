@@ -27,7 +27,7 @@ def config(lengths,frames,family,kind,flagmode,escape=None):
         ep+=field(len(s['classes']),6)
         for k,c in enumerate(s['classes']):
             escaped=escape if k==0 else None
-            ep+=field(escaped=='length',1)+field(escaped=='rate',1)+field(escaped=='crc',1)+field(c['joined'],1)+field(c['fec'],2)
+            ep+=field(escaped=='length',1)+field(escaped=='rate',1)+field(escaped=='crc',1)+(field(c['joined'],1)if frames!=1 else '')+field(c['fec'],2)
             if c['fec']==0:ep+=field(c['terminated'],1)
             if kind==2:ep+=field(c['interleave'],2)
             ep+='0'+field(15 if escaped=='length'else c['length'],4 if escaped=='length'else 16)

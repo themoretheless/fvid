@@ -47,7 +47,7 @@ def build_asc(aot: int, slots: int, rate: int, signal: str) -> bytes:
     return packed(bits)
 
 
-def main():
+def main(frame_count=6, include_bits=False):
     v1024 = json.loads((DEST / 'aac-ps-matrix-controller-oracles.json').read_text())['videos'][0]
     v960 = json.loads((DEST / 'aac-sbr-ps-30-oracles.json').read_text())['videos'][0]
     payloads_by_slots = {
@@ -69,7 +69,7 @@ def main():
             ltp_oracle = Oracle(n) if aot == 19 else None
             ltp_mutant = Oracle(n) if aot == 19 else None
 
-            for frame in range(6):
+            for frame in range(frame_count):
                 q = [[1, -1, 1, -1, 0, 0, 0, 0] if frame % 2 else [-1, 1, -1, 1, 0, 0, 0, 0]]
                 if aot == 17:
                     info = ics(0, 2, False)
@@ -101,6 +101,8 @@ def main():
                     lag=lag,
                     coefficient=coefficient,
                 ))
+                if include_bits:
+                    rows[-1]['core_bits'] = core_bits
                 blob.extend(good_pkt)
                 bad_rows.append(dict(
                     offset=len(blob),
@@ -136,7 +138,7 @@ def main():
                         container_rate=rate,
                         container_frame_samples=frame_samples,
                         pcm_offset=0,
-                        samples=6 * frame_samples * 2,
+                        samples=frame_count * frame_samples * 2,
                     )
                     c['video'] = video_fixture(
                         [dict(c)],
