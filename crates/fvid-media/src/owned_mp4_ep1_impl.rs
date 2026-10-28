@@ -43,6 +43,22 @@ impl AccessUnit {
     }
 }
 impl Group {
+    pub fn dependent_track(track: &Track) -> bool {
+        if track.handler != *b"soun" || track.codec != *b"mp4a" {
+            return false;
+        }
+        aac_stream_descriptor(&track.configuration).is_ok_and(|d| {
+            d.depends_on.is_some()
+                && AudioSpecificConfig::parse(d.asc).is_ok_and(|p| p.separate_esc)
+        })
+    }
+    pub fn sample_at_source_time(&self, pts: i64) -> Result<usize> {
+        let root = &self.streams[0];
+        root.samples
+            .binary_search_by_key(&key(pts, root.timescale), |entry| entry.0)
+            .map(|i| root.samples[i].1)
+            .map_err(|_| invalid("EP1 MP4 root packet source time is absent"))
+    }
     /// Root audio candidates only, with the same enabled-track preference as
     /// ordinary MP4 selection. Dependent EP1 ESs are not alternative programs.
     pub fn automatic_audio_tracks<R: Read + Seek>(reader: &Mp4Reader<R>) -> Result<Vec<usize>> {

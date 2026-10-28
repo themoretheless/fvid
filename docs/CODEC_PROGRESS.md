@@ -1,3 +1,42 @@
+## Typed EP1 AudioStream playback and worker navigation, 2026-10-28
+
+`AudioStream::decode_source_packet` now provides a container-owned decoding
+hook. Its default preserves ordinary byte-packet dispatch; the MP4 override
+reads a complete typed ESC group by exact root source time and checks that the
+yielded root bytes/duration match the index. `AudioDecode::decode_esc_packet`
+defaults to an explicit refusal. AAC and PS adapters accept the typed group;
+AAC validates original source-clock agreement before assigning the reader's
+association stamp. The worker uses this hook without inventing serialized
+multi-stream payloads or changing EncodedPacket's byte layout.
+
+MP4 program lists exclude dependent EP1 ESs. Both ordinary and coarse-clock
+reader construction, probing and decoding preserve the same group. Native
+PS bridge source timing remains checkpointed and queued by original frame
+identity. Actual EP1 PS movie acceptance still needs a dedicated corpus.
+
+Eight existing real MP4 programs (ER-LC, ER-LD, mono/7.1 LD-SBR and repeated/
+silent edits) now pass complete AudioStream playback, EOF validation, forward/
+backward/repeated seeks, EOF seek and rewind using one decoder. The old bare-
+root byte path still refuses specifically; a changed root packet refuses before
+decoder mutation and the correct packet can immediately be retried. These
+controls do not masquerade as acceptance of bare EP1 byte framing.
+
+A worker acceptance test exercises the real decoding thread's synchronous
+queueing path with a capture backend. It compares complete queued PCM and exact
+rational packet clocks with uninterrupted owned export, including edits and
+seeks after live partial decoding, checkpoint-assisted preroll and rewind.
+Existing ordinary AAC/PS workers and all root/media unit tests pass.
+
+All 39 selected integration checks and 1,622 root/media unit tests pass offline
+(29 unit tests ignored). The 25 original EP1 assets / 437,631 bytes regenerate
+identically with process/socket creation forbidden. Ordinary tests only read
+saved synthetic assets and invoke no foreign codecs.
+
+**Still open:** physical output-device qualification, actual EP1 PS movies,
+changing dependent descriptions, empty ESC MP4 samples, external-clock/SL
+bindings, wider tool combinations and the overall codec-gap objective. Capture-
+backend queue acceptance is not a listening test or full codec coverage.
+
 ## EP1 group export through shared MP4 presentation scheduling, 2026-10-28
 
 The owned and native compatibility PCM exporters now read complete EP1 groups

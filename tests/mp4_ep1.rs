@@ -433,3 +433,126 @@ fn ep1_file_exports_preserve_group_pcm_edits_and_interval_gain() {
         }
     }
 }
+#[cfg(feature = "player")]
+fn play_stream(
+    reader: &mut dyn fvid::audio::AudioStream,
+    decoder: &mut Box<dyn fvid::audio::AudioDecode>,
+) -> Vec<u8> {
+    use fvid::audio::AudioStep;
+    let mut pcm = Vec::new();
+    while let Some(step) = reader.next_step().unwrap() {
+        match step {
+            AudioStep::ResetDecoder => reader.reset_decoder(decoder).unwrap(),
+            AudioStep::ReconfigureDecoder => panic!("unexpected changing EP1 setup"),
+            AudioStep::Pcm(packet) => pcm.extend(packet.data),
+            AudioStep::Encoded(packet) => {
+                let stamp = reader.decoder_stamp(&packet);
+                if let Some(frame) = reader
+                    .decode_source_packet(decoder.as_mut(), &packet, stamp)
+                    .unwrap()
+                {
+                    if let Some(p) = reader
+                        .present_decoded(frame.packet, frame.source_pts)
+                        .unwrap()
+                    {
+                        pcm.extend(p.data);
+                    }
+                }
+            }
+        }
+    }
+    if reader.drain_decoded_at_eof() {
+        while let Some(frame) = decoder.finish_packet().unwrap() {
+            if let Some(p) = reader
+                .present_decoded(frame.packet, frame.source_pts)
+                .unwrap()
+            {
+                pcm.extend(p.data);
+            }
+        }
+    }
+    reader.validate_eof().unwrap();
+    pcm
+}
+#[cfg(feature = "player")]
+#[test]
+fn grouped_ep1_audiostream_playback_rewind_and_seek_preserve_the_complete_pcm() {
+    use fvid::audio::AudioStream;
+    let m = manifest();
+    let cases = m["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| !c["name"].as_str().unwrap().ends_with("-signed"))
+        .chain(m["exports"].as_array().unwrap());
+    for case in cases {
+        let bytes = std::fs::read(root().join(case["video"].as_str().unwrap())).unwrap();
+        let mut reader =
+            fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(&bytes), Default::default())
+                .unwrap();
+        assert_eq!(
+            reader.audio_tracks().len(),
+            1,
+            "{} dependent ES listed as a program",
+            case["name"]
+        );
+        let mut decoder = reader.make_decoder().unwrap();
+        let first = reader.next_packet().unwrap().unwrap();
+        let error = match decoder.decode_packet(&first.data, first.pts, first.duration as u64) {
+            Ok(_) => panic!("bare root AU accepted as a complete EP1 group"),
+            Err(e) => e,
+        };
+        assert!(error.to_string().contains("separately associated ESC"));
+        reader.reset_decoder(&mut decoder).unwrap();
+        let mut altered = fvid::audio::EncodedPacket {
+            data: first.data.clone(),
+            pts: first.pts,
+            duration: first.duration,
+        };
+        altered.data[0] ^= 1;
+        let stamp = reader.decoder_stamp(&first);
+        let error = match reader.decode_source_packet(decoder.as_mut(), &altered, stamp) {
+            Ok(_) => panic!("mismatched root AU accepted"),
+            Err(e) => e,
+        };
+        assert!(error.to_string().contains("disagrees with indexed AU"));
+        assert!(
+            reader
+                .decode_source_packet(decoder.as_mut(), &first, stamp)
+                .unwrap()
+                .is_some()
+        );
+        reader.rewind();
+        reader.reset_decoder(&mut decoder).unwrap();
+        let full = play_stream(&mut reader, &mut decoder);
+        let mut expected = Vec::new();
+        fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+            Cursor::new(&bytes),
+            &mut expected,
+            None,
+            &Default::default(),
+        )
+        .unwrap();
+        assert_eq!(full, expected, "{} initial playback", case["name"]);
+        let width = case["channels"].as_u64().unwrap() as usize * 4;
+        for sample in [13, 0, 7, 7, (full.len() / width) as i64, 13, 0] {
+            let ticks = (i128::from(sample) * i128::from(reader.timescale())
+                / i128::from(reader.sample_rate())) as i64;
+            let landed = reader.seek_to(ticks);
+            reader.reset_decoder(&mut decoder).unwrap();
+            let actual = play_stream(&mut reader, &mut decoder);
+            let begin = (u128::try_from(landed).unwrap() * u128::from(reader.sample_rate()))
+                .div_ceil(u128::from(reader.timescale())) as usize
+                * width;
+            assert_eq!(
+                actual,
+                full[begin.min(full.len())..],
+                "{} seek {sample}",
+                case["name"]
+            );
+        }
+        reader.rewind();
+        reader.reset_decoder(&mut decoder).unwrap();
+        assert_eq!(play_stream(&mut reader, &mut decoder), full);
+    }
+}

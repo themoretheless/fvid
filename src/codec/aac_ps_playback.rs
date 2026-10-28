@@ -127,13 +127,13 @@ impl PsAacDecoder {
         pts: i64,
         duration: u64,
     ) -> crate::Result<Option<DecodedFrame>> {
-        if self.failed {
-            return Err(crate::invalid(
-                "PS AAC decoder requires reset after an error",
-            ));
-        }
+        self.decode_input(data,None,pts,duration)
+    }
+    fn decode_input(&mut self,data:&[u8],units:Option<&[crate::codec::aac_ep1::AccessUnit<'_>]>,pts:i64,duration:u64)->crate::Result<Option<DecodedFrame>> {
+        if self.failed {return Err(crate::invalid("PS AAC decoder requires reset after an error"));}
         let native = self.decoder.checkpoint();
-        let output = match self.decoder.decode(data) {
+        let result=if let Some(units)=units {self.decoder.decode_esc(units)}else{self.decoder.decode(data)};
+        let output = match result {
             Ok(output) => output,
             Err(e) => {
                 self.failed = true;
@@ -234,6 +234,9 @@ impl crate::audio::AudioDecode for PsAacDecoder {
                 source_duration: f.source_duration,
             })
         })
+    }
+    fn decode_esc_packet(&mut self,units:&[crate::codec::aac_ep1::AccessUnit<'_>],stamp:i64,duration:u64)->crate::Result<Option<crate::audio::DecodedAudio>> {
+        self.decode_input(&[],Some(units),stamp,duration).map(|out|out.map(|f|crate::audio::DecodedAudio {packet:f.packet,source_pts:f.source_pts,source_duration:f.source_duration}))
     }
     fn finish_packet(&mut self) -> crate::Result<Option<crate::audio::DecodedAudio>> {
         self.finish().map(|out| {

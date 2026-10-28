@@ -30,6 +30,7 @@ use clock_recovery::PlaybackClock;
 enum EditAction { Encoded, Step(crate::audio::AudioStep), End }
 /// MP4 audio track reader. Extracts encoded packets for decoding.
 pub struct Mp4AudioReader<R> {
+    ep1_group: Option<crate::container::mp4_ep1::Group>,
     navigation_error: Option<crate::Error>,
     clock: Option<PlaybackClock>,
     clock_mode: std::cell::Cell<bool>,
@@ -182,7 +183,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             .tracks()
             .iter()
             .enumerate()
-            .filter(|(_, t)| t.handler == *b"soun" && CODECS.contains(&t.codec))
+            .filter(|(_, t)| t.handler == *b"soun" && CODECS.contains(&t.codec) && !crate::container::mp4_ep1::Group::dependent_track(t))
             .map(|(index, _)| index)
             .collect()
     }
@@ -247,6 +248,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
     /// Open a specific audio track by index.
     pub fn from_demuxer(demuxer:Mp4Reader<R>,index:usize)->Result<Self>{Self::from_programme(demuxer,index,None)}
     fn from_programme(mut demuxer: Mp4Reader<R>, index: usize,programme:Option<u8>) -> Result<Self> {
+        let ep1_group=crate::container::mp4_ep1::Group::for_root(demuxer.tracks(),index)?;
         let clock=PlaybackClock::build(&mut demuxer,index,programme.unwrap_or(0))?;
         if clock.is_some() || demuxer.tracks().get(index).is_some_and(|t|t.ensure_constant_description().is_err()) {
             return Self::from_changing(demuxer,index,programme,clock);
@@ -290,7 +292,11 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 demuxer.read_packet(index, sample, &mut payload)?;
                 // A valid LC-only block has no SBR fill. It remains on normal
                 // AAC dispatch; subsequent extension runs can still be probed.
-                if let Err(error) = probe.read(&payload) {
+                let result=if let Some(group)=&ep1_group {
+                    let units=group.read_frame(&mut demuxer,sample)?;
+                    let input:Vec<_>=units.iter().map(|u|u.borrowed()).collect();probe.read_esc(&input)
+                }else{probe.read(&payload)};
+                if let Err(error) = result {
                     first_error.get_or_insert_with(|| error.to_string());
                     probe.reset();
                     continue;
@@ -320,6 +326,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         // packets. Always re-seek the selected first packet on real playback.
         demuxer.invalidate_position();
         Ok(Self {
+            ep1_group,
             navigation_error:None,
             clock:None,clock_mode:std::cell::Cell::new(false),clock_floor:std::cell::Cell::new(EditTime::ZERO),clock_anchor:std::cell::Cell::new(None),
             variable_edits: None, opening_sample_index: 0,
@@ -432,6 +439,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         &self.track().sample_descriptions[self.active_description]
     }
     fn from_changing(demuxer: Mp4Reader<R>, index: usize, programme: Option<u8>,clock:Option<PlaybackClock>) -> Result<Self> {
+        let ep1_group=crate::container::mp4_ep1::Group::for_root(demuxer.tracks(),index)?;
         let track = demuxer
             .tracks()
             .get(index)
@@ -470,6 +478,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         states.resize(track.sample_descriptions.len(), None);
         let tracks = demuxer.tracks().len();
         let mut source = Self {
+            ep1_group,
             navigation_error:None,
             clock,clock_mode:std::cell::Cell::new(false),clock_floor:std::cell::Cell::new(EditTime::ZERO),clock_anchor:std::cell::Cell::new(None),
             variable_edits, opening_sample_index: 0,
@@ -534,7 +543,11 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                         }
                         self.demuxer
                             .read_packet(self.track_index, i, &mut payload)?;
-                        if let Err(error) = probe.read(&payload) {
+                        let result=if let Some(group)=&self.ep1_group {
+                            let units=group.read_frame(&mut self.demuxer,i)?;
+                            let input:Vec<_>=units.iter().map(|u|u.borrowed()).collect();probe.read_esc(&input)
+                        }else{probe.read(&payload)};
+                        if let Err(error) = result {
                             first_error.get_or_insert_with(|| error.to_string());
                             probe.reset();
                             continue;
@@ -821,6 +834,15 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
 /// Packets are timestamped in the *track* timescale, which differs from the
 /// movie timescale in most files (sample rate versus a nominal 1000 Hz).
 impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
+    fn decode_source_packet(&mut self,decoder:&mut dyn crate::audio::AudioDecode,packet:&crate::audio::EncodedPacket,stamp:i64)->Result<Option<crate::audio::DecodedAudio>> {
+        let Some(group)=&self.ep1_group else {return decoder.decode_packet(&packet.data,stamp,packet.duration.max(0)as u64);};
+        let index=group.sample_at_source_time(packet.pts)?;
+        let units=group.read_frame(&mut self.demuxer,index)?;
+        let root=units.first().ok_or_else(||invalid("empty EP1 MP4 group"))?;
+        if root.data!=packet.data || root.duration!=packet.duration.max(0)as u64 {return Err(invalid("EP1 MP4 root packet disagrees with indexed AU"));}
+        let input:Vec<_>=units.iter().map(|u|u.borrowed()).collect();
+        decoder.decode_esc_packet(&input,stamp,packet.duration.max(0)as u64)
+    }
     fn decoder_stamp(&self,packet:&crate::audio::EncodedPacket)->i64 {
         if self.clock.is_some() {self.clock_mode.set(true);self.sample_index.saturating_sub(1) as i64}else{packet.pts}
     }

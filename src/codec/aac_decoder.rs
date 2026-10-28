@@ -118,6 +118,16 @@ impl crate::audio::AudioDecode for AacDecoder {
     ) -> crate::Result<Option<crate::audio::DecodedAudio>> {
         self.decode_source(data, pts, duration)
     }
+    fn decode_esc_packet(&mut self,units:&[crate::codec::aac_ep1::AccessUnit<'_>],stamp:i64,duration:u64)->crate::Result<Option<crate::audio::DecodedAudio>> {
+        if self.failed {return Err(crate::invalid("AAC decoder requires reset after an error"));}
+        crate::codec::aac_ep1::associate(units).map_err(|e|crate::invalid(&e.to_string()))?;
+        let input:Vec<_>=units.iter().map(|u|crate::codec::aac_ep1::AccessUnit {pts:stamp,duration,timescale:self.source_timescale,..*u}).collect();
+        if duration==0 {self.decoder.use_fixed_packet_clock();}
+        match self.decoder.decode_esc(&input) {
+            Ok(frame)=>Ok(frame.map(|f|self.frame(f))),
+            Err(e)=>{self.failed=true;Err(crate::invalid(&format!("AAC decode: {e}")))},
+        }
+    }
     fn finish_packet(&mut self) -> crate::Result<Option<crate::audio::DecodedAudio>> {
         if self.failed {
             return Err(crate::invalid("AAC decoder requires reset after an error"));

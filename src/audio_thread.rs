@@ -447,7 +447,7 @@ impl Worker {
                     }
                 }
 
-                return match self.decoder.decode_packet(&packet.data,stamp,packet.duration.max(0) as u64) {
+                return match self.stream.decode_source_packet(self.decoder.as_mut(),&packet,stamp) {
                     Ok(Some(frame)) => self.present_frame(frame),
                     Ok(None) => (None,Duration::ZERO),
                     Err(error) => {self.ended=true;(Some(AudioEvent::Error(error.to_string())),Duration::ZERO)},
@@ -1996,3 +1996,7 @@ mod sample_seek_clock_regressions {
         }
     }
 }
+
+#[cfg(test)]
+#[path="playback/audio/ep1_worker_tests.rs"]
+mod ep1_worker_tests;

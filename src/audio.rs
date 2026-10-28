@@ -698,6 +698,13 @@ pub trait AudioStream: Send {
         Ok(())
     }
 
+    /// Decode a yielded source packet. Containers with separately transported
+    /// elementary streams override this to supply a complete typed AU group.
+    #[cfg(feature="player")]
+    fn decode_source_packet(&mut self,decoder:&mut dyn AudioDecode,packet:&EncodedPacket,stamp:i64)->crate::Result<Option<DecodedAudio>> {
+        decoder.decode_packet(&packet.data,stamp,packet.duration.max(0) as u64)
+    }
+
     /// Commit a pending natural configuration boundary after draining old PCM.
     fn advance_configuration(&mut self) -> crate::Result<()> {
         Err(crate::invalid("audio source has no pending configuration change"))
@@ -829,6 +836,11 @@ pub trait AudioDecode: Send {
     /// window; delayed codecs must return the original window with their PCM.
     fn decode_packet(&mut self, data: &[u8], pts: i64, duration: u64) -> crate::Result<Option<DecodedAudio>> {
         self.decode_encoded(data, pts.max(0) as u64, duration).map(|out| out.map(|packet| DecodedAudio {packet,source_pts:pts,source_duration:duration}))
+    }
+    /// Decode a synchronized typed ESC group with the reader's association
+    /// stamp. Source clocks must be validated before assigning that stamp.
+    fn decode_esc_packet(&mut self,_units:&[crate::codec::aac_ep1::AccessUnit<'_>],_stamp:i64,_duration:u64)->crate::Result<Option<DecodedAudio>> {
+        Err(crate::unsupported("this audio decoder does not accept separate ESC access units"))
     }
     /// Drain delayed PCM before reporting EOF. Repeated calls must eventually
     /// return None; source timing belongs to the original encoded packet.
