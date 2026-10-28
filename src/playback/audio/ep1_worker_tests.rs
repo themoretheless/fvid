@@ -42,6 +42,7 @@ fn ep1_worker_queues_exact_pcm_after_partial_playback_seek_rewind_and_edits() {
     check_corpus("mp4-ep1-transitions");
     check_corpus("mp4-ep1-grouped-sbr");
     check_corpus("mp4-ep1-sbr-batches");
+    check_corpus("mp4-ep1-grouped-core");
 }
 fn check_corpus(corpus: &str) {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))

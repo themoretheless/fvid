@@ -5,18 +5,21 @@ from generate_mp4_ep1_epochs_fixtures import eld_control
 from generate_mp4_ep1_active_chain_fixtures import streams
 from generate_he_aac_packet_fixtures import box,boxes,packed
 OUT=SOURCE/'mp4-ep1-grouped-sbr'
-def grouped(source,groups,mode,mutation=None):
+def grouped(source,groups,mode,mutation=None,partitions=None):
     original=streams(source);core=len(original)-groups*2;assert core>0
-    partitions=[[i]for i in range(core)]
+    if partitions is None:
+        assert mode!='custom'
+        partitions=[[i]for i in range(core)]
     if mode=='batch':partitions.append(list(range(core,len(original))))
     elif mode=='bridge':
         partitions.append([core])
         partitions.extend([[i,i+1]for i in range(core+1,len(original)-1,2)])
         partitions.append([len(original)-1])
-    else:
+    elif mode!='custom':
         for i in range(groups):
             pair=[core+2*i,core+2*i+1]
             partitions.extend([pair]if mode=='all'or i==groups-1 else[[pair[0]],[pair[1]]])
+    assert [i for part in partitions for i in part]==list(range(len(original)))
     parts=list(boxes(source));prefix=b''.join(box(t,p)for t,p in parts[:-1]);payload=bytearray();tracks=[]
     for ordinal,indices in enumerate(partitions):
         raw=[];pads=[]

@@ -36,7 +36,10 @@ pub(crate) struct Reader {
     next: usize,
     current: [Option<usize>; 11],
     spans: Vec<Span>,
-    grouped_sbr: bool,
+    grouped_ep1: bool,
+    // EP1 category boundaries are bound only when their syntax is first read.
+    pending: [bool; 11],
+    last: Option<usize>,
 }
 impl Reader {
     fn new(frame: &RecoveredFrame) -> Result<Self> {
@@ -60,10 +63,17 @@ impl Reader {
             next: 0,
             current: [None; 11],
             spans: Vec::new(),
-            grouped_sbr: false,
+            grouped_ep1: false,
+            pending: [false; 11],
+            last: None,
         })
     }
     fn allocate(&mut self, category: usize) -> Result<()> {
+        if self.grouped_ep1 {
+            self.current[category] = None;
+            self.pending[category] = true;
+            return Ok(());
+        }
         if self.next == self.instances.len() {
             return Err(invalid("missing AAC ESC instance"));
         }
@@ -71,41 +81,43 @@ impl Reader {
         self.next += 1;
         Ok(())
     }
+    fn bind(&mut self, category: usize, empty_allowed: bool) -> Result<usize> {
+        if let Some(index) = self.current[category] {
+            return Ok(index);
+        }
+        if !self.pending[category] {
+            return Err(invalid("unassigned AAC ESC category"));
+        }
+        let continued = self
+            .last
+            .filter(|&i| self.instances[i].position < self.instances[i].bits);
+        let index = if let Some(index) = continued {
+            index
+        } else if self.next < self.instances.len() {
+            let index = self.next;
+            self.next += 1;
+            index
+        } else if empty_allowed {
+            self.last
+                .ok_or_else(|| invalid("missing AAC ESC instance"))?
+        } else {
+            return Err(invalid("missing AAC ESC instance"));
+        };
+        self.pending[category] = false;
+        self.current[category] = Some(index);
+        self.last = Some(index);
+        Ok(index)
+    }
     fn sbr(&mut self) -> Result<()> {
-        let continued = self.current[10].filter(|&index| {
-            self.grouped_sbr && self.instances[index].position < self.instances[index].bits
-        });
-        if let Some(index) = continued {
-            // The previous self-delimited data instance may be followed by the
-            // next element's prefix in the same EP1 AU. Never skip bits or infer
-            // this boundary from the number of transported streams.
-            self.current[9] = Some(index);
-        } else {
-            self.allocate(9)?;
-        }
-        if self.grouped_sbr {
-            self.current[10] = None;
-            Ok(())
-        } else {
-            self.allocate(10)
-        }
+        self.allocate(9)?;
+        self.allocate(10)
     }
     fn read_sbr<T>(
         &mut self,
         category: usize,
         f: impl FnOnce(&mut SbrBitReader<'_>) -> SbrResult<T>,
     ) -> Result<T> {
-        if self.grouped_sbr && category == 10 && self.current[10].is_none() {
-            let prefix = self.current[9].ok_or_else(|| invalid("unassigned LD-SBR ESC prefix"))?;
-            if self.instances[prefix].position < self.instances[prefix].bits {
-                // EP1 may put the adjacent prefix and data instances in one AU.
-                // The syntax parser has established the exact prefix boundary;
-                // remaining bits belong to data, never guessed byte padding.
-                self.current[10] = Some(prefix);
-            } else {
-                self.allocate(10)?;
-            }
-        }
+        self.bind(category, false)?;
         let index =
             self.current[category].ok_or_else(|| invalid("unassigned LD-SBR ESC category"))?;
         let source = &mut self.instances[index];
@@ -128,6 +140,7 @@ impl Reader {
     }
     pub(crate) fn channel(&mut self, rvlc: bool) -> Result<()> {
         self.current[1..].fill(None);
+        self.pending[1..].fill(false);
         self.allocate(1)?;
         if rvlc {
             self.allocate(2)?;
@@ -145,12 +158,36 @@ impl Reader {
         category: usize,
         f: impl FnOnce(&mut BitReader<'_>) -> Result<T>,
     ) -> Result<T> {
-        let index = self.current[category].ok_or_else(|| invalid("unassigned AAC ESC category"))?;
+        let previous = self.last;
+        let was_pending = self.pending[category];
+        let missing = was_pending
+            && self.next == self.instances.len()
+            && previous.is_some_and(|i| self.instances[i].position == self.instances[i].bits);
+        let index = self.bind(category, true)?;
         let source = &mut self.instances[index];
         let mut bits = BitReader::with_bit_len(&source.bytes, source.bits)?;
         bits.skip(source.position)?;
-        let output = f(&mut bits)?;
+        let output = f(&mut bits).map_err(|e| {
+            if missing {
+                invalid("missing AAC ESC instance")
+            } else {
+                e
+            }
+        })?;
         let end = bits.position();
+        // A grammar-proven empty category may be grouped at an AU boundary.
+        // Do not claim the next nonempty AU when no bit was read. Explicit
+        // empty AUs still retain their own transport boundary.
+        if self.grouped_ep1
+            && was_pending
+            && end == source.position
+            && source.bits != 0
+            && previous != Some(index)
+        {
+            self.next -= 1;
+            self.last = previous;
+            self.current[category] = previous;
+        }
         self.spans.push(Span {
             instance: index,
             start: source.position,
@@ -361,6 +398,19 @@ impl ChannelInput<'_, '_> {
             Self::Categories(reader) => reader.read(category, f),
         }
     }
+    pub(crate) fn grouped_tns_mark(&self) -> Option<usize> {
+        match self {
+            Self::Categories(reader) if reader.grouped_ep1 => Some(reader.spans.len()),
+            _ => None,
+        }
+    }
+    pub(crate) fn restore_tns_order(&mut self, mark: usize) {
+        if let Self::Categories(reader) = self {
+            // Category headers precede TNS in transport order, while the logical
+            // ELD packet puts TNS before those remaining header/RVLC fields.
+            reader.spans[mark..].rotate_right(1);
+        }
+    }
     pub(crate) fn payload(&mut self, tns: bool) -> Result<()> {
         match self {
             Self::Logical(_) => Ok(()),
@@ -467,7 +517,7 @@ pub fn reassemble_eld(
 ) -> Result<Vec<u8>> {
     reassemble_eld_transport(config, frame, sbr, false)
 }
-/// EP1 AUs can contain successive LD-SBR prefix/data instances across elements.
+/// EP1 AUs can contain successive ELD core and LD-SBR instances across elements.
 /// EP3 recovered classes retain their declared separate-instance boundaries
 /// through the ordinary entrypoint above.
 pub fn reassemble_eld_ep1(
@@ -481,7 +531,7 @@ fn reassemble_eld_transport(
     config: &AacConfig,
     frame: &RecoveredFrame,
     sbr: Option<&SbrDecoder>,
-    grouped_sbr: bool,
+    grouped_ep1: bool,
 ) -> Result<Vec<u8>> {
     if config.object_type != 39 {
         return Err(invalid("ELD ESC mapping requires AOT39"));
@@ -499,7 +549,7 @@ fn reassemble_eld_transport(
         _ => return Err(invalid("unsupported ELD ESC layout")),
     };
     let mut reader = Reader::new(frame)?;
-    reader.grouped_sbr = grouped_sbr;
+    reader.grouped_ep1 = grouped_ep1;
     for &kind in kinds {
         if kind == 1 {
             super::aac_pair::ChannelPair::read_eld_esc(&mut reader, config)?;

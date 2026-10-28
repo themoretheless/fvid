@@ -382,7 +382,12 @@ impl ChannelData {
         let tns_present = input.read(1, |b| b.bit())?;
         input.payload(tns_present)?;
         let er = matches!(config.object_type, 17 | 19 | 23);
-        let mut tns = if tns_present && !er {
+        let tns_mark = if tns_present && !er {
+            input.grouped_tns_mark()
+        } else {
+            None
+        };
+        let mut tns = if tns_present && !er && tns_mark.is_none() {
             Some(input.read(3, |b| {
                 tns_syntax::read_profile(b, info.sequence, config.object_type == 1)
             })?)
@@ -410,8 +415,11 @@ impl ChannelData {
         if let Some(header) = rvlc {
             scales = input.read(2, |b| header.decode(b, gain, &codebooks))?;
         }
-        if tns_present && er {
+        if tns_present && (er || tns_mark.is_some()) {
             tns = Some(input.read(3, |b| tns_syntax::read_profile(b, info.sequence, false))?);
+            if let Some(mark) = tns_mark {
+                input.restore_tns_order(mark);
+            }
         }
         let offsets = if info.sequence == WindowSequence::EightShort {
             tables.short

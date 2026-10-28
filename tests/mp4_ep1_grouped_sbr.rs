@@ -6,17 +6,23 @@ fn root() -> PathBuf {
 fn manifest() -> serde_json::Value {
     let mut base: serde_json::Value =
         serde_json::from_slice(&std::fs::read(root().join("manifest.json")).unwrap()).unwrap();
-    let mut batches: serde_json::Value = serde_json::from_slice(
-        &std::fs::read(root().join("../mp4-ep1-sbr-batches/manifest.json")).unwrap(),
-    )
-    .unwrap();
-    for c in batches["cases"].as_array_mut().unwrap() {
-        c["video"] = format!("../mp4-ep1-sbr-batches/{}", c["video"].as_str().unwrap()).into();
-        for bad in c["malformed"].as_array_mut().unwrap() {
-            bad["video"] =
-                format!("../mp4-ep1-sbr-batches/{}", bad["video"].as_str().unwrap()).into();
+    for corpus in ["mp4-ep1-sbr-batches", "mp4-ep1-grouped-core"] {
+        let mut extra: serde_json::Value = serde_json::from_slice(
+            &std::fs::read(root().join(format!("../{corpus}/manifest.json"))).unwrap(),
+        )
+        .unwrap();
+        for c in extra["cases"].as_array_mut().unwrap() {
+            for key in ["video", "control", "golden"] {
+                let path = c[key].as_str().unwrap();
+                if !path.starts_with("../") {
+                    c[key] = format!("../{corpus}/{path}").into();
+                }
+            }
+            for bad in c["malformed"].as_array_mut().unwrap() {
+                bad["video"] = format!("../{corpus}/{}", bad["video"].as_str().unwrap()).into();
+            }
+            base["cases"].as_array_mut().unwrap().push(c.clone());
         }
-        base["cases"].as_array_mut().unwrap().push(c.clone());
     }
     base
 }
@@ -27,7 +33,7 @@ fn grouped_ld_sbr_pairs_decode_to_independent_pcm() {
         owned_mp4::Mp4Reader, owned_mp4_ep1::Group,
     };
     let m = manifest();
-    assert_eq!(m["cases"].as_array().unwrap().len(), 176);
+    assert_eq!(m["cases"].as_array().unwrap().len(), 722);
     for c in m["cases"].as_array().unwrap() {
         let data = std::fs::read(root().join(c["video"].as_str().unwrap())).unwrap();
         let mut reader = Mp4Reader::open_indexed(Cursor::new(data), Default::default()).unwrap();
@@ -408,6 +414,20 @@ fn ep1_pair_reassembly_is_bit_exact_and_packetization_can_change_without_dsp_res
                         }
                     }
                 }
+                if let Some(declared) = c.get("partitions") {
+                    partitions = declared
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .map(|p| {
+                            p.as_array()
+                                .unwrap()
+                                .iter()
+                                .map(|i| i.as_u64().unwrap() as usize)
+                                .collect()
+                        })
+                        .collect();
+                }
                 assert_eq!(joined.payload.classes.len(), partitions.len());
                 for (actual, indices) in joined.payload.classes.iter().zip(partitions) {
                     let expected: Vec<_> = indices
@@ -459,7 +479,7 @@ fn ep1_pair_reassembly_is_bit_exact_and_packetization_can_change_without_dsp_res
 }
 
 #[test]
-fn every_consecutive_sbr_partition_preserves_complete_native_history() {
+fn consecutive_core_and_sbr_partitions_preserve_complete_native_history() {
     use fvid_media::{
         owned_aac::{NativeAacDecoder, aac_ep1},
         owned_codec_config::aac_stream_descriptor,
@@ -467,15 +487,22 @@ fn every_consecutive_sbr_partition_preserves_complete_native_history() {
         owned_mp4_ep1::Group,
     };
     let mut layouts = 0;
-    // Each batch case uniquely identifies a multichannel control. All possible
-    // category-boundary masks include separate, paired, cross-element and whole
-    // SBR-region AUs; no production parser is used to decide the partition.
-    for c in manifest()["cases"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .filter(|c| c["mode"] == "batch")
-    {
+    // Batch cases identify the multichannel SBR controls; selected whole cases
+    // add combined core tools and empty categories. All boundary masks include
+    // separate, paired and whole-region AUs, without parser-derived partitions.
+    for c in manifest()["cases"].as_array().unwrap().iter().filter(|c| {
+        c["mode"] == "batch"
+            || c["mode"] == "whole" && {
+                let name = c["name"].as_str().unwrap();
+                name.contains("tns-resilience")
+                    || name.contains("empty-core")
+                    || matches!(
+                        name,
+                        "n480-r24000-c2-resilience-f7-x2-crc1-whole"
+                            | "n512-r24000-c2-resilience-f7-x2-crc1-whole"
+                    )
+            }
+    }) {
         let bytes = std::fs::read(root().join(c["control"].as_str().unwrap())).unwrap();
         let mut reader = Mp4Reader::open_indexed(Cursor::new(bytes), Default::default()).unwrap();
         let selected = Group::automatic_audio_tracks(&reader).unwrap()[0];
@@ -493,8 +520,12 @@ fn every_consecutive_sbr_partition_preserves_complete_native_history() {
             expected.push(baseline.decode_esc(&borrowed).unwrap());
             frames.push(aac_ep1::associate(&borrowed).unwrap());
         }
-        let sbr_count = c["groups"].as_u64().unwrap() as usize * 2;
-        let core_count = frames[0].payload.classes.len() - sbr_count;
+        let core_count = if c["mode"] == "whole" {
+            0
+        } else {
+            frames[0].payload.classes.len() - c["groups"].as_u64().unwrap() as usize * 2
+        };
+        let sbr_count = frames[0].payload.classes.len() - core_count;
         for mask in 0..1usize << (sbr_count - 1) {
             layouts += 1;
             let mut decoder = NativeAacDecoder::new(&asc).unwrap();
@@ -544,5 +575,5 @@ fn every_consecutive_sbr_partition_preserves_complete_native_history() {
             }
         }
     }
-    assert_eq!(layouts, 1856);
+    assert_eq!(layouts, 2512);
 }
