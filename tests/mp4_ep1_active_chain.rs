@@ -242,10 +242,12 @@ fn normalized_active_chain_exports_match_destination_controls_and_cross_epoch_ra
         }
     }
     for c in manifest()["cases"].as_array().unwrap() {
+        let case_dir = dir.join(c["name"].as_str().unwrap());
+        std::fs::create_dir(&case_dir).unwrap();
         for destination in [1u16, 2] {
             let mut controls = Vec::new();
             for (i, control) in c["controls"].as_array().unwrap().iter().enumerate() {
-                let output = dir.join(format!("control-{i}-{destination}.wav"));
+                let output = case_dir.join(format!("control-{i}-{destination}.wav"));
                 fvid_media::decode_audio_transformed(
                     &root().join(control.as_str().unwrap()),
                     &output,
@@ -270,7 +272,7 @@ fn normalized_active_chain_exports_match_destination_controls_and_cross_epoch_ra
             for key in ["video", "equivalent"] {
                 let source = root().join(c[key].as_str().unwrap());
                 let data = std::fs::read(&source).unwrap();
-                let full_path = dir.join(format!("{key}-{destination}-full.wav"));
+                let full_path = case_dir.join(format!("{key}-{destination}-full.wav"));
                 fvid_media::decode_audio_transformed(
                     &source,
                     &full_path,
@@ -329,7 +331,7 @@ fn normalized_active_chain_exports_match_destination_controls_and_cross_epoch_ra
                         assert_eq!((stats.sample_rate, stats.channels), (48000, 1));
                         assert!(output == wanted, "exact interval/default PCM differs");
                     }
-                    let output = dir.join(format!("{key}-{destination}-{crop}.wav"));
+                    let output = case_dir.join(format!("{key}-{destination}-{crop}.wav"));
                     fvid_media::decode_audio_transformed(
                         &source,
                         &output,
@@ -353,4 +355,148 @@ fn normalized_active_chain_exports_match_destination_controls_and_cross_epoch_ra
             }
         }
     }
+}
+
+#[test]
+fn fragmented_active_chain_preserves_storage_bits_clocks_and_effective_descriptions() {
+    use fvid_media::{owned_mp4::Mp4Reader, owned_mp4_ep1::Group};
+    fn children(mut data: &[u8]) -> Vec<([u8; 4], &[u8])> {
+        let mut result = Vec::new();
+        while !data.is_empty() {
+            assert!(data.len() >= 8);
+            let size = u32::from_be_bytes(data[..4].try_into().unwrap()) as usize;
+            assert!(size >= 8 && size <= data.len());
+            result.push((data[4..8].try_into().unwrap(), &data[8..size]));
+            data = &data[size..];
+        }
+        result
+    }
+    let m = manifest();
+    let (mut partial, mut excluded_nonzero) = (false, false);
+    assert_eq!(m["cases"].as_array().unwrap().len(), 3);
+    let baseline = &m["cases"][0];
+    for c in m["cases"].as_array().unwrap().iter().skip(1) {
+        for key in ["video", "equivalent"] {
+            let data = std::fs::read(root().join(c[key].as_str().unwrap())).unwrap();
+            let original = std::fs::read(root().join(baseline[key].as_str().unwrap())).unwrap();
+            let top = children(&data);
+            let counts: Vec<_> = top
+                .iter()
+                .filter(|(tag, _)| tag == b"moof")
+                .map(|(_, p)| children(p).iter().filter(|(tag, _)| tag == b"traf").count())
+                .collect();
+            assert_eq!(
+                counts,
+                if c["mode"] == "hybrid" {
+                    vec![27, 4]
+                } else {
+                    vec![4, 27, 4]
+                }
+            );
+            let mut moov_end = 0u64;
+            for (tag, payload) in &top {
+                moov_end += payload.len() as u64 + 8;
+                if tag == b"moov" {
+                    break;
+                }
+            }
+            let moov = top.iter().find(|(t, _)| t == b"moov").unwrap().1;
+            for (_, trak) in children(moov).into_iter().filter(|(t, _)| t == b"trak") {
+                let boxes = children(trak);
+                let tkhd = boxes.iter().find(|(t, _)| t == b"tkhd").unwrap().1;
+                let id = u32::from_be_bytes(tkhd[12..16].try_into().unwrap());
+                let mdia = children(boxes.iter().find(|(t, _)| t == b"mdia").unwrap().1);
+                if mdia.iter().find(|(t, _)| t == b"hdlr").unwrap().1[8..12] != *b"soun" {
+                    continue;
+                }
+                let minf = children(mdia.iter().find(|(t, _)| t == b"minf").unwrap().1);
+                let stbl = children(minf.iter().find(|(t, _)| t == b"stbl").unwrap().1);
+                let stsz = stbl.iter().find(|(t, _)| t == b"stsz").unwrap().1;
+                assert_eq!(
+                    u32::from_be_bytes(stsz[8..12].try_into().unwrap()),
+                    if c["mode"] == "hybrid" && id <= 5 {
+                        6
+                    } else {
+                        0
+                    }
+                );
+            }
+            let mut reader =
+                Mp4Reader::open_indexed(Cursor::new(data), Default::default()).unwrap();
+            let mut reference =
+                Mp4Reader::open_indexed(Cursor::new(original), Default::default()).unwrap();
+            let mut a = Vec::new();
+            let mut b = Vec::new();
+            for index in 0..reader.tracks().len() {
+                if reader.tracks()[index].handler != *b"soun" {
+                    continue;
+                }
+                let id = reader.tracks()[index].id;
+                let other = reference.tracks().iter().position(|t| t.id == id).unwrap();
+                assert_eq!(
+                    reader.tracks()[index].sample_descriptions,
+                    reference.tracks()[other].sample_descriptions
+                );
+                let count = reader.tracks()[index].samples.len();
+                assert_eq!(count, reference.tracks()[other].samples.len());
+                for sample in 0..count {
+                    let x = reader.tracks()[index].samples.get(sample).unwrap();
+                    let y = reference.tracks()[other].samples.get(sample).unwrap();
+                    let indexed = c["mode"] == "hybrid" && id <= 5 && sample < 6;
+                    assert_eq!(
+                        x.offset < moov_end,
+                        indexed,
+                        "audio packet must reference its declared storage"
+                    );
+                    assert_eq!(
+                        (x.dts, x.pts, x.duration, x.size, x.description_index),
+                        (y.dts, y.pts, y.duration, y.size, y.description_index)
+                    );
+                    let bits = reader.packet_bit_len(index, sample).unwrap();
+                    assert_eq!(bits, reference.packet_bit_len(other, sample).unwrap());
+                    reader.read_packet(index, sample, &mut a).unwrap();
+                    reference.read_packet(other, sample, &mut b).unwrap();
+                    assert!(a == b, "stored ESC payload differs");
+                    if bits % 8 != 0 {
+                        partial = true;
+                        excluded_nonzero |= a.last().unwrap() & ((1u8 << (8 - bits % 8)) - 1) != 0;
+                    }
+                }
+            }
+            let selected = Group::automatic_audio_tracks(&reader).unwrap()[0];
+            let other = Group::automatic_audio_tracks(&reference).unwrap()[0];
+            let group = Group::new(reader.tracks(), selected).unwrap();
+            let expected = Group::new(reference.tracks(), other).unwrap();
+            for sample in 0..18 {
+                let actual = group.read_frame(&mut reader, sample).unwrap();
+                let baseline = expected.read_frame(&mut reference, sample).unwrap();
+                assert_eq!(actual.len(), baseline.len());
+                for (a, b) in actual.iter().zip(&baseline) {
+                    assert_eq!(
+                        (
+                            a.stream_id,
+                            a.depends_on,
+                            a.bit_len,
+                            a.pts,
+                            a.duration,
+                            a.timescale
+                        ),
+                        (
+                            b.stream_id,
+                            b.depends_on,
+                            b.bit_len,
+                            b.pts,
+                            b.duration,
+                            b.timescale
+                        )
+                    );
+                    assert!(a.data == b.data);
+                }
+            }
+        }
+    }
+    assert!(
+        partial && excluded_nonzero,
+        "padding witness must exercise non-byte AUs with nonzero excluded bits"
+    );
 }

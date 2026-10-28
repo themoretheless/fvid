@@ -231,7 +231,19 @@ fn active_esc_chain_worker_reconfigures_native_layout_and_seeks_between_all_epoc
         .iter()
         .map(|n| std::fs::read(root.join(n)).unwrap())
         .collect();
-    for name in ["mono-eight-mono.mp4", "unused-tail-config.mp4"] {
+    let manifest: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(root.join("manifest.json")).unwrap()).unwrap();
+    let names: Vec<_> = manifest["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .flat_map(|c| {
+            ["video", "equivalent"]
+                .into_iter()
+                .map(move |key| c[key].as_str().unwrap())
+        })
+        .collect();
+    for name in names {
         let data = std::fs::read(root.join(name)).unwrap();
         let stream = crate::playback_mp4_audio::Mp4AudioReader::open(
             std::io::Cursor::new(data),

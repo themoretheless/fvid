@@ -1,3 +1,53 @@
+## Fragmented and hybrid LD-SBR active-prefix qualification, 2026-10-28
+
+The active-chain corpus now covers indexed, fully fragmented and hybrid
+index-plus-fragments storage. Each form includes a 4/27/4 mono/8-channel/mono
+programme and an equivalent unused-tail-description variant, plus missing-active
+and internal-gap refusal controls. The existing decoder and fragment parser
+accepted these complete sparse-track files; no production decoder change was
+needed for this storage extension.
+
+The new fragment authoring keeps only four trafs in mono epochs and 27 in the
+middle epoch. A hybrid retains the first six samples in each prefix track's
+index; the other 23 initial indexes are empty and receive their six AUs from the
+middle fragment. Explicit tfhd description/duration fields override deliberately
+different trex defaults. Version-1 tfdt and per-row trun composition offsets
+preserve indexed DTS as well as PTS, including the delayed start of tail tracks.
+Exact padding flags preserve non-byte ESCs and their nonzero excluded low bits.
+
+A structural acceptance test verifies actual moof/traf counts, empty/initial stsz
+counts, and that each packet references its declared old-index or post-moov
+fragment storage. All audio sample DTS/PTS, duration, size, effective description,
+bit length and stored bytes compare exactly to indexed controls. All eighteen
+active groups retain identical stream IDs, dependencies, bits and rational source
+clocks. Missing required final AUs and internal activity gaps keep their specific
+refusals after valid initial mono groups in every storage form.
+
+All six programmes pass independent native PCM checks, complete AudioStream
+playback and native 1/8/1 geometry/routing, frame-edge/repeated/EOF/past-EOF seek
+and rewind. Worker capture now reads the manifest rather than a hardcoded indexed
+pair, covering 190 programmes in total. It retains exact packet-clock assertions
+and independent native PCM checks after partial playback and navigation.
+Default mono and explicit stereo exports, exact repeated/cross-boundary crops,
+owned/public agreement and unused-description equivalence pass in all forms.
+Static f32 fold versus changing-geometry f64-matrix comparisons retain the prior
+1e-9 numerical bound; same-path byte equality and native reference bounds are
+unchanged. Per-case temporary export directories preserve overwrite refusal
+while allowing the expanded matrix to run in one test.
+
+All 17 active-chain artifacts / 539260 bytes regenerate byte-exact with process/
+socket creation forbidden and an exact directory inventory. The prior indexed
+media/control payloads and five other EP1 corpora remain unchanged. Ordinary
+tests read checked-in own synthetic files only, without FFmpeg/network. The 57
+selected integration checks, 1623 root/media unit tests (29 ignored), and all-test
+compilation pass offline with --no-default-features --features player.
+
+This qualifies complete-file fragmented/hybrid active-prefix layout changes;
+it does not establish partial live-fragment opening or physical device output.
+Grouped successive ESC instances inside an AU, same-ASC repartitioning, arbitrary
+OD/stream-map parent updates and broader codec conformance remain open. The
+codec-gap goal remains active.
+
 ## Active ESC chain width across LD-SBR layout epochs, 2026-10-28
 
 The new short own mono/8-channel/mono movie first reproduced `EP1 MP4 missing

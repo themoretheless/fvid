@@ -65,13 +65,76 @@ def movie(controls,missing=False,unused=False,gap_entry=None):
         if tag==b'mvhd':body=body[:12]+word(movie_scale,6*(480+512+480))+body[20:-4]+word(len(big)+2)
         moov.append(box(tag,body))
     return prefix+box(b'mdat',payload)+box(b'moov',b''.join(moov+tracks))
+def fragmented(source,hybrid=False):
+    parts=list(boxes(source));assert parts[-1][0]==b'moov'
+    prefix=b''.join(box(t,p)for t,p in parts[:-1]);moov=[];defaults=[];tracks=[]
+    def runs(p):
+        return [int.from_bytes(p[12+8*i:16+8*i],'big')for i in range(int.from_bytes(p[4:8],'big'))for _ in range(int.from_bytes(p[8+8*i:12+8*i],'big'))]
+    for tag,body in boxes(parts[-1][1]):
+        if tag!=b'trak':moov.append(box(tag,body));continue
+        children=dict(boxes(body));md=dict(boxes(children[b'mdia']))
+        if md[b'hdlr'][8:12]!=b'soun':moov.append(box(tag,body));continue
+        tables=dict(boxes(dict(boxes(md[b'minf']))[b'stbl']));ident=int.from_bytes(children[b'tkhd'][12:16],'big');count=int.from_bytes(tables[b'stsz'][8:12],'big')
+        sizes=[int.from_bytes(tables[b'stsz'][12+4*i:16+4*i],'big')for i in range(count)];pads=[tables[b'padb'][8+i//2]>>(4 if i%2==0 else 0)&7 for i in range(count)]
+        duration=runs(tables[b'stts']);composition=runs(tables[b'ctts']);assert len(duration)==len(composition)==count
+        chunks=int.from_bytes(tables[b'stco'][4:8],'big');assert chunks in [1,3]and int.from_bytes(tables[b'stsc'][4:8],'big')==chunks
+        rows={};cursor=0;dts=0
+        for i in range(chunks):
+            row=tables[b'stsc'][8+12*i:20+12*i];assert int.from_bytes(row[:4],'big')==i+1
+            qty=int.from_bytes(row[4:8],'big');desc=int.from_bytes(row[8:12],'big');offset=int.from_bytes(tables[b'stco'][8+4*i:12+4*i],'big');raw=[]
+            for size in sizes[cursor:cursor+qty]:raw.append(source[offset:offset+size]);offset+=size
+            step=duration[cursor];cts=composition[cursor];assert all(v==step for v in duration[cursor:cursor+qty])and all(v==cts for v in composition[cursor:cursor+qty])
+            epoch=i if chunks==3 else 1
+            rows[epoch]=dict(raw=raw,pads=pads[cursor:cursor+qty],description=desc,step=step,cts=cts,dts=dts)
+            cursor+=qty;dts+=qty*step
+        assert cursor==count;tracks.append(dict(id=ident,rows=rows))
+        descriptions=int.from_bytes(tables[b'stsd'][4:8],'big');defaults.append(box(b'trex',word(0,ident,descriptions,7,7,0)))
+        initial=rows.get(0)if hybrid else None
+        def rewrite(t,p):
+            if t in [b'mdia',b'minf',b'stbl']:p=b''.join(rewrite(k,v)for k,v in boxes(p))
+            elif t in [b'stsz',b'stts',b'stsc',b'stco',b'ctts',b'padb']:
+                if initial is None:p=word(0,0,0)if t==b'stsz'else word(0,0)
+                else:
+                    qty=len(initial['raw'])
+                    if t==b'stsz':p=word(0,0,qty)+word(*(len(v)for v in initial['raw']))
+                    elif t==b'stts':p=word(0,1,qty,initial['step'])
+                    elif t==b'stsc':p=word(0,1,1,qty,initial['description'])
+                    elif t==b'stco':p=word(0,1)+p[8:12]
+                    elif t==b'ctts':p=word(0,1,qty,initial['cts'])
+                    elif t==b'padb':p=word(0,qty)+bytes((initial['pads'][i]<<4)|(initial['pads'][i+1]if i+1<qty else 0)for i in range(0,qty,2))
+            elif t==b'mdhd':p=p[:16]+word(len(initial['raw'])*initial['step']if initial else 0)+p[20:]
+            return box(t,p)
+        moov.append(box(tag,b''.join(rewrite(t,p)for t,p in boxes(body))))
+    result=prefix+box(b'moov',b''.join(moov)+box(b'mvex',b''.join(defaults)))
+    for epoch in range(1 if hybrid else 0,3):
+        active=[(t['id'],t['rows'][epoch])for t in tracks if epoch in t['rows']]
+        assert len(active)==[4,27,4][epoch]
+        def moof(base):
+            offset=base;traf=[]
+            for ident,row in active:
+                tfhd=box(b'tfhd',word(0x02000a,ident,row['description'],row['step']))
+                tfdt=box(b'tfdt',word(0x01000000,row['dts']>>32,row['dts']&0xffffffff))
+                entries=b''.join(word(len(raw),pad<<17,row['cts'])for raw,pad in zip(row['raw'],row['pads']))
+                trun=box(b'trun',word(0xe01,len(row['raw']),offset)+entries);traf.append(box(b'traf',tfhd+tfdt+trun));offset+=sum(map(len,row['raw']))
+            return box(b'moof',box(b'mfhd',word(0,epoch+1))+b''.join(traf))
+        probe=moof(0);payload=b''.join(raw for _,row in active for raw in row['raw'])
+        result+=moof(len(probe)+8)+box(b'mdat',payload)
+    return result
+
 def generate():
     controls=[eld_control(480,1),eld_control(512,7)];files={}
     for i,(data,gold,_,_)in enumerate(controls):files[f'control-{i}.mp4']=data;files[f'control-{i}.f32le']=gold
     files['mono-eight-mono.mp4']=movie([c[0]for c in controls]);files['missing-active-tail.mp4']=movie([c[0]for c in controls],True)
     files['unused-tail-config.mp4']=movie([c[0]for c in controls],unused=True)
     extra=eld_control(512,1)[0];files['active-gap.mp4']=movie([c[0]for c in controls],gap_entry=streams(extra)[0]['entry'])
-    files['manifest.json']=(json.dumps(dict(cases=[dict(name='ld-sbr-mono-eight-mono',video='mono-eight-mono.mp4',equivalent='unused-tail-config.mp4',gap='active-gap.mp4',malformed='missing-active-tail.mp4',controls=['control-0.mp4','control-1.mp4'],golden=['control-0.f32le','control-1.f32le'],active=[4,27,4],channels=[1,8,1],frames=[5760,6144,5760],edges=[5760,11904])],provenance='Own LD-SBR mono/8-channel/mono epochs; static canonical dpnd union, four-stream active prefix then 27 streams then four. Tail tracks only have middle-epoch AUs. Independent scalar native PCM, exact bits and rational per-track clocks. No private media, external codec, process or network.'),indent=2)+'\n').encode();return files
+    base=dict(name='ld-sbr-mono-eight-mono',video='mono-eight-mono.mp4',equivalent='unused-tail-config.mp4',gap='active-gap.mp4',malformed='missing-active-tail.mp4',controls=['control-0.mp4','control-1.mp4'],golden=['control-0.f32le','control-1.f32le'],active=[4,27,4],channels=[1,8,1],frames=[5760,6144,5760],edges=[5760,11904],mode='indexed')
+    cases=[base]
+    for mode in ['fragmented','hybrid']:
+        case=dict(base,name=base['name']+'-'+mode,mode=mode)
+        for key in ['video','equivalent','gap','malformed']:
+            filename=base[key][:-4]+'-'+mode+'.mp4';files[filename]=fragmented(files[base[key]],mode=='hybrid');case[key]=filename
+        cases.append(case)
+    files['manifest.json']=(json.dumps(dict(cases=cases,provenance='Own LD-SBR mono/8-channel/mono epochs; static canonical dpnd union, four-stream active prefix then 27 streams then four. Tail tracks only have middle-epoch AUs. Indexed, fragmented and hybrid storage with explicit descriptions, DTS/CTS, exact padding and inactive-traf omission. Independent scalar native PCM and rational per-track clocks. No private media, external codec, process or network.'),indent=2)+'\n').encode();return files
 if __name__=='__main__':
     OUT.mkdir(exist_ok=True)
     for name,data in generate().items():(OUT/name).write_bytes(data)

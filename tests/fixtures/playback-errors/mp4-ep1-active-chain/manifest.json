@@ -32,8 +32,79 @@
       "edges": [
         5760,
         11904
-      ]
+      ],
+      "mode": "indexed"
+    },
+    {
+      "name": "ld-sbr-mono-eight-mono-fragmented",
+      "video": "mono-eight-mono-fragmented.mp4",
+      "equivalent": "unused-tail-config-fragmented.mp4",
+      "gap": "active-gap-fragmented.mp4",
+      "malformed": "missing-active-tail-fragmented.mp4",
+      "controls": [
+        "control-0.mp4",
+        "control-1.mp4"
+      ],
+      "golden": [
+        "control-0.f32le",
+        "control-1.f32le"
+      ],
+      "active": [
+        4,
+        27,
+        4
+      ],
+      "channels": [
+        1,
+        8,
+        1
+      ],
+      "frames": [
+        5760,
+        6144,
+        5760
+      ],
+      "edges": [
+        5760,
+        11904
+      ],
+      "mode": "fragmented"
+    },
+    {
+      "name": "ld-sbr-mono-eight-mono-hybrid",
+      "video": "mono-eight-mono-hybrid.mp4",
+      "equivalent": "unused-tail-config-hybrid.mp4",
+      "gap": "active-gap-hybrid.mp4",
+      "malformed": "missing-active-tail-hybrid.mp4",
+      "controls": [
+        "control-0.mp4",
+        "control-1.mp4"
+      ],
+      "golden": [
+        "control-0.f32le",
+        "control-1.f32le"
+      ],
+      "active": [
+        4,
+        27,
+        4
+      ],
+      "channels": [
+        1,
+        8,
+        1
+      ],
+      "frames": [
+        5760,
+        6144,
+        5760
+      ],
+      "edges": [
+        5760,
+        11904
+      ],
+      "mode": "hybrid"
     }
   ],
-  "provenance": "Own LD-SBR mono/8-channel/mono epochs; static canonical dpnd union, four-stream active prefix then 27 streams then four. Tail tracks only have middle-epoch AUs. Independent scalar native PCM, exact bits and rational per-track clocks. No private media, external codec, process or network."
+  "provenance": "Own LD-SBR mono/8-channel/mono epochs; static canonical dpnd union, four-stream active prefix then 27 streams then four. Tail tracks only have middle-epoch AUs. Indexed, fragmented and hybrid storage with explicit descriptions, DTS/CTS, exact padding and inactive-traf omission. Independent scalar native PCM and rational per-track clocks. No private media, external codec, process or network."
 }
