@@ -1,0 +1,71 @@
+{
+  "cases": [
+    {
+      "name": "ps-aot17-960-1024-960",
+      "video": "ps-aot17-960-1024-960.mp4",
+      "malformed": "ps-aot17-960-1024-960-mismatch.mp4",
+      "controls": [
+        "sbr-ps-aot17-960-48000-explicit-indexed.mp4",
+        "sbr-ps-aot17-1024-48000-explicit-indexed.mp4"
+      ],
+      "frames": 18,
+      "streams": 4,
+      "channels": 2,
+      "edges": [
+        11520,
+        23808
+      ]
+    },
+    {
+      "name": "ps-aot19-960-1024-960",
+      "video": "ps-aot19-960-1024-960.mp4",
+      "malformed": "ps-aot19-960-1024-960-mismatch.mp4",
+      "controls": [
+        "sbr-ps-aot19-960-48000-explicit-indexed.mp4",
+        "sbr-ps-aot19-1024-48000-explicit-indexed.mp4"
+      ],
+      "frames": 18,
+      "streams": 4,
+      "channels": 2,
+      "edges": [
+        11520,
+        23808
+      ]
+    },
+    {
+      "name": "ld-sbr-c1-480-512-480",
+      "video": "ld-sbr-c1-480-512-480.mp4",
+      "malformed": "ld-sbr-c1-480-512-480-mismatch.mp4",
+      "controls": [
+        "ld-sbr-c1-480-512-480-control-0.mp4",
+        "ld-sbr-c1-480-512-480-control-1.mp4"
+      ],
+      "local_controls": true,
+      "frames": 18,
+      "streams": 4,
+      "channels": 1,
+      "edges": [
+        5760,
+        11904
+      ]
+    },
+    {
+      "name": "ld-sbr-c7-480-512-480",
+      "video": "ld-sbr-c7-480-512-480.mp4",
+      "malformed": "ld-sbr-c7-480-512-480-mismatch.mp4",
+      "controls": [
+        "ld-sbr-c7-480-512-480-control-0.mp4",
+        "ld-sbr-c7-480-512-480-control-1.mp4"
+      ],
+      "local_controls": true,
+      "frames": 18,
+      "streams": 27,
+      "channels": 8,
+      "edges": [
+        5760,
+        11904
+      ]
+    }
+  ],
+  "provenance": "Own six-AU EP1 PS and LD-SBR controls spliced into 960/1024/960 and 480/512/480 sample-description epochs with canonical dpnd, exact padding and rational clocks. Controls reset each epoch; mismatch changes a dependent ASC only. No private media or foreign codec."
+}

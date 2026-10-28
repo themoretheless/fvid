@@ -14,6 +14,7 @@ struct Stream {
     parent: Option<u16>,
     timescale: u32,
     configuration: Vec<u8>,
+    descriptions: Vec<([u8; 4], Vec<u8>)>,
     samples: Vec<((i64, u32), usize)>,
 }
 pub struct Group {
@@ -49,7 +50,10 @@ struct Binding {
     file: bool,
 }
 fn binding(track: &Track) -> Result<Binding> {
-    let d = aac_stream_descriptor(&track.configuration)?;
+    binding_config(track, &track.configuration)
+}
+fn binding_config(track: &Track, configuration: &[u8]) -> Result<Binding> {
+    let d = aac_stream_descriptor(configuration)?;
     let canonical = d.es_id == 0 && d.depends_on.is_none() && d.ocr_es_id.is_none();
     if canonical || !track.dependencies.is_empty() {
         if !canonical {
@@ -215,6 +219,18 @@ impl Group {
                 .checked_mul(std::mem::size_of::<((i64, u32), usize)>())
                 .ok_or_else(|| invalid("EP1 MP4 memory estimate overflow"))?)?;
             add(track.configuration.len())?;
+            add(track
+                .sample_descriptions
+                .len()
+                .checked_mul(std::mem::size_of::<([u8; 4], Vec<u8>)>())
+                .ok_or_else(|| invalid("EP1 MP4 memory estimate overflow"))?)?;
+            for description in &track.sample_descriptions {
+                add(description
+                    .configuration
+                    .len()
+                    .checked_mul(2)
+                    .ok_or_else(|| invalid("EP1 MP4 memory estimate overflow"))?)?;
+            }
             add(4 * std::mem::size_of::<Stream>())?;
             // Owned inputs, borrowed views, recovered class tables and allocation
             // growth coexist. The existing decoder admission covers DSP/checkpoints.
@@ -252,9 +268,6 @@ impl Group {
         let mut at = root;
         loop {
             let track = &tracks[at];
-            track
-                .ensure_constant_description()
-                .map_err(|e| invalid(&e.to_string()))?;
             let d = aac_stream_descriptor(&track.configuration)?;
             let current = binding(track)?;
             if current.file != root_binding.file {
@@ -277,15 +290,44 @@ impl Group {
             if streams.iter().any(|s: &Stream| s.es_id == current.id) {
                 return Err(invalid("EP1 MP4 repeated or cyclic ES ID"));
             }
+            let mut descriptions = Vec::new();
+            descriptions
+                .try_reserve_exact(track.sample_descriptions.len())
+                .map_err(|_| invalid("EP1 MP4 description allocation failed"))?;
+            for description in &track.sample_descriptions {
+                descriptions.push((description.codec, description.configuration.clone()));
+            }
             let mut samples = Vec::new();
             samples
                 .try_reserve_exact(track.samples.len())
                 .map_err(|_| invalid("EP1 MP4 timing index allocation failed"))?;
+            let mut checked_description = None;
             for i in 0..track.samples.len() {
                 let sample = track
                     .samples
                     .get(i)
                     .ok_or_else(|| invalid("EP1 MP4 sample index out of range"))?;
+                if checked_description != Some(sample.description_index) {
+                    let setup = track
+                        .description_for_sample(i)
+                        .ok_or_else(|| invalid("EP1 MP4 missing sample description"))?;
+                    let b = binding_config(track, &setup.configuration)?;
+                    let d = aac_stream_descriptor(&setup.configuration)?;
+                    if setup.codec != *b"mp4a" || !AudioSpecificConfig::parse(d.asc)?.separate_esc {
+                        return Err(invalid(
+                            "EP1 MP4 description must retain separate ESC coding",
+                        ));
+                    }
+                    if b.id != current.id || b.parent != current.parent || b.file != current.file {
+                        return Err(invalid("EP1 MP4 description changes dependency binding"));
+                    }
+                    if d.sl_config != Some(&[2][..]) || d.url.is_some() {
+                        return Err(invalid(
+                            "EP1 MP4 description requires self-contained SL configuration 2",
+                        ));
+                    }
+                    checked_description = Some(sample.description_index);
+                }
                 samples.push((key(sample.pts, track.timescale), i));
             }
             samples.sort_unstable_by_key(|row| row.0);
@@ -302,6 +344,7 @@ impl Group {
                 parent: current.parent,
                 timescale: track.timescale,
                 configuration: track.configuration.clone(),
+                descriptions,
                 samples,
             });
             let mut next = None;
@@ -354,6 +397,20 @@ impl Group {
             .ok_or_else(|| invalid("EP1 MP4 retained payload size overflow"))?;
         for stream in &self.streams {
             total = total
+                .checked_add(
+                    stream
+                        .descriptions
+                        .capacity()
+                        .checked_mul(std::mem::size_of::<([u8; 4], Vec<u8>)>())
+                        .ok_or_else(|| invalid("EP1 MP4 retained payload size overflow"))?,
+                )
+                .ok_or_else(|| invalid("EP1 MP4 retained payload size overflow"))?;
+            for (_, configuration) in &stream.descriptions {
+                total = total
+                    .checked_add(configuration.capacity())
+                    .ok_or_else(|| invalid("EP1 MP4 retained payload size overflow"))?;
+            }
+            total = total
                 .checked_add(stream.configuration.capacity())
                 .and_then(|n| {
                     stream
@@ -393,6 +450,12 @@ impl Group {
             .samples
             .get(root_sample)
             .ok_or_else(|| invalid("EP1 MP4 root sample index out of range"))?;
+        let root_setup = root
+            .description_for_sample(root_sample)
+            .ok_or_else(|| invalid("EP1 MP4 missing root sample description"))?;
+        let root_asc = aac_stream_descriptor(&root_setup.configuration)?
+            .asc
+            .to_vec();
         let time = key(stamp.pts, root.timescale);
         let root_scale = root.timescale;
         let mut output = Vec::new();
@@ -434,6 +497,30 @@ impl Group {
                     != u128::from(stamp.duration) * u128::from(track.timescale)
             {
                 return Err(invalid("EP1 MP4 ESC source clocks disagree"));
+            }
+            let setup = track
+                .description_for_sample(index)
+                .ok_or_else(|| invalid("EP1 MP4 missing sample description"))?;
+            let saved = stream
+                .descriptions
+                .get(
+                    sample
+                        .description_index
+                        .checked_sub(1)
+                        .ok_or_else(|| invalid("EP1 MP4 zero sample description"))?
+                        as usize,
+                )
+                .ok_or_else(|| invalid("EP1 MP4 unknown sample description"))?;
+            if setup.codec != saved.0 || setup.configuration != saved.1 {
+                return Err(invalid(
+                    "EP1 MP4 group belongs to different track configuration",
+                ));
+            }
+            let descriptor = aac_stream_descriptor(&setup.configuration)?;
+            if descriptor.asc != root_asc {
+                return Err(invalid(
+                    "EP1 MP4 simultaneous descriptions disagree with root ASC",
+                ));
             }
             let bit_len = reader
                 .packet_bit_len(stream.index, index)

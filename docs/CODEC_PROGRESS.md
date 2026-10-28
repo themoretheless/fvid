@@ -1,3 +1,43 @@
+## EP1 sample-description epochs and LD-SBR reconfiguration, 2026-10-28
+
+A saved synthetic 960/1024/960 PS movie first reproduced `MP4 sample description
+changes require decoder reconfiguration` at group creation. Group construction
+now retains a bounded snapshot of each description, validates used descriptions'
+separate-ESC coding and stable dependency bindings, and indexes source clocks
+across epochs. Validation runs at description transitions rather than reparsing
+ASC for every sample. Each simultaneous AU group must use the active root ASC;
+a different child ASC fails at the exact epoch boundary before decoder dispatch.
+Reading a different movie with matching initial headers but changed later stsd
+also fails the saved fingerprint, without invalidating subsequent valid reads.
+Admission and retained-storage estimates include the new description snapshots.
+
+The authored corpus contains AOT17/19 PS 960/1024/960 and mono/8-channel LD-SBR
+480/512/480 movies. Each of three epochs has six AUs, including empty LD-SBR ESCs,
+canonical dpnd and exact padding/source clocks. LD controls match independent
+scalar PCM to 1e-7. Whole-movie output equals the concatenated fresh-epoch controls
+exactly through both owned and public export. PS delayed final frames are drained
+before changing configuration. This is transport/navigation equivalence for PS,
+not a new independent PS synthesis oracle.
+
+AudioStream acceptance covers complete playback, both sides of each epoch edge,
+repeated seeks, EOF/past-EOF seeks and rewind. Millisecond export windows cross
+the first boundary and repeat after a different interval. Worker capture now
+includes 100 programmes, with live partial playback before seeks and exact queued
+PCM/rational timing checks. Four malformed child-ASC movies preserve valid first
+epochs and then refuse the mismatching group; these are refusal controls, not
+acceptance for incompatible elementary configurations.
+
+All 17 artifacts / 598969 bytes regenerate exactly with process/socket creation
+forbidden; ordinary tests only read checked-in fixtures. The selected 33
+integration checks and 1622 root/media unit tests pass (29 unit tests ignored).
+
+This closes exercised indexed-MP4 configuration epochs with a stable dependency
+graph and synchronized separate-ESC ASCs. It does not yet qualify fragmented
+epoch transitions, changing dependency graphs, transitions between separate and
+ordinary transport, unused-first-description binding, external SL/clock sources,
+physical audio output or complete codec conformance. The codec-gap goal remains
+open.
+
 ## ISO MP4 dependency binding, PS and LD-SBR navigation, 2026-10-28
 
 The new canonical MP4 corpus first reproduced `select exactly one audio stream`:
