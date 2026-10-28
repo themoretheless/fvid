@@ -292,7 +292,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 demuxer.read_packet(index, sample, &mut payload)?;
                 // A valid LC-only block has no SBR fill. It remains on normal
                 // AAC dispatch; subsequent extension runs can still be probed.
-                let result=if let Some(group)=&ep1_group {
+                let result=if let Some(group)=&ep1_group && group.requires_esc(demuxer.tracks(),sample)? {
                     let units=group.read_frame(&mut demuxer,sample)?;
                     let input:Vec<_>=units.iter().map(|u|u.borrowed()).collect();probe.read_esc(&input)
                 }else{probe.read(&payload)};
@@ -543,7 +543,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                         }
                         self.demuxer
                             .read_packet(self.track_index, i, &mut payload)?;
-                        let result=if let Some(group)=&self.ep1_group {
+                        let result=if let Some(group)=&self.ep1_group && group.requires_esc(self.demuxer.tracks(),i)? {
                             let units=group.read_frame(&mut self.demuxer,i)?;
                             let input:Vec<_>=units.iter().map(|u|u.borrowed()).collect();probe.read_esc(&input)
                         }else{probe.read(&payload)};
@@ -837,6 +837,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     fn decode_source_packet(&mut self,decoder:&mut dyn crate::audio::AudioDecode,packet:&crate::audio::EncodedPacket,stamp:i64)->Result<Option<crate::audio::DecodedAudio>> {
         let Some(group)=&self.ep1_group else {return decoder.decode_packet(&packet.data,stamp,packet.duration.max(0)as u64);};
         let index=group.sample_at_source_time(packet.pts)?;
+        if !group.requires_esc(self.demuxer.tracks(),index)? {return decoder.decode_packet(&packet.data,stamp,packet.duration.max(0)as u64);}
         let units=group.read_frame(&mut self.demuxer,index)?;
         let root=units.first().ok_or_else(||invalid("empty EP1 MP4 group"))?;
         if root.data!=packet.data || root.duration!=packet.duration.max(0)as u64 {return Err(invalid("EP1 MP4 root packet disagrees with indexed AU"));}
@@ -1047,9 +1048,9 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
                 packet.data.truncate((frames - skip) * stride);
                 let numerator = i128::from(source_pts) * i128::from(rate)
                     + skip as i128 * i128::from(scale);
-                let at = numerator * 1_000_000_000 / (i128::from(rate) * i128::from(scale));
-                packet.pts = u64::try_from(at).map_err(|_| invalid("negative MP4 audio presentation time"))?;
-                packet.timebase_den = 1_000_000_000;
+                let (pts, den) = EditTime::new(numerator, u128::from(rate) * u128::from(scale))?.stamp()?;
+                packet.pts = pts;
+                packet.timebase_den = den;
             } else {
                 // Decoder output labels the integer PTS with a sample clock;
                 // the caller supplied track media units, which need not match.

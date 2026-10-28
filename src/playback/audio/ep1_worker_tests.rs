@@ -39,6 +39,7 @@ fn ep1_worker_queues_exact_pcm_after_partial_playback_seek_rewind_and_edits() {
     check_corpus("mp4-ep1-empty");
     check_corpus("mp4-ep1-ps");
     check_corpus("mp4-ep1-epochs");
+    check_corpus("mp4-ep1-transitions");
 }
 fn check_corpus(corpus: &str) {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -108,7 +109,11 @@ fn check_corpus(corpus: &str) {
             .collect();
         assert_eq!(actual, full, "{} initial worker", case["name"]);
         check(&captured.lock().unwrap(), &full, 0, rate, stride);
-        for sample in [13i64, 0, 7, 7, (full.len() / stride) as i64, 13, 0] {
+        let mut seeks = vec![13i64, 0, 7, 7, (full.len() / stride) as i64, 13, 0];
+        if let Some(edges) = case.get("edges").and_then(|v|v.as_array()) {
+            for edge in edges {let edge=edge.as_i64().unwrap();seeks.extend([edge-1,edge,edge+1]);}
+        }
+        for sample in seeks {
             // Leave a live decoder and queue before applying the next seek.
             worker.drain_commands(Some(Command::Rewind));
             let prefix = if case["name"].as_str().unwrap().ends_with("-edits") {

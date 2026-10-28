@@ -4,7 +4,7 @@ fn mp4_decode_source_packet<R:std::io::Read+std::io::Seek>(
     pts:u64,duration:u64,control:&DecodeProgress<'_>,
 )->Result<(Option<Vec<Mp4PcmScalar>>,usize)> {
     control.check()?;
-    if let Some(group)=group {
+    if let Some(group)=group && group.requires_esc(reader.tracks(),sample)? {
         let units=group.read_frame_checked(reader,sample,||control.check())?;
         let bytes=units.iter().try_fold(0usize,|n,u|n.checked_add(u.data.len()).ok_or_else(||invalid("EP1 MP4 group byte count overflow")))?;
         let input:Vec<_>=units.iter().map(|u|u.borrowed()).collect();
@@ -318,7 +318,7 @@ fn negotiate_mp4_description_ps<R: std::io::Read + std::io::Seek>(
             probe.reset();
             continue;
         }
-        let result=if let Some(group)=&ep1_group {
+        let result=if let Some(group)=&ep1_group && group.requires_esc(reader.tracks(),sample)? {
             let units=group.read_frame_checked(reader,sample,||check())?;
             let input:Vec<_>=units.iter().map(|u|u.borrowed()).collect();
             probe.read_esc(&input)

@@ -1,3 +1,57 @@
+## Bidirectional ordinary/EP1 transport epochs and exact trimmed clocks, 2026-10-28
+
+A short own ordinary/EP1/ordinary movie first reproduced `EP1 requires separately
+associated ESC access units`: group dispatch was decided once from the first AU.
+The shared group now detects separate transport among used descriptions, retains
+stable ES bindings across ordinary AAC descriptions, and exposes a fingerprinted
+per-sample `requires_esc` decision. Owned/root export, PS discovery and AudioStream
+use ordinary byte decoding or complete typed ESC groups according to that active
+description. Inactive auxiliary AUs are neither required nor read. Active groups
+still require exact ASC agreement, simultaneous source clocks and complete AUs;
+no damaged-ESC fallback is introduced. Header-based dependency ordering stays
+stable; changing dependency graphs remains a different open contract.
+
+The 64-programme acceptance matrix covers both ordinary/EP1/ordinary and
+EP1/ordinary/EP1, AOT17/19 PS with explicit/sync/implicit signaling and
+960/1024/960 windows, plus mono/8-channel LD-SBR 480/512/480. Indexed, fragmented,
+hybrid and sparse-auxiliary indexed forms each have 18 root AUs. Sparse auxiliaries
+contain only the 6 or 12 active AUs; source composition offsets preserve the exact
+phase boundaries. Full and repeated/cross-boundary interval PCM agrees exactly
+with already qualified all-EP1 fresh-epoch controls through owned and public
+exports. LD controls inherit the independent scalar reference; PS equivalence is
+not an independent PS DSP oracle. Stereo WAV exports at 48 and 32 kHz match
+normalized/resampled controls byte-for-byte under caller-owned admission limits.
+
+Sixteen partial-active-AU controls reproduce `missing simultaneous ESC access
+unit` at the exact required frame while earlier groups stay readable. Another
+sixteen wholly unsupplied auxiliary-track controls remain parser refusals (`MP4
+track states no samples`), using real hybrid root fragments; these are structural
+incompleteness controls, not acceptance for absent active streams. A first attempt
+without fragment metadata hit the unrelated empty-sample-table refusal and was
+replaced by the real hybrid witnesses before saving this qualification.
+
+Extending live worker seeks to both sides of each epoch edge exposed another
+actual failure: after a trimmed seek, PCM matched but packet timestamps were
+floored to nanoseconds. For the 11518/48000 witness, cross-multiplied time was
+11517999984000 instead of 11518000000000. The changing-description trim branch
+now uses the existing reduced rational EditTime stamp path, preserving exact
+sample-grid timestamps when representable. Wider-than-packet clocks retain that
+existing helper's documented nanosecond emission limit; the internal rational
+clock is not replaced by a nanosecond cursor. Tests retain exact equality without
+loosening tolerances. Worker capture now covers 184 programmes and epoch-edge,
+repeated, EOF and rewind seeks after live partial decoding.
+
+All 101 new artifacts / 1278743 bytes regenerate byte-exact with process/socket
+creation forbidden and exact directory inventories; the four previous EP1 corpora
+remain byte-identical. Ordinary tests read checked-in own fixtures only. The 52
+selected integration checks, 1622 root/media unit tests (29 ignored), and all-test
+compilation pass offline with `--no-default-features --features player`.
+
+Still open: changing dependency graphs, wider codec/profile and clock combinations,
+external SL sources and physical output qualification. This closes the exercised
+ordinary/separate AAC transport transitions with a stable dependency graph; the
+complete codec-gap goal remains active.
+
 ## Fragmented EP1 epochs and first-used description binding, 2026-10-28
 
 Extended the own epoch corpus from four to 24 programmes: indexed, fully

@@ -58,6 +58,32 @@ fn initial_setup(track: &Track) -> ([u8; 4], &[u8]) {
             (d.codec, d.configuration.as_slice())
         })
 }
+fn has_separate_esc(track: &Track) -> Result<bool> {
+    if track.sample_descriptions.is_empty() {
+        return Ok(
+            AudioSpecificConfig::parse(aac_stream_descriptor(&track.configuration)?.asc)?
+                .separate_esc,
+        );
+    }
+    for (i, setup) in track.sample_descriptions.iter().enumerate() {
+        if setup.codec != *b"mp4a"
+            || !(0..track.samples.len()).any(|n| {
+                track
+                    .samples
+                    .get(n)
+                    .is_some_and(|s| s.description_index as usize == i + 1)
+            })
+        {
+            continue;
+        }
+        if AudioSpecificConfig::parse(aac_stream_descriptor(&setup.configuration)?.asc)?
+            .separate_esc
+        {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
 fn binding(track: &Track) -> Result<Binding> {
     binding_config(track, initial_setup(track).1)
 }
@@ -110,7 +136,7 @@ impl Group {
         }
         aac_stream_descriptor(initial_setup(track).1).is_ok_and(|d| {
             (d.depends_on.is_some() || !track.dependencies.is_empty())
-                && AudioSpecificConfig::parse(d.asc).is_ok_and(|p| p.separate_esc)
+                && has_separate_esc(track).unwrap_or(false)
         })
     }
     pub fn sample_at_source_time(&self, pts: i64) -> Result<usize> {
@@ -150,8 +176,7 @@ impl Group {
         if initial_setup(track).0 != *b"mp4a" {
             return Ok(None);
         }
-        let d = aac_stream_descriptor(initial_setup(track).1)?;
-        if !AudioSpecificConfig::parse(d.asc)?.separate_esc {
+        if !has_separate_esc(track)? {
             return Ok(None);
         }
         Self::new(tracks, root).map(Some)
@@ -165,8 +190,7 @@ impl Group {
         if initial_setup(source).0 != *b"mp4a" {
             return Ok(0);
         }
-        let d = aac_stream_descriptor(initial_setup(source).1)?;
-        if !AudioSpecificConfig::parse(d.asc)?.separate_esc {
+        if !has_separate_esc(source)? {
             return Ok(0);
         }
         let root_binding = binding(source)?;
@@ -182,8 +206,7 @@ impl Group {
                 continue;
             }
             let mut member = index == root;
-            let descriptor = aac_stream_descriptor(initial_setup(track).1)?;
-            if !AudioSpecificConfig::parse(descriptor.asc)?.separate_esc {
+            if index != root && !has_separate_esc(track)? {
                 continue;
             }
             let own_binding = binding(track)?;
@@ -204,8 +227,7 @@ impl Group {
                     .iter()
                     .filter(|t| initial_setup(t).0 == *b"mp4a" && t.handler == *b"soun")
                 {
-                    let descriptor = aac_stream_descriptor(initial_setup(candidate).1)?;
-                    if !AudioSpecificConfig::parse(descriptor.asc)?.separate_esc {
+                    if !has_separate_esc(candidate)? {
                         continue;
                     }
                     let candidate = binding(candidate)?;
@@ -264,15 +286,13 @@ impl Group {
         if track.handler != *b"soun" || initial_setup(track).0 != *b"mp4a" {
             return Err(invalid("EP1 MP4 root is not MPEG-4 audio"));
         }
-        let descriptor = aac_stream_descriptor(initial_setup(track).1)?;
         let root_binding = binding(track)?;
         if root_binding.parent.is_some() {
             return Err(invalid("EP1 MP4 selected track is not a root ES"));
         }
-        if !AudioSpecificConfig::parse(descriptor.asc)?.separate_esc {
+        if !has_separate_esc(track)? {
             return Err(invalid("EP1 MP4 root does not declare separate ESCs"));
         }
-        let asc = descriptor.asc;
         let mut streams = Vec::new();
         let mut at = root;
         loop {
@@ -289,9 +309,6 @@ impl Group {
             }
             if d.sl_config != Some(&[2][..]) {
                 return Err(invalid("EP1 MP4 requires SL predefined configuration 2"));
-            }
-            if d.asc != asc {
-                return Err(invalid("EP1 MP4 dependent ASC disagrees with root"));
             }
             if track.timescale == 0 {
                 return Err(invalid("EP1 MP4 zero source timescale"));
@@ -322,7 +339,9 @@ impl Group {
                         .ok_or_else(|| invalid("EP1 MP4 missing sample description"))?;
                     let b = binding_config(track, &setup.configuration)?;
                     let d = aac_stream_descriptor(&setup.configuration)?;
-                    if setup.codec != *b"mp4a" || !AudioSpecificConfig::parse(d.asc)?.separate_esc {
+                    if setup.codec != *b"mp4a"
+                        || (at != root && !AudioSpecificConfig::parse(d.asc)?.separate_esc)
+                    {
                         return Err(invalid(
                             "EP1 MP4 description must retain separate ESC coding",
                         ));
@@ -362,7 +381,7 @@ impl Group {
                     continue;
                 }
                 let child = aac_stream_descriptor(initial_setup(candidate).1)?;
-                if !AudioSpecificConfig::parse(child.asc).is_ok_and(|p| p.separate_esc)
+                if !has_separate_esc(candidate)?
                     && !candidate.dependencies.contains(&track.id)
                     && child.depends_on != Some(current.id)
                 {
@@ -394,6 +413,49 @@ impl Group {
     }
     pub fn root_track(&self) -> usize {
         self.root
+    }
+    /// Decide from the selected sample, not from the initial track header.
+    /// Ordinary epochs must not request auxiliary ESC AUs at that timestamp.
+    pub fn requires_esc(&self, tracks: &[Track], sample: usize) -> Result<bool> {
+        let track = tracks
+            .get(self.root)
+            .ok_or_else(|| invalid("EP1 MP4 root track index out of range"))?;
+        let stream = &self.streams[0];
+        if track.id != stream.id
+            || track.timescale != stream.timescale
+            || track.configuration != stream.configuration
+            || track.samples.len() != stream.samples.len()
+        {
+            return Err(invalid(
+                "EP1 MP4 group belongs to different track configuration",
+            ));
+        }
+        let entry = track
+            .samples
+            .get(sample)
+            .ok_or_else(|| invalid("EP1 MP4 root sample index out of range"))?;
+        let setup = track
+            .description_for_sample(sample)
+            .ok_or_else(|| invalid("EP1 MP4 missing sample description"))?;
+        let saved = stream
+            .descriptions
+            .get(
+                entry
+                    .description_index
+                    .checked_sub(1)
+                    .ok_or_else(|| invalid("EP1 MP4 zero sample description"))?
+                    as usize,
+            )
+            .ok_or_else(|| invalid("EP1 MP4 unknown sample description"))?;
+        if setup.codec != saved.0 || setup.configuration != saved.1 {
+            return Err(invalid(
+                "EP1 MP4 group belongs to different track configuration",
+            ));
+        }
+        Ok(
+            AudioSpecificConfig::parse(aac_stream_descriptor(&setup.configuration)?.asc)?
+                .separate_esc,
+        )
     }
     pub fn stream_count(&self) -> usize {
         self.streams.len()
@@ -451,6 +513,11 @@ impl Group {
         mut check: impl FnMut() -> std::result::Result<(), E>,
     ) -> Result<Vec<AccessUnit>> {
         check().map_err(|e| invalid(&e.to_string()))?;
+        if !self.requires_esc(reader.tracks(), root_sample)? {
+            return Err(invalid(
+                "EP1 MP4 selected sample uses ordinary AAC transport",
+            ));
+        }
         let root = reader
             .tracks()
             .get(self.root)
