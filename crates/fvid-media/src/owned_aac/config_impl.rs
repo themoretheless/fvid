@@ -240,7 +240,7 @@ impl AudioSpecificConfig {
         let hint=self.eld_downscale_sample_rate?;
         let multiplier=if self.eld_sbr.as_ref().is_some_and(|s|s.double_rate){2}else{1};
         if self.core.object_type!=39 || hint==0 || hint.checked_mul(multiplier)!=Some(declared) || !self.core.sample_rate.is_multiple_of(hint) {return None;}
-        match self.core.sample_rate/hint {2=>Some(2),4=>Some(4),8=>Some(8),_=>None}
+        match self.core.sample_rate/hint {2=>Some(2),3 if self.eld_sbr.is_none() && self.core.frame_samples.is_multiple_of(3)=>Some(3),4=>Some(4),8=>Some(8),_=>None}
     }
     /// Resolve explicit output clocks without guessing SBR or downscale modes.
     pub fn resolve_output_rate(&self, declared: u32) -> Result<u32> {

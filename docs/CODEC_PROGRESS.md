@@ -1,3 +1,71 @@
+## Factor-three ELD core adaptation, 2026-10-30
+
+A new own 480-sample ELD movie advertises 8 kHz from a nominal 24-kHz source.
+The previous explicit-output constructor refused it with
+`AAC output clock disagrees with configuration`. The native ELD core now
+supports an exact factor-three hint/output pair for 480-sample source frames,
+producing 160 samples per source AU. Source entropy, SFB and TNS geometry,
+packet clock and spectral-level normalization retain the nominal source values.
+Default native reconstruction remains nominal/full-rate. There is no added
+PCM resampler or foreign decoder.
+
+The own inverse transform adds 160-point plans, checked by the existing direct
+cosine/transpose/dense-spectrum tests. Independent 40-value spline segments
+produce the short window from the 512-reference numeric facts; the production
+Thomas solver and the oracle's dense pivoted solve/Hermite evaluation agree
+within 2e-12. The independent short cosine/overlap PCM agrees within 1e-7.
+
+There are 22 ordinary, 22 EP3 and 22 EP1 programmes, covering all eligible
+480-frame source controls: 8/16-kHz output, layouts, resilience, PNS/MS/intensity
+and TNS. Generation and a separate fixture-integrity check assert source AU
+bytes (including the saved protected transport bytes) are unchanged. Every
+programme's PCM oracle is explicitly nonzero. Shared qualification checks cover
+checkpoints/reset, smaller retained native payload, MP4/Matroska export and
+repeated ranges, frame-edge/repeated/EOF/past-EOF seek/rewind, EP1 groups, and
+WAVE crop/gain/stereo/32-kHz transforms.
+
+A further 22 ordinary and 22 EP1 high-band programmes cover 11 standard/explicit
+source clocks. Outputs include 32000, 29400, 16000, 14700, 8000, 7350, 4000,
+3675, 2450, 12522 and 4115 Hz. First and final source SFBs are coded; the high
+coefficients must be parsed at the source geometry and discarded by short
+synthesis. These cases also qualify fractional-nanosecond packet/seek timing.
+There are 110 accepted programmes across both corpora.
+
+Four additional own movies qualify refusal of the requested short mode: two
+512-sample core programmes would require a noninteger output frame, and two
+LD-SBR programmes would require a fractional CLDFB width. The tests parse the
+actual movie's ESDS/ASC, verify strict output negotiation, and retain default
+nominal native construction. These are refusal/guard tests, not acceptance of
+playback at the requested invalid output clock. The low-level synthesis
+constructor also rejects non-divisible source geometry before truncating sizes.
+
+The new 139 artifacts (1119149 bytes) and all 660 previous short-core artifacts
+(5482463 bytes) regenerate byte-exact with process/socket creation forbidden;
+[the generator report](validation/aac-eld-third-generation-2026-10-30.json) saves
+hashes and measurements. Ordinary tests read committed data without FFmpeg or
+network access. Nine actual PlatformBackend cases pass all 36 full/quarter-seek/
+60-percent-seek/rewind phases, including EP3/EP1, resilience/TNS/PNS, eight-
+channel sources and the 2450/4115/14700-Hz output clocks. [The device report](validation/aac-eld-third-device-2026-10-30.json)
+saves input hashes, positions/drain measurements and linkage. The binary has no
+FFmpeg/libav linkage. Eight-channel inputs use normal stereo routing; subjective
+listening and physical eight-speaker output are not established.
+
+The additional rate corpus has 90 artifacts / 813869 bytes, also regenerated
+byte-exact under the same process/socket guard. Fourteen new integration
+checks (including strict refusal/fixture-quality checks) and 33 selected prior
+ELD/LD-SBR checks pass, 47 total. The complete root/media suites pass 1631 unit
+checks, plus the added rate-worker check (1632 unique checks; 29 existing ignored).
+Worker navigation covers 5527 programmes. Offline all-test compilation passes.
+[The test report](validation/aac-eld-third-tests-2026-10-30.json) records the
+before-fix diagnostic and separately executed qualification checks.
+
+The [published lower-rate/ELD window construction](https://data.epo.org/publication-server/rest/v1.2/patents/EP4231287NWA1/document.pdf),
+sections A.0/A.1, distinguishes integer core-only frame geometry from LD-SBR's
+band geometry. This implementation and numerical/device qualification are not
+an official ISO conformance certificate. Other adaptation ratios, AAC-LD output
+adaptation and SAOC/LD MPEG Surround remain open; the broader codec-gap goal
+stays active.
+
 ## LD-SBR crossover predictor continuity, 2026-10-30
 
 Own nonzero movies alternate the crossover between kx=4 and kx=5 at source

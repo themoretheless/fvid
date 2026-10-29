@@ -37,12 +37,12 @@ def short_window(n):
             result.append((2*t**3-3*t*t+1)*y[j]+(t**3-2*t*t+t)*left+(-2*t**3+3*t*t)*y[j+1]+(t**3-t*t)*right)
     assert len(result)==4*n
     return result
-def generate():
+def generate(factors=(2,4), windows=(120,128,240,256)):
     files={};cases=[];exports=[];blob=bytearray();parent=json.loads((SOURCE/'aac-eld'/'manifest.json').read_bytes());parent_blob=(SOURCE/'aac-eld'/'packets.bin').read_bytes()
     for spec in specifications():
       n,rate=spec[:2]
-      for factor in [2,4]:
-        if rate%factor:continue
+      for factor in factors:
+        if rate%factor or n%factor:continue
         sn=n//factor;data=core(specs=[spec],output_samples=sn,synthesis_window=short_window);base=json.loads(data['manifest.json'])['cases'][0]
         original=next(c for c in parent['cases']if c['name']==base['name']);raw=data['packets.bin']
         assert [raw[r['offset']:r['offset']+r['bytes']]for r in base['frames']]==[parent_blob[r['offset']:r['offset']+r['bytes']]for r in original['frames']]
@@ -71,7 +71,7 @@ def generate():
         head,tail=prefix(original['asc']);asc=packed(head+extension(base['rate'],True)+tail[:4]+'01'+tail[6:])
         name='ep1-'+base['name'];case=dict(base,name=name,asc=asc.hex(),video=name+'.mp4',control=base['video'])
         files[case['video']]=replace_asc(files[base['video']],asc);exports.append(case)
-    for n in [120,128,240,256]:files[f'window-{n}.f64le']=struct.pack('<'+'d'*(4*n),*short_window(n))
+    for n in windows:files[f'window-{n}.f64le']=struct.pack('<'+'d'*(4*n),*short_window(n))
     files['packets.bin']=bytes(blob);files['manifest.json']=(json.dumps(dict(cases=cases,exports=exports,provenance='Own full-spectrum ELD entropy packets, independently solved dense not-a-knot window segments, Hermite evaluation and direct short cosine/overlap oracle. Nominal source transform normalization. Existing source AU bytes asserted unchanged. No private media, foreign codec, process or network.'),indent=2)+'\n').encode();return files
 if __name__=='__main__':
     OUT.mkdir(exist_ok=True)

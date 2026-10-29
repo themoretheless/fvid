@@ -38,7 +38,7 @@ fn evaluate(y: &[f64], c: &[f64; 128], x: f64) -> f64 {
     y[k] + t * (slope + t * (c[k] + t * (c[k + 1] - c[k]) / 3.0))
 }
 pub(crate) fn window(samples: usize) -> Result<Vec<f64>> {
-    if !matches!(samples, 60 | 64 | 120 | 128 | 240 | 256) {
+    if !matches!(samples, 60 | 64 | 120 | 128 | 160 | 240 | 256) {
         return Err(invalid("unsupported AAC ELD downscaled window"));
     }
     let per_segment = samples / 4;
@@ -63,14 +63,14 @@ mod tests {
         for power in 0..=3 {
             let y: Vec<_> = (0..128).map(|i| (i as f64 / 128.0).powi(power)).collect();
             let c = curvature(&y);
-            for length in [15, 16, 30, 32, 60, 64] {
+            for length in [15, 16, 30, 32, 40, 60, 64] {
                 for i in 0..length {
                     let x = (i as f64 + 0.5) * 128.0 / length as f64 - 0.5;
                     assert!((evaluate(&y, &c, x) - (x / 128.0).powi(power)).abs() < 2e-14);
                 }
             }
         }
-        for n in [60, 64, 120, 128, 240, 256] {
+        for n in [60, 64, 120, 128, 160, 240, 256] {
             let w = window(n).unwrap();
             assert_eq!(w.len(), 4 * n);
             assert!(w[..n / 4].iter().all(|v| *v == 0.0));
@@ -81,9 +81,11 @@ mod tests {
     fn adapted_windows_match_independent_dense_solve() {
         let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../../tests/fixtures/playback-errors/aac-eld-short");
-        for n in [60, 64, 120, 128, 240, 256] {
+        for n in [60, 64, 120, 128, 160, 240, 256] {
             let path = if n < 120 {
                 root.join("../aac-eld-sbr-eighth")
+            } else if n == 160 {
+                root.join("../aac-eld-third")
             } else {
                 root.clone()
             };
