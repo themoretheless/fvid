@@ -1,0 +1,87 @@
+{
+  "date": "2026-10-30",
+  "base_commit": "f20ad962f6",
+  "before_fix": {
+    "case": "n480-c1-start0-invf3-x2",
+    "error": "independent PCM error 0.0000030056835",
+    "passing_controls": "inverse filtering off; single-rate output before the failing double-rate case"
+  },
+  "results": {
+    "root_media": [
+      {
+        "passed": 1057,
+        "failed": 0,
+        "ignored": 26,
+        "seconds": 434.02
+      },
+      {
+        "passed": 572,
+        "failed": 0,
+        "ignored": 3,
+        "seconds": 1.36
+      }
+    ],
+    "wide_worker": [
+      {
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 19.55
+      }
+    ],
+    "dynamic_eighth": [
+      {
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 3.98
+      }
+    ],
+    "dynamic_two_four": [
+      {
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 10.63
+      }
+    ],
+    "compatibility": [
+      {
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 142.49
+      },
+      {
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 107.3
+      },
+      {
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 253.56
+      },
+      {
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 86.21
+      },
+      {
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 24.4
+      }
+    ]
+  },
+  "unique_unit_checks": 1630,
+  "unique_integration_checks": 46,
+  "programmes": 288,
+  "worker_programmes": 5417,
+  "all_test_compilation": "cargo check --offline --no-default-features --features player --tests passed",
+  "commands": "CARGO_TARGET_DIR=<worktree-parent>/target cargo --config profile.dev.package.fvid-media.opt-level=2 test/check --offline --no-default-features --features player"
+}

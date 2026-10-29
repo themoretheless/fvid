@@ -1,3 +1,50 @@
+## LD-SBR crossover predictor continuity, 2026-10-30
+
+Own nonzero movies alternate the crossover between kx=4 and kx=5 at source
+frames 4 and 8, crossing the factor-eight short analysis width. The previous
+native decoder disagreed with the independent PCM oracle by 0.0000030056835
+on `n480-c1-start0-invf3-x2`; the same controls with inverse filtering off and
+single-rate output passed before that failing case. This is a numerical
+acceptance failure, not an unsupported-format/refusal result.
+
+The HF predictor requires the two LF columns actually emitted before the current
+frame. Previously the decoder selected the new analysis bank's cached past
+columns, replacing the actual predecessor signal when the bank changed. It now
+retains one emitted LF tail, with the previous crossover cutoff. Both short and
+full analysis histories continue advancing. Checkpoint/reset/transactional
+clones retain the actual signal history. Removing the redundant full-bank tail
+also removes its duplicate inline storage; no throughput or RSS gain is claimed.
+A focused unit invariant checks the exact predecessor rows in both directions.
+
+Across two corpora there are 96 ordinary, 96 EP3 and 96 EP1 twelve-frame
+programmes (288 total): 480/512 source samples, mono/stereo, both starting banks,
+off/high inverse filtering and single/double-rate output. Factor 2 crosses
+kx=16/17, factor 4 crosses kx=8/9 and factor 8 crosses kx=4/5. EP3 uses variable-length header/control categories with
+reversed wire order. Source spectra, packets, headers, CRC and FEC are entirely
+own synthetic data. Independent PCM uses direct convolution, chronological
+selected LF rows, scalar complex covariance/gain/noise, and modulated-column
+superposition. Ordinary tests only read saved fixtures. Ten new integration
+checks cover numerical acceptance, checkpoint/reset and malformed-packet
+rollback, MP4/Matroska export/crops/WAVE transforms, frame-edge and repeated
+seek, EOF/past-EOF and rewind, including EP1 group transport.
+
+All 36 selected prior ELD/LD-SBR integration checks pass as well (46 integration
+checks total). The complete root/media suites pass 1629 unit checks, and the
+additional wide-crossover worker check passes (1630 unique checks; 29 existing
+ignored tests). Worker navigation covers 5417 programmes. Offline all-test
+compilation passes. [The test report](validation/aac-eld-crossover-tests-2026-10-30.json)
+records the before-fix failure and separately executed qualification checks.
+
+All 580 artifacts (3583011 bytes) regenerate byte-exact while process and socket
+creation are forbidden; [the generator report](validation/aac-eld-crossover-generation-2026-10-30.json)
+saves hashes and measurements. Ten actual PlatformBackend cases pass all 40
+full/quarter-seek/60-percent-seek/rewind phases in both switching directions,
+including EP1/EP3; [the device report](validation/aac-eld-crossover-device-2026-10-30.json)
+saves input hashes and positions/drain times. The binary has no FFmpeg/libav
+linkage. This is not subjective listening or an official codec conformance
+certificate. The broader codec-gap goal, other adaptation ratios and spatial
+SAOC/LD MPEG Surround remain open.
+
 ## Factor-eight ELD/LD-SBR adaptation, 2026-10-29
 
 A new own nonzero mono movie declares a 3-kHz LD-SBR output from a nominal

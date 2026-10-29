@@ -1,0 +1,77 @@
+{
+  "date": "2026-10-29T22:39:15.162872+00:00",
+  "cases": [
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-crossover/n480-c1-start0-invf3-x2.mp4",
+      "sha256": "98faf2435c3f8914d85bfb91c4c8d3e00a811036a6da6ab76807d3e810f598ca",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=1 rate=24000 duration=0.060000\nphase=full generation=0 from=0.000000 position=0.060000 wall=0.079799 device_drain=complete\nphase=seek-quarter generation=1 from=0.015000 position=0.060000 wall=0.072632 device_drain=complete\nphase=seek-60-percent generation=2 from=0.036000 position=0.060000 wall=0.039967 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.060000 wall=0.082242 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-crossover/n512-c2-start1-invf3-x2.mka",
+      "sha256": "66e99bb8f493fdd28ec1954483f081829c45608ae52edd2e912e5c53c3364e81",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=2 rate=24000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.085484 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.064749 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.063983 wall=0.047711 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.091714 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-crossover/ep3-n512-c2-start0-invf3-x2.mp4",
+      "sha256": "68053500d0709e47d45b7d1822a1b9e576b6e91a3b317b63e6683a367e0feb4e",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=2 rate=24000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.086526 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.067033 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.064000 wall=0.054757 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.092617 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-crossover/ep3-n480-c1-start1-invf3-x2.mka",
+      "sha256": "dc785b9edf9b9061ed35ef0f85e2fbc805af104dc1eba8353253715ad056ef10",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=1 rate=24000 duration=0.060000\nphase=full generation=0 from=0.000000 position=0.060000 wall=0.082853 device_drain=complete\nphase=seek-quarter generation=1 from=0.015000 position=0.060000 wall=0.064570 device_drain=complete\nphase=seek-60-percent generation=2 from=0.036000 position=0.060000 wall=0.047009 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.060000 wall=0.079925 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-crossover/ep1-n480-c2-start0-invf3-x2.mp4",
+      "sha256": "ba6b5d2c5767a642bb8607c6eca4a2dd0ebe95ad623e48d5b5cb639f4dad55ed",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=2 rate=24000 duration=0.060000\nphase=full generation=0 from=0.000000 position=0.060000 wall=0.084528 device_drain=complete\nphase=seek-quarter generation=1 from=0.015000 position=0.060000 wall=0.068625 device_drain=complete\nphase=seek-60-percent generation=2 from=0.036000 position=0.060000 wall=0.042491 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.060000 wall=0.076577 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-crossover/ep1-n512-c1-start1-invf3-x2.mp4",
+      "sha256": "666154aa4805f5e0a85ae518e8239c1bfbc7146041d7fa48f2ddc3ddd51b5494",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=1 rate=24000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.085485 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.072439 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.064000 wall=0.052794 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.089747 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-crossover-wide/n480-c1-start0-invf3-x2-ds2.mp4",
+      "sha256": "7397d64df819cb6a53598efaf3c927a89b08a08953dfc503dd989606df5bf299",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=1 rate=24000 duration=0.240000\nphase=full generation=0 from=0.000000 position=0.240000 wall=0.263775 device_drain=complete\nphase=seek-quarter generation=1 from=0.060000 position=0.240000 wall=0.200778 device_drain=complete\nphase=seek-60-percent generation=2 from=0.144000 position=0.240000 wall=0.119142 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.240000 wall=0.259676 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-crossover-wide/ep3-n512-c2-start1-invf3-x2-ds2.mka",
+      "sha256": "51b7efbc64b4c826b1b3d15c8b11227e713e3c3b9174b88ad99df1467ab0d9b0",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=2 rate=24000 duration=0.256000\nphase=full generation=0 from=0.000000 position=0.256000 wall=0.276518 device_drain=complete\nphase=seek-quarter generation=1 from=0.064000 position=0.256000 wall=0.214147 device_drain=complete\nphase=seek-60-percent generation=2 from=0.153600 position=0.256017 wall=0.135378 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.256000 wall=0.277676 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-crossover-wide/ep1-n512-c2-start0-invf3-x2-ds4.mp4",
+      "sha256": "1f1ea5f68b52ca45507c51949eb341f6aa4a0dfef2004c41d4d4009965afccfc",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=2 rate=12000 duration=0.256000\nphase=full generation=0 from=0.000000 position=0.256000 wall=0.282642 device_drain=complete\nphase=seek-quarter generation=1 from=0.064000 position=0.256000 wall=0.207492 device_drain=complete\nphase=seek-60-percent generation=2 from=0.153600 position=0.256000 wall=0.125752 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.256000 wall=0.282272 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-eld-crossover-wide/n480-c1-start1-invf3-x2-ds4.mka",
+      "sha256": "0ba983af38a8002c974216d7a2c955b54f35d84093c69614e2dfbf860a62ee70",
+      "exit": 0,
+      "stdout": "platform_device=started source_channels=1 rate=12000 duration=0.240000\nphase=full generation=0 from=0.000000 position=0.240000 wall=0.261695 device_drain=complete\nphase=seek-quarter generation=1 from=0.060000 position=0.240000 wall=0.196895 device_drain=complete\nphase=seek-60-percent generation=2 from=0.144000 position=0.240000 wall=0.117080 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.240000 wall=0.264799 device_drain=complete\n",
+      "stderr": ""
+    }
+  ],
+  "limits": "Default PlatformBackend generation/drain/position qualification, not subjective listening.",
+  "linkage": "/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target/debug/examples/audio_probe:\n\t/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit (compatibility version 45.0.0, current version 2775.10.103)\n\t/System/Library/Frameworks/VideoToolbox.framework/Versions/A/VideoToolbox (compatibility version 1.0.0, current version 3350.77.5)\n\t/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 5027.0.69)\n\t/System/Library/Frameworks/CoreMedia.framework/Versions/A/CoreMedia (compatibility version 1.0.0, current version 3350.77.5)\n\t/System/Library/Frameworks/CoreVideo.framework/Versions/A/CoreVideo (compatibility version 1.2.0, current version 758.27.0)\n\t/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices (compatibility version 1.0.0, current version 66.0.0)\n\t/System/Library/Frameworks/CoreGraphics.framework/Versions/A/CoreGraphics (compatibility version 64.0.0, current version 2050.0.0)\n\t/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon (compatibility version 2.0.0, current version 170.0.0)\n\t/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation (compatibility version 300.0.0, current version 5027.0.69)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.0.0)\n\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)\n\t/System/Library/Frameworks/QuartzCore.framework/Versions/A/QuartzCore (compatibility version 1.2.0, current version 1223.2.2)\n\t/System/Library/Frameworks/Metal.framework/Versions/A/Metal (compatibility version 1.0.0, current version 382.5.3)\n\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)\n\t/System/Library/Frameworks/AudioUnit.framework/Versions/A/AudioUnit (compatibility version 1.0.0, current version 1.0.0)\n\t/System/Library/Frameworks/CoreAudio.framework/Versions/A/CoreAudio (compatibility version 1.0.0, current version 1.0.0)\n\t/System/Library/Frameworks/ColorSync.framework/Versions/A/ColorSync (compatibility version 1.0.0, current version 3929.0.0)\n\t/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices (compatibility version 1.0.0, current version 1226.0.0)\n"
+}

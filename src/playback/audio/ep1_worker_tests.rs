@@ -61,6 +61,14 @@ fn eighth_ld_sbr_worker_keeps_exact_pcm_and_timestamps_through_navigation() {
     check_corpus("aac-eld-sbr-eighth");
     check_corpus("aac-eld-sbr-eighth/core");
 }
+#[test]
+fn dynamic_ld_sbr_crossover_worker_keeps_exact_pcm_and_timestamps() {
+    check_corpus("aac-eld-crossover");
+}
+#[test]
+fn wide_ld_sbr_crossover_worker_keeps_exact_pcm_and_timestamps() {
+    check_corpus("aac-eld-crossover-wide");
+}
 fn check_corpus(corpus: &str) {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests/fixtures/playback-errors")

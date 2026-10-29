@@ -18,7 +18,6 @@ use super::{
 struct Channel {
     analysis: Analysis,
     full_analysis: Option<Analysis>,
-    full_tail: [[Complex; 32]; 2],
     factor: usize,
     tail: [[Complex; 32]; 2],
     previous_kx: u8,
@@ -40,7 +39,6 @@ impl Channel {
             } else {
                 Some(Analysis::new_downscaled(1)?)
             },
-            full_tail: [[Complex::default(); 32]; 2],
             factor,
             tail: [[Complex::default(); 32]; 2],
             previous_kx: 0,
@@ -83,14 +81,7 @@ impl Channel {
         }
         let mut low = Vec::with_capacity(analysis.len() + 2);
         for (rows, cutoff) in [
-            (
-                if use_full {
-                    &self.full_tail[..]
-                } else {
-                    &self.tail[..]
-                },
-                self.previous_kx,
-            ),
+            (&self.tail[..], self.previous_kx),
             (analysis.as_slice(), kx),
         ] {
             for row in rows {
@@ -99,20 +90,10 @@ impl Channel {
                 low.push(v);
             }
         }
-        for (dst, src) in self.tail.iter_mut().zip(&short[short.len() - 2..]) {
-            *dst = std::array::from_fn(|k| Complex {
-                re: src[k].re * 32768. * self.factor as f64,
-                im: src[k].im * 32768. * self.factor as f64,
-            });
-        }
-        if let Some(full) = full {
-            for (dst, src) in self.full_tail.iter_mut().zip(&full[full.len() - 2..]) {
-                *dst = std::array::from_fn(|k| Complex {
-                    re: src[k].re * 32768.,
-                    im: src[k].im * 32768.,
-                });
-            }
-        }
+        // HF prediction consumes the two LF columns actually emitted before
+        // this frame. Using the newly selected bank's cached past columns
+        // changes the predecessor signal at a short/full crossover switch.
+        self.tail.copy_from_slice(&analysis[analysis.len() - 2..]);
         self.previous_kx = kx;
         Ok(low)
     }
@@ -336,5 +317,30 @@ impl Dsp {
         let output = trial.channels[0].output(&rows, trial.bands)?;
         *self = trial;
         Ok(output)
+    }
+}
+
+#[cfg(test)]
+mod crossover_tests {
+    use super::*;
+    #[test]
+    fn predictor_prefix_is_the_preceding_emitted_signal_in_both_bank_directions() {
+        let mut channel = Channel::new(1, 64, 8).unwrap();
+        let mut previous = None::<Vec<[Complex; 32]>>;
+        for (frame, kx) in [4, 5, 4, 5, 4].into_iter().enumerate() {
+            let short: Vec<f32> = (0..60)
+                .map(|i| ((i + frame * 60) as f32 * 0.13).sin() * 0.2)
+                .collect();
+            let full: Vec<f32> = (0..480)
+                .map(|i| ((i + frame * 480) as f32 * 0.07).cos() * 0.1)
+                .collect();
+            let rows = channel.low(&short, Some(&full), kx).unwrap();
+            if let Some(old) = previous {
+                assert_eq!(&rows[..2], &old[old.len() - 2..]);
+            } else {
+                assert_eq!(rows[..2], [[Complex::default(); 32]; 2]);
+            }
+            previous = Some(rows);
+        }
     }
 }
