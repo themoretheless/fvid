@@ -1,0 +1,8 @@
+{
+  "commit": "02ce5fd4703cdea5c0fc29e68bfe8c63d1e4ec3b",
+  "sha256": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": "e33bddc7c679ca353df6458af8c07e208b768ad1ab29dcdbd72ec03a17cae82f",
+    "src/playback/audio/mp4_audio.rs": "99f601a808f247d8e7cf9a7811976ec02854a58d276cf01ada6ba51405206dac"
+  },
+  "status": "synthetic acceptance baseline running; no production fix applied"
+}

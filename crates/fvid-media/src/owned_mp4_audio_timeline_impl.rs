@@ -1,3 +1,15 @@
+fn mp4_write_tail_silence(output: &mut impl std::io::Write, frames: u64, channels: u16, control: &DecodeProgress<'_>) -> Result<()> {
+    let mut bytes = frames.checked_mul(u64::from(channels) * Mp4TimelineDecoder::SAMPLE_BYTES as u64)
+        .ok_or_else(|| invalid("MP4 tail silence size overflow"))?;
+    let zeros = [0u8; 4096];
+    while bytes != 0 {
+        control.check()?;
+        let count = bytes.min(zeros.len() as u64) as usize;
+        output.write_all(&zeros[..count])?;
+        bytes -= count as u64;
+    }
+    Ok(())
+}
 pub(crate) fn mp4_active_samples(
     track: &Mp4NormalizationTrack,
     interval: Option<(Duration, Duration)>,
@@ -86,7 +98,12 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
     }
     // Detect the need for normalization before caller-owned output.
     let mut checked = initial_description;
-    let mut normalize = target.is_some() || track.timescale % rate != 0;
+    // Even a prefix with one decoder setup can belong to a longer track whose
+    // endpoint is fractional on that setup's grid. The integer schedule would
+    // reject the whole duration before reaching the requested short interval.
+    let fractional_extent = track.edits.is_empty()
+        && (u128::from(track.duration) * u128::from(rate)) % u128::from(track.timescale) != 0;
+    let mut normalize = target.is_some() || track.timescale % rate != 0 || fractional_extent;
     for i in 0..active_samples {
         control.check()?;
         let id = track.samples.get(i).ok_or_else(|| invalid("missing audio sample"))?.description_index;
@@ -119,6 +136,13 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
         edit_clock.timescale,
         rate,
     )?;
+    let declared_tail = track.declared_empty_tail()?.map(|tail| -> Result<(u64, u64)> {
+        let boundary = |ticks| -> Result<u64> {
+            u64::try_from(mp4_export_clock::Time::new(ticks, u128::from(track.timescale))?.ceil_frames(rate)?)
+                .map_err(|_| invalid("MP4 tail sample position overflow"))
+        };
+        Ok((boundary(tail.start)?, boundary(tail.end)?))
+    }).transpose()?;
     let timeline = presentation.sample_frames;
     let segments = presentation.segments;
     let (from, to) = if let Some((begin, end)) = interval {
@@ -307,7 +331,14 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
             }
         }
         if written != length && !control.packet_limit_reached() {
-            return Err(invalid("audio edit extends outside available samples"));
+            let position = from.checked_add(written).ok_or_else(|| invalid("MP4 tail position overflow"))?;
+            if sample_index == track.samples.len()
+                && declared_tail.is_some_and(|(start, end)| position >= start && to <= end) {
+                mp4_write_tail_silence(output, length - written, channels, control)?;
+                written = length;
+            } else {
+                return Err(invalid("audio edit extends outside available samples"));
+            }
         }
         stats.sample_frames += written;
     }

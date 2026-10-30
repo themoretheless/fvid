@@ -1,0 +1,17 @@
+{
+  "command": "python3 scripts/generate_mp4_open_edit_tail.py",
+  "identical_checked_in_bytes_after_regeneration": true,
+  "files": 32,
+  "valid_open_finite_pairs": 12,
+  "invalid_codec_controls": [
+    "aac-invalid-last.mp4",
+    "alac-invalid-last.mp4"
+  ],
+  "overlong_edit_controls": [
+    "aac-outside-tail.mp4",
+    "pcm-outside-tail.mp4",
+    "alac-outside-tail.mp4"
+  ],
+  "manifest_sha256": "2f857c73bb8a91299482d006ce738687099e1e4c75727e62bf4789887e7e801e",
+  "external_tools_or_network": false
+}

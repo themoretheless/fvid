@@ -1,0 +1,12 @@
+{
+  "commit": "02ce5fd4703cdea5c0fc29e68bfe8c63d1e4ec3b",
+  "production_sha256": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": "e33bddc7c679ca353df6458af8c07e208b768ad1ab29dcdbd72ec03a17cae82f",
+    "crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs": "fb88d5cb03ad8a0f60c8b180a0fa7ebbe771b5c04f2a287dd774fd3b0eedcfc1",
+    "crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs": "1812e330c5cedbd73dc74fdb6c2a349f1d7080dca679e5a851ebbdfef20c6931",
+    "crates/fvid-media/src/owned_mp4_edit_clock_impl.rs": "7a2fe9339413cac6d093ae3e027780daddd81ae18c734db7df8f4a5b64b8622e",
+    "src/playback/audio/mp4_audio.rs": "99f601a808f247d8e7cf9a7811976ec02854a58d276cf01ada6ba51405206dac"
+  },
+  "test_sha256": "f0c0a0f4c5ae2369665217497fab08440133149c72dde4db06552b10732238fc",
+  "method": "Same workspace, temporarily restore only these five owned production edits; original sources recompiled, then finally restore exact fixed bytes. No snapshot/target path switching."
+}

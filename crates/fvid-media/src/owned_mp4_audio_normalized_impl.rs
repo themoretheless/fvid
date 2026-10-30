@@ -224,6 +224,10 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
         });
         timeline.end = end;
     }
+    let declared_tail = track.declared_empty_tail()?.map(|tail| -> Result<_> {
+        Ok((Mp4ExportTime::new(tail.start, u128::from(track.timescale))?,
+            Mp4ExportTime::new(tail.end, u128::from(track.timescale))?))
+    }).transpose()?;
     let total = timeline.end.ceil_frames(rate)?;
     let boundary = |d: Duration| -> Result<i128> {
         Mp4ExportTime::new(
@@ -409,7 +413,18 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
             stats.decoded_frames += 1;
         }
         if cursor != end && !control.packet_limit_reached() {
-            return Err(invalid("MP4 audio edit extends outside available samples"));
+            let tail = declared_tail.map(|(start, stop)| -> Result<_> {
+                Ok((segment.start.add(start.sub(media)?)?.ceil_frames(rate)?,
+                    segment.start.add(stop.sub(media)?)?.ceil_frames(rate)?))
+            }).transpose()?;
+            if sample_index == track.samples.len()
+                && tail.is_some_and(|(start, stop)| cursor >= start && end <= stop) {
+                mp4_write_tail_silence(output, u64::try_from(end - cursor)
+                    .map_err(|_| invalid("MP4 tail output count overflow"))?, channels, control)?;
+                cursor = end;
+            } else {
+                return Err(invalid("MP4 audio edit extends outside available samples"));
+            }
         }
         stats.sample_frames = stats
             .sample_frames

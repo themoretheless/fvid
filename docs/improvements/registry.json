@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 418,
-  "next_id": "FVID-0419",
+  "accepted_count": 419,
+  "next_id": "FVID-0420",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4529,11 +4529,14 @@
       "batch": 398,
       "title": "Reuse validated single-block ADTS transport allocations without duplicating payload",
       "source": "crates/fvid-media/src/owned_aac/adts_impl.rs",
-      "regression": "tests/adts_packet_working_set.rs; scripts/check_adts_allocations.py",
+      "regression": "tests/adts_packet_working_set.rs",
       "before": "Both parsers allocate a transport body, raw range, pending queue and copied payload for the first 1042-byte block: 4 allocations and 2196 scoped peak bytes in all six baseline observations; allocation guard fails. Nonzero PCM, MP4 companion and exact packet/EOF controls pass before optimization.",
       "result": "After framing and complete CRC validation, retain the original transport allocation for one raw block; compact only the optional CRC prefix. PCE bootstrap reuses its body too; multi-block ordering/validation stays intact. Both parsers use 2 allocations and 1058 scoped peak bytes repeatedly. Offline automatic allocation regression and 27 focused PCM/CRC/PCE/multi-block/budget checks pass. Three pre-existing broader integration failures are separately reproduced and retained. No throughput or RSS claim.",
       "status": "accepted",
-      "validation": "batch-398-validation.json"
+      "validation": "batch-398-validation.json",
+      "additional_regressions": [
+        "scripts/check_adts_allocations.py"
+      ]
     },
     {
       "id": "FVID-0406",
@@ -4633,8 +4636,9 @@
       "before": "Corrected runtime baseline: selected-unknown refusal passes; 3 acceptance tests fail. Both indexed parser wrappers discard audio in all 16 initial regular/fragmented constant/changing witnesses; native audio reports unknown zzzz and owned decode sees no audio stream. Initial parser-harness constant-description misuse was corrected and rerun before production edits; original log retained.",
       "result": "Retain opaque unknown audio SampleEntry metadata as already done for video, validating its common data reference. Select supported codec state only from actual sample or compact-chunk references before clock construction; unknown unselected entries cannot hide supported audio or reach a decoder. Fully unsupported tracks and actually selected unknown entries retain explicit capability refusal. 50 distinct integration checks pass across 9 targets, including all 6 expanded new tests. Twenty authored regular, fragmented and compact-index cases retain both tracks, exact selected descriptions, encoded packet bytes, DTS/PTS, independent nonzero PCM across coding/rate/channel/precision transitions, seek/rewind, six-picture video companions, owned normalized waveform equality and actual audio-worker replay. Core locked/offline no-default-features check passes. Four unrelated owned audio failures are reproduced before and after the fix. An uncounted follow-up qualifies automatic PCM eligibility using the first referenced setup, preventing an unused unsupported first entry from selecting a quiet alternate. Fifty-two checks and a core build pass. Prior owned audio test-oracle failures were requalified separately in batch-410.",
       "status": "accepted",
-      "validation": "batch-409-validation.json",
-      "follow_up_validation": "batch-412-validation.json"
+      "validation": "batch-419-prior-requalification-validation.json",
+      "follow_up_validation": "batch-412-validation.json",
+      "historical_validation": "batch-409-validation.json"
     },
     {
       "id": "FVID-0415",
@@ -4678,9 +4682,21 @@
       "source": "src/native_media.rs",
       "regression": "tests/native_mp4_initial_metadata.rs",
       "before": "Public audio_source_info_selected variants reject8 valid regular/fragmented changing-description witnesses because a constant-format admission guard also gates inspection. The12 authored PCM/VP9 witnesses play correctly; primary baseline2 pass,1 fail.",
-      "result": "Separate metadata inspection of the first actual decoder setup from explicit constant_audio_source_info_selected admission variants. Migrate repository DSP/CLI route callers with identical arguments/control flow and document external admission migration.173 selected checks pass with core/player builds; seven matching original failures remain separately proved on d25e228c19 and hold publication.",
+      "result": "Separate metadata inspection of the first actual decoder setup from explicit constant_audio_source_info_selected admission variants. Migrate repository DSP/CLI route callers with identical arguments/control flow and document external admission migration.Initial qualification had173 passing checks and seven separately proved original failures on d25e228c19. The uncounted prefix follow-up subsequently repaired those failures, passed210 checks/core/player builds and published the change. Current acceptance is backed by batch-419 prior-ID requalification; no old ID is recounted.",
       "status": "accepted",
-      "validation": "batch-418-validation.json"
+      "validation": "batch-419-prior-requalification-validation.json",
+      "historical_validation": "batch-418-validation.json"
+    },
+    {
+      "id": "FVID-0419",
+      "batch": 419,
+      "title": "Preserve declared packet-free MP4 audio tails through open and finite edits",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_open_edit_tail.rs",
+      "before": "Original 02ce5fd470 correctly indexes a trailing empty-duration fragment but resolves an open edit only against packet endpoints: AAC85 1/3ms becomes64ms and PCM/ALAC lose20ms. Finite equivalents are refused by owned decoding; native playback loses the tail, and overlong finite edits can falsely end. Final nine synthetic regressions on original production:2 controls pass,7 fail.",
+      "result": "Distinguish indexed decode coverage from composition endpoints, retain genuine declared tails without undoing signed CTTS shifts, and split native edit schedules into exact source/silence ranges. Append bounded zero chunks in owned f32/f64 integer and rational normalized paths only after source packets drain and only within declared time. Twelve open/finite AAC/PCM/ALAC video pairs preserve nonzero PCM then exact silence, both edit/tfdt versions, trim origins, timestamps, seek/rewind/EOF, probes, resampling/rematrixing and actual workers. Invalid codec packets and edits beyond the declared tail retain explicit refusals and no WAVE publication.281 distinct checks pass with locked/offline core/player builds. An original SSR interval-routing failure and registry metadata repairs are uncounted.",
+      "status": "accepted",
+      "validation": "batch-419-validation.json"
     }
   ]
 }

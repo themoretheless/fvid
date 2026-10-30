@@ -222,6 +222,30 @@ impl Timeline {
             minimum_starts: Vec::new(),
         })
     }
+    #[allow(dead_code)] // Playback marks packet-free source tails before scheduling.
+    pub fn declare_source_silence(&mut self, from: Time, to: Time) -> Result<()> {
+        let mut split = Vec::new();
+        split.try_reserve_exact(self.segments.len().checked_mul(3).ok_or_else(overflow)?)
+            .map_err(|_| invalid("MP4 edit silence allocation failed"))?;
+        for segment in &self.segments {
+            let Some(media) = segment.media else { split.push(*segment); continue; };
+            let source_end = media.add(segment.end.sub(segment.start)?)?;
+            let begin = from.max(media);
+            let end = if to.cmp(source_end) == Ordering::Less { to } else { source_end };
+            if begin.cmp(end) != Ordering::Less { split.push(*segment); continue; }
+            let a = segment.start.add(begin.sub(media)?)?;
+            let b = segment.start.add(end.sub(media)?)?;
+            if segment.start.cmp(a) == Ordering::Less {
+                split.push(Segment { start: segment.start, end: a, media: Some(media) });
+            }
+            split.push(Segment { start: a, end: b, media: None });
+            if b.cmp(segment.end) == Ordering::Less {
+                split.push(Segment { start: b, end: segment.end, media: Some(end) });
+            }
+        }
+        self.segments = split;
+        Ok(())
+    }
     pub fn locate(&self) -> Option<usize> {
         let at = self
             .segments

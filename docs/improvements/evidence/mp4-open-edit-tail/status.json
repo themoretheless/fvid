@@ -1,0 +1,48 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0419"
+  ],
+  "count_delta": 1,
+  "accepted_count": 419,
+  "summary": "Preserve declared packet-free MP4 audio tails in open/finite edit resolution, scheduling, owned decoding and native playback",
+  "before": {
+    "commit": "02ce5fd4703cdea5c0fc29e68bfe8c63d1e4ec3b",
+    "new_regression_passed": 2,
+    "new_regression_failed": 7,
+    "original_geometry_suite_passed": 8,
+    "original_geometry_suite_failed": 1,
+    "evidence": "full-baseline.log"
+  },
+  "checks": {
+    "integration": 234,
+    "root-units": 14,
+    "owned-clock": 3,
+    "owned-admission": 21,
+    "player-check": "passed locked/offline/no-default-features",
+    "core-check": "passed locked/offline/no-default-features",
+    "prior-owned-audio-requalification": 9
+  },
+  "integration_suites": 40,
+  "additional_old_owned_suites": 2,
+  "distinct_passed": 281,
+  "fixtures": {
+    "valid_open_finite_pairs": 12,
+    "authored_video_files": 29,
+    "pcm_oracles": 3,
+    "invalid_codec_controls": 2,
+    "overlong_edit_refusal_controls": 3,
+    "generator_offline_repeatability": "passed"
+  },
+  "uncounted": [
+    "Original SSR short-interval rational-normalization repair",
+    "Existing assertion diagnostics with the case and interval",
+    "Registry path and acceptance-evidence pointer repairs",
+    "All codec/version/edit, probe, normalization, worker and refusal variants"
+  ],
+  "limits": [
+    "No performance, physical speaker or GPU qualification claim",
+    "Not a whole-project test result"
+  ],
+  "publication": "ready; pending final Git delivery"
+}

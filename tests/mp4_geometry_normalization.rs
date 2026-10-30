@@ -123,7 +123,7 @@ fn aac_profile_rate_and_layout_changes_match_independent_native_and_filter_oracl
                 interval,
                 &Default::default(),
             )
-            .unwrap();
+            .unwrap_or_else(|error| panic!("{name} interval {interval:?}: {error}"));
             let expected = interval_oracle(&oracle, interval, case["rate"].as_u64().unwrap());
             compare(&f32s(&output), &expected, 2e-6, name);
             assert_eq!(

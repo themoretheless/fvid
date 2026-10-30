@@ -1,0 +1,11 @@
+{
+  "crates/fvid-media/src/owned_mp4_impl.rs": "64aa2ebb70cca1cd3b3e16b0f9f22fe9f5b692ac80f3fc663d65e370fea85e5d",
+  "crates/fvid-media/src/owned_mp4_edit_clock_impl.rs": "005da95be0581658f771bc01ebe15191329ab4c9132964d55ade45da71cba628",
+  "crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs": "b8724808332e34d7f0b4868636f2edce60fc87b02ffb53b18dbc131e42777619",
+  "crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs": "6f2e53f001551bff676f955c1d6be4f2759ead0f4f482666851e266b35505c98",
+  "src/playback/audio/mp4_audio.rs": "c1d723c6eed620bff0a065aec5df27518866a5998d64f78e2a2e39cbea1527c0",
+  "tests/mp4_open_edit_tail.rs": "f0c0a0f4c5ae2369665217497fab08440133149c72dde4db06552b10732238fc",
+  "tests/mp4_geometry_normalization.rs": "ed07b992961c807f2f6eef3962ae0818d0e703ced9180ddbf36afa71a645f2fc",
+  "scripts/generate_mp4_open_edit_tail.py": "24197811a2c32948606be059f1fdd74d2fb09cc1fedcbfe7f7a735151129a3a8",
+  "tests/fixtures/playback-errors/mp4-open-edit-tail/manifest.json": "2f857c73bb8a91299482d006ce738687099e1e4c75727e62bf4789887e7e801e"
+}

@@ -1,0 +1,31 @@
+{
+  "batch": 419,
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0414",
+    "FVID-0418"
+  ],
+  "count_delta": 0,
+  "summary": "Point previously accepted entries at current green qualification; retain all original baseline reports unchanged",
+  "historical_validation": [
+    "batch-409-validation.json",
+    "batch-418-validation.json"
+  ],
+  "follow_up_evidence": [
+    "batch-410-validation.json",
+    "batch-412-validation.json",
+    "batch-418-prefix-followup-validation.json",
+    "batch-419-validation.json"
+  ],
+  "current_checks": {
+    "integration_suites": 40,
+    "integration_passed": 234,
+    "owned_audio_requalification_passed": 9,
+    "root_audio_passed": 14,
+    "owned_clock_passed": 3,
+    "owned_admission_passed": 21,
+    "core_and_player_checks": "passed"
+  },
+  "evidence": "docs/improvements/evidence/mp4-open-edit-tail/ledger-requalification.log",
+  "note": "Historical failures remain in their original reports; they no longer block the current tested source. No old ID is counted again."
+}

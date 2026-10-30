@@ -279,7 +279,11 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         Self::validate_selected_codecs(demuxer.tracks().get(index)
             .ok_or_else(|| invalid("MP4 track index out of range"))?)?;
         let clock=PlaybackClock::build(&mut demuxer,index,programme.unwrap_or(0))?;
-        if clock.is_some() || demuxer.tracks().get(index).is_some_and(|t|t.ensure_constant_description().is_err() || t.has_open_edit()
+        let finite_aac_tail = {
+            let track = &demuxer.tracks()[index];
+            track.codec == *b"mp4a" && !track.edits.is_empty() && track.declared_empty_tail()?.is_some()
+        };
+        if clock.is_some() || finite_aac_tail || demuxer.tracks().get(index).is_some_and(|t|t.ensure_constant_description().is_err() || t.has_open_edit()
             || (t.codec == *b"mp4a" && (t.edits.len() > 1 || t.edits.first().is_some_and(|e|e.media_time < 0)))
             || (!t.edits.is_empty() && matches!(&t.codec,b"alac"|b"raw "|b"sowt"|b"twos"|b"in24"|b"in32"|b"fl32"|b"fl64"))) {
             return Self::from_changing(demuxer,index,programme,clock);
@@ -463,7 +467,14 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             .ok_or_else(|| invalid("MP4 track index out of range"))?;
         let edit_clock = track.resolved_edit_clock(demuxer.movie_timescale())?;
         let variable_edits = if track.edits.is_empty() {None} else {
-            Some(VariableTimeline::new(edit_clock.edits(),track.timescale,edit_clock.timescale)?)
+            let mut timeline = VariableTimeline::new(edit_clock.edits(),track.timescale,edit_clock.timescale)?;
+            if let Some(tail) = track.declared_empty_tail()? {
+                timeline.declare_source_silence(
+                    EditTime::new(tail.start, u128::from(track.timescale))?,
+                    EditTime::new(tail.end, u128::from(track.timescale))?,
+                )?;
+            }
+            Some(timeline)
         };
         if programme.is_some()
             && !track

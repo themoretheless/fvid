@@ -254,6 +254,27 @@ pub struct Track {
 }
 
 impl Track {
+    fn indexed_endpoints(&self) -> Result<(i128, i128)> {
+        match &self.samples {
+            SampleIndex::Expanded(samples) => Ok(samples.iter().fold((0i128, 0i128), |(pts, dts), s| (
+                pts.max(i128::from(s.pts) + i128::from(s.duration)),
+                dts.max(i128::from(s.dts) + i128::from(s.duration)),
+            ))),
+            SampleIndex::Uniform(index) => {
+                let end = i128::try_from(index.count).ok()
+                    .and_then(|n| n.checked_mul(i128::from(index.duration)))
+                    .ok_or_else(|| invalid("MP4 indexed endpoint overflow"))?;
+                Ok((end, end))
+            }
+        }
+    }
+    /// Declared time after all indexed audio, including empty-duration fragments.
+    /// Decode duration alone must not erase a signed composition shift.
+    pub(crate) fn declared_empty_tail(&self) -> Result<Option<Range<i128>>> {
+        let (presentation, decoded) = self.indexed_endpoints()?;
+        let end = i128::from(self.duration);
+        Ok((end > decoded && end > presentation).then_some(presentation..end))
+    }
     pub fn has_open_edit(&self) -> bool {
         matches!(self.edits.as_slice(), [edit] if edit.duration == 0 && edit.media_time >= 0)
     }
@@ -268,14 +289,10 @@ impl Track {
         }
         let mut clock = ResolvedEditClock { timescale: movie_scale, original: &self.edits, resolved: None };
         if self.has_open_edit() {
-            let end = match &self.samples {
-                SampleIndex::Expanded(samples) => samples.iter()
-                    .map(|sample| i128::from(sample.pts) + i128::from(sample.duration))
-                    .max().unwrap_or(0),
-                SampleIndex::Uniform(index) => i128::try_from(index.count)
-                    .ok().and_then(|n| n.checked_mul(i128::from(index.duration)))
-                    .ok_or_else(|| invalid("MP4 open edit endpoint overflow"))?,
-            };
+            let (mut end, decoded) = self.indexed_endpoints()?;
+            if i128::from(self.duration) > decoded {
+                end = end.max(i128::from(self.duration));
+            }
             let start = self.edits[0].media_time;
             let duration = u64::try_from(end - i128::from(start))
                 .ok().filter(|n| *n != 0)
