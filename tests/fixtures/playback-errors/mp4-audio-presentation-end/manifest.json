@@ -295,7 +295,8 @@
       "shift_ms": 0,
       "shift_ticks": 0,
       "clock": 1000,
-      "oracle": "full.f32le"
+      "oracle": "full-tail.f32le",
+      "silent_tail_frames": 160
     },
     {
       "file": "alac-empty-tail.mp4",
@@ -303,12 +304,14 @@
       "shift_ms": 0,
       "shift_ticks": 0,
       "clock": 1000,
-      "oracle": "full.f32le"
+      "oracle": "full-tail.f32le",
+      "silent_tail_frames": 160
     }
   ],
   "sha256": {
     "full.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
     "negative.f32le": "cf220a13739728837fcc83ff4ccff535aef5524d53d92a16cd94c7e1d6bb3888",
+    "full-tail.f32le": "c8f52d73529d0684f7febfbf182b1d170e1c9fce8fccdc3b27b24a5213775eb6",
     "pcm-1000-shift-10-known.mp4": "76be47075606010de2b8b629e22c2ac177a437b9848c34476997aefded35099b",
     "pcm-1000-shift-10-unknown.mp4": "6593380094433c97c04f71eddf31a6d1774a646a8054521d4597985935014227",
     "pcm-1000-shift0-known.mp4": "9bee63f11e1e4412aacb365dbad1ca975fbe2be9aec93f06f63d54d011f56789",

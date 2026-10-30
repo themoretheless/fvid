@@ -1,0 +1,7 @@
+{
+  "commit": "e83292bf1906960c8a6d23455e7ea050b4f51660",
+  "original_production_sha256": "66d4aec9427ca22a827deb462e3b50f24d8ed0ba92bcdeff7a5573558943037d",
+  "fixed_production_sha256": "20c647c43b49b16aad880d931b83cd243c93deee929992eb72fbafd8ed6c7ce2",
+  "test_sha256": "307d950c007a4309774e6228b19e5ae6bf1928f44d8ec4481c989f24626fc968",
+  "manifest_sha256": "ce919c51774fffa0bcdace46a7d81b1930990ca75be440991ea696ce437ee4d9"
+}

@@ -1,0 +1,10 @@
+{
+  "src/playback/audio/mp4_audio.rs": "20c647c43b49b16aad880d931b83cd243c93deee929992eb72fbafd8ed6c7ce2",
+  "tests/mp4_unedited_audio_tail.rs": "307d950c007a4309774e6228b19e5ae6bf1928f44d8ec4481c989f24626fc968",
+  "scripts/generate_mp4_unedited_audio_tail.py": "837294b8c0a1a53f5810d2bb8f9466b89c9f5974918408d41ce2d1f66468b8f0",
+  "tests/fixtures/playback-errors/mp4-unedited-audio-tail/manifest.json": "ce919c51774fffa0bcdace46a7d81b1930990ca75be440991ea696ce437ee4d9",
+  "scripts/generate_mp4_audio_presentation_end.py": "c0b95b803e85a32b41fc326404f43c2fc0ef160c9276ea89d0f98deaa2ae9638",
+  "tests/mp4_audio_presentation_end.rs": "391c8f0bb594d53ce99055ca59e588c239f577f06de6e7a2c63f625eca8783e3",
+  "tests/fixtures/playback-errors/mp4-audio-presentation-end/manifest.json": "3a85dd015d5c430f45b8c9e512ed143374fcc6dea1b863219ee8c62d3219ea8d",
+  "tests/fixtures/playback-errors/mp4-audio-presentation-end/full-tail.f32le": "c8f52d73529d0684f7febfbf182b1d170e1c9fce8fccdc3b27b24a5213775eb6"
+}

@@ -1,0 +1,6 @@
+{
+  "src/playback/audio/mp4_audio.rs": "20c647c43b49b16aad880d931b83cd243c93deee929992eb72fbafd8ed6c7ce2",
+  "tests/mp4_unedited_audio_tail.rs": "307d950c007a4309774e6228b19e5ae6bf1928f44d8ec4481c989f24626fc968",
+  "scripts/generate_mp4_unedited_audio_tail.py": "837294b8c0a1a53f5810d2bb8f9466b89c9f5974918408d41ce2d1f66468b8f0",
+  "tests/fixtures/playback-errors/mp4-unedited-audio-tail/manifest.json": "ce919c51774fffa0bcdace46a7d81b1930990ca75be440991ea696ce437ee4d9"
+}

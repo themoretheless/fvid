@@ -1,0 +1,10 @@
+{
+  "commit": "e83292bf1906960c8a6d23455e7ea050b4f51660",
+  "sha256": {
+    "src/playback/audio/mp4_audio.rs": "66d4aec9427ca22a827deb462e3b50f24d8ed0ba92bcdeff7a5573558943037d",
+    "tests/mp4_unedited_audio_tail.rs": "0208d7092cb2d46faf9da06f21379f22d747791aba82620a5271e11db93ab321",
+    "scripts/generate_mp4_unedited_audio_tail.py": "1aba17901cb0d11b182ea048f4164175f910f677fcea310e316cc9cef55558c1",
+    "tests/fixtures/playback-errors/mp4-unedited-audio-tail/manifest.json": "6c696017e1585cfcb6b2b08fe9985d201deb18be7a3a0ff580619f00951e7656"
+  },
+  "test_contract": "Exact byte count and trailing zero bytes; compressed source floats use the established independent-reference tolerance1e-6. Cold build has not reached this test yet."
+}

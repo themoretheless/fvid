@@ -76,7 +76,9 @@ fn exact_pcm_timestamps_seek_rewind_and_video_remain_intact() {
         let target = c["shift_ticks"].as_i64().unwrap() + c["clock"].as_i64().unwrap() / 50;
         assert_eq!(s.seek_to(target), target);
         let got = transitions::collect(&mut s);
-        let full = bytes("full.f32le");
+        let full = if c["silent_tail_frames"].as_u64().unwrap_or(0)>0 {
+            bytes("full-tail.f32le")
+        } else {bytes("full.f32le")};
         assert_eq!(
             got.iter()
                 .flat_map(|f| f.3.iter().copied())

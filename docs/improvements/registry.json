@@ -4696,7 +4696,9 @@
       "before": "Original 02ce5fd470 correctly indexes a trailing empty-duration fragment but resolves an open edit only against packet endpoints: AAC85 1/3ms becomes64ms and PCM/ALAC lose20ms. Finite equivalents are refused by owned decoding; native playback loses the tail, and overlong finite edits can falsely end. Final nine synthetic regressions on original production:2 controls pass,7 fail.",
       "result": "Distinguish indexed decode coverage from composition endpoints, retain genuine declared tails without undoing signed CTTS shifts, and split native edit schedules into exact source/silence ranges. Append bounded zero chunks in owned f32/f64 integer and rational normalized paths only after source packets drain and only within declared time. Twelve open/finite AAC/PCM/ALAC video pairs preserve nonzero PCM then exact silence, both edit/tfdt versions, trim origins, timestamps, seek/rewind/EOF, probes, resampling/rematrixing and actual workers. Invalid codec packets and edits beyond the declared tail retain explicit refusals and no WAVE publication.281 distinct checks pass with locked/offline core/player builds. An original SSR interval-routing failure and registry metadata repairs are uncounted.",
       "status": "accepted",
-      "validation": "batch-419-validation.json"
+      "validation": "batch-419-validation.json",
+      "follow_up_validation": "batch-419-unedited-tail-followup-validation.json",
+      "follow_up_note": "Uncounted native playback without elst: retain explicit source tails through the existing variable scheduler. Four codecs preserve exact silence, seeks, rewind, EOF and actual workers; a physically short two-day tail yields bounded output.365 scoped checks and core/player builds pass. Legacy tail expectations now include literal zeros; all old media payload bytes remain unchanged."
     },
     {
       "id": "FVID-0420",

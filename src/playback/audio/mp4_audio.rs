@@ -287,7 +287,11 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             track.codec == *b"mp4a" && !track.edits.is_empty() && track.declared_empty_tail()?.is_some()
         };
         let middle_gaps = demuxer.tracks()[index].has_declared_gaps();
-        if clock.is_some() || finite_aac_tail || middle_gaps || demuxer.tracks().get(index).is_some_and(|t|t.ensure_constant_description().is_err() || t.has_open_edit()
+        let unedited_tail = {
+            let track = &demuxer.tracks()[index];
+            track.edits.is_empty() && track.declared_empty_tail()?.is_some()
+        };
+        if clock.is_some() || finite_aac_tail || middle_gaps || unedited_tail || demuxer.tracks().get(index).is_some_and(|t|t.ensure_constant_description().is_err() || t.has_open_edit()
             || (t.codec == *b"mp4a" && (t.edits.len() > 1 || t.edits.first().is_some_and(|e|e.media_time < 0)))
             || (!t.edits.is_empty() && matches!(&t.codec,b"alac"|b"raw "|b"sowt"|b"twos"|b"in24"|b"in32"|b"fl32"|b"fl64"))) {
             return Self::from_changing(demuxer,index,programme,clock);
@@ -477,8 +481,9 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             .get(index)
             .ok_or_else(|| invalid("MP4 track index out of range"))?;
         let source_gaps = track.has_declared_gaps();
+        let declared_tail = track.declared_empty_tail()?;
         let edit_clock = track.resolved_edit_clock(demuxer.movie_timescale())?;
-        let variable_edits = if track.edits.is_empty() && !source_gaps {None} else {
+        let variable_edits = if track.edits.is_empty() && !source_gaps && declared_tail.is_none() {None} else {
             let mut timeline = VariableTimeline::new(edit_clock.edits(),track.timescale,edit_clock.timescale)?;
             if track.edits.is_empty() {
                 let end = match &clock {
@@ -488,7 +493,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 timeline.segments.push(edit_clock::Segment { start: EditTime::ZERO, end, media: Some(EditTime::ZERO) });
                 timeline.end = end;
             }
-            if let Some(tail) = track.declared_empty_tail()? {
+            if let Some(tail) = declared_tail {
                 let start = if let Some(clock) = &clock {
                     let last = track.samples.len().checked_sub(1).ok_or_else(||invalid("empty MP4 tail clock"))?;
                     clock.point(track,last)?.add(EditTime::ticks(clock.frames(track,last)? as u64,clock.rate(last)?)?)?

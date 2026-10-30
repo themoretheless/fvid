@@ -1,0 +1,8 @@
+{
+  "all_existing_payload_sha256_unchanged": true,
+  "new_oracle": "full-tail.f32le",
+  "construction": "Independent authored full PCM then160 mono f32 zero frames",
+  "old_empty_tail_assertion": "Duration80ms with only60ms PCM",
+  "accepted_empty_tail_assertion": "Duration80ms with60ms PCM plus20ms exact zeros, including seek suffix",
+  "no_tolerances_or_checks_removed": true
+}

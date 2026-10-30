@@ -1,0 +1,16 @@
+{
+  "raw_sha256": {
+    "fvid-unedited-audio-tail-seek-after-20261030.log": "6d174c400c3cce6dfe26aa01ce7008c232a8c935126f82b35110ef1f37543c94",
+    "fvid-unedited-audio-tail-final-integration-20261030.log": "61f42e903ec3714ced74b627ff8bb06485f06ae7c39d454913a318f4f3a356e0",
+    "fvid-unedited-audio-tail-accept-player-check-20261030.log": "e9880d1e4aad30745d827bd29a650668b6d766de06aa5c5926caf685afcff19d",
+    "fvid-unedited-audio-tail-resource-after-20261030.log": "eb1d93ecc07c7c1ea4171eff90f3f62342e5bc6569194eabd89a0fbee9752577",
+    "fvid-unedited-audio-tail-accept-integration-20261030.log": "2d69a32c6724623b1abbef22c711ed5fd731d3e4b845487a12098c8f85030dea",
+    "fvid-unedited-audio-tail-full-before-20261030.log": "796c353d59056e629fc4f9735d0f455c8b5859d93bd5eb3fb367da6e9e98a16b",
+    "fvid-unedited-audio-tail-old-oracle-after-20261030.log": "a9437432894a9cb20dc7e8acc91cd933ed6f6488344e89eafb78d23cf257fbd0",
+    "fvid-unedited-audio-tail-before-20261030.log": "cb3974c835b7058deacd09a9733416960bc7d9d4cf7799379ab0f93dbaa13ca7",
+    "fvid-unedited-audio-tail-accept-core-check-20261030.log": "0e58ee429556e2d606b38ed1dc856f1f7298ca5f5e5e8c054f2e775c678c7771",
+    "fvid-unedited-audio-tail-after-20261030.log": "a1859d125d5fdc64f3aa2863f4a8b421a76eb57a302333efc88dc3ae1b0d1209",
+    "fvid-unedited-audio-tail-accept-root-units-20261030.log": "c737476298de1bbed8b0116da108ec185c98b2d7c4913b539165bd6ec55bcb55"
+  },
+  "normalization": "Trailing whitespace and EOF blank lines stripped in archived text logs."
+}

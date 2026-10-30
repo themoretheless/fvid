@@ -1,0 +1,46 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0419"
+  ],
+  "count_delta": 0,
+  "accepted_count": 421,
+  "summary": "Uncounted declared empty-tail playback without an edit list",
+  "before": {
+    "commit": "e83292bf1906960c8a6d23455e7ea050b4f51660",
+    "final_primary_passed": 1,
+    "final_primary_failed": 3,
+    "specific_failure": "Owned decoder preserves tail; native AAC/PS/PCM/ALAC omit it despite correct declared duration. Seek skips it and long-tail seek yields no PCM."
+  },
+  "checks": {
+    "integration": {
+      "passed": 309,
+      "ignored": 0,
+      "suites": 59
+    },
+    "root-units": {
+      "passed": 56,
+      "ignored": 1,
+      "suites": 1
+    },
+    "player-check": "passed locked/offline/no-default-features",
+    "core-check": "passed locked/offline/no-default-features"
+  },
+  "distinct_passed": 365,
+  "ignored": 1,
+  "fixtures": {
+    "short_acceptance_videos": 4,
+    "two_day_resource_video": 1,
+    "independent_pcm_oracles": 4,
+    "all_video_frames_and_packet_clocks": "verified",
+    "old_media_payloads": "unchanged",
+    "offline_generator_repeatability": "passed"
+  },
+  "resource_result": "Physically short two-day tail seeks directly to day1, emits at most4096 zero bytes, renders10ms as80 frames/320 bytes and seeks EOF. Full logical PCM is not allocated.",
+  "limits": [
+    "No new ID counted for this tail variant",
+    "No performance, physical GPU/audio-device or whole-project claim"
+  ],
+  "evidence": "docs/improvements/evidence/mp4-unedited-audio-tail/status.json",
+  "publication": "pending"
+}

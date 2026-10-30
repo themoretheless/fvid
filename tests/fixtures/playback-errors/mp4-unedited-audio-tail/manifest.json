@@ -1,0 +1,56 @@
+{
+  "provenance": "Existing authored VP9/AAC/PS/PCM/ALAC packets. Three contiguous audio packets followed by one duration-is-empty fragment, no edit list. No private media/parameters, FFmpeg or network.",
+  "cases": [
+    {
+      "file": "aac.mp4",
+      "codec": "aac",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 4096,
+      "packet_frames": 1024,
+      "step": 301056,
+      "video_frames": 16
+    },
+    {
+      "file": "pcm.mp4",
+      "codec": "pcm",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 640,
+      "packet_frames": 160,
+      "step": 160,
+      "video_frames": 3
+    },
+    {
+      "file": "alac.mp4",
+      "codec": "alac",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 640,
+      "packet_frames": 160,
+      "step": 160,
+      "video_frames": 3
+    },
+    {
+      "file": "ps.mp4",
+      "codec": "ps",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 8192,
+      "packet_frames": 2048,
+      "step": 602112,
+      "video_frames": 16
+    }
+  ],
+  "sha256": {
+    "aac.mp4": "35fe31f5dd09f7dd03227ee0c67fdc0a1c402467226f246088f10f2d1715ce9b",
+    "aac-oracle.f32le": "f177c33c2595e909600fd278a570ed1945f6d5605890baf55ebe472e0df374bb",
+    "pcm.mp4": "1268a9356de92fe632fa324b7a7fd77060ac9f9ab20d5eac0f051af19efe1679",
+    "pcm-oracle.f32le": "c8f52d73529d0684f7febfbf182b1d170e1c9fce8fccdc3b27b24a5213775eb6",
+    "alac.mp4": "a419a2e1fbe9da8f7d5413be37a3b898335dcb5635490bdc492b5cafcf3712c0",
+    "alac-oracle.f32le": "c8f52d73529d0684f7febfbf182b1d170e1c9fce8fccdc3b27b24a5213775eb6",
+    "ps.mp4": "59d975d8d1f16ec0b171b2270221a85ca4eb04dd4f109253a4fcabddd8508b2d",
+    "ps-oracle.f32le": "06137b61f7c919a60f71515b6faf86f84c27f33be2f7f4d9429f137f58cc4692",
+    "pcm-two-day-tail.mp4": "27d6632f16368edbcf875e9ba91d75509991733af2bae6b342447a1860c15106"
+  }
+}

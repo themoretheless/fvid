@@ -6,7 +6,7 @@ from generate_vp9_chroma import atom,word
 from generate_mp4_tfhd_defaults_regressions import atoms
 OUT=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/mp4-audio-presentation-end'
 def main():
-    own=generate();files={'full.f32le':own['expected.f32le'],'negative.f32le':own['negative-expected.f32le']};cases=[]
+    own=generate();files={'full.f32le':own['expected.f32le'],'negative.f32le':own['negative-expected.f32le'],'full-tail.f32le':own['expected.f32le']+bytes(160*4)};cases=[]
     for codec in ['pcm','alac']:
         for clock in [1000,44100,1001]:
             base=own[f'{codec}-{1000 if clock==1001 else clock}.mp4']
@@ -46,7 +46,7 @@ def main():
                 out+=atom(k,b)
             return out
         tail=atom(b'moof',atom(b'mfhd',word(0,1))+atom(b'traf',atom(b'tfhd',word(0x30008,2,20))+atom(b'tfdt',word(0,60))))
-        n=f'{codec}-empty-tail.mp4';files[n]=gap(base)+tail;cases.append(dict(file=n,end_ns=80_000_000,shift_ms=0,shift_ticks=0,clock=1000,oracle='full.f32le'))
+        n=f'{codec}-empty-tail.mp4';files[n]=gap(base)+tail;cases.append(dict(file=n,end_ns=80_000_000,shift_ms=0,shift_ticks=0,clock=1000,oracle='full-tail.f32le',silent_tail_frames=160))
     OUT.mkdir(parents=True,exist_ok=True)
     for n,b in files.items():(OUT/n).write_bytes(b)
     (OUT/'manifest.json').write_text(json.dumps({'provenance':'Own 60ms VP9 with independently authored 8kHz mono PCM/raw ALAC. Signed composition offsets -10/0/+10ms, 1000/44100/1001 media clocks, known/unknown mdhd, explicit empty audio tails. No private media/parameters, external encoder, FFmpeg or network.','cases':cases,'sha256':{n:hashlib.sha256(b).hexdigest() for n,b in files.items()}},indent=2)+'\n')
