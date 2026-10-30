@@ -1,5 +1,5 @@
 {
-  "scope": "Primary-source research for the next valid codec gap: AAC-LD AOT23 plus attached LD-MPS. No implementation or playback acceptance is claimed here.",
+  "scope": "Historical pre-implementation primary-source research for AAC-LD AOT23 plus attached LD-MPS, inspected at a5e069cde0. Code findings below describe that baseline; implementation/acceptance evidence is recorded separately in aac-ld-mps-ld-core-tests-2026-10-31.json.",
   "sources": [
     {
       "url": "https://mpeg.chiariglione.org/sites/default/files/files/standards/docs/w15073.zip",
@@ -45,5 +45,14 @@
     "Independent/compositional PCM control with disclosed boundary",
     "Playback, seek, rewind, repeated ranges, late-error rollback",
     "Keep SBR prohibition for AAC-LD and unqualified residual domains explicit"
-  ]
+  ],
+  "followup_search": {
+    "date": "2026-10-31",
+    "official_catalog": "https://www.mpeg.org/standards/MPEG-D/2/",
+    "unverified_mirrors": [
+      "https://iso.ieclist.ink/iec/ISO%20IEC%2023003-2-2018%20PDF.pdf",
+      "https://www.ieclist.ink/iso/ISO%20IEC%2023003-2-2010%20PDF.pdf"
+    ],
+    "result": "Search-index text exists but the attempted 2018 PDF download and screenshot fetch return404. Cached text does not expose Annex B. These mirrors are not used as a complete normative source or implementation oracle."
+  }
 }

@@ -555,6 +555,14 @@ impl NativeAacDecoder {
             .decode_timed(packet, 0, 0)?
             .map_or_else(Vec::new, |f| f.samples))
     }
+    /// Spatial output may wait for parameters and may cover several core packets.
+    pub fn has_spatial(&self) -> bool { self.ld_mps.is_some() }
+    /// Use reader-owned opaque packet identities instead of media PTS for
+    /// spatial source association. Configure before decoding or after reset.
+    pub fn set_source_packet_ids(&mut self, enabled: bool) -> Result<()> {
+        if let Some(spatial)=&mut self.ld_mps {spatial.set_source_packet_ids(enabled)?;}
+        Ok(())
+    }
     pub fn delayed(&self) -> bool {
         self.ssr_alignment.is_some() || self.ld_mps.as_ref().is_some_and(NativeSpatial::delayed)
     }
@@ -657,7 +665,7 @@ impl NativeAacDecoder {
     }
     fn decode_unprotected_timed_in_clock(&mut self, packet: &[u8], pts:i64, duration:u64, source_timescale:u32) -> Result<Option<AacFrame>> {
         if self.config.object_type==39 {return self.decode_eld_timed(packet,pts,duration,source_timescale);}
-        if self.config.object_type==23 {return self.decode_ld_timed(packet,pts,duration);}
+        if self.config.object_type==23 {return self.decode_ld_timed(packet,pts,duration,source_timescale);}
         let mut ltp_coupling_synthesis=self.ltp_coupling_synthesis.clone();
         let mut bits = BitReader::new(packet);
         let mut current_program = self.program.clone();

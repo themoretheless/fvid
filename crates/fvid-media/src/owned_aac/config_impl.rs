@@ -293,7 +293,7 @@ impl AudioSpecificConfig {
         } else {
             signaled_object_type
         };
-        let (core, program, eld_sbr, protection, direct_mapping, separate_esc, eld_downscale_sample_rate, ld_mps) =
+        let (core, program, eld_sbr, protection, direct_mapping, separate_esc, eld_downscale_sample_rate, mut ld_mps) =
             AacConfig::read_core(&mut b, core_object_type, sample_rate, configuration)?;
         if core.object_type == 39 && !explicit {
             // ELD's own ldSbrPresentFlag was zero. It does not permit the
@@ -302,7 +302,10 @@ impl AudioSpecificConfig {
             ps_present=Some(false);
             if let Some(ld)=&eld_sbr {extension_sample_rate=Some(ld.output_rate(core.sample_rate)?);}
         }
-        if !explicit && eld_sbr.is_none() && b.remaining() >= 16 {
+        let ld_spatial_tail = core.object_type == 23 && b.remaining() >= 12 && {
+            let mut probe = b.clone(); probe.read(11)? == 0x7cc
+        };
+        if !explicit && !ld_spatial_tail && eld_sbr.is_none() && b.remaining() >= 16 {
             if b.read(11)? != 0x2b7 {
                 return Err(invalid("unsupported AAC trailing extension"));
             }
@@ -318,6 +321,27 @@ impl AudioSpecificConfig {
                         return Err(invalid("unsupported AAC trailing PS extension"));
                     }
                     ps_present = Some(b.bit()?);
+                }
+            }
+        }
+        // A false SBR discovery can still be followed by false PS metadata.
+        if !explicit && core.object_type == 23 && b.remaining() >= 12 {
+            let mut probe = b.clone();
+            if probe.read(11)? == 0x548 { b = probe; ps_present = Some(b.bit()?); }
+        }
+        // ISO/IEC14496-3:2009/Amd2 Table1.15 attaches LD-MPS to an AAC-LD
+        // core through sync extension0x7cc. AOT44 itself is spatial-only.
+        if !explicit && core.object_type == 23 && b.remaining() >= 12 {
+            let mut probe = b.clone();
+            if probe.read(11)? == 0x7cc {
+                b = probe;
+                if b.bit()? {
+                    let mut bytes = b.read(8)? as usize;
+                    if bytes == 255 { bytes += b.read(16)? as usize; }
+                    if bytes == 0 { return Err(invalid("empty AAC LD spatial configuration")); }
+                    if bytes > b.remaining()/8 { return Err(invalid("truncated AAC LD spatial configuration")); }
+                    ld_mps = Some(super::aac_ld_mps_config::Config::read_prefix(b.source_bytes(), b.position(), bytes)?.0);
+                    b.skip(bytes*8)?;
                 }
             }
         }

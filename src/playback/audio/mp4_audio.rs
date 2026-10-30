@@ -920,6 +920,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         } else {
             let mut decoder=crate::codec::make_audio_decoder(self.codec(), self.extra_data(), self.sample_rate(), self.channels(), self.bits_per_sample())?;
             decoder.set_source_timescale(self.track().timescale)?;
+            decoder.set_source_packet_ids(self.clock.is_some())?;
             if self.clock.as_ref().is_some_and(|c|c.full_packet(self.sample_index)) {decoder.defer_packet_trimming();}
             Ok(decoder)
         }

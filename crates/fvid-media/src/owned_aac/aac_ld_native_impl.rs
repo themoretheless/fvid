@@ -4,6 +4,7 @@ impl NativeAacDecoder {
         packet: &[u8],
         pts: i64,
         duration: u64,
+        source_timescale: u32,
     ) -> Result<Option<AacFrame>> {
         use super::aac_ld_synthesis::LdWindowShape;
         let config = &self.config;
@@ -61,8 +62,13 @@ impl NativeAacDecoder {
                 channels.push((channel, spectrum, prediction));
             }
         }
-        super::aac_pce::skip_er_extensions(&mut bits)?;
-        if channels.len() != usize::from(config.channels) || bits.remaining() > 7 {
+        let used_bits = bits.position();
+        if self.ld_mps.is_none() {
+            super::aac_pce::skip_er_extensions(&mut bits)?;
+        }
+        if channels.len() != usize::from(config.channels)
+            || self.ld_mps.is_none() && bits.remaining() > 7
+        {
             return Err(invalid(
                 "trailing bytes or channel mismatch after AAC LD block",
             ));
@@ -99,12 +105,34 @@ impl NativeAacDecoder {
                 output[i * usize::from(config.channels) + target] = value;
             }
         }
+        let frame = if let Some(spatial) = &mut self.ld_mps {
+            spatial
+                .decode_core(
+                    packet,
+                    used_bits,
+                    &output,
+                    super::aac_ld_mps_native::Stamp {
+                        pts,
+                        duration,
+                        timescale: source_timescale,
+                    },
+                )?
+                .map(|frame| AacFrame {
+                    samples: frame.samples,
+                    pts: frame.pts,
+                    duration: frame.duration,
+                })
+        } else {
+            Some(AacFrame {
+                samples: output,
+                pts,
+                duration,
+            })
+        };
+        // Spatial parsing/rendering is part of the same packet transaction.
+        // A late suffix error cannot advance LD overlap, lag or PNS history.
         self.ld_synthesis = next;
         self.noise = noise;
-        Ok(Some(AacFrame {
-            samples: output,
-            pts,
-            duration,
-        }))
+        Ok(frame)
     }
 }

@@ -101,7 +101,9 @@ fn check_corpus(corpus: &str) {
                 .flatten(),
         );
     for case in cases {
-        let bytes = std::fs::read(root.join(case["video"].as_str().unwrap())).unwrap();
+        let video = case["video"].as_str().map(str::to_owned)
+            .unwrap_or_else(|| format!("{}.mp4", case["name"].as_str().unwrap()));
+        let bytes = std::fs::read(root.join(video)).unwrap();
         let mut full = Vec::new();
         fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
             std::io::Cursor::new(&bytes),
@@ -382,4 +384,9 @@ fn active_esc_chain_worker_reconfigures_native_layout_and_seeks_between_all_epoc
 #[test]
 fn downscaled_ld_worker_keeps_exact_pcm_and_timestamps_through_navigation() {
     check_corpus("aac-ld-downscaled");
+}
+
+#[test]
+fn ld_mps_aac_ld_worker_keeps_source_windows_through_navigation() {
+    check_corpus("aac-ld-mps-ld-core");
 }

@@ -18,10 +18,17 @@ pub struct Stamp {
     pub duration: u64,
     pub timescale: u32,
 }
+/// Exact source-chunk slice represented by part of one rendered spatial frame.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct SourceSpan {
+    pub samples: usize,
+    pub stamp: Stamp,
+}
 #[derive(Clone, Debug, PartialEq)]
 pub struct Frame {
     pub pcm: aac_ld_mps_pcm::Frame,
     pub stamp: Stamp,
+    pub sources: Vec<SourceSpan>,
 }
 #[derive(Clone, Debug, PartialEq)]
 enum Signal {
@@ -57,6 +64,7 @@ pub struct Session {
     chunks: VecDeque<Chunk>,
     pending: VecDeque<Pending>,
     queued_samples: usize,
+    packet_ids: bool,
 }
 impl Session {
     pub fn new(config: &Config, mode: Mode) -> Result<Self> {
@@ -94,6 +102,7 @@ impl Session {
             chunks: VecDeque::new(),
             pending: VecDeque::new(),
             queued_samples: 0,
+            packet_ids: false,
         })
     }
     pub fn reset(&mut self) {
@@ -103,6 +112,15 @@ impl Session {
         self.chunks.clear();
         self.pending.clear();
         self.queued_samples = 0;
+    }
+    /// Reader-owned association IDs are opaque, not timestamps. This mode
+    /// requires complete source chunks so each output keeps its original ID.
+    pub fn set_source_packet_ids(&mut self, enabled: bool) -> Result<()> {
+        if self.packet_ids != enabled && (self.queued_samples != 0 || !self.pending.is_empty()) {
+            return Err(invalid("LD-MPS source stamp mode change requires reset"));
+        }
+        self.packet_ids = enabled;
+        Ok(())
     }
     pub fn queued_samples(&self) -> usize {
         self.queued_samples
@@ -187,7 +205,9 @@ impl Session {
             if stamp.timescale == 0 {
                 return Err(invalid("zero LD-MPS source timescale"));
             }
-            endpoint(stamp, count, count)?;
+            if !next.packet_ids {
+                endpoint(stamp, count, count)?;
+            }
             next.queued_samples = next
                 .queued_samples
                 .checked_add(count)
@@ -244,7 +264,7 @@ impl Session {
         }
         let mut output = Vec::new();
         while next.queued_samples >= next.frame_samples && !next.pending.is_empty() {
-            let (signal, stamp) = next.front_signal()?;
+            let (signal, stamp, sources) = next.front_signal()?;
             let pending = next.pending.front().unwrap();
             if let Some(candidate) = &pending.replacement {
                 next.pcm.reconfigure(candidate)?;
@@ -266,7 +286,11 @@ impl Session {
             output
                 .try_reserve(1)
                 .map_err(|_| invalid("LD-MPS output queue allocation failed"))?;
-            output.push(Frame { pcm, stamp });
+            output.push(Frame {
+                pcm,
+                stamp,
+                sources,
+            });
             next.pending.pop_front();
             let mut remaining = next.frame_samples;
             while remaining != 0 {
@@ -284,7 +308,7 @@ impl Session {
         *self = next;
         Ok(output)
     }
-    fn front_signal(&self) -> Result<(Signal, Stamp)> {
+    fn front_signal(&self) -> Result<(Signal, Stamp, Vec<SourceSpan>)> {
         let mut signal = if self.qmf_input {
             Signal::Qmf(Vec::with_capacity(self.frame_samples / self.bins))
         } else {
@@ -297,12 +321,23 @@ impl Session {
         let mut remaining = self.frame_samples;
         let mut stamp: Option<Stamp> = None;
         let mut prior_end = 0;
+        let mut sources = Vec::new();
         for chunk in &self.chunks {
             let total = chunk.samples;
             let take = (total - chunk.offset).min(remaining);
-            let start = endpoint(chunk.stamp, chunk.offset, total)?;
-            let end = endpoint(chunk.stamp, chunk.offset + take, total)?;
-            let timed = chunk.stamp.duration != 0;
+            let (start, end) = if self.packet_ids {
+                // Association IDs never participate in timestamp arithmetic.
+                (chunk.stamp.pts, chunk.stamp.pts)
+            } else {
+                (
+                    endpoint(chunk.stamp, chunk.offset, total)?,
+                    endpoint(chunk.stamp, chunk.offset + take, total)?,
+                )
+            };
+            if self.packet_ids && (chunk.offset != 0 || take != total) {
+                return Err(invalid("LD-MPS packet association splits a source window"));
+            }
+            let timed = self.packet_ids || chunk.stamp.duration != 0;
             if let Some(first) = &stamp {
                 if first.timescale != chunk.stamp.timescale {
                     return Err(invalid("LD-MPS frame spans different source clocks"));
@@ -310,11 +345,12 @@ impl Session {
                 // A positive source duration may round to zero for a short
                 // prefix; retain source timing mode rather than testing the
                 // accumulated output duration to distinguish untimed input.
-                let first_timed = self.chunks.front().unwrap().stamp.duration != 0;
+                let first_timed =
+                    self.packet_ids || self.chunks.front().unwrap().stamp.duration != 0;
                 if first_timed != timed {
                     return Err(invalid("LD-MPS frame mixes timed and untimed PCM"));
                 }
-                if timed && start != prior_end {
+                if timed && !self.packet_ids && start != prior_end {
                     return Err(invalid("LD-MPS frame spans discontinuous timestamps"));
                 }
             } else {
@@ -324,11 +360,39 @@ impl Session {
                     timescale: chunk.stamp.timescale,
                 });
             }
+            sources
+                .try_reserve(1)
+                .map_err(|_| invalid("LD-MPS source span allocation failed"))?;
+            sources.push(SourceSpan {
+                samples: take,
+                stamp: Stamp {
+                    pts: if self.packet_ids {
+                        chunk.stamp.pts
+                    } else {
+                        start
+                    },
+                    duration: if self.packet_ids {
+                        chunk.stamp.duration
+                    } else if timed {
+                        u64::try_from(i128::from(end) - i128::from(start))
+                            .map_err(|_| invalid("LD-MPS source duration overflow"))?
+                    } else {
+                        0
+                    },
+                    timescale: chunk.stamp.timescale,
+                },
+            });
             prior_end = end;
             let out = stamp.as_mut().unwrap();
             if timed {
-                out.duration = u64::try_from(i128::from(end) - i128::from(out.pts))
-                    .map_err(|_| invalid("LD-MPS output duration overflow"))?;
+                out.duration = if self.packet_ids {
+                    out.duration
+                        .checked_add(chunk.stamp.duration)
+                        .ok_or_else(|| invalid("LD-MPS output duration overflow"))?
+                } else {
+                    u64::try_from(i128::from(end) - i128::from(out.pts))
+                        .map_err(|_| invalid("LD-MPS output duration overflow"))?
+                };
             }
             match (&mut signal, &chunk.signal) {
                 (Signal::Pcm(dst), Signal::Pcm(src)) => {
@@ -355,10 +419,10 @@ impl Session {
             return Err(invalid("LD-MPS PCM queue count mismatch"));
         }
         let mut stamp = stamp.ok_or_else(|| invalid("empty LD-MPS PCM queue"))?;
-        if self.chunks.front().unwrap().stamp.duration == 0 {
+        if !self.packet_ids && self.chunks.front().unwrap().stamp.duration == 0 {
             stamp.duration = 0;
         }
-        Ok((signal, stamp))
+        Ok((signal, stamp, sources))
     }
 }
 fn endpoint(stamp: Stamp, offset: usize, samples: usize) -> Result<i64> {

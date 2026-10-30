@@ -220,8 +220,9 @@ impl PacketPcmDecoder {
     pub(crate) fn normalization_mask(&self) -> u32 {
         self.channel_mask().unwrap_or_else(||fvid_media::owned_pcm_channels::standard_mask(self.channels()).unwrap_or(0) as u32)
     }
+    pub(crate) fn spatial(&self) -> bool { matches!(self,Self::Aac(d) if d.has_spatial()) }
     pub(crate) fn delayed(&self) -> bool {
-        matches!(self, Self::Ps(_)) || matches!(self,Self::Aac(d) if d.delayed())
+        matches!(self, Self::Ps(_)) || matches!(self,Self::Aac(d) if d.has_spatial() || d.delayed())
     }
     pub(crate) fn decode_esc(&mut self,units:&[crate::codec::aac_ep1::AccessUnit<'_>])->Result<Option<Vec<f32>>> {
         match self {

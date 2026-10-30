@@ -1,4 +1,4 @@
-//! Owned AAC-ELD spatial stream context shared by native AAC frontends.
+//! Owned AAC-LD/AAC-ELD spatial stream context shared by native AAC frontends.
 pub use super::aac_ld_mps_session::Stamp;
 pub type Subbands = Vec<Vec<Vec<super::aac_sbr_qmf::Complex>>>;
 use super::{Result, aac_native::AacFrame, invalid, unsupported};
@@ -37,7 +37,7 @@ impl Decoder {
         core: Core,
         sbr: Option<bool>,
     ) -> Result<Self> {
-        if core.object_type != 39 || core.downscale != 1 {
+        if !matches!(core.object_type, 23 | 39) || core.downscale != 1 {
             return Err(unsupported(
                 "downscaled spatial filter banks are not yet implemented",
             ));
@@ -59,13 +59,21 @@ impl Decoder {
             .sample_rate
             .checked_mul(factor)
             .ok_or_else(|| invalid("LD-MPS output rate overflow"))?;
+        let spatial_samples = usize::from(config.frame_slots) * bins;
+        let core_samples = usize::from(core.frame_samples) * factor as usize;
+        // A 480-sample AAC-LD core at48kHz needs two core packets for a
+        // complete15-slot64-bin spatial frame. Session owns those source spans.
+        let frame_geometry = if core.object_type == 23 {
+            spatial_samples != 0 && core_samples != 0 && spatial_samples % core_samples == 0
+        } else {
+            spatial_samples == core_samples
+        };
         if config.sample_rate != rate
             || config.tree.input_channels != core.channels
-            || usize::from(config.frame_slots) * bins
-                != usize::from(core.frame_samples) * factor as usize
+            || !frame_geometry
         {
             return Err(invalid(
-                "LD-MPS rate, downmix channels or frame geometry disagree with AAC ELD core",
+                "LD-MPS rate, downmix channels or frame geometry disagree with AAC LD/ELD core",
             ));
         }
         if let Some(double) = sbr {
@@ -110,6 +118,12 @@ impl Decoder {
         self.assembler.reset();
         self.ready.clear();
         self.source_clock = None;
+    }
+    pub fn set_source_packet_ids(&mut self, enabled: bool) -> Result<()> {
+        if !self.ready.is_empty() {
+            return Err(invalid("LD-MPS source stamp mode change requires reset"));
+        }
+        self.session.set_source_packet_ids(enabled)
     }
     pub fn delayed(&self) -> bool {
         !self.ready.is_empty()
@@ -157,26 +171,47 @@ impl Decoder {
             {
                 return Err(invalid("AAC LD-MPS output clock or layout mismatch"));
             }
-            let mut samples = Vec::new();
-            samples
-                .try_reserve(frame.pcm.samples.len())
-                .map_err(|_| invalid("AAC LD-MPS PCM allocation failed"))?;
-            // Preserve one source window per native response. WAVE back L/R
-            // precede side L/R for the rear-surround trees4/6.
-            for row in frame.pcm.samples.chunks_exact(channels) {
-                for c in 0..channels {
-                    let value = row[if order.is_empty() { c } else { order[c] }] as f32;
-                    if !value.is_finite() {
-                        return Err(invalid("nonfinite AAC LD-MPS PCM output"));
-                    }
-                    samples.push(value);
+            let mut at = 0usize;
+            self.ready
+                .try_reserve(frame.sources.len())
+                .map_err(|_| invalid("AAC LD-MPS ready queue allocation failed"))?;
+            for source in frame.sources {
+                let count = source
+                    .samples
+                    .checked_mul(channels)
+                    .ok_or_else(|| invalid("AAC LD-MPS source stride overflow"))?;
+                let end = at
+                    .checked_add(count)
+                    .ok_or_else(|| invalid("AAC LD-MPS source stride overflow"))?;
+                if source.stamp.timescale != clock || end > frame.pcm.samples.len() {
+                    return Err(invalid("AAC LD-MPS output source span mismatch"));
                 }
+                let mut samples = Vec::new();
+                samples
+                    .try_reserve(count)
+                    .map_err(|_| invalid("AAC LD-MPS PCM allocation failed"))?;
+                // Emit each original AAC source window separately, even when
+                // one spatial frame covers several core packets. Container
+                // padding/edits must remain attached to their own source PCM.
+                for row in frame.pcm.samples[at..end].chunks_exact(channels) {
+                    for c in 0..channels {
+                        let value = row[if order.is_empty() { c } else { order[c] }] as f32;
+                        if !value.is_finite() {
+                            return Err(invalid("nonfinite AAC LD-MPS PCM output"));
+                        }
+                        samples.push(value);
+                    }
+                }
+                self.ready.push_back(AacFrame {
+                    samples,
+                    pts: source.stamp.pts,
+                    duration: source.stamp.duration,
+                });
+                at = end;
             }
-            self.ready.push_back(AacFrame {
-                samples,
-                pts: frame.stamp.pts,
-                duration: frame.stamp.duration,
-            });
+            if at != frame.pcm.samples.len() {
+                return Err(invalid("AAC LD-MPS output source span mismatch"));
+            }
         }
         Ok(())
     }

@@ -166,8 +166,9 @@ impl Mp4TimelineDecoder {
         }
     }
     fn normalization_mask(&self) -> u32 { self.channel_mask() }
+    fn spatial(&self) -> bool { matches!(self,Self::Aac(d) if d.has_spatial()) }
     fn delayed(&self) -> bool {
-        matches!(self, Self::Ps(_)) || matches!(self,Self::Aac(d) if d.delayed())
+        matches!(self, Self::Ps(_)) || matches!(self,Self::Aac(d) if d.has_spatial() || d.delayed())
     }
     fn finish_delayed(&mut self) -> Result<Option<Vec<f32>>> {
         match self {
@@ -542,6 +543,7 @@ mod precise {
             Ok(false)
         }
         fn normalization_mask(&self) -> u32 { self.channel_mask() }
+        fn spatial(&self) -> bool { false }
         fn delayed(&self) -> bool {
             false
         }

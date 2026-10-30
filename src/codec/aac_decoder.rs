@@ -103,6 +103,9 @@ impl AacDecoder {
 }
 
 impl crate::audio::AudioDecode for AacDecoder {
+    fn set_source_packet_ids(&mut self, enabled: bool) -> crate::Result<()> {
+        self.decoder.set_source_packet_ids(enabled).map_err(|e|crate::invalid(&e.to_string()))
+    }
     fn set_source_timescale(&mut self, timescale: u32) -> crate::Result<()> {
         if timescale == 0 {
             return Err(crate::invalid("zero AAC source timescale"));

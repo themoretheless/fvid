@@ -510,3 +510,87 @@ fn fragment_storage_and_snapshots_are_counted_separately_from_spatial_session() 
     assert_eq!(assembler.retained_payload_bytes().unwrap(), 0);
     assert!(saved.retained_payload_bytes().unwrap() >= 5);
 }
+
+#[test]
+fn opaque_source_ids_preserve_zero_duration_windows_without_relaxing_timestamps() {
+    let (config, pcm, messages) = setup(7);
+    let a = slice(&pcm[0], 0, 256);
+    let b = slice(&pcm[0], 256, 512);
+    let first = Stamp {
+        pts: 41,
+        duration: 0,
+        timescale: 1000,
+    };
+    let second = Stamp {
+        pts: i64::MAX,
+        duration: 11,
+        timescale: 1000,
+    };
+    let mut session = Session::new(&config, Mode::Complex).unwrap();
+    session.set_source_packet_ids(true).unwrap();
+    assert!(
+        session
+            .submit(Some((&a, first)), &messages[..1])
+            .unwrap()
+            .is_empty()
+    );
+    let saved = session.clone();
+    assert!(session.set_source_packet_ids(false).is_err());
+    assert_eq!(session, saved);
+    let output = session.submit(Some((&b, second)), &[]).unwrap();
+    assert_eq!(output.len(), 1);
+    assert_eq!(
+        output[0]
+            .sources
+            .iter()
+            .map(|s| (s.samples, s.stamp))
+            .collect::<Vec<_>>(),
+        vec![(256, first), (256, second)]
+    );
+    session.finish().unwrap();
+    session.reset();
+    assert!(
+        session
+            .submit(Some((&a, first)), &messages[..1])
+            .unwrap()
+            .is_empty()
+    );
+    assert_eq!(session.submit(Some((&b, second)), &[]).unwrap(), output);
+
+    let mut timed = Session::new(&config, Mode::Complex).unwrap();
+    let timed_first = Stamp {
+        duration: 5,
+        ..first
+    };
+    assert!(
+        timed
+            .submit(Some((&a, timed_first)), &messages[..1])
+            .unwrap()
+            .is_empty()
+    );
+    let saved = timed.clone();
+    assert!(
+        timed
+            .submit(Some((&b, Stamp { pts: 7, ..second })), &[])
+            .unwrap_err()
+            .to_string()
+            .contains("discontinuous timestamps")
+    );
+    assert_eq!(timed, saved);
+
+    let mut oversized = Session::new(&config, Mode::Complex).unwrap();
+    oversized.set_source_packet_ids(true).unwrap();
+    let mut wide = pcm[0].clone();
+    for channel in &mut wide {
+        channel.extend_from_within(..256);
+    }
+    let saved = oversized.clone();
+    assert!(
+        oversized
+            .submit(Some((&wide, second)), &messages[..1])
+            .unwrap_err()
+            .to_string()
+            .contains("splits a source window")
+    );
+    assert_eq!(oversized, saved);
+}

@@ -1,3 +1,31 @@
+## AAC-LD with attached LD-MPS — source-window playback,2026-10-31
+
+AOT23 now reads the normative ASC sync extension0x7cc and dispatches its ER
+spatial payload through the owned LD-MPS session. AOT44 remains a separate
+spatial-only object. Core LD overlap/LTP/noise and spatial history commit as one
+packet transaction; late suffix errors leave both unchanged.
+
+Spatial PCM retains its original source spans. At480 samples/48kHz one spatial
+frame covers two core packets, which must remain separate for container padding
+and packet association. The reader explicitly identifies opaque packet IDs;
+ordinary timestamp mode still rejects discontinuous or cross-clock spans.
+MP4 export holds delayed spatial windows until their matching PCM is available.
+
+318 own acceptance movies cover480/512,24/48kHz,all8 trees,TTT variants,
+STP/GES,grid changes,delayed/burst/fragmented transport,escaped SSC,interior
+padding and a3kHz container clock. Tests exercise the AudioWorker reader protocol,
+rewind/reset,forward/backward/EOF seek,repeated ranges and transactional retry.
+PCM comparison uses the frozen analytical LD core plus the separately qualified
+spatial session:8,300,064 samples,max difference7.258e-12,tolerance1e-9.
+This is compositional qualification,not independent complete LD-MPS conformance.
+EP0 without SBR at the listed geometries is covered; broader protection modes,
+residual domains,device output and real-time throughput are not newly qualified.
+
+Primary-source baseline: `docs/validation/aac-ld-mps-aac-ld-source-2026-10-31.json`.
+Corpus and gate evidence: `docs/validation/aac-ld-mps-ld-core-{generation,tests}-2026-10-31.json`.
+Final gates:1779 passed,0 failed,27 pre-existing ignored tests across media/root
+units and31 AAC/LD-MPS integration targets. Tests run offline without FFmpeg.
+
 ## MPEG-2 residual syntax boundary — corrected diagnostic,2026-10-31
 
 ISO/IEC23003-1 §4.3.1.2 specifies MPEG-2 AAC LC syntax for residual signals.

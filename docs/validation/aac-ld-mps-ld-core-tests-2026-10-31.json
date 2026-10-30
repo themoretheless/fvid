@@ -1,0 +1,303 @@
+{
+  "baseline_commit": "a5e069cde0",
+  "scope": "AAC-LD AOT23 attached LD-MPS, EP0 without SBR, own synthetic MP4 corpus; not complete LD-SBR/LD-MPS conformance",
+  "acceptance_movies": 318,
+  "flag_off_controls": 2,
+  "malformed_asc_movies": 2,
+  "late_runtime_error_movies": 4,
+  "oracle": {
+    "samples": 8300064,
+    "maximum_difference": 7.25793549067634e-12,
+    "tolerance": 1e-09,
+    "boundary": "Frozen analytical AAC-LD core PCM plus separately qualified spatial session; not independent full decoder"
+  },
+  "before_fix": {
+    "log_sha256": "474546c7d160b498be9abbdae52af980b2a7ef29d60e74f86b1820db80ebd156",
+    "error": "unsupported AAC trailing extension",
+    "case": "n480-r24000-tree0-v1-plain"
+  },
+  "checks": [
+    "All source-core windows retain native PTS/duration in nondefault clocks",
+    "AudioStream decoder_stamp/decode_source_packet and AudioWorker with capturing backend",
+    "Forward/back/EOF seek, repeated ranges, partial-history seek and rewind",
+    "Interior packet padding and 3 kHz container clock",
+    "Late malformed spatial retry preserves core/spatial/source history",
+    "Opaque source IDs including i64::MAX and zero-duration windows; real timestamp discontinuity remains rejected"
+  ],
+  "command_base": [
+    "cargo",
+    "--config",
+    "profile.dev.package.fvid-media.opt-level=2",
+    "test",
+    "--offline"
+  ],
+  "integration_targets": [
+    "aac_ld_mps_assemble",
+    "aac_ld_mps_config",
+    "aac_ld_mps_entropy",
+    "aac_ld_mps_frame",
+    "aac_ld_mps_ges",
+    "aac_ld_mps_grid",
+    "aac_ld_mps_inband",
+    "aac_ld_mps_ld_core",
+    "aac_ld_mps_matrix_apply",
+    "aac_ld_mps_parameters",
+    "aac_ld_mps_pcm",
+    "aac_ld_mps_prepare",
+    "aac_ld_mps_qmf",
+    "aac_ld_mps_residual",
+    "aac_ld_mps_residual_native",
+    "aac_ld_mps_route",
+    "aac_ld_mps_session",
+    "aac_ld_mps_stp",
+    "aac_ld_mps_stp_energy",
+    "aac_ld_mps_transport",
+    "aac_ld_mps_tree_matrix",
+    "aac_ld_mps_ttt",
+    "aac_ld_mps_ttt_tree",
+    "aac_ld_mps_upmix",
+    "aac_eld_mps_native",
+    "aac_eld_mps_core",
+    "aac_eld_spatial_tail",
+    "aac_eld_spatial_sbr",
+    "aac_mps_mdct_qmf",
+    "aac_mps_residual_icc",
+    "aac_ld_layout"
+  ],
+  "gates": [
+    {
+      "gate": "media",
+      "status": 0,
+      "seconds": 58.28790307044983,
+      "log": "/tmp/fvid-ld-core-verified-gate-media.log",
+      "log_sha256": "5f200296a96121bd228cadb668a24606d33e2565dc4a981347db4dd007aa7ecf",
+      "results": [
+        {
+          "passed": 587,
+          "failed": 0,
+          "ignored": 1
+        }
+      ]
+    },
+    {
+      "gate": "root",
+      "status": 0,
+      "seconds": 261.12796902656555,
+      "log": "/tmp/fvid-ld-core-verified-gate-root.log",
+      "log_sha256": "17693785f434158a6a35a2be1904cebdd1b1f6fe6506cf4f3f64cc15ac1160d8",
+      "results": [
+        {
+          "passed": 1062,
+          "failed": 0,
+          "ignored": 26
+        }
+      ]
+    },
+    {
+      "gate": "integration",
+      "status": 0,
+      "seconds": 354.62278008461,
+      "log": "/tmp/fvid-ld-core-final-gate-integration.log",
+      "note": "Completed integration run reused for identical frozen sources; duplicate integration run stopped after final media/root checks.",
+      "log_sha256": "75d674fcdeaa908fb1cd83fc6079f5cf170bb3615373fad8767a5cbf4db9fc97",
+      "results": [
+        {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 10,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    }
+  ],
+  "total": {
+    "passed": 1779,
+    "failed": 0,
+    "ignored": 27
+  },
+  "source_sha256": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "d7c6b2108648aa0d554f09326c4994c67e62b5417bf657549da1a82ca9678a7f",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_session.rs": "0bf427bc29743a03d11ade9f75956635313a62d109f9cc5dfb4d8b70ebf34e3f",
+    "crates/fvid-media/src/owned_aac/aac_ld_native_impl.rs": "bdfe8d0afef76143e20a5a13bf808ed43796cba979b30b4217928cc91e3d9744",
+    "crates/fvid-media/src/owned_aac/aac_native_impl.rs": "bf7129b4452719f4d3b9475de56eb564871acd265707dbd8087b57e2c0ec48fd",
+    "crates/fvid-media/src/owned_aac/config_impl.rs": "61c392017135ee2d25d42537579b5be28e437f0f949d03c8643bbcb9c5669c26",
+    "crates/fvid-media/src/owned_mp4_audio.rs": "21a0af53cea8844b12080f5efc239c68fa0d41ef061f08ec2d9066392921789b",
+    "crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs": "f54c8bc5b33aa2d216a745c81aa14cc760aae0e84dcdf1d60c7d1f358870c448",
+    "crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs": "153a7627dce204a13bb0d797e76631a37166c5ac98f447c685a6feaeb23bb0ca",
+    "src/audio.rs": "abc9cc340228aad1fc350d04249c7dd25b47df195e4f13f02ac9dee5679cfcf8",
+    "src/codec/aac_decoder.rs": "f7184ce9129858233c16a716113105daabced7d84b7aa6a52b383043a8cf2b32",
+    "src/native_audio_decoder.rs": "3f86ce4f3bc5632c51052e548d07be212825fcf2a2fa722c64aa99ee6d886ceb",
+    "src/playback/audio/ep1_worker_tests.rs": "1d538e73406d158653cb662caf4e844cbe44becccf3c5ab412759e7982510610",
+    "src/playback/audio/mp4_audio.rs": "09d8abba5f129d7f9aa34869b31a70b880617720e7db91181e539c7e89fa219b",
+    "tests/aac_eld_spatial_sbr.rs": "91d04ddcb09ada4883d4f2a6eaebe9b64b4804b8e10339dc4731a417a2041a34",
+    "tests/aac_ld_mps_session.rs": "f3bb71f873487bb30cdca90b982543ee6e50f78a1050075862f3a16229acb34b",
+    "tests/aac_ld_mps_ld_core.rs": "9f5e4d6a17694662f6570a77c00b577daa95951c873427a002bed70297fd2167",
+    "scripts/generate_aac_ld_mps_ld_core_fixtures.py": "644998bc9f3fef20dfa371a2e2d51afee8671d244d1317e4d076d992a901b1da"
+  },
+  "generator_inputs_sha256": {
+    "scripts/generate_he_aac_packet_fixtures.py": "11ec6ba89f95ca25d7a6d4ec7cd7626994ba2b7dcae6ae73cf9c25fd91a78b40",
+    "scripts/generate_aac_ld_layout_fixtures.py": "1aa775af3e8a2ca8aa6e57fbd13654c553639f4e341fcda98a5f234ad333ee82",
+    "scripts/generate_aac_ld_mps_inband_fixtures.py": "2d895a1cbac2664840b83d987bebc8cafd0ec994f481d74dd5c8ad991aac225e",
+    "scripts/generate_aac_ld_mps_transport_fixtures.py": "cc7e7a04b59bb2abb5c007ba357f94b4dd0ed157c49481e01d9dde662a88ff03",
+    "scripts/generate_aac_ld_mps_stp_fixtures.py": "f11549a94f841dc94000b962b348a540c7e1a3da76dd00189d996e575b6ed5d3",
+    "scripts/generate_aac_ld_mps_ges_fixtures.py": "78cac17c3a5f90ff032110472d2fb42ce5645853b4e092fd51bb8639b3fd6770",
+    "tests/fixtures/playback-errors/aac-ld-layout.json": "020d6bd5a0321322ad9e8975bd5e9a4bdca0d7466fc2eea1f0196223ab948140",
+    "tests/fixtures/playback-errors/aac-ld-layout-packets.bin": "a710279196a97b6cc47c7c37b81bad07cf1d9359a4e97b808694cb95444af9b3",
+    "tests/fixtures/playback-errors/aac-ld-layout-reference.f32le": "a3636ddb5ef5dd7e08922d85c941cc11e7eb679d98797fb0a5d4ba673afa00eb"
+  },
+  "limitations": [
+    "No independent whole LD-MPS conformance oracle",
+    "Only EP0 AAC-LD without SBR at 24/48 kHz and tested 480/512 geometries",
+    "Residual 32/128 domains, update8, residual LFE/nonzero time align remain open",
+    "Device output and real-time throughput not measured"
+  ]
+}

@@ -219,7 +219,39 @@ fn spatial_ld_sbr_subbands_match_independent_convolution_hf_noise_and_gain_contr
             let parts = split_session
                 .submit_qmf(Some((&qmf[count..], second)), &messages)
                 .unwrap();
-            assert_eq!(parts, complete, "{} fragmented QMF clock", case["name"]);
+            assert_eq!(parts.len(), 1);
+            assert_eq!(complete.len(), 1);
+            assert_eq!(
+                parts[0].pcm, complete[0].pcm,
+                "{} fragmented QMF PCM",
+                case["name"]
+            );
+            assert_eq!(
+                parts[0].stamp, complete[0].stamp,
+                "{} fragmented QMF clock",
+                case["name"]
+            );
+            use fvid_media::owned_aac::aac_ld_mps_session::SourceSpan;
+            assert_eq!(
+                parts[0].sources,
+                vec![
+                    SourceSpan {
+                        samples: count * bands,
+                        stamp: first
+                    },
+                    SourceSpan {
+                        samples: (slots - count) * bands,
+                        stamp: second
+                    },
+                ]
+            );
+            assert_eq!(
+                complete[0].sources,
+                vec![SourceSpan {
+                    samples: slots * bands,
+                    stamp
+                }]
+            );
             assert_eq!(complete[0].stamp, stamp);
             delayed_messages.extend(messages.clone());
             delayed_expected.extend(complete.clone());

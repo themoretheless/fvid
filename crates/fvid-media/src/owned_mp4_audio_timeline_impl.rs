@@ -244,8 +244,9 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
                 control.packet(bytes)?;
                 sample_index += 1;
                 if decoder.delayed() {
+                    pending_window.try_reserve(1).map_err(|_| invalid("MP4 source window allocation failed"))?;
                     pending_window.push_back((start, duration));
-                    if pending_window.len() > 3 { return Err(invalid("delayed MP4 source lookahead exceeded")); }
+                    if !decoder.spatial() && pending_window.len() > 3 { return Err(invalid("delayed MP4 source lookahead exceeded")); }
                     let Some(samples) = samples else {
                         continue;
                     };

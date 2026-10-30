@@ -816,6 +816,10 @@ pub trait AudioDecode: Send {
     /// preserves codecs whose reconstruction does not depend on that window.
     fn set_source_timescale(&mut self, _timescale: u32) -> crate::Result<()> { Ok(()) }
 
+    /// The source uses opaque packet IDs, not media PTS, for decoded association.
+    /// Configure before input or after reset. Other codecs retain their IDs.
+    fn set_source_packet_ids(&mut self, _enabled: bool) -> crate::Result<()> { Ok(()) }
+
     /// AC-3 stereo folding policy; other codecs intentionally ignore it.
     #[cfg(feature = "player")]
     fn set_ac3_stereo_downmix(&mut self, _policy: crate::codec::ac3_decoder::StereoDownmixPolicy) {}

@@ -360,8 +360,9 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
                 control.packet(bytes)?;
                 sample_index += 1;
                 if decoder.delayed() {
+                    pending.try_reserve(1).map_err(|_| invalid("MP4 source window allocation failed"))?;
                     pending.push_back((start, duration));
-                    if pending.len() > 3 {
+                    if !decoder.spatial() && pending.len() > 3 {
                         return Err(invalid("delayed MP4 source lookahead exceeded"));
                     }
                     let Some(samples) = samples else {
