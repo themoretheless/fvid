@@ -2737,10 +2737,12 @@ fn chunk_runs_with_units(
     walked
         .try_reserve_exact(chunks)
         .map_err(|_| invalid("chunk index allocation failed"))?;
+    let mut extents = Vec::new();
+    extents.try_reserve_exact(chunks)
+        .map_err(|_| invalid("chunk overlap index allocation failed"))?;
     let mut first = 0usize;
     let mut raw_first = 0usize;
     let mut run = 0usize;
-    let mut prev_end = 0u64;
     for chunk in 1..=chunks {
         while run + 1 < runs && chunk >= mapping[run + 1].0 {
             run += 1;
@@ -2758,9 +2760,6 @@ fn chunk_runs_with_units(
         } else {
             u64be(offsets, 8 + (chunk - 1) * 8)?
         };
-        if offset < prev_end {
-            return Err(invalid("overlapping or non-increasing MP4 chunk offsets"));
-        }
         let end = offset
             .checked_add(chunk_bytes(first, raw_first, frames, mapping[run].2)?)
             .ok_or_else(|| invalid("chunk offset overflow"))?;
@@ -2768,7 +2767,7 @@ fn chunk_runs_with_units(
         if containing == 0 || end > mdats[containing - 1].end {
             return Err(invalid("sample chunk outside mdat"));
         }
-        prev_end = end;
+        extents.push((offset, end));
         walked.push(FrameRun {
             description_index: mapping[run].2,
             first,
@@ -2780,6 +2779,13 @@ fn chunk_runs_with_units(
     }
     if raw_first != count {
         return Err(invalid("chunk mapping omits samples"));
+    }
+    // Decode/sample order is the table order, not physical storage order.
+    // Sort only the byte extents to reject actual overlaps without moving
+    // FrameRun records or changing their sample/description associations.
+    extents.sort_unstable();
+    if extents.windows(2).any(|pair| pair[1].0 < pair[0].1) {
+        return Err(invalid("overlapping or non-increasing MP4 chunk offsets"));
     }
     Ok(walked)
 }

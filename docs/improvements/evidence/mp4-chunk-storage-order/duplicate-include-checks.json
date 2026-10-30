@@ -1,0 +1,9 @@
+{
+  "names": [
+    "mp4_export_clock::tests::comparing_and_scaling_large_fractions_does_not_multiply_denominators",
+    "mp4_export_clock::tests::normalization_origins_keep_signed_fractional_output_phase",
+    "mp4_export_clock::tests::source_phase_and_signed_preroll_survive_fractional_container_clocks"
+  ],
+  "source": "crates/fvid-media/src/owned_mp4_edit_clock_impl.rs",
+  "exclude_from_distinct_count": 3
+}

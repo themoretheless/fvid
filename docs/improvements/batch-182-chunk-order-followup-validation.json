@@ -1,0 +1,92 @@
+{
+  "status": "accepted uncounted follow-up",
+  "parent_ids": [
+    "FVID-0189"
+  ],
+  "accepted_ids": [],
+  "count_delta": 0,
+  "accepted_count": 431,
+  "summary": "Restore valid disjoint MP4 chunk storage permutations while retaining every existing corrupted-table refusal",
+  "before": {
+    "commit": "e6b4e9df77e269e13812e857705c1fa71d1dd35e",
+    "passed": 2,
+    "failed": 1,
+    "first_disjoint_witness": "stco-one-mdat-021.mp4",
+    "specific_failure": "Ascending-offset guard rejects disjoint physical chunks despite valid packet/PTS mappings. Original ascending and all corruption controls pass.",
+    "unchanged_original_tests_passed": 2
+  },
+  "checks": {
+    "before": {
+      "suites": 1,
+      "passed": 2,
+      "failed": 1,
+      "ignored": 0
+    },
+    "existing-before": {
+      "suites": 1,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    "after": {
+      "suites": 2,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "integration": {
+      "suites": 94,
+      "passed": 454,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-mp4": {
+      "suites": 1,
+      "passed": 57,
+      "failed": 0,
+      "ignored": 1
+    },
+    "media": {
+      "suites": 1,
+      "passed": 547,
+      "failed": 0,
+      "ignored": 1
+    },
+    "core-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "distinct_passed": 1055,
+  "shared_include_duplicates_excluded": 3,
+  "focused_repeats_not_added": 5,
+  "ignored": {
+    "physical_metal_videotoolbox": 1,
+    "existing_pending_integer_float_rgb_compatibility": 1
+  },
+  "fixtures": {
+    "disjoint_accepted_videos": 24,
+    "explicit_corruption_refusal_videos": 8,
+    "packet_oracles": 3,
+    "plane_oracles": 3,
+    "files": 39,
+    "repeatability": "identical"
+  },
+  "existing_tests_and_fixtures": "Original tests/mp4_chunk_bounds.rs, generator and complete existing fixture corpus unchanged by SHA256; original backward-co64 actually overlaps and still refuses.",
+  "core-check": "passed locked/offline/no-default-features",
+  "player-check": "passed locked/offline/no-default-features",
+  "limits": [
+    "Temporary fallibly reserved chunk extents bounded by validated chunk count; no process-wide peak-memory or speed claim.",
+    "Original overlap diagnostic retained for compatibility.",
+    "No physical-device qualification."
+  ],
+  "evidence": "docs/improvements/evidence/mp4-chunk-storage-order/README.md"
+}
