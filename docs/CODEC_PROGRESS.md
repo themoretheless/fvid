@@ -1,3 +1,52 @@
+## Transactional ordinary LD-MPS QMF chain, 2026-10-30
+
+A single QMF decoder now joins spatial-frame assembly, complex M1 application,
+per-channel decorrelation, W routing and both M2 applications. Downmix inputs
+have the configured channel count; the separate decoded TTT residual basis is
+inserted into M1 only below its cutoff. OTT residuals enter W instead. Output
+keeps dry/wet planes separate and carries prepared metadata for downstream
+gains/temporal shaping/PCM. No residual codec or PCM playback is implied.
+
+Full-complex seed scheduling follows the reference frontend branch: sequential
+indices with tree2's TTT auxiliary using seed3 and stereo using seed2. Both
+real/complex coefficient modes are explicit implementation choices on complex
+QMF samples, not stream flags or partially-complex alias-lock processing.
+All parser, smoothing/matrix and decorrelator histories plus the reader commit
+only after the entire frame succeeds. Clone captures their joint checkpoint;
+reset restores the initial state. The 128-bin decorrelator refusal remains.
+
+224 controlled sequences/672 frames cover eight trees, seven resolutions,
+32/64 bins and both filter modes. All 6709248 dry/wet scalar outputs match the
+original stage-function chain within 2.66179e-7 absolute error (test ceiling
+2e-6). Every sequence retains a nonzero wet tail on the third, zero-input frame.
+Checkpoint and complete reset replay agree exactly. Missing OTT residuals are
+detected after filters have run; the original parser/matrix/filter histories
+and reader remain unchanged, and the valid retry matches checkpoint replay.
+Missing TTT input and nonfinite sample errors also preserve state.
+
+The research harness calls unmodified original M1 apply, decorrelate, W merge
+and M2 apply routines on the separately qualified saved matrix endpoints,
+including the documented 212 residual-basis fields. Padded W geometry follows
+that controlled interface; this does not qualify the original frontend's
+automatic V/W channel-count selection or its full decoder. The unselected HRTF
+branch aborts, and is not implemented by a stub fallback. Its 64MiB thread stack
+belongs only to the research harness; neither C nor that requirement enters
+production. Source/archive/driver and endpoint hashes are retained in the
+[reference report](validation/aac-ld-mps-qmf-reference-2026-10-30.json).
+Explicit regeneration is byte-identical; see the
+[generation audit](validation/aac-ld-mps-qmf-generation-2026-10-30.json).
+Ordinary tests load saved data without FFmpeg, network, generation, a compiler
+or reference software.
+
+All 50 LD-MPS integration tests and 575 media unit tests passed (one existing
+unit ignored); see the [test report](validation/aac-ld-mps-qmf-tests-2026-10-30.json).
+
+The chain still needs fixed gains and temporal shaping, synthesis/LD-SBR PCM
+integration, residual AAC decoding, arbitrary-downmix/HRTF and unqualified
+profile/tool combinations. Actual synthetic movie playback/seek/rewind remains
+open. The native spatial renderer refusal stays enabled; component outputs
+count zero accepted spatial movies or closed player failures.
+
 ## Transactional LD-MPS spatial-frame matrix assembly, 2026-10-30
 
 The frame assembler now connects physical parameter decoding with the ordinary

@@ -1,0 +1,8 @@
+{
+  "scope": "Explicit original stage-function comparison generation, separate from ordinary tests.",
+  "byte_exact_regeneration": true,
+  "sha256": {
+    "tests/fixtures/playback-errors/aac-ld-mps-qmf/expected.bin": "aab46ef8737c7b7920d840b24d126ca7490e006e2ec5cb8100a31678bc3e549c",
+    "tests/fixtures/playback-errors/aac-ld-mps-qmf/manifest.json": "7bf2d16c3e348b9056a920b8a18228840f152ca7f874ef44d019c58480ebca7e"
+  }
+}
