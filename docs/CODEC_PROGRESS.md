@@ -1,5 +1,33 @@
 ## Native LD-MPS guided envelope shaping (GES), 2026-10-30
 
+## LD-MPS STP scalar energy history — partial (2026-10-30)
+
+Added an owned, transactional scalar STP energy/gain tracker. Its old-energy
+refresh occurs before slots 33/65/97; damping, limiting and gain smoothing use
+per-instance state, with explicit reset and retained-payload accounting. It
+accepts preweighted energies and explicit dry-group assignments, and must run
+also when a frame disables shaping. Signal grouping, LD frequency weighting and
+mixing are not implemented by this component. Native STP playback remains an
+explicit refusal; this milestone is not playback/seek acceptance.
+
+The independently extracted ISO scalar prefix supplies 20 own synthetic
+programmes, 2,000 slots and 13,600 reference gains for trees 0..4. Its invalid
+final LD mixing loop is excluded, not repaired. The tree7 uninitialized channel
+indices and tree5/6 surplus uninitialized dry-energy rows are outside this
+oracle. Generator/compiler/network access is separate from ordinary tests.
+Closed-form tests cover clamp convergence and refresh ordering; invalid and
+overflowing input at a refresh boundary must preserve the complete history.
+Frozen-reference replay crosses all three refresh boundaries from a checkpoint.
+Validation: 585 media unit tests and the independent integration test passed;
+13,600 scalar gains have maximum absolute error 2.914e-7 (tolerance 2e-6).
+One pre-existing media unit test remains ignored.
+
+See `docs/validation/aac-ld-mps-standard-source-research-2026-10-30.json` and
+`docs/validation/aac-ld-mps-stp-energy-reference-2026-10-30.json`. Full normative
+Annex B is still unavailable in the inspected public previews; final LD mixing
+must be resolved before the existing PCM refusal is changed.
+
+
 GES now runs in the FVid-owned QMF chain after M2 and before synthesis. It
 tracks normalized downmix and dry+wet broadband energy, derives the signalled
 envelope target, accounts for the wet/dry energy ratio and limits dry gain to

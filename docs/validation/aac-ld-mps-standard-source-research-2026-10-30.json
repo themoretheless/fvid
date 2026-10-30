@@ -1,0 +1,47 @@
+{
+  "scope": "Source discovery for LD-MPS implementation; research only, no new playback acceptance claim.",
+  "date": "2026-10-30",
+  "standard_search": [
+    {
+      "edition": 2010,
+      "url": "https://www.ieclist.ink/iso/ISO%20IEC%2023003-2-2010%20PDF.pdf",
+      "observed_pdf_pages": 110,
+      "annex_b_printed_start": 109,
+      "note": "Incomplete: front matter occupies six pages; Annex B is beyond the available PDF."
+    },
+    {
+      "edition": 2018,
+      "url": "https://iso.ieclist.ink/iec/ISO%20IEC%2023003-2-2018%20PDF.pdf",
+      "observed_pdf_pages": 144,
+      "annex_b_printed_start": 150,
+      "note": "Incomplete: Annex B is beyond the available PDF. Direct local HTTP retrieval returned 403; page count and contents inspected through web PDF extraction."
+    },
+    {
+      "url": "https://www.iso.org/standard/73122.html",
+      "note": "Official catalogue for edition 2018; full open normative Annex B not obtained in this search."
+    }
+  ],
+  "available_primary_implementations": [
+    {
+      "url": "https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip",
+      "role": "ISO reference software; inspect LD conditional branches before using as oracle."
+    },
+    {
+      "url": "https://android.googlesource.com/platform/external/aac/+/ee76460efbdb147e26d804c798949c23f174460b/libSACdec/src/sac_stp.cpp",
+      "role": "Pinned Fraunhofer fixed-point STP implementation. Inspected energy scale switch implements TREE_212; it does not by itself qualify all multichannel trees."
+    }
+  ],
+  "cached_sha256": {
+    "saoc-reference.zip": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+    "iso/mp4spatialdec/src/sac_TPprocess.c": "fc18e7e5851122c24d2c1317e39cf5269343f367bfe5446bd9833e06d772c9fe",
+    "fdk-sac_stp.cpp": "5a743995576a7cae5822494dac29a3dbfee5cbc077c69225d7d93a465154c43a",
+    "fdk-sac_stp.h": "4aa7fe22a04c9c5cb1999d257d35996e20b23b9054b46cc313f34899ae8ec649"
+  },
+  "stp_reference_findings": [
+    "ISO subbandTP uses static energy and previous-scale history shared between decoder instances.",
+    "ISO LD output weighting loop reaches BP[n+3-10] for n=3..6, producing negative indices.",
+    "ISO tree 7 leaves i_LFE uninitialized, then reads it in the unconditional channel exclusion at line 343.",
+    "Pinned FDK stores STP history in STP_DEC per handle; its hybrid buffer offset and crossover must be translated explicitly before comparison with LD QMF bins."
+  ],
+  "implementation_boundary": "Active STP remains refused. Do not silently patch the ISO oracle and claim unmodified-reference equivalence; resolve LD indexing and verify synthesis/navigation using owned synthetic media first."
+}

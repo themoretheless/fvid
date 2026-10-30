@@ -1,0 +1,12 @@
+{
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "member": "mp4spatialdec/src/sac_TPprocess.c",
+  "member_sha256": "fc18e7e5851122c24d2c1317e39cf5269343f367bfe5446bd9833e06d772c9fe",
+  "extracted_instrumented_source_sha256": "1f61987aaf23a66cc53df07b6756b989c79dfd069bf37e8274d70eb50c74dc65",
+  "generator_sha256": "c886951c1b2b797145deab44d289327a5ad0e64ce9757cf99d3687cf76762ceb",
+  "output_sha256": "858455b6ae045d6421cfa37350982c3c7a9c0b7e1e090c0996b9f3c8c34e92a8",
+  "programmes": 20,
+  "slots": 2000,
+  "reference_gains": 13600,
+  "scope": "Unchanged scalar reference operations with input-energy/output-gain capture; final LD mixing excluded. Sanitized extraction for trees 0..4 only. No playback qualification."
+}
