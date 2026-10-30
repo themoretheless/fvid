@@ -1,0 +1,48 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0424"
+  ],
+  "count_delta": 1,
+  "accepted_count": 424,
+  "batch": 424,
+  "summary": "Respect explicit Matroska subtitle BlockDuration including zero",
+  "before": {
+    "commit": "6eeab195ec8db479bfe33777aeb32cfac58595fb",
+    "passed": 2,
+    "failed": 2,
+    "specific_failure": "Exact packet durations survive both parsers; native cues ignore them and linger through gaps/after seeks."
+  },
+  "checks": {
+    "integration": {
+      "passed": 329,
+      "suites": 66,
+      "ignored": 0
+    },
+    "root-subtitles": {
+      "passed": 48,
+      "ignored": 1
+    },
+    "core-check": "passed locked/offline/no-default-features",
+    "player-check": "passed locked/offline/no-default-features"
+  },
+  "distinct_passed": 377,
+  "fixtures": {
+    "valid_videos": 24,
+    "overflow_refusal_videos": 1,
+    "video_companions": 1,
+    "packet_snapshots": 6,
+    "files": 33,
+    "repeatability": "identical"
+  },
+  "uncounted": [
+    "Two legacy unit expectations updated to independently confirmed encoded durations; no media edits.",
+    "Codec/time-scale/default/zero/fallback variants"
+  ],
+  "limits": [
+    "Negative absolute timestamps not qualified",
+    "Finite software playback and native paint/seek/end tests; physical GPU ignored",
+    "No performance claim"
+  ],
+  "evidence": "docs/improvements/evidence/matroska-subtitle-spans/README.md"
+}

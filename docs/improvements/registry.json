@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 423,
-  "next_id": "FVID-0424",
+  "accepted_count": 424,
+  "next_id": "FVID-0425",
   "entries": [
     {
       "id": "FVID-0001",
@@ -470,7 +470,7 @@
       "source": "src/codec/avc_mbaff_picture.rs",
       "regression": "tests/avc_mbaff_pcm_memory.rs",
       "before": "Actual decoder allocation probe for128-square PCM frame reports274 allocations and3_320_590 requested bytes; the same packet needs no neighbor prediction.",
-      "result": "Direct PCM publication preserves validated frame/field footprints and readiness. Six alternating pairs repeat exact allocator savings:128-square frame274→18 allocations and3_320_590→109_326 cumulative bytes; native pixels, clocks, seek, atomicity and41 distinct Rust regressions pass. No release-speed/RSS claim.",
+      "result": "Direct PCM publication preserves validated frame/field footprints and readiness. Six alternating pairs repeat exact allocator savings:128-square frame274\u219218 allocations and3_320_590\u2192109_326 cumulative bytes; native pixels, clocks, seek, atomicity and41 distinct Rust regressions pass. No release-speed/RSS claim.",
       "status": "accepted",
       "validation": "batch-019-validation.json"
     },
@@ -554,11 +554,11 @@
     {
       "id": "FVID-0049",
       "batch": 27,
-      "title": "Preserve effective disabled-track usability through MP4→Matroska copy and filtered video export",
+      "title": "Preserve effective disabled-track usability through MP4\u2192Matroska copy and filtered video export",
       "source": "crates/fvid-media/src/owned_mp4_matroska_impl.rs",
       "regression": "tests/mp4_matroska_usability.rs",
       "before": "Equal-priority/legacy controls match; copying disabled-first dual AVC drops its usability flag and selects a different video, changing decoded pixels.",
-      "result": "MP4→Matroska copy and filtered FFV1/AAC export preserve effective disabled-track status through source/output reorder. Exact packet bytes, decoded video/clocks/seek, AAC silence and atomic refusal pass;23 Rust tests,1 Python integrity check and player build pass. Legacy fallback retained.",
+      "result": "MP4\u2192Matroska copy and filtered FFV1/AAC export preserve effective disabled-track status through source/output reorder. Exact packet bytes, decoded video/clocks/seek, AAC silence and atomic refusal pass;23 Rust tests,1 Python integrity check and player build pass. Legacy fallback retained.",
       "status": "accepted",
       "validation": "batch-027-validation.json"
     },
@@ -590,7 +590,7 @@
       "title": "Preserve MP4 non-AAC media clocks independently of codec sample rate",
       "source": "src/playback/audio/mp4_audio.rs",
       "regression": "tests/mp4_audio_clocks.rs",
-      "before": "Matching8kHz clock control passes. A20ms packet in1000/44100/48000/90000 media clocks is presented as2.5/110.25/120/225ms. Signed-ctts companion independently fails10ms→1.25ms.",
+      "before": "Matching8kHz clock control passes. A20ms packet in1000/44100/48000/90000 media clocks is presented as2.5/110.25/120/225ms. Signed-ctts companion independently fails10ms\u21921.25ms.",
       "result": "MP4 non-AAC decoded audio now retains source media units independently of codec sample rate and clips negative composition preroll exactly. Twelve authored PCM/ALAC clips pass samples, clocks, seek/replay/EOF through actual worker;40 Rust and1 Python test plus player binary build pass.",
       "status": "accepted",
       "validation": "batch-029-validation.json"
@@ -1881,7 +1881,7 @@
       "title": "Convert whole XM tick spans before microsecond rounding",
       "source": "src/container/xm.rs",
       "regression": "tests/xm_tick_span.rs",
-      "before": "Eight authored equal-tempo scores lose10–72us,publish PCM1ms short and shift a microsecond seek boundary. A fixed-window test isolates Kxx/ECx cutting one sample early at44100Hz. Four forced acceptances fail at timing,PCM and actual-worker packet length.",
+      "before": "Eight authored equal-tempo scores lose10\u201372us,publish PCM1ms short and shift a microsecond seek boundary. A fixed-window test isolates Kxx/ECx cutting one sample early at44100Hz. Four forced acceptances fail at timing,PCM and actual-worker packet length.",
       "result": "Row duration and delayed deadlines share a whole-span conversion.40 full PCM pairs,16 fixed-window pairs,20 worker targets,20 integrations,35 player units,18 core units,2 core regressions,fixture checks and player build pass. Public one-tick behavior and packet units remain unchanged.",
       "status": "accepted",
       "validation": "batch-158-validation.json"
@@ -3015,11 +3015,11 @@
     {
       "id": "FVID-0269",
       "batch": 262,
-      "title": "Scope Matroska and MP4 audio packet-byte and controlled-memory admission to the active max_packets prefix and preserve QuickTime/iTunes ©too encoder tags across probe, WAVE INFO, and Matroska PCM exports",
+      "title": "Scope Matroska and MP4 audio packet-byte and controlled-memory admission to the active max_packets prefix and preserve QuickTime/iTunes \u00a9too encoder tags across probe, WAVE INFO, and Matroska PCM exports",
       "source": "crates/fvid-media/src/owned_matroska_audio.rs",
       "regression": "tests/matroska_prefix_budget_mp4_wave_info_regressions.rs",
-      "before": "validate_audio_packet_budget and admit_audio_reader in `crates/fvid-media/src/owned_matroska_audio.rs`, validate_encoded_audio_packet_budget in `src/native_plan.rs`, try_plan in `src/native_loudnorm.rs`, and extract_source_pcm_metadata in `src/native_export/pcm_matroska.rs` scan every packet of the selected audio track across the entire container without bounding by `options.max_packets`, causing `plan_decode_audio`, `decode_audio_transformed`, `plan_trim`, `trim`, `plan_loudnorm`, `apply_loudnorm`, and WAVE/Matroska `mix_audio_with_controls` / `merge_audio_with_controls` to reject prefix-bounded (`max_packets = Some(n)`) Matroska and MP4 audio when an oversized packet lies after the first `n` packets; `Mp4Reader::parse_ilst` (`crates/fvid-media/src/owned_mp4_impl.rs`) ignores QuickTime/iTunes `©too` (`0xa9746f6f`) encoder atoms so `probe`, WAVE `ISFT` (`owned_wave_metadata::mp4_source_info`), and Matroska `ENCODER` tags (`export_pcm_selected`, `extract_source_pcm_metadata_with_packet_limit`) drop MP4 encoder metadata; and `normalize_loudness_controlled` (`src/media.rs`) and CLI `normalize-loudness` (`src/media_cli.rs`) forward output metadata mutations into `loudness_channel_weights_with_options`, failing with `\"owned loudness requires at most one audio stream and no metadata edits\"` before normalization.",
-      "result": "Bound `validate_audio_packet_budget` and `admit_audio_reader` (`crates/fvid-media/src/owned_matroska_audio.rs`), `validate_encoded_audio_packet_budget` (`src/native_plan.rs`), `native_loudnorm::try_plan` (`src/native_loudnorm.rs`), and `extract_source_pcm_metadata_with_packet_limit` (`src/native_export/pcm_matroska.rs`) by `options.max_packets`; parse QuickTime/iTunes `©too` into `Mp4Reader::encoder()` (`crates/fvid-media/src/owned_mp4_impl.rs`) and expose it in `try_mp4` (`crates/fvid-media/src/owned_mp4_probe_impl.rs`), `mp4_source_info` (`crates/fvid-media/src/owned_wave_metadata.rs`), `export_pcm_selected` (`src/native_export.rs`), and `extract_source_pcm_metadata_with_packet_limit`; and clear output metadata edits before `loudness_channel_weights_with_options` in `src/media.rs` and `src/media_cli.rs`. Two focused integration tests, 5 related test suites, and 2 offline fixture unit tests pass.",
+      "before": "validate_audio_packet_budget and admit_audio_reader in `crates/fvid-media/src/owned_matroska_audio.rs`, validate_encoded_audio_packet_budget in `src/native_plan.rs`, try_plan in `src/native_loudnorm.rs`, and extract_source_pcm_metadata in `src/native_export/pcm_matroska.rs` scan every packet of the selected audio track across the entire container without bounding by `options.max_packets`, causing `plan_decode_audio`, `decode_audio_transformed`, `plan_trim`, `trim`, `plan_loudnorm`, `apply_loudnorm`, and WAVE/Matroska `mix_audio_with_controls` / `merge_audio_with_controls` to reject prefix-bounded (`max_packets = Some(n)`) Matroska and MP4 audio when an oversized packet lies after the first `n` packets; `Mp4Reader::parse_ilst` (`crates/fvid-media/src/owned_mp4_impl.rs`) ignores QuickTime/iTunes `\u00a9too` (`0xa9746f6f`) encoder atoms so `probe`, WAVE `ISFT` (`owned_wave_metadata::mp4_source_info`), and Matroska `ENCODER` tags (`export_pcm_selected`, `extract_source_pcm_metadata_with_packet_limit`) drop MP4 encoder metadata; and `normalize_loudness_controlled` (`src/media.rs`) and CLI `normalize-loudness` (`src/media_cli.rs`) forward output metadata mutations into `loudness_channel_weights_with_options`, failing with `\"owned loudness requires at most one audio stream and no metadata edits\"` before normalization.",
+      "result": "Bound `validate_audio_packet_budget` and `admit_audio_reader` (`crates/fvid-media/src/owned_matroska_audio.rs`), `validate_encoded_audio_packet_budget` (`src/native_plan.rs`), `native_loudnorm::try_plan` (`src/native_loudnorm.rs`), and `extract_source_pcm_metadata_with_packet_limit` (`src/native_export/pcm_matroska.rs`) by `options.max_packets`; parse QuickTime/iTunes `\u00a9too` into `Mp4Reader::encoder()` (`crates/fvid-media/src/owned_mp4_impl.rs`) and expose it in `try_mp4` (`crates/fvid-media/src/owned_mp4_probe_impl.rs`), `mp4_source_info` (`crates/fvid-media/src/owned_wave_metadata.rs`), `export_pcm_selected` (`src/native_export.rs`), and `extract_source_pcm_metadata_with_packet_limit`; and clear output metadata edits before `loudness_channel_weights_with_options` in `src/media.rs` and `src/media_cli.rs`. Two focused integration tests, 5 related test suites, and 2 offline fixture unit tests pass.",
       "status": "accepted",
       "validation": "batch-262-validation.json"
     },
@@ -3048,10 +3048,10 @@
     {
       "id": "FVID-0272",
       "batch": 265,
-      "title": "Preserve QuickTime/iTunes ©too encoder metadata in MP4-to-Matroska remux and concat with set/delete override support and scope compressed MP4 concat packet-byte admission to selected streams and the active max_packets prefix",
+      "title": "Preserve QuickTime/iTunes \u00a9too encoder metadata in MP4-to-Matroska remux and concat with set/delete override support and scope compressed MP4 concat packet-byte admission to selected streams and the active max_packets prefix",
       "source": "src/container/mp4_concat.rs",
       "regression": "tests/mp4_matroska_encoder_concat_prefix_regression.rs",
-      "before": "owned_mp4_remux::metadata (`crates/fvid-media/src/owned_mp4_remux.rs`), owned_mp4_matroska_impl::write_selected (`crates/fvid-media/src/owned_mp4_matroska_impl.rs`), matroska_write::write_mp4_aac_metadata (`src/container/matroska_write.rs`), and mp4_concat::write_with_options (`src/container/mp4_concat.rs`) initialize Matroska tags from `FileMetadata::from_mp4` without seeding the file-wide `ENCODER` text tag from `Mp4Reader::encoder()` (`©too`), silently dropping the source MP4 writing-application tag so `probe` on remuxed or concatenated `.mka`/`.mkv` outputs reports `\"FVid\"` instead of the source encoder; and `mp4_concat::open_with_packet_limit` (`src/container/mp4_concat.rs`) called by `concat_mp4_matroska_with_options` (`src/native_plan.rs`) and `try_concat_mp4_matroska_with_options` (`src/native_export.rs`) checks every sample of every track across all segments against `max_packet_bytes` without bounding by `options.streams` or `options.max_packets`, causing `plan_concat` and `concat` on MP4 inputs with `.mka`/`.mkv` output to fail with `\"MP4 packet exceeds budget\"` when an oversized packet lies after the active `max_packets` prefix or in an unselected stream.",
+      "before": "owned_mp4_remux::metadata (`crates/fvid-media/src/owned_mp4_remux.rs`), owned_mp4_matroska_impl::write_selected (`crates/fvid-media/src/owned_mp4_matroska_impl.rs`), matroska_write::write_mp4_aac_metadata (`src/container/matroska_write.rs`), and mp4_concat::write_with_options (`src/container/mp4_concat.rs`) initialize Matroska tags from `FileMetadata::from_mp4` without seeding the file-wide `ENCODER` text tag from `Mp4Reader::encoder()` (`\u00a9too`), silently dropping the source MP4 writing-application tag so `probe` on remuxed or concatenated `.mka`/`.mkv` outputs reports `\"FVid\"` instead of the source encoder; and `mp4_concat::open_with_packet_limit` (`src/container/mp4_concat.rs`) called by `concat_mp4_matroska_with_options` (`src/native_plan.rs`) and `try_concat_mp4_matroska_with_options` (`src/native_export.rs`) checks every sample of every track across all segments against `max_packet_bytes` without bounding by `options.streams` or `options.max_packets`, causing `plan_concat` and `concat` on MP4 inputs with `.mka`/`.mkv` output to fail with `\"MP4 packet exceeds budget\"` when an oversized packet lies after the active `max_packets` prefix or in an unselected stream.",
       "result": "Seed `text` with `(\"ENCODER\", encoder.to_owned())` from `Mp4Reader::encoder()` before applying `options.metadata_set` and `options.metadata_delete` in `owned_mp4_remux::metadata` (`crates/fvid-media/src/owned_mp4_remux.rs`) and `mp4_concat::write_with_options` (`src/container/mp4_concat.rs`), as well as in `owned_mp4_matroska_impl::write_selected` (`crates/fvid-media/src/owned_mp4_matroska_impl.rs`) and `matroska_write::write_mp4_aac_metadata` (`src/container/matroska_write.rs`), while keeping `export_aac_pcm` (`allow_wave == false` in `src/native_export.rs`) free of muxer `WritingApp` injection; and add `mp4_concat::open_with_options` (`src/container/mp4_concat.rs`) wired into `concat_mp4_matroska_with_options` (`src/native_plan.rs`) and `try_concat_mp4_matroska_with_options` (`src/native_export.rs`) to validate `max_packet_bytes` in DTS-interleaved order across `selected` tracks up to `options.max_packets`. Two focused integration tests, 4 related test suites, and 1 offline fixture unit test pass.",
       "status": "accepted",
       "validation": "batch-265-validation.json"
@@ -3858,7 +3858,7 @@
       "title": "Propagate controlled-memory ceilings (max_controlled_bytes) to FFV1, AVC, HEVC, VP9, and AV1 codec decoders in owned_webm_codec::Decoder, owned_video_decode::decode_webm, and owned_mp4_video_decode::decode_presented, and to owned_probe::probe_with_options in plan_transcode_lossless and plan_burn_subtitles",
       "source": "crates/fvid-media/src/owned_webm_codec.rs",
       "regression": "tests/mp4_metadata_admission.rs",
-      "before": "In `crates/fvid-media/src/owned_webm_codec.rs`, `Decoder::new` hardcoded `usize::MAX` as the memory budget when constructing `owned_ffv1_decoder::Decoder`, `avc_decoder::AvcDecoder`, `hevc_decoder::HevcDecoder`, `vp9_decoder::Decoder`, and `av1_decoder::Decoder`, and both `owned_video_decode::decode_webm` (`crates/fvid-media/src/owned_video_decode.rs:211`) and `owned_webm_codec::presentation_durations` (`crates/fvid-media/src/owned_webm_codec.rs:411`) called `Decoder::new` without passing `options.max_controlled_bytes`. Similarly, `owned_mp4_video_decode::decode_presented` (`crates/fvid-media/src/owned_mp4_video_decode.rs:125,236,320,365`) constructed `AvcDecoder`, `Av1Decoder`, `vp9_decoder::Decoder`, and `HevcDecoder` with `usize::MAX`. As a result, a 4 KiB `max_controlled_bytes` budget on `ffv1-six-frames.mkv` or `small.mp4` (whose container metadata, packet indices, and output frame buffers fit in <4 KiB, but whose FFV1 context tables or AVC DPB/reference buffers require ~16–20 KiB) was admitted by `plan_transcode_lossless`, `transcode_lossless`, `plan_burn_subtitles`, and `burn_subtitles`. In addition, `owned_lossless::plan_transcode_lossless` (`crates/fvid-media/src/owned_lossless.rs:898`) and `owned_subtitle_burn::plan_burn_subtitles` (`crates/fvid-media/src/owned_subtitle_burn.rs:351`) called `owned_probe::probe(source)` without `options`.",
+      "before": "In `crates/fvid-media/src/owned_webm_codec.rs`, `Decoder::new` hardcoded `usize::MAX` as the memory budget when constructing `owned_ffv1_decoder::Decoder`, `avc_decoder::AvcDecoder`, `hevc_decoder::HevcDecoder`, `vp9_decoder::Decoder`, and `av1_decoder::Decoder`, and both `owned_video_decode::decode_webm` (`crates/fvid-media/src/owned_video_decode.rs:211`) and `owned_webm_codec::presentation_durations` (`crates/fvid-media/src/owned_webm_codec.rs:411`) called `Decoder::new` without passing `options.max_controlled_bytes`. Similarly, `owned_mp4_video_decode::decode_presented` (`crates/fvid-media/src/owned_mp4_video_decode.rs:125,236,320,365`) constructed `AvcDecoder`, `Av1Decoder`, `vp9_decoder::Decoder`, and `HevcDecoder` with `usize::MAX`. As a result, a 4 KiB `max_controlled_bytes` budget on `ffv1-six-frames.mkv` or `small.mp4` (whose container metadata, packet indices, and output frame buffers fit in <4 KiB, but whose FFV1 context tables or AVC DPB/reference buffers require ~16\u201320 KiB) was admitted by `plan_transcode_lossless`, `transcode_lossless`, `plan_burn_subtitles`, and `burn_subtitles`. In addition, `owned_lossless::plan_transcode_lossless` (`crates/fvid-media/src/owned_lossless.rs:898`) and `owned_subtitle_burn::plan_burn_subtitles` (`crates/fvid-media/src/owned_subtitle_burn.rs:351`) called `owned_probe::probe(source)` without `options`.",
       "result": "Add `Decoder::new_with_budget` in `crates/fvid-media/src/owned_webm_codec.rs` and pass `options.and_then(|o| o.max_controlled_bytes).unwrap_or(usize::MAX)` in `owned_video_decode::decode_webm`, `owned_webm_codec::presentation_durations`, and all four codec branches (`AvcDecoder`, `Av1Decoder`, `vp9_decoder::Decoder`, `HevcDecoder`) of `owned_mp4_video_decode::decode_presented`, and add `owned_probe::probe_with_options` (`crates/fvid-media/src/owned_probe.rs`) used by `plan_transcode_lossless` and `plan_burn_subtitles`. Eleven integration tests in `mp4_metadata_admission` and nine in `mp4_audio_metadata_admission` pass.",
       "status": "accepted",
       "validation": "batch-337-validation.json"
@@ -4747,6 +4747,17 @@
       "result": "Decode UTF16BE/optional LE before markup processing, preserve unmarked UTF8 behavior, use code-unit-aware boxed NUL termination and complete group-layout recognition. Thirteen acceptance videos and fifteen separate malformed-cue recovery witnesses verify exact Unicode, surrogate pairs, newlines, empty text, source packets/pictures, real seek/clock bounds and healthy following text.423 distinct checks pass:325 in65 integration suites and98 unique root units, excluding seven overlaps; locked/offline core/player builds and native paint/seek/end checks pass. Two hardware tests explicitly ignored. An introduced prefix-selection regression and older font-descriptor fixture qualification are corrected without additional IDs.",
       "status": "accepted",
       "validation": "batch-423-validation.json"
+    },
+    {
+      "id": "FVID-0424",
+      "batch": 424,
+      "title": "Respect per-block Matroska subtitle durations instead of extending cues through gaps",
+      "source": "src/playback/subtitles/webm_subtitles.rs",
+      "regression": "tests/matroska_subtitle_spans.rs",
+      "before": "Exact packet durations survive both parsers; native cues ignore them and linger through gaps/after seeks. Original source passes2 controls and fails2 cue/seek acceptances.",
+      "result": "Use explicit BlockDuration before track defaults/next-cue fallback; omit zero-length intervals and preserve missing-duration compatibility.24 authored VP9/UTF8/ASS videos verify exact packets/pictures, bounds, EOF and real seeks; a separate duration overflow remains refused. 377 distinct checks pass across66 integration suites and48 root subtitle units; core/player locked offline builds pass, one physical-GPU check ignored. Two old literal expectations corrected from independently verified packet spans, no extra IDs.",
+      "status": "accepted",
+      "validation": "batch-424-validation.json"
     }
   ]
 }

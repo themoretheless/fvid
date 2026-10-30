@@ -72,7 +72,9 @@ impl<R: Read + Seek> WebmSubtitleReader<R> {
             .tracks
             .iter()
             .filter(|track| {
-                track.kind == SUBTITLE_KIND && self.demuxer.track_enabled(track.number) && TEXT_CODECS.contains(&track.codec.as_str())
+                track.kind == SUBTITLE_KIND
+                    && self.demuxer.track_enabled(track.number)
+                    && TEXT_CODECS.contains(&track.codec.as_str())
             })
             .map(|track| track.number)
             .collect()
@@ -144,9 +146,19 @@ impl<R: Read + Seek> WebmSubtitleReader<R> {
                 .map(|(pts, _)| Duration::from_nanos(u64::try_from(*pts).unwrap_or_default()));
             let (start, end) = match stated {
                 Some(range) => range,
-                None => (container, subtitles::cue_end(container, default, next)),
+                None => {
+                    let end = match self.demuxer.packets[*index].duration_ns {
+                        Some(duration) => container.saturating_add(Duration::from_nanos(duration)),
+                        None => subtitles::cue_end(container, default, next),
+                    };
+                    (container, end)
+                }
             };
-            cues.push(Cue { start, end, text });
+            // An explicit zero BlockDuration is an empty interval, not missing
+            // timing that should acquire the next timestamp or a default.
+            if end > start {
+                cues.push(Cue { start, end, text });
+            }
         }
         Ok(cues)
     }
@@ -196,17 +208,14 @@ mod tests {
         // blocks: 200 ms and 1.1 s here, not the file's 200/500/1.1/1.2.
         assert_eq!(
             lines(&reader.cues(0).expect("first track")),
-            [
-                ("plain first", 200, 1_100),
-                ("plain second", 1_100, 1_100 + LAST_LINE.as_millis() as u64),
-            ]
+            [("plain first", 200, 900), ("plain second", 1_100, 1_700),]
         );
         assert_eq!(
             lines(&reader.cues(1).expect("second track")),
             [
-                ("other track", 500, 1_200),
+                ("other track", 500, 1_000),
                 // Markup inside a block is stripped like it is in a sidecar.
-                ("tagged words", 1_200, 1_200 + LAST_LINE.as_millis() as u64),
+                ("tagged words", 1_200, 1_600),
             ]
         );
         let error = reader.cues(2).expect_err("only two tracks");
@@ -417,9 +426,8 @@ mod tests {
     ///   -metadata:s:s:0 title=События -metadata:s:s:0 language=rus \
     ///   tests/fixtures/subtitles/ass-track.mkv
     /// `one.ass` holds the two lines read here and a `Comment:` line, which the
-    /// muxer leaves out of the file, and its clocks never reach the blocks:
-    /// `ffmpeg` writes the fields with the two timing ones taken out, which is
-    /// why the first line ends where the next block starts.
+    /// muxer leaves out of the file. `ffmpeg` removes both clock fields from
+    /// the text payload and preserves the durations in BlockDuration elements.
     #[test]
     fn an_ass_track_is_listed_by_its_title_and_read_from_its_blocks() {
         const ASS: &[u8] = include_bytes!("../../../tests/fixtures/subtitles/ass-track.mkv");
@@ -430,12 +438,8 @@ mod tests {
         assert_eq!(
             lines(&reader.cues(0).expect("the ASS track")),
             [
-                ("First\nsecond line", 500, 2_000),
-                (
-                    "Hello, world with commas",
-                    2_000,
-                    2_000 + LAST_LINE.as_millis() as u64
-                ),
+                ("First\nsecond line", 500, 1_500),
+                ("Hello, world with commas", 2_000, 3_000),
             ]
         );
     }

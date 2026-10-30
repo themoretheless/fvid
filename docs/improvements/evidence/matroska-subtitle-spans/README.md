@@ -1,0 +1,11 @@
+# Matroska subtitle BlockDuration
+
+The native subtitle reader discarded per-packet BlockDuration already retained by both parsers. It extended text to DefaultDuration, the next cue or a two-second fallback. The primary original-source run (6eeab195ec) passes the packet/video and overflow-refusal controls and fails both cue/actual-seek acceptance tests. before-source.json freezes the original source and authored witnesses.
+
+Twenty-four authored 16x16 three-picture VP9 videos cover UTF8 and canonical mapped ASS, two TimestampScale values, absent/conflicting DefaultDuration, explicit positive/zero BlockDuration, and missing-duration SimpleBlock controls. Negative relative block timestamps still produce positive absolute presentation times. Six packet snapshots prove original invented text bytes; a companion picture stream proves exact decoded video equivalence, intervals and EOF. A separate overflow witness is refused for the specific block-duration-overflow error in both parser paths. Generation is pure offline Python and is separate from ordinary tests.
+
+The fix uses an explicit packet duration before defaults and successor timing. An explicit zero is an empty interval; absent duration retains existing fallback behavior. Explicit timing embedded in legacy full ASS dialogue remains unchanged. Tests check exact text, nanosecond bounds and active cues after actual software video seeks, including gaps and exclusive endpoints. No public API or decoder is changed; no performance claim is made.
+
+Two older root-unit expectations encoded the previous lingering-text behavior. Independently inspecting existing authored fixtures with ffprobe confirms their exact packet durations; legacy-fixture-independent-spans.json records that evidence. Literal endpoints are corrected, with all strings, track selection and boundary assertions retained. The old media files are unchanged and the tests do not invoke ffprobe. These expectation corrections and all witness variants count as no extra improvements.
+
+References: https://www.matroska.org/technical/subtitles.html and https://www.rfc-editor.org/rfc/rfc9559.html section5.1.3.5.3. This qualification does not cover negative absolute frame timestamps or physical-device rendering.

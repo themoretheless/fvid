@@ -1,0 +1,822 @@
+{
+  "provenance": "Pure authored three-color16x16 VP9 and invented UTF8/canonical mapped ASS text. Two clusters, negative relative block timestamps with positive absolute PTS, explicit BlockDuration including zero, DefaultDuration conflicts and SimpleBlock fallback controls. No private media/parameters, FFmpeg or network.",
+  "standards": [
+    "https://www.matroska.org/technical/subtitles.html",
+    "https://www.rfc-editor.org/rfc/rfc9559.html#section-5.1.3.5.3"
+  ],
+  "cases": [
+    {
+      "file": "utf8-scale1000000-default0-explicit.mkv",
+      "codec": "utf8",
+      "scale_ns": 1000000,
+      "default_ns": 0,
+      "mode": "explicit",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        20000000,
+        10000000,
+        10000000
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "middle\nline",
+          "start_ns": 60000000,
+          "end_ns": 70000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-scale1000000-default0-zero.mkv",
+      "codec": "utf8",
+      "scale_ns": 1000000,
+      "default_ns": 0,
+      "mode": "zero",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        20000000,
+        0,
+        10000000
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-scale1000000-default0-missing.mkv",
+      "codec": "utf8",
+      "scale_ns": 1000000,
+      "default_ns": 0,
+      "mode": "missing",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        null
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 60000000
+        },
+        {
+          "text": "middle\nline",
+          "start_ns": 60000000,
+          "end_ns": 90000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 2090000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-scale1000000-default60000000-explicit.mkv",
+      "codec": "utf8",
+      "scale_ns": 1000000,
+      "default_ns": 60000000,
+      "mode": "explicit",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        20000000,
+        10000000,
+        10000000
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "middle\nline",
+          "start_ns": 60000000,
+          "end_ns": 70000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-scale1000000-default60000000-zero.mkv",
+      "codec": "utf8",
+      "scale_ns": 1000000,
+      "default_ns": 60000000,
+      "mode": "zero",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        20000000,
+        0,
+        10000000
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-scale1000000-default60000000-missing.mkv",
+      "codec": "utf8",
+      "scale_ns": 1000000,
+      "default_ns": 60000000,
+      "mode": "missing",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        null
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 70000000
+        },
+        {
+          "text": "middle\nline",
+          "start_ns": 60000000,
+          "end_ns": 120000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 150000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-scale2000000-default0-explicit.mkv",
+      "codec": "utf8",
+      "scale_ns": 2000000,
+      "default_ns": 0,
+      "mode": "explicit",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        20000000,
+        10000000,
+        10000000
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "middle\nline",
+          "start_ns": 60000000,
+          "end_ns": 70000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-scale2000000-default0-zero.mkv",
+      "codec": "utf8",
+      "scale_ns": 2000000,
+      "default_ns": 0,
+      "mode": "zero",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        20000000,
+        0,
+        10000000
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-scale2000000-default0-missing.mkv",
+      "codec": "utf8",
+      "scale_ns": 2000000,
+      "default_ns": 0,
+      "mode": "missing",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        null
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 60000000
+        },
+        {
+          "text": "middle\nline",
+          "start_ns": 60000000,
+          "end_ns": 90000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 2090000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-scale2000000-default60000000-explicit.mkv",
+      "codec": "utf8",
+      "scale_ns": 2000000,
+      "default_ns": 60000000,
+      "mode": "explicit",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        20000000,
+        10000000,
+        10000000
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "middle\nline",
+          "start_ns": 60000000,
+          "end_ns": 70000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-scale2000000-default60000000-zero.mkv",
+      "codec": "utf8",
+      "scale_ns": 2000000,
+      "default_ns": 60000000,
+      "mode": "zero",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        20000000,
+        0,
+        10000000
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-scale2000000-default60000000-missing.mkv",
+      "codec": "utf8",
+      "scale_ns": 2000000,
+      "default_ns": 60000000,
+      "mode": "missing",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        null
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 70000000
+        },
+        {
+          "text": "middle\nline",
+          "start_ns": 60000000,
+          "end_ns": 120000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 150000000
+        }
+      ]
+    },
+    {
+      "file": "ass-scale1000000-default0-explicit.mkv",
+      "codec": "ass",
+      "scale_ns": 1000000,
+      "default_ns": 0,
+      "mode": "explicit",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        20000000,
+        10000000,
+        10000000
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "middle\nline",
+          "start_ns": 60000000,
+          "end_ns": 70000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "ass-scale1000000-default0-zero.mkv",
+      "codec": "ass",
+      "scale_ns": 1000000,
+      "default_ns": 0,
+      "mode": "zero",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        20000000,
+        0,
+        10000000
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "ass-scale1000000-default0-missing.mkv",
+      "codec": "ass",
+      "scale_ns": 1000000,
+      "default_ns": 0,
+      "mode": "missing",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        null
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 60000000
+        },
+        {
+          "text": "middle\nline",
+          "start_ns": 60000000,
+          "end_ns": 90000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 2090000000
+        }
+      ]
+    },
+    {
+      "file": "ass-scale1000000-default60000000-explicit.mkv",
+      "codec": "ass",
+      "scale_ns": 1000000,
+      "default_ns": 60000000,
+      "mode": "explicit",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        20000000,
+        10000000,
+        10000000
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "middle\nline",
+          "start_ns": 60000000,
+          "end_ns": 70000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "ass-scale1000000-default60000000-zero.mkv",
+      "codec": "ass",
+      "scale_ns": 1000000,
+      "default_ns": 60000000,
+      "mode": "zero",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        20000000,
+        0,
+        10000000
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "ass-scale1000000-default60000000-missing.mkv",
+      "codec": "ass",
+      "scale_ns": 1000000,
+      "default_ns": 60000000,
+      "mode": "missing",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        null
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 70000000
+        },
+        {
+          "text": "middle\nline",
+          "start_ns": 60000000,
+          "end_ns": 120000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 150000000
+        }
+      ]
+    },
+    {
+      "file": "ass-scale2000000-default0-explicit.mkv",
+      "codec": "ass",
+      "scale_ns": 2000000,
+      "default_ns": 0,
+      "mode": "explicit",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        20000000,
+        10000000,
+        10000000
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "middle\nline",
+          "start_ns": 60000000,
+          "end_ns": 70000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "ass-scale2000000-default0-zero.mkv",
+      "codec": "ass",
+      "scale_ns": 2000000,
+      "default_ns": 0,
+      "mode": "zero",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        20000000,
+        0,
+        10000000
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "ass-scale2000000-default0-missing.mkv",
+      "codec": "ass",
+      "scale_ns": 2000000,
+      "default_ns": 0,
+      "mode": "missing",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        null
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 60000000
+        },
+        {
+          "text": "middle\nline",
+          "start_ns": 60000000,
+          "end_ns": 90000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 2090000000
+        }
+      ]
+    },
+    {
+      "file": "ass-scale2000000-default60000000-explicit.mkv",
+      "codec": "ass",
+      "scale_ns": 2000000,
+      "default_ns": 60000000,
+      "mode": "explicit",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        20000000,
+        10000000,
+        10000000
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "middle\nline",
+          "start_ns": 60000000,
+          "end_ns": 70000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "ass-scale2000000-default60000000-zero.mkv",
+      "codec": "ass",
+      "scale_ns": 2000000,
+      "default_ns": 60000000,
+      "mode": "zero",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        20000000,
+        0,
+        10000000
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "ass-scale2000000-default60000000-missing.mkv",
+      "codec": "ass",
+      "scale_ns": 2000000,
+      "default_ns": 60000000,
+      "mode": "missing",
+      "pts_ns": [
+        10000000,
+        60000000,
+        90000000
+      ],
+      "packet_durations_ns": [
+        null,
+        null,
+        null
+      ],
+      "cues": [
+        {
+          "text": "first",
+          "start_ns": 10000000,
+          "end_ns": 70000000
+        },
+        {
+          "text": "middle\nline",
+          "start_ns": 60000000,
+          "end_ns": 120000000
+        },
+        {
+          "text": "last",
+          "start_ns": 90000000,
+          "end_ns": 150000000
+        }
+      ]
+    }
+  ],
+  "refused": [
+    "duration-overflow.mkv"
+  ],
+  "sha256": {
+    "video-only.mkv": "f4716fe2a17215c16eaeca30ec6290aef138d8278913369276c51759626bd2b3",
+    "utf8-0.packet": "a7937b64b8caa58f03721bb6bacf5c78cb235febe0e70b1b84cd99541461a08e",
+    "utf8-1.packet": "dc5df1b95b230cc02a8fd556f9116fff255e297e48f0f23d1577f77bd33a18d4",
+    "utf8-2.packet": "3547cb112ac4489af2310c0626cdba6f3097a2ad5a3b42ddd3b59c76c7a079a3",
+    "utf8-scale1000000-default0-explicit.mkv": "ab6b34fdf01067a07bfd2b76cde14ce1c937ed527490fd66ea360c16e13a7608",
+    "utf8-scale1000000-default0-zero.mkv": "435f36302aa7c4ab46746366fe418388486deacfdd4c86f1b9e563c6b253c1bb",
+    "utf8-scale1000000-default0-missing.mkv": "810236ba7cf484c41707a2da02ac9be9292b3f44cf0e21ce10b43c40bc5f560f",
+    "utf8-scale1000000-default60000000-explicit.mkv": "1d1f77b9d833f93ac678fc01d9a687b3a9ff5da2e71a927836355f9d85287d7a",
+    "utf8-scale1000000-default60000000-zero.mkv": "dc6c596f179b15c7dd4ff08851ef5e934c583b5bb069345ca8f7aa1de0c82ab9",
+    "utf8-scale1000000-default60000000-missing.mkv": "5031cc0555ca88045aa1a404ecc3f0efe436758ae9ea9d634e2d186c96df0914",
+    "utf8-scale2000000-default0-explicit.mkv": "15ddc79ba46c8bc4b0f6089b1322a4dc1666be5cea9a3d53cb10d8b88a52d6a1",
+    "utf8-scale2000000-default0-zero.mkv": "39231e3e8c86e0683de53eb44b492a0fa5d1e74bea998983b5a80a4dec40a223",
+    "utf8-scale2000000-default0-missing.mkv": "d5d0b617c9c6339d2f29b7c1f97a55f04a51172994fe57224bffddb9bd544164",
+    "utf8-scale2000000-default60000000-explicit.mkv": "0b60c47b38e1d25238c679d0137daa1fabaf9d0f0479e50e7efc87e6f132a9a2",
+    "utf8-scale2000000-default60000000-zero.mkv": "47084c8fbc8c0b777007c8e4588d85e775a9e1da1200d11f88b054d6deb7a0fb",
+    "utf8-scale2000000-default60000000-missing.mkv": "1e8349c231556a1aca66625f354f4fea466d4b6ae0bc4697a7105dc291dedfa9",
+    "ass-0.packet": "fb91890d9ec72dc08243b09a8d1154cac8d2f1b77a21eb2743f91edd53419e20",
+    "ass-1.packet": "279ebf9e8f50006b5face4ef9470483a9a40c9e007bc68ffa658ae179060fe81",
+    "ass-2.packet": "5dc102d5caed4c33662a027ffd200da0e9027eee9cf16b1cefe3dc0067a31cfd",
+    "ass-scale1000000-default0-explicit.mkv": "c7aa981a2f4c0a8ea58e14fc93f3fe6cd0adfae4cea38e32e99ec33f6411566b",
+    "ass-scale1000000-default0-zero.mkv": "4f041e50043cd8787288aeecbc282a1b42a5a27e9b44277bea989d8647d04615",
+    "ass-scale1000000-default0-missing.mkv": "82868e38df5036fb13fe3bc08dbefa4a6f49de097d852ebb613dfb35ff3c1e4a",
+    "ass-scale1000000-default60000000-explicit.mkv": "6ababa5ba0b3ddf3b119c36d1c258f8f02095cadc650cc1c29555414d2e2f21e",
+    "ass-scale1000000-default60000000-zero.mkv": "4ea30643fca978ba293d783d592103b37921e87e652b21dd05de1dfb6d5ca481",
+    "ass-scale1000000-default60000000-missing.mkv": "8b7e9d89a0fa6330629d43c9707f9497d8d41a2a2a6d415f7fbd179d7f32e3ce",
+    "ass-scale2000000-default0-explicit.mkv": "05d85f5b4474f742b0f91ed10d6c990a76e9a6fb4f229413ed232d3842db40a2",
+    "ass-scale2000000-default0-zero.mkv": "02be24b04bb51f873c8367b8334064472080faba38d50354c40a7e78dbefc4b9",
+    "ass-scale2000000-default0-missing.mkv": "58546917005bb16f2541263c4269286526e58f831b29be2e9cfd82ea1875a773",
+    "ass-scale2000000-default60000000-explicit.mkv": "ca09f4596b38abf490dd1af702225c458e6eb3b70f79e38e93310ab06ffa3b1f",
+    "ass-scale2000000-default60000000-zero.mkv": "625643356cdce4c70d025af12b2662d10a48eed2dcef569929dde796cb2f92f1",
+    "ass-scale2000000-default60000000-missing.mkv": "f9c5d276f9dfc691c3cc9f64e33e3dbfc5143972c804ce2cc16bfbb2857bd8a2",
+    "duration-overflow.mkv": "d0efe6398292edc0f72b3503ec6d7450a171e3dfbb87ee2a2daa7e21496b102c"
+  }
+}
