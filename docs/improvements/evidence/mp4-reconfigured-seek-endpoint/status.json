@@ -1,0 +1,55 @@
+{
+  "batch": 416,
+  "accepted_ids": [
+    "FVID-0416"
+  ],
+  "status": "accepted",
+  "before": {
+    "base_commit": "fe5812f5059dc1e621b3d8b291cb8e386da1c4e9",
+    "final_regression": {
+      "passed": 1,
+      "failed": 4
+    },
+    "pcm_example": "changing-regular-10000.mp4: seek125ms returns320 bytes at120ms instead of160 bytes at125ms; seek130ms repeats320 bytes instead of EOF. Positive200ms origins can repeat the entire3840-byte stream. Equivalent constant descriptions and unshifted/negative controls pass.",
+    "aac_example": "Exact 48kHz media clock with CTTS +480/+4800: AAC clips the positive presentation tail and preroll seek can return no PCM while audible samples remain. Analytical control agrees with elementary decoding within 1e-7; final isolated source regression also reproduces full-playback and worker failures."
+  },
+  "after": {
+    "integration_passed": 69,
+    "integration_suites": 13,
+    "audio_reader_unit_passed": 14,
+    "total_distinct_checks": 83,
+    "player_build": "passed locked/offline/no-default-features",
+    "core_build": "passed locked/offline/no-default-features"
+  },
+  "fix": "Reuse the existing nominal composition endpoint calculation, cached as exact media ticks, for changing-setup seek clamping, ordinary preroll seek bounds and unedited AAC decoded-window clipping. Duration conversion remains at the API edge. Explicit empty tails and edit/recovered-clock paths retain their policies.",
+  "independent_scope": "Non-recovered native audio bounds were still using mdhd decode duration. This is separate from FVID-0415 recovery-clock clipping: the new PCM media clock is an exact multiple of every active sample rate, so PlaybackClock is absent. One accepted item covers each affected consumer and fixture variant of this bound error.",
+  "fixtures": {
+    "synthetic_video_count": 21,
+    "pcm_cases": 16,
+    "shifted_aac_cases": 4,
+    "aac_control": 1,
+    "max_extent_ms": 320,
+    "ordinary_tests_require": [
+      "checked-in own fixtures only"
+    ],
+    "generation": "scripts/generate_mp4_reconfigured_seek_endpoint.py; purely authored PCM/VP9 and AAC pulse/analytical IMDCT; no FFmpeg, network or private source media/parameters"
+  },
+  "checks": [
+    "Exact full PCM and byte-exact seek suffixes; signed origins; last sample and EOF; rewind; six VP9 pictures per PCM movie",
+    "AAC independent analytical reference, exact elementary control history, preroll seeks and complete shifted tails",
+    "Actual AudioPlayback worker PCM/time/EOF acceptance for regular+fragmented PCM transitions and shifted AAC",
+    "Related edit lists, changing descriptions, coarse media clocks, unknown headers, empty tails, unsupported/malformed AAC descriptions and resource/index controls",
+    "14 targeted root audio-reader units, including compact PCM sample index and over-budget index controls"
+  ],
+  "source_sha256": {
+    "src/playback/audio/mp4_audio.rs": "5ee312e19d742b7da545851223bcf5cdc2e176dea210b228f536649bacfd7e55",
+    "tests/mp4_reconfigured_seek_endpoint.rs": "ba87db20b8216828ca2d7688ae0cbf9a962d66f43b98052ac89691ea0854d7c0",
+    "scripts/generate_mp4_reconfigured_seek_endpoint.py": "d805f571a6ff912d86f71ea88a9e9e9a3f45f6f0b9d0c0152117feda743a3b0b",
+    "tests/fixtures/playback-errors/mp4-reconfigured-seek-endpoint/manifest.json": "b0e9498993244817bc5aff9f18e175c0628dd902ed5e65e6b227dabbcfd6460d"
+  },
+  "limitations": [
+    "No end-to-end physical audio-device, hardware GPU or performance claim",
+    "Scope is the selected83 checks and two configurations, not whole-project/all-platform qualification",
+    "No public API change; no existing regression assertions weakened"
+  ]
+}

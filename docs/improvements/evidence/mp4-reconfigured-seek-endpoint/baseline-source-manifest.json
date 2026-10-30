@@ -1,0 +1,8 @@
+{
+  "base_commit": "fe5812f5059dc1e621b3d8b291cb8e386da1c4e9",
+  "copied_files": 5319,
+  "fixture_tree": "read-only test usage of source fixture symlink; no generation run in baseline",
+  "old_audio_source_sha256": "a7be19ba44a3096838b3e9cba712e874afa5fca857e2dc741c82d6d87bd062a7",
+  "fixed_audio_source_sha256": "5ee312e19d742b7da545851223bcf5cdc2e176dea210b228f536649bacfd7e55",
+  "other_rust_files_identical": true
+}

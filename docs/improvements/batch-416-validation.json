@@ -1,0 +1,50 @@
+{
+  "batch": 416,
+  "accepted_ids": [
+    "FVID-0416"
+  ],
+  "status": "accepted",
+  "summary": "Bound native MP4 audio seeking and ordinary AAC rendering by composition endpoints",
+  "source_files": [
+    "src/playback/audio/mp4_audio.rs"
+  ],
+  "regressions": [
+    "tests/mp4_reconfigured_seek_endpoint.rs"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/mp4-reconfigured-seek-endpoint/status.json"
+  ],
+  "before": {
+    "base_commit": "fe5812f5059dc1e621b3d8b291cb8e386da1c4e9",
+    "final_regression": {
+      "passed": 1,
+      "failed": 4
+    },
+    "pcm_example": "changing-regular-10000.mp4: seek125ms returns320 bytes at120ms instead of160 bytes at125ms; seek130ms repeats320 bytes instead of EOF. Positive200ms origins can repeat the entire3840-byte stream. Equivalent constant descriptions and unshifted/negative controls pass.",
+    "aac_example": "Exact 48kHz media clock with CTTS +480/+4800: AAC clips the positive presentation tail and preroll seek can return no PCM while audible samples remain. Analytical control agrees with elementary decoding within 1e-7; final isolated source regression also reproduces full-playback and worker failures."
+  },
+  "after": {
+    "integration_passed": 69,
+    "integration_suites": 13,
+    "audio_reader_unit_passed": 14,
+    "total_distinct_checks": 83,
+    "player_build": "passed locked/offline/no-default-features",
+    "core_build": "passed locked/offline/no-default-features"
+  },
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --features player --test mp4_reconfigured_seek_endpoint (initial, expanded, isolated final before; final related suite)",
+    "cargo test --locked --offline --no-default-features --features player --no-fail-fast --test mp4_reconfigured_seek_endpoint --test mp4_audio_presentation_end --test mp4_audio_clocks --test mp4_quantized_audio_clock --test mp4_fixed_audio_edits --test mp4_variable_rate_edits --test mp4_open_ended_edit_audio --test mp4_aac_quicktime --test mp4_aac_transitions --test mp4_audio_reconfiguration --test mp4_empty_tail --test mp4_active_audio_choice --test mp4_unused_audio_descriptions",
+    "cargo test --locked --offline --no-default-features --features player --lib playback_mp4_audio::",
+    "cargo check --locked --offline --no-default-features --features player",
+    "cargo check --locked --offline --no-default-features"
+  ],
+  "uncounted": [
+    "All fixture and negative/origin/codec/container variations of the same endpoint bound defect",
+    "Shared endpoint cache extraction and additional acceptance checks are part of the same fix"
+  ],
+  "limitations": [
+    "No end-to-end physical audio-device, hardware GPU or performance claim",
+    "Scope is the selected83 checks and two configurations, not whole-project/all-platform qualification",
+    "No public API change; no existing regression assertions weakened"
+  ]
+}

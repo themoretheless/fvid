@@ -1,0 +1,193 @@
+{
+  "provenance": "Authored 120ms 16x16 VP9 + six nonzero 8kHz mono PCM packets, three selected equivalent or changing precision setups; signed CTTS/TRUN origins with exact integral media clocks. Plus authored 48kHz mono AAC-LC pulse/overlap with analytical IMDCT reference. No external encoder, private media/parameters, FFmpeg or network.",
+  "cases": [
+    {
+      "file": "changing-regular--10000.mp4",
+      "profile": "changing",
+      "container": "regular",
+      "shift_ticks": -10000,
+      "scale": 1000000,
+      "end_ticks": 110000,
+      "oracle": "changing.f32le"
+    },
+    {
+      "file": "changing-regular-0.mp4",
+      "profile": "changing",
+      "container": "regular",
+      "shift_ticks": 0,
+      "scale": 1000000,
+      "end_ticks": 120000,
+      "oracle": "changing.f32le"
+    },
+    {
+      "file": "changing-regular-10000.mp4",
+      "profile": "changing",
+      "container": "regular",
+      "shift_ticks": 10000,
+      "scale": 1000000,
+      "end_ticks": 130000,
+      "oracle": "changing.f32le"
+    },
+    {
+      "file": "changing-regular-200000.mp4",
+      "profile": "changing",
+      "container": "regular",
+      "shift_ticks": 200000,
+      "scale": 1000000,
+      "end_ticks": 320000,
+      "oracle": "changing.f32le"
+    },
+    {
+      "file": "changing-fragmented--10000.mp4",
+      "profile": "changing",
+      "container": "fragmented",
+      "shift_ticks": -10000,
+      "scale": 1000000,
+      "end_ticks": 110000,
+      "oracle": "changing.f32le"
+    },
+    {
+      "file": "changing-fragmented-0.mp4",
+      "profile": "changing",
+      "container": "fragmented",
+      "shift_ticks": 0,
+      "scale": 1000000,
+      "end_ticks": 120000,
+      "oracle": "changing.f32le"
+    },
+    {
+      "file": "changing-fragmented-10000.mp4",
+      "profile": "changing",
+      "container": "fragmented",
+      "shift_ticks": 10000,
+      "scale": 1000000,
+      "end_ticks": 130000,
+      "oracle": "changing.f32le"
+    },
+    {
+      "file": "changing-fragmented-200000.mp4",
+      "profile": "changing",
+      "container": "fragmented",
+      "shift_ticks": 200000,
+      "scale": 1000000,
+      "end_ticks": 320000,
+      "oracle": "changing.f32le"
+    },
+    {
+      "file": "constant-regular--10000.mp4",
+      "profile": "constant",
+      "container": "regular",
+      "shift_ticks": -10000,
+      "scale": 1000000,
+      "end_ticks": 110000,
+      "oracle": "constant.f32le"
+    },
+    {
+      "file": "constant-regular-0.mp4",
+      "profile": "constant",
+      "container": "regular",
+      "shift_ticks": 0,
+      "scale": 1000000,
+      "end_ticks": 120000,
+      "oracle": "constant.f32le"
+    },
+    {
+      "file": "constant-regular-10000.mp4",
+      "profile": "constant",
+      "container": "regular",
+      "shift_ticks": 10000,
+      "scale": 1000000,
+      "end_ticks": 130000,
+      "oracle": "constant.f32le"
+    },
+    {
+      "file": "constant-regular-200000.mp4",
+      "profile": "constant",
+      "container": "regular",
+      "shift_ticks": 200000,
+      "scale": 1000000,
+      "end_ticks": 320000,
+      "oracle": "constant.f32le"
+    },
+    {
+      "file": "constant-fragmented--10000.mp4",
+      "profile": "constant",
+      "container": "fragmented",
+      "shift_ticks": -10000,
+      "scale": 1000000,
+      "end_ticks": 110000,
+      "oracle": "constant.f32le"
+    },
+    {
+      "file": "constant-fragmented-0.mp4",
+      "profile": "constant",
+      "container": "fragmented",
+      "shift_ticks": 0,
+      "scale": 1000000,
+      "end_ticks": 120000,
+      "oracle": "constant.f32le"
+    },
+    {
+      "file": "constant-fragmented-10000.mp4",
+      "profile": "constant",
+      "container": "fragmented",
+      "shift_ticks": 10000,
+      "scale": 1000000,
+      "end_ticks": 130000,
+      "oracle": "constant.f32le"
+    },
+    {
+      "file": "constant-fragmented-200000.mp4",
+      "profile": "constant",
+      "container": "fragmented",
+      "shift_ticks": 200000,
+      "scale": 1000000,
+      "end_ticks": 320000,
+      "oracle": "constant.f32le"
+    }
+  ],
+  "aac_cases": [
+    {
+      "file": "aac--480.mp4",
+      "shift_ticks": -480
+    },
+    {
+      "file": "aac-0.mp4",
+      "shift_ticks": 0
+    },
+    {
+      "file": "aac-480.mp4",
+      "shift_ticks": 480
+    },
+    {
+      "file": "aac-4800.mp4",
+      "shift_ticks": 4800
+    }
+  ],
+  "sha256": {
+    "changing.f32le": "256123e546912c6561f12dbe2409690112cd6b49117b388bb91d4f7c853e0a2d",
+    "changing-regular--10000.mp4": "f09bc765a69c76ea22bf291afcb1a33fd70b8af93ed5046f76581bcd31d1f73e",
+    "changing-regular-0.mp4": "e26972837dac4ccaadbb4165a12fcb195b1613012a320a595fc0dfc9994e80cb",
+    "changing-regular-10000.mp4": "2c6f48c775001fd0eac89d5f22d6cebce9aab87fe8f87ba774af253bf63adfdd",
+    "changing-regular-200000.mp4": "ab12ac22d28ce32fd77e3dac8f83fff7c51a7405c6c5ed9cb7ddb2b1eae69516",
+    "changing-fragmented--10000.mp4": "58427338cc7102cab4edfa2a1c1bde14c43948af31641332caa61fe4e0de8df5",
+    "changing-fragmented-0.mp4": "93a1ceed78fdc3801b90af6eef61cab3fcef748c1a6b98526805d609063af109",
+    "changing-fragmented-10000.mp4": "834269080d940401ba18b280cb94b3e72735713985e0bce74a4e4d082d123aa1",
+    "changing-fragmented-200000.mp4": "53c100d555d14386a915330d58e1963e410c57c512f5c14140c794ca5de30e9d",
+    "constant.f32le": "d42fba7b41c96be4222e54c2baaf43930db656279aa621820b54160627134064",
+    "constant-regular--10000.mp4": "d24ffe5f409f0dfd9e4e199f416dc2d77ad2c54072986fdeff5d485be2a702e4",
+    "constant-regular-0.mp4": "a16ffd8ec46a5bcbfc737a74e02e865607464c4f7c4657ea3cf590a21d150e4d",
+    "constant-regular-10000.mp4": "326bf583e3d6407c81ca8193b321a3f470605355d7ae5dd94b6e8017d38d4c7d",
+    "constant-regular-200000.mp4": "a6a7f539700702a54ab8f579cca258865fe66c5360b84298bd4e1b79532db24d",
+    "constant-fragmented--10000.mp4": "357867afc50f67ad27893330280f3f1309e156716a7cb8152fc194c65955896d",
+    "constant-fragmented-0.mp4": "4a961af88b9db751182b54f3be6ff091c2572dbd6328f31224a6fccc7c406ec5",
+    "constant-fragmented-10000.mp4": "45f3fcb6a8d790e183bdf9fea3ca665a5c809595c5eaed3a45d518992e691486",
+    "constant-fragmented-200000.mp4": "bb8dd62d5870b9bb06dd093e9906af578235d3d5d0e66b031fe94f62c275594a",
+    "aac-control.mp4": "40abaabaf72367bd231e6396a30286873920c90f4417fb72c46392fd2cf6cf23",
+    "aac-reference.f32le": "0e7c1faf087653e91eefeddd232d3995fd80b06ef005ac5e433175ac0669e8f5",
+    "aac--480.mp4": "c07922550a099b119cfdb4667ad505a60abea12dcb973ac5de4e26e2936c14bb",
+    "aac-0.mp4": "90ca311a2f222ffcecbb17174ce89cae732bfd83e0a9f33ed651b4acde2649f9",
+    "aac-480.mp4": "38fd1b6468e5a5eb37fd89f0e60c100c8c876a0fd3ea1f551599fd4b799469e6",
+    "aac-4800.mp4": "7ec0d9f972c664955f5544161210d3e423808115157915c801225b5a918930a3"
+  }
+}

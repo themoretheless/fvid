@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 415,
-  "next_id": "FVID-0416",
+  "accepted_count": 416,
+  "next_id": "FVID-0417",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4628,6 +4628,17 @@
       "result": "Use the recovered run presentation endpoint, including its composition origin, as the clipping/seek extent. Preserve explicitly stated time beyond indexed decode coverage (including empty tails). For the non-recovered path, cache a nominal indexed composition endpoint lazily, preserve stated empty tails, and retain explicit edit/recovered-clock duration precedence. Uniform PCM uses its compact aggregate endpoint. 62 distinct integration checks pass: 61 in ten related targets plus one added worker regression (two focused checks overlap and are not counted twice). All 38 own PCM/ALAC+VP9 movies retain independent PCM byte counts/values, exact rational timestamps, seek suffixes, rewind, EOF, and all three video pictures. The worker plays and rewinds both shifted 1001Hz PCM/ALAC cases with the full 1920-byte waveform. Locked/offline no-default-features core build passes.",
       "status": "accepted",
       "validation": "batch-411-validation.json"
+    },
+    {
+      "id": "FVID-0416",
+      "batch": 416,
+      "title": "Use composition endpoints for native MP4 audio seek bounds and unedited AAC playback",
+      "source": "src/playback/audio/mp4_audio.rs",
+      "regression": "tests/mp4_reconfigured_seek_endpoint.rs",
+      "before": "Unquantized changing PCM seeks clamp to mdhd decode duration: seek125ms in a130ms shifted presentation returns80 samples at120ms rather than40 at125ms, and seeking EOF repeats the tail. Ordinary exact-clock AAC also clips shifted tails and misclamps preroll seeks. Final isolated original-source regression: 1 control passes, 4 acceptances fail.",
+      "result": "Share the cached exact composition endpoint between duration, changing-setup/preroll seek bounds and unedited AAC crop limits.83 distinct checks pass (69 integrations across 13 suites, 14 audio-reader units), plus locked/offline core and player builds.21 short authored video witnesses cover signed CTTS/TRUN, regular/fragmented PCM, equivalent/changing setups, AAC pulse reference/history, exact suffix PCM/PTS, rewind, EOF and actual playback workers.",
+      "status": "accepted",
+      "validation": "batch-416-validation.json"
     }
   ]
 }

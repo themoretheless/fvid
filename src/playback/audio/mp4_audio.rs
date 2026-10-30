@@ -31,7 +31,7 @@ enum EditAction { Encoded, Step(crate::audio::AudioStep), End }
 /// MP4 audio track reader. Extracts encoded packets for decoding.
 pub struct Mp4AudioReader<R> {
     navigation_error: Option<crate::Error>,
-    presentation_duration: std::sync::OnceLock<Option<std::time::Duration>>,
+    presentation_end_ticks: std::sync::OnceLock<Option<u128>>,
     clock: Option<PlaybackClock>,
     clock_mode: std::cell::Cell<bool>,
     clock_floor: std::cell::Cell<EditTime>,
@@ -343,7 +343,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         // packets. Always re-seek the selected first packet on real playback.
         demuxer.invalidate_position();
         Ok(Self {
-            presentation_duration: std::sync::OnceLock::new(),
+            presentation_end_ticks: std::sync::OnceLock::new(),
             navigation_error:None,
             clock:None,clock_mode:std::cell::Cell::new(false),clock_floor:std::cell::Cell::new(EditTime::ZERO),clock_anchor:std::cell::Cell::new(None),
             variable_edits: None, opening_sample_index: 0,
@@ -485,7 +485,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         states.resize(track.sample_descriptions.len(), None);
         let tracks = demuxer.tracks().len();
         let mut source = Self {
-            presentation_duration: std::sync::OnceLock::new(),
+            presentation_end_ticks: std::sync::OnceLock::new(),
             navigation_error:None,
             clock,clock_mode:std::cell::Cell::new(false),clock_floor:std::cell::Cell::new(EditTime::ZERO),clock_anchor:std::cell::Cell::new(None),
             variable_edits, opening_sample_index: 0,
@@ -817,6 +817,36 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         self.edit_segment.set(None);
     }
 
+    // Keep the endpoint in media ticks so seek and decoded-window bounds
+    // share duration's presentation clock without nanosecond round trips.
+    fn presentation_end_ticks(&self) -> Option<u128> {
+        let track = self.track();
+        *self.presentation_end_ticks.get_or_init(|| {
+            if track.timescale == 0 { return None; }
+            let (mut end, decoded_end) = match &track.samples {
+                crate::container::mp4::SampleIndex::Expanded(samples) => {
+                    let mut end = 0i128;
+                    let mut decoded_end = 0u128;
+                    for sample in samples {
+                        end = end.max(i128::from(sample.pts) + i128::from(sample.duration));
+                        decoded_end = decoded_end.max(u128::from(sample.dts) + u128::from(sample.duration));
+                    }
+                    (end as u128, decoded_end)
+                }
+                crate::container::mp4::SampleIndex::Uniform(index) => {
+                    let end = index.count as u128 * u128::from(index.duration);
+                    (end, end)
+                }
+            };
+            // A declared empty tail extends time without a packet. Ordinary
+            // decode duration alone must not undo a signed composition shift.
+            if u128::from(track.duration) > decoded_end {
+                end = end.max(u128::from(track.duration));
+            }
+            (end > 0).then_some(end)
+        })
+    }
+
     /// Seek to the sample with the greatest PTS at or before `pts`.
     pub fn seek(&mut self, pts: i64) -> i64 {
         let track = self.track();
@@ -956,33 +986,9 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             let nanos = ticks.checked_mul(1_000_000_000)? / u128::from(self.demuxer.movie_timescale());
             return Some(std::time::Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX)));
         }
-        *self.presentation_duration.get_or_init(|| {
-            if track.timescale == 0 { return None; }
-            let (mut end, decoded_end) = match &track.samples {
-                crate::container::mp4::SampleIndex::Expanded(samples) => {
-                    let mut end = 0i128;
-                    let mut decoded_end = 0u128;
-                    for sample in samples {
-                        end = end.max(i128::from(sample.pts) + i128::from(sample.duration));
-                        decoded_end = decoded_end.max(u128::from(sample.dts) + u128::from(sample.duration));
-                    }
-                    (end as u128, decoded_end)
-                }
-                crate::container::mp4::SampleIndex::Uniform(index) => {
-                    let end = index.count as u128 * u128::from(index.duration);
-                    (end, end)
-                }
-            };
-            // A declared empty tail extends time without a packet. Ordinary
-            // decode duration alone must not undo a signed composition shift.
-            if u128::from(track.duration) > decoded_end {
-                end = end.max(u128::from(track.duration));
-            }
-            (end > 0).then(|| {
-                let nanos = end * 1_000_000_000 / u128::from(track.timescale);
-                std::time::Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX))
-            })
-        })
+        let end = self.presentation_end_ticks()?;
+        let nanos = end * 1_000_000_000 / u128::from(track.timescale);
+        Some(std::time::Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX)))
     }
 
     fn time_of(&self, pts: i64) -> std::time::Duration {
@@ -1081,7 +1087,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         if scale == 0 || movie_scale == 0 { return Err(invalid("zero MP4 audio presentation clock")); }
         let (media_start, length) = if let Some(edit) = track.edits.first() {
             ((edit.media_time as u128 * rate).div_ceil(scale), (u128::from(edit.duration) * rate).div_ceil(movie_scale))
-        } else { (0, (u128::from(track.duration) * rate).div_ceil(scale)) };
+        } else { (0, (self.presentation_end_ticks().unwrap_or(0) * rate).div_ceil(scale)) };
         let media_end = media_start.checked_add(length).ok_or_else(|| invalid("MP4 audio edit overflow"))?;
         let source_start = i128::from(source_pts) * i128::from(self.sample_rate()) / i128::from(track.timescale);
         let stride = usize::from(self.channels()).checked_mul(4).filter(|n| *n != 0).ok_or_else(|| invalid("invalid AAC PCM stride"))?;
@@ -1224,7 +1230,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             return match result {Ok((returned,_))=>returned,Err(error)=>{self.navigation_error=Some(error);0}};
         }
         if self.changing {
-            let requested=pts.max(0).min(self.track().duration.min(i64::MAX as u64)as i64);
+            let requested=pts.max(0).min(self.presentation_end_ticks().unwrap_or(0).min(i64::MAX as u128)as i64);
             let selected=self.track().samples.at_or_before(requested);
             let codec=self.track().description_for_sample(selected).unwrap().codec;
             if matches!(&codec,b"mp4a"|b"ac-3"|b"ec-3"|b"MAC3"|b"MAC6") {
@@ -1247,9 +1253,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         let shift = if self.variable_edits.is_none() && track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0 { track.edits[0].media_time } else { 0 };
         let preroll = matches!(&track.codec, b"ac-3" | b"ec-3" | b"MAC3" | b"MAC6")
             || (track.codec == *b"mp4a" && (track.edits.is_empty() || (track.edits.len() == 1 && track.edits[0].media_time >= 0)));
-        let source_end=if track.duration>0 {track.duration as u128}else{
-            track.samples.get(track.samples.len().saturating_sub(1)).map_or(0,|sample|sample.pts.max(0)as u128+u128::from(sample.duration))
-        };
+        let source_end=self.presentation_end_ticks().unwrap_or(0);
         let end=if preroll&&track.edits.len()==1&&self.demuxer.movie_timescale()!=0 {
             (shift.max(0)as u128+(u128::from(track.edits[0].duration)*u128::from(track.timescale)).div_ceil(u128::from(self.demuxer.movie_timescale()))).min(source_end)
         }else{source_end};
