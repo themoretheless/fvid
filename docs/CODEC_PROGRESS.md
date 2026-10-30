@@ -1,3 +1,48 @@
+## LD-MPS filterbank foundation, 2026-10-30
+
+The spatial extensions remain open. This step implements the owned 32/64-band
+LD-QMF analysis and synthesis required for LD-MPS, not spatial frame decoding,
+upmix or movie playback. ELD extension 1/2 refusal is unchanged; no newly
+accepted codec programme or closed codec gap is counted for this component.
+
+The [Fraunhofer guide](https://www.iis.fraunhofer.de/content/dam/iis/de/doc/ame/wp/FraunhoferIIS_Application-Bulletin_AAC_ELDv2_Implementation_Guide.pdf)
+identifies LD-QMF for active LD-MPS and distinguishes it from plain LD-SBR's
+CLDFB. The [official ISO insert](https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip)
+is now available for research qualification. No reference implementation code
+or library has been incorporated into FVid. The 640 window values are numeric
+facts from its single-precision realization of ISO 23003-2 table A.21; that
+realization, rather than the full-precision normative decimal table, is explicit
+in the source and [provenance report](validation/aac-ld-qmf-source-2026-10-30.json).
+
+Owned scalar traces cover first-sample impulses, dense bursts and mixed tones
+at both widths over 40 slots, including their complete tails. Six additional
+synthesis traces exercise low real, high imaginary and dense arbitrary complex
+subbands, as required after spatial upmix. Absolute sample
+and slot timelines use direct complex modulation without production shifting.
+Rust analysis/synthesis agrees within 3e-12; whole-call/chunked operation, cloned
+checkpoints, reset and malformed/finite-overflow rollback pass. The impulse
+peak occurs at sample 128/256 under chronological block indexing; this is not
+a claim about device/framing latency. The saved fixture generator regenerates
+31 files / 508181 bytes byte-exact with process/socket creation denied; the
+numeric table is a separately tracked input.
+
+An explicit research validator compiles unmodified ISO reference source files
+in a temporary directory. It retains the original reference comparison and a
+separate translation-unit control using double-precision pi. Original reference
+arithmetic rounds pi, intermediate analysis products/accumulators, subbands and
+final PCM to float. The independent rounding realization matches all 24 original/
+pi-control cases: analysis exactly, synthesis within 3.6e-15. Original f64-oracle
+differences reach 5.81e-5 in analysis and 3.51e-6 in PCM; they are retained in
+[the report](validation/aac-ld-qmf-reference-2026-10-30.json), not hidden by
+reducing Rust precision. Ordinary Rust tests read saved fixtures and require no
+reference archive, C compiler, FFmpeg, process creation or network.
+
+The full no-default-features/player fvid-media unit suite passes 572 checks
+(one existing ignored), and the root player library checks offline. This is
+component qualification only. Next requirements remain spatial configuration,
+parameter/frame decoding, decorrelation/upmix, LD-SBR routing through LD-QMF,
+then synthetic movie playback, exact PCM/ranges and seek/rewind acceptance.
+
 ## AAC-LD explicit lower-rate reconstruction, 2026-10-30
 
 The previous explicit-output constructor refused the new own AAC-LD movie with

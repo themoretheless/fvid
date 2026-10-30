@@ -140,3 +140,6 @@ mod aac_sbr_timing;
 mod aac_eld_sbr_dsp;
 
 pub mod aac_eld_sbr;
+
+pub mod aac_ld_qmf;
+mod aac_ld_qmf_window;

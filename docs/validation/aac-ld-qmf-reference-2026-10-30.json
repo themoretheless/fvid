@@ -1,0 +1,180 @@
+{
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "reference_members": {
+    "sac_polyphase.c": "7d5c4f41ebfb9c9ed789af3ec3cb8892f1ee6ec89037fc31fb3077a73d3b30df",
+    "sac_polyphase.h": "72389c5e037ce65468433399f6ca731561e2d39393f01d52d7eb55e449928ba7",
+    "sac_sbrconst.h": "bc3338fbd3800bac6e0187c9b415b832ffb32a415d502c354b69318d8e5d5d6e"
+  },
+  "driver_sha256": "4125810afda49fc503394dd05bb7ae345c9275887d23d19ff4c8b44cc4e26b6d",
+  "controls": "Original ISO insert; independent rounding realization; separate double-PI research control. Original reference differences are retained, not treated as double-precision failures.",
+  "results": [
+    {
+      "name": "32-impulse",
+      "control": "original",
+      "analysis_f64_difference": 9.682608783506685e-06,
+      "synthesis_f64_difference": 1.728749114131055e-06,
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 8.881784197001252e-16
+    },
+    {
+      "name": "32-tones",
+      "control": "original",
+      "analysis_f64_difference": 2.858151942009002e-06,
+      "synthesis_f64_difference": 1.2022611950435191e-07,
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 0.0
+    },
+    {
+      "name": "32-dense",
+      "control": "original",
+      "analysis_f64_difference": 2.7494929776494814e-05,
+      "synthesis_f64_difference": 9.113123033653028e-07,
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 0.0
+    },
+    {
+      "name": "64-impulse",
+      "control": "original",
+      "analysis_f64_difference": 9.76570510462585e-06,
+      "synthesis_f64_difference": 3.5084062845372633e-06,
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 4.440892098500626e-16
+    },
+    {
+      "name": "64-tones",
+      "control": "original",
+      "analysis_f64_difference": 7.190326985512252e-06,
+      "synthesis_f64_difference": 2.6124898325208257e-07,
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 1.1102230246251565e-16
+    },
+    {
+      "name": "64-dense",
+      "control": "original",
+      "analysis_f64_difference": 5.8106394015489116e-05,
+      "synthesis_f64_difference": 1.8478789955243412e-06,
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 0.0
+    },
+    {
+      "name": "32-low-real",
+      "control": "original",
+      "synthesis_f64_difference": 1.175248932894224e-09,
+      "synthesis_float_model_error": 0.0
+    },
+    {
+      "name": "32-high-imag",
+      "control": "original",
+      "synthesis_f64_difference": 4.689137091291873e-08,
+      "synthesis_float_model_error": 0.0
+    },
+    {
+      "name": "32-complex-dense",
+      "control": "original",
+      "synthesis_f64_difference": 1.202610761079359e-07,
+      "synthesis_float_model_error": 0.0
+    },
+    {
+      "name": "64-low-real",
+      "control": "original",
+      "synthesis_f64_difference": 1.0819965964858902e-09,
+      "synthesis_float_model_error": 0.0
+    },
+    {
+      "name": "64-high-imag",
+      "control": "original",
+      "synthesis_f64_difference": 9.447085197195754e-08,
+      "synthesis_float_model_error": 0.0
+    },
+    {
+      "name": "64-complex-dense",
+      "control": "original",
+      "synthesis_f64_difference": 5.003725764667066e-07,
+      "synthesis_float_model_error": 0.0
+    },
+    {
+      "name": "32-impulse",
+      "control": "precise",
+      "analysis_f64_difference": 1.1003249156260608e-07,
+      "synthesis_f64_difference": 4.149112808882194e-08,
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 2.220446049250313e-16
+    },
+    {
+      "name": "32-tones",
+      "control": "precise",
+      "analysis_f64_difference": 1.4642894305971765e-06,
+      "synthesis_f64_difference": 4.190691301614313e-08,
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 0.0
+    },
+    {
+      "name": "32-dense",
+      "control": "precise",
+      "analysis_f64_difference": 3.2876279956184362e-06,
+      "synthesis_f64_difference": 1.0071502168100423e-07,
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 0.0
+    },
+    {
+      "name": "64-impulse",
+      "control": "precise",
+      "analysis_f64_difference": 2.7449394646161807e-08,
+      "synthesis_f64_difference": 4.901876349272527e-09,
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 2.220446049250313e-16
+    },
+    {
+      "name": "64-tones",
+      "control": "precise",
+      "analysis_f64_difference": 1.3794013087320423e-06,
+      "synthesis_f64_difference": 2.9586049804519732e-08,
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 3.552713678800501e-15
+    },
+    {
+      "name": "64-dense",
+      "control": "precise",
+      "analysis_f64_difference": 2.1550485165278133e-06,
+      "synthesis_f64_difference": 8.31740238349532e-08,
+      "analysis_float_model_error": 0.0,
+      "synthesis_float_model_error": 6.938893903907228e-18
+    },
+    {
+      "name": "32-low-real",
+      "control": "precise",
+      "synthesis_f64_difference": 4.3505065869253734e-10,
+      "synthesis_float_model_error": 0.0
+    },
+    {
+      "name": "32-high-imag",
+      "control": "precise",
+      "synthesis_f64_difference": 4.350506344064087e-10,
+      "synthesis_float_model_error": 0.0
+    },
+    {
+      "name": "32-complex-dense",
+      "control": "precise",
+      "synthesis_f64_difference": 1.8466118703597267e-09,
+      "synthesis_float_model_error": 0.0
+    },
+    {
+      "name": "64-low-real",
+      "control": "precise",
+      "synthesis_f64_difference": 4.493558823648325e-10,
+      "synthesis_float_model_error": 0.0
+    },
+    {
+      "name": "64-high-imag",
+      "control": "precise",
+      "synthesis_f64_difference": 4.49355880630109e-10,
+      "synthesis_float_model_error": 0.0
+    },
+    {
+      "name": "64-complex-dense",
+      "control": "precise",
+      "synthesis_f64_difference": 5.333783276162407e-09,
+      "synthesis_float_model_error": 0.0
+    }
+  ]
+}

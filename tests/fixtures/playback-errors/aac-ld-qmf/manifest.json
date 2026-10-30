@@ -1,0 +1,73 @@
+{
+  "cases": [
+    {
+      "name": "32-impulse",
+      "bands": 32,
+      "slots": 40,
+      "peak": 128
+    },
+    {
+      "name": "32-tones",
+      "bands": 32,
+      "slots": 40,
+      "peak": 172
+    },
+    {
+      "name": "32-dense",
+      "bands": 32,
+      "slots": 40,
+      "peak": 205
+    },
+    {
+      "name": "64-impulse",
+      "bands": 64,
+      "slots": 40,
+      "peak": 256
+    },
+    {
+      "name": "64-tones",
+      "bands": 64,
+      "slots": 40,
+      "peak": 300
+    },
+    {
+      "name": "64-dense",
+      "bands": 64,
+      "slots": 40,
+      "peak": 434
+    }
+  ],
+  "synthesis_cases": [
+    {
+      "name": "32-low-real",
+      "bands": 32,
+      "slots": 40
+    },
+    {
+      "name": "32-high-imag",
+      "bands": 32,
+      "slots": 40
+    },
+    {
+      "name": "32-complex-dense",
+      "bands": 32,
+      "slots": 40
+    },
+    {
+      "name": "64-low-real",
+      "bands": 64,
+      "slots": 40
+    },
+    {
+      "name": "64-high-imag",
+      "bands": 64,
+      "slots": 40
+    },
+    {
+      "name": "64-complex-dense",
+      "bands": 64,
+      "slots": 40
+    }
+  ],
+  "provenance": "Own absolute-time scalar convolution, complex exponential modulation, impulses, tones and deterministic dense bursts. LD-QMF foundation only; not spatial playback acceptance."
+}
