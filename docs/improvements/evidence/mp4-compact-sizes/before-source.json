@@ -1,0 +1,9 @@
+{
+  "commit": "9e581b15739e352b210d709383b78f2973ff94dc",
+  "sha256": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": "4f65f7bd47fc2974cd23eae14c1b39c3457dcc297828864b9f71597ac066c20a",
+    "scripts/generate_mp4_compact_sizes.py": "a2ce87af5c6332af333d970155e73fe2336272888d1b630fdd20caad52dd5699",
+    "tests/mp4_compact_sizes.rs": "933e83352cc3cea1953b94273dd0962d5610c1f7419d73c8d1b3db4632ba5b4a",
+    "tests/fixtures/playback-errors/mp4-compact-sizes/manifest.json": "7e008801e6f3b529a8e66c7a89aec00f16ba2cda346ed52e554e21c6e205806d"
+  }
+}

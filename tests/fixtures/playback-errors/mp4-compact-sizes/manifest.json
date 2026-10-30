@@ -1,0 +1,325 @@
+{
+  "provenance": "Authored16x16 VP9 and invented ASCII captions. stsz controls and stz2 alternatives contain identical packets/timing. Compact field sizes4/8/16, odd/even nibble counts, byte/word-spanning values; authored60ms mono48kHz PCM formula and zero-coded MACE blocks, with separate malformed-table refusals. No private media/parameters, FFmpeg or network.",
+  "reference": "ISO/IEC14496-12:2015 8.7.3.3 Compact Sample Size Box",
+  "cases": [
+    {
+      "file": "video-stsz-16.mp4",
+      "mode": "stsz",
+      "target": "video",
+      "width": 16
+    },
+    {
+      "file": "video-stz2-16.mp4",
+      "mode": "stz2",
+      "target": "video",
+      "width": 16
+    },
+    {
+      "file": "text-stsz-4-3.mp4",
+      "mode": "stsz",
+      "target": "text",
+      "width": 4,
+      "texts": [
+        "A",
+        "BBB",
+        "CC"
+      ],
+      "sizes": [
+        3,
+        5,
+        4
+      ],
+      "timescale": 50
+    },
+    {
+      "file": "text-stz2-4-3.mp4",
+      "mode": "stz2",
+      "target": "text",
+      "width": 4,
+      "texts": [
+        "A",
+        "BBB",
+        "CC"
+      ],
+      "sizes": [
+        3,
+        5,
+        4
+      ],
+      "timescale": 50
+    },
+    {
+      "file": "text-stsz-4-4.mp4",
+      "mode": "stsz",
+      "target": "text",
+      "width": 4,
+      "texts": [
+        "A",
+        "BBB",
+        "CC",
+        "DDDD"
+      ],
+      "sizes": [
+        3,
+        5,
+        4,
+        6
+      ],
+      "timescale": 100
+    },
+    {
+      "file": "text-stz2-4-4.mp4",
+      "mode": "stz2",
+      "target": "text",
+      "width": 4,
+      "texts": [
+        "A",
+        "BBB",
+        "CC",
+        "DDDD"
+      ],
+      "sizes": [
+        3,
+        5,
+        4,
+        6
+      ],
+      "timescale": 100
+    },
+    {
+      "file": "text-stsz-8-3.mp4",
+      "mode": "stsz",
+      "target": "text",
+      "width": 8,
+      "texts": [
+        "A",
+        "BBBBBBBBBBBBBBBBB",
+        "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+      ],
+      "sizes": [
+        3,
+        19,
+        131
+      ],
+      "timescale": 50
+    },
+    {
+      "file": "text-stz2-8-3.mp4",
+      "mode": "stz2",
+      "target": "text",
+      "width": 8,
+      "texts": [
+        "A",
+        "BBBBBBBBBBBBBBBBB",
+        "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+      ],
+      "sizes": [
+        3,
+        19,
+        131
+      ],
+      "timescale": 50
+    },
+    {
+      "file": "text-stsz-16-3.mp4",
+      "mode": "stsz",
+      "target": "text",
+      "width": 16,
+      "texts": [
+        "A",
+        "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+      ],
+      "sizes": [
+        3,
+        257,
+        513
+      ],
+      "timescale": 50
+    },
+    {
+      "file": "text-stz2-16-3.mp4",
+      "mode": "stz2",
+      "target": "text",
+      "width": 16,
+      "texts": [
+        "A",
+        "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+      ],
+      "sizes": [
+        3,
+        257,
+        513
+      ],
+      "timescale": 50
+    },
+    {
+      "file": "pcm-stsz-4.mp4",
+      "mode": "stsz",
+      "target": "pcm",
+      "width": 4,
+      "frames": 2880,
+      "sample_rate": 48000,
+      "channels": 1
+    },
+    {
+      "file": "pcm-stz2-4.mp4",
+      "mode": "stz2",
+      "target": "pcm",
+      "width": 4,
+      "frames": 2880,
+      "sample_rate": 48000,
+      "channels": 1
+    },
+    {
+      "file": "pcm-stz2-8.mp4",
+      "mode": "stz2",
+      "target": "pcm",
+      "width": 8,
+      "frames": 2880,
+      "sample_rate": 48000,
+      "channels": 1
+    },
+    {
+      "file": "pcm-stz2-16.mp4",
+      "mode": "stz2",
+      "target": "pcm",
+      "width": 16,
+      "frames": 2880,
+      "sample_rate": 48000,
+      "channels": 1
+    },
+    {
+      "file": "mace-stsz-4.mp4",
+      "mode": "stsz",
+      "target": "mace",
+      "width": 4
+    },
+    {
+      "file": "mace-stz2-4.mp4",
+      "mode": "stz2",
+      "target": "mace",
+      "width": 4
+    }
+  ],
+  "malformed": [
+    {
+      "file": "bad-mace-zero-entry.mp4",
+      "damage": "zero-entry"
+    },
+    {
+      "file": "bad-both.mp4",
+      "damage": "both"
+    },
+    {
+      "file": "bad-missing.mp4",
+      "damage": "missing"
+    },
+    {
+      "file": "bad-field-0.mp4",
+      "damage": "field-0"
+    },
+    {
+      "file": "bad-field-3.mp4",
+      "damage": "field-3"
+    },
+    {
+      "file": "bad-field-32.mp4",
+      "damage": "field-32"
+    },
+    {
+      "file": "bad-reserved.mp4",
+      "damage": "reserved"
+    },
+    {
+      "file": "bad-flags.mp4",
+      "damage": "flags"
+    },
+    {
+      "file": "bad-version.mp4",
+      "damage": "version"
+    },
+    {
+      "file": "bad-truncated.mp4",
+      "damage": "truncated"
+    },
+    {
+      "file": "bad-trailing.mp4",
+      "damage": "trailing"
+    },
+    {
+      "file": "bad-count-large.mp4",
+      "damage": "count-large"
+    },
+    {
+      "file": "bad-zero-entry.mp4",
+      "damage": "zero-entry"
+    }
+  ],
+  "fragmented": [
+    "fragment-init-stsz.mp4",
+    "fragment-init-4.mp4",
+    "fragment-init-8.mp4",
+    "fragment-init-16.mp4"
+  ],
+  "sha256": {
+    "frame-0.packet": "d586e4311a14b4eeebf2c61fadc917a6dc99aeccb87ceffb1e5166c318e67346",
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.packet": "81a6bc19b3f2ed2d203a852e97b487c13712d0a3d9730d8cadf902a5cbda05c4",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.packet": "338d4038d521a4e55109198d490b0f8ac78bbb13d41591848bbe2ac879988144",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "video-stsz-16.mp4": "c624dff4c7a50651dbb167409a79d3b7cdf9a57e43599a49596d10e7df135471",
+    "video-stz2-16.mp4": "9f038df8d74124d5d430b5f835d01061d1d906d3ec6e93f2eaaef77f95f90695",
+    "text-stsz-4-3.mp4": "ff0dcf4de4b991c9e79c11682263abf8977323beef7bb2f5372faefd07520217",
+    "text-4-3-0.packet": "ddfbf54dbfc27075a5529f7cc46d4d60aa64ec807649e5d8d55657c4b9efd924",
+    "text-4-3-1.packet": "bb5973528755c6cc38eb551860f944be3869215640d787fc38216d2305648811",
+    "text-4-3-2.packet": "37a455346baf84128eade05cbc133efc49140583340befab81f5595755cc0d39",
+    "text-stz2-4-3.mp4": "a7063d2542fd35054a63f099c1426199505e4423ca363f83701f1e3d0a588828",
+    "text-stsz-4-4.mp4": "682996c45d486564c38d9f27e1423efad33476b4b7398c7d40796a4021e631c1",
+    "text-4-4-0.packet": "ddfbf54dbfc27075a5529f7cc46d4d60aa64ec807649e5d8d55657c4b9efd924",
+    "text-4-4-1.packet": "bb5973528755c6cc38eb551860f944be3869215640d787fc38216d2305648811",
+    "text-4-4-2.packet": "37a455346baf84128eade05cbc133efc49140583340befab81f5595755cc0d39",
+    "text-4-4-3.packet": "de642376336708f850061dc0fd57a46cfc4b70c776462e7be29c7602e2f7a823",
+    "text-stz2-4-4.mp4": "9e38a963cc1dd070a19f610adb3a679c3cdbc1c24751f818d8c6a1f9c4b13bb9",
+    "text-stsz-8-3.mp4": "01646aaab3544c45c9512f6319fb2044636f74a8f17a5fc2ed7e80303106982e",
+    "text-8-3-0.packet": "ddfbf54dbfc27075a5529f7cc46d4d60aa64ec807649e5d8d55657c4b9efd924",
+    "text-8-3-1.packet": "8906f5c573b605351d72d7484b5fc4c5ba6812d507f15acbb6ad8c169c176ca5",
+    "text-8-3-2.packet": "c1ff656e0d0efcec0f920f05ea3817eba5fc114f8363359082c16bc992885644",
+    "text-stz2-8-3.mp4": "245db929ff3f680cf3603c62410a8e83411c0223c81ba772ec551f00d7f53e01",
+    "text-stsz-16-3.mp4": "5c0bec254636549b12e0df51a9686598198103bd8b4bbf0a3be7fe5cf6abee0a",
+    "text-16-3-0.packet": "ddfbf54dbfc27075a5529f7cc46d4d60aa64ec807649e5d8d55657c4b9efd924",
+    "text-16-3-1.packet": "1eccd601dc9022ea29dc882574e181c545cfd1c0a0ff85a66f35a370db169df3",
+    "text-16-3-2.packet": "56b9c4ce30d7432860a18e9f24440093a1a360963252529f50ba17c1c31c64ab",
+    "text-stz2-16-3.mp4": "6f77f5d7f3ef87d27a8bf347cde1d504a55bf6db71062645070ff960e113ca54",
+    "pcm.s16le": "35007542ceaa2e2438965594bb4a78b2d4b96d3518a0073d8faa04bcc1288bd4",
+    "pcm.f32le": "8ba041e90e3a910de8ab00dc06c0abc222a85d32670de19b3931788b298bca9f",
+    "pcm-stsz-4.mp4": "60733146757e3d92ac9648c3e3c56a0d52508dec6ed84312426116a6cb4b5ec3",
+    "pcm-stz2-4.mp4": "f7a0b5cba3a12f746e9c53bf8c024bbdeeaa25bb286502ef6e96e087e49be82e",
+    "pcm-stz2-8.mp4": "f85b5dbe0a16c66fc665d0db77018382ca55f7b538a4dae12d504b0a1ca9cdb8",
+    "pcm-stz2-16.mp4": "b3d313b02fe8166cdbcac4ebe8d8f715b67c94af251feb076f5933b598383d92",
+    "mace-stsz-4.mp4": "c9da899f51861d221ad2b4d38e3f479cc7bf2d770aafc111770bb3dc7672bfd6",
+    "mace-stz2-4.mp4": "70da8cc5da2f7ed168dc813987eff4a9ea3b0f9500c0e2496b060f499b98fc7b",
+    "bad-mace-zero-entry.mp4": "00a7a7af62a81463301c2240b51cf18663357ee2ab4976f84f2ffe1697421ea7",
+    "bad-both.mp4": "21978a52755aa23c19a8aafc8019c84a0c3583a9893273afef07242b5e80cfa5",
+    "bad-missing.mp4": "4694aef33a83eb5d90e70dd6142a85b80a7204746a7106965040e3f26cc4b219",
+    "bad-field-0.mp4": "68d37cd24bee7504f06a0b3d8c8266d0ad208eff0e6a3c9d8fa862ac93ebe288",
+    "bad-field-3.mp4": "c0efbf990bbcf56cb331ca83ca84344c4f64f27a72b8732ab52ff276c8d8d605",
+    "bad-field-32.mp4": "6a206996a654c7ebcaf23fc15cc3dbdc67781cf041b4317ce2544b9ebb7d6373",
+    "bad-reserved.mp4": "aede31327906d3ad55866d53829f9bf07dfdd8553070a7e8122d37d830ab340b",
+    "bad-flags.mp4": "75226216f39ed42bb600cd13355cf6e56c1dfa344eb95cffc23063d9cd7b68bb",
+    "bad-version.mp4": "2a19cf1ac9dcf77d30e3e13c456431cb1c0d912a4a76a04c1fe75c7f809b7311",
+    "bad-truncated.mp4": "104c1381cbb4ca8f912bfadf40ca01398f3a52faf5b366da9469442390e89986",
+    "bad-trailing.mp4": "96d3fc9a14f88697e05da0260ed370d2024e74aed45c5a8b331efcd8ab05823f",
+    "bad-count-large.mp4": "963c239e65a49481ad40ad6952965d10a01750ff7e973da80af6f502b2f571b0",
+    "bad-zero-entry.mp4": "7ade9360c465247deac32aea64fda82f1af9a75c70e7f661899df88f789ab46c",
+    "fragment-init-stsz.mp4": "d692c1b7a5a3aec582b1eaf4dd74dbffc128d151c89902bfade38078aa6eff77",
+    "fragment-init-4.mp4": "52459385d5901fb475fd2667b066537ccfa85b644b5699c6aa478d8841c4bf07",
+    "fragment-init-8.mp4": "1f22a02e6e3c132876ab8cb55ddc081ab3bece6646f42d174e16e945a2ece1d0",
+    "fragment-init-16.mp4": "434a1fc0b8fd08b22839e64ec7956b81b1b466ba50b471b9e785125394035ab3",
+    "fragment-text-0.packet": "9dd98bb378967cd4fc76e866be804c57b43da7e901b1268640db9f63fbf701d7",
+    "fragment-text-1.packet": "22cde6588d0cde3dbf6ab074b27e22b2fdfff1a2367930610f70e5213c9a32e7",
+    "fragment-text-2.packet": "845cf311ffabee6b4c36910e982db25287d18d8218565e42730cc11777a620eb"
+  }
+}

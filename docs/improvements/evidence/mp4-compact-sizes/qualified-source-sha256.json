@@ -1,0 +1,6 @@
+{
+  "crates/fvid-media/src/owned_mp4_impl.rs": "3fca0cd5964a2b5ef0e5afcc00488650661c1194204970d0d689b0b88c66a743",
+  "scripts/generate_mp4_compact_sizes.py": "901ef12c5267a0860f3ffd2cabccd5404c47de90357fab3d9f020c96b4e14be4",
+  "tests/mp4_compact_sizes.rs": "b520aefa39b8b6d19f47d48e2f3aef58f64ade5de4540aadc9859b44bcdab9a6",
+  "tests/fixtures/playback-errors/mp4-compact-sizes/manifest.json": "1e9a3c64bccdf64c8c51c367d0626f1448a7a949e404a105e5ace089eef7dba1"
+}

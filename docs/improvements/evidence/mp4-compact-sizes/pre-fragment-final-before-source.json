@@ -1,0 +1,10 @@
+{
+  "commit": "9e581b15739e352b210d709383b78f2973ff94dc",
+  "sha256": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": "4f65f7bd47fc2974cd23eae14c1b39c3457dcc297828864b9f71597ac066c20a",
+    "scripts/generate_mp4_compact_sizes.py": "0643ad74fbb327175b69a7a9b1f1ad7717772f2b02416689e72ccb499e50bc2a",
+    "tests/mp4_compact_sizes.rs": "9ad25a70395c2b58b39343340f91000b4ef69602a888e83af09fc552a6a6e0df",
+    "tests/fixtures/playback-errors/mp4-compact-sizes/manifest.json": "2076a38c46358f7d1b6e976e4ec245243580a4fb8262b5ce4389a89ebf7e8b64"
+  },
+  "restoration": "finally restores qualified candidate bytes regardless of baseline result"
+}

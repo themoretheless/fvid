@@ -1,0 +1,43 @@
+{
+  "checks": {
+    "before": {
+      "passed": 1,
+      "failed": 1
+    },
+    "after": {
+      "passed": 2,
+      "failed": 0
+    },
+    "extended-after": {
+      "passed": 3,
+      "failed": 1
+    },
+    "final-after": {
+      "passed": 4,
+      "failed": 0
+    },
+    "mace-guard-before": {
+      "passed": 4,
+      "failed": 1
+    },
+    "complete-after": {
+      "passed": 5,
+      "failed": 0
+    },
+    "fragment-after": {
+      "passed": 6,
+      "failed": 0
+    },
+    "final-before": {
+      "passed": 1,
+      "failed": 5
+    },
+    "qualified-after": {
+      "passed": 6,
+      "failed": 0
+    }
+  },
+  "status": "final focused and broader qualification green; accepted FVID-0432",
+  "count_delta": 0,
+  "accepted_count": 432
+}

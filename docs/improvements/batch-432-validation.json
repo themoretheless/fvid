@@ -1,0 +1,141 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0432"
+  ],
+  "count_delta": 1,
+  "accepted_count": 432,
+  "batch": 432,
+  "summary": "Read standard compact MP4 sample-size tables with bounded indices and strict table validation",
+  "before": {
+    "commit": "9e581b15739e352b210d709383b78f2973ff94dc",
+    "passed": 1,
+    "failed": 5,
+    "specific_failure": "All regular-size control movies retain packets/pictures/seek; valid stz2 fails with missing MP4 stsz box. Full-corpus original reproduced after restoring production in finally.",
+    "initial_original_passed": 1,
+    "initial_original_failed": 1,
+    "prototype_mace_zero_guard_passed": 4,
+    "prototype_mace_zero_guard_failed": 1
+  },
+  "checks": {
+    "before": {
+      "suites": 1,
+      "passed": 1,
+      "failed": 1,
+      "ignored": 0
+    },
+    "after": {
+      "suites": 1,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    "extended-after": {
+      "suites": 1,
+      "passed": 3,
+      "failed": 1,
+      "ignored": 0
+    },
+    "final-after": {
+      "suites": 1,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    "mace-guard-before": {
+      "suites": 1,
+      "passed": 4,
+      "failed": 1,
+      "ignored": 0
+    },
+    "complete-after": {
+      "suites": 1,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "fragment-after": {
+      "suites": 1,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    "final-before": {
+      "suites": 1,
+      "passed": 1,
+      "failed": 5,
+      "ignored": 0
+    },
+    "qualified-after": {
+      "suites": 1,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    "integration": {
+      "suites": 95,
+      "passed": 460,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-mp4": {
+      "suites": 1,
+      "passed": 57,
+      "failed": 0,
+      "ignored": 1
+    },
+    "media": {
+      "suites": 1,
+      "passed": 547,
+      "failed": 0,
+      "ignored": 1
+    },
+    "core-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "distinct_passed": 1061,
+  "shared_include_duplicates_excluded": 3,
+  "focused_repeats_not_added": 6,
+  "ignored": {
+    "physical_metal_videotoolbox": 1,
+    "existing_pending_integer_float_rgb_compatibility": 1
+  },
+  "fixtures": {
+    "valid_movies": 20,
+    "classic_regular_compact_pairs": 16,
+    "real_fragmented_init_controls": 4,
+    "explicit_malformed_or_ambiguous_tables": 13,
+    "oracle_files": 24,
+    "manifest_files": 1,
+    "files": 58,
+    "repeatability": "identical",
+    "initial_media_oracles_unchanged": 29
+  },
+  "core-check": "passed locked/offline/no-default-features",
+  "player-check": "passed locked/offline/no-default-features",
+  "resources": "PCM2880 frames and MACE480 blocks retain one audio index record; a total4-record limit admits them alongside3 video samples. Oversized-row declarations fail exact table lengths before index allocation; packet cap1 still refuses.",
+  "migration": "No signature change. stz2 discovery is added; simultaneous stsz/stz2 is now explicitly invalid and requires retaining exactly one size table.",
+  "uncounted": [
+    "Introduced prototype compact-MACE zero-entry gap fixed before acceptance.",
+    "Wrong test expectation for unsupported-version error category corrected to existing Invalid; refusal remains mandatory.",
+    "Portable byte-count arithmetic refinement and additional field/fragment/audio variants are part of this format capability."
+  ],
+  "limits": [
+    "No speed, process-wide RSS or physical-device qualification.",
+    "Regular MACE table policy otherwise unchanged."
+  ],
+  "references": [
+    "https://github.com/FFmpeg/FFmpeg/blob/n8.0/libavformat/mov.c#L3194-L3279"
+  ],
+  "evidence": "docs/improvements/evidence/mp4-compact-sizes/README.md"
+}

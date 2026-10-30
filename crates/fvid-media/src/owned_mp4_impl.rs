@@ -1832,27 +1832,55 @@ fn sample_index(
     limit: usize,
     fragmented: bool,
 ) -> Result<Option<SampleIndex>> {
-    let stsz = required(stbl, b"stsz")?;
-    version(stsz, 0)?;
-    let fixed_size = u32be(stsz, 4)?;
-    let count = u32be(stsz, 8)? as usize;
+    let regular = optional(stbl, b"stsz")?;
+    let compact = optional(stbl, b"stz2")?;
+    let sizes = match (regular, compact) {
+        (Some(table), None) | (None, Some(table)) => table,
+        (None, None) => required(stbl, b"stsz")?,
+        (Some(_), Some(_)) => return Err(invalid("expected exactly one MP4 sample-size table")),
+    };
+    version(sizes, 0)?;
+    let (fixed_size, field_size) = if compact.is_some() {
+        if u32be(sizes, 0)? != 0 || u32be(sizes, 4)? & 0xffff_ff00 != 0 {
+            return Err(invalid("reserved MP4 compact sample-size fields"));
+        }
+        let field = u32be(sizes, 4)? as u8;
+        if !matches!(field, 4 | 8 | 16) {
+            return Err(invalid("invalid MP4 compact sample-size field width"));
+        }
+        (0, field)
+    } else {
+        (u32be(sizes, 4)?, 32)
+    };
+    let count = u32be(sizes, 8)? as usize;
     if !fragmented && count == 0 {
         return Err(invalid("empty MP4 sample table"));
     }
     let expected = if fixed_size == 0 {
-        count.checked_mul(4).and_then(|n| n.checked_add(12))
+        match field_size {
+            4 => Some(count / 2 + count % 2),
+            8 => Some(count),
+            16 => count.checked_mul(2),
+            _ => count.checked_mul(4),
+        }
+            .and_then(|n| n.checked_add(12))
     } else {
         Some(12)
     };
-    if expected != Some(stsz.len()) {
+    if expected != Some(sizes.len()) {
         return Err(invalid("invalid sample-size table"));
     }
     let size_at = |index: usize| -> Result<u32> {
-        if fixed_size == 0 {
-            u32be(stsz, 12 + index * 4)
-        } else {
-            Ok(fixed_size)
+        if index >= count {
+            return Err(invalid("MP4 sample-size index out of range"));
         }
+        if fixed_size != 0 { return Ok(fixed_size); }
+        Ok(match field_size {
+            4 => u32::from((sizes[12 + index / 2] >> if index % 2 == 0 { 4 } else { 0 }) & 15),
+            8 => u32::from(sizes[12 + index]),
+            16 => u32::from(u16be(sizes, 12 + index * 2)?),
+            _ => return u32be(sizes, 12 + index * 4),
+        })
     };
     let stts = required(stbl, b"stts")?;
     version(stts, 0)?;
@@ -1875,6 +1903,13 @@ fn sample_index(
     if timed != count {
         return Err(invalid("decode-time count differs from sample count"));
     }
+    // MACE's block index does not visit each raw sample size. Compact size
+    // entries must still be validated before selecting that representation.
+    if compact.is_some() && descriptions.iter().any(|d| is_mace(&d.codec)) {
+        for index in 0..count {
+            if size_at(index)? == 0 { return Err(invalid("zero MP4 sample size")); }
+        }
+    }
     if count != 0 && descriptions.iter().any(|d| is_mace(&d.codec))
         && (descriptions.iter().any(|d| d.codec != *codec || d.channels != channels)
             || fragmented || timing.len() != 1 || optional(stbl,b"ctts")?.is_some() || optional(stbl,b"stss")?.is_some())
@@ -1894,10 +1929,22 @@ fn sample_index(
     // So the unit there is the block, sized and timed by the coding; the chunks
     // divide into it exactly in both takes, as they must for the reference's own
     // reading of the same tables.
+    // Compact tables spell every size, even when PCM frames are all equal.
+    // Preserve the existing chunk-sized uniform index and its sample budget
+    // without materializing one size/index record for every PCM frame.
+    let mut uniform_size = fixed_size;
+    if compact.is_some() && !fragmented && is_pcm(codec) && count != 0 {
+        let candidate = size_at(0)?;
+        let mut constant = candidate != 0;
+        for index in 1..count {
+            if size_at(index)? != candidate { constant = false; break; }
+        }
+        if constant { uniform_size = candidate; }
+    }
     let unit = if fragmented {
         None
-    } else if is_pcm(codec) && fixed_size != 0 {
-        Some((1, usize::try_from(fixed_size).unwrap_or(usize::MAX)))
+    } else if is_pcm(codec) && uniform_size != 0 {
+        Some((1, usize::try_from(uniform_size).unwrap_or(usize::MAX)))
     } else {
         mace_block(codec, channels)
     };

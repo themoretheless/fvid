@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 431,
-  "next_id": "FVID-0432",
+  "accepted_count": 432,
+  "next_id": "FVID-0433",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4841,6 +4841,17 @@
       "result": "Select chapter count/entry start from the stated version instead of assuming four reserved bytes.20 authored VP9 movies cover version0/1, 10MHz/legacy movie clocks, known/unknown/zero duration and optional empty/truncated metadata. Both parser paths return exact UTF8 titles/times; real native seeks select exact20ms intervals; every movie decodes three exact pictures and EOF.1012 distinct checks pass across86 integration suites and deduplicated root/media units, plus locked/offline core/player builds. One physical-GPU test, two explicit HTTP integration checks and one existing RGB compatibility acceptance remain ignored. All variants count once.",
       "status": "accepted",
       "validation": "batch-431-validation.json"
+    },
+    {
+      "id": "FVID-0432",
+      "batch": 432,
+      "title": "Read standard compact MP4 sample-size tables with bounded indices and strict table validation",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_compact_sizes.rs",
+      "before": "All regular-size control movies retain packets/pictures/seek; valid stz2 fails with missing MP4 stsz box. Full-corpus original reproduced after restoring production in finally. Initial1pass1fail; final1pass5fail on the complete corpus.",
+      "result": "Borrow and decode4/8/16-bit stz2 entries after checked exact body lengths; preserve normal stsz and constant-size PCM/MACE chunk indexing, and reject ambiguous tables/reserved fields/invalid widths/counts/zero sizes.20 authored video/text/PCM/MACE movies verify exact packets/pictures, native caption and audio media seeks, PCM suffixes, real fragmented init/edit clocks and EOF;13 damaged companions require exact refusal.58 files regenerate identically.1061 distinct checks pass across95 integration suites and deduplicated root/media units; locked/offline core/player builds pass. One physical-GPU test and one existing RGB compatibility acceptance remain ignored. All variants and introduced prototype/test repairs count once; no performance claim.",
+      "status": "accepted",
+      "validation": "batch-432-validation.json"
     }
   ]
 }
