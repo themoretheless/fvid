@@ -1,0 +1,31 @@
+{
+  "native_code_commit": "c84dfc33132672beb291eb292766c8ecc5adbb37",
+  "conversion_followup_commit": "ea308431e70b66bb99e9a00aac7ca76b5057822d",
+  "verified_remote_refs": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "accepted_count": 428,
+  "followup_count_delta": 0,
+  "removed_owned_target": "/private/tmp/fvid-invisible-subtitles-20261031",
+  "removed_archived_raw_logs": {
+    "matroska-invisible-subtitles": [
+      "/private/tmp/fvid-invisible-subtitles-root-20261031.log",
+      "/private/tmp/fvid-invisible-subtitles-core-check-20261031.log",
+      "/private/tmp/fvid-invisible-subtitles-integration-20261031.log",
+      "/private/tmp/fvid-invisible-subtitles-player-check-20261031.log",
+      "/private/tmp/fvid-invisible-subtitles-before-20261031.log",
+      "/private/tmp/fvid-invisible-subtitles-after-20261031.log"
+    ],
+    "matroska-subtitle-conversion-presentation": [
+      "/private/tmp/fvid-subtitle-conversion-presentation-root-20261031.log",
+      "/private/tmp/fvid-subtitle-conversion-presentation-integration-20261031.log",
+      "/private/tmp/fvid-subtitle-conversion-presentation-core-check-20261031.log",
+      "/private/tmp/fvid-subtitle-conversion-presentation-media-20261031.log",
+      "/private/tmp/fvid-subtitle-conversion-presentation-after-20261031.log",
+      "/private/tmp/fvid-subtitle-conversion-presentation-player-check-20261031.log",
+      "/private/tmp/fvid-subtitle-conversion-presentation-before-20261031.log"
+    ]
+  },
+  "preserved": "All regression witnesses, qualified proof, active other worktrees and four stashes."
+}
