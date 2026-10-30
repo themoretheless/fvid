@@ -1,0 +1,10 @@
+{
+  "commit": "1d7a66c4eb8160170a13081f2fa2f22d9d36e9c3",
+  "sha256": {
+    "src/playback/subtitles/webm_subtitles.rs": "2b0e45f3cb7e886e880a606259e09b9cf8230552169d6bc50cdc5d2cf80737a5",
+    "tests/matroska_subtitle_delay.rs": "572efa48871eb8a061531e64341f6c3a3b30304e306379f39898f4f2964b4144",
+    "scripts/generate_matroska_subtitle_delay.py": "6f8e572460ca83141c7486d098bfb1a814dea587315a7fc97468aa31ec625d81",
+    "tests/fixtures/playback-errors/matroska-subtitle-delay/manifest.json": "8e8fa626dc1308c38555b51c2a608fc0d40efd9ab93ae3cc8cf4c328c0aa823b"
+  },
+  "initial_primary": "1 source/picture control passed,2 cue/seek acceptances failed; no production edits."
+}

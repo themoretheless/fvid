@@ -1,0 +1,10 @@
+{
+  "src/playback/subtitles/webm_subtitles.rs": "4527149d2bfa23adc5debb172ae2da413d8967459236f8db5f3b34d29f248943",
+  "tests/matroska_subtitle_delay.rs": "572efa48871eb8a061531e64341f6c3a3b30304e306379f39898f4f2964b4144",
+  "scripts/generate_matroska_subtitle_delay.py": "6f8e572460ca83141c7486d098bfb1a814dea587315a7fc97468aa31ec625d81",
+  "scripts/generate_matroska_ssa_text.py": "e209ee4772a74a1b930e160a59379b7d14173dd68a330ac1161ab0f825ffc5dd",
+  "scripts/generate_matroska_subtitle_spans.py": "0aa24345e2fc4ed8d7d9face9a9e48a1924e8130090a127931b60609060c4de5",
+  "scripts/generate_mp4_seek_io_regressions.py": "0f4fb2b227b8d7ef3ae0d468a2b22224edf6819da01058024f7e27d388d7cd82",
+  "scripts/generate_vp9_chroma.py": "6575165cdf9be9bcb6280f6de0837329222e17c186e60bd9bd51cd6fdb64f80b",
+  "tests/fixtures/playback-errors/matroska-subtitle-delay/manifest.json": "8e8fa626dc1308c38555b51c2a608fc0d40efd9ab93ae3cc8cf4c328c0aa823b"
+}

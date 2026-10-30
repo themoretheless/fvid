@@ -1,0 +1,503 @@
+{
+  "provenance": "Pure authored16x16 three-color VP9 with invented UTF8/SSA/ASS text. CodecDelay is nanoseconds independent of TimestampScale; omitted delay,20ms delay and maximum unsigned delay controls. No private media/parameters, FFmpeg or network.",
+  "reference": "https://www.rfc-editor.org/rfc/rfc9559.html#section-11.2",
+  "cases": [
+    {
+      "file": "utf8-scale1000000-delay0.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "utf8",
+      "default_ns": 0,
+      "delay_ns": 0,
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 30000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 40000000,
+          "end_ns": 60000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 80000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-scale1000000-delay20000000.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "utf8",
+      "default_ns": 0,
+      "delay_ns": 20000000,
+      "cues": [
+        {
+          "text": "Middle caption",
+          "start_ns": 20000000,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 60000000,
+          "end_ns": 80000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-scale1000000-delay18446744073709551615.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "utf8",
+      "default_ns": 0,
+      "delay_ns": 18446744073709551615,
+      "cues": []
+    },
+    {
+      "file": "utf8-scale2000000-delay0.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "utf8",
+      "default_ns": 0,
+      "delay_ns": 0,
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 30000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 40000000,
+          "end_ns": 60000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 80000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-scale2000000-delay20000000.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "utf8",
+      "default_ns": 0,
+      "delay_ns": 20000000,
+      "cues": [
+        {
+          "text": "Middle caption",
+          "start_ns": 20000000,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 60000000,
+          "end_ns": 80000000
+        }
+      ]
+    },
+    {
+      "file": "utf8-scale2000000-delay18446744073709551615.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "utf8",
+      "default_ns": 0,
+      "delay_ns": 18446744073709551615,
+      "cues": []
+    },
+    {
+      "file": "ssa-scale1000000-delay0.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "ssa",
+      "default_ns": 0,
+      "delay_ns": 0,
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 30000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 40000000,
+          "end_ns": 60000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 80000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "ssa-scale1000000-delay20000000.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "ssa",
+      "default_ns": 0,
+      "delay_ns": 20000000,
+      "cues": [
+        {
+          "text": "Middle caption",
+          "start_ns": 20000000,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 60000000,
+          "end_ns": 80000000
+        }
+      ]
+    },
+    {
+      "file": "ssa-scale1000000-delay18446744073709551615.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "ssa",
+      "default_ns": 0,
+      "delay_ns": 18446744073709551615,
+      "cues": []
+    },
+    {
+      "file": "ssa-scale2000000-delay0.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "ssa",
+      "default_ns": 0,
+      "delay_ns": 0,
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 30000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 40000000,
+          "end_ns": 60000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 80000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "ssa-scale2000000-delay20000000.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "ssa",
+      "default_ns": 0,
+      "delay_ns": 20000000,
+      "cues": [
+        {
+          "text": "Middle caption",
+          "start_ns": 20000000,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 60000000,
+          "end_ns": 80000000
+        }
+      ]
+    },
+    {
+      "file": "ssa-scale2000000-delay18446744073709551615.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "ssa",
+      "default_ns": 0,
+      "delay_ns": 18446744073709551615,
+      "cues": []
+    },
+    {
+      "file": "ass-scale1000000-delay0.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "ass",
+      "default_ns": 0,
+      "delay_ns": 0,
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 30000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 40000000,
+          "end_ns": 60000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 80000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "ass-scale1000000-delay20000000.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "ass",
+      "default_ns": 0,
+      "delay_ns": 20000000,
+      "cues": [
+        {
+          "text": "Middle caption",
+          "start_ns": 20000000,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 60000000,
+          "end_ns": 80000000
+        }
+      ]
+    },
+    {
+      "file": "ass-scale1000000-delay18446744073709551615.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "ass",
+      "default_ns": 0,
+      "delay_ns": 18446744073709551615,
+      "cues": []
+    },
+    {
+      "file": "ass-scale2000000-delay0.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "ass",
+      "default_ns": 0,
+      "delay_ns": 0,
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 30000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 40000000,
+          "end_ns": 60000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 80000000,
+          "end_ns": 100000000
+        }
+      ]
+    },
+    {
+      "file": "ass-scale2000000-delay20000000.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "ass",
+      "default_ns": 0,
+      "delay_ns": 20000000,
+      "cues": [
+        {
+          "text": "Middle caption",
+          "start_ns": 20000000,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 60000000,
+          "end_ns": 80000000
+        }
+      ]
+    },
+    {
+      "file": "ass-scale2000000-delay18446744073709551615.mkv",
+      "pts_ns": [
+        0,
+        40000000,
+        80000000
+      ],
+      "packet_durations_ns": [
+        30000000,
+        20000000,
+        20000000
+      ],
+      "codec": "ass",
+      "default_ns": 0,
+      "delay_ns": 18446744073709551615,
+      "cues": []
+    }
+  ],
+  "sha256": {
+    "utf8-0.packet": "657577ec140ab081cc64fbd30b81f41f17b2694a3b772d7b16e3ed4665b6efd1",
+    "utf8-1.packet": "685d1cf3d81074847ebeb69a00092eecbf4b955ef920aa998ce14edaad27fd76",
+    "utf8-2.packet": "4294fec18c52fada4329d70269c474cc7801766eb014f836bc17007a6de4a106",
+    "utf8-scale1000000-delay0.mkv": "81d19ec1a136998dfeb0fc1f42340b99e32eaa5be15cce865a02620961f3c1f0",
+    "utf8-scale1000000-delay20000000.mkv": "19758b8acb7d41d2b39f4b5766ec16080757b7a56b78cb1a0c3cb4d249238330",
+    "utf8-scale1000000-delay18446744073709551615.mkv": "e7dc83e441985ddcd683e130ddd0aef61254322203b9a239257e2e1b22682d66",
+    "utf8-scale2000000-delay0.mkv": "1d5391606b71f8e677ef8b49eab6618796cc8881d791ce39eb0afe78a462b0be",
+    "utf8-scale2000000-delay20000000.mkv": "af033544ed135092ad2bb7b3198af5ce7cdec07f276a06b96bc5c4a81041b688",
+    "utf8-scale2000000-delay18446744073709551615.mkv": "921f137090d2caed122aba9acd29c02ae2456c0c1761bb36a2ac9021eb755a24",
+    "ssa-0.packet": "42b188507f571fc4989be6ca605b91cda9624b5f8f1a13a583b889caf36947be",
+    "ssa-1.packet": "0f44e95448162763b8baffc9333521cde703f177b99d10624f9a13c1fb7168dd",
+    "ssa-2.packet": "8feadb8ef7a0d3dc159e0cd501c5f722ca75f4a853e50daca71e9b35f487a3fb",
+    "ssa-scale1000000-delay0.mkv": "082be60f1d61abe9015a54ae4c6cd59f75af526c9bb838586389e8a6f268f680",
+    "ssa-scale1000000-delay20000000.mkv": "d28ffa0d8195246c8358a12c8f54f79653b191fa692ac21f942e351d34abd934",
+    "ssa-scale1000000-delay18446744073709551615.mkv": "67464df5f8dee1ae9bbcadd0bc446e423ed99174ecc5f6f5129c0a09cf7a3467",
+    "ssa-scale2000000-delay0.mkv": "61ce1a5fd86aa2f751f0d93f34c09213ec44a4267cf56bfa440ef456c326d31d",
+    "ssa-scale2000000-delay20000000.mkv": "f4104d3e0178636c166f80b2e3837f2ac650706e8db923f56808330a8f295d69",
+    "ssa-scale2000000-delay18446744073709551615.mkv": "23d215f6621d24f69f75d4ef15b35474f4b35b5604157e730e5b840c60e32b0e",
+    "ass-0.packet": "de2595972a33d887e82fb736437d6f0a082fe8c7aba99c7ac4863d99cef1de3b",
+    "ass-1.packet": "8cb0e1e2bc350ee66201df1cdabbc1d4aea82d1f17cff5e600f79a304451b4cd",
+    "ass-2.packet": "ca3ca58692eea19716878eb251bfd2069eb7b7ed5df94ffaf40f0b0760b774a8",
+    "ass-scale1000000-delay0.mkv": "721fc348b285dd7c418583b546cbb3c17835e2b46849f1e3d433e0cb3c63308a",
+    "ass-scale1000000-delay20000000.mkv": "3fcde26eee683d184db809c0cb065a469a16558ec36913e0e7dbea2a62cf3c3e",
+    "ass-scale1000000-delay18446744073709551615.mkv": "0659d355e190368d41f1496dd43f51e8192add2dfbe226089992b037302f281d",
+    "ass-scale2000000-delay0.mkv": "69de0418cd3a226b64202a382d1aecd1acf2de14a902e407ba2047718fb43905",
+    "ass-scale2000000-delay20000000.mkv": "a5206ab6fd19466e7ae69f48078dfe921fe5a3469184bcd86033eb08e4fa0470",
+    "ass-scale2000000-delay18446744073709551615.mkv": "a70c7ca6d23f4979dc245ed82e0a15be4dbbbd19db351032c4ba230b23b91100"
+  }
+}

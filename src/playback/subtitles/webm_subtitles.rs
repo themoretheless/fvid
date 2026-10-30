@@ -117,6 +117,14 @@ impl<R: Read + Seek> WebmSubtitleReader<R> {
             .expect("supported lists existing tracks");
         let default = Duration::from_nanos(track.default_duration_ns);
         let script = SCRIPT_CODECS.contains(&track.codec.as_str());
+        // Packet PTS is already scaled to nanoseconds; CodecDelay uses that
+        // same unit and applies to both current and successor presentation.
+        let delay = i128::from(track.codec_delay_ns);
+        let presentation = |pts: i64| {
+            u64::try_from(i128::from(pts) - delay)
+                .ok()
+                .map(Duration::from_nanos)
+        };
         let mut blocks: Vec<(i64, usize)> = self
             .demuxer
             .packets
@@ -142,13 +150,12 @@ impl<R: Read + Seek> WebmSubtitleReader<R> {
             }
             // Negative-PTS frames must still be decoded, but Matroska does
             // not present them, even when their duration crosses the origin.
-            let Ok(pts) = u64::try_from(*pts) else {
+            let Some(container) = presentation(*pts) else {
                 continue;
             };
-            let container = Duration::from_nanos(pts);
             let next = blocks
                 .get(position + 1)
-                .map(|(pts, _)| Duration::from_nanos(u64::try_from(*pts).unwrap_or_default()));
+                .and_then(|(pts, _)| presentation(*pts));
             let (start, end) = match stated {
                 Some(range) => range,
                 None => {
