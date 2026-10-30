@@ -226,7 +226,7 @@ fn invalid_modes_pair_geometry_and_slots_are_transactional() {
         assert_eq!(s, initial);
         assert_eq!(b.position(), 0);
     }
-    assert!(Parameters::new(Kind::Cld, 0, 0).is_err());
+    assert!(Parameters::new(Kind::Cld, 0, 0).is_ok());
     assert!(Parameters::new(Kind::Icc, 24, 0).is_err());
     assert!(Parameters::new(Kind::Icc, 2, -1).is_err());
     assert!(Parameters::new(Kind::Cpc, 2, 31).is_err());

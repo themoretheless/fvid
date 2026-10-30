@@ -75,6 +75,9 @@ impl History {
 /// Group widths differ by at most one. Short groups precede long groups;
 /// notably a five-band region at stride two maps to widths [1, 2, 2].
 fn groups(bands: usize, stride: usize) -> Vec<std::ops::Range<usize>> {
+    if bands == 0 {
+        return Vec::new();
+    }
     let count = bands.div_ceil(stride);
     let deficit = count * stride - bands;
     let mut start = 0;
@@ -91,6 +94,9 @@ fn groups(bands: usize, stride: usize) -> Vec<std::ops::Range<usize>> {
 // Each interior boundary moves left once per preceding shortened group; any
 // remaining shortage is absorbed at the final boundary.
 fn history_groups(bands: usize, stride: usize) -> Vec<std::ops::Range<usize>> {
+    if bands == 0 {
+        return Vec::new();
+    }
     let count = bands.div_ceil(stride);
     let deficit = count * stride - bands;
     (0..count)
@@ -114,11 +120,13 @@ fn expand(values: &[i16], groups: &[std::ops::Range<usize>]) -> Vec<i16> {
 }
 
 impl Parameters {
-    /// The band region is fixed for this instance. Zero-width tool regions must
-    /// be skipped by the enclosing frame dispatcher, not entropy-decoded here.
+    /// The band region is fixed for this instance. Zero-width regions still
+    /// carry data modes; unit-stride empty PCM consumes its flag but yields no
+    /// indices. Empty Huffman and unqualified zero-width grouped coding remain
+    /// explicitly refused; do not guess at the reference's integer-division case.
     pub fn new(kind: Kind, bands: usize, default: i16) -> Result<Self> {
         let (low, high) = bounds(kind, false);
-        if !(1..=23).contains(&bands) || !(low..=high).contains(&default) {
+        if bands > 23 || !(low..=high).contains(&default) {
             return Err(invalid("invalid LD-MPS parameter region or default"));
         }
         let history = History {
@@ -189,6 +197,11 @@ impl Parameters {
                 let paired = b.bit()?;
                 let coarse = b.bit()?;
                 let stride = [1, 2, 5, 23][b.read(2)? as usize];
+                if self.parsed.indices.is_empty() && stride != 1 {
+                    return Err(super::unsupported(
+                        "LD-MPS zero-width grouped parameter coding is not yet qualified",
+                    ));
+                }
                 if paired && (i + 1 >= slots.len() || modes[i + 1] != 3) {
                     return Err(invalid("LD-MPS data pair lacks a second coded set"));
                 }

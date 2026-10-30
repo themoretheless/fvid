@@ -15,7 +15,7 @@ pub struct Tree {
     pub ttt_boxes: u8,
 }
 impl Tree {
-    fn new(code: u8) -> Result<Self> {
+    pub(super) fn new(code: u8) -> Result<Self> {
         let (input, output, lfe, ttt): (_, _, &[bool], _) = match code {
             0 => (1, 6, &[false, false, false, false, true], 0),
             1 => (1, 6, &[false, false, true, false, false], 0),
@@ -292,7 +292,7 @@ impl Config {
             extensions,
         })
     }
-    fn extension(
+    pub(super) fn extension(
         kind: u8,
         payload: &[u8],
         tree: &Tree,

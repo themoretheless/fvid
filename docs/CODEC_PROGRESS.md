@@ -1,3 +1,80 @@
+## LD-MPS spatial-frame syntax and complete tree dispatch, 2026-10-30
+
+The owned frame parser now schedules parameter blocks for all eight LD trees:
+OTT CLD, shared/per-OTT ICC, low/high TTT CPC/CLD/ICC, arbitrary-downmix gains
+and arbitrary-tree CLD extension regions. It reads implicit/explicit parameter
+slots, independence, all smoothing modes/masks and STP/GES metadata. Forty
+numeric GES reshape codewords cover all five values and run lengths 1..8.
+Every codeword is separately checked at eight bit offsets with a following
+sentinel. Frame alignment is relative to the frame's own syntactic-element
+origin, including unaligned enclosing readers.
+
+All tree/extension histories and the caller position commit only after the
+entire frame succeeds. A failure in the final child cannot leave earlier OTT,
+TTT, downmix or arbitrary-tree states advanced. A clone is a syntax/parameter
+checkpoint, and reset restores all region histories. Independent keep modes,
+invalid/repeated slots, predictive-TTT default ICC, overflowing GES runs and
+truncated extension children are rejected specifically. The residual-coding
+restriction is presence-aware: interpolation is forbidden when the residual
+configuration exists even when all its bands are zero.
+
+Zero-width regions still carry data modes. Unit-stride empty PCM and empty
+ordinary default/keep regions now have positive acceptance fixtures; the old
+constructor-level zero-width refusal is updated. Empty Huffman vectors remain
+refused. Zero-width grouped coding at strides 2/5/23 is explicitly unqualified:
+the old C expression `(stop-start-1)/stride+1` yields a scalar for an empty
+region and can consult a neighboring region's storage. This needs normative
+clarification and an appropriate coupled-history test before acceptance; the
+parser must not silently consume the zero-vector representation instead.
+
+Frame extensions are byte-length bounded, including the 255+16-bit length
+form. Arbitrary-tree parameters use independent state per region. Residual AAC
+and unknown payloads are preserved as opaque bytes. Parsing those bytes does
+not decode or accept residual audio, nor authorize a spatial PCM output.
+Configuration topology/region metadata are validated before state allocation.
+
+The own inverse-coded corpus contains 336 configurations and 1008 frames,
+covering every tree/resolution, both quantizers, four strides, zero-width
+regions, shared ICC, dual-mode TTT, explicit nonfinal slots, smoothing masks,
+STP/GES and nested arbitrary-tree payloads. All expected fine indices and tool
+metadata match at eight starting offsets; checkpoint replay is exact. Every
+frame prefix is checked at offsets 0/3/7: 777384 truncations preserve the whole
+state and cursor despite later bits in backing storage. Five saved error
+payloads exercise run overflow, active/zero residual restrictions and the two
+empty-coding refusals. Additional mutations verify exact slot/predictive-ICC
+errors and that a shortened child cannot read the next extension. These remain
+component fixtures, not synthetic movie/playback acceptance.
+
+The [reference report](validation/aac-ld-mps-frame-reference-2026-10-30.json)
+retains original ISO results and separate research controls. Of 1008 frames,
+168 opaque-residual frames are excluded from reference audio parsing. Original
+safe paths check 714 frames: 661 match and 53 index mismatches are retained.
+The latter arise when arbitrary-tree lossless metadata aliases downmix/TTT
+metadata indices. Original leading interpolation and enabled tree7 temporal
+shaping paths are not executed because of the old uninitialized anchor and
+missing table column. A separate control initializes the anchor, adds the two
+numeric tree7 channel counts from the later original-author table and separates
+the arbitrary-tree metadata namespace. All 840 nonopaque-residual frames then
+match exact consumed bit counts, slots, fine parameter rows, smoothing and
+STP/GES metadata. The C probe aborts if asked to execute residual AAC decoding.
+All original/control source hashes, exact changes, mismatching values, exclusions
+and output hashes are retained. This is internal qualification, not formal ISO
+conformance. No reference implementation or FDK dependency enters production.
+
+The full fvid-media suite passes 575 unit checks (one existing ignored),
+and all 17 configuration/entropy/parameter/frame integration checks pass.
+Offline all-test compilation passes. Fixture regeneration is byte-exact with
+process/socket creation denied. The [test report](validation/aac-ld-mps-frame-tests-2026-10-30.json)
+and [generation report](validation/aac-ld-mps-frame-generation-2026-10-30.json)
+retain exact scope and hashes.
+
+Full spatial PCM is still unsupported: CLD energy quantization/dequantization,
+smoothing application, matrix interpolation, decorrelation/upmix, residual AAC
+integration and LD-QMF/LD-SBR routing remain. The native renderer refusal is
+unchanged. Synthetic movie playback, seeking and rewinding acceptance are still
+required; there are zero accepted spatial programmes or closed spatial codec
+gaps. The full codec goal remains active.
+
 ## LD-MPS stateful parameter indices, 2026-10-30
 
 The owned parameter layer now handles all LD data modes, single/paired coded

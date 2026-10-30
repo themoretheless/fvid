@@ -49,7 +49,7 @@ fn book(kind: Kind, context: Option<bool>, lav: Option<usize>) -> Book {
         },
     }
 }
-fn symbol(bits: &mut BitReader<'_>, table: Book) -> Result<i32> {
+pub(super) fn symbol(bits: &mut BitReader<'_>, table: Book) -> Result<i32> {
     let max = table.iter().map(|r| r.0).max().unwrap_or(0);
     let mut prefix = 0u32;
     for width in 1..=max {
