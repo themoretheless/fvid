@@ -1,0 +1,22 @@
+{
+  "code_commit": "8067c33642ce6ff4d8850ad3efc42ace2b86abbf",
+  "remote_verified": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "accepted_count": 431,
+  "count_delta": 0,
+  "preserved": "All39 new synthetic fixture/oracle/manifest files, unchanged old corruption corpus, reproduction/qualification logs, independent packet cross-check and source hashes.",
+  "untouched": "Other worktrees and four stashes.",
+  "cleanup": [
+    "/private/tmp/fvid-mp4-chunk-storage-order-before-20261031.log",
+    "/private/tmp/fvid-mp4-chunk-storage-order-existing-before-20261031.log",
+    "/private/tmp/fvid-mp4-chunk-storage-order-after-20261031.log",
+    "/private/tmp/fvid-mp4-chunk-storage-order-integration-20261031.log",
+    "/private/tmp/fvid-mp4-chunk-storage-order-root-mp4-20261031.log",
+    "/private/tmp/fvid-mp4-chunk-storage-order-media-20261031.log",
+    "/private/tmp/fvid-mp4-chunk-storage-order-core-check-20261031.log",
+    "/private/tmp/fvid-mp4-chunk-storage-order-player-check-20261031.log",
+    "/private/tmp/fvid-mp4-chunk-storage-order-20261031"
+  ]
+}
