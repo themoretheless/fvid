@@ -701,6 +701,19 @@ fn estimate_subtitle_matroska_metadata_working_bytes(
     raw.saturating_mul(8)
 }
 
+// Materialize a packet's presentation origin without changing the raw index.
+// The caller retains its existing raw-negative-input refusal policy.
+fn matroska_subtitle_span(raw_start: u64, duration: u64, delay: u64) -> Result<Option<(u64, u64)>> {
+    let Ok(start) = u64::try_from(i128::from(raw_start) - i128::from(delay)) else {
+        return Ok(None);
+    };
+    let end = start
+        .checked_add(duration)
+        .filter(|end| *end <= i64::MAX as u64)
+        .ok_or_else(|| invalid("subtitle timestamp overflow"))?;
+    Ok(Some((start, end)))
+}
+
 fn try_convert_matroska_inner(
     source: &Path,
     destination: &Path,
@@ -797,10 +810,11 @@ fn try_convert_matroska_inner(
         if destination.extension().and_then(|s| s.to_str()) != Some("mkv") {
             return Err(invalid("convert-subtitles requires Matroska (.mkv) output"));
         }
-        let (number, name, configuration) = (
+        let (number, name, configuration, delay) = (
             track.number,
             track.name.clone(),
             track.codec_private.clone(),
+            track.codec_delay_ns,
         );
         let meta = apply_subtitle_matroska_metadata(
             &name,
@@ -818,24 +832,26 @@ fn try_convert_matroska_inner(
         }
         let mut events = Vec::new();
         let mut bytes = 0usize;
+        let mut processed_packets = 0u64;
         for i in 0..reader.packets.len() {
             check_controls()?;
             let packet = &reader.packets[i];
+            let invisible = packet.invisible;
             if packet.track != number {
                 continue;
             }
-            if max_packets.is_some_and(|limit| events.len() as u64 >= limit) {
+            if max_packets.is_some_and(|limit| processed_packets >= limit) {
                 return Err(invalid("packet work limit exceeded"));
             }
-            let start = u64::try_from(packet.pts_ns)
+            processed_packets = processed_packets
+                .checked_add(1)
+                .ok_or_else(|| invalid("subtitle packet count overflow"))?;
+            let raw_start = u64::try_from(packet.pts_ns)
                 .map_err(|_| invalid("subtitle requires nonnegative timestamps"))?;
             let Some(duration) = packet.duration_ns.filter(|d| *d > 0) else {
                 return Ok(None);
             };
-            let end = start
-                .checked_add(duration)
-                .filter(|end| *end <= i64::MAX as u64)
-                .ok_or_else(|| invalid("subtitle timestamp overflow"))?;
+            let timing = matroska_subtitle_span(raw_start, duration, delay)?;
             let packet_size = reader.packet_payload_size(i)?;
             if packet_size > max_packet_bytes {
                 return Err(invalid("subtitle packet exceeds packet byte limit"));
@@ -860,6 +876,13 @@ fn try_convert_matroska_inner(
             if text.is_empty() || text.contains('\0') || text.splitn(9, ',').count() != 9 {
                 return Err(invalid("invalid Matroska ASS event"));
             }
+            // Validate and charge hidden input before omitting its output.
+            if invisible {
+                continue;
+            }
+            let Some((start, end)) = timing else {
+                continue;
+            };
             events.push((start, end, payload));
         }
         if events.is_empty() {
@@ -880,7 +903,7 @@ fn try_convert_matroska_inner(
     if destination.extension().and_then(|s| s.to_str()) != Some("mkv") {
         return Err(invalid("convert-subtitles requires Matroska (.mkv) output"));
     }
-    let (number, name) = (track.number, track.name.clone());
+    let (number, name, delay) = (track.number, track.name.clone(), track.codec_delay_ns);
     let meta = apply_subtitle_matroska_metadata(
         &name,
         &source_language,
@@ -897,24 +920,26 @@ fn try_convert_matroska_inner(
     }
     let mut cues = Vec::new();
     let mut bytes = 0usize;
+    let mut processed_packets = 0u64;
     for i in 0..reader.packets.len() {
         check_controls()?;
         let packet = &reader.packets[i];
+        let invisible = packet.invisible;
         if packet.track != number {
             continue;
         }
-        if max_packets.is_some_and(|limit| cues.len() as u64 >= limit) {
+        if max_packets.is_some_and(|limit| processed_packets >= limit) {
             return Err(invalid("packet work limit exceeded"));
         }
-        let start = u64::try_from(packet.pts_ns)
+        processed_packets = processed_packets
+            .checked_add(1)
+            .ok_or_else(|| invalid("subtitle packet count overflow"))?;
+        let raw_start = u64::try_from(packet.pts_ns)
             .map_err(|_| invalid("subtitle requires nonnegative timestamps"))?;
         let Some(duration) = packet.duration_ns.filter(|d| *d > 0) else {
             return Ok(None);
         };
-        let end = start
-            .checked_add(duration)
-            .filter(|end| *end <= i64::MAX as u64)
-            .ok_or_else(|| invalid("subtitle timestamp overflow"))?;
+        let timing = matroska_subtitle_span(raw_start, duration, delay)?;
         let packet_size = reader.packet_payload_size(i)?;
         if packet_size > max_packet_bytes {
             return Err(invalid("subtitle packet exceeds packet byte limit"));
@@ -946,6 +971,13 @@ fn try_convert_matroska_inner(
         if format!("{},0,Default,,0,0,0,,{text}", cues.len()).len() > max_packet_bytes {
             return Err(invalid("subtitle packet exceeds packet byte limit"));
         }
+        // Validate and charge hidden input before omitting its output.
+        if invisible {
+            continue;
+        }
+        let Some((start, end)) = timing else {
+            continue;
+        };
         cues.push((start, end, text));
     }
     if cues.is_empty() {

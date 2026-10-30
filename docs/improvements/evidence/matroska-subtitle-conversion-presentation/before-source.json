@@ -1,0 +1,13 @@
+{
+  "commit": "c84dfc33132672beb291eb292766c8ecc5adbb37",
+  "count_delta": 0,
+  "related_ids": [
+    "FVID-0427",
+    "FVID-0428"
+  ],
+  "sha256": {
+    "crates/fvid-media/src/owned_subtitle_impl.rs": "dde7feb4b0bb0d8a196eb5f7d57a75e5791c882592442822784aef6e26268462",
+    "tests/matroska_subtitle_conversion_presentation.rs": "21a4a678ad4b05feb3797632b3b93d6ed76362a11b8447f7b93f05952f52fd2a"
+  },
+  "initial_primary": "2 controls pass,2 acceptance tests fail; final reproduction asserts emitted text/time before stats to isolate content corruption."
+}

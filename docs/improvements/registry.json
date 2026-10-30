@@ -4790,7 +4790,9 @@
       "before": "Raw PTS, CodecDelay and pictures are correct in both parsers; native captions ignore delay and display wrongly timed or negative-after-delay text. Same1pass2fail on initial18 explicit and final54 explicit/default/fallback cases.",
       "result": "Subtract nanosecond CodecDelay from current and successor PTS in i128 before admitting nonnegative presentation times. Explicit BlockDuration, track defaults and next-cue fallback keep their duration policy at the correct origin; negative-after-delay captions are decoded without display.54 authored VP9/UTF8/SSA/ASS videos verify exact raw packets, parsed delay, actual pictures/EOF, text/bounds and real seeks with exact selected frame intervals.123 distinct checks pass across22 integration suites and48 root subtitle units; locked/offline core/player builds pass, one physical-GPU check ignored. All variants and retained initial witnesses count as one improvement.",
       "status": "accepted",
-      "validation": "batch-427-validation.json"
+      "validation": "batch-427-validation.json",
+      "follow_up_validation": "batch-427-428-conversion-followup-validation.json",
+      "follow_up_note": "Uncounted owned/frontend Matroska conversion parity: exact emitted text/time, correct all-hidden refusal and preserved input work/byte/memory limits.676 distinct checks pass; zero additional IDs."
     },
     {
       "id": "FVID-0428",
@@ -4801,7 +4803,9 @@
       "before": "Both parsers retain exact Invisible flags and all pictures, but native captions show hidden middle/tail/all events. Final baseline adds exact40/60/80ms boundaries with the same1pass2fail.",
       "result": "Read/decode captions before suppressing Invisible output; derive fallback endpoints from the next visible packet.24 authored VP9/UTF8/SSA/ASS Block/SimpleBlock videos verify exact packets/flags/pictures, visible controls, hidden middle/tail/all text, EOF and actual seeks with exact selected frame intervals and40/60/80ms boundaries.126 distinct checks pass across23 integration suites and48 root subtitle units; locked/offline core/player builds pass, one physical-GPU test ignored. All mask/codec/block variants count as one visibility improvement.",
       "status": "accepted",
-      "validation": "batch-428-validation.json"
+      "validation": "batch-428-validation.json",
+      "follow_up_validation": "batch-427-428-conversion-followup-validation.json",
+      "follow_up_note": "Uncounted owned/frontend Matroska conversion parity: exact emitted text/time, correct all-hidden refusal and preserved input work/byte/memory limits.676 distinct checks pass; zero additional IDs."
     }
   ]
 }

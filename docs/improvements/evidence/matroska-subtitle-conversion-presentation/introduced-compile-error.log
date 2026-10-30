@@ -1,0 +1,223 @@
+warning: unreachable pattern
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+492 |                         _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |                         ^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+482 | ...   merge_order::Selection::Initial(i)=>{
+    |       ---------------------------------- matches some of the same values
+...
+486 | ...   merge_order::Selection::ViewSynthesis=>return Ok(Resolved::ViewSynthesis),
+    |       ------------------------------------- matches some of the same values
+487 | ...   merge_order::Selection::Texture=>return Ok(Resolved::Texture),
+    |       ------------------------------- matches some of the same values
+488 | ...   merge_order::Selection::InterView=>{selected_iv=1;(special.inter_view.copied().ok_or_else(||invalid("missing selected HEVC IV...
+    |       --------------------------------- matches some of the same values
+...
+492 | ...   _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |       ^ ...and 3 other patterns collectively make this unreachable
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `intra_plane` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/avc_deblock.rs:184:15
+    |
+184 | pub(super) fn intra_plane(
+    |               ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `read_inter_coefficients_422` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_inter_coefficients.rs:34:15
+   |
+34 | pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,pattern:u8,transform8:bool,neighbours:CoefficientNeighbours,chroma...
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `candidates` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_mv.rs:78:4
+   |
+78 | fn candidates(n: Neighbours) -> Result<[Neighbour; 3]> {
+   |    ^^^^^^^^^^
+
+warning: function `inverse2` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:190:4
+    |
+190 | fn inverse2(input: &[i32], output: &mut [i32]) {
+    |    ^^^^^^^^
+
+warning: function `inverse4` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:218:15
+    |
+218 | inverse_size!(inverse4, inverse2, 4);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse8` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:219:15
+    |
+219 | inverse_size!(inverse8, inverse4, 8);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse16` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:220:15
+    |
+220 | inverse_size!(inverse16, inverse8, 16);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse32` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:221:15
+    |
+221 | inverse_size!(inverse32, inverse16, 32);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: enum `RunKind` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:420:17
+    |
+420 | pub(crate) enum RunKind {
+    |                 ^^^^^^^
+
+warning: struct `Run` is never constructed
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:425:19
+    |
+425 | pub(crate) struct Run {
+    |                   ^^^
+
+warning: function `expand_runs` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:431:15
+    |
+431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run]) -> Result<Vec<u8>> {
+    |               ^^^^^^^^^^^
+
+warning: `fvid-codecs` (lib) generated 12 warnings
+   Compiling fvid-media v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media)
+error: expected `;`, found `events`
+   --> crates/fvid-media/src/owned_subtitle_impl.rs:884:14
+    |
+884 |             }
+    |              ^ help: add `;` here
+885 |             events.push((start, end, payload));
+    |             ------ unexpected token
+
+error: expected `;`, found `cues`
+   --> crates/fvid-media/src/owned_subtitle_impl.rs:978:10
+    |
+978 |         }
+    |          ^ help: add `;` here
+979 |         cues.push((start, end, text));
+    |         ---- unexpected token
+
+error: expected `;`, found `events`
+    --> crates/fvid-media/src/owned_subtitle_impl.rs:1144:14
+     |
+1144 |             }
+     |              ^ help: add `;` here
+1145 |             events.push((start, end, payload));
+     |             ------ unexpected token
+
+error[E0425]: cannot find value `packet` in this scope
+    --> crates/fvid-media/src/owned_subtitle_impl.rs:1139:16
+     |
+1139 |             if packet.invisible {
+     |                ^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `timing` in this scope
+    --> crates/fvid-media/src/owned_subtitle_impl.rs:1142:38
+     |
+1142 |             let Some((start, end)) = timing else {
+     |                                      ^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `processed_packets` in this scope
+    --> crates/fvid-media/src/owned_subtitle_impl.rs:1262:44
+     |
+1262 |         if max_packets.is_some_and(|limit| processed_packets >= limit) {
+     |                                            ^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `processed_packets` in this scope
+    --> crates/fvid-media/src/owned_subtitle_impl.rs:1265:9
+     |
+1265 |         processed_packets = processed_packets
+     |         ^^^^^^^^^^^^^^^^^
+     |
+help: you might have meant to introduce a new binding
+     |
+1265 |         let processed_packets = processed_packets
+     |         +++
+
+error[E0425]: cannot find value `processed_packets` in this scope
+    --> crates/fvid-media/src/owned_subtitle_impl.rs:1265:29
+     |
+1265 |         processed_packets = processed_packets
+     |                             ^^^^^^^^^^^^^^^^^ not found in this scope
+
+warning: unused variable: `aspect`
+    --> crates/fvid-media/src/owned_y4m_decode.rs:1075:9
+     |
+1075 |     let aspect = presented_header.pixel_aspect()?;
+     |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_aspect`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> crates/fvid-media/src/owned_xfade.rs:462:5
+    |
+462 |     mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
+    |     ----^^^^^
+    |     |
+    |     help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable `pages` is assigned to, but never used
+  --> crates/fvid-media/src/owned_ogg_opus_export.rs:56:9
+   |
+56 |     let mut pages = 0usize;
+   |         ^^^^^^^^^
+   |
+   = note: consider using `_pages` instead
+
+warning: value assigned to `pages` is never read
+  --> crates/fvid-media/src/owned_ogg_opus_export.rs:80:9
+   |
+80 |         pages += 1;
+   |         ^^^^^^^^^^
+   |
+   = help: maybe it is overwritten before being read?
+   = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+error[E0502]: cannot borrow `reader` as mutable because it is also borrowed as immutable
+   --> crates/fvid-media/src/owned_subtitle_impl.rs:872:27
+    |
+838 |             let packet = &reader.packets[i];
+    |                           -------------- immutable borrow occurs here
+...
+872 |             let payload = reader.read_packet(i)?;
+    |                           ^^^^^^^^^^^^^^^^^^^^^ mutable borrow occurs here
+...
+879 |             if packet.invisible {
+    |                ---------------- immutable borrow later used here
+
+error[E0502]: cannot borrow `reader` as mutable because it is also borrowed as immutable
+   --> crates/fvid-media/src/owned_subtitle_impl.rs:960:20
+    |
+925 |         let packet = &reader.packets[i];
+    |                       -------------- immutable borrow occurs here
+...
+960 |         let data = reader.read_packet(i)?;
+    |                    ^^^^^^^^^^^^^^^^^^^^^ mutable borrow occurs here
+...
+973 |         if packet.invisible {
+    |            ---------------- immutable borrow later used here
+
+Some errors have detailed explanations: E0425, E0502.
+For more information about an error, try `rustc --explain E0425`.
+warning: `fvid-media` (lib) generated 4 warnings
+error: could not compile `fvid-media` (lib) due to 10 previous errors; 4 warnings emitted

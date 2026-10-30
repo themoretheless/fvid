@@ -1,0 +1,6 @@
+{
+  "crates/fvid-media/src/owned_subtitle_impl.rs": "221bda3b333df28a083d4e1ec7ccb29f3e918a1b35eb4374da0096f54dea65e1",
+  "tests/matroska_subtitle_conversion_presentation.rs": "21a4a678ad4b05feb3797632b3b93d6ed76362a11b8447f7b93f05952f52fd2a",
+  "tests/fixtures/playback-errors/matroska-subtitle-delay/manifest.json": "8e8fa626dc1308c38555b51c2a608fc0d40efd9ab93ae3cc8cf4c328c0aa823b",
+  "tests/fixtures/playback-errors/matroska-invisible-subtitles/manifest.json": "0fbb2bf4e01bbdfaa2fab2500286f18b634a9dada729dc8528a2a2320fde574a"
+}

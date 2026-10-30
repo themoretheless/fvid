@@ -1,0 +1,51 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0427",
+    "FVID-0428"
+  ],
+  "count_delta": 0,
+  "accepted_count": 428,
+  "scope": "Uncounted conversion follow-up to the already counted CodecDelay and Invisible causes.",
+  "before": {
+    "commit": "c84dfc33132672beb291eb292766c8ecc5adbb37",
+    "passed": 2,
+    "failed": 2,
+    "specific_failure": "Decoded destination text/spans reintroduce hidden captions and unshifted PTS; positive and resource controls pass."
+  },
+  "checks": {
+    "integration": {
+      "passed": 82,
+      "suites": 24,
+      "ignored": 0
+    },
+    "root": {
+      "passed": 48,
+      "suites": 1,
+      "ignored": 1
+    },
+    "media": {
+      "passed": 547,
+      "suites": 1,
+      "ignored": 1
+    }
+  },
+  "core-check": "passed locked/offline/no-default-features",
+  "player-check": "passed locked/offline/no-default-features",
+  "successful_test_executions": 677,
+  "duplicate_unit_checks_excluded": 1,
+  "distinct_passed": 676,
+  "duplicate": "native_subtitle::tests::entities_are_literal_text_not_ass_or_html_commands and owned_subtitle::tests::entities_are_literal_text_not_ass_or_html_commands share the same included unit source.",
+  "ignored": [
+    "Physical Metal/VideoToolbox test",
+    "Existing pending complete integer-float RGB conversion compatibility acceptance"
+  ],
+  "resource_policy": "All selected input packets count toward work; packet byte/memory and input text validation precede suppression. All-hidden/negative-after-delay subtitle-only output remains a plan/execution no-cues refusal without a file.",
+  "evidence": "docs/improvements/evidence/matroska-subtitle-conversion-presentation/README.md",
+  "limits": [
+    "Explicit-duration UTF8/ASS conversion qualified; SSA/missing-duration conversion remains unsupported.",
+    "Raw-negative-source timestamp refusal policy retained.",
+    "Initial introduced compile errors corrected; standalone parser tail restored byte-identically.",
+    "No new IDs, API change or performance claim."
+  ]
+}

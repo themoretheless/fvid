@@ -1,0 +1,15 @@
+{
+  "count_delta": 0,
+  "standalone_parser_tail_identical_to_baseline": true,
+  "standalone_tail_sha256": "630bcf912104c587affcc9590df3a89f685c157c6e269b5cc094d2c24b5eccd3",
+  "unchanged_existing_authored_witnesses": {
+    "matroska-subtitle-delay": {
+      "files": 64,
+      "manifest_sha256": "8e8fa626dc1308c38555b51c2a608fc0d40efd9ab93ae3cc8cf4c328c0aa823b"
+    },
+    "matroska-invisible-subtitles": {
+      "files": 34,
+      "manifest_sha256": "0fbb2bf4e01bbdfaa2fab2500286f18b634a9dada729dc8528a2a2320fde574a"
+    }
+  }
+}
