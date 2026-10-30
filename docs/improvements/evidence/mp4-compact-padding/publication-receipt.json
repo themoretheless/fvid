@@ -1,0 +1,23 @@
+{
+  "accepted_count": 432,
+  "remote_tip_at_verification": "08024db6d20cb89de8de1af60581179dc6c1cf0d",
+  "remote_verified": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "preserved": "All feature/padding synthetic media, packet/plane/PCM oracles, manifests, reproduction/qualification stages, independent checks and source hashes.",
+  "untouched": "Other worktrees and four stashes.",
+  "code_commit": "08024db6d20cb89de8de1af60581179dc6c1cf0d",
+  "follow_up_commit": "08024db6d20cb89de8de1af60581179dc6c1cf0d",
+  "count_delta": 0,
+  "cleanup": [
+    "/private/tmp/fvid-mp4-compact-padding-before-20261031.log",
+    "/private/tmp/fvid-mp4-compact-padding-after-20261031.log",
+    "/private/tmp/fvid-mp4-compact-padding-integration-20261031.log",
+    "/private/tmp/fvid-mp4-compact-padding-root-mp4-20261031.log",
+    "/private/tmp/fvid-mp4-compact-padding-media-20261031.log",
+    "/private/tmp/fvid-mp4-compact-padding-core-check-20261031.log",
+    "/private/tmp/fvid-mp4-compact-padding-player-check-20261031.log",
+    "/private/tmp/fvid-mp4-compact-sizes-20261031"
+  ]
+}

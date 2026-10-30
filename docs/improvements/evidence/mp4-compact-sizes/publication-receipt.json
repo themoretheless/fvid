@@ -1,0 +1,31 @@
+{
+  "accepted_count": 432,
+  "remote_tip_at_verification": "08024db6d20cb89de8de1af60581179dc6c1cf0d",
+  "remote_verified": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "preserved": "All feature/padding synthetic media, packet/plane/PCM oracles, manifests, reproduction/qualification stages, independent checks and source hashes.",
+  "untouched": "Other worktrees and four stashes.",
+  "code_commit": "e4ca760ec55e6e93aec09bb9f86fc48f27af95a7",
+  "follow_up_commit": "08024db6d20cb89de8de1af60581179dc6c1cf0d",
+  "count_delta": 1,
+  "cleanup": [
+    "/private/tmp/fvid-mp4-compact-sizes-before-20261031.log",
+    "/private/tmp/fvid-mp4-compact-sizes-after-20261031.log",
+    "/private/tmp/fvid-mp4-compact-sizes-extended-after-20261031.log",
+    "/private/tmp/fvid-mp4-compact-sizes-final-after-20261031.log",
+    "/private/tmp/fvid-mp4-compact-sizes-mace-guard-before-20261031.log",
+    "/private/tmp/fvid-mp4-compact-sizes-complete-after-20261031.log",
+    "/private/tmp/fvid-mp4-compact-sizes-fragment-after-20261031.log",
+    "/private/tmp/fvid-mp4-compact-sizes-final-before-20261031.log",
+    "/private/tmp/fvid-mp4-compact-sizes-qualified-after-20261031.log",
+    "/private/tmp/fvid-mp4-compact-sizes-integration-20261031.log",
+    "/private/tmp/fvid-mp4-compact-sizes-root-mp4-20261031.log",
+    "/private/tmp/fvid-mp4-compact-sizes-media-20261031.log",
+    "/private/tmp/fvid-mp4-compact-sizes-core-check-20261031.log",
+    "/private/tmp/fvid-mp4-compact-sizes-player-check-20261031.log",
+    "/private/tmp/fvid-mp4-compact-sizes-production-20261031.rs"
+  ],
+  "shared_target_removed_in": "../mp4-compact-padding/publication-receipt.json"
+}
