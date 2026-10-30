@@ -1,0 +1,25 @@
+{
+  "status": "published",
+  "accepted_ids": [
+    "FVID-0422"
+  ],
+  "accepted_count": 422,
+  "implementation_commit": "40a288dfd6b0f592a53712ec711e4cefa956193b",
+  "remote_refs_verified": [
+    "main",
+    "codex/deliver-fvid-20261029"
+  ],
+  "checks": "batch-422-validation.json",
+  "cleanup": {
+    "removed_owned_target": "/private/tmp/fvid-unedited-audio-tail-20261030",
+    "removed_archived_raw_logs": 8,
+    "also_closes": "Target reused from the unedited-tail follow-up is now removed",
+    "fixtures_and_proofs": "retained"
+  },
+  "preserved": [
+    "Other active worktrees and branches",
+    "All stashes",
+    "Foreign caches and artifacts"
+  ],
+  "remaining_goal": 578
+}
