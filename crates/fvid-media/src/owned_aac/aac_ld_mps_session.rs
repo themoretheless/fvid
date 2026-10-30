@@ -1,9 +1,9 @@
 //! PCM/spatial-frame association in the caller's timestamp clock.
 //! The AAC owner supplies canonical decoded downmix and completed ancillary
-//! messages. This does not enable native admission or decode residual AAC.
+//! messages. Residual AAC is reconstructed in the qualified complex64-bin domain.
 use super::{
     Result,
-    aac_ld_mps_config::{Config, ExtensionValue},
+    aac_ld_mps_config::Config,
     aac_ld_mps_decor::Mode,
     aac_ld_mps_pcm,
     aac_ld_mps_transport::{Kind, Message},
@@ -66,14 +66,6 @@ impl Session {
         Self::new_domain(config, mode, true)
     }
     fn new_domain(config: &Config, mode: Mode, qmf_input: bool) -> Result<Self> {
-        if config.extensions.iter().any(|e| {
-            matches!(&e.value,
-            ExtensionValue::Residual {bands, ..} if bands.iter().any(|b| b.unwrap_or(0)!=0))
-        }) {
-            return Err(unsupported(
-                "LD-MPS session residual AAC reconstruction is not yet implemented",
-            ));
-        }
         if config.frame_slots == 0 || config.tree.input_channels == 0 {
             return Err(invalid("zero LD-MPS session geometry"));
         }
@@ -84,16 +76,18 @@ impl Session {
         } else {
             64
         };
+        let mut pcm = if qmf_input {
+            aac_ld_mps_pcm::Decoder::new_qmf(config, mode)?
+        } else {
+            aac_ld_mps_pcm::Decoder::new(config, mode)?
+        };
+        pcm.enable_native_residuals()?;
         Ok(Self {
             initial_config: config.clone(),
             mode,
             qmf_input,
             bins,
-            pcm: if qmf_input {
-                aac_ld_mps_pcm::Decoder::new_qmf(config, mode)?
-            } else {
-                aac_ld_mps_pcm::Decoder::new(config, mode)?
-            },
+            pcm,
             inputs: usize::from(config.tree.input_channels),
             frame_samples: usize::from(config.frame_slots) * bins,
             residual_boxes: config.tree.ott_lfe.len() + usize::from(config.tree.ttt_boxes),

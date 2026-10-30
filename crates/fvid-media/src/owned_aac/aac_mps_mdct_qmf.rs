@@ -272,12 +272,16 @@ impl Decoder {
         self.tail = out.split_off(self.slots);
         Ok(out)
     }
+    pub(crate) fn visit_retained(&self, f: &mut Footprint) -> std::result::Result<(), String> {
+        f.vector(&self.tail)?;
+        for r in &self.tail {
+            f.vector(r)?;
+        }
+        Ok(())
+    }
     pub fn retained_payload_bytes(&self) -> Result<usize> {
         let mut f = Footprint::new();
-        f.vector(&self.tail).map_err(|e| invalid(&e))?;
-        for r in &self.tail {
-            f.vector(r).map_err(|e| invalid(&e))?;
-        }
+        self.visit_retained(&mut f).map_err(|e| invalid(&e))?;
         Ok(f.total())
     }
 }

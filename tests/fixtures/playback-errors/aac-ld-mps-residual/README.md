@@ -15,13 +15,12 @@ all256 leading bytes at every bit offset and every truncated prefix.
 
 `native-residual-refusal.mp4` is a twelve-frame own H.264/AAC-ELD movie with
 nonzero residual AAC. Its ASC, all spatial frames and all residual payloads are
-separately parsed successfully. Native playback must still refuse with the
-specific missing residual-reconstruction message until MDCT-to-QMF conversion,
-ICC correction application, source timing and playback/navigation are wired and
-qualified. That is a passing refusal/reproduction test, not playback acceptance.
-`native-packets.bin`, `native.asc` and `native.ssc` preserve the same own stream
-for the later integration acceptance test. No private media or parameter sets
-are included.
+separately parsed successfully. The historical filename is retained; the test
+now requires native PCM acceptance (12 frames /12288 stereo samples), rather
+than the old missing-reconstruction refusal. The broader native residual corpus
+in `../aac-ld-mps-residual-native` verifies PCM, source timing and navigation.
+`native-packets.bin`, `native.asc` and `native.ssc` preserve the same own stream.
+No private media or parameter sets are included.
 
 Explicit generation from the repository root:
 

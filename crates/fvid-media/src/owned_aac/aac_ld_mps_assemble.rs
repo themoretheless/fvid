@@ -194,6 +194,40 @@ impl Decoder {
         *bits = reader;
         Ok(output)
     }
+    /// Parse compressed residual extension and apply ICC before building M1/M2.
+    /// The spectral/QMF owner advances overlap only after this succeeds.
+    pub(crate) fn decode_compressed_residual(
+        &mut self,
+        bits: &mut BitReader<'_>,
+        extension: &ExtensionValue,
+    ) -> Result<(Assembled, super::aac_ld_mps_residual::Frame)> {
+        let mut next = self.clone();
+        let mut reader = bits.clone();
+        let prepared = next.physical.decode(&mut reader)?;
+        let at = next
+            .config
+            .extensions
+            .iter()
+            .position(|e| &e.value == extension)
+            .ok_or_else(|| invalid("missing native residual AAC configuration"))?;
+        let payload = &prepared.syntax.extensions[at].payload;
+        let mut data = BitReader::new(payload);
+        let residual = super::aac_ld_mps_residual::read(
+            &mut data,
+            &next.config,
+            extension,
+            prepared.syntax.slots.len(),
+        )?;
+        // SpatialDecParseExtensionFrame bounds the payload by sacExtLen and
+        // skips every remaining fill bit, including complete bytes. Their
+        // values are unconstrained; residual::read already rejects truncation.
+        let corrected =
+            super::aac_ld_mps_residual_icc::apply(&next.config, extension, &prepared, &residual)?;
+        let result = next.assemble(corrected)?;
+        *self = next;
+        *bits = reader;
+        Ok((result, residual))
+    }
     fn assemble(&mut self, p: Prepared) -> Result<Assembled> {
         let config = &self.config;
         let tree = config.tree.code;

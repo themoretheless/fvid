@@ -1,3 +1,46 @@
+## Native residual AAC playback — qualified64-bin path,2026-10-31
+
+Compressed residual AAC is now wired into the native source-window session.
+Each active OTT/TTT box owns its MDCT-to-QMF overlap. Residual ICC corrections
+are applied before M1/M2 assembly; residual QMF then enters the existing router,
+STP/GES and LD synthesis without a PCM roundtrip. All histories and source queues
+commit atomically, including errors after multiple delayed frames were prepared.
+Repeated identical headers retain overlap, cutoff-only changes retain compatible
+banks, and disabled/re-enabled residual boxes start fresh.
+
+The64-bin phase is selected from the pinned ISO default full-complex LD bank:
+analysis/synthesis formulas and gains match the owned LD bank, and the converter
+uses the same default post-rotation. This is compositional phase qualification,
+not a new independent complete-decoder oracle. The cached ISO LD_MPS hybrid
+analysis branch omits residual preparation, so it cannot validate complete LD
+residual routing; independent whole-decoder conformance remains open.
+32/128-bin residual domains,
+update8, residual LFE routing and nonzero sacTimeAlign remain unqualified/refused;
+this milestone does not claim complete LD-SBR/LD-MPS or AAC profile coverage.
+
+397 own synthetic movies cover all8 trees,480/512 cores,15/16 QMF slots,
+4/9/23 parameter grids, OTT/TTT, partial/full cutoffs, shared ICC, all4 window
+sequences and both shapes. Whole native PCM matches a separately composed chain
+with independently encoded corrected-ICC controls across31,736,832 samples;
+maximum difference2.3005817303273224e-10 at unchanged2e-7 tolerance. Residual
+signal and ICC omission controls both alter PCM (minimum maximum differences
+8.21757272645198e-6 and4.007567640810459e-6 across the23-band plain variants).
+The reference adapter correctly zero-fills unstored high QMF bands. A new
+acceptance regression verifies nonzero residual fill bits and extra fill bytes;
+the pinned ISO parser skips the complete bounded remainder without value checks.
+
+Public/owned export, live playback/drain, reset/rewind, forward/backward/EOF seek,
+repeat ranges, delayed/fragmented delivery and in-band residual-mask transitions
+have automated acceptance checks. Four distinct corrupt runs test rollback;
+two explicit domain refusals stay separate from playback acceptance. The old
+`native-residual-refusal.mp4` filename is retained with an enabled acceptance test.
+Generated files repeat byte-identically with process/network APIs denied, and
+ordinary tests require no FFmpeg/compiler/network. See
+`docs/validation/aac-ld-mps-residual-native-{phase,generation,tests}-2026-10-31.json`.
+Full gates: 1769 passed,0 failed,27 pre-existing ignored tests
+across media/root units and29 AAC/LD-MPS integration targets.
+Earlier sections below retain the evidence boundaries of their dated milestones.
+
 ## Residual ICC quantization and matrix application — component qualified,2026-10-31
 
 Parameter decoding now exposes the original coarse/fine flag per output set,

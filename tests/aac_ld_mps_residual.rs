@@ -155,12 +155,12 @@ fn mismatched_extra_short_ics_is_a_specific_atomic_failure() {
     assert_eq!(b.position(), 0);
 }
 #[test]
-fn native_residual_movie_still_reports_the_specific_unimplemented_qmf_bridge() {
+fn native_residual_movie_accepts_owned_reconstruction_instead_of_refusing() {
     let ssc = std::fs::read(root().join("native.ssc")).unwrap();
     let cfg = Config::parse(&ssc).unwrap();
     assert!(cfg.extensions.iter().any(|e|matches!(&e.value,ExtensionValue::Residual{bands,..}if bands.iter().any(|b|b.unwrap_or(0)>0))));
     // Prove that every spatial frame and its compressed residual payload are
-    // syntactically valid; the native failure is the missing QMF bridge.
+    // syntactically valid; the formerly refused movie now produces owned PCM.
     let manifest: Value =
         serde_json::from_slice(&std::fs::read(root().join("manifest.json")).unwrap()).unwrap();
     let extension = &cfg.extensions[0].value;
@@ -192,11 +192,10 @@ fn native_residual_movie_still_reports_the_specific_unimplemented_qmf_bridge() {
         }
     }
     let movie = std::fs::read(root().join("native-residual-refusal.mp4")).unwrap();
-    let err = fvid::native_media::decode_mp4_aac_pcm(&movie, &mut Vec::new())
-        .unwrap_err()
-        .to_string();
-    assert!(
-        err.contains("session residual AAC reconstruction is not yet implemented"),
-        "{err}"
-    );
+    let mut pcm = Vec::new();
+    let stats = fvid::native_media::decode_mp4_aac_pcm(&movie, &mut pcm).unwrap();
+    assert_eq!(stats.sample_frames, 12288);
+    assert_eq!(stats.decoded_frames, 12);
+    assert_eq!(pcm.len(), 12288 * 2 * 4);
+    assert!(pcm.iter().any(|&v| v != 0));
 }

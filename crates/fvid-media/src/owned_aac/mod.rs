@@ -164,6 +164,7 @@ pub mod aac_ld_mps_stp_energy;
 pub mod aac_ld_mps_stp;
 pub mod aac_ld_mps_residual;
 pub mod aac_ld_mps_residual_icc;
+pub(crate) mod aac_ld_mps_residual_native;
 pub mod aac_mps_mdct_qmf;
 pub mod aac_ld_mps_pcm;
 pub mod aac_ld_mps_transport;

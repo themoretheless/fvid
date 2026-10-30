@@ -109,6 +109,9 @@ impl Decoder {
             clip_gain: facts::DOWNMIX[usize::from(config.downmix_gain)],
         })
     }
+    pub(crate) fn enable_native_residuals(&mut self) -> Result<()> {
+        self.qmf.enable_native_residuals(self.mode)
+    }
     /// Apply a same-format in-band SSC without erasing unrelated filter state.
     /// Fixed downmix-gain changes clear synthesis only. The analysis window,
     /// unchanged decorrelators and matrix interpolation histories continue.

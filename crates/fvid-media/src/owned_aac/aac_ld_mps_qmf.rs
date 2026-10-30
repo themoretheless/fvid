@@ -22,6 +22,8 @@ pub struct Output {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Decoder {
     config: Config,
+    native_residuals: bool,
+    residuals: Option<super::aac_ld_mps_residual_native::Residuals>,
     ges: Option<super::aac_ld_mps_ges::Decoder>,
     stp: Option<super::aac_ld_mps_stp::Decoder>,
     matrices: aac_ld_mps_assemble::Decoder,
@@ -62,6 +64,8 @@ impl Decoder {
         };
         Ok(Self {
             config: config.clone(),
+            native_residuals: false,
+            residuals: None,
             ges: if config.temporal_shape == 2 {
                 Some(super::aac_ld_mps_ges::Decoder::new(
                     config.tree.code,
@@ -89,6 +93,12 @@ impl Decoder {
             return Ok(());
         }
         let mut next = Self::new(config, mode)?;
+        if self.native_residuals {
+            next.enable_native_residuals(mode)?;
+            if let (Some(new), Some(old)) = (&mut next.residuals, &self.residuals) {
+                new.inherit(old);
+            }
+        }
         if next.ges.is_some() && self.ges.is_some() {
             next.ges = self.ges.clone();
         }
@@ -103,8 +113,17 @@ impl Decoder {
         *self = next;
         Ok(())
     }
+    pub(crate) fn enable_native_residuals(&mut self, mode: Mode) -> Result<()> {
+        let residuals = super::aac_ld_mps_residual_native::Residuals::new(&self.config, mode)?;
+        self.residuals = residuals;
+        self.native_residuals = true;
+        Ok(())
+    }
     pub fn reset(&mut self) {
         self.matrices.reset();
+        if let Some(r) = &mut self.residuals {
+            r.reset();
+        }
         if let Some(stp) = &mut self.stp {
             stp.reset();
         }
@@ -126,7 +145,21 @@ impl Decoder {
     ) -> Result<Output> {
         let mut next = self.clone();
         let mut reader = bits.clone();
-        let matrices = next.matrices.decode(&mut reader)?;
+        let decoded_residuals;
+        let (matrices, residuals) = if let Some(owner) = &mut next.residuals {
+            if residuals.iter().any(Option::is_some) {
+                return Err(invalid(
+                    "external QMF residuals supplied to native residual AAC owner",
+                ));
+            }
+            let (matrices, spectra) = next
+                .matrices
+                .decode_compressed_residual(&mut reader, &owner.extension)?;
+            decoded_residuals = owner.process(&spectra)?;
+            (matrices, decoded_residuals.as_slice())
+        } else {
+            (next.matrices.decode(&mut reader)?, residuals)
+        };
         let slots = usize::from(next.config.frame_slots);
         let bins = next.qmf_bands;
         let finite = |v: &Complex| v.re.is_finite() && v.im.is_finite();
@@ -237,6 +270,9 @@ impl Decoder {
         f: &mut super::memory::Footprint,
     ) -> std::result::Result<(), String> {
         self.config.visit_retained(f)?;
+        if let Some(r) = &self.residuals {
+            r.visit_retained(f)?;
+        }
         if let Some(ges) = &self.ges {
             ges.visit_retained(f)?;
         }
