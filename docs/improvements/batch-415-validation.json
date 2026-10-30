@@ -1,0 +1,16 @@
+{
+  "batch": 415,
+  "status": "passed-requalification",
+  "accepted_ids": [],
+  "count_delta": 0,
+  "evidence": "docs/improvements/evidence/audio-timeline-budget-requalification-20261030/status.json",
+  "before": {
+    "passed": 59,
+    "failed": 2
+  },
+  "after": {
+    "passed": 61,
+    "failed": 0
+  },
+  "summary": "Keep exact AAC container-time and compact interval PCM oracles; account simultaneously live ADTS payload in exact prefix admission control"
+}

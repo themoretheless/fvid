@@ -227,51 +227,92 @@ fn synthetic_adts_concat_cli_copies_aac_instead_of_decoding_pcm() {
     assert_eq!(bytes, std::fs::read(&expected).unwrap());
 }
 #[test]
-fn synthetic_leading_aac_padding_does_not_return_as_silence() {
+fn synthetic_aac_padding_preserves_container_time_and_exact_audible_samples() {
     use fvid::container::matroska_write::{Encoding, PacketWriter, TrackOptions, TrackSpec};
-    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/fixtures/playback-errors/adts-concat-a.aac");
-    let data = std::fs::read(path).unwrap();
-    let mut source = fvid::container::adts::StreamReader::open(data.as_slice()).unwrap();
-    let config = source.configuration();
-    let asc = source.audio_specific_config().to_vec();
-    let payload = source.next_packet().unwrap().unwrap();
-    let ns = |n: u64| (n * 1_000_000_000 + 22050) / 44100;
-    let mut output = Cursor::new(Vec::new());
-    let mut writer = PacketWriter::new_with_options(
-        &mut output,
-        &[TrackSpec {
-            encoding: Encoding::Aac {
-                configuration: &asc,
-                sample_rate: config.sample_rate,
-                channels: config.channels,
-            },
-            name: "",
-            language: "",
-        }],
-        &[TrackOptions::default()],
-    )
-    .unwrap();
-    writer
-        .write_packet_with_padding(0, 0, ns(1024), true, &payload, -(ns(128) as i64))
-        .unwrap();
-    writer
-        .write_packet_with_padding(
-            0,
-            ns(1024),
-            ns(2048) - ns(1024),
-            true,
-            &payload,
-            ns(256) as i64,
+    for name in ["adts-concat-a.aac", "../audio/aac-mono-44k.aac"] {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors")
+            .join(name);
+        let data = std::fs::read(path).unwrap();
+        let mut source = fvid::container::adts::StreamReader::open(data.as_slice()).unwrap();
+        let config = source.configuration();
+        let asc = source.audio_specific_config().to_vec();
+        let payload = source.next_packet().unwrap().unwrap();
+        let rate = u64::from(config.sample_rate);
+        assert_eq!(config.channels, 1);
+        let mut decoder = fvid_media::owned_aac::NativeAacDecoder::new(&asc).unwrap();
+        let first = decoder.decode(&payload).unwrap();
+        let second = decoder.decode(&payload).unwrap();
+        assert_eq!(first.len(), 1024);
+        assert_eq!(second.len(), 1024);
+        let audible: Vec<u8> = first[128..]
+            .iter()
+            .chain(&second[..768])
+            .flat_map(|sample| sample.to_le_bytes())
+            .collect();
+        if name.starts_with("../audio/") {
+            assert!(
+                audible
+                    .chunks_exact(4)
+                    .any(|s| f32::from_le_bytes(s.try_into().unwrap()) != 0.0)
+            );
+        }
+        let ns = |n: u64| (n * 1_000_000_000 + rate / 2) / rate;
+        let mut output = Cursor::new(Vec::new());
+        let mut writer = PacketWriter::new_with_options(
+            &mut output,
+            &[TrackSpec {
+                encoding: Encoding::Aac {
+                    configuration: &asc,
+                    sample_rate: config.sample_rate,
+                    channels: config.channels,
+                },
+                name: "",
+                language: "",
+            }],
+            &[TrackOptions::default()],
         )
         .unwrap();
-    writer.finish().unwrap();
-    let mut pcm = Vec::new();
-    let stats =
-        fvid::native_media::decode_matroska_aac_pcm_interval(output.get_ref(), &mut pcm, None)
+        writer
+            .write_packet_with_padding(0, 0, ns(1024), true, &payload, -(ns(128) as i64))
             .unwrap();
-    assert_eq!(stats.sample_frames, 2048 - 128 - 256);
-    assert_eq!(pcm.len(), (2048 - 128 - 256) * 4);
+        writer
+            .write_packet_with_padding(
+                0,
+                ns(1024),
+                ns(2048) - ns(1024),
+                true,
+                &payload,
+                ns(256) as i64,
+            )
+            .unwrap();
+        writer.finish().unwrap();
+        let mut pcm = Vec::new();
+        let stats =
+            fvid::native_media::decode_matroska_aac_pcm_interval(output.get_ref(), &mut pcm, None)
+                .unwrap();
+        let mut expected = vec![0; 128 * 4];
+        expected.extend_from_slice(&audible);
+        assert_eq!(stats.sample_frames, 2048 - 256);
+        assert_eq!(
+            pcm, expected,
+            "{name}: exact container timeline including its initial gap"
+        );
+
+        // An interval starting at the first audible sample must retain precisely
+        // the compact 1664-sample window, without replacing discarded audio.
+        let mut selected = Vec::new();
+        let from = std::time::Duration::from_nanos(128 * 1_000_000_000 / rate);
+        let to = std::time::Duration::from_nanos(2048 * 1_000_000_000 / rate);
+        let stats = fvid::native_media::decode_matroska_aac_pcm_interval(
+            output.get_ref(),
+            &mut selected,
+            Some((from, to)),
+        )
+        .unwrap();
+        assert_eq!(stats.sample_frames, 2048 - 128 - 256);
+        assert_eq!(selected, audible, "{name}: exact cropped audible window");
+    }
 }
 
 #[test]

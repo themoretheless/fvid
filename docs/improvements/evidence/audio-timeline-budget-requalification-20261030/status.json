@@ -1,0 +1,34 @@
+{
+  "batch": 415,
+  "status": "passed-requalification",
+  "accepted_ids": [],
+  "count_delta": 0,
+  "accepted_count": 415,
+  "before": {
+    "passed": 59,
+    "failed": 2
+  },
+  "after": {
+    "passed": 61,
+    "failed": 0
+  },
+  "suites": [
+    "owned_adts_remux",
+    "matroska_padding_rounding",
+    "mp4_audio_metadata_admission"
+  ],
+  "production_unchanged_sha256": {
+    "src/native_plan.rs": "ab102544ed9b4de50cdd420821050b52ddaae1e96a645efdfe54e2211619c900",
+    "src/native_media.rs": "d626f0d0dd10f6c13720df0f2cfbbcf5fd3157dadbe37a3f66a95224c49b9cf8",
+    "crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs": "a77c21af53c3f6c634797a7ffc173404d1103366fb3db8cfef1f27a7c34d65e8"
+  },
+  "budget_contract": "The retained cue, reusable 9-byte ADTS payload and 16384-byte reserve coexist. Admit exactly 16425 bytes for one packet; reject one byte less and reject a two-packet prefix under that same budget. All original metadata/publication/budget checks retained.",
+  "padding_contract": "The documented container-time API renders from zero, retaining 128 silent timeline frames followed by exactly 1664 audible frames after 128 head and 256 tail samples are discarded. A requested audible-only interval must produce precisely the compact 1664-frame output. Validate every PCM byte against a separate elementary AAC decoder, both for the original silence and existing nonzero mono LC fixture. Require the nonzero control to contain actual signal.",
+  "rejected_attempt": "The audio-budget-controls AAC fixture is authored silence and cannot prove signal preservation. Its nonzero assertion failed as intended; use the existing nonzero mono AAC fixture instead. Production code was never changed.",
+  "command": "CARGO_TARGET_DIR=/private/tmp/forma-gpu-common-check-20261030 CARGO_BUILD_JOBS=2 cargo test --locked --offline --no-default-features --features player --no-fail-fast --test owned_adts_remux --test matroska_padding_rounding --test mp4_audio_metadata_admission",
+  "limitations": [
+    "No production fault fixed or counted",
+    "No claim of whole-project/all-platform qualification",
+    "No new media file copied; existing synthetic/control fixture assets reused"
+  ]
+}

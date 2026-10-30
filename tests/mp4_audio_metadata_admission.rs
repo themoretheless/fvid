@@ -1383,13 +1383,28 @@ fn matroska_remux_zero_packets_and_native_export_wave_metadata_budgets_are_enfor
         adts_zero_err.contains("packet work limit requires at least one packet"),
         "expected `packet work limit requires at least one packet` from native_plan::remux_with_options on ADTS with max_packets: Some(0), got: {adts_zero_err}"
     );
-    // With `max_packets: Some(1)`, `max_controlled_bytes: Some(16384 + 32)` is enough for 1 packet
-    // (whereas scanning all 10 packets without honoring `max_packets` exceeds `16384 + 32` at packet 2).
+    // The retained cue and reusable encoded payload coexist with the base
+    // reserve. Keep an exact one-packet budget and prove both its lower bound
+    // and the refusal when the selected prefix grows to two packets.
+    let one_packet_bytes = 16384 + 32 + valid_frame_len - 7;
     let one_packet_budget = CopyOptions {
         max_packets: Some(1),
-        max_controlled_bytes: Some(16384 + 32),
+        max_controlled_bytes: Some(one_packet_bytes),
         ..Default::default()
     };
+    for options in [
+        CopyOptions {
+            max_controlled_bytes: Some(one_packet_bytes - 1),
+            ..one_packet_budget.clone()
+        },
+        CopyOptions {
+            max_packets: Some(2),
+            ..one_packet_budget.clone()
+        },
+    ] {
+        let error = fvid::native_plan::remux_with_options(&adts_path, &options).unwrap_err();
+        assert_eq!(error, "controlled memory budget exceeded");
+    }
     let plan = fvid::native_plan::remux_with_options(&adts_path, &one_packet_budget)
         .expect("native_plan::remux_with_options on ADTS with max_packets: Some(1) should stop scanning after 1 packet")
         .expect("ADTS source should be recognized");
