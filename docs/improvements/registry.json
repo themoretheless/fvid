@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 416,
-  "next_id": "FVID-0417",
+  "accepted_count": 417,
+  "next_id": "FVID-0418",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4639,6 +4639,17 @@
       "result": "Share the cached exact composition endpoint between duration, changing-setup/preroll seek bounds and unedited AAC crop limits.83 distinct checks pass (69 integrations across 13 suites, 14 audio-reader units), plus locked/offline core and player builds.21 short authored video witnesses cover signed CTTS/TRUN, regular/fragmented PCM, equivalent/changing setups, AAC pulse reference/history, exact suffix PCM/PTS, rewind, EOF and actual playback workers.",
       "status": "accepted",
       "validation": "batch-416-validation.json"
+    },
+    {
+      "id": "FVID-0417",
+      "batch": 417,
+      "title": "Preserve fractional AAC composition origins and exact native seek boundaries",
+      "source": "src/playback/audio/mp4_audio.rs",
+      "regression": "tests/mp4_aac_fractional_origin.rs",
+      "before": "Unedited AAC rounds source PTS and seek floors independently to native sample coordinates, even when CTTS is fractional on an otherwise integral media clock. Negative origin keeps an extra sample; seek to source1024 yields2047 rather than2048 remaining samples and the final sample can vanish. The corrected final regression on the original reader fails all3 tests.",
+      "result": "Use exact rational presentation origins and crop relative to those origins before rounding the retained sample window.86 distinct checks pass (72 integrations across14 suites plus14 root audio-reader units), with locked/offline core and player builds.16 authored AAC/VP9 videos with independent analytical pulse reference cover three media rates, signed offsets, exact PCM/PTS, both seek APIs, rewind, EOF and actual playback workers.",
+      "status": "accepted",
+      "validation": "batch-417-validation.json"
     }
   ]
 }

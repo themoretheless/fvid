@@ -1,0 +1,129 @@
+{
+  "provenance": "Own 64ms 48kHz mono AAC-LC pulse/overlap, analytic IMDCT reference and neutral16x16 VP9; exact 4x/40x/65537x media clocks with signed CTTS smaller than or near one native sample. No private media/parameters, encoder, FFmpeg or network.",
+  "cases": [
+    {
+      "file": "factor4-shift-5.mp4",
+      "factor": 4,
+      "shift": -5,
+      "scale": 192000,
+      "drop": 2
+    },
+    {
+      "file": "factor4-shift-1.mp4",
+      "factor": 4,
+      "shift": -1,
+      "scale": 192000,
+      "drop": 1
+    },
+    {
+      "file": "factor4-shift0.mp4",
+      "factor": 4,
+      "shift": 0,
+      "scale": 192000,
+      "drop": 0
+    },
+    {
+      "file": "factor4-shift1.mp4",
+      "factor": 4,
+      "shift": 1,
+      "scale": 192000,
+      "drop": 0
+    },
+    {
+      "file": "factor4-shift5.mp4",
+      "factor": 4,
+      "shift": 5,
+      "scale": 192000,
+      "drop": 0
+    },
+    {
+      "file": "factor40-shift-5.mp4",
+      "factor": 40,
+      "shift": -5,
+      "scale": 1920000,
+      "drop": 1
+    },
+    {
+      "file": "factor40-shift-1.mp4",
+      "factor": 40,
+      "shift": -1,
+      "scale": 1920000,
+      "drop": 1
+    },
+    {
+      "file": "factor40-shift0.mp4",
+      "factor": 40,
+      "shift": 0,
+      "scale": 1920000,
+      "drop": 0
+    },
+    {
+      "file": "factor40-shift1.mp4",
+      "factor": 40,
+      "shift": 1,
+      "scale": 1920000,
+      "drop": 0
+    },
+    {
+      "file": "factor40-shift5.mp4",
+      "factor": 40,
+      "shift": 5,
+      "scale": 1920000,
+      "drop": 0
+    },
+    {
+      "file": "factor65537-shift-5.mp4",
+      "factor": 65537,
+      "shift": -5,
+      "scale": 3145776000,
+      "drop": 1
+    },
+    {
+      "file": "factor65537-shift-1.mp4",
+      "factor": 65537,
+      "shift": -1,
+      "scale": 3145776000,
+      "drop": 1
+    },
+    {
+      "file": "factor65537-shift0.mp4",
+      "factor": 65537,
+      "shift": 0,
+      "scale": 3145776000,
+      "drop": 0
+    },
+    {
+      "file": "factor65537-shift1.mp4",
+      "factor": 65537,
+      "shift": 1,
+      "scale": 3145776000,
+      "drop": 0
+    },
+    {
+      "file": "factor65537-shift5.mp4",
+      "factor": 65537,
+      "shift": 5,
+      "scale": 3145776000,
+      "drop": 0
+    }
+  ],
+  "sha256": {
+    "control.mp4": "40abaabaf72367bd231e6396a30286873920c90f4417fb72c46392fd2cf6cf23",
+    "reference.f32le": "0e7c1faf087653e91eefeddd232d3995fd80b06ef005ac5e433175ac0669e8f5",
+    "factor4-shift-5.mp4": "a972e8f556c3811a1f79e8876c8f8d215864885a1418db22f0e6f62427706bbf",
+    "factor4-shift-1.mp4": "e427775fe08d4c2b9ed39657ec80a8f6897ffee5e4c0aabbc89bc43aab680d94",
+    "factor4-shift0.mp4": "0c7a69425900e6be557830568893b151052cc561b7c76468e0644ce6de8ccd04",
+    "factor4-shift1.mp4": "a7afbdc18306e85cbcba8b3ac07b86e2764b19019a8e506b2a81447781d2dadd",
+    "factor4-shift5.mp4": "c5356049f783290f6387a81cab5c72a3481389784c8177ab0a617cb91ef09e1f",
+    "factor40-shift-5.mp4": "d58da745388e65534eed46929e96e676c57339905032312d7402c1f8e617ebf6",
+    "factor40-shift-1.mp4": "bf68cdd15b0abfaeb50b736a8f9aca85bdae530cae240ff62aef67784b612bc5",
+    "factor40-shift0.mp4": "80b121c7032d17af9b8275ecb443b221059270b473c405a510c3d214580a7066",
+    "factor40-shift1.mp4": "1c1fe52d91b6b3d49ba67e0c6ef10a9c105eeb45447a929cb770432e3d47f666",
+    "factor40-shift5.mp4": "8346da7ab00359c9d57ea43850e7c3305f77e62896674e5330eb04f8be5b8370",
+    "factor65537-shift-5.mp4": "29dc261c5141c1b7ef75537752a8e1f5e619d9bda4056092f80f4dc01d997d71",
+    "factor65537-shift-1.mp4": "f73241c294bd859cfec715d7c8ffe2cdd0277fe7efb90cedd541f8bea4747868",
+    "factor65537-shift0.mp4": "e44bf6729cdbf11928792c8bc7b0ddab8661ea2c9f2a46fd329553b20e48d4a6",
+    "factor65537-shift1.mp4": "0c14aa2cc9edfb9089ae0eed0613b8df28114db444fb7e980ef8d35a2cf23162",
+    "factor65537-shift5.mp4": "7a957c085922d508a178837583338baf2e66235cc1909d1ffe76f71caebde65e"
+  }
+}

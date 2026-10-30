@@ -1,0 +1,59 @@
+{
+  "batch": 417,
+  "accepted_ids": [
+    "FVID-0417"
+  ],
+  "status": "accepted",
+  "summary": "Preserve fractional native AAC composition origins and exact seek sample boundaries",
+  "source_files": [
+    "src/playback/audio/mp4_audio.rs"
+  ],
+  "regressions": [
+    "tests/mp4_aac_fractional_origin.rs"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/mp4-aac-fractional-origin/status.json"
+  ],
+  "before": {
+    "base_commit": "0f257e117263b1df9fa5bd3bc212db6508d6a06f",
+    "final_corrected_regression": {
+      "passed": 0,
+      "failed": 3
+    },
+    "examples": [
+      "CTTS -5 on a192kHz media clock keeps3071 native samples instead of3070 and labels the first at0ns rather than15.625us.",
+      "Seek to native source1024 loses a sample (2047 rather than2048 remain); native source3071 can disappear entirely.",
+      "Positive fractional origins change packet timestamps and can skip the requested first sample."
+    ]
+  },
+  "after": {
+    "fresh_integration_passed": 72,
+    "integration_suites": 14,
+    "root_audio_reader_unit_passed": 14,
+    "total_distinct_checks": 86,
+    "player_build": "passed locked/offline/no-default-features",
+    "core_build": "passed locked/offline/no-default-features"
+  },
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --features player --test mp4_aac_fractional_origin (initial/expanded, corrected after, isolated final before)",
+    "cargo clean -p fvid (only owned target; invalidate differing-source snapshot artifacts)",
+    "cargo test --locked --offline --no-default-features --features player --no-fail-fast --test mp4_aac_fractional_origin --test mp4_reconfigured_seek_endpoint --test mp4_audio_presentation_end --test mp4_audio_clocks --test mp4_quantized_audio_clock --test mp4_fixed_audio_edits --test mp4_variable_rate_edits --test mp4_open_ended_edit_audio --test mp4_aac_quicktime --test mp4_aac_transitions --test mp4_audio_reconfiguration --test mp4_empty_tail --test mp4_active_audio_choice --test mp4_unused_audio_descriptions",
+    "cargo test --locked --offline --no-default-features --features player --lib playback_mp4_audio::",
+    "cargo check --locked --offline --no-default-features --features player",
+    "cargo check --locked --offline --no-default-features"
+  ],
+  "build_profile": {
+    "CARGO_PROFILE_DEV_DEBUG": 0,
+    "CARGO_PROFILE_TEST_DEBUG": 0,
+    "note": "Debug symbols disabled consistently before/after; no performance claim."
+  },
+  "uncounted": [
+    "All sign/rate/seek/worker variants and fixture/reference files",
+    "New video-control oracle correction and package cache invalidation"
+  ],
+  "limitations": [
+    "Selected86 checks and core/player configurations, not whole-project or all-platform qualification",
+    "No physical sound-device, GPU or performance claim",
+    "Existing tests were not relaxed; new tests use exact PCM/time oracles."
+  ]
+}

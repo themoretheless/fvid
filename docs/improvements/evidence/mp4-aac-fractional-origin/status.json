@@ -1,0 +1,76 @@
+{
+  "batch": 417,
+  "accepted_ids": [
+    "FVID-0417"
+  ],
+  "status": "accepted",
+  "before": {
+    "base_commit": "0f257e117263b1df9fa5bd3bc212db6508d6a06f",
+    "final_corrected_regression": {
+      "passed": 0,
+      "failed": 3
+    },
+    "examples": [
+      "CTTS -5 on a192kHz media clock keeps3071 native samples instead of3070 and labels the first at0ns rather than15.625us.",
+      "Seek to native source1024 loses a sample (2047 rather than2048 remain); native source3071 can disappear entirely.",
+      "Positive fractional origins change packet timestamps and can skip the requested first sample."
+    ]
+  },
+  "after": {
+    "fresh_integration_passed": 72,
+    "integration_suites": 14,
+    "root_audio_reader_unit_passed": 14,
+    "total_distinct_checks": 86,
+    "player_build": "passed locked/offline/no-default-features",
+    "core_build": "passed locked/offline/no-default-features"
+  },
+  "fix": "Keep unedited constant AAC presentation origins as rational media times, subtract seek and packet coordinates before ceil-to-native-sample cropping, and stamp the retained PCM at its exact rational origin. Reuse the existing rational crop path; edit and changing-description policies retain their dispatch.",
+  "independent_scope": "The media clock is an exact multiple of the sample frequency, so there is no recovered PlaybackClock, yet CTTS need not align to native samples. This is a fractional origin/crop error at middle-of-stream seeks, independent of FVID-0416 endpoint bounds. All rate, sign, seek and worker variants count as one fix.",
+  "fixtures": {
+    "synthetic_video_count": 16,
+    "shifted_cases": 15,
+    "control_videos": 1,
+    "max_declared_extent_ms_less_than": 65,
+    "native_rate": 48000,
+    "media_scales": [
+      192000,
+      1920000,
+      3145776000
+    ],
+    "ctts_ticks": [
+      -5,
+      -1,
+      0,
+      1,
+      5
+    ],
+    "generator": "scripts/generate_mp4_aac_fractional_origin.py",
+    "ordinary_tests": "Checked-in authored media and analytic PCM only; no encoder, FFmpeg, network, private media or private codec parameters."
+  },
+  "coverage": [
+    "Byte-exact full PCM, required negative-origin sample removal, rational packet PTS, independent nonzero pulse reference within1e-7, all three video frames and rewind",
+    "Byte-exact suffix at native sources3/1024/3000/3071/3072 via both tick seek and time seek",
+    "Actual AudioPlayback workers for negative/positive and sub-nanosecond media clocks: full PCM/time, seek suffix and EOF without replay",
+    "Related AAC, quantized clocks, recovered clocks, signed endpoints, edit lists, changing configurations, empty tails, invalid descriptions and resource/index admission controls"
+  ],
+  "verification_corrections": [
+    "Initial new video control mistakenly expected one picture although the generator authors three. Corrected to require all three plus EOF; only the corrected final baseline qualifies the media failure. Rejected attempt retained.",
+    "An isolated original-source snapshot reused the package target directory; a subsequent run reused its old binary. That run is rejected. Cleaned the owned fvid package artifacts, verified the fixed-branch diagnostic is present in the rebuilt test, and reran all72 integration checks. See artifact-verification.json and package-clean.log. Neither qualification repair is a counted improvement."
+  ],
+  "build_profile": {
+    "CARGO_PROFILE_DEV_DEBUG": 0,
+    "CARGO_PROFILE_TEST_DEBUG": 0,
+    "note": "Debug symbols disabled consistently before/after; no performance claim."
+  },
+  "source_sha256": {
+    "src/playback/audio/mp4_audio.rs": "c487d0ce08ee5da35d97b24731724cc1184870a1c72ce473c21a2e65311dee7c",
+    "tests/mp4_aac_fractional_origin.rs": "a5a4de22dcca5f5306c7bf14ffdeeda0fd5c416ec06d6347019b84265a2309bb",
+    "scripts/generate_mp4_aac_fractional_origin.py": "417ab28807be8cd2819f297c6cc48157d6a0b874509a40484fdfd08ba1b26b13",
+    "tests/fixtures/playback-errors/mp4-aac-fractional-origin/manifest.json": "46bce7df132d1dd73ab1fc3e82aa62d861c1fd219af3a35520c126d4ec53b332"
+  },
+  "limitations": [
+    "Selected86 checks and core/player configurations, not whole-project or all-platform qualification",
+    "No physical sound-device, GPU or performance claim",
+    "Existing tests were not relaxed; new tests use exact PCM/time oracles."
+  ]
+}

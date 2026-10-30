@@ -1013,12 +1013,27 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
 
     fn present_decoded(&self, mut packet: crate::audio::AudioPacket, source_pts: i64) -> Result<Option<crate::audio::AudioPacket>> {
         if self.variable_edits.is_some() {return self.present_variable_edit(packet,source_pts);}
-        if self.clock_mode.get() && let Some(clock)=&self.clock {
-            let start=self.source_time(source_pts)?;let rate=self.sample_rate();let stride=usize::from(self.channels())*4;
-            if rate==0 || stride==0 || !packet.data.len().is_multiple_of(stride) {return Err(invalid("invalid recovered MP4 PCM geometry"));}
+        let absolute_window = if self.clock_mode.get() && let Some(clock)=&self.clock {
+            Some((self.source_time(source_pts)?, self.clock_floor.get(), clock.end()))
+        } else if !self.changing && self.track().codec == *b"mp4a" && self.track().edits.is_empty() {
+            // An integral ratio of media ticks to native samples does not make
+            // CTTS sample-aligned. Subtract exact times before rounding a crop;
+            // independently rounding the origin and seek point loses samples.
+            let scale = self.track().timescale;
+            let end = i128::try_from(self.presentation_end_ticks().unwrap_or(0))
+                .map_err(|_| invalid("MP4 AAC presentation endpoint overflow"))?;
+            Some((EditTime::signed_ticks(source_pts, scale)?,
+                EditTime::signed_ticks(self.presentation_floor.max(0), scale)?,
+                EditTime::new(end, u128::from(scale))?))
+        } else { None };
+        if let Some((start, floor, end)) = absolute_window {
+            let rate=self.sample_rate();let stride=usize::from(self.channels())*4;
+            if rate==0 || stride==0 || !packet.data.len().is_multiple_of(stride) {
+                return Err(invalid(if self.clock_mode.get() {"invalid recovered MP4 PCM geometry"} else {"invalid AAC PCM presentation geometry"}));
+            }
             let frames=packet.data.len()/stride;
-            let first=self.clock_floor.get().max(EditTime::ZERO).sub(start)?.ceil_frames(rate)?.clamp(0,frames as i128) as usize;
-            let last=clock.end().sub(start)?.ceil_frames(rate)?.clamp(0,frames as i128) as usize;
+            let first=floor.max(EditTime::ZERO).sub(start)?.ceil_frames(rate)?.clamp(0,frames as i128) as usize;
+            let last=end.sub(start)?.ceil_frames(rate)?.clamp(0,frames as i128) as usize;
             if first>=last {return Ok(None);}
             packet.data.copy_within(first*stride..last*stride,0);packet.data.truncate((last-first)*stride);
             let at=start.add(EditTime::new(first as i128,u128::from(rate))?)?;let (pts,den)=at.stamp()?;

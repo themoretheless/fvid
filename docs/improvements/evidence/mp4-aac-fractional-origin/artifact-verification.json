@@ -1,0 +1,11 @@
+{
+  "stale_shared_target_binary_had_fixed_branch_diagnostic": false,
+  "fresh_rebuilt_binary_has_fixed_branch_diagnostic": true,
+  "cleaned_package": "fvid",
+  "owned_target": "/private/tmp/fvid-aac-fractional-20261030",
+  "fresh_related_passed": 72,
+  "suites": 14,
+  "rule": "Only the fresh rebuilt results qualify the fix. Different source snapshots must not reuse a package artifact without cleaning or distinct target directories.",
+  "analytical_reference_nonzero_samples": 3072,
+  "analytical_reference_peak": 4.622330322945345e-07
+}
