@@ -362,17 +362,12 @@ fn actual_access_units_keep_pcm_and_pts_when_parameters_arrive_late_or_fragmente
             let mut bits = BitReader::new(packet);
             bits.skip(frame["core_bits"].as_u64().unwrap() as usize)
                 .unwrap();
-            let end = frame["end_bits"].as_u64().unwrap() as usize;
-            let mut messages = Vec::new();
-            while bits.position() < end {
-                if let Some(message) = assembler.read(&mut bits, end).unwrap() {
-                    messages.push(message);
-                }
-            }
-            assert_eq!(bits.position(), end);
-            while bits.remaining() > 0 {
-                assert!(!bits.bit().unwrap());
-            }
+            let messages = fvid_media::owned_aac::aac_pce::read_eld_spatial_extensions(
+                &mut bits,
+                &mut assembler,
+            )
+            .unwrap();
+            assert_eq!(bits.remaining(), 0);
             let stamp = Stamp {
                 pts: frame["pts"].as_i64().unwrap(),
                 duration: frame["duration"].as_u64().unwrap(),

@@ -1,3 +1,46 @@
+## Bounded AAC-ELD spatial-tail dispatch, 2026-10-30
+
+The shared AAC extension parser now offers opt-in ELD spatial dispatch alongside
+its unchanged ordinary FIL/ER entry points. Spatial tags9/12 reach the owned
+ancillary assembler. EXT_DATA_LENGTH children use their declared bit bound and
+preserve following parent records, including DRC and ancillary data. Unknown
+compatible children consume their own bound. Nested/empty/overlong wrappers are
+refused. Direct spatial records consume the supplied parent remainder.
+
+The ELD entry point assumes the explicit LD-SBR prefix has already been parsed.
+Implicit SBR tags13/14 in this tail stay opaque, matching the pinned primary
+reference's ELD branch; a bounded implicit child preserves later parent records.
+Generic AAC ER SBR behavior and ordinary FIL opacity are retained. Completed
+messages, fragment assembly and final zero alignment form one transaction:
+late DRC or alignment errors restore the cursor and pending ancillary history.
+The frontend's separate cursor uses a buffer/absolute-bit bridge to the same
+owned assembler; no second ancillary implementation or source-buffer copy is
+introduced. The scheduling composition suite now uses this dispatcher instead
+of manually extracting each spatial envelope.
+
+44 own short movies provide 38 valid mixed-tail programmes and six specific
+failure controls. All valid variants preserve spatial PCM for the eight ordinary
+trees, both direct tags, bounded children and escaped lengths through65805 bytes.
+Late bad DRC, nested/empty/overlong lengths, bad final alignment and orphan stop
+reach their intended errors. Cross-facade continuation and all eight storage bit
+offsets are checked. These are parser/core/session composition checks: native
+spatial admission is still refused, and the new native mixed-tail playback test
+is explicitly ignored pending that integration.
+
+All 577 media units pass (one existing ignored), along with 74 scoped ELD/LD-MPS
+integration tests (four pending native acceptance tests ignored). The four
+additional legacy AAC ER/SBR suites pass 15 distinct tests. Fixture regeneration
+is byte-identical with Python process/spawn and socket APIs denied. Ordinary
+tests use saved fixtures without FFmpeg, network or runtime fixture generation.
+See the [source facts](validation/aac-eld-spatial-tail-source-2026-10-30.json),
+[generation audit](validation/aac-eld-spatial-tail-generation-2026-10-30.json) and
+[test report](validation/aac-eld-spatial-tail-tests-2026-10-30.json).
+
+Native factory admission, output speaker masks and timed decode/checkpoint/EOF
+wiring remain open. Dropped/replaced-fragment source association, in-band config,
+coupled LD-SBR bank selection, residual codecs, active tools and 128-bin DSP
+remain open. Zero native spatial movies are counted as accepted.
+
 ## LD-MPS PCM/timestamp association and owned allocation accounting, 2026-10-30
 
 A spatial session now associates canonical decoded core PCM with completed

@@ -1,0 +1,1589 @@
+{
+  "scope": "ELD mixed ER-tail dispatch and component playback; native spatial movie factory still refused.",
+  "cases": [
+    {
+      "name": "tree0-direct9",
+      "tree": 0,
+      "mode": "direct9",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e62025339000000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 215,
+          "core_bits": 51,
+          "end_bits": 1715
+        },
+        {
+          "offset": 215,
+          "bytes": 219,
+          "core_bits": 51,
+          "end_bits": 1747
+        },
+        {
+          "offset": 434,
+          "bytes": 28,
+          "core_bits": 53,
+          "end_bits": 221
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree0-direct12",
+      "tree": 0,
+      "mode": "direct12",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e62025339000000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 462,
+          "bytes": 215,
+          "core_bits": 51,
+          "end_bits": 1715
+        },
+        {
+          "offset": 677,
+          "bytes": 219,
+          "core_bits": 51,
+          "end_bits": 1747
+        },
+        {
+          "offset": 896,
+          "bytes": 28,
+          "core_bits": 53,
+          "end_bits": 221
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree0-wrapped9",
+      "tree": 0,
+      "mode": "wrapped9",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e62025339000000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 924,
+          "bytes": 230,
+          "core_bits": 51,
+          "end_bits": 1835
+        },
+        {
+          "offset": 1154,
+          "bytes": 234,
+          "core_bits": 51,
+          "end_bits": 1867
+        },
+        {
+          "offset": 1388,
+          "bytes": 42,
+          "core_bits": 53,
+          "end_bits": 333
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree0-wrapped12",
+      "tree": 0,
+      "mode": "wrapped12",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e62025339000000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 1430,
+          "bytes": 230,
+          "core_bits": 51,
+          "end_bits": 1835
+        },
+        {
+          "offset": 1660,
+          "bytes": 234,
+          "core_bits": 51,
+          "end_bits": 1867
+        },
+        {
+          "offset": 1894,
+          "bytes": 42,
+          "core_bits": 53,
+          "end_bits": 333
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree1-direct9",
+      "tree": 1,
+      "mode": "direct9",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e62025339100000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 1936,
+          "bytes": 215,
+          "core_bits": 51,
+          "end_bits": 1715
+        },
+        {
+          "offset": 2151,
+          "bytes": 219,
+          "core_bits": 51,
+          "end_bits": 1747
+        },
+        {
+          "offset": 2370,
+          "bytes": 28,
+          "core_bits": 53,
+          "end_bits": 221
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree1-direct12",
+      "tree": 1,
+      "mode": "direct12",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e62025339100000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 2398,
+          "bytes": 215,
+          "core_bits": 51,
+          "end_bits": 1715
+        },
+        {
+          "offset": 2613,
+          "bytes": 219,
+          "core_bits": 51,
+          "end_bits": 1747
+        },
+        {
+          "offset": 2832,
+          "bytes": 28,
+          "core_bits": 53,
+          "end_bits": 221
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree1-wrapped9",
+      "tree": 1,
+      "mode": "wrapped9",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e62025339100000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 2860,
+          "bytes": 230,
+          "core_bits": 51,
+          "end_bits": 1835
+        },
+        {
+          "offset": 3090,
+          "bytes": 234,
+          "core_bits": 51,
+          "end_bits": 1867
+        },
+        {
+          "offset": 3324,
+          "bytes": 42,
+          "core_bits": 53,
+          "end_bits": 333
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree1-wrapped12",
+      "tree": 1,
+      "mode": "wrapped12",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e62025339100000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 3366,
+          "bytes": 230,
+          "core_bits": 51,
+          "end_bits": 1835
+        },
+        {
+          "offset": 3596,
+          "bytes": 234,
+          "core_bits": 51,
+          "end_bits": 1867
+        },
+        {
+          "offset": 3830,
+          "bytes": 42,
+          "core_bits": 53,
+          "end_bits": 333
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree2-direct9",
+      "tree": 2,
+      "mode": "direct9",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e64027339200000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 3872,
+          "bytes": 214,
+          "core_bits": 98,
+          "end_bits": 1706
+        },
+        {
+          "offset": 4086,
+          "bytes": 219,
+          "core_bits": 100,
+          "end_bits": 1748
+        },
+        {
+          "offset": 4305,
+          "bytes": 35,
+          "core_bits": 100,
+          "end_bits": 276
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree2-direct12",
+      "tree": 2,
+      "mode": "direct12",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e64027339200000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 4340,
+          "bytes": 214,
+          "core_bits": 98,
+          "end_bits": 1706
+        },
+        {
+          "offset": 4554,
+          "bytes": 219,
+          "core_bits": 100,
+          "end_bits": 1748
+        },
+        {
+          "offset": 4773,
+          "bytes": 35,
+          "core_bits": 100,
+          "end_bits": 276
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree2-wrapped9",
+      "tree": 2,
+      "mode": "wrapped9",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e64027339200000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 4808,
+          "bytes": 229,
+          "core_bits": 98,
+          "end_bits": 1826
+        },
+        {
+          "offset": 5037,
+          "bytes": 234,
+          "core_bits": 100,
+          "end_bits": 1868
+        },
+        {
+          "offset": 5271,
+          "bytes": 49,
+          "core_bits": 100,
+          "end_bits": 388
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree2-wrapped12",
+      "tree": 2,
+      "mode": "wrapped12",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e64027339200000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 5320,
+          "bytes": 229,
+          "core_bits": 98,
+          "end_bits": 1826
+        },
+        {
+          "offset": 5549,
+          "bytes": 234,
+          "core_bits": 100,
+          "end_bits": 1868
+        },
+        {
+          "offset": 5783,
+          "bytes": 49,
+          "core_bits": 100,
+          "end_bits": 388
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree3-direct9",
+      "tree": 3,
+      "mode": "direct9",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e64027339300000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 5832,
+          "bytes": 311,
+          "core_bits": 98,
+          "end_bits": 2482
+        },
+        {
+          "offset": 6143,
+          "bytes": 315,
+          "core_bits": 100,
+          "end_bits": 2516
+        },
+        {
+          "offset": 6458,
+          "bytes": 37,
+          "core_bits": 100,
+          "end_bits": 292
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree3-direct12",
+      "tree": 3,
+      "mode": "direct12",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e64027339300000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 6495,
+          "bytes": 311,
+          "core_bits": 98,
+          "end_bits": 2482
+        },
+        {
+          "offset": 6806,
+          "bytes": 315,
+          "core_bits": 100,
+          "end_bits": 2516
+        },
+        {
+          "offset": 7121,
+          "bytes": 37,
+          "core_bits": 100,
+          "end_bits": 292
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree3-wrapped9",
+      "tree": 3,
+      "mode": "wrapped9",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e64027339300000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 7158,
+          "bytes": 328,
+          "core_bits": 98,
+          "end_bits": 2618
+        },
+        {
+          "offset": 7486,
+          "bytes": 332,
+          "core_bits": 100,
+          "end_bits": 2652
+        },
+        {
+          "offset": 7818,
+          "bytes": 51,
+          "core_bits": 100,
+          "end_bits": 404
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree3-wrapped12",
+      "tree": 3,
+      "mode": "wrapped12",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e64027339300000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 7869,
+          "bytes": 328,
+          "core_bits": 98,
+          "end_bits": 2618
+        },
+        {
+          "offset": 8197,
+          "bytes": 332,
+          "core_bits": 100,
+          "end_bits": 2652
+        },
+        {
+          "offset": 8529,
+          "bytes": 51,
+          "core_bits": 100,
+          "end_bits": 404
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree4-direct9",
+      "tree": 4,
+      "mode": "direct9",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e64027339400000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 8580,
+          "bytes": 311,
+          "core_bits": 98,
+          "end_bits": 2482
+        },
+        {
+          "offset": 8891,
+          "bytes": 315,
+          "core_bits": 100,
+          "end_bits": 2516
+        },
+        {
+          "offset": 9206,
+          "bytes": 37,
+          "core_bits": 100,
+          "end_bits": 292
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree4-direct12",
+      "tree": 4,
+      "mode": "direct12",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e64027339400000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 9243,
+          "bytes": 311,
+          "core_bits": 98,
+          "end_bits": 2482
+        },
+        {
+          "offset": 9554,
+          "bytes": 315,
+          "core_bits": 100,
+          "end_bits": 2516
+        },
+        {
+          "offset": 9869,
+          "bytes": 37,
+          "core_bits": 100,
+          "end_bits": 292
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree4-wrapped9",
+      "tree": 4,
+      "mode": "wrapped9",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e64027339400000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 9906,
+          "bytes": 328,
+          "core_bits": 98,
+          "end_bits": 2618
+        },
+        {
+          "offset": 10234,
+          "bytes": 332,
+          "core_bits": 100,
+          "end_bits": 2652
+        },
+        {
+          "offset": 10566,
+          "bytes": 51,
+          "core_bits": 100,
+          "end_bits": 404
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree4-wrapped12",
+      "tree": 4,
+      "mode": "wrapped12",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e64027339400000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 10617,
+          "bytes": 328,
+          "core_bits": 98,
+          "end_bits": 2618
+        },
+        {
+          "offset": 10945,
+          "bytes": 332,
+          "core_bits": 100,
+          "end_bits": 2652
+        },
+        {
+          "offset": 11277,
+          "bytes": 51,
+          "core_bits": 100,
+          "end_bits": 404
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree5-direct9",
+      "tree": 5,
+      "mode": "direct9",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e6c025339500000000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 11328,
+          "bytes": 146,
+          "core_bits": 283,
+          "end_bits": 1163
+        },
+        {
+          "offset": 11474,
+          "bytes": 150,
+          "core_bits": 285,
+          "end_bits": 1197
+        },
+        {
+          "offset": 11624,
+          "bytes": 55,
+          "core_bits": 283,
+          "end_bits": 435
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree5-direct12",
+      "tree": 5,
+      "mode": "direct12",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e6c025339500000000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 11679,
+          "bytes": 146,
+          "core_bits": 283,
+          "end_bits": 1163
+        },
+        {
+          "offset": 11825,
+          "bytes": 150,
+          "core_bits": 285,
+          "end_bits": 1197
+        },
+        {
+          "offset": 11975,
+          "bytes": 55,
+          "core_bits": 283,
+          "end_bits": 435
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree5-wrapped9",
+      "tree": 5,
+      "mode": "wrapped9",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e6c025339500000000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 12030,
+          "bytes": 161,
+          "core_bits": 283,
+          "end_bits": 1283
+        },
+        {
+          "offset": 12191,
+          "bytes": 165,
+          "core_bits": 285,
+          "end_bits": 1317
+        },
+        {
+          "offset": 12356,
+          "bytes": 69,
+          "core_bits": 283,
+          "end_bits": 547
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree5-wrapped12",
+      "tree": 5,
+      "mode": "wrapped12",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e6c025339500000000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 12425,
+          "bytes": 161,
+          "core_bits": 283,
+          "end_bits": 1283
+        },
+        {
+          "offset": 12586,
+          "bytes": 165,
+          "core_bits": 285,
+          "end_bits": 1317
+        },
+        {
+          "offset": 12751,
+          "bytes": 69,
+          "core_bits": 283,
+          "end_bits": 547
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree6-direct9",
+      "tree": 6,
+      "mode": "direct9",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e6c025339600000000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 12820,
+          "bytes": 146,
+          "core_bits": 283,
+          "end_bits": 1163
+        },
+        {
+          "offset": 12966,
+          "bytes": 150,
+          "core_bits": 285,
+          "end_bits": 1197
+        },
+        {
+          "offset": 13116,
+          "bytes": 55,
+          "core_bits": 283,
+          "end_bits": 435
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree6-direct12",
+      "tree": 6,
+      "mode": "direct12",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e6c025339600000000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 13171,
+          "bytes": 146,
+          "core_bits": 283,
+          "end_bits": 1163
+        },
+        {
+          "offset": 13317,
+          "bytes": 150,
+          "core_bits": 285,
+          "end_bits": 1197
+        },
+        {
+          "offset": 13467,
+          "bytes": 55,
+          "core_bits": 283,
+          "end_bits": 435
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree6-wrapped9",
+      "tree": 6,
+      "mode": "wrapped9",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e6c025339600000000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 13522,
+          "bytes": 161,
+          "core_bits": 283,
+          "end_bits": 1283
+        },
+        {
+          "offset": 13683,
+          "bytes": 165,
+          "core_bits": 285,
+          "end_bits": 1317
+        },
+        {
+          "offset": 13848,
+          "bytes": 69,
+          "core_bits": 283,
+          "end_bits": 547
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree6-wrapped12",
+      "tree": 6,
+      "mode": "wrapped12",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e6c025339600000000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 13917,
+          "bytes": 161,
+          "core_bits": 283,
+          "end_bits": 1283
+        },
+        {
+          "offset": 14078,
+          "bytes": 165,
+          "core_bits": 285,
+          "end_bits": 1317
+        },
+        {
+          "offset": 14243,
+          "bytes": 69,
+          "core_bits": 283,
+          "end_bits": 547
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-direct9",
+      "tree": 7,
+      "mode": "direct9",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 14312,
+          "bytes": 69,
+          "core_bits": 51,
+          "end_bits": 547
+        },
+        {
+          "offset": 14381,
+          "bytes": 73,
+          "core_bits": 51,
+          "end_bits": 579
+        },
+        {
+          "offset": 14454,
+          "bytes": 25,
+          "core_bits": 53,
+          "end_bits": 197
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-direct12",
+      "tree": 7,
+      "mode": "direct12",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 14479,
+          "bytes": 69,
+          "core_bits": 51,
+          "end_bits": 547
+        },
+        {
+          "offset": 14548,
+          "bytes": 73,
+          "core_bits": 51,
+          "end_bits": 579
+        },
+        {
+          "offset": 14621,
+          "bytes": 25,
+          "core_bits": 53,
+          "end_bits": 197
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-wrapped9",
+      "tree": 7,
+      "mode": "wrapped9",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 14646,
+          "bytes": 84,
+          "core_bits": 51,
+          "end_bits": 667
+        },
+        {
+          "offset": 14730,
+          "bytes": 88,
+          "core_bits": 51,
+          "end_bits": 699
+        },
+        {
+          "offset": 14818,
+          "bytes": 39,
+          "core_bits": 53,
+          "end_bits": 309
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-wrapped12",
+      "tree": 7,
+      "mode": "wrapped12",
+      "length": 0,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 14857,
+          "bytes": 84,
+          "core_bits": 51,
+          "end_bits": 667
+        },
+        {
+          "offset": 14941,
+          "bytes": 88,
+          "core_bits": 51,
+          "end_bits": 699
+        },
+        {
+          "offset": 15029,
+          "bytes": 39,
+          "core_bits": 53,
+          "end_bits": 309
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-length-1",
+      "tree": 7,
+      "mode": "length",
+      "length": 1,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 15068,
+          "bytes": 86,
+          "core_bits": 51,
+          "end_bits": 683
+        },
+        {
+          "offset": 15154,
+          "bytes": 88,
+          "core_bits": 51,
+          "end_bits": 699
+        },
+        {
+          "offset": 15242,
+          "bytes": 39,
+          "core_bits": 53,
+          "end_bits": 309
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-length-14",
+      "tree": 7,
+      "mode": "length",
+      "length": 14,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 15281,
+          "bytes": 99,
+          "core_bits": 51,
+          "end_bits": 787
+        },
+        {
+          "offset": 15380,
+          "bytes": 88,
+          "core_bits": 51,
+          "end_bits": 699
+        },
+        {
+          "offset": 15468,
+          "bytes": 39,
+          "core_bits": 53,
+          "end_bits": 309
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-length-15",
+      "tree": 7,
+      "mode": "length",
+      "length": 15,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 15507,
+          "bytes": 101,
+          "core_bits": 51,
+          "end_bits": 803
+        },
+        {
+          "offset": 15608,
+          "bytes": 88,
+          "core_bits": 51,
+          "end_bits": 699
+        },
+        {
+          "offset": 15696,
+          "bytes": 39,
+          "core_bits": 53,
+          "end_bits": 309
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-length-269",
+      "tree": 7,
+      "mode": "length",
+      "length": 269,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 15735,
+          "bytes": 355,
+          "core_bits": 51,
+          "end_bits": 2835
+        },
+        {
+          "offset": 16090,
+          "bytes": 88,
+          "core_bits": 51,
+          "end_bits": 699
+        },
+        {
+          "offset": 16178,
+          "bytes": 39,
+          "core_bits": 53,
+          "end_bits": 309
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-length-270",
+      "tree": 7,
+      "mode": "length",
+      "length": 270,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 16217,
+          "bytes": 358,
+          "core_bits": 51,
+          "end_bits": 2859
+        },
+        {
+          "offset": 16575,
+          "bytes": 88,
+          "core_bits": 51,
+          "end_bits": 699
+        },
+        {
+          "offset": 16663,
+          "bytes": 39,
+          "core_bits": 53,
+          "end_bits": 309
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-length-65805",
+      "tree": 7,
+      "mode": "length",
+      "length": 65805,
+      "error": null,
+      "error_frame": null,
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 16702,
+          "bytes": 65893,
+          "core_bits": 51,
+          "end_bits": 527139
+        },
+        {
+          "offset": 82595,
+          "bytes": 88,
+          "core_bits": 51,
+          "end_bits": 699
+        },
+        {
+          "offset": 82683,
+          "bytes": 39,
+          "core_bits": 53,
+          "end_bits": 309
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-bad-drc",
+      "tree": 7,
+      "mode": "bad-drc",
+      "length": 0,
+      "error": "AAC extension exceeds fill payload",
+      "error_frame": 1,
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 82722,
+          "bytes": 59,
+          "core_bits": 51,
+          "end_bits": 467
+        },
+        {
+          "offset": 82781,
+          "bytes": 56,
+          "core_bits": 51,
+          "end_bits": 443
+        },
+        {
+          "offset": 82837,
+          "bytes": 39,
+          "core_bits": 53,
+          "end_bits": 309
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-nested",
+      "tree": 7,
+      "mode": "nested",
+      "length": 0,
+      "error": "nested AAC EXT_DATA_LENGTH",
+      "error_frame": 1,
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 82876,
+          "bytes": 84,
+          "core_bits": 51,
+          "end_bits": 667
+        },
+        {
+          "offset": 82960,
+          "bytes": 87,
+          "core_bits": 51,
+          "end_bits": 691
+        },
+        {
+          "offset": 83047,
+          "bytes": 39,
+          "core_bits": 53,
+          "end_bits": 309
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-overlong",
+      "tree": 7,
+      "mode": "overlong",
+      "length": 0,
+      "error": "AAC spatial child exceeds parent",
+      "error_frame": 1,
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 83086,
+          "bytes": 84,
+          "core_bits": 51,
+          "end_bits": 667
+        },
+        {
+          "offset": 83170,
+          "bytes": 86,
+          "core_bits": 51,
+          "end_bits": 683
+        },
+        {
+          "offset": 83256,
+          "bytes": 39,
+          "core_bits": 53,
+          "end_bits": 309
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-empty-child",
+      "tree": 7,
+      "mode": "empty-child",
+      "length": 0,
+      "error": "AAC spatial child exceeds parent",
+      "error_frame": 1,
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 83295,
+          "bytes": 84,
+          "core_bits": 51,
+          "end_bits": 667
+        },
+        {
+          "offset": 83379,
+          "bytes": 85,
+          "core_bits": 51,
+          "end_bits": 675
+        },
+        {
+          "offset": 83464,
+          "bytes": 39,
+          "core_bits": 53,
+          "end_bits": 309
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-alignment",
+      "tree": 7,
+      "mode": "alignment",
+      "length": 0,
+      "error": "nonzero AAC ELD alignment",
+      "error_frame": 1,
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 83503,
+          "bytes": 84,
+          "core_bits": 51,
+          "end_bits": 667
+        },
+        {
+          "offset": 83587,
+          "bytes": 88,
+          "core_bits": 51,
+          "end_bits": 699
+        },
+        {
+          "offset": 83675,
+          "bytes": 39,
+          "core_bits": 53,
+          "end_bits": 309
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-orphan",
+      "tree": 7,
+      "mode": "orphan",
+      "length": 0,
+      "error": "continuation/stop without start",
+      "error_frame": 1,
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 83714,
+          "bytes": 84,
+          "core_bits": 51,
+          "end_bits": 667
+        },
+        {
+          "offset": 83798,
+          "bytes": 88,
+          "core_bits": 51,
+          "end_bits": 699
+        },
+        {
+          "offset": 83886,
+          "bytes": 39,
+          "core_bits": 53,
+          "end_bits": 309
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    }
+  ]
+}

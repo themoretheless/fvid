@@ -456,6 +456,46 @@ pub(crate) fn read_er_extensions(
     read_extension_bytes(bits, bits.remaining()/8, true, sbr)
 }
 
+/// ELD's explicit LD-SBR prefix is already consumed by the core owner. Parse
+/// the remaining ER records, collecting spatial messages and preserving bounded
+/// children and following ordinary records. Implicit SBR in this ELD tail is
+/// opaque, as ELD signals SBR explicitly. Final zero alignment belongs here.
+/// Any error retains both the input cursor and ancillary assembly history.
+pub fn read_eld_spatial_extensions(
+    bits: &mut BitReader<'_>,
+    assembler: &mut super::aac_ld_mps_transport::Assembler,
+) -> Result<Vec<super::aac_ld_mps_transport::Message>> {
+    let mut input = bits.clone();
+    let mut spatial = SpatialExtensions {
+        assembler: assembler.clone(),
+        messages: Vec::new(),
+    };
+    let count = input.remaining() / 8;
+    read_extension_bytes_dispatch(
+        &mut input,
+        count,
+        true,
+        &mut |_, _, _| {
+            Err(unsupported(
+                "unexpected implicit SBR synthesis in ELD spatial tail",
+            ))
+        },
+        Some(&mut spatial),
+    )?;
+    while input.remaining() != 0 {
+        if input.bit()? {
+            return Err(invalid("nonzero AAC ELD alignment bits"));
+        }
+    }
+    *bits = input;
+    *assembler = spatial.assembler;
+    Ok(spatial.messages)
+}
+struct SpatialExtensions {
+    assembler: super::aac_ld_mps_transport::Assembler,
+    messages: Vec<super::aac_ld_mps_transport::Message>,
+}
+
 /// Shared DRC syntax; evaluation is optional and default decoding preserves
 /// original dynamics. Both logical and separated ESC payloads use these fields.
 pub(crate) fn read_dynamic_range(mut read: impl FnMut(u8) -> Result<u32>) -> Result<()> {
@@ -496,22 +536,47 @@ fn read_extension_bytes(
     er: bool,
     mut sbr: impl FnMut(&mut super::bits::BitReader<'_>, usize, bool) -> Result<()>,
 ) -> Result<()> {
+    read_extension_bytes_dispatch(bits, count, er, &mut sbr, None)
+}
+fn read_extension_bytes_dispatch(
+    bits: &mut BitReader<'_>,
+    count: usize,
+    er: bool,
+    sbr: &mut dyn FnMut(&mut BitReader<'_>, usize, bool) -> Result<()>,
+    mut spatial: Option<&mut SpatialExtensions>,
+) -> Result<()> {
     let mut input = bits.clone();
-    let end = input.position() + count * 8;
-    if count * 8 > input.remaining() {
+    let payload_bits = count
+        .checked_mul(8)
+        .ok_or_else(|| invalid("AAC extension size overflow"))?;
+    if payload_bits > input.remaining() {
         return Err(invalid("truncated AAC fill payload"));
     }
-    let mut sbr_started=false;
-    while input.position() < end {
+    let parent_end = input
+        .position()
+        .checked_add(payload_bits)
+        .ok_or_else(|| invalid("AAC extension bound overflow"))?;
+    let mut child_end = None;
+    let mut sbr_started = false;
+    while input.position() < parent_end {
+        if child_end == Some(input.position()) {
+            child_end = None;
+        }
+        let end = child_end.unwrap_or(parent_end);
+        let tag_start = input.clone();
         let read = |input: &mut super::bits::BitReader<'_>, width: u8| -> Result<u32> {
             if usize::from(width) > end - input.position() {
                 return Err(invalid("AAC extension exceeds fill payload"));
             }
             input.read(width)
         };
-        let kind=read(&mut input, 4)?;
-        if er && kind==14 {return Err(invalid("ER AAC SBR CRC is forbidden"));}
-        if er && sbr_started && kind!=13 {return Err(invalid("ER AAC extensions must precede SBR"));}
+        let kind = read(&mut input, 4)?;
+        if er && kind == 14 && spatial.is_none() {
+            return Err(invalid("ER AAC SBR CRC is forbidden"));
+        }
+        if er && sbr_started && kind != 13 && spatial.is_none() {
+            return Err(invalid("ER AAC extensions must precede SBR"));
+        }
         match kind {
             0 => input.skip(end - input.position())?,
             1 => {
@@ -544,9 +609,52 @@ fn read_extension_bytes(
                 }
                 input.skip(length * 8)?;
             }
+            3 if spatial.is_some() => {
+                if child_end.is_some() {
+                    return Err(invalid("nested AAC EXT_DATA_LENGTH is forbidden"));
+                }
+                let mut length = read(&mut input, 4)? as usize;
+                if length == 15 {
+                    let add = read(&mut input, 8)? as usize;
+                    length += add;
+                    if add == 255 {
+                        length += read(&mut input, 16)? as usize;
+                    }
+                }
+                let limit = input
+                    .position()
+                    .checked_add(length * 8)
+                    .ok_or_else(|| invalid("AAC spatial child bound overflow"))?;
+                if length == 0 || limit > end {
+                    return Err(invalid("AAC spatial child exceeds parent extension"));
+                }
+                let mut peek = input.clone();
+                if peek.read(4)? == 3 {
+                    return Err(invalid("nested AAC EXT_DATA_LENGTH is forbidden"));
+                }
+                child_end = Some(limit);
+            }
+            9 | 12 if spatial.is_some() => {
+                let owner = spatial.as_deref_mut().unwrap();
+                let (message, position) = owner.assembler.read_bytes(
+                    tag_start.source_bytes(),
+                    tag_start.position(),
+                    end,
+                )?;
+                if let Some(message) = message {
+                    owner
+                        .messages
+                        .try_reserve(1)
+                        .map_err(|_| invalid("AAC spatial message queue allocation failed"))?;
+                    owner.messages.push(message);
+                }
+                input = tag_start;
+                input.skip(position - input.position())?;
+            }
             11 => read_dynamic_range(|width| read(&mut input, width))?,
+            13 | 14 if spatial.is_some() => input.skip(end - input.position())?,
             kind @ (13 | 14) => {
-                sbr_started=true;
+                sbr_started = true;
                 let start = input.position();
                 sbr(&mut input, end, kind == 14)?;
                 if input.position() <= start || input.position() > end {

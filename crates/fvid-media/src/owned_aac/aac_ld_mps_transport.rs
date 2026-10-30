@@ -178,3 +178,20 @@ impl Assembler {
         Ok(footprint.total())
     }
 }
+
+impl Assembler {
+    /// Buffer/absolute-bit facade for AAC owners with a distinct cursor type.
+    /// No source-buffer copy or implicit alignment; returned position follows the
+    /// parsed envelope. Errors preserve pending ancillary state.
+    pub fn read_bytes(
+        &mut self,
+        bytes: &[u8],
+        start: usize,
+        end: usize,
+    ) -> Result<(Option<Message>, usize)> {
+        let mut bits = BitReader::with_bit_len(bytes, end)?;
+        bits.skip(start)?;
+        let message = self.read(&mut bits, end)?;
+        Ok((message, bits.position()))
+    }
+}

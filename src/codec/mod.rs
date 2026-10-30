@@ -317,3 +317,4 @@ pub mod aac_ld_syntax;
 pub use fvid_media::owned_sl as sl;
 
 pub use fvid_media::owned_aac::aac_ld_mps_config;
+pub use fvid_media::owned_aac::aac_ld_mps_transport;
