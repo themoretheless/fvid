@@ -1,0 +1,20 @@
+{
+  "code_commit": "da2310327b820224e60fcdd555f86074e99f6735",
+  "accepted_count": 434,
+  "remote_verified": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "preserved": "All47 synthetic fixture/oracle/manifest files, before/after/subsystem logs, independent packet/catalog audits and qualified source hashes.",
+  "untouched": "Other worktrees, active AAC/AV1 work and four stashes.",
+  "cleanup": [
+    "/private/tmp/fvid-mp4-local-data-references-before-20261031.log",
+    "/private/tmp/fvid-mp4-local-data-references-after-20261031.log",
+    "/private/tmp/fvid-mp4-local-data-references-integration-20261031.log",
+    "/private/tmp/fvid-mp4-local-data-references-root-mp4-20261031.log",
+    "/private/tmp/fvid-mp4-local-data-references-media-20261031.log",
+    "/private/tmp/fvid-mp4-local-data-references-core-check-20261031.log",
+    "/private/tmp/fvid-mp4-local-data-references-player-check-20261031.log",
+    "/private/tmp/fvid-mp4-local-data-references-20261031"
+  ]
+}
