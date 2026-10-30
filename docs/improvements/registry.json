@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 429,
-  "next_id": "FVID-0430",
+  "accepted_count": 430,
+  "next_id": "FVID-0431",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4817,6 +4817,17 @@
       "result": "Map clipped and repeated cue appearances with exact rational clocks, preserve empty edits/open media and source precedence for coincident PTS, and normalize the leading origin of the same automatically selected video track. Preserve no-edit zero-origin fallback; bound each returned cue list by Limits.samples.30 authored VP9/tx3g videos plus a malformed-edit refusal verify exact metadata/packets/pictures, actual seeks, EOF, fractional endpoints and expansion limits.495 distinct checks pass across84 integration suites and98 unique root units; locked/offline core/player builds pass, two hardware checks ignored. Fixture repairs and an introduced tie-order regression add no IDs; necessary cue-clock migration is documented.",
       "status": "accepted",
       "validation": "batch-429-validation.json"
+    },
+    {
+      "id": "FVID-0430",
+      "batch": 430,
+      "title": "Preserve valid MP4 text tracks with dormant unsupported sample descriptions",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_text_descriptions.rs",
+      "before": "Unreferenced opaque text catalog entries hide correctly selected tx3g samples; catalog-first legacy guard also rejects recognized-primary text setup. Original3 controls pass and2 acceptance tests fail.",
+      "result": "Retain common-header-validated opaque text catalog entries, validate actual references after complete fragment indexing, preserve parallel track header metadata, and compare legacy text samples to their recognized primary setup.43 authored VP9/text videos cover3 handlers, classic/fragmented reference selection and dormant/active/mixed unknown entries; malformed unused data references still refuse exactly. Exact packets/pictures/intervals, actual native seek/captions and EOF pass.1043 distinct checks pass across85 integration suites and deduplicated root/media units; locked/offline core/player builds pass. Two existing hardware checks and one pending RGB compatibility check remain ignored. All variants and internal guard/alignment repairs count once.",
+      "status": "accepted",
+      "validation": "batch-430-validation.json"
     }
   ]
 }

@@ -1,0 +1,91 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0430"
+  ],
+  "count_delta": 1,
+  "accepted_count": 430,
+  "batch": 430,
+  "summary": "Preserve valid MP4 text tracks with dormant unsupported sample descriptions",
+  "before": {
+    "commit": "6a130608095a3cfebc63232572f150aeef122b60",
+    "passed": 3,
+    "failed": 2,
+    "specific_failure": "Unreferenced opaque text catalog entries hide correctly selected tx3g samples; catalog-first legacy guard also rejects recognized-primary text setup."
+  },
+  "checks": {
+    "before": {
+      "suites": 1,
+      "passed": 3,
+      "failed": 2,
+      "ignored": 0
+    },
+    "after": {
+      "suites": 1,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "integration": {
+      "suites": 85,
+      "passed": 402,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-mp4": {
+      "suites": 1,
+      "passed": 57,
+      "failed": 0,
+      "ignored": 1
+    },
+    "root-subtitles": {
+      "suites": 1,
+      "passed": 48,
+      "failed": 0,
+      "ignored": 1
+    },
+    "media": {
+      "suites": 1,
+      "passed": 547,
+      "failed": 0,
+      "ignored": 1
+    },
+    "core-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "core-check": "passed locked/offline/no-default-features",
+  "player-check": "passed locked/offline/no-default-features",
+  "distinct_passed": 1043,
+  "duplicate_checks_excluded": 11,
+  "focused_repeats_not_added": 5,
+  "ignored": {
+    "physical_metal_videotoolbox": 2,
+    "existing_pending_integer_float_rgb_compatibility": 1
+  },
+  "fixtures": {
+    "files": 54,
+    "valid_video_files": 43,
+    "unsupported_text_refusals_with_video_acceptance": 19,
+    "available_text_cases": 24,
+    "malformed_unused_data_reference": 1,
+    "raw_plane_oracles": 3,
+    "packet_snapshots": 6,
+    "repeatability": "identical"
+  },
+  "migration": "Previously skipped valid text tracks now follow real container order; callers relying on skipped indices should use track IDs/kinds. No signature change.",
+  "limits": [
+    "No WebVTT decoder or arbitrary known-text-codec reconfiguration.",
+    "No physical-device rendering or performance claim."
+  ],
+  "evidence": "docs/improvements/evidence/mp4-text-descriptions/README.md"
+}

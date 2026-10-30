@@ -348,7 +348,11 @@ impl Track {
         if self.sample_descriptions.len() <= 1 {
             return Ok(());
         }
-        let first = &self.sample_descriptions[0];
+        // Text metadata already identifies the first recognized setup. An
+        // unused opaque entry before it is not a decoder reconfiguration.
+        // Keep the existing catalog-entry guard for audio/video consumers.
+        let primary = text_handler(&self.handler).then(|| SampleDescription::from_track(self));
+        let first = primary.as_ref().unwrap_or(&self.sample_descriptions[0]);
         if (0..self.samples.len()).any(|i| self.description_for_sample(i) != Some(first)) {
             return Err(unsupported("MP4 sample description changes require decoder reconfiguration"));
         }
@@ -703,6 +707,40 @@ impl<R: Read + Seek> Mp4Reader<R> {
                 &mut tracks,
                 &mut remaining,
             )?;
+        }
+        // Only referenced text descriptions determine whether the stream can
+        // be represented. Fragments can select entries absent from classic
+        // tables, so this check follows the complete fragment index pass.
+        if tracks.iter().any(|track| text_handler(&track.handler)
+            && track.sample_descriptions.iter().any(|d| !supported_text_entry(&track.handler, &d.codec)))
+        {
+            let mut keep = Vec::with_capacity(tracks.len());
+            for track in &tracks {
+                let mut unsupported = None;
+                if text_handler(&track.handler) && track.sample_descriptions.iter()
+                    .any(|d| !supported_text_entry(&track.handler, &d.codec))
+                {
+                    for index in 0..track.samples.len() {
+                        let description = track.description_for_sample(index)
+                            .ok_or_else(|| invalid("MP4 text sample description index is out of range"))?;
+                        if !supported_text_entry(&track.handler, &description.codec) {
+                            unsupported = Some(description.codec);
+                            break;
+                        }
+                    }
+                }
+                if let Some(codec) = unsupported {
+                    refused.push(SkippedTrack { handler: track.handler, codec });
+                    skipped += 1;
+                }
+                keep.push(unsupported.is_none());
+            }
+            let mut index = 0;
+            tracks.retain(|_| { let retain = keep[index]; index += 1; retain });
+            let mut index = 0;
+            track_header_flags.retain(|_| { let retain = keep[index]; index += 1; retain });
+            let mut index = 0;
+            track_header_durations.retain(|_| { let retain = keep[index]; index += 1; retain });
         }
         if tracks.is_empty() {
             // A file whose every track is a format there is no decoder for is
@@ -1466,7 +1504,7 @@ fn parse_track(
         if let Some(parsed) = parse_sample_entry(entry, template.clone(), &mut rejected, drawn, rotation)? {
             descriptions.push(SampleDescription::from_track(&parsed));
             if !supported { result = parsed; supported = true; }
-        } else if handler == *b"vide" || handler == *b"soun" {
+        } else if handler == *b"vide" || handler == *b"soun" || text_handler(&handler) {
             // An unreferenced SampleEntry must not hide the supported entries.
             // Its common header/data reference was validated above; the unknown
             // codec's payload stays opaque and is never supplied to a decoder.
@@ -1537,6 +1575,14 @@ fn parse_track(
         }
     }
     Ok(Some((result, flags, header_duration)))
+}
+
+fn text_handler(handler: &[u8; 4]) -> bool {
+    matches!(handler, b"sbtl" | b"text" | b"subt")
+}
+fn supported_text_entry(handler: &[u8; 4], codec: &[u8; 4]) -> bool {
+    matches!((handler, codec),
+        (b"sbtl" | b"text" | b"subt", b"tx3g") | (b"text", b"text"))
 }
 
 fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<SkippedTrack>, drawn: (u32, u32), rotation: u16) -> Result<Option<Track>> {
@@ -1679,10 +1725,10 @@ fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<Skip
         // MPEG-4 text (`subt`). The sample entry describes how the letters are
         // drawn, none of which this player asks; the samples are the lines
         // themselves, so the entry is the whole description here too.
-        (b"sbtl" | b"text" | b"subt", b"tx3g") => (entry.data.len(), None),
-        // QuickTime chapter text is an opaque data track. Index its packets so
-        // inspection preserves stream order; this does not claim a text decoder.
-        (b"text", b"text") => (entry.data.len(), None),
+        // QuickTime chapter text shares the common-entry handling, while its
+        // own consumers interpret its packets. Keep the supported set in one
+        // predicate with post-fragment text validation.
+        (handler, codec) if supported_text_entry(handler, codec) => (entry.data.len(), None),
         // The entry was read right through and says what it codes; there is only
         // no arm here for that coding, which is a gap of a different kind from a
         // box this reader could not parse.
