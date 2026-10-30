@@ -1,0 +1,82 @@
+{
+  "status": "accepted uncounted follow-up",
+  "parent_ids": [
+    "FVID-0432"
+  ],
+  "accepted_ids": [],
+  "count_delta": 0,
+  "accepted_count": 432,
+  "summary": "Reject nonzero unused compact sample-size padding without rejecting real low-bit size data",
+  "before": {
+    "commit": "e4ca760ec55e6e93aec09bb9f86fc48f27af95a7",
+    "passed": 1,
+    "failed": 1,
+    "specific_failure": "Nonzero low padding nibble of odd4-bit stz2 is accepted; manifest proves one-byte-only differences with unchanged meaningful high nibble and every packet."
+  },
+  "checks": {
+    "before": {
+      "suites": 1,
+      "passed": 1,
+      "failed": 1,
+      "ignored": 0
+    },
+    "after": {
+      "suites": 2,
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    "integration": {
+      "suites": 12,
+      "passed": 70,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-mp4": {
+      "suites": 1,
+      "passed": 57,
+      "failed": 0,
+      "ignored": 1
+    },
+    "media": {
+      "suites": 1,
+      "passed": 547,
+      "failed": 0,
+      "ignored": 1
+    },
+    "core-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "distinct_passed": 671,
+  "shared_include_duplicates_excluded": 3,
+  "focused_repeats_not_added": 8,
+  "ignored": {
+    "physical_metal_videotoolbox": 1,
+    "existing_pending_integer_float_rgb_compatibility": 1
+  },
+  "fixtures": {
+    "valid_videos": 4,
+    "nonzero_padding_refusal_videos": 2,
+    "files": 23,
+    "repeatability": "identical",
+    "all_parent_58_files_unchanged": true
+  },
+  "core-check": "passed locked/offline/no-default-features",
+  "player-check": "passed locked/offline/no-default-features",
+  "reference": "ISO/IEC14496-12:2015 section8.7.3.3; https://b.goeswhere.com/ISO_IEC_14496-12_2015.pdf#page=62",
+  "limits": [
+    "No speed/RSS or physical-device qualification.",
+    "One introduced FVID-0432 format guard gap, zero additional IDs."
+  ],
+  "evidence": "docs/improvements/evidence/mp4-compact-padding/README.md"
+}

@@ -1,0 +1,90 @@
+{
+  "env": {
+    "CARGO_TARGET_DIR": "/private/tmp/fvid-mp4-compact-sizes-20261031",
+    "CARGO_BUILD_JOBS": "2",
+    "CARGO_PROFILE_TEST_DEBUG": "0",
+    "CARGO_PROFILE_DEV_DEBUG": "0"
+  },
+  "commands": {
+    "integration": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "mp4",
+      "--test",
+      "mp4_chunk_bounds",
+      "--test",
+      "mp4_chunk_storage_order",
+      "--test",
+      "mp4_compact_padding",
+      "--test",
+      "mp4_compact_sizes",
+      "--test",
+      "mp4_mace_export",
+      "--test",
+      "mp4_mace_transitions",
+      "--test",
+      "mp4_owned_fragment_parity",
+      "--test",
+      "mp4_subtitle_edits",
+      "--test",
+      "mp4_subtitle_unicode",
+      "--test",
+      "mp4_text_descriptions",
+      "--test",
+      "owned_mp4",
+      "--",
+      "--test-threads=2"
+    ],
+    "root-mp4": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "mp4",
+      "--",
+      "--test-threads=2"
+    ],
+    "media": [
+      "cargo",
+      "test",
+      "-p",
+      "fvid-media",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--lib",
+      "--",
+      "--test-threads=2"
+    ],
+    "core-check": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features"
+    ],
+    "player-check": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player"
+    ]
+  },
+  "logs": "/private/tmp/fvid-mp4-compact-padding-{kind}-20261031.log",
+  "count_delta": 0
+}

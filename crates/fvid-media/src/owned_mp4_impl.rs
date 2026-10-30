@@ -1870,6 +1870,11 @@ fn sample_index(
     if expected != Some(sizes.len()) {
         return Err(invalid("invalid sample-size table"));
     }
+    if compact.is_some() && field_size == 4 && count % 2 == 1
+        && sizes.last().is_some_and(|byte| byte & 15 != 0)
+    {
+        return Err(invalid("nonzero MP4 compact sample-size padding"));
+    }
     let size_at = |index: usize| -> Result<u32> {
         if index >= count {
             return Err(invalid("MP4 sample-size index out of range"));

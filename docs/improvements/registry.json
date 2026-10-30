@@ -4851,7 +4851,9 @@
       "before": "All regular-size control movies retain packets/pictures/seek; valid stz2 fails with missing MP4 stsz box. Full-corpus original reproduced after restoring production in finally. Initial1pass1fail; final1pass5fail on the complete corpus.",
       "result": "Borrow and decode4/8/16-bit stz2 entries after checked exact body lengths; preserve normal stsz and constant-size PCM/MACE chunk indexing, and reject ambiguous tables/reserved fields/invalid widths/counts/zero sizes.20 authored video/text/PCM/MACE movies verify exact packets/pictures, native caption and audio media seeks, PCM suffixes, real fragmented init/edit clocks and EOF;13 damaged companions require exact refusal.58 files regenerate identically.1061 distinct checks pass across95 integration suites and deduplicated root/media units; locked/offline core/player builds pass. One physical-GPU test and one existing RGB compatibility acceptance remain ignored. All variants and introduced prototype/test repairs count once; no performance claim.",
       "status": "accepted",
-      "validation": "batch-432-validation.json"
+      "validation": "batch-432-validation.json",
+      "follow_up_validation": "batch-432-padding-followup-validation.json",
+      "follow_up_note": "Uncounted compact-size padding guard: reject only unused nonzero low nibbles; real even-count low nibbles and8/16-bit data remain valid. All58 parent files unchanged;671 distinct checks plus core/player builds pass. Zero new IDs."
     }
   ]
 }
