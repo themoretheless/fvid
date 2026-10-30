@@ -1,0 +1,13 @@
+error: failed to get `gpu-compute` as a dependency of package `fvid-vt v0.1.0 (/private/tmp/fvid-ci-dependency-check-20261030/fvid/crates/fvid-vt)`
+
+Caused by:
+  failed to load source for dependency `gpu-compute`
+
+Caused by:
+  unable to update /private/tmp/fvid-ci-dependency-check-20261030/forma/crates/gpu-compute
+
+Caused by:
+  failed to read `/private/tmp/fvid-ci-dependency-check-20261030/forma/crates/gpu-compute/Cargo.toml`
+
+Caused by:
+  No such file or directory (os error 2)

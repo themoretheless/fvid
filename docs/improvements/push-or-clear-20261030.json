@@ -1,0 +1,36 @@
+{
+  "status": "preserved-publication-held",
+  "preservation_commit": "669ec6d8be2f2a8cb74407e38d5578edae568fc5",
+  "accepted_count": 415,
+  "count_delta": 0,
+  "remote": "https://github.com/themoretheless/fvid.git",
+  "default_branch": "main",
+  "branch": "codex/deliver-fvid-20261029",
+  "origin_main_relation_after_fetch": {
+    "behind": 0,
+    "ahead": 3
+  },
+  "owned_media_result": {
+    "passed": 540,
+    "failed": 5,
+    "ignored": 1
+  },
+  "failed_tests": [
+    "owned_adts_export::admission_tests::adts_export_admits_large_policy_and_rejects_small_without_publication",
+    "owned_adts_loudness::admission_tests::aac_loudness_and_normalization_keep_owned_budget_policy",
+    "owned_audio_export::control_tests::progress_counts_source_blocks_and_cancel_never_publishes_output",
+    "owned_audio_export::rss_tests::public_wave_export_checks_requested_process_limit_without_legacy_admission",
+    "owned_xfade::tests::atomic_export_preserves_existing_output_and_cleans_failed_decode"
+  ],
+  "baseline_comparison": "Same five failed test names as the 2026-10-29 publication gate; no claim that they are resolved. Focused media regressions were qualified separately through batch-412.",
+  "publication": "No push or main merge performed: push-or-clear requires stopping publication on failed checks. Continue correction/audit work under the active 1000-improvement goal.",
+  "source_whitespace": "Production/source paths pass git diff-tree --check; raw evidence transcripts retain their original trailing blank lines. One inadvertent rustfmt-only change to audio_capture.rs was verified as exactly formatting HEAD and reverted before the checkpoint.",
+  "portability_gate": "Standalone offline Cargo metadata on the unchanged fvid-vt manifest fails to load ../../../forma/crates/gpu-compute when no Forma sibling exists. Existing CI checks out only fvid. Resolve portable/pinned generic GPU dependency delivery before publication. Forma is public; current generic Metal source hashes match its previously retained qualification. No Forma UI/MSL work changed.",
+  "worktree_policy": "Current task work saved. Primary, actively advancing AAC/EP worktree and preserved AV1 worktree remain untouched; no branch/worktree/tag deleted. Missing historical freeze worktree metadata retained, not pruned.",
+  "stashes_preserved": 4,
+  "limitations": [
+    "Whole-project publication qualification is not green.",
+    "No new improvement counted for checkpoint, inventory or publication checks.",
+    "Temporary Cargo targets and manifest probe removed after logs were saved."
+  ]
+}
