@@ -1,0 +1,20 @@
+{
+  "code_commit": "0f00d46f037dfc6ea271aa69c0d530fe19b8bc61",
+  "accepted_count": 433,
+  "remote_verified": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "preserved": "All37 synthetic fixture/oracle/manifest files, original/after/subsystem logs, RLE equivalence/media hashes and qualified source hashes.",
+  "untouched": "Other worktrees and four stashes.",
+  "cleanup": [
+    "/private/tmp/fvid-mp4-terminal-zero-runs-before-20261031.log",
+    "/private/tmp/fvid-mp4-terminal-zero-runs-after-20261031.log",
+    "/private/tmp/fvid-mp4-terminal-zero-runs-integration-20261031.log",
+    "/private/tmp/fvid-mp4-terminal-zero-runs-root-mp4-20261031.log",
+    "/private/tmp/fvid-mp4-terminal-zero-runs-media-20261031.log",
+    "/private/tmp/fvid-mp4-terminal-zero-runs-core-check-20261031.log",
+    "/private/tmp/fvid-mp4-terminal-zero-runs-player-check-20261031.log",
+    "/private/tmp/fvid-mp4-terminal-zero-runs-20261031"
+  ]
+}
