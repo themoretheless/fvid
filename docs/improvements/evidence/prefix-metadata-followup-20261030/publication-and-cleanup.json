@@ -1,0 +1,17 @@
+{
+  "removed_owned_temporary_directories": [
+    "/private/tmp/fvid-aac-edit-phase-20261030",
+    "/private/tmp/fvid-edit-metadata-baseline-target-20261030",
+    "/private/tmp/fvid-edit-metadata-baseline-20261030"
+  ],
+  "regression_fixtures_and_evidence": "preserved",
+  "branches_worktrees_stashes": "preserved",
+  "published_commit": "dbfef2036e616eb56d69d83346a6e47f4731e5ac",
+  "remote": "https://github.com/themoretheless/fvid.git",
+  "verified_remote_refs": {
+    "main": "dbfef2036e616eb56d69d83346a6e47f4731e5ac",
+    "codex/deliver-fvid-20261029": "dbfef2036e616eb56d69d83346a6e47f4731e5ac"
+  },
+  "push": "atomic fast-forward; no forced updates",
+  "accepted_count": 418
+}

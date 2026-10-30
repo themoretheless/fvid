@@ -29,7 +29,7 @@
     "First expanded run:172 passed,3 failed; corrections requalified.",
     "First root unit command used an empty filter:0 tests; not counted."
   ],
-  "publication": "ready; remote ancestry and push pending",
+  "publication": "published with FVID-0418 in dbfef2036e616eb56d69d83346a6e47f4731e5ac; remote main and delivery branch verified",
   "owned_admission_passed": 21,
   "distinct_passed": 210
 }
