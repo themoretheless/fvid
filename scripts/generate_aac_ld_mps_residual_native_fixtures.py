@@ -12,17 +12,17 @@ from generate_aac_main_tools_fixtures import ics,channel,sc,tuple_bits
 from generate_he_aac_packet_fixtures import video_fixture
 ROOT=Path(__file__).resolve().parents[1];FIX=ROOT/'tests/fixtures/playback-errors';OUT=FIX/'aac-ld-mps-residual-native'
 SEQUENCES=[0,0,1,2,2,3,0,1,2,3,0,0]
-def residual_ics(seq,shape,box,frame,silent):
+def residual_ics(seq,shape,box,frame,silent,reserved13=False):
  text=(ROOT/'crates/fvid-media/src/owned_aac/aac_band_tables.rs').read_text();kind='SHORT'if seq==2 else'LONG'
  offsets=[int(v)for v in re.findall(r'\d+',re.search(r'const SWB_OFFSET_48K_'+kind+r':[^=]+=\s*\[(.*?)\];',text,re.S)[1])]
  bands=[1,4,len(offsets)-1][box%3];width=3 if seq==2 else 5;escape=(1<<width)-1
  section='';left=bands
  while left>=escape:section+=field(escape,width);left-=escape
  section+=field(left,width)
- wire=field(116+4*(box%3),8)+ics(seq,bands,False,shape=shape)+field(0 if silent else 1,4)+section
- if not silent:wire+=sc(0)*bands
+ wire=field(116+4*(box%3),8)+ics(seq,bands,False,shape=shape)+field(0 if silent else (13 if reserved13 else 1),4)+section
+ if not silent:wire+=(field(256,9)+sc(0)*(bands-1))if reserved13 else sc(0)*bands
  wire+='000'
- if not silent:
+ if not silent and not reserved13:
   for b in range(bands):
    for window in range(8 if seq==2 else 1):
     for at in range(offsets[b],offsets[b+1],4):wire+=tuple_bits([(at+i+box+frame+window)%3-1 for i in range(4)])
@@ -44,7 +44,7 @@ def payload(c,frame,slots,cutoffs,bad=None):
    differences.append(rows)
   else:differences.append(None)
   seq=SEQUENCES[frame];silent=frame==6
-  bits+=residual_ics(seq,(box+frame)%2,box,frame,silent)
+  bits+=residual_ics(seq,(box+frame)%2,box,frame,silent,reserved13=bad=='reserved13')
  data=packed(bits)if bits else b''
  if bad=='short':data=data[:-1]
  if bad=='fill':
@@ -116,7 +116,7 @@ def main():
     for mode in('plain','delayed','fragmented','stp','ges')+(('repeat','cutoff','mask')if bands==23 else()):cases.append(build(base,c,mode))
  base=next(b for b in bases if b['name']=='n512-c1-base-x2-crc1-bands23-on');c=next(c for c in am if c['tree']==7 and c['variant']==1 and c['bands']==23)
  cases.insert(0,build(base,c,'fill'))
- for kind,message in[('short','truncated or oversized bit field'),('spatial-trailing','trailing bytes after LD-MPS spatial frame'),('icc','residual ICC correction exceeds quantization grid')]:
+ for kind,message in[('reserved13','reserved codebook 13 in MPEG-2 AAC residual'),('short','truncated or oversized bit field'),('spatial-trailing','trailing bytes after LD-MPS spatial frame'),('icc','residual ICC correction exceeds quantization grid')]:
   case=build(base,c,'plain',kind);case['error']=message;errors.append(case)
  case=build(base,c,'delayed','spatial-trailing');case['error']='trailing bytes after LD-MPS spatial frame';errors.append(case)
  # Explicit domain refusals remain distinct from accepted64-bin playback.

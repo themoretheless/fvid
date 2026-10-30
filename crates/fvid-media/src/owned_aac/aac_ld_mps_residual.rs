@@ -53,6 +53,11 @@ pub fn icc_difference(bits: &mut BitReader<'_>) -> Result<u8> {
 }
 fn spectrum(bits: &mut BitReader<'_>, config: &AacConfig) -> Result<Spectrum> {
     let channel = ChannelData::read(bits, config)?;
+    // ISO/IEC 23003-1 §4.3.1.2 uses MPEG-2 AAC LC for residuals.
+    // PNS belongs to MPEG-4 AAC; book13 is reserved in this syntax.
+    if channel.codebooks.iter().flatten().any(|&book| book == 13) {
+        return Err(invalid("reserved codebook 13 in MPEG-2 AAC residual"));
+    }
     let coefficients = channel.apply_tns(config, channel.ordinary_spectrum(config)?)?;
     if channel.gain.is_some() {
         return Err(invalid("gain control is not a residual AAC-LC tool"));

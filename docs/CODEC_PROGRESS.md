@@ -1,3 +1,25 @@
+## MPEG-2 residual syntax boundary — corrected diagnostic,2026-10-31
+
+ISO/IEC23003-1 §4.3.1.2 specifies MPEG-2 AAC LC syntax for residual signals.
+MPEG-4 AAC adds PNS; book13 is reserved in the implemented MPEG-2 residual path.
+Residual parsing now reports that invalid codebook explicitly, instead of
+claiming noise reconstruction is missing. Ordinary MPEG-4 AAC PNS is unchanged.
+This is a syntax-boundary correction, not a newly supported codec/profile.
+
+One own twelve-frame movie introduces book13 in residual frame3. A direct test
+proves the same ICS parses and reconstructs PNS through the existing MPEG-4
+channel tool, but the residual reader rejects it and preserves its cursor.
+The native corruption/retry test also checks unchanged core/SBR/residual/source
+history, checkpoint restore and subsequent PCM. The corpus now has397 acceptance
+movies,5 corrupt movies and2 explicit unqualified-domain refusals. Invalid-book
+rejection is not counted as playback acceptance.
+
+Sources and gate evidence:
+`docs/validation/aac-ld-mps-residual-mpeg2-{generation,tests}-2026-10-31.json`.
+Full gates: 1770 passed,0 failed,27 pre-existing ignored tests
+across media/root units and29 AAC/LD-MPS integration targets.
+Earlier sections retain evidence for their original committed corpus revisions.
+
 ## Native residual AAC playback — qualified64-bin path,2026-10-31
 
 Compressed residual AAC is now wired into the native source-window session.

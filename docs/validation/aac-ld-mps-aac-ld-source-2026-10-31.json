@@ -1,0 +1,49 @@
+{
+  "scope": "Primary-source research for the next valid codec gap: AAC-LD AOT23 plus attached LD-MPS. No implementation or playback acceptance is claimed here.",
+  "sources": [
+    {
+      "url": "https://mpeg.chiariglione.org/sites/default/files/files/standards/docs/w15073.zip",
+      "sha256": "21ce2de5aa11fbdc60411b6ffcfd4f2169d0bd61595f9872f29b2488f7ef79b9",
+      "section": "3.3.2,3.4; Figure4"
+    },
+    {
+      "url": "https://mpeg.chiariglione.org/sites/default/files/files/standards/docs/w15070.zip",
+      "sha256": "09daf0c42b7195522f4a14d73d6e38395c74c3303419ca4d40bb6f2c9731230c"
+    },
+    {
+      "url": "https://cdn.standards.iteh.ai/samples/54838/d8a5c595f1dd498e9f045f1863caba0b/ISO-IEC-14496-3-2009-Amd-2-2010.pdf",
+      "section": "Table1.15 ASC extensionIdentifier0x7cc"
+    }
+  ],
+  "facts": [
+    "AAC-LD uses AOT23; attached LDSpatialSpecificConfig is carried in the ASC.",
+    "The sync extension identifier is0x7cc, followed by ldmpsPresentFlag1. A present configuration has length8;255 adds16 bits.",
+    "AAC-LD spatial payload uses EXT_LDSAC_DATA like AAC-ELD, without SBR.",
+    "AOT44 denotes a separate LD-MPS object, not an alias for the AAC-LD core."
+  ],
+  "code_inspection": [
+    {
+      "path": "crates/fvid-media/src/owned_aac/config_impl.rs",
+      "sha256": "e2ca4597336cd85e99376e011babef60cf4b398ada9b3f555344858552b88454",
+      "finding": "AOT23 tail currently expects only0x2b7 SBR discovery; no0x7cc dispatcher."
+    },
+    {
+      "path": "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs",
+      "sha256": "ad76974f09c2cad41ac6050e3d3f891d1e001eba60eb6a92e42ee4142587c848",
+      "finding": "NativeSpatial admission requires core.object_type39."
+    },
+    {
+      "path": "crates/fvid-media/src/owned_aac/aac_ld_native_impl.rs",
+      "sha256": "64fb624e8b8ba26819c2e10a6383fbf91fb2a791b3817a79654d4448c867a476",
+      "finding": "LD core skips ER extensions and returns core PCM without spatial dispatch or source-timescale argument."
+    }
+  ],
+  "required_acceptance": [
+    "Own short synthetic movie before changing admission",
+    "ASC length bounds and correct output channels/clock",
+    "LD core PCM to owned LD-QMF and existing session",
+    "Independent/compositional PCM control with disclosed boundary",
+    "Playback, seek, rewind, repeated ranges, late-error rollback",
+    "Keep SBR prohibition for AAC-LD and unqualified residual domains explicit"
+  ]
+}

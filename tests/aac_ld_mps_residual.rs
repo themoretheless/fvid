@@ -1,5 +1,4 @@
-//! Residual extension syntax and spectra only. The movie test below is an
-//! explicit native refusal regression, not residual playback acceptance.
+//! Residual syntax/spectra, native PCM acceptance and explicit invalid-book refusal.
 use fvid_media::owned_aac::{
     aac_ld_mps_config::{Config, ExtensionValue},
     aac_ld_mps_residual as residual,
@@ -198,4 +197,59 @@ fn native_residual_movie_accepts_owned_reconstruction_instead_of_refusing() {
     assert_eq!(stats.decoded_frames, 12);
     assert_eq!(pcm.len(), 12288 * 2 * 4);
     assert!(pcm.iter().any(|&v| v != 0));
+}
+
+#[test]
+fn mpeg4_noise_book_is_reserved_in_mpeg2_residual_and_rejection_is_atomic() {
+    use fvid_media::owned_aac::{
+        aac_channel::ChannelData, aac_ld_mps_frame, aac_noise::NoiseState,
+        config::AudioSpecificConfig,
+    };
+    let native = root().parent().unwrap().join("aac-ld-mps-residual-native");
+    let m: Value =
+        serde_json::from_slice(&std::fs::read(native.join("manifest.json")).unwrap()).unwrap();
+    let c = m["errors"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|c| c["name"].as_str().unwrap().ends_with("-bad-reserved13"))
+        .unwrap();
+    let unhex = |s: &str| {
+        s.as_bytes()
+            .chunks_exact(2)
+            .map(|b| u8::from_str_radix(std::str::from_utf8(b).unwrap(), 16).unwrap())
+            .collect::<Vec<_>>()
+    };
+    let cfg = Config::parse(&unhex(c["ssc"].as_str().unwrap())).unwrap();
+    let spatial = unhex(c["reference"][3]["spatial"].as_str().unwrap());
+    let raw = aac_ld_mps_frame::Decoder::new(&cfg)
+        .unwrap()
+        .decode(&mut BitReader::new(&spatial))
+        .unwrap();
+    let payload = &raw.extensions[0].payload;
+    let mut witness = BitReader::new(payload);
+    for _ in &raw.slots {
+        if witness.bit().unwrap() {
+            residual::icc_difference(&mut witness).unwrap();
+        }
+    }
+    let mut core = AudioSpecificConfig::parse(&unhex(c["asc"].as_str().unwrap()))
+        .unwrap()
+        .core;
+    core.object_type = 2;
+    core.sample_rate = 48000;
+    core.frame_samples = 1024;
+    let channel = ChannelData::read(&mut witness, &core).unwrap();
+    assert_eq!(channel.codebooks, vec![vec![13]]);
+    // This is a valid MPEG-4 AAC PNS channel, not a missing PNS implementation.
+    let spectrum = channel
+        .spectrum_with_noise(&core, &mut NoiseState::default())
+        .unwrap();
+    assert!(spectrum.iter().any(|&v| v != 0.));
+    let mut reader = BitReader::new(payload);
+    let error = residual::read(&mut reader, &cfg, &cfg.extensions[0].value, raw.slots.len())
+        .unwrap_err()
+        .to_string();
+    assert_eq!(error, "reserved codebook 13 in MPEG-2 AAC residual");
+    assert_eq!(reader.position(), 0);
 }
