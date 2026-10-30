@@ -1217,7 +1217,7 @@ mod mp4_edit_scheduler_tests {
         }
         assert!(worker.ended);
         let rendered=packets.lock().unwrap();let mut cursor=0;
-        for packet in rendered.iter() {assert_eq!(packet.pts,cursor);cursor+=(packet.data.len()/8) as u64;}
+        for packet in rendered.iter() {assert!(packet.timebase_num>0 && packet.timebase_den>0);assert_eq!(i128::from(packet.pts)*i128::from(packet.timebase_num)*48000,i128::from(cursor)*i128::from(packet.timebase_den));cursor+=(packet.data.len()/8) as u64;}
         assert_eq!(cursor,10560);
         let actual:Vec<_>=rendered.iter().flat_map(|p|p.data.iter().copied()).collect();
         let mut expected=Vec::new();crate::native_media::decode_mp4_aac_pcm(data,&mut expected).unwrap();
@@ -1233,7 +1233,13 @@ mod mp4_edit_scheduler_tests {
             }
             assert!(worker.ended);
             let rendered=packets.lock().unwrap();
-            if request<10560 {assert_eq!(rendered[0].pts,request as u64);}
+            let mut cursor=request as u64;
+            for packet in rendered.iter() {
+                assert!(packet.timebase_num>0 && packet.timebase_den>0);
+                assert_eq!(i128::from(packet.pts)*i128::from(packet.timebase_num)*48000,i128::from(cursor)*i128::from(packet.timebase_den));
+                cursor+=(packet.data.len()/8) as u64;
+            }
+            assert_eq!(cursor,10560);
             let tail:Vec<_>=rendered.iter().flat_map(|p|p.data.iter().copied()).collect();
             assert!(tail==expected[request*8..],"PCM after seek to sample {request} differs from continuous playback");
         }
@@ -1441,7 +1447,7 @@ mod ps_edit_worker_tests {
             let decoder=stream.make_decoder().unwrap();
             let captured=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let (events,_)=sync_channel(1);
             let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
-            let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(p.pts,cursor);assert_eq!(p.timebase_den,48000);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,9600);assert!(bytes==expected[from*8..],"core/output clock changes altered PCM");};
+            let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert!(p.timebase_num>0 && p.timebase_den>0);assert_eq!(i128::from(p.pts)*i128::from(p.timebase_num)*48000,i128::from(cursor)*i128::from(p.timebase_den));cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,9600);assert!(bytes==expected[from*8..],"core/output clock changes altered PCM");};
             run(&mut worker);check(0);
             for sample in [4000,6000,9000,0] {captured.lock().unwrap().clear();worker.drain_commands(Some(Command::Seek(sample/2)));run(&mut worker);check(sample as usize);}
             captured.lock().unwrap().clear();worker.drain_commands(Some(Command::Rewind));run(&mut worker);check(0);

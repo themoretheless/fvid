@@ -1,0 +1,13 @@
+{
+  "status": "published",
+  "accepted_count": 420,
+  "count_delta": 0,
+  "commit": "ec61d3669b133265e135ffd501696066f908d11e",
+  "remote_refs_verified": [
+    "main",
+    "codex/deliver-fvid-20261029"
+  ],
+  "temporary_raw_logs_removed": 7,
+  "regression_fixtures_and_evidence": "retained",
+  "build_target": "In active use by the subsequent wide-decode-clock audit; remove after terminal qualification."
+}

@@ -1,0 +1,16 @@
+{
+  "commit": "ec61d3669b133265e135ffd501696066f908d11e",
+  "sha256": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": "08ee223875d30c197d57cffc7bba5513d89a00630b866325f5df452fe2671bfc",
+    "tests/mp4_wide_decode_clock.rs": "2ce0f203941fa06c6e7d6dd9d737e0b1ef276c24ba40e2395e436826b10b2550",
+    "scripts/generate_mp4_wide_decode_clock.py": "35527d74707df7b91e44d9c484de624e9e05dbd0819d69e4eb2ff79a358f6cd2",
+    "tests/fixtures/playback-errors/mp4-wide-decode-clock/manifest.json": "5da0c38264e3a858f7c1611b6c417b2ca4d588d5ce93f3c622cf95eb03a66eab"
+  },
+  "final_baseline_test_sha256": "7aae8168f254b0d303fd79cf75baa7b7d60c79910f13f43a98526fe9a8e78009",
+  "before_results": {
+    "control_passed": 1,
+    "acceptance_failed": 2,
+    "log": "fvid-wide-decode-clock-full-before-20261030.log",
+    "note": "Final test formatted after the baseline run without semantic changes."
+  }
+}

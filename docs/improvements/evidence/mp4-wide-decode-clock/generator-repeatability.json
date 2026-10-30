@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "files": 7,
+  "sha256": {
+    "frame.packet": "d586e4311a14b4eeebf2c61fadc917a6dc99aeccb87ceffb1e5166c318e67346",
+    "signed-boundary.mp4": "4b7085c51c2ee2762ed4c557f391a4bc2872e0a78c2ac10868ae09ee240c0d5b",
+    "frame.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "true-overflow.mp4": "45c9cee08ecd6ad3746f28ea2269c296063863d49799a3b655a4d409efc04731",
+    "control.mp4": "c91768f86a6d0471e5a2e9004efe0d30432f906ffaff86192fa23b712de929ac",
+    "manifest.json": "ca8cfeac0c6d5ccd9797ba5cc0857ee23161a14a7565a4591b911fb00d62bb6c",
+    "negative-offset.mp4": "c70e9164b22ab4bcefbf67685c6145467a2b361159377a703d99f3292a89e2ef"
+  },
+  "provenance_correction": "Description says colored instead of neutral; all video, packet and picture payload bytes unchanged. Primary regression rerun after correction."
+}

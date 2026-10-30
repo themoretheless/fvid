@@ -1,0 +1,55 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0421"
+  ],
+  "count_delta": 1,
+  "accepted_count": 421,
+  "batch": 421,
+  "summary": "Compose unsigned MP4 decode timestamps and signed composition offsets before narrowing PTS",
+  "before": {
+    "commit": "ec61d3669b133265e135ffd501696066f908d11e",
+    "primary_passed": 1,
+    "primary_failed": 2,
+    "root_baseline_passed": 52,
+    "root_baseline_failed": 4,
+    "root_baseline_failures": "Same four test failures on original and fixed parser; corrected without changing production behavior or removing invalid-data refusals."
+  },
+  "checks": {
+    "integration": {
+      "passed": 305,
+      "ignored": 0,
+      "suites": 58
+    },
+    "root-units": {
+      "passed": 56,
+      "ignored": 1,
+      "suites": 1
+    },
+    "owned-units": {
+      "passed": 547,
+      "ignored": 1,
+      "suites": 1
+    },
+    "core-check": "passed locked/offline/no-default-features",
+    "player-check": "passed locked/offline/no-default-features"
+  },
+  "distinct_passed": 908,
+  "ignored": 2,
+  "fixtures": {
+    "valid_videos": 3,
+    "actual_overflow_refusal_videos": 1,
+    "files_including_manifest_packet_and_picture_oracle": 7,
+    "offline_repeatability": "passed"
+  },
+  "uncounted": [
+    "Exact rational-clock and supported implicit-base unit-test corrections",
+    "Fixture variants and separate acceptance/refusal paths",
+    "FVID-0420 tail follow-up publication receipt"
+  ],
+  "limits": [
+    "Finite scoped validation, not whole-project or hardware qualification",
+    "No performance claim"
+  ],
+  "evidence": "docs/improvements/evidence/mp4-wide-decode-clock/status.json"
+}

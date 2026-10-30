@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 420,
-  "next_id": "FVID-0421",
+  "accepted_count": 421,
+  "next_id": "FVID-0422",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4710,6 +4710,17 @@
       "validation": "batch-420-validation.json",
       "follow_up_validation": "batch-420-gap-tail-followup-validation.json",
       "follow_up_note": "Uncounted coarse-clock declared-tail interaction: recovered source endpoint preserves the first silence sample. Two additional synthetic PCM/ALAC videos cover exact PCM, duration, seek suffix/PTS, EOF and actual workers;270 new scoped checks and core/player builds pass."
+    },
+    {
+      "id": "FVID-0421",
+      "batch": 421,
+      "title": "Accept representable MP4 composition times from unsigned wide decode timestamps",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_wide_decode_clock.rs",
+      "before": "Both parser ownership paths narrow unsigned tfdt DTS to i64 before applying signed trun composition offsets. Authored DTS2^63 with offsets-1 and-i32::MAX-1 are refused even though their PTS values fit i64. Original production:1 refusal control passes,2 acceptance tests fail.",
+      "result": "Compose DTS and offset in i128, then validate the resulting signed PTS; retain sample-span and decode-end overflow checks. Three valid authored colored VP9 videos preserve exact index/packet/picture data, seek and EOF; a separate real-overflow video remains refused.908 distinct tests pass across58 integration suites,56 root MP4 units and547 media-library units, with locked/offline core/player builds and two explicit hardware ignores. Four original unit-test failures are separately reproduced and corrected with exact rational timestamp assertions and full implicit-base index/payload parity; no extra IDs counted.",
+      "status": "accepted",
+      "validation": "batch-421-validation.json"
     }
   ]
 }

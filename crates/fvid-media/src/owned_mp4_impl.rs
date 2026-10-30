@@ -2568,10 +2568,10 @@ fn index_fragments(
                     if containing == 0 || end > mdats[containing - 1].end {
                         return Err(invalid("sample chunk outside mdat"));
                     }
-                    let pts = i64::try_from(dts)
-                        .map_err(|_| invalid("MP4 timestamp overflow"))?
-                        .checked_add(shift)
-                        .ok_or_else(|| invalid("MP4 PTS overflow"))?;
+                    // tfdt is unsigned, while V1 composition offsets are signed.
+                    // Check the composed value rather than narrowing DTS first.
+                    let pts = i64::try_from(i128::from(dts) + i128::from(shift))
+                        .map_err(|_| invalid("MP4 PTS overflow"))?;
                     list.push(Sample {
                         description_index: description,
                         offset,

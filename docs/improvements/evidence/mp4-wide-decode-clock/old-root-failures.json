@@ -1,0 +1,14 @@
+{
+  "original_commit": "ec61d3669b133265e135ffd501696066f908d11e",
+  "same_original_and_fixed_failures": [
+    "audio_thread::mp4_edit_scheduler_tests::gap_and_repeat_playback_matches_owned_pcm_export",
+    "audio_thread::mp4_edit_scheduler_tests::nonzero_media_range_repeats_restore_aac_overlap_before_seek",
+    "audio_thread::ps_edit_worker_tests::core_clock_ps_mp4_uses_asc_output_rate_for_pcm_edits_seek_and_rewind",
+    "container::mp4::tests::a_fragment_saying_something_no_reader_can_honour_is_refused"
+  ],
+  "method": "Sequentially restore only original owned_mp4_impl.rs, run MP4 units in the same workspace and target, then restore exact fixed bytes in finally. Root test fixes were applied only afterward.",
+  "uncounted_corrections": [
+    "Exact rational timestamp equality, retaining positive timebase checks and exact PCM/frame counts; every seek packet is now checked",
+    "Supported implicit fragment base compares complete sample indices and payloads; existing reserved flags, truncated run, invalid media span and init-only refusals remain"
+  ]
+}

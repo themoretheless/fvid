@@ -711,9 +711,9 @@ mod tests {
     }
 
     #[test]
-    fn a_fragment_saying_something_no_reader_can_honour_is_refused() {
+    fn fragment_validation_preserves_refusals_and_resolves_an_implicit_base() {
         // Flags this reader has no rule for, a run whose rows do not fill it, a
-        // sample reaching past the media, and a base nothing measures from: each
+        // sample reaching past the media: each
         // is said in the bytes of the take above, and each has to stop the file
         // rather than index a wrong sample list a player would play quietly.
         let error = demux(&rewriting(FRAG_AUDIO, &[(AUDIO_TFHD_FLAGS, 0x0002_0078)]))
@@ -734,12 +734,24 @@ mod tests {
         .err()
         .expect("no sample is 268 MB of a 20 KB take");
         assert!(error.to_string().contains("outside mdat"), "{error}");
-        // `default-base-is-moof` is what lets a fragment say nothing; take it away
-        // with no absolute offset left and the bytes have no measured start.
-        let error = demux(&rewriting(FRAG_AUDIO, &[(AUDIO_TFHD_FLAGS, 0x0000_0038)]))
-            .err()
-            .expect("an offset is needed from somewhere");
-        assert!(error.to_string().contains("neither a base"), "{error}");
+        // The first fragment has a defined implicit moof base even without
+        // default-base-is-moof. Its complete index and payload must match.
+        let implicit = rewriting(FRAG_AUDIO, &[(AUDIO_TFHD_FLAGS, 0x0000_0038)]);
+        let mut actual = demux(&implicit).expect("the first fragment has an implicit base");
+        let mut expected = demux(FRAG_AUDIO).unwrap();
+        assert_eq!(actual.tracks().len(), expected.tracks().len());
+        for track in 0..actual.tracks().len() {
+            assert_eq!(actual.tracks()[track].duration, expected.tracks()[track].duration);
+            assert_eq!(actual.tracks()[track].timescale, expected.tracks()[track].timescale);
+            assert_eq!(actual.tracks()[track].samples.len(), expected.tracks()[track].samples.len());
+            for sample in 0..actual.tracks()[track].samples.len() {
+                assert_eq!(entry(&actual.tracks()[track].samples.get(sample).unwrap()), entry(&expected.tracks()[track].samples.get(sample).unwrap()));
+                let (mut a,mut b)=(Vec::new(),Vec::new());
+                actual.read_packet(track,sample,&mut a).unwrap();
+                expected.read_packet(track,sample,&mut b).unwrap();
+                assert_eq!(a,b);
+            }
+        }
         // An init segment on its own names no media at all: `mvex` says the file
         // indexes by fragment and no fragment was ever written, which is what a
         // stream that stopped before it began leaves behind.
