@@ -315,3 +315,5 @@ pub use fvid_media::owned_aac::{aac_ep,aac_ep1,aac_eld_sbr,aac_eld_synthesis,aac
 pub mod aac_ld_syntax;
 
 pub use fvid_media::owned_sl as sl;
+
+pub use fvid_media::owned_aac::aac_ld_mps_config;

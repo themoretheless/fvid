@@ -307,6 +307,7 @@ impl NativeAacDecoder {
         Self::from_parsed_downscaled(parsed,1)
     }
     fn from_parsed_downscaled(parsed:AudioSpecificConfig,output_downscale_factor:u8)->Result<Self> {
+        if parsed.ld_mps.is_some() {return Err(unsupported("AAC LD-MPS spatial reconstruction is not yet implemented"));}
         if parsed.ps_present == Some(true) {
             return Err(unsupported("AAC parametric stereo synthesis is not yet implemented"));
         }

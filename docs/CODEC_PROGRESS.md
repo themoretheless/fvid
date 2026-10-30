@@ -1,3 +1,56 @@
+## LD-MPS configuration metadata and bounded ELD integration, 2026-10-30
+
+`LDSpatialSpecificConfig` now has an owned typed parser. It covers all eight
+standard tree descriptions, seven parameter resolutions, indexed/explicit
+frequencies, frame-slot counts, quantization, gains, one-ICC and matrix flags,
+temporal/decorrelation modes, single/dual TTT regions, symmetric/asymmetric HRTF
+levels/phases and length-delimited residual, downmix-residual, arbitrary-tree
+and unknown extension records. Optional fields retain presence independently
+of explicit zero. Unknown payload bytes are retained for later consumers.
+
+Every child parser is limited to its declared payload; parsing commits the
+caller cursor only on complete success. Malformed frequency/tree/tool values,
+invalid band counts, zero-length residual children, unfinished arbitrary trees,
+oversized declared extents and every bit truncation of a complex outer extent preserve the
+caller position. Standalone metadata is tested at all eight bit offsets.
+
+ELD extension type 2 now populates `AudioSpecificConfig.ld_mps` in both root and
+media APIs. The baseline `54afcc2531` rejects an own tree-7 ASC with
+`AAC ELD extension tool is not yet implemented`; the new ASC parser accepts
+its spatial metadata. Native reconstruction still explicitly refuses with
+`AAC LD-MPS spatial reconstruction is not yet implemented`. Core-only parsing
+also refuses spatial configurations. This prevents interpreting a downmix as
+finished spatial output while the renderer is under construction.
+
+The own corpus has 336 configurations and eight short nonzero AAC-ELD MP4
+configuration controls, 361 files / 966634 bytes. All 336 expected metadata
+records match the unchanged [official ISO reference insert](https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip),
+including HRTF and known extension fields. The
+[reference report](validation/aac-ld-mps-config-reference-2026-10-30.json)
+freezes archive, reference members, driver and individual payload hashes.
+The insert's nested AAC `flex_mux.c` also confirms that an ELD configuration
+payload is extracted as its own byte array; its internal byte alignment is
+relative to that payload origin. Reference code is used only by an explicit
+research validator, never by ordinary tests or the FVid runtime.
+
+The movies deliberately contain core payload only, without spatial parameter
+frames. They prove ASC metadata acceptance and specific renderer refusal before
+PCM output; they are not complete spatial programmes, playback acceptance,
+seek/rewind qualification or closed codec gaps. Those require encoded spatial
+frames, parameter reconstruction, decorrelation/upmix and actual LD-QMF routing.
+ELD extension type 1 (SAOC), AAC-LD sync-extension/AOT-44 transport integration,
+and other broader codec requirements remain open.
+
+Four new integration checks pass. The saved generator regenerates all files
+byte-exact with process creation and sockets denied; ordinary tests require no
+FFmpeg, network, reference archive or C compiler. The complete root/media unit
+suites pass 1061/572 checks (26/1 existing ignored), and 43 integration checks
+pass, including the new four. Offline all-test compilation passes; both root
+and media metadata/MP4 paths are covered. The
+[test report](validation/aac-ld-mps-config-tests-2026-10-30.json) separates
+configuration acceptance from renderer refusal and records zero accepted
+spatial programmes and zero closed codec gaps for this foundation stage.
+
 ## LD-MPS filterbank foundation, 2026-10-30
 
 The spatial extensions remain open. This step implements the owned 32/64-band
