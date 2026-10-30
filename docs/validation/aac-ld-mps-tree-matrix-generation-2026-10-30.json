@@ -1,0 +1,8 @@
+{
+  "scope": "Explicit frozen reference generation only, separate from ordinary tests.",
+  "byte_exact_regeneration": true,
+  "sha256": {
+    "tests/fixtures/playback-errors/aac-ld-mps-tree-matrix/expected.bin": "b37c6c52322e40fc302706cb79a9349f3b5a7b5fce237edc6c42e788870c3149",
+    "tests/fixtures/playback-errors/aac-ld-mps-tree-matrix/manifest.json": "b3fa654d323c09dd2feacd6ad8dc45416e9ec5e74bb065c5eee0278517a7fc83"
+  }
+}

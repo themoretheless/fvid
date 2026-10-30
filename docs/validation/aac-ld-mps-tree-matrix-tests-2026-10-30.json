@@ -1,0 +1,53 @@
+{
+  "base_commit": "4fece1bc20",
+  "scope": "OTT-only tree matrix component qualification. Native spatial playback refusal remains; zero new accepted spatial programmes.",
+  "trees": [
+    0,
+    1,
+    5,
+    6,
+    7
+  ],
+  "cases": 1184,
+  "saved_reference_scalars": 89408,
+  "separately_identified_original_212_dry_auxiliary_fields": 64,
+  "max_abs_error_other_fields": 1.4744651988252144e-07,
+  "reference_discrepancy": "Original 212 writes decor H12/H22 into its residual plane. Raw output preserved. Owned signed-unit residual injection independently checked against covariance and analytic [X/2+R,X/2-R].",
+  "results": [
+    {
+      "log": "/tmp/fvid-ld-mps-tree-all-tests.log",
+      "sha256": "444dd3d49be579647e0f7f6b7d52c00ebd69b5962534b1c6b3457b51cbefde58",
+      "passed": 34,
+      "ignored": 0
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-tree-media-tests.log",
+      "sha256": "e8876dbef910a4e9f9da03c13e8dc4d24bb23e6aeea6f34c4a74f07d1ac91581",
+      "passed": 575,
+      "ignored": 1
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-tree-final-tests.log",
+      "sha256": "4a1a2e9ddbd44d9a964951e837bfc78b39e06a294c4c5257a3c0bebac04a93e4",
+      "passed": 4,
+      "ignored": 0
+    }
+  ],
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_tree_matrix.rs": "3fdd29ab547198e0dbe7bcf6c193bc22fb616e5b37be0f727b5fd8a6f3c5b133",
+    "tests/aac_ld_mps_tree_matrix.rs": "f69e9ed821b857b355d7aab2d55c4f21675f273fc621fc31c490c98416e2b766",
+    "scripts/support/aac_ld_mps_tree_matrix_reference_probe.c": "b8fbe48dafeaeb58489ea62ecfe7d6ce298c4c560bcfaed696d896fd357dc42d",
+    "scripts/generate_aac_ld_mps_tree_matrix_fixtures.py": "fda37944a48164dc62749ebf147b6628177ea96a42808e062d6da2527b384dba"
+  },
+  "ordinary_tests": "Saved fixtures; no FFmpeg, network, regeneration, external reference software or C compiler.",
+  "remaining": [
+    "TTT trees 2/3/4",
+    "LFE residual routing",
+    "arbitrary downmix and HRTF composition",
+    "W signal routing",
+    "residual AAC decoding",
+    "STP/GES processing",
+    "LD-SBR/PCM integration",
+    "synthetic spatial movie playback/seek/rewind"
+  ]
+}

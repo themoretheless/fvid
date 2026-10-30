@@ -1,3 +1,47 @@
+## Owned OTT-only LD-MPS tree matrices, 2026-10-30
+
+The matrix builder now composes the five OTT-only trees 0/1/5/6/7 from a
+symbolic signal graph. Each split propagates direct, decorrelated and residual
+basis vectors separately; CLD-only energy paths feed M1 and the direct LFE
+branch. Tree topology supplies auxiliary-column order and native output order.
+The builder returns M1 and both M2 planes; it does not decode residual audio or
+apply fixed output gains. Above the LFE cutoff, center uses unity and LFE is
+silent. Trees 2/3/4 require a TTT builder and are explicitly refused. LFE
+residual routing is also explicitly unqualified rather than silently ignored.
+
+1184 synthetic cases cover all non-LFE residual masks, both LFE regions and
+varied CLD/ICC including extremes. Original unmodified ISO tree routines
+produce 89408 saved scalar coefficients. Excluding the 64 identified 212
+residual-plane fields below, the owned graph differs by at most 1.47447e-7.
+Ordinary tests read saved data without FFmpeg, generation, network, external
+reference software or a C compiler. The frozen archive/source/driver hashes
+and raw output hash are retained in the
+[reference report](validation/aac-ld-mps-tree-matrix-reference-2026-10-30.json).
+Explicit regeneration is byte-identical; see its
+[audit](validation/aac-ld-mps-tree-matrix-generation-2026-10-30.json).
+
+The original 212 routine writes H12/H22 into M2resid rather than the separately
+computed H12_res/H22_res. All 64 raw fields remain unchanged in the saved
+reference data. Nonresidual dry auxiliary signals are zero, so the dormant
+nonzero coefficients do not affect routed output. In residual bands its zero
+column would discard the residual. The owned builder uses signed-unit residual
+injection from the independently qualified OTT covariance kernel. A separate
+analytic equal-power/zero-coherence case requires [X/2+R, X/2-R], demonstrating
+the intended basis independently of the reference write. This is a reference
+component discrepancy; it is not claimed as a fixed player media failure.
+
+Validation passed: all 34 LD-MPS integration tests and 575 media unit tests
+(one existing ignored). A final focused run passed all four tree tests; see the
+[test report](validation/aac-ld-mps-tree-matrix-tests-2026-10-30.json).
+
+Additional checks verify dimensions, direct input identity, absent dry/wet
+basis columns outside/inside residual regions, LFE silence above cutoff,
+passthrough center/LFE for the six-input trees, and invalid input refusal.
+All are component qualification. Full spatial W routing, TTT, arbitrary-downmix
+and HRTF composition, residual AAC, STP/GES, LD-SBR/PCM integration and actual
+synthetic movie playback/seek/rewind are still open. The native spatial refusal
+remains enabled and no accepted spatial programmes are counted by these tests.
+
 ## Owned LD-MPS complex QMF matrix application, 2026-10-30
 
 The interpolated matrix planes now have an owned QMF application kernel.

@@ -153,6 +153,7 @@ mod aac_ld_mps_frame_facts;
 pub mod aac_ld_mps_prepare;
 pub mod aac_ld_mps_matrix_time;
 pub mod aac_ld_mps_matrix_apply;
+pub mod aac_ld_mps_tree_matrix;
 pub mod aac_ld_mps_ott;
 pub mod aac_ld_mps_decor;
 mod aac_ld_mps_decor_facts;
