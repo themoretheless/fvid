@@ -1,3 +1,34 @@
+## Owned LD-MPS complex QMF matrix application, 2026-10-30
+
+The interpolated matrix planes now have an owned QMF application kernel.
+It selects separate real/imaginary planes from the common seven-plane layout,
+expands parameter bands with the native QMF map and performs complex channel
+mixing into a separate output buffer. Real-only matrices support M0 and ordinary
+M2 arithmetic; paired planes support M1 and complex M2 arithmetic. This is the
+application primitive, not a tree matrix builder or a complete spatial pipeline.
+
+An independent integer complex-product oracle covers 63 cases: seven parameter
+resolutions, 32/64/128 bins, and 1x1, 3x2 and 8x13 matrix shapes. Stimuli are
+dyadic rationals and all 75264 scalar outputs agree exactly. The largest layout
+selects planes five/six, exercising nonadjacent-to-zero plane offsets. Whole
+frames and individually applied slots agree. A noncommuting M1/M2 composition
+with a complex rotation verifies stage order, imaginary signs and connection
+to matrix interpolation/reset. Invalid geometry, later nonfinite coefficients
+(including unused planes), invalid samples and overflow are refused. Inputs
+and coefficient frames are borrowed, so errors cannot modify their histories.
+
+All 30 LD-MPS integration tests and 575 media unit tests passed (one existing
+unit test remains ignored); see the [test report](validation/aac-ld-mps-matrix-apply-tests-2026-10-30.json).
+
+Fixture regeneration is byte-exact with process and socket creation denied;
+ordinary tests load saved expectations without regeneration, FFmpeg or network.
+See the [generation audit](validation/aac-ld-mps-matrix-apply-generation-2026-10-30.json).
+128-bin matrix arithmetic does not qualify 128-bin analysis/synthesis or the
+still-refused decorrelator. Tree-specific M0/M1/M2 construction, decorrelation
+and residual routing, STP/GES, LD-SBR integration and actual spatial movie
+playback/seek remain open. The native spatial renderer refusal stays enabled;
+this stage closes zero spatial programme acceptance gaps.
+
 ## Owned LD-MPS OTT mixing and QMF decorrelation, 2026-10-30
 
 The owned OTT kernel constructs output rows [direct, decorrelated, residual]

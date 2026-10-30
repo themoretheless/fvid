@@ -1,0 +1,46 @@
+{
+  "base_commit": "74fb392142",
+  "scope": "Complex matrix application component. Zero new accepted spatial programmes; no actual player playback or seek acceptance.",
+  "results": [
+    {
+      "log": "/tmp/fvid-ld-mps-matrix-all-tests.log",
+      "sha256": "40dfec17b05a7f6c2fd05fa1f377175c3762861e8985944a48de12cf0c21b703",
+      "passed": 30,
+      "ignored": 0
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-matrix-media-tests.log",
+      "sha256": "dba9cb7ce7bbd18570af1bbc704a800434d1c4f7aa1e4c45608eb36c34f81861",
+      "passed": 575,
+      "ignored": 1
+    }
+  ],
+  "new_tests": 3,
+  "oracle_cases": 63,
+  "exact_scalar_outputs": 75264,
+  "coverage": [
+    "seven native parameter-band resolutions",
+    "32/64/128-bin arithmetic",
+    "1x1, 3x2, 8x13 shapes",
+    "plane offsets 5/6",
+    "whole-frame versus individual slots",
+    "interpolated noncommuting M1/M2 complex rotation",
+    "matrix interpolation reset",
+    "geometry/nonfinite/overflow refusal"
+  ],
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_matrix_apply.rs": "1cad545dd97302f984afbeaaf198e35b91e7168078d17bc94a2c7d5771dc8ce9",
+    "tests/aac_ld_mps_matrix_apply.rs": "1d8294364878a3519be484eb71eea7daa1c98bb18bfe9c48a7916f82fe96cdde",
+    "scripts/generate_aac_ld_mps_matrix_apply_fixtures.py": "6084237523f2334c4d137d329c7c5d4820c68e4e59cb5e076f9523d610e85093"
+  },
+  "ordinary_tests": "No FFmpeg, network, regeneration or external reference compilation.",
+  "still_open": [
+    "tree matrix construction",
+    "decorrelator and residual routing",
+    "residual AAC decoding",
+    "STP/GES processing",
+    "128-bin analysis/synthesis and decorrelation",
+    "LD-SBR/PCM integration",
+    "spatial movie playback/seek/rewind"
+  ]
+}
