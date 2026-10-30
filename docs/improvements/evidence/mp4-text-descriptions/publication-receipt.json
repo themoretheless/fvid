@@ -1,0 +1,21 @@
+{
+  "code_commit": "85a303287a809db4e1cd984249577863b897052f",
+  "remote_verified": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "accepted_count": 430,
+  "preserved": "All synthetic fixtures, before/after logs, intermediate legacy-guard proof and source/fixture hashes.",
+  "untouched": "Other worktrees and four stashes.",
+  "cleanup": [
+    "/private/tmp/fvid-mp4-text-descriptions-before-20261031.log",
+    "/private/tmp/fvid-mp4-text-descriptions-after-20261031.log",
+    "/private/tmp/fvid-mp4-text-descriptions-integration-20261031.log",
+    "/private/tmp/fvid-mp4-text-descriptions-root-mp4-20261031.log",
+    "/private/tmp/fvid-mp4-text-descriptions-root-subtitles-20261031.log",
+    "/private/tmp/fvid-mp4-text-descriptions-media-20261031.log",
+    "/private/tmp/fvid-mp4-text-descriptions-core-check-20261031.log",
+    "/private/tmp/fvid-mp4-text-descriptions-player-check-20261031.log",
+    "/private/tmp/fvid-mp4-text-descriptions-20261031"
+  ]
+}
