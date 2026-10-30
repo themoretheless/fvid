@@ -1908,6 +1908,7 @@ dependencies = [
 [[package]]
 name = "gpu-compute"
 version = "0.1.0"
+source = "git+https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9"
 dependencies = [
  "gpu-runtime",
  "gpu-shader",
@@ -1919,6 +1920,7 @@ dependencies = [
 [[package]]
 name = "gpu-runtime"
 version = "0.1.0"
+source = "git+https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9"
 dependencies = [
  "gpu-shader",
 ]
@@ -1926,6 +1928,7 @@ dependencies = [
 [[package]]
 name = "gpu-shader"
 version = "0.1.0"
+source = "git+https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9"
 
 [[package]]
 name = "guillotiere"

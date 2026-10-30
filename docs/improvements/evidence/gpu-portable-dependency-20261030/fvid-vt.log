@@ -1,0 +1,54 @@
+   Compiling unicode-ident v1.0.24
+   Compiling objc2 v0.6.4
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling syn v3.0.5
+   Compiling cfg-if v1.0.4
+   Compiling thiserror v2.0.20
+   Compiling thiserror-impl v2.0.20
+   Compiling objc2-core-foundation v0.3.2
+   Compiling syn v2.0.119
+   Compiling equivalent v1.0.2
+   Compiling zerocopy v0.8.57
+   Compiling zerocopy-derive v0.8.57
+   Compiling indexmap v2.14.2
+   Compiling libc v0.2.189
+   Compiling naga-types v30.0.1
+   Compiling objc2-foundation v0.3.2
+   Compiling bytemuck_derive v1.12.1
+   Compiling block2 v0.6.2
+   Compiling dispatch2 v0.3.1
+   Compiling bytemuck v1.25.2
+   Compiling objc2-metal v0.3.2
+   Compiling half v2.7.1
+   Compiling objc2-core-graphics v0.3.2
+   Compiling smallvec v1.16.1
+   Compiling naga v30.0.1
+   Compiling objc2-quartz-core v0.3.2
+   Compiling wgpu-types v30.0.1
+   Compiling parking_lot_core v0.9.12
+   Compiling parking_lot v0.12.5
+   Compiling wgpu-naga-bridge v30.0.1
+   Compiling raw-window-metal v1.1.0
+   Compiling libloading v0.8.9
+   Compiling wgpu-hal v30.0.1
+   Compiling gpu-shader v0.1.0 (https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067)
+   Compiling wgpu-core-deps-apple v30.0.1
+   Compiling wgpu-core v30.0.1
+   Compiling gpu-runtime v0.1.0 (https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067)
+   Compiling pollster v0.4.0
+   Compiling wgpu v30.0.1
+   Compiling gpu-compute v0.1.0 (https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067)
+   Compiling fvid-vt v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-vt)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 27.56s
+     Running unittests src/lib.rs (/private/tmp/forma-gpu-common-check-20261030/debug/deps/fvid_vt-f7e33eb783c8621b)
+
+running 5 tests
+test retained_surface_tests::nv12_import_uses_no_optional_gpu_features ... ignored, requires a physical VideoToolbox decoder and Metal GPU
+test retained_surface_tests::retained_frames_survive_pool_reuse_and_session_drop ... ignored, requires a physical VideoToolbox Main10 decoder
+test retained_surface_tests::uma_shared_buffer_zero_copy_roundtrip ... ignored, requires a physical Metal GPU
+test p010_tests::nv12_unpack_checks_stride_and_odd_dimensions ... ok
+test p010_tests::p010_unpack_retains_low_bits_and_excludes_stride_padding ... ok
+
+test result: ok. 2 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

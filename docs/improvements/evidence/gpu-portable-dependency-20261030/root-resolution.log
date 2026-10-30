@@ -1,0 +1,5 @@
+    Updating git repository `https://github.com/themoretheless/forma.git`
+     Locking 3 packages to latest Rust 1.98.1 compatible versions
+      Adding gpu-compute v0.1.0 (https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067)
+      Adding gpu-runtime v0.1.0 (https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067)
+      Adding gpu-shader v0.1.0 (https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067)

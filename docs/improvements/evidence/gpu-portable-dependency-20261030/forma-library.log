@@ -1,0 +1,86 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling bitflags v2.13.2
+   Compiling objc2 v0.6.5
+   Compiling cfg_aliases v0.2.2
+   Compiling objc2-encode v4.1.0
+   Compiling syn v3.0.9
+   Compiling foldhash v0.2.0
+   Compiling thiserror v2.0.21
+   Compiling libm v0.2.16
+   Compiling autocfg v1.5.1
+   Compiling cfg-if v1.0.5
+   Compiling num-traits v0.2.19
+   Compiling thiserror-impl v2.0.21
+   Compiling hashbrown v0.17.1
+   Compiling objc2-core-foundation v0.3.2
+   Compiling syn v2.0.119
+   Compiling zerocopy v0.8.63
+   Compiling equivalent v1.0.3
+   Compiling indexmap v2.14.2
+   Compiling zerocopy-derive v0.8.63
+   Compiling libc v0.2.191
+   Compiling rustc-hash v1.1.0
+   Compiling naga-types v30.0.1
+   Compiling objc2-foundation v0.3.2
+   Compiling bytemuck_derive v1.12.1
+   Compiling dispatch2 v0.3.1
+   Compiling block2 v0.6.2
+   Compiling naga v30.0.1
+   Compiling bit-vec v0.9.1
+   Compiling log v0.4.34
+   Compiling unicode-width v0.2.2
+   Compiling parking_lot_core v0.9.12
+   Compiling codespan-reporting v0.13.1
+   Compiling bit-set v0.10.0
+   Compiling objc2-metal v0.3.2
+   Compiling half v2.7.1
+   Compiling bytemuck v1.25.2
+   Compiling objc2-core-graphics v0.3.2
+   Compiling once_cell v1.21.4
+   Compiling scopeguard v1.2.0
+   Compiling arrayvec v0.7.8
+   Compiling static_assertions v1.1.0
+   Compiling smallvec v1.16.4
+   Compiling raw-window-handle v0.6.2
+   Compiling wgpu-types v30.0.1
+   Compiling objc2-quartz-core v0.3.2
+   Compiling lock_api v0.4.14
+   Compiling wgpu-hal v30.0.1
+   Compiling parking_lot v0.12.5
+   Compiling raw-window-metal v1.1.0
+   Compiling libloading v0.8.9
+   Compiling profiling v1.0.18
+   Compiling wgpu-core v30.0.1
+   Compiling litrs v1.0.0
+   Compiling document-features v0.2.12
+   Compiling wgpu v30.0.1
+   Compiling gpu-shader v0.1.0 (/private/tmp/forma-gpu-common-delivery-20261030/crates/gpu-shader)
+   Compiling wgpu-naga-bridge v30.0.1
+   Compiling wgpu-core-deps-apple v30.0.1
+   Compiling gpu-runtime v0.1.0 (/private/tmp/forma-gpu-common-delivery-20261030/crates/gpu-runtime)
+   Compiling gpu-compute v0.1.0 (/private/tmp/forma-gpu-common-delivery-20261030/crates/gpu-compute)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 27.44s
+     Running unittests src/lib.rs (/private/tmp/forma-gpu-common-check-20261030/debug/deps/gpu_compute-75c925d6a5397527)
+
+running 16 tests
+test metal_memory::tests::cloned_storage_retains_allocation_and_checks_logical_bounds ... ignored, requires a physical Metal GPU
+test backend::tests::asd_page_buffer_aligns_to_16k_and_preserves_data ... ok
+test backend::tests::unified_transfer_plan_selects_asd_uma_and_duma_appropriately ... ok
+test backend::tests::tuned_workgroup_size_falls_back_to_default_off_metal ... ok
+test backend::tests::tuned_workgroup_size_selects_metal_variant ... ok
+test context::tests::optional_features_require_explicit_adapter_support ... ok
+test backend::tests::wgsl_tiled_matmul_and_parallel_reduction_shader_generators_emit_valid_kernels ... ok
+test profiling::tests::timestamp_conversion_preserves_short_deltas_and_rejects_unusable_samples ... ok
+test backend::tests::multi_target_shader_compiler_emits_msl_spirv_hlsl_ptx_glsl_and_wgsl ... ok
+test backend::tests::opengl_vulkan_and_rtx_raytracing_subsystems_work ... ok
+test backend::tests::available_subgroup_report_is_well_formed_when_present ... ok
+test memory::tests::backend_allocation_validation_is_recoverable_and_scopes_are_balanced ... ok
+test backend::tests::available_backend_report_is_well_formed_when_present ... ok
+test backend::tests::execution_topology_and_2d_workgroup_recommendations_match_hardware_primitives ... ok
+test readback::tests::stalled_callback_can_timeout_then_fail_without_an_empty_success ... ok
+test profiling::tests::completion_and_mapping_timeouts_keep_pending_tickets ... ok
+
+test result: ok. 15 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.10s
+

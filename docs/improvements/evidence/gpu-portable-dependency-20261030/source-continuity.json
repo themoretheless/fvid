@@ -1,0 +1,18 @@
+{
+  "/Users/themoretheless/Documents/Sources/forma/crates/gpu-compute/Cargo.toml": {
+    "sha256": "36578e420bd9e3b652dd8ef7505c5983459067b3426d16a8e8fb696bb81ce253",
+    "matches_prior_qualified_source": true
+  },
+  "/Users/themoretheless/Documents/Sources/forma/crates/gpu-compute/src/lib.rs": {
+    "sha256": "745a279d5fa4f34c6c0ba20869215d21e1b45bbf5074e33ac28923dbc41f3d19",
+    "matches_prior_qualified_source": true
+  },
+  "/Users/themoretheless/Documents/Sources/forma/crates/gpu-compute/src/metal_memory.rs": {
+    "sha256": "0987dd3be83faa81fe452db0208dc19e27105ec240ba5046cdd1239b27baf87e",
+    "matches_prior_qualified_source": true
+  },
+  "fvid-adapter": {
+    "sha256": "02931792d76c031c9aa2f193a92126b610f2cad28de971dd0da22a01b775b3fb",
+    "unchanged": true
+  }
+}

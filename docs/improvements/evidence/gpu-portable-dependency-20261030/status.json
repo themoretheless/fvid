@@ -1,0 +1,62 @@
+{
+  "status": "qualified-dependency-delivery",
+  "accepted_ids": [],
+  "count_delta": 0,
+  "accepted_count": 415,
+  "forma_commit": "82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9",
+  "forma_published_refs": [
+    "refs/heads/main",
+    "refs/heads/codex/gpu-common-metal-20261030"
+  ],
+  "scope": [
+    "Page-aligned shared Metal storage",
+    "Shared allocation lifetime, bounded host copies, wgpu wrapping and caller synchronization contract"
+  ],
+  "fvid_owned_scope_retained": [
+    "CoreVideo",
+    "YUV and colour conversion",
+    "Video shaders and presentation",
+    "Player policy",
+    "CUDA kernels",
+    "NVDEC",
+    "NVENC"
+  ],
+  "isolated_forma_changes": 6,
+  "unrelated_forma_changes_preserved": [
+    "crates/gpu-shader/src/back/msl.rs",
+    "packages/svet/README.md",
+    "packages/svet/src/engine/advanced.ts",
+    "packages/svet/src/engine/reactivity.ts"
+  ],
+  "checks": {
+    "forma_library": {
+      "passed": 15,
+      "failed": 0,
+      "ignored": 1
+    },
+    "fvid_vt": {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 3
+    },
+    "player_check": "passed locked/offline",
+    "standalone_resolution": "before: missing local Forma; after: locked/offline metal resolves three packages from pinned public Git commit",
+    "mp4_integration": {
+      "passed": 13,
+      "failed": 0,
+      "suites": [
+        "mp4_active_audio_choice",
+        "mp4_audio_presentation_end",
+        "mp4_unused_audio_descriptions"
+      ]
+    }
+  },
+  "lockfile_scope": "Only the source identities of gpu-compute, gpu-runtime and gpu-shader change; no version updates.",
+  "notes": [
+    "No new physical GPU or performance run; prior source-qualified hardware evidence retained separately.",
+    "Original Forma main worktree remains dirty at its original commit; remote main advanced by fast-forward from isolated delivery worktree.",
+    "License copy retained verbatim including upstream trailing whitespace; source paths pass diff --check.",
+    "All fixture/proof assets retained. No active branch, stash or worktree deleted.",
+    "Fvid publication remains pending broader known baseline checks, including signed AAC padding and MP4 metadata admission. No claim of whole-project green."
+  ]
+}

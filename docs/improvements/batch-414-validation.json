@@ -1,0 +1,37 @@
+{
+  "batch": 414,
+  "status": "qualified-dependency-delivery",
+  "accepted_ids": [],
+  "count_delta": 0,
+  "summary": "Publish only generic Metal shared storage in Forma and replace fvid sibling-path dependency with immutable public Git revision",
+  "forma_commit": "82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9",
+  "evidence": "docs/improvements/evidence/gpu-portable-dependency-20261030/status.json",
+  "checks": {
+    "forma_library": {
+      "passed": 15,
+      "failed": 0,
+      "ignored": 1
+    },
+    "fvid_vt": {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 3
+    },
+    "player_check": "passed locked/offline",
+    "standalone_resolution": "before: missing local Forma; after: locked/offline metal resolves three packages from pinned public Git commit",
+    "mp4_integration": {
+      "passed": 13,
+      "failed": 0,
+      "suites": [
+        "mp4_active_audio_choice",
+        "mp4_audio_presentation_end",
+        "mp4_unused_audio_descriptions"
+      ]
+    }
+  },
+  "limitations": [
+    "Structural extraction and delivery are not counted as new media fixes",
+    "No new physical GPU/performance run",
+    "Fvid main publication awaits remaining known baseline qualification"
+  ]
+}

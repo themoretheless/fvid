@@ -1,0 +1,28 @@
+{
+  "standalone_manifest": "fvid-vt manifest copied without any Forma sibling",
+  "offline": true,
+  "locked": true,
+  "features": [
+    "metal"
+  ],
+  "packages": [
+    {
+      "name": "gpu-compute",
+      "version": "0.1.0",
+      "source": "git+https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9",
+      "manifest_path": "/Users/themoretheless/.cargo/git/checkouts/forma-7e1124ee5797e9c3/82ff606/crates/gpu-compute/Cargo.toml"
+    },
+    {
+      "name": "gpu-runtime",
+      "version": "0.1.0",
+      "source": "git+https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9",
+      "manifest_path": "/Users/themoretheless/.cargo/git/checkouts/forma-7e1124ee5797e9c3/82ff606/crates/gpu-runtime/Cargo.toml"
+    },
+    {
+      "name": "gpu-shader",
+      "version": "0.1.0",
+      "source": "git+https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9",
+      "manifest_path": "/Users/themoretheless/.cargo/git/checkouts/forma-7e1124ee5797e9c3/82ff606/crates/gpu-shader/Cargo.toml"
+    }
+  ]
+}
