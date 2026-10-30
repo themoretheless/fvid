@@ -118,6 +118,26 @@ impl Mp4NormalizationRun {
     }
 }
 
+fn mp4_normalized_silence(
+    run: &mut Option<Mp4NormalizationRun>, output: &mut impl std::io::Write,
+    window: std::ops::Range<i128>, gap: std::ops::Range<i128>, cursor: &mut i128,
+    channels: u16, control: &DecodeProgress<'_>,
+) -> Result<()> {
+    if let Some(filter) = run { filter.finish(output, window.clone(), cursor)?; }
+    *run = None;
+    let first = gap.start.max(window.start);
+    let last = gap.end.min(window.end);
+    if first < last {
+        if *cursor < first { return Err(invalid("MP4 audio gap has an uncovered source window")); }
+        if *cursor < last {
+            mp4_write_tail_silence(output, u64::try_from(last - *cursor)
+                .map_err(|_| invalid("MP4 gap silence overflow"))?, channels, control)?;
+            *cursor = last;
+        }
+    }
+    Ok(())
+}
+
 fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
     mut reader: Mp4TimelineReader<R>,
     output: &mut impl std::io::Write,
@@ -291,6 +311,10 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
         let mut pending = std::collections::VecDeque::new();
         let mut sample_index = 0usize;
         let mut clock_index=0usize;
+        let mut clock_native_cursor = 0u64;
+        let mut source_output_index = 0usize;
+        let mut last_source_end: Option<Mp4ExportTime> = None;
+        let mut terminal_gap: Option<Mp4ExportTime> = None;
         let mut expected: Option<Mp4ExportTime> = None;
         let mut run: Option<Mp4NormalizationRun> = None;
         loop {
@@ -298,7 +322,14 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
             if cursor == end {
                 break;
             }
-            let terminal = sample_index == track.samples.len() || control.packet_limit_reached();
+            let stop_in_gap = if sample_index>0 && track.declared_gap_after(sample_index-1).is_some() {
+                let next=track.samples.get(sample_index).ok_or_else(||invalid("missing MP4 gap endpoint"))?;
+                let stop=Mp4ExportTime::signed_ticks(next.pts,track.timescale)?;
+                if segment.start.add(stop.sub(media)?)?.ceil_frames(rate)? >= end {
+                    terminal_gap=Some(stop); true
+                } else {false}
+            } else {false};
+            let terminal = sample_index == track.samples.len() || control.packet_limit_reached() || stop_in_gap;
             let changing = !terminal && {
                 let id = track
                     .samples
@@ -313,7 +344,7 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
                     if !pending.is_empty() {
                         return Err(invalid("delayed MP4 audio left an undrained source window"));
                     }
-                    if let Some(r) = &mut run {
+                    if let Some(mut r) = run.take() {
                         r.finish(output, window.clone(), &mut cursor)?;
                     }
                     break;
@@ -341,15 +372,28 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
                 }
                 let declared_start = Mp4ExportTime::signed_ticks(sample.pts, track.timescale)?;
                 let declared_duration = Mp4ExportTime::ticks(u64::from(sample.duration), track.timescale)?;
-                if expected.is_some_and(|at| at != declared_start) {return Err(invalid("non-contiguous MP4 audio timeline"));}
+                let gap = sample_index > 0 && track.declared_gap_after(sample_index-1).is_some();
+                if expected.is_some_and(|at| at != declared_start && !(gap && at.cmp(declared_start)==std::cmp::Ordering::Less)) {
+                    return Err(invalid("non-contiguous MP4 audio timeline"));
+                }
                 expected=Some(declared_start.add(declared_duration)?);
-                reader.read_packet(index, sample_index, &mut packet)?;
-                while packet_clocks.get(clock_index).is_some_and(|r|sample_index>=r.last) {clock_index+=1;}
+                while packet_clocks.get(clock_index).is_some_and(|r|sample_index>=r.last) {
+                    clock_index+=1; clock_native_cursor=0;
+                }
                 let clock=packet_clocks.get(clock_index).filter(|r|sample_index>=r.first).ok_or_else(||invalid("missing MP4 packet clock run"))?;
+                if gap && pending.is_empty() {
+                    let start=last_source_end.ok_or_else(||invalid("MP4 gap has no preceding PCM window"))?;
+                    let stop=if clock.quantized {clock.origin}else{declared_start};
+                    let a=segment.start.add(start.sub(media)?)?.ceil_frames(rate)?;
+                    let b=segment.start.add(stop.sub(media)?)?.ceil_frames(rate)?;
+                    mp4_normalized_silence(&mut run,output,window.clone(),a..b,&mut cursor,channels,control)?;
+                    if cursor==end { break; }
+                }
+                reader.read_packet(index, sample_index, &mut packet)?;
                 let (start,duration,frames)=if clock.quantized {
                     let setup=track.description_for_sample(sample_index).ok_or_else(||invalid("missing MP4 clock description"))?;
                     let frames=mp4_coded_packet_frames(&setup.codec,&setup.configuration,decoder.sample_rate(),setup.channels,setup.bit_depth,packet.len(),Some(&packet)).map_err(|e|invalid(&e))?;
-                    (clock.origin.add(Mp4ExportTime::new(i128::from(native_cursor),u128::from(decoder.sample_rate()))?)?,Mp4ExportTime::new(i128::from(frames),u128::from(decoder.sample_rate()))?,frames)
+                    (clock.origin.add(Mp4ExportTime::new(i128::from(clock_native_cursor),u128::from(decoder.sample_rate()))?)?,Mp4ExportTime::new(i128::from(frames),u128::from(decoder.sample_rate()))?,frames)
                 } else {
                     let frames=declared_duration.ceil_frames(decoder.sample_rate())?;
                     if frames<=0 || Mp4ExportTime::new(frames,u128::from(decoder.sample_rate()))?!=declared_duration {return Err(invalid("MP4 audio packet clock is not sample aligned"));}
@@ -359,6 +403,8 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
                 native_cursor = native_cursor
                     .checked_add(frames)
                     .ok_or_else(|| invalid("MP4 native clock overflow"))?;
+                clock_native_cursor = clock_native_cursor.checked_add(frames)
+                    .ok_or_else(|| invalid("MP4 run native clock overflow"))?;
                 control.packet(packet.len())?;
                 sample_index += 1;
                 if decoder.delayed() {
@@ -392,6 +438,14 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
                     "MP4 audio packet duration disagrees with decoded samples",
                 ));
             }
+            if source_output_index>0 && track.declared_gap_after(source_output_index-1).is_some() {
+                let previous=last_source_end.ok_or_else(||invalid("MP4 gap has no decoded predecessor"))?;
+                let a=segment.start.add(previous.sub(media)?)?.ceil_frames(rate)?;
+                let b=segment.start.add(start.sub(media)?)?.ceil_frames(rate)?;
+                mp4_normalized_silence(&mut run,output,window.clone(),a..b,&mut cursor,channels,control)?;
+            }
+            last_source_end=Some(start.add(duration)?);
+            source_output_index+=1;
             if run.is_none() {
                 let origin = segment.start.add(start.sub(media)?)?;
                 run = Some(Mp4NormalizationRun::new(
@@ -411,6 +465,12 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
                 control,
             )?;
             stats.decoded_frames += 1;
+        }
+        if cursor != end && !control.packet_limit_reached()
+            && let (Some(stop),Some(start)) = (terminal_gap,last_source_end) {
+            let a=segment.start.add(start.sub(media)?)?.ceil_frames(rate)?;
+            let b=segment.start.add(stop.sub(media)?)?.ceil_frames(rate)?;
+            mp4_normalized_silence(&mut run,output,window.clone(),a..b,&mut cursor,channels,control)?;
         }
         if cursor != end && !control.packet_limit_reached() {
             let tail = declared_tail.map(|(start, stop)| -> Result<_> {

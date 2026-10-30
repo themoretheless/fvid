@@ -1,0 +1,60 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0420"
+  ],
+  "count_delta": 1,
+  "accepted_count": 420,
+  "batch": 420,
+  "summary": "Preserve packet-free middle MP4 audio intervals without resetting codec history or allocating their full duration",
+  "before": {
+    "commit": "1766aff8b64557438c9d4d9a62b9b8d295cf6052",
+    "primary_original_passed": 1,
+    "primary_original_failed": 10,
+    "log": "fvid-middle-gap-full-before-20261030.log",
+    "coarse_followup": "coarse-before.log and coarse-seek.log confirm sample loss and seek silence skipping in the initial implementation"
+  },
+  "checks": {
+    "integration": {
+      "passed": 255,
+      "ignored": 0,
+      "suites": 43
+    },
+    "root-units": {
+      "passed": 14,
+      "ignored": 1,
+      "suites": 1
+    },
+    "owned-units": {
+      "passed": 547,
+      "ignored": 1,
+      "suites": 1
+    },
+    "player-check": "passed locked/offline/no-default-features",
+    "core-check": "passed locked/offline/no-default-features"
+  },
+  "distinct_passed": 816,
+  "ignored": 2,
+  "integration_suites": 43,
+  "fixtures": {
+    "integral_acceptance_cases": 48,
+    "coarse_acceptance_cases": 2,
+    "invalid_codec_refusals": 2,
+    "long_gap_resource_control": 1,
+    "video_files": 53,
+    "physical_payload_files": 78,
+    "manifest_files": 1,
+    "offline_deterministic_generation": "passed"
+  },
+  "evidence": "docs/improvements/evidence/mp4-audio-middle-gap/status.json",
+  "limits": [
+    "Finite scoped qualification, not whole-project or hardware validation",
+    "No performance claim",
+    "ALAC f64 remains unsupported with an explicit refusal regression"
+  ],
+  "uncounted": [
+    "Fixture/codecs/timestamp/edit variants",
+    "Coarse-clock boundary and seek corrections within the same middle-gap cause",
+    "Test harness and separate resampling-reference corrections"
+  ]
+}

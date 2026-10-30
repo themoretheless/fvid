@@ -1,0 +1,12 @@
+{
+  "crates/fvid-media/src/owned_mp4_audio.rs": "1d06b8d0e4fe3dbf88febcc4598455346919274680573a3f222def47eb257d5a",
+  "crates/fvid-media/src/owned_mp4_audio_clock_runs_impl.rs": "15976cc280931ed6f664c90b2cb7e6043028e8af57e15d11eda235fc00aea37a",
+  "crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs": "065110af38bcc0ff3f92bf81f2d5f2d2846310f37c4b25dabaf2085fd771b3f0",
+  "crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs": "0523d2d07fbcd8f4c971167820cee18ddba428e28f1c4e7fc5908590aae876f6",
+  "crates/fvid-media/src/owned_mp4_impl.rs": "08ee223875d30c197d57cffc7bba5513d89a00630b866325f5df452fe2671bfc",
+  "src/playback/audio/mp4_audio.rs": "5d8c744769ee9f87160d7785206981224033f8d53d3b7e3f312cccb9054f7d0b",
+  "crates/fvid-media/src/owned_mp4_audio_gap_tests.rs": "f53094f4ea9111429a59eadb104291eb56c87d608a5e1163a8487f5d6b8197bd",
+  "tests/mp4_audio_middle_gap.rs": "3089f6946e6d6a083212b45772cf2b3c06e1d90d4650e6ec0cc31eddb7429f24",
+  "scripts/generate_mp4_audio_middle_gap.py": "f85f0115d847cd3bf78494df2b56a6bf5ea4c7cc7a78abaccb76c41ae0740953",
+  "tests/fixtures/playback-errors/mp4-audio-middle-gap/manifest.json": "9e4b2d6b4a6ebe37526de1d40224c6547ccae9f4bc427e809adda9cfc8f210ca"
+}

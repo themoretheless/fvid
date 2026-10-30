@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 419,
-  "next_id": "FVID-0420",
+  "accepted_count": 420,
+  "next_id": "FVID-0421",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4697,6 +4697,17 @@
       "result": "Distinguish indexed decode coverage from composition endpoints, retain genuine declared tails without undoing signed CTTS shifts, and split native edit schedules into exact source/silence ranges. Append bounded zero chunks in owned f32/f64 integer and rational normalized paths only after source packets drain and only within declared time. Twelve open/finite AAC/PCM/ALAC video pairs preserve nonzero PCM then exact silence, both edit/tfdt versions, trim origins, timestamps, seek/rewind/EOF, probes, resampling/rematrixing and actual workers. Invalid codec packets and edits beyond the declared tail retain explicit refusals and no WAVE publication.281 distinct checks pass with locked/offline core/player builds. An original SSR interval-routing failure and registry metadata repairs are uncounted.",
       "status": "accepted",
       "validation": "batch-419-validation.json"
+    },
+    {
+      "id": "FVID-0420",
+      "batch": 420,
+      "title": "Preserve declared packet-free middle MP4 audio intervals and exact seek boundaries",
+      "source": "crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs",
+      "regression": "tests/mp4_audio_middle_gap.rs",
+      "before": "Original 1766aff8b6 preserves the indexed empty middle fragment but owned decoding refuses a non-contiguous timeline and native playback omits its silence. Final original-production acceptance:1 control passes,10 tests fail. Coarse 1001 Hz clock variants additionally expose rounded silence dropping a coded sample and recovered seeks skipping the gap.",
+      "result": "Split source clock/resampling runs at declared DTS/PTS gaps while retaining decoder history. Emit bounded silence in owned f32/f64 and native schedules, drain delayed PS before the gap without reading oversized future payloads, preserve repeated edits and exact coarse-clock boundaries/seek. Fifty valid synthetic VP9/audio witnesses cover AAC/PS/PCM/ALAC, native PCM/PTS, seek/rewind/EOF, real playback workers and normalization; malformed codecs retain refusal/no publication. A short two-day-gap file proves bounded seek/output.816 distinct tests pass with locked/offline core/player builds; two hardware tests explicitly ignored.",
+      "status": "accepted",
+      "validation": "batch-420-validation.json"
     }
   ]
 }

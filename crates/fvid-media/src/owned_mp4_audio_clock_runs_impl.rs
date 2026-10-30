@@ -39,7 +39,8 @@ where R:std::io::Read+std::io::Seek,
         let scale=source.timescale;let rate=match rates {Some(rates)=>*rates.get(sample.description_index as usize-1).ok_or_else(||invalid("missing MP4 native clock rate"))?,None=>setup.sample_rate};
         if scale==0 || rate==0 {return Err(invalid("zero MP4 packet clock"));}
         let mut last=first+1;
-        while last<count && source.description_for_sample(last)==source.description_for_sample(first) {last+=1;}
+        while last<count && source.description_for_sample(last)==source.description_for_sample(first)
+            && source.declared_gap_after(last-1).is_none() {last+=1;}
         let declared_origin=Mp4ExportTime::signed_ticks(sample.pts,scale)?;
         let mut origin=declared_origin;
         if let Some(previous)=result.last() {
@@ -52,7 +53,10 @@ where R:std::io::Read+std::io::Seek,
             control.check()?;
             let sample=reader.tracks()[index].samples.get(i).ok_or_else(||invalid("missing MP4 clock sample"))?;
             let begin=i128::from(sample.pts);let end=begin+i128::from(sample.duration);
-            if declared_end.is_some_and(|expected|expected!=begin) {return Err(invalid("non-contiguous MP4 audio timeline"));}
+            if declared_end.is_some_and(|expected| expected!=begin
+                && !(expected<begin && i>0 && reader.tracks()[index].declared_gap_after(i-1).is_some())) {
+                return Err(invalid("non-contiguous MP4 audio timeline"));
+            }
             declared_end=Some(end);
             if quantized {
                 let payload=if matches!(&setup.codec,b"alac"|b"ac-3"|b"ec-3") {reader.read_packet(index,i,&mut packet)?;Some(packet.as_slice())}else{None};

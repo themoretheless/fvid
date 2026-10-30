@@ -103,7 +103,8 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
     // reject the whole duration before reaching the requested short interval.
     let fractional_extent = track.edits.is_empty()
         && (u128::from(track.duration) * u128::from(rate)) % u128::from(track.timescale) != 0;
-    let mut normalize = target.is_some() || track.timescale % rate != 0 || fractional_extent;
+    let mut normalize = target.is_some() || track.timescale % rate != 0 || fractional_extent
+        || track.has_declared_gaps();
     for i in 0..active_samples {
         control.check()?;
         let id = track.samples.get(i).ok_or_else(|| invalid("missing audio sample"))?.description_index;

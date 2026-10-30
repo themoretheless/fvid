@@ -346,7 +346,11 @@ pub(crate) fn admit_audio_reader_with_interval<R: Read + Seek>(
     add(decoder)?;
     add(track.sample_descriptions.len())?; // per-description in-band PS flags
     add(configuration.checked_mul(2).ok_or_else(overflow)?)?; // initial and replacement decoder headers
-    if target.is_some() || track.description_for_sample(0).is_some_and(|d| d.sample_rate>0 && track.timescale%d.sample_rate!=0) || (0..active_samples).any(|n|track.description_for_sample(n)!=track.description_for_sample(0)) {
+    if target.is_some() || track.has_declared_gaps()
+        || track.description_for_sample(0).is_some_and(|d| d.sample_rate>0 && (track.timescale%d.sample_rate!=0
+            || (track.edits.is_empty() && track.timescale>0
+                && (u128::from(track.duration)*u128::from(d.sample_rate))%u128::from(track.timescale)!=0)))
+        || (0..active_samples).any(|n|track.description_for_sample(n)!=track.description_for_sample(0)) {
         let first=track.description_for_sample(0).ok_or_else(||invalid("MP4 audio has no samples"))?;
         let output_rate=target.map_or(first.sample_rate,|t|t.0);
         let output_channels=usize::from(target.map_or(first.channels.max(2),|t|t.1));
@@ -366,7 +370,8 @@ pub(crate) fn admit_audio_reader_with_interval<R: Read + Seek>(
         }
         add(normalization)?;
         // Two geometric capacities of rational per-configuration clock records.
-        add(active_samples.max(4).checked_mul(320).ok_or_else(overflow)?)?;
+        let clock_records = if track.has_declared_gaps() {track.samples.len()} else {active_samples};
+        add(clock_records.max(4).checked_mul(320).ok_or_else(overflow)?)?;
     }
 
     for bytes in [
@@ -667,3 +672,7 @@ mod precise {
     type Mp4OutputResampler = crate::owned_resample_f64::Resampler<Vec<u8>>;
     include!("owned_mp4_audio_timeline_impl.rs");
 }
+
+#[cfg(test)]
+#[path = "owned_mp4_audio_gap_tests.rs"]
+mod gap_tests;

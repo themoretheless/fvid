@@ -1,0 +1,38 @@
+{
+  "cases": 48,
+  "codecs": [
+    "AAC-LC",
+    "delayed PS AAC",
+    "PCM",
+    "ALAC"
+  ],
+  "packet_spans_match_authored_controls": true,
+  "derived_dts_steps": [
+    0,
+    2,
+    3
+  ],
+  "declared_end_steps": 4,
+  "empty_gap_has_no_run": true,
+  "deterministic_regeneration_without_ffmpeg_or_network": true,
+  "historical_manifest_sha256": "9e4b2d6b4a6ebe37526de1d40224c6547ccae9f4bc427e809adda9cfc8f210ca",
+  "historical_physical_files": 76,
+  "physical_payload_files": 78,
+  "manifest_files": 1,
+  "coarse_clock_controls": {
+    "files": [
+      "pcm-coarse.mp4",
+      "alac-coarse.mp4"
+    ],
+    "container_rate": 1001,
+    "native_rate": 8000,
+    "packet_dts": [
+      0,
+      40,
+      60
+    ],
+    "packet_ticks": 20,
+    "native_packet_frames": 160
+  },
+  "qualified_manifest_sha256": "2730d19d4776654f6e404f81f4e23c285751b5b519c6ca3973e41ee3c8381559"
+}

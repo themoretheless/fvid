@@ -254,6 +254,23 @@ pub struct Track {
 }
 
 impl Track {
+    /// Packet-free source time between two indexed decode/presentation windows.
+    pub(crate) fn declared_gap_after(&self, index: usize) -> Option<Range<i128>> {
+        let samples = self.samples.expanded()?;
+        let a = samples.get(index)?;
+        let b = samples.get(index.checked_add(1)?)?;
+        let start = i128::from(a.pts) + i128::from(a.duration);
+        (i128::from(b.dts) > i128::from(a.dts) + i128::from(a.duration)
+            && i128::from(b.pts) > start).then_some(start..i128::from(b.pts))
+    }
+    pub(crate) fn has_declared_gaps(&self) -> bool {
+        self.samples.expanded().is_some_and(|samples|
+            (0..samples.len().saturating_sub(1)).any(|i| self.declared_gap_after(i).is_some()))
+    }
+    pub(crate) fn presentation_endpoint(&self) -> Result<i128> {
+        let (end, decoded) = self.indexed_endpoints()?;
+        Ok(if i128::from(self.duration) > decoded { end.max(i128::from(self.duration)) } else { end })
+    }
     fn indexed_endpoints(&self) -> Result<(i128, i128)> {
         match &self.samples {
             SampleIndex::Expanded(samples) => Ok(samples.iter().fold((0i128, 0i128), |(pts, dts), s| (

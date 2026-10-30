@@ -1,0 +1,10 @@
+{
+  "commit": "1766aff8b64557438c9d4d9a62b9b8d295cf6052",
+  "sha256": {
+    "crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs": "b8724808332e34d7f0b4868636f2edce60fc87b02ffb53b18dbc131e42777619",
+    "crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs": "6f2e53f001551bff676f955c1d6be4f2759ead0f4f482666851e266b35505c98",
+    "crates/fvid-media/src/owned_mp4_audio_clock_runs_impl.rs": "b10174007efaeb34cb0b393dfa594a31313c713d05260c48cbdc89533d7e4c89",
+    "src/playback/audio/mp4_audio.rs": "c1d723c6eed620bff0a065aec5df27518866a5998d64f78e2a2e39cbea1527c0"
+  },
+  "new_test_sha256": "535019c09a1e7d94b951fd3d43f337aaa2851e2641ad7112307bba9ba7490fdd"
+}
