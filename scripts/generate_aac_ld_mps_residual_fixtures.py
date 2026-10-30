@@ -48,7 +48,7 @@ def main():
  bits,_=payload(7,3,2,18,0,[1],True);bad=dict(tree=7,rate=48000,slots=18,frames_code=0,bands=[1],offset=len(blob),bytes=len(packed(bits)),bits=len(bits));blob.extend(packed(bits))
  (OUT/'payloads.bin').write_bytes(blob)
  # A complete owned movie exposes the remaining native-admission refusal.
- parent=FIX/'aac-ld-mps-stp';base=next(c for c in json.loads((parent/'manifest.json').read_text())['cases']if c['name']=='plain-tree7-bands23-on');source=(parent/'packets.bin').read_bytes()
+ parent=FIX/'aac-ld-mps-stp';base=next(c for c in json.loads((parent/'manifest.json').read_text())['cases']if c['name']=='n512-c1-base-x2-crc1-bands23-on');source=(parent/'packets.bin').read_bytes()
  ssc=bytes.fromhex(base['ordinary_ssc'])+packed('0000'+length(2)+'0011001000010000')
  original=bytes.fromhex(base['ssc']);asc_bits=raw(bytes.fromhex(base['asc']));suffix='0010'+length(len(original))+raw(original)+'0000'+'00';at=asc_bits.rfind(suffix);assert at>=0
  asc=packed(asc_bits[:at]+'0010'+length(len(ssc))+raw(ssc)+'0000'+'00');packets=bytearray();frames=[]

@@ -1,3 +1,33 @@
+## Residual MDCT-to-QMF and overlap — component qualified,2026-10-30
+
+Added owned full-complex64-bin MDCT-to-QMF projection for updates15/16/18/24/30/32.
+It implements frequency/time windows, safe spectral folding, complex transform
+and post-rotation, short-block schedules (including update15 interleaving and
+extra18/24/30 spectra), normalized output and per-instance overlap carry.
+Malformed late blocks leave all overlap unchanged; checkpoints/reset replay
+exactly. Window coefficients are factual f32 realizations from the pinned ISO
+insert; no external implementation is linked into FVid.
+
+The unchanged ISO conversion routines and original numeric tables supply an
+independent default-phase oracle.24 own programmes cover dense/silent/edge
+impulses and long/start/short/stop transitions, including zero-input frames that
+must retain overlap.907,776 scalars have maximum difference3.080261185596511e-7
+at tolerance5e-7; the f32 reference and f64 owned arithmetic differ. A zero-output
+negative control differs by0.04170691967010498;16 non-silent programmes carry
+history into their zero-input frame.587 media unit tests and4 integration tests
+passed, with one pre-existing media test ignored. Facts, stimuli and reference
+outputs regenerate byte-identically. Ordinary tests require no FFmpeg/compiler
+or network.
+
+This is component qualification, not native residual playback acceptance. The
+oracle uses `twiddleExtern=NULL`; native LD phase/bank selection, ICC correction
+application, source-window integration and PCM/navigation tests remain open.
+Update8 is explicitly unqualified: its reference constant exists but its frequency
+window is absent. The own native residual candidate now uses the matched512-core
+double-rate LD-SBR16-slot/64-bin path, with independently valid frame grammar;
+the current native residual refusal stays enabled. See
+`docs/validation/aac-mps-mdct-qmf-tests-2026-10-30.json`.
+
 ## Residual AAC extension syntax and MDCT spectra — partial,2026-10-30
 
 The owned `aac_ld_mps_residual` stage parses bounded kind0 residual payloads:
@@ -22,7 +52,7 @@ A new twelve-frame own video contains nonzero residual AAC. Its ASC, all spatial
 frames and residual payloads parse separately, while the native player still
 returns the specific residual-reconstruction refusal. This is deliberately a
 refusal/reproduction regression, not PCM playback acceptance. Remaining work:
-MDCT-to-QMF and overlap state, ICC correction application, per-source residual
+Native use of the MDCT-to-QMF overlap stage, ICC correction application, per-source residual
 association, and native PCM/navigation acceptance. Explicit generation is byte
 identical with network and child-process APIs denied; ordinary tests need no
 FFmpeg, compiler or network. See

@@ -28,7 +28,7 @@
   },
   "generation": "Byte-identical regeneration with socket and child-process APIs denied.",
   "open": [
-    "MDCT-to-QMF conversion and overlap history",
+    "Native phase qualification and source-frame integration of the separately qualified MDCT-to-QMF overlap stage",
     "Apply decoded ICC corrections to matrix parameters",
     "Per-source-frame residual association and native integration",
     "Residual PCM playback/seek/rewind acceptance",
@@ -36,17 +36,18 @@
   ],
   "source_sha256": {
     "crates/fvid-media/src/owned_aac/aac_ld_mps_residual.rs": "c9b34bc7fa930f218f1d8489eacab64423ddb3e05cde47bf54553d21083d2b8c",
-    "crates/fvid-media/src/owned_aac/mod.rs": "183f57749735b4b91375d85bb6b3a74387a9eb0dfab0c8cb89238c445ab4750b",
+    "crates/fvid-media/src/owned_aac/mod.rs": "27b6a5d830b693f919959d0ed474c455423e082ff162fd57222170bc282ec20b",
     "tests/aac_ld_mps_residual.rs": "2b860b717ff28dd72b0f86961731c71910fefcf29329779e0f4e53e60c0bd600",
-    "scripts/generate_aac_ld_mps_residual_fixtures.py": "5cbd4a0fbf4266cd619349513ed44b9d4a410f7faebfcd52d8b62c5bc2cfa558"
+    "scripts/generate_aac_ld_mps_residual_fixtures.py": "c2891219f437f93984582dec1db5a5eaa5acdb8891684ca7f0333a611ebd8096"
   },
   "fixture_sha256": {
     "README.md": "a704cf1036fdb2cd8b93a79947780065e1e2a50ff62a7bc7e14d8d81ed2f251f",
-    "manifest.json": "12917eb17c5da1bbfd61f87d52e81945c3f748649341ee5feb471b1d2f8f9aef",
-    "native-packets.bin": "4fef6626220fda7fb27e6c83edf5077300fac402eba87ada93bb661c8e83c9be",
-    "native-residual-refusal.mp4": "30f4b53eb7b912a8fef3b14b7d555781f6a54a45337a9d5cf14361c87f94204e",
-    "native.asc": "42f546834c72282cb5492486ad963c0306dd717377ef06aa1469521fd11a8396",
-    "native.ssc": "97377ac37a1b1018c1975eb0aa2264f670f9ada1168b43a12e0291a3135c2810",
+    "manifest.json": "1075ab16f32a1075e71fd10a5c08624d1b3417430f6ac0fb471dbe01ff980a28",
+    "native-packets.bin": "c87bec854cb71ce9efcea6c5603dff77aecb7bf659f4ff832627fe0fc96be342",
+    "native-residual-refusal.mp4": "d92248b05f4d4e05df2c1bcc9129c74f5662f88a23940acdf050fef45493386f",
+    "native.asc": "f55da31c899803d9e65728350db67dbc48f39bf26710910aa389a8f1b2a8f5be",
+    "native.ssc": "abaa0d453a7d5eee21583b55bec910afcefbc8cf3265dc17b20fd592d8b56fd8",
     "payloads.bin": "a15f7e8dde0cbf07bf70e268f1a5603b377285126765140be4f49237eea1c34d"
-  }
+  },
+  "native_movie_update": "Uses the matched n512 mono double-rate LD-SBR core,64-bin output and16 spatial slots for the supported MDCT-to-QMF schedule. It remains a specific native refusal, not playback acceptance."
 }

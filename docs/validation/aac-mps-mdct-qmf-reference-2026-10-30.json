@@ -1,0 +1,13 @@
+{
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "source_sha256": "b85d0482c8e2f5913db334d905e2572fa1b7a21db583a79c98f3420b7ee3ecf8",
+  "window_table_sha256": "24d9245c46c8e138968d69634052eeabc953975dae7b3ea8e91257d29104d88a",
+  "extracted_probe_sha256": "3a56daf76edbfff29af66bb63db0efb3bc8e2c8fa5949a0f2cfe6bb0a00e06eb",
+  "generator_sha256": "0cd5b7eb02feb86567356fd1356621e689fe436e95e3bc80dcba5b224f4db8db",
+  "facts_sha256": "73f382f0e254d47e1c1eb0e55713b95d55fe471aee0bc4729031fd2c75e99e0e",
+  "input_sha256": "0f8208d1ce612ab9795d35f6f4aebb230daa0d01282a853866a8e5dc8a6a5481",
+  "expected_sha256": "36bfc1b311e3440f95e2f16be44f1262dee813a2eaa816699c56ad4c19fff296",
+  "programmes": 24,
+  "scalar_values": 907776,
+  "scope": "Unmodified ISO function extraction with original numeric tables. Default phase only. Ordinary tests use frozen outputs and owned Rust."
+}
