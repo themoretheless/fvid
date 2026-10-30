@@ -140,7 +140,12 @@ impl<R: Read + Seek> WebmSubtitleReader<R> {
             if text.is_empty() {
                 continue;
             }
-            let container = Duration::from_nanos(u64::try_from(*pts).unwrap_or_default());
+            // Negative-PTS frames must still be decoded, but Matroska does
+            // not present them, even when their duration crosses the origin.
+            let Ok(pts) = u64::try_from(*pts) else {
+                continue;
+            };
+            let container = Duration::from_nanos(pts);
             let next = blocks
                 .get(position + 1)
                 .map(|(pts, _)| Duration::from_nanos(u64::try_from(*pts).unwrap_or_default()));

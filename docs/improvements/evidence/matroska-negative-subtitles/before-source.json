@@ -1,0 +1,10 @@
+{
+  "commit": "7e703321d3fef7852913959c0096f5986f241966",
+  "sha256": {
+    "src/playback/subtitles/webm_subtitles.rs": "a66743e61d8063f579012d6a504815643903cf879b984625616813a6598e926c",
+    "tests/matroska_negative_subtitles.rs": "96c42ffab20a704725106c2350afd0ebc1b7d14a81de7a720aa04c76c91864ba",
+    "scripts/generate_matroska_negative_subtitles.py": "c08e263d8cafeb503e46a227c14255ce7bb922aebe13c91a923956fd2ff67e2a",
+    "tests/fixtures/playback-errors/matroska-negative-subtitles/manifest.json": "1bec6edcdeda5d25ec1c5646a39a7e8c122a002c6becfb3740df5bc918640eac"
+  },
+  "strengthened_control": "Every actual seek must select the exact expected40ms video frame interval."
+}

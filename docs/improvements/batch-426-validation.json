@@ -1,0 +1,44 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0426"
+  ],
+  "count_delta": 1,
+  "accepted_count": 426,
+  "batch": 426,
+  "summary": "Decode but do not present negative-PTS Matroska subtitle frames",
+  "before": {
+    "commit": "7e703321d3fef7852913959c0096f5986f241966",
+    "passed": 1,
+    "failed": 2,
+    "specific_failure": "Both parsers retain exact negative PTS and all pictures; native captions clamp negative starts tozero and display both wholly-negative and crossing-origin frames."
+  },
+  "checks": {
+    "integration": {
+      "passed": 72,
+      "suites": 21,
+      "ignored": 0
+    },
+    "root-subtitles": {
+      "passed": 48,
+      "ignored": 1
+    },
+    "core-check": "passed locked/offline/no-default-features",
+    "player-check": "passed locked/offline/no-default-features"
+  },
+  "distinct_passed": 120,
+  "fixtures": {
+    "acceptance_videos": 6,
+    "packet_snapshots": 9,
+    "files": 16,
+    "repeatability": "identical",
+    "semantics": "Files accepted and decoded; negative-PTS subtitle content suppressed, healthy later cues retained, not whole-file refusal."
+  },
+  "reference": "https://www.rfc-editor.org/rfc/rfc9559.html#section-11.2",
+  "limits": [
+    "Negative timestamps discouraged by RFC; mandatory encountered-input playback rule tested.",
+    "CodecDelay handling and physical-device rendering outside scope.",
+    "No performance or whole-project qualification claim."
+  ],
+  "evidence": "docs/improvements/evidence/matroska-negative-subtitles/README.md"
+}

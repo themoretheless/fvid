@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 425,
-  "next_id": "FVID-0426",
+  "accepted_count": 426,
+  "next_id": "FVID-0427",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4769,6 +4769,17 @@
       "result": "Recognize numeric ReadOrder with empty SSA or numeric ASS Layer; preserve complete dialogue clocks and fallback/refusal behavior.Three authored VP9/SSA/ASS videos verify exact source packets/pictures, text/newlines/Unicode, real seek gaps/endpoints and EOF. 117 distinct checks pass across20 integration suites and48 root subtitle units; locked/offline core/player builds pass, one physical-GPU test ignored. Two original budget expectation failures are reproduced separately and repaired with exact zero-packet policy and explicit32KiB refusal/64KiB index-aware admission; no extra IDs counted.",
       "status": "accepted",
       "validation": "batch-425-validation.json"
+    },
+    {
+      "id": "FVID-0426",
+      "batch": 426,
+      "title": "Suppress negative-PTS Matroska subtitle frames after decoding",
+      "source": "src/playback/subtitles/webm_subtitles.rs",
+      "regression": "tests/matroska_negative_subtitles.rs",
+      "before": "Both parsers retain exact negative PTS and all pictures; native captions clamp negative starts tozero and display both wholly-negative and crossing-origin frames. Original7e703321d3 passes1 source/video control and fails2 caption/seek acceptances, including the final exact sought-frame interval check.",
+      "result": "Read and decode each caption, then omit negative-PTS frames instead of clamping them tozero. Six authored VP9/UTF8/SSA/ASS videos retain exact packets, decoded pictures/intervals and EOF; whole-negative/cross-zero captions stay hidden while positive controls and healthy following text remain visible. Actual seeks select the exact expected picture and cue at exclusive endpoints/gaps.120 distinct checks pass across21 integration suites and48 root subtitle units; locked/offline core/player builds pass, one physical-GPU check ignored. All codec/sign variants count as one improvement.",
+      "status": "accepted",
+      "validation": "batch-426-validation.json"
     }
   ]
 }

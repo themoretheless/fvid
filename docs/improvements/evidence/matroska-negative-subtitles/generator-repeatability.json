@@ -1,0 +1,22 @@
+{
+  "identical": true,
+  "files": 16,
+  "sha256": {
+    "ssa-1.packet": "03c7026e1001dda03c18486ea0cac0a9ad1a93f7bb4efaa6a5af267857b233a5",
+    "utf8-0.packet": "ab60944aece98b3bd99abf376375a42d480838b2c07ac5d16b98e62c021eae1e",
+    "utf8-positive.mkv": "0f7eecfbdd221b1f5a98141f23808e5703726a720d0a895e0a35bbb4b23045fd",
+    "utf8-2.packet": "6cca685437f5100a174da4b4897bee056bab01ef48b2733939fcd09b2e73d674",
+    "ass-positive.mkv": "396c2f0e6c90b827eacb477116480af4cb02662e61c5f0388260ea269ed3e881",
+    "ass-negative.mkv": "618f60e9307e1836848c8b5158c1b2b90207200dd8cb1fdd19933210dade17fd",
+    "utf8-negative.mkv": "bbb6093a3f3b01653db11afce719ab6cf8ff0f041f6d43f1a2ad12cdd65de89c",
+    "ass-2.packet": "3de0154b98c89a7ab4f2a7edda6e16c19a1f6f51d4776bbb8c3a43584e53b8f2",
+    "ass-0.packet": "89823671c40a5297da0a47040ef19c89e06b08a5dae2df58082aaeca7f00f253",
+    "ssa-positive.mkv": "62fb5af36217d3bf587555f8de234c8e08ee85a0c968409c876a80d606019277",
+    "utf8-1.packet": "8b3a799484a2a52c9720fd4558f96de1bcdfb14e82589a32a582bdc6fa824ee5",
+    "ssa-0.packet": "5c47178d979e0e557c07cbda4e102053fbd2f62ba17b82d3627b65a7d86bb8f8",
+    "ssa-2.packet": "dd695f59ff407db60753459c3b4040ef16e2e4ec340c81a32e231fb584645e07",
+    "manifest.json": "1bec6edcdeda5d25ec1c5646a39a7e8c122a002c6becfb3740df5bc918640eac",
+    "ass-1.packet": "3224691d8abc75488707a6e33e2a18e3ab5d4446ad1453df91e2324863c230d1",
+    "ssa-negative.mkv": "a853f4c4eaa4e59381db1cfc6ac5495eb2c4bc36ad57072eb501368e79c5e1c5"
+  }
+}

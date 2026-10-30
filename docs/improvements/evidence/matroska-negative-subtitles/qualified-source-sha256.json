@@ -1,0 +1,6 @@
+{
+  "src/playback/subtitles/webm_subtitles.rs": "2b0e45f3cb7e886e880a606259e09b9cf8230552169d6bc50cdc5d2cf80737a5",
+  "tests/matroska_negative_subtitles.rs": "96c42ffab20a704725106c2350afd0ebc1b7d14a81de7a720aa04c76c91864ba",
+  "scripts/generate_matroska_negative_subtitles.py": "c08e263d8cafeb503e46a227c14255ce7bb922aebe13c91a923956fd2ff67e2a",
+  "tests/fixtures/playback-errors/matroska-negative-subtitles/manifest.json": "1bec6edcdeda5d25ec1c5646a39a7e8c122a002c6becfb3740df5bc918640eac"
+}
