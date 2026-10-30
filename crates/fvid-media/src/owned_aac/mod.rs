@@ -162,6 +162,7 @@ pub mod aac_ld_mps_qmf;
 pub mod aac_ld_mps_ges;
 pub mod aac_ld_mps_stp_energy;
 pub mod aac_ld_mps_stp;
+pub mod aac_ld_mps_residual;
 pub mod aac_ld_mps_pcm;
 pub mod aac_ld_mps_transport;
 pub mod aac_ld_mps_ott;

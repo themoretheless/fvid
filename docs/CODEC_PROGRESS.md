@@ -1,3 +1,33 @@
+## Residual AAC extension syntax and MDCT spectra — partial,2026-10-30
+
+The owned `aac_ld_mps_residual` stage parses bounded kind0 residual payloads:
+OTT ICC differences per parameter set, one-to-four AAC-LC individual-channel
+streams per active residual box, TTT without an ICC prefix, and extra short ICS
+for18/24/30-slot update schedules. It restores1024 spectral coefficients per
+ICS through existing owned inverse quantization and TNS. It starts at
+global_gain without element IDs/tags and preserves the outer reader on any
+failure. It does not enable native residual playback or perform MDCT-to-QMF.
+
+The capped unary ICC reader is checked for all256 leading bytes at every bit
+offset and every truncated prefix, including the eighth-bit consumption at7.
+416 own analytical payloads cover eight trees,13 rates,four window sequences,
+both shapes and every residual-frame count.2,349,056 coefficients match exact
+analytical values;54 extra short spectra and84 active TTT cases are exercised.
+Truncation/retry and a specific extra-window mismatch preserve the reader.
+The spectral corpus uses ordinary codebook1; this is not all-tool residual AAC
+or independent full-decoder conformance.587 media unit tests and3 integration
+tests passed; one pre-existing media test remains ignored.
+
+A new twelve-frame own video contains nonzero residual AAC. Its ASC, all spatial
+frames and residual payloads parse separately, while the native player still
+returns the specific residual-reconstruction refusal. This is deliberately a
+refusal/reproduction regression, not PCM playback acceptance. Remaining work:
+MDCT-to-QMF and overlap state, ICC correction application, per-source residual
+association, and native PCM/navigation acceptance. Explicit generation is byte
+identical with network and child-process APIs denied; ordinary tests need no
+FFmpeg, compiler or network. See
+`docs/validation/aac-ld-mps-residual-syntax-2026-10-30.json`.
+
 ## Native LD-MPS STP playback, 2026-10-30
 
 STP now runs in the owned full-complex QMF chain before PCM synthesis. Low wet bins0..11
