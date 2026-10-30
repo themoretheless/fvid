@@ -1,0 +1,18 @@
+{
+  "commit": "838fe5c2bcb9f5d06258580f2bbe8fa9c39b33ec",
+  "verified_remote_refs": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "accepted_count": 426,
+  "removed_owned_target": "/private/tmp/fvid-negative-subtitles-20261030",
+  "removed_archived_raw_logs": [
+    "/private/tmp/fvid-negative-subtitles-before-20261030.log",
+    "/private/tmp/fvid-negative-subtitles-after-20261030.log",
+    "/private/tmp/fvid-negative-subtitles-root-20261030.log",
+    "/private/tmp/fvid-negative-subtitles-player-check-20261030.log",
+    "/private/tmp/fvid-negative-subtitles-core-check-20261030.log",
+    "/private/tmp/fvid-negative-subtitles-integration-20261030.log"
+  ],
+  "preserved": "Synthetic fixtures, proof, active other worktrees and four stashes."
+}
