@@ -1,0 +1,29 @@
+{
+  "scope": "Offline component fixture regeneration, process/socket creation denied by Python audit hook.",
+  "files": [
+    {
+      "file": "packets.bin",
+      "bytes": 14001,
+      "sha256": "6d76e0b9b9302da85664b92fe0b0f32d8388776ac98e97be7582cb78466aca8f"
+    },
+    {
+      "file": "manifest.json",
+      "bytes": 1114666,
+      "sha256": "457b959404f6634b5b4b3985f305bc0af774fb1a1cb961dd750f4f57c7492c1b"
+    }
+  ],
+  "inputs": [
+    {
+      "file": "scripts/generate_aac_ld_mps_parameter_fixtures.py",
+      "sha256": "7e3f4d3f7f434b5c10158357ee3e61e7f5d7c464dd0822c83802778a13a38709"
+    },
+    {
+      "file": "scripts/generate_aac_ld_mps_entropy_fixtures.py",
+      "sha256": "f74d18b6a1f99adb8472d430760a7ba7dd80ba5c6b204fbef02b32f236e08677"
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-entropy/codewords.json",
+      "sha256": "531501ca68e00be3edebcc0d50a934304a5b1154cbee881bb6280e98e9af6cd2"
+    }
+  ]
+}

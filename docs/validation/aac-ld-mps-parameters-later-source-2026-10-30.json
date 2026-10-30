@@ -1,0 +1,12 @@
+{
+  "repository": "https://github.com/mstorsjo/fdk-aac",
+  "revision": "c41c3c7516ea8d0d78a53b96b30bed3a29745cc6",
+  "url": "https://github.com/mstorsjo/fdk-aac/blob/c41c3c7516ea8d0d78a53b96b30bed3a29745cc6/cpp/libSACdec/src/sac_bitdec.cpp",
+  "sha256": "cf5092c174dfbfb6d027ff0d1a252e94d69a09341520fe593ac48609f89ed60e",
+  "facts": [
+    "mapIndexData initializes the left anchor to the first parameter set.",
+    "First interpolation uses the retained first row at its own slot.",
+    "Final interpolation and independent leading keep/interpolation are rejected."
+  ],
+  "scope": "Primary behavior clarification only. No FDK code is copied into or compiled for FVid."
+}

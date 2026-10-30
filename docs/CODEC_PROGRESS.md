@@ -1,3 +1,67 @@
+## LD-MPS stateful parameter indices, 2026-10-30
+
+The owned parameter layer now handles all LD data modes, single/paired coded
+sets, stride 1/2/5/23, coarse/fine transitions and separate entropy/mapped
+histories for CLD, ICC and CPC. Output rows contain fine indices before energy
+quantization, dequantization, smoothing or spatial matrix processing. A cloned
+instance is a component checkpoint; reset restores both histories and their
+quantization domains. The full block and caller cursor commit together only
+on success. Independent first-set keep/interpolate, trailing interpolation,
+unpaired coded geometry, bad slots, unused PCM ordinals and truncated fields
+are refused transactionally. One or two strictly ordered parameter sets are
+bounded by a 1..32-slot frame. Zero-width regions remain the responsibility of
+the enclosing dispatcher; this positive-region component accepts 1..23 bands.
+
+The two band maps must remain distinct. For six bands at stride five, entropy
+history expands as 4+2, while mapped output expands as 3+3. The first
+comparison exposed
+inconsistent assumptions: the initial generator used the history map for
+expected output while the initial Rust component used the output map for both
+histories. The independent ISO comparison confirms the two separate maps;
+the generator output and Rust parse-history mapping were corrected separately.
+A dedicated check now verifies parse history after every block. Subsequent
+frames switch strides to expose
+incorrect history reuse. CLD fine-to-coarse division truncates toward zero,
+whereas CPC uses arithmetic shift; coarse CLD endpoints expand to -15/+15.
+
+The old ISO insert leaves the interpolation left-anchor index uninitialized.
+The later [original-author implementation](https://github.com/mstorsjo/fdk-aac/blob/c41c3c7516ea8d0d78a53b96b30bed3a29745cc6/cpp/libSACdec/src/sac_bitdec.cpp)
+explicitly initializes it to zero. With LD's maximum of two sets and no final
+interpolated set, a leading interpolated row retains its previous indices at
+its own first slot; this layer does not invent a previous-frame slot. The
+reference harness runs 3864 noninterpolated blocks against unmodified ISO
+sources. A separate research control changes only that anchor initialization
+and matches all 4416 blocks, including their exact consumed bit counts and
+parse histories. It does not execute the original undefined interpolation path.
+The original/control source hashes and results are retained in the
+[reference report](validation/aac-ld-mps-parameters-reference-2026-10-30.json).
+No reference C/FDK implementation is included in the production decoder.
+
+The saved corpus contains 552 eight-block sequences / 4416 blocks covering all
+positive band counts, four strides, both initial quantizers and all three
+parameter kinds. Expected output rows, parse histories and quantization are
+independently inverse-generated. Ordinary Rust tests only read saved fixtures;
+generation and reference compilation remain separate research commands.
+Checkpoint replay is bit- and state-exact at eight starting bit offsets.
+Every block prefix is checked at offsets 0/3/7: 280719 failures preserve both
+histories and the caller position, even with later bits present in storage.
+Additional controls cover first/final legal slots, leading interpolation with
+default/keep anchors and reset. Regeneration matches both outputs byte-for-byte
+with process/socket creation denied, recorded in the
+[generation report](validation/aac-ld-mps-parameters-generation-2026-10-30.json).
+
+The full fvid-media unit suite passes 574 checks (one existing ignored),
+and all 13 configuration/entropy/parameter integration checks pass. Offline
+compilation of all test targets passes. Exact scope is recorded in the
+[test report](validation/aac-ld-mps-parameters-tests-2026-10-30.json).
+
+This is component qualification, not spatial playback or seek acceptance.
+There are still zero accepted spatial programmes and zero closed spatial codec
+gaps. Full spatial-frame dispatch, residual restrictions, smoothing, CLD energy
+quantization, decorrelation/upmix, LD-QMF/LD-SBR routing and synthetic movie
+playback/seek/rewind acceptance remain open. The native decoder's existing
+spatial-renderer refusal remains enabled. The broader codec goal remains active.
+
 ## LD-MPS parameter-pair entropy and index reconstruction, 2026-10-30
 
 The owned parameter-pair component now reconstructs CLD, ICC and CPC indices
