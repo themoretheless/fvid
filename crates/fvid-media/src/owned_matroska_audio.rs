@@ -187,8 +187,9 @@ impl MatroskaTimelineDecoder {
             _ => Err(invalid("channel mask requires AAC decoder")),
         }
     }
+    fn spatial(&self) -> bool { matches!(self,Self::Aac(d) if d.has_spatial()) }
     fn delayed(&self) -> bool {
-        matches!(self, Self::Ps(_)) || matches!(self,Self::Aac(d) if d.delayed())
+        matches!(self, Self::Ps(_)) || matches!(self,Self::Aac(d) if d.has_spatial() || d.delayed())
     }
     fn decode(&mut self, data: &[u8]) -> Result<Option<Vec<f32>>> {
         let samples = match self {
@@ -198,7 +199,7 @@ impl MatroskaTimelineDecoder {
             Self::Flac(d) => d.decode(data)?,
             Self::Pcm(d) => d.decode_pcm(data)?,
             Self::Alac(d) => d.decode_pcm(data)?,
-            Self::Aac(d) => return Ok(d.decode_timed(data,0,u64::from(d.core_packet_samples()))?.map(|f|f.samples)),
+            Self::Aac(d) => return Ok(d.decode_timed(data,0,if d.has_spatial(){0}else{u64::from(d.core_packet_samples())})?.map(|f|f.samples)),
             Self::Opus(d) => d.decode(data).map_err(|e| invalid(&e))?,
         };
         Ok(Some(samples))

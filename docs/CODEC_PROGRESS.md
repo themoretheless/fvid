@@ -1,3 +1,34 @@
+## Matroska AAC-LD / LD-MPS — delayed source windows,2026-10-31
+
+The AAC-LD spatial path now keeps Matroska packet association in both owned and
+frontend export. The sample-only decoder adapter no longer invents overlapping
+positive-duration windows at PTS0. Spatial delay remains a stream capability;
+the timeline queues original packet metadata until its PCM arrives,including
+bursts spanning more than three source windows. Other codecs retain their
+existing delay bounds. Source-window allocation is fallible and existing
+caller controls/cancellation remain in force.
+
+314 own MKV acceptance movies pair the previous AAC-LD/MPS packets with the
+same MP4 controls and an own AVC video track. PCM matches byte-for-byte through
+both exports,AudioStream playback,rewind,forward/backward/EOF seek and repeated
+ranges. The actual AudioWorker capture checks PCM and integer-nanosecond PTS:
+rounding is downward by less than1ns,without cumulative sample-clock drift.
+Two flag-off controls and six precise corruption rejections are separate from
+acceptance. Complete controlled prefixes drain; incomplete spatial windows
+refuse publication of unfinished PCM.
+
+This qualifies the listed EP0,no-SBR,24/48kHz,480/512 geometries in Matroska.
+The paired MP4 reference is a previously qualified compositional chain,not an
+independent full LD-MPS decoder. CodecDelay/DiscardPadding combinations,
+arbitrary container clocks,protected AAC+MPS and device output remain outside
+this new corpus. Other LD-MPS residual/profile gaps listed below remain open.
+
+Evidence: `docs/validation/aac-ld-mps-matroska-{generation,tests}-2026-10-31.json`.
+Relevant gates:1694 passed,0 failed,27 pre-existing ignored,including all
+media/root units and12 AAC/Matroska integration targets. All run offline.
+Additional multi-core spatial geometries (for example32-slot24kHz/512-core
+frames) still need Matroska acceptance with rounded source clocks.
+
 ## AAC-LD with attached LD-MPS — source-window playback,2026-10-31
 
 AOT23 now reads the normative ASC sync extension0x7cc and dispatches its ER

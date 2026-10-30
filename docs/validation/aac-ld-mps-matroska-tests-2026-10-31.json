@@ -1,0 +1,230 @@
+{
+  "baseline_commit": "a54abba384",
+  "scope": "AAC-LD with attached LD-MPS in Matroska; relevant codec/container regression gates, not universal codec or independent full-decoder conformance",
+  "acceptance_movies": 314,
+  "flag_off_controls": 2,
+  "late_error_movies": 4,
+  "asc_error_movies": 2,
+  "reference": "Identical own AAC/MPS packets in previously qualified MP4 controls; byte-for-byte PCM comparison, not an independent decoder",
+  "before_fix": [
+    {
+      "log": "/tmp/fvid-mps-matroska-before.log",
+      "sha256": "822b3cf589158d626590d2cf9a06f12c67661ffc607a83faf5b6058f9a0ede3a",
+      "observed_frontend_error": "LD-MPS frame spans discontinuous timestamps"
+    },
+    {
+      "log": "/tmp/fvid-mps-matroska-association-before.log",
+      "sha256": "bb1ac0541e59659b09cf64629ba49b4afce0a29f89f06c05c299b9f51804c3d6",
+      "observed_frontend_error": "delayed Matroska source lookahead exceeded"
+    }
+  ],
+  "checks": [
+    "Both owned/frontend Matroska export PCM and sample counts match paired MP4",
+    "314 AudioStream programmes: initial,rewind,forward/backward/EOF seek,repeat ranges",
+    "314 AudioWorker programmes with seven live-history seeks and rewind",
+    "Published integer ns timestamp floors the exact sample clock with error below1ns; existing MP4 rational timestamp checks unchanged",
+    "Complete controlled four-packet prefixes drain; incomplete two-core spatial frame refuses with zero PCM",
+    "Two flag-off controls retain core PCM; all six corrupt inputs reach their specific error"
+  ],
+  "gates": {
+    "targets": [
+      "aac_eld_mps_native",
+      "aac_ld_mps_ld_core",
+      "aac_ld_mps_matroska",
+      "aac_ld_mps_residual_native",
+      "aac_ssr_alignment",
+      "he_aac_ps_inband_matroska_export",
+      "he_aac_ps_matroska_export",
+      "he_aac_ps_matroska_output_clock",
+      "owned_matroska_aac",
+      "owned_matroska_alac",
+      "owned_matroska_audio_plan",
+      "owned_matroska_tracks"
+    ],
+    "gates": [
+      {
+        "gate": "media",
+        "command": [
+          "cargo",
+          "--config",
+          "profile.dev.package.fvid-media.opt-level=2",
+          "test",
+          "--offline",
+          "-p",
+          "fvid-media",
+          "--lib"
+        ],
+        "status": 0,
+        "seconds": 35.91656454099575,
+        "log": "/tmp/fvid-mps-matroska-gate-media.log",
+        "log_sha256": "85030acc9e5666f1318074b534cf5b7ca7e3a435d2ac996e31929585ec86604a",
+        "results": [
+          {
+            "passed": 587,
+            "failed": 0,
+            "ignored": 1
+          }
+        ]
+      },
+      {
+        "gate": "root",
+        "command": [
+          "cargo",
+          "--config",
+          "profile.dev.package.fvid-media.opt-level=2",
+          "test",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "player",
+          "--lib"
+        ],
+        "status": 0,
+        "seconds": 269.18997129099444,
+        "log": "/tmp/fvid-mps-matroska-gate-root.log",
+        "log_sha256": "aebe534b2fc6269bbc719902f59eeede735f6932d5737eb11cd3ed47ba78625c",
+        "results": [
+          {
+            "passed": 1063,
+            "failed": 0,
+            "ignored": 26
+          }
+        ]
+      },
+      {
+        "gate": "integration",
+        "command": [
+          "cargo",
+          "--config",
+          "profile.dev.package.fvid-media.opt-level=2",
+          "test",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "player",
+          "--test",
+          "aac_eld_mps_native",
+          "--test",
+          "aac_ld_mps_ld_core",
+          "--test",
+          "aac_ld_mps_matroska",
+          "--test",
+          "aac_ld_mps_residual_native",
+          "--test",
+          "aac_ssr_alignment",
+          "--test",
+          "he_aac_ps_inband_matroska_export",
+          "--test",
+          "he_aac_ps_matroska_export",
+          "--test",
+          "he_aac_ps_matroska_output_clock",
+          "--test",
+          "owned_matroska_aac",
+          "--test",
+          "owned_matroska_alac",
+          "--test",
+          "owned_matroska_audio_plan",
+          "--test",
+          "owned_matroska_tracks",
+          "--",
+          "--nocapture"
+        ],
+        "status": 0,
+        "seconds": 155.75033149999217,
+        "log": "/tmp/fvid-mps-matroska-gate-integration.log",
+        "log_sha256": "2308f837180d5723e80e4f2c25fe80a085217785eede6d13ce67b3f7f08e2964",
+        "results": [
+          {
+            "passed": 6,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 5,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 5,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 7,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 9,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 3,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 2,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 3,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0
+          },
+          {
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0
+          }
+        ]
+      }
+    ]
+  },
+  "total": {
+    "passed": 1694,
+    "failed": 0,
+    "ignored": 27
+  },
+  "source_sha256": {
+    "crates/fvid-media/src/owned_matroska_audio.rs": "873888e98d94d05fd65da6c8d07362dd30472e2651197cd934f098501a989208",
+    "crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs": "89e0fac520f25fb9e7b58f27542881356d9ed057bf639f48c15f121bc2297c1f",
+    "crates/fvid-media/src/owned_matroska_pcm.rs": "532035ae81ab884d3d58fe36199b202bf4093e0222a78d24d31e86a47f439784",
+    "src/native_audio_decoder.rs": "223cceb42680494bfb4bffd91950e50a5794ef66e51e8172b78cf890c9bfbf3c",
+    "src/native_media.rs": "7f855a32911a5d994a057626374992cc53d3b42a83ff540eb9468840bed98781",
+    "src/playback/audio/ep1_worker_tests.rs": "48bbee941ad4efa75e9bba310bcd347b93d06f13543c6e1de3d7a2a7ad716e9b",
+    "tests/aac_ld_mps_matroska.rs": "09b7199dc5f8379702a92bcc685b6bf000a35a54f4d699a6966c231b61c80def",
+    "scripts/generate_aac_ld_mps_matroska_fixtures.py": "046380227b27f17b1e91247483663f7467bf71ae12554575b784149a2bdf96ba"
+  },
+  "generator_inputs_sha256": {
+    "tests/fixtures/playback-errors/aac-ld-mps-ld-core/manifest.json": "78d868cbb178171943084293c1c11dd37b5f4cc8067e1028417fe6c7cc945c0d",
+    "tests/fixtures/playback-errors/aac-ld-mps-ld-core/packets.bin": "ec5e25aa7388fc02389fa6656324c714dc96019eeec451f4adeb125fc259d231",
+    "tests/fixtures/playback-errors/aac-ld-mps-ld-core/n480-r24000-tree0-v1-plain.mp4": "9b2a7488d4990b6dde8d66963ba768cee3c179f7e889d0101adfac729bd2a157",
+    "scripts/generate_aac_ps_matroska_fixtures.py": "20ed489b0cce9ee0aedfb2d228832148be2b79d931614872442629988b196146",
+    "scripts/generate_he_aac_packet_fixtures.py": "11ec6ba89f95ca25d7a6d4ec7cd7626994ba2b7dcae6ae73cf9c25fd91a78b40"
+  },
+  "limitations": [
+    "EP0/no-SBR24/48kHz480/512 at listed geometries only",
+    "CodecDelay/DiscardPadding combinations and arbitrary container clocks not newly qualified",
+    "Protected AAC+MPS combinations and residual/profile gaps remain open",
+    "Device output and throughput not measured",
+    "No independent full LD-MPS conformance oracle"
+  ]
+}

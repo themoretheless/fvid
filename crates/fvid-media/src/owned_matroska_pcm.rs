@@ -53,6 +53,7 @@ mod precise {
         fn channels(&self) -> u16 {
             self.0.channels()
         }
+        fn spatial(&self) -> bool { false }
         fn delayed(&self) -> bool {
             false
         }

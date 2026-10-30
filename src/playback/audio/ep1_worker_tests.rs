@@ -1,13 +1,7 @@
 //! Full worker path: typed ES group transport, queueing and navigation.
 use super::*;
 use crate::audio::AudioStream;
-fn check(
-    packets: &[crate::audio::AudioPacket],
-    full: &[u8],
-    begin: usize,
-    rate: u32,
-    stride: usize,
-) {
+fn check(packets: &[crate::audio::AudioPacket], full: &[u8], begin: usize, rate: u32, stride: usize, nanoseconds: bool) {
     let actual: Vec<_> = packets
         .iter()
         .flat_map(|p| p.data.iter().copied())
@@ -15,10 +9,14 @@ fn check(
     assert_eq!(actual, full[begin.min(full.len())..]);
     let mut cursor = begin.min(full.len()) / stride;
     for p in packets {
-        assert_eq!(
-            u128::from(p.pts) * u128::from(p.timebase_num) * u128::from(rate),
-            (cursor as u128) * u128::from(p.timebase_den)
-        );
+        let actual=u128::from(p.pts)*u128::from(p.timebase_num)*u128::from(rate);
+        let exact=(cursor as u128)*u128::from(p.timebase_den);
+        if nanoseconds {
+            // Matroska's published clock is integer ns. Verify floor rounding
+            // of the exact sample position, with less than one ns of error.
+            assert_eq!((p.timebase_num,p.timebase_den),(1,1_000_000_000));
+            assert!(actual<=exact && exact-actual<u128::from(rate),"ns timestamp {actual} vs exact {exact}");
+        } else { assert_eq!(actual,exact); }
         cursor += p.data.len() / stride;
     }
     assert_eq!(cursor, full.len() / stride);
@@ -101,22 +99,18 @@ fn check_corpus(corpus: &str) {
                 .flatten(),
         );
     for case in cases {
-        let video = case["video"].as_str().map(str::to_owned)
+        let video = case["video"].as_str().or_else(||case["file"].as_str()).map(str::to_owned)
             .unwrap_or_else(|| format!("{}.mp4", case["name"].as_str().unwrap()));
+        let matroska=video.ends_with(".mkv");
         let bytes = std::fs::read(root.join(video)).unwrap();
         let mut full = Vec::new();
-        fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
-            std::io::Cursor::new(&bytes),
-            &mut full,
-            None,
-            &Default::default(),
-        )
-        .unwrap();
-        let stream = crate::playback_mp4_audio::Mp4AudioReader::open(
-            std::io::Cursor::new(bytes),
-            Default::default(),
-        )
-        .unwrap();
+        let stream:Box<dyn AudioStream>=if matroska {
+            fvid_media::owned_matroska_aac::decode_matroska_aac_pcm(std::io::Cursor::new(&bytes),&mut full,None,&Default::default()).unwrap();
+            Box::new(crate::playback_webm_audio::WebmAudioReader::open(std::io::Cursor::new(bytes),Default::default()).unwrap())
+        } else {
+            fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(std::io::Cursor::new(&bytes),&mut full,None,&Default::default()).unwrap();
+            Box::new(crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(bytes),Default::default()).unwrap())
+        };
         let scale = stream.timescale();
         let rate = stream.sample_rate();
         let stride = usize::from(stream.channels()) * 4;
@@ -131,7 +125,7 @@ fn check_corpus(corpus: &str) {
             duration: Arc::new(Mutex::new(None)),
             checkpoints: Vec::new(),
             dolby_policy: DolbyPlaybackPolicy::default(),
-            stream: Box::new(stream),
+            stream,
             decoder,
             backend: Box::new(super::presentation_window_tests::Capture(captured.clone())),
             commands,
@@ -151,7 +145,7 @@ fn check_corpus(corpus: &str) {
             .flat_map(|p| p.data.iter().copied())
             .collect();
         assert_eq!(actual, full, "{} initial worker", case["name"]);
-        check(&captured.lock().unwrap(), &full, 0, rate, stride);
+        check(&captured.lock().unwrap(), &full, 0, rate, stride, matroska);
         let mut seeks = vec![13i64, 0, 7, 7, (full.len() / stride) as i64, 13, 0];
         if let Some(edges) = case.get("edges").and_then(|v| v.as_array()) {
             for edge in edges {
@@ -191,7 +185,7 @@ fn check_corpus(corpus: &str) {
                 .iter()
                 .flat_map(|p| p.data.iter().copied())
                 .collect();
-            check(&captured.lock().unwrap(), &full, begin, rate, stride);
+            check(&captured.lock().unwrap(), &full, begin, rate, stride, matroska);
             assert_eq!(
                 actual,
                 full[begin.min(full.len())..],
@@ -389,4 +383,9 @@ fn downscaled_ld_worker_keeps_exact_pcm_and_timestamps_through_navigation() {
 #[test]
 fn ld_mps_aac_ld_worker_keeps_source_windows_through_navigation() {
     check_corpus("aac-ld-mps-ld-core");
+}
+
+#[test]
+fn ld_mps_matroska_worker_keeps_source_windows_through_navigation() {
+    check_corpus("aac-ld-mps-matroska");
 }

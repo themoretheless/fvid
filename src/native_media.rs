@@ -423,6 +423,7 @@ impl MatroskaTimelineDecoder {
     fn channels(&self) -> u16 {
         self.0.channels()
     }
+    fn spatial(&self) -> bool { self.0.spatial() }
     fn delayed(&self) -> bool {
         self.0.delayed()
     }

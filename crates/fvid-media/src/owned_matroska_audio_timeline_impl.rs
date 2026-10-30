@@ -83,8 +83,9 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
             control.packet(encoded.len())?;
             index += 1;
             if decoder.delayed() {
+                pending_packet.try_reserve(1).map_err(|_| invalid("Matroska source window allocation failed"))?;
                 pending_packet.push_back((source_index,packet));
-                if pending_packet.len() > 3 { return Err(invalid("delayed Matroska source lookahead exceeded")); }
+                if !decoder.spatial() && pending_packet.len() > 3 { return Err(invalid("delayed Matroska source lookahead exceeded")); }
                 let Some(samples) = samples else {
                     continue;
                 };
