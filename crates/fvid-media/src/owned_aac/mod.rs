@@ -145,3 +145,6 @@ pub mod aac_ld_qmf;
 mod aac_ld_qmf_window;
 
 pub mod aac_ld_mps_config;
+
+pub mod aac_ld_mps_entropy;
+mod aac_ld_mps_huffman_facts;

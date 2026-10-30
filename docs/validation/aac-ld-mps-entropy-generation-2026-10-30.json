@@ -1,0 +1,12 @@
+{
+  "guard": "process creation and sockets denied",
+  "generated_files": 2,
+  "generated_bytes": 4716104,
+  "seconds": 0.18192383300629444,
+  "sha256": {
+    "packets.bin": "b564bd55527506bb78f8c37b9e546a08afc63bd72549a44523a3f15e01d3cf1e",
+    "manifest.json": "86c6dfaca18cb041d85529f3e52d7cc5831795b594453e3ee4c76994903dd1ee"
+  },
+  "numeric_facts_sha256": "531501ca68e00be3edebcc0d50a934304a5b1154cbee881bb6280e98e9af6cd2",
+  "scope": "8094 inverse-coded parameter pairs; includes full signed LAV symmetry domains, empty PCM subregions and 42 retained reference-defect controls. Component only; no spatial movies or playback acceptance."
+}

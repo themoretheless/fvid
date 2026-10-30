@@ -1,3 +1,67 @@
+## LD-MPS parameter-pair entropy and index reconstruction, 2026-10-30
+
+The owned parameter-pair component now reconstructs CLD, ICC and CPC indices
+from grouped-radix PCM or Huffman 1D/2D syntax, including both difference
+contexts, every LD LAV, signed symmetry restoration, odd-vector tails, escaped
+pairs, coarse/fine alphabets and fine-CPC LSBs. LD mode uses frequency pairing
+and no pilot-coding flag; this does not claim generic non-LD MPEG Surround
+pilot/time-pair support. Numeric prefix facts are separately frozen: 34 books,
+1504 reachable codewords, with no reference implementation in the runtime.
+
+The caller supplies history already in the requested quantization domain.
+Independent/frequency vectors do not read irrelevant history; a second vector
+may depend on the first vector's MSBs before either vector receives CPC LSBs.
+The initial independent pair also supports the LD time-codebook/frequency-
+reconstruction rule. Cursor and input history remain unchanged on failure,
+including a later vector or the last CPC LSB. Unused PCM ordinals and out-of-
+alphabet reconstructed indices are refused. Positive vectors cover 1..23
+bands; zero-band PCM consumes its coding flag and returns empty rows. Empty
+Huffman vectors are explicitly refused, without claiming normative acceptance
+of that representation.
+
+The own inverse-coded corpus has 8094 blocks. It covers every meaningful
+independence/set/difference-flag combination, single/paired vectors, seven
+positive region sizes, empty PCM, every reconstructible signed LAV symmetry
+pair and repeated escapes. All 8094 blocks match the independent expected
+indices at eight bit offsets with an immediately following sentinel. Full-band
+coding contexts undergo every bit truncation at offsets 0/3/7, including the
+sentinel in backing storage but outside the declared bit limit. Every numeric
+leaf is separately checked at eight offsets; codeword uniqueness and complete
+prefix mass are checked without regenerating fixtures.
+
+The [official ISO insert](https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip)
+provides an additional comparison. Original sources agree on 8052 cases and
+consume the expected number of bits on all 8094, without changing history.
+There are 42 retained value mismatches: the original CLD escape scratch array
+has shape `esc_data[MAXBANDS][2]` while its two row pointers are used as separate
+vectors of escape values. They overlap for three or more escapes. A research-
+only control changes that single declaration to `esc_data[2][MAXBANDS]`; all
+8094 then agree, including the original 8052 controls. The original results,
+exact declaration change, archive/member/input/output hashes and mismatching
+values are retained in [the reference report](validation/aac-ld-mps-entropy-reference-2026-10-30.json).
+No corrected or original C decoder is incorporated into FVid. This evidence
+qualifies this implementation internally, not the full standard or an official
+ISO conformance certificate.
+
+The fixture generator regenerates two output files / 4716104 bytes byte-exact
+with process/socket creation denied. Codeword JSON is a separate numeric input;
+its complete contents are also verified against the frozen ISO archive by the
+explicit research validator. Ordinary tests use saved data only, without
+FFmpeg, reference software, compiler, process creation or network.
+
+This is a parameter-pair component, not complete spatial-frame/playback support.
+No accepted spatial movie or closed codec gap is counted here. Frame data modes,
+stride expansion, coarse/fine history transitions, interpolation/smoothing,
+frame checkpoint/reset, decorrelation/upmix and LD-QMF/LD-SBR routing still
+require implementation and synthetic playback/seek/rewind acceptance. The
+broader codec goal remains active.
+
+The complete fvid-media unit suite passes 573 checks (one existing ignored).
+All five new entropy integration checks and four configuration checks pass;
+offline all-test compilation also passes. The
+[test report](validation/aac-ld-mps-entropy-tests-2026-10-30.json) records exact
+scope, 512 full-band coding contexts and the short-prefix check count.
+
 ## LD-MPS configuration metadata and bounded ELD integration, 2026-10-30
 
 `LDSpatialSpecificConfig` now has an owned typed parser. It covers all eight

@@ -1,0 +1,12 @@
+{
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "members": {
+    "mp4spatialdec/src/sac_nodes_pt0.c": "a57206780aa20ad600fc1687ad9ff8e3d812c2de09ef762faa59dbeb90abe7ff",
+    "mp4spatialdec/src/sac_nodes_cld.c": "cee880909c6012c6e5cfa26117616460a17d2f6b4f3d59062edac5e963f8676b",
+    "mp4spatialdec/src/sac_nodes_icc.c": "cf6252944f76916900d543fa833e9627d2d758f2c016a4f5d52c7cc5cfcacbbb",
+    "mp4spatialdec/src/sac_nodes_cpc.c": "39a20c7f78777ab868b12c638781437aeb08e388ea319c6e8aa2cb166b9fc73b"
+  },
+  "scope": "Numeric prefix codeword facts only. LD-MPS excludes pilot and time-pair coding; both frequency/time difference contexts and every LAV retained.",
+  "books": 34,
+  "codewords": 1504
+}
