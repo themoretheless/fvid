@@ -168,3 +168,5 @@ mod aac_ld_mps_prepare_facts;
 mod aac_ld_mps_huffman_facts;
 
 pub mod aac_ld_mps_session;
+
+pub mod aac_ld_mps_native;

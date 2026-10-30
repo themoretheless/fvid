@@ -1,0 +1,69 @@
+{
+  "scope": "Factual ordinary spatial speaker roles and WAVE mapping used by the native PCM adapter.",
+  "sources": [
+    {
+      "url": "https://patents.google.com/patent/US10529342B2/en",
+      "sha256": "eefed8c4ce01acf12f16056a66dcaaf7cc227389d24b25eb6938925f83ac6df3",
+      "local_evidence": "/tmp/fvid-ld-mps-research/native-layout-patent.html"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ksmedia/ns-ksmedia-ksaudio_channel_config",
+      "sha256": "b8fd906179fb98150f4cb5814308c7a3e0e40ccbf2f1443928e9ff89bce4fabb",
+      "local_evidence": "/tmp/fvid-ld-mps-research/native-wave-layout.html"
+    },
+    {
+      "url": "https://android.googlesource.com/platform/external/aac/+/ee76460efbdb147e26d804c798949c23f174460b/libSACdec/src/sac_dec.cpp",
+      "sha256": "e753d7660c6e99798afd32b7fb2e8513d154f77e323218b987c13e7b99bca2d3",
+      "local_evidence": "/tmp/fvid-ld-mps-research/fdk-sac_dec.cpp"
+    }
+  ],
+  "roles": "Published patent Table1 supplies standard trees0..6 roles. Existing official ISO reference supplies canonical reorder. Pinned FDK TREE_212 channel properties identify stereo as front left/right.",
+  "canonical_to_wave": {
+    "trees0_1_2": {
+      "mask": "0x3f",
+      "order": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "trees3_5_front_pair": {
+      "mask": "0xff",
+      "order": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "trees4_6_rear_pair": {
+      "mask": "0x63f",
+      "order": [
+        0,
+        1,
+        2,
+        3,
+        6,
+        7,
+        4,
+        5
+      ]
+    },
+    "tree7": {
+      "mask": "0x3",
+      "order": [
+        0,
+        1
+      ]
+    }
+  },
+  "geometry_source": "aac-ld-mps-transport-source-2026-10-30.json",
+  "geometry": "Out-of-band core/spatial rate and channel equality; frame_samples equals frame_slots times native QMF bands. Native admission here excludes coupled LD-SBR and output downscale."
+}

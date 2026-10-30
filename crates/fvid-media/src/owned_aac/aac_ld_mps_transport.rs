@@ -20,6 +20,7 @@ pub struct Message {
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Assembler {
     pending: Option<Vec<u8>>,
+    replacements: u64,
 }
 impl Assembler {
     /// End-of-stream validation does not discard an unfinished message.
@@ -32,6 +33,14 @@ impl Assembler {
     }
     pub fn reset(&mut self) {
         self.pending = None;
+        self.replacements = 0;
+    }
+    pub fn has_pending(&self) -> bool {
+        self.pending.is_some()
+    }
+    /// Completed messages which replaced an unfinished ancillary sequence.
+    pub fn replacements(&self) -> u64 {
+        self.replacements
     }
     /// `end` is the absolute bound supplied by the AAC envelope owner. Direct
     /// types9/12 consume that bound; type3 consumes only its length-delimited
@@ -134,6 +143,12 @@ impl Assembler {
                 }
             }
             3 => {
+                if self.pending.is_some() {
+                    self.replacements = self
+                        .replacements
+                        .checked_add(1)
+                        .ok_or_else(|| invalid("MPEG Surround replacement count overflow"))?;
+                }
                 self.pending = None;
                 Some(Message {
                     extension,

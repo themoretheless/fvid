@@ -1,5 +1,5 @@
 {
-  "scope": "Real nonzero ELD core boundary and atomic preparation controls. Spatial movie admission remains unsupported.",
+  "scope": "Nonzero ELD core boundary controls and native ordinary spatial playback/seek acceptance.",
   "cases": [
     {
       "tree": 0,

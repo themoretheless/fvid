@@ -215,7 +215,7 @@ fn render_ssr_sources(
 }
 
 /// PCM retains the timing of its source packet, including delayed SSR output.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct AacFrame {
     pub samples: Vec<f32>,
     pub pts: i64,
@@ -232,6 +232,7 @@ pub struct NativeAacDecoder {
     eld_synthesis: Vec<super::aac_eld_synthesis::EldSynthesis>,
     eld_full_synthesis: Vec<super::aac_eld_synthesis::EldSynthesis>,
     eld_sbr: Option<super::aac_eld_sbr::Decoder>,
+    ld_mps: Option<NativeSpatial>,
     output_downscale_factor: u8,
     protection: Option<super::aac_ep::Config>,
     direct_mapping: bool,
@@ -270,6 +271,7 @@ pub struct AacCheckpoint {
     eld_synthesis: Vec<super::aac_eld_synthesis::EldHistory>,
     eld_full_synthesis: Vec<super::aac_eld_synthesis::EldHistory>,
     eld_sbr: Option<super::aac_eld_sbr::Decoder>,
+    ld_mps: Option<NativeSpatial>,
     output_downscale_factor: u8,
     protection: Option<super::aac_ep::Config>,
     direct_mapping: bool,
@@ -307,7 +309,10 @@ impl NativeAacDecoder {
         Self::from_parsed_downscaled(parsed,1)
     }
     fn from_parsed_downscaled(parsed:AudioSpecificConfig,output_downscale_factor:u8)->Result<Self> {
-        if parsed.ld_mps.is_some() {return Err(unsupported("AAC LD-MPS spatial reconstruction is not yet implemented"));}
+        let ld_mps = parsed.ld_mps.as_ref().map(|config| NativeSpatial::new(config, super::aac_ld_mps_native::Core {
+            object_type:parsed.core.object_type,sample_rate:parsed.core.sample_rate,frame_samples:parsed.core.frame_samples,
+            channels:parsed.core.channels,has_sbr:parsed.eld_sbr.is_some(),downscale:output_downscale_factor,
+        }).map_err(|e| unsupported(&format!("AAC LD-MPS spatial reconstruction: {e}")))).transpose()?;
         if parsed.ps_present == Some(true) {
             return Err(unsupported("AAC parametric stereo synthesis is not yet implemented"));
         }
@@ -333,7 +338,7 @@ impl NativeAacDecoder {
         if program.is_none() && !matches!(config.channels, 1..=8) {
             return Err(unsupported("unsupported owned AAC channel layout"));
         }
-        let (channel_mask, mapping) = if let Some(program) = &program {
+        let (mut channel_mask, mapping) = if let Some(program) = &program {
             program.pcm_layout()?
         } else {
             let mapping: &[usize] = match config.channel_configuration {
@@ -392,7 +397,9 @@ impl NativeAacDecoder {
             let mut banks = vec![Some(bank); usize::from(config.channels)];
             banks.extend((0..16).map(|_| None)); banks
         } else { Vec::new() };
+        if let Some(spatial) = &ld_mps { channel_mask = spatial.mask(); }
         Ok(Self {
+            ld_mps,
             main_prediction,
             config,
             protection, direct_mapping, separate_esc, eld_sbr, output_downscale_factor, eld_synthesis, eld_full_synthesis, ld_synthesis, synthesis, ssr_synthesis, ltp_synthesis, ltp_coupling_synthesis,
@@ -464,7 +471,7 @@ impl NativeAacDecoder {
         if self.config.object_type==3 {self.ssr_fixed_clock=true;}
     }
     pub fn channels(&self) -> u8 {
-        self.config.channels
+        self.ld_mps.as_ref().map_or(self.config.channels, |spatial| spatial.channels())
     }
     pub fn channel_mask(&self) -> u32 {
         self.channel_mask
@@ -475,7 +482,7 @@ impl NativeAacDecoder {
         self.program.as_ref().map(|p| p.pcm_positions()).transpose()
     }
     pub fn checkpoint(&self) -> AacCheckpoint {
-        AacCheckpoint {separate_esc:self.separate_esc,direct_mapping:self.direct_mapping,protection:self.protection.clone(),main_prediction:self.main_prediction.clone(),config:self.config.clone(),initial_program:self.initial_program.clone(),program:self.program.clone(),
+        AacCheckpoint {ld_mps:self.ld_mps.clone(),separate_esc:self.separate_esc,direct_mapping:self.direct_mapping,protection:self.protection.clone(),main_prediction:self.main_prediction.clone(),config:self.config.clone(),initial_program:self.initial_program.clone(),program:self.program.clone(),
             eld_full_synthesis:self.eld_full_synthesis.iter().map(super::aac_eld_synthesis::EldSynthesis::checkpoint).collect(),
             eld_synthesis:self.eld_synthesis.iter().map(super::aac_eld_synthesis::EldSynthesis::checkpoint).collect(),eld_sbr:self.eld_sbr.clone(),output_downscale_factor:self.output_downscale_factor,
             ld_synthesis:self.ld_synthesis.iter().map(super::aac_ld_channel::LdChannel::checkpoint).collect(),
@@ -485,6 +492,7 @@ impl NativeAacDecoder {
     }
     /// Restore without changing the decoder if configuration/layout differs.
     pub fn restore(&mut self, state:&AacCheckpoint) -> Result<()> {
+        if self.ld_mps.as_ref().map(|s|s.initial_config())!=state.ld_mps.as_ref().map(|s|s.initial_config()) {return Err(invalid("AAC LD-MPS checkpoint configuration mismatch"));}
         if self.output_downscale_factor!=state.output_downscale_factor {return Err(invalid("AAC checkpoint output geometry mismatch"));}
         if self.separate_esc!=state.separate_esc || self.protection!=state.protection || self.direct_mapping!=state.direct_mapping {return Err(invalid("AAC EP checkpoint configuration mismatch"));}
         if self.config!=state.config || self.initial_program!=state.initial_program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask || self.detect_sbr!=state.detect_sbr || self.sbr_detection_rate!=state.sbr_detection_rate || (!self.detect_sbr && self.sbr_rate!=state.sbr_rate) {
@@ -508,12 +516,14 @@ impl NativeAacDecoder {
         }
         self.ssr_alignment=state.ssr_alignment.clone();self.ssr_alignment_tags=state.ssr_alignment_tags.clone();self.ssr_pending_duration=state.ssr_pending_duration.clone();self.ssr_fixed_clock=state.ssr_fixed_clock;self.ssr_source_alignment=state.ssr_source_alignment;
         self.eld_sbr=state.eld_sbr.clone();
+        self.ld_mps=state.ld_mps.clone();
         self.program=state.program.clone();
         self.main_prediction=state.main_prediction.clone();
         self.synthesis=state.synthesis.clone();self.ssr_synthesis=state.ssr_synthesis.clone();self.ssr_coupling_synthesis=state.ssr_coupling_synthesis.clone();self.coupling_synthesis=state.coupling_synthesis.clone();self.noise=state.noise.clone();self.sbr_rate=state.sbr_rate;self.sbr_elements=state.sbr_elements.clone();
         Ok(())
     }
     pub fn reset(&mut self) {
+        if let Some(spatial)=&mut self.ld_mps {spatial.reset();}
         self.program=self.initial_program.clone();
         self.ssr_alignment=None; self.ssr_alignment_tags.clear(); self.ssr_pending_duration=Default::default();self.ssr_fixed_clock=false;self.ssr_source_alignment=false;
         if let Some(ld)=&mut self.eld_sbr {ld.reset();}
@@ -544,9 +554,10 @@ impl NativeAacDecoder {
             .map_or_else(Vec::new, |f| f.samples))
     }
     pub fn delayed(&self) -> bool {
-        self.ssr_alignment.is_some()
+        self.ssr_alignment.is_some() || self.ld_mps.as_ref().is_some_and(NativeSpatial::delayed)
     }
     pub fn finish(&mut self) -> Result<Option<AacFrame>> {
+        if let Some(spatial)=&mut self.ld_mps {return Ok(spatial.finish()?.map(|f|AacFrame {samples:f.samples,pts:f.pts,duration:f.duration}));}
         let Some(mut alignment) = self.ssr_alignment.clone() else {return Ok(None);};
         let mut pending=self.ssr_pending_duration.clone();
         let mut elements=self.sbr_elements.clone();
@@ -643,7 +654,7 @@ impl NativeAacDecoder {
         }
     }
     fn decode_unprotected_timed_in_clock(&mut self, packet: &[u8], pts:i64, duration:u64, source_timescale:u32) -> Result<Option<AacFrame>> {
-        if self.config.object_type==39 {return self.decode_eld_timed(packet,pts,duration);}
+        if self.config.object_type==39 {return self.decode_eld_timed(packet,pts,duration,source_timescale);}
         if self.config.object_type==23 {return self.decode_ld_timed(packet,pts,duration);}
         let mut ltp_coupling_synthesis=self.ltp_coupling_synthesis.clone();
         let mut bits = BitReader::new(packet);

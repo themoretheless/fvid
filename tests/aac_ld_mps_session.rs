@@ -432,7 +432,7 @@ fn actual_access_units_keep_pcm_and_pts_when_parameters_arrive_late_or_fragmente
 }
 
 #[test]
-fn scheduling_movies_still_reproduce_specific_native_spatial_refusal() {
+fn scheduling_movies_play_or_refuse_the_specific_malformed_association() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests/fixtures/playback-errors/aac-ld-mps-session");
     let manifest: serde_json::Value =
@@ -441,19 +441,28 @@ fn scheduling_movies_still_reproduce_specific_native_spatial_refusal() {
         let movie =
             std::fs::read(root.join(format!("{}.mp4", case["name"].as_str().unwrap()))).unwrap();
         let mut pcm = Vec::new();
-        let error = fvid::native_media::decode_mp4_aac_pcm(&movie, &mut pcm)
-            .unwrap_err()
-            .to_string();
-        assert!(
-            error.contains("LD-MPS spatial reconstruction"),
-            "{}: {error}",
-            case["name"]
-        );
-        assert!(pcm.is_empty());
+        let result = fvid::native_media::decode_mp4_aac_pcm(&movie, &mut pcm);
+        match case["mode"].as_str().unwrap() {
+            "malformed-late" => assert!(
+                result
+                    .unwrap_err()
+                    .to_string()
+                    .contains("trailing bytes after LD-MPS spatial frame")
+            ),
+            "unfinished" => assert!(
+                result
+                    .unwrap_err()
+                    .to_string()
+                    .contains("unfinished LD-MPS PCM/spatial association")
+            ),
+            _ => {
+                result.unwrap();
+                assert!(!pcm.is_empty());
+            }
+        }
     }
 }
 #[test]
-#[ignore = "pending native spatial dispatch and retained-memory integration"]
 fn native_movies_match_immediate_pcm_with_late_and_fragmented_parameters() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests/fixtures/playback-errors/aac-ld-mps-session");

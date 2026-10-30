@@ -50,5 +50,5 @@ def main():
    case=dict(name=name,tree=tree,mode=mode,length=size,error=error,error_frame=1 if error else None,asc=(source/f'tree{tree}.spatial.asc').read_bytes().hex(),channels=channels,frames=frames,slots=8,bands=64,container_rate=48000,container_frame_samples=512,pcm_offset=0,samples=1536)
    (OUT/(name+'.mp4')).write_bytes(video_fixture([case],blob,channels,write=False)['data']);cases.append(case)
  (OUT/'packets.bin').write_bytes(blob)
- (OUT/'manifest.json').write_text(json.dumps(dict(scope='ELD mixed ER-tail dispatch and component playback; native spatial movie factory still refused.',cases=cases),indent=2)+'\n')
+ (OUT/'manifest.json').write_text(json.dumps(dict(scope='Native AAC-ELD spatial playback with mixed bounded ER tails and specific malformed-tail/alignment controls.',cases=cases),indent=2)+'\n')
 if __name__=='__main__':main()

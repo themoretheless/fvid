@@ -36,5 +36,5 @@ def main():
   movie=dict(core,asc=asc.hex(),frames=rows)
   (OUT/(name+'.mp4')).write_bytes(video_fixture([movie],blob,core['channels'],write=False)['data'])
   cases.append(dict(tree=tree,channels=core['channels'],frames=3,core_bits=[len(c['bits'])for c in core['frames'][:3]]))
- (OUT/'manifest.json').write_text(json.dumps(dict(scope='Real nonzero ELD core boundary and atomic preparation controls. Spatial movie admission remains unsupported.',cases=cases),indent=2)+'\n')
+ (OUT/'manifest.json').write_text(json.dumps(dict(scope='Nonzero ELD core boundary controls and native ordinary spatial playback/seek acceptance.',cases=cases),indent=2)+'\n')
 if __name__=='__main__':main()

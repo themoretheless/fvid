@@ -139,7 +139,7 @@ fn late_bad_drc_and_alignment_restore_pending_fragments_and_cursor() {
     assembler.finish().unwrap();
 }
 #[test]
-fn new_mixed_tail_movies_still_reproduce_native_factory_refusal() {
+fn native_mixed_tail_movies_play_or_refuse_the_specific_tail_failure() {
     let root = folder("aac-eld-spatial-tail");
     let manifest: serde_json::Value =
         serde_json::from_slice(&std::fs::read(root.join("manifest.json")).unwrap()).unwrap();
@@ -147,15 +147,14 @@ fn new_mixed_tail_movies_still_reproduce_native_factory_refusal() {
         let movie =
             std::fs::read(root.join(format!("{}.mp4", case["name"].as_str().unwrap()))).unwrap();
         let mut pcm = Vec::new();
-        let error = fvid::native_media::decode_mp4_aac_pcm(&movie, &mut pcm)
-            .unwrap_err()
-            .to_string();
-        assert!(
-            error.contains("LD-MPS spatial reconstruction"),
-            "{}: {error}",
-            case["name"]
-        );
-        assert!(pcm.is_empty());
+        let result = fvid::native_media::decode_mp4_aac_pcm(&movie, &mut pcm);
+        if let Some(reason) = case["error"].as_str() {
+            let error = result.unwrap_err().to_string();
+            assert!(error.contains(reason), "{}: {error}", case["name"]);
+        } else {
+            result.unwrap();
+            assert!(!pcm.is_empty());
+        }
     }
 }
 
@@ -208,7 +207,6 @@ fn spatial_dispatch_accepts_bounded_er_records_at_every_storage_bit_offset() {
 }
 
 #[test]
-#[ignore = "pending native LD-MPS admission and mixed-tail integration"]
 fn native_mixed_tail_movies_preserve_the_complete_spatial_pcm() {
     let root = folder("aac-eld-spatial-tail");
     let manifest: serde_json::Value =

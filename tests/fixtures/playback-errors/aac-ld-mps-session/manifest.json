@@ -1,5 +1,5 @@
 {
-  "scope": "AAC core/transport/session association, including delayed and fragmented parameters. Native spatial movie admission remains unsupported.",
+  "scope": "Native AAC-ELD spatial playback with immediate, late and fragmented parameters; malformed tail and unmatched PCM refuse specifically.",
   "cases": [
     {
       "name": "tree0-immediate",

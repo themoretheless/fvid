@@ -36,5 +36,5 @@ def main():
    movie=video_fixture([case],blob,channels,write=False)['data']
    OUT.mkdir(exist_ok=True);(OUT/(name+'.mp4')).write_bytes(movie);cases.append(case)
  (OUT/'packets.bin').write_bytes(blob)
- (OUT/'manifest.json').write_text(json.dumps(dict(scope='AAC core/transport/session association, including delayed and fragmented parameters. Native spatial movie admission remains unsupported.',cases=cases),indent=2)+'\n')
+ (OUT/'manifest.json').write_text(json.dumps(dict(scope='Native AAC-ELD spatial playback with immediate, late and fragmented parameters; malformed tail and unmatched PCM refuse specifically.',cases=cases),indent=2)+'\n')
 if __name__=='__main__':main()

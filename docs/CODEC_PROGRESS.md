@@ -1,3 +1,59 @@
+## Native ordinary AAC-ELD spatial playback and navigation, 2026-10-30
+
+The native factory now admits matching ordinary AAC-ELD/LD-MPS configurations.
+Spatial state lives entirely in fvid-media and is shared by the frontend's AAC
+facade. The coded core layout stays separate from output layout. ASC output
+channel metadata, native channel count and WAVE mask agree with the spatial tree;
+front-wide and rear-surround 7.1 trees have distinct masks and channel ordering.
+Rate, downmix-channel and frame geometry disagreements remain specific errors.
+Coupled LD-SBR, output downscale and remaining unsupported tools do not fall back
+to rendering the core downmix as spatial output.
+
+Core/noise histories, ER-tail assembly, spatial parsing/DSP, source metadata and
+ready PCM commit together after validation. Complete spatial frames retain one
+source window each. When parameters arrive late, one frame returns from decode
+and remaining ready frames drain individually at EOF; concatenating them had
+left the MP4 source-window queue undrained and is now a regression. Checkpoints
+include the owned spatial state; incompatible SSC restore is rejected before
+mutation. Reset clears PCM, parameters, ancillary fragments, ready output and
+source-clock state. Unmatched PCM/parameters at EOF are explicit errors. Replacing
+an unfinished fragment sequence still refuses specifically, retaining all state;
+a valid continuation can be retried and produce the complete reference PCM.
+
+All four previously ignored native acceptance tests are enabled. Old ordinary
+factory-refusal checks now assert playback or the specific malformed-stream
+error. 88 saved own movies are accepted: eight original core controls, 24
+immediate/late/fragmented programmes, 38 mixed-tail controls and 18 new native
+controls. AudioStream playback, rewind and seek match full decoded PCM for all
+88; 71 also reset and seek an already-used decoder. The new controls cover all
+eight trees at 24 kHz with 32-bin banks and 480/512-sample cores, alongside the
+48-kHz/64-bin/512-sample controls. A delayed 48-kHz programme in a distinct
+90-kHz MP4 source clock also preserves PCM, ranges and live navigation. The
+native stream's source timescale stays fixed until reset. Repeated range export
+remains exact.
+
+154752 native spatial samples match the previously qualified spatial component
+fed by independent direct-cosine core PCM, with maximum absolute difference
+1.4539377460234121e-11. This qualifies the integration and channel order; it is
+not an independent full-decoder conformance certificate. Performance remains
+separate qualification work.
+
+Validation passed: 577 media units (one existing ignored), 1061 frontend units
+(26 existing ignored), and 108 scoped codec integration checks with zero ignored.
+A focused rerun covers the descriptive fixture-scope updates; compressed packet,
+ASC, PCM and movie bytes of the earlier controls are unchanged. New fixture
+regeneration is byte-identical with Python process/spawn and socket APIs denied.
+Ordinary tests require no FFmpeg, network, fixture generation or external codec.
+See [source facts](validation/aac-eld-mps-native-source-2026-10-30.json), the
+[generation audit](validation/aac-eld-mps-native-generation-2026-10-30.json) and
+[test report](validation/aac-eld-mps-native-tests-2026-10-30.json).
+
+Remaining work includes the coupled LD-SBR QMF domain, output downscale, in-band
+configuration/AAC-LD signalling, dropped/replaced-fragment source association,
+delayed spatial output inside concatenated EP sources, residual AAC, active
+spatial tools, arbitrary/HRTF composition and 128-bin DSP. These tests do not
+close the full codec-coverage goal or performance qualification.
+
 ## Bounded AAC-ELD spatial-tail dispatch, 2026-10-30
 
 The shared AAC extension parser now offers opt-in ELD spatial dispatch alongside

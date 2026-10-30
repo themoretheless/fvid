@@ -1,5 +1,5 @@
 {
-  "scope": "ELD mixed ER-tail dispatch and component playback; native spatial movie factory still refused.",
+  "scope": "Native AAC-ELD spatial playback with mixed bounded ER tails and specific malformed-tail/alignment controls.",
   "cases": [
     {
       "name": "tree0-direct9",

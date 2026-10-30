@@ -21,3 +21,5 @@ tests/fixtures/playback-errors/aac-eld-mps-core/*.au binary
 tests/fixtures/playback-errors/aac-eld-mps-core/*.bits binary
 tests/fixtures/playback-errors/aac-eld-mps-core/*.spatial binary
 tests/fixtures/playback-errors/aac-eld-mps-core/*.ssc binary
+tests/fixtures/playback-errors/aac-eld-mps-native/*.f32le binary
+tests/fixtures/playback-errors/aac-eld-mps-native/*.bin binary
