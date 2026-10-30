@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 434,
-  "next_id": "FVID-0435",
+  "accepted_count": 435,
+  "next_id": "FVID-0436",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4876,6 +4876,17 @@
       "result": "Validate the complete nonempty local dref catalog against its declared count and exact existing self-contained URL/alias form; validate each common SampleEntry reference as a nonzero in-range index, including unused opaque descriptions.19 authored movies cover URL/alias orders, third/largest65535 indices, alternating descriptions, PCM/MACE, captions and real text fragments. Exact video/text packets, pictures, native seeks/EOF, independent PCM and baseline MACE PCM pass;12 malformed/unsupported companions retain specific refusals.47 files regenerate identically.1087 distinct checks pass across101 integration suites and deduplicated root/media units; locked/offline core/player builds pass. One physical-GPU test and one existing RGB compatibility acceptance remain ignored. All variants count once; no external-resolution or performance claim.",
       "status": "accepted",
       "validation": "batch-434-validation.json"
+    },
+    {
+      "id": "FVID-0435",
+      "batch": 435,
+      "title": "Recognize QuickTime preview atoms before movie data",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_preview_prefix.rs",
+      "before": "Direct indexed readers and software decoding preserve exact authored VP9 packets, clocks and pictures, but pnot/PICT-first MOV files fail native recognition and automatic owned probe. Original e73192bb passes2 controls and fails3 dispatch/probe/refusal-precedence checks.",
+      "result": "Add only pnot and PICT to the common opening-atom predicate; all box/track validation stays in the parser. Five valid MOV orders retain exact packets/pictures, native playback, rewind, EOF and seven seeks each. Four malformed/empty companions retain parser-specific refusals; JPEG/PNG/GIF-specific refusals stay intact.16 offline authored files regenerate identically; independent ffprobe validates15 packets/clocks.1092 distinct checks pass across102 integration suites and deduplicated root/media units, plus locked/offline core/player builds. No standalone PICT, preview-rendering, performance or physical-device claim.",
+      "status": "accepted",
+      "validation": "batch-435-validation.json"
     }
   ]
 }

@@ -1,0 +1,30 @@
+{
+  "before": {
+    "path": "/private/tmp/fvid-mp4-preview-before.log",
+    "sha256": "c9844e3fad3f2f6ee1276d1bb55b70675189dbc8eddbf786ef33404da429ae22"
+  },
+  "after": {
+    "path": "/private/tmp/fvid-mp4-preview-after.log",
+    "sha256": "d1ca8a8fc249895d8c334b06857c7a43018b6157bb604a321cc6250dce1703e7"
+  },
+  "integration": {
+    "path": "/private/tmp/fvid-mp4-preview-integration.log",
+    "sha256": "f4d06a6e478c180a452143620bd41fbc0aa600a20d553fe734a0f9651c7e258f"
+  },
+  "root-mp4": {
+    "path": "/private/tmp/fvid-mp4-preview-root-mp4.log",
+    "sha256": "8b8173b4fe0224eda05d0b6ac3a84d56acd80b7e1801946968c84a0448f96e18"
+  },
+  "media": {
+    "path": "/private/tmp/fvid-mp4-preview-media.log",
+    "sha256": "4e406568e84ca6d35fd76e4cb763e0b9e2de36f0792d7b1a9b0f641f945892de"
+  },
+  "core-check": {
+    "path": "/private/tmp/fvid-mp4-preview-core-check.log",
+    "sha256": "2a3707a279bed25f5e208dc3f00b587b5c3bd2ed610b5d189c39162ac46e6349"
+  },
+  "player-check": {
+    "path": "/private/tmp/fvid-mp4-preview-player-check.log",
+    "sha256": "05878bfff04b2ccc09a297327e6abb85dfab35f2ee21c3787098070c9814acaa"
+  }
+}

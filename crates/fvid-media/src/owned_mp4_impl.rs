@@ -16,7 +16,7 @@ fn seek_uninterrupted(reader: &mut impl std::io::Seek, from: std::io::SeekFrom) 
 /// by `Mp4Reader`, including malformed recognized inputs.
 pub fn recognizes_prefix(prefix: &[u8]) -> bool {
     prefix.len() >= 8
-        && matches!(&prefix[4..8], b"ftyp" | b"styp" | b"moov" | b"mdat" | b"wide" | b"free" | b"skip" | b"uuid")
+        && matches!(&prefix[4..8], b"ftyp" | b"styp" | b"moov" | b"mdat" | b"wide" | b"free" | b"skip" | b"uuid" | b"pnot" | b"PICT")
 }
 
 #[derive(Clone, Copy, Debug)]

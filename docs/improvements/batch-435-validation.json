@@ -1,0 +1,76 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0435"
+  ],
+  "batch": 435,
+  "count_delta": 1,
+  "accepted_count": 435,
+  "summary": "Recognize QuickTime movie preview atoms before movie data",
+  "before": "e73192bb7120922487ecd0718ea582c4b4e8a95a",
+  "checks": {
+    "before": {
+      "suites": 1,
+      "passed": 2,
+      "failed": 3,
+      "ignored": 0
+    },
+    "after": {
+      "suites": 1,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "integration": {
+      "suites": 102,
+      "passed": 491,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-mp4": {
+      "suites": 1,
+      "passed": 57,
+      "failed": 0,
+      "ignored": 1
+    },
+    "media": {
+      "suites": 1,
+      "passed": 547,
+      "failed": 0,
+      "ignored": 1
+    },
+    "core-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "distinct_passed": 1092,
+  "shared_include_duplicates_excluded": 3,
+  "focused_repeats_not_added": 5,
+  "fixtures": {
+    "valid_movies": 5,
+    "malformed_or_empty_refusals": 4,
+    "oracle_files": 6,
+    "manifest_files": 1,
+    "total_files": 16,
+    "repeatability": "identical"
+  },
+  "builds": "locked/offline/no-default-features core and player passed",
+  "ignored": [
+    "physical Metal/VideoToolbox required",
+    "existing integer/float RGB compatibility acceptance"
+  ],
+  "limits": [
+    "No standalone PICT decoding or preview rendering",
+    "No speed/RSS or physical-device claim"
+  ],
+  "evidence": "docs/improvements/evidence/mp4-preview-prefix/README.md"
+}

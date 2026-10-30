@@ -1,0 +1,6 @@
+{
+  "crates/fvid-media/src/owned_mp4_impl.rs": "57af29858645c18c0f720fa4a7f947648c70a4a8a95d22013c3c1d64d189dda1",
+  "tests/mp4_preview_prefix.rs": "46a07af8531acf3ca4d07eb00ac365e33cf61e561d34242896b89bb6af80c893",
+  "scripts/generate_mp4_preview_prefix.py": "a5688e683dc5b5810f55e3be6eccfd8ea01b22f97059e25587fb65c4795b7154",
+  "tests/fixtures/playback-errors/mp4-preview-prefix/manifest.json": "80bead87f16e2919db261dc03e193909d78be055d5c1ac2ef2ce868598cc5da9"
+}
