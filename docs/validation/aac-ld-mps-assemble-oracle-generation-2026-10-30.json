@@ -1,0 +1,8 @@
+{
+  "scope": "Explicit frozen original-C plus Decimal temporal oracle generation, excluded from ordinary tests.",
+  "byte_exact_regeneration": true,
+  "sha256": {
+    "tests/fixtures/playback-errors/aac-ld-mps-assemble/expected.bin": "878abc810badf34032f6c22a26e609f0432264bd2a2ffc13f956dbae03f13d88",
+    "tests/fixtures/playback-errors/aac-ld-mps-assemble/oracle.json": "c5b16f420f3c53c3adcd85807d33ba46bbf37751db5c9ed09fdb50fc89a3778f"
+  }
+}

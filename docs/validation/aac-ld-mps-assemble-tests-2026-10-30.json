@@ -1,0 +1,67 @@
+{
+  "base_commit": "38a1bbeb4d",
+  "scope": "Transactional frame-to-QMF-matrix assembly only; no spatial PCM/movie/playback/seek acceptance.",
+  "results": [
+    {
+      "log": "/tmp/fvid-ld-mps-assemble-all-tests.log",
+      "sha256": "81da85bc3a77366995b5f5a133db06bf13469bc8ba046032aa08199b7c429c15",
+      "passed": 48,
+      "ignored": 0
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-assemble-media-tests.log",
+      "sha256": "0665d1cfac6fe205bceeeebab3bc7f9c93919929a6bb8f1d21fe9b19888f4d87",
+      "passed": 575,
+      "ignored": 1
+    }
+  ],
+  "configurations": 336,
+  "frames": 1008,
+  "band_endpoints": 25200,
+  "endpoint_scalars": 3339000,
+  "interpolated_slot_scalars": 26235000,
+  "held_endpoints": 336,
+  "max_abs_endpoint_or_slot_error": 8.474283561543672e-07,
+  "absolute_test_ceiling": 5e-06,
+  "oracle_endpoint_storage": "f32 from original C raw matrices and 80-digit Decimal temporal smoothing",
+  "semantic_212_auxiliary_fields": 6300,
+  "reference_report": "aac-ld-mps-assemble-reference-2026-10-30.json",
+  "generation_audits": [
+    "aac-ld-mps-assemble-generation-2026-10-30.json",
+    "aac-ld-mps-assemble-oracle-generation-2026-10-30.json"
+  ],
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_assemble.rs": "3c1423fe8057909f919b3594864aff9f9f7f640c90990552147f4f216570ff90",
+    "tests/aac_ld_mps_assemble.rs": "c871e26da979d6664c88511186453d4e3032cd029eb283d36d8034b488ae458e",
+    "scripts/generate_aac_ld_mps_assemble_fixtures.py": "ca81d65f14fc2b521ede22b157993492a4faf9f7d675bdd09e9e942274acd538",
+    "scripts/generate_aac_ld_mps_assemble_reference.py": "a5477f5c234fc91476207b4d2115ccfcfab2e8a6c2318253b3fbf6e5ff69ca70",
+    "scripts/support/aac_ld_mps_assemble_reference_probe.c": "99ec65800c6345ee6bdbd0e5497cd74bdc2aea1ef5f04c0b205e61aa45a2b948"
+  },
+  "coverage": [
+    "all eight ordinary trees",
+    "seven parameter resolutions",
+    "shared/per-box ICC",
+    "all six TTT modes",
+    "low/high boundaries zero/middle/end",
+    "residual and LFE regions",
+    "32/64/128-bin matrix geometry",
+    "smoothing/keep history/held endpoint",
+    "checkpoint and reset replay",
+    "truncated-packet rollback",
+    "fully parsed frame then singular matrix failure rolls back every history and cursor"
+  ],
+  "ordinary_tests": "Saved controls only; no FFmpeg, network, generation, C compiler or reference software.",
+  "accepted_spatial_movies": 0,
+  "remaining": [
+    "actual downmix/residual QMF inputs",
+    "decorrelator and synthesis state orchestration",
+    "fixed gains and temporal shaping",
+    "residual AAC",
+    "arbitrary downmix/HRTF",
+    "unsupported quantization/profile combinations",
+    "128-bin DSP",
+    "full LD-SBR spatial PCM",
+    "synthetic movie playback/seek/rewind"
+  ],
+  "native_spatial_refusal": "remains enabled"
+}

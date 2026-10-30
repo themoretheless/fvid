@@ -1,0 +1,24 @@
+{
+  "scope": "Owned spatial frame syntax only; no movie or PCM acceptance.",
+  "byte_exact_regeneration": true,
+  "process_and_socket_creation": "denied by audit hook",
+  "files": {
+    "configs.bin": {
+      "bytes": 2905,
+      "sha256": "902d84ddd01ea5f0ebf710d87f9a5345ea437b706960fdd1812b4e9e832e90e8"
+    },
+    "packets.bin": {
+      "bytes": 57338,
+      "sha256": "10d2346f49e7e6e750e6adce63922abb9d82c4fe229a05742da3f065b1faa742"
+    },
+    "errors.bin": {
+      "bytes": 44,
+      "sha256": "3d641118adacb5d1c3bff89817af6210a54cfc5bb14d24b31f0e5a61bff67bc6"
+    },
+    "manifest.json": {
+      "bytes": 1066906,
+      "sha256": "80dd8056006b33c70a6634b6f342b89c32af14954d8fe747ddd70bebde671eda"
+    }
+  },
+  "generator_sha256": "ca81d65f14fc2b521ede22b157993492a4faf9f7d675bdd09e9e942274acd538"
+}

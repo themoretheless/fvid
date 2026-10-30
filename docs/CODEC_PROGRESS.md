@@ -1,3 +1,56 @@
+## Transactional LD-MPS spatial-frame matrix assembly, 2026-10-30
+
+The frame assembler now connects physical parameter decoding with the ordinary
+matrix builders for all eight trees. It selects shared/per-box ICC, dequantized
+CLD/CPC, low/high TTT modes at the native-band boundary, residual regions and
+LFE cutoff. It packs complex M1 and both M2 planes for their independent temporal
+histories and returns interpolated slot matrices, the W router, residual cutoffs
+and prepared metadata for later audio stages. Held final endpoints retain the
+preparation layer's parameter and smoothing state. Fixed gains/temporal tools
+remain metadata for the downstream stage; they are not silently applied here.
+
+Decoding is one transaction over the reader, parameter/entropy histories,
+smoothing state and all three matrix histories. Clone captures a full component
+checkpoint; reset restores the initial state. Constructor refusal explicitly
+preserves the unimplemented arbitrary-downmix/HRTF matrix scope. Existing
+physical preparation restrictions on other quantization/tool combinations
+remain authoritative. This is not full spatial audio decoding.
+
+336 synthetic ordinary configurations and 1008 frames cover eight trees,
+seven resolutions, shared ICC, all six TTT modes, boundaries at zero/middle/end,
+inversion, LFE and residual regions, smoothing/keep history and held endpoints.
+All 3339000 endpoint coefficients and every interpolated time slot match the
+saved original-matrix/Decimal-temporal oracle within 8.47429e-7 absolute error
+(test ceiling 5e-6). Endpoint storage is f32; temporal generation uses 80-digit
+Decimal. The known original 212 residual-column discrepancy is explicitly
+separated for 6300 auxiliary fields using the previously qualified residual
+basis. Raw original outputs remain identified by hash; no reference source is
+patched. See the [reference report](validation/aac-ld-mps-assemble-reference-2026-10-30.json).
+
+Whole-frame checkpoint replay, three-frame reset replay and truncated-packet
+rollback pass across all cases. A separate synthetic packet first parses fully
+through physical preparation, then fails specifically at singular TTT coherence;
+the complete assembler retains the original cursor and all histories, and the
+next valid frame agrees with checkpoint replay. This is a refusal/transaction
+regression, not intended playback acceptance. Native spatial renderer refusal
+remains enabled; zero accepted spatial movies are counted.
+
+Syntax regeneration is byte-identical with process/socket creation denied;
+see the [syntax audit](validation/aac-ld-mps-assemble-generation-2026-10-30.json).
+Explicit original-C/Decimal oracle regeneration is also byte-identical; see the
+[oracle audit](validation/aac-ld-mps-assemble-oracle-generation-2026-10-30.json).
+Ordinary tests load saved controls without FFmpeg, network, generation, a C
+compiler or reference software.
+
+All 48 LD-MPS integration tests and 575 media unit tests passed (one existing
+unit ignored); see the [test report](validation/aac-ld-mps-assemble-tests-2026-10-30.json).
+
+The next integration must supply actual downmix/residual QMF inputs, maintain
+decorrelator and synthesis state, apply fixed gains and temporal shaping, and
+produce qualified PCM. Residual AAC, arbitrary-downmix/HRTF tools, unsupported
+quantization/profile combinations, 128-bin DSP and actual synthetic movie
+playback/seek/rewind remain open.
+
 ## Owned LD-MPS W-signal routing, 2026-10-30
 
 The W router now selects direct, decoded-residual and decorrelated complex QMF
