@@ -4707,7 +4707,9 @@
       "before": "Original 1766aff8b6 preserves the indexed empty middle fragment but owned decoding refuses a non-contiguous timeline and native playback omits its silence. Final original-production acceptance:1 control passes,10 tests fail. Coarse 1001 Hz clock variants additionally expose rounded silence dropping a coded sample and recovered seeks skipping the gap.",
       "result": "Split source clock/resampling runs at declared DTS/PTS gaps while retaining decoder history. Emit bounded silence in owned f32/f64 and native schedules, drain delayed PS before the gap without reading oversized future payloads, preserve repeated edits and exact coarse-clock boundaries/seek. Fifty valid synthetic VP9/audio witnesses cover AAC/PS/PCM/ALAC, native PCM/PTS, seek/rewind/EOF, real playback workers and normalization; malformed codecs retain refusal/no publication. A short two-day-gap file proves bounded seek/output.816 distinct tests pass with locked/offline core/player builds; two hardware tests explicitly ignored.",
       "status": "accepted",
-      "validation": "batch-420-validation.json"
+      "validation": "batch-420-validation.json",
+      "follow_up_validation": "batch-420-gap-tail-followup-validation.json",
+      "follow_up_note": "Uncounted coarse-clock declared-tail interaction: recovered source endpoint preserves the first silence sample. Two additional synthetic PCM/ALAC videos cover exact PCM, duration, seek suffix/PTS, EOF and actual workers;270 new scoped checks and core/player builds pass."
     }
   ]
 }

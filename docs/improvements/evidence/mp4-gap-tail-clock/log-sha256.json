@@ -1,0 +1,12 @@
+{
+  "raw_sha256": {
+    "fvid-gap-tail-clock-seek-20261030.log": "d82d43092ccec032f9d6021f0a943f33a593b94f0aafdf5fbafa5f3983c1d903",
+    "fvid-gap-tail-clock-after-20261030.log": "fa1098d1a7da77a35790e263bf8c1c3d9f1c9b2e704802185ff5efa4698bca84",
+    "fvid-gap-tail-clock-before-20261030.log": "7ffab26728bb2b5de9760c225a908191b67692072587e473329121d7f2313184",
+    "fvid-gap-tail-clock-integration-20261030.log": "93bddef929d86c56bfd6573ea1fbf9713bfdca059807fd4c0d962e8dabd1ca95",
+    "fvid-gap-tail-clock-root-units-20261030.log": "fa8e8f5bf5b6b08b2ed6a3432571f33f1f46807b7feab736afdb30e747095185",
+    "fvid-gap-tail-clock-player-check-20261030.log": "becad2b9747a6b28bb7200bdad26b45dac612c160fb62e6d948e92dc082dded8",
+    "fvid-gap-tail-clock-core-check-20261030.log": "ba2b3467184b42ee148ec31cff7ca97e594a3ccdd5e82d7844befeb1f22b99b4"
+  },
+  "normalization": "Trailing whitespace and EOF blank lines stripped in archived text logs."
+}

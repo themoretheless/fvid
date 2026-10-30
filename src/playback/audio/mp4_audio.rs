@@ -489,8 +489,12 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 timeline.end = end;
             }
             if let Some(tail) = track.declared_empty_tail()? {
+                let start = if let Some(clock) = &clock {
+                    let last = track.samples.len().checked_sub(1).ok_or_else(||invalid("empty MP4 tail clock"))?;
+                    clock.point(track,last)?.add(EditTime::ticks(clock.frames(track,last)? as u64,clock.rate(last)?)?)?
+                } else {EditTime::new(tail.start, u128::from(track.timescale))?};
                 timeline.declare_source_silence(
-                    EditTime::new(tail.start, u128::from(track.timescale))?,
+                    start,
                     EditTime::new(tail.end, u128::from(track.timescale))?,
                 )?;
             }

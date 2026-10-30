@@ -1,0 +1,10 @@
+{
+  "commit": "f8ba7d59fb6ea9fc0d5c405777efc60902d79036",
+  "sha256": {
+    "src/playback/audio/mp4_audio.rs": "a6083efa9a700810ddc4765c014ef9bc2b43d05e447382c420f83ae7176b9b6c",
+    "tests/mp4_audio_middle_gap.rs": "a36a8980525dd6d4800a6025ed3e80cca583364870e9cbba5783e6bc8e1c9c67",
+    "scripts/generate_mp4_audio_middle_gap.py": "735121c3b2edb6433496c2e7fb1ee2621c0b090d263f566d2cf271d6307d5905",
+    "tests/fixtures/playback-errors/mp4-audio-middle-gap/manifest.json": "6e79fd633b55533c4fd081a6e1c3be12930d77bce1a504a7d31772564cc0f7db"
+  },
+  "counting": "Uncounted FVID-0420 endpoint interaction follow-up; no new independent improvement accepted."
+}

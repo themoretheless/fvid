@@ -120,6 +120,8 @@ def main():
         return out
     for codec in ['pcm','alac']:
         files[f'{codec}-coarse.mp4']=coarse(files[f'{codec}-v0-none.mp4'])
+        tail=atom(b'moof',atom(b'mfhd',word(0,5))+atom(b'traf',atom(b'tfhd',word(0x030008,2,20))+atom(b'tfdt',word(0,80))))
+        files[f'{codec}-coarse-tail.mp4']=files[f'{codec}-coarse.mp4']+tail
     # Three coded audio packets and pictures, but a two-day empty source span.
     # This is never rendered in full: regression checks seek and render 10 ms.
     long_gap_ticks=2*24*3600*8000

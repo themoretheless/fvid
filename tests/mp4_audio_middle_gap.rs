@@ -630,3 +630,37 @@ fn coarse_clock_gap_preserves_every_native_sample() {
         assert!(transitions::collect(&mut r).is_empty());
     }
 }
+
+#[cfg(feature = "player")]
+#[test]
+fn recovered_middle_gap_clock_keeps_a_declared_trailing_empty_fragment() {
+    use fvid::{audio::AudioStream, playback_mp4_audio::Mp4AudioReader};
+    for codec in ["pcm", "alac"] {
+        let c = cases().into_iter().find(|c| c["codec"] == codec && c["mode"] == "none" && c["stamp"] == "v0").unwrap();
+        let name = format!("{codec}-coarse-tail.mp4");
+        let mut r = Mp4AudioReader::open(Cursor::new(bytes(&name)), Default::default()).unwrap();
+        let packets = transitions::collect(&mut r);
+        let out: Vec<_> = packets.iter().flat_map(|p| p.3.iter().copied()).collect();
+        let mut oracle = expected(&c);
+        oracle.resize(oracle.len() + 160 * 4, 0);
+        compare(&out, &oracle, &name);
+        assert_eq!(r.duration(), Some(Duration::from_nanos(100_000_000_000 / 1001)));
+        r.seek_time(Duration::from_millis(90));
+        let suffix = transitions::collect(&mut r);
+        let suffix_bytes: Vec<_> = suffix.iter().flat_map(|p| p.3.iter().copied()).collect();
+        assert_eq!(suffix_bytes, vec![0; 79 * 4], "{name}: tail seek silence");
+        assert_eq!(suffix[0].2, Duration::from_nanos(40_000_000_000 / 1001 + 40_000_000 + 81 * 125_000));
+        r.seek_time(r.duration().unwrap());
+        assert!(transitions::collect(&mut r).is_empty());
+        let trace = std::sync::Arc::new(std::sync::Mutex::new(transitions::Trace::default()));
+        let captured = trace.clone();
+        let reader = Mp4AudioReader::open(Cursor::new(bytes(&name)), Default::default()).unwrap();
+        let audio = fvid::audio_thread::AudioPlayback::start(Box::new(reader), move || {
+            Box::new(transitions::Capture::new(captured))
+        });
+        audio.play();
+        transitions::ended(&audio, 0);
+        let played: Vec<_> = trace.lock().unwrap().packets.iter().flat_map(|p| p.3.iter().copied()).collect();
+        compare(&played, &oracle, &name);
+    }
+}

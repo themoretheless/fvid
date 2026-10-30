@@ -1,0 +1,6 @@
+{
+  "src/playback/audio/mp4_audio.rs": "66d4aec9427ca22a827deb462e3b50f24d8ed0ba92bcdeff7a5573558943037d",
+  "tests/mp4_audio_middle_gap.rs": "eeec87e49f6ccad3552cefe423f3d5f120b1b02af47c591d76519f1b4065e357",
+  "scripts/generate_mp4_audio_middle_gap.py": "735121c3b2edb6433496c2e7fb1ee2621c0b090d263f566d2cf271d6307d5905",
+  "tests/fixtures/playback-errors/mp4-audio-middle-gap/manifest.json": "6e79fd633b55533c4fd081a6e1c3be12930d77bce1a504a7d31772564cc0f7db"
+}

@@ -1,0 +1,33 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0420"
+  ],
+  "count_delta": 0,
+  "accepted_count": 420,
+  "summary": "Uncounted recovered native packet endpoint versus declared trailing silence interaction",
+  "before": "Published f8ba7d59fb returns799 samples rather than800 for authored coarse PCM with middle and trailing gaps",
+  "checks": {
+    "integration": {
+      "passed": 256,
+      "ignored": 0,
+      "suites": 43
+    },
+    "root-units": {
+      "passed": 14,
+      "ignored": 1,
+      "suites": 1
+    },
+    "core-check": "passed locked/offline/no-default-features",
+    "player-check": "passed locked/offline/no-default-features"
+  },
+  "distinct_passed": 270,
+  "ignored": 1,
+  "prior_unchanged_owned_library_checks": 547,
+  "evidence": "docs/improvements/evidence/mp4-gap-tail-clock/status.json",
+  "limits": [
+    "No new independent improvement counted",
+    "No hardware or performance qualification claim"
+  ],
+  "publication": "pending"
+}
