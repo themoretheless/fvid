@@ -33,6 +33,7 @@ enum Banks {
 }
 #[derive(Clone, Debug, PartialEq)]
 pub struct Decoder {
+    qmf_input: bool,
     qmf: aac_ld_mps_qmf::Decoder,
     banks: Banks,
     config: Config,
@@ -51,9 +52,21 @@ pub fn native_order(tree: u8) -> Result<&'static [usize]> {
 }
 impl Decoder {
     pub fn new(config: &Config, mode: Mode) -> Result<Self> {
+        Self::new_domain(config, mode, false)
+    }
+    /// Consume already-normalized spatial-domain QMF (e.g. from LD-SBR).
+    /// The sole PCM synthesis bank remains here; no analysis round trip runs.
+    pub fn new_qmf(config: &Config, mode: Mode) -> Result<Self> {
+        Self::new_domain(config, mode, true)
+    }
+    fn new_domain(config: &Config, mode: Mode, qmf_input: bool) -> Result<Self> {
         let qmf = aac_ld_mps_qmf::Decoder::new(config, mode)?;
         let order = native_order(config.tree.code)?.to_vec();
-        let inputs = usize::from(config.tree.input_channels);
+        let inputs = if qmf_input {
+            0
+        } else {
+            usize::from(config.tree.input_channels)
+        };
         let outputs = order.len();
         let banks = if config.sample_rate < 27713 {
             Banks::B32 {
@@ -86,6 +99,7 @@ impl Decoder {
             }
         }
         Ok(Self {
+            qmf_input,
             qmf,
             banks,
             config: config.clone(),
@@ -130,6 +144,9 @@ impl Decoder {
         downmix: &[Vec<f64>],
         residuals: &[Option<Vec<Vec<Complex>>>],
     ) -> Result<Frame> {
+        if self.qmf_input {
+            return Err(invalid("QMF LD-MPS decoder requires subband input"));
+        }
         let mut next = self.clone();
         let mut reader = bits.clone();
         let slots = usize::from(next.config.frame_slots);
@@ -175,6 +192,79 @@ impl Decoder {
         Ok(frame)
     }
 }
+impl Decoder {
+    /// Subbands are [slot][canonical downmix channel][band]. Clip protection
+    /// applies to the decoded SBR signal before spatial matrices; supplied
+    /// residuals retain their own normalized scale.
+    pub fn decode_qmf(
+        &mut self,
+        bits: &mut BitReader<'_>,
+        downmix: &[Vec<Vec<Complex>>],
+        residuals: &[Option<Vec<Vec<Complex>>>],
+    ) -> Result<Frame> {
+        if !self.qmf_input {
+            return Err(invalid("PCM LD-MPS decoder requires PCM input"));
+        }
+        let slots = usize::from(self.config.frame_slots);
+        let bins = if self.config.sample_rate < 27713 {
+            32
+        } else {
+            64
+        };
+        if downmix.len() != slots
+            || downmix.iter().any(|s| {
+                s.len() != usize::from(self.config.tree.input_channels)
+                    || s.iter().any(|c| {
+                        c.len() != bins || c.iter().any(|v| !v.re.is_finite() || !v.im.is_finite())
+                    })
+            })
+        {
+            return Err(invalid("invalid LD-MPS shared QMF frame"));
+        }
+        let mut next = self.clone();
+        let mut reader = bits.clone();
+        let mut scaled = downmix.to_vec();
+        for slot in &mut scaled {
+            for c in slot {
+                for v in c {
+                    v.re *= next.clip_gain;
+                    v.im *= next.clip_gain;
+                }
+            }
+        }
+        let samples = match &mut next.banks {
+            Banks::B32 { synthesis, .. } => render_subbands(
+                &mut next.qmf,
+                &mut reader,
+                &scaled,
+                residuals,
+                slots,
+                synthesis,
+                &next.order,
+                &next.gains,
+            )?,
+            Banks::B64 { synthesis, .. } => render_subbands(
+                &mut next.qmf,
+                &mut reader,
+                &scaled,
+                residuals,
+                slots,
+                synthesis,
+                &next.order,
+                &next.gains,
+            )?,
+        };
+        let frame = Frame {
+            sample_rate: next.config.sample_rate,
+            channels: next.order.len(),
+            samples,
+        };
+        *self = next;
+        *bits = reader;
+        Ok(frame)
+    }
+}
+
 fn render<const B: usize>(
     qmf: &mut aac_ld_mps_qmf::Decoder,
     bits: &mut BitReader<'_>,
@@ -202,7 +292,21 @@ fn render<const B: usize>(
             downmix[t][c] = value.to_vec();
         }
     }
-    let output = qmf.decode(bits, &downmix, residuals)?;
+    render_subbands(
+        qmf, bits, &downmix, residuals, slots, synthesis, order, gains,
+    )
+}
+fn render_subbands<const B: usize>(
+    qmf: &mut aac_ld_mps_qmf::Decoder,
+    bits: &mut BitReader<'_>,
+    downmix: &[Vec<Vec<Complex>>],
+    residuals: &[Option<Vec<Vec<Complex>>>],
+    slots: usize,
+    synthesis: &mut [Synthesis<B>],
+    order: &[usize],
+    gains: &[f64],
+) -> Result<Vec<f64>> {
+    let output = qmf.decode(bits, downmix, residuals)?;
     if !matches!(output.prepared.temporal_shape, Shape::Disabled) {
         return Err(unsupported(
             "LD-MPS active temporal PCM shaping is not yet implemented",

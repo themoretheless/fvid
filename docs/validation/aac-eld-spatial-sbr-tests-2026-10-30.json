@@ -1,0 +1,114 @@
+{
+  "scope": "Native shared-QMF AAC-ELD LD-SBR and LD-MPS acceptance; all8 trees at matched32/64-bin geometry.",
+  "runs": [
+    {
+      "group": "media",
+      "code": 0,
+      "log": "/tmp/fvid-spatial-sbr-gate-media.log",
+      "passed": 577,
+      "failed": 0,
+      "ignored": 1,
+      "targets": 1,
+      "sha256": "f385fa8b649b9cdee44c8d8e0873cd1be1d1478ee07af37204a1affa7a04fdde"
+    },
+    {
+      "group": "root",
+      "code": 0,
+      "log": "/tmp/fvid-spatial-sbr-gate-root.log",
+      "passed": 1061,
+      "failed": 0,
+      "ignored": 26,
+      "targets": 1,
+      "sha256": "5ee6f2d25b394e5272199a487a42772440438918f24e35d1d1e1388007016b1a"
+    },
+    {
+      "group": "integration",
+      "code": 0,
+      "log": "/tmp/fvid-spatial-sbr-gate-integration.log",
+      "passed": 180,
+      "failed": 0,
+      "ignored": 0,
+      "targets": 36,
+      "sha256": "c8a9365c2f3551d2e8bcf9edc5d03a562c5e46ebe30553f5acdf42fb93ea46fb"
+    }
+  ],
+  "fixtures": {
+    "valid": 152,
+    "malformed": 4,
+    "frames_per_valid": 12,
+    "core_samples": [
+      480,
+      512
+    ],
+    "core_rate": 24000,
+    "output_rates": [
+      24000,
+      48000
+    ],
+    "trees": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ]
+  },
+  "numeric": {
+    "qmf_scalar_values": 5428224,
+    "maximum_qmf_difference": 3.651050815844936e-17,
+    "wrong_cldfb_negative_control_gap": 0.01993681909956761,
+    "above32_band_energy": 0.0038317389170102146,
+    "native_pcm_tolerance": 2e-07,
+    "numeric_scope": "Independent direct-cosine AAC core input and absolute-time LD-QMF/scalar SBR oracle feed the previously qualified owned spatial consumer. This is not an independent end-to-end reference decoder."
+  },
+  "navigation": "Every valid movie: owned/frontend full PCM equality, playback, live rewind/reset, forward/backward/EOF seek, repeated interval ranges.",
+  "transactions": "Per-frame QMF split with fractional source stamps, three-frame delayed parameters, NaN rejection/rollback; native CRC/truncation retry and checkpoint restore.",
+  "generation_report": "aac-eld-spatial-sbr-generation-2026-10-30.json",
+  "source_report": "aac-eld-spatial-sbr-source-2026-10-30.json",
+  "no_libav_linkage": true,
+  "linkage_sha256": "cfa09a491facfaf717d6b5fac9e1e303a676f5039dac9ebd90e9a288ef05786f",
+  "sources_sha256": {
+    "crates/fvid-media/src/owned_aac/aac_eld_cldfb.rs": "8c9a760ac91096f599c342a6c9a32d9630a23b09f8e9c056923c0c1987319cca",
+    "crates/fvid-media/src/owned_aac/aac_eld_cldfb_window.rs": "99c7462d2bf2120283b5dcc18c91431fd2f274784d0d11b39ab56be1f9f6cadd",
+    "crates/fvid-media/src/owned_aac/aac_eld_downscale_window.rs": "d65fbcb14510cdf31cd0491d1c864706b013f2085820eb9f9eea24b8be2f1812",
+    "crates/fvid-media/src/owned_aac/aac_eld_native_impl.rs": "ab54792d0c34a85cdf0ed075fb9adcacca73313a5151c199c929b2cae81cd662",
+    "crates/fvid-media/src/owned_aac/aac_eld_sbr.rs": "3540dc4f957d9bc96de289faf676b948ffb5bb67daa91e6f2068f7a354b9818a",
+    "crates/fvid-media/src/owned_aac/aac_eld_sbr_dsp.rs": "32ed5b9f3762d7217139dd4b35de8b323a2d545a24d1137a1e155789fedfe955",
+    "crates/fvid-media/src/owned_aac/aac_eld_synthesis.rs": "904d18d2ce6b74e0c433c3dd9d65044e8a3b63054ea9ea96e823f4019068d478",
+    "crates/fvid-media/src/owned_aac/aac_eld_windows.rs": "382eb19589c75392813aac479243605e737443e4f2963cf51586c73813dc3866",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_assemble.rs": "c6b5183ef0868705091c1e65460f799d8cbc41eeae9ff6284308695c83e9d87a",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_config.rs": "babf3f6f196965bb172929fb026a36046a4846f4e8124ec5468cb1a149641244",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_decor.rs": "3e20dd3e6a86da0f08141817d2f4718835d0f042f780d5d42f4377455bdfd36b",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_decor_facts.rs": "9005aac039e457ceabaeedbb4154f607b6eea77a6c488e4e52927ed1b32a3072",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_entropy.rs": "ba947eeb6ebb5d18fc928f2a31a1ea9b3929e36da6429436535fec9e50f18907",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_frame.rs": "4306136db14b09ba75b2566e816e5c9cba9ea2d0da62fbd1f1ded0341438e0a9",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_frame_facts.rs": "b2f02af4290cfc222dac8479919d6e272b890cdc2311c38b7cb6442d5050e421",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_huffman_facts.rs": "41dd3b806baaafe43822849716e0cef5d99f5401e0491de7352f735eea9d736b",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_matrix_apply.rs": "1cad545dd97302f984afbeaaf198e35b91e7168078d17bc94a2c7d5771dc8ce9",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_matrix_time.rs": "379f8de413165ce0c8fef2c38c2a7fb09e97b8baea667c34ff9ac18ed0c354e0",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "ad76974f09c2cad41ac6050e3d3f891d1e001eba60eb6a92e42ee4142587c848",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_ott.rs": "0b9fce96ccab004773d1af7ae4167a76e4d1e0dd74be88012f30ab31884fa37f",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_parameters.rs": "bee2cfe621c652b68ba725a1a5a046247e75e3d3b49fa9c22817156287d5aec7",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_pcm.rs": "9da89e52a6d8e4ad019ff674708b31e891f12c04eb74d0e6430aa58eb7b70e61",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_prepare.rs": "44f53573ec51edd135ece05736b7f037e6267b6e0ec46918352ea2e11c6d76a1",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_prepare_facts.rs": "dd2c2409c84c3a8e6261df94e47cf5f6c4b52b992c11b026803bf3661d88b6ec",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_qmf.rs": "fc9c2d286e2f87756edd8d7e7619d85b05d3c277d8f9c34119ecdcc8e6fb024b",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_route.rs": "06ce3c093a5351b809c243bd0b8b0df655891f15b5a36451af7a5f4186235d0a",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_session.rs": "9688a76df90f676c0bb494d9fadd9ab41edd777985372ffebce642b40b5aaf5a",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_transport.rs": "5fdbd9f498ca562251d9c4505defe002c4408ca9c6ba9f96142d09cdabc22079",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_tree_matrix.rs": "6421b31695e9c40c1d2ebe9e42905363a3a1e93b916ddedab2a0accdec98722a",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_ttt.rs": "b0609ccd7593ae152594a3cc149e1a9cfcda44a06f76de420d5ed03e6ee7ed85",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_ttt_tree.rs": "2763830e84c871b7d3e4edf07db58b728ec8264fd16eb1b5acff5eda2c648c09",
+    "crates/fvid-media/src/owned_aac/aac_native_impl.rs": "11cb57e59042751bbc8e358b81e31f14d6b184819fc23718e420f10c4bb4c3d0",
+    "scripts/generate_aac_eld_spatial_sbr_fixtures.py": "60019ef039f449bccdfa000cd046759e1586f6980a1dadea08f46d3ee6bd973e",
+    "tests/aac_eld_spatial_sbr.rs": "5a635fd0d2f884d8f9d93923be8d0e0c7948022bdffef1f16a12ccb398236a51"
+  },
+  "limits": [
+    "Other shared-bank geometries and spatial output downscale are not accepted by this gate.",
+    "Residual AAC, remaining spatial tools and full published codec conformance require separate evidence.",
+    "No physical output-device or throughput qualification."
+  ]
+}

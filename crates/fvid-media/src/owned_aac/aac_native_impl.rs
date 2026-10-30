@@ -309,10 +309,12 @@ impl NativeAacDecoder {
         Self::from_parsed_downscaled(parsed,1)
     }
     fn from_parsed_downscaled(parsed:AudioSpecificConfig,output_downscale_factor:u8)->Result<Self> {
-        let ld_mps = parsed.ld_mps.as_ref().map(|config| NativeSpatial::new(config, super::aac_ld_mps_native::Core {
-            object_type:parsed.core.object_type,sample_rate:parsed.core.sample_rate,frame_samples:parsed.core.frame_samples,
-            channels:parsed.core.channels,has_sbr:parsed.eld_sbr.is_some(),downscale:output_downscale_factor,
-        }).map_err(|e| unsupported(&format!("AAC LD-MPS spatial reconstruction: {e}")))).transpose()?;
+        let ld_mps=parsed.ld_mps.as_ref().map(|config| {
+            let core=super::aac_ld_mps_native::Core {object_type:parsed.core.object_type,sample_rate:parsed.core.sample_rate,
+                frame_samples:parsed.core.frame_samples,channels:parsed.core.channels,has_sbr:parsed.eld_sbr.is_some(),downscale:output_downscale_factor};
+            let decoder=if let Some(sbr)=&parsed.eld_sbr {NativeSpatial::new_with_sbr(config,core,sbr.double_rate)}else{NativeSpatial::new(config,core)};
+            decoder.map_err(|e|unsupported(&format!("AAC LD-MPS spatial reconstruction: {e}")))
+        }).transpose()?;
         if parsed.ps_present == Some(true) {
             return Err(unsupported("AAC parametric stereo synthesis is not yet implemented"));
         }
@@ -320,7 +322,7 @@ impl NativeAacDecoder {
         let direct_mapping=parsed.direct_mapping;
         let separate_esc=parsed.separate_esc;
         let protection=parsed.protection.clone();
-        let eld_sbr=parsed.eld_sbr.clone().map(|config|super::aac_eld_sbr::Decoder::new_downscaled(config,parsed.core.sample_rate,parsed.core.frame_samples,parsed.core.channel_configuration,usize::from(output_downscale_factor))).transpose()?;
+        let eld_sbr=parsed.eld_sbr.clone().map(|config|if ld_mps.is_some() {super::aac_eld_sbr::Decoder::new_spatial(config,parsed.core.sample_rate,parsed.core.frame_samples,parsed.core.channel_configuration)}else{super::aac_eld_sbr::Decoder::new_downscaled(config,parsed.core.sample_rate,parsed.core.frame_samples,parsed.core.channel_configuration,usize::from(output_downscale_factor))}).transpose()?;
         let sbr_rate = if parsed.sbr_present == Some(true) && eld_sbr.is_none() {
             let rate = parsed.extension_sample_rate.ok_or_else(|| invalid("missing SBR output frequency"))?;
             let core = parsed.core.sample_rate;

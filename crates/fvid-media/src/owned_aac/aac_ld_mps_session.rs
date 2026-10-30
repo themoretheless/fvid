@@ -24,13 +24,25 @@ pub struct Frame {
     pub stamp: Stamp,
 }
 #[derive(Clone, Debug, PartialEq)]
+enum Signal {
+    Pcm(Vec<Vec<f64>>),
+    Qmf(Vec<Vec<Vec<super::aac_sbr_qmf::Complex>>>),
+}
+enum SignalView<'a> {
+    Pcm(&'a [Vec<f64>]),
+    Qmf(&'a [Vec<Vec<super::aac_sbr_qmf::Complex>>]),
+}
+#[derive(Clone, Debug, PartialEq)]
 struct Chunk {
-    planar: Vec<Vec<f64>>,
+    signal: Signal,
+    samples: usize,
     offset: usize,
     stamp: Stamp,
 }
 #[derive(Clone, Debug, PartialEq)]
 pub struct Session {
+    qmf_input: bool,
+    bins: usize,
     pcm: aac_ld_mps_pcm::Decoder,
     inputs: usize,
     frame_samples: usize,
@@ -41,6 +53,12 @@ pub struct Session {
 }
 impl Session {
     pub fn new(config: &Config, mode: Mode) -> Result<Self> {
+        Self::new_domain(config, mode, false)
+    }
+    pub fn new_qmf(config: &Config, mode: Mode) -> Result<Self> {
+        Self::new_domain(config, mode, true)
+    }
+    fn new_domain(config: &Config, mode: Mode, qmf_input: bool) -> Result<Self> {
         if config.extensions.iter().any(|e| {
             matches!(&e.value,
             ExtensionValue::Residual {bands, ..} if bands.iter().any(|b| b.unwrap_or(0)!=0))
@@ -60,7 +78,13 @@ impl Session {
             64
         };
         Ok(Self {
-            pcm: aac_ld_mps_pcm::Decoder::new(config, mode)?,
+            qmf_input,
+            bins,
+            pcm: if qmf_input {
+                aac_ld_mps_pcm::Decoder::new_qmf(config, mode)?
+            } else {
+                aac_ld_mps_pcm::Decoder::new(config, mode)?
+            },
             inputs: usize::from(config.tree.input_channels),
             frame_samples: usize::from(config.frame_slots) * bins,
             residual_boxes: config.tree.ott_lfe.len() + usize::from(config.tree.ttt_boxes),
@@ -101,17 +125,60 @@ impl Session {
         core: Option<(&[Vec<f64>], Stamp)>,
         messages: &[Message],
     ) -> Result<Vec<Frame>> {
+        if self.qmf_input {
+            return Err(invalid("QMF LD-MPS session requires subband input"));
+        }
+        self.submit_signal(core.map(|(v, s)| (SignalView::Pcm(v), s)), messages)
+    }
+    /// Shared normalized QMF is [slot][canonical channel][band]. Source timing
+    /// still uses physical output samples; QMF chunks split only on slot edges.
+    pub fn submit_qmf(
+        &mut self,
+        core: Option<(&[Vec<Vec<super::aac_sbr_qmf::Complex>>], Stamp)>,
+        messages: &[Message],
+    ) -> Result<Vec<Frame>> {
+        if !self.qmf_input {
+            return Err(invalid("PCM LD-MPS session requires PCM input"));
+        }
+        self.submit_signal(core.map(|(v, s)| (SignalView::Qmf(v), s)), messages)
+    }
+    fn submit_signal(
+        &mut self,
+        core: Option<(SignalView<'_>, Stamp)>,
+        messages: &[Message],
+    ) -> Result<Vec<Frame>> {
         let mut next = self.clone();
-        if let Some((planar, stamp)) = core {
-            let count = planar.first().map_or(0, Vec::len);
-            if planar.len() != next.inputs
-                || count == 0
-                || planar
-                    .iter()
-                    .any(|c| c.len() != count || c.iter().any(|v| !v.is_finite()))
-            {
-                return Err(invalid("invalid LD-MPS session downmix geometry or sample"));
-            }
+        if let Some((signal, stamp)) = core {
+            let count = match &signal {
+                SignalView::Pcm(planar) => {
+                    let count = planar.first().map_or(0, Vec::len);
+                    if planar.len() != next.inputs
+                        || count == 0
+                        || planar
+                            .iter()
+                            .any(|c| c.len() != count || c.iter().any(|v| !v.is_finite()))
+                    {
+                        return Err(invalid("invalid LD-MPS session downmix geometry or sample"));
+                    }
+                    count
+                }
+                SignalView::Qmf(rows) => {
+                    if rows.is_empty()
+                        || rows.iter().any(|s| {
+                            s.len() != next.inputs
+                                || s.iter().any(|c| {
+                                    c.len() != next.bins
+                                        || c.iter().any(|v| !v.re.is_finite() || !v.im.is_finite())
+                                })
+                        })
+                    {
+                        return Err(invalid("invalid LD-MPS session QMF geometry or sample"));
+                    }
+                    rows.len()
+                        .checked_mul(next.bins)
+                        .ok_or_else(|| invalid("LD-MPS QMF sample count overflow"))?
+                }
+            };
             if stamp.timescale == 0 {
                 return Err(invalid("zero LD-MPS source timescale"));
             }
@@ -120,11 +187,16 @@ impl Session {
                 .queued_samples
                 .checked_add(count)
                 .ok_or_else(|| invalid("LD-MPS queued sample count overflow"))?;
+            let signal = match signal {
+                SignalView::Pcm(v) => Signal::Pcm(v.to_vec()),
+                SignalView::Qmf(v) => Signal::Qmf(v.to_vec()),
+            };
             next.chunks
                 .try_reserve(1)
                 .map_err(|_| invalid("LD-MPS PCM queue allocation failed"))?;
             next.chunks.push_back(Chunk {
-                planar: planar.to_vec(),
+                signal,
+                samples: count,
                 offset: 0,
                 stamp,
             });
@@ -142,11 +214,14 @@ impl Session {
         }
         let mut output = Vec::new();
         while next.queued_samples >= next.frame_samples && !next.pending.is_empty() {
-            let (planar, stamp) = next.front_pcm()?;
+            let (signal, stamp) = next.front_signal()?;
             let payload = next.pending.front().unwrap();
             let mut bits = BitReader::new(payload);
             let residuals = vec![None; next.residual_boxes];
-            let pcm = next.pcm.decode(&mut bits, &planar, &residuals)?;
+            let pcm = match signal {
+                Signal::Pcm(planar) => next.pcm.decode(&mut bits, &planar, &residuals)?,
+                Signal::Qmf(rows) => next.pcm.decode_qmf(&mut bits, &rows, &residuals)?,
+            };
             if bits.remaining() > 7 {
                 return Err(invalid("trailing bytes after LD-MPS spatial frame"));
             }
@@ -163,7 +238,7 @@ impl Session {
             let mut remaining = next.frame_samples;
             while remaining != 0 {
                 let chunk = next.chunks.front_mut().unwrap();
-                let available = chunk.planar[0].len() - chunk.offset;
+                let available = chunk.samples - chunk.offset;
                 let take = available.min(remaining);
                 chunk.offset += take;
                 remaining -= take;
@@ -176,15 +251,21 @@ impl Session {
         *self = next;
         Ok(output)
     }
-    fn front_pcm(&self) -> Result<(Vec<Vec<f64>>, Stamp)> {
-        let mut planar: Vec<Vec<f64>> = (0..self.inputs)
-            .map(|_| Vec::with_capacity(self.frame_samples))
-            .collect();
+    fn front_signal(&self) -> Result<(Signal, Stamp)> {
+        let mut signal = if self.qmf_input {
+            Signal::Qmf(Vec::with_capacity(self.frame_samples / self.bins))
+        } else {
+            Signal::Pcm(
+                (0..self.inputs)
+                    .map(|_| Vec::with_capacity(self.frame_samples))
+                    .collect(),
+            )
+        };
         let mut remaining = self.frame_samples;
         let mut stamp: Option<Stamp> = None;
         let mut prior_end = 0;
         for chunk in &self.chunks {
-            let total = chunk.planar[0].len();
+            let total = chunk.samples;
             let take = (total - chunk.offset).min(remaining);
             let start = endpoint(chunk.stamp, chunk.offset, total)?;
             let end = endpoint(chunk.stamp, chunk.offset + take, total)?;
@@ -216,8 +297,21 @@ impl Session {
                 out.duration = u64::try_from(i128::from(end) - i128::from(out.pts))
                     .map_err(|_| invalid("LD-MPS output duration overflow"))?;
             }
-            for (dst, src) in planar.iter_mut().zip(&chunk.planar) {
-                dst.extend_from_slice(&src[chunk.offset..chunk.offset + take]);
+            match (&mut signal, &chunk.signal) {
+                (Signal::Pcm(dst), Signal::Pcm(src)) => {
+                    for (dst, src) in dst.iter_mut().zip(src) {
+                        dst.extend_from_slice(&src[chunk.offset..chunk.offset + take]);
+                    }
+                }
+                (Signal::Qmf(dst), Signal::Qmf(src)) => {
+                    if !chunk.offset.is_multiple_of(self.bins) || !take.is_multiple_of(self.bins) {
+                        return Err(invalid("LD-MPS QMF queue split between subband slots"));
+                    }
+                    dst.extend_from_slice(
+                        &src[chunk.offset / self.bins..(chunk.offset + take) / self.bins],
+                    );
+                }
+                _ => return Err(invalid("LD-MPS input domain changed within a queued frame")),
             }
             remaining -= take;
             if remaining == 0 {
@@ -231,7 +325,7 @@ impl Session {
         if self.chunks.front().unwrap().stamp.duration == 0 {
             stamp.duration = 0;
         }
-        Ok((planar, stamp))
+        Ok((signal, stamp))
     }
 }
 fn endpoint(stamp: Stamp, offset: usize, samples: usize) -> Result<i64> {
@@ -251,9 +345,22 @@ impl Session {
         self.pcm.visit_retained(f)?;
         f.deque(&self.chunks)?;
         for chunk in &self.chunks {
-            f.vector(&chunk.planar)?;
-            for row in &chunk.planar {
-                f.vector(row)?;
+            match &chunk.signal {
+                Signal::Pcm(planar) => {
+                    f.vector(planar)?;
+                    for row in planar {
+                        f.vector(row)?;
+                    }
+                }
+                Signal::Qmf(slots) => {
+                    f.vector(slots)?;
+                    for slot in slots {
+                        f.vector(slot)?;
+                        for row in slot {
+                            f.vector(row)?;
+                        }
+                    }
+                }
             }
         }
         f.deque(&self.pending)?;
@@ -325,7 +432,9 @@ mod memory_tests {
         let prior = session.pending.capacity();
         session.pending.reserve(17);
         extra += (session.pending.capacity() - prior) * std::mem::size_of::<Vec<u8>>();
-        let planar = &mut session.chunks.front_mut().unwrap().planar;
+        let Signal::Pcm(planar) = &mut session.chunks.front_mut().unwrap().signal else {
+            unreachable!()
+        };
         let prior = planar.capacity();
         planar.reserve(11);
         extra += (planar.capacity() - prior) * std::mem::size_of::<Vec<f64>>();

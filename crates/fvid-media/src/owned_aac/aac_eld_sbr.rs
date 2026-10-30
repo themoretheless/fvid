@@ -64,8 +64,13 @@ struct Group {
     stream: Stream,
     dsp: Dsp,
 }
+enum Output {
+    Pcm(Vec<Vec<f32>>),
+    Qmf(Vec<Vec<Vec<super::aac_sbr_qmf::Complex>>>),
+}
 #[derive(Clone, Debug, PartialEq)]
 pub struct Decoder {
+    spatial: bool,
     config: Config,
     core_rate: u32,
     factor: usize,
@@ -120,6 +125,7 @@ impl Decoder {
             .contains(&3)
             .then(|| Dsp::new_downscaled(config.double_rate, factor));
         Ok(Self {
+            spatial: false,
             config,
             core_rate,
             factor,
@@ -128,6 +134,54 @@ impl Decoder {
             groups,
             lfe,
         })
+    }
+    /// LD-MPS QMF-domain handoff. Uses the spatial LD analysis bank and
+    /// returns normalized subbands without CLDFB/PCM synthesis. Output is in
+    /// coded AAC element/channel order, indexed [channel][slot][band].
+    pub fn new_spatial(
+        config: Config,
+        core_rate: u32,
+        frame_samples: u16,
+        configuration: u8,
+    ) -> Result<Self> {
+        let mut decoder = Self::new(config, core_rate, frame_samples, configuration)?;
+        decoder.spatial = true;
+        for group in &mut decoder.groups {
+            group.dsp = Dsp::new_spatial(decoder.config.double_rate);
+        }
+        if decoder.lfe.is_some() {
+            decoder.lfe = Some(Dsp::new_spatial(decoder.config.double_rate));
+        }
+        Ok(decoder)
+    }
+    pub fn is_spatial(&self) -> bool {
+        self.spatial
+    }
+    pub fn process_prefix_qmf(
+        &mut self,
+        bytes: &[u8],
+        offset: usize,
+        end: usize,
+        core: &[Vec<f32>],
+    ) -> Result<(Vec<Vec<Vec<super::aac_sbr_qmf::Complex>>>, usize)> {
+        let mut bits = BitReader::with_bit_len(bytes, end)?;
+        bits.skip(offset)?;
+        let output = self.process_qmf(&mut bits, end, core)?;
+        Ok((output, bits.position() - offset))
+    }
+    pub fn process_qmf(
+        &mut self,
+        bits: &mut BitReader<'_>,
+        end: usize,
+        core: &[Vec<f32>],
+    ) -> Result<Vec<Vec<Vec<super::aac_sbr_qmf::Complex>>>> {
+        if !self.spatial {
+            return Err(invalid("CLDFB LD-SBR cannot supply spatial QMF"));
+        }
+        match self.process_output(bits, end, core, None, true)? {
+            Output::Qmf(output) => Ok(output),
+            Output::Pcm(_) => unreachable!(),
+        }
     }
     /// Current headers for syntax-only ESC reconstruction. Native synthesis
     /// commits these only after a complete valid decoded frame.
@@ -220,6 +274,22 @@ impl Decoder {
         core: &[Vec<f32>],
         full: Option<&[Vec<f32>]>,
     ) -> Result<Vec<Vec<f32>>> {
+        if self.spatial {
+            return Err(invalid("spatial LD-SBR requires QMF output"));
+        }
+        match self.process_output(bits, end, core, full, false)? {
+            Output::Pcm(output) => Ok(output),
+            Output::Qmf(_) => unreachable!(),
+        }
+    }
+    fn process_output(
+        &mut self,
+        bits: &mut BitReader<'_>,
+        end: usize,
+        core: &[Vec<f32>],
+        full: Option<&[Vec<f32>]>,
+        qmf: bool,
+    ) -> Result<Output> {
         let kinds = elements(self.configuration)?;
         let channels: usize = kinds.iter().map(|&k| if k == 1 { 2 } else { 1 }).sum();
         if core.len() != channels
@@ -238,18 +308,25 @@ impl Decoder {
         }
         let mut state = self.clone();
         let mut trial = bits.clone();
-        let mut output = Vec::with_capacity(channels);
+        let mut output = Vec::with_capacity(if qmf { 0 } else { channels });
+        let mut subbands = Vec::with_capacity(if qmf { channels } else { 0 });
         let mut at = 0;
         let mut group = 0;
         for &kind in kinds {
             if kind == 3 {
-                output.push(
-                    state
-                        .lfe
-                        .as_mut()
-                        .ok_or_else(|| invalid("missing low-delay SBR LFE state"))?
-                        .upsample_lfe(&core[at], state.slots, full.map(|p| p[at].as_slice()))?,
-                );
+                let lfe = state
+                    .lfe
+                    .as_mut()
+                    .ok_or_else(|| invalid("missing low-delay SBR LFE state"))?;
+                if qmf {
+                    subbands.push(lfe.upsample_lfe_qmf(&core[at], state.slots)?);
+                } else {
+                    output.push(lfe.upsample_lfe(
+                        &core[at],
+                        state.slots,
+                        full.map(|p| p[at].as_slice()),
+                    )?);
+                }
                 at += 1;
                 continue;
             }
@@ -274,18 +351,29 @@ impl Decoder {
                     .map(Vec::as_slice)
                     .collect::<Vec<_>>()
             });
-            output.extend(g.dsp.process(
-                &frame,
-                &refs,
-                state.core_rate,
-                state.slots,
-                full_refs.as_deref(),
-            )?);
+            if qmf {
+                subbands.extend(
+                    g.dsp
+                        .process_qmf(&frame, &refs, state.core_rate, state.slots)?,
+                );
+            } else {
+                output.extend(g.dsp.process(
+                    &frame,
+                    &refs,
+                    state.core_rate,
+                    state.slots,
+                    full_refs.as_deref(),
+                )?);
+            }
             at += width;
             group += 1;
         }
         *self = state;
         *bits = trial;
-        Ok(output)
+        Ok(if qmf {
+            Output::Qmf(subbands)
+        } else {
+            Output::Pcm(output)
+        })
     }
 }

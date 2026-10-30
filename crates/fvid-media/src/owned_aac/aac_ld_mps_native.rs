@@ -1,5 +1,6 @@
 //! Owned AAC-ELD spatial stream context shared by native AAC frontends.
 pub use super::aac_ld_mps_session::Stamp;
+pub type Subbands = Vec<Vec<Vec<super::aac_sbr_qmf::Complex>>>;
 use super::{Result, aac_native::AacFrame, invalid, unsupported};
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Core {
@@ -22,9 +23,23 @@ pub struct Decoder {
 }
 impl Decoder {
     pub fn new(config: &super::aac_ld_mps_config::Config, core: Core) -> Result<Self> {
-        if core.object_type != 39 || core.has_sbr || core.downscale != 1 {
+        Self::new_domain(config, core, None)
+    }
+    pub fn new_with_sbr(
+        config: &super::aac_ld_mps_config::Config,
+        core: Core,
+        double_rate: bool,
+    ) -> Result<Self> {
+        Self::new_domain(config, core, Some(double_rate))
+    }
+    fn new_domain(
+        config: &super::aac_ld_mps_config::Config,
+        core: Core,
+        sbr: Option<bool>,
+    ) -> Result<Self> {
+        if core.object_type != 39 || core.downscale != 1 {
             return Err(unsupported(
-                "coupled LD-SBR/downscaled spatial filter banks are not yet implemented",
+                "downscaled spatial filter banks are not yet implemented",
             ));
         }
         let bins = if config.sample_rate < 27713 {
@@ -34,21 +49,48 @@ impl Decoder {
         } else {
             64
         };
-        if config.sample_rate != core.sample_rate
+        if core.has_sbr != sbr.is_some() {
+            return Err(invalid(
+                "LD-MPS SBR context requires explicit shared QMF mode",
+            ));
+        }
+        let factor = if sbr == Some(true) { 2 } else { 1 };
+        let rate = core
+            .sample_rate
+            .checked_mul(factor)
+            .ok_or_else(|| invalid("LD-MPS output rate overflow"))?;
+        if config.sample_rate != rate
             || config.tree.input_channels != core.channels
-            || usize::from(config.frame_slots) * bins != usize::from(core.frame_samples)
+            || usize::from(config.frame_slots) * bins
+                != usize::from(core.frame_samples) * factor as usize
         {
             return Err(invalid(
                 "LD-MPS rate, downmix channels or frame geometry disagree with AAC ELD core",
             ));
         }
+        if let Some(double) = sbr {
+            if bins != if double { 64 } else { 32 }
+                || usize::from(config.frame_slots) != usize::from(core.frame_samples) / 32
+            {
+                return Err(unsupported(
+                    "LD-MPS coupled QMF bank geometry is not yet implemented",
+                ));
+            }
+        }
         Ok(Self {
             core,
             config: config.clone(),
-            session: super::aac_ld_mps_session::Session::new(
-                config,
-                super::aac_ld_mps_decor::Mode::Complex,
-            )?,
+            session: if core.has_sbr {
+                super::aac_ld_mps_session::Session::new_qmf(
+                    config,
+                    super::aac_ld_mps_decor::Mode::Complex,
+                )?
+            } else {
+                super::aac_ld_mps_session::Session::new(
+                    config,
+                    super::aac_ld_mps_decor::Mode::Complex,
+                )?
+            },
             assembler: Default::default(),
             ready: Default::default(),
             source_clock: None,
@@ -156,6 +198,46 @@ impl Decoder {
         samples: &[f32],
         stamp: Stamp,
     ) -> Result<Option<AacFrame>> {
+        if self.core.has_sbr {
+            return Err(invalid("LD-SBR spatial decoder requires shared QMF input"));
+        }
+        let channels = usize::from(self.config.tree.input_channels);
+        if samples.len() != usize::from(self.core.frame_samples) * channels {
+            return Err(invalid("AAC LD-MPS core PCM channel mismatch"));
+        }
+        let planar: Vec<Vec<f64>> = (0..channels)
+            .map(|c| {
+                samples
+                    .chunks_exact(channels)
+                    .map(|r| f64::from(r[c]))
+                    .collect()
+            })
+            .collect();
+        self.decode_signal(packet, used_bits, Some(&planar), None, stamp)
+    }
+    pub fn decode_qmf(
+        &mut self,
+        packet: &[u8],
+        used_bits: usize,
+        qmf: &[Vec<Vec<super::aac_sbr_qmf::Complex>>],
+        stamp: Stamp,
+    ) -> Result<Option<AacFrame>> {
+        if !self.core.has_sbr {
+            return Err(invalid("AAC spatial decoder requires core PCM input"));
+        }
+        if qmf.len() != usize::from(self.config.frame_slots) {
+            return Err(invalid("AAC LD-MPS shared QMF slot mismatch"));
+        }
+        self.decode_signal(packet, used_bits, None, Some(qmf), stamp)
+    }
+    fn decode_signal(
+        &mut self,
+        packet: &[u8],
+        used_bits: usize,
+        pcm: Option<&[Vec<f64>]>,
+        qmf: Option<&[Vec<Vec<super::aac_sbr_qmf::Complex>>]>,
+        stamp: Stamp,
+    ) -> Result<Option<AacFrame>> {
         if self
             .source_clock
             .is_some_and(|clock| clock != stamp.timescale)
@@ -172,19 +254,12 @@ impl Decoder {
                 "AAC LD-MPS replaced-fragment source association is not yet implemented",
             ));
         }
-        let channels = usize::from(self.config.tree.input_channels);
-        if samples.len() != usize::from(self.core.frame_samples) * channels {
-            return Err(invalid("AAC LD-MPS core PCM channel mismatch"));
-        }
-        let planar: Vec<Vec<f64>> = (0..channels)
-            .map(|c| {
-                samples
-                    .chunks_exact(channels)
-                    .map(|r| f64::from(r[c]))
-                    .collect()
-            })
-            .collect();
-        let frames = next.session.submit(Some((&planar, stamp)), &messages)?;
+        let frames = if let Some(qmf) = qmf {
+            next.session.submit_qmf(Some((qmf, stamp)), &messages)?
+        } else {
+            next.session
+                .submit(Some((pcm.unwrap(), stamp)), &messages)?
+        };
         next.queue_frames(frames, stamp.timescale)?;
         let output = next.ready.pop_front();
         *self = next;

@@ -5,6 +5,7 @@ type NativeSpatial = super::aac_ld_mps_native::Decoder;
 struct PreparedEldCore {
     used_bits: usize,
     samples: Vec<f32>,
+    spatial_qmf: Option<super::aac_ld_mps_native::Subbands>,
     synthesis: Vec<super::aac_eld_synthesis::EldSynthesis>,
     full_synthesis: Vec<super::aac_eld_synthesis::EldSynthesis>,
     sbr: Option<super::aac_eld_sbr::Decoder>,
@@ -52,17 +53,42 @@ impl NativeAacDecoder {
             }
         }
         let mut ld = self.eld_sbr.clone();
+        let mut spatial_qmf = None;
         if let Some(ld) = &mut ld {
             let end = bits.position() + bits.remaining();
-            let (output, used) = ld.process_prefix_with_full(
-                packet,
-                bits.position(),
-                end,
-                &planar,
-                (!full_planar.is_empty()).then_some(full_planar.as_slice()),
-            )?;
-            bits.skip(used)?;
-            planar = output;
+            if ld.is_spatial() {
+                let (output, used) =
+                    ld.process_prefix_qmf(packet, bits.position(), end, &planar)?;
+                let slots = output.first().map_or(0, Vec::len);
+                let bins = output.first().and_then(|c| c.first()).map_or(0, Vec::len);
+                if output.len() != usize::from(config.channels)
+                    || slots == 0
+                    || bins == 0
+                    || output
+                        .iter()
+                        .any(|c| c.len() != slots || c.iter().any(|r| r.len() != bins))
+                {
+                    return Err(invalid("invalid shared LD-SBR QMF output geometry"));
+                }
+                let mut canonical = vec![vec![vec![Default::default(); bins]; output.len()]; slots];
+                for (c, rows) in output.iter().enumerate() {
+                    for (t, row) in rows.iter().enumerate() {
+                        canonical[t][self.mapping[c]] = row.clone();
+                    }
+                }
+                spatial_qmf = Some(canonical);
+                bits.skip(used)?;
+            } else {
+                let (output, used) = ld.process_prefix_with_full(
+                    packet,
+                    bits.position(),
+                    end,
+                    &planar,
+                    (!full_planar.is_empty()).then_some(full_planar.as_slice()),
+                )?;
+                bits.skip(used)?;
+                planar = output;
+            }
         }
         if planar.len() != usize::from(config.channels) {
             return Err(invalid(
@@ -82,6 +108,7 @@ impl NativeAacDecoder {
         Ok(PreparedEldCore {
             used_bits: bits.position(),
             samples: output,
+            spatial_qmf,
             synthesis: next,
             full_synthesis: full_next,
             sbr: ld,
@@ -106,16 +133,16 @@ impl NativeAacDecoder {
         let mut bits = BitReader::new(packet);
         bits.skip(core.used_bits)?;
         if let Some(spatial) = &mut self.ld_mps {
-            let output = spatial.decode_core(
-                packet,
-                core.used_bits,
-                &core.samples,
-                super::aac_ld_mps_native::Stamp {
-                    pts,
-                    duration,
-                    timescale: source_timescale,
-                },
-            )?;
+            let stamp = super::aac_ld_mps_native::Stamp {
+                pts,
+                duration,
+                timescale: source_timescale,
+            };
+            let output = if let Some(qmf) = &core.spatial_qmf {
+                spatial.decode_qmf(packet, core.used_bits, qmf, stamp)?
+            } else {
+                spatial.decode_core(packet, core.used_bits, &core.samples, stamp)?
+            };
             self.commit_eld_core(core);
             return Ok(output.map(|frame| AacFrame {
                 samples: frame.samples,

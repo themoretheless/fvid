@@ -1,3 +1,36 @@
+## Native coupled AAC-ELD LD-SBR/LD-MPS, 2026-10-30
+
+Native AAC now passes normalized LD-SBR subbands directly into LD-MPS.
+The spatial path uses LD-QMF analysis and one final spatial synthesis;
+it does not synthesize CLDFB PCM and analyse it again. Ordinary LD-SBR
+retains its separate CLDFB path. Both domains share HF generation and gain,
+noise, harmonic and inverse-filter processing, with explicit domain guards.
+
+152 saved own synthetic movies cover all eight spatial trees, 480/512-sample
+24-kHz cores, 15/16 slots, single-rate 32-bin and double-rate 64-bin output.
+Controls include CRC, mono/stereo/coupled stereo, LFE, header changes,
+transients, inverse filtering, smoothing, harmonics and nonzero bands above32.
+Four malformed movies reach the specific CRC/truncation failure.
+The independent absolute-time convolution and scalar SBR oracle checks
+5,428,224 QMF scalars; maximum difference is 3.651050815844936e-17.
+A wrong CLDFB analysis negative control differs by 0.01993681909956761.
+The QMF golden then feeds the previously qualified spatial consumer and
+compares full native PCM; this is not an independent full-decoder oracle.
+
+Each valid movie checks owned/frontend PCM equality, AudioStream playback,
+rewind, reset of an already-used decoder, forward/backward seek including EOF,
+and repeated ranges. Split QMF chunks conserve fractional source-clock
+endpoints. Parameters delayed across three source frames drain with identical
+PCM and timestamps. Malformed input leaves histories and queued chunks unchanged;
+whole-native CRC/truncation recovery and checkpoint replay match continuous PCM.
+Offline fixture regeneration denies network/process APIs and is byte identical.
+
+This gate does not establish every LD-SBR/LD-MPS combination: other bank
+geometries, spatial output downscale and remaining unsupported spatial tools
+still need separate implementation and synthetic acceptance evidence.
+Validation without production FFmpeg/libav: media: 577 passed, 1 existing ignored; root: 1061 passed, 26 existing ignored; integration: 180 passed, 0 existing ignored.
+See docs/validation/aac-eld-spatial-sbr-*-2026-10-30.json.
+
 ## Native ordinary AAC-ELD spatial playback and navigation, 2026-10-30
 
 The native factory now admits matching ordinary AAC-ELD/LD-MPS configurations.
