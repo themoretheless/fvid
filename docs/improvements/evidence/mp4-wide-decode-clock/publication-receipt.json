@@ -1,0 +1,25 @@
+{
+  "status": "published",
+  "accepted_ids": [
+    "FVID-0421"
+  ],
+  "accepted_count": 421,
+  "implementation_commit": "9814e478e1af38166c374ef91cdfe1bbbde4019b",
+  "remote_refs_verified": [
+    "main",
+    "codex/deliver-fvid-20261029"
+  ],
+  "checks": "batch-421-validation.json",
+  "cleanup": {
+    "removed_owned_target": "/private/tmp/fvid-gap-tail-clock-20261030",
+    "removed_archived_raw_logs": 15,
+    "also_closes": "Shared target retained during FVID-0420 coarse-tail follow-up is now removed",
+    "fixtures_and_proofs": "retained"
+  },
+  "preserved": [
+    "Other active worktrees and branches",
+    "All stashes",
+    "All foreign targets/caches"
+  ],
+  "remaining_goal": 579
+}
