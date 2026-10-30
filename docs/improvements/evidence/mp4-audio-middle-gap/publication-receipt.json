@@ -1,0 +1,25 @@
+{
+  "status": "published",
+  "accepted_count": 420,
+  "accepted_ids": [
+    "FVID-0420"
+  ],
+  "implementation_commit": "e786a7d558b4969940d3ccf9d8ffc8dcc064e906",
+  "remote_refs": {
+    "main": "e786a7d558b4969940d3ccf9d8ffc8dcc064e906",
+    "codex/deliver-fvid-20261029": "e786a7d558b4969940d3ccf9d8ffc8dcc064e906"
+  },
+  "remote_verified": true,
+  "checks": "batch-420-validation.json",
+  "cleanup": {
+    "removed_owned_target": "/private/tmp/fvid-middle-gap-20261030",
+    "removed_archived_temporary_logs": 31,
+    "regression_fixtures_and_proofs": "retained in Git"
+  },
+  "preserved": [
+    "Other active worktrees and branches",
+    "All stashes",
+    "All foreign caches and build artifacts"
+  ],
+  "next_audit": "Coarse recovered-clock source gaps combined with a declared trailing empty fragment; verify composition endpoint before claiming coverage. No additional improvement counted."
+}
