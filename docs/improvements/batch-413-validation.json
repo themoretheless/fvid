@@ -1,0 +1,39 @@
+{
+  "batch": 413,
+  "accepted_ids": [],
+  "count_delta": 0,
+  "accepted_count": 415,
+  "status": "passed-requalification",
+  "command": "CARGO_TARGET_DIR=/private/tmp/fvid-owned-gates-20261030 CARGO_BUILD_JOBS=2 cargo test --locked --offline -p fvid-media --no-default-features --lib",
+  "before": {
+    "passed": 540,
+    "failed": 5,
+    "ignored": 1
+  },
+  "after": {
+    "passed": 545,
+    "failed": 0,
+    "ignored": 1
+  },
+  "findings": [
+    "One-byte ADTS transport admission fails with exact ADTS packet exceeds budget before decoder working-set admission. Retain that negative control and separately exercise 8192-byte decoder admission, below decoder memory requirements but above every possible ADTS frame size.",
+    "Pre-cancelled WAVE requests and zero RSS limits are rejected by internal supports; public execution still must refuse without publishing. Progress-triggered cancellation remains admitted first.",
+    "Y4M cross-fade refuses an oversized input frame during header preflight with the exact frame-length error, before encoded-packet checks."
+  ],
+  "strength_preserved": [
+    "Exact transport and Y4M errors asserted rather than accepting arbitrary errors",
+    "ADTS controlled decoder-budget error and successful budget/default byte equality retained",
+    "All cancellation modes, progress counters, RSS refusals, no-publication checks and output preservation retained"
+  ],
+  "limitations": [
+    "No new production media fix or improvement counted",
+    "No GPU runtime qualification added",
+    "Portable Forma dependency delivery remains outstanding",
+    "Library-only qualification is not whole-project qualification"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/owned-admission-requalification/status.json",
+    "docs/improvements/evidence/owned-admission-requalification/before.log",
+    "docs/improvements/evidence/owned-admission-requalification/after.log"
+  ]
+}

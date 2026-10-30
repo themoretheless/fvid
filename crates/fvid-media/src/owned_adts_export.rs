@@ -425,6 +425,18 @@ mod admission_tests {
             max_controlled_bytes: Some(1),
             ..Default::default()
         };
+        // A one-byte policy cannot admit even the encoded ADTS packet. Verify
+        // that earlier refusal separately from the decoder working-set budget.
+        assert!(!supports(&source, transform, &too_small));
+        assert_eq!(
+            crate::decode_audio_transformed(&source, &output, transform, &too_small).unwrap_err(),
+            "ADTS packet exceeds budget"
+        );
+        assert!(!output.exists());
+        let too_small = CopyOptions {
+            max_controlled_bytes: Some(8192),
+            ..Default::default()
+        };
         assert!(supports(&source, transform, &too_small));
         let error =
             crate::decode_audio_transformed(&source, &output, transform, &too_small).unwrap_err();

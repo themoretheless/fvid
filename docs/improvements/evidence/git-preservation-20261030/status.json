@@ -32,5 +32,15 @@
     "Whole-project publication qualification is not green.",
     "No new improvement counted for checkpoint, inventory or publication checks.",
     "Temporary Cargo targets and manifest probe removed after logs were saved."
-  ]
+  ],
+  "latest_requalification": {
+    "batch": 413,
+    "result": {
+      "passed": 545,
+      "failed": 0,
+      "ignored": 1
+    },
+    "evidence": "docs/improvements/evidence/owned-admission-requalification/status.json",
+    "publication_remaining": "Portable/pinned Forma dependency and remaining integration/configuration qualification"
+  }
 }

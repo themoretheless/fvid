@@ -717,7 +717,9 @@ mod control_tests {
                 })),
                 ..Default::default()
             };
-            assert!(supports(&source, &output, Default::default(), &options));
+            // Pre-cancelled work is refused during admission; cancellation
+            // from a progress callback occurs only after successful admission.
+            assert_eq!(supports(&source, &output, Default::default(), &options), mode != 0);
             let error = crate::decode_audio(&source, &output, &options).unwrap_err();
             assert!(error.contains("cancelled"));
             assert!(!output.exists());
@@ -1091,7 +1093,7 @@ mod rss_tests {
             max_rss_bytes: Some(0),
             ..Default::default()
         };
-        assert!(supports(&source, &absent, Default::default(), &options));
+        assert!(!supports(&source, &absent, Default::default(), &options));
         let error = crate::decode_audio(&source, &absent, &options).unwrap_err();
         assert!(error.contains("rss"));
         assert!(!absent.exists());

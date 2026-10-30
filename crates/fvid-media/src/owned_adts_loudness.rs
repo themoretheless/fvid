@@ -203,6 +203,16 @@ mod admission_tests {
             max_controlled_bytes: Some(32 * 1024 * 1024),
             ..Default::default()
         };
+        assert!(!supports(&source, &small));
+        assert!(!supports_plan(&source, &small));
+        assert_eq!(
+            crate::measure_loudness(&source, &small).unwrap_err(),
+            "ADTS packet exceeds budget"
+        );
+        let small = CopyOptions {
+            max_controlled_bytes: Some(8192),
+            ..Default::default()
+        };
         assert!(supports(&source, &small));
         assert!(supports_plan(&source, &small));
         assert!(

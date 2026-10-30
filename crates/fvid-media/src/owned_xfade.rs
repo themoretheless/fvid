@@ -999,11 +999,8 @@ mod tests {
             max_packet_bytes: 1,
             ..Default::default()
         };
-        assert!(
-            crate::xfade_video(&main, &other, &output, "fade", 500000, 0, &options)
-                .unwrap_err()
-                .contains("packet exceeds byte limit")
-        );
+        let packet_error = crate::xfade_video(&main, &other, &output, "fade", 500000, 0, &options).unwrap_err();
+        assert_eq!(packet_error, "Y4M frame byte length exceeds packet byte limit");
         assert!(!output.exists());
         std::fs::write(
             &main,
