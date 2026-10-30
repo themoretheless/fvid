@@ -1,0 +1,217 @@
+{
+  "single-url.mp4": [
+    {
+      "catalog_count": 1,
+      "sample_entry_references": [
+        1
+      ],
+      "catalog_sha256": "4202aff9896704e3f61b936a535726e169d4dad3dbd1e4489be9f95d6ae31848"
+    }
+  ],
+  "single-alis.mp4": [
+    {
+      "catalog_count": 1,
+      "sample_entry_references": [
+        1
+      ],
+      "catalog_sha256": "413cd47ceb456751a7ebcf7d950af8ab31f2392f8ecfc813affa6fd0102a8192"
+    }
+  ],
+  "video-url-url-1.mp4": [
+    {
+      "catalog_count": 2,
+      "sample_entry_references": [
+        1
+      ],
+      "catalog_sha256": "cd6ee7c9cefc265f13a1495aa24b08f6802287105f338b123873fdf74d1487f0"
+    }
+  ],
+  "video-url-url-2.mp4": [
+    {
+      "catalog_count": 2,
+      "sample_entry_references": [
+        2
+      ],
+      "catalog_sha256": "cd6ee7c9cefc265f13a1495aa24b08f6802287105f338b123873fdf74d1487f0"
+    }
+  ],
+  "video-alis-alis-1.mp4": [
+    {
+      "catalog_count": 2,
+      "sample_entry_references": [
+        1
+      ],
+      "catalog_sha256": "2ad475adf3496c780574e6c0667b0cb326d75defd02cf04182a445ca6ae9d53a"
+    }
+  ],
+  "video-alis-alis-2.mp4": [
+    {
+      "catalog_count": 2,
+      "sample_entry_references": [
+        2
+      ],
+      "catalog_sha256": "2ad475adf3496c780574e6c0667b0cb326d75defd02cf04182a445ca6ae9d53a"
+    }
+  ],
+  "video-url-alis-1.mp4": [
+    {
+      "catalog_count": 2,
+      "sample_entry_references": [
+        1
+      ],
+      "catalog_sha256": "dbfe4bff9af6cd4a303bed9e65c1f0045399abc502d3aee7394e88a23e99c642"
+    }
+  ],
+  "video-url-alis-2.mp4": [
+    {
+      "catalog_count": 2,
+      "sample_entry_references": [
+        2
+      ],
+      "catalog_sha256": "dbfe4bff9af6cd4a303bed9e65c1f0045399abc502d3aee7394e88a23e99c642"
+    }
+  ],
+  "video-alis-url-1.mp4": [
+    {
+      "catalog_count": 2,
+      "sample_entry_references": [
+        1
+      ],
+      "catalog_sha256": "d779f4ecc2dfdea75f785c6ce903ad2432e2ccc1b101ceb970f8f86a62f84036"
+    }
+  ],
+  "video-alis-url-2.mp4": [
+    {
+      "catalog_count": 2,
+      "sample_entry_references": [
+        2
+      ],
+      "catalog_sha256": "d779f4ecc2dfdea75f785c6ce903ad2432e2ccc1b101ceb970f8f86a62f84036"
+    }
+  ],
+  "video-third-local.mp4": [
+    {
+      "catalog_count": 3,
+      "sample_entry_references": [
+        3
+      ],
+      "catalog_sha256": "c47631074c923b721a77d44bec3f9a45c6cddee352cc362ded6e7340b73e75c3"
+    }
+  ],
+  "video-largest-reference.mp4": [
+    {
+      "catalog_count": 65535,
+      "sample_entry_references": [
+        65535
+      ],
+      "catalog_sha256": "ef2759656ba82962ac63ee5439d75ca722312be24435131b36df89819837f957"
+    }
+  ],
+  "video-alternating-descriptions.mp4": [
+    {
+      "catalog_count": 3,
+      "sample_entry_references": [
+        1,
+        2,
+        3
+      ],
+      "catalog_sha256": "c47631074c923b721a77d44bec3f9a45c6cddee352cc362ded6e7340b73e75c3"
+    }
+  ],
+  "pcm-third-local.mp4": [
+    {
+      "catalog_count": 3,
+      "sample_entry_references": [
+        3
+      ],
+      "catalog_sha256": "c47631074c923b721a77d44bec3f9a45c6cddee352cc362ded6e7340b73e75c3"
+    },
+    {
+      "catalog_count": 3,
+      "sample_entry_references": [
+        3
+      ],
+      "catalog_sha256": "c47631074c923b721a77d44bec3f9a45c6cddee352cc362ded6e7340b73e75c3"
+    }
+  ],
+  "pcm-single-control.mp4": [
+    {
+      "catalog_count": 1,
+      "sample_entry_references": [
+        1
+      ],
+      "catalog_sha256": "4202aff9896704e3f61b936a535726e169d4dad3dbd1e4489be9f95d6ae31848"
+    },
+    {
+      "catalog_count": 1,
+      "sample_entry_references": [
+        1
+      ],
+      "catalog_sha256": "4202aff9896704e3f61b936a535726e169d4dad3dbd1e4489be9f95d6ae31848"
+    }
+  ],
+  "mace-third-local.mp4": [
+    {
+      "catalog_count": 3,
+      "sample_entry_references": [
+        3
+      ],
+      "catalog_sha256": "c47631074c923b721a77d44bec3f9a45c6cddee352cc362ded6e7340b73e75c3"
+    },
+    {
+      "catalog_count": 3,
+      "sample_entry_references": [
+        3
+      ],
+      "catalog_sha256": "c47631074c923b721a77d44bec3f9a45c6cddee352cc362ded6e7340b73e75c3"
+    }
+  ],
+  "mace-single-control.mp4": [
+    {
+      "catalog_count": 1,
+      "sample_entry_references": [
+        1
+      ],
+      "catalog_sha256": "4202aff9896704e3f61b936a535726e169d4dad3dbd1e4489be9f95d6ae31848"
+    },
+    {
+      "catalog_count": 1,
+      "sample_entry_references": [
+        1
+      ],
+      "catalog_sha256": "4202aff9896704e3f61b936a535726e169d4dad3dbd1e4489be9f95d6ae31848"
+    }
+  ],
+  "text-third-local.mp4": [
+    {
+      "catalog_count": 3,
+      "sample_entry_references": [
+        3
+      ],
+      "catalog_sha256": "c47631074c923b721a77d44bec3f9a45c6cddee352cc362ded6e7340b73e75c3"
+    },
+    {
+      "catalog_count": 3,
+      "sample_entry_references": [
+        3
+      ],
+      "catalog_sha256": "c47631074c923b721a77d44bec3f9a45c6cddee352cc362ded6e7340b73e75c3"
+    }
+  ],
+  "fragment-third-local.mp4": [
+    {
+      "catalog_count": 3,
+      "sample_entry_references": [
+        3
+      ],
+      "catalog_sha256": "c47631074c923b721a77d44bec3f9a45c6cddee352cc362ded6e7340b73e75c3"
+    },
+    {
+      "catalog_count": 3,
+      "sample_entry_references": [
+        3
+      ],
+      "catalog_sha256": "c47631074c923b721a77d44bec3f9a45c6cddee352cc362ded6e7340b73e75c3"
+    }
+  ]
+}

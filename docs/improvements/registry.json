@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 433,
-  "next_id": "FVID-0434",
+  "accepted_count": 434,
+  "next_id": "FVID-0435",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4865,6 +4865,17 @@
       "result": "After classic index construction, reject more than one real zero-duration tail packet using expanded/uniform index units. Preserve a single zero tail, including one six-sample MACE block; the existing STTS rule makes zero packets a suffix.12 authored healthy movies preserve exact video packets/pictures, native seek/EOF, raw PCM/MACE packet clocks and decoded blocks;16 malformed timing companions refuse consistently,8 newly rejected.37 files regenerate identically; logical RLE equivalence and unchanged media hashes prove the intended failure.1067 distinct checks pass across97 integration suites and deduplicated root/media units, plus locked/offline core/player builds. One physical-GPU test and one existing RGB compatibility acceptance remain ignored. All table/codec variants count once; no audible zero-window audio, TRUN-policy or performance claim.",
       "status": "accepted",
       "validation": "batch-433-validation.json"
+    },
+    {
+      "id": "FVID-0434",
+      "batch": 434,
+      "title": "Resolve bounded sample-entry indices into multiple self-contained MP4 data references",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_local_data_references.rs",
+      "before": "A valid two-local-URL movie is rejected by the one-entry dref restriction. Non-one SampleEntry indices are also hardcoded invalid. Single-reference and existing-refusal controls pass; multi-table index-specific refusals originally stop at the unrelated cardinality restriction. Original2 controls pass and2 acceptance/index-specific checks fail.",
+      "result": "Validate the complete nonempty local dref catalog against its declared count and exact existing self-contained URL/alias form; validate each common SampleEntry reference as a nonzero in-range index, including unused opaque descriptions.19 authored movies cover URL/alias orders, third/largest65535 indices, alternating descriptions, PCM/MACE, captions and real text fragments. Exact video/text packets, pictures, native seeks/EOF, independent PCM and baseline MACE PCM pass;12 malformed/unsupported companions retain specific refusals.47 files regenerate identically.1087 distinct checks pass across101 integration suites and deduplicated root/media units; locked/offline core/player builds pass. One physical-GPU test and one existing RGB compatibility acceptance remain ignored. All variants count once; no external-resolution or performance claim.",
+      "status": "accepted",
+      "validation": "batch-434-validation.json"
     }
   ]
 }

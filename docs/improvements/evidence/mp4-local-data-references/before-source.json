@@ -1,0 +1,9 @@
+{
+  "commit": "b01513f6d22bbcb288b7c5845ab1468adca02084",
+  "sha256": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": "b65e7e5927f6fb93238bbf0ab0a2ef1a35148468c431191d36ff89593ad7787a",
+    "scripts/generate_mp4_local_data_references.py": "c4001a0396238f7c9fa067dcbec8ce291fa7d0c6c9fb187ee0759c46d12675c7",
+    "tests/mp4_local_data_references.rs": "3eb7ab75cbe177b030b07d92aecb23bc56947ff9e4c4491ed6e8b38cdf64bdc3",
+    "tests/fixtures/playback-errors/mp4-local-data-references/manifest.json": "7d227542d605f4a0079b6cf580d01a3cb8604bd9fa343658451b494658a10c3d"
+  }
+}

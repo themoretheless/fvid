@@ -1,0 +1,6 @@
+{
+  "crates/fvid-media/src/owned_mp4_impl.rs": "1bfdda00c42d0a80a3d59f0c8e5a7b403bed584beff145d9defebcd40e11e3c3",
+  "scripts/generate_mp4_local_data_references.py": "c4001a0396238f7c9fa067dcbec8ce291fa7d0c6c9fb187ee0759c46d12675c7",
+  "tests/mp4_local_data_references.rs": "3eb7ab75cbe177b030b07d92aecb23bc56947ff9e4c4491ed6e8b38cdf64bdc3",
+  "tests/fixtures/playback-errors/mp4-local-data-references/manifest.json": "7d227542d605f4a0079b6cf580d01a3cb8604bd9fa343658451b494658a10c3d"
+}

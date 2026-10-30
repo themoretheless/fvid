@@ -1459,10 +1459,12 @@ fn parse_track(
     )?;
     // ISO files use `url `, QuickTime (macOS screen recordings) `alis`; either is
     // acceptable only with the self-contained flag and no external location.
-    if u32be(dref, 4)? != 1
-        || references.len() != 1
-        || !(references[0].kind == *b"url " || references[0].kind == *b"alis")
-        || references[0].data != [0, 0, 0, 1]
+    if references.is_empty()
+        || u32be(dref, 4)? as usize != references.len()
+        || references.iter().any(|reference| {
+            !(reference.kind == *b"url " || reference.kind == *b"alis")
+                || reference.data != [0, 0, 0, 1]
+        })
     {
         return Err(invalid(
             "only self-contained MP4 data references are supported",
@@ -1506,7 +1508,7 @@ fn parse_track(
     let mut unknown_codec = None;
     for entry in entries {
         let mut rejected = Vec::new();
-        if let Some(parsed) = parse_sample_entry(entry, template.clone(), &mut rejected, drawn, rotation)? {
+        if let Some(parsed) = parse_sample_entry(entry, template.clone(), &mut rejected, drawn, rotation, references.len())? {
             descriptions.push(SampleDescription::from_track(&parsed));
             if !supported { result = parsed; supported = true; }
         } else if handler == *b"vide" || handler == *b"soun" || text_handler(&handler) {
@@ -1600,8 +1602,12 @@ fn supported_text_entry(handler: &[u8; 4], codec: &[u8; 4]) -> bool {
         (b"sbtl" | b"text" | b"subt", b"tx3g") | (b"text", b"text"))
 }
 
-fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<SkippedTrack>, drawn: (u32, u32), rotation: u16) -> Result<Option<Track>> {
-    if u16be(entry.data, 6)? != 1 {
+fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<SkippedTrack>, drawn: (u32, u32), rotation: u16, reference_count: usize) -> Result<Option<Track>> {
+    // Every catalog entry was validated as referring to this same file.
+    // Sample entries still require a nonzero, in-range one-based index,
+    // including opaque descriptions that no sample currently selects.
+    let reference = usize::from(u16be(entry.data, 6)?);
+    if reference == 0 || reference > reference_count {
         return Err(invalid("invalid sample data reference"));
     }
     let handler = result.handler;
