@@ -127,6 +127,37 @@ fn residual_rate(bits: &mut BitReader<'_>) -> Result<u32> {
     rate(bits.read(4)?)
 }
 impl Config {
+    /// Byte-bounded SSC prefix of an ancillary HeaderAndFrame message.
+    /// Alignment delay is returned to the timeline owner, never discarded.
+    /// A failed header leaves the caller cursor unchanged.
+    pub fn read_in_band(bits: &mut BitReader<'_>) -> Result<(Self, Option<u16>)> {
+        let mut reader = bits.clone();
+        if reader.remaining() < 8 {
+            return Err(invalid("truncated in-band LD-MPS header"));
+        }
+        let aligned = reader.bit()?;
+        let mut bytes = reader.read(7)? as usize;
+        if bytes == 127 {
+            if reader.remaining() < 16 {
+                return Err(invalid("truncated extended in-band LD-MPS length"));
+            }
+            bytes += reader.read(16)? as usize;
+        }
+        if bytes == 0 {
+            return Err(invalid("empty in-band LD-MPS configuration"));
+        }
+        let config = Self::read(&mut reader, bytes)?;
+        let delay = if aligned {
+            if reader.remaining() < 16 {
+                return Err(invalid("truncated in-band LD-MPS time alignment"));
+            }
+            Some(reader.read(16)? as u16)
+        } else {
+            None
+        };
+        *bits = reader;
+        Ok((config, delay))
+    }
     pub fn parse(payload: &[u8]) -> Result<Self> {
         Self::read(&mut BitReader::new(payload), payload.len())
     }

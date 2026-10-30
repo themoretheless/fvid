@@ -1,0 +1,29 @@
+{
+  "scope": "Factual in-band SSC envelope, zero time alignment and selective initialization; no foreign decoder dependency.",
+  "sources": [
+    {
+      "url": "https://android.googlesource.com/platform/external/aac/+/ee76460efbdb147e26d804c798949c23f174460b/libSACdec/src/sac_dec_lib.cpp",
+      "file": "fdk-sac.cpp"
+    },
+    {
+      "url": "https://github.com/mstorsjo/fdk-aac/blob/c41c3c7516ea8d0d78a53b96b30bed3a29745cc6/cpp/libSACdec/src/sac_bitdec.cpp",
+      "file": "fdk-source-pin.cpp"
+    },
+    {
+      "url": "https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip",
+      "file": "saoc-reference.zip"
+    }
+  ],
+  "sha256": {
+    "fdk-sac.cpp": "04fd313411472d5cee4723fbcc25cf84037f529c4129e15e025127caf4225b76",
+    "fdk-source-pin.cpp": "cf5092c174dfbfb6d027ff0d1a252e94d69a09341520fe593ac48609f89ed60e",
+    "iso/mp4spatialdec/src/sac_dec.c": "06b308c62ee31705d47a37d779e2ac8ba6ce7acad9c668624ae14c242a36438b",
+    "saoc-reference.zip": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83"
+  },
+  "facts": [
+    "In-band prefix: time-align flag1, SSC byte length7; value127 adds16-bit count; byte-bounded SSC, optional time-align16, then spatial frame.",
+    "Official ISO sac_dec.c lines144-158 accepts the flagged zero-alignment case and refuses nonzero alignment.",
+    "Pinned sac_dec_lib.cpp CalcInitFlags lines286-345: fixed downmix-gain change clears synthesis; tree/rate/mode changes clear analysis; decorrelation design changes clear decorrelators; same tree/rate preserves matrix interpolation. Configuration changes reinitialize parameter state."
+  ],
+  "qualification": "Fixed frame geometry/tree/parameter grid, identical SSC continuation, fixed downmix gain change/restore, escaped length with bounded unknown extensions, flagged zero alignment. Nonzero alignment, output format changes and matrix-grid changes remain explicit unsupported."
+}

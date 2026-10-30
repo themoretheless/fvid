@@ -138,6 +138,27 @@ impl Decoder {
             wet: MatrixTime::new(config.parameter_bands, b)?,
         })
     }
+    pub(crate) fn reconfigure(&mut self, config: &Config) -> Result<()> {
+        if config == &self.config {
+            return Ok(());
+        }
+        if config.sample_rate != self.config.sample_rate
+            || config.tree != self.config.tree
+            || config.parameter_bands != self.config.parameter_bands
+        {
+            return Err(unsupported(
+                "LD-MPS in-band matrix grid change is not yet implemented",
+            ));
+        }
+        let mut next = Self::new(config)?;
+        // A new SSC clears parameter/entropy/smoothing contexts, not the
+        // unchanged M1/M2 interpolation histories.
+        next.m1 = self.m1.clone();
+        next.dry = self.dry.clone();
+        next.wet = self.wet.clone();
+        *self = next;
+        Ok(())
+    }
     pub fn reset(&mut self) {
         self.physical.reset();
         self.m1.reset();

@@ -278,6 +278,7 @@ fn incompatible_clock_spans_and_bad_core_are_atomic() {
     assert_eq!(session, saved);
     let mut header = messages[0].clone();
     header.kind = Kind::HeaderAndFrame;
+    header.payload = vec![0];
     assert!(
         session
             .submit(None, &[header])

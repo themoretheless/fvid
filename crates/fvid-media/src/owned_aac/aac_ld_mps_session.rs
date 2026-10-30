@@ -40,7 +40,14 @@ struct Chunk {
     stamp: Stamp,
 }
 #[derive(Clone, Debug, PartialEq)]
+struct Pending {
+    replacement: Option<Config>,
+    payload: Vec<u8>,
+}
+#[derive(Clone, Debug, PartialEq)]
 pub struct Session {
+    initial_config: Config,
+    mode: Mode,
     qmf_input: bool,
     bins: usize,
     pcm: aac_ld_mps_pcm::Decoder,
@@ -48,7 +55,7 @@ pub struct Session {
     frame_samples: usize,
     residual_boxes: usize,
     chunks: VecDeque<Chunk>,
-    pending: VecDeque<Vec<u8>>,
+    pending: VecDeque<Pending>,
     queued_samples: usize,
 }
 impl Session {
@@ -78,6 +85,8 @@ impl Session {
             64
         };
         Ok(Self {
+            initial_config: config.clone(),
+            mode,
             qmf_input,
             bins,
             pcm: if qmf_input {
@@ -94,7 +103,9 @@ impl Session {
         })
     }
     pub fn reset(&mut self) {
-        self.pcm.reset();
+        self.pcm = Self::new_domain(&self.initial_config, self.mode, self.qmf_input)
+            .expect("previously validated LD-MPS reset configuration")
+            .pcm;
         self.chunks.clear();
         self.pending.clear();
         self.queued_samples = 0;
@@ -205,18 +216,51 @@ impl Session {
             .try_reserve(messages.len())
             .map_err(|_| invalid("LD-MPS frame queue allocation failed"))?;
         for message in messages {
-            if message.kind != Kind::Frame {
-                return Err(unsupported(
-                    "LD-MPS in-band configuration is not yet implemented",
-                ));
-            }
-            next.pending.push_back(message.payload.clone());
+            let (replacement, payload) = if message.kind == Kind::HeaderAndFrame {
+                let mut bits = BitReader::new(&message.payload);
+                let (config, delay) = Config::read_in_band(&mut bits)?;
+                if delay.is_some_and(|delay| delay != 0) {
+                    return Err(unsupported(
+                        "LD-MPS in-band time alignment is not yet implemented",
+                    ));
+                }
+                if config.sample_rate != next.initial_config.sample_rate
+                    || config.frame_slots != next.initial_config.frame_slots
+                    || config.tree.code != next.initial_config.tree.code
+                {
+                    return Err(unsupported(
+                        "LD-MPS in-band output format change requires stream reconfiguration",
+                    ));
+                }
+                if config.parameter_bands != next.initial_config.parameter_bands {
+                    return Err(unsupported(
+                        "LD-MPS in-band matrix grid change is not yet implemented",
+                    ));
+                }
+                let _validated = Self::new_domain(&config, next.mode, next.qmf_input)?;
+                let offset = bits.position() / 8;
+                if offset == message.payload.len() {
+                    return Err(invalid(
+                        "missing spatial frame after in-band LD-MPS configuration",
+                    ));
+                }
+                (Some(config), message.payload[offset..].to_vec())
+            } else {
+                (None, message.payload.clone())
+            };
+            next.pending.push_back(Pending {
+                replacement,
+                payload,
+            });
         }
         let mut output = Vec::new();
         while next.queued_samples >= next.frame_samples && !next.pending.is_empty() {
             let (signal, stamp) = next.front_signal()?;
-            let payload = next.pending.front().unwrap();
-            let mut bits = BitReader::new(payload);
+            let pending = next.pending.front().unwrap();
+            if let Some(candidate) = &pending.replacement {
+                next.pcm.reconfigure(candidate)?;
+            }
+            let mut bits = BitReader::new(&pending.payload);
             let residuals = vec![None; next.residual_boxes];
             let pcm = match signal {
                 Signal::Pcm(planar) => next.pcm.decode(&mut bits, &planar, &residuals)?,
@@ -343,6 +387,7 @@ impl Session {
         f: &mut super::memory::Footprint,
     ) -> std::result::Result<(), String> {
         self.pcm.visit_retained(f)?;
+        self.initial_config.visit_retained(f)?;
         f.deque(&self.chunks)?;
         for chunk in &self.chunks {
             match &chunk.signal {
@@ -364,8 +409,11 @@ impl Session {
             }
         }
         f.deque(&self.pending)?;
-        for payload in &self.pending {
-            f.vector(payload)?;
+        for pending in &self.pending {
+            f.vector(&pending.payload)?;
+            if let Some(candidate) = &pending.replacement {
+                candidate.visit_retained(f)?;
+            }
         }
         Ok(())
     }
@@ -431,7 +479,7 @@ mod memory_tests {
         extra += (session.chunks.capacity() - prior) * std::mem::size_of::<Chunk>();
         let prior = session.pending.capacity();
         session.pending.reserve(17);
-        extra += (session.pending.capacity() - prior) * std::mem::size_of::<Vec<u8>>();
+        extra += (session.pending.capacity() - prior) * std::mem::size_of::<Pending>();
         let Signal::Pcm(planar) = &mut session.chunks.front_mut().unwrap().signal else {
             unreachable!()
         };
@@ -442,7 +490,7 @@ mod memory_tests {
         let prior = row.capacity();
         row.reserve(157);
         extra += (row.capacity() - prior) * std::mem::size_of::<f64>();
-        let payload = session.pending.front_mut().unwrap();
+        let payload = &mut session.pending.front_mut().unwrap().payload;
         let prior = payload.capacity();
         payload.reserve(293);
         extra += payload.capacity() - prior;
@@ -464,5 +512,71 @@ mod memory_tests {
         session.reset();
         assert!(session.retained_payload_bytes().unwrap() < before + extra);
         assert_eq!(saved.retained_payload_bytes().unwrap(), saved_size);
+    }
+}
+
+#[cfg(test)]
+mod inband_memory_tests {
+    use super::*;
+    #[test]
+    fn queued_configuration_nested_spare_capacity_and_checkpoints_are_counted() {
+        let raw =
+            include_bytes!("../../../../tests/fixtures/playback-errors/aac-eld-mps-core/tree7.ssc");
+        let config = Config::parse(raw).unwrap();
+        let fresh = Session::new(&config, Mode::Complex).unwrap();
+        let mut session = fresh.clone();
+        // A bounded unknown extension keeps a separately owned payload in SSC.
+        let mut body = raw.to_vec();
+        body.extend([0xf1, 0x5a]);
+        let mut payload = vec![body.len() as u8];
+        payload.extend(body);
+        payload.extend(include_bytes!(
+            "../../../../tests/fixtures/playback-errors/aac-eld-mps-core/tree7-0.spatial"
+        ));
+        let message = Message {
+            extension: super::super::aac_ld_mps_transport::Extension::LowDelay,
+            kind: Kind::HeaderAndFrame,
+            payload,
+        };
+        assert!(session.submit(None, &[message]).unwrap().is_empty());
+        let before = session.retained_payload_bytes().unwrap();
+        let mut extra = 0;
+        let pending = session.pending.front_mut().unwrap();
+        let prior = pending.payload.capacity();
+        pending.payload.reserve(93);
+        extra += pending.payload.capacity() - prior;
+        let cfg = pending.replacement.as_mut().unwrap();
+        let prior = cfg.tree.ott_lfe.capacity();
+        cfg.tree.ott_lfe.reserve(29);
+        extra += cfg.tree.ott_lfe.capacity() - prior;
+        let prior = cfg.ttt.capacity();
+        cfg.ttt.reserve(11);
+        extra += (cfg.ttt.capacity() - prior)
+            * std::mem::size_of::<super::super::aac_ld_mps_config::Ttt>();
+        let prior = cfg.extensions.capacity();
+        cfg.extensions.reserve(17);
+        extra += (cfg.extensions.capacity() - prior)
+            * std::mem::size_of::<super::super::aac_ld_mps_config::Extension>();
+        let bytes = &mut cfg.extensions.last_mut().unwrap().payload;
+        let prior = bytes.capacity();
+        bytes.reserve(37);
+        extra += bytes.capacity() - prior;
+        assert_eq!(session.retained_payload_bytes().unwrap(), before + extra);
+        assert_eq!(
+            session
+                .retained_payload_bytes_with_checkpoint(Some(&session))
+                .unwrap(),
+            before + extra
+        );
+        let saved = session.clone();
+        assert_eq!(
+            session
+                .retained_payload_bytes_with_checkpoint(Some(&saved))
+                .unwrap(),
+            before + extra + saved.retained_payload_bytes().unwrap()
+        );
+        session.reset();
+        assert_eq!(session, fresh);
+        assert!(!saved.pending.is_empty());
     }
 }

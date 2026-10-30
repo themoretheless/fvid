@@ -64,6 +64,19 @@ impl Decoder {
             direct,
         })
     }
+    pub(crate) fn reconfigure(&mut self, config: &Config, mode: Mode) -> Result<()> {
+        if config == &self.config {
+            return Ok(());
+        }
+        let mut next = Self::new(config, mode)?;
+        next.matrices = self.matrices.clone();
+        next.matrices.reconfigure(config)?;
+        if config.decorrelation == self.config.decorrelation {
+            next.decorrelators = self.decorrelators.clone();
+        }
+        *self = next;
+        Ok(())
+    }
     pub fn reset(&mut self) {
         self.matrices.reset();
         for d in &mut self.decorrelators {
@@ -182,5 +195,63 @@ impl Decoder {
             d.visit_retained(f)?;
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod inband_state_tests {
+    use super::*;
+    #[test]
+    fn fixed_gain_keeps_decorrelation_and_matrix_history_but_new_design_clears_decorrelation() {
+        let config = Config::parse(include_bytes!(
+            "../../../../tests/fixtures/playback-errors/aac-eld-mps-core/tree7.ssc"
+        ))
+        .unwrap();
+        let packet = include_bytes!(
+            "../../../../tests/fixtures/playback-errors/aac-eld-mps-core/tree7-0.spatial"
+        );
+        let rows: Vec<_> = (0..config.frame_slots)
+            .map(|t| {
+                vec![
+                    (0..64)
+                        .map(|b| Complex {
+                            re: ((t as usize * 64 + b) as f64 * 0.13).sin() * 0.01,
+                            im: 0.003,
+                        })
+                        .collect(),
+                ]
+            })
+            .collect();
+        let mut decoder = Decoder::new(&config, Mode::Complex).unwrap();
+        decoder
+            .decode(&mut BitReader::new(packet), &rows, &[None])
+            .unwrap();
+        let mut uninterrupted = decoder.clone();
+        let prior = decoder.clone();
+        decoder.reconfigure(&config, Mode::Complex).unwrap();
+        assert_eq!(decoder, prior);
+        let mut gain = config.clone();
+        gain.downmix_gain = (gain.downmix_gain + 1) % 8;
+        decoder.reconfigure(&gain, Mode::Complex).unwrap();
+        assert_eq!(decoder.decorrelators, prior.decorrelators);
+        let a = decoder
+            .decode(&mut BitReader::new(packet), &rows, &[None])
+            .unwrap();
+        let b = uninterrupted
+            .decode(&mut BitReader::new(packet), &rows, &[None])
+            .unwrap();
+        assert_eq!(a.dry, b.dry);
+        assert_eq!(a.wet, b.wet);
+        let mut changed = gain.clone();
+        changed.decorrelation = (changed.decorrelation + 1) % 3;
+        let fresh = Decoder::new(&changed, Mode::Complex).unwrap();
+        assert_ne!(decoder.decorrelators, fresh.decorrelators);
+        decoder.reconfigure(&changed, Mode::Complex).unwrap();
+        assert_eq!(decoder.decorrelators, fresh.decorrelators);
+        let saved = decoder.clone();
+        let mut invalid = changed;
+        invalid.parameter_bands = if invalid.parameter_bands == 4 { 5 } else { 4 };
+        assert!(decoder.reconfigure(&invalid, Mode::Complex).is_err());
+        assert_eq!(decoder, saved);
     }
 }

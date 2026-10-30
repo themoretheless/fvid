@@ -34,6 +34,7 @@ enum Banks {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Decoder {
     qmf_input: bool,
+    mode: Mode,
     qmf: aac_ld_mps_qmf::Decoder,
     banks: Banks,
     config: Config,
@@ -100,6 +101,7 @@ impl Decoder {
         }
         Ok(Self {
             qmf_input,
+            mode,
             qmf,
             banks,
             config: config.clone(),
@@ -107,6 +109,61 @@ impl Decoder {
             gains,
             clip_gain: facts::DOWNMIX[usize::from(config.downmix_gain)],
         })
+    }
+    /// Apply a same-format in-band SSC without erasing unrelated filter state.
+    /// Fixed downmix-gain changes clear synthesis only. The analysis window,
+    /// unchanged decorrelators and matrix interpolation histories continue.
+    pub fn reconfigure(&mut self, config: &Config) -> Result<()> {
+        if config == &self.config {
+            return Ok(());
+        }
+        if config.sample_rate != self.config.sample_rate
+            || config.frame_slots != self.config.frame_slots
+            || config.tree != self.config.tree
+        {
+            return Err(unsupported(
+                "LD-MPS in-band output format change requires stream reconfiguration",
+            ));
+        }
+        let mut next = Self::new_domain(config, self.mode, self.qmf_input)?;
+        next.qmf = self.qmf.clone();
+        next.qmf.reconfigure(config, self.mode)?;
+        let keep_synthesis = config.downmix_gain == self.config.downmix_gain;
+        match (&mut next.banks, &self.banks) {
+            (
+                Banks::B32 {
+                    analysis: a,
+                    synthesis: s,
+                },
+                Banks::B32 {
+                    analysis: old_a,
+                    synthesis: old_s,
+                },
+            ) => {
+                *a = old_a.clone();
+                if keep_synthesis {
+                    *s = old_s.clone();
+                }
+            }
+            (
+                Banks::B64 {
+                    analysis: a,
+                    synthesis: s,
+                },
+                Banks::B64 {
+                    analysis: old_a,
+                    synthesis: old_s,
+                },
+            ) => {
+                *a = old_a.clone();
+                if keep_synthesis {
+                    *s = old_s.clone();
+                }
+            }
+            _ => return Err(invalid("LD-MPS in-band filter bank changed")),
+        }
+        *self = next;
+        Ok(())
     }
     pub fn reset(&mut self) {
         self.qmf.reset();
@@ -375,5 +432,60 @@ impl Decoder {
             }
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod inband_state_tests {
+    use super::*;
+    #[test]
+    fn gain_change_preserves_analysis_clears_synthesis_and_failed_reconfigure_is_atomic() {
+        let config = Config::parse(include_bytes!(
+            "../../../../tests/fixtures/playback-errors/aac-eld-mps-core/tree7.ssc"
+        ))
+        .unwrap();
+        let packet = include_bytes!(
+            "../../../../tests/fixtures/playback-errors/aac-eld-mps-core/tree7-0.spatial"
+        );
+        let pcm = vec![(0..512).map(|i| (i as f64 * 0.13).sin() * 0.01).collect()];
+        let mut decoder = Decoder::new(&config, Mode::Complex).unwrap();
+        decoder
+            .decode(&mut BitReader::new(packet), &pcm, &[None])
+            .unwrap();
+        let prior = decoder.clone();
+        decoder.reconfigure(&config).unwrap();
+        assert_eq!(decoder, prior);
+        let mut gain = config.clone();
+        gain.downmix_gain = (gain.downmix_gain + 1) % 8;
+        let fresh = Decoder::new(&gain, Mode::Complex).unwrap();
+        decoder.reconfigure(&gain).unwrap();
+        let (
+            Banks::B64 {
+                analysis,
+                synthesis,
+            },
+            Banks::B64 {
+                analysis: old_a,
+                synthesis: old_s,
+            },
+            Banks::B64 {
+                synthesis: fresh_s, ..
+            },
+        ) = (&decoder.banks, &prior.banks, &fresh.banks)
+        else {
+            unreachable!()
+        };
+        assert_eq!(analysis, old_a);
+        assert_eq!(synthesis, fresh_s);
+        assert_ne!(synthesis, old_s);
+        let saved = decoder.clone();
+        let mut changed = gain.clone();
+        changed.frame_slots += 1;
+        assert!(decoder.reconfigure(&changed).is_err());
+        assert_eq!(decoder, saved);
+        let mut changed = gain;
+        changed.surround_gain = None; // stereo has no surround field: unchanged SSC.
+        decoder.reconfigure(&changed).unwrap();
+        assert_eq!(decoder, saved);
     }
 }

@@ -1,0 +1,120 @@
+{
+  "scope": "Native HeaderAndFrame source-frame association and selective same-format SSC transitions.",
+  "rerun_note": "Media units rerun after adding a queued in-band-configuration memory regression; production behavior was unchanged.",
+  "runs": [
+    {
+      "group": "media",
+      "code": 0,
+      "log": "/tmp/fvid-inband-gate-media-final.log",
+      "passed": 580,
+      "failed": 0,
+      "ignored": 1,
+      "targets": 1,
+      "sha256": "46183fbf9a72cafb388d9bb420b3643df87d02faf30c7360332d9aa6f8d1d7de"
+    },
+    {
+      "group": "root",
+      "code": 0,
+      "log": "/tmp/fvid-inband-gate-root.log",
+      "passed": 1061,
+      "failed": 0,
+      "ignored": 26,
+      "targets": 1,
+      "sha256": "7a19ca6ae71114234b3a4f105444c29faceaa850440cc618a41177a3d8502090"
+    },
+    {
+      "group": "integration",
+      "code": 0,
+      "log": "/tmp/fvid-inband-gate-integration.log",
+      "passed": 91,
+      "failed": 0,
+      "ignored": 0,
+      "targets": 21,
+      "sha256": "11e9dd82311b52b5a47b3c85f6660bd8bc487db9cd2341efd06e3d2eabe96e28"
+    }
+  ],
+  "fixtures": {
+    "base_configurations": 40,
+    "valid": 280,
+    "negative_controls": 18,
+    "trees": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "plain_rate": 48000,
+    "coupled_core_rate": 24000,
+    "coupled_core_samples": [
+      480,
+      512
+    ],
+    "coupled_output_rates": [
+      24000,
+      48000
+    ]
+  },
+  "baseline": {
+    "session_revision": "8253256f30",
+    "specific_refusal_reproduced": true,
+    "detail": "Current test support with the parent Session implementation, restored immediately after its expected refusal. No private media."
+  },
+  "numeric": {
+    "maximum_native_staged_pcm_difference": 1.4551482360649487e-11,
+    "all_state_reset_negative_control_gap": 0.00029669260094689076,
+    "tolerance": 2e-07,
+    "oracle": "Qualified component QMF chain with separately managed continuous analysis/decorrelation/matrices and selective synthesis reset; coupled input is saved independent LD-QMF/scalar-SBR QMF. Not an independent full-decoder oracle."
+  },
+  "transactions": "Delayed/fragmented headers apply to their own source frames; identical headers preserve state; rewind/reset restore ASC; invalid header retry and checkpoint restore match uninterrupted decoding.",
+  "no_libav_linkage": true,
+  "generation_report": "aac-ld-mps-inband-generation-2026-10-30.json",
+  "source_report": "aac-ld-mps-inband-source-2026-10-30.json",
+  "logs_sha256": {
+    "/tmp/fvid-inband-baseline.log": "a4e54c457e448e322b7f6f2eaadd00b7b97253e82994a44c6ab5a68cab826df1",
+    "/tmp/fvid-inband-first.log": "f75f3c03cbc43d9f455ed9ee93d2fd28724c0beb38e40d85f798c5ea605f18cc",
+    "/tmp/fvid-inband-selective.log": "681f567e36ce2577ba2f197b8a17735570a0e9229b63cd9463a2d85b41ec37f9",
+    "/tmp/fvid-inband-final-focused.log": "a1df6cbdd474947e8a2a370a3128a6603a1c1082c8102fb63d7bc836fb70b8f6",
+    "/tmp/fvid-inband-linkage.log": "327fca352c4bc1abc69813d066ea68d657534317e5710f6f424ddf9fa3b138b1",
+    "/tmp/fvid-inband-gate-media.log": "72768cbecca0ce149397d23389df4651e0ef8de594c5e190816417770d27f172",
+    "/tmp/fvid-inband-bounds.log": "a26ef31c3e9192f991f6b7ede2dd5b881111262b63ba6c32ce070df4c97ce0da"
+  },
+  "sources_sha256": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_assemble.rs": "a217a316cfd46d5caff9f9926f0dde0f03489ebfb5eabf4dba637d0dbcf2d4b3",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_config.rs": "10a3b1f360961c5823776299a155c40e5e0cb9a0a2efcb3b8ec2f5f23eedcbe2",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_decor.rs": "3e20dd3e6a86da0f08141817d2f4718835d0f042f780d5d42f4377455bdfd36b",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_decor_facts.rs": "9005aac039e457ceabaeedbb4154f607b6eea77a6c488e4e52927ed1b32a3072",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_entropy.rs": "ba947eeb6ebb5d18fc928f2a31a1ea9b3929e36da6429436535fec9e50f18907",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_frame.rs": "4306136db14b09ba75b2566e816e5c9cba9ea2d0da62fbd1f1ded0341438e0a9",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_frame_facts.rs": "b2f02af4290cfc222dac8479919d6e272b890cdc2311c38b7cb6442d5050e421",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_huffman_facts.rs": "41dd3b806baaafe43822849716e0cef5d99f5401e0491de7352f735eea9d736b",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_matrix_apply.rs": "1cad545dd97302f984afbeaaf198e35b91e7168078d17bc94a2c7d5771dc8ce9",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_matrix_time.rs": "379f8de413165ce0c8fef2c38c2a7fb09e97b8baea667c34ff9ac18ed0c354e0",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "ad76974f09c2cad41ac6050e3d3f891d1e001eba60eb6a92e42ee4142587c848",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_ott.rs": "0b9fce96ccab004773d1af7ae4167a76e4d1e0dd74be88012f30ab31884fa37f",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_parameters.rs": "bee2cfe621c652b68ba725a1a5a046247e75e3d3b49fa9c22817156287d5aec7",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_pcm.rs": "6d175c3f875e6b08d0ae8908b2d5720a5c7f2d30a703d808369905a5d1294d2f",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_prepare.rs": "44f53573ec51edd135ece05736b7f037e6267b6e0ec46918352ea2e11c6d76a1",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_prepare_facts.rs": "dd2c2409c84c3a8e6261df94e47cf5f6c4b52b992c11b026803bf3661d88b6ec",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_qmf.rs": "ded254613b0572b8df3a8a62a62ab86a92e4c9dd15465c944a50530a1de3ce6b",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_route.rs": "06ce3c093a5351b809c243bd0b8b0df655891f15b5a36451af7a5f4186235d0a",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_session.rs": "6e8ff160bb4e56a2e995a71889f45a0c02d5022b87ec9ea9dadc056388ed13bc",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_transport.rs": "5fdbd9f498ca562251d9c4505defe002c4408ca9c6ba9f96142d09cdabc22079",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_tree_matrix.rs": "6421b31695e9c40c1d2ebe9e42905363a3a1e93b916ddedab2a0accdec98722a",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_ttt.rs": "b0609ccd7593ae152594a3cc149e1a9cfcda44a06f76de420d5ed03e6ee7ed85",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_ttt_tree.rs": "2763830e84c871b7d3e4edf07db58b728ec8264fd16eb1b5acff5eda2c648c09",
+    "scripts/generate_aac_ld_mps_inband_fixtures.py": "6725e04ff674fe9ed2d95bde460d2f5cc26f36cc71e0a7fad65916294ccd56b2",
+    "tests/aac_ld_mps_inband.rs": "c6ec1852f1f8b2e688198e7a5e843000aaec5e9821f2df8c800ee579e5de8cf5",
+    "tests/aac_ld_mps_session.rs": "fdab8d17d12d2ebde5d559a88c30b118c961d7794959585cfc26a331d8c43977"
+  },
+  "rejected_attempt": "Initial extended fixture used zero padding, which is an invalid zero-length residual extension. Replaced with syntactically valid unknown extensions; the failed run is retained and not counted as a codec fix.",
+  "limits": [
+    "Nonzero time alignment still requires implementation.",
+    "Output format changes require stream reconfiguration; changing parameter grids requires history remapping.",
+    "Existing unsupported spatial tools, residual AAC, other bank geometries and downscale remain open.",
+    "No physical audio-output or throughput qualification."
+  ]
+}

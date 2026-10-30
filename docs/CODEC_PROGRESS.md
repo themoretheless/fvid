@@ -1,3 +1,42 @@
+## Native in-band LD-MPS configuration and selective state continuity, 2026-10-30
+
+HeaderAndFrame messages now carry a byte-bounded spatial configuration into
+the source-frame FIFO. The prefix reads the alignment flag, 7-bit byte count,
+16-bit extension for count127, the declared SSC and optional 16-bit alignment.
+Following spatial-frame bytes remain bounded separately. Flagged zero alignment
+is accepted; nonzero alignment stays an explicit unsupported timing feature.
+Output-rate/tree/frame-geometry changes require stream reconfiguration, and
+parameter-grid changes still require qualified matrix-history remapping.
+
+Identical SSCs preserve every history. A changed SSC reinitializes parameter
+contexts while preserving same-grid M1/M2 interpolation. A fixed downmix-gain
+change clears synthesis but preserves analysis and unchanged decorrelators;
+a decorrelator-design change clears its own state. Reset/rewind restores the
+ASC configuration, not whichever header happened to arrive last. Parsed queued
+configurations and spare FIFO capacity participate in retained-memory accounting.
+
+280 saved own movies cover 40 base configurations: all eight plain 48-kHz trees plus
+all eight coupled LD-SBR trees at 24-kHz core, 480/512 samples, single 24-kHz/32-bin and
+double 48-kHz/64-bin output. Cases cover identical/repeated SSCs, extended lengths
+with bounded unknown extensions, flagged zero alignment, gain change/restore,
+three-frame delayed delivery and fragmented headers. All play through both
+native frontends, rewind/reset a used decoder, seek forward/backward/to EOF and
+repeat ranges. Eighteen negative controls distinguish malformed syntax from
+explicit unsupported timing/format/grid changes and retry without state loss.
+
+A separately assembled analysis/QMF/synthesis reference keeps the qualified
+QMF chain continuous and applies the selective synthesis reset explicitly;
+coupled input uses the saved independent LD-QMF/scalar-SBR oracle. Maximum
+native/reference PCM difference is 1.4551482360649487e-11. A deliberately wrong
+all-state reset differs by 2.9669260094689076e-4, proving that continuity matters.
+This is a state-transition oracle built from qualified components, not a foreign
+full-decoder conformance claim. Private unit checks also inspect which bank and
+decorrelator states survive or clear. Offline fixture regeneration denies
+process/network APIs and is byte identical. The saved parent-session reproduction
+fails specifically at its blanket in-band-configuration refusal.
+Validation: media: 580 passed, 1 existing ignored; root: 1061 passed, 26 existing ignored; integration: 91 passed, 0 existing ignored.
+See docs/validation/aac-ld-mps-inband-*-2026-10-30.json.
+
 ## Native coupled AAC-ELD LD-SBR/LD-MPS, 2026-10-30
 
 Native AAC now passes normalized LD-SBR subbands directly into LD-MPS.
