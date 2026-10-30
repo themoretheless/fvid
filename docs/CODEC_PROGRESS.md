@@ -1,3 +1,55 @@
+## Owned LD-MPS W-signal routing, 2026-10-30
+
+The W router now selects direct, decoded-residual and decorrelated complex QMF
+signals for all eight trees. Direct dry signals copy the leading M1 virtual
+channels; direct wet signals are zero. Each OTT auxiliary chooses decoded
+residual below its parameter-band cutoff, otherwise its decorrelator output.
+Optional absent residual inputs are accepted only when not needed by W.
+Supplied planes are fully validated; borrowed inputs remain unchanged on errors.
+
+Mode0 TTT W mixing combines original decorrelator outputs 3/4/5 before applying
+OTT residual masks. This order matters: an OTT wet channel muted by its own
+residual region still contributes to the separate TTT mixture. TTT residual
+samples themselves enter M1, not W column5. Original residual-index lookup
+maps W column5 to the unused LFE box; active LFE residual routing remains an
+explicit refusal. Its TTT residual cutoff must not mute/replace the W mixture.
+A targeted test verifies independence from both supplied TTT residual samples
+and their cutoff, alongside OTT-mask ordering.
+
+504 synthetic cases cover eight trees, seven parameter resolutions,
+32/64/128-bin routing and three cutoff/mode patterns. All 1881600 scalar outputs
+match an independent 80-digit Decimal oracle: dry values exactly, wet values
+within 1e-15. Per-slot and whole-frame routing agree. A separate comparison
+uses unmodified original SpatialDecMergeResDecor and residual-index lookup;
+its maximum absolute error is 1.66798e-7. The owned path uses exact 1/sqrt(2),
+where the original C uses 0.707107f and float samples. Per-bin C calls permit
+adversarial mode patterns and qualify routing rather than complete two-region
+stream configurations. See the
+[reference report](validation/aac-ld-mps-route-reference-2026-10-30.json).
+
+An initial unpublished design conflated TTT residual input with the W column5
+auxiliary. That design and its oracle were rejected after checking the original
+lookup table. Their hashes remain in the
+[rejected-design report](validation/aac-ld-mps-route-rejected-2026-10-30.json).
+The final independent original-function comparison qualifies the corrected
+mapping. No production player failure or accepted movie is counted here.
+
+Fixture regeneration is byte-identical with process/socket creation denied;
+see the [generation audit](validation/aac-ld-mps-route-generation-2026-10-30.json).
+Ordinary tests load saved controls without FFmpeg, network, regeneration,
+reference software or a C compiler. Missing residuals, nonfinite later values,
+geometry and TTT-mixture overflow are refused. Empty frames are no-ops.
+
+All 45 LD-MPS integration tests and 575 media unit tests passed (one existing
+unit ignored); a final focused routing run also passed all three tests. See the
+[test report](validation/aac-ld-mps-route-tests-2026-10-30.json).
+
+The route is not yet wired into a complete spatial decoder. Frame low/high-mode
+assembly, residual AAC decoding and its M1 inputs, fixed output gains, temporal
+shaping, arbitrary-downmix/HRTF tools, 128-bin QMF/decorrelation DSP, LD-SBR PCM
+integration and actual synthetic movie playback/seek remain open. Native
+spatial refusal stays enabled; zero accepted spatial movies are counted.
+
 ## Owned full-output TTT tree matrices, 2026-10-30
 
 The TTT tree builder now composes trees 2/3/4 using the shared symbolic OTT
