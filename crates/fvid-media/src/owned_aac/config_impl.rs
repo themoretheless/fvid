@@ -242,9 +242,19 @@ impl AudioSpecificConfig {
         if self.core.object_type!=39 || hint==0 || hint.checked_mul(multiplier)!=Some(declared) || !self.core.sample_rate.is_multiple_of(hint) {return None;}
         match self.core.sample_rate/hint {2=>Some(2),3 if self.eld_sbr.is_none() && self.core.frame_samples.is_multiple_of(3)=>Some(3),4=>Some(4),8=>Some(8),_=>None}
     }
+    /// AAC-LD has no ELD downscaleInfo: callers explicitly request a lower
+    /// container/output clock, while entropy and prediction retain the source.
+    pub fn ld_downscale_factor(&self,declared:u32)->Option<u8> {
+        if self.core.object_type!=23 || declared==0 || self.sbr_present==Some(true) || self.ps_present==Some(true) || !self.core.sample_rate.is_multiple_of(declared) {return None;}
+        let factor=self.core.sample_rate/declared;
+        if matches!(factor,2|3|4|8) && u32::from(self.core.frame_samples).is_multiple_of(factor) {Some(factor as u8)}else{None}
+    }
+    pub fn output_downscale_factor(&self,declared:u32)->Option<u8> {
+        self.eld_downscale_factor(declared).or_else(||self.ld_downscale_factor(declared))
+    }
     /// Resolve explicit output clocks without guessing SBR or downscale modes.
     pub fn resolve_output_rate(&self, declared: u32) -> Result<u32> {
-        if declared == self.output_sample_rate() || self.eld_downscale_factor(declared).is_some() {
+        if declared == self.output_sample_rate() || self.output_downscale_factor(declared).is_some() {
             return Ok(declared);
         }
         if self.sbr_present.is_none() && self.core.sample_rate.checked_mul(2) == Some(declared) {

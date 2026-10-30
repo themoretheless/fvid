@@ -70,7 +70,7 @@ impl NativeAacDecoder {
         // Whole-packet transaction: a later channel failure cannot advance an
         // earlier channel's PCM, lag, window, or noise history.
         let mut next = self.ld_synthesis.clone();
-        let n = usize::from(config.frame_samples);
+        let n = usize::from(config.frame_samples) / usize::from(self.output_downscale_factor);
         let mut output = vec![0.; n * channels.len()];
         for (slot, (channel, residual, mut prediction)) in channels.into_iter().enumerate() {
             let target = self.mapping[slot];
@@ -80,7 +80,9 @@ impl NativeAacDecoder {
                 LdWindowShape::LowOverlap
             };
             let limit = bands.tns_max_bands.min(usize::from(channel.info.max_sfb));
-            if let Some(data) = &mut prediction { channel.suppress_ltp_noise(&mut data.used); }
+            if let Some(data) = &mut prediction {
+                channel.suppress_ltp_noise(&mut data.used);
+            }
             let pcm = next[target].process(
                 residual,
                 prediction.as_ref(),

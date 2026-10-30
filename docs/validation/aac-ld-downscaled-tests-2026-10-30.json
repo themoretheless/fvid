@@ -1,0 +1,119 @@
+{
+  "baseline": "ed57ba391a",
+  "before_failure": "AAC output clock disagrees with configuration",
+  "scope": "AAC-LD explicit lower-rate reconstruction. Full nominal LTP retained; independent short cosine output. Internal qualification only.",
+  "checks": [
+    {
+      "log": "/tmp/fvid-ld-downscaled-before.log",
+      "sha256": "ca9b8e98201683c40adac76b18f0e241018920736b02010d102086bb13a11a6c",
+      "results": [
+        "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.02s"
+      ],
+      "finished": [
+        "    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.62s"
+      ],
+      "expected_failure": true
+    },
+    {
+      "log": "/tmp/fvid-ld-downscaled-final.log",
+      "sha256": "e02d1e2e1dae9844a7d35ab5ab24ee72a2d97afd79e69e783f55eea6f1c96ada",
+      "results": [
+        "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 31.18s"
+      ],
+      "finished": [
+        "    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.42s"
+      ],
+      "expected_failure": false
+    },
+    {
+      "log": "/tmp/fvid-ld-channel-tests.log",
+      "sha256": "0d644bf5602e3c10c62a3ee29059a9e7a40831af9171cb56e03c655c2b99d97b",
+      "results": [
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 568 filtered out; finished in 0.01s"
+      ],
+      "finished": [
+        "    Finished `test` profile [unoptimized + debuginfo] target(s) in 39.40s"
+      ],
+      "expected_failure": false
+    },
+    {
+      "log": "/tmp/fvid-ld-worker.log",
+      "sha256": "378892a5148d06d6225e8b27c44440e8afb54b0a269345ff230105603802a3dc",
+      "results": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1086 filtered out; finished in 49.95s"
+      ],
+      "finished": [
+        "    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 21s"
+      ],
+      "expected_failure": false
+    },
+    {
+      "log": "/tmp/fvid-ld-compat.log",
+      "sha256": "89dc1f0f4e7e3f1190c8b19c9c285c874f00ff3408d2df54e1f2b6cc58c17502",
+      "results": [
+        "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 62.97s",
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.71s",
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s",
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.31s"
+      ],
+      "finished": [
+        "    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 48s"
+      ],
+      "expected_failure": false
+    },
+    {
+      "log": "/tmp/fvid-ld-media-unit.log",
+      "sha256": "6548654ba64b73fdf9f623d3e9605cc758028e2246c2b429345742f1d6d5a00b",
+      "results": [
+        "test result: ok. 569 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 2.43s"
+      ],
+      "finished": [
+        "    Finished `test` profile [unoptimized + debuginfo] target(s) in 2m 01s"
+      ],
+      "expected_failure": false
+    },
+    {
+      "log": "/tmp/fvid-ld-check-tests.log",
+      "sha256": "09ea1de0a94f41ee4da895a6aa0c0dd8bad1be8b2567d1139f52b9a7b0887257",
+      "results": [],
+      "finished": [
+        "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2m 08s"
+      ],
+      "expected_failure": false
+    },
+    {
+      "log": "/tmp/fvid-ld-eld-compat.log",
+      "sha256": "87123727ed2f6a612cafd6efae8735cf88c5c3a4b553eca5919c77670dc6ea34",
+      "results": [
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 346.95s",
+        "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 82.74s",
+        "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 19.03s",
+        "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.55s"
+      ],
+      "finished": [
+        "    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 50s"
+      ],
+      "expected_failure": false
+    },
+    {
+      "log": "/tmp/fvid-ld-root-unit.log",
+      "sha256": "dbbbbde05d5f370fa2281920d5fdd86f678340f44703cb558ba6d1dc2c883591",
+      "results": [
+        "test result: ok. 1061 passed; 0 failed; 26 ignored; 0 measured; 0 filtered out; finished in 386.20s"
+      ],
+      "finished": [
+        "    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 53s"
+      ],
+      "expected_failure": false
+    }
+  ],
+  "pending": [],
+  "root_unit_passed": 1061,
+  "media_unit_passed": 569,
+  "ignored": 27,
+  "unique_integration_checks": 44,
+  "new_worker_programmes": 620,
+  "actual_device_phases": 32,
+  "all_test_compilation": "passed offline, no-default-features, player"
+}

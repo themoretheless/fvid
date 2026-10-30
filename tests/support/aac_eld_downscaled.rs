@@ -259,7 +259,9 @@ fn downscaled_ld_sbr_ep1_groups_keep_core_clock_and_short_output_through_exports
         )
         .unwrap();
         let mut typed = Vec::new();
-        for i in 0..12 {
+        let count = reader.tracks()[at].samples.len();
+        assert_eq!(count, c["frames"].as_array().unwrap().len());
+        for i in 0..count {
             let units = group.read_frame(&mut reader, i).unwrap();
             let input: Vec<_> = units.iter().map(|u| u.borrowed()).collect();
             let checkpoint = native.checkpoint();

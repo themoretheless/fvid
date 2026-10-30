@@ -1,3 +1,50 @@
+## AAC-LD explicit lower-rate reconstruction, 2026-10-30
+
+The previous explicit-output constructor refused the new own AAC-LD movie with
+`AAC output clock disagrees with configuration` (baseline `ed57ba391a`).
+AOT 23 now accepts exact integer factors 2/3/4/8 when both source rate and
+480/512-sample source frame divide exactly. Factor three requires 480 samples.
+The default constructor remains nominal-rate. SBR/PS and incompatible clocks
+are excluded from this AAC-LD path.
+
+This implementation retains the full nominal synthesis and LTP history, including
+odd lag 1023/13, retained lag, TNS and original SFB geometry. A separate short
+sine/low-overlap inverse filterbank reconstructs the low spectral prefix at the
+requested output rate, with source spectral normalization. It does not resample
+nominal PCM. Both banks participate in checkpoints, reset and packet rollback.
+Retaining nominal LTP deliberately provides no CPU or memory saving claim.
+
+The saved synthetic corpus contains 310 programmes, 310 EP1 movie variants and
+120 nominal PCM controls (1362 files, 23712504 bytes). The independent oracle
+uses an absolute nominal prediction timeline, direct cosine transforms and
+analytical windows. It covers both source frame sizes, ten layouts, alternating
+windows, all LTP gains and odd/reused lag. No private media or foreign decoder
+was used. Regeneration was byte-exact with process creation and sockets denied;
+ordinary tests load the saved corpus without generating it.
+
+Six integration tests pass, including oracle PCM, MP4/Matroska ranges, EP1,
+playback frame-edge seeks, repeated ranges, EOF and rewind. Two additional
+channel tests verify unchanged nominal prediction and state after invalid
+synthesis or cross-mode restore. The real PlatformBackend passes 32 phases across eight ordinary/EP1 movies:
+full playback, two seeks and rewind with queue drain. This covers 11025, 8000,
+and 6000-Hz output and an eight-channel input routed through the default device.
+The [device report](validation/aac-ld-downscaled-device-2026-10-30.json) saves
+input hashes, output positions, drain results and binary linkage without libav.
+This does not establish subjective listening quality or eight-speaker wiring.
+Worker navigation additionally passes all 620 ordinary/EP1 programmes. The full
+root/media suites pass 1061/569 checks (26/1 existing ignored); 44 selected
+LD/ELD/LD-SBR integration checks and offline all-test compilation pass.
+The [test report](validation/aac-ld-downscaled-tests-2026-10-30.json) separates
+initial refusal evidence from acceptance and compatibility qualification. These results are internal regression
+qualification, not a formal ISO conformance certificate or completion of the
+broader codec coverage goal.
+
+Current source audit still finds explicit ELD extension type 1/2 refusal in
+`config_impl.rs`; spatial rendering remains a separate open requirement. The
+[Fraunhofer implementation guide](https://www.iis.fraunhofer.de/content/dam/iis/de/doc/ame/wp/FraunhoferIIS_Application-Bulletin_AAC_ELDv2_Implementation_Guide.pdf)
+distinguishes AOT 39 including LD-SBR from AOT 44 LD MPEG Surround. Successful
+LD-SBR playback does not qualify the spatial reconstruction tool.
+
 ## Factor-three ELD core adaptation, 2026-10-30
 
 A new own 480-sample ELD movie advertises 8 kHz from a nominal 24-kHz source.

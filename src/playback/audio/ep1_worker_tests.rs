@@ -378,3 +378,8 @@ fn active_esc_chain_worker_reconfigures_native_layout_and_seeks_between_all_epoc
         check(0);
     }
 }
+
+#[test]
+fn downscaled_ld_worker_keeps_exact_pcm_and_timestamps_through_navigation() {
+    check_corpus("aac-ld-downscaled");
+}
