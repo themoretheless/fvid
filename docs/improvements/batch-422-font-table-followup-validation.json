@@ -1,0 +1,15 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0422"
+  ],
+  "count_delta": 0,
+  "accepted_count": 423,
+  "summary": "Upgrade signed subtitle clock fixtures to complete visible defaults and declared font table; revalidate original fault and acceptance",
+  "original_commit": "73ec5a006097d9f48a04474460ceeba51ceb178f",
+  "original_passed": 1,
+  "original_failed": 2,
+  "final_checks": "batch-423-validation.json",
+  "descriptor_validation": "docs/improvements/evidence/mp4-subtitle-unicode/font-table-validation.json",
+  "evidence": "docs/improvements/evidence/mp4-subtitle-unicode/status.json"
+}

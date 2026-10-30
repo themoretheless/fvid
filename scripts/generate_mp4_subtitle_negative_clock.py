@@ -6,6 +6,11 @@ from generate_vp9_chroma import atom,word
 from generate_mp4_tfhd_defaults_regressions import atoms
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'tests/fixtures/playback-errors/mp4-subtitle-negative-clock'
+def text_entry():
+    # Complete visible default style and its declared font table (TS26.245).
+    defaults=word(0)+bytes(2)+bytes(4)+struct.pack('>hhhh',0,0,16,16)+struct.pack('>HHHBB4B',0,0,1,0,12,255,255,255,255)
+    fonts=atom(b'ftab',struct.pack('>HHB',1,1,5)+b'Serif')
+    return atom(b'tx3g',bytes(6)+struct.pack('>H',1)+defaults+fonts)
 def main():
     own=generate();parts=list(atoms(own['three-colors.mp4']));assert [k for k,b in parts]==[b'ftyp',b'mdat',b'moov']
     moov=parts[2][1];track=next(b for k,b in atoms(moov) if k==b'trak')
@@ -26,12 +31,12 @@ def main():
             if k in [b'mdia',b'minf']:b=subtitle(b,offset,scale,shifts,version)
             elif k==b'tkhd':
                 span=max(d+s+n for d,s,n in zip([0,2,3],shifts,[2,1,2]))
-                b=b[:12]+word(2)+b[16:20]+word((max(span,0)*50+scale-1)//scale)+b[24:-8]+bytes(8)
+                b=b[:12]+word(2)+b[16:20]+word((max(span,0)*50+scale-1)//scale)+b[24:-8]+word(16<<16,16<<16)
             elif k==b'mdhd':b=b[:12]+word(scale,5)+b[20:]
             elif k==b'hdlr':b=word(0,0)+b'sbtl'+bytes(12)+b'Own text\0'
             elif k==b'vmhd':k=b'nmhd';b=word(0)
             elif k==b'stbl':
-                entry=atom(b'tx3g',bytes(6)+struct.pack('>H',1)+bytes(30))
+                entry=text_entry()
                 b=atom(b'stsd',word(0,1)+entry)+atom(b'stts',word(0,3,1,2,1,1,1,2))+atom(b'stsz',word(0,0,3,*map(len,packets)))+atom(b'stsc',word(0,1,1,3,1))+atom(b'stco',word(0,1,offset))
                 b+=atom(b'ctts',word(version<<24,3)+b''.join(word(1)+struct.pack('>i' if version else '>I',shift) for shift in shifts))
             out+=atom(k,b)

@@ -1,0 +1,132 @@
+{
+  "status": "passed",
+  "records": [
+    {
+      "file": "utf16be-styled.mp4",
+      "sample": 0,
+      "range": [
+        0,
+        1
+      ],
+      "characters": 10,
+      "font_id": 1
+    },
+    {
+      "file": "utf16be-styled.mp4",
+      "sample": 1,
+      "range": [
+        0,
+        1
+      ],
+      "characters": 16,
+      "font_id": 1
+    },
+    {
+      "file": "utf16be-styled.mp4",
+      "sample": 2,
+      "range": [
+        0,
+        1
+      ],
+      "characters": 7,
+      "font_id": 1
+    },
+    {
+      "file": "utf16be-group-style.mp4",
+      "sample": 0,
+      "range": [
+        0,
+        1
+      ],
+      "characters": 10,
+      "font_id": 1
+    },
+    {
+      "file": "utf16be-group-style.mp4",
+      "sample": 1,
+      "range": [
+        0,
+        1
+      ],
+      "characters": 16,
+      "font_id": 1
+    },
+    {
+      "file": "utf16be-group-style.mp4",
+      "sample": 2,
+      "range": [
+        0,
+        1
+      ],
+      "characters": 7,
+      "font_id": 1
+    },
+    {
+      "file": "utf16be-empty-styled.mp4",
+      "sample": 0,
+      "range": [
+        0,
+        0
+      ],
+      "characters": 0,
+      "font_id": 1
+    },
+    {
+      "file": "utf16be-empty-styled.mp4",
+      "sample": 1,
+      "range": [
+        0,
+        1
+      ],
+      "characters": 7,
+      "font_id": 1
+    },
+    {
+      "file": "utf16be-empty-styled.mp4",
+      "sample": 2,
+      "range": [
+        0,
+        1
+      ],
+      "characters": 7,
+      "font_id": 1
+    },
+    {
+      "file": "utf16be-empty-group-style.mp4",
+      "sample": 0,
+      "range": [
+        0,
+        0
+      ],
+      "characters": 0,
+      "font_id": 1
+    },
+    {
+      "file": "utf16be-empty-group-style.mp4",
+      "sample": 1,
+      "range": [
+        0,
+        1
+      ],
+      "characters": 7,
+      "font_id": 1
+    },
+    {
+      "file": "utf16be-empty-group-style.mp4",
+      "sample": 2,
+      "range": [
+        0,
+        1
+      ],
+      "characters": 7,
+      "font_id": 1
+    }
+  ],
+  "only_changed_payloads": [
+    "utf16be-empty-styled.mp4",
+    "utf16be-empty-styled.mp4-0.packet",
+    "utf16be-empty-group-style.mp4",
+    "utf16be-empty-group-style.mp4-0.packet"
+  ],
+  "meaning": "Empty UTF16 style range ends at0 rather than nonexistent character1. Text bytes, table lengths, clocks and all other packets remain identical."
+}

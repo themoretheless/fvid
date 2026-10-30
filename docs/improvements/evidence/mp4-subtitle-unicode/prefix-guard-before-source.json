@@ -1,0 +1,5 @@
+{
+  "production_sha256": "bcee9db78545bd763dd6ae50ee5ce8a28c446ccd477f7ff0871e4f8bd9782b45",
+  "manifest_sha256": "5f326707413c81ddbcabb3d1c74f694f4acbd8b53f9e5c4e0916c820396f3ac6",
+  "result": "Initial Unicode implementation passes all earlier cases, but drops a canonical unmarked UTF8 string whose bytes resemble a modifier box. New fixture:2passed2failed; no improvement counted for this introduced regression."
+}

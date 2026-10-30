@@ -1,0 +1,21 @@
+{
+  "commit": "073fefa35ee71a95c726136efd3654a3f8def785",
+  "sha256": {
+    "src/playback/subtitles/mp4_subtitles.rs": "3112eccfeccd56209fea1c5794fe1299cc545e5cea55fab624ad0696ce1d0649",
+    "tests/mp4_subtitle_unicode.rs": "fb594739ab5fade73423a6a2c0fd8afe2652a164a5041f062ccb5b78fdd4de2e",
+    "scripts/generate_mp4_subtitle_unicode.py": "b522e06e97ef488082ecbd12ce73f28acc2d1aa0f9de6fa1c825ad053b73f019",
+    "scripts/generate_mp4_subtitle_negative_clock.py": "c7902c17b5a9a7bd49e6119464fca481654a31ead2f1337ac65ba9df44f4157a",
+    "tests/fixtures/playback-errors/mp4-subtitle-unicode/manifest.json": "3e0963530864bbbb7224e4fec1917a0ebc70367d3dfe11bce224f5cc38fd9960",
+    "tests/fixtures/playback-errors/mp4-subtitle-negative-clock/manifest.json": "b25e53bc76f31692640e8643840873cdceee1aead880b67c23b463d77905517f"
+  },
+  "standard": "https://www.etsi.org/deliver/etsi_ts/126200_126299/126245/10.00.00_60/ts_126245v100000p.pdf",
+  "sections": [
+    "5.1",
+    "5.16",
+    "5.17"
+  ],
+  "fixtures": {
+    "valid": 12,
+    "malformed_cue_refusals": 15
+  }
+}

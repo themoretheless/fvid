@@ -1,0 +1,87 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0423"
+  ],
+  "count_delta": 1,
+  "accepted_count": 423,
+  "batch": 423,
+  "summary": "Decode BOM-tagged UTF16 timed text without garbling Unicode or malformed-cue recovery",
+  "before": {
+    "commit": "073fefa35ee71a95c726136efd3654a3f8def785",
+    "final_primary_passed": 1,
+    "final_primary_failed": 3,
+    "specific_failure": "Both parsers preserve exact packets and actual video; native text treats UTF16 as lossy UTF8 or drops it, including empty/invalid Unicode distinctions.",
+    "introduced_prefix_regression": "An initial helper drops a valid canonical UTF8 string resembling a modifier box;2pass2fail before a complete-layout guard. Corrected before acceptance; no extra improvement counted."
+  },
+  "checks": {
+    "integration": {
+      "passed": 325,
+      "ignored": 0,
+      "suites": 65
+    },
+    "root-mp4": {
+      "passed": 57,
+      "ignored": 1,
+      "suites": 1
+    },
+    "root-subtitles": {
+      "passed": 48,
+      "ignored": 1,
+      "suites": 1
+    },
+    "player-check": "passed locked/offline/no-default-features",
+    "core-check": "passed locked/offline/no-default-features"
+  },
+  "unique_root_checks": 98,
+  "duplicate_root_checks_excluded": 7,
+  "distinct_passed": 423,
+  "ignored": 2,
+  "fixtures": {
+    "valid_acceptance_videos": 13,
+    "malformed_cue_refusal_videos": 15,
+    "source_frames_per_video": 3,
+    "packet_snapshots": 84,
+    "picture_oracles": 3,
+    "physical_files_including_manifest": 116,
+    "offline_repeatability": "passed"
+  },
+  "standard": {
+    "url": "https://www.etsi.org/deliver/etsi_ts/126200_126299/126245/10.00.00_60/ts_126245v100000p.pdf",
+    "sections": [
+      "5.1",
+      "5.16",
+      "5.17"
+    ],
+    "scope": "Required UTF16BE BOM plus optional reversed byte order; legacy grouped/boxed forms are compatibility extensions."
+  },
+  "uncounted": [
+    "Valid UTF8 prefix/padding preservation and initial decoder correction",
+    "Complete default font descriptors for FVID-0422 witnesses; original timestamp failure remains1pass2fail on valid descriptors",
+    "Encoding/wrapper/empty/refusal variants and fixture names retained via identical-byte mapping"
+  ],
+  "limits": [
+    "Malformed cues are skipped while healthy text/video are retained; not a whole-file refusal claim",
+    "Finite subsystem and native-paint/seek checks, not whole-project or physical-device qualification",
+    "No performance claim"
+  ],
+  "evidence": "docs/improvements/evidence/mp4-subtitle-unicode/status.json",
+  "final_fixture_descriptor_qualification": {
+    "source_unchanged_from_broad_qualification": true,
+    "only_payload_changes": [
+      "utf16be-empty-styled.mp4",
+      "utf16be-empty-group-style.mp4",
+      "their first packet snapshots"
+    ],
+    "change": "Empty text modifier ranges use0..0 rather than0..1. Text bytes, clocks, lengths, source pictures and production code are unchanged.",
+    "original_final_fixture_checks": {
+      "passed": 1,
+      "failed": 3
+    },
+    "fixed_final_fixture_checks": {
+      "passed": 7,
+      "failed": 0
+    },
+    "duplicate_checks_not_added_to_total": true
+  }
+}

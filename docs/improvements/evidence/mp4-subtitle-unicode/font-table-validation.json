@@ -1,0 +1,57 @@
+{
+  "status": "passed",
+  "videos": 34,
+  "properties": {
+    "font_id": 1,
+    "declared_font": "Serif",
+    "size": 12,
+    "rgba": [
+      255,
+      255,
+      255,
+      255
+    ],
+    "box": [
+      0,
+      0,
+      16,
+      16
+    ]
+  },
+  "sha256": {
+    "mp4-subtitle-negative-clock/positive-50.mp4": "c7952568ec39782aa91b55528a694e00d641b92330d5395d82fc619a74f87f1e",
+    "mp4-subtitle-negative-clock/negative-50.mp4": "bdd4e4db544d2f4183b21c52027566fa8050fb5b70998528e6eeb5a79a57d9ef",
+    "mp4-subtitle-negative-clock/positive-1001.mp4": "46850085789fc5bb543907cfcb554d44523b833ec46a9969edafbd984c2345ce",
+    "mp4-subtitle-negative-clock/zero-1001.mp4": "03996cc435c6ed1919caafb8446c37c0ed5ca235b791c8b4d254b6de0e221b1b",
+    "mp4-subtitle-negative-clock/zero-50.mp4": "52d70443745e68895bc4b3d31f7301b44d22ae0c1b743f962d1a905558504206",
+    "mp4-subtitle-negative-clock/negative-1001.mp4": "289464002978b0e60fdeb30bf8b2607cbea4ae9211324617886bf42ebc53172c",
+    "mp4-subtitle-unicode/utf16be-empty-styled.mp4": "cd187850e52413b8ae58ad6057ad6c5d3bec77eebda52fb6180a7874d3e26e76",
+    "mp4-subtitle-unicode/utf16be-invalid-odd-boxed.mp4": "85dbf586c29692a499ab1b078920e3207cee0f22c5a1edf2a52a2d38243435f9",
+    "mp4-subtitle-unicode/utf16le-standard.mp4": "8bb94deb6dca7c5416cae18a1ca9178898c4de3035511b2663da5c91f2ec2cdf",
+    "mp4-subtitle-unicode/utf16be-empty-group-style.mp4": "22e85d80e7e4f3ce23d351a6c845680fdf318deafec98977f66e5725f5fb1721",
+    "mp4-subtitle-unicode/utf16be-group-zero.mp4": "f0b1e1666e4173cdf6c690e2e55a8deb9bb4be581f73645b10769ae4f39639fc",
+    "mp4-subtitle-unicode/utf16be-standard.mp4": "7571b31f5aea06191ead133d042e359b426ee404262dc8e46de9dd5303ab59d1",
+    "mp4-subtitle-unicode/utf16be-invalid-high-surrogate-group-style.mp4": "ac3ba53495d93999c6cb2ea68f75ca595f1af424a683dd26333cb0ca08a5dc38",
+    "mp4-subtitle-unicode/utf8-control-prefix.mp4": "dac2b8148c741d4bba3081efb459ef55741fa734fc98cb6d01e0f0e1c7b46847",
+    "mp4-subtitle-unicode/utf16be-invalid-odd-group-style.mp4": "b665069d17e2e1195cec1b8254c66ced1faf4b2622ac4454a240458120a07fb1",
+    "mp4-subtitle-unicode/utf16be-invalid-high-surrogate-boxed.mp4": "9ccea2405828b0e6d96a3a9af8489040ec157cb6432b22f64acc7fa67e56798a",
+    "mp4-subtitle-unicode/utf16be-invalid-low-surrogate-styled.mp4": "e2302621ced95b9e39e8d71dd7fb61e259f494186b1f69ad7859c08ba3953add",
+    "mp4-subtitle-unicode/utf16be-empty-boxed.mp4": "2453098f4ee0d14d891c068a07a97dd0e97e3a461c675001ac6f80b6aa70e0fa",
+    "mp4-subtitle-unicode/utf16be-empty.mp4": "945ff40854a1aa044d621663639043245c45c2b01847378d72da8f7ffee898b3",
+    "mp4-subtitle-unicode/utf16be-invalid-odd-standard.mp4": "cc8f0036124a0f84b436f17288a674b6e559164596e4be3d1f3faa22faf9b4de",
+    "mp4-subtitle-unicode/utf16be-boxed.mp4": "3dcfe2581e1d1080c3e5e7d86eb247262e89e16e43869e6ed5f8fb95dc07d189",
+    "mp4-subtitle-unicode/utf16be-invalid-low-surrogate-boxed.mp4": "d273f4fec881617b9311fdba2a3aa995eaa14708c8cf87f4c265971afdf55874",
+    "mp4-subtitle-unicode/utf16be-invalid-high-surrogate-standard.mp4": "575129457cc805b8d9cc4a38812170140c20a7d9fc714e2f196acd250ab3f383",
+    "mp4-subtitle-unicode/utf16be-group-style.mp4": "f9554e39367504a0bf186b758c411296afb7dbfa59f3c3c4577259d035be9a2b",
+    "mp4-subtitle-unicode/utf8-standard.mp4": "7d186a7059269a83facbb8fd4da39edefc8c954e43980ce78b68b4c6758d817c",
+    "mp4-subtitle-unicode/utf16be-invalid-low-surrogate-standard.mp4": "531a460ad0e8ff18bba375c4881612ec74dbfd2f2ca265543c43cc4bf4c0fdfb",
+    "mp4-subtitle-unicode/utf16be-invalid-odd-styled.mp4": "5c45924eca9af12e43e59e9e9f585210d2a7f73d45e24da553574d9eba0646bb",
+    "mp4-subtitle-unicode/utf16be-invalid-high-surrogate-styled.mp4": "72ebffebd1624d3216e66e7288886ad558f4534bb07107bc26140d43bbfe4504",
+    "mp4-subtitle-unicode/utf16be-invalid-odd-group-zero.mp4": "5993e8a529b75450b024594103c76f8622a9c10f8f73093978d5d799e414b100",
+    "mp4-subtitle-unicode/utf16be-invalid-low-surrogate-group-zero.mp4": "d82846285861b2f7988587a77ffe0dd7583db85ca92bbe0daa63aeb74a3ceaf9",
+    "mp4-subtitle-unicode/utf16be-invalid-low-surrogate-group-style.mp4": "92cfe1bdce2e87b8e5f386f6a003e92897b8d41e2954c38aa8ed1cead41e7854",
+    "mp4-subtitle-unicode/utf16be-empty-group-zero.mp4": "53a71fa271e4f5d6a58731be6d763526960463fc779002a91166ea6ad04c5662",
+    "mp4-subtitle-unicode/utf16be-invalid-high-surrogate-group-zero.mp4": "402e0f5e66ed1bdf6dcc1b5f90a5c3a510652d4f313a161e333fb10eca5079df",
+    "mp4-subtitle-unicode/utf16be-styled.mp4": "dc5bfbbf9ad61773dc08122003c9abef14dd8376bfc4b152b86f220b4d105137"
+  }
+}

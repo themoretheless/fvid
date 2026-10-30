@@ -1,0 +1,18 @@
+{
+  "source_unchanged_from_broad_qualification": true,
+  "only_payload_changes": [
+    "utf16be-empty-styled.mp4",
+    "utf16be-empty-group-style.mp4",
+    "their first packet snapshots"
+  ],
+  "change": "Empty text modifier ranges use0..0 rather than0..1. Text bytes, clocks, lengths, source pictures and production code are unchanged.",
+  "original_final_fixture_checks": {
+    "passed": 1,
+    "failed": 3
+  },
+  "fixed_final_fixture_checks": {
+    "passed": 7,
+    "failed": 0
+  },
+  "duplicate_checks_not_added_to_total": true
+}

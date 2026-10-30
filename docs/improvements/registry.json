@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 422,
-  "next_id": "FVID-0423",
+  "accepted_count": 423,
+  "next_id": "FVID-0424",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4733,7 +4733,20 @@
       "before": "Native tx3g extraction clamps negative PTS tozero then adds the full duration: a wholly negative cue appears, and a cue crossing zero stays too long. Separate rescaling also loses1ns on1001Hz positive spans. Six authored video witnesses preserve exact packets/PTS/durations and pictures; original production passes1 control and fails2 cue/seek acceptances after correcting the test seek API usage.",
       "result": "Compose explicit cue endpoints in signed wide arithmetic before clamping/rescaling, omit invisible spans, and retain unspecified-duration successor/fallback behavior. Six short authored VP9/UTF-8 tx3g videos verify cue contents and exact nanosecond bounds, hidden negative text, ordinary positive controls, true video seek and active-cue boundaries.418 distinct checks pass:321 in64 integration suites and97 unique root units, excluding six overlapping checks. Native subtitle paint/seek/end checks and locked/offline core/player builds pass; two hardware checks explicitly ignored.",
       "status": "accepted",
-      "validation": "batch-422-validation.json"
+      "validation": "batch-422-validation.json",
+      "follow_up_validation": "batch-422-font-table-followup-validation.json",
+      "follow_up_note": "Uncounted fixture qualification: complete visible default style/ftab and declared font, with source video pixels and clock expectations preserved. Original timing source still1pass2fail; all current clock acceptances pass in batch423."
+    },
+    {
+      "id": "FVID-0423",
+      "batch": 423,
+      "title": "Decode BOM-tagged UTF16 MP4 timed text and reject malformed cue strings",
+      "source": "src/playback/subtitles/mp4_subtitles.rs",
+      "regression": "tests/mp4_subtitle_unicode.rs",
+      "before": "Native tx3g reads every string as UTF8, garbling required BOM-marked UTF16, losing grouped Unicode and rendering empty/corrupt text as junk. Both parsers retain exact source packets and all three real VP9 pictures. Final original073fefa35e passes1 source control and fails3 Unicode/seek/refusal tests.",
+      "result": "Decode UTF16BE/optional LE before markup processing, preserve unmarked UTF8 behavior, use code-unit-aware boxed NUL termination and complete group-layout recognition. Thirteen acceptance videos and fifteen separate malformed-cue recovery witnesses verify exact Unicode, surrogate pairs, newlines, empty text, source packets/pictures, real seek/clock bounds and healthy following text.423 distinct checks pass:325 in65 integration suites and98 unique root units, excluding seven overlaps; locked/offline core/player builds and native paint/seek/end checks pass. Two hardware tests explicitly ignored. An introduced prefix-selection regression and older font-descriptor fixture qualification are corrected without additional IDs.",
+      "status": "accepted",
+      "validation": "batch-423-validation.json"
     }
   ]
 }

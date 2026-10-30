@@ -1,0 +1,6 @@
+{
+  "commit": "73ec5a006097d9f48a04474460ceeba51ceb178f",
+  "original_production_sha256": "2b1be70f1191ce1978f84a7ee34204831a07c54373cc7587b22b9e95dceebc95",
+  "new_complete_font_fixture_manifest_sha256": "b25e53bc76f31692640e8643840873cdceee1aead880b67c23b463d77905517f",
+  "result": "Original timing defect remains1pass2fail with full font table and visible default style; current timing fix then passes all3"
+}

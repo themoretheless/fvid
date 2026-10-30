@@ -1,0 +1,9 @@
+{
+  "commit": "073fefa35ee71a95c726136efd3654a3f8def785",
+  "original_production_sha256": "3112eccfeccd56209fea1c5794fe1299cc545e5cea55fab624ad0696ce1d0649",
+  "fixed_production_sha256": "7b8e6917ff88aff058a44d6e8f59aa16335fafe30ebf9db14b0a5c6992049fa4",
+  "test_sha256": "fb594739ab5fade73423a6a2c0fd8afe2652a164a5041f062ccb5b78fdd4de2e",
+  "manifest_sha256": "5f326707413c81ddbcabb3d1c74f694f4acbd8b53f9e5c4e0916c820396f3ac6",
+  "valid_cases": 13,
+  "malformed_cue_refusal_cases": 15
+}

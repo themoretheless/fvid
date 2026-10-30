@@ -1,0 +1,25 @@
+{
+  "raw_sha256": {
+    "fvid-tx3g-unicode-before-20261030.log": "f9f86e4c7e37de122088d4f90d111a06310ab73a9399ab70a1984b18e87ac30d",
+    "fvid-tx3g-unicode-pre-guard-root-mp4-20261030.log": "794fee81259ea395783c6657783acc342fdf0d0713c353dc3826d6df6fe806f4",
+    "fvid-tx3g-unicode-empty-style-original-20261030.log": "6d21713ae4c9893dcbfb69e6e6690a89f76c0478be42b52207c03e98d794c275",
+    "fvid-tx3g-unicode-pre-guard-core-check-20261030.log": "5da4d8201c953c5bf829faee9f0e14fd14315ba0e58d041e59bd6e4cbfb66d1f",
+    "fvid-tx3g-unicode-final-root-subtitles-20261030.log": "e183410ce87fa23065bf6874109f36c042b99f111fbb865f6b0b5328970a31a5",
+    "fvid-tx3g-font-table-clock-before-20261030.log": "678513cfb1bdff052f0eb4896e18ccfac3de179435761941f4586437eef45ab6",
+    "fvid-tx3g-unicode-final-integration-20261030.log": "3ad5b42d3fdf6d491a9535ba75c053d4bd55537fa7af469fed48f8f2ae81721a",
+    "fvid-tx3g-unicode-empty-style-fixed-20261030.log": "f971257e601901eeef46a6609f4476e24271160899a7d626bc1bb6021ac5adcd",
+    "fvid-tx3g-unicode-after-20261030.log": "ef68f65cced0ae1ad48894445e3f55d3eb40a0283a8ab4bc1ff2c8921beac57e",
+    "fvid-tx3g-unicode-final-core-check-20261030.log": "ef7097b85161ba3a0a26f1c20d6695fc0675048ef6007203d4a9e8192ea7d96c",
+    "fvid-tx3g-unicode-compat-after-20261030.log": "ce289356af10c2dfddb45ebff7b05ea4a34ae4fa62135ccdd5470d2479a46a6f",
+    "fvid-tx3g-unicode-final-player-check-20261030.log": "bcdbcf7b0b38cc5e230c82aff0ab8eb1e3ccb519dd4d86ac63c463ffe6f7d0c8",
+    "fvid-tx3g-unicode-full-before-20261030.log": "0164b012c34045df5503db89fa50577035612a135775a359390ab8c4dd561f5f",
+    "fvid-tx3g-unicode-prefix-before-20261030.log": "52ae42a18e753357da73e571524242a1a33f5fd16c417f7ac5cbf13f0e5e44f4",
+    "fvid-tx3g-unicode-pre-guard-player-check-20261030.log": "45f4b19e7f48ecc7adbfa87e191a995b029c206cd8e448fe5841921d6a435f46",
+    "fvid-tx3g-unicode-pre-guard-root-subtitles-20261030.log": "63b35d45da53f50490fb0914a25e87479fd4c7becf3ff2d03e9883cb75f9b972",
+    "fvid-tx3g-unicode-final-before-20261030.log": "63a88a2449f73115a32e2c89b96d8d08cb469c0941fa7349cd91ae59086a28a0",
+    "fvid-tx3g-unicode-prefix-after-20261030.log": "9818b22efe4f4ac669c5560d0538c624cf8d8811a274e6dd9c1609baebfb2ced",
+    "fvid-tx3g-unicode-pre-guard-integration-20261030.log": "5bfc93b3d1529f739aac0b77d36d35470b8095d3b5d6d5b11d566d2f50a60b50",
+    "fvid-tx3g-unicode-final-root-mp4-20261030.log": "05940fd17e466497c92e006d5a07cf99417ed2370469e212c09d0637c5d60050"
+  },
+  "normalization": "Trailing whitespace and EOF blank lines stripped in archived text logs."
+}

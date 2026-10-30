@@ -1,0 +1,50 @@
+{
+  "utf16be-invalid-odd.mp4": {
+    "retained_as": "utf16be-invalid-odd-standard.mp4",
+    "sha256": "cc8f0036124a0f84b436f17288a674b6e559164596e4be3d1f3faa22faf9b4de"
+  },
+  "utf16be-invalid-odd.mp4-0.packet": {
+    "retained_as": "utf16be-invalid-odd-standard.mp4-0.packet",
+    "sha256": "0bb9898b1fec493672f79d8695f1a3f755d7123ef51ae5702b6e74020f127e24"
+  },
+  "utf16be-invalid-odd.mp4-1.packet": {
+    "retained_as": "utf16be-invalid-odd-standard.mp4-1.packet",
+    "sha256": "2e87ec3938158c473a624d3e267e890f202f7b1622c0c99f1ae29ceda7f64150"
+  },
+  "utf16be-invalid-odd.mp4-2.packet": {
+    "retained_as": "utf16be-invalid-odd-standard.mp4-2.packet",
+    "sha256": "5420c8611765c311760aebc50ce10d47332b18c02bf73e7dcaaf6634f365fd7c"
+  },
+  "utf16be-invalid-high-surrogate.mp4": {
+    "retained_as": "utf16be-invalid-high-surrogate-standard.mp4",
+    "sha256": "575129457cc805b8d9cc4a38812170140c20a7d9fc714e2f196acd250ab3f383"
+  },
+  "utf16be-invalid-high-surrogate.mp4-0.packet": {
+    "retained_as": "utf16be-invalid-high-surrogate-standard.mp4-0.packet",
+    "sha256": "5bbb45363727954bb0f7e28e7ee5a453a407fce946ac00ffa2463c381b382993"
+  },
+  "utf16be-invalid-high-surrogate.mp4-1.packet": {
+    "retained_as": "utf16be-invalid-high-surrogate-standard.mp4-1.packet",
+    "sha256": "2e87ec3938158c473a624d3e267e890f202f7b1622c0c99f1ae29ceda7f64150"
+  },
+  "utf16be-invalid-high-surrogate.mp4-2.packet": {
+    "retained_as": "utf16be-invalid-high-surrogate-standard.mp4-2.packet",
+    "sha256": "5420c8611765c311760aebc50ce10d47332b18c02bf73e7dcaaf6634f365fd7c"
+  },
+  "utf16be-invalid-low-surrogate.mp4": {
+    "retained_as": "utf16be-invalid-low-surrogate-standard.mp4",
+    "sha256": "531a460ad0e8ff18bba375c4881612ec74dbfd2f2ca265543c43cc4bf4c0fdfb"
+  },
+  "utf16be-invalid-low-surrogate.mp4-0.packet": {
+    "retained_as": "utf16be-invalid-low-surrogate-standard.mp4-0.packet",
+    "sha256": "2423217f2ca82d80f0fb06fbbafc3d68d7da0a3da4c19bac7e1e9fa4b001c90f"
+  },
+  "utf16be-invalid-low-surrogate.mp4-1.packet": {
+    "retained_as": "utf16be-invalid-low-surrogate-standard.mp4-1.packet",
+    "sha256": "2e87ec3938158c473a624d3e267e890f202f7b1622c0c99f1ae29ceda7f64150"
+  },
+  "utf16be-invalid-low-surrogate.mp4-2.packet": {
+    "retained_as": "utf16be-invalid-low-surrogate-standard.mp4-2.packet",
+    "sha256": "5420c8611765c311760aebc50ce10d47332b18c02bf73e7dcaaf6634f365fd7c"
+  }
+}

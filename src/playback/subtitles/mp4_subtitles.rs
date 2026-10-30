@@ -168,7 +168,37 @@ fn sample_text(sample: &[u8]) -> Option<String> {
         // group that carries no display parameters at all.
         return box_text(sample).or_else(|| group_text(body, 0));
     }
+    // A recognized parameter-box run is a group even when its Unicode text
+    // is empty or malformed; do not redisplay its binary parameters as text.
+    let complete_group = body
+        .get(prefix..)
+        .and_then(|tail| {
+            tail.get(..2).map(|header| {
+                tail.len() - 2 == usize::from(u16::from_be_bytes([header[0], header[1]]))
+            })
+        })
+        .unwrap_or(false);
+    if complete_group && modifier_run(&body[..prefix]) {
+        return group_text(body, prefix);
+    }
     group_text(body, prefix).or_else(|| plain(&body[..prefix]))
+}
+
+fn modifier_run(mut bytes: &[u8]) -> bool {
+    if bytes.is_empty() {
+        return false;
+    }
+    while !bytes.is_empty() {
+        let Some(header) = bytes.get(..8) else {
+            return false;
+        };
+        let size = u32::from_be_bytes(header[..4].try_into().unwrap()) as usize;
+        if size < 8 || size > bytes.len() {
+            return false;
+        }
+        bytes = &bytes[size..];
+    }
+    true
 }
 
 /// The string a timed text group states after `params` bytes of display
@@ -197,10 +227,10 @@ fn group_text(body: &[u8], params: usize) -> Option<String> {
 /// Bytes that read as a line of subtitles rather than as the boxes around one:
 /// UTF-8 with no control characters beyond the whitespace a line may hold.
 fn looks_like_text(bytes: &[u8]) -> bool {
-    std::str::from_utf8(bytes).is_ok()
-        && !bytes
-            .iter()
-            .any(|byte| *byte < 0x20 && !matches!(byte, b'\t' | b'\n' | b'\r'))
+    decoded_text(bytes, false).is_some_and(|text| {
+        text.chars()
+            .all(|ch| ch >= ' ' || matches!(ch, '\t' | '\n' | '\r'))
+    })
 }
 
 /// Letters inside a chain of sample boxes: `text` holds them plain and `html`
@@ -218,10 +248,17 @@ fn box_text(sample: &[u8]) -> Option<String> {
             let payload = &sample[at + 8..at + size];
             // A box ends at its first NUL; what follows it is a second string
             // this player has no use for.
-            let cut = payload
-                .iter()
-                .position(|byte| *byte == 0)
-                .unwrap_or(payload.len());
+            let cut = if payload.starts_with(&[0xfe, 0xff]) || payload.starts_with(&[0xff, 0xfe]) {
+                payload[2..]
+                    .chunks_exact(2)
+                    .position(|unit| unit == [0, 0])
+                    .map_or(payload.len(), |index| 2 + index * 2)
+            } else {
+                payload
+                    .iter()
+                    .position(|byte| *byte == 0)
+                    .unwrap_or(payload.len())
+            };
             found.push(&payload[..cut]);
         }
         at += size;
@@ -231,17 +268,46 @@ fn box_text(sample: &[u8]) -> Option<String> {
     }
     let joined = found
         .iter()
-        .map(|bytes| subtitles::plain(&String::from_utf8_lossy(bytes)))
-        .filter(|text| !text.is_empty())
+        .filter_map(|bytes| plain(bytes))
         .collect::<Vec<String>>()
         .join("\n");
     (!joined.is_empty()).then_some(joined)
 }
 
-/// Lossy UTF-8 with the markup of a sidecar stripped, dropped when nothing is
-/// left to show.
+/// Decode BOM-tagged UTF-16 and retain the legacy unmarked UTF-8 policy.
+fn decoded_text(bytes: &[u8], lossy_utf8: bool) -> Option<std::borrow::Cow<'_, str>> {
+    let utf16 = bytes
+        .strip_prefix(&[0xfe, 0xff])
+        .map(|body| (body, false))
+        .or_else(|| bytes.strip_prefix(&[0xff, 0xfe]).map(|body| (body, true)));
+    if let Some((body, little)) = utf16 {
+        if body.len() % 2 != 0 {
+            return None;
+        }
+        let units = body.chunks_exact(2).map(|unit| {
+            let pair = [unit[0], unit[1]];
+            if little {
+                u16::from_le_bytes(pair)
+            } else {
+                u16::from_be_bytes(pair)
+            }
+        });
+        let text = char::decode_utf16(units)
+            .collect::<std::result::Result<String, _>>()
+            .ok()?;
+        Some(std::borrow::Cow::Owned(text))
+    } else if lossy_utf8 {
+        Some(String::from_utf8_lossy(bytes))
+    } else {
+        std::str::from_utf8(bytes)
+            .ok()
+            .map(std::borrow::Cow::Borrowed)
+    }
+}
+
+/// Markup is stripped after decoding, and empty or malformed UTF-16 is hidden.
 fn plain(bytes: &[u8]) -> Option<String> {
-    let text = subtitles::plain(&String::from_utf8_lossy(bytes));
+    let text = subtitles::plain(&decoded_text(bytes, true)?);
     (!text.is_empty()).then_some(text)
 }
 
@@ -259,6 +325,15 @@ mod tests {
     fn fixture() -> Mp4SubtitleReader<Cursor<&'static [u8]>> {
         Mp4SubtitleReader::open(Cursor::new(FIXTURE), Limits::default())
             .expect("fixture has a text track")
+    }
+
+    #[test]
+    fn unmarked_utf8_replacement_and_plain_padding_remain_compatible() {
+        assert_eq!(
+            sample_text(b"\0\x04\xffabc").as_deref(),
+            Some("\u{fffd}abc")
+        );
+        assert_eq!(sample_text(b"\0\x04text\0\0").as_deref(), Some("text"));
     }
 
     fn lines(cues: &[super::Cue]) -> Vec<(&str, u64, u64)> {
