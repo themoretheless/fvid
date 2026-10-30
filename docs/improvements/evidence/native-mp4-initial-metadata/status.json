@@ -1,0 +1,58 @@
+{
+  "batch": 418,
+  "accepted_ids": [
+    "FVID-0418"
+  ],
+  "follow_up_ids": [
+    "FVID-0417"
+  ],
+  "count_delta": 1,
+  "checks": {
+    "selected_integration_suites": 25,
+    "integration_passed": 159,
+    "integration_original_failed": 7,
+    "audio_reader_units_passed": 14,
+    "distinct_passed": 173,
+    "player_check": "passed locked/offline/no-default-features",
+    "core_check": "passed locked/offline/no-default-features"
+  },
+  "original_failures": "Same seven failure names and exact panic reasons on original d25e228c19 in a separate target; comparison proof in evidence/edit-metadata-baseline-20261030. No old failure is claimed resolved.",
+  "publication": "held under push-or-clear because original failing checks remain",
+  "build_profile": {
+    "CARGO_PROFILE_DEV_DEBUG": 0,
+    "CARGO_PROFILE_TEST_DEBUG": 0,
+    "note": "Same correctness profiles before/after; no performance claim."
+  },
+  "status": "accepted",
+  "summary": "Separate initial MP4 metadata inspection from constant-format native DSP admission",
+  "before": {
+    "base_commit": "d25e228c19cdf6cc2d160d9174b5c69bf03a1acd",
+    "primary_regression": "2 pass,1 fail;8 valid changing-description sources refused through all3 public metadata variants",
+    "controls": "All12 witnesses already play exact per-setup PCM, rewind and all6 video frames; constant route classification and exact policy-refusal reasons pass"
+  },
+  "after": {
+    "focused_primary_and_old_transition_regression": "10 distinct checks pass before adding the extra public-admission test",
+    "final_primary": "4 pass, including all3 new explicit constant-admission variants",
+    "first_actual_setup": "regular/fragmented and reordered stsd inputs report either48kHz stereo s16le or32kHz mono f32le from the first actual packet, not entry1"
+  },
+  "compatibility": {
+    "old_metadata_signatures": "unchanged",
+    "behavior_change": "metadata now accepts changing MP4 setups and describes the initial negotiated decoder configuration",
+    "admission": "new constant_audio_source_info_selected family preserves the previous constant-format check and budgets; every repository routing caller migrated without changing arguments/control flow",
+    "migration": "docs/improvements/native-audio-metadata-admission.md",
+    "caller_proof": "caller-migration.json"
+  },
+  "fixtures": {
+    "synthetic_video_count": 12,
+    "duration_ms": 120,
+    "generator": "scripts/generate_native_mp4_initial_metadata.py",
+    "private_media_or_parameters": false,
+    "external_encoder_or_network": false
+  },
+  "regression": "tests/native_mp4_initial_metadata.rs",
+  "limitations": [
+    "The173 passing checks qualify selected scope; seven proven original failures remain and block publication.",
+    "No physical sound-device, GPU, performance or whole-project qualification claim.",
+    "No existing assertions relaxed."
+  ]
+}

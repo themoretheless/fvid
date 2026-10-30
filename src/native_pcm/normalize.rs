@@ -96,7 +96,7 @@ pub fn normalize_file_with_options(
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
         && (super::is_wave(source)?
-            || crate::native_media::audio_source_info_selected_with_options(source, selected, options).is_ok());
+            || crate::native_media::constant_audio_source_info_selected_with_options(source, selected, options).is_ok());
     let sample_frames = if use_native_export {
         let mut export_options = options.clone();
         export_options.progress = export_hook;

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 417,
-  "next_id": "FVID-0418",
+  "accepted_count": 418,
+  "next_id": "FVID-0419",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4649,7 +4649,20 @@
       "before": "Unedited AAC rounds source PTS and seek floors independently to native sample coordinates, even when CTTS is fractional on an otherwise integral media clock. Negative origin keeps an extra sample; seek to source1024 yields2047 rather than2048 remaining samples and the final sample can vanish. The corrected final regression on the original reader fails all3 tests.",
       "result": "Use exact rational presentation origins and crop relative to those origins before rounding the retained sample window.86 distinct checks pass (72 integrations across14 suites plus14 root audio-reader units), with locked/offline core and player builds.16 authored AAC/VP9 videos with independent analytical pulse reference cover three media rates, signed offsets, exact PCM/PTS, both seek APIs, rewind, EOF and actual playback workers.",
       "status": "accepted",
-      "validation": "batch-417-validation.json"
+      "validation": "batch-417-validation.json",
+      "follow_up_validation": "batch-418-validation.json",
+      "follow_up_note": "Uncounted finite/split AAC edit-origin phase correction,54 authored edit cases and actual worker acceptance. Same independent-rounding cause; count unchanged for this follow-up."
+    },
+    {
+      "id": "FVID-0418",
+      "batch": 418,
+      "title": "Inspect changing MP4 audio metadata while preserving explicit constant-format DSP admission",
+      "source": "src/native_media.rs",
+      "regression": "tests/native_mp4_initial_metadata.rs",
+      "before": "Public audio_source_info_selected variants reject8 valid regular/fragmented changing-description witnesses because a constant-format admission guard also gates inspection. The12 authored PCM/VP9 witnesses play correctly; primary baseline2 pass,1 fail.",
+      "result": "Separate metadata inspection of the first actual decoder setup from explicit constant_audio_source_info_selected admission variants. Migrate repository DSP/CLI route callers with identical arguments/control flow and document external admission migration.173 selected checks pass with core/player builds; seven matching original failures remain separately proved on d25e228c19 and hold publication.",
+      "status": "accepted",
+      "validation": "batch-418-validation.json"
     }
   ]
 }

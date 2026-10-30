@@ -161,7 +161,7 @@ fn validate_and_inspect_source_with_options(
         let probe_opts = strip_output_controls(options);
         crate::native_plan::decode_audio_with_options(source, &Default::default(), &probe_opts)
             .map_err(|e| invalid(&e))?;
-        let info = crate::native_media::audio_source_info_selected_with_options(source, None, &probe_opts)?;
+        let info = crate::native_media::constant_audio_source_info_selected_with_options(source, None, &probe_opts)?;
         if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
             use std::io::{Seek, SeekFrom};
             let mut input = BufReader::new(File::open(source)?);
@@ -371,7 +371,7 @@ pub fn eligible_with_options(
                 return Ok(false);
             }
         } else if crate::native_media::is_owned_audio_source_with_options(source, &clean_opts)? {
-            let Ok(info) = crate::native_media::audio_source_info_selected_with_options(source, None, &clean_opts) else {
+            let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(source, None, &clean_opts) else {
                 return Ok(false);
             };
             if crate::native_probe::try_probe_as_with_options(source, None, &clean_opts)

@@ -1,0 +1,14 @@
+{
+  "callers": [
+    "src/native_audio_mix/concat.rs",
+    "src/native_audio_mix.rs",
+    "src/native_pcm/loudness.rs",
+    "src/native_pcm/normalize.rs",
+    "src/media.rs",
+    "src/native_plan.rs",
+    "src/native_loudnorm.rs",
+    "src/media_cli.rs"
+  ],
+  "verified": "Each caller file differs from HEAD only by replacing audio_source_info_selected with constant_audio_source_info_selected; arguments and control flow are identical.",
+  "purpose": "Preserve FVID-0274 constant-format DSP fallback and caller limits while allowing public metadata inspection of the initial used setup."
+}

@@ -1,0 +1,549 @@
+{
+  "provenance": "Own AAC-LC pulse/overlap and analytic PCM with neutral VP9; a finite 2048-native-sample unit-rate edit or two contiguous equivalent edits at exact media origins, signed sub-sample CTTS, 4x/40x/65537x media clocks. No private media/parameters, external encoder, FFmpeg or network.",
+  "cases": [
+    {
+      "file": "factor4-start0-shift-1.mp4",
+      "factor": 4,
+      "start": 0,
+      "shift": -1,
+      "first": 1,
+      "last": 2049,
+      "phase": 3
+    },
+    {
+      "file": "factor4-start0-shift0.mp4",
+      "factor": 4,
+      "start": 0,
+      "shift": 0,
+      "first": 0,
+      "last": 2048,
+      "phase": 0
+    },
+    {
+      "file": "factor4-start0-shift1.mp4",
+      "factor": 4,
+      "start": 0,
+      "shift": 1,
+      "first": 0,
+      "last": 2048,
+      "phase": 1
+    },
+    {
+      "file": "factor4-start1-shift-1.mp4",
+      "factor": 4,
+      "start": 1,
+      "shift": -1,
+      "first": 1,
+      "last": 2049,
+      "phase": 2
+    },
+    {
+      "file": "factor4-start1-shift0.mp4",
+      "factor": 4,
+      "start": 1,
+      "shift": 0,
+      "first": 1,
+      "last": 2049,
+      "phase": 3
+    },
+    {
+      "file": "factor4-start1-shift1.mp4",
+      "factor": 4,
+      "start": 1,
+      "shift": 1,
+      "first": 0,
+      "last": 2048,
+      "phase": 0
+    },
+    {
+      "file": "factor4-start4-shift-1.mp4",
+      "factor": 4,
+      "start": 4,
+      "shift": -1,
+      "first": 2,
+      "last": 2050,
+      "phase": 3
+    },
+    {
+      "file": "factor4-start4-shift0.mp4",
+      "factor": 4,
+      "start": 4,
+      "shift": 0,
+      "first": 1,
+      "last": 2049,
+      "phase": 0
+    },
+    {
+      "file": "factor4-start4-shift1.mp4",
+      "factor": 4,
+      "start": 4,
+      "shift": 1,
+      "first": 1,
+      "last": 2049,
+      "phase": 1
+    },
+    {
+      "file": "factor40-start0-shift-1.mp4",
+      "factor": 40,
+      "start": 0,
+      "shift": -1,
+      "first": 1,
+      "last": 2049,
+      "phase": 39
+    },
+    {
+      "file": "factor40-start0-shift0.mp4",
+      "factor": 40,
+      "start": 0,
+      "shift": 0,
+      "first": 0,
+      "last": 2048,
+      "phase": 0
+    },
+    {
+      "file": "factor40-start0-shift1.mp4",
+      "factor": 40,
+      "start": 0,
+      "shift": 1,
+      "first": 0,
+      "last": 2048,
+      "phase": 1
+    },
+    {
+      "file": "factor40-start1-shift-1.mp4",
+      "factor": 40,
+      "start": 1,
+      "shift": -1,
+      "first": 1,
+      "last": 2049,
+      "phase": 38
+    },
+    {
+      "file": "factor40-start1-shift0.mp4",
+      "factor": 40,
+      "start": 1,
+      "shift": 0,
+      "first": 1,
+      "last": 2049,
+      "phase": 39
+    },
+    {
+      "file": "factor40-start1-shift1.mp4",
+      "factor": 40,
+      "start": 1,
+      "shift": 1,
+      "first": 0,
+      "last": 2048,
+      "phase": 0
+    },
+    {
+      "file": "factor40-start40-shift-1.mp4",
+      "factor": 40,
+      "start": 40,
+      "shift": -1,
+      "first": 2,
+      "last": 2050,
+      "phase": 39
+    },
+    {
+      "file": "factor40-start40-shift0.mp4",
+      "factor": 40,
+      "start": 40,
+      "shift": 0,
+      "first": 1,
+      "last": 2049,
+      "phase": 0
+    },
+    {
+      "file": "factor40-start40-shift1.mp4",
+      "factor": 40,
+      "start": 40,
+      "shift": 1,
+      "first": 1,
+      "last": 2049,
+      "phase": 1
+    },
+    {
+      "file": "factor65537-start0-shift-1.mp4",
+      "factor": 65537,
+      "start": 0,
+      "shift": -1,
+      "first": 1,
+      "last": 2049,
+      "phase": 65536
+    },
+    {
+      "file": "factor65537-start0-shift0.mp4",
+      "factor": 65537,
+      "start": 0,
+      "shift": 0,
+      "first": 0,
+      "last": 2048,
+      "phase": 0
+    },
+    {
+      "file": "factor65537-start0-shift1.mp4",
+      "factor": 65537,
+      "start": 0,
+      "shift": 1,
+      "first": 0,
+      "last": 2048,
+      "phase": 1
+    },
+    {
+      "file": "factor65537-start1-shift-1.mp4",
+      "factor": 65537,
+      "start": 1,
+      "shift": -1,
+      "first": 1,
+      "last": 2049,
+      "phase": 65535
+    },
+    {
+      "file": "factor65537-start1-shift0.mp4",
+      "factor": 65537,
+      "start": 1,
+      "shift": 0,
+      "first": 1,
+      "last": 2049,
+      "phase": 65536
+    },
+    {
+      "file": "factor65537-start1-shift1.mp4",
+      "factor": 65537,
+      "start": 1,
+      "shift": 1,
+      "first": 0,
+      "last": 2048,
+      "phase": 0
+    },
+    {
+      "file": "factor65537-start65537-shift-1.mp4",
+      "factor": 65537,
+      "start": 65537,
+      "shift": -1,
+      "first": 2,
+      "last": 2050,
+      "phase": 65536
+    },
+    {
+      "file": "factor65537-start65537-shift0.mp4",
+      "factor": 65537,
+      "start": 65537,
+      "shift": 0,
+      "first": 1,
+      "last": 2049,
+      "phase": 0
+    },
+    {
+      "file": "factor65537-start65537-shift1.mp4",
+      "factor": 65537,
+      "start": 65537,
+      "shift": 1,
+      "first": 1,
+      "last": 2049,
+      "phase": 1
+    },
+    {
+      "file": "split-factor4-start0-shift-1.mp4",
+      "factor": 4,
+      "start": 0,
+      "shift": -1,
+      "first": 1,
+      "last": 2049,
+      "phase": 3
+    },
+    {
+      "file": "split-factor4-start0-shift0.mp4",
+      "factor": 4,
+      "start": 0,
+      "shift": 0,
+      "first": 0,
+      "last": 2048,
+      "phase": 0
+    },
+    {
+      "file": "split-factor4-start0-shift1.mp4",
+      "factor": 4,
+      "start": 0,
+      "shift": 1,
+      "first": 0,
+      "last": 2048,
+      "phase": 1
+    },
+    {
+      "file": "split-factor4-start1-shift-1.mp4",
+      "factor": 4,
+      "start": 1,
+      "shift": -1,
+      "first": 1,
+      "last": 2049,
+      "phase": 2
+    },
+    {
+      "file": "split-factor4-start1-shift0.mp4",
+      "factor": 4,
+      "start": 1,
+      "shift": 0,
+      "first": 1,
+      "last": 2049,
+      "phase": 3
+    },
+    {
+      "file": "split-factor4-start1-shift1.mp4",
+      "factor": 4,
+      "start": 1,
+      "shift": 1,
+      "first": 0,
+      "last": 2048,
+      "phase": 0
+    },
+    {
+      "file": "split-factor4-start4-shift-1.mp4",
+      "factor": 4,
+      "start": 4,
+      "shift": -1,
+      "first": 2,
+      "last": 2050,
+      "phase": 3
+    },
+    {
+      "file": "split-factor4-start4-shift0.mp4",
+      "factor": 4,
+      "start": 4,
+      "shift": 0,
+      "first": 1,
+      "last": 2049,
+      "phase": 0
+    },
+    {
+      "file": "split-factor4-start4-shift1.mp4",
+      "factor": 4,
+      "start": 4,
+      "shift": 1,
+      "first": 1,
+      "last": 2049,
+      "phase": 1
+    },
+    {
+      "file": "split-factor40-start0-shift-1.mp4",
+      "factor": 40,
+      "start": 0,
+      "shift": -1,
+      "first": 1,
+      "last": 2049,
+      "phase": 39
+    },
+    {
+      "file": "split-factor40-start0-shift0.mp4",
+      "factor": 40,
+      "start": 0,
+      "shift": 0,
+      "first": 0,
+      "last": 2048,
+      "phase": 0
+    },
+    {
+      "file": "split-factor40-start0-shift1.mp4",
+      "factor": 40,
+      "start": 0,
+      "shift": 1,
+      "first": 0,
+      "last": 2048,
+      "phase": 1
+    },
+    {
+      "file": "split-factor40-start1-shift-1.mp4",
+      "factor": 40,
+      "start": 1,
+      "shift": -1,
+      "first": 1,
+      "last": 2049,
+      "phase": 38
+    },
+    {
+      "file": "split-factor40-start1-shift0.mp4",
+      "factor": 40,
+      "start": 1,
+      "shift": 0,
+      "first": 1,
+      "last": 2049,
+      "phase": 39
+    },
+    {
+      "file": "split-factor40-start1-shift1.mp4",
+      "factor": 40,
+      "start": 1,
+      "shift": 1,
+      "first": 0,
+      "last": 2048,
+      "phase": 0
+    },
+    {
+      "file": "split-factor40-start40-shift-1.mp4",
+      "factor": 40,
+      "start": 40,
+      "shift": -1,
+      "first": 2,
+      "last": 2050,
+      "phase": 39
+    },
+    {
+      "file": "split-factor40-start40-shift0.mp4",
+      "factor": 40,
+      "start": 40,
+      "shift": 0,
+      "first": 1,
+      "last": 2049,
+      "phase": 0
+    },
+    {
+      "file": "split-factor40-start40-shift1.mp4",
+      "factor": 40,
+      "start": 40,
+      "shift": 1,
+      "first": 1,
+      "last": 2049,
+      "phase": 1
+    },
+    {
+      "file": "split-factor65537-start0-shift-1.mp4",
+      "factor": 65537,
+      "start": 0,
+      "shift": -1,
+      "first": 1,
+      "last": 2049,
+      "phase": 65536
+    },
+    {
+      "file": "split-factor65537-start0-shift0.mp4",
+      "factor": 65537,
+      "start": 0,
+      "shift": 0,
+      "first": 0,
+      "last": 2048,
+      "phase": 0
+    },
+    {
+      "file": "split-factor65537-start0-shift1.mp4",
+      "factor": 65537,
+      "start": 0,
+      "shift": 1,
+      "first": 0,
+      "last": 2048,
+      "phase": 1
+    },
+    {
+      "file": "split-factor65537-start1-shift-1.mp4",
+      "factor": 65537,
+      "start": 1,
+      "shift": -1,
+      "first": 1,
+      "last": 2049,
+      "phase": 65535
+    },
+    {
+      "file": "split-factor65537-start1-shift0.mp4",
+      "factor": 65537,
+      "start": 1,
+      "shift": 0,
+      "first": 1,
+      "last": 2049,
+      "phase": 65536
+    },
+    {
+      "file": "split-factor65537-start1-shift1.mp4",
+      "factor": 65537,
+      "start": 1,
+      "shift": 1,
+      "first": 0,
+      "last": 2048,
+      "phase": 0
+    },
+    {
+      "file": "split-factor65537-start65537-shift-1.mp4",
+      "factor": 65537,
+      "start": 65537,
+      "shift": -1,
+      "first": 2,
+      "last": 2050,
+      "phase": 65536
+    },
+    {
+      "file": "split-factor65537-start65537-shift0.mp4",
+      "factor": 65537,
+      "start": 65537,
+      "shift": 0,
+      "first": 1,
+      "last": 2049,
+      "phase": 0
+    },
+    {
+      "file": "split-factor65537-start65537-shift1.mp4",
+      "factor": 65537,
+      "start": 65537,
+      "shift": 1,
+      "first": 1,
+      "last": 2049,
+      "phase": 1
+    }
+  ],
+  "sha256": {
+    "control.mp4": "40abaabaf72367bd231e6396a30286873920c90f4417fb72c46392fd2cf6cf23",
+    "reference.f32le": "0e7c1faf087653e91eefeddd232d3995fd80b06ef005ac5e433175ac0669e8f5",
+    "factor4-start0-shift-1.mp4": "835fcb3a986cd7f8c4d763ef5df4e4edc40b50d4b6c64779ec968b4bb2ef7a15",
+    "factor4-start0-shift0.mp4": "c8da8681d19e4ef59b46432d16cbd68f238f5f5747d7b1927754071e1d134043",
+    "factor4-start0-shift1.mp4": "3d0608a78b27276dc9919cdcdaeb4ccb8bd37bbbf4dc7b7abf11e7454e01a260",
+    "factor4-start1-shift-1.mp4": "bdb008fa41caf26f823ae32a36f5662fe97436d7d3abb434cd658aec904db8fc",
+    "factor4-start1-shift0.mp4": "c7226d1145faa087ddf5ee9c9839bc8d3d7b5691f5b310f618494e07adc8a25e",
+    "factor4-start1-shift1.mp4": "f4b9733c530cb48c53e66264ce0fbdf20d4cda8c503b11f6466f03f08ddfa44e",
+    "factor4-start4-shift-1.mp4": "ac33ced46fd58d732032e50810a3fc8bf868c7f200c2fb976e426d6806bd1ca4",
+    "factor4-start4-shift0.mp4": "de6b93696d4bcd0de3165f48df25f31cf395caf29aa2fc36afa0d0e8811faa57",
+    "factor4-start4-shift1.mp4": "b9d2112a00408225c67c0fcb205ca347340bbfbde564fb0c288fe6a5d8029027",
+    "factor40-start0-shift-1.mp4": "4f8224577ae057d3cc4922c11e3375799d32564b4ea2975d95e55386a7df6700",
+    "factor40-start0-shift0.mp4": "864180ebd23c36a74c8df963dc104df6d43a6137acb4b28bcf174c63423afc17",
+    "factor40-start0-shift1.mp4": "df0738fa443071634e58e6236f769f29c47b348ae0302b663b2ddd9152bc9f7b",
+    "factor40-start1-shift-1.mp4": "f1cb563cbb00847474a3b95b1c34270bce25a909b873909cf9ff959646a0eb09",
+    "factor40-start1-shift0.mp4": "0b0999813e5fbb50c6471a9563af7d4109821e6714459e400eff3675f4b15257",
+    "factor40-start1-shift1.mp4": "65ba4054e960c6de79d43e96b2f4234b0cf21b8b103a481810fde32978d2248c",
+    "factor40-start40-shift-1.mp4": "b6b2d0b9f012abcf1d12df2bbb14560cc54e48b97349d283151718e0cf02bace",
+    "factor40-start40-shift0.mp4": "b76f7f11307a92f26060dcd8f9bb562536f14456801d07df7f29fb4218c0b2a9",
+    "factor40-start40-shift1.mp4": "d37b8933ff12564f0edba1c3365da4b168876bbb4332d1375689360e64d3a656",
+    "factor65537-start0-shift-1.mp4": "3637d283c07eb733ae04c5147e80a466d0e985275fa39017d1705f1291bb45a9",
+    "factor65537-start0-shift0.mp4": "31b08ca9d57a7bff8e6482ab967a8d32a3e170257e88da7eac93e3050f81f26f",
+    "factor65537-start0-shift1.mp4": "289921302cd5703b927fb8d80d18a5e2ebe2e9007256c7b98e6d523d98ae6c2f",
+    "factor65537-start1-shift-1.mp4": "853fee954c2edf75546723e0ff2a21ae8b5181326aa036bf56d4478bd1c3320d",
+    "factor65537-start1-shift0.mp4": "884e66417ff96847d4903b8d065b10eea6f686f3ebe34412577e12b4963325bf",
+    "factor65537-start1-shift1.mp4": "69abdf753ebffc5f2fb9be464ed8d9e4fb5b722d93be4c92c2315b36978a1db3",
+    "factor65537-start65537-shift-1.mp4": "2de58f95d7f73684a3afc0c6a7901d42778d8f656a8a11d5e2626a5e5a2cb7eb",
+    "factor65537-start65537-shift0.mp4": "2f76d0be2365adc626833c898a7a763b350d1aff0e8e950aecf47de7ebbf82f8",
+    "factor65537-start65537-shift1.mp4": "2a72656de010d5b085b25ecb117da27bc2cb13fabced79588d2bae3749e034ec",
+    "split-factor4-start0-shift-1.mp4": "a9ed12b01024daef3796621cb3bfbddef1803e1ebedbd62325d8a56ab416baae",
+    "split-factor4-start0-shift0.mp4": "66140979cb1248cd651edae75ee7d216844e6de90a9064d1117635f35840cb2a",
+    "split-factor4-start0-shift1.mp4": "87af799b3666fb2ae9475b0b384328863428fedd1037b06ba42c46c2316dbef0",
+    "split-factor4-start1-shift-1.mp4": "e56038554ed7b834d9a07d38d9b8f60f52c0662f6c4a117a341fd00ab818230b",
+    "split-factor4-start1-shift0.mp4": "a1883579e7263de7f467546c81a63e3ae89dbb013dda98344de95c7bcca978fc",
+    "split-factor4-start1-shift1.mp4": "e2259fd50d3b2f1ed867c8d63cd859acdc3b20f6c2f8b260aecfc8e19a7cf2a6",
+    "split-factor4-start4-shift-1.mp4": "524a2b0d8e70860a46f6ccc05859960878547eead960867b0b07a2c38c53dd7c",
+    "split-factor4-start4-shift0.mp4": "f808e2c4ac8c65532e75a3eec2937aef21d80c0c02744ca9556d06af97f2e976",
+    "split-factor4-start4-shift1.mp4": "60071ed901d811a0495637aa264275a59d80d3f608ed31c49fcd473d4e280a7a",
+    "split-factor40-start0-shift-1.mp4": "25b78d8803034cc12b99974572612a40f15d985047ab50aac8b000c77d5ee662",
+    "split-factor40-start0-shift0.mp4": "1e1b029413e9e4412f6e06697d14c14cb7fdf8e50e8c529e66c7b4a71886c041",
+    "split-factor40-start0-shift1.mp4": "84bf18fe9ac9fda59c13795305918aa6712ba41ed8156ee58eff7907efe43122",
+    "split-factor40-start1-shift-1.mp4": "3ac63bd77b41d0c65002893b18d0a10a1e043306ec9281b8c1e8dd1be59163f9",
+    "split-factor40-start1-shift0.mp4": "944d761dad0d51fcd14512d775a8a962a914d70385b2cad3fbb547e9efa88115",
+    "split-factor40-start1-shift1.mp4": "03f2b50e1b3925856a0699c68a6f87f83e8c21ba2ba6e5b8f093898f9e74ae5e",
+    "split-factor40-start40-shift-1.mp4": "6be348ed32796938b13a15a93494753a8cf35a0fe9b931efd676f16cedf7daa2",
+    "split-factor40-start40-shift0.mp4": "75c4df23a8f95e4e74b1ee90731ec0555507495eac6de20ed78c36f0bd462de8",
+    "split-factor40-start40-shift1.mp4": "1415e8fca8e15f2a71500bc47fb1fe3a6aa5be9b66c29f4517a19f636752a407",
+    "split-factor65537-start0-shift-1.mp4": "3a3d83b3ff35037a1685de346cad296976ea8c07b94d4dd43c4feed9e6b9e96e",
+    "split-factor65537-start0-shift0.mp4": "e3ed135fb7d743a9f8e8210dcad049b3a2eda194a683551a3f3660983b178563",
+    "split-factor65537-start0-shift1.mp4": "d2791c6c6d9740bbb80b396e8c91dbbfa174430c673816747f593d346b7b16b8",
+    "split-factor65537-start1-shift-1.mp4": "f50ea65eedff13ff3309bb0cf637dd03411594c42f02cab065b87957cf7c0a21",
+    "split-factor65537-start1-shift0.mp4": "f4096f76743fddf2415ddd55a03dbdeb074c518b822c0ce533c40427f5049822",
+    "split-factor65537-start1-shift1.mp4": "f5bf9592d5d2155ab51143c77989ec72972baf1a2ec6c14e0ea5aed254a228b8",
+    "split-factor65537-start65537-shift-1.mp4": "87ee0066637e81101cf53f1fcfa302419078494c73a9241e746e4ab3ed160dcc",
+    "split-factor65537-start65537-shift0.mp4": "63eb03341a00d8e0c8414159d81c48c97302df129ae352efafd335102657f383",
+    "split-factor65537-start65537-shift1.mp4": "10a2c85a6b3e3a58d200fae830456f7a9321a590d79854620b6370fb4a24883f"
+  }
+}

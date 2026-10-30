@@ -124,7 +124,7 @@ pub fn decode_audio_with_options(
                 std::time::Duration::from_micros(b as u64),
             )
         });
-        let info=crate::native_media::audio_source_info_selected_with_interval_and_options(source,selected,interval,options).map_err(|e|e.to_string())?;
+        let info=crate::native_media::constant_audio_source_info_selected_with_interval_and_options(source,selected,interval,options).map_err(|e|e.to_string())?;
         if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
             validate_encoded_audio_packet_budget(source, info.stream_index, interval, options)?;
         }
@@ -994,7 +994,7 @@ pub fn audio_trim_selection_with_interval_and_options(
         None if info.streams.len() == 1 => info.streams[0].index,
         None => return Err("audio-to-WAVE trim requires an explicit audio stream when other tracks exist".into()),
     };
-    crate::native_media::audio_source_info_selected_with_interval_and_options(source, Some(index), interval, options).map_err(|e| e.to_string())?;
+    crate::native_media::constant_audio_source_info_selected_with_interval_and_options(source, Some(index), interval, options).map_err(|e| e.to_string())?;
     Ok(index)
 }
 
@@ -1395,7 +1395,7 @@ pub fn loudness_with_options(
     let selected = options.streams.first().copied();
     let mut plan = if options.max_controlled_bytes.is_none()
         && (crate::native_pcm::is_wave(source).map_err(|e| e.to_string())?
-            || crate::native_media::audio_source_info_selected_with_options(source, selected, options).is_ok())
+            || crate::native_media::constant_audio_source_info_selected_with_options(source, selected, options).is_ok())
     {
         decode_audio_with_options(source, &Default::default(), options)?
     } else {
@@ -1415,7 +1415,7 @@ pub fn loudness_with_options(
         }
         (info.sample_rate,info.channels)
     } else if options.max_controlled_bytes.is_none()
-        && let Ok(info) = crate::native_media::audio_source_info_selected_with_options(source, selected, options)
+        && let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(source, selected, options)
     {
         if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
             validate_encoded_audio_packet_budget(source, info.stream_index, None, options)?;

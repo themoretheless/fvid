@@ -30,7 +30,7 @@ fn geometry_with_options(source: &Path, options: &fvid_media::CopyOptions) -> Re
         let info = crate::native_pcm::inspect(&mut File::open(source)?, options.cancel.as_ref())?;
         Ok((info.sample_rate, info.channels))
     } else if options.max_controlled_bytes.is_none() && crate::native_media::is_owned_audio_source_with_options(source, options)? {
-        let info = crate::native_media::audio_source_info_selected_with_options(source, None, options)?;
+        let info = crate::native_media::constant_audio_source_info_selected_with_options(source, None, options)?;
         Ok((info.sample_rate, info.channels))
     } else {
         fvid_media::owned_audio_plan::source_geometry(source, options)
@@ -91,7 +91,7 @@ fn segment_packet_count(source: &Path, options: &fvid_media::CopyOptions) -> Res
         {
             return Err(invalid("controlled memory budget exceeded"));
         }
-        let info = crate::native_media::audio_source_info_selected_with_options(source, None, options)?;
+        let info = crate::native_media::constant_audio_source_info_selected_with_options(source, None, options)?;
         if let Some(track) = reader.tracks().get(info.stream_index) {
             if track.edits.iter().filter(|e| e.media_time >= 0).count() <= 1 {
                 return Ok(track.samples.len() as u64);
@@ -131,7 +131,7 @@ fn segment_packet_count(source: &Path, options: &fvid_media::CopyOptions) -> Res
         {
             return Err(invalid("controlled memory budget exceeded"));
         }
-        let info = crate::native_media::audio_source_info_selected_with_options(source, None, options)?;
+        let info = crate::native_media::constant_audio_source_info_selected_with_options(source, None, options)?;
         if let Some(track) = reader.tracks.get(info.stream_index) {
             let track_number = track.number;
             return Ok(reader

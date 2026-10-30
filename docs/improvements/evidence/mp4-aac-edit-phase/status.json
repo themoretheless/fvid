@@ -1,0 +1,43 @@
+{
+  "batch": 418,
+  "accepted_ids": [],
+  "follow_up_ids": [
+    "FVID-0417"
+  ],
+  "count_delta": 0,
+  "checks": {
+    "selected_integration_suites": 25,
+    "integration_passed": 159,
+    "integration_original_failed": 7,
+    "audio_reader_units_passed": 14,
+    "distinct_passed": 173,
+    "player_check": "passed locked/offline/no-default-features",
+    "core_check": "passed locked/offline/no-default-features"
+  },
+  "original_failures": "Same seven failure names and exact panic reasons on original d25e228c19 in a separate target; comparison proof in evidence/edit-metadata-baseline-20261030. No old failure is claimed resolved.",
+  "publication": "held under push-or-clear because original failing checks remain",
+  "build_profile": {
+    "CARGO_PROFILE_DEV_DEBUG": 0,
+    "CARGO_PROFILE_TEST_DEBUG": 0,
+    "note": "Same correctness profiles before/after; no performance claim."
+  },
+  "status": "accepted-uncounted-follow-up",
+  "summary": "Extend FVID-0417 rational AAC crop coordinates through finite edit origins and contiguous split edits",
+  "before": {
+    "single_edit_baseline": "0 passed,3 failed",
+    "expanded_54_case_baseline": "0 passed,3 failed; single edits miscrop/retime; split edits can refuse valid fractional timestamps with Invalid(sample not aligned). Refusal/reproduction is not successful playback."
+  },
+  "after": {
+    "focused": "3 passed;54 edit windows play exact PCM and PTS, with both single and equivalent split edit lists",
+    "scope": "single finite positive edit uses exact rebasing and keeps existing seek return coordinates; complex AAC edits use the existing rational variable timeline"
+  },
+  "fixtures": {
+    "edited_video_cases": 54,
+    "control_videos": 1,
+    "max_extent_ms": 64,
+    "generator": "scripts/generate_mp4_aac_edit_phase.py"
+  },
+  "regression": "tests/mp4_aac_edit_phase.rs",
+  "source_sha256": "99f601a808f247d8e7cf9a7811976ec02854a58d276cf01ada6ba51405206dac",
+  "uncounted": "Same independent-rounding defect as FVID-0417; no additional ID for any edit/clock/worker variation."
+}

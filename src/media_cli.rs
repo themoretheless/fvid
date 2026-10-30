@@ -2154,7 +2154,7 @@ fn try_native_audio_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Er
         && limits.stream_metadata_delete.is_empty()
         && fvid::native_media::is_owned_audio_trim_source(source_path)?
         && selected.is_none_or(|idx| {
-            fvid::native_media::audio_source_info_selected(source_path, Some(idx)).is_ok()
+            fvid::native_media::constant_audio_source_info_selected(source_path, Some(idx)).is_ok()
         });
     if plan {
         let mut result = if command == "trim-pcm" {

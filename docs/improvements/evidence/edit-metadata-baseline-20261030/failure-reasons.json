@@ -1,0 +1,37 @@
+{
+  "adts_mono_then_ps_aac_scopes_negotiation_and_packet_budget_to_max_packets_prefix": {
+    "same_reason": true,
+    "original_reason": "called `Result::unwrap()` on an `Err` value: \"ADTS packet exceeds budget\"",
+    "current_reason": "called `Result::unwrap()` on an `Err` value: \"ADTS packet exceeds budget\""
+  },
+  "mp4_and_matroska_mono_then_ps_aac_scope_geometry_to_max_packets_prefix": {
+    "same_reason": true,
+    "original_reason": "called `Result::unwrap()` on an `Err` value: \"WebM packet exceeds budget or has empty lace frame\"",
+    "current_reason": "called `Result::unwrap()` on an `Err` value: \"WebM packet exceeds budget or has empty lace frame\""
+  },
+  "adts_interval_prefix_bounds_plan_decode_and_trim_packet_budget": {
+    "same_reason": true,
+    "original_reason": "fvid::media::plan_trim on ADTS [0, 15ms) should succeed: \"ADTS packet exceeds budget\"",
+    "current_reason": "fvid::media::plan_trim on ADTS [0, 15ms) should succeed: \"ADTS packet exceeds budget\""
+  },
+  "mp4_interval_prefix_bounds_packet_budget_and_in_band_ps_negotiation": {
+    "same_reason": true,
+    "original_reason": "fvid::media::plan_trim should succeed on [0, 20ms): \"MP4 packet exceeds budget\"",
+    "current_reason": "fvid::media::plan_trim should succeed on [0, 20ms): \"MP4 packet exceeds budget\""
+  },
+  "mp4_compressed_concat_scopes_packet_budget_to_selected_prefix_and_tracks": {
+    "same_reason": true,
+    "original_reason": "plan_concat should ignore unselected track 1 packet sizes: \"MP4 packet exceeds budget\"",
+    "current_reason": "plan_concat should ignore unselected track 1 packet sizes: \"MP4 packet exceeds budget\""
+  },
+  "compressed_packet_limit_refuses_without_publication_in_each_container": {
+    "same_reason": true,
+    "original_reason": "called `Result::unwrap_err()` on an `Ok` value: None",
+    "current_reason": "called `Result::unwrap_err()` on an `Ok` value: None"
+  },
+  "owned_normalizer_plans_cli_and_api_without_decoding_packet_contents": {
+    "same_reason": true,
+    "original_reason": "called `Result::unwrap()` on an `Err` value: Invalid(\"failed to fill whole buffer\")",
+    "current_reason": "called `Result::unwrap()` on an `Err` value: Invalid(\"failed to fill whole buffer\")"
+  }
+}

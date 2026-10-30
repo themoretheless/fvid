@@ -1,0 +1,26 @@
+{
+  "original_failed": [
+    "adts_interval_prefix_bounds_plan_decode_and_trim_packet_budget",
+    "adts_mono_then_ps_aac_scopes_negotiation_and_packet_budget_to_max_packets_prefix",
+    "compressed_packet_limit_refuses_without_publication_in_each_container",
+    "mp4_and_matroska_mono_then_ps_aac_scope_geometry_to_max_packets_prefix",
+    "mp4_compressed_concat_scopes_packet_budget_to_selected_prefix_and_tracks",
+    "mp4_interval_prefix_bounds_packet_budget_and_in_band_ps_negotiation",
+    "owned_normalizer_plans_cli_and_api_without_decoding_packet_contents"
+  ],
+  "current_failed": [
+    "adts_interval_prefix_bounds_plan_decode_and_trim_packet_budget",
+    "adts_mono_then_ps_aac_scopes_negotiation_and_packet_budget_to_max_packets_prefix",
+    "compressed_packet_limit_refuses_without_publication_in_each_container",
+    "mp4_and_matroska_mono_then_ps_aac_scope_geometry_to_max_packets_prefix",
+    "mp4_compressed_concat_scopes_packet_budget_to_selected_prefix_and_tracks",
+    "mp4_interval_prefix_bounds_packet_budget_and_in_band_ps_negotiation",
+    "owned_normalizer_plans_cli_and_api_without_decoding_packet_contents"
+  ],
+  "same_failure_names": true,
+  "current_test_suites": 25,
+  "current_passed": 159,
+  "current_failed_count": 7,
+  "independent_original_target": true,
+  "publication": "Held: these original failures remain unresolved. No assertion changed or counted for baseline comparison."
+}

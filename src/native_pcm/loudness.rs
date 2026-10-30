@@ -131,7 +131,7 @@ pub fn measure_file_with_options(
         .map_err(|e| invalid(&e))?
         || ((crate::container::mp4::recognizes_prefix(&prefix)
             || prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]))
-            && (native_media::audio_source_info_selected_with_options(source, selected, options).is_err()
+            && (native_media::constant_audio_source_info_selected_with_options(source, selected, options).is_err()
                 || options.max_controlled_bytes.is_some()))
     {
         let (rate, channels) =
@@ -367,7 +367,7 @@ pub fn default_weights_with_options(
         }
         info.channels
     } else if options.max_controlled_bytes.is_none()
-        && let Ok(info) = crate::native_media::audio_source_info_selected_with_options(source, selected, options)
+        && let Ok(info) = crate::native_media::constant_audio_source_info_selected_with_options(source, selected, options)
     {
         if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
             use std::io::{BufReader, Read, Seek, SeekFrom};

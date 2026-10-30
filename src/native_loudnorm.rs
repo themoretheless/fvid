@@ -266,7 +266,7 @@ pub fn try_plan(
         default_opts.cancel = options.cancel.clone();
         let native_stream = if crate::native_media::is_owned_audio_trim_source_with_options(source, &default_opts)? {
             let idx = selected_audio(source, options)?;
-            crate::native_media::audio_source_info_selected_with_options(source, Some(idx), &default_opts)
+            crate::native_media::constant_audio_source_info_selected_with_options(source, Some(idx), &default_opts)
                 .ok()
                 .map(|info| (idx, info))
         } else {
@@ -620,7 +620,7 @@ pub fn try_apply(
         && options.metadata_delete.is_empty()
         && crate::native_media::is_owned_audio_trim_source_with_options(source, &default_opts)?
         && selected_audio(source, options).is_ok_and(|idx| {
-            crate::native_media::audio_source_info_selected_with_options(
+            crate::native_media::constant_audio_source_info_selected_with_options(
                 source,
                 Some(idx),
                 &default_opts,
@@ -665,7 +665,7 @@ pub fn try_apply(
     plan_options.streams = vec![selected];
     crate::native_plan::decode_audio_with_options(source, &Default::default(), &plan_options)
         .map_err(|e| crate::invalid(&e))?;
-    let info = crate::native_media::audio_source_info_selected_with_options(source, Some(selected), options)?;
+    let info = crate::native_media::constant_audio_source_info_selected_with_options(source, Some(selected), options)?;
     if !fvid_media::owned_wave_loudness::qualified_rate(info.sample_rate) {
         return Ok(None);
     }

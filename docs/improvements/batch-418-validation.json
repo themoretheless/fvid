@@ -1,0 +1,55 @@
+{
+  "batch": 418,
+  "accepted_ids": [
+    "FVID-0418"
+  ],
+  "follow_up_ids": [
+    "FVID-0417"
+  ],
+  "count_delta": 1,
+  "checks": {
+    "selected_integration_suites": 25,
+    "integration_passed": 159,
+    "integration_original_failed": 7,
+    "audio_reader_units_passed": 14,
+    "distinct_passed": 173,
+    "player_check": "passed locked/offline/no-default-features",
+    "core_check": "passed locked/offline/no-default-features"
+  },
+  "original_failures": "Same seven failure names and exact panic reasons on original d25e228c19 in a separate target; comparison proof in evidence/edit-metadata-baseline-20261030. No old failure is claimed resolved.",
+  "publication": "held under push-or-clear because original failing checks remain",
+  "build_profile": {
+    "CARGO_PROFILE_DEV_DEBUG": 0,
+    "CARGO_PROFILE_TEST_DEBUG": 0,
+    "note": "Same correctness profiles before/after; no performance claim."
+  },
+  "status": "accepted-with-original-failures",
+  "summary": "Inspect initial MP4 audio metadata without using constant-DSP admission as a format gate; extend FVID-0417 AAC edit phase preservation without another count",
+  "source_files": [
+    "src/native_media.rs",
+    "src/media.rs",
+    "src/media_cli.rs",
+    "src/native_plan.rs",
+    "src/native_loudnorm.rs",
+    "src/native_pcm/loudness.rs",
+    "src/native_pcm/normalize.rs",
+    "src/native_audio_mix.rs",
+    "src/native_audio_mix/concat.rs",
+    "src/playback/audio/mp4_audio.rs"
+  ],
+  "regressions": [
+    "tests/native_mp4_initial_metadata.rs",
+    "tests/mp4_aac_edit_phase.rs"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/native-mp4-initial-metadata/status.json",
+    "docs/improvements/evidence/mp4-aac-edit-phase/status.json",
+    "docs/improvements/evidence/edit-metadata-baseline-20261030/comparison.json",
+    "docs/improvements/evidence/edit-metadata-baseline-20261030/failure-reasons.json"
+  ],
+  "limitations": [
+    "The173 passing checks qualify selected scope; seven proven original failures remain and block publication.",
+    "No physical sound-device, GPU, performance or whole-project qualification claim.",
+    "No existing assertions relaxed."
+  ]
+}

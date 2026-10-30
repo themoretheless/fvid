@@ -1052,7 +1052,7 @@ pub fn is_owned_audio_source_with_interval_and_options(
     }
     Ok(
         (is_mp4_audio_container(path)? || crate::native_export::is_matroska_source(path)?)
-            && audio_source_info_selected_with_interval_and_options(path, None, interval, options).is_ok(),
+            && constant_audio_source_info_selected_with_interval_and_options(path, None, interval, options).is_ok(),
     )
 }
 
@@ -1083,7 +1083,7 @@ pub fn is_owned_audio_trim_source_with_interval_and_options(
     let info = crate::native_probe::probe_with_options(path, options).map_err(|e| invalid(&e))?;
     Ok(info.streams.iter().any(|stream| {
         stream.media_type == "audio"
-            && audio_source_info_selected_with_interval_and_options(path, Some(stream.index), interval, options).is_ok()
+            && constant_audio_source_info_selected_with_interval_and_options(path, Some(stream.index), interval, options).is_ok()
     }))
 }
 
@@ -1119,7 +1119,7 @@ pub(crate) fn is_aac_trim_source_with_interval_and_options(
     }
     fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
     match selected {
-        Some(index) => Ok(audio_source_info_selected_with_interval_and_options(path, Some(index), interval, options)?.codec == "aac"),
+        Some(index) => Ok(constant_audio_source_info_selected_with_interval_and_options(path, Some(index), interval, options)?.codec == "aac"),
         None => Ok(is_aac_source_with_metadata_limit(path, options.max_controlled_bytes)?),
     }
 }
@@ -1152,6 +1152,7 @@ pub(crate) fn mp4_audio_index<R: std::io::Read + std::io::Seek>(
     Ok(index)
 }
 
+/// Geometry of the initial decoded setup; later MP4 descriptions may differ.
 pub struct AudioSourceInfo {
     /// None when the codec/container does not describe speaker positions.
     pub channel_mask: Option<u32>,
@@ -1160,6 +1161,8 @@ pub struct AudioSourceInfo {
     pub channels: u16,
     pub codec: &'static str,
 }
+/// Inspect the initial decoder setup, including streams with later changes.
+/// Use `constant_audio_source_info_selected` to qualify a constant-format DSP route.
 pub fn audio_source_info_selected(
     source: &Path,
     selected: Option<usize>,
@@ -1180,6 +1183,44 @@ pub fn audio_source_info_selected_with_interval_and_options(
     selected: Option<usize>,
     interval: Option<(Duration, Duration)>,
     options: &fvid_media::CopyOptions,
+) -> Result<AudioSourceInfo> {
+    inspect_audio_source_selected(source, selected, interval, options, false)
+}
+
+/// Inspect a source only when the selected MP4 track keeps one decoder setup.
+/// This retains the constant-format admission contract independently of metadata.
+pub fn constant_audio_source_info_selected(
+    source: &Path,
+    selected: Option<usize>,
+) -> Result<AudioSourceInfo> {
+    constant_audio_source_info_selected_with_options(source, selected, &fvid_media::CopyOptions::default())
+}
+
+/// Constant-format admission with the caller's packet, memory and cancellation limits.
+pub fn constant_audio_source_info_selected_with_options(
+    source: &Path,
+    selected: Option<usize>,
+    options: &fvid_media::CopyOptions,
+) -> Result<AudioSourceInfo> {
+    constant_audio_source_info_selected_with_interval_and_options(source, selected, None, options)
+}
+
+/// Require one MP4 setup; bound packet/PS inspection by the prefix and interval.
+pub fn constant_audio_source_info_selected_with_interval_and_options(
+    source: &Path,
+    selected: Option<usize>,
+    interval: Option<(Duration, Duration)>,
+    options: &fvid_media::CopyOptions,
+) -> Result<AudioSourceInfo> {
+    inspect_audio_source_selected(source, selected, interval, options, true)
+}
+
+fn inspect_audio_source_selected(
+    source: &Path,
+    selected: Option<usize>,
+    interval: Option<(Duration, Duration)>,
+    options: &fvid_media::CopyOptions,
+    require_constant_description: bool,
 ) -> Result<AudioSourceInfo> {
     if options
         .cancel
@@ -1296,7 +1337,9 @@ pub fn audio_source_info_selected_with_interval_and_options(
             ));
         }
         let index = mp4_audio_index(&reader, selected)?;
-        reader.tracks()[index].ensure_constant_description()?;
+        if require_constant_description {
+            reader.tracks()[index].ensure_constant_description()?;
+        }
         if options.max_packet_bytes != fvid_media::CopyOptions::default().max_packet_bytes {
             let track = &reader.tracks()[index];
             let max_samples = mp4_active_samples(track, interval, options.max_packets);

@@ -225,7 +225,7 @@ fn uses_native_audio_route(source: &std::path::Path, options: &CopyOptions, tran
     }
     if options.streams.len() == 1 {
         return Ok(
-            crate::native_media::audio_source_info_selected_with_interval_and_options(source, Some(options.streams[0]), interval, options)
+            crate::native_media::constant_audio_source_info_selected_with_interval_and_options(source, Some(options.streams[0]), interval, options)
                 .is_ok(),
         );
     }
@@ -874,7 +874,7 @@ pub fn trim(
         && crate::native_media::is_owned_audio_trim_source_with_interval_and_options(source, trim_interval, options).map_err(|e|e.to_string())?
         && matches!(destination.extension().and_then(|s|s.to_str()),Some("wav" | "f32le" | "mka" | "mkv"))
         && (options.streams.len() != 1
-            || crate::native_media::audio_source_info_selected_with_interval_and_options(source, Some(options.streams[0]), trim_interval, options)
+            || crate::native_media::constant_audio_source_info_selected_with_interval_and_options(source, Some(options.streams[0]), trim_interval, options)
                 .is_ok()) {
         validate_owned_audio_options(options)?;
         let stats=crate::native_export::trim_audio_pcm_with_controls(source,destination,from,to,options).map_err(|e|e.to_string())?;
@@ -948,7 +948,7 @@ pub fn plan_trim(
         && options.stream_metadata_delete.is_empty()
         && crate::native_media::is_owned_audio_trim_source_with_interval_and_options(source, trim_interval, options).map_err(|e|e.to_string())?
         && (options.streams.len() != 1
-            || crate::native_media::audio_source_info_selected_with_interval_and_options(source, Some(options.streams[0]), trim_interval, options)
+            || crate::native_media::constant_audio_source_info_selected_with_interval_and_options(source, Some(options.streams[0]), trim_interval, options)
                 .is_ok()) {
         validate_owned_audio_options(options)?;
         return crate::native_plan::trim_audio_with_options(source,from,to,options);

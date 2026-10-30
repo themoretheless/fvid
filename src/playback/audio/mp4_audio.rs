@@ -280,6 +280,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             .ok_or_else(|| invalid("MP4 track index out of range"))?)?;
         let clock=PlaybackClock::build(&mut demuxer,index,programme.unwrap_or(0))?;
         if clock.is_some() || demuxer.tracks().get(index).is_some_and(|t|t.ensure_constant_description().is_err() || t.has_open_edit()
+            || (t.codec == *b"mp4a" && (t.edits.len() > 1 || t.edits.first().is_some_and(|e|e.media_time < 0)))
             || (!t.edits.is_empty() && matches!(&t.codec,b"alac"|b"raw "|b"sowt"|b"twos"|b"in24"|b"in32"|b"fl32"|b"fl64"))) {
             return Self::from_changing(demuxer,index,programme,clock);
         }
@@ -1014,19 +1015,24 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     fn present_decoded(&self, mut packet: crate::audio::AudioPacket, source_pts: i64) -> Result<Option<crate::audio::AudioPacket>> {
         if self.variable_edits.is_some() {return self.present_variable_edit(packet,source_pts);}
         let absolute_window = if self.clock_mode.get() && let Some(clock)=&self.clock {
-            Some((self.source_time(source_pts)?, self.clock_floor.get(), clock.end()))
-        } else if !self.changing && self.track().codec == *b"mp4a" && self.track().edits.is_empty() {
-            // An integral ratio of media ticks to native samples does not make
-            // CTTS sample-aligned. Subtract exact times before rounding a crop;
-            // independently rounding the origin and seek point loses samples.
+            Some((self.source_time(source_pts)?, self.clock_floor.get(), clock.end(), EditTime::ZERO))
+        } else if !self.changing && self.track().codec == *b"mp4a"
+            && self.track().edits.len() <= 1 && self.track().edits.first().is_none_or(|e|e.media_time >= 0) {
+            // Media and edit origins can both be between native samples. Keep
+            // their phase through clipping, then rebase only the emitted PTS.
             let scale = self.track().timescale;
-            let end = i128::try_from(self.presentation_end_ticks().unwrap_or(0))
-                .map_err(|_| invalid("MP4 AAC presentation endpoint overflow"))?;
+            let (origin, end) = if let Some(edit) = self.track().edits.first() {
+                let origin = EditTime::signed_ticks(edit.media_time, scale)?;
+                (origin, origin.add(EditTime::ticks(edit.duration, self.demuxer.movie_timescale())?)?)
+            } else {
+                let end = i128::try_from(self.presentation_end_ticks().unwrap_or(0))
+                    .map_err(|_| invalid("MP4 AAC presentation endpoint overflow"))?;
+                (EditTime::ZERO, EditTime::new(end, u128::from(scale))?)
+            };
             Some((EditTime::signed_ticks(source_pts, scale)?,
-                EditTime::signed_ticks(self.presentation_floor.max(0), scale)?,
-                EditTime::new(end, u128::from(scale))?))
+                EditTime::signed_ticks(self.presentation_floor.max(0), scale)?.max(origin), end, origin))
         } else { None };
-        if let Some((start, floor, end)) = absolute_window {
+        if let Some((start, floor, end, origin)) = absolute_window {
             let rate=self.sample_rate();let stride=usize::from(self.channels())*4;
             if rate==0 || stride==0 || !packet.data.len().is_multiple_of(stride) {
                 return Err(invalid(if self.clock_mode.get() {"invalid recovered MP4 PCM geometry"} else {"invalid AAC PCM presentation geometry"}));
@@ -1036,7 +1042,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             let last=end.sub(start)?.ceil_frames(rate)?.clamp(0,frames as i128) as usize;
             if first>=last {return Ok(None);}
             packet.data.copy_within(first*stride..last*stride,0);packet.data.truncate((last-first)*stride);
-            let at=start.add(EditTime::new(first as i128,u128::from(rate))?)?;let (pts,den)=at.stamp()?;
+            let at=start.add(EditTime::new(first as i128,u128::from(rate))?)?.sub(origin)?;let (pts,den)=at.stamp()?;
             packet.pts=pts;packet.timebase_num=1;packet.timebase_den=den;return Ok(Some(packet));
         }
         let track = self.track();

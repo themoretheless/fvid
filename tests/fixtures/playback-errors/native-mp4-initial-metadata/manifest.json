@@ -1,0 +1,505 @@
+{
+  "provenance": "Own 120ms neutral16x16 VP9 and six authored nonzero PCM spans with coding/rate/channel/precision transitions or equivalent constant setups, in regular/fragmented form and reordered sample-description tables. No private media/parameters, external encoder, FFmpeg or network.",
+  "cases": [
+    {
+      "file": "changing-s16-pcm.mp4",
+      "rate": 48000,
+      "channels": 2,
+      "codec": "pcm_s16le",
+      "changing": true,
+      "frames": [
+        {
+          "rate": 48000,
+          "channels": 2,
+          "oracle": "changing-s16-0.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "changing-s16-1.f32le"
+        },
+        {
+          "rate": 44100,
+          "channels": 2,
+          "oracle": "changing-s16-2.f32le"
+        },
+        {
+          "rate": 48000,
+          "channels": 2,
+          "oracle": "changing-s16-3.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "changing-s16-4.f32le"
+        },
+        {
+          "rate": 44100,
+          "channels": 2,
+          "oracle": "changing-s16-5.f32le"
+        }
+      ]
+    },
+    {
+      "file": "changing-s16-pcm-fragmented.mp4",
+      "rate": 48000,
+      "channels": 2,
+      "codec": "pcm_s16le",
+      "changing": true,
+      "frames": [
+        {
+          "rate": 48000,
+          "channels": 2,
+          "oracle": "changing-s16-0.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "changing-s16-1.f32le"
+        },
+        {
+          "rate": 44100,
+          "channels": 2,
+          "oracle": "changing-s16-2.f32le"
+        },
+        {
+          "rate": 48000,
+          "channels": 2,
+          "oracle": "changing-s16-3.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "changing-s16-4.f32le"
+        },
+        {
+          "rate": 44100,
+          "channels": 2,
+          "oracle": "changing-s16-5.f32le"
+        }
+      ]
+    },
+    {
+      "file": "changing-s16-pcm-start-third.mp4",
+      "rate": 48000,
+      "channels": 2,
+      "codec": "pcm_s16le",
+      "changing": true,
+      "frames": [
+        {
+          "rate": 48000,
+          "channels": 2,
+          "oracle": "changing-s16-0.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "changing-s16-1.f32le"
+        },
+        {
+          "rate": 44100,
+          "channels": 2,
+          "oracle": "changing-s16-2.f32le"
+        },
+        {
+          "rate": 48000,
+          "channels": 2,
+          "oracle": "changing-s16-3.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "changing-s16-4.f32le"
+        },
+        {
+          "rate": 44100,
+          "channels": 2,
+          "oracle": "changing-s16-5.f32le"
+        }
+      ]
+    },
+    {
+      "file": "changing-s16-pcm-start-third-fragmented.mp4",
+      "rate": 48000,
+      "channels": 2,
+      "codec": "pcm_s16le",
+      "changing": true,
+      "frames": [
+        {
+          "rate": 48000,
+          "channels": 2,
+          "oracle": "changing-s16-0.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "changing-s16-1.f32le"
+        },
+        {
+          "rate": 44100,
+          "channels": 2,
+          "oracle": "changing-s16-2.f32le"
+        },
+        {
+          "rate": 48000,
+          "channels": 2,
+          "oracle": "changing-s16-3.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "changing-s16-4.f32le"
+        },
+        {
+          "rate": 44100,
+          "channels": 2,
+          "oracle": "changing-s16-5.f32le"
+        }
+      ]
+    },
+    {
+      "file": "changing-f32-pcm.mp4",
+      "rate": 32000,
+      "channels": 1,
+      "codec": "pcm_f32le",
+      "changing": true,
+      "frames": [
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "changing-f32-0.f32le"
+        },
+        {
+          "rate": 48000,
+          "channels": 2,
+          "oracle": "changing-f32-1.f32le"
+        },
+        {
+          "rate": 44100,
+          "channels": 2,
+          "oracle": "changing-f32-2.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "changing-f32-3.f32le"
+        },
+        {
+          "rate": 48000,
+          "channels": 2,
+          "oracle": "changing-f32-4.f32le"
+        },
+        {
+          "rate": 44100,
+          "channels": 2,
+          "oracle": "changing-f32-5.f32le"
+        }
+      ]
+    },
+    {
+      "file": "changing-f32-pcm-fragmented.mp4",
+      "rate": 32000,
+      "channels": 1,
+      "codec": "pcm_f32le",
+      "changing": true,
+      "frames": [
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "changing-f32-0.f32le"
+        },
+        {
+          "rate": 48000,
+          "channels": 2,
+          "oracle": "changing-f32-1.f32le"
+        },
+        {
+          "rate": 44100,
+          "channels": 2,
+          "oracle": "changing-f32-2.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "changing-f32-3.f32le"
+        },
+        {
+          "rate": 48000,
+          "channels": 2,
+          "oracle": "changing-f32-4.f32le"
+        },
+        {
+          "rate": 44100,
+          "channels": 2,
+          "oracle": "changing-f32-5.f32le"
+        }
+      ]
+    },
+    {
+      "file": "changing-f32-pcm-start-third.mp4",
+      "rate": 32000,
+      "channels": 1,
+      "codec": "pcm_f32le",
+      "changing": true,
+      "frames": [
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "changing-f32-0.f32le"
+        },
+        {
+          "rate": 48000,
+          "channels": 2,
+          "oracle": "changing-f32-1.f32le"
+        },
+        {
+          "rate": 44100,
+          "channels": 2,
+          "oracle": "changing-f32-2.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "changing-f32-3.f32le"
+        },
+        {
+          "rate": 48000,
+          "channels": 2,
+          "oracle": "changing-f32-4.f32le"
+        },
+        {
+          "rate": 44100,
+          "channels": 2,
+          "oracle": "changing-f32-5.f32le"
+        }
+      ]
+    },
+    {
+      "file": "changing-f32-pcm-start-third-fragmented.mp4",
+      "rate": 32000,
+      "channels": 1,
+      "codec": "pcm_f32le",
+      "changing": true,
+      "frames": [
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "changing-f32-0.f32le"
+        },
+        {
+          "rate": 48000,
+          "channels": 2,
+          "oracle": "changing-f32-1.f32le"
+        },
+        {
+          "rate": 44100,
+          "channels": 2,
+          "oracle": "changing-f32-2.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "changing-f32-3.f32le"
+        },
+        {
+          "rate": 48000,
+          "channels": 2,
+          "oracle": "changing-f32-4.f32le"
+        },
+        {
+          "rate": 44100,
+          "channels": 2,
+          "oracle": "changing-f32-5.f32le"
+        }
+      ]
+    },
+    {
+      "file": "constant-pcm.mp4",
+      "rate": 32000,
+      "channels": 1,
+      "codec": "pcm_f32le",
+      "changing": false,
+      "frames": [
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-0.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-1.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-2.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-3.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-4.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-5.f32le"
+        }
+      ]
+    },
+    {
+      "file": "constant-pcm-fragmented.mp4",
+      "rate": 32000,
+      "channels": 1,
+      "codec": "pcm_f32le",
+      "changing": false,
+      "frames": [
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-0.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-1.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-2.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-3.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-4.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-5.f32le"
+        }
+      ]
+    },
+    {
+      "file": "constant-pcm-start-third.mp4",
+      "rate": 32000,
+      "channels": 1,
+      "codec": "pcm_f32le",
+      "changing": false,
+      "frames": [
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-0.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-1.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-2.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-3.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-4.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-5.f32le"
+        }
+      ]
+    },
+    {
+      "file": "constant-pcm-start-third-fragmented.mp4",
+      "rate": 32000,
+      "channels": 1,
+      "codec": "pcm_f32le",
+      "changing": false,
+      "frames": [
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-0.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-1.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-2.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-3.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-4.f32le"
+        },
+        {
+          "rate": 32000,
+          "channels": 1,
+          "oracle": "constant-5.f32le"
+        }
+      ]
+    }
+  ],
+  "sha256": {
+    "changing-s16-0.f32le": "91243e0046d268fb98e826ad735fda18effda33fed04c3806ca3039b55a57fb7",
+    "changing-s16-1.f32le": "7ab44742e070c61034a5a2bf5dacd09ec53c03ff357dd265b9b36fab37b8274e",
+    "changing-s16-2.f32le": "37a5267ed10d74f6955236b12fe93186887f0964aeac2535e71f21b822d30deb",
+    "changing-s16-3.f32le": "4a88419d89ac5e1ace3bb61933c10661e96884e4ed5c9e094b4781e142ac441d",
+    "changing-s16-4.f32le": "7ab44742e070c61034a5a2bf5dacd09ec53c03ff357dd265b9b36fab37b8274e",
+    "changing-s16-5.f32le": "8747eb3a25994a84497c16aa57501004e8164e4629338ee332c23cbda6d3d0cc",
+    "changing-s16-pcm.mp4": "6b3d94bfcae4fb205fcbe12becf391adf12453398f4cf0fbb89ff8911ff0db32",
+    "changing-s16-pcm-fragmented.mp4": "c0ac85fdfc884bacbedc626f7b7004ee7bdd306f8d0fa6f67a4609548715a9b6",
+    "changing-s16-pcm-start-third.mp4": "008474765083acfe13b08915e9cad903ac11a0d198244b14a5da118d2e35c07d",
+    "changing-s16-pcm-start-third-fragmented.mp4": "00860a6c96db7bd750ae23fabc1f743f8d8f43a88af1f6187e327341b3c752ed",
+    "changing-f32-0.f32le": "7ab44742e070c61034a5a2bf5dacd09ec53c03ff357dd265b9b36fab37b8274e",
+    "changing-f32-1.f32le": "4dcec86ac665a35506b549fc6402cb2e98f3611ca1af420a2dc3938fce431a99",
+    "changing-f32-2.f32le": "37a5267ed10d74f6955236b12fe93186887f0964aeac2535e71f21b822d30deb",
+    "changing-f32-3.f32le": "7ab44742e070c61034a5a2bf5dacd09ec53c03ff357dd265b9b36fab37b8274e",
+    "changing-f32-4.f32le": "d8ca47c7010d403b546f4fb1f3286096d89fbaf36d0c4a404d876762b8bc75bf",
+    "changing-f32-5.f32le": "8747eb3a25994a84497c16aa57501004e8164e4629338ee332c23cbda6d3d0cc",
+    "changing-f32-pcm.mp4": "1bd93ced2d6d1c75defb426112fe1094517b937a19c5e3e470823899f3c54714",
+    "changing-f32-pcm-fragmented.mp4": "f3cecd9e00cb315a72482e840ad039b059b0b8156ac9761cd682d78596618956",
+    "changing-f32-pcm-start-third.mp4": "332a803c661804c4df3d2e305daa3952b55646272bc9ea7d46c9150b55b1d186",
+    "changing-f32-pcm-start-third-fragmented.mp4": "ea33dc983adb719975df7feb1fffd9ffcfc09e5438a2b704b0ac0f32017780b9",
+    "constant-0.f32le": "7ab44742e070c61034a5a2bf5dacd09ec53c03ff357dd265b9b36fab37b8274e",
+    "constant-1.f32le": "7ab44742e070c61034a5a2bf5dacd09ec53c03ff357dd265b9b36fab37b8274e",
+    "constant-2.f32le": "7ab44742e070c61034a5a2bf5dacd09ec53c03ff357dd265b9b36fab37b8274e",
+    "constant-3.f32le": "7ab44742e070c61034a5a2bf5dacd09ec53c03ff357dd265b9b36fab37b8274e",
+    "constant-4.f32le": "7ab44742e070c61034a5a2bf5dacd09ec53c03ff357dd265b9b36fab37b8274e",
+    "constant-5.f32le": "7ab44742e070c61034a5a2bf5dacd09ec53c03ff357dd265b9b36fab37b8274e",
+    "constant-pcm.mp4": "f634ca35142ef127233155f0b9579e21c20416c2a5c6a12f1131c2eec80f45bb",
+    "constant-pcm-fragmented.mp4": "91681a559283cfb42b4d44ae18a63cf5ff0b3d68d1353427266e3f6d10190256",
+    "constant-pcm-start-third.mp4": "300cd85776153482db800b5b698c0ef2246616e1810268d8d2c9e49a34cd6ccc",
+    "constant-pcm-start-third-fragmented.mp4": "db7ebcc86432e587e3bce740b16ffd40216758271a29cdd60e52728d097f6405"
+  }
+}
