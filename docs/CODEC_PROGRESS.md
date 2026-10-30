@@ -1,3 +1,53 @@
+## Owned TTT transform and complex downmix inversion, 2026-10-30
+
+The TTT primitive now implements predictive modes 0/1, center-subtraction
+modes 2/3 and energy modes 4/5. Its three columns represent the two downmix
+channels and decoded residual basis; its center output includes sqrt(2).
+Predictive coherence normalization is bypassed inside residual bands. Energy
+modes use normalized channel powers and conditional covariance rather than
+copying the reference's unnormalized matrix expressions. This is the band
+transform, not yet the complete matrix builder for trees 2/3/4.
+
+The inversion primitive derives weights from OTT CLDs and TTT CPC/CLD values,
+constructs the complex forward downmix and solves its inverse by pivoted
+elimination. This differs from the original implementation's explicit
+adjugate/determinant arithmetic. Real-only alias-lock processing remains
+separate and unqualified. Inputs are bounded physical parameters with explicit
+nonfinite/range/mode checks; no external implementation enters production.
+
+An independent 80-digit Decimal corpus covers 40937 transforms: all 51x51 CPC
+pairs with ICC/residual combinations except singular nonresidual ICC=0, and
+all 31x31 CLD pairs in each energy family. Tests also verify mode aliases.
+7688 inversion cases cover every pair of OTT CLDs with four deterministic
+TTT parameter trials in each family. The Decimal inverse uses an adjugate;
+Rust elimination matches it within 3e-12 absolute error and both multiplication
+orders recover identity. All 2601 singular CPC pairs are checked for a specific
+coherence refusal in both predictive modes, while their residual-region
+transforms remain accepted at component level. This refusal is not playback
+acceptance or a closed spatial codec gap.
+
+Unmodified original ISO functions agree with the Decimal corpus within
+5.99847e-7 for transforms and 3.48264e-7 for inversion weights/coefficients;
+all compared reference values are finite. The frozen archive, source and
+harness hashes are in the
+[reference report](validation/aac-ld-mps-ttt-reference-2026-10-30.json).
+Fixture regeneration is byte-identical with process and socket creation
+denied; see the [generation audit](validation/aac-ld-mps-ttt-generation-2026-10-30.json).
+Ordinary tests read saved data without regeneration, FFmpeg, network, a C
+compiler or reference software.
+
+All 38 LD-MPS integration tests and 575 media unit tests passed (one existing
+unit test ignored); see the [test report](validation/aac-ld-mps-ttt-tests-2026-10-30.json).
+An initial analytic assertion used a twice-rounded sqrt(2)/3 expression; its
+correctly rounded high-precision constant passed without runtime or tolerance
+changes. The rejected attempt hash is preserved in the report.
+
+Full TTT tree composition including mode-dependent routing/decorrelation,
+optional inversion wiring, residual AAC, STP/GES, arbitrary downmix/HRTF,
+LD-SBR/PCM integration and actual synthetic movie playback/seek remain open.
+The native spatial renderer refusal remains enabled. These primitive tests
+count zero new accepted spatial programmes.
+
 ## Owned OTT-only LD-MPS tree matrices, 2026-10-30
 
 The matrix builder now composes the five OTT-only trees 0/1/5/6/7 from a

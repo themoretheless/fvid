@@ -1,0 +1,16 @@
+{
+  "scope": "80-digit Decimal transform and adjugate oracle, not full spatial playback acceptance.",
+  "byte_exact_regeneration": true,
+  "process_and_socket_creation": "denied by Python audit hook",
+  "files": {
+    "expected.bin": {
+      "bytes": 3562504,
+      "sha256": "fdffc0f4ccc071032471c19cc52c955d1ad24ae0b120284a69e6f72c28721603"
+    },
+    "manifest.json": {
+      "bytes": 1210957,
+      "sha256": "771535838ca2833fd6229642b789d767bca7b191717978e04adc245747e095dc"
+    }
+  },
+  "generator_sha256": "750419e0105a058f51ae53ed2b851df13d421d0d35588aee5db6d7f11137f955"
+}
