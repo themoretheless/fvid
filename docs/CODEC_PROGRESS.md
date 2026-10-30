@@ -1,3 +1,50 @@
+## Native LD-MPS guided envelope shaping (GES), 2026-10-30
+
+GES now runs in the FVid-owned QMF chain after M2 and before synthesis. It
+tracks normalized downmix and dry+wet broadband energy, derives the signalled
+envelope target, accounts for the wet/dry energy ratio and limits dry gain to
+[0.25,4]. Bins 0..5 and wet rows retain their data. State advances when frame
+signalling disables shaping, and is preserved across same-domain parameter-grid
+changes. Changing SSC from GES to disabled removes the context; enabling GES
+again starts fresh. Checkpoints, reset and retained-memory inspection include
+all owned envelope histories. Prepared metadata retains the signalled envelopes;
+the QMF dry output already includes GES processing. Active STP remains a specific
+unsupported PCM tool, with its old refusal regression narrowed accordingly.
+
+400 own twelve-frame movies cover all eight trees, plain 48-kHz ELD and coupled
+LD-SBR with 480/512-sample 24-kHz cores and 32/64-bin output. Matrix resolutions
+23, 9 and 4 exercise active, warm-disabled and alternating masks. Forty additional
+transition controls within that count disable and restore GES through in-band
+SSC. The common corpus explicitly signals GES in ASC and repeats an identical
+first header. Configuration-change controls exercise owned-stream robustness,
+without claiming strict baseline MPEG-4 transport conformance. Every movie
+checks owned/public PCM, AudioStream playback, live rewind/reset, forward/backward
+and EOF seek, and repeated ranges across active/disabled boundaries. Four saved
+error movies reach a specific reshape-run overflow or a trailing-byte error
+after DSP processing; valid retry and checkpoint restore preserve core, SBR,
+spatial/GES and source history.
+
+The independent component reference executes the unmodified ISO GES routine and
+unmodified channel mapper, with source energy domains preserved in separate
+translation units. On 1,148,160 scalar values, maximum difference is
+1.047865317432839e-8. Low bins and disabled blocks retain exact bits; splitting
+blocks and checkpoint replay retain exact Rust state and output. An identity
+negative control differs by 0.06299999915063381, with 132,384 changed reference
+scalars and both gain clamps exercised. A separately assembled qualified chain
+checks 21,765,120 native PCM samples, with maximum difference
+1.4551891321708949e-11; it is not an independent full-decoder oracle. Ordinary
+tests read saved fixtures without a compiler, external decoder, network or FFmpeg.
+Explicit fixture regeneration denies process/network APIs and is byte identical.
+
+Nonzero time alignment remains open. New primary-source research establishes a
+magnitude restriction but does not establish sign encoding, direction and PCM/QMF
+association well enough to implement it safely. Its results are saved separately;
+no guessed shift has been introduced. STP, residual AAC, other bank geometries,
+spatial downscale and the other remaining codec tools still require work.
+Validation: media: 582 passed, 1 existing ignored; root: 1061 passed, 26 existing ignored; integration: 100 passed, 0 existing ignored.
+See docs/validation/aac-ld-mps-ges-*-2026-10-30.json and
+docs/validation/aac-ld-mps-time-alignment-research-2026-10-30.json.
+
 ## Native LD-MPS resolution changes with indexed matrix history, 2026-10-30
 
 Same-format in-band SSCs may now change the coded parameter resolution between

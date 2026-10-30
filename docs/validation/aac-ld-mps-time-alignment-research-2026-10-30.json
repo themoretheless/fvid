@@ -1,0 +1,19 @@
+{
+  "scope": "Research evidence only: nonzero MPEG Surround time alignment remains unimplemented.",
+  "primary_sources": [
+    {
+      "url": "https://cdn.standards.iteh.ai/samples/46458/4e50a1d8052b414aa4ebba2246893da8/ISO-IEC-23003-1-2007-Amd-1-2008.pdf",
+      "cached_sha256": "5adbcbff912a8922568d9e611e272df8ca8ff23444eaf5d5b7d574048b1cc2f4"
+    },
+    {
+      "url": "https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip"
+    }
+  ],
+  "observed": [
+    "The public ISO conformance amendment limits absolute sacTimeAlign magnitude to twice the spatial PCM frame size.",
+    "Inspected ISO source sac_dec.c accepts zero only; inspected FDK transport source also refuses nonzero alignment.",
+    "These sources did not establish sign encoding, offset direction and PCM/QMF association semantics sufficiently for implementing nonzero shifts."
+  ],
+  "decision": "Keep raw16 bits and the explicit nonzero-alignment refusal. Do not claim support or guess sign/direction; continue other codec tools with available primary algorithms.",
+  "related_scope": "A baseline MPEG-4 transport restriction in the2008 amendment requires in-band SSC equal to out-of-band SSC. Existing configuration-change controls are robustness/owned-API tests, not independent proof of strict baseline transport conformance."
+}

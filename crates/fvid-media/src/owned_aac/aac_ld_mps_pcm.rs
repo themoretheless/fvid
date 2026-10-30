@@ -1,6 +1,6 @@
 //! Ordinary LD-MPS PCM analysis/QMF chain/synthesis with canonical channel order.
-//! Residual QMF must already be decoded. Active temporal tools remain explicit
-//! refusals; this component does not enable the native AAC spatial factory.
+//! Residual QMF must already be decoded. GES is applied by the owned QMF
+//! chain; active STP remains an explicit unsupported PCM tool.
 use super::{
     Result,
     aac_ld_mps_config::Config,
@@ -364,9 +364,9 @@ fn render_subbands<const B: usize>(
     gains: &[f64],
 ) -> Result<Vec<f64>> {
     let output = qmf.decode(bits, downmix, residuals)?;
-    if !matches!(output.prepared.temporal_shape, Shape::Disabled) {
+    if matches!(output.prepared.temporal_shape, Shape::Stp(_)) {
         return Err(unsupported(
-            "LD-MPS active temporal PCM shaping is not yet implemented",
+            "LD-MPS active STP temporal PCM shaping is not yet implemented",
         ));
     }
     let mut planar = Vec::with_capacity(synthesis.len());

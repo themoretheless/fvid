@@ -217,7 +217,7 @@ fn pcm_chain_matches_reference_analysis_synthesis_order_and_all_fixed_gain_grids
     assert_eq!(native_order(4).unwrap(), [0, 3, 6, 7, 2, 5, 1, 4]);
 }
 #[test]
-fn late_active_temporal_tool_refusal_and_bad_pcm_roll_back_the_whole_pcm_chain() {
+fn late_active_stp_refusal_and_bad_pcm_roll_back_the_whole_pcm_chain() {
     let r = root("aac-ld-mps-frame");
     let m: Value =
         serde_json::from_slice(&std::fs::read(r.join("manifest.json")).unwrap()).unwrap();
@@ -251,7 +251,7 @@ fn late_active_temporal_tool_refusal_and_bad_pcm_roll_back_the_whole_pcm_chain()
             .decode(&mut reader, &x, &res)
             .unwrap_err()
             .to_string()
-            .contains("active temporal PCM shaping")
+            .contains("STP temporal PCM shaping")
     );
     assert_eq!(reader.position(), 0);
     assert_eq!(decoder, saved);
