@@ -145,7 +145,9 @@ impl<R: Read + Seek> WebmSubtitleReader<R> {
             } else {
                 (None, subtitles::plain(block.trim()))
             };
-            if text.is_empty() {
+            // Invisible frames still pass through packet/text decoding, but
+            // neither show a caption nor replace a visible fallback cue.
+            if text.is_empty() || self.demuxer.packets[*index].invisible {
                 continue;
             }
             // Negative-PTS frames must still be decoded, but Matroska does
@@ -154,7 +156,9 @@ impl<R: Read + Seek> WebmSubtitleReader<R> {
                 continue;
             };
             let next = blocks
-                .get(position + 1)
+                .iter()
+                .skip(position + 1)
+                .find(|(_, index)| !self.demuxer.packets[*index].invisible)
                 .and_then(|(pts, _)| presentation(*pts));
             let (start, end) = match stated {
                 Some(range) => range,

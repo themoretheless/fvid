@@ -1,0 +1,11 @@
+{
+  "commit": "4356db8fef46e129b9ee8bb07745ac86ab3d55ee",
+  "sha256": {
+    "src/playback/subtitles/webm_subtitles.rs": "4527149d2bfa23adc5debb172ae2da413d8967459236f8db5f3b34d29f248943",
+    "tests/matroska_invisible_subtitles.rs": "2ced3efa113b103422fffb1733ebb5b05717c8afae17e0489e277fa14305190f",
+    "scripts/generate_matroska_invisible_subtitles.py": "a8086810ad0419b0e9d6b4ab5f40ade815cf57a01cdadaf472629056219725f4",
+    "tests/fixtures/playback-errors/matroska-invisible-subtitles/manifest.json": "0fbb2bf4e01bbdfaa2fab2500286f18b634a9dada729dc8528a2a2320fde574a"
+  },
+  "initial_primary": "1 packet/flag/picture control passes,2 cue/seek acceptances fail; production unchanged.",
+  "final_seek_control": "Also tests exact hidden middle/tail start and end boundaries at40/60/80ms."
+}

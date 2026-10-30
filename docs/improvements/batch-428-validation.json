@@ -1,0 +1,44 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0428"
+  ],
+  "count_delta": 1,
+  "accepted_count": 428,
+  "batch": 428,
+  "summary": "Decode Invisible Matroska subtitle frames without publishing them or ending visible fallback cues",
+  "before": {
+    "commit": "4356db8fef46e129b9ee8bb07745ac86ab3d55ee",
+    "passed": 1,
+    "failed": 2,
+    "specific_failure": "Both parsers retain exact Invisible flags and all pictures, but native captions show hidden middle/tail/all events. Final baseline adds exact40/60/80ms boundaries with the same1pass2fail."
+  },
+  "checks": {
+    "integration": {
+      "passed": 78,
+      "suites": 23,
+      "ignored": 0
+    },
+    "root-subtitles": {
+      "passed": 48,
+      "ignored": 1
+    },
+    "core-check": "passed locked/offline/no-default-features",
+    "player-check": "passed locked/offline/no-default-features"
+  },
+  "distinct_passed": 126,
+  "fixtures": {
+    "acceptance_videos": 24,
+    "packet_snapshots": 9,
+    "files": 34,
+    "repeatability": "identical"
+  },
+  "reference": "https://www.rfc-editor.org/rfc/rfc9559.html#section-10.1",
+  "limits": [
+    "Native presentation fixed; subtitle conversion is a separate operation not qualified by this patch.",
+    "Compatibility missing-duration endpoints derive from next visible packet; not a normative end-of-stream duration claim.",
+    "Finite software playback/seek/EOF and native paint checks; physical GPU ignored.",
+    "No performance claim."
+  ],
+  "evidence": "docs/improvements/evidence/matroska-invisible-subtitles/README.md"
+}
