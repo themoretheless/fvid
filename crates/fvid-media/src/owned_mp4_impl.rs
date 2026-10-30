@@ -1034,8 +1034,13 @@ fn read_chpl(udta: Option<&[u8]>, timescale: u32, duration: u64) -> Vec<Chapter>
     let Ok(Some(list)) = optional(&children, b"chpl") else {
         return Vec::new();
     };
-    // Version and flags, then the four bytes no writer explains.
-    let Some(&count) = list.get(8) else {
+    // Version zero places the count directly after version/flags. Later
+    // layouts retain the four reserved bytes before it.
+    let Some(&version) = list.first() else {
+        return Vec::new();
+    };
+    let count_at = if version == 0 { 4 } else { 8 };
+    let Some(&count) = list.get(count_at) else {
         return Vec::new();
     };
     let nanos = |ticks: i64, per_second: u32| {
@@ -1045,7 +1050,7 @@ fn read_chpl(udta: Option<&[u8]>, timescale: u32, duration: u64) -> Vec<Chapter>
             .and_then(|value| i64::try_from(value).ok())
     };
     let mut runs: Vec<(i64, String)> = Vec::new();
-    let mut at = 9;
+    let mut at = count_at + 1;
     for _ in 0..usize::from(count).min(1_024) {
         let Some(bytes) = list.get(at..at + 8) else {
             break;

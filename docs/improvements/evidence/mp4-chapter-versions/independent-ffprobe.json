@@ -1,0 +1,76 @@
+{
+  "v0-ten-mhz-known.mp4": {
+    "chapters": [
+      {
+        "id": 0,
+        "time_base": "1/10000000",
+        "start": 0,
+        "start_time": "0.000000",
+        "end": 200000,
+        "end_time": "0.020000",
+        "tags": {
+          "title": "Opening"
+        }
+      },
+      {
+        "id": 1,
+        "time_base": "1/10000000",
+        "start": 200000,
+        "start_time": "0.020000",
+        "end": 400000,
+        "end_time": "0.040000",
+        "tags": {
+          "title": "Середина"
+        }
+      },
+      {
+        "id": 2,
+        "time_base": "1/10000000",
+        "start": 400000,
+        "start_time": "0.040000",
+        "end": 600000,
+        "end_time": "0.060000",
+        "tags": {
+          "title": "End 🎬"
+        }
+      }
+    ]
+  },
+  "v1-ten-mhz-known.mp4": {
+    "chapters": [
+      {
+        "id": 0,
+        "time_base": "1/10000000",
+        "start": 0,
+        "start_time": "0.000000",
+        "end": 200000,
+        "end_time": "0.020000",
+        "tags": {
+          "title": "Opening"
+        }
+      },
+      {
+        "id": 1,
+        "time_base": "1/10000000",
+        "start": 200000,
+        "start_time": "0.020000",
+        "end": 400000,
+        "end_time": "0.040000",
+        "tags": {
+          "title": "Середина"
+        }
+      },
+      {
+        "id": 2,
+        "time_base": "1/10000000",
+        "start": 400000,
+        "start_time": "0.040000",
+        "end": 600000,
+        "end_time": "0.060000",
+        "tags": {
+          "title": "End 🎬"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "status": "reproduced, fixed and qualified",
+  "before": {
+    "passed": 2,
+    "failed": 2,
+    "specific_movie": "v0-movie-known.mp4",
+    "chapters_actual": [],
+    "chapters_expected": [
+      [
+        0,
+        "Opening"
+      ],
+      [
+        20000000,
+        "Середина"
+      ],
+      [
+        40000000,
+        "End 🎬"
+      ]
+    ],
+    "controls": "All20 movies decode exact video/EOF; all version1 chapter/empty/truncated controls pass."
+  },
+  "focused_after": {
+    "passed": 4,
+    "failed": 0
+  },
+  "qualification_pending": false
+}

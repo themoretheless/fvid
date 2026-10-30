@@ -1,0 +1,86 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0431"
+  ],
+  "count_delta": 1,
+  "accepted_count": 431,
+  "batch": 431,
+  "summary": "Read version-zero MP4 chapter-list layout and restore chapter navigation",
+  "before": {
+    "commit": "36bedf7d62272e0f8215d0200ab8d9c06bc5db8b",
+    "passed": 2,
+    "failed": 2,
+    "specific_failure": "Version0 count at byte4 is read from byte8; healthy video and version1 controls pass, but version0 chapters disappear and native chapter seek navigation is unavailable."
+  },
+  "checks": {
+    "before": {
+      "suites": 1,
+      "passed": 2,
+      "failed": 2,
+      "ignored": 0
+    },
+    "after": {
+      "suites": 1,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    "integration": {
+      "suites": 86,
+      "passed": 406,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-mp4": {
+      "suites": 1,
+      "passed": 57,
+      "failed": 0,
+      "ignored": 1
+    },
+    "media": {
+      "suites": 1,
+      "passed": 552,
+      "failed": 0,
+      "ignored": 3
+    },
+    "core-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "distinct_passed": 1012,
+  "shared_include_duplicates_excluded": 3,
+  "focused_repeats_not_added": 4,
+  "ignored": {
+    "physical_metal_videotoolbox": 1,
+    "explicit_network_http_checks": 2,
+    "existing_pending_integer_float_rgb_compatibility": 1
+  },
+  "fixtures": {
+    "movies": 20,
+    "complete_lists": 12,
+    "empty_or_truncated_optional_lists": 8,
+    "packet_oracles": 3,
+    "plane_oracles": 3,
+    "files": 27,
+    "repeatability": "identical"
+  },
+  "core-check": "passed locked/offline/no-default-features",
+  "player-check": "passed locked/offline/no-default-features",
+  "external_cross_check": "Optional ffprobe validates authored version0/version1 10MHz titles and times; ordinary tests and generation do not invoke it.",
+  "migration": "No public interface or clock-policy change. Version0 chapters are newly available.",
+  "limits": [
+    "No performance or physical-device qualification.",
+    "Existing legacy chapter clock heuristic and partial-prefix optional-metadata policy remain."
+  ],
+  "evidence": "docs/improvements/evidence/mp4-chapter-versions/README.md"
+}

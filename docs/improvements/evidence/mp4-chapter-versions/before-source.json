@@ -1,0 +1,9 @@
+{
+  "commit": "36bedf7d62272e0f8215d0200ab8d9c06bc5db8b",
+  "sha256": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": "8247263c6fcebc6bf27253b03f999101bf5df8671302b9a5cbba2ae20b038f31",
+    "tests/mp4_chapter_versions.rs": "eecc47a8bdb30e1ef6b2c36c327df3ef8bc3180de33d581b690c2322d8b5fae3",
+    "scripts/generate_mp4_chapter_versions.py": "a04ad3ae3dcc4acd825f12dfc4467f3c4916936f2e265238e75d69beab1e5a3d",
+    "tests/fixtures/playback-errors/mp4-chapter-versions/manifest.json": "0dd8629c93c61a9728e66a1d86ebca4ca1d0294aadc196a8d30fa21322086d0d"
+  }
+}
