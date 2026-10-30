@@ -1,0 +1,55 @@
+{
+  "status": "published-current-verified-delivery",
+  "fvid_commit": "b1c556cfe6706b5be0a5f96d144a2162fe9782ac",
+  "fvid_refs": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "forma_commit": "82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9",
+  "forma_refs": [
+    "refs/heads/main",
+    "refs/heads/codex/gpu-common-metal-20261030"
+  ],
+  "verified_remote_heads": true,
+  "accepted_count": 415,
+  "count_delta": 0,
+  "checks": {
+    "fvid_media_library": {
+      "passed": 545,
+      "failed": 0,
+      "ignored": 1
+    },
+    "forma_library": {
+      "passed": 15,
+      "failed": 0,
+      "ignored": 1
+    },
+    "fvid_vt": {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 3
+    },
+    "player_check": "passed locked/offline",
+    "mp4_integration": {
+      "passed": 13,
+      "failed": 0
+    },
+    "known_baseline_integration": {
+      "passed": 61,
+      "failed": 0
+    }
+  },
+  "preserved": [
+    "Original dirty fvid main worktree",
+    "Active AAC/EP branch/worktree",
+    "Original dirty Forma main worktree, including unrelated Svet/MSL edits",
+    "AV1 preservation worktree",
+    "Historical branches, release branches, tags and four fvid stashes"
+  ],
+  "limitations": [
+    "Only the current verified delivery branches were integrated; active parallel work was not merged",
+    "No whole-project/all-platform, new hardware-GPU or performance qualification claimed",
+    "The 1000-improvement goal remains active at 415 accepted independent improvements"
+  ],
+  "artifacts": "Owned temporary targets, metadata probes and copied qualification lock removed; regression media and proof logs retained; delivery worktrees/branches preserved"
+}

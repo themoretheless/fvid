@@ -57,6 +57,7 @@
     "Original Forma main worktree remains dirty at its original commit; remote main advanced by fast-forward from isolated delivery worktree.",
     "License copy retained verbatim including upstream trailing whitespace; source paths pass diff --check.",
     "All fixture/proof assets retained. No active branch, stash or worktree deleted.",
-    "Fvid publication remains pending broader known baseline checks, including signed AAC padding and MP4 metadata admission. No claim of whole-project green."
-  ]
+    "Remaining known baselines requalified in batch-415: 61 passed. Current verified fvid delivery published to main and delivery branch."
+  ],
+  "fvid_published_commit": "b1c556cfe6706b5be0a5f96d144a2162fe9782ac"
 }
