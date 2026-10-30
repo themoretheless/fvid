@@ -1,0 +1,22 @@
+[
+  "filter_subtitle_regressions",
+  "matroska_default_tracks",
+  "matroska_enabled_tracks",
+  "matroska_ssa_text",
+  "matroska_subtitle_spans",
+  "matroska_text_termination_playback",
+  "mix_merge_subtitle_controls_regressions",
+  "mp4_subtitle_negative_clock",
+  "mp4_subtitle_unicode",
+  "native_subtitle_burn_cli",
+  "native_subtitle_convert",
+  "owned_subtitle",
+  "subtitle_burn_matroska_xfade_metadata_regressions",
+  "subtitle_burn_xfade_metadata_regressions",
+  "subtitle_convert_burn_budget_parity_regressions",
+  "subtitle_convert_plan_metadata_regressions",
+  "subtitle_native_clock_overflow",
+  "subtitle_normalize_metadata_regressions",
+  "subtitle_spool_regressions",
+  "xfade_subtitle_budget_parity_regressions"
+]

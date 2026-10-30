@@ -1,0 +1,11 @@
+{
+  "count_delta": 0,
+  "baseline": "Original8fd959ef98 reproduces the same4pass2fail.",
+  "index_payload_bytes": 34312,
+  "packet_and_io_overhead": 16512,
+  "required_index_bytes": 50824,
+  "mkv_positive_control_bytes": 65536,
+  "preserved": "Exact32KiB plan/execution refusal and unpublished output; SRT/ASS32KiB acceptance; all heavy-metadata and packet-byte refusals. Zero packets checked against exact earlier policy error.",
+  "before_test_sha256": "23b06e863446c3660a25f776003a57177f24b5fe2e935b66318b77a89ebf3386",
+  "snapshot_normalization": "Archived original test text removes extra EOF blank lines; raw original SHA retained above and original8fd959ef98 remains available in Git."
+}

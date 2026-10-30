@@ -1,0 +1,7 @@
+{
+  "src/subtitles.rs": "d133c2fff32d2e408d9081dd2cca174f762ad5343c386d90af2ae11125da793b",
+  "tests/matroska_ssa_text.rs": "9895f1dae9bc1ac4661358b99ff97a87c161b57eee8ecf22eba17b88cbe445fd",
+  "scripts/generate_matroska_ssa_text.py": "e209ee4772a74a1b930e160a59379b7d14173dd68a330ac1161ab0f825ffc5dd",
+  "tests/subtitle_convert_burn_budget_parity_regressions.rs": "0c29a1852195c2709d086ff1543f8d4ce7211fc037a72651add484eba5765e32",
+  "tests/fixtures/playback-errors/matroska-ssa-text/manifest.json": "812c1c839f78119e84ceeb4f28ee1e75e16ee58d0103c3348ec159b238905c38"
+}

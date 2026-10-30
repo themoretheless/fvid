@@ -1,0 +1,11 @@
+use std::{path::Path,fs::File,io::BufReader};
+#[test]
+fn inspect_existing_fixture_admission() {
+    let p=Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/subtitle-convert-burn-budget-parity/muxed-audio-and-subrip.mkv");
+    let mut r=fvid_media::owned_webm::WebmReader::open(BufReader::new(File::open(&p).unwrap()),Default::default()).unwrap();r.scan_all().unwrap();
+    println!("index_payload={} packets={} overhead={}",r.estimated_index_payload_bytes().unwrap(),r.packets.len(),r.packets.len()*64+16384);
+    for limit in [32768,65536,131072] {
+        let mut o=fvid::media::CopyOptions::default();o.max_controlled_bytes=Some(limit);
+        println!("budget={limit}: {:?}",fvid::media::plan_convert_subtitles_with_controls(&p,&Default::default(),&o).map(|p|p.command));
+    }
+}

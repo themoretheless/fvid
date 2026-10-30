@@ -1,0 +1,10 @@
+{
+  "commit": "8fd959ef983fb0c462af9727be7436588b304d23",
+  "sha256": {
+    "src/subtitles.rs": "611bf9f7dfa74276930181b0f01b68f5005f49bc371e18a7acfea772b581bf84",
+    "tests/matroska_ssa_text.rs": "9895f1dae9bc1ac4661358b99ff97a87c161b57eee8ecf22eba17b88cbe445fd",
+    "scripts/generate_matroska_ssa_text.py": "e209ee4772a74a1b930e160a59379b7d14173dd68a330ac1161ab0f825ffc5dd",
+    "tests/fixtures/playback-errors/matroska-ssa-text/manifest.json": "812c1c839f78119e84ceeb4f28ee1e75e16ee58d0103c3348ec159b238905c38"
+  },
+  "initial_test_compile_error": "Test initially compared frame_interval triple against a pair; corrected to compare both timestamp fields. No production edit or defect counted."
+}

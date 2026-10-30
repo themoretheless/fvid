@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 424,
-  "next_id": "FVID-0425",
+  "accepted_count": 425,
+  "next_id": "FVID-0426",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4758,6 +4758,17 @@
       "result": "Use explicit BlockDuration before track defaults/next-cue fallback; omit zero-length intervals and preserve missing-duration compatibility.24 authored VP9/UTF8/ASS videos verify exact packets/pictures, bounds, EOF and real seeks; a separate duration overflow remains refused. 377 distinct checks pass across66 integration suites and48 root subtitle units; core/player locked offline builds pass, one physical-GPU check ignored. Two old literal expectations corrected from independently verified packet spans, no extra IDs.",
       "status": "accepted",
       "validation": "batch-424-validation.json"
+    },
+    {
+      "id": "FVID-0425",
+      "batch": 425,
+      "title": "Decode canonical Matroska SSA events with an empty Layer field",
+      "source": "src/subtitles.rs",
+      "regression": "tests/matroska_ssa_text.rs",
+      "before": "Both parsers and real video are correct; native SSA captions display the full ReadOrder/Style prefix, including after actual seeks. Original8fd959ef98 passes1 packet/picture control and fails2 text/seek acceptances.",
+      "result": "Recognize numeric ReadOrder with empty SSA or numeric ASS Layer; preserve complete dialogue clocks and fallback/refusal behavior.Three authored VP9/SSA/ASS videos verify exact source packets/pictures, text/newlines/Unicode, real seek gaps/endpoints and EOF. 117 distinct checks pass across20 integration suites and48 root subtitle units; locked/offline core/player builds pass, one physical-GPU test ignored. Two original budget expectation failures are reproduced separately and repaired with exact zero-packet policy and explicit32KiB refusal/64KiB index-aware admission; no extra IDs counted.",
+      "status": "accepted",
+      "validation": "batch-425-validation.json"
     }
   ]
 }

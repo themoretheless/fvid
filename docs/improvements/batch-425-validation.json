@@ -1,0 +1,46 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0425"
+  ],
+  "count_delta": 1,
+  "accepted_count": 425,
+  "batch": 425,
+  "summary": "Decode canonical Matroska SSA events with empty Layer without showing metadata fields",
+  "before": {
+    "commit": "8fd959ef983fb0c462af9727be7436588b304d23",
+    "passed": 1,
+    "failed": 2,
+    "specific_failure": "Both parsers and real video are correct; native SSA captions display the full ReadOrder/Style prefix, including after actual seeks."
+  },
+  "checks": {
+    "integration": {
+      "passed": 69,
+      "suites": 20,
+      "ignored": 0
+    },
+    "root-subtitles": {
+      "passed": 48,
+      "ignored": 1
+    },
+    "core-check": "passed locked/offline/no-default-features",
+    "player-check": "passed locked/offline/no-default-features"
+  },
+  "distinct_passed": 117,
+  "fixtures": {
+    "valid_videos": 3,
+    "packet_snapshots": 9,
+    "files": 13,
+    "repeatability": "identical"
+  },
+  "uncounted": [
+    "Initial test frame_interval tuple correction before reproduction.",
+    "Two independently reproduced baseline budget expectation repairs. Exact32KiB refusal added,64KiB index-aware success, all metadata/packet refusals retained."
+  ],
+  "baseline_failure_evidence": "original-budget-reproduction.json",
+  "limits": [
+    "Finite software native video/text/seek/EOF checks; physical GPU test ignored.",
+    "No performance claim or general SSA styling parity claim."
+  ],
+  "evidence": "docs/improvements/evidence/matroska-ssa-text/README.md"
+}

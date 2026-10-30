@@ -187,16 +187,12 @@ fn burn_subtitles_enforces_input_packet_bytes_and_matches_plan_and_execution_err
     zero_pkt.max_packets = Some(0);
     for (name, src) in [("y4m", &y4m), ("mkv", &mkv_video)] {
         let p_err = media::plan_burn_subtitles(src, &srt, &zero_pkt).unwrap_err();
-        assert!(
-            p_err.contains("packet count exceeds limit"),
-            "plan_burn_subtitles zero_pkt for {name} returned: {p_err}"
-        );
+        assert_eq!(p_err, "packet work limit requires at least one packet",
+            "plan_burn_subtitles zero_pkt for {name}");
         let out_zero = temp_dir.join(format!("zero-{name}.mkv"));
         let e_err = media::burn_subtitles(src, &out_zero, &srt, &zero_pkt).unwrap_err();
-        assert!(
-            e_err.contains("packet count exceeds limit"),
-            "burn_subtitles zero_pkt for {name} returned: {e_err}"
-        );
+        assert_eq!(e_err, "packet work limit requires at least one packet",
+            "burn_subtitles zero_pkt for {name}");
         assert!(!out_zero.exists());
     }
 
@@ -382,18 +378,40 @@ fn convert_subtitles_and_plan_convert_subtitles_enforce_controlled_memory_for_ma
         codec: SubtitleCodec::Ass,
     };
 
-    // 1. With max_controlled_bytes = Some(32_768), converting SRT, ASS, and Matroska subtitles without
-    // extra metadata mutations fits comfortably in the 32 KiB controlled memory budget.
+    // SRT/ASS without extra metadata fit 32 KiB. Matroska additionally
+    // retains a capacity-accounted index, tested below at both budget bounds.
     let base_tight = CopyOptions {
         max_controlled_bytes: Some(32_768),
         ..Default::default()
     };
+    // The capacity-aware Matroska index now exceeds 32 KiB on its own.
+    // Preserve that tight refusal and derive the positive control from the
+    // same retained-index accounting used by planning and execution.
+    let mut indexed = fvid_media::owned_webm::WebmReader::open(
+        std::io::BufReader::new(std::fs::File::open(&muxed_mkv).unwrap()),
+        Default::default(),
+    ).unwrap();
+    indexed.scan_all().unwrap();
+    let index_work = indexed.estimated_index_payload_bytes().unwrap()
+        + indexed.packets.len() * 64 + 16_384;
+    assert!(index_work > 32_768 && index_work <= 65_536);
+    assert_eq!(media::plan_convert_subtitles_with_controls(&muxed_mkv, &sub_opts, &base_tight)
+        .unwrap_err(), "controlled memory budget exceeded");
+    let tight_out = temp_dir.join("tight-index.mkv");
+    assert_eq!(media::convert_subtitles_with_controls(&muxed_mkv, &tight_out, &sub_opts, &base_tight)
+        .unwrap_err(), "controlled memory budget exceeded");
+    assert!(!tight_out.exists());
+    let mkv_admission = CopyOptions {
+        max_controlled_bytes: Some(index_work.next_power_of_two()),
+        ..Default::default()
+    };
     for (label, src) in [("srt", &srt), ("ass", &ass), ("mkv", &muxed_mkv)] {
-        media::plan_convert_subtitles_with_controls(src, &sub_opts, &base_tight)
-            .expect(&format!("plan_convert_subtitles({label}) without metadata must fit in 32 KiB"));
+        let admission = if label == "mkv" { &mkv_admission } else { &base_tight };
+        media::plan_convert_subtitles_with_controls(src, &sub_opts, admission)
+            .expect(&format!("plan_convert_subtitles({label}) must fit its accounted budget"));
         let ok_out = temp_dir.join(format!("ok-{label}.mkv"));
-        let stats = media::convert_subtitles_with_controls(src, &ok_out, &sub_opts, &base_tight)
-            .expect(&format!("convert_subtitles({label}) without metadata must fit in 32 KiB"));
+        let stats = media::convert_subtitles_with_controls(src, &ok_out, &sub_opts, admission)
+            .expect(&format!("convert_subtitles({label}) must fit its accounted budget"));
         assert!(stats.cues >= 1);
         let _ = std::fs::remove_file(&ok_out);
     }

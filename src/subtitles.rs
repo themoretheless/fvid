@@ -243,13 +243,13 @@ pub fn ass_block(block: &str) -> (Option<(Duration, Duration)>, String) {
             plain(ten[9].trim()),
         );
     }
-    // Without two clocks to read the line is told from plain text by the two
-    // numbers that head its field list, which no line of text starts with.
+    // Mapped events begin with a numeric ReadOrder and an ASS Layer. SSA
+    // uses the same field layout but leaves Layer empty.
     let nine = fields.splitn(9, ',').collect::<Vec<_>>();
     let fields_form = nine.len() == 9
-        && nine[..2]
-            .iter()
-            .all(|field| !field.is_empty() && field.bytes().all(|byte| byte.is_ascii_digit()));
+        && !nine[0].is_empty()
+        && nine[0].bytes().all(|byte| byte.is_ascii_digit())
+        && nine[1].bytes().all(|byte| byte.is_ascii_digit());
     if fields_form {
         return (None, plain(nine[8].trim()));
     }

@@ -1,0 +1,47 @@
+{
+  "provenance": "Authored16x16 three-color VP9, complete invented SSA/ASS headers and text; canonical SSA empty Layer, numeric ASS controls. No external encoder/network/private media.",
+  "reference": "https://www.matroska.org/technical/subtitles.html",
+  "cases": [
+    {
+      "file": "ssa-layerempty.mkv",
+      "codec": "SSA",
+      "text": [
+        "First, with commas",
+        "Middle\nnext",
+        "Last \u041f\u0440\u0438\u0432\u0435\u0442"
+      ]
+    },
+    {
+      "file": "ass-layer0.mkv",
+      "codec": "ASS",
+      "text": [
+        "First, with commas",
+        "Middle\nnext",
+        "Last \u041f\u0440\u0438\u0432\u0435\u0442"
+      ]
+    },
+    {
+      "file": "ass-layer12.mkv",
+      "codec": "ASS",
+      "text": [
+        "First, with commas",
+        "Middle\nnext",
+        "Last \u041f\u0440\u0438\u0432\u0435\u0442"
+      ]
+    }
+  ],
+  "sha256": {
+    "ssa-layerempty.mkv-0.packet": "d91df4e5c0fb68f0363d756ad5b3aea8657edb35381735169ad0a4a6afdc21d2",
+    "ssa-layerempty.mkv-1.packet": "e328005fa24b2cdb88f5b7f8ef0479cab3bf57cb5e0dd2dd8e87fe778c5cee38",
+    "ssa-layerempty.mkv-2.packet": "150bad3403f0a11aa96d3c9b3942a9995f19aaffff0560b08cc2bcb8d3b1c39c",
+    "ssa-layerempty.mkv": "0353b129023b76ceabea9f14e1ced8ca240f06268b5bc11973e2ca75bcf7cd07",
+    "ass-layer0.mkv-0.packet": "a5e86a308d7ca629316dbecca3275dcfb74990cf0cd8e5619682a8da3a77cccb",
+    "ass-layer0.mkv-1.packet": "760ffd0a46a689bbb2d281b5d41974efd4b535669afd049e22628c3abfca2618",
+    "ass-layer0.mkv-2.packet": "e9fe09882c13948d368f1de6463bb1176fce58db0ec3f1333b9e4549a78ea7b0",
+    "ass-layer0.mkv": "d5e3b517c716cb09a31dd06a18790019f544f96477fe0447641b1a1cf350c271",
+    "ass-layer12.mkv-0.packet": "2ab23b4259bdf32cf4ca9b564a51f604eeb03b4abbd4bc54524a6e307b550c06",
+    "ass-layer12.mkv-1.packet": "9d474c5abcba3b191a940288332315c07d57673b9479e48ea5e5bc49ee7908f4",
+    "ass-layer12.mkv-2.packet": "32b8865835a9024672dcb9f808aa4a815b3ee218ea2c38f6aa71da53d5ac94df",
+    "ass-layer12.mkv": "1bde87db7e109681f1f84eec74a97abfb5495bdf34c326d1cf2d10508e43e286"
+  }
+}
