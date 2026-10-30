@@ -20,18 +20,18 @@ pub struct Matrices {
     pub auxiliary_boxes: Vec<usize>,
 }
 #[derive(Clone)]
-struct Node {
-    dry: Vec<f64>,
-    wet: Vec<f64>,
-    gain: Vec<f64>,
+pub(super) struct Node {
+    pub(super) dry: Vec<f64>,
+    pub(super) wet: Vec<f64>,
+    pub(super) gain: Vec<f64>,
 }
-struct Composer<'a> {
-    bands: &'a [Band],
-    matrices: Matrices,
-    inputs: usize,
+pub(super) struct Composer<'a> {
+    pub(super) bands: &'a [Band],
+    pub(super) matrices: Matrices,
+    pub(super) inputs: usize,
 }
 impl Composer<'_> {
-    fn root(&self, input: usize) -> Node {
+    pub(super) fn root(&self, input: usize) -> Node {
         let mut dry = vec![0.0; self.matrices.m1.len()];
         dry[input] = 1.0;
         Node {
@@ -40,7 +40,7 @@ impl Composer<'_> {
             gain: self.matrices.m1[input].clone(),
         }
     }
-    fn split(&mut self, node: Node, box_index: usize) -> Result<[Node; 2]> {
+    pub(super) fn split(&mut self, node: Node, box_index: usize) -> Result<[Node; 2]> {
         let p = self.bands[box_index];
         let h = Ott::physical(p.cld_db, p.coherence, p.residual)?;
         let col = self.inputs
@@ -67,7 +67,7 @@ impl Composer<'_> {
             child
         }))
     }
-    fn lfe(&self, node: Node, box_index: usize, active: bool) -> Result<[Node; 2]> {
+    pub(super) fn lfe(&self, node: Node, box_index: usize, active: bool) -> Result<[Node; 2]> {
         let gains = if active {
             let p = self.bands[box_index];
             Ott::physical(p.cld_db, p.coherence, false)?.channel_gains
@@ -108,7 +108,7 @@ pub fn build(tree: u8, bands: &[Band], lfe_active: bool) -> Result<Matrices> {
         7 => (1, 1, &[0]),
         2..=4 => {
             return Err(unsupported(
-                "LD-MPS TTT matrix construction is not yet implemented",
+                "LD-MPS TTT trees require the TTT matrix builder",
             ));
         }
         _ => return Err(invalid("invalid LD-MPS matrix tree")),

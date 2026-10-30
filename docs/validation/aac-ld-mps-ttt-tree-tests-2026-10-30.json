@@ -1,0 +1,68 @@
+{
+  "base_commit": "d61cb96b8f",
+  "scope": "Ordinary full-output per-band TTT tree matrix qualification; no spatial movie/PCM/playback/seek acceptance.",
+  "trees": [
+    2,
+    3,
+    4
+  ],
+  "cases": 6912,
+  "scalar_coefficients": 1164288,
+  "max_abs_error": 9.213461948931467e-07,
+  "absolute_test_ceiling": 5e-06,
+  "results": [
+    {
+      "log": "/tmp/fvid-ld-mps-ttt-tree-all-tests.log",
+      "sha256": "b59a1bfd10180f34341dc011f71dc49cc97d7ed06fd5b8bf3d6f52ca540f8f5e",
+      "passed": 42,
+      "ignored": 0
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-ttt-tree-media-tests.log",
+      "sha256": "cfb61bb87b0c4ad911d136bb6747985ab6bc795248890b006e6acab9111e7190",
+      "passed": 575,
+      "ignored": 1
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-ttt-tree-fixed-tests.log",
+      "sha256": "ed398efd09f18504b071a7d9bcbc31ee207f300f619721356901e5f2b17dd26a",
+      "passed": 4,
+      "ignored": 0
+    }
+  ],
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_ttt_tree.rs": "2763830e84c871b7d3e4edf07db58b728ec8264fd16eb1b5acff5eda2c648c09",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_tree_matrix.rs": "6421b31695e9c40c1d2ebe9e42905363a3a1e93b916ddedab2a0accdec98722a",
+    "tests/aac_ld_mps_ttt_tree.rs": "504abdf5fc2dedba8a0ddb0eb9e352747cadcc6c45eb60ff4841c534cc9da682",
+    "scripts/generate_aac_ld_mps_ttt_tree_fixtures.py": "dc36f39224db3a44c09b05cf9c28b88d68f089e3c8b12e1658bd1be286120c02",
+    "scripts/support/aac_ld_mps_ttt_tree_reference_probe.c": "b46a05666e434952713b6fcfcaa202d0fd1122adee9922adfc355d3301feb057"
+  },
+  "rejected_attempt": {
+    "log": "/tmp/fvid-ld-mps-ttt-tree-tests.log",
+    "sha256": "318b8fb6f17955574a7e5e0cba1b2642ffec5807389b15c444281eecec632f5a",
+    "failure": "Missing dormant dry-plane TTT coefficient in tree2 mode0 outside residual region. Fixed the builder; raw reference and comparison ceiling unchanged."
+  },
+  "coverage": [
+    "all six TTT modes",
+    "TTT residual regions",
+    "inversion flag and mode3/5 bypass",
+    "LFE cutoff",
+    "all non-LFE OTT residual masks",
+    "four varied parameter trials",
+    "constructed M1/M2 through existing complex QMF executor"
+  ],
+  "ordinary_tests": "Saved fixtures only; no FFmpeg, network, regeneration, reference software or C compiler.",
+  "accepted_spatial_movies": 0,
+  "remaining": [
+    "frame low/high-mode endpoint assembly",
+    "W-signal routing",
+    "residual AAC decoding",
+    "fixed channel gains",
+    "temporal shaping",
+    "arbitrary downmix and HRTF/3D-stereo",
+    "128-bin DSP",
+    "full LD-SBR spatial PCM integration",
+    "synthetic spatial movie playback/seek/rewind"
+  ],
+  "native_spatial_refusal": "remains enabled"
+}

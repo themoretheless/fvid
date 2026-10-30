@@ -1,3 +1,46 @@
+## Owned full-output TTT tree matrices, 2026-10-30
+
+The TTT tree builder now composes trees 2/3/4 using the shared symbolic OTT
+basis graph. M1 includes the two downmix inputs and decoded TTT residual basis,
+with optional complex downmix inversion. Modes 3/5 bypass inversion; mode0
+creates the center-fed TTT decorrelator path. Both M2 planes carry the proper
+OTT residual injection, CLD-only energy feeds, front-channel coherence scaling,
+TTT diffuse contributions and LFE cutoff. Native tree-specific output orders
+are explicit. This supplies ordinary full-output per-band matrix construction
+for the three trees, complementing the existing five OTT-only tree builders.
+
+6912 synthetic sets cover all six modes, both TTT residual regions, inversion
+flags, LFE regions and every non-LFE OTT residual mask with four varied physical
+parameter trials. All 1164288 scalar coefficients match unmodified original
+ISO tree routines within 9.21347e-7 absolute error (test ceiling 5e-6). Frozen
+archive/source/driver hashes and raw output hashes are retained in the
+[reference report](validation/aac-ld-mps-ttt-tree-reference-2026-10-30.json).
+Explicit regeneration is byte-identical; see the
+[generation audit](validation/aac-ld-mps-ttt-tree-generation-2026-10-30.json).
+Ordinary tests read saved outputs without regeneration, FFmpeg, network, a C
+compiler or external reference software.
+
+An initial comparison exposed a missing dormant dry-plane TTT coefficient in
+tree2. The builder now retains it, matching the wet-plane value in mode0 outside
+TTT residual bands; the W-dry sample itself is zero there. The original failing
+comparison remains identified in validation evidence. No comparison values or
+error ceilings were changed to hide the mismatch. Additional tests verify
+mode-dependent feeds, inversion bypass, dry/wet residual basis gating and LFE
+silence above cutoff. A separate analytic case applies constructed M1 and M2
+through the existing complex-QMF executor and verifies native output channel
+orders for all three trees.
+
+All 42 LD-MPS integration tests and 575 media unit tests passed (one existing
+unit ignored); see the [test report](validation/aac-ld-mps-ttt-tree-tests-2026-10-30.json).
+
+These are per-band matrix checks. Frame low/high-mode endpoint assembly,
+W-signal routing, residual AAC decoding, fixed output gains, temporal shaping,
+arbitrary downmix, HRTF/3D-stereo transforms, 128-bin DSP, full LD-SBR spatial
+PCM and actual synthetic movie playback/seek remain open. Singular nonresidual
+zero-coherence prediction and LFE residual routing stay explicit refusals.
+Native spatial playback refusal remains enabled; no accepted spatial movies
+or closed player failures are counted by the matrix component tests.
+
 ## Owned TTT transform and complex downmix inversion, 2026-10-30
 
 The TTT primitive now implements predictive modes 0/1, center-subtraction
