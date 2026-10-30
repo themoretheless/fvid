@@ -1,0 +1,164 @@
+{
+  "baseline_commit": "9da0339bf1",
+  "scope": "Qualification of existing AAC-LD/MPS multi-core runtime. The timestamp-refusal hypothesis was disproved; no production behavior changed.",
+  "baseline_probe": {
+    "log": "/tmp/fvid-mps-multicore-before.log",
+    "sha256": "1f0da52cee3e2f0d3a217c0a76aef889ff1913715b2c33e93aee7d02010a1d66",
+    "result": "Targeted512/24kHz,two-core spatial frame with integer-nanosecond timing already passes before changes."
+  },
+  "geometries": [
+    [
+      480,
+      24000,
+      2
+    ],
+    [
+      480,
+      48000,
+      4
+    ],
+    [
+      512,
+      24000,
+      2
+    ],
+    [
+      512,
+      48000,
+      2
+    ],
+    [
+      512,
+      48000,
+      3
+    ],
+    [
+      512,
+      48000,
+      4
+    ]
+  ],
+  "acceptance": {
+    "mp4": 462,
+    "matroska": 606
+  },
+  "late_corruptions": {
+    "mp4": 12,
+    "matroska": 12,
+    "counted_as_acceptance": false
+  },
+  "oracle": {
+    "raw_core_samples": 306432,
+    "raw_core_maximum_difference": 4.547473508864641e-13,
+    "raw_core_tolerance": 1e-10,
+    "spatial_samples": 17636864,
+    "spatial_maximum_difference": 7.25793549067634e-12,
+    "spatial_tolerance": 1e-09,
+    "boundary": "Analytical sparse-cosine/LTP core plus separately qualified spatial session; not independent complete LD-MPS decoder"
+  },
+  "checks": [
+    "All six additional integral2/3/4-core spatial geometries within32 slots at24/48kHz",
+    "1ns/1us/1ms Matroska clocks,floor/ceil/absent DefaultDuration",
+    "Initial playback,rewind,forward/backward/EOF seeks,repeated ranges",
+    "Complete2*group packet prefixes drain; group-1 incomplete spatial windows refuse with no PCM",
+    "Specific corruption errors in MP4,both Matroska exports and reset/rewind reader",
+    "Native retained bytes,retry before restore,checkpoint restore and subsequent PCM remain correct"
+  ],
+  "worker_programmes": {
+    "new": 606,
+    "retained_controls": 632,
+    "total": 1238,
+    "published_clock_error_ns_less_than": 1
+  },
+  "gates": [
+    {
+      "gate": "integration",
+      "command": [
+        "cargo",
+        "--config",
+        "profile.dev.package.fvid-media.opt-level=2",
+        "test",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "aac_ld_mps_multicore",
+        "--",
+        "--nocapture"
+      ],
+      "log": "/tmp/fvid-mps-multicore-final.log",
+      "log_sha256": "5fb51b7f4503b2f0c1051bd272ed76c86cbdf5e97b3fec6ce4afef3a846c85c4",
+      "results": [
+        {
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "gate": "workers",
+      "command": [
+        "cargo",
+        "--config",
+        "profile.dev.package.fvid-media.opt-level=2",
+        "test",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "worker_keeps_source_windows",
+        "--",
+        "--nocapture"
+      ],
+      "log": "/tmp/fvid-mps-multicore-workers.log",
+      "log_sha256": "780afd315469ab747f19b562fe94f364061197eee3b31b32d74c870d99311d52",
+      "results": [
+        {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    }
+  ],
+  "total": {
+    "passed": 9,
+    "failed": 0,
+    "ignored": 0
+  },
+  "previous_full_runtime_gate": {
+    "path": "docs/validation/aac-ld-mps-matroska-tests-2026-10-31.json",
+    "sha256": "71251f750cb0b92524a45101c9e22113ca60ffd1c2f7b52c321f2d410cb08a2a",
+    "note": "1694 tests at baseline9da0339bf1. Production sources unchanged; current checks target added acceptance and all three source-window workers rather than recounting the old full run."
+  },
+  "source_sha256": {
+    "scripts/generate_aac_ld_mps_multicore_fixtures.py": "77d0e9fcb3aaabe7c6586b33bf2029e7f6d52cff9ec8d0f14786f29b32d00aa1",
+    "tests/aac_ld_mps_multicore.rs": "d7f7adb369240e6462c97561d4b1d3da213f62f3c89db5e85dd9151d08821440",
+    "src/playback/audio/ep1_worker_tests.rs": "5ea669dd85638bc41bc5f44fe54aacc5b5aa860e91d2ed62c57b9b20f035c483"
+  },
+  "input_sha256": {
+    "scripts/generate_aac_ld_layout_fixtures.py": "1aa775af3e8a2ca8aa6e57fbd13654c553639f4e341fcda98a5f234ad333ee82",
+    "scripts/generate_he_aac_packet_fixtures.py": "11ec6ba89f95ca25d7a6d4ec7cd7626994ba2b7dcae6ae73cf9c25fd91a78b40",
+    "scripts/generate_aac_ld_mps_stp_fixtures.py": "f11549a94f841dc94000b962b348a540c7e1a3da76dd00189d996e575b6ed5d3",
+    "scripts/generate_aac_ld_mps_ges_fixtures.py": "78cac17c3a5f90ff032110472d2fb42ce5645853b4e092fd51bb8639b3fd6770",
+    "scripts/generate_aac_ld_mps_transport_fixtures.py": "cc7e7a04b59bb2abb5c007ba357f94b4dd0ed157c49481e01d9dde662a88ff03",
+    "scripts/generate_aac_ld_mps_inband_fixtures.py": "2d895a1cbac2664840b83d987bebc8cafd0ec994f481d74dd5c8ad991aac225e",
+    "scripts/generate_aac_ps_matroska_fixtures.py": "20ed489b0cce9ee0aedfb2d228832148be2b79d931614872442629988b196146",
+    "tests/fixtures/playback-errors/aac-ld-layout.json": "020d6bd5a0321322ad9e8975bd5e9a4bdca0d7466fc2eea1f0196223ab948140",
+    "tests/fixtures/playback-errors/aac-ld-layout-packets.bin": "a710279196a97b6cc47c7c37b81bad07cf1d9359a4e97b808694cb95444af9b3",
+    "tests/fixtures/playback-errors/aac-ld-layout-reference.f32le": "a3636ddb5ef5dd7e08922d85c941cc11e7eb679d98797fb0a5d4ba673afa00eb",
+    "tests/fixtures/playback-errors/aac-ld-mps-assemble/manifest.json": "80dd8056006b33c70a6634b6f342b89c32af14954d8fe747ddd70bebde671eda",
+    "tests/fixtures/playback-errors/aac-ld-mps-assemble/configs.bin": "902d84ddd01ea5f0ebf710d87f9a5345ea437b706960fdd1812b4e9e832e90e8",
+    "tests/fixtures/playback-errors/aac-ld-mps-frame/reshape-codewords.json": "4c01eed0b9575c24cfde64c748e290b34bf864f4f8b314466f3d9782e868e451",
+    "tests/fixtures/playback-errors/aac-ld-mps-ld-core/n480-r24000-tree0-v1-plain.mp4": "9b2a7488d4990b6dde8d66963ba768cee3c179f7e889d0101adfac729bd2a157"
+  },
+  "limitations": [
+    "Only EP0/no-SBR24/48kHz and32/64-bin domains",
+    "Other sample rates and128-bin/residual/profile domains not qualified",
+    "Protected AAC+MPS,CodecDelay/DiscardPadding combinations remain open",
+    "Independent complete conformance,physical output and throughput not measured"
+  ]
+}

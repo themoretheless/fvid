@@ -1,3 +1,37 @@
+## Multi-core AAC-LD / LD-MPS — extended acceptance,2026-10-31
+
+The previously unqualified multi-core geometries already work in the owned
+runtime. The suspected Matroska timestamp refusal was not reproduced; this
+milestone changes tests/fixtures and adds a test-only worker entrypoint,without
+changing production behavior. It must not be reported as a decoder bug fix.
+
+All six additional integral2/3/4-core spatial geometries within32 slots at
+24/48kHz are now exercised:480/24kHz/group2,480/48kHz/group4,
+512/24kHz/group2,and512/48kHz/groups2/3/4.462 MP4 and606 MKV acceptance movies
+cover all8 trees,TTT variants,STP/GES,parameter grids,repeat/burst/fragmented
+transport,1ns/1us/1ms clocks and floor/ceil/absent DefaultDuration.
+
+Extended raw AAC-LD history matches306,432 scalar-oracle samples within
+4.548e-13. Complete spatial output matches17,636,864 compositional-oracle
+samples within7.258e-12. This remains analytical core plus separately qualified
+spatial session,not independent complete-decoder conformance.
+Both Matroska export APIs,AudioStream playback,forward/backward/EOF seeks,
+rewind and repeat ranges match paired MP4 PCM byte-for-byte.24 corrupt movies
+are distinct refusal/rollback cases. Complete controlled prefixes drain;
+incomplete spatial windows refuse without publishing PCM.
+
+Nine selected Rust tests passed with0 failures,including three AudioWorker
+source-window tests exercising1238 programmes (606 new plus632 retained
+controls),live-history navigation/checkpoints and<1ns published timestamp
+rounding. Production sources remain identical to9da0339bf1,whose previous
+full runtime gate was1694 passed/0 failed/27 ignored; that old count is not
+presented as a freshly rerun full suite.
+
+Other rates,128-bin/residual/profile domains,protected AAC+MPS,
+CodecDelay/DiscardPadding combinations,independent full conformance,
+physical output and real-time throughput remain unqualified here.
+Evidence: `docs/validation/aac-ld-mps-multicore-{generation,tests}-2026-10-31.json`.
+
 ## Matroska AAC-LD / LD-MPS — delayed source windows,2026-10-31
 
 The AAC-LD spatial path now keeps Matroska packet association in both owned and
@@ -26,8 +60,8 @@ this new corpus. Other LD-MPS residual/profile gaps listed below remain open.
 Evidence: `docs/validation/aac-ld-mps-matroska-{generation,tests}-2026-10-31.json`.
 Relevant gates:1694 passed,0 failed,27 pre-existing ignored,including all
 media/root units and12 AAC/Matroska integration targets. All run offline.
-Additional multi-core spatial geometries (for example32-slot24kHz/512-core
-frames) still need Matroska acceptance with rounded source clocks.
+The then-open multi-core geometries are qualified in the newer section above;
+this older gate retains its original revision and scope.
 
 ## AAC-LD with attached LD-MPS — source-window playback,2026-10-31
 

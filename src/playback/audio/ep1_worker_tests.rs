@@ -389,3 +389,8 @@ fn ld_mps_aac_ld_worker_keeps_source_windows_through_navigation() {
 fn ld_mps_matroska_worker_keeps_source_windows_through_navigation() {
     check_corpus("aac-ld-mps-matroska");
 }
+
+#[test]
+fn ld_mps_multicore_worker_keeps_source_windows_through_navigation() {
+    check_corpus("aac-ld-mps-multicore");
+}
