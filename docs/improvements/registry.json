@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 432,
-  "next_id": "FVID-0433",
+  "accepted_count": 433,
+  "next_id": "FVID-0434",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4854,6 +4854,17 @@
       "validation": "batch-432-validation.json",
       "follow_up_validation": "batch-432-padding-followup-validation.json",
       "follow_up_note": "Uncounted compact-size padding guard: reject only unused nonzero low nibbles; real even-count low nibbles and8/16-bit data remain valid. All58 parent files unchanged;671 distinct checks plus core/player builds pass. Zero new IDs."
+    },
+    {
+      "id": "FVID-0433",
+      "batch": 433,
+      "title": "Validate terminal-zero STTS runs in indexed packet units",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_terminal_zero_runs.rs",
+      "before": "The same logical durations [1,0,0] reject when split but pass when grouped in one final STTS row. Both parsers admit all8 new video/PCM/MACE grouped/all-zero witnesses; all healthy and existing-refusal controls pass. Original3 controls pass and1 collected refusal regression fails.",
+      "result": "After classic index construction, reject more than one real zero-duration tail packet using expanded/uniform index units. Preserve a single zero tail, including one six-sample MACE block; the existing STTS rule makes zero packets a suffix.12 authored healthy movies preserve exact video packets/pictures, native seek/EOF, raw PCM/MACE packet clocks and decoded blocks;16 malformed timing companions refuse consistently,8 newly rejected.37 files regenerate identically; logical RLE equivalence and unchanged media hashes prove the intended failure.1067 distinct checks pass across97 integration suites and deduplicated root/media units, plus locked/offline core/player builds. One physical-GPU test and one existing RGB compatibility acceptance remain ignored. All table/codec variants count once; no audible zero-window audio, TRUN-policy or performance claim.",
+      "status": "accepted",
+      "validation": "batch-433-validation.json"
     }
   ]
 }

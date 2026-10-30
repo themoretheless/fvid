@@ -1,0 +1,89 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0433"
+  ],
+  "count_delta": 1,
+  "accepted_count": 433,
+  "batch": 433,
+  "summary": "Validate terminal-zero STTS runs in indexed packet units",
+  "before": {
+    "commit": "dc8a8cf068c3a348feac0edef6eaa6824ba82d29",
+    "passed": 3,
+    "failed": 1,
+    "specific_failure": "The same logical durations [1,0,0] reject when split but pass when grouped in one final STTS row. Both parsers admit all8 new video/PCM/MACE grouped/all-zero witnesses; all healthy and existing-refusal controls pass.",
+    "newly_rejected_witnesses": 8
+  },
+  "checks": {
+    "before": {
+      "suites": 1,
+      "passed": 3,
+      "failed": 1,
+      "ignored": 0
+    },
+    "after": {
+      "suites": 2,
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    "integration": {
+      "suites": 97,
+      "passed": 466,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-mp4": {
+      "suites": 1,
+      "passed": 57,
+      "failed": 0,
+      "ignored": 1
+    },
+    "media": {
+      "suites": 1,
+      "passed": 547,
+      "failed": 0,
+      "ignored": 1
+    },
+    "core-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "distinct_passed": 1067,
+  "shared_include_duplicates_excluded": 3,
+  "focused_repeats_not_added": 8,
+  "ignored": {
+    "physical_metal_videotoolbox": 1,
+    "existing_pending_integer_float_rgb_compatibility": 1
+  },
+  "fixtures": {
+    "valid_video_only_movies": 8,
+    "valid_pcm_mace_companion_movies": 4,
+    "previously_rejected_timing_movies": 8,
+    "newly_rejected_timing_movies": 8,
+    "packet_or_plane_oracles": 8,
+    "manifest_files": 1,
+    "files": 37,
+    "repeatability": "identical"
+  },
+  "resources": "Three-sample video index budget still accepts; two-sample budget refuses. Packet cap1 still refuses. The index-unit check allocates no new buffer.",
+  "core-check": "passed locked/offline/no-default-features",
+  "player-check": "passed locked/offline/no-default-features",
+  "migration": "No signature change. Nonterminal packets require positive STTS durations regardless of row grouping; malformed grouped zero tails now refuse.",
+  "limits": [
+    "Classic STTS index validation before fragment append; no new general TRUN-duration policy.",
+    "Zero-window audio controls verify metadata/block decode and video playback compatibility, not audible output.",
+    "No speed/RSS or physical-device qualification."
+  ],
+  "reference": "https://b.goeswhere.com/ISO_IEC_14496-12_2015.pdf#page=49",
+  "evidence": "docs/improvements/evidence/mp4-terminal-zero-runs/README.md"
+}

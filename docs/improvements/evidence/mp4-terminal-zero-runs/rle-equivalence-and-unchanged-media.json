@@ -1,0 +1,133 @@
+{
+  "pairs": [
+    {
+      "grouped": "stsz-two-zero-grouped.mp4",
+      "split": "stsz-two-zero-split.mp4",
+      "same_logical_durations": [
+        1,
+        0,
+        0
+      ],
+      "derived_dts": [
+        0,
+        1,
+        1
+      ],
+      "original_grouped": "accepted by both parsers in baseline log",
+      "original_split": "refused by both parsers in baseline control"
+    },
+    {
+      "grouped": "stz2-two-zero-grouped.mp4",
+      "split": "stz2-two-zero-split.mp4",
+      "same_logical_durations": [
+        1,
+        0,
+        0
+      ],
+      "derived_dts": [
+        0,
+        1,
+        1
+      ],
+      "original_grouped": "accepted by both parsers in baseline log",
+      "original_split": "refused by both parsers in baseline control"
+    }
+  ],
+  "mdat_payload_sha256": {
+    "stsz-positive-grouped.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "stsz-positive-split.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "stsz-single-zero-grouped.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "stsz-single-zero-split.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "stz2-positive-grouped.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "stz2-positive-split.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "stz2-single-zero-grouped.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "stz2-single-zero-split.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "pcm-last-zero-packet.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b",
+      "35007542ceaa2e2438965594bb4a78b2d4b96d3518a0073d8faa04bcc1288bd4"
+    ],
+    "pcm-one-uniform-zero-packet.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b",
+      "35007542ceaa2e2438965594bb4a78b2d4b96d3518a0073d8faa04bcc1288bd4"
+    ],
+    "mace-last-zero-packet.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b",
+      "3dc463a76fc170607c07b104c3cb531362ce7d6e10c1a34e0c0f370aeae08ce8"
+    ],
+    "mace-one-uniform-zero-packet.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b",
+      "3dc463a76fc170607c07b104c3cb531362ce7d6e10c1a34e0c0f370aeae08ce8"
+    ],
+    "stsz-two-zero-grouped.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "stsz-all-zero-grouped.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "stsz-two-zero-split.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "stsz-all-zero-split.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "stsz-middle-zero.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "stz2-two-zero-grouped.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "stz2-all-zero-grouped.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "stz2-two-zero-split.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "stz2-all-zero-split.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "stz2-middle-zero.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    ],
+    "pcm-two-zero-packets.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b",
+      "35007542ceaa2e2438965594bb4a78b2d4b96d3518a0073d8faa04bcc1288bd4"
+    ],
+    "pcm-all-zero-packets.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b",
+      "35007542ceaa2e2438965594bb4a78b2d4b96d3518a0073d8faa04bcc1288bd4"
+    ],
+    "pcm-middle-zero-packet.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b",
+      "35007542ceaa2e2438965594bb4a78b2d4b96d3518a0073d8faa04bcc1288bd4"
+    ],
+    "mace-two-zero-packets.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b",
+      "3dc463a76fc170607c07b104c3cb531362ce7d6e10c1a34e0c0f370aeae08ce8"
+    ],
+    "mace-all-zero-packets.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b",
+      "3dc463a76fc170607c07b104c3cb531362ce7d6e10c1a34e0c0f370aeae08ce8"
+    ],
+    "mace-middle-zero-packet.mp4": [
+      "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b",
+      "3dc463a76fc170607c07b104c3cb531362ce7d6e10c1a34e0c0f370aeae08ce8"
+    ]
+  },
+  "note": "All sound timing variants retain identical media; video grouped/split pairs are payload-identical. Runtime accept/refuse behavior is recorded in before log."
+}

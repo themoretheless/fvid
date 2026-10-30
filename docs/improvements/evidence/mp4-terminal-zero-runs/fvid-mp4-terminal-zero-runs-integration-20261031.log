@@ -1,0 +1,1839 @@
+warning: unreachable pattern
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+492 |                         _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |                         ^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+482 | ...   merge_order::Selection::Initial(i)=>{
+    |       ---------------------------------- matches some of the same values
+...
+486 | ...   merge_order::Selection::ViewSynthesis=>return Ok(Resolved::ViewSynthesis),
+    |       ------------------------------------- matches some of the same values
+487 | ...   merge_order::Selection::Texture=>return Ok(Resolved::Texture),
+    |       ------------------------------- matches some of the same values
+488 | ...   merge_order::Selection::InterView=>{selected_iv=1;(special.inter_view.copied().ok_or_else(||invalid("missing selected HEVC IV...
+    |       --------------------------------- matches some of the same values
+...
+492 | ...   _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |       ^ ...and 3 other patterns collectively make this unreachable
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `intra_plane` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/avc_deblock.rs:184:15
+    |
+184 | pub(super) fn intra_plane(
+    |               ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `read_inter_coefficients_422` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_inter_coefficients.rs:34:15
+   |
+34 | pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,pattern:u8,transform8:bool,neighbours:CoefficientNeighbours,chroma...
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `candidates` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_mv.rs:78:4
+   |
+78 | fn candidates(n: Neighbours) -> Result<[Neighbour; 3]> {
+   |    ^^^^^^^^^^
+
+warning: function `inverse2` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:190:4
+    |
+190 | fn inverse2(input: &[i32], output: &mut [i32]) {
+    |    ^^^^^^^^
+
+warning: function `inverse4` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:218:15
+    |
+218 | inverse_size!(inverse4, inverse2, 4);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse8` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:219:15
+    |
+219 | inverse_size!(inverse8, inverse4, 8);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse16` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:220:15
+    |
+220 | inverse_size!(inverse16, inverse8, 16);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse32` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:221:15
+    |
+221 | inverse_size!(inverse32, inverse16, 32);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: enum `RunKind` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:420:17
+    |
+420 | pub(crate) enum RunKind {
+    |                 ^^^^^^^
+
+warning: struct `Run` is never constructed
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:425:19
+    |
+425 | pub(crate) struct Run {
+    |                   ^^^
+
+warning: function `expand_runs` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:431:15
+    |
+431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run]) -> Result<Vec<u8>> {
+    |               ^^^^^^^^^^^
+
+warning: `fvid-codecs` (lib) generated 12 warnings
+warning: unused variable: `aspect`
+    --> crates/fvid-media/src/owned_y4m_decode.rs:1075:9
+     |
+1075 |     let aspect = presented_header.pixel_aspect()?;
+     |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_aspect`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> crates/fvid-media/src/owned_xfade.rs:462:5
+    |
+462 |     mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
+    |     ----^^^^^
+    |     |
+    |     help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable `pages` is assigned to, but never used
+  --> crates/fvid-media/src/owned_ogg_opus_export.rs:56:9
+   |
+56 |     let mut pages = 0usize;
+   |         ^^^^^^^^^
+   |
+   = note: consider using `_pages` instead
+
+warning: value assigned to `pages` is never read
+  --> crates/fvid-media/src/owned_ogg_opus_export.rs:80:9
+   |
+80 |         pages += 1;
+   |         ^^^^^^^^^^
+   |
+   = help: maybe it is overwritten before being read?
+   = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `encode` is never used
+   --> crates/fvid-media/src/owned_y4m_impl.rs:212:8
+    |
+ 31 | impl Header {
+    | ----------- method in this implementation
+...
+212 |     fn encode(&self, width: usize, height: usize) -> String {
+    |        ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `apply_pixel_filters` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:578:15
+    |
+578 | pub(crate) fn apply_pixel_filters(
+    |               ^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:585:15
+    |
+585 | pub(crate) fn apply_pixel_filters_cached(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached_at` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:594:15
+    |
+594 | pub(crate) fn apply_pixel_filters_cached_at(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `esds_for_mp4` is never used
+   --> crates/fvid-media/src/owned_aac/adts_impl.rs:334:15
+    |
+334 | pub(crate) fn esds_for_mp4(asc: &[u8]) -> Option<Vec<u8>> {
+    |               ^^^^^^^^^^^^
+
+warning: method `read_short` is never used
+  --> crates/fvid-media/src/owned_aac/bits_impl.rs:45:19
+   |
+ 7 | impl<'a> BitReader<'a> {
+   | ---------------------- method in this implementation
+...
+45 |     pub(crate) fn read_short(&mut self, count: u8) -> Result<u16> {
+   |                   ^^^^^^^^^^
+
+warning: associated function `identifiers` is never used
+   --> crates/fvid-media/src/owned_avc_impl.rs:509:19
+    |
+495 | impl Pps {
+    | -------- associated function in this implementation
+...
+509 |     pub(crate) fn identifiers(nal: &[u8]) -> Result<(u32, u32)> {
+    |                   ^^^^^^^^^^^
+
+warning: function `try_mp4_as` is never used
+   --> crates/fvid-media/src/owned_probe.rs:106:15
+    |
+106 | pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    |               ^^^^^^^^^^
+
+warning: function `try_webm_as` is never used
+   --> crates/fvid-media/src/owned_probe.rs:127:15
+    |
+127 | pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    |               ^^^^^^^^^^^
+
+warning: function `try_adts_as` is never used
+   --> crates/fvid-media/src/owned_probe.rs:147:15
+    |
+147 | pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    |               ^^^^^^^^^^^
+
+warning: type alias `Decoder` is never used
+ --> crates/fvid-media/src/owned_audio_mix.rs:8:6
+  |
+8 | type Decoder = fn(&Path) -> Result<(AudioDecodeStats, Vec<u8>)>;
+  |      ^^^^^^^
+
+warning: function `decode_owned_audio` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:226:15
+    |
+226 | pub(crate) fn decode_owned_audio(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `decode_float_wave` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:283:15
+    |
+283 | pub(crate) fn decode_float_wave(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
+    |               ^^^^^^^^^^^^^^^^^
+
+warning: function `decode_float_wave_controlled` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:287:15
+    |
+287 | pub(crate) fn decode_float_wave_controlled<F: FnMut(usize) -> Result<()>>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `read_float_wave_controlled` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:294:15
+    |
+294 | pub(crate) fn read_float_wave_controlled<F: FnMut(usize) -> Result<()>>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `read_float_wave_with_limits` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:302:15
+    |
+302 | pub(crate) fn read_float_wave_with_limits<F: FnMut(usize) -> Result<()>>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `mix_with_decoder` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:455:15
+    |
+455 | pub(crate) fn mix_with_decoder(
+    |               ^^^^^^^^^^^^^^^^
+
+warning: function `merge_with_decoder` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:615:15
+    |
+615 | pub(crate) fn merge_with_decoder(
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_audio_export.rs:8:15
+  |
+8 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_audio_plan.rs:94:15
+   |
+94 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_export.rs:69:15
+   |
+69 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `router` is never used
+  --> crates/fvid-media/src/owned_aac_export_routing.rs:11:15
+   |
+11 | pub(crate) fn router(
+   |               ^^^^^^
+
+warning: function `supports_concat` is never used
+   --> crates/fvid-media/src/owned_wave_remux.rs:122:15
+    |
+122 | pub(crate) fn supports_concat(
+    |               ^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_adts_loudness.rs:107:15
+    |
+107 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_loudnorm.rs:30:15
+   |
+30 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: method `nul_name` is never used
+  --> crates/fvid-media/src/owned_pixel_format.rs:9:27
+   |
+ 6 |           impl PixelFormat {
+   |           ---------------- method in this implementation
+...
+ 9 |               pub(crate) fn nul_name(self) -> &'static [u8] { match self { $( Self::$variant => concat!($name, "\0").as_bytes(), )* } }
+   |                             ^^^^^^^^
+...
+16 | / formats! {
+17 | |     Yuv420p, "yuv420p", Some((1, 1)), 1;
+18 | |     Yuv422p, "yuv422p", Some((1, 0)), 1;
+19 | |     Yuv444p, "yuv444p", Some((0, 0)), 1;
+...  |
+58 | |     Gray16Be, "gray16be", None, 2;
+59 | | }
+   | |_- in this macro invocation
+   |
+   = note: this warning originates in the macro `formats` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `aac_packet_plan` is never used
+  --> crates/fvid-media/src/owned_mp4_aac_plan_impl.rs:35:15
+   |
+35 | pub(crate) fn aac_packet_plan(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `check_encoded_ffv1` is never used
+   --> crates/fvid-media/src/owned_lossless.rs:754:15
+    |
+754 | pub(crate) fn check_encoded_ffv1(
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_ogg_opus_export.rs:200:15
+    |
+200 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_opus_export.rs:34:15
+   |
+34 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `inspect` is never used
+ --> crates/fvid-media/src/owned_matroska_copy_impl.rs:8:15
+  |
+8 | pub(crate) fn inspect<R: Read + Seek>(
+  |               ^^^^^^^
+
+warning: function `inspect_with_packet_limit` is never used
+  --> crates/fvid-media/src/owned_matroska_copy_impl.rs:15:15
+   |
+15 | pub(crate) fn inspect_with_packet_limit<R: Read + Seek>(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_raw_flac.rs:191:15
+    |
+191 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_raw_flac.rs:198:15
+    |
+198 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_flac_export.rs:46:15
+   |
+46 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_flac_export.rs:134:15
+    |
+134 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_raw_mp3.rs:265:15
+    |
+265 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_mp3_export.rs:46:15
+   |
+46 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_mp3_export.rs:126:15
+    |
+126 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_alac_export.rs:38:15
+   |
+38 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_alac_export.rs:121:15
+    |
+121 | pub(crate) fn geometry(source:&Path,options:&CopyOptions)->Result<(u32,u16)>{let (rate,channels,_)=geometry_with_mask(source,option...
+    |               ^^^^^^^^
+
+warning: function `geometry_with_mask` is never used
+   --> crates/fvid-media/src/owned_matroska_alac_export.rs:122:15
+    |
+122 | pub(crate) fn geometry_with_mask(source: &Path, options: &CopyOptions) -> Result<(u32, u16,u32)> {
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_audio_packet_budget` is never used
+   --> crates/fvid-media/src/owned_matroska_audio.rs:347:15
+    |
+347 | pub(crate) fn validate_audio_packet_budget<R: Read + Seek>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `admit_audio_reader` is never used
+   --> crates/fvid-media/src/owned_matroska_audio.rs:409:15
+    |
+409 | pub(crate) fn admit_audio_reader<R: Read + Seek>(
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `negotiate_matroska_ps` is never used
+   --> crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs:293:15
+    |
+293 | pub(crate) fn negotiate_matroska_ps<R: std::io::Read + std::io::Seek>(
+    |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_aac_export.rs:38:15
+   |
+38 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: method `convert` is never used
+   --> crates/fvid-media/src/owned_pcm_decoder_impl.rs:139:8
+    |
+ 79 | impl PcmDecoder {
+    | --------------- method in this implementation
+...
+139 |     fn convert(&self, data: &[u8]) -> Result<Vec<u8>> {
+    |        ^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_pcm_export.rs:42:15
+   |
+42 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_pcm_export.rs:126:15
+    |
+126 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: method `presentation_endpoint` is never used
+   --> crates/fvid-media/src/owned_mp4_impl.rs:270:19
+    |
+256 | impl Track {
+    | ---------- method in this implementation
+...
+270 |     pub(crate) fn presentation_endpoint(&self) -> Result<i128> {
+    |                   ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `decode_mp4_audio_reader_controlled` is never used
+  --> crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs:54:15
+   |
+54 | pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::Seek>(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_mp4_audio_export.rs:285:15
+    |
+285 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `recognizes` is never used
+  --> crates/fvid-media/src/owned_container_loudness.rs:46:15
+   |
+46 | pub(crate) fn recognizes(source: &Path) -> Result<bool> {
+   |               ^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_container_loudness.rs:161:15
+    |
+161 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_container_loudnorm.rs:30:15
+   |
+30 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `input` is never used
+ --> crates/fvid-media/src/owned_ffv1_export.rs:7:4
+  |
+7 | fn input(source: &Path) -> Result<crate::owned_webm::WebmReader<BufReader<File>>> {
+  |    ^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_ffv1_export.rs:49:15
+   |
+49 | pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
+   |               ^^^^^^^^
+
+warning: function `pack_bgra` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:8786:15
+     |
+8786 | pub(crate) fn pack_bgra(
+     |               ^^^^^^^^^
+
+warning: function `take_aligned` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:9498:15
+     |
+9498 | pub(crate) fn take_aligned(
+     |               ^^^^^^^^^^^^
+
+warning: associated function `new` is never used
+  --> crates/fvid-media/src/owned_webm_codec.rs:42:12
+   |
+41 | impl Decoder {
+   | ------------ associated function in this implementation
+42 |     pub fn new(codec: &str, private: &[u8], width: usize, height: usize) -> Result<Option<Self>> {
+   |            ^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_ogg_vorbis_export.rs:134:15
+    |
+134 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_ogg_joint_export.rs:98:15
+   |
+98 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_g711_wave_export.rs:181:15
+    |
+181 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: `fvid-media` (lib) generated 67 warnings (run `cargo fix --lib -p fvid-media` to apply 2 suggestions)
+warning: method `iter` is never used
+  --> src/codec/../../crates/fvid-media/src/owned_aac/aac_ssr_metadata_impl.rs:17:19
+   |
+16 | impl<T> PacketQueue<T> {
+   | ---------------------- method in this implementation
+17 |     pub(crate) fn iter(&self) -> impl Iterator<Item = &T> {
+   |                   ^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `trimmed_audio_sample_frames` is never read
+  --> src/container/../../crates/fvid-media/src/owned_mp4_matroska_impl.rs:43:16
+   |
+40 | pub(crate) struct TrackPlan {
+   |                   --------- field in this struct
+...
+43 |     pub(crate) trimmed_audio_sample_frames: u64,
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `inspect` is never used
+ --> src/container/../../crates/fvid-media/src/owned_matroska_copy_impl.rs:8:15
+  |
+8 | pub(crate) fn inspect<R: Read + Seek>(
+  |               ^^^^^^^
+
+warning: function `inspect_with_packet_limit` is never used
+  --> src/container/../../crates/fvid-media/src/owned_matroska_copy_impl.rs:15:15
+   |
+15 | pub(crate) fn inspect_with_packet_limit<R: Read + Seek>(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: field `length_size` is never read
+   --> src/playback/video/mp4_layered.rs:264:5
+    |
+248 | pub(super) struct LayeredPipeline {
+    |                   --------------- field in this struct
+...
+264 |     length_size: u8,
+    |     ^^^^^^^^^^^
+
+warning: function `adjust_luma` is never used
+    --> src/player.rs:1649:4
+     |
+1649 | fn adjust_luma(y: f32, s: &[f32; 5]) -> f32 {
+     |    ^^^^^^^^^^^
+
+warning: function `adjust_rgb` is never used
+    --> src/player.rs:1660:15
+     |
+1660 | pub(crate) fn adjust_rgb(source: &[u8], out: &mut Vec<u8>, s: &[f32; 5]) {
+     |               ^^^^^^^^^^
+
+warning: function `covered_span` is never used
+    --> src/player.rs:4402:4
+     |
+4402 | fn covered_span(covered: (u64, u64), total: u64) -> [f32; 2] {
+     |    ^^^^^^^^^^^^
+
+warning: function `inspect_first_y4m_frame` is never used
+   --> src/native_export.rs:173:15
+    |
+173 | pub(crate) fn inspect_first_y4m_frame(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `inspect_first_y4m_frame_with_filters` is never used
+   --> src/native_export.rs:184:15
+    |
+184 | pub(crate) fn inspect_first_y4m_frame_with_filters(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_y4m_concat_compatibility` is never used
+   --> src/native_export.rs:325:15
+    |
+325 | pub(crate) fn validate_y4m_concat_compatibility(sources: &[PathBuf]) -> Result<()> {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_video_selection` is never used
+   --> src/native_export.rs:360:15
+    |
+360 | pub(crate) fn validate_video_selection(source: &Path, selected: Option<usize>) -> Result<()> {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_video_packet_budget` is never used
+   --> src/native_export.rs:385:15
+    |
+385 | pub(crate) fn validate_video_packet_budget(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_video_packet_budget_with_geometry` is never used
+   --> src/native_export.rs:397:15
+    |
+397 | pub(crate) fn validate_video_packet_budget_with_geometry(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `y4m_segment_frame_upper_bound` is never used
+   --> src/native_export.rs:718:15
+    |
+718 | pub(crate) fn y4m_segment_frame_upper_bound(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `export_y4m_sources` is never used
+   --> src/native_export.rs:834:4
+    |
+834 | fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
+    |    ^^^^^^^^^^^^^^^^^^
+
+warning: associated function `validate_pair_with_geometry` is never used
+   --> src/native_export/overlay.rs:176:19
+    |
+117 | impl TimedOverlay {
+    | ----------------- associated function in this implementation
+...
+176 |     pub(crate) fn validate_pair_with_geometry(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `mp4` is never used
+  --> src/../crates/fvid-media/src/owned_mp4_probe_impl.rs:49:15
+   |
+49 | pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
+   |               ^^^
+
+warning: function `mp4_with_metadata_limit` is never used
+  --> src/../crates/fvid-media/src/owned_mp4_probe_impl.rs:53:15
+   |
+53 | pub(crate) fn mp4_with_metadata_limit(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `try_mp4` is never used
+  --> src/../crates/fvid-media/src/owned_mp4_probe_impl.rs:73:15
+   |
+73 | pub(crate) fn try_mp4(path: &Path) -> Result<Option<MediaInfo>> {
+   |               ^^^^^^^
+
+warning: function `try_mp4_with_metadata_limit` is never used
+  --> src/../crates/fvid-media/src/owned_mp4_probe_impl.rs:77:15
+   |
+77 | pub(crate) fn try_mp4_with_metadata_limit(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `matroska` is never used
+  --> src/media_probe.rs:50:15
+   |
+50 | pub(crate) fn matroska(path: &Path) -> Result<MediaInfo> {
+   |               ^^^^^^^^
+
+warning: function `matroska_with_packet_limit` is never used
+  --> src/media_probe.rs:54:15
+   |
+54 | pub(crate) fn matroska_with_packet_limit(path: &Path, packet_bytes: usize) -> Result<MediaInfo> {
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `matroska_with_packet_and_memory_limit` is never used
+  --> src/media_probe.rs:58:15
+   |
+58 | pub(crate) fn matroska_with_packet_and_memory_limit(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `fvid` (lib) generated 24 warnings
+   Compiling fvid v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid)
+warning: function `compare` is never used
+  --> tests/support/audio_transitions.rs:13:8
+   |
+13 | pub fn compare(actual: &Frames, expected: &Frames) {
+   |        ^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: struct `Trace` is never constructed
+   --> tests/support/audio_transitions.rs:107:12
+    |
+107 | pub struct Trace {
+    |            ^^^^^
+
+warning: struct `Capture` is never constructed
+   --> tests/support/audio_transitions.rs:114:12
+    |
+114 | pub struct Capture {
+    |            ^^^^^^^
+
+warning: function `ended` is never used
+   --> tests/support/audio_transitions.rs:230:8
+    |
+230 | pub fn ended(audio: &AudioPlayback, generation: u64) {
+    |        ^^^^^
+
+warning: associated function `new` is never used
+   --> tests/support/audio_transitions.rs:246:12
+    |
+245 | impl Capture {
+    | ------------ associated function in this implementation
+246 |     pub fn new(trace: Arc<Mutex<Trace>>) -> Self {
+    |            ^^^
+
+warning: `fvid` (test "mp4_open_ended_edit_audio") generated 5 warnings
+warning: variable does not need to be mutable
+   --> tests/mp4_audio_middle_gap.rs:530:17
+    |
+530 |             let mut audio = AudioPlayback::start(Box::new(r), move || {
+    |                 ----^^^^^
+    |                 |
+    |                 help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: `fvid` (test "mp4_audio_middle_gap") generated 2 warnings (1 duplicate) (run `cargo fix --test "mp4_audio_middle_gap" -p fvid` to apply 1 suggestion)
+warning: `fvid` (test "mp4_active_audio_choice") generated 5 warnings (5 duplicates)
+warning: variable does not need to be mutable
+   --> tests/mp4_open_edit_tail.rs:398:17
+    |
+398 |             let mut audio = AudioPlayback::start(Box::new(r), move || {
+    |                 ----^^^^^
+    |                 |
+    |                 help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: `fvid` (test "mp4_open_edit_tail") generated 2 warnings (1 duplicate) (run `cargo fix --test "mp4_open_edit_tail" -p fvid` to apply 1 suggestion)
+warning: associated function `new` is never used
+   --> tests/support/audio_transitions.rs:246:12
+    |
+245 | impl Capture {
+    | ------------ associated function in this implementation
+246 |     pub fn new(trace: Arc<Mutex<Trace>>) -> Self {
+    |            ^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `fvid` (test "mp4_aac_edit_phase") generated 1 warning (1 duplicate)
+warning: `fvid` (test "mp4_audio_reconfiguration") generated 1 warning
+warning: `fvid` (test "mp4_audio_presentation_end") generated 2 warnings (2 duplicates)
+warning: `fvid` (test "mp4_aac_fractional_origin") generated 1 warning (1 duplicate)
+warning: `fvid` (test "mp4_unused_audio_descriptions") generated 1 warning (1 duplicate)
+warning: `fvid` (test "mp4_reconfigured_seek_endpoint") generated 1 warning (1 duplicate)
+warning: `fvid` (test "mp4_fixed_audio_edits") generated 5 warnings (5 duplicates)
+warning: `fvid` (test "mp4_unedited_audio_tail") generated 1 warning (1 duplicate)
+warning: unused import: `fvid::audio::AudioStream`
+ --> tests/native_mp4_initial_metadata.rs:2:5
+  |
+2 | use fvid::audio::AudioStream;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `fvid` (test "native_mp4_initial_metadata") generated 6 warnings (5 duplicates)
+    Finished `test` profile [unoptimized] target(s) in 42.93s
+     Running tests/aac_clock.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/aac_clock-082556e1aaee9355)
+
+running 6 tests
+test aac_padding_larger_than_its_decoded_packet_is_explicitly_refused ... ok
+test aac_packet_tail_padding_trims_only_its_source_pcm_and_endpoint ... ok
+test delayed_ps_padding_uses_original_source_metadata_including_eof ... ok
+test quantized_aac_seek_trims_at_exact_requested_sample ... ok
+test quantized_aac_clocks_preserve_samples_and_real_discontinuities ... ok
+test warmed_aac_seek_restores_the_paired_quantized_sample_clock ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.09s
+
+     Running tests/aac_duration_grid.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/aac_duration_grid-75e97cbbb3bf11bd)
+
+running 1 test
+test aac_duration_and_actual_eof_seek_share_the_sample_clock ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running tests/aac_scaled_clock.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/aac_scaled_clock-95a87c3a9d92b196)
+
+running 3 tests
+test scaled_laced_main_ps_keeps_original_source_clock_through_delayed_output ... ok
+test scaled_aac_block_coordinates_recover_exact_pcm_clock_and_seek_windows ... ok
+test scaled_warm_seek_restores_exact_grid_phase_and_paired_decoder_history ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 13.65s
+
+     Running tests/aac_source_info_prefix_budget_regression.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/aac_source_info_prefix_budget_regression-fdb4e9903805f015)
+
+running 2 tests
+test adts_mono_then_ps_aac_scopes_negotiation_and_packet_budget_to_max_packets_prefix ... ok
+test mp4_and_matroska_mono_then_ps_aac_scope_geometry_to_max_packets_prefix ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.93s
+
+     Running tests/adts_concat_remux_prefix_budget_regression.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/adts_concat_remux_prefix_budget_regression-2669b3a29d8f8e30)
+
+running 1 test
+test adts_concat_and_remux_scope_packet_budget_to_active_prefix_and_report_negotiated_sbr_rate ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/audio_concat_packet_prefix_budget_regression.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/audio_concat_packet_prefix_budget_regression-9ba34718a9da1726)
+
+running 2 tests
+test mp4_single_source_audio_operations_scope_packet_byte_budget_to_max_packets_prefix_on_open ... ok
+test sample_domain_concat_scopes_packet_byte_budget_to_cumulative_max_packets_prefix ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.90s
+
+     Running tests/decode_trim_wave_budget_parity_regressions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/decode_trim_wave_budget_parity_regressions-d7d68405bd2ee6b0)
+
+running 3 tests
+test cli_trim_and_plan_trim_support_wave_non_wav_destinations_and_validate_matroska_metadata ... ok
+test wave_trim_trim_pcm_and_concat_preserve_stream_zero_errors_backend_and_budget_notes ... ok
+test decode_audio_and_trim_enforce_packet_bytes_and_zero_packet_limits_across_containers ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.03s
+
+     Running tests/filter_subtitle_regressions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/filter_subtitle_regressions-14c648e4a21af578)
+
+running 4 tests
+test drawbox_rejects_negative_thickness_and_accepts_double_quoted_options ... ok
+test fade_and_colorhold_validate_16bit_sample_precision_before_mutation ... ok
+test ass_conversion_accepts_spaced_case_insensitive_keys_and_variable_fraction_digits ... ok
+test srt_conversion_accepts_dot_decimals_trailing_coords_and_uppercase_entities ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/loudnorm_mix_budget_parity_regressions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/loudnorm_mix_budget_parity_regressions-f82e2dc3ec37ce83)
+
+running 3 tests
+test loudness_and_normalize_plans_enforce_packet_bytes_via_options ... ok
+test audio_mix_and_merge_propagate_controlled_memory_and_packet_budget_errors ... ok
+test loudnorm_plan_and_apply_enforce_packet_budgets_and_wave_stream_selection ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/matroska_default_tracks.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/matroska_default_tracks-22c2a2ac76a710b4)
+
+running 10 tests
+test default_second_video_is_selected_automatically ... ok
+test empty_default_flag_uses_its_schema_default ... ok
+test equal_priority_and_first_default_controls_keep_file_order ... ok
+test malformed_default_flags_refuse_the_specific_attribute ... ok
+test movie_preference_is_preserved_as_matroska_default_priority ... ok
+test owned_audio_file_geometry_and_interval_follow_enabled_stream ... ok
+test player_audio_preference_preserves_manual_audio_and_subtitle_lists ... ok
+test preference_metadata_is_defaulted_and_explicit_access_remains_available ... ok
+test unique_default_audio_decodes_without_an_explicit_index ... ok
+test default_candidates_preserve_pixels_clocks_seek_and_eof ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/matroska_enabled_tracks.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/matroska_enabled_tracks-82a3f5cf41bedf3c)
+
+running 12 tests
+test disabled_packets_still_consume_index_and_stored_byte_budgets ... ok
+test disabled_tracks_remain_indexed_and_byte_exact_copies_preserve_flags ... ok
+test disabled_video_is_excluded_from_owned_automatic_decode ... ok
+test explicit_audio_inspection_can_still_select_disabled_stored_stream ... ok
+test invalid_usability_flags_are_specific_parse_refusals ... ok
+test disabled_video_is_excluded_from_automatic_playback_selection ... ok
+test omitted_empty_and_enabled_flag_controls_stay_usable ... ok
+test only_enabled_audio_is_automatically_selected_for_pcm ... ok
+test player_audio_and_subtitle_selection_skips_disabled_tracks ... ok
+test unsupported_remux_does_not_silently_enable_a_disabled_track ... ok
+test owned_audio_file_geometry_and_interval_follow_enabled_stream ... ok
+test usable_video_variants_preserve_pixels_clocks_seek_and_eof ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/matroska_invisible_subtitles.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/matroska_invisible_subtitles-36db16a5ec6b3f0d)
+
+running 3 tests
+test cue_gaps_and_endpoints_remain_correct_after_actual_video_seeks ... ok
+test invisible_subtitle_frames_do_not_display_or_terminate_visible_fallback_cues ... ok
+test both_parsers_keep_exact_packet_spans_and_the_actual_video ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/matroska_negative_subtitles.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/matroska_negative_subtitles-ee02633a8762e5c2)
+
+running 3 tests
+test cue_gaps_and_endpoints_remain_correct_after_actual_video_seeks ... ok
+test negative_subtitle_frames_are_decoded_but_never_published ... ok
+test both_parsers_keep_exact_packet_spans_and_the_actual_video ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/matroska_ssa_text.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/matroska_ssa_text-ccd01ae95ae62165)
+
+running 3 tests
+test canonical_ssa_empty_layer_is_metadata_instead_of_visible_text ... ok
+test seek_displays_only_ssa_text_with_exact_exclusive_endpoints ... ok
+test mapped_script_packets_and_actual_pictures_are_preserved ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/matroska_subtitle_conversion_presentation.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/matroska_subtitle_conversion_presentation-8acb98ccf950dfcd)
+
+running 4 tests
+test conversion_materializes_codec_delay_without_reintroducing_hidden_negative_text ... ok
+test hidden_packets_still_consume_selected_input_work_and_resource_budgets ... ok
+test conversion_does_not_turn_invisible_events_into_visible_captions ... ok
+test ordinary_conversion_controls_keep_every_cue_and_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+
+     Running tests/matroska_subtitle_delay.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/matroska_subtitle_delay-81ab8452fea86d3a)
+
+running 3 tests
+test cue_gaps_and_endpoints_remain_correct_after_actual_video_seeks ... ok
+test both_parsers_keep_exact_packet_spans_and_the_actual_video ... ok
+test subtitle_codec_delay_is_subtracted_in_nanoseconds_before_presentation ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+
+     Running tests/matroska_subtitle_spans.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/matroska_subtitle_spans-0b9a4d3aaa2f337b)
+
+running 4 tests
+test cue_gaps_and_endpoints_remain_correct_after_actual_video_seeks ... ok
+test malformed_block_duration_is_refused_instead_of_using_a_fallback ... ok
+test native_cues_honour_per_block_duration_including_explicit_zero ... ok
+test both_parsers_keep_exact_packet_spans_and_the_actual_video ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+     Running tests/matroska_text_termination_playback.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/matroska_text_termination_playback-b7fb2f26fbf2cb3c)
+
+running 1 test
+test nul_terminated_text_preserves_native_playback_seek_rewind_and_eof ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/mix_merge_subtitle_controls_regressions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mix_merge_subtitle_controls_regressions-7a3be12bd348ce5a)
+
+running 1 test
+test mix_audio_merge_audio_and_convert_subtitles_honor_budget_and_progress_controls ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+
+     Running tests/mp4.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4-71d081f93985bd1d)
+
+running 20 tests
+test a_chapter_list_in_the_movies_own_clock_needs_no_second_reading ... ok
+test a_file_of_only_unplayable_tracks_names_the_gap ... ok
+test a_foreign_track_never_has_its_sample_table_read ... ok
+test a_header_turns_the_picture_upright ... ok
+test a_language_that_is_not_three_letters_reads_as_nothing_said ... ok
+test a_movies_own_chapter_list_names_its_parts ... ok
+test a_title_that_is_not_text_costs_only_the_title ... ok
+test a_track_keeps_the_title_and_language_the_file_gives_it ... ok
+test a_track_reports_the_shape_of_its_pixels ... ok
+test a_truncated_chapter_list_leaves_the_movie_playable ... ok
+test an_anamorphic_file_states_the_shape_of_its_pixels ... ok
+test an_unplayable_track_is_left_out_without_costing_the_picture ... ok
+test every_truncation_is_rejected_and_limits_are_enforced ... ok
+test extended_box_size ... ok
+test hevc_track_validates_hevc_configuration ... ok
+test indexed_packets_timestamps_sync_and_edits ... ok
+test invalid_box_reports_offset_size_and_remaining_bytes ... ok
+test mutated_metadata_never_panics ... ok
+test rejects_invalid_tables_offsets_and_external_references ... ok
+test a_quicktime_text_track_does_not_spoil_the_picture ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+
+     Running tests/mp4_aac_edit_phase.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_aac_edit_phase-38eccd3101be48b0)
+
+running 3 tests
+test finite_aac_edits_keep_exact_source_windows_and_their_presentation_phase ... ok
+test the_audio_worker_keeps_finite_edit_pcm_phase_and_seek ... ok
+test finite_edit_seek_matches_the_continuous_source_suffix ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.59s
+
+     Running tests/mp4_aac_fractional_origin.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_aac_fractional_origin-886227469261a31d)
+
+running 3 tests
+test fractional_composition_points_keep_exact_pcm_and_do_not_round_into_negative_time ... ok
+test the_audio_worker_keeps_fractional_origins_and_seek_pcm ... ok
+test seeks_to_fractional_native_points_preserve_exact_suffixes ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.45s
+
+     Running tests/mp4_aac_quicktime.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_aac_quicktime-17e3b63100adbbcc)
+
+running 4 tests
+test owned_mp4_audio_interval_and_budget_controls_work_on_quicktime_v1_aac ... ok
+test owned_mp4_quicktime_aac_controls_and_refusals_match_root_reader_and_analytical_pcm ... ok
+test root_mp4_reader_parses_all_quicktime_aac_controls_and_rejects_malformed ... ok
+test player_audio_stream_decodes_quicktime_aac_controls_and_seeks_cleanly ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running tests/mp4_aac_transitions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_aac_transitions-b74a3a0887b73bf5)
+
+running 6 tests
+test aac_owned_video_companions_keep_exact_planes_and_clocks ... ok
+test aac_profile_frame_geometry_and_rate_changes_match_exact_control_history ... ok
+test aac_seek_preroll_starts_at_the_last_real_decoder_setup_boundary ... ok
+test aac_direct_seek_matches_exact_continuous_suffix_across_960_1024_boundaries ... ok
+test owned_aac_controls_match_independent_nonzero_pulse_pcm ... ok
+test aac_workers_recreate_devices_and_keep_preroll_after_seek_and_rewind ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 17.84s
+
+     Running tests/mp4_ac3_sample_clock.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_ac3_sample_clock-7eeeea417de6026e)
+
+running 3 tests
+test coarse_ac3_packets_keep_native_pcm_timestamps_and_duration ... ok
+test real_ac3_worker_seek_after_eof_and_rewind_match_exact_control_pcm ... ok
+test native_ac3_seek_and_rewind_preserve_history_below_a_container_tick ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.47s
+
+     Running tests/mp4_active_audio_choice.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_active_audio_choice-66a99fb74e667dac)
+
+running 4 tests
+test an_actually_selected_unsupported_setup_still_falls_back_and_refuses_explicit_decode ... ok
+test automatic_selection_uses_the_initial_selected_setup_not_the_first_table_entry ... ok
+test explicit_selection_and_owned_decode_keep_the_analytic_preferred_waveform ... ok
+test automatic_worker_plays_and_navigates_the_preferred_nonzero_track ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_adpcm_transitions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_adpcm_transitions-83d391be27ad1a98)
+
+running 4 tests
+test adpcm_duration_clocks_keep_the_exact_grouped_pcm_and_intentional_trim ... ok
+test adpcm_timing_fixtures_retain_their_exact_owned_video_companions ... ok
+test constant_adpcm_exports_keep_pcm_with_a_non_native_mp4_duration_clock ... ok
+test adpcm_seek_rewind_and_worker_output_preserve_clock_conversion_after_reconfiguration ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.96s
+
+     Running tests/mp4_adts_interval_prefix_budget_regression.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_adts_interval_prefix_budget_regression-57c4983b2d6b1854)
+
+running 2 tests
+test adts_interval_prefix_bounds_plan_decode_and_trim_packet_budget ... ok
+test mp4_interval_prefix_bounds_packet_budget_and_in_band_ps_negotiation ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/mp4_audio_clocks.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_audio_clocks-6c517d1bf3732ef4)
+
+running 8 tests
+test decoded_geometry_and_fractional_negative_preroll_are_bounded ... ok
+test millisecond_media_clock ... ok
+test negative_composition_audio_start ... ok
+test sample_clock_control ... ok
+test standard_audio_clock ... ok
+test unrelated_audio_rate_clock ... ok
+test seek_inside_pcm_and_alac_packets_trims_to_first_sample_at_or_after_target ... ok
+test video_rate_media_clock ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_audio_export_transitions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_audio_export_transitions-64e370133a43debc)
+
+running 8 tests
+test changing_aac_profiles_with_identical_speaker_routing_can_fold_to_mono ... ok
+test delayed_ssr_is_drained_before_reconfiguration_and_at_eof ... ok
+test memory_limit_refuses_before_pcm ... ok
+test owned_file_plan_and_wave_publication_accept_configuration_changes ... ok
+test pcm_depth_and_coding_changes_preserve_float32_and_float64_samples ... ok
+test repeated_edits_restore_the_active_decoder_configuration_and_delayed_windows ... ok
+test aac_configuration_changes_export_the_independent_waveform_and_interval ... ok
+test root_aac_export_uses_the_same_configuration_aware_timeline ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.26s
+
+     Running tests/mp4_audio_metadata_admission.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_audio_metadata_admission-7a25f00b4b69d699)
+
+running 54 tests
+test adts_packet_limit_clamps_to_controlled_memory_and_wave_loudness_plan_notes_report_budgets ... ok
+test adts_source_info_and_native_plan_wave_trim_concat_and_remux_enforce_budgets_and_cancellation ... ok
+test ample_budget_decodes_exactly_the_same_pcm_as_unpadded_input ... ok
+test audio_decode_plan_respects_parser_metadata_ceiling ... ok
+test audio_export_plan_source_geometry_and_adts_concat_enforce_zero_limits ... ok
+test audio_geometry_respects_parser_metadata_ceiling ... ok
+test audio_mix_merge_concat_native_loudnorm_and_multitrack_supports_enforce_options_before_input_count_or_args ... ok
+test audio_mix_simultaneous_pcm_buffers_and_native_plan_export_index_payload_budget_are_enforced ... ok
+test canonical_file_tags_are_charged_in_matroska_metadata_working_set_across_lossless_remux_and_subtitle_routes ... ok
+test container_wave_metadata_working_set_and_matroska_source_geometry_errors_are_enforced ... ok
+test decode_audio_to_f32le_and_loudnorm_try_plan_preserve_rss_and_canonical_option_order ... ok
+test decode_refuses_before_output_and_leaves_no_temporary_files ... ok
+test lossless_xfade_subtitle_burn_convert_and_y4m_export_enforce_zero_limits ... ok
+test loudness_loudnorm_and_audio_mix_merge_concat_enforce_zero_limits_and_metadata_budgets ... ok
+test adts_wave_metadata_budget_and_container_loudnorm_admission_preserve_metadata_working_set ... ok
+test matroska_lossless_multitrack_video_decode_and_subtitle_burn_enforce_estimated_index_payload_budget ... ok
+test matroska_pcm_f64_codec_check_and_stream_selection_enforce_kind_and_cardinality ... ok
+test matroska_probe_copy_and_subtitle_conversion_enforce_estimated_index_payload_budget ... ok
+test matroska_remux_zero_packets_and_native_export_wave_metadata_budgets_are_enforced ... ok
+test media_entrypoints_matroska_probe_and_subtitle_conversion_enforce_options_and_memory_packet_bounds ... ok
+test mix_merge_concat_and_loudnorm_matroska_output_and_eligibility_propagate_controlled_memory_budgets ... ok
+test mp4_and_adts_matroska_remux_and_concat_charge_simultaneous_plan_cue_and_packet_working_sets ... ok
+test mp4_and_matroska_audio_export_supports_and_admission_preserve_budget_and_packet_policies ... ok
+test mp4_matroska_and_adts_plan_decode_and_supports_enforce_source_metadata_budget_and_nonempty_interval_prefix ... ok
+test mp4_probe_remux_concat_video_decode_and_native_source_info_enforce_estimated_index_payload_budget ... ok
+test native_audio_trim_mix_merge_and_source_admission_enforce_zero_limits ... ok
+test native_export_adts_concat_audio_trim_and_wave_concat_honor_packet_and_cancellation_controls ... ok
+test native_export_native_plan_and_video_decode_enforce_options_before_extension_input_count_or_interval_checks ... ok
+test native_pcm_loudness_normalize_and_audio_source_info_enforce_zero_limits ... ok
+test native_pcm_native_media_and_owned_remux_video_bridge_burn_and_xfade_enforce_canonical_option_order ... ok
+test native_plan_adts_concat_and_wave_inspection_honor_cancellation_and_packet_budgets ... ok
+test native_plan_audio_trim_and_decode_entrypoints_enforce_mp4_metadata_and_matroska_packet_index_budgets ... ok
+test native_probe_and_pcm_matroska_metadata_extraction_enforce_budget_across_wave_ogg_flac_mpeg_adts_and_spool_exports ... ok
+test native_probes_respect_the_same_metadata_ceiling ... ok
+test ogg_opus_plan_decode_and_supports_enforce_wave_metadata_budget_and_nonempty_interval_prefix ... ok
+test overlay_pcm_export_mp4_concat_and_wave_loudness_enforce_canonical_option_order ... ok
+test owned_audio_mix_and_merge_with_controls_and_native_loudnorm_fallback_enforce_budgets_and_cancellation ... ok
+test owned_lossless_supports_ffv1_export_and_mp4_video_decode_enforce_zero_limits_and_preserve_plan_budgets ... ok
+test owned_loudness_loudnorm_audio_export_supports_and_ogg_y4m_probe_enforce_options_before_policy_or_io ... ok
+test owned_remux_plan_and_wave_remux_trim_concat_enforce_zero_limits_and_rss_before_policy_errors ... ok
+test pcm_matroska_all_canonical_file_tags_and_mp4_relocate_index_payload_budget_are_enforced ... ok
+test probe_flac_adts_wave_webm_mp4_and_y4m_enforce_zero_limits_and_rss_budgets ... ok
+test public_media_routes_validate_copy_options_before_unbounded_source_io ... ok
+test raw_flac_and_mp3_plan_decode_and_standalone_loudness_admission_enforce_pcm_and_copy_policies ... ok
+test raw_mp3_flac_ogg_source_info_and_decoded_pcm_budgets_are_enforced ... ok
+test raw_pcm_decoders_and_audio_export_backends_enforce_options_before_stream_metadata_or_destination_checks ... ok
+test raw_pcm_stream_decoders_enforce_zero_limits ... ok
+test remux_adts_concat_mp4_relocate_and_matroska_copy_enforce_canonical_option_order ... ok
+test small_and_ample_budget_audio_controls_are_valid ... ok
+test wave_adts_and_mp4_remux_trim_and_concat_enforce_zero_limits_and_metadata_budgets ... ok
+test wave_loudnorm_plan_and_concat_segment_validation_preserve_budget_and_cancellation_controls ... ok
+test wave_metadata_matroska_scan_errors_and_audio_reader_rss_cancellation_budgets_are_enforced ... ok
+test xfade_three_frame_working_set_and_adts_pce_open_packet_limits_are_enforced_before_allocating ... ok
+test loudness_loudnorm_mix_merge_concat_and_spatial_routing_respect_mp4_metadata_ceiling ... ok
+
+test result: ok. 54 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.70s
+
+     Running tests/mp4_audio_middle_gap.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_audio_middle_gap-b8e3aa61eec1e6e5)
+
+running 13 tests
+test a_long_empty_interval_seeks_and_renders_bounded_pcm_instead_of_allocating_its_duration ... ok
+test a_silent_interval_stops_before_the_oversized_post_gap_ps_packet ... ok
+test a_burst_of_real_decoded_frames_drains_after_bounded_gap_silence ... ok
+test both_parsers_preserve_the_gap_packet_bytes_clocks_and_decodable_video ... ok
+test coarse_clock_gap_preserves_every_native_sample ... ok
+test gap_silence_does_not_consume_the_encoded_packet_work_budget ... ok
+test middle_gap_controls_keep_cancellation_packet_and_memory_refusals ... ok
+test middle_silence_does_not_mask_a_broken_following_codec_packet ... ok
+test actual_workers_keep_the_gap_and_seek_into_its_silence ... ok
+test owned_decode_preserves_history_and_inserts_only_the_middle_silent_interval ... ok
+test recovered_middle_gap_clock_keeps_a_declared_trailing_empty_fragment ... ok
+test whole_pcm_resampling_preserves_middle_gap_boundaries ... ok
+test native_gap_playback_keeps_pcm_timestamps_seek_rewind_and_eof ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.67s
+
+     Running tests/mp4_audio_presentation_end.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_audio_presentation_end-b91ebbd20645249d)
+
+running 3 tests
+test audio_duration_matches_the_composition_endpoint_and_retains_empty_tails ... ok
+test exact_pcm_timestamps_seek_rewind_and_video_remain_intact ... ok
+test the_audio_worker_keeps_the_complete_shifted_tail ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/mp4_audio_reconfiguration.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_audio_reconfiguration-231c2c1e5f08cc3d)
+
+running 10 tests
+test changing_descriptions_with_leading_silence_play_the_intended_timeline ... ok
+test eac3_delayed_tail_keeps_its_old_geometry_before_output_reconfiguration ... ok
+test eac3_session_rf_and_dialogue_choices_survive_natural_decoder_recreation ... ok
+test owned_video_companions_play_with_exact_planes_and_clocks ... ok
+test paused_seek_cancels_a_pending_output_drain_without_decoding_stale_pcm ... ok
+test pcm_coding_rate_channels_and_precision_follow_actual_packet_descriptions ... ok
+test failed_output_reconfiguration_latches_error_and_rewind_rebuilds_the_device ... ok
+test stop_interrupts_output_drain_that_never_completes ... ok
+test variable_rate_edits_report_presentation_duration ... ok
+test real_worker_drains_old_output_before_changing_geometry_and_keeps_navigation ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.38s
+
+     Running tests/mp4_chapter_composition.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_chapter_composition-9eed5e09853ce343)
+
+running 2 tests
+test chapter_clock_accounts_for_the_composition_endpoint_in_both_parsers ... ok
+test chapter_media_keeps_analytic_pixels_and_exact_playback_navigation ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/mp4_chapter_versions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_chapter_versions-ccf8db1c01ad17f5)
+
+running 4 tests
+test parsed_chapters_seek_to_their_exact_native_intervals ... ok
+test version_one_and_empty_or_truncated_lists_keep_their_existing_policy ... ok
+test every_chapter_movie_decodes_exact_pictures_and_eof ... ok
+test version_zero_reads_its_own_count_and_utf8_titles ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_chunk_bounds.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_chunk_bounds-eff4a4ce39a43d24)
+
+running 2 tests
+test overlapping_or_non_increasing_chunks_zero_size_samples_and_empty_tracks_are_rejected ... ok
+test chunk_ordering_non_empty_tracks_and_positive_sample_sizes_are_enforced ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/mp4_chunk_storage_order.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_chunk_storage_order-b7422562f6b4f6a8)
+
+running 3 tests
+test actual_overlap_and_outside_media_data_remain_explicit_refusals ... ok
+test ascending_controls_keep_exact_packets_pixels_seek_and_eof ... ok
+test disjoint_chunks_keep_sample_order_independent_of_storage_order ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/mp4_compact_padding.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_compact_padding-6b4db80f95a39504)
+
+running 2 tests
+test unused_nonzero_padding_is_rejected_by_its_own_error_before_playback ... ok
+test real_nibbles_and_zero_padding_preserve_packets_pixels_caption_seek_and_eof ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_compact_sizes.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_compact_sizes-6c0bad06816c0776)
+
+running 6 tests
+test compact_mace_preserves_block_units_exact_pcm_and_eof ... ok
+test compact_empty_init_tables_populate_real_fragments_and_keep_edit_seek_clocks ... ok
+test malformed_or_ambiguous_size_tables_refuse_before_playback ... ok
+test compact_size_tables_preserve_packets_playback_and_caption_seek ... ok
+test ordinary_size_table_controls_preserve_packets_playback_and_caption_seek ... ok
+test uniform_pcm_keeps_chunk_budget_exact_samples_decode_seek_and_eof ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/mp4_concat_selected_clock.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_concat_selected_clock-0a624f5dd20ad911)
+
+running 2 tests
+test unselected_audio_does_not_insert_video_concat_gap ... ok
+test selected_video_plays_seeks_rewinds_and_ends_at_eighty_ms ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_decode_only_seek.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_decode_only_seek-327597f4fdd38652)
+
+running 5 tests
+test empty_replay_is_bounded_and_genuine_leading_gaps_do_not_restart ... ok
+test decode_only_shapes_preserve_exact_colored_pictures_and_intervals ... ok
+test replay_preserves_trimmed_and_repeated_edit_timeline_and_continuation ... ok
+test native_seek_never_loses_the_last_visible_picture_to_a_decode_only_tail ... ok
+test seek_decode_errors_remain_errors_and_the_reader_can_recover ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_eac3_programme_clock.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_eac3_programme_clock-fca6ff4fd78ee8e1)
+
+running 4 tests
+test missing_or_corrupt_selected_programme_refuses_without_default_fallback ... ok
+test real_selected_programme_worker_preserves_eof_seek_rewind_and_pcm_geometry ... ok
+test selected_eac3_programme_keeps_native_pcm_and_time_under_coarse_ticks ... ok
+test selected_eac3_seek_and_rewind_keep_delayed_native_windows_and_history ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 21.99s
+
+     Running tests/mp4_edit_loop.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_edit_loop-4441f654bdccc741)
+
+running 3 tests
+test loop_edits_are_explicit_capability_refusals_and_reserved_bits_are_invalid ... ok
+test native_open_does_not_silently_play_a_loop_once ... ok
+test finite_edits_keep_exact_pixels_clock_seek_and_eof ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_edit_window_eof.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_edit_window_eof-ae9956b811651a5b)
+
+running 4 tests
+test no_picture_programs_are_bounded_and_codec_errors_are_not_window_eof ... ok
+test raw_controls_keep_the_two_authored_colored_pictures ... ok
+test every_edit_window_runs_and_eof_does_not_retime_the_last_picture ... ok
+test seek_keeps_edit_positions_and_continuation_across_empty_windows ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/mp4_empty_fragment.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_empty_fragment-14edff05b602907a)
+
+running 4 tests
+test empty_duration_disallows_even_empty_runs_and_checks_its_endpoint ... ok
+test empty_intervals_keep_packet_timestamps_and_total_duration_in_both_parsers ... ok
+test empty_intervals_do_not_consume_sample_budget ... ok
+test empty_intervals_play_exact_pictures_and_seek_on_the_authored_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/mp4_empty_tail.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_empty_tail-d0ca4b79b969298f)
+
+running 4 tests
+test explicit_zero_delta_is_preserved_by_both_parsers ... ok
+test native_empty_tail_preserves_duration_seek_rewind_and_eof ... ok
+test zero_duration_does_not_hide_a_broken_final_codec_packet ... ok
+test empty_final_presentation_window_completes_without_emitting_or_failing ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_fixed_audio_edits.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_fixed_audio_edits-42bf42cb96936177)
+
+running 3 tests
+test finite_fixed_audio_seek_respects_the_media_trim ... ok
+test finite_fixed_audio_edits_set_the_native_duration_and_trim_window ... ok
+test finite_fractional_pcm_and_alac_edits_keep_exact_duration_and_sample_positions ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_fragment_description.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_fragment_description-769b8ad144397cfe)
+
+running 4 tests
+test a_nonempty_fragment_must_resolve_a_supported_description ... ok
+test playback::unresolved_description_refuses_before_native_decoder_admission ... ok
+test supported_effective_descriptions_keep_packets_clocks_and_budgets ... ok
+test playback::healthy_descriptions_keep_analytic_planes_rgb_public_seek_and_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_geometry_lossless_adpcm.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_geometry_lossless_adpcm-d8dcfc53711bf391)
+
+running 2 tests
+test alac_and_adpcm_file_exports_publish_only_the_normalized_pcm ... ok
+test alac_raw_rice_and_adpcm_duration_clocks_normalize_the_exact_authored_signal ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+
+     Running tests/mp4_geometry_normalization.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_geometry_normalization-5bf5bf3119f56e51)
+
+running 9 tests
+test explicit_destinations_can_normalize_an_opaque_initial_aac_layout ... ok
+test file_planning_and_wave_publication_accept_normalized_geometry ... ok
+test normalization_honours_budget_and_packet_prefix_controls ... ok
+test normalized_aac_can_fold_to_mono_without_applying_source_layout_twice ... ok
+test opaque_initial_aac_layout_requires_a_destination_instead_of_silent_rematrixing ... ok
+test pcm_native_rate_and_layout_changes_follow_one_exact_output_grid ... ok
+test aac_profile_rate_and_layout_changes_match_independent_native_and_filter_oracles ... ok
+test public_media_api_and_cli_publish_the_normalized_waveform ... ok
+test root_aac_export_keeps_the_same_normalized_waveform ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.38s
+
+     Running tests/mp4_hybrid_fragments.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_hybrid_fragments-4ebdfb5871760928)
+
+running 4 tests
+test playback::corrupt_init_stbl_in_fragmented_mp4_refuses_before_native_decoder_admission ... ok
+test corrupt_init_stbl_in_fragmented_mp4_refuses_as_invalid ... ok
+test valid_hybrid_and_fragmented_files_preserve_all_packets_clocks_and_budgets ... ok
+test playback::valid_hybrid_and_fragmented_files_keep_analytic_planes_rgb_public_seek_and_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_implicit_fragment_base.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_implicit_fragment_base-6ce8725f57ec7ef7)
+
+running 5 tests
+test implicit_fragment_sample_admission_remains_bounded ... ok
+test implicit_bases_preserve_both_parser_indices_and_packet_bytes ... ok
+test invalid_implicit_bases_refuse_before_native_decoding ... ok
+test unresolved_or_outside_media_bases_are_invalid ... ok
+test implicit_fragments_play_seek_rewind_and_reach_eof ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/mp4_interrupted_seek.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_interrupted_seek-8a665f07bbce5ce1)
+
+running 5 tests
+test owned_packet_and_range_seeks_retry_interruption ... ok
+test opening_retries_interrupted_end_and_atom_seeks_in_both_parsers ... ok
+test permanent_seek_failures_still_propagate_and_allow_recovery ... ok
+test root_packet_and_range_seeks_retry_interruption ... ok
+test software_playback_keeps_pixels_timestamps_seek_rewind_and_eof_after_interruption ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/mp4_layered_seek_coverage.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_layered_seek_coverage-39e9edec22a1622e)
+
+running 2 tests
+test layered_sequential_control_preserves_four_presentation_intervals ... ok
+test layered_seek_preserves_frames_preceding_the_landing_in_decode_order ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/mp4_mace_export.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_mace_export-bd50aa36a21b942d)
+
+running 7 tests
+test constant_mace_edits_apply_silence_and_repeat_source_with_fresh_predictors ... ok
+test constant_mace_player_seeks_and_edits_recover_predictors_before_exposing_pcm ... ok
+test mace_export_witnesses_keep_exact_owned_video_planes_and_clocks ... ok
+test fvid_media_mace_decode_plan_export_and_controlled_budget_match_the_facade ... ok
+test owned_mace_export_admission_intervals_and_edits_preserve_predictor_history ... ok
+test shared_mace_engine_preserves_pcm_across_public_float_byte_and_packet_boundaries ... ok
+test mace_workers_keep_exact_packet_times_and_history_after_seek_and_rewind ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.97s
+
+     Running tests/mp4_mace_transitions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_mace_transitions-f0b98888b113cae5)
+
+running 6 tests
+test mace_index_uses_selected_width_and_coded_sample_timing ... ok
+test mace_invalid_chunk_tables_fail_for_the_specific_structural_reason ... ok
+test mace_description_changes_keep_block_geometry_and_predictor_state ... ok
+test mace_movies_retain_exact_owned_video_planes_and_clocks ... ok
+test mixed_mace_pcm_units_preserve_exact_samples_and_index_cost ... ok
+test mace_workers_and_seek_preserve_predictors_across_changes_and_repeated_edits ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.52s
+
+     Running tests/mp4_multi_trun.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_multi_trun-572072ce60e41103)
+
+running 4 tests
+test cross_traf_and_empty_reset_outside_mdat_refuse_as_invalid ... ok
+test playback::cross_traf_and_empty_reset_outside_mdat_refuse_before_native_decoder_admission ... ok
+test valid_multi_trun_continuity_preserves_packets_clocks_and_budgets ... ok
+test playback::valid_multi_trun_continuity_keeps_analytic_planes_rgb_public_seek_and_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_nondisplay_endpoint.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_nondisplay_endpoint-e3dc6a90b02ff86b)
+
+running 2 tests
+test hidden_and_shown_controls_keep_exact_display_intervals ... ok
+test late_hidden_pts_does_not_stretch_native_duration_or_seek ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_open_edit_tail.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_open_edit_tail-b015d6d2a84f6ee1)
+
+running 9 tests
+test a_declared_silent_tail_does_not_hide_an_invalid_final_encoded_packet ... ok
+test normalization_preserves_the_declared_tail_with_resampling_and_rematrixing ... ok
+test actual_audio_workers_play_the_empty_tail_and_seek_into_it ... ok
+test open_edits_retain_the_declared_packet_free_endpoint_in_both_parsers ... ok
+test owned_open_and_finite_edits_preserve_nonzero_pcm_then_exact_tail_silence ... ok
+test probes_report_the_same_complete_edited_duration_for_open_and_finite_controls ... ok
+test open_edit_playback_keeps_duration_tail_seek_rewind_and_eof ... ok
+test the_short_video_witnesses_still_decode_and_audio_refusals_publish_nothing ... ok
+test silence_is_limited_to_declared_source_time_and_does_not_make_overlong_edits_playable ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.53s
+
+     Running tests/mp4_open_ended_edit.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_open_ended_edit-9cf9f7bc4d444eb0)
+
+running 7 tests
+test finite_edit_controls_preserve_both_parsers_and_packets ... ok
+test malformed_zero_edits_still_refuse ... ok
+test finite_edit_controls_keep_native_playback_seek_and_eof ... ok
+test open_edit_probe_reports_the_exact_remaining_media_duration ... ok
+test owned_video_decode_honors_the_complete_open_edit_window ... ok
+test single_fragmented_open_edits_preserve_the_unbounded_marker ... ok
+test open_edit_duration_frames_seek_and_eof_use_exact_media_ticks ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/mp4_open_ended_edit_audio.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_open_ended_edit_audio-5fc455f106029442)
+
+running 7 tests
+test fractional_open_audio_export_and_probe_match_the_exact_finite_clock ... ok
+test fractional_open_native_audio_keeps_sample_alignment_without_rounding_movie_ticks ... ok
+test audio_open_edit_probe_and_export_keep_nonzero_pcm_and_exact_lengths ... ok
+test open_aac_packet_remux_preserves_nonzero_pcm_and_trimmed_audible_length ... ok
+test open_audio_packet_budget_errors_do_not_publish_pcm ... ok
+test public_open_audio_plans_and_wave_publication_keep_exact_sample_counts ... ok
+test native_open_audio_preserves_pcm_seek_rewind_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.78s
+
+     Running tests/mp4_owned_fragment_parity.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_owned_fragment_parity-343764331ca8cf3e)
+
+running 4 tests
+test owned_mp4_reader_enforces_per_traf_continuity_mfhd_and_unique_trex_ids ... ok
+test owned_mp4_reader_enforces_fragment_description_trun_flags_and_box_extents ... ok
+test owned_mp4_reader_handles_minimum_signed_trun_offset_without_overflow ... ok
+test owned_mp4_reader_probe_and_decode_support_hybrid_fragments_and_refuse_corrupt_init_stbl ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_pcm_choice.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_pcm_choice-1ccd4cf170fb24bb)
+
+running 1 test
+test automatic_pcm_choice_skips_unsupported_movie_width_without_reordering_manual_tracks ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/mp4_presentation_endpoint.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_presentation_endpoint-6445dfdc45d47abb)
+
+running 2 tests
+test composition_endpoint_witnesses_keep_raw_media_clock_and_exact_decoded_frames ... ok
+test native_duration_and_seek_reach_the_actual_composition_endpoint ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_quantized_audio_clock.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_quantized_audio_clock-055f63c92062bdcd)
+
+running 4 tests
+test an_extra_tick_at_an_exact_coded_endpoint_is_not_rounding ... ok
+test native_and_library_files_keep_quantized_edit_waveforms_and_packet_prefixes ... ok
+test precise_pcm_coarse_clock_does_not_narrow_sub_float32_samples ... ok
+test coarse_cumulative_ticks_recover_the_native_clock_without_packet_drift ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 8.37s
+
+     Running tests/mp4_reconfigured_seek_endpoint.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_reconfigured_seek_endpoint-ba5a0906b6f7bf5a)
+
+running 5 tests
+test ordinary_playback_rewind_and_video_are_valid_controls ... ok
+test presentation_tail_seeks_preserve_the_exact_pcm_suffix ... ok
+test the_audio_worker_keeps_aac_overlap_when_seeking_the_shifted_tail ... ok
+test aac_preroll_seeks_keep_exact_history_and_the_presentation_tail ... ok
+test the_audio_worker_seeks_the_shifted_tail_and_ends_without_replaying_it ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.57s
+
+     Running tests/mp4_remux_prefix_budget_regression.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_remux_prefix_budget_regression-5b1673e83f0257d8)
+
+running 3 tests
+test mp4_compressed_concat_scopes_packet_budget_to_selected_prefix_and_tracks ... ok
+test native_plan_decode_audio_with_options_forwards_budgets_for_dynamic_stsd_mp4 ... ok
+test mp4_matroska_remux_and_plan_remux_scope_packet_budget_to_selected_prefix_and_tracks ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/mp4_seek_io_regressions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_seek_io_regressions-03ca4db625f0a40b)
+
+running 3 tests
+test a_failed_seek_invalidates_the_cached_cursor_before_recovery ... ok
+test control_samples_are_contiguous_distinct_and_exact ... ok
+test authored_colors_play_with_exact_samples_timestamps_seek_rewind_and_eof ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/mp4_signed_offset.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_signed_offset-937fa62a927f28aa)
+
+running 4 tests
+test ordinary_negative_and_adjacent_boundary_controls_keep_exact_packets ... ok
+test playback::ordinary_and_adjacent_offsets_keep_analytic_playback_and_public_navigation ... ok
+test playback::valid_min_displacement_plays_without_gigabyte_reads_and_corruption_refuses ... ok
+test the_entire_signed_range_resolves_or_refuses_without_panicking ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_subtitle_edits.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_subtitle_edits-201663502cc78a18)
+
+running 6 tests
+test coincident_pts_identity_edits_preserve_source_sample_precedence ... ok
+test malformed_edit_count_is_refused_before_any_caption_is_published ... ok
+test parsers_preserve_subtitle_edit_programs_raw_packets_and_actual_video ... ok
+test repeated_edits_obey_the_subtitle_output_sample_budget ... ok
+test subtitle_edits_map_clip_repeat_and_hide_cues_on_the_movie_clock ... ok
+test actual_video_seeks_select_the_edited_caption_at_every_boundary ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/mp4_subtitle_negative_clock.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_subtitle_negative_clock-d31f85ff2b50045c)
+
+running 3 tests
+test subtitle_cues_clip_at_zero_and_keep_the_absolute_composition_endpoint ... ok
+test subtitle_clock_witnesses_preserve_packets_signed_pts_and_actual_video ... ok
+test subtitle_lookup_follows_the_video_clock_before_and_after_seek ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_subtitle_unicode.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_subtitle_unicode-582be27312601ee2)
+
+running 4 tests
+test malformed_utf16_cues_are_refused_without_losing_healthy_following_text ... ok
+test unicode_cue_content_and_timestamps_survive_real_video_seeks ... ok
+test utf16_cues_preserve_unicode_markup_newlines_and_empty_text ... ok
+test unicode_witnesses_keep_exact_packets_and_decodable_video ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/mp4_terminal_zero_runs.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_terminal_zero_runs-fe4a2e226790c402)
+
+running 4 tests
+test grouped_zero_suffixes_must_not_bypass_the_single_last_packet_rule ... ok
+test previously_rejected_nonterminal_zero_rows_still_refuse ... ok
+test positive_and_single_terminal_zero_video_preserve_packets_pixels_seek_and_eof ... ok
+test terminal_zero_audio_uses_real_pcm_frames_or_mace_blocks_without_rejecting_one_packet ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/mp4_text_descriptions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_text_descriptions-eee87152052a7d2e)
+
+running 5 tests
+test an_unused_description_still_requires_a_valid_common_data_reference ... ok
+test dormant_unknown_entries_preserve_referenced_tx3g_descriptions_and_bytes ... ok
+test actual_video_seeks_keep_captions_from_the_active_description ... ok
+test referenced_unknown_descriptions_are_explicitly_refused_without_partial_text ... ok
+test video_and_plain_text_controls_decode_with_original_headers_and_pixels ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/mp4_trun_flags.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_trun_flags-f8b991f1f824dc89)
+
+running 4 tests
+test mutually_exclusive_trun_flags_refuse_as_invalid ... ok
+test playback::mutually_exclusive_trun_flags_refuse_before_native_decoder_admission ... ok
+test valid_exclusive_trun_flag_modes_preserve_packets_sync_clocks_and_budgets ... ok
+test playback::valid_exclusive_trun_flag_modes_keep_analytic_planes_rgb_public_seek_and_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mp4_unedited_audio_tail.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_unedited_audio_tail-c1a5cbcd86c893bc)
+
+running 4 tests
+test a_two_day_unedited_tail_seeks_without_materializing_its_pcm ... ok
+test native_unedited_tail_matches_owned_pcm_and_declared_duration ... ok
+test owned_unedited_tail_is_real_silence_after_all_codec_output ... ok
+test unedited_tail_seek_rewind_and_workers_keep_exact_silence ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.34s
+
+     Running tests/mp4_unused_audio_descriptions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_unused_audio_descriptions-337bf9633fd45363)
+
+running 6 tests
+test an_actually_selected_unknown_entry_is_refused_as_a_capability ... ok
+test the_audio_worker_plays_and_rewinds_with_unused_first_entries ... ok
+test unselected_unknown_entries_still_validate_their_common_data_reference ... ok
+test unused_audio_entries_play_exact_pcm_transitions_rewind_and_seek ... ok
+test unused_opaque_audio_entries_preserve_tracks_packet_selection_and_clocks ... ok
+test owned_audio_decode_keeps_the_control_waveform_with_unused_metadata ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.40s
+
+     Running tests/mp4_variable_rate_edits.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_variable_rate_edits-5635b0a11dcfbd63)
+
+running 5 tests
+test edited_audio_keeps_its_owned_video_companion_decodable ... ok
+test explicit_ranges_negative_pts_and_fractional_clocks_keep_exact_source_samples ... ok
+test missing_source_extent_fails_after_the_available_pcm_instead_of_false_eof ... ok
+test presentation_seek_matches_continuous_suffix_even_at_fractional_edit_edges ... ok
+test actual_workers_keep_edit_repeats_device_geometry_rewind_and_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.29s
+
+     Running tests/mp4_wide_decode_clock.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/mp4_wide_decode_clock-130b3fcde3b366fa)
+
+running 3 tests
+test actual_composition_overflow_is_still_refused ... ok
+test wide_decode_clock_plays_the_exact_picture_and_seeks_on_its_signed_pts ... ok
+test wide_unsigned_decode_time_can_have_a_representable_signed_composition_time ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/native_loudnorm_cli.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/native_loudnorm_cli-901768ecbdbde274)
+
+running 9 tests
+test cancellation_after_compressed_decode_never_publishes_normalization ... ok
+test compressed_packet_limit_refuses_without_publication_in_each_container ... ok
+test compressed_rss_limit_refuses_before_decode_or_publication ... ok
+test dual_pass_uses_owned_measurement_and_prints_one_final_report ... ok
+test encoded_packet_prefix_preserves_presentation_and_is_not_a_pcm_block_limit ... ok
+test loudnorm_cli_exports_long_wave_and_reports_prefix_progress_without_legacy ... ok
+test owned_normalizer_plans_cli_and_api_without_decoding_packet_contents ... ok
+test synthetic_prefix_stops_before_truncated_tail_and_zero_count_never_publishes ... ok
+test compressed_audio_normalization_matches_owned_pcm_with_edits_and_selection ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.96s
+
+     Running tests/native_mp4_audio_transitions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/native_mp4_audio_transitions-113dee658bd1dd55)
+
+running 7 tests
+test native_alac_and_adpcm_transitions_match_independent_controls ... ok
+test native_explicit_destinations_keep_pce_positions_and_output_clock ... ok
+test native_aac_entrypoint_keeps_first_used_setup_and_no_overwrite ... ok
+test native_interval_gain_and_packet_prefix_keep_the_global_output_grid ... ok
+test native_source_metadata_and_planning_use_the_first_actual_description ... ok
+test opaque_same_geometry_does_not_require_an_invented_destination_layout ... ok
+test native_file_export_accepts_native_rate_layout_and_edit_transitions ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.63s
+
+     Running tests/native_mp4_initial_metadata.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/native_mp4_initial_metadata-34f7d05a9b670422)
+
+running 4 tests
+test inspection_keeps_limits_and_constant_route_admission_separate ... ok
+test explicit_constant_inspection_preserves_each_admission_variant ... ok
+test metadata_inspection_reports_the_first_actual_setup_without_requiring_constant_descriptions ... ok
+test the_witnesses_play_exact_pcm_transitions_and_all_video_frames ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/native_subtitle_burn_cli.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/native_subtitle_burn_cli-49569622a549c017)
+
+running 1 test
+test native_burn_and_plan_run_without_external_tools ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/native_subtitle_convert.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/native_subtitle_convert-1105542847aa5073)
+
+running 4 tests
+test reordered_ass_fields_map_to_matroska_packet_order ... ok
+test srt_convert_cli_and_api_use_owned_ass_muxer_atomically ... ok
+test matroska_ass_conversion_preserves_header_styling_packets_and_timing ... ok
+test standalone_ass_preserves_styles_dialogue_fields_and_timestamps ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/owned_audio_window_parity.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/owned_audio_window_parity-c69f8cf3fb484167)
+
+running 1 test
+test synthetic_container_windows_preserve_exact_pcm_and_language_info ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/owned_mp4.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/owned_mp4-3a665fe0d26cc1d3)
+
+running 5 tests
+test library_mp4_enforces_metadata_and_packet_limits_before_allocating_payload ... ok
+test library_mp4_preserves_recognition_and_specific_extent_refusal ... ok
+test library_mp4_remux_cancellation_and_packet_cap_leave_no_partial_file ... ok
+test library_mp4_demux_matches_frontend_indexes_metadata_and_packets ... ok
+test owned_mp4_matroska_mux_and_publication_match_frontend_bytes ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/owned_mp4_audio.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/owned_mp4_audio-174e35f804c4f373)
+
+running 8 tests
+test explicit_mp4_audio_selection_keeps_source_index_in_plan_and_export ... ok
+test mp4_audio_plan_uses_owned_metadata_without_decoding_or_callbacks ... ok
+test mp4_pcm_raw_api_matches_frontend_with_retained_budget ... ok
+test synthetic_matroska_interval_resampling_keeps_future_input ... ok
+test synthetic_mp4_audio_controls_preserve_publication ... ok
+test synthetic_mp4_interval_resampling_keeps_future_input ... ok
+test synthetic_precise_pcm_interval_resampling_keeps_future_input ... ok
+test library_mp4_audio_pcm_and_file_export_match_frontend_edits ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.01s
+
+     Running tests/owned_subtitle.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/owned_subtitle-18cd7045d0cadaf5)
+
+running 2 tests
+test synthetic_srt_public_library_conversion_matches_frontend_and_refuses_overwrite ... ok
+test synthetic_ass_and_matroska_subrip_public_conversion_preserves_cues ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/subtitle_burn_matroska_xfade_metadata_regressions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/subtitle_burn_matroska_xfade_metadata_regressions-5e0a176827d81b1c)
+
+running 1 test
+test subtitle_burn_supports_compressed_and_rotated_matroska_preserves_writing_app_and_xfade_enforces_container_metadata_bounds ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/subtitle_burn_xfade_metadata_regressions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/subtitle_burn_xfade_metadata_regressions-29182994d8a3bb8e)
+
+running 1 test
+test subtitle_burn_single_track_mp4_gray_rgb_and_set_then_delete_metadata_precedence ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/subtitle_convert_burn_budget_parity_regressions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/subtitle_convert_burn_budget_parity_regressions-f51cf250458c8ac6)
+
+running 6 tests
+test burn_subtitles_enforces_input_packet_bytes_and_matches_plan_and_execution_errors ... ok
+test burn_subtitles_and_mp4_decode_enforce_controlled_memory_for_srt_cues_and_decode_loop_frames ... ok
+test convert_subtitles_and_burn_subtitles_precheck_script_and_metadata_budgets_before_reading_or_opening_output ... ok
+test cli_burn_subtitles_xfade_and_transcode_lossless_preserve_specific_policy_refusals ... ok
+test convert_subtitles_and_plan_convert_subtitles_enforce_controlled_memory_for_matroska_metadata_working_sets ... ok
+test convert_subtitles_enforces_matroska_container_packet_bytes_and_cli_memory_budget_refusal ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/subtitle_convert_plan_metadata_regressions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/subtitle_convert_plan_metadata_regressions-7aa2d5586773c22a)
+
+running 1 test
+test plan_convert_subtitles_and_writing_app_metadata_preservation_work_across_api_and_cli ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+     Running tests/subtitle_native_clock_overflow.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/subtitle_native_clock_overflow-1b5fa0d7fd1bdf5e)
+
+running 2 tests
+test long_decimal_subtitle_fractions_keep_millisecond_truncation ... ok
+test native_subtitle_clocks_refuse_unaddressable_times_without_panicking ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/subtitle_normalize_metadata_regressions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/subtitle_normalize_metadata_regressions-d7ca440d98f9ced5)
+
+running 1 test
+test convert_subtitles_and_normalize_loudness_support_matroska_metadata_and_cue_limits ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+     Running tests/subtitle_spool_regressions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/subtitle_spool_regressions-764219ec1aaf7f56)
+
+running 4 tests
+test ass_parser_ignores_dialogue_prefixes_outside_events_section ... ok
+test sami_parser_treats_case_insensitive_nbsp_entities_as_caption_clears ... ok
+test webvtt_parser_skips_multiline_note_and_style_blocks_with_arrow_timings ... ok
+test spool_seek_rejects_negative_result_positions_per_std_io_seek_contract ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/xfade_subtitle_budget_parity_regressions.rs (/private/tmp/fvid-mp4-terminal-zero-runs-20261031/debug/deps/xfade_subtitle_budget_parity_regressions-99c79d97e1fb4ad7)
+
+running 4 tests
+test convert_subtitles_checks_formatted_ass_event_byte_limit_per_cue_before_subsequent_work_limit ... ok
+test xfade_and_subtitle_burn_default_options_enforce_frame_presence_and_timeline_offset_parity ... ok
+test xfade_plan_and_execution_preserve_zero_packet_byte_budget_and_invalid_header_parity ... ok
+test burn_subtitles_planning_enforces_encoded_ffv1_packet_byte_budget_on_y4m_and_matroska ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s

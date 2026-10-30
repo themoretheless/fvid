@@ -1535,6 +1535,16 @@ fn parse_track(
     let Some(index) = sample_index(&stbl, &result.codec, result.channels, &result.sample_descriptions, mdats, limit, fragmented)? else {
         return Ok(None);
     };
+    // STTS validation already confines zero deltas to its final run. After
+    // grouping legacy MACE samples into packets, zeros still form a suffix;
+    // a zero penultimate packet means the permitted single tail was exceeded.
+    // Check indexed units so one six-sample MACE tail block remains valid.
+    let nonterminal_zero = match &index {
+        SampleIndex::Expanded(samples) => samples.len().checked_sub(2)
+            .and_then(|i| samples.get(i)).is_some_and(|sample| sample.duration == 0),
+        SampleIndex::Uniform(uniform) => uniform.count > 1 && uniform.duration == 0,
+    };
+    if nonterminal_zero { return Err(invalid("invalid decode-time run")); }
     result.samples = index;
     if duration_unknown && !result.samples.is_empty() {
         let last = result.samples.get(result.samples.len() - 1)
