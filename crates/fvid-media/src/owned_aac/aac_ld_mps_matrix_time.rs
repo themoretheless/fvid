@@ -41,8 +41,18 @@ impl MatrixTime {
         Ok(Self {
             bands,
             layout,
-            previous: vec![0.0; usize::from(bands) * layout.width()?],
+            previous: vec![0.0; 23 * layout.width()?],
         })
+    }
+    /// Ordinary LD-MPS retains indexed matrix history in the 23-band
+    /// workspace, including bands temporarily outside the current resolution.
+    /// No frequency averaging or history reset is implied by an SSC change.
+    pub fn reconfigure_bands(&mut self, bands: u8) -> Result<()> {
+        if !(1..=23).contains(&bands) {
+            return Err(invalid("invalid LD-MPS matrix band count"));
+        }
+        self.bands = bands;
+        Ok(())
     }
     pub fn reset(&mut self) {
         self.previous.fill(0.0);
@@ -89,7 +99,9 @@ impl MatrixTime {
         let mut output = Vec::with_capacity(usize::from(frame_slots));
         let mut last_slot = -1i16;
         for (ps, &slot) in slots.iter().enumerate() {
-            let previous = endpoints.last().unwrap_or(&self.previous);
+            let previous = endpoints
+                .last()
+                .map_or(&self.previous[..size], Vec::as_slice);
             let delta =
                 f64::from(i16::from(slot) - last_slot) / f64::from(controls[ps].time.max(1));
             let mut endpoint = raw[ps].clone();
@@ -117,7 +129,7 @@ impl MatrixTime {
             endpoints.push(endpoint);
             last_slot = i16::from(slot);
         }
-        self.previous = endpoints.last().unwrap().clone();
+        self.previous[..size].copy_from_slice(endpoints.last().unwrap());
         Ok(MatrixFrame {
             endpoints,
             slots: output,
@@ -132,5 +144,51 @@ impl MatrixTime {
     ) -> std::result::Result<(), String> {
         f.vector(&self.previous)?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod grid_history_tests {
+    use super::*;
+    #[test]
+    fn dormant_rows_are_owned_counted_and_detectably_different_from_resize_with_zero_fill() {
+        let layout = Layout {
+            planes: 1,
+            rows: 1,
+            columns: 1,
+        };
+        let mut good = MatrixTime::new(23, layout).unwrap();
+        let control = |bands| SmoothControl {
+            time: 0,
+            mask: vec![false; bands],
+        };
+        good.process(
+            8,
+            &[7],
+            &[control(23)],
+            &[(0..23).map(|i| i as f64 / 8. + 1.).collect()],
+            0,
+        )
+        .unwrap();
+        good.reconfigure_bands(4).unwrap();
+        good.process(8, &[7], &[control(4)], &[vec![-1.; 4]], 0)
+            .unwrap();
+        let mut footprint = super::super::memory::Footprint::new();
+        good.visit_retained(&mut footprint).unwrap();
+        assert_eq!(footprint.total(), 23 * 8);
+        let mut wrong = good.clone();
+        wrong.previous[4..].fill(0.); // A resize-to-active-length loses these rows.
+        good.reconfigure_bands(23).unwrap();
+        wrong.reconfigure_bands(23).unwrap();
+        let raw = vec![0.; 23];
+        let a = good
+            .process(8, &[7], &[control(23)], &[raw.clone()], 0)
+            .unwrap();
+        let b = wrong.process(8, &[7], &[control(23)], &[raw], 0).unwrap();
+        assert_eq!(&a.slots[0][..4], &b.slots[0][..4]);
+        assert_ne!(&a.slots[0][4..], &b.slots[0][4..]);
+        assert_eq!(a.slots[0][22], (22. / 8. + 1.) * 7. / 8.);
+        good.reset();
+        assert!(good.previous.iter().all(|v| *v == 0.));
     }
 }

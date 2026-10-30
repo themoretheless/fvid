@@ -250,7 +250,7 @@ mod inband_state_tests {
         assert_eq!(decoder.decorrelators, fresh.decorrelators);
         let saved = decoder.clone();
         let mut invalid = changed;
-        invalid.parameter_bands = if invalid.parameter_bands == 4 { 5 } else { 4 };
+        invalid.sample_rate = 24000;
         assert!(decoder.reconfigure(&invalid, Mode::Complex).is_err());
         assert_eq!(decoder, saved);
     }

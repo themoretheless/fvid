@@ -58,7 +58,7 @@ def main():
   if base['name'] not in ('plain-tree7','n480-c1-base-x2-crc1'):continue
   wrong=packed(field(6 if base['rate']==48000 else 3,4)+raw(initial)[4:])
   grid=packed(raw(initial)[:9]+field(2 if raw(initial)[9:12]!='010' else 1,3)+raw(initial)[12:])
-  malformed=[('grid-change',header(grid,body),'matrix grid change'),('empty',bytes([0]),'empty in-band'),('short',bytes([126])+initial,'truncated LD-MPS configuration'),('extended-short',bytes([127,0]),'truncated extended in-band'),('missing-frame',header(initial,b''),'missing spatial frame'),('time-alignment',bytes([128+len(initial)])+initial+b'\0\1'+body,'time alignment'),('alignment-short',bytes([128+len(initial)])+initial+b'\0','truncated in-band LD-MPS time alignment'),('wrong-rate',header(wrong,body),'output format change'),('reserved-config',header(bytes([0xd0])+bytes(len(initial)-1),body),'reserved')]
+  malformed=[('grid-change',header(grid,body),'independent LD-MPS set requires default or coded data'),('empty',bytes([0]),'empty in-band'),('short',bytes([126])+initial,'truncated LD-MPS configuration'),('extended-short',bytes([127,0]),'truncated extended in-band'),('missing-frame',header(initial,b''),'missing spatial frame'),('time-alignment',bytes([128+len(initial)])+initial+b'\0\1'+body,'time alignment'),('alignment-short',bytes([128+len(initial)])+initial+b'\0','truncated in-band LD-MPS time alignment'),('wrong-rate',header(wrong,body),'output format change'),('reserved-config',header(bytes([0xd0])+bytes(len(initial)-1),body),'reserved')]
   for mode,payload,error in malformed:
    frames=[]
    for i,prefix in enumerate(base['prefixes']):

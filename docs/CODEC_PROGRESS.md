@@ -1,3 +1,44 @@
+## Native LD-MPS resolution changes with indexed matrix history, 2026-10-30
+
+Same-format in-band SSCs may now change the coded parameter resolution between
+4, 5, 7, 9, 12, 15 and 23 bands. Ordinary M1/M2 history occupies the fixed 23-band
+workspace. Processing updates only active rows; rows temporarily outside the
+current resolution survive. Changing resolution selects a new active prefix,
+without frequency averaging, clearing history or resizing away dormant rows.
+Reset clears the whole workspace, and checkpoints include dormant rows.
+This supersedes the grid-refusal limitation in the earlier in-band entry below.
+
+560 saved own movies cover all 42 ordered resolution changes and returns for
+all eight plain 48-kHz trees, plus seven cyclic resolution changes/returns for each
+of 32 coupled LD-SBR base configurations (all eight trees, 480/512-sample 24-kHz cores,
+single 24-kHz/32-bin and double 48-kHz/64-bin output). Immediate, delayed and
+fragmented messages associate the appropriate grid with its source frame.
+Every movie checks public/owned PCM, AudioStream playback, live rewind/reset,
+forward/backward/EOF seek and repeated ranges crossing header boundaries.
+
+An independent explicit reference step freezes raw ISO matrix coefficients for
+all 56 tree/resolution combinations. Ordinary tests read those bytes and assemble
+the temporal/QMF/synthesis chain separately; no external decoder, compiler,
+process, network or FFmpeg runs in tests. On 6,604,416 native PCM samples, maximum
+absolute difference is 5.55645391351646e-11. The comparison does not claim full
+live foreign-decoder reconfiguration conformance. A separate Fraction oracle
+covers 196 transition sequences and 66,150 exact scalar endpoints, first-slot
+interpolation, checkpoint replay and late-error rollback. A resize-with-zero-fill
+negative control detects loss of dormant rows; retained-memory inspection counts
+the complete workspace even while only four bands are active.
+
+The parent Session implementation specifically refuses a valid new changing-grid
+movie. Its old negative fixture only changed SSC while leaving mismatched frame
+syntax: that fixture remains a malformed-payload control with a specific frame
+parser error, rather than becoming a false acceptance. Fresh correct header/frame
+pairs provide the new acceptance coverage. Fixture regeneration is byte identical
+with network/process APIs denied after the reference extraction step.
+
+Nonzero time alignment, output-format changes, residual AAC and the other open
+spatial tools/bank geometries/downscale remain separate requirements.
+Validation: media: 581 passed, 1 existing ignored; root: 1061 passed, 26 existing ignored; integration: 95 passed, 0 existing ignored.
+See docs/validation/aac-ld-mps-grid-*-2026-10-30.json.
+
 ## Native in-band LD-MPS configuration and selective state continuity, 2026-10-30
 
 HeaderAndFrame messages now carry a byte-bounded spatial configuration into

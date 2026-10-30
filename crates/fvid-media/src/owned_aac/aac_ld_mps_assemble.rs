@@ -142,12 +142,9 @@ impl Decoder {
         if config == &self.config {
             return Ok(());
         }
-        if config.sample_rate != self.config.sample_rate
-            || config.tree != self.config.tree
-            || config.parameter_bands != self.config.parameter_bands
-        {
+        if config.sample_rate != self.config.sample_rate || config.tree != self.config.tree {
             return Err(unsupported(
-                "LD-MPS in-band matrix grid change is not yet implemented",
+                "LD-MPS in-band matrix layout change requires stream reconfiguration",
             ));
         }
         let mut next = Self::new(config)?;
@@ -156,6 +153,9 @@ impl Decoder {
         next.m1 = self.m1.clone();
         next.dry = self.dry.clone();
         next.wet = self.wet.clone();
+        next.m1.reconfigure_bands(config.parameter_bands)?;
+        next.dry.reconfigure_bands(config.parameter_bands)?;
+        next.wet.reconfigure_bands(config.parameter_bands)?;
         *self = next;
         Ok(())
     }

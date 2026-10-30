@@ -232,11 +232,6 @@ impl Session {
                         "LD-MPS in-band output format change requires stream reconfiguration",
                     ));
                 }
-                if config.parameter_bands != next.initial_config.parameter_bands {
-                    return Err(unsupported(
-                        "LD-MPS in-band matrix grid change is not yet implemented",
-                    ));
-                }
                 let _validated = Self::new_domain(&config, next.mode, next.qmf_input)?;
                 let offset = bits.position() / 8;
                 if offset == message.payload.len() {
