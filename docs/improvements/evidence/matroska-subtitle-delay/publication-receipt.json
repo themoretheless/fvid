@@ -1,0 +1,18 @@
+{
+  "commit": "895b3b0d5c6ab7b2495777bc675d80e7b1d185ba",
+  "verified_remote_refs": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "accepted_count": 427,
+  "removed_owned_target": "/private/tmp/fvid-subtitle-delay-20261030",
+  "removed_archived_raw_logs": [
+    "/private/tmp/fvid-subtitle-delay-core-check-20261030.log",
+    "/private/tmp/fvid-subtitle-delay-before-20261030.log",
+    "/private/tmp/fvid-subtitle-delay-integration-20261030.log",
+    "/private/tmp/fvid-subtitle-delay-after-20261030.log",
+    "/private/tmp/fvid-subtitle-delay-root-20261030.log",
+    "/private/tmp/fvid-subtitle-delay-player-check-20261030.log"
+  ],
+  "preserved": "All regression samples and proof, active other worktrees and four stashes."
+}
