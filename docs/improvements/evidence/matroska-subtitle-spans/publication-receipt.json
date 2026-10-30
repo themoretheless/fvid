@@ -1,0 +1,19 @@
+{
+  "commit": "bc2ba520c6b79f94440521316116c5a3a1d45794",
+  "verified_remote_refs": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "accepted_count": 424,
+  "removed_owned_target": "/private/tmp/fvid-matroska-subtitle-spans-20261030",
+  "removed_archived_raw_logs": [
+    "/private/tmp/fvid-matroska-subtitle-spans-after-20261030.log",
+    "/private/tmp/fvid-matroska-subtitle-integration-20261030.log",
+    "/private/tmp/fvid-matroska-subtitle-lib-20261030.log",
+    "/private/tmp/fvid-matroska-subtitle-core-check-20261030.log",
+    "/private/tmp/fvid-matroska-subtitle-player-check-20261030.log",
+    "/private/tmp/fvid-matroska-subtitle-spans-before-20261030.log",
+    "/private/tmp/fvid-matroska-subtitle-lib-after-20261030.log"
+  ],
+  "preserved": "All synthetic fixtures, evidence, active other worktrees and all four stashes."
+}
