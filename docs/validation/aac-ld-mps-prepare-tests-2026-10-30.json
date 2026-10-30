@@ -1,0 +1,97 @@
+{
+  "base_head": "966a16f610",
+  "scope": "Physical parameters, smoothing control and matrix temporal components only; no spatial PCM/movie/playback/seek/rewind acceptance or closed codec gap.",
+  "results": {
+    "media": {
+      "sha256": "f93f8afcf31ec4c8d8d783f923491b6529a3396558d9ec09ed392d3af7d90d52",
+      "expected_markers": [
+        "575 passed; 0 failed; 1 ignored"
+      ]
+    },
+    "integration": {
+      "sha256": "76e5bd3f7239a332372aa6296f718882ede9a4fda5bc54eaeaa8076405378ed4",
+      "expected_markers": [
+        "6 passed; 0 failed",
+        "5 passed; 0 failed",
+        "777384 spatial-frame truncated prefixes checked",
+        "280719 stateful truncated prefixes checked"
+      ]
+    },
+    "all_test_compile": {
+      "sha256": "01b1906b45c5b6033ce28fc076e52141b653939475a4cf5df632f20c88d26abb",
+      "expected_markers": [
+        "Finished `dev` profile"
+      ]
+    }
+  },
+  "media_passed": 575,
+  "media_ignored": 1,
+  "integration_passed": 23,
+  "base_physical_configs": 161,
+  "positive_arbitrary_quant0_overrides": 56,
+  "physical_frames": 651,
+  "constructor_refusal_configs": 175,
+  "replay_offsets": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "physical_checkpoint_replays": 5208,
+  "last_bit_truncation_rollbacks": 3864,
+  "energy_oracle_points": 1116,
+  "matrix_sequences": 28,
+  "matrix_frames": 112,
+  "rate_gain_controls": 1400,
+  "smoothing_reference_frames": 1008,
+  "coupled_physical_reference_frames": 483,
+  "coupled_physical_max_level_abs_error": 9.536743172944284e-08,
+  "original_float_nonfinite_energies": 186,
+  "original_float_max_finite_energy_error": 1.46533203125,
+  "double_control_max_energy_error": 1.1368683772161603e-13,
+  "reference_float_matrix_max_error": 2.384185791015625e-07,
+  "native_qmf_map_entries": 896,
+  "ld_kernel_signs": "All unit signs verified against frozen ISO archive.",
+  "ordinary_tests_require_ffmpeg": false,
+  "ordinary_tests_require_network": false,
+  "ordinary_tests_require_generation": false,
+  "ordinary_tests_require_reference_software": false,
+  "rejected_scope_assumption": "Initial preparation treated active-arbitrary-tree nonzero-quant data as ordinary dequantization. Coupled reference revealed an undefined EBQ energy feed/assertion; this combination is now explicitly unqualified, and quant-zero positive fixtures were added for every tree.",
+  "inputs": [
+    {
+      "file": "crates/fvid-media/src/owned_aac/aac_ld_mps_prepare.rs",
+      "sha256": "211bb8850e02fe77c350e0599fba7c51e31df845e90df5cd4e661d607a2d4215"
+    },
+    {
+      "file": "crates/fvid-media/src/owned_aac/aac_ld_mps_prepare_facts.rs",
+      "sha256": "dd2c2409c84c3a8e6261df94e47cf5f6c4b52b992c11b026803bf3661d88b6ec"
+    },
+    {
+      "file": "crates/fvid-media/src/owned_aac/aac_ld_mps_matrix_time.rs",
+      "sha256": "498bcdb8363df6eea60d2f98c0d0464695d23b88609b19164e599af58db5cc02"
+    },
+    {
+      "file": "tests/aac_ld_mps_prepare.rs",
+      "sha256": "4b7b0ebe899be9b0d1364584fad7220d93881f73a261fc61f25924924e2907b2"
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-prepare/manifest.json",
+      "sha256": "d3118200b57c12b742a41ec5c2648c32e3f5c022b95697260480426268d9833f"
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-prepare/facts.json",
+      "sha256": "e5a42f5d508ec99004f8f5a495d6ffc7e7e2b8052d793dc5d49a14ed0332f171"
+    }
+  ],
+  "open": [
+    "Spatial matrix construction and decorrelation/upmix.",
+    "Residual AAC, STP/GES and HRTF/binaural processing.",
+    "LD-QMF/LD-SBR routing and LD-QMF 128 DSP.",
+    "Normative semantics for unqualified energy combinations and empty grouped/Huffman syntax.",
+    "Short synthetic movie playback, actual seek and rewind qualification."
+  ]
+}

@@ -150,4 +150,7 @@ pub mod aac_ld_mps_entropy;
 pub mod aac_ld_mps_parameters;
 pub mod aac_ld_mps_frame;
 mod aac_ld_mps_frame_facts;
+pub mod aac_ld_mps_prepare;
+pub mod aac_ld_mps_matrix_time;
+mod aac_ld_mps_prepare_facts;
 mod aac_ld_mps_huffman_facts;

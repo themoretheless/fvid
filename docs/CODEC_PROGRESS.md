@@ -1,3 +1,93 @@
+## LD-MPS physical parameters, matrix smoothing and interpolation, 2026-10-30
+
+The owned preparation layer now couples spatial-frame parsing with physical
+CLD/ICC/CPC grids, CLD energy quantization/propagation, persistent smoothing
+controls, temporal-shape levels, fixed gain lookups and native QMF band maps.
+Energy-adjusted indices are separate from raw entropy/mapped history. The two
+1->5.1 tree energy graphs propagate the correct left/right ancestor levels;
+LFE regions remain independently rooted. A cloned preparation decoder is a
+complete syntax/physical-control checkpoint, and reset restores both histories.
+An incomplete later frame leaves both histories and the caller cursor intact.
+
+LD-MPS has its own grids: in particular ICC's last entry is -0.99, whereas the
+existing PS component uses -1.0. Native QMF assignments are preserved for each
+4/5/7/9/12/15/23-band resolution and 32/64/128 QMF bins. They must not be
+replaced by the separate 23-band expansion used for optional stereo downmix.
+Rate boundaries at 27713 and 55426 Hz are tested on both sides. Mapping 128 bins
+is metadata preparation, not a claim that LD-QMF 128 DSP/routing is implemented.
+Surround/LFE/clip-protection gain values are returned as grid values; their
+application/compensation belongs to matrix construction.
+
+The smoothing state resolves all four modes, four times and all LD strides.
+Leading keep retains the initial inactive mask/time zero without dividing by
+zero. Explicit mode zero selects inactive/256. Mask expansion uses balanced
+output groups, then carries the last encoded set across frames. A held final
+endpoint is appended when a variable frame ends before its final time slot.
+GES indices become physical envelope levels; STP flags are retained. Neither
+STP nor GES has yet been applied to audio.
+
+The matrix-time component smooths actual coefficients, not CLD/ICC/CPC values.
+It covers all seven real/imaginary M0/M1/M2 planes, up to the base workspace's
+8 rows and 13 columns, and bypasses smoothing below the residual cutoff.
+Each slot interpolates from the previous frame's final matrix through the
+smoothed endpoints. Held final endpoints participate in the same update.
+Geometry, nonfinite coefficients, invalid controls and later failures preserve
+matrix history. Maximum layout and residual bypass have explicit controls.
+This is a matrix temporal stage, not a matrix builder or a PCM upmixer.
+
+Energy propagation uses stable log-domain arithmetic. The saved independent
+Decimal oracle covers 1116 splits with all 31 CLD indices, three quant modes
+and parents down to -1000 dB. Original ISO float functions return 186 nonfinite
+energy values on that set; their largest finite energy error is 1.465332 dB.
+These original outcomes are retained. A separate research control widens only
+the four branch-local energy functions from float to double; all indices agree
+and its maximum energy error is 1.13687e-13. Both controls keep the original
+float matrix code: its largest error against exact-Fraction traces is 2.38419e-7.
+The owned f64 temporal stage matches the independent oracle within 2e-12 scaled
+absolute tolerance. This is internal precision qualification, not formal ISO
+conformance or reference-code incorporation into FVid.
+
+The corpus positively covers 161 base configurations / 483 frames, plus 56
+quant-zero active-arbitrary-tree overrides / 168 frames. All eight trees have
+physical acceptance controls; replay at eight bit offsets and reset are exact.
+Another 175 base configurations remain explicit physical-constructor refusals.
+Nonzero quant modes on unqualified tree/TTT combinations and active arbitrary
+trees are not silently treated as mode zero. The old arbitrary-tree mapper has
+no EBQ input energy and asserts on that path; its normative semantics require
+clarification before enabling it. These refusals are not positive acceptance
+or proof that the corresponding syntax is a legal full programme.
+
+A separate coupled ISO parse/decode/mapping probe checks 483 qualified
+nonopaque-residual frames: encoded-set energy-adjusted indices agree exactly,
+and physical levels differ by at most 1.00001e-7 (float-grid precision). It
+retains the previous explicit parser controls and separates the arbitrary-tree
+namespace in the physical mapper too. Two additional empty-region controls
+bypass an energy assertion where no bands exist, and skip an individual empty
+TTT region without abandoning its nonempty high region. Exact source changes,
+hashes, earlier rejected assertions and exclusions are retained. The C mapper
+extends physical levels only; its unused held index row is not an index oracle.
+The owned derived held indices remain independently tested.
+
+The saved oracle also contains 112 rational matrix frames and 1400 rate/gain
+controls. Ordinary tests read saved data only; generation, source extraction
+and optional C comparisons are explicit separate steps without FFmpeg.
+
+The full fvid-media unit suite passes 575 checks (one existing ignored),
+and all 23 LD-MPS integration checks pass. Offline all-test compilation passes.
+Fixture regeneration is byte-exact with process/socket creation denied. The
+[test report](validation/aac-ld-mps-prepare-tests-2026-10-30.json),
+[precision/matrix comparison](validation/aac-ld-mps-prepare-reference-2026-10-30.json),
+[coupled comparison](validation/aac-ld-mps-physical-frame-reference-2026-10-30.json)
+and [generation report](validation/aac-ld-mps-prepare-generation-2026-10-30.json)
+retain the exact scope, controls, exclusions and hashes.
+
+The broad codec goal remains active. Spatial matrix construction, decorrelation/
+upmix, residual AAC integration, HRTF/binaural processing, STP/GES application,
+LD-QMF/LD-SBR routing and LD-QMF 128 DSP still require work. Unqualified energy
+combinations and empty grouped/Huffman syntax remain open. The native spatial
+renderer refusal stays enabled; zero spatial programmes, actual playback/seek/
+rewind checks or closed spatial codec gaps are counted by this component work.
+
 ## LD-MPS spatial-frame syntax and complete tree dispatch, 2026-10-30
 
 The owned frame parser now schedules parameter blocks for all eight LD trees:
