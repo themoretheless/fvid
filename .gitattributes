@@ -17,3 +17,7 @@ scripts/*.patch whitespace=-blank-at-eol,-blank-at-eof
 # Spatial configuration payloads may contain no NUL but remain binary.
 tests/fixtures/playback-errors/aac-ld-mps-config/*.bin binary
 tests/fixtures/playback-errors/aac-ld-mps-config/*.config binary
+tests/fixtures/playback-errors/aac-eld-mps-core/*.au binary
+tests/fixtures/playback-errors/aac-eld-mps-core/*.bits binary
+tests/fixtures/playback-errors/aac-eld-mps-core/*.spatial binary
+tests/fixtures/playback-errors/aac-eld-mps-core/*.ssc binary

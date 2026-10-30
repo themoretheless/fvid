@@ -1,3 +1,37 @@
+## Transactional AAC-ELD core boundary for LD-MPS integration, 2026-10-30
+
+ELD core parsing/synthesis now has a private preparation step which reports the
+exact consumed bit count and keeps synthesis, companion synthesis, LD-SBR and
+noise histories pending. Existing native ELD playback commits them only after
+ER extension and final alignment validation. Canonical core channel ordering is
+preserved, including the six-channel downmix used by spatial trees5/6.
+
+Eight owned short MP4 reproducers and 24 saved access units pair nonzero ELD
+cores with wrapped LD-MPS frames for all eight spatial trees. The cores use
+mono/stereo/six-channel configurations; suffixes begin at bit offsets2/3/4/5.
+Core samples match the independent direct-cosine/window/overlap controls.
+Composition tests feed this actual core PCM to the ordinary spatial component,
+compare against the independent core-input path, and verify exact component
+checkpoint replay. Invalid suffix bounds and nonzero final alignment preserve
+core history. These are component composition checks, not native spatial
+playback or seek acceptance.
+
+The existing ELD container playback, rewind and sample-seek suite passes.
+All 576 media units and all 55 LD-MPS integration tests pass (one existing media
+unit ignored). The additional ELD-SBR/CLDFB/downscale regression suites pass
+all 17 tests, including playback/seek/rewind. New spatial movies still reproduce the specific native factory
+refusal; explicit playback and timestamp/checkpoint acceptance tests remain
+ignored until production admission is implemented. Zero spatial movies are
+counted as accepted. Ordinary tests require neither generation nor FFmpeg,
+network access or reference software. Fixture regeneration is byte-identical
+with Python subprocess/spawn and socket APIs denied. See the
+[generation audit](validation/aac-eld-mps-core-generation-2026-10-30.json) and
+[test report](validation/aac-eld-mps-core-tests-2026-10-30.json).
+
+Native spatial dispatch, retained-memory accounting, PCM/PTS association,
+in-band configuration and correct coupled LD-SBR filter banks remain open.
+Residual decoding, active spatial tools and 128-bin DSP also remain open.
+
 ## Owned AAC ER/MPS ancillary transport assembly, 2026-10-30
 
 The transport component now handles spatial extension tags9/12 directly and

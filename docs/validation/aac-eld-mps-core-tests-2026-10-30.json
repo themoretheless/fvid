@@ -1,0 +1,65 @@
+{
+  "base_commit": "be4ed67cf1",
+  "scope": "Transactional real ELD core boundary and controlled ordinary spatial PCM composition, not native spatial movie acceptance.",
+  "results": [
+    {
+      "log": "/tmp/fvid-eld-core-media-final.log",
+      "sha256": "923f4504be5ff4e6e897890eab8b31ac10b11aee4b1ec5a209c3e175c7c2ac0c",
+      "passed": 576,
+      "ignored": 1
+    },
+    {
+      "log": "/tmp/fvid-eld-core-spatial-suite.log",
+      "sha256": "8a0394db5f625b29151117d4bca25aaff2873a5229db0d187ac5bf2aa71d9df2",
+      "passed": 55,
+      "ignored": 0
+    },
+    {
+      "log": "/tmp/fvid-eld-core-integration-final.log",
+      "sha256": "c55fc3cc8723dff5b7efd0d7633bff87ef4a6034abb8b9be1379493dd31814d8",
+      "passed": 6,
+      "ignored": 2
+    },
+    {
+      "log": "/tmp/fvid-eld-core-sbr-regression.log",
+      "sha256": "5cb7ed6f39ccc7a3f6e99b22f6f4ecd14a16ae4956d36462bb54ee0c5be279c7",
+      "passed": 17,
+      "ignored": 0
+    }
+  ],
+  "trees": 8,
+  "access_units": 24,
+  "core_channels": [
+    1,
+    2,
+    6
+  ],
+  "core_bit_offsets": [
+    2,
+    3,
+    4,
+    5
+  ],
+  "accepted_spatial_movies": 0,
+  "pending_acceptance_tests": 2,
+  "generation_audit": "aac-eld-mps-core-generation-2026-10-30.json",
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/aac_eld_native_impl.rs": "7c656c4ee551ace3b9aaea541abbe629d159a955f2054eb139892cac6a45f233",
+    "scripts/generate_aac_eld_mps_core_fixtures.py": "e6ebeaade7018c71d31e3b1efb8c2d71d63961fa13a21c9816a7f3c681ae98ac",
+    "tests/aac_eld_mps_core.rs": "7fb227d198cfa5fdbef8ffb3424e8c8e57b03b3cbe663bf859335eddd0b1caea"
+  },
+  "rejected_attempt": {
+    "log": "/tmp/fvid-eld-core-media.log",
+    "reason": "Test supplied empty residual array instead of one None per spatial box; corrected test input, production validation retained."
+  },
+  "remaining": [
+    "native spatial dispatch",
+    "PCM/PTS queue across access units",
+    "retained-memory accounting",
+    "in-band config admission",
+    "coupled LD-SBR banks",
+    "residual codecs",
+    "active spatial tools",
+    "128-bin DSP"
+  ]
+}
