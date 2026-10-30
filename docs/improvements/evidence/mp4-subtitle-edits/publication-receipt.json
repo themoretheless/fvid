@@ -1,0 +1,21 @@
+{
+  "commit": "1fe8e326a6392f6746eee89c9a58eed1cfbe997d",
+  "verified_remote_refs": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "accepted_count": 429,
+  "removed_owned_target": "/private/tmp/fvid-mp4-subtitle-edits-20261031",
+  "removed_archived_raw_logs": [
+    "/private/tmp/fvid-mp4-subtitle-edits-before-20261031.log",
+    "/private/tmp/fvid-mp4-subtitle-edits-root-mp4-20261031.log",
+    "/private/tmp/fvid-mp4-subtitle-edits-root-subtitles-20261031.log",
+    "/private/tmp/fvid-mp4-subtitle-edits-precedence-before-20261031.log",
+    "/private/tmp/fvid-mp4-subtitle-edits-integration-20261031.log",
+    "/private/tmp/fvid-mp4-subtitle-edits-after-20261031.log",
+    "/private/tmp/fvid-mp4-subtitle-edits-player-check-20261031.log",
+    "/private/tmp/fvid-mp4-subtitle-edits-core-check-20261031.log",
+    "/private/tmp/fvid-mp4-subtitle-edits-final-after-20261031.log"
+  ],
+  "preserved": "All authored regression samples, incomplete/rejected qualification evidence, source snapshots, active other worktrees and all four stashes."
+}
