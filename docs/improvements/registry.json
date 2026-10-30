@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 428,
-  "next_id": "FVID-0429",
+  "accepted_count": 429,
+  "next_id": "FVID-0430",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4806,6 +4806,17 @@
       "validation": "batch-428-validation.json",
       "follow_up_validation": "batch-427-428-conversion-followup-validation.json",
       "follow_up_note": "Uncounted owned/frontend Matroska conversion parity: exact emitted text/time, correct all-hidden refusal and preserved input work/byte/memory limits.676 distinct checks pass; zero additional IDs."
+    },
+    {
+      "id": "FVID-0429",
+      "batch": 429,
+      "title": "Apply MP4 subtitle edit programs and align them with the automatic video clock",
+      "source": "src/playback/subtitles/mp4_subtitles.rs",
+      "regression": "tests/mp4_subtitle_edits.rs",
+      "before": "Raw subtitle PTS ignores edit delay/trim/blank/reorder/repeat/open media and the selected video origin; output expansion has no cue budget. Original coincident-PTS precedence control passes. Final originalca0819b482 passes3 controls and fails3 acceptance/resource tests.",
+      "result": "Map clipped and repeated cue appearances with exact rational clocks, preserve empty edits/open media and source precedence for coincident PTS, and normalize the leading origin of the same automatically selected video track. Preserve no-edit zero-origin fallback; bound each returned cue list by Limits.samples.30 authored VP9/tx3g videos plus a malformed-edit refusal verify exact metadata/packets/pictures, actual seeks, EOF, fractional endpoints and expansion limits.495 distinct checks pass across84 integration suites and98 unique root units; locked/offline core/player builds pass, two hardware checks ignored. Fixture repairs and an introduced tie-order regression add no IDs; necessary cue-clock migration is documented.",
+      "status": "accepted",
+      "validation": "batch-429-validation.json"
     }
   ]
 }

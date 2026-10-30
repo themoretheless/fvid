@@ -2,9 +2,8 @@
 //!
 //! Reads the samples of one `tx3g` track and turns them into the cue list the
 //! player paints, so a file with embedded subtitles needs no sidecar. The
-//! timestamps stay in the track's own clock, which is what the picture of the
-//! same file is timed in, and the edits of the track are left out of it for the
-//! same reason the video source leaves them out.
+//! cues follow the subtitle edit program on the movie clock, rebased by the
+//! leading empty edits skipped by the automatically selected video track.
 
 use crate::container::mp4::{Limits, Mp4Reader};
 use crate::subtitles::{self, Cue};
@@ -49,12 +48,14 @@ impl Mp4SubtitleTrack {
 /// Reader over the plain-text subtitle tracks of an MP4 or QuickTime file.
 pub struct Mp4SubtitleReader<R> {
     demuxer: Mp4Reader<R>,
+    cue_limit: usize,
 }
 
 impl<R: Read + Seek> Mp4SubtitleReader<R> {
     pub fn open(reader: R, limits: Limits) -> Result<Self> {
         Ok(Self {
             demuxer: Mp4Reader::open(reader, limits)?,
+            cue_limit: limits.samples,
         })
     }
 
@@ -94,9 +95,31 @@ impl<R: Read + Seek> Mp4SubtitleReader<R> {
             .ok_or_else(|| invalid("MP4 has no such subtitle track"))?;
         let track = &self.demuxer.tracks()[track_index];
         let timescale = track.timescale;
-        // The samples are indexed in decode order, which for a text track is
-        // the order the lines are read in; sorting anyway keeps a file whose
-        // edit list reorders them in the same shape as one that does not.
+        let movie_scale = self.demuxer.movie_timescale();
+        let resolved = track.resolved_edit_clock(movie_scale)?;
+        let edit_scale = resolved.timescale;
+        let edits: Vec<_> = resolved
+            .edits()
+            .iter()
+            .map(|e| (e.duration, e.media_time))
+            .collect();
+        let origin = crate::playback_mp4::preferred_video_track(&self.demuxer)
+            .map(|index| {
+                self.demuxer.tracks()[index]
+                    .edits
+                    .iter()
+                    .take_while(|e| e.media_time < 0)
+                    .try_fold(0i128, |total, e| {
+                        total
+                            .checked_add(i128::from(e.duration))
+                            .ok_or_else(|| invalid("MP4 subtitle video origin overflow"))
+                    })
+            })
+            .transpose()?
+            .unwrap_or(0);
+        let mapped_clock = SubtitleClock::new(timescale, edit_scale, movie_scale, origin)?;
+        // Decode each source sample once. Its edit program may place several
+        // clipped appearances elsewhere on the movie timeline.
         let mut lines: Vec<(i64, u32, usize)> = (0..track.samples.len())
             .filter_map(|index| {
                 let sample = track.samples.get(index)?;
@@ -117,29 +140,136 @@ impl<R: Read + Seek> Mp4SubtitleReader<R> {
             Ok(Duration::new(seconds, (nanos % 1_000_000_000) as u32))
         };
         let mut packet = Vec::new();
-        let mut cues = Vec::with_capacity(lines.len());
+        let mut cues = Vec::new();
+        cues.try_reserve(lines.len().min(self.cue_limit))
+            .map_err(|_| invalid("MP4 subtitle cue allocation failed"))?;
         for (position, (pts, duration, index)) in lines.iter().enumerate() {
             self.demuxer.read_packet(track_index, *index, &mut packet)?;
             let Some(text) = sample_text(&packet) else {
                 continue;
             };
-            let start = clock(i128::from(*pts))?;
-            let end = if *duration != 0 {
-                // Compose before clipping/rounding: a cue that crosses zero
-                // keeps its original end, and a fully negative cue stays hidden.
-                clock(i128::from(*pts) + i128::from(*duration))?
+            if edits.is_empty() && origin == 0 {
+                // Preserve the existing no-edit fallback and rounding policy.
+                let start = clock(i128::from(*pts))?;
+                let end = if *duration != 0 {
+                    clock(i128::from(*pts) + i128::from(*duration))?
+                } else {
+                    let next = lines
+                        .get(position + 1)
+                        .map(|(pts, _, _)| clock(i128::from(*pts)))
+                        .transpose()?;
+                    subtitles::cue_end(start, Duration::ZERO, next)
+                };
+                if end > start {
+                    reserve_cue(&mut cues, self.cue_limit)?;
+                    cues.push(Cue { start, end, text });
+                }
+                continue;
+            }
+            let raw_start = i128::from(*pts);
+            let raw_end = if *duration != 0 {
+                raw_start + i128::from(*duration)
             } else {
-                let next = lines
+                lines
                     .get(position + 1)
-                    .map(|(pts, _, _)| clock(i128::from(*pts)))
-                    .transpose()?;
-                subtitles::cue_end(start, Duration::ZERO, next)
+                    .map(|(p, _, _)| i128::from(*p))
+                    .filter(|next| *next > raw_start)
+                    .unwrap_or(raw_start.max(0) + 2 * i128::from(timescale))
             };
-            if end > start {
-                cues.push(Cue { start, end, text });
+            if edits.is_empty() {
+                let start = mapped_clock.at(0, raw_start)?;
+                let end = mapped_clock.at(0, raw_end)?;
+                if end > start {
+                    reserve_cue(&mut cues, self.cue_limit)?;
+                    cues.push(Cue { start, end, text });
+                }
+                continue;
+            }
+            let mut movie = 0i128;
+            for &(duration, media) in &edits {
+                let next_movie = movie
+                    .checked_add(i128::from(duration))
+                    .ok_or_else(|| invalid("MP4 subtitle edit duration overflow"))?;
+                if media >= 0 {
+                    let relative_start = (raw_start - i128::from(media)).max(0);
+                    let relative_end = raw_end - i128::from(media);
+                    let extent = i128::from(duration) * i128::from(timescale);
+                    if relative_end > 0 && relative_start * i128::from(edit_scale) < extent {
+                        let start = mapped_clock.at(movie, relative_start)?;
+                        let end = if relative_end * i128::from(edit_scale) >= extent {
+                            mapped_clock.at(next_movie, 0)?
+                        } else {
+                            mapped_clock.at(movie, relative_end)?
+                        };
+                        if end > start {
+                            reserve_cue(&mut cues, self.cue_limit)?;
+                            cues.push(Cue {
+                                start,
+                                end,
+                                text: text.clone(),
+                            });
+                        }
+                    }
+                }
+                movie = next_movie;
             }
         }
+        if !edits.is_empty() {
+            cues.sort_by_key(|cue| cue.start);
+        }
         Ok(cues)
+    }
+}
+
+fn reserve_cue(cues: &mut Vec<Cue>, limit: usize) -> Result<()> {
+    if cues.len() >= limit {
+        return Err(invalid("MP4 subtitle cue count exceeds limit"));
+    }
+    cues.try_reserve(1)
+        .map_err(|_| invalid("MP4 subtitle cue allocation failed"))
+}
+
+/// Sum the rational movie/track clocks before rounding either endpoint.
+/// Splitting whole seconds from residues avoids multiplying wide absolute
+/// timestamps by nanoseconds or by all three clock denominators.
+struct SubtitleClock {
+    track: i128,
+    edit: i128,
+    movie: i128,
+    origin: i128,
+}
+impl SubtitleClock {
+    fn new(track: u32, edit: u32, movie: u32, origin: i128) -> Result<Self> {
+        if track == 0 || edit == 0 || movie == 0 {
+            return Err(invalid("zero MP4 subtitle timescale"));
+        }
+        Ok(Self {
+            track: i128::from(track),
+            edit: i128::from(edit),
+            movie: i128::from(movie),
+            origin,
+        })
+    }
+    fn at(&self, prefix: i128, media: i128) -> Result<Duration> {
+        // Each denominator is a positive u32: products fit 96 bits and a
+        // normalized remainder times 1e9 fits 126 bits.
+        let denominator = self.track * self.edit * self.movie;
+        let residual = prefix.rem_euclid(self.edit) * self.track * self.movie
+            + media.rem_euclid(self.track) * self.edit * self.movie
+            - self.origin.rem_euclid(self.movie) * self.edit * self.track;
+        let whole = prefix
+            .div_euclid(self.edit)
+            .checked_add(media.div_euclid(self.track))
+            .and_then(|n| n.checked_sub(self.origin.div_euclid(self.movie)))
+            .and_then(|n| n.checked_add(residual.div_euclid(denominator)))
+            .ok_or_else(|| invalid("MP4 subtitle timestamp overflow"))?;
+        if whole < 0 {
+            return Ok(Duration::ZERO);
+        }
+        let seconds = u64::try_from(whole)
+            .map_err(|_| invalid("MP4 subtitle timestamp exceeds duration range"))?;
+        let nanos = residual.rem_euclid(denominator) * 1_000_000_000 / denominator;
+        Ok(Duration::new(seconds, nanos as u32))
     }
 }
 

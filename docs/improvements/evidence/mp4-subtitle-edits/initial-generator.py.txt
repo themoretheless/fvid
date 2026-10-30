@@ -1,0 +1,62 @@
+"""Authored VP9/tx3g movie edits with exact rational presentation oracles."""
+from pathlib import Path
+from fractions import Fraction
+import json,struct,hashlib
+from generate_mp4_seek_io_regressions import generate
+from generate_mp4_subtitle_negative_clock import text_entry
+from generate_mp4_tfhd_defaults_regressions import atoms
+from generate_vp9_chroma import atom,word
+OUT=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/mp4-subtitle-edits'
+def main():
+    own=generate();parts=list(atoms(own['three-colors.mp4']));prefix=b''.join(atom(k,b) for k,b in parts[:2]);texts=['First caption','Middle caption','Last caption'];packets=[struct.pack('>H',len(t))+t.encode() for t in texts]
+    def video(data):
+        out=b''
+        for k,b in atoms(data):
+            if k in [b'trak',b'mdia',b'minf',b'stbl']:b=video(b)
+            elif k in [b'mvhd',b'mdhd']:b=b[:12]+word(1000,120)+b[20:]
+            elif k==b'tkhd':b=b[:20]+word(120)+b[24:]
+            elif k==b'stts':b=word(0,1,3,40)
+            if k==b'mvhd':b=b[:-4]+word(3)
+            out+=atom(k,b)
+        return out
+    base=video(parts[2][1]);vtrack=next(b for k,b in atoms(base) if k==b'trak')
+    def sub(data,offset,scale,rows,version=0,bad=False,with_edit=True):
+        out=b''
+        for k,b in atoms(data):
+            if k in [b'mdia',b'minf']:b=sub(b,offset,scale,rows,version,with_edit=False)
+            elif k==b'tkhd':b=b[:12]+word(2)+b[16:20]+word(120)+b[24:]
+            elif k==b'mdhd':b=b[:12]+word(scale,120)+b[20:]
+            elif k==b'hdlr':b=word(0,0)+b'sbtl'+bytes(12)+b'Authored text\0'
+            elif k==b'vmhd':k=b'nmhd';b=word(0)
+            elif k==b'stbl':b=atom(b'stsd',word(0,1)+text_entry())+atom(b'stts',word(0,1,3,40))+atom(b'stsz',word(0,0,3,*map(len,packets)))+atom(b'stsc',word(0,1,1,3,1))+atom(b'stco',word(0,1,offset))
+            out+=atom(k,b)
+        if with_edit and rows is not None:
+            payload=word(version<<24,len(rows)+(1 if bad else 0))+b''.join(struct.pack('>QqI' if version else '>IiI',d,m,65536) for d,m in rows)
+            out+=atom(b'edts',atom(b'elst',payload))
+        return out
+    def clip(scale,rows,version=0,bad=False):
+        size=len(atom(b'moov',base+atom(b'trak',sub(vtrack,0,scale,rows,version,bad))))
+        return prefix+atom(b'moov',base+atom(b'trak',sub(vtrack,len(prefix)+size+8,scale,rows,version,bad)))+atom(b'mdat',b''.join(packets))
+    programs={'none':None,'identity':[(120,0)],'delay':[(40,-1),(80,0)],'trim':[(40,10),(80,-1)],'gap':[(40,0),(40,-1),(40,80)],'reorder':[(40,80),(40,0),(40,40)],'repeat':[(40,0),(40,0),(40,40)],'blank':[(120,-1)],'short-tail':[(10,110),(110,-1)],'bounded-repeat':[(10,m) for m in [0,40]*4]+[(40,-1)]}
+    files={f'frame-{i}.yuv16':own[f'frame-{i}.yuv16'] for i in range(3)};cases=[]
+    for scale in [1000,1001]:
+        for name,rows in programs.items():
+            version=1 if name in ['reorder','repeat'] else 0;n=f'{name}-{scale}.mp4';files[n]=clip(scale,rows,version);cues=[]
+            for i,t in enumerate(texts):files[f'text-{i}.packet']=packets[i]
+            if rows is None:
+                cues=[dict(text=t,start_ns=p*1_000_000_000//scale,end_ns=(p+40)*1_000_000_000//scale) for t,p in zip(texts,[0,40,80])]
+            else:
+                movie=Fraction(0)
+                for duration,media in rows:
+                    span=Fraction(duration,1000)
+                    if media>=0:
+                        for text,p in zip(texts,[0,40,80]):
+                            a=max(Fraction(p-media,scale),Fraction(0));b=min(Fraction(p+40-media,scale),span)
+                            if b>a:cues.append(dict(text=text,start_ns=int((movie+a)*1_000_000_000),end_ns=int((movie+b)*1_000_000_000)))
+                    movie+=span
+            cues.sort(key=lambda c:(c['start_ns'],c['end_ns']));cases.append(dict(file=n,scale=scale,movie_scale=1000,edits=rows,version=version,texts=texts,cues=cues,resource_bound=name=='bounded-repeat'))
+    files['bad-edit-count.mp4']=clip(1000,[(120,0)],bad=True)
+    OUT.mkdir(parents=True,exist_ok=True)
+    for n,b in files.items():(OUT/n).write_bytes(b)
+    (OUT/'manifest.json').write_text(json.dumps(dict(provenance='Pure authored three-color16x16 VP9 and complete visible tx3g text entry. Video stays unedited at0/40/80ms. Subtitle-only v0/v1 elst programs use independent Fraction oracles, differing track/movie scales, delay/trim/blank/reorder/repeat/end and bounded expansion. No private media/parameters, FFmpeg or network.',reference='https://developer.apple.com/documentation/quicktime-file-format/edit_list_atom',cases=cases,refused=['bad-edit-count.mp4'],sha256={n:hashlib.sha256(b).hexdigest() for n,b in files.items()}),indent=2)+'\n')
+if __name__=='__main__':main()

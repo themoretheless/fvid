@@ -1,0 +1,74 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0429"
+  ],
+  "count_delta": 1,
+  "accepted_count": 429,
+  "batch": 429,
+  "summary": "Apply subtitle MP4 edit programs on the movie clock, normalized to automatic video playback origin",
+  "before": {
+    "commit": "ca0819b482dfbfc26d18ff346c7b62d3949cd1ed",
+    "passed": 3,
+    "failed": 3,
+    "specific_failure": "Raw subtitle PTS ignores edit delay/trim/blank/reorder/repeat/open media and the selected video origin; output expansion has no cue budget. Original coincident-PTS precedence control passes."
+  },
+  "checks": {
+    "integration": {
+      "passed": 397,
+      "suites": 84,
+      "ignored": 0
+    },
+    "root-mp4": {
+      "passed": 57,
+      "suites": 1,
+      "ignored": 1
+    },
+    "root-subtitles": {
+      "passed": 48,
+      "suites": 1,
+      "ignored": 1
+    },
+    "final-after": {
+      "passed": 6,
+      "suites": 1,
+      "ignored": 0
+    }
+  },
+  "core-check": "passed locked/offline/no-default-features",
+  "player-check": "passed locked/offline/no-default-features",
+  "unique_root_checks": 98,
+  "duplicate_root_checks_excluded": 7,
+  "repeated_final_focus_checks_not_added": 6,
+  "distinct_passed": 495,
+  "ignored": 2,
+  "fixtures": {
+    "valid_videos": 30,
+    "malformed_edit_refusal_videos": 1,
+    "raw_plane_oracles": 3,
+    "packet_snapshots": 3,
+    "files": 38,
+    "repeatability": "identical",
+    "previously_broad_qualified_files_unchanged": 35,
+    "final_fractional_origin_example_ns": 40959040,
+    "incorrect_separate_rounding_ns": 40959039
+  },
+  "qualification_scope": "Final source passed84 integration suites and both unit filters/builds. Two additional fractional-origin witnesses and stronger video-timing controls pass all6 focused tests on unchanged production; all35 previously qualified files are byte-identical. Focus checks are not counted twice.",
+  "uncounted": [
+    "Initial output-budget test corrected from3 premature input-budget refusal to6 valid input samples/8 output cues.",
+    "Incomplete mvex/no-moof open witnesses replaced with genuine text fragments, without parser weakening.",
+    "Introduced coincident-PTS ordering regression corrected before acceptance; prototype qualification logs segregated.",
+    "Variable-duration video oracle parameterization and shared unchanged video selection predicate."
+  ],
+  "migration": "cues() now returns playback presentation time including edits and automatic video origin. Manual mappings should be removed; raw timestamps remain in Mp4Reader samples. Limits.samples bounds one returned cue list.",
+  "references": [
+    "https://developer.apple.com/documentation/quicktime-file-format/edit_list_atom",
+    "https://developer.apple.com/documentation/quicktime-file-format/playing_with_edit_lists"
+  ],
+  "limits": [
+    "Automatic video origin only; explicitly different video selections need their own origin handling.",
+    "Finite rate-one edit cases, not general styling or physical-device qualification.",
+    "A finite edit-list scan per source sample; no performance or process-wide RSS claim."
+  ],
+  "evidence": "docs/improvements/evidence/mp4-subtitle-edits/README.md"
+}

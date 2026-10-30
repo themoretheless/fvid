@@ -177,6 +177,17 @@ pub type Mp4AvcReader<R> = Mp4VideoReader<R>;
 fn supported_video_codec(codec: &[u8; 4]) -> bool {
     matches!(codec, b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"vp09" | b"av01")
 }
+/// The default movie track used by playback and its companion timelines.
+pub(crate) fn preferred_video_track<R: Read + Seek>(demuxer: &Mp4Reader<R>) -> Option<usize> {
+    demuxer
+        .automatic_track_indices(&[*b"vide"])
+        .into_iter()
+        .find(|&index| {
+            demuxer.tracks()[index]
+                .description_for_sample(0)
+                .is_some_and(|d| supported_video_codec(&d.codec))
+        })
+}
 impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
     fn from_demuxer_with_hardware(
         demuxer: Mp4Reader<R>,

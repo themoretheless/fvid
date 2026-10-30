@@ -247,14 +247,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
     }
     fn open_inner(reader: R, limits: Limits, budget: usize, hardware: bool) -> Result<Self> {
         let demuxer = Mp4Reader::open_indexed(reader, limits)?;
-        let index = demuxer
-            .automatic_track_indices(&[*b"vide"])
-            .into_iter()
-            .find(|&index| {
-                demuxer.tracks()[index]
-                    .description_for_sample(0)
-                    .is_some_and(|d| supported_video_codec(&d.codec))
-            })
+        let index = preferred_video_track(&demuxer)
             .ok_or_else(|| invalid("MP4 has no supported AVC, HEVC, VP9 or AV1 video track"))?;
         Self::from_inner(demuxer, index, budget, hardware)
     }

@@ -1,0 +1,10 @@
+{
+  "commit": "ca0819b482dfbfc26d18ff346c7b62d3949cd1ed",
+  "exit_code": 101,
+  "original_source_sha256": {
+    "src/playback/subtitles/mp4_subtitles.rs": "7b8e6917ff88aff058a44d6e8f59aa16335fafe30ebf9db14b0a5c6992049fa4",
+    "src/playback/video/mp4.rs": "b23609ec1900de8b5bd556c2100783de7a459b2d07d392802c618b6b05a73932",
+    "src/playback/video/mp4_dispatch.rs": "5f3dbb46fd6f90739078b6576ff2b71be6a379ce4a761befa5306675fa3bdfcc"
+  },
+  "fixed_sources_restored": true
+}

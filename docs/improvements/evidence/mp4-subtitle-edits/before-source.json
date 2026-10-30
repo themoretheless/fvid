@@ -1,0 +1,18 @@
+{
+  "commit": "ca0819b482dfbfc26d18ff346c7b62d3949cd1ed",
+  "sha256": {
+    "src/playback/subtitles/mp4_subtitles.rs": "7b8e6917ff88aff058a44d6e8f59aa16335fafe30ebf9db14b0a5c6992049fa4",
+    "tests/mp4_subtitle_edits.rs": "1fbc649c2148a0e6ca74a560ec806a56d1449a1f4ceec709fa3a0353992415b0",
+    "scripts/generate_mp4_subtitle_edits.py": "553aee47ee4775232ff589ae1693d1dd0b7b131ff78237e678e9458fe4fceaff",
+    "tests/fixtures/playback-errors/mp4-subtitle-edits/manifest.json": "cfabb643278442b622380217a7585a0a6142523a2ed783f8028ebf23cf4b75f1",
+    "src/playback/video/mp4.rs": "b23609ec1900de8b5bd556c2100783de7a459b2d07d392802c618b6b05a73932",
+    "src/playback/video/mp4_dispatch.rs": "5f3dbb46fd6f90739078b6576ff2b71be6a379ce4a761befa5306675fa3bdfcc"
+  },
+  "initial_primary": "2 controls passed,2 caption/seek acceptances failed; resource test had a premature input-budget refusal at3 total samples and is corrected to6.",
+  "scope_extension": "Matched and video-only leading empty edits verify normalization against the automatically selected video track.",
+  "initial_resource_test_correction": "MP4 input budget is global across6 video+subtitle samples; use6 input/render budget and8 expected output cues to isolate expansion refusal.",
+  "final_open_edit_witnesses": "Classic VP9 plus an actual three-sample tx3g moof/trun fragment, empty classic text tables, single open edit at40ticks, both1000/1001Hz.",
+  "rejected_open_fixture": "mvex without moof refused before timing validation; incomplete samples and generator/log preserved separately. No parser change or test weakening.",
+  "introduced_precedence_regression": "Initial edited-cue sorting by(start,end) reverses existing coincident-PTS sample precedence; separate test fails on that prototype and must pass original and corrected code. No additional ID.",
+  "fractional_movie_origin_controls": "Movie1001Hz/media997or1001Hz, exact1s three-picture video at400/400/200ms; endpoint40959040ns differs from separately rounded40959039ns."
+}

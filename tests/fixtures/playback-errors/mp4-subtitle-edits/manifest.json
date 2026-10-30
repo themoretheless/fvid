@@ -1,0 +1,1324 @@
+{
+  "provenance": "Pure authored three-color16x16 VP9 and complete visible tx3g text entry. Video stays unedited at0/40/80ms. Subtitle-only v0/v1 elst programs use independent Fraction oracles, differing track/movie scales, delay/trim/blank/reorder/repeat/end and bounded expansion. No private media/parameters, FFmpeg or network.",
+  "reference": "https://developer.apple.com/documentation/quicktime-file-format/edit_list_atom",
+  "cases": [
+    {
+      "file": "none-1000.mp4",
+      "scale": 1000,
+      "movie_scale": 1000,
+      "edits": null,
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 40000000,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "open-1000.mp4",
+      "scale": 1000,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          0,
+          40
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "Middle caption",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 40000000,
+          "end_ns": 80000000
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "identity-1000.mp4",
+      "scale": 1000,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          120,
+          0
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 40000000,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "delay-1000.mp4",
+      "scale": 1000,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          40,
+          -1
+        ],
+        [
+          80,
+          0
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 40000000,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "trim-1000.mp4",
+      "scale": 1000,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          40,
+          10
+        ],
+        [
+          80,
+          -1
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 30000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 30000000,
+          "end_ns": 40000000
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "gap-1000.mp4",
+      "scale": 1000,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          40,
+          0
+        ],
+        [
+          40,
+          -1
+        ],
+        [
+          40,
+          80
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "reorder-1000.mp4",
+      "scale": 1000,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          40,
+          80
+        ],
+        [
+          40,
+          0
+        ],
+        [
+          40,
+          40
+        ]
+      ],
+      "version": 1,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "Last caption",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "First caption",
+          "start_ns": 40000000,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "repeat-1000.mp4",
+      "scale": 1000,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          40,
+          0
+        ],
+        [
+          40,
+          0
+        ],
+        [
+          40,
+          40
+        ]
+      ],
+      "version": 1,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "First caption",
+          "start_ns": 40000000,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 80000000,
+          "end_ns": 120000000
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "blank-1000.mp4",
+      "scale": 1000,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          120,
+          -1
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [],
+      "resource_bound": false
+    },
+    {
+      "file": "short-tail-1000.mp4",
+      "scale": 1000,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          10,
+          110
+        ],
+        [
+          110,
+          -1
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "Last caption",
+          "start_ns": 0,
+          "end_ns": 10000000
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "bounded-repeat-1000.mp4",
+      "scale": 1000,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          40,
+          -1
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 10000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 10000000,
+          "end_ns": 20000000
+        },
+        {
+          "text": "First caption",
+          "start_ns": 20000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 30000000,
+          "end_ns": 40000000
+        },
+        {
+          "text": "First caption",
+          "start_ns": 40000000,
+          "end_ns": 50000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 50000000,
+          "end_ns": 60000000
+        },
+        {
+          "text": "First caption",
+          "start_ns": 60000000,
+          "end_ns": 70000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 70000000,
+          "end_ns": 80000000
+        }
+      ],
+      "resource_bound": true
+    },
+    {
+      "file": "none-1001.mp4",
+      "scale": 1001,
+      "movie_scale": 1000,
+      "edits": null,
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 39960039
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 39960039,
+          "end_ns": 79920079
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 79920079,
+          "end_ns": 119880119
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "open-1001.mp4",
+      "scale": 1001,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          0,
+          40
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "Middle caption",
+          "start_ns": 0,
+          "end_ns": 39960039
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 39960039,
+          "end_ns": 79920079
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "identity-1001.mp4",
+      "scale": 1001,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          120,
+          0
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 39960039
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 39960039,
+          "end_ns": 79920079
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 79920079,
+          "end_ns": 119880119
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "delay-1001.mp4",
+      "scale": 1001,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          40,
+          -1
+        ],
+        [
+          80,
+          0
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 40000000,
+          "end_ns": 79960039
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 79960039,
+          "end_ns": 119920079
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 119920079,
+          "end_ns": 120000000
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "trim-1001.mp4",
+      "scale": 1001,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          40,
+          10
+        ],
+        [
+          80,
+          -1
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 29970029
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 29970029,
+          "end_ns": 40000000
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "gap-1001.mp4",
+      "scale": 1001,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          40,
+          0
+        ],
+        [
+          40,
+          -1
+        ],
+        [
+          40,
+          80
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 39960039
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 39960039,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 80000000,
+          "end_ns": 119960039
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "reorder-1001.mp4",
+      "scale": 1001,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          40,
+          80
+        ],
+        [
+          40,
+          0
+        ],
+        [
+          40,
+          40
+        ]
+      ],
+      "version": 1,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "Last caption",
+          "start_ns": 0,
+          "end_ns": 39960039
+        },
+        {
+          "text": "First caption",
+          "start_ns": 40000000,
+          "end_ns": 79960039
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 79960039,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 80000000,
+          "end_ns": 119960039
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 119960039,
+          "end_ns": 120000000
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "repeat-1001.mp4",
+      "scale": 1001,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          40,
+          0
+        ],
+        [
+          40,
+          0
+        ],
+        [
+          40,
+          40
+        ]
+      ],
+      "version": 1,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 39960039
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 39960039,
+          "end_ns": 40000000
+        },
+        {
+          "text": "First caption",
+          "start_ns": 40000000,
+          "end_ns": 79960039
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 79960039,
+          "end_ns": 80000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 80000000,
+          "end_ns": 119960039
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 119960039,
+          "end_ns": 120000000
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "blank-1001.mp4",
+      "scale": 1001,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          120,
+          -1
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [],
+      "resource_bound": false
+    },
+    {
+      "file": "short-tail-1001.mp4",
+      "scale": 1001,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          10,
+          110
+        ],
+        [
+          110,
+          -1
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "Last caption",
+          "start_ns": 0,
+          "end_ns": 9990009
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "bounded-repeat-1001.mp4",
+      "scale": 1001,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          40,
+          -1
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 10000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 10000000,
+          "end_ns": 20000000
+        },
+        {
+          "text": "First caption",
+          "start_ns": 20000000,
+          "end_ns": 30000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 30000000,
+          "end_ns": 40000000
+        },
+        {
+          "text": "First caption",
+          "start_ns": 40000000,
+          "end_ns": 50000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 50000000,
+          "end_ns": 60000000
+        },
+        {
+          "text": "First caption",
+          "start_ns": 60000000,
+          "end_ns": 70000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 70000000,
+          "end_ns": 80000000
+        }
+      ],
+      "resource_bound": true
+    },
+    {
+      "file": "matched-video-delay-1000.mp4",
+      "scale": 1000,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          40,
+          -1
+        ],
+        [
+          80,
+          0
+        ]
+      ],
+      "video_edits": [
+        [
+          40,
+          -1
+        ],
+        [
+          80,
+          0
+        ]
+      ],
+      "video_duration_ns": 80000000,
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 40000000,
+          "end_ns": 80000000
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "video-only-delay-1000.mp4",
+      "scale": 1000,
+      "movie_scale": 1000,
+      "edits": null,
+      "video_edits": [
+        [
+          40,
+          -1
+        ],
+        [
+          80,
+          0
+        ]
+      ],
+      "video_duration_ns": 80000000,
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "Middle caption",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 40000000,
+          "end_ns": 80000000
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "matched-video-delay-1001.mp4",
+      "scale": 1001,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          40,
+          -1
+        ],
+        [
+          80,
+          0
+        ]
+      ],
+      "video_edits": [
+        [
+          40,
+          -1
+        ],
+        [
+          80,
+          0
+        ]
+      ],
+      "video_duration_ns": 80000000,
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 39960039
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 39960039,
+          "end_ns": 79920079
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 79920079,
+          "end_ns": 80000000
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "video-only-delay-1001.mp4",
+      "scale": 1001,
+      "movie_scale": 1000,
+      "edits": null,
+      "video_edits": [
+        [
+          40,
+          -1
+        ],
+        [
+          80,
+          0
+        ]
+      ],
+      "video_duration_ns": 80000000,
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "Middle caption",
+          "start_ns": 0,
+          "end_ns": 39920079
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 39920079,
+          "end_ns": 79880119
+        }
+      ],
+      "resource_bound": false
+    },
+    {
+      "file": "coincident-1000.mp4",
+      "scale": 1000,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          120,
+          0
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 60000000
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 0,
+          "end_ns": 40000000
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 0,
+          "end_ns": 20000000
+        }
+      ],
+      "pts": [
+        0,
+        0,
+        0
+      ],
+      "durations": [
+        60,
+        40,
+        20
+      ],
+      "resource_bound": false,
+      "coincident": true
+    },
+    {
+      "file": "coincident-1001.mp4",
+      "scale": 1001,
+      "movie_scale": 1000,
+      "edits": [
+        [
+          120,
+          0
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 0,
+          "end_ns": 59940059
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 0,
+          "end_ns": 39960039
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 0,
+          "end_ns": 19980019
+        }
+      ],
+      "pts": [
+        0,
+        0,
+        0
+      ],
+      "durations": [
+        60,
+        40,
+        20
+      ],
+      "resource_bound": false,
+      "coincident": true
+    },
+    {
+      "file": "fractional-origin-997.mp4",
+      "scale": 997,
+      "movie_scale": 1001,
+      "edits": [
+        [
+          1,
+          -1
+        ],
+        [
+          120,
+          0
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 999000,
+          "end_ns": 41119362
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 41119362,
+          "end_ns": 81239723
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 81239723,
+          "end_ns": 120879120
+        }
+      ],
+      "resource_bound": false,
+      "video_duration_ns": 1000000000,
+      "video_pts_ticks": [
+        0,
+        400,
+        800
+      ],
+      "video_durations_ticks": [
+        400,
+        400,
+        200
+      ],
+      "video_intervals_ns": [
+        [
+          0,
+          400000000
+        ],
+        [
+          400000000,
+          800000000
+        ],
+        [
+          800000000,
+          1000000000
+        ]
+      ]
+    },
+    {
+      "file": "fractional-origin-1001.mp4",
+      "scale": 1001,
+      "movie_scale": 1001,
+      "edits": [
+        [
+          1,
+          -1
+        ],
+        [
+          120,
+          0
+        ]
+      ],
+      "version": 0,
+      "texts": [
+        "First caption",
+        "Middle caption",
+        "Last caption"
+      ],
+      "cues": [
+        {
+          "text": "First caption",
+          "start_ns": 999000,
+          "end_ns": 40959040
+        },
+        {
+          "text": "Middle caption",
+          "start_ns": 40959040,
+          "end_ns": 80919080
+        },
+        {
+          "text": "Last caption",
+          "start_ns": 80919080,
+          "end_ns": 120879120
+        }
+      ],
+      "resource_bound": false,
+      "video_duration_ns": 1000000000,
+      "video_pts_ticks": [
+        0,
+        400,
+        800
+      ],
+      "video_durations_ticks": [
+        400,
+        400,
+        200
+      ],
+      "video_intervals_ns": [
+        [
+          0,
+          400000000
+        ],
+        [
+          400000000,
+          800000000
+        ],
+        [
+          800000000,
+          1000000000
+        ]
+      ]
+    }
+  ],
+  "refused": [
+    "bad-edit-count.mp4"
+  ],
+  "sha256": {
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "none-1000.mp4": "a487c0275ab9f2106394959f51bac17cdd81717f8de7dc2128d0c08dd16f5c96",
+    "text-0.packet": "9dd98bb378967cd4fc76e866be804c57b43da7e901b1268640db9f63fbf701d7",
+    "text-1.packet": "22cde6588d0cde3dbf6ab074b27e22b2fdfff1a2367930610f70e5213c9a32e7",
+    "text-2.packet": "845cf311ffabee6b4c36910e982db25287d18d8218565e42730cc11777a620eb",
+    "open-1000.mp4": "d692c1b7a5a3aec582b1eaf4dd74dbffc128d151c89902bfade38078aa6eff77",
+    "identity-1000.mp4": "6d5ef8f548baee612fd8047f94b8ecc429fa9e51758394e56081c5ba96a188cf",
+    "delay-1000.mp4": "1ee49afd78f0db12035255c138cf71b3fe9070b7b3cc18b7bf65ab4eeeb9d6ea",
+    "trim-1000.mp4": "8d06ebb5a319123eaac68075d7e4caec0bfd86426550881cc0b6589711bd0eb7",
+    "gap-1000.mp4": "c09bdcb1023024cdde2dee9ec71d11b0bef3e90837ccad9481fcec88b8a4cd42",
+    "reorder-1000.mp4": "3fc381309dc2db5f7986bfab58d10deb3582bfb4f03f479e4fa8298325fd562e",
+    "repeat-1000.mp4": "b8df88b370b77d0ae7cd5dfd3feb101fe6104e312bbbbb43bc8d893374229f1a",
+    "blank-1000.mp4": "8509175e4401388c72fb955e7323a00ee94606e737b4442e7f4b8b0b9eb6cab3",
+    "short-tail-1000.mp4": "7dea45316691582ec9cc907ee98dfc00e02282395d5678ce2ce6165058a563c0",
+    "bounded-repeat-1000.mp4": "f44b52060e38a28c02f04f2014ac76500aa90a16f96f4e392a98a7fdbcf78fe1",
+    "none-1001.mp4": "e1c0f527f177dacbb105abe6c6bb0a5829031824ccb080811da040e4ed8e414f",
+    "open-1001.mp4": "766e3347d1e2d11f4edee5f6374f81ba2d7acd12936d097d520c2f5937b3d197",
+    "identity-1001.mp4": "2cc12fa34037a12ff656584f2fe0aa843185108b8cb0ad65ad9831d8cdabfb49",
+    "delay-1001.mp4": "c56882ad1ac656c314a7d3280678f2dcac9cda3935e5f2d7d352b2aaf749d94a",
+    "trim-1001.mp4": "0cd6d8b16fa9702b0b582512b11d49214e626b3b17c2f916d8823a84d4020dcd",
+    "gap-1001.mp4": "0e61e17301e0b3b9c01fc568f655507ac475e24d664bcbc4295cda58c7fa0a6d",
+    "reorder-1001.mp4": "bbe06cf5b0e797c5646d5df7ccb6c26d134c401db8543bca94a7f92f12269b79",
+    "repeat-1001.mp4": "98db0c709a5068ba1f0b0cd8f73568793ae5895a89cbf10832830bdc127b26f1",
+    "blank-1001.mp4": "bfd7bdb5e6bb28ea1eff5def260cda7a8896ae6c50f02904844103b84bbd35da",
+    "short-tail-1001.mp4": "e399957b43cd14303388edf87eaee47acde8fc6818e40ff7f2b5d0ee33dfb875",
+    "bounded-repeat-1001.mp4": "e3a31e126c53a2dfaf72e0510d133325d40cfa60983e80e1a521c77f0617fdcc",
+    "matched-video-delay-1000.mp4": "53edc6583aa492df5bf0b6afd84625942d256fda9623688f792cf7cef877a40b",
+    "video-only-delay-1000.mp4": "8ac6e3fcb70300a2f928362cc5cd2702933dd7594dcd64858ff5eeaadcd80dec",
+    "matched-video-delay-1001.mp4": "81a529cbae2adbbfc29bc5c4515a1e71f47bc7062e51cceeda3b0304f23b0af5",
+    "video-only-delay-1001.mp4": "14ff76f550119d0639db855804e5ce878cd04cbb64e9e44a1fae3d7abe085025",
+    "coincident-1000.mp4": "7fbeb471975eb47a004e86610645b32803f9f38810b95d4aa2fd95ef3c0d67f2",
+    "coincident-1001.mp4": "9b48c5c6832b333124eba55b9730ec6aac5034a2b24f9de4bab5580c298fabd7",
+    "fractional-origin-997.mp4": "2a34542b27dfc72a0d53aa3f5d9e32c0bb2e5d66b816b69d30b4b20f2f2d366c",
+    "fractional-origin-1001.mp4": "1f66e165d4b9538c2a4485b799c7871f89a54ded2f56cf0d4ab8822cb2f9390e",
+    "bad-edit-count.mp4": "857010060c24b7bdcc7638f794a5879fe59a7f2a1d7e9ad02cbb797bda828865"
+  }
+}
