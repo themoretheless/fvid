@@ -1,0 +1,20 @@
+{
+  "status": "accepted",
+  "improvement": "FVID-0415",
+  "before": "Initial exact-clock regression: sample/seek/video control passes and duration acceptance fails in 16 signed-CTS cases, reporting 60ms instead of 50/70ms. After fixing that getter, the expanded 1001Hz regression still fails both duration and PCM acceptance. pcm-1001-shift10-known.mp4 yields 1600 PCM bytes rather than 1920: 80 authored 8kHz samples are clipped by the recovered clock decode-duration endpoint. Both intermediate stages are retained.",
+  "change": "Use the recovered run presentation endpoint, including its composition origin, as the clipping/seek extent. Preserve explicitly stated time beyond indexed decode coverage (including empty tails). For the non-recovered path, cache a nominal indexed composition endpoint lazily, preserve stated empty tails, and retain explicit edit/recovered-clock duration precedence. Uniform PCM uses its compact aggregate endpoint.",
+  "after": "62 distinct integration checks pass: 61 in ten related targets plus one added worker regression (two focused checks overlap and are not counted twice). All 38 own PCM/ALAC+VP9 movies retain independent PCM byte counts/values, exact rational timestamps, seek suffixes, rewind, EOF, and all three video pictures. The worker plays and rewinds both shifted 1001Hz PCM/ALAC cases with the full 1920-byte waveform. Locked/offline no-default-features core build passes.",
+  "independence": "This item is the independently reproduced loss of decoded audio samples in recovered-clock clipping. FVID-0407 covers native video duration reporting. The companion audio duration getter correction, clock/header/coding variants and private cache do not add separate IDs.",
+  "fixtures": "41 byte-identical regenerated files: 38 short own PCM/raw-ALAC movies with VP9 companion, 2 analytic float32 oracles and manifest. Exact 1000/44100Hz and quantized 1001Hz media clocks, signed CTS, known/unknown mdhd and explicit empty tails. No private media/parameters, encoder, FFmpeg or network. Tests consume saved files only.",
+  "resources": "Duration queries do not read encoded data; immutable index endpoint is retained in a private OnceLock, with direct Uniform aggregate handling. No performance improvement or throughput claim is made.",
+  "limitations": [
+    "The raw unedited index endpoint is nominal for ordinary codecs; existing explicit edits and recovered clocks remain authoritative.",
+    "Physical audio hardware, GPU parity and whole-project green are not claimed. Actual playback qualification uses the native worker with the existing captured backend."
+  ],
+  "sha256": {
+    "src/playback/audio/mp4_audio.rs": "f13d10279f9411b2e41e38ad205a1945ad96c690bb41af7e101f1f0fb482af7d",
+    "src/playback/audio/mp4_clock_recovery.rs": "22dc76dd820a65a5e623bd15a50c38d218c7835b1c67e9dfa714b692bd5fd90e",
+    "scripts/generate_mp4_audio_presentation_end.py": "7552de271ab05cdc456cb72d98e9600bf75f85580d9a9320c0a0b52487b14103",
+    "tests/mp4_audio_presentation_end.rs": "f7b4cac75fb00b928c9f5e156e4770103bc15f4bba269976bb43b5231bc04b48"
+  }
+}

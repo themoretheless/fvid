@@ -1,0 +1,13 @@
+{
+  "status": "unconfirmed_candidate_not_counted",
+  "accepted_ids": [],
+  "topic": "Legacy MP4 fragment base addressing without tfhd explicit base or default-base-is-moof",
+  "source": "crates/fvid-media/src/owned_mp4_impl.rs index_fragments base match rejects (None, _)",
+  "primary_reference": "https://www.w3.org/TR/mse-byte-stream-format-isobmff/#media-segments",
+  "observation": "The W3C byte-stream format accepts a single traf with first-trun data offset and no base-data-offset-present flag as movie-fragment-relative addressing. The current parser rejects tfhd with neither explicit base nor default-base-is-moof before considering traf order. No reproducer/test or fix yet; no improvement accepted.",
+  "next_steps": [
+    "Author a single-traf owned VP9 control with explicit moof flag and an otherwise identical legacy implicit-base witness; reproduce opening/playback refusal.",
+    "Cover per-traf preceding-data-end continuity, mixed explicit/implicit bases and skipped foreign tracks before changing the base algorithm.",
+    "Retain malformed offset and resource refusal tests, then verify both parsers and native seek/playback."
+  ]
+}

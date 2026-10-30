@@ -1,0 +1,22 @@
+{
+  "batch": 393,
+  "accepted_ids": [
+    "FVID-0399"
+  ],
+  "status": "accepted",
+  "summary": "Validate complete MP4 movie/media time-header payload sizes",
+  "source_files": [
+    "crates/fvid-media/src/owned_mp4_impl.rs"
+  ],
+  "regression": "tests/mp4_time_header_sizes.rs",
+  "evidence": "docs/improvements/evidence/mp4-time-header-sizes/status.json",
+  "before": "Both MP4 wrappers accepted all 12 owned mvhd/mdhd v0/v1 companions with a shortened or extended fixed payload. Valid-header packet/clock/budget controls passed; original core result 1 passed, 1 failed.",
+  "after": "Validate the complete version-specific fixed payload before reading timestamps: mvhd 100/112 bytes, mdhd 24/36 bytes. Core 9, player 20 and related integration 37 tests pass, no failures or ignored tests. Valid V0/V1 videos preserve exact RGB, 60ms duration, packet clocks, seek, rewind and repeated EOF. The old basic MP4 test constructor now authors a complete movie header; all original assertions remain.",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --test mp4_time_header_sizes --test mp4_time_header_flags --test mp4_unknown_duration --test mp4_tfhd_defaults",
+    "cargo test --locked --offline --features player --test mp4_time_header_sizes --test mp4_time_header_flags --test mp4_unknown_duration --test mp4_tfhd_defaults --test mp4_hybrid_fragments",
+    "cargo test --locked --offline --no-default-features --test mp4 --test mp4_elst_validation --test mp4_enabled_tracks --test mp4_fragment_description --test mp4_chunk_bounds"
+  ],
+  "results": "66 tests passed, 0 failed/ignored.",
+  "independence": "One missing fixed-header size admission rule; versions, header types and fixture variants count together. The old fixture repair is not an improvement."
+}

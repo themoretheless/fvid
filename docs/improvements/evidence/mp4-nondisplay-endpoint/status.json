@@ -1,0 +1,23 @@
+{
+  "status": "requalified-uncounted-followup",
+  "original_improvement": "FVID-0407",
+  "accepted_count_delta": 0,
+  "before": "A valid hidden VP9 keyframe at PTS=100 ticks stretches native duration from the stated 3 ticks (60ms) to 101 ticks (2.02s). Three hidden positions reproduce it; decoded output/interval controls pass. Initial baseline and an explicit before-source replay both produce 1 passing control and 1 failing aggregate duration test.",
+  "replay": "test-before-replay.rs filters the three original V0 witnesses and omits the subsequently added header getter assertions, so it compiles against the retained before-source snapshots and reproduces the same 2.02s failures. The final test includes additional V1/coarse-clock/unknown-header cases.",
+  "change": "Retain positive known tkhd and mvhd durations separately from raw media duration. Native composition estimation uses the selected-track bound, falling back to a known movie bound, while tolerating sub-movie-tick header quantization. Unknown/zero markers are not finite bounds. Track-header vector capacity is included in estimated index payload bytes. Track objects, existing clocks and edit windows retain their semantics.",
+  "after": "51 checks pass in 10 player-enabled targets, 0 failed/ignored; no-default-features cargo check passes. Exact neutral pixels/RGB and presentation intervals, early/non-display output, seek/rewind/EOF, positive CTS and equal-PTS endpoint controls, layered seek coverage, edits, concat, fragments and malformed time headers are covered.",
+  "fixtures": "26 short movies plus manifest (27 files): hidden positions 0/1/2, tkhd V0/V1, zero/unknown duration markers with known movie fallback, and floor/ceil coarse movie-clock positive-CTS controls. Regeneration is byte-identical; the original positive-CTS 19-file corpus also regenerates identically after the generator-only show flag extension.",
+  "resources": "No packet scan or decode is added to duration queries. The metadata endpoint scan remains cached; the new private duration vector is charged by its capacity and element size.",
+  "limits": [
+    "When both movie and track duration are absent/unknown, the fallback remains a nominal index-based estimate; precise codec-output duration in that case is not claimed.",
+    "No physical GPU/NVIDIA or UI interaction claim. Actual software NativeReader playback was exercised.",
+    "The complete project suite is not claimed green; historical unrelated failures remain separate."
+  ],
+  "sha256": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": "6121ac89d483551ccff546af87d675ac4bb2768cf1c5a87ec893be75957ffcf5",
+    "src/playback/video/mp4_dispatch.rs": "0841e4ab7022b0df85da20dbc60cc56b84b184c8f5f03dbbab87af5d5b3d9665",
+    "scripts/generate_vp9_chroma.py": "6575165cdf9be9bcb6280f6de0837329222e17c186e60bd9bd51cd6fdb64f80b",
+    "scripts/generate_mp4_nondisplay_endpoint.py": "6740deb01293faaab524bd5329a410b76eb2d43f970febbe39344514491ff65f",
+    "tests/mp4_nondisplay_endpoint.rs": "e0f3efb049b5f11287908a0669baf6fe292baa9e5c0f34c7c3e6d3a4163b384a"
+  }
+}

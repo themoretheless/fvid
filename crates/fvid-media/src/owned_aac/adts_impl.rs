@@ -358,6 +358,16 @@ fn check_packet_limit(header: Header, max: usize) -> Result<()> {
     Ok(())
 }
 
+// The range has already passed framing and CRC validation. Keep ownership of
+// the transport allocation for a single block instead of retaining a duplicate.
+fn retain_raw_block(mut body: Vec<u8>, range: std::ops::Range<usize>) -> Vec<u8> {
+    if range.start != 0 {
+        body.copy_within(range.clone(), 0);
+    }
+    body.truncate(range.end - range.start);
+    body
+}
+
 /// Sequential ADTS reader. Retains blocks from at most one transport frame
 /// (ADTS length is 13 bits),
 /// with no file-size or packet-count allocation. Input starts at an ADTS header;
@@ -379,17 +389,36 @@ impl<R: std::io::Read> StreamReader<R> {
     /// Bound retained transport payload before allocating it, including PCE
     /// bootstrap. A multiplexed frame's payload shares this one frame budget.
     /// ADTS headers and an optional two-byte CRC are framing, not payload.
-    pub fn open_with_packet_limit(mut source: R, max_packet_bytes: usize) -> Result<Self> {
+    pub fn open_with_packet_limit(source: R, max_packet_bytes: usize) -> Result<Self> {
+        Self::open_with_packet_limit_mode(source, max_packet_bytes, false)
+    }
+
+    // A sequence compares every input configuration even if its packet prefix
+    // ends in an earlier segment. Header-only setup needs no payload allocation;
+    // defer its packet check until next_packet selects the segment. PCE setup
+    // reads a body, so its allocation must still be bounded at open.
+    pub(crate) fn open_for_sequence_with_packet_limit(source: R, max_packet_bytes: usize) -> Result<Self> {
+        Self::open_with_packet_limit_mode(source, max_packet_bytes, true)
+    }
+
+    fn open_with_packet_limit_mode(mut source: R, max_packet_bytes: usize, defer_header_only: bool) -> Result<Self> {
         let mut bytes = [0; 7];
         source.read_exact(&mut bytes)?;
         let mut configuration = header(&bytes).ok_or_else(|| invalid("invalid ADTS header"))?;
-        check_packet_limit(configuration, max_packet_bytes)?;
+        if !defer_header_only || configuration.channels == 0 {
+            check_packet_limit(configuration, max_packet_bytes)?;
+        }
         let mut pending=std::collections::VecDeque::new();
         let asc=if configuration.channels==0 {
             let mut packet=vec![0;configuration.frame_bytes-7];source.read_exact(&mut packet)?;
             let start = configuration.header_bytes - 7;
             let asc=packet_configuration(configuration,&packet[start..])?;
-            for range in raw_ranges(&bytes, &packet, &asc)? { pending.push_back(packet[range].to_vec()); }
+            let ranges = raw_ranges(&bytes, &packet, &asc)?;
+            if let [range] = ranges.as_slice() {
+                pending.push_back(retain_raw_block(packet, range.clone()));
+            } else {
+                for range in ranges { pending.push_back(packet[range].to_vec()); }
+            }
             asc
         } else {configuration.asc.to_vec()};
         let config = AacConfig::parse(&asc)?;
@@ -453,7 +482,12 @@ impl<R: std::io::Read> StreamReader<R> {
         check_packet_limit(next, self.max_packet_bytes)?;
         let mut remaining = vec![0; next.frame_bytes - 7];
         self.source.read_exact(&mut remaining)?;
-        for range in raw_ranges(&fixed, &remaining, &self.asc)? { self.pending.push_back(remaining[range].to_vec()); }
+        let ranges = raw_ranges(&fixed, &remaining, &self.asc)?;
+        if let [range] = ranges.as_slice() {
+            self.finished = false;
+            return Ok(Some(retain_raw_block(remaining, range.clone())));
+        }
+        for range in ranges { self.pending.push_back(remaining[range].to_vec()); }
         self.finished = false;
         Ok(self.pending.pop_front())
     }

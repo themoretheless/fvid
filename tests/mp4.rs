@@ -13,6 +13,20 @@ fn joined(parts: &[Vec<u8>]) -> Vec<u8> {
 fn words(values: &[u32]) -> Vec<u8> {
     values.iter().flat_map(|v| v.to_be_bytes()).collect()
 }
+/// A complete movie header, including the fixed-rate, matrix and reserved tail.
+/// Keep the file structurally valid so tests reach the track behavior they assert.
+fn movie_header() -> Vec<u8> {
+    let mut body = vec![0u8; 100];
+    body[..20].copy_from_slice(&words(&[0, 0, 0, 1000, 40]));
+    body[20..24].copy_from_slice(&0x0001_0000u32.to_be_bytes());
+    body[24..26].copy_from_slice(&0x0100u16.to_be_bytes());
+    for at in [36, 52] {
+        body[at..at + 4].copy_from_slice(&0x0001_0000u32.to_be_bytes());
+    }
+    body[68..72].copy_from_slice(&0x4000_0000u32.to_be_bytes());
+    body[96..100].copy_from_slice(&4u32.to_be_bytes());
+    atom(b"mvhd", &body)
+}
 /// A whole `tkhd`: unlike the fields a test cares about, the transform matrix and
 /// the size the track is drawn at are fixed at the end of the header, so a short
 /// one is a truncated file rather than a terse writer.
@@ -143,7 +157,7 @@ fn fixture_traks(wide: bool, extra: &[Vec<u8>], configs: &[Vec<u8>]) -> Vec<u8> 
         atom(
             b"moov",
             &joined(
-                &[atom(b"mvhd", &words(&[0, 0, 0, 1000, 40]))]
+                &[movie_header()]
                     .into_iter()
                     .chain(traks)
                     .collect::<Vec<_>>(),
@@ -384,7 +398,7 @@ fn a_file_of_only_unplayable_tracks_names_the_gap() {
     // An empty moov still reports what it holds rather than a codec gap.
     let empty = joined(&[
         atom(b"mdat", &[]),
-        atom(b"moov", &atom(b"mvhd", &words(&[0, 0, 0, 1000, 40]))),
+        atom(b"moov", &movie_header()),
     ]);
     let error = Mp4Reader::open(Cursor::new(empty), Limits::default())
         .err()

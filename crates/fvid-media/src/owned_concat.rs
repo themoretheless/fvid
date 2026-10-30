@@ -80,7 +80,7 @@ fn open_readers(
         if !file.metadata().map_err(|e| e.to_string())?.is_file() {
             return Err("ADTS concat requires regular files".into());
         }
-        let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+        let reader = crate::owned_aac::adts::StreamReader::open_for_sequence_with_packet_limit(
             BufReader::new(file),
             options
                 .max_packet_bytes

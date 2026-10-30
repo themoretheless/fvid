@@ -1,0 +1,12 @@
+{
+  "byte_identical": true,
+  "files": {
+    "unused-first.mp4": "0160af42d23a36e64b325bdbae35b9401a7513cb78e675be9f8c9973c08da6c5",
+    "unused-last.mp4": "d96a6acff4481620f0038abb94103ed4b1e11ceefb740a4140fee5d0c8f10cb2",
+    "unused-first-compact.mp4": "cbfeab9f32d33917ef7962839285e36db5c1bbaa01dd1eb2f4874e2a259f69a6",
+    "expected.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "control.mp4": "0537c806fd4a9d2a41ff43945eac7e58d14dfb193efa987ff7a4c59e00e527f0",
+    "selected-bad.mp4": "52fed9a23ce14748587b9cba424d70dd62ce3c5a7264f01b0abc3c18b3851070",
+    "manifest.json": "e30baf58145194fb5cd0172cca6994c251b6b2ea94c2d15bae3842350f93e5cc"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "status": "unconfirmed_candidate_not_counted",
+  "accepted_ids": [],
+  "topic": "Open-ended zero-duration single media edit in a fragmented MP4 init segment",
+  "reference": "https://www.w3.org/TR/mse-byte-stream-format-isobmff/#initialization-segments",
+  "source": "owned_mp4_impl.rs parse_track currently rejects every zero-duration elst entry; W3C permits a single rate-one duration-zero media edit spanning subsequent fragments.",
+  "next_steps": [
+    "Author independent V0/V1 fMP4 controls/witnesses and prove exact before behavior, preserving existing malformed regular-file and blank-edit refusals.",
+    "Audit every edit consumer: native video, audio, export, probe and planners. Preserve zero as an open-ended state or resolve with exact media endpoints, rather than silently quantizing it into integer movie duration.",
+    "Cover trimmed start, positive composition offsets, differing/fractional movie clocks, missing media, budgets, seek and repeated EOF before accepting."
+  ],
+  "caution": "No fix or reproducer exists yet for this candidate. Do not count a field-check variant or a partial one-consumer workaround as completion.",
+  "resolved_by": [
+    "FVID-0403"
+  ],
+  "resolution_evidence": "../mp4-open-ended-edit/status.json"
+}

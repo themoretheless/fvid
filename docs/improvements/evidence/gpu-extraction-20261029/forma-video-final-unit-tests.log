@@ -1,0 +1,11 @@
+   Compiling gpu-compute v0.1.0 (/Users/themoretheless/Documents/Sources/forma/crates/gpu-compute)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.00s
+     Running unittests src/lib.rs (/private/tmp/forma-gpu-extraction-197/debug/deps/gpu_compute-0432628465a7c837)
+
+running 3 tests
+test video::processor::tests::layout_handles_unaligned_payload ... ok
+test video::tests::byte_shader_validates_both_execution_routes_without_a_device ... ok
+test video::tests::color_shader_validates_encoder_variants_without_a_device ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.07s
+

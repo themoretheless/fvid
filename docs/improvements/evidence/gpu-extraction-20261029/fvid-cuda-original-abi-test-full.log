@@ -1,0 +1,43 @@
+warning: associated function `new` is never used
+  --> src/nvenc_session.rs:63:19
+   |
+62 | impl FunctionTable {
+   | ------------------ associated function in this implementation
+63 |     pub(crate) fn new() -> Self {
+   |                   ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `sample_bytes` is never read
+  --> src/nv12_buffer.rs:36:5
+   |
+31 | pub struct Nv12Buffer {
+   |            ---------- field in this struct
+...
+36 |     sample_bytes: u32,
+   |     ^^^^^^^^^^^^
+
+warning: `fvid-cuda` (lib test) generated 2 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.00s
+     Running unittests src/lib.rs (/private/tmp/fvid-gpu-extraction-target/cuda-before/debug/deps/fvid_cuda-2ea44b3185fb6bd3)
+
+running 1 test
+test nvenc_session::tests::preset_init_abi_and_geometry_match_the_pinned_sdk ... FAILED
+
+failures:
+
+---- nvenc_session::tests::preset_init_abi_and_geometry_match_the_pinned_sdk stdout ----
+
+thread 'nvenc_session::tests::preset_init_abi_and_geometry_match_the_pinned_sdk' (8682380) panicked at src/nvenc_session.rs:1281:9:
+assertion `left == right` failed
+  left: 3600
+ right: 3584
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    nvenc_session::tests::preset_init_abi_and_geometry_match_the_pinned_sdk
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 45 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`

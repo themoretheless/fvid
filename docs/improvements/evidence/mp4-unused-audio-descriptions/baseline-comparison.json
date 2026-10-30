@@ -1,0 +1,25 @@
+{
+  "before_source_differences": [
+    "src/playback/audio/mp4_audio.rs",
+    "crates/fvid-media/src/owned_mp4_impl.rs"
+  ],
+  "baseline_failed_tests": [
+    "library_mp4_audio_pcm_and_file_export_match_frontend_edits",
+    "mp4_audio_plan_uses_owned_metadata_without_decoding_or_callbacks",
+    "synthetic_matroska_interval_resampling_keeps_future_input",
+    "synthetic_precise_pcm_interval_resampling_keeps_future_input"
+  ],
+  "after_failed_tests": [
+    "library_mp4_audio_pcm_and_file_export_match_frontend_edits",
+    "mp4_audio_plan_uses_owned_metadata_without_decoding_or_callbacks",
+    "synthetic_matroska_interval_resampling_keeps_future_input",
+    "synthetic_precise_pcm_interval_resampling_keeps_future_input"
+  ],
+  "same_waveform_assertion_arrays_sha256": [
+    "548c0c6b1d9861e0a2d45f6b040131559d468b9dd7d35db151949fcfe513fefc",
+    "ed87b8f313beb4982aa00a100e684539951bc5568f34a214ae1ceff17ff3b85c"
+  ],
+  "baseline": "4 pass, 4 fail in owned_mp4_audio with pre-fix parser/audio sources",
+  "after": "50 distinct integration checks pass; same 4 owned_mp4_audio failures reproduced before fix",
+  "temporary_fixture_policy": "Read-only symlink to existing fixture tree; source copied to isolated temporary directory; original worktree never reverted."
+}

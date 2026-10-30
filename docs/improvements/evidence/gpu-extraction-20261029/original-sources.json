@@ -1,0 +1,12 @@
+{
+  "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/src/gpu/mod.rs": "a4786aa9b7d4eacc6824816e6f9d8e9d964255b316d17ca94a9d6fe36bb77104",
+  "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/src/gpu/compute.wgsl": "14e7f42f3d460f294a80c9c54a0156a376c6d264d3cdaad1bf7f254f60b23c39",
+  "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/src/gpu/transform.wgsl": "2a72b92bcb8d4182715f2d672f68f61ca6b65f28fcc29db42bde42de464e7677",
+  "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/src/resident/shader.rs": "cb24ad68dd7fc7c63e0dbcc8d2f24679e5fa688ab224438972e08ad2c30ab9b5",
+  "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/src/resident.rs": "58a2ff3f6b641f285db87849c761c3b7f3c235c2ac642efc575f70130f80f8b8",
+  "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/Cargo.toml": "752cbe2603b7a78e1824d4fd8244d70162513f4e4d7d36fac128b72b85166235",
+  "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-vt/Cargo.toml": "46688410d9eed3aaf1292b981204cc03a4fb6eef7dee7129f726b468bddb3239",
+  "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-vt/src/metal.rs": "000c89eedcf9367973a846f5aaca39e736c627031f4ee332225d9ae3585d4088",
+  "/Users/themoretheless/Documents/Sources/forma/crates/gpu-compute/Cargo.toml": "ac6655c78c261171cdf1302fcaff6d16c614df97de71f4485d28f5fcbfb890f5",
+  "/Users/themoretheless/Documents/Sources/forma/crates/gpu-compute/src/lib.rs": "7655c22e16d79774550ee497e3805178e931f4ae4328a4da66d428ba807dcd18"
+}

@@ -1,0 +1,20 @@
+{
+  "status": "accepted-follow-up",
+  "existing_improvement": "FVID-0414",
+  "count_delta": 0,
+  "before": "Runtime baseline: 2 controls pass and automatic selection fails. unused-first.mp4 and unused-first-compact.mp4 select quiet track ID 2 and output 1920 zero bytes; explicit selection and owned decode correctly return the authored nonzero preferred track ID 3. An actually selected unsupported setup still chooses a valid alternate and refuses explicit decoder construction.",
+  "change": "Use the description selected by the first sample when qualifying PCM geometry for automatic track selection. No cloned index or packet read; the common and compact forms share description_for_sample. Keep track order, enabled/default preference and explicit unsupported-setup behavior.",
+  "after": "52 distinct tests pass across 9 integration targets, including 4 new tests. Automatic PCM selection now agrees with explicit selection and owned decode on exact analytic samples. Real worker checks cover play, seek, rewind and EOF for expanded and compact index forms. Existing unsupported PCM fallback, enabled-track behavior, unknown unused descriptions, recovered clocks, transitions and owned audio exports remain green. Locked offline no-default-features core build check passes.",
+  "fixtures": "Seven byte-identical files: five short authored VP9/two-PCM movies, analytic PCM oracle and manifest. One active-unsupported setup is a refusal/fallback control, not acceptance of 272-bit PCM. No private media/parameters, encoder, FFmpeg or network; generation is separate from tests.",
+  "scope": "Uncounted FVID-0414 admission follow-up. The first implementation retained opaque audio entries but did not cover automatic PCM eligibility based on an unused known-codec entry. No new ID is created for this additional unselected-description case.",
+  "limitations": [
+    "Only initial PCM decoder usability is qualified; unsupported actually selected setups retain their existing capability behavior.",
+    "Captured native worker qualification does not claim physical audio hardware or GPU parity.",
+    "No whole-project green or performance claim."
+  ],
+  "sha256": {
+    "src/playback/audio/mp4_audio.rs": "a7be19ba44a3096838b3e9cba712e874afa5fca857e2dc741c82d6d87bd062a7",
+    "scripts/generate_mp4_active_audio_choice.py": "3cf5be3ec00495dfbb54b67f7ef8765dde33c22e676010e7deca83cf467bed14",
+    "tests/mp4_active_audio_choice.rs": "c6bfdc5d954c4aba7cdc489d00289c568fe3b9349736380dc3ff43c9d906c743"
+  }
+}

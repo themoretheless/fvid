@@ -1,0 +1,21 @@
+worktree /Users/themoretheless/Documents/Sources/fvid
+HEAD eb0c0148fe434ec8e2da425936e93467f7c6edee
+branch refs/heads/main
+
+worktree /private/tmp/fvid-export-20261025-freeze
+HEAD ff68df1f365c8d4c77b944c95effe78ef112a303
+branch refs/heads/codex/aac-eld-ld-sbr-20261026
+prunable gitdir file points to non-existent location
+
+worktree /Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/fvid
+HEAD 87407c419214e57c969909073fbe7eb716950d42
+branch refs/heads/codex/aac-ep-srcpc-20261028
+
+worktree /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid
+HEAD bd95009d8823b92be229277c289c6f9511a134a8
+branch refs/heads/codex/deliver-fvid-20261029
+
+worktree /Users/themoretheless/.codex/worktrees/verify-av1-alt-lf/fvid
+HEAD fcf429296df10d96bf0013e57c73a7aad688678a
+branch refs/heads/codex/preserve-av1-active-20261009-final
+

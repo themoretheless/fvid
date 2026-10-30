@@ -1,0 +1,35 @@
+{
+  "batch": 406,
+  "accepted_ids": [
+    "FVID-0412"
+  ],
+  "status": "accepted",
+  "summary": "Reject malformed fixed-size MP4 pixel-aspect boxes instead of discarding field-read errors",
+  "source_files": [
+    "crates/fvid-media/src/owned_mp4_impl.rs"
+  ],
+  "regressions": [
+    "tests/mp4_pasp_sizes.rs"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/mp4-pasp-sizes/status.json",
+    "docs/improvements/evidence/mp4-pasp-sizes/semantics.md"
+  ],
+  "before": "Runtime baseline: 2 positive controls pass and malformed-size test fails. Both parser wrappers accept all five authored pasp payload lengths (0,4,7,9,12 bytes), treating failed field reads as absence or ignoring trailing data.",
+  "after": "51 distinct checks pass in 8 integration targets. Dedicated positive controls cover exact normalized 2:1 aspect, square absence and existing zero fallback, random packet reads, analytic YUV16, native software RGB, exact clocks, 24 seeks, rewind and EOF. Related MP4 parsing, rotation/aspect, sample-description changes, video reconfiguration, edit/refusal and timing regressions pass. Locked offline no-default-features core build check passes.",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --features player --test mp4_pasp_sizes",
+    "cargo test --locked --offline --no-default-features --features player --no-fail-fast --test mp4_pasp_sizes --test mp4 --test mp4_media_sample_descriptions --test mp4_video_reconfiguration --test mp4_edit_loop --test mp4_edit_window_eof --test mp4_empty_tail --test mp4_time_header_sizes",
+    "cargo check --locked --offline --no-default-features"
+  ],
+  "limitations": [
+    "Existing zero-spacing fallback policy is retained, not requalified as normative support.",
+    "No new visual/UI behavior or performance improvement is claimed.",
+    "No project-wide green or physical GPU parity claim; historical unrelated baseline failures remain separate."
+  ],
+  "uncounted": [
+    "Five malformed-size variants",
+    "Exact aspect, zero fallback and absent-box positive controls",
+    "Regenerated fixtures and verification harness"
+  ]
+}

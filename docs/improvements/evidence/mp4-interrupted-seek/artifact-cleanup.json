@@ -1,0 +1,19 @@
+{
+  "status": "complete",
+  "removed_owned_temporary_paths": [
+    "fvid-adts-prefix-20261030",
+    "fvid-adts-prefix-followup.log",
+    "fvid-adts-prefix-pce-guards.log",
+    "fvid-adts-prefix-allocation.log",
+    "fvid-mp4-interrupted-before.log",
+    "fvid-mp4-interrupted-before-corrected.log",
+    "fvid-mp4-interrupted-baseline.log",
+    "fvid-mp4-interrupted-after.log"
+  ],
+  "preserved": [
+    "synthetic media and pixel oracles",
+    "fixture generator and automated regressions",
+    "before/after validation logs and source preimage",
+    "ADTS prefix, PCE and allocation evidence"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "status": "accepted",
+  "id": "FVID-0399",
+  "before": "Both MP4 wrappers accepted all 12 owned mvhd/mdhd v0/v1 companions with a shortened or extended fixed payload. Valid-header packet/clock/budget controls passed; original core result 1 passed, 1 failed.",
+  "after": "Validate the complete version-specific fixed payload before reading timestamps: mvhd 100/112 bytes, mdhd 24/36 bytes. Core 9, player 20 and related integration 37 tests pass, no failures or ignored tests. Valid V0/V1 videos preserve exact RGB, 60ms duration, packet clocks, seek, rewind and repeated EOF. The old basic MP4 test constructor now authors a complete movie header; all original assertions remain.",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --test mp4_time_header_sizes --test mp4_time_header_flags --test mp4_unknown_duration --test mp4_tfhd_defaults",
+    "cargo test --locked --offline --features player --test mp4_time_header_sizes --test mp4_time_header_flags --test mp4_unknown_duration --test mp4_tfhd_defaults --test mp4_hybrid_fragments",
+    "cargo test --locked --offline --no-default-features --test mp4 --test mp4_elst_validation --test mp4_enabled_tracks --test mp4_fragment_description --test mp4_chunk_bounds"
+  ],
+  "baseline_control_repair": "The pre-existing tests/mp4.rs built only the first 20 of the required 100 mvhd bytes. Strict parsing exposed 9 failures (11 passed); adding the required fields without changing assertions restores all 20. This is not counted separately.",
+  "logs": [
+    "before-core.log",
+    "after-core.log",
+    "after-player.log",
+    "old-control-qualification.log",
+    "after-integration.log"
+  ]
+}

@@ -533,7 +533,7 @@ pub fn remux_with_options(
             {
                 break;
             }
-            let Some(_) = reader.next_packet().map_err(|e| e.to_string())? else {
+            let Some(packet) = reader.next_packet().map_err(|e| e.to_string())? else {
                 break;
             };
             packets += 1;
@@ -541,7 +541,7 @@ pub fn remux_with_options(
                 return Err("AAC remux sample index exceeds limit".into());
             }
             if options.max_controlled_bytes.is_some_and(|limit| {
-                packets.saturating_mul(32).saturating_add(16384).saturating_add(meta_bytes) > limit
+                packets.saturating_mul(32).saturating_add(16384).saturating_add(meta_bytes).saturating_add(packet.len()) > limit
             }) {
                 return Err("controlled memory budget exceeded".into());
             }
@@ -640,7 +640,7 @@ pub fn remux_adts_with_options(
         if options.max_packets.is_some_and(|limit| packets as u64 >= limit) {
             break;
         }
-        let Some(_) = reader.next_packet().map_err(|e| e.to_string())? else {
+        let Some(packet) = reader.next_packet().map_err(|e| e.to_string())? else {
             break;
         };
         packets += 1;
@@ -648,7 +648,7 @@ pub fn remux_adts_with_options(
             return Err("AAC remux sample index exceeds limit".into());
         }
         if options.max_controlled_bytes.is_some_and(|limit| {
-            packets.saturating_mul(32).saturating_add(16384).saturating_add(meta_bytes) > limit
+            packets.saturating_mul(32).saturating_add(16384).saturating_add(meta_bytes).saturating_add(packet.len()) > limit
         }) {
             return Err("controlled memory budget exceeded".into());
         }
@@ -799,7 +799,7 @@ pub fn concat_adts_with_options(
         }
         fvid_media::owned_budget::check_rss_budget(options)?;
         let file = std::fs::File::open(source).map_err(|e| e.to_string())?;
-        let reader = crate::container::adts::StreamReader::open_with_packet_limit(
+        let reader = crate::container::adts::StreamReader::open_for_sequence_with_packet_limit(
             std::io::BufReader::new(file),
             options
                 .max_packet_bytes
@@ -819,7 +819,7 @@ pub fn concat_adts_with_options(
         if options.max_packets.is_some_and(|limit| packets as u64 >= limit) {
             break;
         }
-        let Some(_) = sequence.next_packet().map_err(|e| e.to_string())? else {
+        let Some(packet) = sequence.next_packet().map_err(|e| e.to_string())? else {
             break;
         };
         packets += 1;
@@ -830,6 +830,7 @@ pub fn concat_adts_with_options(
             base_bytes
                 .saturating_add(packets.saturating_mul(32))
                 .saturating_add(meta_bytes)
+                .saturating_add(packet.len())
                 > limit
         }) {
             return Err("controlled memory budget exceeded".into());

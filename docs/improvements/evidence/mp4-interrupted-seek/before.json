@@ -1,0 +1,7 @@
+{
+  "status": "reproduced",
+  "sha256": "08de55745d3b26f035170954387bad7756aa49ec7c55f1628f095800319ed05b",
+  "tests": "1 passed (permanent errors), 4 failed (transient opening, packet/range and software playback paths)",
+  "fixture": "tests/fixtures/playback-errors/mp4-interrupted-seek",
+  "scope": "One transient seek retry cause across four parser seek sites and two included wrappers."
+}

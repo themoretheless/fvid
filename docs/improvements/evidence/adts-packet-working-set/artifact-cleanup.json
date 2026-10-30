@@ -1,0 +1,31 @@
+{
+  "status": "complete",
+  "removed_owned_temporary_paths": [
+    "fvid-adts-working-set-20261030",
+    "fvid-adts-alloc-bench",
+    "fvid-adts-working-set-before.log",
+    "fvid-adts-working-set-before-resumed.log",
+    "fvid-adts-working-set-before-corrected.log",
+    "fvid-adts-working-set-parity-after.log",
+    "fvid-adts-working-set-control-before-optimization.log",
+    "fvid-adts-working-set-after.log",
+    "fvid-adts-working-set-after-all.log",
+    "fvid-adts-prefix-baseline.log",
+    "fvid-adts-other-baselines.log",
+    "fvid-adts-alloc-before.log",
+    "fvid-adts-alloc-after.log",
+    "fvid-adts-allocation-automatic.log",
+    "fvid-adts-working-set-final.log",
+    "fvid-adts-stream-zero-followup.log",
+    "fvid-adts-cargo-sample.txt",
+    "fvid-adts-resumed-sample.txt",
+    "fvid-adts-cargo-files.txt"
+  ],
+  "preserved": [
+    "synthetic fixtures and generators",
+    "source baseline snapshot",
+    "regression source",
+    "before/after and baseline failure evidence",
+    "allocation regression harness and runner"
+  ]
+}

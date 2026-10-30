@@ -523,7 +523,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 if track.timescale == 0 {
                     return None;
                 }
-                let end = media_end.map_or(i128::from(track.duration), i128::from);
+                let end = media_end.map_or_else(|| source.presentation_end_ticks(), i128::from);
                 let ticks = edits.last().map_or(end - i128::from(*media_start), |edit| {
                     i128::from(edit.movie_end)
                 });
@@ -671,22 +671,39 @@ impl<R: BufRead + Seek> NativeReader<R> {
             .and_then(|t| t.checked_add(*media_start))
             .ok_or_else(|| invalid("seek target overflow"))?;
         source.seek_to_sync(media_ticks);
+        let starts_at_beginning = source.starts_at_first_sample() && *edit_index == 0;
         *resync = true;
-        let result = (|| {
+        let advance_to_target = |reader: &mut Self| -> Result<Option<RawFrame>> {
             let mut last = None;
             loop {
-                let Some(raw) = self.read_frame_raw()? else {
+                let Some(raw) = reader.read_frame_raw()? else {
                     return Ok(last);
                 };
                 last = Some(raw);
-                let Self::Avc { next_pts, .. } = self else {
+                let Self::Avc { next_pts, .. } = reader else {
                     unreachable!()
                 };
                 if *next_pts > ticks {
                     return Ok(last);
                 }
             }
-        })();
+        };
+        let first = advance_to_target(self);
+        let missing_coverage = match &first {
+            Ok(None) => true,
+            Ok(Some(_)) => matches!(&*self, Self::Avc { frame_start, .. } if *frame_start > ticks),
+            Err(_) => false,
+        };
+        let result = if !starts_at_beginning && missing_coverage {
+            // A sync packet can be decode-only. Replay once to recover a
+            // preceding displayed interval or the true visible endpoint.
+            // Release an unhelpful future picture before resetting storage.
+            drop(first);
+            self.rewind()?;
+            advance_to_target(self)
+        } else {
+            first
+        };
         if result.is_err() {
             self.rewind()?;
         }
@@ -778,12 +795,17 @@ impl<R: BufRead + Seek> NativeReader<R> {
         else {
             return Ok(None);
         };
+        let mut window_finished = false;
+        let mut can_retry_window_start = false;
+        let mut complete_scan = *frames == 0 && *edit_index == 0 && source.starts_at_first_sample();
+        let mut saw_presentable_picture = false;
         let frame = loop {
-            let finished = !*resync
-                && media_end.is_some_and(|end| {
-                    i128::from(*next_pts) - i128::from(*movie_start) + i128::from(*media_start)
-                        >= i128::from(end)
-                });
+            let finished = window_finished
+                || (!*resync
+                    && media_end.is_some_and(|end| {
+                        i128::from(*next_pts) - i128::from(*movie_start) + i128::from(*media_start)
+                            >= i128::from(end)
+                    }));
             if finished {
                 if *edit_index + 1 >= edits.len() {
                     return Ok(None);
@@ -795,20 +817,51 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 *movie_start = edit.movie_start;
                 source.seek_to_sync(edit.media_start);
                 *resync = true;
+                window_finished = false;
+                complete_scan = source.starts_at_first_sample();
+                saw_presentable_picture = false;
+                can_retry_window_start = !complete_scan;
             }
             let Some(mut frame) = source.read_frame()? else {
-                return Ok(None);
+                // A full scan with no nonnegative display interval cannot serve
+                // any edit. Avoid replaying such a source for every window.
+                if complete_scan && !saw_presentable_picture {
+                    return Ok(None);
+                }
+                if can_retry_window_start {
+                    source.rewind();
+                    *resync = true;
+                    complete_scan = true;
+                    saw_presentable_picture = false;
+                    can_retry_window_start = false;
+                    continue;
+                }
+                window_finished = true;
+                continue;
             };
             let begin = frame.presentation_time.ticks;
             let end = begin
                 .checked_add(frame.duration.ticks)
                 .ok_or_else(|| invalid("video timestamp overflow"))?;
+            saw_presentable_picture |= end > 0;
             if end <= *media_start {
                 continue;
             }
+            if can_retry_window_start {
+                can_retry_window_start = false;
+                if begin > *media_start {
+                    // A decode-only sync sample may hide a covering picture
+                    // before it. Retry the prefix once before accepting a gap.
+                    drop(frame);
+                    source.rewind();
+                    *resync = true;
+                    complete_scan = true;
+                    saw_presentable_picture = false;
+                    continue;
+                }
+            }
             if media_end.is_some_and(|limit| begin >= limit) {
-                *next_pts = media_end.unwrap() - *media_start + *movie_start;
-                *resync = false;
+                window_finished = true;
                 continue;
             }
             let clipped_begin = begin.max(*media_start);
@@ -1363,10 +1416,11 @@ fn playback_edits(
     track: &crate::container::mp4::Track,
     movie_scale: u32,
 ) -> Result<Vec<PlaybackEdit>> {
+    let clock = track.resolved_edit_clock(movie_scale)?;
     fvid_media::owned_video_timeline::map_edits(
-        track.edits.iter().map(|edit| (edit.duration, edit.media_time)),
+        clock.edits().iter().map(|edit| (edit.duration, edit.media_time)),
         track.timescale,
-        movie_scale,
+        clock.timescale,
     )
 }
 

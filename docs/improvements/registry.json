@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 398,
-  "next_id": "FVID-0399",
+  "accepted_count": 415,
+  "next_id": "FVID-0416",
   "entries": [
     {
       "id": "FVID-0001",
@@ -2621,7 +2621,8 @@
       "before": "native_export::export_pcm_selected (`src/native_export.rs`) writes only the 80-byte WAVE header and `data` chunk when exporting `.wav` files (dropping all source WAVE `LIST`/`INFO` chunks including opaque 4-CC entries and all MP4/Matroska container/track tags on `decode-audio`, `trim`, `loudnorm`, and `normalize-loudness` whenever no metadata mutations or controlled memory limits force the `fvid_media` spool path); and `owned_mp4_audio_export::apply`, `owned_matroska_{aac,opus,flac,alac,mp3,pcm}_export::apply`, `owned_container_loudness::decode_to_wave`, and `owned_aac_export_routing::export` (`crates/fvid-media/src/...`) never populate or preserve source container/track RIFF `INFO` chunks on their temporary WAVE spools, so `.wav` exports and `loudnorm` / `normalize-loudness` from MP4/MOV/M4A and Matroska/WebM/MKA lose all source tags or drop untouched tags when `--metadata` / `--metadata-delete` is passed.",
       "result": "Add `info_for_file_tags`, `mp4_source_info`, and `matroska_source_info` in `crates/fvid-media/src/owned_wave_metadata.rs`; append source MP4 and Matroska RIFF `INFO` chunks to the decoded WAVE spool in `owned_mp4_audio_export::apply`, `owned_matroska_{aac,opus,flac,alac,mp3,pcm}_export::apply`, and `owned_container_loudness::decode_to_wave` and preserve `info_chunks` across spatial AAC fold-down in `owned_aac_export_routing::export`; and update `native_export::export_pcm_selected` (`src/native_export.rs`) to extract and edit source WAVE `INFO` chunks and MP4/Matroska container/track tags and append them to `.wav` outputs while updating the RIFF chunk size. One focused integration test, 7 related integration tests, and 1 offline fixture unit test pass.",
       "status": "accepted",
-      "validation": "batch-226-validation.json"
+      "validation": "batch-226-validation.json",
+      "follow_up_validation": "batch-410-validation.json"
     },
     {
       "id": "FVID-0234",
@@ -4437,6 +4438,196 @@
       "result": "Validate reserved flags in shared media_time before consuming time fields, preserving version checks and the specific invalid-input error. Core: 2 focused plus 5 related tests pass. Player: 4 focused plus 12 related tests pass, distinguishing malformed-input refusal before decoding from successful v0/v1 native RGB playback, 60ms duration, seek, rewind and repeated EOF. No failures or ignored tests.",
       "status": "accepted",
       "validation": "batch-392-validation.json"
+    },
+    {
+      "id": "FVID-0399",
+      "batch": 393,
+      "title": "Validate complete MP4 movie/media time-header payload sizes",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_time_header_sizes.rs",
+      "before": "Both MP4 wrappers accepted all 12 owned mvhd/mdhd v0/v1 companions with a shortened or extended fixed payload. Valid-header packet/clock/budget controls passed; original core result 1 passed, 1 failed.",
+      "result": "Validate the complete version-specific fixed payload before reading timestamps: mvhd 100/112 bytes, mdhd 24/36 bytes. Core 9, player 20 and related integration 37 tests pass, no failures or ignored tests. Valid V0/V1 videos preserve exact RGB, 60ms duration, packet clocks, seek, rewind and repeated EOF. The old basic MP4 test constructor now authors a complete movie header; all original assertions remain.",
+      "status": "accepted",
+      "validation": "batch-393-validation.json"
+    },
+    {
+      "id": "FVID-0400",
+      "batch": 394,
+      "title": "Validate reserved MP4 fragment decode-time flags",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_tfdt_flags.rs",
+      "before": "Both MP4 wrappers admitted all four V0/V1 tfdt witnesses with low/high reserved flags. Original core result: zero-flag packet/clock/budget controls pass; reserved-flag refusal fails (1 passed, 1 failed).",
+      "result": "Reject nonzero reserved tfdt FullBox flags before consuming decode time. Eleven core and twenty player checks pass with no failures/ignored tests. Zero-flag V0/V1 fragments preserve three exact packet clocks and RGB frames at 50Hz/60ms, eight seeks per file, rewind, repeated EOF and budget rejection. Damaged companions fail specifically on their flags before decoding.",
+      "status": "accepted",
+      "validation": "batch-394-validation.json"
+    },
+    {
+      "id": "FVID-0401",
+      "batch": 395,
+      "title": "Preserve MP4 chapter clocks when the movie duration is unavailable",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_unknown_movie_chapters.rs",
+      "before": "Core baseline: legacy movie-clock and edit-duration controls pass; 10MHz chapters with unknown mvhd fail (2 passed, 1 failed). A 20ms chapter becomes 200s. Native playback confirms chapter 1 incorrectly seeks to sample interval (2,3,50) instead of (1,2,50). A separate experimental absolute-leading-edit assertion was rejected because NativeReader explicitly normalizes leading empty edits; it is archived and not counted.",
+      "result": "For unknown/all-ones or unstated zero movie duration, use the indexed supported-track presentation length only as the chapter clock-selection bound. Convert media ticks to movie ticks with wide arithmetic, and honor total movie edit durations including empty edits. Known movie duration and legacy movie-clock chapter behavior are preserved. Thirty core and 36 player tests pass, no failures/ignored tests. Twenty-four short regular/fragmented V0/V1 chapter witnesses preserve 0/20/40ms chapters, titles, 60ms exact RGB playback, seek, rewind, EOF, packet clocks and budgets; four edited companions preserve absolute chapter metadata. Native leading-edit playback policy is unchanged. An uncounted positive-CTS follow-up uses known tkhd presentation length or a nominal composition endpoint for chapter clock bounds when mvhd is unknown/zero. Forty-five selected checks and core build pass; no extra ID.",
+      "status": "accepted",
+      "validation": "batch-395-validation.json",
+      "follow_up_validation": "batch-408-validation.json"
+    },
+    {
+      "id": "FVID-0402",
+      "batch": 396,
+      "title": "Support implicit MP4 fragment data-base addressing",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_implicit_fragment_base.rs",
+      "before": "Both MP4 wrappers refuse seven valid owned legacy-base witnesses with \"fragment states neither a base offset nor its own moof as the base\"; the explicit-moof control completes exact index/packet assertions. Original core result: 0 passed, 2 failed (the malformed-input test also encounters the old addressing refusal before reaching its specific bounds check).",
+      "result": "Resolve a first implicit traf base from its moof and later implicit bases from the preceding traf data end. Explicit absolute/moof bases override inheritance. For unrepresented tracks, resolve declared run byte extents without decoding, packet allocation or default-sized sample-count loops; unresolved foreign data cannot become an implicit base. Thirteen core, 21 player and 28 related integration tests pass, zero failed/ignored. Nine valid controls/witnesses preserve exact packet offsets/bytes/DTS/PTS, 60/120ms duration, neutral RGB, 72 seeks, rewind and repeated EOF. Three corrupt witnesses refuse specifically, including a huge foreign sample count; sample and packet budget checks remain enforced.",
+      "status": "accepted",
+      "validation": "batch-396-validation.json"
+    },
+    {
+      "id": "FVID-0403",
+      "batch": 397,
+      "title": "Resolve open-ended fragmented MP4 media edits in exact media time",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_open_ended_edit.rs",
+      "before": "In an isolated pre-fix source snapshot, both parsers, probe and native playback refuse valid single rate-one duration-zero fMP4 media edits as unsupported duration. Finite-edit parsing/packets/native controls and existing malformed-input refusals pass. Open-edit target: 3 passed, 3 failed. The witness headers have consistent movie/track durations; versions, clocks, trimming and positive CTS are independently authored.",
+      "result": "Admit only the single fragmented open media edit, retaining raw duration=0. A stack-backed resolved edit view derives the composition endpoint from indexed samples and uses media timescale for the open range, avoiding movie-clock double rounding. Playback, owned decode, probe, shader windows, AAC remux and audio planning/export consume the view. Coarse 25Hz and fractional 1001Hz movie clocks preserve exact 20ms media frames; positive CTS and non-sample-aligned audio endpoints stay exact. Nonzero AAC/PCM/ALAC oracles, public WAVE publication, budgets, seek, rewind and EOF pass.",
+      "status": "accepted",
+      "validation": "batch-397-validation.json"
+    },
+    {
+      "id": "FVID-0404",
+      "batch": 397,
+      "title": "Honor finite fixed PCM/ALAC playback edits",
+      "source": "src/playback/audio/mp4_audio.rs",
+      "regression": "tests/mp4_fixed_audio_edits.rs",
+      "before": "In the same isolated source snapshot, finite fixed PCM/ALAC media edits are ignored: four trim controls expose 60ms rather than 40ms; seek yields 1600 PCM bytes instead of 960. A fractional 44100Hz edit is reported as 60ms rather than 2645/44100 seconds. All three dedicated finite-edit tests fail. Untrimmed controls complete decoding/EOF assertions before the aggregate trim assertion fails.",
+      "result": "Route finite PCM/ALAC media edits through the existing rational variable-edit scheduler even for one constant sample description. Preserve original media packets and decoder configuration while clipping presentation to the requested range. Native duration, nonzero PCM, seek suffix, rewind, repeated EOF and fractional sample positions now match their owned oracles. AAC finite-path seek conventions and the established leading-empty-edit policy are preserved.",
+      "status": "accepted",
+      "validation": "batch-397-validation.json"
+    },
+    {
+      "id": "FVID-0405",
+      "batch": 398,
+      "title": "Reuse validated single-block ADTS transport allocations without duplicating payload",
+      "source": "crates/fvid-media/src/owned_aac/adts_impl.rs",
+      "regression": "tests/adts_packet_working_set.rs; scripts/check_adts_allocations.py",
+      "before": "Both parsers allocate a transport body, raw range, pending queue and copied payload for the first 1042-byte block: 4 allocations and 2196 scoped peak bytes in all six baseline observations; allocation guard fails. Nonzero PCM, MP4 companion and exact packet/EOF controls pass before optimization.",
+      "result": "After framing and complete CRC validation, retain the original transport allocation for one raw block; compact only the optional CRC prefix. PCE bootstrap reuses its body too; multi-block ordering/validation stays intact. Both parsers use 2 allocations and 1058 scoped peak bytes repeatedly. Offline automatic allocation regression and 27 focused PCM/CRC/PCE/multi-block/budget checks pass. Three pre-existing broader integration failures are separately reproduced and retained. No throughput or RSS claim.",
+      "status": "accepted",
+      "validation": "batch-398-validation.json"
+    },
+    {
+      "id": "FVID-0406",
+      "batch": 399,
+      "title": "Retry transient interrupted MP4 seeks while preserving cursor recovery",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_interrupted_seek.rs",
+      "before": "The final pre-fix regression builds and runs: 1 permanent-error control passes and 4 transient-seek tests fail. Both parsers refuse finite Interrupted faults before/after moving the cursor, during open and full-packet reads. Actual software playback fails on its first injected random-access interruption. Range recovery is verified after the same shared seek fix.",
+      "result": "Retry only Interrupted for idempotent absolute and End(0) seeks in shared MP4 opening, packet and bounded-range reads. Forty selected checks pass, including exact software-decoded colors, PTS/duration, random seek, rewind, repeated EOF, permanent-error recovery and related malformed/header/edit/fragmentation regressions. Finite before/after-movement faults and both parser wrappers are covered.",
+      "status": "accepted",
+      "validation": "batch-399-validation.json"
+    },
+    {
+      "id": "FVID-0407",
+      "batch": 400,
+      "title": "Report the complete unedited MP4 composition endpoint in native playback duration",
+      "source": "src/playback/video/mp4_dispatch.rs",
+      "regression": "tests/mp4_presentation_endpoint.rs",
+      "before": "Final expanded baseline: exact parser/media-clock/pixel controls pass; native-duration test fails. Ten authored cases report 60ms although their actual displayed endpoint is 80/100/120/260/280ms. Plain zero-shift controls pass. Actual NativeReader playback/seek/rewind/EOF assertions run before the final aggregate duration failure.",
+      "result": "Use a private lazy index-derived composition endpoint for NativeReader unedited duration, including the final equal-PTS group span. Known track/movie header bounds prevent hidden/non-output timestamp outliers from stretching the estimate, with sub-movie-tick quantization tolerance and zero/unknown markers preserved. Raw media clocks and edit windows remain intact. The follow-up passes 51 software playback/parser/seek/header/fragment checks and a core build; no extra ID is counted. Fully unstated duration remains a nominal index estimate.",
+      "status": "accepted",
+      "validation": "batch-400-validation.json",
+      "follow_up_validation": "batch-401-validation.json"
+    },
+    {
+      "id": "FVID-0408",
+      "batch": 402,
+      "title": "Complete MP4 playback after an explicit zero-duration terminal presentation window",
+      "source": "src/playback/video/mp4.rs",
+      "regression": "tests/mp4_empty_tail.rs",
+      "before": "Valid stts [1,1,0] media has two-tick mdhd/tkhd/mvhd duration. Both parsers preserve the explicit zero and the malformed-codec control passes. Software packet playback and NativeReader fail at EOF with non-increasing MP4 presentation timestamps: 2 tests pass, 2 fail. After the initial streaming fix, owned decode still refuses invalid video duration; this intermediate failure is retained.",
+      "result": "Decode and validate zero-duration terminal samples without publishing an empty window. Preserve explicit zero timing, skip only the terminal empty presentation and restart EOF seeks early enough to return the last visible frame. Streaming and owned decode agree on two exact pictures and clean EOF; corrupt terminal payloads still refuse. Thirty-two distinct checks and a core build pass, including timestamps, seek, rewind, EOF and private positive/invalid clock guards.",
+      "status": "accepted",
+      "validation": "batch-402-validation.json"
+    },
+    {
+      "id": "FVID-0409",
+      "batch": 403,
+      "title": "Recover covered and final MP4 pictures after decode-only sync landings",
+      "source": "src/playback/video/native.rs",
+      "regression": "tests/mp4_decode_only_seek.rs",
+      "before": "Runtime baseline: 3 controls pass, seek acceptance fails. Ten ordinary/late decode-only-tail requests return no picture; two middle-control requests return the future picture at [2,3) instead of the sequentially visible [0,2) picture. Exact picture/clock controls, bounded empty-stream behavior and codec-error recovery already pass.",
+      "result": "Replay once when a non-initial indexed landing produces no displayed frame or begins after the requested interval. Keep real leading gaps and codec errors unchanged, release unhelpful output before reset, and preserve subsequent playback. Exact software pixels, timestamps, EOF, trim/repeat edit mappings, error recovery and byte traversal guards pass: 46 distinct checks plus a core build.",
+      "status": "accepted",
+      "validation": "batch-403-validation.json"
+    },
+    {
+      "id": "FVID-0410",
+      "batch": 404,
+      "title": "Continue finite MP4 edit programs after source EOF without retiming the last picture",
+      "source": "src/playback/video/native.rs",
+      "regression": "tests/mp4_edit_window_eof.rs",
+      "before": "2 passing controls, 2 failing acceptance tests: source EOF loses later edit windows; a trailing no-output window changes the last displayed interval. Middle decode-only sync coverage is an uncounted FVID-0409 follow-up.",
+      "result": "Advance finite edit windows on media EOF without modifying the last published clock. Recover a covering prefix once at internal sync restarts. A seek landing at source sample zero in a later edit is not the beginning of the presentation. Preserve decoder errors and short-circuit a complete source scan with no nonnegative display intervals. 34 distinct integration tests pass across 9 targets. Four new tests include exact authored YUV controls, six sequential/rewind edit programs, 84 seek positions plus continuation, all-hidden/negative-preroll byte bounds, and corrupt-codec refusal. No-default-features offline locked build check passes.",
+      "status": "accepted",
+      "validation": "batch-404-validation.json"
+    },
+    {
+      "id": "FVID-0411",
+      "batch": 405,
+      "title": "Refuse looping MP4 edits explicitly instead of silently treating them as finite",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_edit_loop.rs",
+      "before": "After correcting a test-harness enum match (compile log retained separately), the runtime baseline has 1 passing finite trim test and 2 failing tests. Both parser wrappers accept six loop/reserved flag witnesses and native playback accepts a loop as a finite trim.",
+      "result": "Check elst FullBox flags before consuming its finite edit rows. Bit zero returns the explicit unsupported looping-edit capability error. Unknown bits return an invalid edit-list flag error, including unknown bits combined with the loop bit. Both wrappers share the check. 49 distinct checks pass in 11 integration targets, including 3 new tests. Zero-flag V0/V1 trim controls retain exact analytic YUV, software RGB, PTS/duration, random seeks, rewind and EOF. Related finite/open-ended video/audio edits, variable rates, decode-only coverage, header sizes and seek I/O remain green. Locked offline no-default-features core build check passes.",
+      "status": "accepted",
+      "validation": "batch-405-validation.json"
+    },
+    {
+      "id": "FVID-0412",
+      "batch": 406,
+      "title": "Reject malformed fixed-size MP4 pixel-aspect boxes instead of discarding field-read errors",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_pasp_sizes.rs",
+      "before": "Runtime baseline: 2 positive controls pass and malformed-size test fails. Both parser wrappers accept all five authored pasp payload lengths (0,4,7,9,12 bytes), treating failed field reads as absence or ignoring trailing data.",
+      "result": "Require exactly the two u32 spacing fields (8 payload bytes) for a present pasp. Propagate field read errors rather than converting them into absence. Existing zero-spacing fallback and absent-box behavior stay intact. 51 distinct checks pass in 8 integration targets. Dedicated positive controls cover exact normalized 2:1 aspect, square absence and existing zero fallback, random packet reads, analytic YUV16, native software RGB, exact clocks, 24 seeks, rewind and EOF. Related MP4 parsing, rotation/aspect, sample-description changes, video reconfiguration, edit/refusal and timing regressions pass. Locked offline no-default-features core build check passes.",
+      "status": "accepted",
+      "validation": "batch-406-validation.json"
+    },
+    {
+      "id": "FVID-0413",
+      "batch": 407,
+      "title": "Support empty-duration MP4 fragments with correct implicit decode-time continuation",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_empty_fragment.rs",
+      "before": "Runtime baseline: all 3 new tests fail. Both parsers and native software playback reject nine authored valid no-sample interval movies as unsupported MP4 track-fragment header flags. Plain finite control assertions complete before aggregate failure. Contradictory-run and overflow witnesses fail at the unrelated unsupported-flag check.",
+      "result": "Support tfhd.duration-is-empty without manufacturing sample entries. Maintain a per-track decode cursor independent of sample-list tails, apply the explicitly present or inherited default duration, preserve tfdt overrides, and include a trailing empty interval in track duration. Refuse every trun in an empty-duration traf, even a zero-row run, and check its end timestamp. 42 distinct integration checks pass across 10 targets, including expanded 4-test regression. Ten valid 3-picture controls include explicit V0/V1 and omitted tfdt, leading/middle/trailing gaps, inherited/zero duration and consecutive gaps. Both parser wrappers agree on packet bytes, DTS/PTS, nominal duration and track endpoint; software playback retains analytic YUV, RGB, exact intervals, 120 seek positions with continuation, rewind and repeated EOF. Exact three-sample budget passes and two-sample budget refuses, so gaps do not consume sample entries. Locked offline no-default-features core build check passes.",
+      "status": "accepted",
+      "validation": "batch-407-validation.json"
+    },
+    {
+      "id": "FVID-0414",
+      "batch": 409,
+      "title": "Preserve playable MP4 audio beside unreferenced unknown sample descriptions",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_unused_audio_descriptions.rs",
+      "before": "Corrected runtime baseline: selected-unknown refusal passes; 3 acceptance tests fail. Both indexed parser wrappers discard audio in all 16 initial regular/fragmented constant/changing witnesses; native audio reports unknown zzzz and owned decode sees no audio stream. Initial parser-harness constant-description misuse was corrected and rerun before production edits; original log retained.",
+      "result": "Retain opaque unknown audio SampleEntry metadata as already done for video, validating its common data reference. Select supported codec state only from actual sample or compact-chunk references before clock construction; unknown unselected entries cannot hide supported audio or reach a decoder. Fully unsupported tracks and actually selected unknown entries retain explicit capability refusal. 50 distinct integration checks pass across 9 targets, including all 6 expanded new tests. Twenty authored regular, fragmented and compact-index cases retain both tracks, exact selected descriptions, encoded packet bytes, DTS/PTS, independent nonzero PCM across coding/rate/channel/precision transitions, seek/rewind, six-picture video companions, owned normalized waveform equality and actual audio-worker replay. Core locked/offline no-default-features check passes. Four unrelated owned audio failures are reproduced before and after the fix. An uncounted follow-up qualifies automatic PCM eligibility using the first referenced setup, preventing an unused unsupported first entry from selecting a quiet alternate. Fifty-two checks and a core build pass. Prior owned audio test-oracle failures were requalified separately in batch-410.",
+      "status": "accepted",
+      "validation": "batch-409-validation.json",
+      "follow_up_validation": "batch-412-validation.json"
+    },
+    {
+      "id": "FVID-0415",
+      "batch": 411,
+      "title": "Preserve shifted PCM tails when reconstructing quantized MP4 audio clocks",
+      "source": "src/playback/audio/mp4_clock_recovery.rs",
+      "regression": "tests/mp4_audio_presentation_end.rs",
+      "before": "Initial exact-clock regression: sample/seek/video control passes and duration acceptance fails in 16 signed-CTS cases, reporting 60ms instead of 50/70ms. After fixing that getter, the expanded 1001Hz regression still fails both duration and PCM acceptance. pcm-1001-shift10-known.mp4 yields 1600 PCM bytes rather than 1920: 80 authored 8kHz samples are clipped by the recovered clock decode-duration endpoint. Both intermediate stages are retained.",
+      "result": "Use the recovered run presentation endpoint, including its composition origin, as the clipping/seek extent. Preserve explicitly stated time beyond indexed decode coverage (including empty tails). For the non-recovered path, cache a nominal indexed composition endpoint lazily, preserve stated empty tails, and retain explicit edit/recovered-clock duration precedence. Uniform PCM uses its compact aggregate endpoint. 62 distinct integration checks pass: 61 in ten related targets plus one added worker regression (two focused checks overlap and are not counted twice). All 38 own PCM/ALAC+VP9 movies retain independent PCM byte counts/values, exact rational timestamps, seek suffixes, rewind, EOF, and all three video pictures. The worker plays and rewinds both shifted 1001Hz PCM/ALAC cases with the full 1920-byte waveform. Locked/offline no-default-features core build passes.",
+      "status": "accepted",
+      "validation": "batch-411-validation.json"
     }
   ]
 }

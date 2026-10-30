@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "reason": "The new experimental oracle expected absolute 5060ms native duration. Existing NativeReader intentionally normalizes leading empty edits to first-picture time (60ms); this is explicit in playback/video/native.rs playback_edits and owned_video_timeline::map_edits. The newly drafted test does not establish a regression in that API. Kept as evidence of rejected assumption, not weakened into a passing media regression and not counted.",
+  "source": [
+    "src/playback/video/native.rs",
+    "crates/fvid-media/src/owned_video_timeline.rs"
+  ],
+  "original_test": "rejected-leading-edit-expectation.rs.txt",
+  "original_log": "before-player.log"
+}

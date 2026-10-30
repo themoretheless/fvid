@@ -1,0 +1,35 @@
+{
+  "batch": 400,
+  "accepted_ids": [
+    "FVID-0407"
+  ],
+  "status": "accepted",
+  "summary": "Keep native unedited MP4 duration consistent with its displayed composition endpoint",
+  "source_files": [
+    "src/playback/video/mp4_dispatch.rs",
+    "src/playback/video/native.rs"
+  ],
+  "regressions": [
+    "tests/mp4_presentation_endpoint.rs"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/mp4-presentation-endpoint/status.json"
+  ],
+  "before": "Final expanded baseline: exact parser/media-clock/pixel controls pass; native-duration test fails. Ten authored cases report 60ms although their actual displayed endpoint is 80/100/120/260/280ms. Plain zero-shift controls pass. Actual NativeReader playback/seek/rewind/EOF assertions run before the final aggregate duration failure.",
+  "after": "21 selected player-configuration checks pass, zero failed/ignored. The strengthened final focused rerun passes 2/2, including duration after rewind/EOF/seeks. No-default-features cargo check passes.",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --features player --no-fail-fast --test mp4_presentation_endpoint --test mp4_open_ended_edit --test mp4_concat_selected_clock --test mp4_layered_seek_coverage --test mp4_seek_io_regressions --test mp4_interrupted_seek",
+    "cargo test --locked --offline --no-default-features --features player --test mp4_presentation_endpoint",
+    "cargo check --locked --offline --no-default-features"
+  ],
+  "results": "21 distinct selected checks pass; strengthened focused rerun 2/2; no-default build check passes.",
+  "limitations": [
+    "Physical GPU/NVIDIA decoding and visual UI interaction were not exercised; software NativeReader playback was exercised.",
+    "Complete repository green status is not claimed; historical baseline failures remain separate."
+  ],
+  "uncounted": [
+    "Composition, header and duplicate-PTS variants",
+    "Lazy cache and fixture infrastructure"
+  ],
+  "follow_up_validation": "batch-401-validation.json: finite track/movie bounds added and FVID-0407 requalified with hidden-frame, V1, unknown/zero and coarse-clock controls; no new improvement ID."
+}

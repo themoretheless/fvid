@@ -1,4 +1,16 @@
 // Shared indexed MP4 parser. Wrapper modules provide errors, allocation and metadata types.
+// Start seeks and End(0) are idempotent: an interrupted implementation may
+// already have moved, so repeat the requested absolute/end position, not a
+// relative adjustment. All non-transient errors retain their original cause.
+fn seek_uninterrupted(reader: &mut impl std::io::Seek, from: std::io::SeekFrom) -> std::io::Result<u64> {
+    loop {
+        match reader.seek(from) {
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+            result => return result,
+        }
+    }
+}
+
 /// Recognize an ISO BMFF/QuickTime opening atom. Older MOV files need no `ftyp`.
 /// This only selects the parser; box extents and track contents are validated
 /// by `Mp4Reader`, including malformed recognized inputs.
@@ -142,9 +154,23 @@ impl SampleIndex {
         }
     }
 }
+/// A borrowed edit view; one open edit is resolved in media ticks on the stack.
+/// Its effective timescale may differ from the movie header. Raw edits remain
+/// unchanged, including the duration-zero marker stated by an init segment.
+pub struct ResolvedEditClock<'a> {
+    pub timescale: u32,
+    original: &'a [Edit],
+    resolved: Option<Edit>,
+}
+impl ResolvedEditClock<'_> {
+    pub fn edits(&self) -> &[Edit] {
+        self.resolved.as_ref().map_or(self.original, std::slice::from_ref)
+    }
+}
 #[derive(Clone, Debug)]
 pub struct Edit {
-    /// Duration in movie ticks, not track ticks.
+    /// Duration in movie ticks. Zero in a single fragmented media edit means
+    /// all subsequent media; use Track::resolved_edit_clock for presentation.
     pub duration: u64,
     /// Track ticks; -1 represents an empty edit.
     pub media_time: i64,
@@ -228,6 +254,37 @@ pub struct Track {
 }
 
 impl Track {
+    pub fn has_open_edit(&self) -> bool {
+        matches!(self.edits.as_slice(), [edit] if edit.duration == 0 && edit.media_time >= 0)
+    }
+    /// Resolve an init segment's open media edit against the complete indexed
+    /// composition endpoint. Use media ticks directly, avoiding double rounding
+    /// through the movie clock (which may be coarser than a single frame).
+    /// Resolution scans an expanded index once; retain the view/timeline rather
+    /// than resolving again for each decoded packet.
+    pub fn resolved_edit_clock(&self, movie_scale: u32) -> Result<ResolvedEditClock<'_>> {
+        if self.timescale == 0 || movie_scale == 0 {
+            return Err(invalid("zero MP4 edit clock"));
+        }
+        let mut clock = ResolvedEditClock { timescale: movie_scale, original: &self.edits, resolved: None };
+        if self.has_open_edit() {
+            let end = match &self.samples {
+                SampleIndex::Expanded(samples) => samples.iter()
+                    .map(|sample| i128::from(sample.pts) + i128::from(sample.duration))
+                    .max().unwrap_or(0),
+                SampleIndex::Uniform(index) => i128::try_from(index.count)
+                    .ok().and_then(|n| n.checked_mul(i128::from(index.duration)))
+                    .ok_or_else(|| invalid("MP4 open edit endpoint overflow"))?,
+            };
+            let start = self.edits[0].media_time;
+            let duration = u64::try_from(end - i128::from(start))
+                .ok().filter(|n| *n != 0)
+                .ok_or_else(|| invalid("MP4 open edit contains no media"))?;
+            clock.timescale = self.timescale;
+            clock.resolved = Some(Edit { duration, media_time: start });
+        }
+        Ok(clock)
+    }
     /// A decoder header for one table entry, without cloning the media index.
     pub fn decoder_setup(&self, description_index: u32) -> Result<Self> {
         let d = description_index.checked_sub(1)
@@ -313,6 +370,7 @@ pub struct Mp4Reader<R> {
     reader: R,
     tracks: Vec<Track>,
     track_header_flags: Vec<u32>,
+    track_header_durations: Vec<Option<u64>>,
     /// Tracks read all the way to their sample entry and then set aside because
     /// that entry names a coding with no arm here. Kept so a caller can tell a
     /// coding it has to implement apart from a file it failed to read.
@@ -324,6 +382,7 @@ pub struct Mp4Reader<R> {
     /// The writing tool / encoder from `moov/udta/©too` or `moov/udta/meta/ilst/©too`.
     encoder: String,
     movie_timescale: u32,
+    movie_duration: Option<u64>,
     limits: Limits,
     /// Byte position the reader was left at by the last packet read, or
     /// `u64::MAX` when unknown (open, rewind or a failed read).
@@ -430,10 +489,16 @@ fn table(data: &[u8], stride: usize, limit: usize) -> Result<usize> {
     }
     Ok(count)
 }
-fn media_time(data: &[u8]) -> Result<(u32, u64)> {
+fn media_time(data: &[u8], size_v0: usize) -> Result<(u32, u64)> {
     let v = version(data, 1)?;
     if u32be(data, 0)? & 0x00ff_ffff != 0 {
         return Err(invalid("reserved MP4 time-header flags"));
+    }
+    // Both headers have fixed payload sizes. V1 widens creation time,
+    // modification time and duration by four bytes each; trailing fields
+    // (including the movie matrix or media language) remain mandatory.
+    if data.len() != size_v0 + if v == 0 { 0 } else { 12 } {
+        return Err(invalid("MP4 time-header size does not match its version"));
     }
     let (scale, duration) = if v == 0 {
         (u32be(data, 12)?, u64::from(u32be(data, 16)?))
@@ -487,7 +552,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
     /// Callers must consult `Track::description_for_sample` for each packet.
     /// Reading raw packets does not implement decoder/muxer reconfiguration.
     pub fn open_indexed(mut reader: R, limits: Limits) -> Result<Self> {
-        let end = reader.seek(SeekFrom::End(0))?;
+        let end = seek_uninterrupted(&mut reader, SeekFrom::End(0))?;
         let mut at = 0u64;
         let mut moov = None;
         let mut mdats = Vec::new();
@@ -499,7 +564,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             if boxes > 100_000 || end - at < 8 {
                 return Err(invalid("invalid MP4 top-level boxes"));
             }
-            reader.seek(SeekFrom::Start(at))?;
+            seek_uninterrupted(&mut reader, SeekFrom::Start(at))?;
             let mut h = [0; 8];
             reader.read_exact(&mut h)?;
             let size = u32::from_be_bytes(h[..4].try_into().unwrap());
@@ -566,9 +631,16 @@ impl<R: Read + Seek> Mp4Reader<R> {
                 "fragmented MP4 states no fragments: it is an init segment without media",
             ));
         }
-        let (movie_timescale, movie_duration) = media_time(required(&movie, b"mvhd")?)?;
+        let movie_header = required(&movie, b"mvhd")?;
+        let (movie_timescale, movie_duration) = media_time(movie_header, 100)?;
+        let movie_duration_unknown = movie_duration == if version(movie_header, 1)? == 0 {
+            u64::from(u32::MAX)
+        } else {
+            u64::MAX
+        };
         let mut tracks = Vec::new();
         let mut track_header_flags = Vec::new();
+        let mut track_header_durations = Vec::new();
         let mut refused = Vec::new();
         let mut remaining = limits.samples;
         let mut skipped = 0usize;
@@ -576,7 +648,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             if tracks.len() >= limits.tracks {
                 return Err(invalid("MP4 track limit exceeded"));
             }
-            let Some((track, flags)) = parse_track(atom.data, &mdats, remaining, fragmented, &mut refused)?
+            let Some((track, flags, duration)) = parse_track(atom.data, &mdats, remaining, fragmented, &mut refused)?
             else {
                 skipped += 1;
                 continue;
@@ -587,6 +659,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             remaining -= track.samples.cost();
             tracks.push(track);
             track_header_flags.push(flags);
+            track_header_durations.push(duration);
         }
         if fragmented {
             index_fragments(
@@ -617,25 +690,85 @@ impl<R: Read + Seek> Mp4Reader<R> {
             });
         }
         let udta = optional(&movie, b"udta")?;
-        let chapters = read_chpl(udta, movie_timescale, movie_duration);
+        // An unknown marker (or an unstated fragmented movie length) is not
+        // a duration bound for distinguishing chapter clocks. Use the indexed
+        // presentation length, in movie ticks, including any empty edits.
+        let has_chapter_list = (movie_duration_unknown || movie_duration == 0)
+            && udta.and_then(|data| atoms(data).ok())
+                .is_some_and(|children| children.iter().any(|atom| &atom.kind == b"chpl"));
+        let chapter_duration = if movie_duration_unknown || movie_duration == 0 {
+            tracks.iter().zip(&track_header_durations).try_fold(0u128, |maximum, (track, header)| -> Result<u128> {
+                let clock = track.resolved_edit_clock(movie_timescale)?;
+                let (ticks, scale) = if track.edits.is_empty() {
+                    if let Some(header) = header.filter(|_| has_chapter_list) {
+                        // tkhd states presentation duration in movie ticks.
+                        // Respect it without letting a late decode-only PTS
+                        // stretch the estimate used to distinguish chpl clocks.
+                        let decoded = (u128::from(track.duration) * u128::from(movie_timescale))
+                            .div_ceil(u128::from(track.timescale));
+                        (u128::from(header).max(decoded), movie_timescale)
+                    } else if has_chapter_list {
+                        // Fully unstated headers need a nominal composition
+                        // estimate. Scan only when chapters actually need it.
+                        let mut latest = i64::MIN;
+                        let mut span = 0i128;
+                        if let Some(samples) = track.samples.expanded() {
+                            for sample in samples {
+                                match sample.pts.cmp(&latest) {
+                                    std::cmp::Ordering::Greater => {
+                                        latest = sample.pts;
+                                        span = i128::from(sample.duration);
+                                    }
+                                    std::cmp::Ordering::Equal => span += i128::from(sample.duration),
+                                    std::cmp::Ordering::Less => {}
+                                }
+                            }
+                        }
+                        let end = i128::from(track.duration).max(i128::from(latest) + span);
+                        (end as u128, track.timescale)
+                    } else {
+                        (u128::from(track.duration), track.timescale)
+                    }
+                } else {
+                    (clock.edits().iter().map(|edit| u128::from(edit.duration)).sum(), clock.timescale)
+                };
+                let length = (ticks * u128::from(movie_timescale)).div_ceil(u128::from(scale));
+                Ok(maximum.max(length))
+            })?.min(u128::from(u64::MAX)) as u64
+        } else {
+            movie_duration
+        };
+        let chapters = read_chpl(udta, movie_timescale, chapter_duration);
         let tags = read_tags(udta);
         let encoder = read_encoder(udta);
         Ok(Self {
             reader,
             tracks,
             track_header_flags,
+            track_header_durations,
             refused,
             chapters,
             tags,
             encoder,
             movie_timescale,
+            movie_duration: (movie_duration != 0 && !movie_duration_unknown).then_some(movie_duration),
             limits,
             position: u64::MAX,
         })
     }
+    /// Known positive movie duration in movie ticks; zero and the unknown
+    /// marker do not provide a finite bound for presentation estimation.
+    pub fn movie_duration(&self) -> Option<u64> {
+        self.movie_duration
+    }
     /// The stored tkhd flags for an indexed track, without the version byte.
     pub fn track_header_flags(&self, index: usize) -> Option<u32> {
         self.track_header_flags.get(index).copied()
+    }
+    /// Known positive `tkhd` duration, in movie timescale ticks. Zero and the
+    /// version-specific unknown marker have no finite duration bound.
+    pub fn track_header_duration(&self, index: usize) -> Option<u64> {
+        self.track_header_durations.get(index).copied().flatten()
     }
     /// Automatic candidates in file order, preferring enabled movie tracks,
     /// then enabled tracks. Preserve the legacy fallback if none is enabled.
@@ -686,6 +819,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
         }
         let mut total = 0;
         add(&mut total, self.track_header_flags.capacity(), std::mem::size_of::<u32>())?;
+        add(&mut total, self.track_header_durations.capacity(), std::mem::size_of::<Option<u64>>())?;
         add(
             &mut total,
             self.tracks.capacity(),
@@ -770,7 +904,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
         if self.position != sample.offset {
             // A failed seek need not leave the source cursor unchanged.
             self.position = u64::MAX;
-            if let Err(error) = self.reader.seek(SeekFrom::Start(sample.offset)) {
+            if let Err(error) = seek_uninterrupted(&mut self.reader, SeekFrom::Start(sample.offset)) {
                 output.clear();
                 return Err(error.into());
             }
@@ -796,7 +930,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
         let offset=sample.offset.checked_add(start as u64).ok_or_else(||invalid("MP4 range offset overflow"))?;
         if self.position!=offset {
             self.position=u64::MAX;
-            self.reader.seek(SeekFrom::Start(offset))?;
+            seek_uninterrupted(&mut self.reader, SeekFrom::Start(offset))?;
         }
         if let Err(error)=self.reader.read_exact(&mut out[..n]) {self.position=u64::MAX;return Err(error.into());}
         self.position=offset.checked_add(n as u64).ok_or_else(||invalid("MP4 range end overflow"))?;
@@ -1192,7 +1326,7 @@ fn parse_track(
     limit: usize,
     fragmented: bool,
     refused: &mut Vec<SkippedTrack>,
-) -> Result<Option<(Track, u32)>> {
+) -> Result<Option<(Track, u32, Option<u64>)>> {
     let track = atoms(data)?;
     let tkhd = required(&track, b"tkhd")?;
     let narrow = version(tkhd, 1)? == 0;
@@ -1201,6 +1335,9 @@ fn parse_track(
     if id == 0 {
         return Err(invalid("zero MP4 track ID"));
     }
+    let duration = if narrow { u64::from(u32be(tkhd, 20)?) } else { u64be(tkhd, 28)? };
+    let unknown = if narrow { u64::from(u32::MAX) } else { u64::MAX };
+    let header_duration = (duration != 0 && duration != unknown).then_some(duration);
     // The transform that places the picture and the size it is drawn at, which
     // are the last fields of the header and whose place depends only on its
     // version. Both are 16.16, so the drawn size stays fixed-point here: the
@@ -1219,7 +1356,7 @@ fn parse_track(
     let drawn = (u32be(tkhd, at + 36)?, u32be(tkhd, at + 40)?);
     let mdia = atoms(required(&track, b"mdia")?)?;
     let mdhd = required(&mdia, b"mdhd")?;
-    let (timescale, duration) = media_time(mdhd)?;
+    let (timescale, duration) = media_time(mdhd, 24)?;
     // mdhd uses all bits set, in its version's field width, for unknown.
     let duration_unknown = if version(mdhd, 1)? == 0 {
         duration == u64::from(u32::MAX)
@@ -1289,17 +1426,17 @@ fn parse_track(
     let template = result.clone();
     let mut descriptions = Vec::new();
     let mut supported = false;
-    let mut unknown_video = None;
+    let mut unknown_codec = None;
     for entry in entries {
         let mut rejected = Vec::new();
         if let Some(parsed) = parse_sample_entry(entry, template.clone(), &mut rejected, drawn, rotation)? {
             descriptions.push(SampleDescription::from_track(&parsed));
             if !supported { result = parsed; supported = true; }
-        } else if handler == *b"vide" {
+        } else if handler == *b"vide" || handler == *b"soun" {
             // An unreferenced SampleEntry must not hide the supported entries.
             // Its common header/data reference was validated above; the unknown
             // codec's payload stays opaque and is never supplied to a decoder.
-            unknown_video.get_or_insert(entry.kind);
+            unknown_codec.get_or_insert(entry.kind);
             let mut opaque = template.clone();
             opaque.codec = entry.kind;
             descriptions.push(SampleDescription::from_track(&opaque));
@@ -1309,7 +1446,7 @@ fn parse_track(
         }
     }
     if !supported {
-        if let Some(codec) = unknown_video { refused.push(SkippedTrack {handler, codec}); }
+        if let Some(codec) = unknown_codec { refused.push(SkippedTrack {handler, codec}); }
         return Ok(None);
     }
     result.name = name;
@@ -1332,6 +1469,13 @@ fn parse_track(
         let children = atoms(edts)?;
         let elst = required(&children, b"elst")?;
         let v = version(elst, 1)?;
+        let edit_flags = u32be(elst, 0)? & 0x00ff_ffff;
+        if edit_flags & !1 != 0 {
+            return Err(invalid("reserved MP4 edit-list flags"));
+        }
+        if edit_flags & 1 != 0 {
+            return Err(unsupported("looping MP4 edits are not implemented"));
+        }
         let stride = if v == 0 { 12 } else { 20 };
         let count = table(elst, stride, 1024)?;
         if count == 0 {
@@ -1348,7 +1492,8 @@ fn parse_track(
             } else {
                 (u64be(elst, at)?, u64be(elst, at + 8)? as i64, at + 16)
             };
-            if duration == 0 || media_time < -1 || u32be(elst, rate_at)? != 0x0001_0000 {
+            let open_media = fragmented && count == 1 && media_time >= 0;
+            if (duration == 0 && !open_media) || media_time < -1 || u32be(elst, rate_at)? != 0x0001_0000 {
                 return Err(invalid("unsupported MP4 edit rate, duration or media time"));
             }
             result.edits.push(Edit {
@@ -1357,7 +1502,7 @@ fn parse_track(
             });
         }
     }
-    Ok(Some((result, flags)))
+    Ok(Some((result, flags, header_duration)))
 }
 
 fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<SkippedTrack>, drawn: (u32, u32), rotation: u16) -> Result<Option<Track>> {
@@ -1540,8 +1685,15 @@ fn parse_sample_entry(entry: Atom<'_>, mut result: Track, refused: &mut Vec<Skip
                     result.channels = u16::from(config.output_channels());
                 }
     }
-    let spacing =
-        optional(&configs, b"pasp")?.and_then(|p| Some((u32be(p, 0).ok()?, u32be(p, 4).ok()?)));
+    let spacing = match optional(&configs, b"pasp")? {
+        Some(payload) => {
+            if payload.len() != 8 {
+                return Err(invalid("invalid MP4 pixel-aspect box size"));
+            }
+            Some((u32be(payload, 0)?, u32be(payload, 4)?))
+        }
+        None => None,
+    };
     if let Some(colr) = optional(&configs, b"colr")?
         && let Some(description) = colr_description(colr)
     {
@@ -1991,9 +2143,9 @@ struct TrackExtends {
 }
 
 /// The `tfhd` flag bits this reader acts on: the two ways of naming where a
-/// fragment's bytes begin, the three defaults a run may leave out, and which
-/// sample description selected for the fragment, overriding the `trex` default.
-const TFHD_SUPPORTED: u32 = 0x00_0001 | 0x00_0002 | 0x00_0008 | 0x00_0010 | 0x00_0020 | 0x02_0000;
+/// fragment's bytes begin, the three defaults a run may leave out, the selected
+/// sample description, and the flag naming an interval without sample data.
+const TFHD_SUPPORTED: u32 = 0x00_0001 | 0x00_0002 | 0x00_0008 | 0x00_0010 | 0x00_0020 | 0x01_0000 | 0x02_0000;
 /// The `trun` bits likewise: where the media starts, the flags of the run's first
 /// sample, and the four per-sample fields, which the box always states in the
 /// order length, size, flags, display shift.
@@ -2030,12 +2182,93 @@ fn fragment_defaults(moov: &[Atom<'_>]) -> Result<Vec<TrackExtends>> {
     Ok(out)
 }
 
+/// Resolve byte extent without decoding or retaining an unsupported track's
+/// packets. A following legacy traf can depend on these bytes. Work is bounded
+/// by run metadata: a default-sized run is summed without looping sample_count.
+fn unindexed_fragment_end(
+    boxes: &[Atom<'_>],
+    base: u64,
+    default_size: Option<u32>,
+    mdats: &[Range<u64>],
+) -> Result<u64> {
+    let mut cursor = base;
+    for run in boxes.iter().filter(|atom| &atom.kind == b"trun") {
+        let bytes = run.data;
+        version(bytes, 1)?;
+        let flags = u32be(bytes, 0)? & 0x00ff_ffff;
+        if flags & !TRUN_SUPPORTED != 0 {
+            return Err(invalid("unsupported MP4 track-run flags"));
+        }
+        if flags & 0x00_0004 != 0 && flags & 0x00_0400 != 0 {
+            return Err(invalid("conflicting MP4 track-run sample flags"));
+        }
+        let count = u32be(bytes, 4)? as usize;
+        let mut at = 8usize;
+        let offset = if flags & 1 != 0 {
+            let shift = u32be(bytes, at)? as i32;
+            at += 4;
+            if shift < 0 {
+                base.checked_sub(u64::from(shift.unsigned_abs()))
+                    .ok_or_else(|| invalid("MP4 fragment data offset before its base"))?
+            } else {
+                base.checked_add(shift as u64)
+                    .ok_or_else(|| invalid("MP4 fragment data offset overflow"))?
+            }
+        } else {
+            cursor
+        };
+        if flags & 4 != 0 {
+            u32be(bytes, at)?;
+            at += 4;
+        }
+        let fields = usize::from(flags & 0x100 != 0)
+            + usize::from(flags & 0x200 != 0)
+            + usize::from(flags & 0x400 != 0)
+            + usize::from(flags & 0x800 != 0);
+        let stride = fields * 4;
+        if count.checked_mul(stride).and_then(|size| size.checked_add(at)) != Some(bytes.len()) {
+            return Err(invalid("MP4 track-run size does not match its rows"));
+        }
+        let total = if count == 0 {
+            0
+        } else if flags & 0x200 != 0 {
+            let size_at = at + usize::from(flags & 0x100 != 0) * 4;
+            let mut total = 0u64;
+            for row in 0..count {
+                let size = u32be(bytes, size_at + row * stride)?;
+                if size == 0 {
+                    return Err(invalid("zero MP4 fragment sample size"));
+                }
+                total = total.checked_add(u64::from(size))
+                    .ok_or_else(|| invalid("MP4 sample span overflow"))?;
+            }
+            total
+        } else {
+            let size = default_size.ok_or_else(|| invalid(
+                "MP4 fragment sample states no size and none is defaulted"))?;
+            if size == 0 {
+                return Err(invalid("zero MP4 fragment sample size"));
+            }
+            u64::from(size).checked_mul(count as u64)
+                .ok_or_else(|| invalid("MP4 sample span overflow"))?
+        };
+        cursor = offset.checked_add(total).ok_or_else(|| invalid("MP4 sample span overflow"))?;
+        if count != 0 {
+            let containing = mdats.partition_point(|range| range.start <= offset);
+            if containing == 0 || cursor > mdats[containing - 1].end {
+                return Err(invalid("sample chunk outside mdat"));
+            }
+        }
+    }
+    Ok(cursor)
+}
+
 /// Append what every fragment indexes to the track its own `traf` names, in the
 /// order the boxes stand in the file.
 ///
 /// A fragment states nothing of where its media sits by itself: the base is
-/// either the absolute offset the track header gives or the `moof` the header
-/// stands in, and only the first run of a track fragment offsets from that base.
+/// either an absolute offset, the enclosing `moof`, or the end of the preceding
+/// track fragment's data (the `moof` start for the first legacy fragment).
 /// Every later sample is measured from the end of the one before, so a file that
 /// interleaves one fragment's picture and sound still resolves to one ordered
 /// list per track.
@@ -2054,6 +2287,19 @@ fn index_fragments(
     tracks: &mut [Track],
     limit: &mut usize,
 ) -> Result<()> {
+    // An empty-duration traf carries time without a sample-index entry. Keep
+    // its end independently so a following traf without tfdt can continue it.
+    let mut decode_ends = Vec::new();
+    decode_ends.try_reserve_exact(tracks.len())
+        .map_err(|_| invalid("MP4 fragment clock allocation failed"))?;
+    for track in tracks.iter() {
+        let end = match track.samples.len().checked_sub(1).and_then(|i| track.samples.get(i)) {
+            Some(last) => last.dts.checked_add(u64::from(last.duration))
+                .ok_or_else(|| invalid("MP4 timestamp overflow"))?,
+            None => 0,
+        };
+        decode_ends.push(end);
+    }
     for fragment in fragments {
         let moof_boxes = atoms(&fragment.data)?;
         let mfhd = required(&moof_boxes, b"mfhd")?;
@@ -2066,6 +2312,10 @@ fn index_fragments(
         if u32be(mfhd, 4)? == 0 {
             return Err(invalid("zero MP4 movie-fragment sequence number"));
         }
+        // Legacy addressing starts at moof, then follows the data end of the
+        // preceding traf. Explicit bases override it but still establish the
+        // inherited base for the next traf.
+        let mut implicit_base = Some(fragment.start);
         for traf in moof_boxes
             .iter()
             .filter(|atom| &atom.kind == b"traf")
@@ -2076,6 +2326,10 @@ fn index_fragments(
             let flags = u32be(header, 0)? & 0x00ff_ffff;
             if flags & !TFHD_SUPPORTED != 0 {
                 return Err(invalid("unsupported MP4 track-fragment header flags"));
+            }
+            let empty_duration = flags & 0x01_0000 != 0;
+            if empty_duration && boxes.iter().any(|atom| &atom.kind == b"trun") {
+                return Err(invalid("empty-duration MP4 fragment contains track runs"));
             }
             let id = u32be(header, 4)?;
             let mut at = 8usize;
@@ -2113,19 +2367,18 @@ fn index_fragments(
             let base = match (stated_base, flags & 0x02_0000) {
                 (Some(value), _) => value,
                 (None, 0x02_0000) => fragment.start,
-                (None, _) => {
-                    return Err(invalid(
-                        "MP4 fragment states neither a base offset nor its own moof as the base",
-                    ));
-                }
-            };
-            // A track the file's own `trak` list set aside for its coding, or one
-            // no init segment ever described, keeps its bytes unread: that list is
-            // what says which tracks exist, and it already answered.
-            let Some(position) = tracks.iter().position(|track| track.id == id) else {
-                continue;
+                (None, _) => implicit_base.ok_or_else(|| invalid(
+                    "MP4 implicit fragment base follows unresolved track data"))?,
             };
             let extends = defaults.iter().find(|entry| entry.track == id);
+            // Keep unrepresented packets unread, but resolve their declared byte
+            // extent for a following implicit base. Unresolvable foreign data
+            // does not block an independently addressed represented track.
+            let Some(position) = tracks.iter().position(|track| track.id == id) else {
+                let default_size = size.or_else(|| extends.and_then(|e| (e.size != 0).then_some(e.size)));
+                implicit_base = unindexed_fragment_end(&boxes, base, default_size, mdats).ok();
+                continue;
+            };
             let description = description
                 .or_else(|| extends.map(|entry| entry.description))
                 .unwrap_or(1);
@@ -2145,6 +2398,9 @@ fn index_fragments(
             let mut dts = match optional(&boxes, b"tfdt")? {
                 Some(stamp) => {
                     let v = version(stamp, 1)?;
+                    if u32be(stamp, 0)? & 0x00ff_ffff != 0 {
+                        return Err(invalid("reserved MP4 track-fragment decode time flags"));
+                    }
                     let expected = if v == 0 { 8 } else { 12 };
                     if stamp.len() != expected {
                         return Err(invalid(
@@ -2157,10 +2413,17 @@ fn index_fragments(
                         u64be(stamp, 4)?
                     }
                 }
-                None => list
-                    .last()
-                    .map_or(0, |last| last.dts.saturating_add(u64::from(last.duration))),
+                None => decode_ends[position],
             };
+            if empty_duration {
+                let end = dts.checked_add(u64::from(duration))
+                    .ok_or_else(|| invalid("MP4 empty-fragment timestamp overflow"))?;
+                decode_ends[position] = end;
+                track.duration = track.duration.max(end);
+                // There are no data runs to move the inherited byte base.
+                implicit_base = Some(base);
+                continue;
+            }
             let mut traf_cursor = base;
             for run in boxes.iter().filter(|atom| &atom.kind == b"trun") {
                 let bytes = run.data;
@@ -2291,12 +2554,13 @@ fn index_fragments(
                 }
                 traf_cursor = offset;
             }
+            decode_ends[position] = dts;
+            implicit_base = Some(traf_cursor);
         }
     }
-    // A fragmented track's length is what its samples add up to: the init segment
-    // writes `mdhd` at zero because it indexes nothing, and no later box states a
-    // total, so the end of the last sample says it - once, after every fragment
-    // has been read, since a fragment is only ever part of the answer.
+    // Init segments can leave mdhd at zero. Sample endpoints establish the
+    // populated duration after all fragments are read; empty-duration endpoints
+    // were retained above even when no sample follows the final gap.
     for track in tracks {
         if track.samples.len() == 0 {
             return Err(invalid("MP4 track states no samples"));

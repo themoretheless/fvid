@@ -1,0 +1,153 @@
+{
+  "provenance": "Own three-sample VP9 at 50 Hz, colored shown pictures and hidden keyframes. Authored finite media edits with independent normalized frame intervals; no private media, external encoder or network.",
+  "cases": [
+    {
+      "file": "tail-repeat.mp4",
+      "source": "source-tail.mp4",
+      "duration": 6,
+      "frames": [
+        {
+          "start": 0,
+          "end": 1,
+          "color": 0
+        },
+        {
+          "start": 1,
+          "end": 2,
+          "color": 1
+        },
+        {
+          "start": 3,
+          "end": 4,
+          "color": 0
+        },
+        {
+          "start": 4,
+          "end": 5,
+          "color": 1
+        }
+      ]
+    },
+    {
+      "file": "tail-empty-first.mp4",
+      "source": "source-tail.mp4",
+      "duration": 3,
+      "frames": [
+        {
+          "start": 1,
+          "end": 2,
+          "color": 0
+        },
+        {
+          "start": 2,
+          "end": 3,
+          "color": 1
+        }
+      ]
+    },
+    {
+      "file": "tail-reordered.mp4",
+      "source": "source-tail.mp4",
+      "duration": 4,
+      "frames": [
+        {
+          "start": 0,
+          "end": 1,
+          "color": 1
+        },
+        {
+          "start": 1,
+          "end": 2,
+          "color": 0
+        },
+        {
+          "start": 2,
+          "end": 3,
+          "color": 1
+        }
+      ]
+    },
+    {
+      "file": "middle-trim-repeat.mp4",
+      "source": "source-middle.mp4",
+      "duration": 4,
+      "frames": [
+        {
+          "start": 0,
+          "end": 1,
+          "color": 0
+        },
+        {
+          "start": 1,
+          "end": 2,
+          "color": 1
+        },
+        {
+          "start": 2,
+          "end": 3,
+          "color": 0
+        },
+        {
+          "start": 3,
+          "end": 4,
+          "color": 1
+        }
+      ]
+    },
+    {
+      "file": "leading-trailing-empty.mp4",
+      "source": "source-leading.mp4",
+      "duration": 3,
+      "frames": [
+        {
+          "start": 0,
+          "end": 1,
+          "color": 0
+        },
+        {
+          "start": 1,
+          "end": 2,
+          "color": 1
+        }
+      ]
+    },
+    {
+      "file": "leading-empty-first.mp4",
+      "source": "source-leading.mp4",
+      "duration": 3,
+      "frames": [
+        {
+          "start": 1,
+          "end": 2,
+          "color": 0
+        },
+        {
+          "start": 2,
+          "end": 3,
+          "color": 1
+        }
+      ]
+    }
+  ],
+  "no_picture": [
+    "all-hidden-many.mp4",
+    "preroll-many.mp4"
+  ],
+  "invalid": "corrupt-window.mp4",
+  "sha256": {
+    "source-tail.mp4": "3d43fbcffb434b4c4dab7ce11e6039ca5898740e72248809c3401eaa1416b0b4",
+    "source-middle.mp4": "06be670fe4eef0f41fafd18eff450433d493bd00dd06943e579c6d2e27b59757",
+    "source-leading.mp4": "94b134a1a03afa0e3b7ecf310b815db744062ecaca826712803e6f9b3fb13981",
+    "tail-repeat.mp4": "747546b6cee1e79bdc29ba79ff7e333d46acd71e17bdd94585aaea83717b36cd",
+    "tail-empty-first.mp4": "74677ed62eba8d6222ca42b750078fb067685d5a59573a66dc99e1b252c797f9",
+    "tail-reordered.mp4": "f3f80f282d38f6e3a8939c710dc8428eda6169415ba7c128a9c5fe8287df4b43",
+    "middle-trim-repeat.mp4": "04f92b324f76592e190294c058f3ceedc57a9ae8987f1ba510eb31b0e55361bb",
+    "leading-trailing-empty.mp4": "3541ca0da971d8ef4c629e23a02abd65b60197bdd0117e0b2c38590ba592658e",
+    "leading-empty-first.mp4": "9a575cbd5ee57fb84a8a7dada764d4b4a4ee32853e383bd34e4ecd250853e456",
+    "all-hidden-many.mp4": "0b1bfd91da1ef035a83a114fded2aaabb22a6b8e82b95022756f001ec0feaef4",
+    "preroll-many.mp4": "4a15824afa739a9d149fcd1404bbd23bb85b9129d81b10388b6b31f578e5f28e",
+    "corrupt-window.mp4": "760fa3d1aa17329743f7745e537413e78dd9aec21b3b88f1bd5046fb657577f8",
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237"
+  }
+}

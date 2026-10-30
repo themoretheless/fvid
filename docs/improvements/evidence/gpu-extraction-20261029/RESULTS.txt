@@ -1,0 +1,15 @@
+HISTORICAL: broad extraction withdrawn; see ../gpu-common-20261029 for current qualification.
+GPU extraction qualification, 2026-10-29
+Baseline fvid commit: bd95009d8823b92be229277c289c6f9511a134a8
+Forma pinned toolchain 1.97.1: video feature builds; all 18 library tests pass.
+Fvid pinned toolchain 1.98.1: CPU-only, CPU+player, gpu, gpu+cuda, player builds pass.
+Ordinary GPU suites: 14 passed, 3 hardware tests ignored; explicit Metal resident chain: 1 passed.
+Player GPU ordinary tests: 12 passed, 21 ignored.
+Player explicit physical GPU/native tests: 20 passed, 1 failed.
+Existing failure: native_crop_scaling_matches_cropped_rotated_packed_source:
+  before extraction and after extraction both depth=8 rotation=180 worst=199.
+CUDA unit suite: 44 passed, 1 failed, 1 ignored.
+Existing failure: preset_init_abi_and_geometry_match_the_pinned_sdk:
+  before extraction and after extraction both size3600 versus expected3584.
+Tests and tolerances preserved. No NVIDIA hardware qualification on macOS.
+No claim of complete suite success or acceptance toward the 1000 media fixes.

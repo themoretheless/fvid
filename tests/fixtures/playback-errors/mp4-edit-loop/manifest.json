@@ -1,0 +1,15 @@
+{
+  "provenance": "Own three colored VP9 keyframes, 50 Hz; two-frame trim. V0/V1 edit flags only distinguish finite, loop and reserved cases. No private media/parameters, FFmpeg or network.",
+  "sha256": {
+    "v0-finite.mp4": "69a916233129bb15568e19c6be45bd6f74b07443bdd4b673e16aabf4fa77ffaa",
+    "v0-loop.mp4": "106497f4146368eda8ee43c6d5b1abe3aa98d3f68b4f2440be3f1d43712c05e1",
+    "v0-reserved.mp4": "02b24c81062bb1e7fc82834a15d2044aa9fffc829f23079523778c8932019397",
+    "v0-loop-reserved.mp4": "10b1470a18b3df1815018eac82863ba9ae3602bae6d77323d9ca703d673322fc",
+    "v1-finite.mp4": "756c4a8308d907b6bed0558bdf3f7d8621a3d9526cb97d8bb582ab5cae799b94",
+    "v1-loop.mp4": "076546ca1987f8be1288136bd55d82a66d192482f742511d2471e992a50ff0da",
+    "v1-reserved.mp4": "a921108aa6cca29f256e7e2970f3663e0d59238e805b234f2765422d2f96357c",
+    "v1-loop-reserved.mp4": "da7d5a1e68bb57738152fe56bb954a4ed692e0b0ca038d5371df1eeb05ff50c8",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7"
+  }
+}

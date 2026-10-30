@@ -67,7 +67,9 @@ pub(crate) fn aac_packet_plan_window(
         u64::try_from(n / d).map_err(|_| invalid("AAC sample position overflow"))
     };
     let media_end = position(track.duration)?;
-    let (mut start, mut end) = match track.edits.as_slice() {
+    let edit_clock = track.resolved_edit_clock(movie_scale)?;
+    let movie_scale = edit_clock.timescale;
+    let (mut start, mut end) = match edit_clock.edits() {
         [] => (0, media_end),
         [edit] if edit.media_time >= 0 && movie_scale != 0 => {
             let start = position(edit.media_time as u64)?;

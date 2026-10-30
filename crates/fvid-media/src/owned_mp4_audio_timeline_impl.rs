@@ -111,11 +111,12 @@ pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>
         u64::try_from(numerator / denominator)
             .map_err(|_| invalid("audio sample position overflow"))
     };
+    let edit_clock = track.resolved_edit_clock(reader.movie_timescale())?;
     let presentation = Mp4AudioSchedule::new(
-        &track.edits,
+        edit_clock.edits(),
         track.duration,
         track.timescale,
-        reader.movie_timescale(),
+        edit_clock.timescale,
         rate,
     )?;
     let timeline = presentation.sample_frames;

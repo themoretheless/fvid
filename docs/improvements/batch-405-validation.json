@@ -1,0 +1,35 @@
+{
+  "batch": 405,
+  "accepted_ids": [
+    "FVID-0411"
+  ],
+  "status": "accepted",
+  "summary": "Refuse looping MP4 edits explicitly instead of silently treating them as finite",
+  "source_files": [
+    "crates/fvid-media/src/owned_mp4_impl.rs"
+  ],
+  "regressions": [
+    "tests/mp4_edit_loop.rs"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/mp4-edit-loop/status.json",
+    "docs/improvements/evidence/mp4-edit-loop/semantics.md"
+  ],
+  "before": "After correcting a test-harness enum match (compile log retained separately), the runtime baseline has 1 passing finite trim test and 2 failing tests. Both parser wrappers accept six loop/reserved flag witnesses and native playback accepts a loop as a finite trim.",
+  "after": "49 distinct checks pass in 11 integration targets, including 3 new tests. Zero-flag V0/V1 trim controls retain exact analytic YUV, software RGB, PTS/duration, random seeks, rewind and EOF. Related finite/open-ended video/audio edits, variable rates, decode-only coverage, header sizes and seek I/O remain green. Locked offline no-default-features core build check passes.",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --features player --test mp4_edit_loop",
+    "cargo test --locked --offline --no-default-features --features player --no-fail-fast --test mp4_edit_loop --test mp4_edit_window_eof --test mp4_decode_only_seek --test mp4_empty_tail --test mp4_open_ended_edit --test mp4_open_ended_edit_audio --test mp4_fixed_audio_edits --test mp4_variable_rate_edits --test mp4_time_header_sizes --test mp4_tfdt_flags --test mp4_seek_io_regressions",
+    "cargo check --locked --offline --no-default-features"
+  ],
+  "limitations": [
+    "Loop playback remains explicitly unsupported.",
+    "No full project-wide green claim; historical unrelated failures remain separate.",
+    "Dedicated acceptance uses software decoding; related existing worker tests do not qualify physical GPU parity."
+  ],
+  "uncounted": [
+    "Fixture versions/flag variants",
+    "Test-harness enum repair",
+    "Related finite edit acceptance and resource controls"
+  ]
+}

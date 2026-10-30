@@ -1,0 +1,29 @@
+{
+  "status": "accepted",
+  "improvement": "FVID-0414",
+  "before": "Corrected runtime baseline: selected-unknown refusal passes; 3 acceptance tests fail. Both indexed parser wrappers discard audio in all 16 initial regular/fragmented constant/changing witnesses; native audio reports unknown zzzz and owned decode sees no audio stream. Initial parser-harness constant-description misuse was corrected and rerun before production edits; original log retained.",
+  "change": "Retain opaque unknown audio SampleEntry metadata as already done for video, validating its common data reference. Select supported codec state only from actual sample or compact-chunk references before clock construction; unknown unselected entries cannot hide supported audio or reach a decoder. Fully unsupported tracks and actually selected unknown entries retain explicit capability refusal.",
+  "after": "50 distinct integration checks pass across 9 targets, including all 6 expanded new tests. Twenty authored regular, fragmented and compact-index cases retain both tracks, exact selected descriptions, encoded packet bytes, DTS/PTS, independent nonzero PCM across coding/rate/channel/precision transitions, seek/rewind, six-picture video companions, owned normalized waveform equality and actual audio-worker replay. Core locked/offline no-default-features check passes.",
+  "baseline_failures": "Four owned_mp4_audio failures also occur in an isolated snapshot restored to the two pre-fix sources. All other Rust sources match. Before and after share the same 4 failed names/errors and waveform assertion hashes: packet-budget planning, precise PCM and Matroska interval-resampling lookahead, and frontend/library transformed WAVE parity. No project-wide green claim. Saved comparison logs replace raw waveform assertion arrays with their hashes.",
+  "fixtures": "40 byte-identically regenerated files: 20 passing short PCM+VP9 movies, 5 equivalent controls, selected-unknown and external-reference refusal witnesses, 12 analytic PCM oracles and manifest. No private media/parameters, FFmpeg or network. Ordinary tests read saved assets without generation.",
+  "controls": [
+    "Actually selected unknown coding refuses as Unsupported before clock construction.",
+    "Unselected unknown entry still rejects an external data reference.",
+    "Compact form is explicitly asserted as Uniform and inspected by runs, without expanding PCM frames.",
+    "Initial harness seek expectation was corrected to existing constant PCM packet-boundary behavior; changing geometry still checks the precise within-packet window. No existing test was weakened."
+  ],
+  "limitations": [
+    "Some constant PCM navigation uses its existing packet-boundary landing contract.",
+    "Opaque unused codec-specific payload stays unparsed and is never sent to a decoder.",
+    "No throughput, physical audio device, GPU parity or whole-project green claim.",
+    "Four demonstrated pre-existing owned_mp4_audio failures remain open separately."
+  ],
+  "sha256": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": "e33bddc7c679ca353df6458af8c07e208b768ad1ab29dcdbd72ec03a17cae82f",
+    "src/playback/audio/mp4_audio.rs": "c63b50dc00b1fa22d07b5c7b125aeb82a549dacc1856e5dae64322c6b9cea629",
+    "scripts/generate_mp4_unused_audio_descriptions.py": "f0742a7bf16e7036576cf99799dfc8a44717ef49dcc3c888f5bb29819477b9e6",
+    "tests/mp4_unused_audio_descriptions.rs": "8887dfa7a43b46493dfa92205d232919db696dc7af93a6ca3ae8690aa1e1f87e"
+  },
+  "follow_up_validation": "batch-412-validation.json",
+  "baseline_resolution": "The four historical owned_mp4_audio failures were test-oracle/admission expectation issues, repaired without production changes in batch-410. The full owned_mp4_audio suite passes in batch-412. Original before/after comparison is retained."
+}

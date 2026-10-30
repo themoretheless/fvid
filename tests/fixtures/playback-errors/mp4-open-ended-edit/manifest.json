@@ -1,0 +1,370 @@
+{
+  "provenance": "Pure-Python owned 16x16 neutral VP9. Three media samples at 50Hz; single media edit V0/V1, clocks 25/50/1000/1001, trimmed starts and positive composition shifts. No private source, FFmpeg or network.",
+  "controls": [
+    {
+      "file": "v0-clock50-whole-known.mp4",
+      "frames": 3,
+      "start": 0,
+      "shift": 0,
+      "duration": 3,
+      "movie_scale": 50
+    },
+    {
+      "file": "v0-clock50-trim-known.mp4",
+      "frames": 2,
+      "start": 1,
+      "shift": 0,
+      "duration": 2,
+      "movie_scale": 50
+    },
+    {
+      "file": "v0-clock50-positive-cts-known.mp4",
+      "frames": 3,
+      "start": 2,
+      "shift": 2,
+      "duration": 3,
+      "movie_scale": 50
+    },
+    {
+      "file": "v0-clock1000-whole-known.mp4",
+      "frames": 3,
+      "start": 0,
+      "shift": 0,
+      "duration": 60,
+      "movie_scale": 1000
+    },
+    {
+      "file": "v0-clock1000-trim-known.mp4",
+      "frames": 2,
+      "start": 1,
+      "shift": 0,
+      "duration": 40,
+      "movie_scale": 1000
+    },
+    {
+      "file": "v0-clock1000-positive-cts-known.mp4",
+      "frames": 3,
+      "start": 2,
+      "shift": 2,
+      "duration": 60,
+      "movie_scale": 1000
+    },
+    {
+      "file": "v0-clock1001-whole-known.mp4",
+      "frames": 3,
+      "start": 0,
+      "shift": 0,
+      "duration": 60,
+      "movie_scale": 1001
+    },
+    {
+      "file": "v0-clock1001-trim-known.mp4",
+      "frames": 2,
+      "start": 1,
+      "shift": 0,
+      "duration": 40,
+      "movie_scale": 1001
+    },
+    {
+      "file": "v0-clock1001-positive-cts-known.mp4",
+      "frames": 3,
+      "start": 2,
+      "shift": 2,
+      "duration": 60,
+      "movie_scale": 1001
+    },
+    {
+      "file": "v1-clock50-whole-known.mp4",
+      "frames": 3,
+      "start": 0,
+      "shift": 0,
+      "duration": 3,
+      "movie_scale": 50
+    },
+    {
+      "file": "v1-clock50-trim-known.mp4",
+      "frames": 2,
+      "start": 1,
+      "shift": 0,
+      "duration": 2,
+      "movie_scale": 50
+    },
+    {
+      "file": "v1-clock50-positive-cts-known.mp4",
+      "frames": 3,
+      "start": 2,
+      "shift": 2,
+      "duration": 3,
+      "movie_scale": 50
+    },
+    {
+      "file": "v1-clock1000-whole-known.mp4",
+      "frames": 3,
+      "start": 0,
+      "shift": 0,
+      "duration": 60,
+      "movie_scale": 1000
+    },
+    {
+      "file": "v1-clock1000-trim-known.mp4",
+      "frames": 2,
+      "start": 1,
+      "shift": 0,
+      "duration": 40,
+      "movie_scale": 1000
+    },
+    {
+      "file": "v1-clock1000-positive-cts-known.mp4",
+      "frames": 3,
+      "start": 2,
+      "shift": 2,
+      "duration": 60,
+      "movie_scale": 1000
+    },
+    {
+      "file": "v1-clock1001-whole-known.mp4",
+      "frames": 3,
+      "start": 0,
+      "shift": 0,
+      "duration": 60,
+      "movie_scale": 1001
+    },
+    {
+      "file": "v1-clock1001-trim-known.mp4",
+      "frames": 2,
+      "start": 1,
+      "shift": 0,
+      "duration": 40,
+      "movie_scale": 1001
+    },
+    {
+      "file": "v1-clock1001-positive-cts-known.mp4",
+      "frames": 3,
+      "start": 2,
+      "shift": 2,
+      "duration": 60,
+      "movie_scale": 1001
+    }
+  ],
+  "open": [
+    {
+      "file": "v0-clock50-whole-open.mp4",
+      "frames": 3,
+      "start": 0,
+      "shift": 0,
+      "duration": 0,
+      "movie_scale": 50
+    },
+    {
+      "file": "v0-clock50-trim-open.mp4",
+      "frames": 2,
+      "start": 1,
+      "shift": 0,
+      "duration": 0,
+      "movie_scale": 50
+    },
+    {
+      "file": "v0-clock50-positive-cts-open.mp4",
+      "frames": 3,
+      "start": 2,
+      "shift": 2,
+      "duration": 0,
+      "movie_scale": 50
+    },
+    {
+      "file": "v0-clock1000-whole-open.mp4",
+      "frames": 3,
+      "start": 0,
+      "shift": 0,
+      "duration": 0,
+      "movie_scale": 1000
+    },
+    {
+      "file": "v0-clock1000-trim-open.mp4",
+      "frames": 2,
+      "start": 1,
+      "shift": 0,
+      "duration": 0,
+      "movie_scale": 1000
+    },
+    {
+      "file": "v0-clock1000-positive-cts-open.mp4",
+      "frames": 3,
+      "start": 2,
+      "shift": 2,
+      "duration": 0,
+      "movie_scale": 1000
+    },
+    {
+      "file": "v0-clock1001-whole-open.mp4",
+      "frames": 3,
+      "start": 0,
+      "shift": 0,
+      "duration": 0,
+      "movie_scale": 1001
+    },
+    {
+      "file": "v0-clock1001-trim-open.mp4",
+      "frames": 2,
+      "start": 1,
+      "shift": 0,
+      "duration": 0,
+      "movie_scale": 1001
+    },
+    {
+      "file": "v0-clock1001-positive-cts-open.mp4",
+      "frames": 3,
+      "start": 2,
+      "shift": 2,
+      "duration": 0,
+      "movie_scale": 1001
+    },
+    {
+      "file": "v0-clock25-single-open.mp4",
+      "frames": 1,
+      "start": 2,
+      "shift": 0,
+      "duration": 0,
+      "movie_scale": 25
+    },
+    {
+      "file": "v1-clock50-whole-open.mp4",
+      "frames": 3,
+      "start": 0,
+      "shift": 0,
+      "duration": 0,
+      "movie_scale": 50
+    },
+    {
+      "file": "v1-clock50-trim-open.mp4",
+      "frames": 2,
+      "start": 1,
+      "shift": 0,
+      "duration": 0,
+      "movie_scale": 50
+    },
+    {
+      "file": "v1-clock50-positive-cts-open.mp4",
+      "frames": 3,
+      "start": 2,
+      "shift": 2,
+      "duration": 0,
+      "movie_scale": 50
+    },
+    {
+      "file": "v1-clock1000-whole-open.mp4",
+      "frames": 3,
+      "start": 0,
+      "shift": 0,
+      "duration": 0,
+      "movie_scale": 1000
+    },
+    {
+      "file": "v1-clock1000-trim-open.mp4",
+      "frames": 2,
+      "start": 1,
+      "shift": 0,
+      "duration": 0,
+      "movie_scale": 1000
+    },
+    {
+      "file": "v1-clock1000-positive-cts-open.mp4",
+      "frames": 3,
+      "start": 2,
+      "shift": 2,
+      "duration": 0,
+      "movie_scale": 1000
+    },
+    {
+      "file": "v1-clock1001-whole-open.mp4",
+      "frames": 3,
+      "start": 0,
+      "shift": 0,
+      "duration": 0,
+      "movie_scale": 1001
+    },
+    {
+      "file": "v1-clock1001-trim-open.mp4",
+      "frames": 2,
+      "start": 1,
+      "shift": 0,
+      "duration": 0,
+      "movie_scale": 1001
+    },
+    {
+      "file": "v1-clock1001-positive-cts-open.mp4",
+      "frames": 3,
+      "start": 2,
+      "shift": 2,
+      "duration": 0,
+      "movie_scale": 1001
+    },
+    {
+      "file": "v1-clock25-single-open.mp4",
+      "frames": 1,
+      "start": 2,
+      "shift": 0,
+      "duration": 0,
+      "movie_scale": 25
+    }
+  ],
+  "invalid": [
+    "v0-regular-invalid.mp4",
+    "v0-empty-invalid.mp4",
+    "v0-rate-zero-invalid.mp4",
+    "v0-multiple-invalid.mp4",
+    "v1-regular-invalid.mp4",
+    "v1-empty-invalid.mp4",
+    "v1-rate-zero-invalid.mp4",
+    "v1-multiple-invalid.mp4"
+  ],
+  "sha256": {
+    "frame.vp9": "217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c",
+    "v0-clock50-whole-known.mp4": "03d269ac29ba3264d16e0d7787e3c6c0d450e37406689bc646420b699181a8a6",
+    "v0-clock50-whole-open.mp4": "ec5561245d177cf77abde24df13fcd79d8970722b2d4a6dbb0b07781aa2dd7d7",
+    "v0-clock50-trim-known.mp4": "84e800edb77e5873ae458f1e47dbb547ded3eea744eebfebf43d99565957caa7",
+    "v0-clock50-trim-open.mp4": "0daa53cb2b75fddd824f7b4515f4267c54383083f01972a0c0961d7ec22a68c9",
+    "v0-clock50-positive-cts-known.mp4": "0aa804d8bd62ff32c868e9cd470dcbb9eecc6fac7efc2888df43fad59661c920",
+    "v0-clock50-positive-cts-open.mp4": "dd49b95396d15374a64ba05c97d0bb3fc43d1199ab83321c7f21e1db2f61dab3",
+    "v0-clock1000-whole-known.mp4": "2bcb8aab9c45cfa86131db770c9b733baf3b2631ad6b292f0d207769b25f4230",
+    "v0-clock1000-whole-open.mp4": "0319591b89f35ed569c24cebf9664740ab77d5b5d937f9fe6822bb5fc430297b",
+    "v0-clock1000-trim-known.mp4": "2c50691ea43f1f250c71da87befbe537edfcb831ae9ce5c632113341d4fc440d",
+    "v0-clock1000-trim-open.mp4": "290ed00e0cc884e84b8d1a46df5a8cb891c6b3434db77ecaf302babd969f242d",
+    "v0-clock1000-positive-cts-known.mp4": "3cbabf159da7768d5bb6ec9714521ec172a3eb5c943d11fc695df406430658e8",
+    "v0-clock1000-positive-cts-open.mp4": "a5da1aea2eaf9c51b31ab6e9bdf228327fc824ac11521dc95b37199e43e517c1",
+    "v0-clock1001-whole-known.mp4": "85cf07344550e41a1df5c81e4aa7a1a09c21654a7f7ef168269dc3464b908e16",
+    "v0-clock1001-whole-open.mp4": "825236ac148c33f429944d553fc3b1987ac1a76cf2939694b1c1fbc8b81ca989",
+    "v0-clock1001-trim-known.mp4": "21c34e81a8d64fb44744942f6185c2a9fd6fad4685f3b6f58c77aea2f0390a49",
+    "v0-clock1001-trim-open.mp4": "5d4af120a45f52c68a6d7285fddd2e94e5501aa9cbf66938d144cb5aa7fc4280",
+    "v0-clock1001-positive-cts-known.mp4": "04224e61e76027047b1be12b0404a69e7f505dc879871cf70f3eae223210c05d",
+    "v0-clock1001-positive-cts-open.mp4": "3c21c775be58499a47b64abce76c166a6156b41edb6dba0c12df2a889e9ebf24",
+    "v0-clock25-single-open.mp4": "94241b23d05e3c3cbb2ef63d7fbb385725a068ffbb53f01bc20525e874ba5322",
+    "v0-regular-invalid.mp4": "e255445a06f013c5ec7570bce38d6e5b92eaded59d4c85d3645fae783fba4832",
+    "v0-empty-invalid.mp4": "83e4faac0df4c36a1688c6b284a12be6e1d7eeaa48e2f24bb23cc655beed35f9",
+    "v0-rate-zero-invalid.mp4": "e7ffe34aeead1f59e0aa3b2b350b5e9848d87c56be01d3ff98ad93f32505b539",
+    "v0-multiple-invalid.mp4": "f7909f2d414a91caad544369cbad45eb3b2104fee3fdef36e57171ca52ecf364",
+    "v1-clock50-whole-known.mp4": "8e712b129affc46ccd40327b4749326f20b390a805c509caf82b7c7231226987",
+    "v1-clock50-whole-open.mp4": "810f898031f62cb162c4055f32aafbb64962f4a816111a1312effb8549bbd82f",
+    "v1-clock50-trim-known.mp4": "d1768bc1f8053ed1f6617771911688935c7b26cb52ec43cbf22ced8670ece14f",
+    "v1-clock50-trim-open.mp4": "390d55e6f838d736b8f6d2a3d2f98821dac9d82db1ce3ac1ebd56981d615a798",
+    "v1-clock50-positive-cts-known.mp4": "eee793960965677785bb9ebe0e25578659135efa7bd70d75d8ea95a6a24e2fca",
+    "v1-clock50-positive-cts-open.mp4": "fdc61760d5b11b67b45eee4372e6b2c73e9a6d0b8951a2c6d36c1eae87930094",
+    "v1-clock1000-whole-known.mp4": "d18e916c2efd1071fd4bf51c5cc314dae28b575e242b5142b771ba837b369ab5",
+    "v1-clock1000-whole-open.mp4": "a4f35e510197e663207a21aa9fd0b2c49cfe143c8d782c1bd685091f963a4af1",
+    "v1-clock1000-trim-known.mp4": "cf488907248cbc762009503a3c40e6f00ea92e41c59ccd0552be590cdca2cf3e",
+    "v1-clock1000-trim-open.mp4": "edc5a0e8e1053902f61d5d3b10b66000e7ad454e8a333bda4ddebd371be083f3",
+    "v1-clock1000-positive-cts-known.mp4": "a34f7a2a3ce23c1b76b776c1078bf1e1c2aadf45c1cc61dc8f5ad6ef9f8d8249",
+    "v1-clock1000-positive-cts-open.mp4": "09ecf067b5fe9789261b9d5dcbdbeae74b5977350e63c503230f0f25bc04d73b",
+    "v1-clock1001-whole-known.mp4": "1c7706e5c3dfcd4ecfcf45fd86050293c5041263f5a7f2878b0dccfb209a631c",
+    "v1-clock1001-whole-open.mp4": "75d2f1931fa40b54a246b4a2af3d4a1f3781cb3010e802f540e181586e5d7c89",
+    "v1-clock1001-trim-known.mp4": "a1f3d500e2171b62ac599addf5cb86e500520b9e5c94b61825c9332e1061b2ad",
+    "v1-clock1001-trim-open.mp4": "fbf70acf3e28b1ec07dfa999b9845ccd9568f3e6b76c8d5c4fcb5b05c01c02ca",
+    "v1-clock1001-positive-cts-known.mp4": "4a44ec4de7d398c589f985785b6638dda46c0dd3666453fe3ddda44f22153c8a",
+    "v1-clock1001-positive-cts-open.mp4": "7e019ad287805fb580ffe6d763ba950249b569d9f656318e456267b0889f4c6b",
+    "v1-clock25-single-open.mp4": "f38a5e8afd93265ec66478eed73caaf65af632fcb1867f623c3591b58e4c2225",
+    "v1-regular-invalid.mp4": "f3c94234264cffb9e490042d859440479fc899930d46d6c2e4fcd12201ae4582",
+    "v1-empty-invalid.mp4": "dc9bfc766ca84ec805bd6685abdd1aeac5d95cc3ddb15bdc9e5c6d6070ce13ca",
+    "v1-rate-zero-invalid.mp4": "681012a8e304609c82b809235013dc54d78f28e15f0d95a0a46d1233afb466fc",
+    "v1-multiple-invalid.mp4": "7227fef391bc01704abb30d5e5734cf7e6c334de4c860bbdb7b09e69f571d87b"
+  }
+}

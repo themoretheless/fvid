@@ -1,0 +1,5 @@
+{
+  "scripts/generate_mp4_tfdt_flags.py": "5dd93fb29a35660639347c9c23e40e9a8c23cf84cebd9107b698d9be68097fae",
+  "tests/mp4_tfdt_flags.rs": "b8f819e40411c93cf06349904a5f666efc541ce14b1f9e3ecb951682d120601b",
+  "crates/fvid-media/src/owned_mp4_impl.rs": "6d7c3d81467ec454f7df3894944abe4f79a77d22b86188cfb2865bb769f56571"
+}

@@ -1,0 +1,23 @@
+{
+  "status": "complete",
+  "removed_owned_temporary_paths": [
+    "fvid-nondisplay-endpoint-20261030",
+    "fvid-nondisplay-before.log",
+    "fvid-nondisplay-after.log",
+    "fvid-nondisplay-expanded-after.log",
+    "fvid-nondisplay-before-replay.log",
+    "fvid-nondisplay-final.log",
+    "fvid-nondisplay-core-check.log",
+    "fvid-empty-tail-before.log",
+    "fvid-empty-tail-after.log",
+    "fvid-empty-tail-final.log",
+    "fvid-empty-tail-unit-and-core.log"
+  ],
+  "preserved": [
+    "short synthetic fixtures and pixel oracles",
+    "offline generators and regression sources",
+    "before/after logs including initial partial failure",
+    "source preimages and before-snapshot replay",
+    "FVID-0407 requalification proof"
+  ]
+}

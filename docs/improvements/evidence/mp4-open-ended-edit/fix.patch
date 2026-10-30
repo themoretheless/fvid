@@ -1,0 +1,298 @@
+--- a/crates/fvid-media/src/owned_mp4_impl.rs
++++ b/crates/fvid-media/src/owned_mp4_impl.rs
+@@ -142,9 +142,23 @@
+         }
+     }
+ }
++/// A borrowed edit view; one open edit is resolved in media ticks on the stack.
++/// Its effective timescale may differ from the movie header. Raw edits remain
++/// unchanged, including the duration-zero marker stated by an init segment.
++pub struct ResolvedEditClock<'a> {
++    pub timescale: u32,
++    original: &'a [Edit],
++    resolved: Option<Edit>,
++}
++impl ResolvedEditClock<'_> {
++    pub fn edits(&self) -> &[Edit] {
++        self.resolved.as_ref().map_or(self.original, std::slice::from_ref)
++    }
++}
+ #[derive(Clone, Debug)]
+ pub struct Edit {
+-    /// Duration in movie ticks, not track ticks.
++    /// Duration in movie ticks. Zero in a single fragmented media edit means
++    /// all subsequent media; use Track::resolved_edit_clock for presentation.
+     pub duration: u64,
+     /// Track ticks; -1 represents an empty edit.
+     pub media_time: i64,
+@@ -228,6 +242,37 @@
+ }
+ 
+ impl Track {
++    pub fn has_open_edit(&self) -> bool {
++        matches!(self.edits.as_slice(), [edit] if edit.duration == 0 && edit.media_time >= 0)
++    }
++    /// Resolve an init segment's open media edit against the complete indexed
++    /// composition endpoint. Use media ticks directly, avoiding double rounding
++    /// through the movie clock (which may be coarser than a single frame).
++    /// Resolution scans an expanded index once; retain the view/timeline rather
++    /// than resolving again for each decoded packet.
++    pub fn resolved_edit_clock(&self, movie_scale: u32) -> Result<ResolvedEditClock<'_>> {
++        if self.timescale == 0 || movie_scale == 0 {
++            return Err(invalid("zero MP4 edit clock"));
++        }
++        let mut clock = ResolvedEditClock { timescale: movie_scale, original: &self.edits, resolved: None };
++        if self.has_open_edit() {
++            let end = match &self.samples {
++                SampleIndex::Expanded(samples) => samples.iter()
++                    .map(|sample| i128::from(sample.pts) + i128::from(sample.duration))
++                    .max().unwrap_or(0),
++                SampleIndex::Uniform(index) => i128::try_from(index.count)
++                    .ok().and_then(|n| n.checked_mul(i128::from(index.duration)))
++                    .ok_or_else(|| invalid("MP4 open edit endpoint overflow"))?,
++            };
++            let start = self.edits[0].media_time;
++            let duration = u64::try_from(end - i128::from(start))
++                .ok().filter(|n| *n != 0)
++                .ok_or_else(|| invalid("MP4 open edit contains no media"))?;
++            clock.timescale = self.timescale;
++            clock.resolved = Some(Edit { duration, media_time: start });
++        }
++        Ok(clock)
++    }
+     /// A decoder header for one table entry, without cloning the media index.
+     pub fn decoder_setup(&self, description_index: u32) -> Result<Self> {
+         let d = description_index.checked_sub(1)
+@@ -633,14 +678,16 @@
+         // a duration bound for distinguishing chapter clocks. Use the indexed
+         // presentation length, in movie ticks, including any empty edits.
+         let chapter_duration = if movie_duration_unknown || movie_duration == 0 {
+-            tracks.iter().map(|track| {
+-                if track.edits.is_empty() {
+-                    (u128::from(track.duration) * u128::from(movie_timescale))
+-                        .div_ceil(u128::from(track.timescale))
++            tracks.iter().try_fold(0u128, |maximum, track| -> Result<u128> {
++                let clock = track.resolved_edit_clock(movie_timescale)?;
++                let (ticks, scale) = if track.edits.is_empty() {
++                    (u128::from(track.duration), track.timescale)
+                 } else {
+-                    track.edits.iter().map(|edit| u128::from(edit.duration)).sum()
+-                }
+-            }).max().unwrap_or(0).min(u128::from(u64::MAX)) as u64
++                    (clock.edits().iter().map(|edit| u128::from(edit.duration)).sum(), clock.timescale)
++                };
++                let length = (ticks * u128::from(movie_timescale)).div_ceil(u128::from(scale));
++                Ok(maximum.max(length))
++            })?.min(u128::from(u64::MAX)) as u64
+         } else {
+             movie_duration
+         };
+@@ -1375,7 +1422,8 @@
+             } else {
+                 (u64be(elst, at)?, u64be(elst, at + 8)? as i64, at + 16)
+             };
+-            if duration == 0 || media_time < -1 || u32be(elst, rate_at)? != 0x0001_0000 {
++            let open_media = fragmented && count == 1 && media_time >= 0;
++            if (duration == 0 && !open_media) || media_time < -1 || u32be(elst, rate_at)? != 0x0001_0000 {
+                 return Err(invalid("unsupported MP4 edit rate, duration or media time"));
+             }
+             result.edits.push(Edit {
+--- a/crates/fvid-media/src/owned_mp4_aac_plan_impl.rs
++++ b/crates/fvid-media/src/owned_mp4_aac_plan_impl.rs
+@@ -67,7 +67,9 @@
+         u64::try_from(n / d).map_err(|_| invalid("AAC sample position overflow"))
+     };
+     let media_end = position(track.duration)?;
+-    let (mut start, mut end) = match track.edits.as_slice() {
++    let edit_clock = track.resolved_edit_clock(movie_scale)?;
++    let movie_scale = edit_clock.timescale;
++    let (mut start, mut end) = match edit_clock.edits() {
+         [] => (0, media_end),
+         [edit] if edit.media_time >= 0 && movie_scale != 0 => {
+             let start = position(edit.media_time as u64)?;
+--- a/crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs
++++ b/crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs
+@@ -207,8 +207,9 @@
+         }
+     }
+     let packet_clocks=mp4_packet_clock_runs(&mut reader,index,control)?;
++    let edit_clock = track.resolved_edit_clock(reader.movie_timescale())?;
+     let mut timeline =
+-        Mp4ExportTimeline::new(&track.edits, track.timescale, reader.movie_timescale())?;
++        Mp4ExportTimeline::new(edit_clock.edits(), track.timescale, edit_clock.timescale)?;
+     if track.edits.is_empty() {
+         let mut end = Mp4ExportTime::ticks(track.duration, track.timescale)?;
+         if track.samples.get(0).is_some_and(|s|s.pts==0) {
+--- a/crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs
++++ b/crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs
+@@ -111,11 +111,12 @@
+         u64::try_from(numerator / denominator)
+             .map_err(|_| invalid("audio sample position overflow"))
+     };
++    let edit_clock = track.resolved_edit_clock(reader.movie_timescale())?;
+     let presentation = Mp4AudioSchedule::new(
+-        &track.edits,
++        edit_clock.edits(),
+         track.duration,
+         track.timescale,
+-        reader.movie_timescale(),
++        edit_clock.timescale,
+         rate,
+     )?;
+     let timeline = presentation.sample_frames;
+--- a/crates/fvid-media/src/owned_mp4_matroska_impl.rs
++++ b/crates/fvid-media/src/owned_mp4_matroska_impl.rs
+@@ -93,7 +93,9 @@
+         });
+     }
+     if interval.is_some() { return Err(invalid("video interval belongs to the presentation bridge")); }
+-    let (begin, end) = match track.edits.as_slice() {
++    let edit_clock = track.resolved_edit_clock(movie_scale)?;
++    let movie_scale = edit_clock.timescale;
++    let (begin, end) = match edit_clock.edits() {
+         [] => (0i128, None),
+         [edit] if edit.media_time >= 0 && movie_scale != 0 => {
+             let ticks = (u128::from(edit.duration) * u128::from(track.timescale))
+--- a/crates/fvid-media/src/owned_mp4_probe_impl.rs
++++ b/crates/fvid-media/src/owned_mp4_probe_impl.rs
+@@ -166,13 +166,14 @@
+         }
+         let edited = !track.edits.is_empty();
+         let (duration, presentation_us) = if edited {
+-            let movie_duration = track.edits.iter().try_fold(0u128, |sum, edit| {
++            let edit_clock = track.resolved_edit_clock(reader.movie_timescale()).map_err(|e|e.to_string())?;
++            let movie_duration = edit_clock.edits().iter().try_fold(0u128, |sum, edit| {
+                 sum.checked_add(u128::from(edit.duration))
+                     .ok_or("MP4 edit duration overflow")
+             })?;
+             (
+-                ticks(movie_duration, reader.movie_timescale(), track.timescale)?,
+-                ticks(movie_duration, reader.movie_timescale(), 1_000_000)?,
++                ticks(movie_duration, edit_clock.timescale, track.timescale)?,
++                ticks(movie_duration, edit_clock.timescale, 1_000_000)?,
+             )
+         } else {
+             (
+--- a/crates/fvid-media/src/owned_mp4_video_decode.rs
++++ b/crates/fvid-media/src/owned_mp4_video_decode.rs
+@@ -79,13 +79,12 @@
+         return Ok(None);
+     }
+     let rotation = track.rotation;
++    let edit_clock = track.resolved_edit_clock(reader.movie_timescale()).map_err(|e| e.to_string())?;
+     let edits = match crate::owned_video_timeline::map_edits(
+-        track
+-            .edits
+-            .iter()
++        edit_clock.edits().iter()
+             .map(|edit| (edit.duration, edit.media_time)),
+         track.timescale,
+-        reader.movie_timescale(),
++        edit_clock.timescale,
+     ) {
+         Ok(value) => value,
+         Err(Error::Unsupported(_)) => return Ok(None),
+--- a/crates/fvid-media/src/owned_nvdec_mp4.rs
++++ b/crates/fvid-media/src/owned_nvdec_mp4.rs
+@@ -264,13 +264,12 @@
+ ) -> Result<Vec<Presentation>, String> {
+     use crate::owned_video_timeline::{MovieEdit, map_movie_edits};
+     let order = media_presentation_order(track)?;
++    let edit_clock = track.resolved_edit_clock(movie_timescale).map_err(|e| e.to_string())?;
+     let edits = map_movie_edits(
+-        track
+-            .edits
+-            .iter()
++        edit_clock.edits().iter()
+             .map(|edit| (edit.duration, edit.media_time)),
+         track.timescale,
+-        movie_timescale,
++        edit_clock.timescale,
+     )
+     .map_err(|e| e.to_string())?;
+     let mut result = Vec::new();
+@@ -347,6 +346,27 @@
+ #[cfg(test)]
+ mod tests {
+     #[test]
++    fn open_edits_plan_exact_media_intervals_without_a_gpu() {
++        let directory = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
++            .join("../../tests/fixtures/playback-errors/mp4-open-ended-edit");
++        let manifest: serde_json::Value = serde_json::from_slice(
++            &std::fs::read(directory.join("manifest.json")).unwrap()).unwrap();
++        for case in manifest["open"].as_array().unwrap() {
++            let name = case["file"].as_str().unwrap();
++            let source = Mp4Reader::open(std::io::Cursor::new(
++                std::fs::read(directory.join(name)).unwrap()), Limits::default()).unwrap();
++            let count = case["frames"].as_u64().unwrap() as usize;
++            let plan = super::movie_presentations(&source.tracks()[0], source.movie_timescale(), count).unwrap();
++            assert_eq!(plan.len(), count, "{name}");
++            let first = (case["start"].as_i64().unwrap() - case["shift"].as_i64().unwrap()) as usize;
++            for (i, frame) in plan.iter().enumerate() {
++                assert_eq!((frame.start, frame.end, frame.sample), (i as i64, i as i64+1, Some(first+i)), "{name}");
++            }
++            assert!(super::movie_presentations(&source.tracks()[0], source.movie_timescale(), count-1)
++                .unwrap_err().contains("presentation count exceeds limit"));
++        }
++    }
++    #[test]
+     fn synthetic_source_metadata_survives_owned_container_export() {
+         use crate::owned_matroska::{Encoding, PacketWriter, TrackSpec};
+         let mut source = AvcMp4Input::open(
+--- a/src/playback/audio/mp4_audio.rs
++++ b/src/playback/audio/mp4_audio.rs
+@@ -248,7 +248,7 @@
+     pub fn from_demuxer(demuxer:Mp4Reader<R>,index:usize)->Result<Self>{Self::from_programme(demuxer,index,None)}
+     fn from_programme(mut demuxer: Mp4Reader<R>, index: usize,programme:Option<u8>) -> Result<Self> {
+         let clock=PlaybackClock::build(&mut demuxer,index,programme.unwrap_or(0))?;
+-        if clock.is_some() || demuxer.tracks().get(index).is_some_and(|t|t.ensure_constant_description().is_err()) {
++        if clock.is_some() || demuxer.tracks().get(index).is_some_and(|t|t.ensure_constant_description().is_err() || t.has_open_edit()) {
+             return Self::from_changing(demuxer,index,programme,clock);
+         }
+         let selected_geometry=if let Some(programme)=programme {
+@@ -437,8 +437,9 @@
+                 "selected MP4 track contains unsupported audio sample descriptions",
+             ));
+         }
++        let edit_clock = track.resolved_edit_clock(demuxer.movie_timescale())?;
+         let variable_edits = if track.edits.is_empty() {None} else {
+-            Some(VariableTimeline::new(&track.edits,track.timescale,demuxer.movie_timescale())?)
++            Some(VariableTimeline::new(edit_clock.edits(),track.timescale,edit_clock.timescale)?)
+         };
+         if programme.is_some()
+             && !track
+--- a/src/playback/video/native.rs
++++ b/src/playback/video/native.rs
+@@ -1363,10 +1363,11 @@
+     track: &crate::container::mp4::Track,
+     movie_scale: u32,
+ ) -> Result<Vec<PlaybackEdit>> {
++    let clock = track.resolved_edit_clock(movie_scale)?;
+     fvid_media::owned_video_timeline::map_edits(
+-        track.edits.iter().map(|edit| (edit.duration, edit.media_time)),
++        clock.edits().iter().map(|edit| (edit.duration, edit.media_time)),
+         track.timescale,
+-        movie_scale,
++        clock.timescale,
+     )
+ }
+ 
+--- a/src/shader_export_cli.rs
++++ b/src/shader_export_cli.rs
+@@ -254,12 +254,13 @@
+                 .iter()
+                 .find(|t| t.handler == *b"vide")
+                 .ok_or("input contains no video track")?;
+-            let (begin, end) = match track.edits.as_slice() {
++            let edit_clock = track.resolved_edit_clock(input.movie_timescale())?;
++            let (begin, end) = match edit_clock.edits() {
+                 [] => (0, u128::from(track.duration)),
+-                [edit] if edit.media_time >= 0 && input.movie_timescale() != 0 => {
++                [edit] if edit.media_time >= 0 && edit_clock.timescale != 0 => {
+                     let begin = edit.media_time as u128;
+                     let length = (u128::from(edit.duration) * u128::from(track.timescale))
+-                        .div_ceil(u128::from(input.movie_timescale()));
++                        .div_ceil(u128::from(edit_clock.timescale));
+                     (
+                         begin,
+                         begin.checked_add(length).ok_or("video edit overflow")?,

@@ -294,7 +294,7 @@ fn write_aac_packets<W: Write + std::io::Seek>(
         }
         let next_packets = sizes.len().saturating_add(1);
         if max_controlled_bytes.is_some_and(|limit| {
-            next_packets.saturating_mul(32).saturating_add(16384) > limit
+            next_packets.saturating_mul(32).saturating_add(16384).saturating_add(packet.len()) > limit
         }) {
             return Err(invalid("controlled memory budget exceeded"));
         }

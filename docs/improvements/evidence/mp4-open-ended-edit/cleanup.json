@@ -1,0 +1,16 @@
+{
+  "owned_paths_removed": [
+    "/private/tmp/fvid-open-edit-20261030",
+    "/private/tmp/fvid-open-edit-baseline-target-20261030",
+    "/private/tmp/fvid-open-edit-baseline-20261030"
+  ],
+  "preserved": [
+    "synthetic fixtures and independent PCM oracles",
+    "all generators, regression tests, logs, source snapshots, patches and hashes"
+  ],
+  "accepted": [
+    "FVID-0403",
+    "FVID-0404"
+  ],
+  "status": "complete"
+}

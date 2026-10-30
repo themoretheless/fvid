@@ -1,0 +1,27 @@
+{
+  "status": "accepted",
+  "improvement": "FVID-0407",
+  "before": "Final expanded baseline: exact parser/media-clock/pixel controls pass; native-duration test fails. Ten authored cases report 60ms although their actual displayed endpoint is 80/100/120/260/280ms. Plain zero-shift controls pass. Actual NativeReader playback/seek/rewind/EOF assertions run before the final aggregate duration failure.",
+  "after": "21 selected player-configuration checks pass, zero failed/ignored. The strengthened final focused rerun passes 2/2, including duration after rewind/EOF/seeks. No-default-features cargo check passes.",
+  "change": "The private MP4 video dispatcher lazily caches the index-derived composition endpoint, including the full nominal span of the final equal-PTS group and any larger declared media duration. NativeReader uses it only for the unedited duration fallback. Raw mdhd duration, timestamps, pixel output and edit-window endpoints remain unchanged; no public API break.",
+  "media": "12 short owned three-color VP9 movies: known/unknown mdhd length, composition shifts 0/2/10 at 50Hz, distinct or duplicate final PTS. Movie/track endpoints include the offset; raw media duration remains three ticks. All 19 fixture/oracle/manifest files regenerate identically offline.",
+  "checks": [
+    "Exact YUV16 sample oracles and raw sample clocks in both parsers.",
+    "Native intervals, last-frame seek, beyond-end seek, rewind and repeated EOF.",
+    "Repeated duration queries retain the correct endpoint after reader state changes.",
+    "Finite/open edits, selected-track concat, reordered layered-HEVC seek coverage and permanent/transient I/O regressions retained."
+  ],
+  "resource": "One allocation-free borrowed-index scan per reader on first unedited duration query, cached with OnceLock; no per-query index rescanning. This is a correctness fix, not a measured throughput/RSS improvement.",
+  "scope": "One unedited playback endpoint problem; header, composition-offset and final-group variants count together.",
+  "limitations": [
+    "Physical GPU/NVIDIA decoding and visual UI interaction were not exercised; software NativeReader playback was exercised.",
+    "Complete repository green status is not claimed; historical baseline failures remain separate."
+  ],
+  "sha256": {
+    "src/playback/video/mp4_dispatch.rs": "78cfca6297851bebee4896ad3bf91b389e26a225fc823e91326bc67af060221c",
+    "src/playback/video/native.rs": "95587b02c5e68cab7798b5a3169934ae831ab3a6c5592cc6fa85963508da49c6",
+    "tests/mp4_presentation_endpoint.rs": "e006aff1abbdd0a38f9818bec079d236129ddd03e15713b4db6b9142a3078b21",
+    "scripts/generate_mp4_presentation_endpoint.py": "2dbbf6f6c9f11443fc31f841c8cefd71f01ea53e609276a12449936e268b7fd9"
+  },
+  "follow_up_validation": "batch-401-validation.json: finite track/movie bounds added and FVID-0407 requalified with hidden-frame, V1, unknown/zero and coarse-clock controls; no new improvement ID."
+}

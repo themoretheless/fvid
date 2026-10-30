@@ -1,0 +1,35 @@
+{
+  "batch": 411,
+  "accepted_ids": [
+    "FVID-0415"
+  ],
+  "status": "accepted",
+  "summary": "Preserve shifted PCM tails when reconstructing quantized MP4 audio clocks",
+  "source_files": [
+    "src/playback/audio/mp4_audio.rs",
+    "src/playback/audio/mp4_clock_recovery.rs"
+  ],
+  "regressions": [
+    "tests/mp4_audio_presentation_end.rs"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/mp4-audio-presentation-end/status.json"
+  ],
+  "before": "Initial exact-clock regression: sample/seek/video control passes and duration acceptance fails in 16 signed-CTS cases, reporting 60ms instead of 50/70ms. After fixing that getter, the expanded 1001Hz regression still fails both duration and PCM acceptance. pcm-1001-shift10-known.mp4 yields 1600 PCM bytes rather than 1920: 80 authored 8kHz samples are clipped by the recovered clock decode-duration endpoint. Both intermediate stages are retained.",
+  "after": "62 distinct integration checks pass: 61 in ten related targets plus one added worker regression (two focused checks overlap and are not counted twice). All 38 own PCM/ALAC+VP9 movies retain independent PCM byte counts/values, exact rational timestamps, seek suffixes, rewind, EOF, and all three video pictures. The worker plays and rewinds both shifted 1001Hz PCM/ALAC cases with the full 1920-byte waveform. Locked/offline no-default-features core build passes.",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --features player --test mp4_audio_presentation_end (baseline and staged/final checks)",
+    "cargo test --locked --offline --no-default-features --features player --no-fail-fast --test mp4_audio_presentation_end --test mp4_audio_clocks --test mp4_quantized_audio_clock --test mp4_variable_rate_edits --test mp4_audio_reconfiguration --test mp4_audio_export_transitions --test mp4_fixed_audio_edits --test mp4_open_ended_edit_audio --test mp4_unused_audio_descriptions --test owned_mp4_audio",
+    "cargo check --locked --offline --no-default-features"
+  ],
+  "limitations": [
+    "The raw unedited index endpoint is nominal for ordinary codecs; existing explicit edits and recovered clocks remain authoritative.",
+    "Physical audio hardware, GPU parity and whole-project green are not claimed. Actual playback qualification uses the native worker with the existing captured backend."
+  ],
+  "uncounted": [
+    "Companion unedited audio-duration getter correction",
+    "Private endpoint cache",
+    "All authored clock/coding/header/seek/gap variants",
+    "Overlapping focused reruns"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "provenance": "Owned pure-Python 16x16 VP9, three independent frames, 50Hz/60ms. Two complete fMP4 controls and four same-size tfdt reserved-flag companions. No private media/parameters, FFmpeg or network. Only tfdt FullBox flags differ.",
+  "invalid_flags": [
+    "tfdt-v0-flags-000001.mp4",
+    "tfdt-v0-flags-800000.mp4",
+    "tfdt-v1-flags-000001.mp4",
+    "tfdt-v1-flags-800000.mp4"
+  ],
+  "sha256": {
+    "frame.vp9": "217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c",
+    "valid-v0.mp4": "c8b67565e378ab0c1484714bdce93117ab0f429aa14882d5190339b2d03465d4",
+    "tfdt-v0-flags-000001.mp4": "8f13550948b8b55c9da1c68fabcca982dbddb88d5eba2534cce295f3525abb5e",
+    "tfdt-v0-flags-800000.mp4": "75e900122dd0ab59a77218d618277c7342a0c3bd614d397624a0b5a11474bc96",
+    "valid-v1.mp4": "9efedd7260906856e19eedeaf052f650701e013098d1020d5d8bcc57d335dc67",
+    "tfdt-v1-flags-000001.mp4": "f0aa89240e0158252f0846d12f90d217c71e59aebd8e5234d01da69b5b098ca0",
+    "tfdt-v1-flags-800000.mp4": "b0e5edb36c8afcd76edbb4d11798f88c8ddcab23aebaad347c6ece468bccb38b"
+  }
+}

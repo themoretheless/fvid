@@ -1,0 +1,53 @@
+{
+  "batch": 398,
+  "accepted_ids": [
+    "FVID-0405"
+  ],
+  "status": "accepted",
+  "summary": "Reuse validated single-block ADTS allocations; finish uncounted FVID-0394 frontend parity",
+  "source_files": [
+    "crates/fvid-media/src/owned_aac/adts_impl.rs",
+    "src/native_plan.rs",
+    "src/container/mp4_write.rs"
+  ],
+  "regressions": [
+    "tests/adts_packet_working_set.rs",
+    "scripts/check_adts_allocations.py"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/adts-packet-working-set/status.json",
+    "docs/improvements/evidence/adts-packet-working-set/stream-zero-followup.json"
+  ],
+  "results": "27 focused checks passed; broader run totals 31 passed and 3 independently confirmed pre-optimization baseline failures. Automated allocation regression passes.",
+  "measurements": {
+    "allocations": [
+      4,
+      2
+    ],
+    "scoped_peak_bytes": [
+      2196,
+      1058
+    ],
+    "payload_bytes": 1042,
+    "scope": "First unprotected single-block packet; two parsers; not total process memory."
+  },
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --no-fail-fast --test adts_packet_working_set --test adts_crc --test adts_multiblock --test adts_pce_sbr --test native_aac_pce --test owned_adts_remux --test adts_concat_remux_prefix_budget_regression --test adts_wave_remux_concat_parity_regressions",
+    "python3 scripts/check_adts_allocations.py --target-dir /private/tmp/fvid-adts-working-set-20261030"
+  ],
+  "limitations": [
+    "No CPU speedup, process RSS reduction, NVIDIA run, UI or full-project green claim.",
+    "Three baseline integration failures remain visible; tests were not weakened."
+  ],
+  "baseline_failures": [
+    "ADTS concat inactive-segment header is charged against active prefix packet limit",
+    "ADTS public remux stream/budget options rejected by pre-existing admission",
+    "Matroska AAC leading signed padding timeline expectation: 1792 versus 1664 samples"
+  ],
+  "uncounted": [
+    "FVID-0394 frontend parity",
+    "fixture/generator and measurement infrastructure",
+    "all fixture and parser variants",
+    "FVID-0246 public ADTS stream-zero plan admission restored; existing 2-test API/CLI parity target and 6 working-set tests pass"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "status": "complete",
+  "removed_owned_temporary_paths": [
+    "fvid-decode-only-seek-20261030",
+    "fvid-decode-only-seek-before.log",
+    "fvid-decode-only-seek-before-expanded.log",
+    "fvid-decode-only-seek-before-final.log",
+    "fvid-decode-only-seek-after.log",
+    "fvid-decode-only-seek-final.log",
+    "fvid-decode-only-seek-unit-and-core.log"
+  ],
+  "preserved": [
+    "synthetic media and analytic oracles",
+    "offline generator and automatic regressions",
+    "before/after logs and source snapshots"
+  ]
+}

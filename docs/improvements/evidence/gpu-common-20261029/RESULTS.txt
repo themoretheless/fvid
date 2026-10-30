@@ -1,0 +1,14 @@
+Narrowed GPU extraction: common Metal shared storage only.
+Forma toolchain 1.97.1: library tests 15 pass, 1 physical-GPU test ignored;
+explicit physical Metal shared-memory lifetime/bounds/copy test: 1 pass.
+Fvid toolchain 1.98.1: original VT UMA roundtrip: 1 pass;
+Metal resident chain vs CPU: 1 pass; player configuration cargo check: pass.
+No video shaders, CoreVideo surfaces, CUDA kernels, NVDEC, NVENC, color or
+presentation policy moved into Forma. Those files restored to original HEAD.
+Existing media tests unchanged. No accepted 1000-improvement registry increment.
+Commands (all offline):
+Forma: cargo test --manifest-path crates/gpu-compute/Cargo.toml --features native-wgpu --lib
+Forma: same command with metal_memory::tests::cloned_storage_retains_allocation_and_checks_logical_bounds -- --ignored --exact
+Fvid: cargo test --manifest-path crates/fvid-vt/Cargo.toml --features metal --lib retained_surface_tests::uma_shared_buffer_zero_copy_roundtrip -- --ignored --exact
+Fvid: cargo test --no-default-features --features gpu --test resident metal_resident_chain -- --ignored --exact
+Fvid: cargo check --locked --features player

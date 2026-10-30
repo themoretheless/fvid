@@ -1,0 +1,7 @@
+{
+  "snapshot": "/private/tmp/fvid-open-edit-baseline-20261030/fvid",
+  "shared_source_sha256": "993015feac829f2b13899ace82a5c5c571520b1db969821a60634653ba20f408",
+  "consumer_sources": "HEAD versions; these files were unchanged before this open-edit work",
+  "fixture_source": "Current generators with consistent movie/track header durations; all fixture hashes copied unchanged",
+  "purpose": "Reconfirm before behavior with corrected fixed metadata. Snapshot is temporary; logs retained."
+}

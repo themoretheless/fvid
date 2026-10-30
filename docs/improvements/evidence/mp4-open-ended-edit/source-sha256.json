@@ -1,0 +1,19 @@
+{
+  "crates/fvid-media/src/owned_mp4_impl.rs": "08de55745d3b26f035170954387bad7756aa49ec7c55f1628f095800319ed05b",
+  "crates/fvid-media/src/owned_mp4_aac_plan_impl.rs": "87f83e2c624c2da0ad146fa304b5a70f1b60d0184ae1a1b5f5f64b47370c95ab",
+  "crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs": "1812e330c5cedbd73dc74fdb6c2a349f1d7080dca679e5a851ebbdfef20c6931",
+  "crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs": "fb88d5cb03ad8a0f60c8b180a0fa7ebbe771b5c04f2a287dd774fd3b0eedcfc1",
+  "crates/fvid-media/src/owned_mp4_matroska_impl.rs": "ebc7e889e1605fb3827815aa000f2ff66e5218ba7610d2669951748496999b1f",
+  "crates/fvid-media/src/owned_mp4_probe_impl.rs": "54388767967c097a37ee2f3d5eb340da06f0a863d0a93db1b2b056bc65462b09",
+  "crates/fvid-media/src/owned_mp4_video_decode.rs": "b848a1653b5bef27d563a63bdc2d9157c3c0d3ee800c054319d5ea91c21a8f09",
+  "crates/fvid-media/src/owned_nvdec_mp4.rs": "2403c3dc776c7ac7cd5721004675e2781fea10d42837be1f15eb109ea1816c72",
+  "src/playback/audio/mp4_audio.rs": "54dcdb1bd3fe1d7751dccead02b9f93630889f84cbe7733c493e289cfa405df4",
+  "src/playback/video/native.rs": "fb74ebc7cc60e8017d640329c82cf4307f7543955e9d04ab42d34aaa301bccc5",
+  "src/shader_export_cli.rs": "b627baa40197acd29f4db28f30bb19e69059a1b67521981c79c0efcde538a98a",
+  "tests/mp4_open_ended_edit.rs": "144131e2c1a10f66a6657ba468f6e74874f60503828b414e11ad31ff15351e62",
+  "tests/mp4_open_ended_edit_audio.rs": "ca2c53c7b49c30ad50773d5119d3d640d32472fbb072b215a4f0acb62c19c92a",
+  "tests/mp4_fixed_audio_edits.rs": "bb8597034218b855376eacb68ac20b39af9d16200f759006a73ff0f7cf677793",
+  "scripts/generate_mp4_open_ended_edit.py": "3505c122c54517fbaddab9e92be086392dfd4444f5d71e9465727f24810e8d3b",
+  "scripts/generate_mp4_open_ended_edit_audio.py": "df03222c3cdbc4ba199c63a51a4d8b61b3ee5a09691ae694a333bb95983beab1",
+  "scripts/generate_mp4_fixed_audio_fractional.py": "3d27f234e7543ffd59c38a8a792099078d6df626baea3554a3d8bd5e513a190d"
+}

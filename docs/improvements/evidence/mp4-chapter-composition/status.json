@@ -1,0 +1,19 @@
+{
+  "status": "accepted-follow-up",
+  "existing_improvement": "FVID-0401",
+  "count_delta": 0,
+  "before": "Runtime baseline: 1 playback control passes and chapter-clock test fails. Twelve unknown/zero movie-duration cases confuse +200ms composition offset with a 60ms decode-duration bound; both parser wrappers report 200ms chapters as 20us (movie-clock case) or 2000s (10MHz case). Six known-movie controls and all 18 actual software playback controls pass.",
+  "change": "For unknown/zero mvhd duration, chapter clock selection prefers known tkhd movie-clock presentation duration while preserving the decode-duration floor. If track presentation duration is also unstated, use a nominal composition endpoint including the final equal-PTS group. Scan the index only when a chpl actually needs an estimate; retain edit resolution/error validation even without chapter metadata. Known movie duration, finite/leading edit mapping and raw clocks are preserved.",
+  "after": "45 distinct checks pass across 8 targets, including 2 new tests. Eighteen synthetic movies preserve 200/220/240ms chapter names/moments in both supported clocks and both parser wrappers, exact software YUV/RGB, 260ms native duration, 180 seek positions, rewind and EOF. Related unknown chapter clocks, hidden-frame endpoint bounds, finite/open edits, empty fragments and baseline MP4 checks pass. Locked offline no-default-features core build check passes.",
+  "fixtures": "22 byte-identical regenerated files: 18 own short colored VP9 movies, 3 analytic YUV16 oracles and manifest. No private media/parameters, external encoder, FFmpeg or network; ordinary tests read saved assets only.",
+  "limitations": [
+    "The clock-selection heuristic remains compatibility behavior for two authored chpl conventions; ambiguous small timestamps cannot always distinguish clocks.",
+    "With all presentation headers unstated, the endpoint is a nominal index estimate and cannot prove display output from decode-only packets.",
+    "No new visual UI, performance, full-project green or GPU parity claim. Historical unrelated baseline failures remain separate."
+  ],
+  "sha256": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": "28f26f14286e9d8c35ba7fa0c6c5c34b4a6bc105512dc9b185db3310c02a0d7c",
+    "scripts/generate_mp4_chapter_composition.py": "74f6e60eecf06c9a0346308c74dab43001167f16f8f3cbf8bd5f17ac37834bb8",
+    "tests/mp4_chapter_composition.rs": "276bb49633b8f1dae7b21cc94924a165d7b016ba8aaf7041a87b0f8decbc78b3"
+  }
+}

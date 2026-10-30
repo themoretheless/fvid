@@ -1,0 +1,10 @@
+{"backend":"root","iteration":0,"allocations":4,"peak_bytes":2196,"payload_bytes":1042}
+{"backend":"root","iteration":1,"allocations":4,"peak_bytes":2196,"payload_bytes":1042}
+{"backend":"root","iteration":2,"allocations":4,"peak_bytes":2196,"payload_bytes":1042}
+{"backend":"owned","iteration":0,"allocations":4,"peak_bytes":2196,"payload_bytes":1042}
+{"backend":"owned","iteration":1,"allocations":4,"peak_bytes":2196,"payload_bytes":1042}
+{"backend":"owned","iteration":2,"allocations":4,"peak_bytes":2196,"payload_bytes":1042}
+
+thread 'main' (16909067) panicked at scripts/bench_adts_allocations.rs:109:9:
+single-block delivery retains a duplicate frame allocation
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

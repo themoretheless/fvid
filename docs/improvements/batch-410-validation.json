@@ -1,0 +1,34 @@
+{
+  "batch": 410,
+  "accepted_ids": [],
+  "follow_up_ids": [
+    "FVID-0233"
+  ],
+  "count_delta": 0,
+  "status": "accepted-requalification",
+  "summary": "Restore strict owned audio WAVE oracles for retained source INFO and packet admission",
+  "source_files": [],
+  "regressions": [
+    "tests/owned_mp4_audio.rs",
+    "tests/owned_audio_window_parity.rs"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/audio-window-metadata/status.json",
+    "docs/improvements/evidence/mp4-unused-audio-descriptions/baseline-comparison.json"
+  ],
+  "before": "Earlier broad owned_mp4_audio run has 4 failures (retained in batch-409 evidence). Fresh filtered baseline reproduces the two supposed resampling lookahead failures. An independent PCM/precision/geometry inspection proves all 3 authored container sources match WAVE sample payloads exactly: float32 704 bytes, float64 1408 bytes. Both Matroska files append exactly 24 bytes of LIST/INFO carrying default language eng; the old whole-WAVE oracle lacked that metadata.",
+  "after": "All 8 owned_mp4_audio tests and the additional sample/metadata test pass (9 distinct checks), locked offline without default features. The two apparent DSP failures and source-WAVE parity failure were stale metadata oracles, while the planning test expected obsolete deferred packet admission. No media/DSP bug was fixed or counted.",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --test owned_audio_window_diagnostics -- --nocapture (temporary diagnostic path, then renamed)",
+    "cargo test --locked --offline --no-default-features --no-fail-fast --test owned_audio_window_diagnostics --test owned_mp4_audio synthetic -- --nocapture (pre-correction)",
+    "cargo test --locked --offline --no-default-features --no-fail-fast --test owned_audio_window_parity --test owned_mp4_audio -- --nocapture (final)"
+  ],
+  "limitations": [
+    "This qualifies only the selected owned audio suite and sample/metadata contracts, not whole-project green.",
+    "No throughput or GPU/audio-device behavior claim."
+  ],
+  "uncounted": [
+    "All test-oracle repairs and the extra positive-control regression",
+    "No production code or media algorithm changes"
+  ]
+}

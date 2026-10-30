@@ -1,0 +1,24 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0404"
+  ],
+  "before": "In the same isolated source snapshot, finite fixed PCM/ALAC media edits are ignored: four trim controls expose 60ms rather than 40ms; seek yields 1600 PCM bytes instead of 960. A fractional 44100Hz edit is reported as 60ms rather than 2645/44100 seconds. All three dedicated finite-edit tests fail. Untrimmed controls complete decoding/EOF assertions before the aggregate trim assertion fails.",
+  "after": "Route finite PCM/ALAC media edits through the existing rational variable-edit scheduler even for one constant sample description. Preserve original media packets and decoder configuration while clipping presentation to the requested range. Native duration, nonzero PCM, seek suffix, rewind, repeated EOF and fractional sample positions now match their owned oracles. AAC finite-path seek conventions and the established leading-empty-edit policy are preserved.",
+  "regression": "tests/mp4_fixed_audio_edits.rs",
+  "authoritative_before": "../mp4-open-ended-edit/before-isolated.log",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --test mp4_open_ended_edit --test mp4_open_ended_edit_audio --test mp4_elst_validation --test mp4_audio_export_transitions --test mp4_implicit_fragment_base --test mp4_unknown_movie_chapters --test mp4",
+    "cargo test --locked --offline --features player --test mp4_fixed_audio_edits --test mp4_open_ended_edit_audio --test mp4_open_ended_edit --test mp4_elst_validation --test mp4_audio_export_transitions --test mp4_aac_transitions --test mp4_audio_clocks --test mp4_variable_rate_edits",
+    "cargo test --locked --offline --manifest-path crates/fvid-media/Cargo.toml --features native-cuda --lib owned_nvdec_mp4::tests",
+    "cargo test --locked --offline --manifest-path crates/fvid-media/Cargo.toml --features native-cuda --lib owned_video_timeline::tests",
+    "cargo check --locked --offline --features player"
+  ],
+  "limitations": [
+    "103 targeted checks passed (46 core, 48 player, 5 CPU NVDEC-schedule, 4 timeline); no failed/ignored selected tests.",
+    "Player configuration builds. NVIDIA device execution was not tested; schedule tests run on CPU.",
+    "The complete project suite is not claimed green; previously recorded unrelated export/admission and CUDA ABI failures are outside this batch.",
+    "Fixture variants, the shared resolver, generator/header qualification repairs and stale-build cleanup do not add IDs."
+  ],
+  "independence": "Finite fixed-audio edits contain no open marker. Their pre-existing routing predicate omits PCM and ALAC; adding open-edit support alone leaves them ignored. Both codec/version/fractional variants share one scheduling omission and count once."
+}

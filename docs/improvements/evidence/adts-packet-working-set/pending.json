@@ -1,0 +1,36 @@
+{
+  "status": "superseded-by-qualified-status",
+  "accepted_count": 404,
+  "reason": "Cargo PID 91060 is live, blocked in system open while discovering path dependency manifests; no compilation or test result yet. Production sources unchanged in this continuation.",
+  "command": "CARGO_TARGET_DIR=/private/tmp/fvid-adts-working-set-20261030 CARGO_BUILD_JOBS=2 cargo test --locked --offline --no-default-features --test adts_packet_working_set",
+  "scope": "Complete FVID-0394 frontend parity; do not assign an independent improvement ID for the same working-set cause.",
+  "checks": [
+    "nonzero decoded PCM against analytic oracle",
+    "small-budget explicit/generic/concat ADTS plan refusal",
+    "ample-budget acceptance",
+    "MP4 publication refusal preserves prior destination"
+  ],
+  "sha256": {
+    "scripts/generate_adts_packet_working_set.py": "ba9a3637d0a525b7ad3a9922e64bc6b90c4f2de6628d0026fb95ff87ff244f43",
+    "tests/adts_packet_working_set.rs": "4dbb3b948de3054d39ea878082cf335992cf4395f0623a77c2de6bc057b8f0e4",
+    "src/native_plan.rs": "52fb76fa3bf9aafab58de2c16ba0397fa380772c5a8a95072b7290f2a50bf233",
+    "src/container/mp4_write.rs": "949ba6efe75008564e8456b12ef1074416e7a909d5b22d782204a7f9e2adbcc8",
+    "tests/fixtures/playback-errors/adts-packet-working-set/padded.mp4": "d61c4c67447f32533815bb3990a49216b09907a991eed393a757697f30ee484b",
+    "tests/fixtures/playback-errors/adts-packet-working-set/padded.aac": "cd4e2f78b24975f1578e4a77cbd1d0188b492a42e618cb66dda18dc477f5da14",
+    "tests/fixtures/playback-errors/adts-packet-working-set/manifest.json": "f1fb7d708d07f9ac2acc90787b54dc9ca85ca29a68c70cd8bb5fdcda5fac84a1",
+    "tests/fixtures/playback-errors/adts-packet-working-set/oracle.f32le": "e7d303920e33ab61afdd330a583bc41deef4914fa85fabdc05bf986b09497817"
+  },
+  "wait_revalidation": {
+    "cargo_pid": 91060,
+    "cargo_session": 29719,
+    "confirmed_live": true,
+    "also_waiting_pids": [
+      90047,
+      90225
+    ],
+    "free_disk_gib": 554,
+    "structural_fixture_check": "3 complete distinct ADTS packets, 1042 raw bytes each; 24576 oracle PCM bytes. This is not decoder or regression qualification.",
+    "production_fix_applied": false
+  },
+  "superseded_by": "status.json"
+}

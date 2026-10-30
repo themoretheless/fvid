@@ -62,6 +62,30 @@ fn library_mp4_audio_pcm_and_file_export_match_frontend_edits() {
         let wave = std::fs::read(&output).unwrap();
         let info = fvid_media::owned_wave_inspect::inspect(&mut Cursor::new(&wave), None).unwrap();
         assert_eq!(info.bits_per_sample, 32);
+        let metadata_reader =
+            fvid_media::owned_mp4::Mp4Reader::open_indexed(Cursor::new(&bytes), Default::default())
+                .unwrap();
+        let audio_tracks: Vec<_> = metadata_reader
+            .tracks()
+            .iter()
+            .filter(|t| t.handler == *b"soun")
+            .collect();
+        assert_eq!(audio_tracks.len(), 1);
+        let metadata_track = audio_tracks[0];
+        let expected_info = fvid_media::owned_wave_metadata::info_for_file_tags(
+            metadata_reader.tags(),
+            &metadata_track.name,
+            &metadata_track.language,
+            Some(metadata_reader.encoder()),
+            &Default::default(),
+        )
+        .unwrap();
+        assert_eq!(
+            fvid_media::owned_wave_inspect::info_chunks(&mut Cursor::new(&wave), &info, None)
+                .unwrap(),
+            expected_info,
+            "{name}: source metadata must survive WAVE publication",
+        );
         assert_eq!(
             &wave[info.data_offset as usize..info.data_offset as usize + info.data_bytes as usize],
             pcm
@@ -78,6 +102,11 @@ fn library_mp4_audio_pcm_and_file_export_match_frontend_edits() {
         )
         .unwrap();
         wave.extend_from_slice(&pcm);
+        // The independent PCM reference must retain the source INFO too:
+        // complete transformed WAVE bytes remain the comparison oracle.
+        wave.extend_from_slice(&expected_info);
+        let riff_size = u32::try_from(wave.len() - 8).unwrap();
+        wave[4..8].copy_from_slice(&riff_size.to_le_bytes());
         std::fs::write(&reference_source, wave).unwrap();
         let reference = dir.join("reference-dsp.wav");
         let transform = fvid_media_info::AudioDecodeTransform {
@@ -150,6 +179,15 @@ fn synthetic_resample_window(extension: &str) {
     )
     .unwrap();
     wave.extend_from_slice(&raw_expected);
+    if extension != "m4a" {
+        // These Matroska fixtures omit Language, whose reader default is eng.
+        // Source INFO preservation adds that tag to the exported WAVE. Give
+        // the analytic reference the same declared metadata; retain the full
+        // byte-for-byte output assertion below, including every PCM sample.
+        wave.extend_from_slice(b"LIST\x10\0\0\0INFOILNG\x04\0\0\0eng\0");
+        let riff_size = u32::try_from(wave.len() - 8).unwrap();
+        wave[4..8].copy_from_slice(&riff_size.to_le_bytes());
+    }
     std::fs::write(&reference_source, wave).unwrap();
     let transform = fvid_media_info::AudioDecodeTransform {
         interval: Some((2000, 6000)),
@@ -351,8 +389,8 @@ fn mp4_audio_plan_uses_owned_metadata_without_decoding_or_callbacks() {
             .join("tests/fixtures")
             .join(name);
         let options = CopyOptions {
-            // A metadata plan must not read any encoded packet: every fixture's
-            // packets exceed this cap, but admission is deferred to execution.
+            // Indexed packet sizes must enforce admission during planning,
+            // without progress callbacks or publishing any decoded output.
             max_packet_bytes: 1,
             progress: Some(ProgressHook::new(|_| panic!("planning emitted progress"))),
             ..Default::default()
@@ -362,6 +400,21 @@ fn mp4_audio_plan_uses_owned_metadata_without_decoding_or_callbacks() {
             volume: Some(0.5),
             sample_rate: Some(16000),
             channels: Some(1),
+        };
+        for error in [
+            fvid_media::plan_decode_audio(&source, &transform, &options).unwrap_err(),
+            fvid_media::owned_audio_plan::plan_decode_audio(&source, &transform, &options)
+                .unwrap_err(),
+        ] {
+            assert!(
+                error.contains("MP4 packet exceeds budget"),
+                "{name}: {error}"
+            );
+        }
+        let limited_options = options.clone();
+        let options = CopyOptions {
+            max_packet_bytes: CopyOptions::default().max_packet_bytes,
+            ..options
         };
         let plan = fvid_media::plan_decode_audio(&source, &transform, &options).unwrap();
         let owned =
@@ -411,7 +464,7 @@ fn mp4_audio_plan_uses_owned_metadata_without_decoding_or_callbacks() {
         let mut output = Vec::new();
         let decode_options = CopyOptions {
             progress: None,
-            ..options.clone()
+            ..limited_options
         };
         let error = fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
             Cursor::new(std::fs::read(&source).unwrap()),
@@ -585,10 +638,10 @@ fn mp4_pcm_raw_api_matches_frontend_with_retained_budget() {
                         || reader.tracks()[index].codec == *b"fl32"
                 );
                 let expected_f64: Vec<u8> = actual
-                    .as_chunks::<4>().0.iter()
-                    .flat_map(|bytes| {
-                        f64::from(f32::from_le_bytes(*bytes)).to_le_bytes()
-                    })
+                    .as_chunks::<4>()
+                    .0
+                    .iter()
+                    .flat_map(|bytes| f64::from(f32::from_le_bytes(*bytes)).to_le_bytes())
                     .collect();
                 let mut precise = Vec::new();
                 fvid_media::owned_mp4_audio::decode_mp4_pcm_f64(

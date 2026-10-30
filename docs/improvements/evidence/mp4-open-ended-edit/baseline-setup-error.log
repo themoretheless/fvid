@@ -1,0 +1,3 @@
+error: Cargo.toml: can't find `audio_probe` example at `examples/audio_probe.rs` or `examples/audio_probe/main.rs`. Please specify example.path if you want to use a non-default path.
+error: Cargo.toml: can't find `av_sync` example at `examples/av_sync.rs` or `examples/av_sync/main.rs`. Please specify example.path if you want to use a non-default path.
+error: could not parse `fvid` (manifest) due to 2 previous errors

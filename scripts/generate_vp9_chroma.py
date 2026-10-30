@@ -8,11 +8,11 @@ from generate_audio_resample_window_fixture import atom, word, ebml
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEST = ROOT / 'tests/fixtures/playback-errors'
-def frame(depth, chroma, width=64, height=64, level=0, tile=None, segmentation='0', base_q=0, rgb=False):
+def frame(depth, chroma, width=64, height=64, level=0, tile=None, segmentation='0', base_q=0, rgb=False, show=True):
     profile = (0 if chroma == '420' else 1) + (2 if depth > 8 else 0)
     bits = '10' + str(profile & 1) + str(profile >> 1)
     if profile == 3: bits += '0'
-    bits += '0010'  # coded keyframe, shown, not error resilient
+    bits += '00' + str(int(show)) + '0'  # coded keyframe, display flag, not error resilient
     bits += f'{0x498342:024b}'
     if depth > 8: bits += str(int(depth == 12))
     if rgb:

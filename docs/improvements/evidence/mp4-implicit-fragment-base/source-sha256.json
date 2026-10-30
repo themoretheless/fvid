@@ -1,0 +1,5 @@
+{
+  "crates/fvid-media/src/owned_mp4_impl.rs": "993015feac829f2b13899ace82a5c5c571520b1db969821a60634653ba20f408",
+  "scripts/generate_mp4_implicit_fragment_base.py": "917ad24a9a348271b5ff02077d3f8b5aa65dc8eb237c7d3a00e16720e4ed3964",
+  "tests/mp4_implicit_fragment_base.rs": "2e69501da48a4e75422b110e382df88c6468114e34162c8905a0fa8bed220a89"
+}

@@ -1,0 +1,28 @@
+{
+  "status": "accepted",
+  "improvement": "FVID-0409",
+  "before": "Runtime baseline: 3 controls pass, seek acceptance fails. Ten ordinary/late decode-only-tail requests return no picture; two middle-control requests return the future picture at [2,3) instead of the sequentially visible [0,2) picture. Exact picture/clock controls, bounded empty-stream behavior and codec-error recovery already pass.",
+  "change": "A non-initial MP4 sync landing that yields no image or an interval beginning after the target is replayed once from the presentation beginning. Release an unhelpful future frame before resetting decoder storage. Starts already at sample zero preserve genuine leading-gap behavior without replay. Codec errors retain the existing error/reset path. Private source-state access keeps this off public API surfaces.",
+  "after": "30 distinct integration checks pass: 25 related checks plus the expanded 5-test regression. The initial broad 29-check run and focused 5-check rerun overlap in four tests and are not double-counted. Sixteen NativeReader unit checks also pass, totaling 46 distinct checks; no-default-features cargo check passes.",
+  "matrix": "72 image/interval/continuation seek positions across ordinary/late tails, middle/leading control packets and normalized trim/repeated edit views agree with sequential software playback. All-hidden and corrupt-tail inputs are separate controls, not successful-playback claims.",
+  "fixtures": "Eight short authored VP9 movies plus two analytic YUV16 oracles and manifest: 11 byte-identical regenerated files. No private media, external encoder, FFmpeg or network.",
+  "controls": [
+    "All-hidden stream returns no picture with a bounded traversal; this is an empty-output/unsupported-view control.",
+    "A real leading gap returns its first visible picture without an extra traversal.",
+    "Corrupt tail retains the precise invalid VP9 frame marker refusal; rewind allows a subsequent valid prefix seek.",
+    "Earlier-frame continuation, repeated EOF and explicit rewind preserve exact pixels and intervals."
+  ],
+  "resources": "At most one fallback traversal; a rejected future RawFrame is dropped before decoder reset. Counted VP9 I/O verifies the all-hidden case stays within two file lengths and a genuine leading gap within one. No throughput win is claimed.",
+  "scope": "One seek-coverage problem across no-output and future-output landings; fixture, accessor, resource-control and edit variants do not add IDs.",
+  "limitations": [
+    "Fallback can require sequential decoding from the beginning rather than a single GOP; it is deliberately bounded to one retry.",
+    "New seek acceptance uses NativeReader::software. Supplemental pre-existing NativeReader unit fixtures may use the configured backend; they do not qualify GPU parity for this fix.",
+    "No project-wide green or physical GPU/NVIDIA qualification is claimed; historical unrelated baseline failures remain separate."
+  ],
+  "sha256": {
+    "src/playback/video/native.rs": "ee19a732ba24c18e3ee4496511d8f62cddce5bcf5e0524c70a225ec0ebf532fb",
+    "src/playback/video/mp4_dispatch.rs": "5f3dbb46fd6f90739078b6576ff2b71be6a379ce4a761befa5306675fa3bdfcc",
+    "tests/mp4_decode_only_seek.rs": "5df81a3a5cd3831002dbd899d5850c8041dd9230b116457e9e1ecc1573dba902",
+    "scripts/generate_mp4_decode_only_seek.py": "8d653bfbdc589da8d00e764e197ec0220c2c73996001937e007c80f9ef254937"
+  }
+}

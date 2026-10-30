@@ -1,0 +1,36 @@
+{
+  "status": "accepted",
+  "improvement": "FVID-0408",
+  "before": "Valid stts [1,1,0] media has two-tick mdhd/tkhd/mvhd duration. Both parsers preserve the explicit zero and the malformed-codec control passes. Software packet playback and NativeReader fail at EOF with non-increasing MP4 presentation timestamps: 2 tests pass, 2 fail. After the initial streaming fix, owned decode still refuses invalid video duration; this intermediate failure is retained.",
+  "after": "25 integration checks pass, plus 6 root MP4 unit checks and 1 owned presentation-normalization unit: 32 distinct checks. The strengthened 4-test focused rerun passes; no-default-features cargo check passes. No selected checks failed or were ignored.",
+  "change": "Decode and validate the terminal packet but omit its empty presentation window. Preserve zero in the sample index; do not guess a duration from headers. Both streaming dispatch paths and owned normalization handle the empty endpoint. Seek avoids restarting solely at an empty terminal sample so to/past-end requests retain the last visible picture.",
+  "fixture": "Owned three-color VP9, durations [1,1,0] at 50Hz, exact analytic YUV16 oracles and an invalid final VP9 marker control. All six fixture/oracle/manifest files regenerate identically offline; no private media, FFmpeg or network.",
+  "checks": [
+    "Both parser wrappers keep raw duration zero.",
+    "Two distinct pictures match their exact pixel oracles; terminal empty picture is not emitted.",
+    "Native duration 40ms, seek at/beyond EOF, rewind and repeated EOF are correct.",
+    "Owned decode publishes exactly two frames with zero errors.",
+    "A broken terminal codec packet is still rejected by both streaming and owned decode, even though its duration is zero.",
+    "Existing positive-duration composition, hidden-frame, edit, layered seek and I/O regressions pass."
+  ],
+  "refusal_expectation_update": "Per the media regression policy, the private terminal-zero refusal assertion is replaced by explicit empty-window acceptance alongside new end-to-end acceptance tests. Positive numeric clock checks remain exact; non-increasing, overflow and negative-duration refusals are retained, and the corrupt zero-duration packet control is strengthened for both decoders.",
+  "sources": [
+    {
+      "url": "https://developer.apple.com/documentation/quicktime-file-format/time-to-sample_atom",
+      "note": "Sample deltas are explicit nonnegative durations; their sum describes media length. Zero is preserved rather than treated as absent."
+    }
+  ],
+  "scope": "One newly supported zero-duration terminal presentation case; renderer, owned decoder, seek and negative-control variants are one improvement.",
+  "limitations": [
+    "Software playback and owned decode were exercised; no physical GPU/NVIDIA claim.",
+    "Nonterminal invalid timestamp and codec checks remain enforced.",
+    "The full project suite is not claimed green; unrelated historical baseline failures remain separate."
+  ],
+  "sha256": {
+    "src/playback/video/mp4.rs": "b23609ec1900de8b5bd556c2100783de7a459b2d07d392802c618b6b05a73932",
+    "src/playback/video/mp4_dispatch.rs": "25ff632998b86f93dfdd27b9dafa67d770c42d9f78bf361bc999230c83800053",
+    "crates/fvid-media/src/owned_mp4_video_decode.rs": "c97d67498896c78f413226476557008e40e1f9bd95b239a9fc6afeee0650a989",
+    "tests/mp4_empty_tail.rs": "d9fb4d32f241877888e00c312454ea361ee84390c2e9929f6b241682ae759af7",
+    "scripts/generate_mp4_empty_tail.py": "24cda6015a2a277efba7c3b9a2f52928f8bf71267867e800ce8020e1953aef1f"
+  }
+}

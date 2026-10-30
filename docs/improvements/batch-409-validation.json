@@ -1,0 +1,41 @@
+{
+  "batch": 409,
+  "accepted_ids": [
+    "FVID-0414"
+  ],
+  "status": "accepted-with-baseline-failures",
+  "summary": "Preserve playable MP4 audio beside unreferenced unknown sample descriptions",
+  "source_files": [
+    "crates/fvid-media/src/owned_mp4_impl.rs",
+    "src/playback/audio/mp4_audio.rs"
+  ],
+  "regressions": [
+    "tests/mp4_unused_audio_descriptions.rs"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/mp4-unused-audio-descriptions/status.json",
+    "docs/improvements/evidence/mp4-unused-audio-descriptions/baseline-comparison.json",
+    "docs/improvements/evidence/mp4-unused-audio-descriptions/audit.md"
+  ],
+  "before": "Corrected runtime baseline: selected-unknown refusal passes; 3 acceptance tests fail. Both indexed parser wrappers discard audio in all 16 initial regular/fragmented constant/changing witnesses; native audio reports unknown zzzz and owned decode sees no audio stream. Initial parser-harness constant-description misuse was corrected and rerun before production edits; original log retained.",
+  "after": "50 distinct integration checks pass across 9 targets, including all 6 expanded new tests. Twenty authored regular, fragmented and compact-index cases retain both tracks, exact selected descriptions, encoded packet bytes, DTS/PTS, independent nonzero PCM across coding/rate/channel/precision transitions, seek/rewind, six-picture video companions, owned normalized waveform equality and actual audio-worker replay. Core locked/offline no-default-features check passes.",
+  "baseline_failures": "Four owned_mp4_audio failures also occur in an isolated snapshot restored to the two pre-fix sources. All other Rust sources match. Before and after share the same 4 failed names/errors and waveform assertion hashes: packet-budget planning, precise PCM and Matroska interval-resampling lookahead, and frontend/library transformed WAVE parity. No project-wide green claim. Saved comparison logs replace raw waveform assertion arrays with their hashes.",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --features player --test mp4_unused_audio_descriptions (baseline and focused reruns)",
+    "cargo test --locked --offline --no-default-features --features player --no-fail-fast --test mp4_unused_audio_descriptions --test mp4_unused_video_descriptions --test mp4_sample_descriptions --test mp4_media_sample_descriptions --test mp4_audio_reconfiguration --test mp4_audio_export_transitions --test mp4_audio_selection --test owned_mp4_audio --test mp4_empty_fragment",
+    "cargo test --manifest-path <isolated pre-fix source>/Cargo.toml --locked --offline --no-default-features --features player --test owned_mp4_audio",
+    "cargo check --locked --offline --no-default-features"
+  ],
+  "limitations": [
+    "Some constant PCM navigation uses its existing packet-boundary landing contract.",
+    "Opaque unused codec-specific payload stays unparsed and is never sent to a decoder.",
+    "No throughput, physical audio device, GPU parity or whole-project green claim.",
+    "Four demonstrated pre-existing owned_mp4_audio failures remain open separately."
+  ],
+  "uncounted": [
+    "All codec-table placement, clock, index and refusal variants",
+    "Test-harness setup/legacy-seek corrections",
+    "Pre-existing four failing owned audio tests",
+    "Opaque audio admission and early selected-codec guard are one independent problem"
+  ]
+}

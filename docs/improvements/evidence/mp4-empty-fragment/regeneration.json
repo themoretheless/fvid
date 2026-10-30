@@ -1,0 +1,21 @@
+{
+  "byte_identical": true,
+  "files": {
+    "inherited.mp4": "ff5e8dec272a4cf3d80b33814102c7d8e9a95662e2d2697447b3677b4bcd3c59",
+    "trailing.mp4": "af4303bab358ed7d10054cfa3ab1b6c8eae3b853dc2e9bb1de26429ac4550fb4",
+    "leading.mp4": "3c83af05647568072f93497996b1b0a4e4b94f980b4d920fae45f5afb4e98de7",
+    "middle-v0-implicit.mp4": "94d44498aeb99d1b9e13fac982f4c76de33a5b037960c113acca3b217adbb215",
+    "plain.mp4": "231dcd58a2fa498ad51b4a866129a6d73992201f467e00b3c0ce7e8989ccb44e",
+    "zero-gap.mp4": "2720dc2383969ed42d3a31e70ebf274f25a49f05bf331791a50d437346e6b8c4",
+    "middle-v1-implicit.mp4": "e7371a729a66b335b4ac9c930491a454cadd6c946ac770170b37dbe699292ab1",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "consecutive.mp4": "1ce5ba56b887c01535f0ee6cfb68c3f1f55fec96042f4e999c53906f60527e0d",
+    "manifest.json": "60a4b57021d0f065f564290548c60aa75a12a227b0c99a4c11540263a44f98d5",
+    "contradictory-run.mp4": "91fa79eb3079853f9b61bcfc7640bbf8479c03031dd51766de4f19fb4afc9a62",
+    "overflow.mp4": "96dc741b7678219c9dc993b8a5a3c89d0687613141918f3c8d3a30a9231f91d5",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "middle-v1-explicit.mp4": "9baa5688da449287429a07acac6cbf7d1690322ed43377e1a3e4dba0a1439b2f",
+    "middle-v0-explicit.mp4": "94dc1930a373b98fe5c887c668e80493fd8838eeb440cd824c6e48f80108cf4d"
+  }
+}

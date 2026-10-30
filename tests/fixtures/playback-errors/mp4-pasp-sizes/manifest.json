@@ -1,0 +1,23 @@
+{
+  "provenance": "Own 3-frame 50Hz VP9 colored keyframes and analytic YUV16. Only sample-entry pasp differs; media bytes/offsets remain identical. No private media/parameters, FFmpeg or network.",
+  "invalid": [
+    "pasp-0-bytes.mp4",
+    "pasp-4-bytes.mp4",
+    "pasp-7-bytes.mp4",
+    "pasp-9-bytes.mp4",
+    "pasp-12-bytes.mp4"
+  ],
+  "sha256": {
+    "absent.mp4": "c624dff4c7a50651dbb167409a79d3b7cdf9a57e43599a49596d10e7df135471",
+    "wide.mp4": "2a3a5781f42b00af0dbd5bfe5d0ae8079580b17f484ac3eb8994734d17adbf5c",
+    "zero-fallback.mp4": "a3562e6fea07e40a0c744bfb9ed056bffdfbadc9a9dec961f022996a3f2849f9",
+    "pasp-0-bytes.mp4": "11e2ad922c12c9279d6148fbda7c77a2652eb252d0fa3a995d06a22ce47d2d80",
+    "pasp-4-bytes.mp4": "1890cdf4556af54008499c2c56c8f967bbed566250db9ad24725242860351c43",
+    "pasp-7-bytes.mp4": "2afc807f3dd3cf8cbe8c779bf7e9ad55bd1f951eaaf1fa489ac7119ba1720399",
+    "pasp-9-bytes.mp4": "e1155d8f6cd68cc45ca57f5bb3b0c461106a1d229ae44f65b74147f3eaafce0b",
+    "pasp-12-bytes.mp4": "1ae234d8e8b8b757e27700ead3011bc6a66cfd4ee190f18f820c2568844c29bd",
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7"
+  }
+}

@@ -207,8 +207,9 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
         }
     }
     let packet_clocks=mp4_packet_clock_runs(&mut reader,index,control)?;
+    let edit_clock = track.resolved_edit_clock(reader.movie_timescale())?;
     let mut timeline =
-        Mp4ExportTimeline::new(&track.edits, track.timescale, reader.movie_timescale())?;
+        Mp4ExportTimeline::new(edit_clock.edits(), track.timescale, edit_clock.timescale)?;
     if track.edits.is_empty() {
         let mut end = Mp4ExportTime::ticks(track.duration, track.timescale)?;
         if track.samples.get(0).is_some_and(|s|s.pts==0) {

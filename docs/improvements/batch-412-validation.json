@@ -1,0 +1,36 @@
+{
+  "batch": 412,
+  "accepted_ids": [],
+  "follow_up_ids": [
+    "FVID-0414"
+  ],
+  "count_delta": 0,
+  "status": "accepted-follow-up",
+  "summary": "Qualify automatic PCM eligibility using the first referenced sample description",
+  "source_files": [
+    "src/playback/audio/mp4_audio.rs"
+  ],
+  "regressions": [
+    "tests/mp4_active_audio_choice.rs"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/mp4-active-audio-choice/status.json"
+  ],
+  "before": "Runtime baseline: 2 controls pass and automatic selection fails. unused-first.mp4 and unused-first-compact.mp4 select quiet track ID 2 and output 1920 zero bytes; explicit selection and owned decode correctly return the authored nonzero preferred track ID 3. An actually selected unsupported setup still chooses a valid alternate and refuses explicit decoder construction.",
+  "after": "52 distinct tests pass across 9 integration targets, including 4 new tests. Automatic PCM selection now agrees with explicit selection and owned decode on exact analytic samples. Real worker checks cover play, seek, rewind and EOF for expanded and compact index forms. Existing unsupported PCM fallback, enabled-track behavior, unknown unused descriptions, recovered clocks, transitions and owned audio exports remain green. Locked offline no-default-features core build check passes.",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --features player --test mp4_active_audio_choice (before/after)",
+    "cargo test --locked --offline --no-default-features --features player --no-fail-fast --test mp4_active_audio_choice --test mp4_pcm_choice --test mp4_enabled_tracks --test mp4_unused_audio_descriptions --test mp4_audio_selection --test mp4_audio_reconfiguration --test mp4_sample_descriptions --test mp4_audio_presentation_end --test owned_mp4_audio",
+    "cargo check --locked --offline --no-default-features"
+  ],
+  "limitations": [
+    "Only initial PCM decoder usability is qualified; unsupported actually selected setups retain their existing capability behavior.",
+    "Captured native worker qualification does not claim physical audio hardware or GPU parity.",
+    "No whole-project green or performance claim."
+  ],
+  "uncounted": [
+    "Known-codec unsupported geometry variant of unused-description admission",
+    "Expanded and Uniform index cases",
+    "Worker, selection, refusal and fixture controls"
+  ]
+}

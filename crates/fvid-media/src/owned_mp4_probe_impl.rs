@@ -166,13 +166,14 @@ pub(crate) fn try_mp4_with_options(
         }
         let edited = !track.edits.is_empty();
         let (duration, presentation_us) = if edited {
-            let movie_duration = track.edits.iter().try_fold(0u128, |sum, edit| {
+            let edit_clock = track.resolved_edit_clock(reader.movie_timescale()).map_err(|e|e.to_string())?;
+            let movie_duration = edit_clock.edits().iter().try_fold(0u128, |sum, edit| {
                 sum.checked_add(u128::from(edit.duration))
                     .ok_or("MP4 edit duration overflow")
             })?;
             (
-                ticks(movie_duration, reader.movie_timescale(), track.timescale)?,
-                ticks(movie_duration, reader.movie_timescale(), 1_000_000)?,
+                ticks(movie_duration, edit_clock.timescale, track.timescale)?,
+                ticks(movie_duration, edit_clock.timescale, 1_000_000)?,
             )
         } else {
             (

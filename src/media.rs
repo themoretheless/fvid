@@ -986,7 +986,7 @@ pub fn plan_remux(source: &std::path::Path, options: &CopyOptions) -> Result<Med
         if options.streams.iter().any(|&s| s != 0) {
             return Err("ADTS has only stream 0".into());
         }
-        validate_adts_copy_options_with_metadata(options, false, true)?;
+        validate_adts_copy_options_with_metadata(options, true, true)?;
         return crate::native_plan::remux_adts_with_options(source, options);
     }
     if crate::native_export::is_native_mp4_matroska_with_memory_limit(source, options.max_controlled_bytes).unwrap_or(false)

@@ -1,0 +1,3 @@
+Uncounted FVID-0401 qualification extension. Positive composition timestamps can place actual movie chapters after raw mdhd decode duration. The previous unknown-movie chapter bound uses only decode duration, so even a valid known tkhd presentation endpoint is ignored. The new corpus uses independent chapter times 200/220/240ms in supported movie and 10MHz clocks, with decode duration 60ms and visible end 260ms.
+
+The earlier hypothesis about decreasing tfdt was not promoted: whether a backwards decode timeline is a valid media program was not established, so no acceptance or refusal behavior was changed on that basis. No ID is assigned to that hypothesis or to this existing-cause follow-up.

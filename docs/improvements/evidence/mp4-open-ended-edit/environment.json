@@ -1,0 +1,14 @@
+{
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+  "head": "bd95009d8823b92be229277c289c6f9511a134a8",
+  "cwd": "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid",
+  "active_goal": "1000 accepted independent improvements",
+  "accepted_count": 404,
+  "unrelated_work_preserved": [
+    "Cargo.lock generic UMA dependency",
+    "crates/fvid-vt generic UMA adapter and feature wiring",
+    "Forma work outside the shared GPU memory scope",
+    "prior accepted MP4 changes and fixture qualification"
+  ]
+}

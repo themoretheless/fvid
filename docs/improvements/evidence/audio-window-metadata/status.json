@@ -1,0 +1,28 @@
+{
+  "status": "accepted-requalification",
+  "count_delta": 0,
+  "existing_improvement": "FVID-0233",
+  "before": "Earlier broad owned_mp4_audio run has 4 failures (retained in batch-409 evidence). Fresh filtered baseline reproduces the two supposed resampling lookahead failures. An independent PCM/precision/geometry inspection proves all 3 authored container sources match WAVE sample payloads exactly: float32 704 bytes, float64 1408 bytes. Both Matroska files append exactly 24 bytes of LIST/INFO carrying default language eng; the old whole-WAVE oracle lacked that metadata.",
+  "change": "No production code change. Keep full-file WAVE byte equality, add source-derived expected INFO metadata to its analytic PCM reference and explicitly assert publication metadata against parsed source tags/title/language/encoder. The short Matroska references carry an independently specified exact ILNG/eng INFO chunk. Add a separate sample-payload/precision/geometry and exact-language INFO regression. Keep the one-byte packet cap as a negative assertion for both planning entrypoints and decoding; use an admitted cap only for plan-structure parity. Progress/cancellation/memory/publication checks remain.",
+  "after": "All 8 owned_mp4_audio tests and the additional sample/metadata test pass (9 distinct checks), locked offline without default features. The two apparent DSP failures and source-WAVE parity failure were stale metadata oracles, while the planning test expected obsolete deferred packet admission. No media/DSP bug was fixed or counted.",
+  "controls": [
+    "Raw analytic PCM equality and complete transformed WAVE equality retained.",
+    "Precise float64 never downgraded: exact 1408-byte payload and 64-bit geometry.",
+    "Matroska language INFO asserted as exact bytes separately from PCM.",
+    "One-byte packet cap must refuse planning through both public and owned APIs and refuse decode.",
+    "Planning callbacks must not fire; cancellation, memory limits, explicit stream selection and no-partial-file guards still pass."
+  ],
+  "harness_notes": [
+    "Initial diagnostic reused the same destination path between cases and correctly hit output-already-exists; unique paths fixed the harness.",
+    "An intermediate test edit reused admitted options for the old decode-budget refusal; limited options were kept separately, preserving that refusal. Both logs are retained."
+  ],
+  "fixtures": "Existing authored ALAC/PCM resample-window files and analytic 512-sample formula; no new media failure and no new fixture needed. No FFmpeg, network or private media copied.",
+  "limitations": [
+    "This qualifies only the selected owned audio suite and sample/metadata contracts, not whole-project green.",
+    "No throughput or GPU/audio-device behavior claim."
+  ],
+  "sha256": {
+    "tests/owned_mp4_audio.rs": "96789e3579fd83398abb805a8319b2f924d0a2d66113904414cec6fec62c6052",
+    "tests/owned_audio_window_parity.rs": "8db9f92699ac01bb700b3b0af25ce099c986c4e5ef0559614642ac77ff661c68"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "snapshot_shared_source_sha256": "993015feac829f2b13899ace82a5c5c571520b1db969821a60634653ba20f408",
+  "current_and_baseline_targets_are_distinct": true,
+  "authoritative_before": "before-isolated.log",
+  "setup_only_or_invalid_observations": [
+    "baseline-setup-error.log",
+    "cpu-schedules-filtered-out.log",
+    "stale-library-artifact.log"
+  ],
+  "note": "The first baseline comparison reused a target directory and contaminated an owned-library artifact. Changed packages were cleaned; the baseline was rerun in its own target and final validations in the current target. Zero selected tests and stale-artifact runs are not counted."
+}

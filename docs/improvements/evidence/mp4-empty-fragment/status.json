@@ -1,0 +1,21 @@
+{
+  "status": "accepted",
+  "improvement": "FVID-0413",
+  "before": "Runtime baseline: all 3 new tests fail. Both parsers and native software playback reject nine authored valid no-sample interval movies as unsupported MP4 track-fragment header flags. Plain finite control assertions complete before aggregate failure. Contradictory-run and overflow witnesses fail at the unrelated unsupported-flag check.",
+  "change": "Support tfhd.duration-is-empty without manufacturing sample entries. Maintain a per-track decode cursor independent of sample-list tails, apply the explicitly present or inherited default duration, preserve tfdt overrides, and include a trailing empty interval in track duration. Refuse every trun in an empty-duration traf, even a zero-row run, and check its end timestamp.",
+  "after": "42 distinct integration checks pass across 10 targets, including expanded 4-test regression. Ten valid 3-picture controls include explicit V0/V1 and omitted tfdt, leading/middle/trailing gaps, inherited/zero duration and consecutive gaps. Both parser wrappers agree on packet bytes, DTS/PTS, nominal duration and track endpoint; software playback retains analytic YUV, RGB, exact intervals, 120 seek positions with continuation, rewind and repeated EOF. Exact three-sample budget passes and two-sample budget refuses, so gaps do not consume sample entries. Locked offline no-default-features core build check passes.",
+  "fixtures": "16 byte-identical regenerated files: 12 own short colored VP9 movies, 3 analytic YUV16 oracles and manifest. No private media/parameters, FFmpeg or network; ordinary tests use saved files only.",
+  "scope": "One valid no-sample-fragment compatibility improvement, including its clock, byte-base and malformed/resource controls. No separate count for fixture variants or replacing sample-tail clock inference.",
+  "limitations": [
+    "Playback retains its existing hold-until-next-picture interval behavior across middle gaps; no generated black-frame policy is introduced.",
+    "A trailing gap extends track duration without inventing or retiming the last picture.",
+    "An entirely sample-free track remains refused by the existing no-samples policy.",
+    "Dedicated playback is software; no GPU parity, performance or full project-wide green claim. Historical unrelated failures remain separate."
+  ],
+  "sha256": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": "4cb685afb9da01b3a02b4898a2ec550677c218d080c281914eeadf9ce4ef07aa",
+    "scripts/generate_mp4_empty_fragment.py": "3ab9e7eb9a16bc46d683c57ecd0cd73835925f27704d8773d308f2e98286860e",
+    "tests/mp4_empty_fragment.rs": "36fb8fd926a3ed4ad41bf46ee2b296989b50b680686f865222e64d439315b154"
+  },
+  "source_note": "Only explanatory comments changed after the integration run; runtime code is unchanged."
+}

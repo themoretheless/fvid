@@ -1,0 +1,6 @@
+{
+  "scripts/generate_mp4_time_header_sizes.py": "c5a0a90cce942f2ace85b2d216d9b6eda1d6642975c581de659c982461a28ab2",
+  "tests/mp4_time_header_sizes.rs": "d7cf66931024f8e83b533f28491849bae1d67ef98f21bc6bfb67fcaac5335933",
+  "tests/mp4.rs": "489aae04df156fbbe4be44bdc09160b28ffc4366118428d77b6781025dff3637",
+  "crates/fvid-media/src/owned_mp4_impl.rs": "5bb13d7275d5c9eac2178b9cc1399d08f1fe62c58f82c02da374e8cbb8d4197f"
+}

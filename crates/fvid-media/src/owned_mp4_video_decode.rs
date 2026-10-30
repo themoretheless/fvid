@@ -79,13 +79,12 @@ pub(crate) fn decode_presented(
         return Ok(None);
     }
     let rotation = track.rotation;
+    let edit_clock = track.resolved_edit_clock(reader.movie_timescale()).map_err(|e| e.to_string())?;
     let edits = match crate::owned_video_timeline::map_edits(
-        track
-            .edits
-            .iter()
+        edit_clock.edits().iter()
             .map(|edit| (edit.duration, edit.media_time)),
         track.timescale,
-        reader.movie_timescale(),
+        edit_clock.timescale,
     ) {
         Ok(value) => value,
         Err(Error::Unsupported(_)) => return Ok(None),
@@ -603,6 +602,11 @@ fn normalize_presentations(frames: &mut Vec<FrameMetadata>) -> Result<()> {
                 .checked_sub(frames[index].pts)
                 .ok_or("presentation duration overflow")?;
         }
+        if index + 1 == frames.len() && frames[index].duration == 0 {
+            // Retain this boundary while assigning the preceding interval,
+            // then omit the terminal empty presentation window below.
+            continue;
+        }
         if frames[index].duration <= 0 {
             return Err("invalid video duration".into());
         }
@@ -610,6 +614,9 @@ fn normalize_presentations(frames: &mut Vec<FrameMetadata>) -> Result<()> {
             .pts
             .checked_add(frames[index].duration)
             .ok_or("video timestamp overflow")?;
+    }
+    if frames.last().is_some_and(|frame| frame.duration == 0) {
+        frames.pop();
     }
     Ok(())
 }
@@ -1125,7 +1132,10 @@ mod tests {
             (frames[1].pts, frames[1].duration, frames[1].size),
             (2, 3, [3, 1])
         );
-        assert!(normalize_presentations(&mut vec![frame(0, 0, 0)]).is_err());
+        let mut empty = vec![frame(0, 0, 0)];
+        normalize_presentations(&mut empty).unwrap();
+        assert!(empty.is_empty());
+        assert!(normalize_presentations(&mut vec![frame(0, -1, 0)]).is_err());
         assert!(normalize_presentations(&mut vec![frame(i64::MAX, 1, 0)]).is_err());
     }
 }

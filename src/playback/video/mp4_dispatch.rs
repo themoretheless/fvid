@@ -6,6 +6,8 @@ use crate::codec::{config::HevcConfig, hevc_vps::LayeredVps};
 /// Indexed MP4 video source with automatic codec and layered HEVC dispatch.
 pub struct Mp4VideoReader<R> {
     source: Source<R>,
+    presentation_end: std::sync::OnceLock<i128>,
+    presentation_bound: Option<(u64, u32)>,
 }
 enum Source<R> {
     Single(Box<SingleLayerMp4VideoReader<R>>),
@@ -201,11 +203,14 @@ impl<R: Read + Seek> SingleView<R> {
                 .checked_add(old)
                 .ok_or_else(|| invalid("duplicate-PTS duration overflow"))?;
         }
-        frame.duration.ticks = presentation_duration(
+        let Some(duration) = presentation_duration(
             frame.presentation_time.ticks,
             self.lookahead.as_ref().map(|f| f.presentation_time.ticks),
             frame.duration.ticks,
-        )?;
+        )? else {
+            return Ok(None);
+        };
+        frame.duration.ticks = duration;
         let conversion = frame
             .decoded
             .retained_bytes()?
@@ -262,6 +267,9 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
         budget: usize,
         hardware: bool,
     ) -> Result<Self> {
+        let presentation_bound = demuxer.track_header_duration(index)
+            .or_else(|| demuxer.movie_duration())
+            .map(|duration| (duration, demuxer.movie_timescale()));
         let track = demuxer
             .tracks()
             .get(index)
@@ -278,10 +286,17 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     // reorder independent access units across sequence resets;
                     // the common reader retains the bounded PTS queue and seek
                     // coverage required for that presentation order.
-                    let reordered = demuxer.tracks()[index].samples.expanded()
-                        .is_some_and(|samples| samples.windows(2).any(|pair| pair[0].pts > pair[1].pts));
+                    let reordered =
+                        demuxer.tracks()[index]
+                            .samples
+                            .expanded()
+                            .is_some_and(|samples| {
+                                samples.windows(2).any(|pair| pair[0].pts > pair[1].pts)
+                            });
                     if vpsless || reordered {
                         return Ok(Self {
+                            presentation_end: Default::default(),
+                            presentation_bound,
                             source: Source::Single(Box::new(
                                 SingleLayerMp4VideoReader::from_demuxer_with_hardware(
                                     demuxer, index, budget, false, true,
@@ -319,6 +334,8 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                         budget / 2,
                     )?;
                     return Ok(Self {
+                        presentation_end: Default::default(),
+                            presentation_bound,
                         source: Source::Layered(Box::new(SingleView {
                             source,
                             lookahead: None,
@@ -337,6 +354,8 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             }
         }
         Ok(Self {
+            presentation_end: Default::default(),
+                            presentation_bound,
             source: Source::Single(Box::new(
                 SingleLayerMp4VideoReader::from_demuxer_with_hardware(
                     demuxer, index, budget, hardware, false,
@@ -369,6 +388,41 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                 .unwrap(),
         }
     }
+    // The media header describes the decode duration, which can end before
+    // composition output. Cache the final PTS group's full nominal span so
+    // duration queries do not rescan the sample index on every UI refresh.
+    pub(crate) fn presentation_end_ticks(&self) -> i128 {
+        *self.presentation_end.get_or_init(|| {
+            let track = self.track();
+            let mut latest = i64::MIN;
+            let mut span = 0i128;
+            for index in 0..track.samples.len() {
+                if let Some(sample) = track.samples.get(index) {
+                    match sample.pts.cmp(&latest) {
+                        std::cmp::Ordering::Greater => {
+                            latest = sample.pts;
+                            span = i128::from(sample.duration);
+                        }
+                        std::cmp::Ordering::Equal => span += i128::from(sample.duration),
+                        std::cmp::Ordering::Less => {}
+                    }
+                }
+            }
+            let mut end = i128::from(track.duration).max(i128::from(latest) + span);
+            if let Some((duration, movie_scale)) = self.presentation_bound {
+                let header = i128::from(duration) * i128::from(track.timescale);
+                let scale = i128::from(movie_scale);
+                // A hidden picture or codec-control sample can carry a late
+                // PTS without displaying anything there. Honor a finite track
+                // endpoint, allowing only sub-movie-tick header quantization.
+                if end.checked_mul(scale).is_none_or(|ticks| ticks - header >= i128::from(track.timescale)) {
+                    end = i128::from(track.duration).max((header + scale - 1) / scale);
+                }
+            }
+            end
+        })
+    }
+
     pub fn movie_timescale(&self) -> u32 {
         match &self.source {
             Source::Single(s) => s.movie_timescale(),
@@ -382,12 +436,38 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
         }
     }
     pub fn seek_to_sync(&mut self, pts: i64) -> i64 {
+        let samples = &self.track().samples;
+        let empty_tail = samples.len().checked_sub(1).and_then(|i| samples.get(i))
+            .is_some_and(|s| s.duration == 0);
+        let pts = if empty_tail {
+            // Do not restart only at a terminal empty window: callers seeking
+            // to/past EOF still need the final displayed frame. Earlier zero
+            // durations can acquire a window from a later composition PTS, so
+            // retain them in decoding rather than filtering packet contents.
+            let mut latest_nonempty = None;
+            let mut earliest = None;
+            for i in 0..samples.len() {
+                if let Some(s) = samples.get(i) {
+                    earliest = Some(earliest.map_or(s.pts, |old: i64| old.min(s.pts)));
+                    if s.duration != 0 {
+                        latest_nonempty = Some(latest_nonempty.map_or(s.pts, |old: i64| old.max(s.pts)));
+                    }
+                }
+            }
+            pts.min(latest_nonempty.or(earliest).unwrap_or(pts))
+        } else { pts };
         match &mut self.source {
             Source::Single(s) => s.seek_to_sync(pts),
             Source::Layered(s) => {
                 s.reset();
                 s.source.seek_to_sync(pts)
             }
+        }
+    }
+    pub(crate) fn starts_at_first_sample(&self) -> bool {
+        match &self.source {
+            Source::Single(source) => source.sample_index == 0,
+            Source::Layered(source) => source.source.visible_sample() == 0,
         }
     }
     pub fn read_frame(&mut self) -> Result<Option<VideoFrame>> {

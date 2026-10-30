@@ -1,0 +1,4 @@
+{
+  "crates/fvid-media/src/owned_mp4_impl.rs": "547018275fc8b576d2df3d6ce0c5f71bdeb4d2b5bd737326296433f53fc8effa",
+  "reconstruction": "HEAD source plus ../mp4-unknown-movie-chapters/fix.patch; matches preceding accepted source hash"
+}

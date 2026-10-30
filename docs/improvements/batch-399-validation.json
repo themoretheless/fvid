@@ -1,0 +1,31 @@
+{
+  "batch": 399,
+  "accepted_ids": [
+    "FVID-0406"
+  ],
+  "status": "accepted",
+  "summary": "Retry interrupted MP4 seeks and finish uncounted ADTS concat-prefix parity",
+  "source_files": [
+    "crates/fvid-media/src/owned_mp4_impl.rs"
+  ],
+  "regressions": [
+    "tests/mp4_interrupted_seek.rs",
+    "tests/mp4_seek_io_regressions.rs"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/mp4-interrupted-seek/status.json",
+    "docs/improvements/evidence/adts-prefix-followup/status.json"
+  ],
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --no-fail-fast --test mp4_interrupted_seek --test mp4_seek_io_regressions --test mp4 --test mp4_open_ended_edit --test mp4_time_header_sizes --test mp4_time_header_flags --test mp4_implicit_fragment_base"
+  ],
+  "results": "40 MP4 checks passed, 0 failed/ignored; 12 ADTS prefix/parity/PCE-budget checks pass as an uncounted restoration of FVID-0278.",
+  "uncounted": [
+    "ADTS sequence constructor and three concat call-site changes restore FVID-0278 without another ID.",
+    "Separate fixture, fault-mode, parser-wrapper and regression variants."
+  ],
+  "limitations": [
+    "Software decoder and seekable synthetic I/O were exercised; no physical disk signal-delivery or NVIDIA/GPU claim.",
+    "No project-wide green claim; separate historical Matroska padding/admission/ABI failures remain outside this fix."
+  ]
+}

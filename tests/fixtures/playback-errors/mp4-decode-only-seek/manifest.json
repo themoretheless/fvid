@@ -1,0 +1,92 @@
+{
+  "provenance": "Own three-sample VP9 movies at 50Hz: two distinct colored shown keyframes, a hidden keyframe at tail/middle/start, normalized trim/repeat edit views, all-hidden and corrupt-marker controls. No private media, encoder or network.",
+  "duration_ticks": 3,
+  "case_intervals": {
+    "ordinary-tail.mp4": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ]
+    ],
+    "late-tail.mp4": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ]
+    ],
+    "middle-control.mp4": [
+      [
+        0,
+        2
+      ],
+      [
+        2,
+        3
+      ]
+    ],
+    "leading-control.mp4": [
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ]
+    ],
+    "middle-trim-edit.mp4": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ]
+    ],
+    "middle-repeat-edit.mp4": [
+      [
+        0,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        5,
+        6
+      ]
+    ]
+  },
+  "no_picture": [
+    "all-hidden.mp4"
+  ],
+  "invalid": [
+    "corrupt-tail.mp4"
+  ],
+  "sha256": {
+    "ordinary-tail.mp4": "3d43fbcffb434b4c4dab7ce11e6039ca5898740e72248809c3401eaa1416b0b4",
+    "late-tail.mp4": "035a8f03be665482c858013d82495ea39f338bb24e6d7ef6eec760d32522baa7",
+    "middle-control.mp4": "06be670fe4eef0f41fafd18eff450433d493bd00dd06943e579c6d2e27b59757",
+    "leading-control.mp4": "94b134a1a03afa0e3b7ecf310b815db744062ecaca826712803e6f9b3fb13981",
+    "middle-trim-edit.mp4": "629d369b10df31136ea80c28622c24c167ecc7acf89c6c26b4af1dc343e1dbf0",
+    "middle-repeat-edit.mp4": "ca5336e4f16195ed7e15d502bb6648d85425dac8fcb1f19ccc0266faa84396b7",
+    "all-hidden.mp4": "f9cd769b12ef96726edaa0398f0cc49b5f5750be7bbf9028a28616762e35539c",
+    "corrupt-tail.mp4": "843516e6a4ee318c0788af17ad2b0094c836dc7d56f436b3fb640cc4a10bd171",
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237"
+  }
+}

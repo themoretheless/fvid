@@ -1,0 +1,16 @@
+{
+  "status": "verified-uncounted-followup",
+  "original_improvement": "FVID-0246",
+  "accepted_count_delta": 0,
+  "before": "Both original and optimized ADTS parsers reach an unchanged public plan_remux admission failure for streams=[0], packet limits and RSS controls; existing regression fails at its first API plan assertion.",
+  "change": "Use the same single-audio-stream selection validator in ADTS plan_remux that execution already uses. Keep explicit nonzero-stream rejection and all budget/metadata admission checks.",
+  "after": "Existing ADTS/WAVE API+CLI parity target: 2 passed. Current exact working-set/packet/PCM regressions: 6 passed. Includes stream 1 refusal with no published output.",
+  "source": "src/media.rs",
+  "sha256": "d753d8a0b01bc0c44fd917b211a5b6725c672e82dcbce08514cef8cf7c279ba2",
+  "regression": "tests/adts_wave_remux_concat_parity_regressions.rs",
+  "log": "stream-zero-followup.log",
+  "remaining_baseline_failures": [
+    "ADTS concat inactive-segment packet prefix budget",
+    "Matroska AAC signed-padding timeline expectation"
+  ]
+}

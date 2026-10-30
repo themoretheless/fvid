@@ -1,16 +1,12 @@
 //! CoreVideo images and page-aligned UMA shared memory mapped into the same Metal device used by wgpu.
 use super::*;
 use objc2::{rc::Retained, runtime::ProtocolObject};
-use objc2_metal::{
-    MTLBuffer, MTLDevice, MTLPixelFormat, MTLResourceOptions, MTLTexture, MTLTextureType,
-};
-use std::alloc::Layout;
+use objc2_metal::{MTLPixelFormat, MTLTexture, MTLTextureType};
 use std::collections::HashMap;
-use std::ptr::NonNull;
 use std::sync::{Arc, Mutex, OnceLock};
 
 /// Apple Silicon unified memory page size (16 KiB) required for `newBufferWithBytesNoCopy`.
-pub const METAL_UMA_PAGE_BYTES: usize = 16_384;
+pub use forma_gpu::metal_memory::METAL_UMA_PAGE_BYTES;
 
 #[link(name = "CoreVideo", kind = "framework")]
 unsafe extern "C" {
@@ -85,142 +81,42 @@ fn cached_texture_cache(raw_device: *const c_void) -> Result<Arc<Mutex<Owned>>, 
     Ok(entry)
 }
 
-struct UmaAllocation {
-    ptr: NonNull<u8>,
-    layout: Layout,
-    len: usize,
-}
-// SAFETY: page-aligned host allocation stays pinned at a stable virtual/physical
-// UMA address until all CPU and Metal references drop.
-unsafe impl Send for UmaAllocation {}
-unsafe impl Sync for UmaAllocation {}
-impl Drop for UmaAllocation {
-    fn drop(&mut self) {
-        // SAFETY: allocated with std::alloc::alloc_zeroed using `self.layout`.
-        unsafe {
-            std::alloc::dealloc(self.ptr.as_ptr(), self.layout);
-        }
-    }
-}
-
-/// Zero-copy Unified Memory Architecture (UMA) buffer shared between CPU and Apple Silicon GPU.
-/// Backed by 16 KiB page-aligned physical RAM wrapped via `newBufferWithBytesNoCopy`
-/// (`MTLResourceStorageModeShared`) and imported into `wgpu::Buffer` without bus transfers.
+/// Source-compatible codec adapter for forma's shared Metal allocation.
 #[derive(Clone)]
-pub struct UmaSharedBuffer {
-    alloc: Arc<UmaAllocation>,
-    buffer: wgpu::Buffer,
-}
-
+pub struct UmaSharedBuffer(forma_gpu::metal_memory::MetalSharedBuffer);
 impl UmaSharedBuffer {
-    /// Allocate a zero-copy UMA buffer of `len` logical bytes (rounded up to a 16 KiB page
-    /// multiple for Metal's `newBufferWithBytesNoCopy` contract) and bind it to `device`.
     pub fn new(
         device: &wgpu::Device,
         len: usize,
         usage: wgpu::BufferUsages,
         label: Option<&str>,
     ) -> Result<Self, Error> {
-        if len == 0 {
-            return Err(Error("UMA shared buffer length must be nonzero".into()));
-        }
-        let aligned_len = len
-            .checked_next_multiple_of(METAL_UMA_PAGE_BYTES)
-            .ok_or_else(|| Error("UMA shared buffer size overflow".into()))?;
-        if aligned_len as u64 > device.limits().max_buffer_size {
-            return Err(Error(
-                "UMA shared buffer exceeds device max_buffer_size".into(),
-            ));
-        }
-        let layout = Layout::from_size_align(aligned_len, METAL_UMA_PAGE_BYTES)
-            .map_err(|_| Error("invalid UMA page alignment layout".into()))?;
-        let raw_ptr = unsafe { std::alloc::alloc_zeroed(layout) };
-        let ptr = NonNull::new(raw_ptr)
-            .ok_or_else(|| Error("UMA page-aligned memory allocation failed".into()))?;
-        let alloc = Arc::new(UmaAllocation { ptr, layout, len });
-        // SAFETY: `alloc.ptr` is 16 KiB page-aligned, `aligned_len` is a multiple of 16 KiB,
-        // and the `Arc<UmaAllocation>` is kept alive until the wgpu/Metal buffer is dropped
-        // or the `UmaSharedBuffer` is dropped (whichever happens last).
-        let buffer = unsafe {
-            let hal = device
-                .as_hal::<wgpu::hal::api::Metal>()
-                .ok_or_else(|| Error("UMA shared buffer requires a Metal wgpu device".into()))?;
-            let raw_device = hal.raw_device();
-            let nn = NonNull::new_unchecked(alloc.ptr.as_ptr().cast::<c_void>());
-            let mtl_buffer: Retained<ProtocolObject<dyn MTLBuffer>> = raw_device
-                .newBufferWithBytesNoCopy_length_options_deallocator(
-                    nn,
-                    aligned_len,
-                    MTLResourceOptions::StorageModeShared,
-                    None,
-                )
-                .ok_or_else(|| {
-                    Error("Metal newBufferWithBytesNoCopy rejected UMA page allocation".into())
-                })?;
-            let hal_buffer = wgpu::hal::metal::Device::buffer_from_raw(
-                mtl_buffer,
-                aligned_len as u64,
-            );
-            device.create_buffer_from_hal::<wgpu::hal::api::Metal>(
-                hal_buffer,
-                &wgpu::BufferDescriptor {
-                    label,
-                    size: aligned_len as u64,
-                    usage,
-                    mapped_at_creation: false,
-                },
-            )
-        };
-        Ok(Self { alloc, buffer })
+        forma_gpu::metal_memory::MetalSharedBuffer::new(device, len, usage, label)
+            .map(Self)
+            .map_err(Error::from)
     }
-
-    /// Logical payload length requested by the caller.
     pub fn len(&self) -> usize {
-        self.alloc.len
+        self.0.len()
     }
-
     pub fn is_empty(&self) -> bool {
-        self.alloc.len == 0
+        self.0.is_empty()
     }
-
-    /// Page-aligned capacity visible to Metal (`multiple of 16384`).
     pub fn aligned_capacity(&self) -> usize {
-        self.alloc.layout.size()
+        self.0.aligned_capacity()
     }
-
-    /// Underlying `wgpu::Buffer` backed by the same physical RAM pages.
     pub fn wgpu_buffer(&self) -> &wgpu::Buffer {
-        &self.buffer
+        self.0.wgpu_buffer()
     }
-
-    /// Write bytes directly into unified RAM without staging or bus transfers.
-    /// Any trailing bytes up to the 4-byte word boundary are zeroed.
-    pub fn write_slice(&self, src: &[u8]) -> Result<(), Error> {
-        if src.len() > self.alloc.len {
-            return Err(Error("source slice exceeds UMA buffer length".into()));
-        }
-        // SAFETY: caller serializes host writes before submitting GPU commands on the queue.
-        unsafe {
-            let dst = self.alloc.ptr.as_ptr();
-            ptr::copy_nonoverlapping(src.as_ptr(), dst, src.len());
-            let padded_end = src.len().next_multiple_of(4).min(self.alloc.layout.size());
-            if padded_end > src.len() {
-                ptr::write_bytes(dst.add(src.len()), 0, padded_end - src.len());
-            }
-        }
-        Ok(())
+    pub fn write_slice(&self, source: &[u8]) -> Result<(), Error> {
+        self.0.write_slice(source).map_err(Error::from)
     }
-
-    /// Read bytes directly from unified RAM after GPU queue synchronization (`device.poll(Wait)`).
-    pub fn read_slice(&self, dst: &mut [u8]) -> Result<(), Error> {
-        if dst.len() > self.alloc.len {
-            return Err(Error("destination slice exceeds UMA buffer length".into()));
-        }
-        // SAFETY: caller polls the Metal device until submission completion before reading.
-        unsafe {
-            ptr::copy_nonoverlapping(self.alloc.ptr.as_ptr(), dst.as_mut_ptr(), dst.len());
-        }
-        Ok(())
+    pub fn read_slice(&self, destination: &mut [u8]) -> Result<(), Error> {
+        self.0.read_slice(destination).map_err(Error::from)
+    }
+}
+impl From<forma_gpu::metal_memory::MetalMemoryError> for Error {
+    fn from(error: forma_gpu::metal_memory::MetalMemoryError) -> Self {
+        Self(error.to_string())
     }
 }
 

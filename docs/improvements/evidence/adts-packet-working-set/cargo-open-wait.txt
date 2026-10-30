@@ -1,0 +1,52 @@
+Analysis of sampling cargo (pid 91060) every 1 millisecond
+Process:         cargo [91060]
+Path:            /Users/USER/*/cargo
+Load Address:    0x10491c000
+Identifier:      cargo
+Version:         0
+Code Type:       ARM64
+Platform:        macOS
+Parent Process:  codex [4526]
+Target Type:     live task
+
+Date/Time:       2026-10-30 04:13:22.129 +0400
+Launch Time:     2026-10-30 04:13:04.139 +0400
+OS Version:      macOS 26.7.2 (25G332)
+Report Version:  7
+Analysis Tool:   /usr/bin/sample
+
+Physical footprint:         7296K
+Physical footprint (peak):  7360K
+Idle exit:                  untracked
+----
+
+Call graph:
+    821 Thread_14329928   DispatchQueue_1: com.apple.main-thread  (serial)
+      821 start  (in dyld) + 6992  [0x1841794e4]
+        821 main  (in cargo) + 52  [0x1051aac20]
+          821 _RNvNtCs82bWklYMk3w_3std2rt19lang_start_internal  (in cargo) + 952  [0x1056312dc]
+            821 _RNCINvNtCs82bWklYMk3w_3std2rt10lang_startuE0CsfM7azVXxMpU_5cargo  (in cargo) + 16  [0x1051443e8]
+              821 _RINvNtNtCs82bWklYMk3w_3std3sys9backtrace28___rust_begin_short_backtraceFEuuECsfM7azVXxMpU_5cargo  (in cargo) + 12  [0x105133c90]
+                821 _RNvCsfM7azVXxMpU_5cargo4main  (in cargo) + 11856  [0x105150d40]
+                  821 _RNvMNtCsfM7azVXxMpU_5cargo3cliNtB2_4Exec4exec  (in cargo) + 948  [0x1051545b4]
+                    821 _RNvNtNtCsfM7azVXxMpU_5cargo8commands4test4exec  (in cargo) + 60  [0x1051705cc]
+                      821 _RNvYNtNtNtNtCscMpIzxYN7Hn_12clap_builder6parser7matches11arg_matches10ArgMatchesNtNtNtCsi3tpU3YNWJ1_5cargo4util15command_prelude13ArgMatchesExt9workspaceCsfM7azVXxMpU_5cargo  (in cargo) + 364  [0x1051aa844]
+                        821 _RNvMs_NtNtCsi3tpU3YNWJ1_5cargo4core9workspaceNtB4_9Workspace3new  (in cargo) + 2096  [0x104e32470]
+                          821 _RNvMs_NtNtCsi3tpU3YNWJ1_5cargo4core9workspaceNtB4_9Workspace14find_path_deps  (in cargo) + 1984  [0x104e28120]
+                            821 _RNvMs_NtNtCsi3tpU3YNWJ1_5cargo4core9workspaceNtB4_9Workspace14find_path_deps  (in cargo) + 1984  [0x104e28120]
+                              821 _RNvMs_NtNtCsi3tpU3YNWJ1_5cargo4core9workspaceNtB4_9Workspace14find_path_deps  (in cargo) + 756  [0x104e27c54]
+                                821 _RNvMs_NtNtCsi3tpU3YNWJ1_5cargo4core9workspaceNtB4_9Workspace9find_root  (in cargo) + 64  [0x104e36a1c]
+                                  821 _RNvMs0_NtNtCsi3tpU3YNWJ1_5cargo4core9workspaceNtB5_8Packages4load  (in cargo) + 748  [0x104dabed0]
+                                    821 _RNvNtNtCsi3tpU3YNWJ1_5cargo4util4toml13read_manifest  (in cargo) + 900  [0x104f420e8]
+                                      821 _RNvNtCs6sZtcfcSfWa_10cargo_util5paths4read  (in cargo) + 44  [0x1051bdbf4]
+                                        821 _RNvNtCs6sZtcfcSfWa_10cargo_util5paths10read_bytes  (in cargo) + 40  [0x1051bb6c0]
+                                          821 _RNvNvNtCs82bWklYMk3w_3std2fs4read5inner  (in cargo) + 332  [0x10563b758]
+                                            821 _RNvMsi_NtNtNtCs82bWklYMk3w_3std3sys2fs4unixNtB5_4File6open_c  (in cargo) + 284  [0x10562e81c]
+                                              821 open  (in libsystem_kernel.dylib) + 64  [0x18450c8f0]
+                                                821 __open  (in libsystem_kernel.dylib) + 8  [0x184501694]
+
+Total number in stack (recursive counted multiple, when >=5):
+
+Sort by top of stack, same collapsed (when >= 5):
+        __open  (in libsystem_kernel.dylib)        821
+

@@ -1,0 +1,16 @@
+{
+  "status": "complete",
+  "removed_owned_temporary_paths": [
+    "fvid-presentation-endpoint-20261030",
+    "fvid-presentation-endpoint-before.log",
+    "fvid-presentation-endpoint-before-expanded.log",
+    "fvid-presentation-endpoint-after.log",
+    "fvid-presentation-endpoint-final.log",
+    "fvid-presentation-endpoint-core-check.log"
+  ],
+  "preserved": [
+    "synthetic movies and analytic pixel oracles",
+    "generator and regressions",
+    "before source preimages and before/after logs"
+  ]
+}

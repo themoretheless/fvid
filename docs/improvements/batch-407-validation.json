@@ -1,0 +1,36 @@
+{
+  "batch": 407,
+  "accepted_ids": [
+    "FVID-0413"
+  ],
+  "status": "accepted",
+  "summary": "Support empty-duration MP4 fragments with correct implicit decode-time continuation",
+  "source_files": [
+    "crates/fvid-media/src/owned_mp4_impl.rs"
+  ],
+  "regressions": [
+    "tests/mp4_empty_fragment.rs"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/mp4-empty-fragment/status.json",
+    "docs/improvements/evidence/mp4-empty-fragment/semantics.md"
+  ],
+  "before": "Runtime baseline: all 3 new tests fail. Both parsers and native software playback reject nine authored valid no-sample interval movies as unsupported MP4 track-fragment header flags. Plain finite control assertions complete before aggregate failure. Contradictory-run and overflow witnesses fail at the unrelated unsupported-flag check.",
+  "after": "42 distinct integration checks pass across 10 targets, including expanded 4-test regression. Ten valid 3-picture controls include explicit V0/V1 and omitted tfdt, leading/middle/trailing gaps, inherited/zero duration and consecutive gaps. Both parser wrappers agree on packet bytes, DTS/PTS, nominal duration and track endpoint; software playback retains analytic YUV, RGB, exact intervals, 120 seek positions with continuation, rewind and repeated EOF. Exact three-sample budget passes and two-sample budget refuses, so gaps do not consume sample entries. Locked offline no-default-features core build check passes.",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --features player --test mp4_empty_fragment",
+    "cargo test --locked --offline --no-default-features --features player --no-fail-fast --test mp4_empty_fragment --test mp4_hybrid_fragments --test mp4_fragment_description --test mp4_implicit_fragment_base --test mp4_owned_fragment_parity --test mp4_tfdt_flags --test mp4_time_header_sizes --test mp4_empty_tail --test mp4_edit_window_eof --test mp4_decode_only_seek",
+    "cargo check --locked --offline --no-default-features"
+  ],
+  "limitations": [
+    "Playback retains its existing hold-until-next-picture interval behavior across middle gaps; no generated black-frame policy is introduced.",
+    "A trailing gap extends track duration without inventing or retiming the last picture.",
+    "An entirely sample-free track remains refused by the existing no-samples policy.",
+    "Dedicated playback is software; no GPU parity, performance or full project-wide green claim. Historical unrelated failures remain separate."
+  ],
+  "uncounted": [
+    "Input, timestamp, resource and malformed variants",
+    "Separate per-track time cursor implementation",
+    "One overlapping focused regression run"
+  ]
+}

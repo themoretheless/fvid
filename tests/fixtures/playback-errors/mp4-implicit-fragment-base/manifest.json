@@ -1,0 +1,199 @@
+{
+  "provenance": "Owned pure-Python 16x16 neutral VP9, three 20ms frames per represented track. Synthetic unrepresented track uses literal dummy bytes, never decoded. No FFmpeg/network/private input.",
+  "valid": [
+    {
+      "file": "moof-control.mp4",
+      "tracks": [
+        {
+          "id": 1,
+          "offset": 730,
+          "offsets": [
+            730,
+            4872,
+            9014
+          ]
+        }
+      ]
+    },
+    {
+      "file": "single-implicit.mp4",
+      "tracks": [
+        {
+          "id": 1,
+          "offset": 730,
+          "offsets": [
+            730,
+            4872,
+            9014
+          ]
+        }
+      ]
+    },
+    {
+      "file": "two-implicit.mp4",
+      "tracks": [
+        {
+          "id": 1,
+          "offset": 1276,
+          "offsets": [
+            1276,
+            5418,
+            9560
+          ]
+        },
+        {
+          "id": 2,
+          "offset": 13702,
+          "offsets": [
+            13702,
+            17844,
+            21986
+          ]
+        }
+      ]
+    },
+    {
+      "file": "explicit-before-implicit.mp4",
+      "tracks": [
+        {
+          "id": 1,
+          "offset": 1280,
+          "offsets": [
+            1280,
+            5422,
+            9564
+          ]
+        },
+        {
+          "id": 2,
+          "offset": 13706,
+          "offsets": [
+            13706,
+            17848,
+            21990
+          ]
+        }
+      ]
+    },
+    {
+      "file": "moof-before-implicit.mp4",
+      "tracks": [
+        {
+          "id": 1,
+          "offset": 1276,
+          "offsets": [
+            1276,
+            5418,
+            9560
+          ]
+        },
+        {
+          "id": 2,
+          "offset": 13702,
+          "offsets": [
+            13702,
+            17844,
+            21986
+          ]
+        }
+      ]
+    },
+    {
+      "file": "implicit-before-moof.mp4",
+      "tracks": [
+        {
+          "id": 1,
+          "offset": 1280,
+          "offsets": [
+            1280,
+            5422,
+            9564
+          ]
+        },
+        {
+          "id": 2,
+          "offset": 13706,
+          "offsets": [
+            13706,
+            17848,
+            21990
+          ]
+        }
+      ]
+    },
+    {
+      "file": "foreign-default-before-implicit.mp4",
+      "tracks": [
+        {
+          "id": 2,
+          "offset": 1292,
+          "offsets": [
+            1292,
+            5434,
+            9576
+          ]
+        }
+      ]
+    },
+    {
+      "file": "foreign-rows-before-implicit.mp4",
+      "tracks": [
+        {
+          "id": 2,
+          "offset": 1296,
+          "offsets": [
+            1296,
+            5438,
+            9580
+          ]
+        }
+      ]
+    },
+    {
+      "file": "two-moofs-implicit.mp4",
+      "tracks": [
+        {
+          "id": 1,
+          "offset": 730,
+          "offsets": [
+            730,
+            4872,
+            9014,
+            13256,
+            17398,
+            21540
+          ]
+        }
+      ]
+    }
+  ],
+  "invalid": [
+    {
+      "file": "outside-mdat-implicit.mp4",
+      "error": "sample chunk outside mdat"
+    },
+    {
+      "file": "unresolved-foreign-before-implicit.mp4",
+      "error": "MP4 implicit fragment base follows unresolved track data"
+    },
+    {
+      "file": "huge-foreign-before-implicit.mp4",
+      "error": "MP4 implicit fragment base follows unresolved track data"
+    }
+  ],
+  "sha256": {
+    "frame.vp9": "217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c",
+    "moof-control.mp4": "4b60ba9914776696285e016eefbc3e29153bf797b3ed50687c26871650ac00a6",
+    "single-implicit.mp4": "9801f8c492c824810ef1fed69bdb01c8ff1739be3057a51c12d5299db45e00e6",
+    "two-implicit.mp4": "164ea4f84eac82e26bd3a58d8549d9e893dbb5fbe894f4c8f9e5773a6ab3856d",
+    "explicit-before-implicit.mp4": "f3f33201bf5cb7b92b16ebecd635f6a71f3c3f3ccee16a83b23deb0f3c351518",
+    "moof-before-implicit.mp4": "677954902c9aac992536405e237a026f0666677d3f78cb5f495e944b84b414fc",
+    "implicit-before-moof.mp4": "5983b649d5e95f827f429142332ad87b1004c45160ead06f02bac2b7efe0eabb",
+    "foreign-default-before-implicit.mp4": "7a81837c524ad3967bd654d17bf09f86759252bd1e006a7a192cb2acdfa38f82",
+    "foreign-rows-before-implicit.mp4": "cf5311fe68968bcf664f1e28a7ca16a3fb36c8bc95e4a920d21a1c29df77c8b9",
+    "outside-mdat-implicit.mp4": "1edeb138352132e40e2eaae76c5dcf7b99a851603bbaae9423ecd804393ad70b",
+    "unresolved-foreign-before-implicit.mp4": "1c924655cb62ef31fd8e9e90472bc6e516b43b3721ae8561b595cace1bfc2826",
+    "huge-foreign-before-implicit.mp4": "9fd521051577faa3f40442e27cd531fef0f94b4760045a952453624e997ee171",
+    "two-moofs-implicit.mp4": "526069e639600375690133e49b5814cd91c2f36fe6dccc2c22bb7e658a683111"
+  }
+}

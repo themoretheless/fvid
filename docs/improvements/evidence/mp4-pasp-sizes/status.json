@@ -1,0 +1,19 @@
+{
+  "status": "accepted",
+  "improvement": "FVID-0412",
+  "before": "Runtime baseline: 2 positive controls pass and malformed-size test fails. Both parser wrappers accept all five authored pasp payload lengths (0,4,7,9,12 bytes), treating failed field reads as absence or ignoring trailing data.",
+  "change": "Require exactly the two u32 spacing fields (8 payload bytes) for a present pasp. Propagate field read errors rather than converting them into absence. Existing zero-spacing fallback and absent-box behavior stay intact.",
+  "after": "51 distinct checks pass in 8 integration targets. Dedicated positive controls cover exact normalized 2:1 aspect, square absence and existing zero fallback, random packet reads, analytic YUV16, native software RGB, exact clocks, 24 seeks, rewind and EOF. Related MP4 parsing, rotation/aspect, sample-description changes, video reconfiguration, edit/refusal and timing regressions pass. Locked offline no-default-features core build check passes.",
+  "fixtures": "12 byte-identical regenerated files: eight own 3-frame VP9 movies, three analytic YUV16 oracles and manifest; offline tests use saved assets without generator, FFmpeg or network.",
+  "scope": "One malformed fixed-size aspect-box parsing problem; size variants and positive controls do not add IDs. Refusal qualification, not a new visual renderer or aspect-ratio rendering claim.",
+  "limitations": [
+    "Existing zero-spacing fallback policy is retained, not requalified as normative support.",
+    "No new visual/UI behavior or performance improvement is claimed.",
+    "No project-wide green or physical GPU parity claim; historical unrelated baseline failures remain separate."
+  ],
+  "sha256": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": "b168fb0c18f372e1538681801ac846ebcdb6630d241fb80346aba7e5aac0c14c",
+    "scripts/generate_mp4_pasp_sizes.py": "f720f5179b6d357b653a5cae0f788eca53e7547d7a4c9273590ef1a61f3346b7",
+    "tests/mp4_pasp_sizes.rs": "0c9b9cb351177722eb251902a4206af01d2ade0de7666fb49144cb8cde7a2135"
+  }
+}

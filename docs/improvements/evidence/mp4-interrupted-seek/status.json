@@ -1,0 +1,25 @@
+{
+  "status": "accepted",
+  "improvement": "FVID-0406",
+  "before": "The final pre-fix regression builds and runs: 1 permanent-error control passes and 4 transient-seek tests fail. Both parsers refuse finite Interrupted faults before/after moving the cursor, during open and full-packet reads. Actual software playback fails on its first injected random-access interruption. Range recovery is verified after the same shared seek fix.",
+  "after": "40 selected checks passed, zero failed/ignored: new transient-seek coverage 5, established seek-I/O controls 3, core MP4 20, implicit fragment base 3, open edits 5, time-header flags 2 and sizes 2.",
+  "change": "A private helper retries ErrorKind::Interrupted at the four seek sites: End(0) size discovery, absolute atom scan, full packet and bounded packet range. Repeating these absolute/end requests also works when an interrupted seek already moved. Existing invalidation, output clearing, admission and permanent-error propagation are unchanged.",
+  "media": "Owned three distinct colored VP9 keyframes, 50 Hz sample clock, analytic YUV16 oracles; offline generator reuses synthetic construction helpers and produces all eight files byte-identically. A finite fault adapter injects two interruptions; no mutation audit, network or FFmpeg is used.",
+  "scope": "One interruption-handling problem; wrapper/path/fault-mode/fixture variants add no IDs.",
+  "correctness": [
+    "Root and owned parser opening covers Start and End(0), interrupted before and after cursor movement.",
+    "Both full packet and range reads recover exact bytes, then return subsequent packets correctly.",
+    "Permanent Other and PermissionDenied faults remain failures, clear full-packet output and permit recovery.",
+    "Software Mp4VideoReader matches all authored pixel oracles and 50 Hz PTS/duration through random+contiguous seeks, rewind and repeated EOF.",
+    "Existing malformed-input, header, edit, fragmentation and seek-I/O regressions pass."
+  ],
+  "limitations": [
+    "Software decoder and seekable synthetic I/O were exercised; no physical disk signal-delivery or NVIDIA/GPU claim.",
+    "No project-wide green claim; separate historical Matroska padding/admission/ABI failures remain outside this fix."
+  ],
+  "sha256": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": "c983f0b8bb28248e64538a9a01bf3d54c78c44b5ae41e5b1e4fa9eff471c0d54",
+    "tests/mp4_interrupted_seek.rs": "0f4e78ce333d1c45fbe65730ae8e46ea44549a44085ed3fb2babe0074802c03b",
+    "scripts/generate_mp4_interrupted_seek.py": "fba931653982e1c8420f3fdc8af043cb3935595cc7d9faf35e66dee3e9b88b68"
+  }
+}

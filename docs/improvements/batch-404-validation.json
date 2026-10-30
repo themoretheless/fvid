@@ -1,0 +1,33 @@
+{
+  "batch": 404,
+  "accepted_ids": [
+    "FVID-0410"
+  ],
+  "status": "accepted",
+  "summary": "Continue finite MP4 edit programs after source EOF without retiming the last picture",
+  "source_files": [
+    "src/playback/video/native.rs"
+  ],
+  "regressions": [
+    "tests/mp4_edit_window_eof.rs"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/mp4-edit-window-eof/status.json"
+  ],
+  "before": "2 passing controls, 2 failing acceptance tests: source EOF loses later edit windows; a trailing no-output window changes the last displayed interval. Middle decode-only sync coverage is an uncounted FVID-0409 follow-up.",
+  "after": "34 distinct integration tests pass across 9 targets. Four new tests include exact authored YUV controls, six sequential/rewind edit programs, 84 seek positions plus continuation, all-hidden/negative-preroll byte bounds, and corrupt-codec refusal. No-default-features offline locked build check passes.",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --features player --test mp4_edit_window_eof",
+    "cargo test --locked --offline --no-default-features --features player --no-fail-fast --test mp4_edit_window_eof --test mp4_decode_only_seek --test mp4_empty_tail --test mp4_nondisplay_endpoint --test mp4_presentation_endpoint --test mp4_open_ended_edit --test mp4_layered_seek_coverage --test mp4_seek_io_regressions --test mp4_interrupted_seek",
+    "cargo check --locked --offline --no-default-features"
+  ],
+  "limitations": [
+    "Software playback qualification; no physical GPU claim.",
+    "A decode-only sync landing can require one prefix replay per entered window.",
+    "No project-wide green claim; historical unrelated failures remain separate."
+  ],
+  "uncounted": [
+    "FVID-0409 internal-window prefix coverage and later-edit seek fallback",
+    "Fixture variants and resource controls"
+  ]
+}

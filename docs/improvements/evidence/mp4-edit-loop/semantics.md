@@ -1,0 +1,3 @@
+The parser ignores all 24 elst flags. Bit 0 indicates a looping edit list, so treating it as a finite trim silently changes playback semantics. Unknown bits must not be interpreted as a finite program either. This change is an explicit unsupported-capability refusal for looped edits, not loop playback support. Zero-flag trim acceptance remains covered by exact software pixels, clocks, seek, rewind and EOF.
+
+Primary implementation reference: Mozilla mp4parse `read_elst`, ISO/IEC 14496-12:2020 section 8.6.6, exposes `looped: flags == 1`: https://docs.rs/mp4parse/latest/src/mp4parse/lib.rs.html#4705-4739 . No external media or codec parameters are used.

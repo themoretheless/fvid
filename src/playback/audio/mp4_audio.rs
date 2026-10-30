@@ -31,6 +31,7 @@ enum EditAction { Encoded, Step(crate::audio::AudioStep), End }
 /// MP4 audio track reader. Extracts encoded packets for decoding.
 pub struct Mp4AudioReader<R> {
     navigation_error: Option<crate::Error>,
+    presentation_duration: std::sync::OnceLock<Option<std::time::Duration>>,
     clock: Option<PlaybackClock>,
     clock_mode: std::cell::Cell<bool>,
     clock_floor: std::cell::Cell<EditTime>,
@@ -170,11 +171,14 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
 
     /// Container indices of the audio tracks a decoder exists for.
     fn automatic_pcm_usable(track: &crate::container::mp4::Track) -> bool {
-        if !matches!(&track.codec, b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64") {
+        // The first table entry can be unused. Eligibility follows the setup
+        // selected by the initial packet, just as explicit playback does.
+        let Some(setup) = track.description_for_sample(0) else { return false; };
+        if !matches!(&setup.codec, b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64") {
             return true;
         }
-        crate::codec::make_audio_decoder(std::str::from_utf8(&track.codec).unwrap_or(""),
-            &track.configuration, track.sample_rate, track.channels, track.bit_depth).is_ok()
+        crate::codec::make_audio_decoder(std::str::from_utf8(&setup.codec).unwrap_or(""),
+            &setup.configuration, setup.sample_rate, setup.channels, setup.bit_depth).is_ok()
     }
 
     fn supported(demuxer: &Mp4Reader<R>) -> Vec<usize> {
@@ -246,9 +250,37 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
 
     /// Open a specific audio track by index.
     pub fn from_demuxer(demuxer:Mp4Reader<R>,index:usize)->Result<Self>{Self::from_programme(demuxer,index,None)}
+    fn validate_selected_codecs(track: &Track) -> Result<()> {
+        if track.handler != *b"soun" {
+            return Err(invalid("selected MP4 track is not audio"));
+        }
+        // Common all-known tables need no index walk. Unknown entries are
+        // harmless unless a sample (or compact chunk) actually selects them.
+        if track.sample_descriptions.iter().all(|d| CODECS.contains(&d.codec)) {
+            return Ok(());
+        }
+        let supported = |id: u32| id.checked_sub(1)
+            .and_then(|i| track.sample_descriptions.get(i as usize))
+            .is_some_and(|description| CODECS.contains(&description.codec));
+        let unsupported_selection = match &track.samples {
+            crate::container::mp4::SampleIndex::Expanded(samples) =>
+                samples.iter().any(|sample| !supported(sample.description_index)),
+            crate::container::mp4::SampleIndex::Uniform(index) =>
+                index.runs.iter().any(|run| !supported(run.description_index)),
+        };
+        if unsupported_selection {
+            return Err(unsupported(
+                "selected MP4 track contains unsupported audio sample descriptions",
+            ));
+        }
+        Ok(())
+    }
     fn from_programme(mut demuxer: Mp4Reader<R>, index: usize,programme:Option<u8>) -> Result<Self> {
+        Self::validate_selected_codecs(demuxer.tracks().get(index)
+            .ok_or_else(|| invalid("MP4 track index out of range"))?)?;
         let clock=PlaybackClock::build(&mut demuxer,index,programme.unwrap_or(0))?;
-        if clock.is_some() || demuxer.tracks().get(index).is_some_and(|t|t.ensure_constant_description().is_err()) {
+        if clock.is_some() || demuxer.tracks().get(index).is_some_and(|t|t.ensure_constant_description().is_err() || t.has_open_edit()
+            || (!t.edits.is_empty() && matches!(&t.codec,b"alac"|b"raw "|b"sowt"|b"twos"|b"in24"|b"in32"|b"fl32"|b"fl64"))) {
             return Self::from_changing(demuxer,index,programme,clock);
         }
         let selected_geometry=if let Some(programme)=programme {
@@ -311,6 +343,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         // packets. Always re-seek the selected first packet on real playback.
         demuxer.invalidate_position();
         Ok(Self {
+            presentation_duration: std::sync::OnceLock::new(),
             navigation_error:None,
             clock:None,clock_mode:std::cell::Cell::new(false),clock_floor:std::cell::Cell::new(EditTime::ZERO),clock_anchor:std::cell::Cell::new(None),
             variable_edits: None, opening_sample_index: 0,
@@ -427,18 +460,9 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             .tracks()
             .get(index)
             .ok_or_else(|| invalid("MP4 track index out of range"))?;
-        if track.handler != *b"soun"
-            || track
-                .sample_descriptions
-                .iter()
-                .any(|d| !CODECS.contains(&d.codec))
-        {
-            return Err(unsupported(
-                "selected MP4 track contains unsupported audio sample descriptions",
-            ));
-        }
+        let edit_clock = track.resolved_edit_clock(demuxer.movie_timescale())?;
         let variable_edits = if track.edits.is_empty() {None} else {
-            Some(VariableTimeline::new(&track.edits,track.timescale,demuxer.movie_timescale())?)
+            Some(VariableTimeline::new(edit_clock.edits(),track.timescale,edit_clock.timescale)?)
         };
         if programme.is_some()
             && !track
@@ -461,6 +485,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         states.resize(track.sample_descriptions.len(), None);
         let tracks = demuxer.tracks().len();
         let mut source = Self {
+            presentation_duration: std::sync::OnceLock::new(),
             navigation_error:None,
             clock,clock_mode:std::cell::Cell::new(false),clock_floor:std::cell::Cell::new(EditTime::ZERO),clock_anchor:std::cell::Cell::new(None),
             variable_edits, opening_sample_index: 0,
@@ -931,9 +956,32 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             let nanos = ticks.checked_mul(1_000_000_000)? / u128::from(self.demuxer.movie_timescale());
             return Some(std::time::Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX)));
         }
-        (track.timescale > 0 && track.duration > 0).then(|| {
-            let nanos = u128::from(track.duration) * 1_000_000_000 / u128::from(track.timescale);
-            std::time::Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX))
+        *self.presentation_duration.get_or_init(|| {
+            if track.timescale == 0 { return None; }
+            let (mut end, decoded_end) = match &track.samples {
+                crate::container::mp4::SampleIndex::Expanded(samples) => {
+                    let mut end = 0i128;
+                    let mut decoded_end = 0u128;
+                    for sample in samples {
+                        end = end.max(i128::from(sample.pts) + i128::from(sample.duration));
+                        decoded_end = decoded_end.max(u128::from(sample.dts) + u128::from(sample.duration));
+                    }
+                    (end as u128, decoded_end)
+                }
+                crate::container::mp4::SampleIndex::Uniform(index) => {
+                    let end = index.count as u128 * u128::from(index.duration);
+                    (end, end)
+                }
+            };
+            // A declared empty tail extends time without a packet. Ordinary
+            // decode duration alone must not undo a signed composition shift.
+            if u128::from(track.duration) > decoded_end {
+                end = end.max(u128::from(track.duration));
+            }
+            (end > 0).then(|| {
+                let nanos = end * 1_000_000_000 / u128::from(track.timescale);
+                std::time::Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX))
+            })
         })
     }
 

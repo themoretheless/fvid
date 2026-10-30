@@ -1,0 +1,22 @@
+{
+  "batch": 396,
+  "accepted_ids": [
+    "FVID-0402"
+  ],
+  "status": "accepted",
+  "summary": "Support implicit MP4 fragment data-base addressing",
+  "source_files": [
+    "crates/fvid-media/src/owned_mp4_impl.rs"
+  ],
+  "regression": "tests/mp4_implicit_fragment_base.rs",
+  "evidence": "docs/improvements/evidence/mp4-implicit-fragment-base/status.json",
+  "before": "Both MP4 wrappers refuse seven valid owned legacy-base witnesses with \"fragment states neither a base offset nor its own moof as the base\"; the explicit-moof control completes exact index/packet assertions. Original core result: 0 passed, 2 failed (the malformed-input test also encounters the old addressing refusal before reaching its specific bounds check).",
+  "after": "Resolve a first implicit traf base from its moof and later implicit bases from the preceding traf data end. Explicit absolute/moof bases override inheritance. For unrepresented tracks, resolve declared run byte extents without decoding, packet allocation or default-sized sample-count loops; unresolved foreign data cannot become an implicit base. Thirteen core, 21 player and 28 related integration tests pass, zero failed/ignored. Nine valid controls/witnesses preserve exact packet offsets/bytes/DTS/PTS, 60/120ms duration, neutral RGB, 72 seeks, rewind and repeated EOF. Three corrupt witnesses refuse specifically, including a huge foreign sample count; sample and packet budget checks remain enforced.",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --test mp4_implicit_fragment_base --test mp4_multi_trun --test mp4_owned_fragment_parity --test mp4_tfhd_defaults --test mp4_hybrid_fragments",
+    "cargo test --locked --offline --features player --test mp4_implicit_fragment_base --test mp4_multi_trun --test mp4_owned_fragment_parity --test mp4_tfhd_defaults --test mp4_hybrid_fragments",
+    "cargo test --locked --offline --features player --test mp4 --test mp4_trun_flags --test mp4_fragment_description"
+  ],
+  "results": "62 tests passed, 0 failed/ignored.",
+  "independence": "One missing implicit fragment base addressing capability. Related offset/foreign-track/multi-moof variants and negative cases count once. No private media, FFmpeg, network in ordinary tests; no mutation/fuzz audit."
+}

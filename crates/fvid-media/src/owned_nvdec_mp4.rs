@@ -264,13 +264,12 @@ pub(crate) fn movie_presentations(
 ) -> Result<Vec<Presentation>, String> {
     use crate::owned_video_timeline::{MovieEdit, map_movie_edits};
     let order = media_presentation_order(track)?;
+    let edit_clock = track.resolved_edit_clock(movie_timescale).map_err(|e| e.to_string())?;
     let edits = map_movie_edits(
-        track
-            .edits
-            .iter()
+        edit_clock.edits().iter()
             .map(|edit| (edit.duration, edit.media_time)),
         track.timescale,
-        movie_timescale,
+        edit_clock.timescale,
     )
     .map_err(|e| e.to_string())?;
     let mut result = Vec::new();
@@ -346,6 +345,27 @@ pub(crate) fn movie_presentations(
 }
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn open_edits_plan_exact_media_intervals_without_a_gpu() {
+        let directory = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/mp4-open-ended-edit");
+        let manifest: serde_json::Value = serde_json::from_slice(
+            &std::fs::read(directory.join("manifest.json")).unwrap()).unwrap();
+        for case in manifest["open"].as_array().unwrap() {
+            let name = case["file"].as_str().unwrap();
+            let source = Mp4Reader::open(std::io::Cursor::new(
+                std::fs::read(directory.join(name)).unwrap()), Limits::default()).unwrap();
+            let count = case["frames"].as_u64().unwrap() as usize;
+            let plan = super::movie_presentations(&source.tracks()[0], source.movie_timescale(), count).unwrap();
+            assert_eq!(plan.len(), count, "{name}");
+            let first = (case["start"].as_i64().unwrap() - case["shift"].as_i64().unwrap()) as usize;
+            for (i, frame) in plan.iter().enumerate() {
+                assert_eq!((frame.start, frame.end, frame.sample), (i as i64, i as i64+1, Some(first+i)), "{name}");
+            }
+            assert!(super::movie_presentations(&source.tracks()[0], source.movie_timescale(), count-1)
+                .unwrap_err().contains("presentation count exceeds limit"));
+        }
+    }
     #[test]
     fn synthetic_source_metadata_survives_owned_container_export() {
         use crate::owned_matroska::{Encoding, PacketWriter, TrackSpec};

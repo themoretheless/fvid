@@ -1,0 +1,27 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0403"
+  ],
+  "before": "In an isolated pre-fix source snapshot, both parsers, probe and native playback refuse valid single rate-one duration-zero fMP4 media edits as unsupported duration. Finite-edit parsing/packets/native controls and existing malformed-input refusals pass. Open-edit target: 3 passed, 3 failed. The witness headers have consistent movie/track durations; versions, clocks, trimming and positive CTS are independently authored.",
+  "after": "Admit only the single fragmented open media edit, retaining raw duration=0. A stack-backed resolved edit view derives the composition endpoint from indexed samples and uses media timescale for the open range, avoiding movie-clock double rounding. Playback, owned decode, probe, shader windows, AAC remux and audio planning/export consume the view. Coarse 25Hz and fractional 1001Hz movie clocks preserve exact 20ms media frames; positive CTS and non-sample-aligned audio endpoints stay exact. Nonzero AAC/PCM/ALAC oracles, public WAVE publication, budgets, seek, rewind and EOF pass.",
+  "regressions": [
+    "tests/mp4_open_ended_edit.rs",
+    "tests/mp4_open_ended_edit_audio.rs"
+  ],
+  "primary_reference": "https://www.w3.org/TR/mse-byte-stream-format-isobmff/#initialization-segments",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --test mp4_open_ended_edit --test mp4_open_ended_edit_audio --test mp4_elst_validation --test mp4_audio_export_transitions --test mp4_implicit_fragment_base --test mp4_unknown_movie_chapters --test mp4",
+    "cargo test --locked --offline --features player --test mp4_fixed_audio_edits --test mp4_open_ended_edit_audio --test mp4_open_ended_edit --test mp4_elst_validation --test mp4_audio_export_transitions --test mp4_aac_transitions --test mp4_audio_clocks --test mp4_variable_rate_edits",
+    "cargo test --locked --offline --manifest-path crates/fvid-media/Cargo.toml --features native-cuda --lib owned_nvdec_mp4::tests",
+    "cargo test --locked --offline --manifest-path crates/fvid-media/Cargo.toml --features native-cuda --lib owned_video_timeline::tests",
+    "cargo check --locked --offline --features player"
+  ],
+  "limitations": [
+    "103 targeted checks passed (46 core, 48 player, 5 CPU NVDEC-schedule, 4 timeline); no failed/ignored selected tests.",
+    "Player configuration builds. NVIDIA device execution was not tested; schedule tests run on CPU.",
+    "The complete project suite is not claimed green; previously recorded unrelated export/admission and CUDA ABI failures are outside this batch.",
+    "Fixture variants, the shared resolver, generator/header qualification repairs and stale-build cleanup do not add IDs."
+  ],
+  "independence": "Open-marker admission/resolution remains a failure even when finite PCM/ALAC scheduling is available. The separate finite fixed-audio routing defect is FVID-0404."
+}

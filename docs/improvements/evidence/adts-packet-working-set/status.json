@@ -1,0 +1,52 @@
+{
+  "status": "qualified",
+  "improvement": "FVID-0405",
+  "scope": "Single-raw-block streaming ADTS allocation reuse, shared by root and owned media parsers.",
+  "before": {
+    "allocations": 4,
+    "peak_bytes": 2196,
+    "payload_bytes": 1042,
+    "repetitions": 3,
+    "backends": [
+      "root",
+      "owned"
+    ],
+    "guard_exit": 101
+  },
+  "after": {
+    "allocations": 2,
+    "peak_bytes": 1058,
+    "payload_bytes": 1042,
+    "measurement_runs": 3,
+    "repetitions_per_run": 3,
+    "backends": [
+      "root",
+      "owned"
+    ],
+    "automatic_guard_exit": 0
+  },
+  "measurement": "Thread-local GlobalAlloc counters surround only next_packet after open; input and open allocations are excluded. First single-block packet per reader. Baseline six identical observations; after eighteen identical observations plus six from the automated replay. These are allocation/temporary-memory measurements, not RSS or CPU throughput claims.",
+  "correctness": "27 focused parser/working-set checks passed; 4 further related checks passed and 3 known baseline checks failed identically before allocation reuse. No assertions changed in existing tests.",
+  "baseline_failures": [
+    "ADTS concat inactive-segment header is charged against active prefix packet limit",
+    "ADTS public remux stream/budget options rejected by pre-existing admission",
+    "Matroska AAC leading signed padding timeline expectation: 1792 versus 1664 samples"
+  ],
+  "parity_followup": "Native explicit/generic ADTS plans, concat plan and MP4 writer now charge packet.len with index memory. Same cause as FVID-0394: zero additional IDs. Before 2 passed/2 failed; after 4 passed, then expanded controls 6 passed.",
+  "rejected_test_setup": "Initial pre-existing-destination export assertion hit File exists before budget checking. Retained initial log, corrected the setup to a nonexistent destination, reproduced successful under-budget publication, then verified refusal leaves no output. The existing-destination failure is not claimed as the working-set defect.",
+  "fixture": "Own legal FIL-padded nonzero stereo AAC, analytic PCM oracle, synthetic VP9/AAC MP4 companion. All four files regenerate identically offline.",
+  "limits": [
+    "No CPU speedup, process RSS reduction, NVIDIA run, UI or full-project green claim.",
+    "Three baseline integration failures remain visible; tests were not weakened."
+  ],
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/adts_impl.rs": "41b76e5119c770a1c3741bfda63be210af8636d4c7d08938ebf0d775e305296d",
+    "src/native_plan.rs": "0cffa25e7958691ebbd565a78d49acba3b74049ceb7066d87524dbccfdc137c3",
+    "src/container/mp4_write.rs": "011cd59abfa3de9a2d3d2ef0c526ebb258bdfa300ea59564746bbf698009f567",
+    "tests/adts_packet_working_set.rs": "2218973d412d3e4bf30bcd36b26e366c3465e2bea584faaa9044719efc286ae0",
+    "scripts/bench_adts_allocations.rs": "02db3bd2a67b636572ce6172125c178a012cfe19b5d2d048fe4944554bcece4f",
+    "scripts/check_adts_allocations.py": "c332df681e20af0d858921dc02ed1bb3ca2a4e9b88cf6962b8dd300720623dda",
+    "scripts/generate_adts_packet_working_set.py": "ba9a3637d0a525b7ad3a9922e64bc6b90c4f2de6628d0026fb95ff87ff244f43"
+  },
+  "later_followup": "stream-zero-followup.json: one of the three baseline failures repaired without another improvement ID; two remain."
+}

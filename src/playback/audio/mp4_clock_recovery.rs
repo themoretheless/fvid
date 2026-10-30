@@ -79,10 +79,17 @@ impl PlaybackClock {
         // run for sample-accurate navigation even when no packet point moved.
         let dolby_seek=runs.iter().any(|r|r.quantized && reader.tracks()[index].description_for_sample(r.first).is_some_and(|d|matches!(&d.codec,b"ac-3"|b"ec-3")));
         if !runs.iter().any(|r|r.changed) && !dolby_seek {return Ok(None);}
-        let track=&reader.tracks()[index];let mut end=Mp4ExportTime::ticks(track.duration,track.timescale)?;
-        if track.samples.get(0).is_some_and(|s|s.pts==0) {
-            if let Some(last)=runs.last() {
-                if last.quantized && mp4_tick_matches(last.end,i128::from(track.duration),track.timescale)? {end=last.end;}
+        let track=&reader.tracks()[index];
+        let declared_end=Mp4ExportTime::ticks(track.duration,track.timescale)?;
+        let mut end=declared_end;
+        if let Some(last)=runs.last() {
+            // The recovered endpoint includes its composition-time origin.
+            // A decode-duration bound would clip a positively shifted tail.
+            end=last.end;
+            let decoded_end=(0..track.samples.len()).filter_map(|i|track.samples.get(i))
+                .map(|sample|u128::from(sample.dts)+u128::from(sample.duration)).max().unwrap_or(0);
+            if u128::from(track.duration)>decoded_end && end.cmp(declared_end)==std::cmp::Ordering::Less {
+                end=declared_end;
             }
         }
         let clock=Self{runs,count:track.samples.len(),scale:track.timescale,end};

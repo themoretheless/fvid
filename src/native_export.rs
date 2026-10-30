@@ -1927,7 +1927,7 @@ pub fn concat_adts_aac_with_options(
     for source in sources {
         if options.cancel.as_ref().is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
         fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
-        let reader = crate::container::adts::StreamReader::open_with_packet_limit(
+        let reader = crate::container::adts::StreamReader::open_for_sequence_with_packet_limit(
             BufReader::new(File::open(source)?),
             options
                 .max_packet_bytes

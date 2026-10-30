@@ -1,0 +1,14 @@
+{
+  "status": "not_counted",
+  "accepted_ids": [],
+  "topic": "Outstanding simultaneous packet working-set admission draft",
+  "source": "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_audio_metadata_admission.rs:5994",
+  "test": "mp4_concat_mp4_write_and_native_plan_adts_remux_concat_charge_simultaneous_packet_working_sets",
+  "next_action": "Inspect the preserved draft and current implementation, isolate the witness without overwriting active primary work, reproduce before editing. Determine independence from accepted FVID-0394, and do not count a duplicate packet-budget repair.",
+  "other_known_unresolved_gates": "Earlier owned-media gate has five failures in export/admission tests; revalidate before Git publication. Their repair is not automatically a new improvement.",
+  "constraints": [
+    "No mutation/fuzz audit.",
+    "Only useful independent before/after-verified changes count.",
+    "Preserve generic UMA extraction and all unrelated work; no private media copying or weakened tests."
+  ]
+}

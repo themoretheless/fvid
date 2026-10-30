@@ -991,11 +991,16 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                         .iter()
                         .map(|f| f.frame.presentation_time.ticks)
                         .min();
-                    frame.frame.duration.ticks = presentation_duration(
+                    let Some(duration) = presentation_duration(
                         frame.frame.presentation_time.ticks,
                         next,
                         frame.frame.duration.ticks,
-                    )?;
+                    )? else {
+                        // Explicit zero-length terminal samples still decode,
+                        // but have no presentation window to publish.
+                        continue;
+                    };
+                    frame.frame.duration.ticks = duration;
                     self.presented_hdr = Some(frame.hdr);
                     self.presented_layer = frame.layer;
                     self.presented_description = Some(frame.description_index);
@@ -1396,17 +1401,20 @@ pub(crate) fn hardware_frame(
     (picture, Some(planar))
 }
 
-fn presentation_duration(pts: i64, next: Option<i64>, final_duration: i64) -> Result<i64> {
+fn presentation_duration(pts: i64, next: Option<i64>, final_duration: i64) -> Result<Option<i64>> {
     let duration = match next {
         Some(next) => next
             .checked_sub(pts)
             .ok_or_else(|| invalid("presentation duration overflow"))?,
         None => final_duration,
     };
+    if duration == 0 && next.is_none() {
+        return Ok(None);
+    }
     if duration <= 0 {
         return Err(invalid("non-increasing MP4 presentation timestamps"));
     }
-    Ok(duration)
+    Ok(Some(duration))
 }
 
 fn frame_storage(frame: &VideoFrame) -> Result<usize> {
@@ -1440,13 +1448,14 @@ mod tests {
     use super::*;
     #[test]
     fn presentation_intervals_follow_composition_order() {
-        assert_eq!(presentation_duration(1024, Some(1536), 1024).unwrap(), 512);
-        assert_eq!(presentation_duration(1536, Some(2560), 512).unwrap(), 1024);
-        assert_eq!(presentation_duration(2560, None, 512).unwrap(), 512);
-        assert_eq!(presentation_duration(-512, Some(0), 256).unwrap(), 512);
+        assert_eq!(presentation_duration(1024, Some(1536), 1024).unwrap(), Some(512));
+        assert_eq!(presentation_duration(1536, Some(2560), 512).unwrap(), Some(1024));
+        assert_eq!(presentation_duration(2560, None, 512).unwrap(), Some(512));
+        assert_eq!(presentation_duration(-512, Some(0), 256).unwrap(), Some(512));
         assert!(presentation_duration(0, Some(0), 512).is_err());
         assert!(presentation_duration(i64::MIN, Some(i64::MAX), 512).is_err());
-        assert!(presentation_duration(0, None, 0).is_err());
+        assert_eq!(presentation_duration(0, None, 0).unwrap(), None);
+        assert!(presentation_duration(0, None, -1).is_err());
     }
     #[test]
     fn media_time_preserves_fractional_and_negative_timestamps() {

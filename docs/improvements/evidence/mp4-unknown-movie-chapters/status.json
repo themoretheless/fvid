@@ -1,0 +1,11 @@
+{
+  "status": "accepted",
+  "id": "FVID-0401",
+  "before": "Core baseline: legacy movie-clock and edit-duration controls pass; 10MHz chapters with unknown mvhd fail (2 passed, 1 failed). A 20ms chapter becomes 200s. Native playback confirms chapter 1 incorrectly seeks to sample interval (2,3,50) instead of (1,2,50). A separate experimental absolute-leading-edit assertion was rejected because NativeReader explicitly normalizes leading empty edits; it is archived and not counted.",
+  "after": "For unknown/all-ones or unstated zero movie duration, use the indexed supported-track presentation length only as the chapter clock-selection bound. Convert media ticks to movie ticks with wide arithmetic, and honor total movie edit durations including empty edits. Known movie duration and legacy movie-clock chapter behavior are preserved. Thirty core and 36 player tests pass, no failures/ignored tests. Twenty-four short regular/fragmented V0/V1 chapter witnesses preserve 0/20/40ms chapters, titles, 60ms exact RGB playback, seek, rewind, EOF, packet clocks and budgets; four edited companions preserve absolute chapter metadata. Native leading-edit playback policy is unchanged.",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --test mp4_unknown_movie_chapters --test mp4 --test mp4_unknown_duration --test mp4_tfdt_flags --test mp4_time_header_sizes",
+    "cargo test --locked --offline --features player --test mp4_unknown_movie_chapters --test mp4 --test mp4_unknown_duration --test mp4_tfdt_flags --test mp4_time_header_sizes"
+  ],
+  "rejected_experiment": "rejected-experiment.json"
+}

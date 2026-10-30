@@ -1,0 +1,23 @@
+{
+  "status": "verified-uncounted-followup",
+  "original_improvement": "FVID-0278",
+  "accepted_count_delta": 0,
+  "before": "Existing concat-prefix regression failed identically before and after FVID-0405 at media::plan_concat: ADTS packet exceeds budget for an oversized inactive segment. Before logs are preserved in ../adts-packet-working-set/prefix-before.log and related-after.log; opening call-site/source hashes were captured before this follow-up.",
+  "change": "A crate-private sequence opening mode defers only header-only packet admission until next_packet chooses that segment. PCE bootstrap still checks its packet/memory ceiling before any body allocation. Public strict opening is unchanged. Native planning, native publication and owned concat use the mode; configuration compatibility remains eager for every input.",
+  "after": "12 integration checks passed: full existing prefix/SBR suite (1), working-set/PCM suite (6), API/CLI parity (2), existing PCE-before-allocation and cancellation guards (3). The unchanged allocation regression passes in both wrappers: 2 allocations, 1058 scoped peak bytes.",
+  "checks": [
+    "Unselected oversized segment accepted for a two-packet prefix.",
+    "Selecting the oversized third packet rejects; no output published.",
+    "Inactive incompatible rate still rejects in native/owned plan and execution.",
+    "Implicit 24-to-48 kHz SBR negotiation and budget notes pass.",
+    "PCE body bootstrap retains early packet rejection across owned/native planning and native execution.",
+    "Zero/cancellation/memory checks and public strict packet opening retained."
+  ],
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/adts_impl.rs": "bcf7bf2780539ba6d7d0a6fb7d09738418d1f6e2530e70824b3b8835645dcac6",
+    "crates/fvid-media/src/owned_concat.rs": "221c04b64427ab9452d52f60e19716946fde63aca9cfdf1f790688ed30e50440",
+    "src/native_plan.rs": "ab102544ed9b4de50cdd420821050b52ddaae1e96a645efdfe54e2211619c900",
+    "src/native_export.rs": "9f497d5b9277dcb750084eb4fdaa54e0bddae26493ea44ebcd299dda2485eb9b"
+  },
+  "remaining": "Historical Matroska AAC signed-padding test conflicts with the newer container-zero timeline expectation; not weakened or hidden."
+}

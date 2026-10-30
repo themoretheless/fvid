@@ -1,0 +1,19 @@
+{
+  "status": "accepted",
+  "improvement": "FVID-0411",
+  "before": "After correcting a test-harness enum match (compile log retained separately), the runtime baseline has 1 passing finite trim test and 2 failing tests. Both parser wrappers accept six loop/reserved flag witnesses and native playback accepts a loop as a finite trim.",
+  "change": "Check elst FullBox flags before consuming its finite edit rows. Bit zero returns the explicit unsupported looping-edit capability error. Unknown bits return an invalid edit-list flag error, including unknown bits combined with the loop bit. Both wrappers share the check.",
+  "after": "49 distinct checks pass in 11 integration targets, including 3 new tests. Zero-flag V0/V1 trim controls retain exact analytic YUV, software RGB, PTS/duration, random seeks, rewind and EOF. Related finite/open-ended video/audio edits, variable rates, decode-only coverage, header sizes and seek I/O remain green. Locked offline no-default-features core build check passes.",
+  "fixtures": "Eight 3-sample synthetic VP9 movies, two authored analytic YUV oracles and manifest: 11 byte-identical regenerated files. No private media or codec parameter sets, FFmpeg or network.",
+  "scope": "Correct refusal of a currently unsupported edit program rather than silent semantic loss. Not acceptance or implementation of cyclic playback. Flag variants are one ignored-field cause, not separate IDs.",
+  "limitations": [
+    "Loop playback remains explicitly unsupported.",
+    "No full project-wide green claim; historical unrelated failures remain separate.",
+    "Dedicated acceptance uses software decoding; related existing worker tests do not qualify physical GPU parity."
+  ],
+  "sha256": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": "50f084a0e661a468b9e66692abf6cf1d34fe79a508f50fe3ad093420696d9a0a",
+    "scripts/generate_mp4_edit_loop.py": "af9f6f0aaad23b7ce4ad64a9fa544afa71aa68909ae98a24309bedbb8e5a251e",
+    "tests/mp4_edit_loop.rs": "587ff56bca9b641851a8944ce9c3fb30cdc1baf5a4dd8fa5247114d7a160e5d5"
+  }
+}

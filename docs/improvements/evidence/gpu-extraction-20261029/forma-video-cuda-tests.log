@@ -1,0 +1,131 @@
+     Locking 4 packages to latest Rust 1.98.1 compatible versions
+      Adding cudarc v0.19.9 (available: v0.19.10)
+    Blocking waiting for file lock on build directory
+   Compiling gpu-video-cuda v0.1.0 (/Users/themoretheless/Documents/Sources/forma/crates/gpu-video-cuda)
+warning: associated function `new` is never used
+  --> src/nvenc_session.rs:63:19
+   |
+62 | impl FunctionTable {
+   | ------------------ associated function in this implementation
+63 |     pub(crate) fn new() -> Self {
+   |                   ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `validate_surface` is never used
+   --> src/nvenc_session.rs:950:4
+    |
+950 | fn validate_surface(
+    |    ^^^^^^^^^^^^^^^^
+
+warning: associated function `unpack` is never used
+ --> src/nvenc.rs:9:8
+  |
+8 | impl NvencVersion {
+  | ----------------- associated function in this implementation
+9 |     fn unpack(value: u32) -> Result<Self, String> {
+  |        ^^^^^^
+
+warning: function `query_result` is never used
+   --> src/nvenc.rs:116:4
+    |
+116 | fn query_result(status: i32, packed: u32) -> Result<NvencVersion, String> {
+    |    ^^^^^^^^^^^^
+
+warning: field `sample_bytes` is never read
+  --> src/nv12_buffer.rs:36:5
+   |
+31 | pub struct Nv12Buffer {
+   |            ---------- field in this struct
+...
+36 |     sample_bytes: u32,
+   |     ^^^^^^^^^^^^
+
+warning: function `layout` is never used
+   --> src/nv12_buffer.rs:299:4
+    |
+299 | fn layout(width: u32, height: u32) -> Result<(u32, usize), String> {
+    |    ^^^^^^
+
+warning: function `make_view` is never used
+   --> src/nv12_buffer.rs:323:4
+    |
+323 | fn make_view(pointer: u64, width: u32, height: u32, pitch: u32) -> Result<Nv12View, String> {
+    |    ^^^^^^^^^
+
+warning: function `make_view_format` is never used
+   --> src/nv12_buffer.rs:326:4
+    |
+326 | fn make_view_format(
+    |    ^^^^^^^^^^^^^^^^
+
+warning: `gpu-video-cuda` (lib) generated 8 warnings
+warning: `gpu-video-cuda` (lib test) generated 2 warnings (2 duplicates)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 27.40s
+     Running unittests src/lib.rs (/private/tmp/fvid-gpu-extraction-target/debug/deps/gpu_video_cuda-1cda306bc91e9752)
+
+running 46 tests
+test nv12_buffer::tests::unsupported_host_does_not_allocate_cuda_buffer ... ok
+test codec_device::tests::unsupported_host_never_creates_a_codec_device ... ok
+test nv12::tests::rejects_odd_crop ... ok
+test nvdec::tests::capability_storage_matches_pinned_c_header ... ok
+test codec_device::tests::invalid_ordinal_is_rejected_before_driver_loading ... ok
+test nv12_buffer::tests::black_plane_extents_cover_padding_without_overlapping_chroma ... ok
+test nv12_buffer::tests::p010_layout_uses_word_rows_and_checks_actual_pitched_extent ... ok
+test nv12_buffer::tests::allocation_layout_covers_both_pitched_planes_and_rejects_overflow ... ok
+test nv12::tests::p010_admission_checks_byte_footprints_and_alignment ... ok
+test nvdec::tests::creation_storage_matches_linux_and_windows_c_layouts ... ok
+test nv12::tests::rejects_kernel_offset_and_device_address_overflow_before_launch ... ok
+test nvdec::tests::destruction_keeps_failed_handle_for_retry ... ok
+test nvdec::tests::creation_request_checks_surface_counts_and_preserves_10_bit_format ... ok
+test nvdec::tests::mapped_surface_extent_and_release_failures_are_checked ... ok
+test nvdec::tests::picture_storage_and_slice_admission_match_sdk_contract ... ok
+test nvdec::tests::processing_storage_matches_pinned_header ... ok
+test nvdec::tests::query_initializes_inputs_and_refuses_errors_and_inconsistent_limits ... ok
+test nvdec::tests::unsupported_capability_is_a_result_not_a_fake_decoder ... ok
+test nvdec::tests::unsupported_host_does_not_load_nvdec ... ok
+test nvenc::tests::driver_query_rejects_errors_and_zero_version ... ok
+test nvenc::tests::unsupported_host_does_not_load_nvenc ... ok
+test nvenc_session::tests::close_error_keeps_handle_and_success_is_idempotent ... ok
+test nvenc_session::tests::codec_query_keeps_unknown_guids_and_rejects_bad_counts ... ok
+test nvenc_session::tests::input_cleanup_does_not_unregister_a_failed_mapping_release ... ok
+test nvenc_session::tests::main10_config_selects_p010_profile_depth_and_preserves_colour ... ok
+test nvenc_session::tests::nv12_surface_extent_includes_both_planes ... ok
+test nvenc_session::tests::output_creation_abi_matches_sdk_and_partial_cleanup_is_retryable ... ok
+test nvenc_session::tests::own_colour_is_written_to_both_codec_vui_members ... ok
+test nvenc_session::tests::p010_registration_validates_word_rows_and_full_pitched_allocation ... ok
+test nvenc_session::tests::sdk_64_bit_session_abi_has_verified_sizes_and_offsets ... ok
+test nvenc_session::tests::submission_distinguishes_buffered_frames_from_unaccepted_busy_frames ... ok
+test nvenc_session::tests::submission_entrypoints_preserve_sdk_function_table_offsets ... ok
+test pipeline::tests::budgets_every_resident_buffer_and_rejects_discontinuity ... ok
+test pipeline::tests::rejects_shader_count_before_device_access ... ok
+test nvenc_session::tests::preset_init_abi_and_geometry_match_the_pinned_sdk ... FAILED
+test shader::tests::p010_generated_sampling_kernel_matches_independent_reference ... ignored, requires clang++ C++14; host qualification does not execute CUDA
+test shader::tests::nv12_wrapper_filters_all_components_without_reinterpreting_chroma_pairs ... ok
+test shader::tests::sampling_wrapper_supplies_current_input_and_plane ... ok
+test shader::tests::validates_source_and_keeps_transform_bounds_in_wrapper ... ok
+test tests::accepts_bounded_crop_and_reflections ... ok
+test tests::rejects_escaped_input_plane_and_address_overflow ... ok
+test tests::rejects_invalid_flags_and_reserved_fields ... ok
+test tests::rejects_mismatched_and_empty_buffers ... ok
+test tests::rejects_overlapping_and_unwritten_output_bytes ... ok
+test tests::unsupported_platform_returns_actionable_errors ... ok
+test yuv420::tests::borrowed_decoder_views_preserve_depth_and_checked_byte_geometry ... ok
+
+failures:
+
+---- nvenc_session::tests::preset_init_abi_and_geometry_match_the_pinned_sdk stdout ----
+
+thread 'nvenc_session::tests::preset_init_abi_and_geometry_match_the_pinned_sdk' (8665503) panicked at src/nvenc_session.rs:1281:9:
+assertion `left == right` failed
+  left: 3600
+ right: 3584
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    nvenc_session::tests::preset_init_abi_and_geometry_match_the_pinned_sdk
+
+test result: FAILED. 44 passed; 1 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`

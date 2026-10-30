@@ -1,0 +1,37 @@
+{
+  "batch": 403,
+  "accepted_ids": [
+    "FVID-0409"
+  ],
+  "status": "accepted",
+  "summary": "Recover visible MP4 seek coverage when indexed sync samples decode without display",
+  "source_files": [
+    "src/playback/video/native.rs",
+    "src/playback/video/mp4_dispatch.rs"
+  ],
+  "regressions": [
+    "tests/mp4_decode_only_seek.rs"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/mp4-decode-only-seek/status.json"
+  ],
+  "before": "Runtime baseline: 3 controls pass, seek acceptance fails. Ten ordinary/late decode-only-tail requests return no picture; two middle-control requests return the future picture at [2,3) instead of the sequentially visible [0,2) picture. Exact picture/clock controls, bounded empty-stream behavior and codec-error recovery already pass.",
+  "after": "30 distinct integration checks pass: 25 related checks plus the expanded 5-test regression. The initial broad 29-check run and focused 5-check rerun overlap in four tests and are not double-counted. Sixteen NativeReader unit checks also pass, totaling 46 distinct checks; no-default-features cargo check passes.",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --features player --no-fail-fast --test mp4_decode_only_seek --test mp4_empty_tail --test mp4_nondisplay_endpoint --test mp4_presentation_endpoint --test mp4_open_ended_edit --test mp4_layered_seek_coverage --test mp4_seek_io_regressions --test mp4_interrupted_seek",
+    "cargo test --locked --offline --no-default-features --features player --test mp4_decode_only_seek",
+    "cargo test --locked --offline --no-default-features --features player --lib playback_native::tests",
+    "cargo check --locked --offline --no-default-features"
+  ],
+  "results": "46 distinct selected checks passed, 0 failed/ignored; core build check passed.",
+  "limitations": [
+    "Fallback can require sequential decoding from the beginning rather than a single GOP; it is deliberately bounded to one retry.",
+    "New seek acceptance uses NativeReader::software. Supplemental pre-existing NativeReader unit fixtures may use the configured backend; they do not qualify GPU parity for this fix.",
+    "No project-wide green or physical GPU/NVIDIA qualification is claimed; historical unrelated baseline failures remain separate."
+  ],
+  "uncounted": [
+    "Four overlapping focused-rerun tests",
+    "Input/window/codec-error/resource-control variants",
+    "Private landing-state accessor and fallback lifetime handling"
+  ]
+}

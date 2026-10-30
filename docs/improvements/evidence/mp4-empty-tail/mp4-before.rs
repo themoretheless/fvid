@@ -1,0 +1,1589 @@
+//! Indexed MP4 frame source for AVC, HEVC, VP9 and AV1.
+//! Frame timestamps remain in the track media timeline; `track().edits` describes
+//! presentation edits separately. This source does not silently discard edits.
+use crate::codec::{
+    av1_decoder as av1, av1_metadata, avc_decoder::AvcDecoder, avc_picture::IntraPicture,
+    hevc_decoder::HevcDecoder, vp9_decoder as vp9,
+};
+use crate::color::hdr::{ColourDescription, HdrMetadata};
+use crate::container::mp4::{Limits, Mp4Reader, Track, SampleDescription};
+use crate::{Result, invalid};
+use std::io::{Read, Seek};
+use std::sync::Arc;
+
+#[path = "mp4_layered.rs"]
+mod layered;
+#[path = "mp4_layered_packet.rs"]
+mod layered_packet;
+#[path = "mp4_mixed_hevc.rs"]
+mod mixed_hevc;
+pub use layered::{LayeredMp4VideoReader, LayeredVideoFrame};
+#[path = "mp4_dispatch.rs"]
+mod dispatch;
+pub use dispatch::Mp4VideoReader;
+
+/// Exact track-clock timestamp, including negative composition timestamps.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct MediaTime {
+    pub ticks: i64,
+    pub timescale: u32,
+}
+impl MediaTime {
+    /// Truncates toward zero to the nearest nanosecond without floating point.
+    pub fn nanoseconds(self) -> Result<i128> {
+        if self.timescale == 0 {
+            return Err(invalid("zero media timescale"));
+        }
+        Ok(i128::from(self.ticks) * 1_000_000_000 / i128::from(self.timescale))
+    }
+}
+
+pub struct VideoFrame {
+    pub packed: Option<Arc<crate::playback_native::PackedPlanar>>,
+    /// Decoded samples. For hardware-decoded frames the planes are empty and
+    /// `planes8` carries the picture; the geometry fields are still valid.
+    pub picture: Arc<IntraPicture>,
+    /// Hardware decoder output as packed 8-bit planes, when in use.
+    pub planes8: Option<Arc<crate::playback_native::Planar8>>,
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    pub surface: Option<fvid_vt::Surface>,
+    pub presentation_time: MediaTime,
+    pub duration: MediaTime,
+    pub sample_index: usize,
+}
+struct QueuedFrame {
+    frame: VideoFrame,
+    hdr: HdrMetadata,
+    description_index: u32,
+    layer: Option<u8>,
+    colour: crate::playback_native::AvcColour,
+    signal: ColourDescription,
+}
+impl QueuedFrame {
+    fn storage(&self) -> Result<usize> {
+        frame_storage(&self.frame)?.checked_add(
+            std::mem::size_of::<Self>() - std::mem::size_of::<VideoFrame>(),
+        ).ok_or_else(|| invalid("MP4 queued metadata storage overflow"))
+    }
+}
+
+/// Indexed MP4/MOV source for the currently supported AVC I/P/B tools,
+/// progressive or fragmented (moof/traf/trun). Demux metadata/packet limits are separate.
+/// Demux metadata/packet limits are separate. The supplied decoder budget is
+/// split equally between decode working storage and display reordering.
+/// Decoded frames retained by the caller are outside these budgets.
+/// Audio tracks are exposed by the demuxer but are not decoded by this source.
+/// Hardware decoding through VideoToolbox, with the stream's SPS kept for
+/// colour information the hardware path does not report.
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+pub(crate) struct Hardware {
+    pub(crate) session: fvid_vt::Session,
+    pub(crate) colour: crate::playback_native::AvcColour,
+    pub(crate) shared: bool,
+}
+
+#[derive(Clone, Copy, Default)]
+struct DecoderMetadata {
+    colour: Option<crate::playback_native::AvcColour>,
+    signal: ColourDescription,
+    hdr: HdrMetadata,
+}
+enum Decoder {
+    Unconfigured,
+    Avc(Box<AvcDecoder>),
+    Hevc(Box<HevcDecoder>),
+    Layered(Box<mixed_hevc::MixedHevc>),
+    Vp9(Box<vp9::Decoder>),
+    Av1(Box<av1::Decoder>),
+}
+impl Decoder {
+    fn from_description(setup: &SampleDescription, budget: usize) -> Result<Self> {
+        Ok(match &setup.codec {
+            b"avc1" | b"avc3" => {
+                Self::Avc(Box::new(AvcDecoder::new(&setup.configuration, budget)?))
+            }
+            b"hvc1" => Self::Hevc(Box::new(HevcDecoder::from_configuration(
+                &setup.configuration,
+                budget,
+            )?)),
+            b"hev1" => Self::Hevc(Box::new(HevcDecoder::from_inband_configuration(
+                &setup.configuration,
+                budget,
+            )?)),
+            b"vp09" => Self::Vp9(Box::new(vp9::Decoder::new(budget))),
+            b"av01" => {
+                if setup.configuration.is_empty() {
+                    return Err(invalid("MP4 AV1 configuration is absent"));
+                }
+                Self::Av1(Box::new(av1::Decoder::from_configuration(
+                    &setup.configuration,
+                    budget,
+                )?))
+            }
+            _ => return Err(invalid("unsupported MP4 video sample description")),
+        })
+    }
+    fn reset(&mut self) {
+        match self {
+            Self::Unconfigured => {}
+            Self::Avc(d) => d.reset(),
+            Self::Hevc(d) => d.reset(),
+            Self::Layered(d) => d.reset(),
+            Self::Vp9(d) => d.reset(),
+            Self::Av1(d) => d.reset(),
+        }
+    }
+}
+/// Indexed MP4 source with AVC and HEVC codec dispatch.
+struct SingleLayerMp4VideoReader<R> {
+    demuxer: Mp4Reader<R>,
+    decoder: Decoder,
+    decoder_description: u32,
+    presented_description: Option<u32>,
+    presented_layer: Option<u8>,
+    mixed_hevc: bool,
+    presented_colour: Option<crate::playback_native::AvcColour>,
+    presented_signal: Option<ColourDescription>,
+    work_budget: usize,
+    needs_description_reset: bool,
+    initial_metadata: DecoderMetadata,
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    hardware: Option<Hardware>,
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    decoded_surface: Option<fvid_vt::Surface>,
+    track_index: usize,
+    sample_index: usize,
+    pending_avc_field_sample: Option<usize>,
+    parameter_preroll: Option<usize>,
+    packet: Vec<u8>,
+    /// What an AV1 track states about its own pictures in bytes this reader can
+    /// see the moment the file is open: the signal of its sequence header and
+    /// the light of its metadata OBUs, read from the `av1C` configuration and
+    /// the first sample. A caller that grades the first picture asks then, not
+    /// after a frame has been decoded, and an encoder that writes its light
+    /// only in-band writes it there. `None` for every other codec, which the
+    /// coding answers from its parameter sets instead.
+    open_signal: Option<(ColourDescription, HdrMetadata)>,
+    failed: bool,
+    future_pts: Vec<i64>,
+    pending: Vec<QueuedFrame>,
+    presented_hdr: Option<HdrMetadata>,
+    decoded_planar: Option<Arc<crate::playback_native::PackedPlanar>>,
+    pending_bytes: usize,
+    queue_budget: usize,
+}
+/// Backward-compatible name for the indexed MP4 video reader.
+pub type Mp4AvcReader<R> = Mp4VideoReader<R>;
+fn supported_video_codec(codec: &[u8; 4]) -> bool {
+    matches!(codec, b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"vp09" | b"av01")
+}
+impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
+    fn from_demuxer_with_hardware(
+        demuxer: Mp4Reader<R>,
+        index: usize,
+        decoder_budget: usize,
+        allow_hardware: bool,
+        owned_hevc_window: bool,
+    ) -> Result<Self> {
+        let _ = allow_hardware;
+        let track = demuxer
+            .tracks()
+            .get(index)
+            .ok_or_else(|| invalid("MP4 track index out of range"))?;
+
+        if track.handler != *b"vide"
+            || !track.description_for_sample(0).is_some_and(|d| supported_video_codec(&d.codec))
+        {
+            return Err(invalid(
+                "selected MP4 track is not AVC, HEVC, VP9 or AV1 video",
+            ));
+        }
+        // Reserve half the supplied budget for output reordering and its index.
+        // Reference storage and reconstruction use the other half.
+        let queue_budget = decoder_budget / 2;
+        // A video track indexes one record per sample; the compact form belongs
+        // to uncompressed audio, which this source never decodes.
+        let Some(samples) = track.samples.expanded() else {
+            return Err(invalid(
+                "selected MP4 track is not AVC, HEVC, VP9 or AV1 video",
+            ));
+        };
+        let index_bytes = samples
+            .len()
+            .checked_mul(std::mem::size_of::<i64>())
+            .ok_or_else(|| invalid("MP4 reorder index overflow"))?;
+        let queue_budget = queue_budget
+            .checked_sub(index_bytes)
+            .ok_or_else(|| invalid("MP4 reorder index exceeds budget"))?;
+        let mut future_pts = Vec::new();
+        future_pts
+            .try_reserve_exact(samples.len())
+            .map_err(|_| invalid("cannot allocate MP4 reorder index"))?;
+        let mut minimum = i64::MAX;
+        for sample in samples.iter().rev() {
+            minimum = minimum.min(sample.pts);
+            future_pts.push(minimum);
+        }
+        future_pts.reverse();
+        let work_budget = decoder_budget - decoder_budget / 2;
+        let decoder_description = samples
+            .first()
+            .ok_or_else(|| invalid("empty MP4 video track"))?
+            .description_index;
+        let setup = &track.sample_descriptions[decoder_description as usize - 1];
+        let mixed_hevc = owned_hevc_window || !layered_packet::all_hevc(track)
+            && (0..samples.len()).any(|i| {
+                track
+                    .description_for_sample(i)
+                    .is_some_and(|s| matches!(&s.codec, b"hvc1" | b"hev1"))
+            });
+        let deferred = mixed_hevc && matches!(&setup.codec, b"hvc1" | b"hev1");
+        let decoder = if deferred {
+            Decoder::Unconfigured
+        } else {
+            Decoder::from_description(setup, work_budget)?
+        };
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        let hardware = if track.ensure_constant_description().is_err()
+            || !allow_hardware
+            || std::env::var_os("FVID_SOFTWARE_DECODE").is_some()
+            || matches!(&decoder, Decoder::Hevc(d) if d.try_parameters().is_none())
+        {
+            None
+        } else {
+            open_hardware(
+                &setup.codec,
+                &setup.configuration,
+                setup.width as u64,
+                setup.height as u64,
+                work_budget,
+                false,
+            )
+        };
+        let mut source = Self {
+            demuxer,
+            decoder,
+            decoder_description,
+            presented_description: None,
+            presented_layer: None,
+            mixed_hevc,
+            presented_colour: None,
+            presented_signal: None,
+            work_budget,
+            needs_description_reset: deferred,
+            initial_metadata: DecoderMetadata::default(),
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            hardware,
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            decoded_surface: None,
+            track_index: index,
+            sample_index: 0,
+            pending_avc_field_sample: None,
+            parameter_preroll: None,
+            packet: Vec::new(),
+            open_signal: None,
+            failed: false,
+            future_pts,
+            pending: Vec::new(),
+            presented_hdr: None,
+            decoded_planar: None,
+            pending_bytes: 0,
+            queue_budget,
+        };
+        if deferred {
+            source.select_description(0)?;
+        }
+        source.read_open_signal();
+        source.initial_metadata = DecoderMetadata {
+            colour: source.decoder_colour().ok(),
+            signal: source.decoder_signal(),
+            hdr: source.decoder_hdr(),
+        };
+        Ok(source)
+    }
+    /// Ask an AV1 track what its own bytes state before any picture is decoded,
+    /// keeping the answer for [`Self::bitstream_colour`] and
+    /// [`Self::bitstream_hdr`] to hand on. The `av1C` configuration OBUs and the
+    /// first sample are the two places an encoder puts them; bytes that do not
+    /// parse state nothing, since the picture route meets the same bytes later
+    /// and reports what it makes of them there.
+    fn read_open_signal(&mut self) {
+        if self.decoder_setup().codec != *b"av01" {
+            return;
+        }
+        let mut seed = av1_metadata::signal_from_bytes(&self.decoder_setup().configuration);
+        let mut packet = Vec::new();
+        if self
+            .demuxer
+            .read_packet(self.track_index, self.sample_index, &mut packet)
+            .is_ok()
+        {
+            // The sample is the later statement of the two, so it wins and the
+            // configuration record fills whatever it left out.
+            let (stated, light) = av1_metadata::signal_from_container_sample(&packet);
+            seed = (stated.filled_with(seed.0), light.filled_with(seed.1));
+        }
+        self.open_signal = Some(seed);
+    }
+    pub fn active_vui(&self) -> Option<&crate::codec::avc::Vui> {
+        match &self.decoder {
+            Decoder::Avc(d) => d.active_vui(),
+            Decoder::Unconfigured
+            | Decoder::Hevc(_)
+            | Decoder::Layered(_)
+            | Decoder::Vp9(_)
+            | Decoder::Av1(_) => None,
+        }
+    }
+    /// The VUI this reader's pictures are read with: the parameter set a decoded
+    /// picture named, or, while none has, the first one the `avcC` record lists.
+    /// A coded picture selects its own set, so the active answer wins as soon as
+    /// there is one; a stream that states its signal only in the recorded set is
+    /// thereby described the moment the file is open, which is when a caller that
+    /// grades the first picture asks.
+    fn avc_vui(&self) -> Option<&crate::codec::avc::Vui> {
+        match &self.decoder {
+            Decoder::Avc(d) => d.active_vui().or_else(|| d.recorded_vui()),
+            Decoder::Unconfigured
+            | Decoder::Hevc(_)
+            | Decoder::Layered(_)
+            | Decoder::Vp9(_)
+            | Decoder::Av1(_) => None,
+        }
+    }
+    pub fn active_colour(&self) -> Result<crate::playback_native::AvcColour> {
+        if let Some(colour) = self.presented_colour { return Ok(colour); }
+        if let Some(seed) = self.reset_metadata() { return Ok(seed.colour.unwrap_or_default()); }
+        self.decoder_colour()
+    }
+    fn decoder_colour(&self) -> Result<crate::playback_native::AvcColour> {
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        if let Some(hardware) = &self.hardware {
+            return Ok(hardware.colour);
+        }
+        match &self.decoder {
+            Decoder::Hevc(d) => crate::playback_native::AvcColour::from_hevc_vui(
+                d.try_parameters().and_then(|(s, _)| s.vui.as_ref()),
+            ),
+            Decoder::Layered(d) => Ok(d.metadata.colour.unwrap_or_default()),
+            Decoder::Avc(_) => crate::playback_native::AvcColour::from_vui(self.avc_vui()),
+            Decoder::Unconfigured | Decoder::Vp9(_) | Decoder::Av1(_) => {
+                Ok(crate::playback_native::AvcColour::default())
+            }
+        }
+    }
+    /// The signal the coding itself states, which is what a picture is graded
+    /// by when the container's own `colr` atom says nothing: an HEVC or AVC
+    /// VUI's three H.273 codes with the range its `video_signal_type` names, or
+    /// the colour an AV1 sequence header carries. VP9 states nothing of its own
+    /// and is left to the container.
+    ///
+    /// An AV1 and an AVC answer are both there the moment the file is open: the
+    /// first from the `av1C` configuration or the sample behind it, the second
+    /// from the parameter set the `avcC` record lists. A decoded picture that
+    /// names a set of its own then wins, so a stream that changes its signal
+    /// mid-file is graded by what it is coding then, not by what its first
+    /// picture said.
+    pub fn bitstream_colour(&self) -> ColourDescription {
+        self.presented_signal.or_else(|| self.reset_metadata().map(|seed| seed.signal))
+            .unwrap_or_else(|| self.decoder_signal())
+    }
+    fn decoder_signal(&self) -> ColourDescription {
+        match &self.decoder {
+            Decoder::Hevc(d) => d
+                .try_parameters()
+                .and_then(|(s, _)| s.vui.as_ref())
+                .and_then(|vui| vui.signal.as_ref())
+                .map(|signal| {
+                    let [primaries, transfer, matrix] = signal.colour.unwrap_or([0; 3]);
+                    ColourDescription {
+                        primaries,
+                        transfer,
+                        matrix,
+                        full_range: signal.full_range,
+                    }
+                })
+                .unwrap_or_default(),
+            Decoder::Avc(_) => self
+                .avc_vui()
+                .and_then(|vui| vui.video_signal)
+                .map(|(_, full_range, colour)| {
+                    let [primaries, transfer, matrix] = colour.unwrap_or([0; 3]);
+                    ColourDescription {
+                        primaries,
+                        transfer,
+                        matrix,
+                        full_range,
+                    }
+                })
+                .unwrap_or_default(),
+            Decoder::Layered(d) => d.metadata.signal,
+            Decoder::Av1(d) => {
+                let seed = self.open_signal.map(|(seed, _)| seed).unwrap_or_default();
+                d.color()
+                    .map(crate::codec::av1_sequence::Color::signal)
+                    .unwrap_or_default()
+                    .filled_with(seed)
+            }
+            Decoder::Unconfigured | Decoder::Vp9(_) => ColourDescription::default(),
+        }
+    }
+    /// The light the coding itself names for its pictures: an HEVC stream's
+    /// mastering display and content light level SEI messages, or the AV1
+    /// metadata OBUs of the same volume. An encoder that writes them in-band
+    /// often writes them nowhere else, so a container with no `mdcv`/`ccll` box
+    /// still has a tone-mappable answer.
+    ///
+    /// Both codecs give it the moment the file is open: HEVC's messages are read
+    /// from the `hvcC`'s own NAL unit array as the decoder is built, and an AV1
+    /// stream's OBUs are read from its `av1C` configuration and its first sample
+    /// before a picture is decoded. That is what a caller grading the first
+    /// picture needs; a stream that first states its light deeper in still
+    /// states it there, once that packet has been decoded.
+    /// After presentation begins, this describes the last returned frame, even
+    /// when decoding has already looked ahead into a new HDR sequence. Before
+    /// the first frame (and after reset), it describes available decoder metadata.
+    pub fn bitstream_hdr(&self) -> HdrMetadata {
+        self.presented_hdr.or_else(|| self.reset_metadata().map(|seed| seed.hdr))
+            .unwrap_or_else(|| self.decoder_hdr())
+    }
+    fn decoder_hdr(&self) -> HdrMetadata {
+        match &self.decoder {
+            Decoder::Hevc(d) => d.hdr(),
+            Decoder::Layered(d) => d.metadata.hdr,
+            Decoder::Av1(d) => {
+                let seed = self.open_signal.map(|(_, seed)| seed).unwrap_or_default();
+                d.hdr_with_fallback(seed)
+            }
+            Decoder::Unconfigured | Decoder::Avc(_) | Decoder::Vp9(_) => HdrMetadata::default(),
+        }
+    }
+    /// Whether frames come from the platform's hardware decoder.
+    pub fn hardware_accelerated(&self) -> bool {
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        {
+            self.hardware.is_some()
+        }
+        #[cfg(not(all(target_os = "macos", feature = "videotoolbox")))]
+        {
+            false
+        }
+    }
+    /// Enable shared decoder surfaces before reading the first frame. Software
+    /// readers remain software; unsupported codecs keep their existing output.
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    pub fn enable_shared_surfaces(&mut self) -> Result<bool> {
+        if self.sample_index != 0 || !self.pending.is_empty() {
+            return Err(invalid(
+                "shared surfaces must be configured before decoding",
+            ));
+        }
+        if self.hardware.is_none()
+            || !matches!(
+                &self.track().codec,
+                b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"vp09" | b"av01"
+            )
+        {
+            return Ok(false);
+        }
+        let track = self.track();
+        let hardware = open_hardware(
+            &track.codec,
+            &track.configuration,
+            u64::from(track.width),
+            u64::from(track.height),
+            self.queue_budget,
+            true,
+        );
+        let Some(hardware) = hardware else {
+            return Ok(false);
+        };
+        self.hardware = Some(hardware);
+        Ok(true)
+    }
+    /// Decode the packet in `self.packet` with whichever decoder is active.
+    /// Hardware frames come back as 8-bit planes plus a geometry-only picture.
+    #[allow(clippy::type_complexity)]
+    fn decode_packet(
+        &mut self,
+    ) -> Result<
+        Option<(
+            Arc<IntraPicture>,
+            Option<Arc<crate::playback_native::Planar8>>,
+        )>,
+    > {
+        self.decoded_planar = None;
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        if let Some(hardware) = &mut self.hardware {
+            if hardware.shared {
+                let surface = hardware
+                    .session
+                    .decode_surface(&self.packet)
+                    .map_err(|error| invalid(&error.to_string()))?;
+                return Ok(surface.map(|surface| {
+                    let (w, h) = (surface.width(), surface.height());
+                    let picture = IntraPicture {
+                        coded_width: w + w % 2,
+                        coded_height: h + h % 2,
+                        crop: [0, w % 2, 0, h % 2],
+                        bit_depth: surface.depth(),
+                        chroma_bit_depth: surface.depth(),
+                        y: Vec::new(),
+                        cb: Vec::new(),
+                        cr: Vec::new(),
+                    };
+                    self.decoded_surface = Some(surface);
+                    (Arc::new(picture), None)
+                }));
+            }
+            let planes = hardware
+                .session
+                .decode(&self.packet)
+                .map_err(|error| invalid(&error.to_string()))?;
+            return Ok(planes.map(|planes| {
+                let (picture, planes8) = hardware_frame(planes, hardware.colour);
+                (Arc::new(picture), planes8.map(Arc::new))
+            }));
+        }
+        match &mut self.decoder {
+            Decoder::Unconfigured => Err(invalid("MP4 decoder is not configured")),
+            Decoder::Layered(_) => Err(invalid("mixed HEVC packets require the window pipeline")),
+            Decoder::Avc(d) => {
+                let Some(picture)=d.decode_order(&self.packet)? else {return Ok(None)};
+                let vui = d.active_vui().or_else(|| d.recorded_vui());
+                let identity = vui
+                    .and_then(|v| v.video_signal)
+                    .and_then(|(_, _, c)| c)
+                    .is_some_and(|c| c[2] == 0);
+                if picture.chroma_format()? != 1 || identity {
+                    self.decoded_planar = Some(Arc::new(
+                        crate::playback_native::avc_picture_with_vui(&picture, vui, self.queue_budget)?,
+                    ));
+                }
+                Ok(Some((picture,None)))
+            },
+            Decoder::Hevc(d) => {
+                let Some(frame) = d.decode_packet(&self.packet)?.filter(|f| f.output) else {
+                    return Ok(None);
+                };
+                let p = &frame.picture;
+                let colour = crate::playback_native::AvcColour::from_hevc_vui(
+                    d.try_parameters().and_then(|(s,_)| s.vui.as_ref()),
+                )?;
+                let explicit_geometry =
+                    d.parameters().0.chroma_format != 1 || p.depth[0] != p.depth[1];
+                if explicit_geometry {
+                    self.decoded_planar = Some(Arc::new(crate::playback_native::hevc_picture_with_vui(
+                        p,
+                        d.parameters().0.chroma_format,
+                        d.parameters().0.vui.as_ref(),
+                    )?));
+                }
+                let coded_width = p.dimensions[0] as usize;
+                let coded_height = p.dimensions[1] as usize;
+                let crop = p.crop.map(|v| v as usize);
+                let picture = IntraPicture {
+                    coded_width,
+                    coded_height,
+                    crop,
+                    bit_depth: p.depth[0],
+                    chroma_bit_depth: if d.parameters().0.chroma_format == 0 {
+                        p.depth[0]
+                    } else {
+                        p.depth[1]
+                    },
+                    y: p.planes[0].samples().to_vec(),
+                    cb: if d.parameters().0.chroma_format == 0 {
+                        vec![1 << (p.depth[0] - 1); coded_width / 2 * (coded_height / 2)]
+                    } else {
+                        p.planes[1].samples().to_vec()
+                    },
+                    cr: if d.parameters().0.chroma_format == 0 {
+                        vec![1 << (p.depth[0] - 1); coded_width / 2 * (coded_height / 2)]
+                    } else {
+                        p.planes[2].samples().to_vec()
+                    },
+                };
+                let planes = if explicit_geometry {
+                    None
+                } else {
+                    Some(Arc::new(crate::playback_native::coded_planes_to_planar8(
+                        &picture.y,
+                        &picture.cb,
+                        &picture.cr,
+                        coded_width,
+                        coded_height,
+                        crop,
+                        p.depth[0],
+                        colour,
+                    )))
+                };
+                Ok(Some((Arc::new(picture), planes)))
+            }
+            Decoder::Vp9(d) => {
+                for frame in crate::codec::vp9::frames(&self.packet)? {
+                    let decoded = d.decode(frame)?;
+                    if decoded.header.show_frame {
+                        let p = &decoded.picture;
+                        let colour = crate::playback_native::AvcColour {
+                            kr: match decoded.header.picture.format.color_space {
+                                0 | 1 | 3 => 0.299,
+                                2 | 7 => 0.2126,
+                                4 => 0.212,
+                                5 => 0.2627,
+                                _ => return Err(invalid("unsupported VP9 RGB colour configuration")),
+                            },
+                            kb: match decoded.header.picture.format.color_space {
+                                0 | 1 | 3 => 0.114,
+                                2 | 7 => 0.0722,
+                                4 => 0.087,
+                                5 => 0.0593,
+                                _ => return Err(invalid("unsupported VP9 RGB colour configuration")),
+                            },
+                            full: decoded.header.picture.format.full_range,
+                        };
+                        self.decoded_planar = Some(Arc::new(crate::playback_native::vp9_picture(p, colour, decoded.header.picture.format.color_space == 7)?));
+                        let coded_width = p.size[0] as usize;
+                        let coded_height = p.size[1] as usize;
+                        let picture = IntraPicture {
+                            coded_width,
+                            coded_height,
+                            crop: [0; 4],
+                            bit_depth: p.depth,
+                            chroma_bit_depth: p.depth,
+                            y: p.planes[0].samples.clone(),
+                            cb: p.planes[1].samples.clone(),
+                            cr: p.planes[2].samples.clone(),
+                        };
+                        let [sx, sy] = p.subsampling.map(usize::from);
+                        let narrow = |i: usize, width: usize, height: usize| {
+                            let plane = &p.planes[i];
+                            (0..height).flat_map(|y| plane.samples[y * plane.width..y * plane.width + width]
+                                .iter().map(|&v| (v >> p.depth.saturating_sub(8)) as u8)).collect()
+                        };
+                        let cw = coded_width.div_ceil(1 << sx);
+                        let ch = coded_height.div_ceil(1 << sy);
+                        let planes = crate::playback_native::Planar8 {
+                            width: coded_width, height: coded_height,
+                            chroma_width: cw, chroma_height: ch,
+                            y: narrow(0, coded_width, coded_height),
+                            cb: narrow(1, cw, ch), cr: narrow(2, cw, ch), colour,
+                        };
+                        return Ok(Some((Arc::new(picture), Some(Arc::new(planes)))));
+                    }
+                }
+                Ok(None)
+            }
+            Decoder::Av1(d) => {
+                if let Some(decoded) = d.decode_container_sample(&self.packet)? {
+                    if decoded.show {
+                        let p = &decoded.picture;
+                        let colour = crate::playback_native::AvcColour {
+                            kr: match decoded.color.matrix {
+                                0 | 1 => 0.2126,
+                                2 | 5 | 6 => 0.299,
+                                4 => 0.30,
+                                7 => 0.212,
+                                9 | 10 => 0.2627,
+                                _ => {
+                                    return Err(invalid("unsupported AV1 RGB matrix coefficients"));
+                                }
+                            },
+                            kb: match decoded.color.matrix {
+                                0 | 1 => 0.0722,
+                                2 | 5 | 6 => 0.114,
+                                4 => 0.11,
+                                7 => 0.087,
+                                9 | 10 => 0.0593,
+                                _ => {
+                                    return Err(invalid("unsupported AV1 RGB matrix coefficients"));
+                                }
+                            },
+                            full: decoded.color.full_range,
+                        };
+                        let coded_width = p.size[0] as usize;
+                        let coded_height = p.size[1] as usize;
+                        let crop = [0; 4];
+                        let explicit_geometry = decoded.color.matrix == 0 || decoded.color.monochrome
+                            || decoded.color.subsampling != [true, true]
+                            || coded_width % 2 != 0
+                            || coded_height % 2 != 0;
+                        if explicit_geometry {
+                            self.decoded_planar = Some(Arc::new(
+                                crate::playback_native::av1_picture(p, &decoded.color, colour)?,
+                            ));
+                            let picture = IntraPicture {
+                                coded_width,
+                                coded_height,
+                                crop,
+                                bit_depth: p.depth,
+                                chroma_bit_depth: p.depth,
+                                y: Vec::new(),
+                                cb: Vec::new(),
+                                cr: Vec::new(),
+                            };
+                            return Ok(Some((Arc::new(picture), None)));
+                        }
+                        // AV1 planes carry their own padded stride, which is
+                        // not necessarily the visible width (e.g. 70 -> 72).
+                        let narrow = |i: usize| -> Result<Vec<u16>> {
+                            let plane = &p.planes[i];
+                            let shift = usize::from(i != 0);
+                            let width = coded_width >> shift;
+                            let height = coded_height >> shift;
+                            if width > plane.width
+                                || height > plane.height
+                                || plane.width.checked_mul(plane.height)
+                                    != Some(plane.samples.len())
+                            {
+                                return Err(invalid("invalid AV1 plane storage"));
+                            }
+                            let count = width
+                                .checked_mul(height)
+                                .ok_or_else(|| invalid("AV1 planar size overflow"))?;
+                            let mut samples = Vec::new();
+                            samples
+                                .try_reserve_exact(count)
+                                .map_err(|_| invalid("AV1 planar allocation failed"))?;
+                            for row in 0..height {
+                                samples.extend_from_slice(
+                                    &plane.samples[row * plane.width..row * plane.width + width],
+                                );
+                            }
+                            Ok(samples)
+                        };
+                        let picture = IntraPicture {
+                            coded_width,
+                            coded_height,
+                            crop,
+                            bit_depth: p.depth,
+                            chroma_bit_depth: p.depth,
+                            y: narrow(0)?,
+                            cb: narrow(1)?,
+                            cr: narrow(2)?,
+                        };
+                        let planes = (p.depth == 8).then(|| {
+                            Arc::new(crate::playback_native::coded_planes_to_planar8(
+                                &picture.y,
+                                &picture.cb,
+                                &picture.cr,
+                                coded_width,
+                                coded_height,
+                                crop,
+                                p.depth,
+                                colour,
+                            ))
+                        });
+                        return Ok(Some((Arc::new(picture), planes)));
+                    }
+                }
+                Ok(None)
+            }
+        }
+    }
+    fn reset_metadata(&self) -> Option<DecoderMetadata> {
+        // A lazy reset must not expose the previous decoder's configuration.
+        // Rewind has a captured opening seed; a seek to another sample has no
+        // decoded bitstream signal until its parameters have been restored.
+        self.needs_description_reset.then(|| {
+            if self.sample_index == 0 { self.initial_metadata } else { DecoderMetadata::default() }
+        })
+    }
+    fn decoder_setup(&self) -> &SampleDescription {
+        &self.track().sample_descriptions[self.decoder_description as usize - 1]
+    }
+    pub fn container_description(&self) -> &SampleDescription {
+        let selected = self
+            .presented_description
+            .or_else(|| {
+                self.needs_description_reset
+                    .then(|| {
+                        self.track()
+                            .samples
+                            .get(self.sample_index)
+                            .map(|s| s.description_index)
+                    })
+                    .flatten()
+            })
+            .unwrap_or(self.decoder_description);
+        &self.track().sample_descriptions[selected as usize - 1]
+    }
+    fn select_description(&mut self, index: usize) -> Result<()> {
+        let selected = self
+            .track()
+            .samples
+            .get(index)
+            .ok_or_else(|| invalid("missing MP4 description sample"))?
+            .description_index;
+        if !self.needs_description_reset
+            && matches!(&self.decoder,Decoder::Layered(d)if d.contains(index))
+        {
+            self.decoder_description = selected;
+            return Ok(());
+        }
+        let setup = &self.track().sample_descriptions[selected as usize - 1];
+        let current = self.decoder_setup();
+        let changed = setup.codec != current.codec
+            || setup.configuration != current.configuration
+            || setup.width != current.width
+            || setup.height != current.height;
+        if !self.needs_description_reset && !changed {
+            self.decoder_description = selected;
+            return Ok(());
+        }
+        if matches!(&self.decoder, Decoder::Avc(d) if d.has_pending_field()) {
+            return Err(invalid("unpaired AVC field across MP4 sample descriptions"));
+        }
+        if let Decoder::Av1(d) = &mut self.decoder {
+            d.finish()?;
+        }
+        // Free old reference storage before allocating the next decoder. Keep
+        // already-decoded display frames and their original metadata queued.
+        self.needs_description_reset = true;
+        self.decoder = Decoder::Unconfigured;
+        let setup = &self.track().sample_descriptions[selected as usize - 1];
+        self.decoder = if self.mixed_hevc && matches!(&setup.codec, b"hvc1" | b"hev1") {
+            self.packet = Vec::new();
+            Decoder::Layered(Box::new(mixed_hevc::MixedHevc::open(
+                &mut self.demuxer,
+                self.track_index,
+                index,
+                self.work_budget,
+            )?))
+        } else {
+            Decoder::from_description(setup, self.work_budget)?
+        };
+        self.decoder_description = selected;
+        self.needs_description_reset = false;
+        self.pending_avc_field_sample = None;
+        self.open_signal = None;
+        self.read_open_signal();
+        Ok(())
+    }
+    pub fn track(&self) -> &Track {
+        &self.demuxer.tracks()[self.track_index]
+    }
+    pub fn movie_timescale(&self) -> u32 {
+        self.demuxer.movie_timescale()
+    }
+    /// Restarts decoding from the first sample, dropping all reference pictures.
+    /// Packet reads seek to indexed offsets, so no eager I/O is needed here.
+    pub fn rewind(&mut self) {
+        self.decoder.reset();
+        self.needs_description_reset = true;
+        self.presented_description = None;
+        self.presented_layer = None;
+        self.presented_colour = None;
+        self.presented_signal = None;
+        self.demuxer.invalidate_position();
+        self.sample_index = 0;
+        self.failed = false;
+        self.packet.clear();
+        self.pending.clear();
+        self.presented_hdr = None;
+        self.pending_bytes = 0;
+        self.pending_avc_field_sample = None;
+        self.parameter_preroll = None;
+    }
+    /// Restart at a sync sample before `pts`, retaining decode-order coverage
+    /// of every later display frame. Reordered PTS can require an earlier sync
+    /// sample than the closest presentation-time candidate. Returns the media
+    /// time where decoding resumes, dropping reference pictures.
+    pub fn seek_to_sync(&mut self, pts: i64) -> i64 {
+        // A video track always indexes one record per sample; with no such index
+        // there is nothing to restart from but the first sample.
+        let samples = self.track().samples.expanded().unwrap_or(&[]);
+        let index = samples
+            .iter()
+            .enumerate()
+            .filter(|(_, s)| s.sync && s.pts <= pts)
+            // Start before the entire equal-PTS group so seek agrees with
+            // sequential playback, including its accumulated final interval.
+            .max_by_key(|(index, s)| (s.pts, std::cmp::Reverse(*index)))
+            .map_or(0, |(i, _)| i);
+        // A sync sample can have an earlier PTS than a packet that precedes it
+        // in decode order. Starting there would omit that later display frame
+        // and incorrectly extend the preceding interval across the hole.
+        let landing = samples.get(index).map_or(pts, |s| s.pts);
+        let required = samples.iter().position(|s| s.pts >= landing).unwrap_or(index);
+        let index = samples.iter().enumerate().take(index.min(required) + 1)
+            .filter(|(_, s)| s.sync && s.pts <= pts)
+            .max_by_key(|(i, s)| (s.pts, std::cmp::Reverse(*i)))
+            .map_or(0, |(i, _)| i);
+        self.rewind();
+        self.sample_index = index;
+        let setup = self.track().description_for_sample(index);
+        if index > 0 && !self.hardware_accelerated()
+            && setup.is_some_and(|s| matches!(&s.codec,b"hvc1"|b"hev1"|b"avc3")) {
+            self.parameter_preroll = Some(index);
+        }
+        self.track().samples.get(index).map_or(0, |s| s.pts)
+    }
+    pub fn read_frame(&mut self) -> Result<Option<VideoFrame>> {
+        if self.failed {
+            return Err(invalid("MP4 frame source requires rewind after an error"));
+        }
+        let result = self.read_frame_inner();
+        self.failed = result.is_err();
+        result
+    }
+    fn read_frame_inner(&mut self) -> Result<Option<VideoFrame>> {
+        if let Some(end) = self.parameter_preroll.take() {
+            // A sync sample resets pictures, not the in-band parameter history.
+            // Recover only parameter state; no preceding pictures are decoded or
+            // retained, and packet/decoder budgets still apply.
+            self.select_description(end)?;
+            let target = self.decoder_setup();
+            let start = (0..end)
+                .rev()
+                .find(|&i| {
+                    self.track().description_for_sample(i).is_some_and(|s| {
+                        s.codec != target.codec
+                            || s.configuration != target.configuration
+                            || s.width != target.width
+                            || s.height != target.height
+                    })
+                })
+                .map_or(0, |i| i + 1);
+            for index in start..end {
+                if matches!(&self.decoder, Decoder::Layered(_)) {
+                    break;
+                }
+                self.demuxer
+                    .read_packet(self.track_index, index, &mut self.packet)?;
+                match &mut self.decoder {
+                    Decoder::Hevc(decoder) => decoder.prime_parameters(&self.packet)?,
+                    Decoder::Avc(decoder) => decoder.prime_parameters(&self.packet)?,
+                    _ => {}
+                }
+            }
+        }
+        loop {
+            if let Some((index, frame)) =
+                self.pending.iter().enumerate().min_by_key(|(_, frame)| {
+                    (
+                        frame.frame.presentation_time.ticks,
+                        frame.frame.sample_index,
+                    )
+                })
+            {
+                let mut future = self.future_pts.get(self.sample_index).copied();
+                if let Decoder::Layered(d) = &self.decoder {
+                    future = future.into_iter().chain(d.pending_pts(&self.demuxer)).min();
+                }
+                // A future sample can be decode-only (for example a RASL
+                // suppressed after EOS). Its PTS is a sorting bound, not a
+                // display endpoint. Decode until the next output's equal-PTS
+                // group is complete, or EOF establishes the final duration.
+                let following = self
+                    .pending
+                    .iter()
+                    .filter(|f| {
+                        f.frame.presentation_time.ticks > frame.frame.presentation_time.ticks
+                    })
+                    .map(|f| f.frame.presentation_time.ticks)
+                    .min();
+                if future.is_none_or(|pts| following.is_some_and(|next| next < pts)) {
+                    let mut frame = self.pending.swap_remove(index);
+                    self.pending_bytes -= frame.storage()?;
+                    let next = self
+                        .pending
+                        .iter()
+                        .map(|f| f.frame.presentation_time.ticks)
+                        .min();
+                    frame.frame.duration.ticks = presentation_duration(
+                        frame.frame.presentation_time.ticks,
+                        next,
+                        frame.frame.duration.ticks,
+                    )?;
+                    self.presented_hdr = Some(frame.hdr);
+                    self.presented_layer = frame.layer;
+                    self.presented_description = Some(frame.description_index);
+                    self.presented_colour = Some(frame.colour);
+                    self.presented_signal = Some(frame.signal);
+                    return Ok(Some(frame.frame));
+                }
+            }
+            if !self.needs_description_reset && matches!(&self.decoder, Decoder::Layered(_)) {
+                let Decoder::Layered(d) = &mut self.decoder else {
+                    unreachable!()
+                };
+                let next = d.read(&mut self.demuxer)?;
+                self.sample_index = d.next_sample();
+                if let Some((frame, metadata, layer)) = next {
+                    let description = self
+                        .track()
+                        .samples
+                        .get(frame.sample_index)
+                        .unwrap()
+                        .description_index;
+                    self.retain_frame(frame, metadata, description, Some(layer))?;
+                } else if self.sample_index < self.track().samples.len() {
+                    self.select_description(self.sample_index)?;
+                } else {
+                    return Ok(None);
+                }
+                continue;
+            }
+            let index = self.sample_index;
+            let Some(mut sample) = self.track().samples.get(index) else {
+                if matches!(&self.decoder, Decoder::Avc(d) if d.has_pending_field()) {
+                    return Err(invalid("unpaired AVC field at end of MP4"));
+                }
+                if let Decoder::Av1(d) = &mut self.decoder {
+                    d.finish()?;
+                }
+                return Ok(None);
+            };
+            self.select_description(index)?;
+            if matches!(&self.decoder, Decoder::Layered(_)) {
+                continue;
+            }
+            self.demuxer
+                .read_packet(self.track_index, index, &mut self.packet)?;
+            let picture = self.decode_packet()?;
+            self.sample_index += 1;
+            let mut output_index = index;
+            if let Decoder::Avc(decoder) = &self.decoder {
+                if decoder.has_pending_field() {
+                    self.pending_avc_field_sample.get_or_insert(index);
+                }
+                if decoder.output_is_field_pair() {
+                    output_index = self
+                        .pending_avc_field_sample
+                        .take()
+                        .ok_or_else(|| invalid("missing AVC first-field timing"))?;
+                    let first = self
+                        .track()
+                        .samples
+                        .get(output_index)
+                        .ok_or_else(|| invalid("missing AVC first-field sample"))?;
+                    sample.pts = first.pts;
+                    sample.duration = sample
+                        .duration
+                        .checked_add(first.duration)
+                        .ok_or_else(|| invalid("AVC field-pair duration overflow"))?;
+                }
+            }
+            if let Some((picture, planes8)) = picture {
+                let frame = VideoFrame {
+                    packed: self.decoded_planar.take(),
+                    picture,
+                    planes8,
+                    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                    surface: self.decoded_surface.take(),
+                    presentation_time: MediaTime {
+                        ticks: sample.pts,
+                        timescale: self.track().timescale,
+                    },
+                    duration: MediaTime {
+                        ticks: i64::from(sample.duration),
+                        timescale: self.track().timescale,
+                    },
+                    sample_index: output_index,
+                };
+                let metadata = DecoderMetadata {
+                    hdr: self.decoder_hdr(),
+                    colour: Some(self.decoder_colour()?),
+                    signal: self.decoder_signal(),
+                };
+                self.retain_frame(frame, metadata, sample.description_index, None)?;
+            }
+        }
+    }
+    fn retain_frame(
+        &mut self,
+        mut frame: VideoFrame,
+        metadata: DecoderMetadata,
+        description_index: u32,
+        layer: Option<u8>,
+    ) -> Result<()> {
+        while let Some(duplicate) = self
+            .pending
+            .iter()
+            .position(|old| old.frame.presentation_time.ticks == frame.presentation_time.ticks)
+        {
+            let old = self.pending.swap_remove(duplicate);
+            self.pending_bytes -= old.storage()?;
+            // If this group is at EOF there is no following PTS to
+            // establish its endpoint. Retain its nominal total span.
+            frame.duration.ticks = frame
+                .duration
+                .ticks
+                .checked_add(old.frame.duration.ticks)
+                .ok_or_else(|| invalid("duplicate-PTS duration overflow"))?;
+        }
+        let frame = QueuedFrame {
+            frame,
+            hdr: metadata.hdr,
+            description_index,
+            layer,
+            colour: metadata.colour.unwrap_or_default(),
+            signal: metadata.signal,
+        };
+        let bytes = frame.storage()?;
+        let total = self
+            .pending_bytes
+            .checked_add(bytes)
+            .ok_or_else(|| invalid("MP4 reorder storage overflow"))?;
+        if total > self.queue_budget {
+            return Err(invalid("MP4 reordered frames exceed memory budget"));
+        }
+        self.pending
+            .try_reserve(1)
+            .map_err(|_| invalid("cannot allocate reorder queue"))?;
+        self.pending.push(frame);
+        self.pending_bytes = total;
+        Ok(())
+    }
+
+}
+
+/// Open a VideoToolbox session for the stream's parameter sets; `None` (with a
+/// note on stderr) leaves decoding to the software decoder.
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+pub(crate) fn open_hardware(
+    codec: &[u8],
+    configuration: &[u8],
+    width: u64,
+    height: u64,
+    budget: usize,
+    shared: bool,
+) -> Option<Hardware> {
+    match codec {
+        b"hvc1" | b"hev1" | b"V_MPEGH/ISO/HEVC" => open_hardware_hevc(configuration, budget, shared),
+        b"avc1" | b"avc3" | b"V_MPEG4/ISO/AVC" => open_hardware_avc(configuration, shared),
+        b"vp09" | b"V_VP9" => open_hardware_vp9(configuration, width, height, shared),
+        b"av01" | b"V_AV1" => open_hardware_av1(configuration, width, height, shared),
+        _ => None,
+    }
+}
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+fn open_hardware_avc(configuration: &[u8], shared: bool) -> Option<Hardware> {
+    let config = crate::codec::config::AvcConfig::parse(configuration).ok()?;
+    let sps = crate::codec::avc::Sps::parse(config.sps.first()?).ok()?;
+    if sps
+        .vui
+        .as_ref()
+        .and_then(|v| v.video_signal)
+        .and_then(|(_, _, c)| c)
+        .is_some_and(|c| c[2] == 0)
+    {
+        return None;
+    }
+    let colour = crate::playback_native::AvcColour::from_vui(sps.vui.as_ref()).ok()?;
+    let session = if shared {
+        fvid_vt::Session::new_avc_surface(&config.sps, &config.pps, config.length_size, colour.full)
+    } else {
+        fvid_vt::Session::new(&config.sps, &config.pps, config.length_size)
+    };
+    match session {
+        Ok(session) => Some(Hardware {
+            session,
+            colour,
+            shared,
+        }),
+        Err(error) => {
+            eprintln!("{error}; using the software decoder");
+            None
+        }
+    }
+}
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+fn open_hardware_hevc(configuration: &[u8], budget: usize, shared: bool) -> Option<Hardware> {
+    use crate::codec::config::HevcConfig;
+    let config = HevcConfig::parse(configuration).ok()?;
+    let mut vps = Vec::new();
+    let mut sps = Vec::new();
+    let mut pps = Vec::new();
+    for array in &config.arrays {
+        match array.nal_type {
+            32 => vps.extend(array.units.iter().copied()),
+            33 => sps.extend(array.units.iter().copied()),
+            34 => pps.extend(array.units.iter().copied()),
+            _ => {}
+        }
+    }
+    if vps.is_empty() || sps.is_empty() || pps.is_empty() {
+        return None;
+    }
+    let sps_parsed = crate::codec::hevc_sps::Sps::parse(sps.first()?, budget).ok()?;
+    // The hardware adapter exposes YUV planes; identity GBR uses the exact
+    // software RGB path until a hardware RGB payload is qualified.
+    if sps_parsed.vui.as_ref().and_then(|v| v.signal.as_ref())
+        .and_then(|s| s.colour).is_some_and(|c| c[2] == 0) {
+        return None;
+    }
+    let colour = crate::playback_native::AvcColour::from_hevc_vui(sps_parsed.vui.as_ref()).ok()?;
+    let constructor = if shared {
+        fvid_vt::Session::new_hevc_surface
+    } else {
+        fvid_vt::Session::new_hevc_with_depth
+    };
+    match constructor(
+        &vps,
+        &sps,
+        &pps,
+        config.length_size,
+        sps_parsed.depth[0],
+        colour.full,
+    ) {
+        Ok(session) => Some(Hardware {
+            session,
+            colour,
+            shared,
+        }),
+        Err(error) => {
+            eprintln!("{error}; using the software HEVC decoder");
+            None
+        }
+    }
+}
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+fn open_hardware_vp9(
+    configuration: &[u8],
+    width: u64,
+    height: u64,
+    shared: bool,
+) -> Option<Hardware> {
+    let default_vpcc = [1u8, 0, 0, 0, 0, 10, (8 << 4) | (1 << 1), 1, 1, 1, 0, 0];
+    let configuration = if configuration.is_empty() {
+        &default_vpcc[..]
+    } else {
+        configuration
+    };
+    let colour = crate::playback_native::AvcColour::default();
+    let (depth, full_range) = if configuration.len() >= 7 {
+        let d = (configuration[6] >> 4) & 0x0F;
+        let depth = if d == 0 { 8 } else { d };
+        let full = (configuration[6] & 1) != 0;
+        (depth, full)
+    } else {
+        (8, false)
+    };
+    let session = if shared {
+        fvid_vt::Session::new_vp9_surface(
+            configuration,
+            width as u32,
+            height as u32,
+            depth,
+            full_range,
+        )
+    } else {
+        fvid_vt::Session::new_vp9(configuration, width as u32, height as u32)
+    };
+    match session {
+        Ok(session) => Some(Hardware {
+            session,
+            colour,
+            shared,
+        }),
+        Err(error) => {
+            eprintln!("{error}; using the software VP9 decoder");
+            None
+        }
+    }
+}
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+fn open_hardware_av1(
+    configuration: &[u8],
+    width: u64,
+    height: u64,
+    shared: bool,
+) -> Option<Hardware> {
+    let colour = crate::playback_native::AvcColour::default();
+    let depth = if configuration.len() >= 3 {
+        let high_bitdepth = (configuration[2] & 0x40) != 0;
+        let twelve_bit = (configuration[2] & 0x20) != 0;
+        if !high_bitdepth { 8 } else if !twelve_bit { 10 } else { 12 }
+    } else {
+        8
+    };
+    let session = if shared {
+        fvid_vt::Session::new_av1_surface(
+            configuration,
+            width as u32,
+            height as u32,
+            depth,
+            false,
+        )
+    } else {
+        fvid_vt::Session::new_av1(configuration, width as u32, height as u32)
+    };
+    match session {
+        Ok(session) => Some(Hardware {
+            session,
+            colour,
+            shared,
+        }),
+        Err(error) => {
+            eprintln!("{error}; using the software AV1 decoder");
+            None
+        }
+    }
+}
+/// Keep hardware output at its decoded precision: 8-bit bytes move into
+/// `Planar8`; Main10 words retain low bits in a coded picture that the player's
+/// source-depth path packs for GPU upload. A geometry-only picture accompanies
+/// 8-bit planes, while Main10 owns samples and crops any padded odd border.
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+pub(crate) fn hardware_frame(
+    planes: fvid_vt::Planes,
+    colour: crate::playback_native::AvcColour,
+) -> (IntraPicture, Option<crate::playback_native::Planar8>) {
+    let (w, h) = (planes.width, planes.height);
+    let mut colour = colour;
+    colour.full = planes.full_range;
+    if planes.depth > 8 {
+        let words = |bytes: Vec<u8>| {
+            bytes
+                .chunks_exact(2)
+                .map(|v| u16::from_le_bytes([v[0], v[1]]))
+                .collect()
+        };
+        let mut y: Vec<u16> = words(planes.y);
+        // IntraPicture uses even coded geometry. Pad the last luma row/column
+        // for odd visible sizes; the crop removes that padding before upload.
+        if w % 2 != 0 {
+            y = y
+                .chunks_exact(w)
+                .flat_map(|row| {
+                    row.iter()
+                        .copied()
+                        .chain(std::iter::once(*row.last().unwrap()))
+                })
+                .collect();
+        }
+        if h % 2 != 0 {
+            let last = y[y.len() - (w + w % 2)..].to_vec();
+            y.extend(last);
+        }
+        return (
+            IntraPicture {
+                coded_width: w + w % 2,
+                coded_height: h + h % 2,
+                crop: [0, w % 2, 0, h % 2],
+                bit_depth: planes.depth,
+                chroma_bit_depth: planes.depth,
+                y,
+                cb: words(planes.cb),
+                cr: words(planes.cr),
+            },
+            None,
+        );
+    }
+
+    let picture = IntraPicture {
+        coded_width: w + w % 2,
+        coded_height: h + h % 2,
+        crop: [0, w % 2, 0, h % 2],
+        bit_depth: 8,
+        chroma_bit_depth: 8,
+        y: Vec::new(),
+        cb: Vec::new(),
+        cr: Vec::new(),
+    };
+    let planar = crate::playback_native::Planar8 {
+        width: w,
+        height: h,
+        chroma_width: w.div_ceil(2),
+        chroma_height: h.div_ceil(2),
+        y: planes.y,
+        cb: planes.cb,
+        cr: planes.cr,
+        colour,
+    };
+    (picture, Some(planar))
+}
+
+fn presentation_duration(pts: i64, next: Option<i64>, final_duration: i64) -> Result<i64> {
+    let duration = match next {
+        Some(next) => next
+            .checked_sub(pts)
+            .ok_or_else(|| invalid("presentation duration overflow"))?,
+        None => final_duration,
+    };
+    if duration <= 0 {
+        return Err(invalid("non-increasing MP4 presentation timestamps"));
+    }
+    Ok(duration)
+}
+
+fn frame_storage(frame: &VideoFrame) -> Result<usize> {
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    let surface_bytes = frame
+        .surface
+        .as_ref()
+        .map_or(0, fvid_vt::Surface::storage_bytes);
+    #[cfg(not(all(target_os = "macos", feature = "videotoolbox")))]
+    let surface_bytes = 0usize;
+    let planes8 = frame
+        .planes8
+        .as_ref()
+        .map_or(0, |p| p.y.len() + p.cb.len() + p.cr.len());
+    frame
+        .picture
+        .y
+        .len()
+        .checked_add(frame.picture.cb.len())
+        .and_then(|n| n.checked_add(frame.picture.cr.len()))
+        .and_then(|n| n.checked_mul(2))
+        .and_then(|n| n.checked_add(planes8))
+        .and_then(|n| n.checked_add(frame.packed.as_ref().map_or(0, |p| p.frame.data.len())))
+        .and_then(|n| n.checked_add(surface_bytes))
+        .and_then(|n| n.checked_add(std::mem::size_of::<VideoFrame>()))
+        .ok_or_else(|| invalid("MP4 output frame size overflow"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn presentation_intervals_follow_composition_order() {
+        assert_eq!(presentation_duration(1024, Some(1536), 1024).unwrap(), 512);
+        assert_eq!(presentation_duration(1536, Some(2560), 512).unwrap(), 1024);
+        assert_eq!(presentation_duration(2560, None, 512).unwrap(), 512);
+        assert_eq!(presentation_duration(-512, Some(0), 256).unwrap(), 512);
+        assert!(presentation_duration(0, Some(0), 512).is_err());
+        assert!(presentation_duration(i64::MIN, Some(i64::MAX), 512).is_err());
+        assert!(presentation_duration(0, None, 0).is_err());
+    }
+    #[test]
+    fn media_time_preserves_fractional_and_negative_timestamps() {
+        assert_eq!(
+            MediaTime {
+                ticks: 1001,
+                timescale: 30000
+            }
+            .nanoseconds()
+            .unwrap(),
+            33_366_666
+        );
+        assert_eq!(
+            MediaTime {
+                ticks: -1001,
+                timescale: 30000
+            }
+            .nanoseconds()
+            .unwrap(),
+            -33_366_666
+        );
+        assert_eq!(
+            MediaTime {
+                ticks: i64::MAX,
+                timescale: 1
+            }
+            .nanoseconds()
+            .unwrap(),
+            i128::from(i64::MAX) * 1_000_000_000
+        );
+        assert!(
+            MediaTime {
+                ticks: 0,
+                timescale: 0
+            }
+            .nanoseconds()
+            .is_err()
+        );
+    }
+
+    /// The coding's half of a file's signal, read out of the stream itself: an
+    /// HEVC clip whose parameter sets name BT.2020 primaries, a PQ curve and the
+    /// BT.2020-NCL matrix states that triple through the reader, which is what
+    /// fills in a container that wrote no `colr` atom.
+    #[test]
+    fn an_hevc_parameter_set_states_its_own_signal() {
+        let data = include_bytes!("../../../tests/fixtures/hevc/hdr10.mp4").to_vec();
+        let mut source =
+            Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
+        let stated = ColourDescription {
+            primaries: 9,
+            transfer: 16,
+            matrix: 9,
+            full_range: false,
+        };
+        // The `hvcC`'s own parameter sets answer before a picture has been read.
+        assert_eq!(source.bitstream_colour(), stated);
+        let mut frames = 0;
+        while source.read_frame().unwrap().is_some() {
+            frames += 1;
+        }
+        assert_eq!(frames, 5);
+        assert_eq!(source.bitstream_colour(), stated);
+    }
+
+    /// An AV1 clip's light, in the only place its file writes it: SVT-AV1 4.2.0's
+    /// own metadata OBUs for a BT.2020/1 000 cd/m² volume and a 1 234/567 content
+    /// light level, spliced into the first packet of the 32x32 ramp and muxed
+    /// into an MP4 with no `ccll`/`mdcv` box beside it. The reader states them
+    /// the moment the file is open, because the grade a first picture gets is
+    /// decided then — it asks the packet for its OBUs before it asks a decoder to
+    /// turn them into a picture.
+    #[test]
+    fn an_av1_metadata_obu_states_its_own_light() {
+        let data = include_bytes!("../../../tests/fixtures/av1/hdr-metadata.mp4").to_vec();
+        let mut source =
+            Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
+        let opened = source.bitstream_hdr();
+        assert!(opened.mastering.unwrap().is_hdr10());
+        assert_eq!(
+            (opened.light.max_cll, opened.light.max_fall),
+            (1_234.0, 567.0)
+        );
+        // Decoding the packet that carries them states the same light again,
+        // by whichever route the samples went.
+        assert!(source.read_frame().unwrap().is_some());
+        assert_eq!(source.bitstream_hdr(), opened);
+    }
+
+    /// The same light as an HEVC clip states it, which the file writes in no box
+    /// at all: SEI 137 states the BT.2020 mastering volume and SEI 144 the
+    /// content light levels. x265 wrote both messages into the `hvcC`'s NAL unit
+    /// array as well as into the first access unit, so a reader states them the
+    /// moment the file is open — which is when a caller that grades the first
+    /// picture asks — and this holds whether samples go to the software walk or a
+    /// hardware session.
+    #[test]
+    fn an_hevc_sei_states_its_own_light() {
+        let data = include_bytes!("../../../tests/fixtures/hevc/hdr10.mp4").to_vec();
+        let mut source =
+            Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
+        let opened = source.bitstream_hdr();
+        assert!(opened.mastering.unwrap().is_hdr10());
+        assert_eq!(
+            (opened.light.max_cll, opened.light.max_fall),
+            (1_000.0, 400.0)
+        );
+        // Decoding the packets that repeat the messages states the same light,
+        // by whichever route the samples went.
+        assert!(source.read_frame().unwrap().is_some());
+        assert_eq!(source.bitstream_hdr(), opened);
+    }
+
+    /// An H.264 clip whose whole signal lives in the VUI of the sequence
+    /// parameter set inside its `avcC`: libx264 wrote BT.2020 primaries, the
+    /// ARIB STD-B67 curve and the BT.2020 NCL weights over a studio range into
+    /// that SPS, and the muxer wrote no `colr` atom at all — measured from this
+    /// file's own bytes, which hold neither `colr` nor `nclx`. A caller that
+    /// grades the first picture asks when the file is open, so the recorded
+    /// parameter set answers then rather than waiting for a picture to select
+    /// one.
+    #[test]
+    fn an_avc_parameter_set_in_the_record_states_its_signal_at_open() {
+        let data = include_bytes!("../../../tests/fixtures/avc/hlg-vui-only.mp4").to_vec();
+        let mut source =
+            Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
+        // The container says nothing about the signal; the coding says HLG.
+        assert_eq!(source.track().colour, ColourDescription::default());
+        let stated = ColourDescription {
+            primaries: 9,
+            transfer: 18,
+            matrix: 9,
+            full_range: false,
+        };
+        assert_eq!(source.bitstream_colour(), stated);
+        // A decoded picture that selects the very same SPS changes nothing.
+        assert!(source.read_frame().unwrap().is_some());
+        assert_eq!(source.bitstream_colour(), stated);
+    }
+}

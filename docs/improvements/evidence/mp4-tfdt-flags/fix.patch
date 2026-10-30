@@ -1,0 +1,51 @@
+diff --git a/crates/fvid-media/src/owned_mp4_impl.rs b/crates/fvid-media/src/owned_mp4_impl.rs
+index 85fb2c2d62..2aeb4d2039 100644
+--- a/crates/fvid-media/src/owned_mp4_impl.rs
++++ b/crates/fvid-media/src/owned_mp4_impl.rs
+@@ -430,11 +430,17 @@ fn table(data: &[u8], stride: usize, limit: usize) -> Result<usize> {
+     }
+     Ok(count)
+ }
+-fn media_time(data: &[u8]) -> Result<(u32, u64)> {
++fn media_time(data: &[u8], size_v0: usize) -> Result<(u32, u64)> {
+     let v = version(data, 1)?;
+     if u32be(data, 0)? & 0x00ff_ffff != 0 {
+         return Err(invalid("reserved MP4 time-header flags"));
+     }
++    // Both headers have fixed payload sizes. V1 widens creation time,
++    // modification time and duration by four bytes each; trailing fields
++    // (including the movie matrix or media language) remain mandatory.
++    if data.len() != size_v0 + if v == 0 { 0 } else { 12 } {
++        return Err(invalid("MP4 time-header size does not match its version"));
++    }
+     let (scale, duration) = if v == 0 {
+         (u32be(data, 12)?, u64::from(u32be(data, 16)?))
+     } else {
+@@ -566,7 +572,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
+                 "fragmented MP4 states no fragments: it is an init segment without media",
+             ));
+         }
+-        let (movie_timescale, movie_duration) = media_time(required(&movie, b"mvhd")?)?;
++        let (movie_timescale, movie_duration) = media_time(required(&movie, b"mvhd")?, 100)?;
+         let mut tracks = Vec::new();
+         let mut track_header_flags = Vec::new();
+         let mut refused = Vec::new();
+@@ -1219,7 +1225,7 @@ fn parse_track(
+     let drawn = (u32be(tkhd, at + 36)?, u32be(tkhd, at + 40)?);
+     let mdia = atoms(required(&track, b"mdia")?)?;
+     let mdhd = required(&mdia, b"mdhd")?;
+-    let (timescale, duration) = media_time(mdhd)?;
++    let (timescale, duration) = media_time(mdhd, 24)?;
+     // mdhd uses all bits set, in its version's field width, for unknown.
+     let duration_unknown = if version(mdhd, 1)? == 0 {
+         duration == u64::from(u32::MAX)
+@@ -2145,6 +2151,9 @@ fn index_fragments(
+             let mut dts = match optional(&boxes, b"tfdt")? {
+                 Some(stamp) => {
+                     let v = version(stamp, 1)?;
++                    if u32be(stamp, 0)? & 0x00ff_ffff != 0 {
++                        return Err(invalid("reserved MP4 track-fragment decode time flags"));
++                    }
+                     let expected = if v == 0 { 8 } else { 12 };
+                     if stamp.len() != expected {
+                         return Err(invalid(

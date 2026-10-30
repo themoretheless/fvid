@@ -1,0 +1,145 @@
+--- a/crates/fvid-media/src/owned_mp4_impl.rs
++++ b/crates/fvid-media/src/owned_mp4_impl.rs
+@@ -2057,12 +2057,93 @@
+     Ok(out)
+ }
+ 
++/// Resolve byte extent without decoding or retaining an unsupported track's
++/// packets. A following legacy traf can depend on these bytes. Work is bounded
++/// by run metadata: a default-sized run is summed without looping sample_count.
++fn unindexed_fragment_end(
++    boxes: &[Atom<'_>],
++    base: u64,
++    default_size: Option<u32>,
++    mdats: &[Range<u64>],
++) -> Result<u64> {
++    let mut cursor = base;
++    for run in boxes.iter().filter(|atom| &atom.kind == b"trun") {
++        let bytes = run.data;
++        version(bytes, 1)?;
++        let flags = u32be(bytes, 0)? & 0x00ff_ffff;
++        if flags & !TRUN_SUPPORTED != 0 {
++            return Err(invalid("unsupported MP4 track-run flags"));
++        }
++        if flags & 0x00_0004 != 0 && flags & 0x00_0400 != 0 {
++            return Err(invalid("conflicting MP4 track-run sample flags"));
++        }
++        let count = u32be(bytes, 4)? as usize;
++        let mut at = 8usize;
++        let offset = if flags & 1 != 0 {
++            let shift = u32be(bytes, at)? as i32;
++            at += 4;
++            if shift < 0 {
++                base.checked_sub(u64::from(shift.unsigned_abs()))
++                    .ok_or_else(|| invalid("MP4 fragment data offset before its base"))?
++            } else {
++                base.checked_add(shift as u64)
++                    .ok_or_else(|| invalid("MP4 fragment data offset overflow"))?
++            }
++        } else {
++            cursor
++        };
++        if flags & 4 != 0 {
++            u32be(bytes, at)?;
++            at += 4;
++        }
++        let fields = usize::from(flags & 0x100 != 0)
++            + usize::from(flags & 0x200 != 0)
++            + usize::from(flags & 0x400 != 0)
++            + usize::from(flags & 0x800 != 0);
++        let stride = fields * 4;
++        if count.checked_mul(stride).and_then(|size| size.checked_add(at)) != Some(bytes.len()) {
++            return Err(invalid("MP4 track-run size does not match its rows"));
++        }
++        let total = if count == 0 {
++            0
++        } else if flags & 0x200 != 0 {
++            let size_at = at + usize::from(flags & 0x100 != 0) * 4;
++            let mut total = 0u64;
++            for row in 0..count {
++                let size = u32be(bytes, size_at + row * stride)?;
++                if size == 0 {
++                    return Err(invalid("zero MP4 fragment sample size"));
++                }
++                total = total.checked_add(u64::from(size))
++                    .ok_or_else(|| invalid("MP4 sample span overflow"))?;
++            }
++            total
++        } else {
++            let size = default_size.ok_or_else(|| invalid(
++                "MP4 fragment sample states no size and none is defaulted"))?;
++            if size == 0 {
++                return Err(invalid("zero MP4 fragment sample size"));
++            }
++            u64::from(size).checked_mul(count as u64)
++                .ok_or_else(|| invalid("MP4 sample span overflow"))?
++        };
++        cursor = offset.checked_add(total).ok_or_else(|| invalid("MP4 sample span overflow"))?;
++        if count != 0 {
++            let containing = mdats.partition_point(|range| range.start <= offset);
++            if containing == 0 || cursor > mdats[containing - 1].end {
++                return Err(invalid("sample chunk outside mdat"));
++            }
++        }
++    }
++    Ok(cursor)
++}
++
+ /// Append what every fragment indexes to the track its own `traf` names, in the
+ /// order the boxes stand in the file.
+ ///
+ /// A fragment states nothing of where its media sits by itself: the base is
+-/// either the absolute offset the track header gives or the `moof` the header
+-/// stands in, and only the first run of a track fragment offsets from that base.
++/// either an absolute offset, the enclosing `moof`, or the end of the preceding
++/// track fragment's data (the `moof` start for the first legacy fragment).
+ /// Every later sample is measured from the end of the one before, so a file that
+ /// interleaves one fragment's picture and sound still resolves to one ordered
+ /// list per track.
+@@ -2093,6 +2174,10 @@
+         if u32be(mfhd, 4)? == 0 {
+             return Err(invalid("zero MP4 movie-fragment sequence number"));
+         }
++        // Legacy addressing starts at moof, then follows the data end of the
++        // preceding traf. Explicit bases override it but still establish the
++        // inherited base for the next traf.
++        let mut implicit_base = Some(fragment.start);
+         for traf in moof_boxes
+             .iter()
+             .filter(|atom| &atom.kind == b"traf")
+@@ -2140,19 +2225,18 @@
+             let base = match (stated_base, flags & 0x02_0000) {
+                 (Some(value), _) => value,
+                 (None, 0x02_0000) => fragment.start,
+-                (None, _) => {
+-                    return Err(invalid(
+-                        "MP4 fragment states neither a base offset nor its own moof as the base",
+-                    ));
+-                }
++                (None, _) => implicit_base.ok_or_else(|| invalid(
++                    "MP4 implicit fragment base follows unresolved track data"))?,
+             };
+-            // A track the file's own `trak` list set aside for its coding, or one
+-            // no init segment ever described, keeps its bytes unread: that list is
+-            // what says which tracks exist, and it already answered.
++            let extends = defaults.iter().find(|entry| entry.track == id);
++            // Keep unrepresented packets unread, but resolve their declared byte
++            // extent for a following implicit base. Unresolvable foreign data
++            // does not block an independently addressed represented track.
+             let Some(position) = tracks.iter().position(|track| track.id == id) else {
++                let default_size = size.or_else(|| extends.and_then(|e| (e.size != 0).then_some(e.size)));
++                implicit_base = unindexed_fragment_end(&boxes, base, default_size, mdats).ok();
+                 continue;
+             };
+-            let extends = defaults.iter().find(|entry| entry.track == id);
+             let description = description
+                 .or_else(|| extends.map(|entry| entry.description))
+                 .unwrap_or(1);
+@@ -2321,6 +2405,7 @@
+                 }
+                 traf_cursor = offset;
+             }
++            implicit_base = Some(traf_cursor);
+         }
+     }
+     // A fragmented track's length is what its samples add up to: the init segment

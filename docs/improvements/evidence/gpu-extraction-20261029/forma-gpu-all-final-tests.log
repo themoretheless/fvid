@@ -1,0 +1,25 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.26s
+     Running unittests src/lib.rs (/private/tmp/forma-gpu-extraction-197/debug/deps/gpu_compute-0432628465a7c837)
+
+running 18 tests
+test context::tests::optional_features_require_explicit_adapter_support ... ok
+test backend::tests::tuned_workgroup_size_falls_back_to_default_off_metal ... ok
+test backend::tests::tuned_workgroup_size_selects_metal_variant ... ok
+test backend::tests::unified_transfer_plan_selects_asd_uma_and_duma_appropriately ... ok
+test video::processor::tests::layout_handles_unaligned_payload ... ok
+test backend::tests::asd_page_buffer_aligns_to_16k_and_preserves_data ... ok
+test profiling::tests::timestamp_conversion_preserves_short_deltas_and_rejects_unusable_samples ... ok
+test backend::tests::wgsl_tiled_matmul_and_parallel_reduction_shader_generators_emit_valid_kernels ... ok
+test backend::tests::multi_target_shader_compiler_emits_msl_spirv_hlsl_ptx_glsl_and_wgsl ... ok
+test backend::tests::opengl_vulkan_and_rtx_raytracing_subsystems_work ... ok
+test video::tests::byte_shader_validates_both_execution_routes_without_a_device ... ok
+test readback::tests::stalled_callback_can_timeout_then_fail_without_an_empty_success ... ok
+test memory::tests::backend_allocation_validation_is_recoverable_and_scopes_are_balanced ... ok
+test profiling::tests::completion_and_mapping_timeouts_keep_pending_tickets ... ok
+test backend::tests::execution_topology_and_2d_workgroup_recommendations_match_hardware_primitives ... ok
+test backend::tests::available_backend_report_is_well_formed_when_present ... ok
+test backend::tests::available_subgroup_report_is_well_formed_when_present ... ok
+test video::tests::color_shader_validates_encoder_variants_without_a_device ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+

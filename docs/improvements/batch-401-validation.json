@@ -1,0 +1,31 @@
+{
+  "batch": 401,
+  "status": "verified-follow-up",
+  "accepted_ids": [],
+  "requalified_ids": [
+    "FVID-0407"
+  ],
+  "accepted_count_delta": 0,
+  "summary": "Bound native composition estimates against finite track/movie headers without inventing hidden-frame duration",
+  "source_files": [
+    "crates/fvid-media/src/owned_mp4_impl.rs",
+    "src/playback/video/mp4_dispatch.rs"
+  ],
+  "regressions": [
+    "tests/mp4_nondisplay_endpoint.rs",
+    "tests/mp4_presentation_endpoint.rs"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/mp4-nondisplay-endpoint/status.json"
+  ],
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --features player --no-fail-fast --test mp4_nondisplay_endpoint --test mp4_presentation_endpoint --test mp4 --test mp4_time_header_sizes --test mp4_time_header_flags --test mp4_open_ended_edit --test mp4_implicit_fragment_base --test mp4_layered_seek_coverage --test mp4_concat_selected_clock --test mp4_seek_io_regressions",
+    "cargo check --locked --offline --no-default-features"
+  ],
+  "results": "51 selected checks pass and core build check passes; FVID-0407 requalified rather than registering another improvement.",
+  "limitations": [
+    "When both movie and track duration are absent/unknown, the fallback remains a nominal index-based estimate; precise codec-output duration in that case is not claimed.",
+    "No physical GPU/NVIDIA or UI interaction claim. Actual software NativeReader playback was exercised.",
+    "The complete project suite is not claimed green; historical unrelated failures remain separate."
+  ]
+}

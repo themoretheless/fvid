@@ -1,0 +1,95 @@
+{
+  "provenance": "Owned PCM/ALAC + VP9. 8000Hz PCM, 44100Hz media/movie ticks, media_start=1 tick. First retained sample is index1 at 102324ns presentation time. No private media, FFmpeg or network.",
+  "cases": [
+    {
+      "file": "pcm-v0-fractional-known.mp4",
+      "codec": "pcm",
+      "version": 0,
+      "open": false,
+      "oracle": "pcm-oracle.f32le",
+      "duration_ticks": 2645,
+      "scale": 44100,
+      "rate": 8000
+    },
+    {
+      "file": "pcm-v0-fractional-open.mp4",
+      "codec": "pcm",
+      "version": 0,
+      "open": true,
+      "oracle": "pcm-oracle.f32le",
+      "duration_ticks": 2645,
+      "scale": 44100,
+      "rate": 8000
+    },
+    {
+      "file": "pcm-v1-fractional-known.mp4",
+      "codec": "pcm",
+      "version": 1,
+      "open": false,
+      "oracle": "pcm-oracle.f32le",
+      "duration_ticks": 2645,
+      "scale": 44100,
+      "rate": 8000
+    },
+    {
+      "file": "pcm-v1-fractional-open.mp4",
+      "codec": "pcm",
+      "version": 1,
+      "open": true,
+      "oracle": "pcm-oracle.f32le",
+      "duration_ticks": 2645,
+      "scale": 44100,
+      "rate": 8000
+    },
+    {
+      "file": "alac-v0-fractional-known.mp4",
+      "codec": "alac",
+      "version": 0,
+      "open": false,
+      "oracle": "alac-oracle.f32le",
+      "duration_ticks": 2645,
+      "scale": 44100,
+      "rate": 8000
+    },
+    {
+      "file": "alac-v0-fractional-open.mp4",
+      "codec": "alac",
+      "version": 0,
+      "open": true,
+      "oracle": "alac-oracle.f32le",
+      "duration_ticks": 2645,
+      "scale": 44100,
+      "rate": 8000
+    },
+    {
+      "file": "alac-v1-fractional-known.mp4",
+      "codec": "alac",
+      "version": 1,
+      "open": false,
+      "oracle": "alac-oracle.f32le",
+      "duration_ticks": 2645,
+      "scale": 44100,
+      "rate": 8000
+    },
+    {
+      "file": "alac-v1-fractional-open.mp4",
+      "codec": "alac",
+      "version": 1,
+      "open": true,
+      "oracle": "alac-oracle.f32le",
+      "duration_ticks": 2645,
+      "scale": 44100,
+      "rate": 8000
+    }
+  ],
+  "sha256": {
+    "pcm-v0-fractional-known.mp4": "b0617ee73230737dba57578ea1681fb321a66de8dbc6f5e67e75cfb9fc6e1b91",
+    "pcm-v0-fractional-open.mp4": "6e5c82ee9c0a7123934f094ce12dd5266b75e06c36c1ca57b13fa59c4440f68b",
+    "pcm-v1-fractional-known.mp4": "9953da29a8dddf31d87c2907a5ba8ac13a54623988493e1be73f3353ffc846a6",
+    "pcm-v1-fractional-open.mp4": "9857f9ad67fd8cb02201fd3b8a6f828f0906b7347d3b9fc27e992b01011ccc48",
+    "alac-v0-fractional-known.mp4": "740a2e402d41ea06b421deb68307e375b6d78483f17c55feac30b5089631d049",
+    "alac-v0-fractional-open.mp4": "d164e619edc5bf80a6d72b4ae770be4f8e4460a672ccecc2469e91f18cf2b0ca",
+    "alac-v1-fractional-known.mp4": "86443cc116143a417bfcf8e81f03b49d16feea905b8c0ec92f4e24290e6ce2f2",
+    "alac-v1-fractional-open.mp4": "251b615232e58037e44ca583f60df016d1d189fad4debb4d00533df0948d0863"
+  }
+}

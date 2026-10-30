@@ -1,0 +1,1 @@
+Accepted FVID-0399 through FVID-0401 only. Original GPU/UMA work retained. No mutation/fuzz audit performed. Only authored short synthetic structural/time regression cases used. Full project suite not claimed green; pre-existing unrelated export/admission gate failures remain outside these targeted validations. Goal 1000 remains incomplete.

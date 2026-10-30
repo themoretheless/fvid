@@ -1718,6 +1718,7 @@ dependencies = [
 name = "fvid-vt"
 version = "0.1.0"
 dependencies = [
+ "gpu-compute",
  "objc2 0.6.4",
  "objc2-metal 0.3.2",
  "pollster 0.4.0",
@@ -1903,6 +1904,28 @@ dependencies = [
  "thiserror 2.0.20",
  "windows 0.62.2",
 ]
+
+[[package]]
+name = "gpu-compute"
+version = "0.1.0"
+dependencies = [
+ "gpu-runtime",
+ "gpu-shader",
+ "objc2 0.6.4",
+ "objc2-metal 0.3.2",
+ "wgpu",
+]
+
+[[package]]
+name = "gpu-runtime"
+version = "0.1.0"
+dependencies = [
+ "gpu-shader",
+]
+
+[[package]]
+name = "gpu-shader"
+version = "0.1.0"
 
 [[package]]
 name = "guillotiere"

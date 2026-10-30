@@ -1,0 +1,37 @@
+{
+  "batch": 408,
+  "accepted_ids": [],
+  "follow_up_ids": [
+    "FVID-0401"
+  ],
+  "count_delta": 0,
+  "status": "accepted-follow-up",
+  "summary": "Requalify unknown-duration MP4 chapter clocks against positive composition endpoints",
+  "source_files": [
+    "crates/fvid-media/src/owned_mp4_impl.rs"
+  ],
+  "regressions": [
+    "tests/mp4_chapter_composition.rs"
+  ],
+  "evidence": [
+    "docs/improvements/evidence/mp4-chapter-composition/status.json",
+    "docs/improvements/evidence/mp4-chapter-composition/audit.md"
+  ],
+  "before": "Runtime baseline: 1 playback control passes and chapter-clock test fails. Twelve unknown/zero movie-duration cases confuse +200ms composition offset with a 60ms decode-duration bound; both parser wrappers report 200ms chapters as 20us (movie-clock case) or 2000s (10MHz case). Six known-movie controls and all 18 actual software playback controls pass.",
+  "after": "45 distinct checks pass across 8 targets, including 2 new tests. Eighteen synthetic movies preserve 200/220/240ms chapter names/moments in both supported clocks and both parser wrappers, exact software YUV/RGB, 260ms native duration, 180 seek positions, rewind and EOF. Related unknown chapter clocks, hidden-frame endpoint bounds, finite/open edits, empty fragments and baseline MP4 checks pass. Locked offline no-default-features core build check passes.",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --features player --test mp4_chapter_composition",
+    "cargo test --locked --offline --no-default-features --features player --no-fail-fast --test mp4_chapter_composition --test mp4_unknown_movie_chapters --test mp4 --test mp4_nondisplay_endpoint --test mp4_presentation_endpoint --test mp4_open_ended_edit --test mp4_empty_fragment --test mp4_edit_window_eof",
+    "cargo check --locked --offline --no-default-features"
+  ],
+  "limitations": [
+    "The clock-selection heuristic remains compatibility behavior for two authored chpl conventions; ambiguous small timestamps cannot always distinguish clocks.",
+    "With all presentation headers unstated, the endpoint is a nominal index estimate and cannot prove display output from decode-only packets.",
+    "No new visual UI, performance, full-project green or GPU parity claim. Historical unrelated baseline failures remain separate."
+  ],
+  "uncounted": [
+    "Positive-CTS qualification and repair of FVID-0401 clock bound",
+    "All fixture and clock/header variants",
+    "Unconfirmed backwards-tfdt audit hypothesis"
+  ]
+}

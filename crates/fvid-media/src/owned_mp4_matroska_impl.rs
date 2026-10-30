@@ -93,7 +93,9 @@ pub(crate) fn plan_window(
         });
     }
     if interval.is_some() { return Err(invalid("video interval belongs to the presentation bridge")); }
-    let (begin, end) = match track.edits.as_slice() {
+    let edit_clock = track.resolved_edit_clock(movie_scale)?;
+    let movie_scale = edit_clock.timescale;
+    let (begin, end) = match edit_clock.edits() {
         [] => (0i128, None),
         [edit] if edit.media_time >= 0 && movie_scale != 0 => {
             let ticks = (u128::from(edit.duration) * u128::from(track.timescale))

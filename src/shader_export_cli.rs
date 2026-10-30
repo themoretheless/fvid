@@ -254,12 +254,13 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 .iter()
                 .find(|t| t.handler == *b"vide")
                 .ok_or("input contains no video track")?;
-            let (begin, end) = match track.edits.as_slice() {
+            let edit_clock = track.resolved_edit_clock(input.movie_timescale())?;
+            let (begin, end) = match edit_clock.edits() {
                 [] => (0, u128::from(track.duration)),
-                [edit] if edit.media_time >= 0 && input.movie_timescale() != 0 => {
+                [edit] if edit.media_time >= 0 && edit_clock.timescale != 0 => {
                     let begin = edit.media_time as u128;
                     let length = (u128::from(edit.duration) * u128::from(track.timescale))
-                        .div_ceil(u128::from(input.movie_timescale()));
+                        .div_ceil(u128::from(edit_clock.timescale));
                     (
                         begin,
                         begin.checked_add(length).ok_or("video edit overflow")?,

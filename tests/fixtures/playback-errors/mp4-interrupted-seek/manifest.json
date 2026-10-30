@@ -1,0 +1,19 @@
+{
+  "provenance": "Regenerated owned VP9 colored keyframes and analytic YUV16 oracles. No input media copied, external encoder or network.",
+  "failure": "A finite test I/O adapter returns Interrupted twice on a seek, optionally after moving the cursor. Opening, whole-packet/range reads and software playback must retry the absolute/end seek; permanent errors must still propagate.",
+  "timescale": 50,
+  "pts": [
+    0,
+    1,
+    2
+  ],
+  "sha256": {
+    "frame-0.packet": "d586e4311a14b4eeebf2c61fadc917a6dc99aeccb87ceffb1e5166c318e67346",
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.packet": "81a6bc19b3f2ed2d203a852e97b487c13712d0a3d9730d8cadf902a5cbda05c4",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.packet": "338d4038d521a4e55109198d490b0f8ac78bbb13d41591848bbe2ac879988144",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "three-colors.mp4": "c624dff4c7a50651dbb167409a79d3b7cdf9a57e43599a49596d10e7df135471"
+  }
+}

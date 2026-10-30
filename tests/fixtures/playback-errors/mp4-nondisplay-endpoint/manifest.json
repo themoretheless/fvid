@@ -1,0 +1,507 @@
+{
+  "provenance": "Own neutral VP9 with explicit show_frame flags. Hidden frames at late PTS; known/zero/unknown V0/V1 tkhd and positive-CTS coarse-clock controls. Raw media decode duration stays 3 ticks at 50Hz. No private media, encoder or network.",
+  "cases": [
+    {
+      "file": "hidden-0.mp4",
+      "hidden": 0,
+      "intervals": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "duration": 3,
+      "header_duration": 3,
+      "movie_scale": 50
+    },
+    {
+      "file": "hidden-1.mp4",
+      "hidden": 1,
+      "intervals": [
+        [
+          0,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "duration": 3,
+      "header_duration": 3,
+      "movie_scale": 50
+    },
+    {
+      "file": "hidden-2.mp4",
+      "hidden": 2,
+      "intervals": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "duration": 3,
+      "header_duration": 3,
+      "movie_scale": 50
+    },
+    {
+      "file": "coarse-v0-duration-2.mp4",
+      "hidden": null,
+      "intervals": [
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "duration": 5,
+      "header_duration": 2,
+      "movie_scale": 25
+    },
+    {
+      "file": "coarse-v0-duration-3.mp4",
+      "hidden": null,
+      "intervals": [
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "duration": 5,
+      "header_duration": 3,
+      "movie_scale": 25
+    },
+    {
+      "file": "header-v0-zero.mp4",
+      "hidden": null,
+      "intervals": [
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "duration": 5,
+      "header_duration": null,
+      "movie_scale": 50
+    },
+    {
+      "file": "hidden-0-v0-zero.mp4",
+      "hidden": 0,
+      "intervals": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "duration": 3,
+      "header_duration": null,
+      "movie_scale": 50
+    },
+    {
+      "file": "hidden-1-v0-zero.mp4",
+      "hidden": 1,
+      "intervals": [
+        [
+          0,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "duration": 3,
+      "header_duration": null,
+      "movie_scale": 50
+    },
+    {
+      "file": "hidden-2-v0-zero.mp4",
+      "hidden": 2,
+      "intervals": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "duration": 3,
+      "header_duration": null,
+      "movie_scale": 50
+    },
+    {
+      "file": "header-v0-unknown.mp4",
+      "hidden": null,
+      "intervals": [
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "duration": 5,
+      "header_duration": null,
+      "movie_scale": 50
+    },
+    {
+      "file": "hidden-0-v0-unknown.mp4",
+      "hidden": 0,
+      "intervals": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "duration": 3,
+      "header_duration": null,
+      "movie_scale": 50
+    },
+    {
+      "file": "hidden-1-v0-unknown.mp4",
+      "hidden": 1,
+      "intervals": [
+        [
+          0,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "duration": 3,
+      "header_duration": null,
+      "movie_scale": 50
+    },
+    {
+      "file": "hidden-2-v0-unknown.mp4",
+      "hidden": 2,
+      "intervals": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "duration": 3,
+      "header_duration": null,
+      "movie_scale": 50
+    },
+    {
+      "file": "hidden-0-tkhd-v1.mp4",
+      "hidden": 0,
+      "intervals": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "duration": 3,
+      "header_duration": 3,
+      "movie_scale": 50
+    },
+    {
+      "file": "hidden-1-tkhd-v1.mp4",
+      "hidden": 1,
+      "intervals": [
+        [
+          0,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "duration": 3,
+      "header_duration": 3,
+      "movie_scale": 50
+    },
+    {
+      "file": "hidden-2-tkhd-v1.mp4",
+      "hidden": 2,
+      "intervals": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "duration": 3,
+      "header_duration": 3,
+      "movie_scale": 50
+    },
+    {
+      "file": "coarse-v1-duration-2.mp4",
+      "hidden": null,
+      "intervals": [
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "duration": 5,
+      "header_duration": 2,
+      "movie_scale": 25
+    },
+    {
+      "file": "coarse-v1-duration-3.mp4",
+      "hidden": null,
+      "intervals": [
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "duration": 5,
+      "header_duration": 3,
+      "movie_scale": 25
+    },
+    {
+      "file": "header-v1-zero.mp4",
+      "hidden": null,
+      "intervals": [
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "duration": 5,
+      "header_duration": null,
+      "movie_scale": 50
+    },
+    {
+      "file": "hidden-0-v1-zero.mp4",
+      "hidden": 0,
+      "intervals": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "duration": 3,
+      "header_duration": null,
+      "movie_scale": 50
+    },
+    {
+      "file": "hidden-1-v1-zero.mp4",
+      "hidden": 1,
+      "intervals": [
+        [
+          0,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "duration": 3,
+      "header_duration": null,
+      "movie_scale": 50
+    },
+    {
+      "file": "hidden-2-v1-zero.mp4",
+      "hidden": 2,
+      "intervals": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "duration": 3,
+      "header_duration": null,
+      "movie_scale": 50
+    },
+    {
+      "file": "header-v1-unknown.mp4",
+      "hidden": null,
+      "intervals": [
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "duration": 5,
+      "header_duration": null,
+      "movie_scale": 50
+    },
+    {
+      "file": "hidden-0-v1-unknown.mp4",
+      "hidden": 0,
+      "intervals": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "duration": 3,
+      "header_duration": null,
+      "movie_scale": 50
+    },
+    {
+      "file": "hidden-1-v1-unknown.mp4",
+      "hidden": 1,
+      "intervals": [
+        [
+          0,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "duration": 3,
+      "header_duration": null,
+      "movie_scale": 50
+    },
+    {
+      "file": "hidden-2-v1-unknown.mp4",
+      "hidden": 2,
+      "intervals": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "duration": 3,
+      "header_duration": null,
+      "movie_scale": 50
+    }
+  ],
+  "sha256": {
+    "hidden-0.mp4": "54859d76fb9ff794025634e3c3b87d040a980d604c712a4211cd39bad151bf20",
+    "hidden-1.mp4": "fba91f5bb1e6ff5cd1955fd99e09d8e113d81c87ccac78483c1a614d047aff75",
+    "hidden-2.mp4": "c836eaa69d55c8852a60618b02e81ec1c6fe9fb28bc6c787db74386d11d4974a",
+    "coarse-v0-duration-2.mp4": "acb1621d30a7333c720a766ac162253e67a4edee8c5008ca9901d5b9e866c5b5",
+    "coarse-v0-duration-3.mp4": "e51a468474cf4be8ef8cde10c9aee0dca09a74ec00461e6bab4d8b59e6121f08",
+    "header-v0-zero.mp4": "fdf9f5d89ae943c2c120c4f62abfe14194037f3a11a0a0aa447050a89acf6ffe",
+    "hidden-0-v0-zero.mp4": "31aa34a6e52b9d15a0638c12020b371be5762ea2dc02675741e9ee8303c454a3",
+    "hidden-1-v0-zero.mp4": "237325c873a0bb0ca53544c238a00226683cd97ecf484fcbabb120b40b22955a",
+    "hidden-2-v0-zero.mp4": "114dec1cc05dd085cbdbc17498bd03720f1b1f4bd0ae0844ba7c3d2416d7b44f",
+    "header-v0-unknown.mp4": "e56205ecd3fb0dbcdef38686e38c116ac3518ec19e0d524ce91b088a2bde8acc",
+    "hidden-0-v0-unknown.mp4": "74ba3931f4406c29cbc278400a3cf980d3c53f05f83d35c29424c3ec4fee9eb2",
+    "hidden-1-v0-unknown.mp4": "bf3b51067106b69496fee81846319d0c68da061d78af31650e54049d39ed040e",
+    "hidden-2-v0-unknown.mp4": "170a1fac8f8321b35d226756e6ff14ad0b27ed56f7c8e1d86d71096d3b9df3a9",
+    "hidden-0-tkhd-v1.mp4": "c727ae3b444a92a0d04c2c30216cc7c732e01e741eb51fbfc9a00797de7aa4cb",
+    "hidden-1-tkhd-v1.mp4": "01a3318d5a8ba9a6bab87b25acb1c7fd90837beb50dbef630c6e726d534bde88",
+    "hidden-2-tkhd-v1.mp4": "096a689eea1268ca5f01cad53fe8dd52bef679950dcbfb66ee9b29c4b47d23a2",
+    "coarse-v1-duration-2.mp4": "03109da753e95697a00076b97f871bb813a965ef7a6c6d5130a796664150dc78",
+    "coarse-v1-duration-3.mp4": "f9063bc98f0e06c1110d86e96b73bf8c0326917fe63510dff4dab2ba950fa4e2",
+    "header-v1-zero.mp4": "8975d68dcca3933bd7b8e8c55c3a591773348b40c95f1e459f278ea28aea9896",
+    "hidden-0-v1-zero.mp4": "3ff072b2b9693bf81041d3e72c370d2b21a61a8402b9f2cffa69b0f30f77d16b",
+    "hidden-1-v1-zero.mp4": "bac7f14b9d5a7f4a390f862c033a17b8aa353130f4a0ffd70c0b56f66e3355cb",
+    "hidden-2-v1-zero.mp4": "11c63a53a567df2878c6822bd1a61c5710a182a9ae2b96ff380c0d4884859a17",
+    "header-v1-unknown.mp4": "1974f651a81e3fab1e074d876f46a888b13aea800115e4e13f9751edbf2f0b60",
+    "hidden-0-v1-unknown.mp4": "6f6e44f802d9bad8f9c7ba3f2a3fb45509dbf1d7b8c25dd7925c0af1bc544eab",
+    "hidden-1-v1-unknown.mp4": "37919668f8611d06f2c04d3ee689c088a21e542c1faf2c6a0b2e3678467c80ba",
+    "hidden-2-v1-unknown.mp4": "8c76dae1209277aa70a61b931f325bf9485efc19d14cc527729e21809081d746"
+  }
+}

@@ -1,0 +1,139 @@
+ M Cargo.lock
+ M crates/fvid-media/src/owned_aac/adts_impl.rs
+ M crates/fvid-media/src/owned_concat.rs
+ M crates/fvid-media/src/owned_mp4_aac_plan_impl.rs
+ M crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs
+ M crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs
+ M crates/fvid-media/src/owned_mp4_impl.rs
+ M crates/fvid-media/src/owned_mp4_matroska_impl.rs
+ M crates/fvid-media/src/owned_mp4_probe_impl.rs
+ M crates/fvid-media/src/owned_mp4_video_decode.rs
+ M crates/fvid-media/src/owned_nvdec_mp4.rs
+ M crates/fvid-vt/Cargo.toml
+ M crates/fvid-vt/src/metal.rs
+ M docs/improvements/registry.json
+ M scripts/generate_vp9_chroma.py
+ M src/container/mp4_write.rs
+ M src/media.rs
+ M src/native_export.rs
+ M src/native_plan.rs
+ M src/playback/audio/mp4_audio.rs
+ M src/playback/audio/mp4_clock_recovery.rs
+ M src/playback/video/mp4.rs
+ M src/playback/video/mp4_dispatch.rs
+ M src/playback/video/native.rs
+ M src/shader_export_cli.rs
+ M tests/mp4.rs
+ M tests/owned_mp4_audio.rs
+?? docs/gpu-library-extraction.md
+?? docs/improvements/batch-393-validation.json
+?? docs/improvements/batch-394-validation.json
+?? docs/improvements/batch-395-validation.json
+?? docs/improvements/batch-396-validation.json
+?? docs/improvements/batch-397-validation.json
+?? docs/improvements/batch-398-validation.json
+?? docs/improvements/batch-399-validation.json
+?? docs/improvements/batch-400-validation.json
+?? docs/improvements/batch-401-validation.json
+?? docs/improvements/batch-402-validation.json
+?? docs/improvements/batch-403-validation.json
+?? docs/improvements/batch-404-validation.json
+?? docs/improvements/batch-405-validation.json
+?? docs/improvements/batch-406-validation.json
+?? docs/improvements/batch-407-validation.json
+?? docs/improvements/batch-408-validation.json
+?? docs/improvements/batch-409-validation.json
+?? docs/improvements/batch-410-validation.json
+?? docs/improvements/batch-411-validation.json
+?? docs/improvements/batch-412-validation.json
+?? docs/improvements/evidence/adts-packet-working-set/
+?? docs/improvements/evidence/adts-prefix-followup/
+?? docs/improvements/evidence/audio-window-metadata/
+?? docs/improvements/evidence/git-preservation-20261030/
+?? docs/improvements/evidence/gpu-common-20261029/
+?? docs/improvements/evidence/gpu-extraction-20261029/
+?? docs/improvements/evidence/mp4-active-audio-choice/
+?? docs/improvements/evidence/mp4-audio-presentation-end/
+?? docs/improvements/evidence/mp4-chapter-composition/
+?? docs/improvements/evidence/mp4-decode-only-seek/
+?? docs/improvements/evidence/mp4-edit-loop/
+?? docs/improvements/evidence/mp4-edit-window-eof/
+?? docs/improvements/evidence/mp4-empty-fragment/
+?? docs/improvements/evidence/mp4-empty-tail/
+?? docs/improvements/evidence/mp4-fixed-audio-edits/
+?? docs/improvements/evidence/mp4-implicit-fragment-base/
+?? docs/improvements/evidence/mp4-interrupted-seek/
+?? docs/improvements/evidence/mp4-nondisplay-endpoint/
+?? docs/improvements/evidence/mp4-open-ended-edit/
+?? docs/improvements/evidence/mp4-pasp-sizes/
+?? docs/improvements/evidence/mp4-presentation-endpoint/
+?? docs/improvements/evidence/mp4-tfdt-flags/
+?? docs/improvements/evidence/mp4-time-audit-20261030/
+?? docs/improvements/evidence/mp4-time-header-sizes/
+?? docs/improvements/evidence/mp4-unknown-movie-chapters/
+?? docs/improvements/evidence/mp4-unused-audio-descriptions/
+?? docs/improvements/mp4-open-ended-edits.md
+?? scripts/bench_adts_allocations.rs
+?? scripts/check_adts_allocations.py
+?? scripts/generate_adts_packet_working_set.py
+?? scripts/generate_mp4_active_audio_choice.py
+?? scripts/generate_mp4_audio_presentation_end.py
+?? scripts/generate_mp4_chapter_composition.py
+?? scripts/generate_mp4_decode_only_seek.py
+?? scripts/generate_mp4_edit_loop.py
+?? scripts/generate_mp4_edit_window_eof.py
+?? scripts/generate_mp4_empty_fragment.py
+?? scripts/generate_mp4_empty_tail.py
+?? scripts/generate_mp4_fixed_audio_fractional.py
+?? scripts/generate_mp4_implicit_fragment_base.py
+?? scripts/generate_mp4_interrupted_seek.py
+?? scripts/generate_mp4_nondisplay_endpoint.py
+?? scripts/generate_mp4_open_ended_edit.py
+?? scripts/generate_mp4_open_ended_edit_audio.py
+?? scripts/generate_mp4_pasp_sizes.py
+?? scripts/generate_mp4_presentation_endpoint.py
+?? scripts/generate_mp4_tfdt_flags.py
+?? scripts/generate_mp4_time_header_sizes.py
+?? scripts/generate_mp4_unknown_movie_chapters.py
+?? scripts/generate_mp4_unused_audio_descriptions.py
+?? tests/adts_packet_working_set.rs
+?? tests/fixtures/playback-errors/adts-packet-working-set/
+?? tests/fixtures/playback-errors/mp4-active-audio-choice/
+?? tests/fixtures/playback-errors/mp4-audio-presentation-end/
+?? tests/fixtures/playback-errors/mp4-chapter-composition/
+?? tests/fixtures/playback-errors/mp4-decode-only-seek/
+?? tests/fixtures/playback-errors/mp4-edit-loop/
+?? tests/fixtures/playback-errors/mp4-edit-window-eof/
+?? tests/fixtures/playback-errors/mp4-empty-fragment/
+?? tests/fixtures/playback-errors/mp4-empty-tail/
+?? tests/fixtures/playback-errors/mp4-implicit-fragment-base/
+?? tests/fixtures/playback-errors/mp4-interrupted-seek/
+?? tests/fixtures/playback-errors/mp4-nondisplay-endpoint/
+?? tests/fixtures/playback-errors/mp4-open-ended-edit/
+?? tests/fixtures/playback-errors/mp4-pasp-sizes/
+?? tests/fixtures/playback-errors/mp4-presentation-endpoint/
+?? tests/fixtures/playback-errors/mp4-tfdt-flags/
+?? tests/fixtures/playback-errors/mp4-time-header-sizes/
+?? tests/fixtures/playback-errors/mp4-unknown-movie-chapters/
+?? tests/fixtures/playback-errors/mp4-unused-audio-descriptions/
+?? tests/mp4_active_audio_choice.rs
+?? tests/mp4_audio_presentation_end.rs
+?? tests/mp4_chapter_composition.rs
+?? tests/mp4_decode_only_seek.rs
+?? tests/mp4_edit_loop.rs
+?? tests/mp4_edit_window_eof.rs
+?? tests/mp4_empty_fragment.rs
+?? tests/mp4_empty_tail.rs
+?? tests/mp4_fixed_audio_edits.rs
+?? tests/mp4_implicit_fragment_base.rs
+?? tests/mp4_interrupted_seek.rs
+?? tests/mp4_nondisplay_endpoint.rs
+?? tests/mp4_open_ended_edit.rs
+?? tests/mp4_open_ended_edit_audio.rs
+?? tests/mp4_pasp_sizes.rs
+?? tests/mp4_presentation_endpoint.rs
+?? tests/mp4_tfdt_flags.rs
+?? tests/mp4_time_header_sizes.rs
+?? tests/mp4_unknown_movie_chapters.rs
+?? tests/mp4_unused_audio_descriptions.rs
+?? tests/owned_audio_window_parity.rs

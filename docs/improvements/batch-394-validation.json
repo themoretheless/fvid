@@ -1,0 +1,21 @@
+{
+  "batch": 394,
+  "accepted_ids": [
+    "FVID-0400"
+  ],
+  "status": "accepted",
+  "summary": "Validate reserved MP4 fragment decode-time flags",
+  "source_files": [
+    "crates/fvid-media/src/owned_mp4_impl.rs"
+  ],
+  "regression": "tests/mp4_tfdt_flags.rs",
+  "evidence": "docs/improvements/evidence/mp4-tfdt-flags/status.json",
+  "before": "Both MP4 wrappers admitted all four V0/V1 tfdt witnesses with low/high reserved flags. Original core result: zero-flag packet/clock/budget controls pass; reserved-flag refusal fails (1 passed, 1 failed).",
+  "after": "Reject nonzero reserved tfdt FullBox flags before consuming decode time. Eleven core and twenty player checks pass with no failures/ignored tests. Zero-flag V0/V1 fragments preserve three exact packet clocks and RGB frames at 50Hz/60ms, eight seeks per file, rewind, repeated EOF and budget rejection. Damaged companions fail specifically on their flags before decoding.",
+  "tests_run": [
+    "cargo test --locked --offline --no-default-features --test mp4_tfdt_flags --test mp4_tfhd_defaults --test mp4_hybrid_fragments --test mp4_time_header_sizes --test mp4_unknown_duration",
+    "cargo test --locked --offline --features player --test mp4_tfdt_flags --test mp4_tfhd_defaults --test mp4_hybrid_fragments --test mp4_time_header_sizes --test mp4_unknown_duration"
+  ],
+  "results": "31 tests passed; 0 failed/ignored.",
+  "independence": "One omitted tfdt flag admission check in fragment indexing, independent of movie/media header size validation. Versions and bit variants count once."
+}

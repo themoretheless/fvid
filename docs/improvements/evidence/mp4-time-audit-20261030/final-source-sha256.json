@@ -1,0 +1,14 @@
+{
+  "crates/fvid-media/src/owned_mp4_impl.rs": "547018275fc8b576d2df3d6ce0c5f71bdeb4d2b5bd737326296433f53fc8effa",
+  "tests/mp4.rs": "489aae04df156fbbe4be44bdc09160b28ffc4366118428d77b6781025dff3637",
+  "docs/improvements/registry.json": "5e9e5a03461ecc53478b376f586d3b2dcdf85d7f46d8f3cc30343a25c4bfd2f1",
+  "tests/mp4_time_header_sizes.rs": "ac3637a41a36f6356aa722d1022f40414d5f14e4fea113bc842f90487fe58cc7",
+  "scripts/generate_mp4_time_header_sizes.py": "c5a0a90cce942f2ace85b2d216d9b6eda1d6642975c581de659c982461a28ab2",
+  "tests/mp4_tfdt_flags.rs": "516e0fac66694f57def8c056ba58d75f649b830458efea9ca26d31789b0cbc67",
+  "scripts/generate_mp4_tfdt_flags.py": "5dd93fb29a35660639347c9c23e40e9a8c23cf84cebd9107b698d9be68097fae",
+  "tests/mp4_unknown_movie_chapters.rs": "d9c63eca93eb14ef46420fe4a215417dc62c71c2864b765db353501cde8c63a3",
+  "scripts/generate_mp4_unknown_movie_chapters.py": "f183b379112d22d50d3e26db0c7731ca0600ba73c71f7be5f09cf921c23cad8b",
+  "docs/improvements/batch-393-validation.json": "4c59adadc2c5c4bceafef1a8b52a25f60892f3b2c39527e6597cc278f6eff400",
+  "docs/improvements/batch-394-validation.json": "f5d504d70a3240fd9c2f0c39577ab2ee4219ae4f8283695b4ccb628f6be05e88",
+  "docs/improvements/batch-395-validation.json": "1a1292b93eb210cd90488061745a2583df2894d59b1b2512dcdc90182119db96"
+}

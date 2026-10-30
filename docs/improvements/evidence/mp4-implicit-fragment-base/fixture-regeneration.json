@@ -1,0 +1,7 @@
+{
+  "deterministic": true,
+  "hashes_verified": 13,
+  "valid_movies": 9,
+  "refusal_movies": 3,
+  "uses_ffmpeg_or_network": false
+}

@@ -1,0 +1,351 @@
+{
+  "provenance": "Own 60ms VP9 with independently authored 8kHz mono PCM/raw ALAC. Signed composition offsets -10/0/+10ms, 1000/44100/1001 media clocks, known/unknown mdhd, explicit empty audio tails. No private media/parameters, external encoder, FFmpeg or network.",
+  "cases": [
+    {
+      "file": "pcm-1000-shift-10-known.mp4",
+      "end_ns": 50000000,
+      "shift_ms": -10,
+      "shift_ticks": -10,
+      "clock": 1000,
+      "oracle": "negative.f32le"
+    },
+    {
+      "file": "pcm-1000-shift-10-unknown.mp4",
+      "end_ns": 50000000,
+      "shift_ms": -10,
+      "shift_ticks": -10,
+      "clock": 1000,
+      "oracle": "negative.f32le"
+    },
+    {
+      "file": "pcm-1000-shift0-known.mp4",
+      "end_ns": 60000000,
+      "shift_ms": 0,
+      "shift_ticks": 0,
+      "clock": 1000,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "pcm-1000-shift0-unknown.mp4",
+      "end_ns": 60000000,
+      "shift_ms": 0,
+      "shift_ticks": 0,
+      "clock": 1000,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "pcm-1000-shift10-known.mp4",
+      "end_ns": 70000000,
+      "shift_ms": 10,
+      "shift_ticks": 10,
+      "clock": 1000,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "pcm-1000-shift10-unknown.mp4",
+      "end_ns": 70000000,
+      "shift_ms": 10,
+      "shift_ticks": 10,
+      "clock": 1000,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "pcm-44100-shift-10-known.mp4",
+      "end_ns": 50000000,
+      "shift_ms": -10,
+      "shift_ticks": -441,
+      "clock": 44100,
+      "oracle": "negative.f32le"
+    },
+    {
+      "file": "pcm-44100-shift-10-unknown.mp4",
+      "end_ns": 50000000,
+      "shift_ms": -10,
+      "shift_ticks": -441,
+      "clock": 44100,
+      "oracle": "negative.f32le"
+    },
+    {
+      "file": "pcm-44100-shift0-known.mp4",
+      "end_ns": 60000000,
+      "shift_ms": 0,
+      "shift_ticks": 0,
+      "clock": 44100,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "pcm-44100-shift0-unknown.mp4",
+      "end_ns": 60000000,
+      "shift_ms": 0,
+      "shift_ticks": 0,
+      "clock": 44100,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "pcm-44100-shift10-known.mp4",
+      "end_ns": 70000000,
+      "shift_ms": 10,
+      "shift_ticks": 441,
+      "clock": 44100,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "pcm-44100-shift10-unknown.mp4",
+      "end_ns": 70000000,
+      "shift_ms": 10,
+      "shift_ticks": 441,
+      "clock": 44100,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "pcm-1001-shift-10-known.mp4",
+      "end_ns": 50009990,
+      "shift_ms": -10,
+      "shift_ticks": -10,
+      "clock": 1001,
+      "oracle": "negative.f32le"
+    },
+    {
+      "file": "pcm-1001-shift-10-unknown.mp4",
+      "end_ns": 50009990,
+      "shift_ms": -10,
+      "shift_ticks": -10,
+      "clock": 1001,
+      "oracle": "negative.f32le"
+    },
+    {
+      "file": "pcm-1001-shift0-known.mp4",
+      "end_ns": 60000000,
+      "shift_ms": 0,
+      "shift_ticks": 0,
+      "clock": 1001,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "pcm-1001-shift0-unknown.mp4",
+      "end_ns": 60000000,
+      "shift_ms": 0,
+      "shift_ticks": 0,
+      "clock": 1001,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "pcm-1001-shift10-known.mp4",
+      "end_ns": 69990009,
+      "shift_ms": 10,
+      "shift_ticks": 10,
+      "clock": 1001,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "pcm-1001-shift10-unknown.mp4",
+      "end_ns": 69990009,
+      "shift_ms": 10,
+      "shift_ticks": 10,
+      "clock": 1001,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "alac-1000-shift-10-known.mp4",
+      "end_ns": 50000000,
+      "shift_ms": -10,
+      "shift_ticks": -10,
+      "clock": 1000,
+      "oracle": "negative.f32le"
+    },
+    {
+      "file": "alac-1000-shift-10-unknown.mp4",
+      "end_ns": 50000000,
+      "shift_ms": -10,
+      "shift_ticks": -10,
+      "clock": 1000,
+      "oracle": "negative.f32le"
+    },
+    {
+      "file": "alac-1000-shift0-known.mp4",
+      "end_ns": 60000000,
+      "shift_ms": 0,
+      "shift_ticks": 0,
+      "clock": 1000,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "alac-1000-shift0-unknown.mp4",
+      "end_ns": 60000000,
+      "shift_ms": 0,
+      "shift_ticks": 0,
+      "clock": 1000,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "alac-1000-shift10-known.mp4",
+      "end_ns": 70000000,
+      "shift_ms": 10,
+      "shift_ticks": 10,
+      "clock": 1000,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "alac-1000-shift10-unknown.mp4",
+      "end_ns": 70000000,
+      "shift_ms": 10,
+      "shift_ticks": 10,
+      "clock": 1000,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "alac-44100-shift-10-known.mp4",
+      "end_ns": 50000000,
+      "shift_ms": -10,
+      "shift_ticks": -441,
+      "clock": 44100,
+      "oracle": "negative.f32le"
+    },
+    {
+      "file": "alac-44100-shift-10-unknown.mp4",
+      "end_ns": 50000000,
+      "shift_ms": -10,
+      "shift_ticks": -441,
+      "clock": 44100,
+      "oracle": "negative.f32le"
+    },
+    {
+      "file": "alac-44100-shift0-known.mp4",
+      "end_ns": 60000000,
+      "shift_ms": 0,
+      "shift_ticks": 0,
+      "clock": 44100,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "alac-44100-shift0-unknown.mp4",
+      "end_ns": 60000000,
+      "shift_ms": 0,
+      "shift_ticks": 0,
+      "clock": 44100,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "alac-44100-shift10-known.mp4",
+      "end_ns": 70000000,
+      "shift_ms": 10,
+      "shift_ticks": 441,
+      "clock": 44100,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "alac-44100-shift10-unknown.mp4",
+      "end_ns": 70000000,
+      "shift_ms": 10,
+      "shift_ticks": 441,
+      "clock": 44100,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "alac-1001-shift-10-known.mp4",
+      "end_ns": 50009990,
+      "shift_ms": -10,
+      "shift_ticks": -10,
+      "clock": 1001,
+      "oracle": "negative.f32le"
+    },
+    {
+      "file": "alac-1001-shift-10-unknown.mp4",
+      "end_ns": 50009990,
+      "shift_ms": -10,
+      "shift_ticks": -10,
+      "clock": 1001,
+      "oracle": "negative.f32le"
+    },
+    {
+      "file": "alac-1001-shift0-known.mp4",
+      "end_ns": 60000000,
+      "shift_ms": 0,
+      "shift_ticks": 0,
+      "clock": 1001,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "alac-1001-shift0-unknown.mp4",
+      "end_ns": 60000000,
+      "shift_ms": 0,
+      "shift_ticks": 0,
+      "clock": 1001,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "alac-1001-shift10-known.mp4",
+      "end_ns": 69990009,
+      "shift_ms": 10,
+      "shift_ticks": 10,
+      "clock": 1001,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "alac-1001-shift10-unknown.mp4",
+      "end_ns": 69990009,
+      "shift_ms": 10,
+      "shift_ticks": 10,
+      "clock": 1001,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "pcm-empty-tail.mp4",
+      "end_ns": 80000000,
+      "shift_ms": 0,
+      "shift_ticks": 0,
+      "clock": 1000,
+      "oracle": "full.f32le"
+    },
+    {
+      "file": "alac-empty-tail.mp4",
+      "end_ns": 80000000,
+      "shift_ms": 0,
+      "shift_ticks": 0,
+      "clock": 1000,
+      "oracle": "full.f32le"
+    }
+  ],
+  "sha256": {
+    "full.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "negative.f32le": "cf220a13739728837fcc83ff4ccff535aef5524d53d92a16cd94c7e1d6bb3888",
+    "pcm-1000-shift-10-known.mp4": "76be47075606010de2b8b629e22c2ac177a437b9848c34476997aefded35099b",
+    "pcm-1000-shift-10-unknown.mp4": "6593380094433c97c04f71eddf31a6d1774a646a8054521d4597985935014227",
+    "pcm-1000-shift0-known.mp4": "9bee63f11e1e4412aacb365dbad1ca975fbe2be9aec93f06f63d54d011f56789",
+    "pcm-1000-shift0-unknown.mp4": "d32fa1aff237ab752ba55f7956f0773bda2bcee0765f1bbbaeea3e3f7bdc903c",
+    "pcm-1000-shift10-known.mp4": "f57960b1c39039246c0e7899ea2263d81cf28bc524872084bce74860ffacf4a5",
+    "pcm-1000-shift10-unknown.mp4": "bbc74c11dd03d11981813e9b0219ca86f9031676e489b71993f8bc21c61d44b1",
+    "pcm-44100-shift-10-known.mp4": "d70ed77e0a39b7af89ffcd1cad7647028bef0c29a3f40e4f32671f36492f2b03",
+    "pcm-44100-shift-10-unknown.mp4": "e0484d41e57b6da3b695444952091c43bfc41e6f10dc178a58dfcf656f3fbf87",
+    "pcm-44100-shift0-known.mp4": "bfc441313cdcce80c435d82ae3703c567aa177ffc4ec326035ed4c5b2290f2b5",
+    "pcm-44100-shift0-unknown.mp4": "9fe398ca6d4965b8706ef9c79b1cdee3622fd4a9f8ff01dcda8e6eb6eb40ecb1",
+    "pcm-44100-shift10-known.mp4": "238a90c9b7b14f5c7294fa6a125e33edd413094042b686f5435d02d21336b251",
+    "pcm-44100-shift10-unknown.mp4": "88d68aa998ecf9bf85b6ffefc42c8e32bbc2d976f45dc335bc868c3091b856a2",
+    "pcm-1001-shift-10-known.mp4": "3a9263d693e4e38288e0e5f800c2dff8d3131c9528fa9093550665e0a21be3ab",
+    "pcm-1001-shift-10-unknown.mp4": "3d48346e1492a4064c1fa2f683009da66dc9689ac7917d216a9e688421466edd",
+    "pcm-1001-shift0-known.mp4": "682cc06bf09f55e030729275acc2a364761347cb8a98312f5e5d69b455092e14",
+    "pcm-1001-shift0-unknown.mp4": "36a6bbeade1151a65ac61d7c4363625a7b7daefd44879f467a28c96a5815960f",
+    "pcm-1001-shift10-known.mp4": "bfea6db9eafc3914511ea527471598625ad93563a87d1d7ae8df40e33de8a453",
+    "pcm-1001-shift10-unknown.mp4": "abf26973f7a93fbfc92bc1315f98c3d45006d2cd410c6dcd7ea094700f6be6a5",
+    "alac-1000-shift-10-known.mp4": "c267165cea75788a772cda7dadeff86644789c50aba63b844bc8ebae7796af40",
+    "alac-1000-shift-10-unknown.mp4": "4408b5df46d7c20fca214076213ebad1c305b88f72f24543da9c118f3aa5df83",
+    "alac-1000-shift0-known.mp4": "410f416380dc94159dbf63336e1cade2b7885485565e1af1f2dbdb38d8658286",
+    "alac-1000-shift0-unknown.mp4": "8a6e319dac48ad746a32724c1b0b2a94c66466f30550f77f558381d0a792d963",
+    "alac-1000-shift10-known.mp4": "a9475366c51b250a0252c86320024d94bbfe797ddf08f6ff98ce5a3290e86195",
+    "alac-1000-shift10-unknown.mp4": "30d9691b6710a6cdb37b9ffe694fdb6436ba2d8e3ed91bc29968d701cc54f482",
+    "alac-44100-shift-10-known.mp4": "2505edc0c9897d7ea0ccaee1af31a03f9b39b1d9b93c24774c90af2172ceef06",
+    "alac-44100-shift-10-unknown.mp4": "5d20ab9f4f88b536fd2c22943f1a63356a04ae0fac446085e5bf48c41a774f03",
+    "alac-44100-shift0-known.mp4": "246c03bae947db93bb5bf8def122a2940aa6091a372989570e891e5bde1523b1",
+    "alac-44100-shift0-unknown.mp4": "9360d77b92495bd78f6abbbad14e1c78cdac5b132efbacbe43782361d2bf17ff",
+    "alac-44100-shift10-known.mp4": "b095ae9573a0195c64d40e85c01f2de8b6cf4d119e49c3b44ab20d259afb6084",
+    "alac-44100-shift10-unknown.mp4": "7bb733a6ffb1be150a84a9da62a81a492c997cc643846c2d78d2f559d72765ac",
+    "alac-1001-shift-10-known.mp4": "9ffa3d67f0cc33537804c9357f0711ca9d1212b9bb3f45987f634265f3821d72",
+    "alac-1001-shift-10-unknown.mp4": "e7bff21241f24ad8b033ee0579d75719ad6ab70d5826461bcaaff96e303d144f",
+    "alac-1001-shift0-known.mp4": "af6adf410cb1871b0096aa706b71a12d2d8b1bd3d279a10c0452c9a5dc1366a4",
+    "alac-1001-shift0-unknown.mp4": "ec2596a559c11feaed8ca17ca746822aabbdafae52e81dd6a5371021010950c5",
+    "alac-1001-shift10-known.mp4": "a1f300ac4f9088c0932f1072191f041eb11497dcbd3d408eed0f70b999535a4a",
+    "alac-1001-shift10-unknown.mp4": "8dee29d27206371ec573b0898d40654355047da4eba913ea5fe093fecfcd32fd",
+    "pcm-empty-tail.mp4": "5c7478ae94503e31f528aa3ad3fa0b83db261fd14fa068e737c6cb4dfc724f0f",
+    "alac-empty-tail.mp4": "645e7b2145b813465d87aa5de285b1a5bc0a1f7618a906673ea0a7b8e090f09d"
+  }
+}
