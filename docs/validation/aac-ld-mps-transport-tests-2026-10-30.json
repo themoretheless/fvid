@@ -1,0 +1,54 @@
+{
+  "base_commit": "53b8280aed",
+  "scope": "AAC ER/MPS envelope and opaque fragment assembly; controlled spatial-message to PCM composition only, not native compressed AAC/movie acceptance.",
+  "results": [
+    {
+      "log": "/tmp/fvid-ld-mps-transport-all-tests.log",
+      "sha256": "3b80d7bb4ddbb48aafda56dff3a2ef5637aafec1bb142a6db1da94a13b8bee84",
+      "passed": 55,
+      "ignored": 0
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-transport-media-tests.log",
+      "sha256": "6ef6dcf5d4b55a5f75ebd7750652d77eb7438586505e6dabc67b47d9fb80446d",
+      "passed": 575,
+      "ignored": 1
+    }
+  ],
+  "format_cases": 224,
+  "starting_offsets": 8,
+  "controlled_pcm_sequences": 224,
+  "reassembled_spatial_frames": 672,
+  "verified_pcm_samples": 1677312,
+  "source_report": "aac-ld-mps-transport-source-2026-10-30.json",
+  "generation_audit": "aac-ld-mps-transport-generation-2026-10-30.json",
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_transport.rs": "8f9b2d3883bcec89aaf789e775267747593b1b445d94028af65229e535f55f78",
+    "tests/aac_ld_mps_transport.rs": "c0a817f3cadcc2d3c6b3c3e910c668e4efe62e3f611024622ba930379e2a9686",
+    "scripts/generate_aac_ld_mps_transport_fixtures.py": "cc7e7a04b59bb2abb5c007ba357f94b4dd0ed157c49481e01d9dde662a88ff03"
+  },
+  "coverage": [
+    "tags9/12 and ancillary kinds0/1",
+    "ER DATA_LENGTH short/escaped/long forms",
+    "maximal 65805-byte child",
+    "start/continue/stop and complete replacement",
+    "all eight bit offsets and following parent extension preservation",
+    "checkpoints/reset",
+    "reserved/nested/bounds/order refusal retains bytes/cursor",
+    "unfinished EOF refusal preserves pending message",
+    "transport-completed spatial frames render unchanged saved PCM"
+  ],
+  "ordinary_tests": "Saved controls only; no FFmpeg, network, generation, compiler or reference software.",
+  "accepted_spatial_movies": 0,
+  "native_spatial_refusal": "remains enabled",
+  "remaining": [
+    "native AAC ER extension dispatch",
+    "PCM/timestamp association across access units",
+    "in-band spatial configuration admission",
+    "coupled LD-SBR filter banks",
+    "residual AAC",
+    "active spatial tools",
+    "128-bin DSP",
+    "actual movie playback/seek/rewind"
+  ]
+}

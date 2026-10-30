@@ -1,3 +1,48 @@
+## Owned AAC ER/MPS ancillary transport assembly, 2026-10-30
+
+The transport component now handles spatial extension tags9/12 directly and
+inside ER EXT_DATA_LENGTH envelopes, including both escaped length forms.
+Length-delimited children stop at their own bound and preserve following
+extensions; direct payloads consume the supplied parent bound. Ancillary
+frame/header-and-frame kinds are retained with opaque bytes. Start, continue,
+stop and complete-message flags assemble payloads across fragments. A complete
+message may replace a pending sequence. Orphan continue/stop fragments are
+explicitly refused rather than attempting unsynchronized recovery.
+
+All reads, bounds, type/order checks and allocation precede pending-content
+changes. Continuations reserve then append without copying the whole pending
+prefix on every fragment. Errors retain pending bytes and reader position.
+Clone captures a component checkpoint, reset discards pending state, and finish
+reports incomplete messages without losing them. No fixed 2048-byte limit from
+the reference implementation is inherited.
+
+224 synthetic cases cover two tags, two kinds, both envelope forms, four
+fragment patterns and seven lengths through the maximal 65805-byte child.
+All eight starting bit offsets, checkpoint replay, following-extension
+sentinels, malformed/nested bounds, reserved kinds and invalid order are tested.
+224 additional controlled sequences reassemble 672 saved spatial frames and
+feed the PCM component; all 1677312 golden samples remain unchanged. This
+supplies decoded synthetic downmix/residual inputs, not compressed core AAC,
+actual access-unit timing or accepted movie playback.
+
+Primary grammar facts are frozen from AOSP FDK AAC commit
+`ee76460efbdb147e26d804c798949c23f174460b`; source content was re-fetched at
+that commit and verified. Numeric facts, source hashes and scope are in the
+[source report](validation/aac-ld-mps-transport-source-2026-10-30.json).
+No foreign implementation or runtime dependency enters production. Fixture
+regeneration is byte-identical with process/socket creation denied; see the
+[generation audit](validation/aac-ld-mps-transport-generation-2026-10-30.json).
+Ordinary tests need no FFmpeg, network, generation, reference software or compiler.
+
+All 55 LD-MPS integration tests and 575 media unit tests passed (one existing
+unit ignored); see the [test report](validation/aac-ld-mps-transport-tests-2026-10-30.json).
+
+Native AAC ER-extension dispatch, PCM/timestamp association across access units,
+in-band configuration admission and coupled LD-SBR filter-bank integration
+remain open, alongside residual codecs, active spatial tools and 128-bin DSP.
+Native spatial renderer refusal remains enabled. Component tests count zero
+accepted spatial movies or closed playback failures.
+
 ## Owned ordinary LD-MPS PCM chain and fixed gains, 2026-10-30
 
 The PCM component now connects downmix analysis, the complete spatial QMF chain

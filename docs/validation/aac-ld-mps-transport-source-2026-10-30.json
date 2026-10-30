@@ -1,0 +1,27 @@
+{
+  "commit": "ee76460efbdb147e26d804c798949c23f174460b",
+  "repository": "https://android.googlesource.com/platform/external/aac",
+  "files_sha256": {
+    "fdk-audio.h": "956ecbfc03c77b43100640c09fadb846d6d03bf13c94bce3693af8cf0dcfd9b8",
+    "fdk-aacdecoder.cpp": "8886d6d8934467ea553bd1f5e9c92ea7291bb160cef141a08691eb740774b7fa",
+    "fdk-sac.cpp": "04fd313411472d5cee4723fbcc25cf84037f529c4129e15e025127caf4225b76"
+  },
+  "numeric_facts": {
+    "EXT_DATA_LENGTH": 3,
+    "EXT_LDSAC_DATA": 9,
+    "EXT_SAC_DATA": 12,
+    "MPEGS_ANCTYPE_FRAME": 0,
+    "MPEGS_ANCTYPE_HEADER_AND_FRAME": 1,
+    "MPEGS_CONTINUE": 0,
+    "MPEGS_STOP": 1,
+    "MPEGS_START": 2,
+    "MPEGS_START_STOP": 3
+  },
+  "scope": "Primary source inspection of AAC envelope and opaque ancillary fragment grammar; no foreign decoder implementation or dependency enters production. Orphan continuations are rejected rather than permitting unsynchronized recovery.",
+  "pinned_contents_verified": true,
+  "source_paths": {
+    "fdk-audio.h": "libSYS/include/FDK_audio.h",
+    "fdk-aacdecoder.cpp": "libAACdec/src/aacdecoder.cpp",
+    "fdk-sac.cpp": "libSACdec/src/sac_dec_lib.cpp"
+  }
+}
