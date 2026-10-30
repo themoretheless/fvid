@@ -1,0 +1,20 @@
+{
+  "code_commit": "5a8707f271440f9ef5c97428fa28c1f12be92934",
+  "remote_verified": [
+    "refs/heads/main",
+    "refs/heads/codex/deliver-fvid-20261029"
+  ],
+  "accepted_count": 431,
+  "preserved": "All27 synthetic fixture/oracle/manifest files, before/after qualification logs, optional independent cross-check and source hashes.",
+  "untouched": "Other worktrees and four stashes.",
+  "cleanup": [
+    "/private/tmp/fvid-mp4-chapter-versions-before-20261031.log",
+    "/private/tmp/fvid-mp4-chapter-versions-after-20261031.log",
+    "/private/tmp/fvid-mp4-chapter-versions-integration-20261031.log",
+    "/private/tmp/fvid-mp4-chapter-versions-root-mp4-20261031.log",
+    "/private/tmp/fvid-mp4-chapter-versions-media-20261031.log",
+    "/private/tmp/fvid-mp4-chapter-versions-core-check-20261031.log",
+    "/private/tmp/fvid-mp4-chapter-versions-player-check-20261031.log",
+    "/private/tmp/fvid-mp4-chapter-versions-20261031"
+  ]
+}
