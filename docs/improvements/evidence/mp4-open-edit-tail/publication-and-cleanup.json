@@ -1,0 +1,35 @@
+{
+  "removed_owned_target": "/private/tmp/fvid-open-edit-tail-20261030",
+  "removed_owned_raw_logs": [
+    "/private/tmp/fvid-open-edit-tail-before-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-baseline-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-after-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-second-after-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-expanded-after-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-qualified-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-negative-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-full-baseline-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-related-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-and-geometry-after-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-and-geometry-second-after-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-ledger-requalification-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-registry-before-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-registry-after-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-final-integration-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-final-root-units-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-final-owned-clock-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-final-owned-admission-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-final-player-check-20261030.log",
+    "/private/tmp/fvid-open-edit-tail-final-core-check-20261030.log"
+  ],
+  "regression_fixtures_and_committed_evidence": "preserved",
+  "foreign_worktrees_branches_stashes": "untouched",
+  "published_commit": "5a95b3ee93e0f257bc14ff48e31d2b6278e1b446",
+  "remote": "https://github.com/themoretheless/fvid.git",
+  "remote_refs_verified": {
+    "main": "5a95b3ee93e0f257bc14ff48e31d2b6278e1b446",
+    "codex/deliver-fvid-20261029": "5a95b3ee93e0f257bc14ff48e31d2b6278e1b446"
+  },
+  "accepted_count": 419,
+  "push": "atomic fast-forward; no force"
+}
