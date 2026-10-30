@@ -1,3 +1,52 @@
+## Owned ordinary LD-MPS PCM chain and fixed gains, 2026-10-30
+
+The PCM component now connects downmix analysis, the complete spatial QMF chain
+and synthesis. It accepts exactly the configured planar decoded-PCM frame,
+applies clip-protection gain before analysis, and supplies decoded residual QMF
+separately without that downmix gain. Dry/wet outputs combine only when temporal
+shaping is disabled. Synthesis histories persist across frames. Outputs are
+reordered into canonical LF/RF/C/LFE/LS/RS[/AL/AR] (or L/R), then LFE/surround
+fixed gains are applied. Additional channels retain their tree-specific AL/AR
+meaning rather than guessing an external speaker mask. Samples are interleaved
+unclamped normalized f64 values with filter latency, not transport-trimmed audio.
+
+Every stage participates in one transaction: analysis, spatial parser/matrices,
+decorrelators, synthesis and the reader. Clone checkpoints and reset replay
+retain the joint state. Active temporal shaping explicitly refuses after QMF
+processing; an existing synthetic STP packet verifies that this late failure
+retains the complete previous state and cursor. A subsequent valid frame agrees
+with checkpoint replay. This is a passing refusal/rollback test, not active-STP
+acceptance. Residual codecs remain external to this component contract.
+
+224 controlled sequences/672 frames cover eight trees, seven resolutions,
+32/64-bin banks, both filter coefficient modes and every clip/surround/LFE table
+index. All 1677312 PCM samples match the double-PI reference control within
+2.37158e-6 absolute error (test ceiling 5e-6); the retained archived-PI baseline
+differs by at most 2.79820e-5 (ceiling 5e-5). Complete checkpoint/reset replay
+agrees exactly. These controls use original analysis/synthesis and original
+matrix-apply/decorrelate/merge functions on the already-qualified saved endpoint
+interface, with the documented 212 semantic fields and padded W layout.
+
+The precise control uses a separate translation unit overriding only PI for the
+polyphase implementation; archived sources are unchanged and original.bin
+retains the original PI baseline. It is not a replacement or correction of the
+original reference output. Source/control/endpoint hashes and the original vs
+precise difference are retained in the
+[reference report](validation/aac-ld-mps-pcm-reference-2026-10-30.json).
+Explicit regeneration of both controls is byte-identical; see the
+[generation audit](validation/aac-ld-mps-pcm-generation-2026-10-30.json).
+Ordinary tests load saved data without FFmpeg, network, regeneration, a compiler
+or reference software.
+
+All 52 LD-MPS integration tests and 575 media unit tests passed (one existing
+unit ignored); see the [test report](validation/aac-ld-mps-pcm-tests-2026-10-30.json).
+
+Native AAC/LD-SBR transport dispatch, sample timing/preroll, actual residual AAC
+decoding, active STP/GES, arbitrary-downmix/HRTF tools, other unqualified profile
+combinations and 128-bin DSP remain open. Actual synthetic movie playback/seek
+acceptance is still missing; the native spatial renderer refusal stays enabled.
+This PCM component qualification counts zero accepted spatial movies.
+
 ## Transactional ordinary LD-MPS QMF chain, 2026-10-30
 
 A single QMF decoder now joins spatial-frame assembly, complex M1 application,

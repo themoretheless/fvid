@@ -1,0 +1,9 @@
+{
+  "scope": "Explicit frozen-reference PCM component generation with original/precise PI controls; excluded from ordinary tests.",
+  "byte_exact_regeneration": true,
+  "sha256": {
+    "tests/fixtures/playback-errors/aac-ld-mps-pcm/expected.bin": "34d2ae37e6ad513fb992935436d48569fc43b40eb0af6606e7c5b91b4462c342",
+    "tests/fixtures/playback-errors/aac-ld-mps-pcm/original.bin": "afec2b0bbe0ce2fc75252d518dcf6e3d783482e53e00336a7a7d84a61056689f",
+    "tests/fixtures/playback-errors/aac-ld-mps-pcm/manifest.json": "4c81b81bfbabbd5f0548ca7107e5178166322861a8fa0e85e64252b13b70c614"
+  }
+}

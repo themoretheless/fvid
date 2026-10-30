@@ -1,0 +1,62 @@
+{
+  "base_commit": "e407d2c047",
+  "scope": "Ordinary decoded-downmix PCM component chain. Synthetic supplied residual QMF; no AAC/LD-SBR transport or movie playback/seek acceptance.",
+  "results": [
+    {
+      "log": "/tmp/fvid-ld-mps-pcm-all-tests.log",
+      "sha256": "66d98b24d61166cb9b12aabec39c287fded62c5d8c5053a3a97f79c81f147ad5",
+      "passed": 52,
+      "ignored": 0
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-pcm-media-tests.log",
+      "sha256": "110f15b68cc070f3bdf57d3445d3b2c01a83ea1104d0ff3ad3ae8dbc267d22d6",
+      "passed": 575,
+      "ignored": 1
+    }
+  ],
+  "sequences": 224,
+  "frames": 672,
+  "pcm_samples": 1677312,
+  "gain_grid_coverage": {
+    "clip": 8,
+    "surround": 5,
+    "lfe": 5
+  },
+  "precise_PI_max_abs_error": 2.3715755306241704e-06,
+  "precise_PI_test_ceiling": 5e-06,
+  "original_PI_max_abs_error": 2.798192237207786e-05,
+  "original_PI_test_ceiling": 5e-05,
+  "reference_report": "aac-ld-mps-pcm-reference-2026-10-30.json",
+  "generation_audit": "aac-ld-mps-pcm-generation-2026-10-30.json",
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_pcm.rs": "dad38fa320bbdb119084634ceccc05bc85580beec5fea7d636abb0611d3eb7cc",
+    "tests/aac_ld_mps_pcm.rs": "8a6b82fd89f1c026576b767d8cb874c9b6485fc74de2ae0a28e7f4cbc4a53abe",
+    "scripts/generate_aac_ld_mps_pcm_reference.py": "4628d419d8e2ebd96370ff7796350505d8458ed2eb3cbe3aab0c85c45ddde661",
+    "scripts/support/aac_ld_mps_pcm_reference_probe.c": "35a898297c75ee2ac31f6bdb776a2865d1346bfc3961002071ed6dd01b5e6b38"
+  },
+  "coverage": [
+    "eight trees and seven resolutions",
+    "32/64 analysis and synthesis",
+    "real/complex decorrelator coefficient modes",
+    "canonical order and tree-specific additional-channel gains",
+    "clip gain before analysis, not on residual QMF",
+    "interleaved normalized unclamped f64 output",
+    "joint analysis/parser/matrix/filter/synthesis checkpoints and reset replay",
+    "late active-STP refusal rolls back state/cursor",
+    "nonfinite PCM rejection"
+  ],
+  "precision_controls": "Original archived PI output retained and checked. Separate polyphase translation unit overrides only PI for double-precision control; archived sources unchanged.",
+  "ordinary_tests": "Saved controls only; no FFmpeg, network, generation, compiler or reference software.",
+  "accepted_spatial_movies": 0,
+  "native_spatial_refusal": "remains enabled",
+  "remaining": [
+    "native AAC/LD-SBR transport dispatch",
+    "sample timing/preroll and actual movie playback/seek",
+    "residual AAC decoding",
+    "active STP/GES",
+    "arbitrary downmix/HRTF",
+    "unqualified profile/tool combinations",
+    "128-bin DSP"
+  ]
+}
