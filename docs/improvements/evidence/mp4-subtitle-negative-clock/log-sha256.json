@@ -1,0 +1,13 @@
+{
+  "raw_sha256": {
+    "fvid-subtitle-negative-clock-correct-before-20261030.log": "f6f06e2944b72237ebb74bf3b860a3ae48aa8eab414448ab88215670af9d8cb9",
+    "fvid-subtitle-negative-clock-final-root-mp4-20261030.log": "7bdd7301223a0fa7faf21aadfe117dae4b3d5ddb31caedff1d89e6281f4d8ad8",
+    "fvid-subtitle-negative-clock-before-20261030.log": "21fc1d05eec146e4e75b8266b50bf6210a3e1ea0275d7a499c4f11d1bbd4c72f",
+    "fvid-subtitle-negative-clock-final-root-subtitles-20261030.log": "382fb34a9f0550073d1e323696ebd46751f97f7b45248bde7fd9708253709626",
+    "fvid-subtitle-negative-clock-final-core-check-20261030.log": "3268165f3d39fb46e0f173b16dc6913ba091147327ce1a35a787f59ac56b0ccd",
+    "fvid-subtitle-negative-clock-final-player-check-20261030.log": "97b936e23413e2a7554b60a61531d5f7cbdaab81a60591571eefb52bdf8f3abb",
+    "fvid-subtitle-negative-clock-after-20261030.log": "133130fbddc4f872776dd6ca9ac1d8d48d478d9655d470219aa9c1bb3631433c",
+    "fvid-subtitle-negative-clock-final-integration-20261030.log": "4e76499397256469a3c2742c6dffe7c5aba2ad5a250a5e755ce512ab87ec4438"
+  },
+  "normalization": "Trailing whitespace and EOF blank lines stripped in archived text logs."
+}

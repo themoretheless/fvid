@@ -1,0 +1,71 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0422"
+  ],
+  "count_delta": 1,
+  "accepted_count": 422,
+  "batch": 422,
+  "summary": "Compose explicit MP4 subtitle endpoints before clipping negative origins and rounding",
+  "before": {
+    "commit": "73ec5a006097d9f48a04474460ceeba51ceb178f",
+    "corrected_primary_passed": 1,
+    "corrected_primary_failed": 2,
+    "specific_failures": [
+      "Fully negative cue appears atzero",
+      "Cue crossing zero keeps its full duration after clipping its start",
+      "Separate1001Hz start/duration rounding shortens positive spans by1ns"
+    ],
+    "rejected_harness": "First run incorrectly read the successor after seek_raw, which already returns its frame; corrected baseline confirms actual active-cue failures."
+  },
+  "checks": {
+    "integration": {
+      "passed": 321,
+      "ignored": 0,
+      "suites": 64
+    },
+    "root-mp4": {
+      "passed": 56,
+      "ignored": 1,
+      "suites": 1
+    },
+    "root-subtitles": {
+      "passed": 47,
+      "ignored": 1,
+      "suites": 1
+    },
+    "player-check": "passed locked/offline/no-default-features",
+    "core-check": "passed locked/offline/no-default-features"
+  },
+  "unique_root_checks": 97,
+  "duplicate_root_checks_excluded": 6,
+  "distinct_passed": 418,
+  "ignored": 2,
+  "fixtures": {
+    "synthetic_videos": 6,
+    "source_frames_per_video": 3,
+    "subtitle_clocks": [
+      50,
+      1001
+    ],
+    "composition_modes": [
+      "negative V1",
+      "zero V0",
+      "positive V0"
+    ],
+    "picture_oracles": 3,
+    "total_files_including_manifest": 10,
+    "generator_offline_repeatability": "passed"
+  },
+  "compatibility": "Public signatures, cue sorting, text/style parsing and unspecified-duration successor/fallback policy preserved; old malformed-text refusals and positive cases pass.",
+  "uncounted": [
+    "Fixture/timescale/control variants",
+    "Baseline harness correction",
+    "Prior unedited audio tail publication metadata"
+  ],
+  "limits": [
+    "Finite scoped validation, not whole-project or physical-device qualification",
+    "No performance claim"
+  ],
+  "evidence": "docs/improvements/evidence/mp4-subtitle-negative-clock/status.json"
+}

@@ -1,0 +1,13 @@
+{
+  "status": "published",
+  "accepted_count": 421,
+  "count_delta": 0,
+  "commit": "73ec5a006097d9f48a04474460ceeba51ceb178f",
+  "remote_refs_verified": [
+    "main",
+    "codex/deliver-fvid-20261029"
+  ],
+  "temporary_raw_logs_removed": 11,
+  "fixtures_and_proofs": "retained",
+  "target": "/private/tmp/fvid-unedited-audio-tail-20261030 retained for the active subtitle clock audit; remove after terminal checks"
+}

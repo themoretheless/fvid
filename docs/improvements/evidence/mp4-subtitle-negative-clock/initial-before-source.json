@@ -1,0 +1,9 @@
+{
+  "commit": "73ec5a006097d9f48a04474460ceeba51ceb178f",
+  "sha256": {
+    "src/playback/subtitles/mp4_subtitles.rs": "2b1be70f1191ce1978f84a7ee34204831a07c54373cc7587b22b9e95dceebc95",
+    "tests/mp4_subtitle_negative_clock.rs": "b25b90b26be8794d71080ef0d5c71080d1c3787c24ddacaea8de9e2dc59da5f8",
+    "scripts/generate_mp4_subtitle_negative_clock.py": "fb216426d7ed1d70911981eeab8e450706422e65201e79660e50fa53dc09cf5d",
+    "tests/fixtures/playback-errors/mp4-subtitle-negative-clock/manifest.json": "80d4a18e55f7d34730821177bd1408f0d61544dc8c8c575e0c25bff6de463e74"
+  }
+}

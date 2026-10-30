@@ -1,0 +1,10 @@
+{
+  "commit": "73ec5a006097d9f48a04474460ceeba51ceb178f",
+  "sha256": {
+    "src/playback/subtitles/mp4_subtitles.rs": "2b1be70f1191ce1978f84a7ee34204831a07c54373cc7587b22b9e95dceebc95",
+    "tests/mp4_subtitle_negative_clock.rs": "a6a3fdcbf0535b3e1c3f7e1ed82e938e8b55c871b07fe8a60a7cfb9c0a5ac0aa",
+    "scripts/generate_mp4_subtitle_negative_clock.py": "ea7602082d9fcb3aa304d00a78883db2b00f6ae4d8266bd4367325931f89dfb2",
+    "tests/fixtures/playback-errors/mp4-subtitle-negative-clock/manifest.json": "75ff13767f82e09dacf35c122763bfa0fca390f32ebc8a8b651cfe8cf7778d96"
+  },
+  "uncounted_harness_correction": "seek_raw returns the sought frame itself; assert that frame rather than reading and checking its successor. Subtitle tkhd duration also matches the rounded absolute presentation endpoint."
+}

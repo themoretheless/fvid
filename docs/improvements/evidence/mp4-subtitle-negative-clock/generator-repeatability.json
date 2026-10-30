@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "offline_without_ffmpeg": true,
+  "files": 10,
+  "sha256": {
+    "positive-50.mp4": "b95962b6de600ae2107afb7063ed1e2de3a4c67857c58e205251f09af046ddf4",
+    "negative-50.mp4": "f4e4fc575d664447f6caa5daa7876ac45ea8e86e0e880d4dcd727811c1f54b9e",
+    "positive-1001.mp4": "570a63d2898b87f449de5d32972b8a82857c4a48492d271494b50bc204128e6c",
+    "zero-1001.mp4": "a71ff2caf8eb0e6885ba97fefd9c6b743d88d0cd8a0875e16b0b728127660af7",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "zero-50.mp4": "d2ead96cbdb9ec644cb26f4203cd2e7d359d1f43f609dd484bf3ba8001ce8874",
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "manifest.json": "75ff13767f82e09dacf35c122763bfa0fca390f32ebc8a8b651cfe8cf7778d96",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "negative-1001.mp4": "fd436762dc5267d051465dbd4bdec6ea71d98610ae7ca66760e37216570c05aa"
+  }
+}

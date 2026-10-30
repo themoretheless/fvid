@@ -7,7 +7,6 @@
 //! same reason the video source leaves them out.
 
 use crate::container::mp4::{Limits, Mp4Reader};
-use crate::playback_mp4::MediaTime;
 use crate::subtitles::{self, Cue};
 use crate::{Result, invalid};
 use std::io::{Read, Seek};
@@ -105,12 +104,17 @@ impl<R: Read + Seek> Mp4SubtitleReader<R> {
             })
             .collect();
         lines.sort_by_key(|(pts, _, index)| (*pts, *index));
-        let clock = |ticks: i64| {
-            MediaTime { ticks, timescale }
-                .nanoseconds()
-                .ok()
-                .and_then(|nanos| u64::try_from(nanos).ok())
-                .map(Duration::from_nanos)
+        let clock = |ticks: i128| -> Result<Duration> {
+            if timescale == 0 {
+                return Err(invalid("zero MP4 subtitle timescale"));
+            }
+            let nanos = (ticks.max(0) as u128)
+                .checked_mul(1_000_000_000)
+                .ok_or_else(|| invalid("MP4 subtitle timestamp overflow"))?
+                / u128::from(timescale);
+            let seconds = u64::try_from(nanos / 1_000_000_000)
+                .map_err(|_| invalid("MP4 subtitle timestamp exceeds duration range"))?;
+            Ok(Duration::new(seconds, (nanos % 1_000_000_000) as u32))
         };
         let mut packet = Vec::new();
         let mut cues = Vec::with_capacity(lines.len());
@@ -119,14 +123,21 @@ impl<R: Read + Seek> Mp4SubtitleReader<R> {
             let Some(text) = sample_text(&packet) else {
                 continue;
             };
-            let start = clock(*pts).unwrap_or_default();
-            let stated = clock(i64::from(*duration)).unwrap_or_default();
-            let next = lines.get(position + 1).and_then(|(pts, _, _)| clock(*pts));
-            cues.push(Cue {
-                start,
-                end: subtitles::cue_end(start, stated, next),
-                text,
-            });
+            let start = clock(i128::from(*pts))?;
+            let end = if *duration != 0 {
+                // Compose before clipping/rounding: a cue that crosses zero
+                // keeps its original end, and a fully negative cue stays hidden.
+                clock(i128::from(*pts) + i128::from(*duration))?
+            } else {
+                let next = lines
+                    .get(position + 1)
+                    .map(|(pts, _, _)| clock(i128::from(*pts)))
+                    .transpose()?;
+                subtitles::cue_end(start, Duration::ZERO, next)
+            };
+            if end > start {
+                cues.push(Cue { start, end, text });
+            }
         }
         Ok(cues)
     }
