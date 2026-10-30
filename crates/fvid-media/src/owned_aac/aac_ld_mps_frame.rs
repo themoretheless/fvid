@@ -485,3 +485,24 @@ mod tests {
         }
     }
 }
+
+impl Decoder {
+    pub(crate) fn visit_retained(
+        &self,
+        f: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        self.config.visit_retained(f)?;
+        f.vector(&self.regions)?;
+        for region in &self.regions {
+            region.state.visit_retained(f)?;
+        }
+        f.vector(&self.extension_regions)?;
+        for regions in &self.extension_regions {
+            f.vector(regions)?;
+            for region in regions {
+                region.state.visit_retained(f)?;
+            }
+        }
+        Ok(())
+    }
+}

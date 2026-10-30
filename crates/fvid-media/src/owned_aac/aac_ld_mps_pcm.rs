@@ -232,3 +232,44 @@ fn render<const B: usize>(
     }
     Ok(interleaved)
 }
+
+impl Decoder {
+    pub(crate) fn visit_retained(
+        &self,
+        f: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        self.qmf.visit_retained(f)?;
+        self.config.visit_retained(f)?;
+        f.vector(&self.order)?;
+        f.vector(&self.gains)?;
+        match &self.banks {
+            Banks::B32 {
+                analysis,
+                synthesis,
+            } => {
+                f.vector(analysis)?;
+                f.vector(synthesis)?;
+                for a in analysis {
+                    a.visit_retained(f)?;
+                }
+                for s in synthesis {
+                    s.visit_retained(f)?;
+                }
+            }
+            Banks::B64 {
+                analysis,
+                synthesis,
+            } => {
+                f.vector(analysis)?;
+                f.vector(synthesis)?;
+                for a in analysis {
+                    a.visit_retained(f)?;
+                }
+                for s in synthesis {
+                    s.visit_retained(f)?;
+                }
+            }
+        }
+        Ok(())
+    }
+}

@@ -147,3 +147,34 @@ impl Assembler {
         Ok(result)
     }
 }
+
+impl Assembler {
+    pub(crate) fn visit_retained(
+        &self,
+        f: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        if let Some(pending) = &self.pending {
+            f.vector(pending)?;
+        }
+        Ok(())
+    }
+}
+
+impl Assembler {
+    /// Owned pending-fragment payload, including spare capacity. Does not count
+    /// caller-owned packets, stack objects or allocation headers.
+    pub fn retained_payload_bytes(&self) -> Result<usize> {
+        self.retained_payload_bytes_with_checkpoint(None)
+    }
+    pub fn retained_payload_bytes_with_checkpoint(&self, saved: Option<&Self>) -> Result<usize> {
+        let mut footprint = super::memory::Footprint::new();
+        self.visit_retained(&mut footprint)
+            .map_err(|e| invalid(&e))?;
+        if let Some(saved) = saved.filter(|saved| !std::ptr::eq(*saved, self)) {
+            saved
+                .visit_retained(&mut footprint)
+                .map_err(|e| invalid(&e))?;
+        }
+        Ok(footprint.total())
+    }
+}

@@ -348,3 +348,21 @@ mod tests {
         assert!(Synthesis::<128>::new().is_err());
     }
 }
+
+impl<const B: usize> Analysis<B> {
+    pub(crate) fn visit_retained(
+        &self,
+        f: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        f.vector(&self.history)
+    }
+}
+
+impl<const B: usize> Synthesis<B> {
+    pub(crate) fn visit_retained(
+        &self,
+        f: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        f.vector(&self.history)
+    }
+}

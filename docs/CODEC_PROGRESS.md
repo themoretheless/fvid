@@ -1,3 +1,48 @@
+## LD-MPS PCM/timestamp association and owned allocation accounting, 2026-10-30
+
+A spatial session now associates canonical decoded core PCM with completed
+spatial messages in FIFO order. Parameter arrival may lag PCM, a packet may
+supply several spatial frames, and a spatial frame may consume multiple input
+chunks. Only complete frame-sized PCM windows render; leftovers remain queued.
+Every output retains its source timescale, PTS and duration. Integer endpoint
+mapping conserves duration when splitting packets, including sub-tick prefixes,
+negative PTS and untimed input. A single output cannot silently combine different
+clocks, timed/untimed input or timestamp discontinuities. Failures roll back the
+entire submit call, including earlier renders in a batch. EOF reports unmatched
+PCM/parameters without discarding them. Clone/reset cover queues and all DSP.
+
+26 own short scheduling movies and saved access units cover immediate, late and
+ancillary-fragmented parameter delivery for all eight ordinary trees, plus a
+malformed late spatial tail and unmatched PCM EOF. The 24 valid programmes
+produce 72 component-composed spatial frames, bit-identical across scheduling
+variants with unchanged source timestamps. Actual native ELD decoding supplies
+the nonzero core. Compressed AAC and ancillary extraction are exercised, but the
+native spatial factory remains refused: these are composition checks, not
+accepted native movie playback. A new ignored acceptance test requires the
+complete native paths to produce matching PCM for all scheduling variants.
+
+Retained allocation visitors now cover the spatial session, pending ancillary
+bytes, both QMF banks, configurations, parameter histories, matrix histories and
+all decorrelator storage. Queue/vector spare capacity and independent checkpoints
+are included; alias inspection counts the same object once. The no-allocation
+inspection excludes stack, allocator headers, process-static QMF modulation
+caches, caller-owned input/output and peak working memory. This introduces no
+fixed memory budget. Native accounting integration remains part of admission.
+
+All 577 media units pass (one existing ignored), along with 63 LD-MPS integration
+checks and six ELD/core checks. Three native spatial acceptance tests remain
+ignored. Fixture regeneration is byte-identical with Python subprocess/spawn
+and socket APIs denied; ordinary tests do not run generation, FFmpeg, external
+codecs, compilers or network operations. See the
+[generation audit](validation/aac-ld-mps-session-generation-2026-10-30.json) and
+[test report](validation/aac-ld-mps-session-tests-2026-10-30.json).
+
+Native dispatch/output masks and delayed-output API/EOF integration remain open.
+The session requires ordered complete frames; transport resynchronization after
+lost/replaced fragments still needs source association. In-band configuration,
+coupled LD-SBR bank selection, residual decoding, active spatial tools and
+128-bin DSP remain open. Zero native spatial movies are counted as accepted.
+
 ## Transactional AAC-ELD core boundary for LD-MPS integration, 2026-10-30
 
 ELD core parsing/synthesis now has a private preparation step which reports the

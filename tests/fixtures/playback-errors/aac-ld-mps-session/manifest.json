@@ -1,0 +1,1019 @@
+{
+  "scope": "AAC core/transport/session association, including delayed and fragmented parameters. Native spatial movie admission remains unsupported.",
+  "cases": [
+    {
+      "name": "tree0-immediate",
+      "tree": 0,
+      "mode": "immediate",
+      "asc": "f8e62025339000000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 206,
+          "core_bits": 51,
+          "end_bits": 1643,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 206,
+          "bytes": 210,
+          "core_bits": 51,
+          "end_bits": 1675,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 416,
+          "bytes": 18,
+          "core_bits": 53,
+          "end_bits": 141,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree0-late",
+      "tree": 0,
+      "mode": "late",
+      "asc": "f8e62025339000000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 434,
+          "bytes": 7,
+          "core_bits": 51,
+          "end_bits": 51,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 441,
+          "bytes": 7,
+          "core_bits": 51,
+          "end_bits": 51,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 448,
+          "bytes": 420,
+          "core_bits": 53,
+          "end_bits": 3357,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree0-fragments",
+      "tree": 0,
+      "mode": "fragments",
+      "asc": "f8e62025339000000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 868,
+          "bytes": 75,
+          "core_bits": 51,
+          "end_bits": 595,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 943,
+          "bytes": 75,
+          "core_bits": 51,
+          "end_bits": 595,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 1018,
+          "bytes": 290,
+          "core_bits": 53,
+          "end_bits": 2317,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree1-immediate",
+      "tree": 1,
+      "mode": "immediate",
+      "asc": "f8e62025339100000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 1308,
+          "bytes": 206,
+          "core_bits": 51,
+          "end_bits": 1643,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 1514,
+          "bytes": 210,
+          "core_bits": 51,
+          "end_bits": 1675,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 1724,
+          "bytes": 18,
+          "core_bits": 53,
+          "end_bits": 141,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree1-late",
+      "tree": 1,
+      "mode": "late",
+      "asc": "f8e62025339100000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 1742,
+          "bytes": 7,
+          "core_bits": 51,
+          "end_bits": 51,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 1749,
+          "bytes": 7,
+          "core_bits": 51,
+          "end_bits": 51,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 1756,
+          "bytes": 420,
+          "core_bits": 53,
+          "end_bits": 3357,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree1-fragments",
+      "tree": 1,
+      "mode": "fragments",
+      "asc": "f8e62025339100000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 2176,
+          "bytes": 75,
+          "core_bits": 51,
+          "end_bits": 595,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 2251,
+          "bytes": 75,
+          "core_bits": 51,
+          "end_bits": 595,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 2326,
+          "bytes": 290,
+          "core_bits": 53,
+          "end_bits": 2317,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree2-immediate",
+      "tree": 2,
+      "mode": "immediate",
+      "asc": "f8e64027339200000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 2616,
+          "bytes": 205,
+          "core_bits": 98,
+          "end_bits": 1634,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 2821,
+          "bytes": 210,
+          "core_bits": 100,
+          "end_bits": 1676,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 3031,
+          "bytes": 25,
+          "core_bits": 100,
+          "end_bits": 196,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree2-late",
+      "tree": 2,
+      "mode": "late",
+      "asc": "f8e64027339200000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 3056,
+          "bytes": 13,
+          "core_bits": 98,
+          "end_bits": 98,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 3069,
+          "bytes": 13,
+          "core_bits": 100,
+          "end_bits": 100,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 3082,
+          "bytes": 414,
+          "core_bits": 100,
+          "end_bits": 3308,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree2-fragments",
+      "tree": 2,
+      "mode": "fragments",
+      "asc": "f8e64027339200000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 3496,
+          "bytes": 79,
+          "core_bits": 98,
+          "end_bits": 626,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 3575,
+          "bytes": 79,
+          "core_bits": 100,
+          "end_bits": 628,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 3654,
+          "bytes": 288,
+          "core_bits": 100,
+          "end_bits": 2300,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree3-immediate",
+      "tree": 3,
+      "mode": "immediate",
+      "asc": "f8e64027339300000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 3942,
+          "bytes": 304,
+          "core_bits": 98,
+          "end_bits": 2426,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 4246,
+          "bytes": 308,
+          "core_bits": 100,
+          "end_bits": 2460,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 4554,
+          "bytes": 27,
+          "core_bits": 100,
+          "end_bits": 212,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree3-late",
+      "tree": 3,
+      "mode": "late",
+      "asc": "f8e64027339300000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 4581,
+          "bytes": 13,
+          "core_bits": 98,
+          "end_bits": 98,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 4594,
+          "bytes": 13,
+          "core_bits": 100,
+          "end_bits": 100,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 4607,
+          "bytes": 613,
+          "core_bits": 100,
+          "end_bits": 4900,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree3-fragments",
+      "tree": 3,
+      "mode": "fragments",
+      "asc": "f8e64027339300000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 5220,
+          "bytes": 111,
+          "core_bits": 98,
+          "end_bits": 882,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 5331,
+          "bytes": 111,
+          "core_bits": 100,
+          "end_bits": 884,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 5442,
+          "bytes": 421,
+          "core_bits": 100,
+          "end_bits": 3364,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree4-immediate",
+      "tree": 4,
+      "mode": "immediate",
+      "asc": "f8e64027339400000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 5863,
+          "bytes": 304,
+          "core_bits": 98,
+          "end_bits": 2426,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 6167,
+          "bytes": 308,
+          "core_bits": 100,
+          "end_bits": 2460,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 6475,
+          "bytes": 27,
+          "core_bits": 100,
+          "end_bits": 212,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree4-late",
+      "tree": 4,
+      "mode": "late",
+      "asc": "f8e64027339400000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 6502,
+          "bytes": 13,
+          "core_bits": 98,
+          "end_bits": 98,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 6515,
+          "bytes": 13,
+          "core_bits": 100,
+          "end_bits": 100,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 6528,
+          "bytes": 613,
+          "core_bits": 100,
+          "end_bits": 4900,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree4-fragments",
+      "tree": 4,
+      "mode": "fragments",
+      "asc": "f8e64027339400000082b000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 7141,
+          "bytes": 111,
+          "core_bits": 98,
+          "end_bits": 882,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 7252,
+          "bytes": 111,
+          "core_bits": 100,
+          "end_bits": 884,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 7363,
+          "bytes": 421,
+          "core_bits": 100,
+          "end_bits": 3364,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree5-immediate",
+      "tree": 5,
+      "mode": "immediate",
+      "asc": "f8e6c025339500000000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 7784,
+          "bytes": 137,
+          "core_bits": 283,
+          "end_bits": 1091,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 7921,
+          "bytes": 141,
+          "core_bits": 285,
+          "end_bits": 1125,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 8062,
+          "bytes": 45,
+          "core_bits": 283,
+          "end_bits": 355,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree5-late",
+      "tree": 5,
+      "mode": "late",
+      "asc": "f8e6c025339500000000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 8107,
+          "bytes": 36,
+          "core_bits": 283,
+          "end_bits": 283,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 8143,
+          "bytes": 36,
+          "core_bits": 285,
+          "end_bits": 285,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 8179,
+          "bytes": 251,
+          "core_bits": 283,
+          "end_bits": 2003,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree5-fragments",
+      "tree": 5,
+      "mode": "fragments",
+      "asc": "f8e6c025339500000000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 8430,
+          "bytes": 71,
+          "core_bits": 283,
+          "end_bits": 563,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 8501,
+          "bytes": 72,
+          "core_bits": 285,
+          "end_bits": 573,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 8573,
+          "bytes": 186,
+          "core_bits": 283,
+          "end_bits": 1483,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree6-immediate",
+      "tree": 6,
+      "mode": "immediate",
+      "asc": "f8e6c025339600000000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 8759,
+          "bytes": 137,
+          "core_bits": 283,
+          "end_bits": 1091,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 8896,
+          "bytes": 141,
+          "core_bits": 285,
+          "end_bits": 1125,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 9037,
+          "bytes": 45,
+          "core_bits": 283,
+          "end_bits": 355,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree6-late",
+      "tree": 6,
+      "mode": "late",
+      "asc": "f8e6c025339600000000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 9082,
+          "bytes": 36,
+          "core_bits": 283,
+          "end_bits": 283,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 9118,
+          "bytes": 36,
+          "core_bits": 285,
+          "end_bits": 285,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 9154,
+          "bytes": 251,
+          "core_bits": 283,
+          "end_bits": 2003,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree6-fragments",
+      "tree": 6,
+      "mode": "fragments",
+      "asc": "f8e6c025339600000000",
+      "channels": 6,
+      "frames": [
+        {
+          "offset": 9405,
+          "bytes": 71,
+          "core_bits": 283,
+          "end_bits": 563,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 9476,
+          "bytes": 72,
+          "core_bits": 285,
+          "end_bits": 573,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 9548,
+          "bytes": 186,
+          "core_bits": 283,
+          "end_bits": 1483,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-immediate",
+      "tree": 7,
+      "mode": "immediate",
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 9734,
+          "bytes": 60,
+          "core_bits": 51,
+          "end_bits": 475,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 9794,
+          "bytes": 64,
+          "core_bits": 51,
+          "end_bits": 507,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 9858,
+          "bytes": 15,
+          "core_bits": 53,
+          "end_bits": 117,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-late",
+      "tree": 7,
+      "mode": "late",
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 9873,
+          "bytes": 7,
+          "core_bits": 51,
+          "end_bits": 51,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 9880,
+          "bytes": 7,
+          "core_bits": 51,
+          "end_bits": 51,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 9887,
+          "bytes": 125,
+          "core_bits": 53,
+          "end_bits": 997,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-fragments",
+      "tree": 7,
+      "mode": "fragments",
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 10012,
+          "bytes": 26,
+          "core_bits": 51,
+          "end_bits": 203,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 10038,
+          "bytes": 27,
+          "core_bits": 51,
+          "end_bits": 211,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 10065,
+          "bytes": 92,
+          "core_bits": 53,
+          "end_bits": 733,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-malformed-late",
+      "tree": 7,
+      "mode": "malformed-late",
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 10157,
+          "bytes": 7,
+          "core_bits": 51,
+          "end_bits": 51,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 10164,
+          "bytes": 7,
+          "core_bits": 51,
+          "end_bits": 51,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 10171,
+          "bytes": 126,
+          "core_bits": 53,
+          "end_bits": 1005,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    },
+    {
+      "name": "tree7-unfinished",
+      "tree": 7,
+      "mode": "unfinished",
+      "asc": "f8e620243397000000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 10297,
+          "bytes": 7,
+          "core_bits": 51,
+          "end_bits": 51,
+          "pts": 0,
+          "duration": 512
+        },
+        {
+          "offset": 10304,
+          "bytes": 7,
+          "core_bits": 51,
+          "end_bits": 51,
+          "pts": 512,
+          "duration": 512
+        },
+        {
+          "offset": 10311,
+          "bytes": 7,
+          "core_bits": 53,
+          "end_bits": 53,
+          "pts": 1024,
+          "duration": 512
+        }
+      ],
+      "slots": 8,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "samples": 1536
+    }
+  ]
+}

@@ -124,3 +124,13 @@ impl MatrixTime {
         })
     }
 }
+
+impl MatrixTime {
+    pub(crate) fn visit_retained(
+        &self,
+        f: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        f.vector(&self.previous)?;
+        Ok(())
+    }
+}

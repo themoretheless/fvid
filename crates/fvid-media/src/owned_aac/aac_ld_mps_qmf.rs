@@ -169,3 +169,18 @@ impl Decoder {
         Ok(result)
     }
 }
+
+impl Decoder {
+    pub(crate) fn visit_retained(
+        &self,
+        f: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        self.config.visit_retained(f)?;
+        self.matrices.visit_retained(f)?;
+        f.vector(&self.decorrelators)?;
+        for d in &self.decorrelators {
+            d.visit_retained(f)?;
+        }
+        Ok(())
+    }
+}

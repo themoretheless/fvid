@@ -331,3 +331,14 @@ mod tests {
         );
     }
 }
+
+impl Parameters {
+    pub(crate) fn visit_retained(
+        &self,
+        f: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        f.vector(&self.parsed.indices)?;
+        f.vector(&self.mapped.indices)?;
+        Ok(())
+    }
+}

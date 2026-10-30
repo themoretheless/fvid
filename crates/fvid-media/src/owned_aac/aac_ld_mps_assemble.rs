@@ -287,3 +287,19 @@ impl Decoder {
         })
     }
 }
+
+impl Decoder {
+    pub(crate) fn visit_retained(
+        &self,
+        f: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        self.config.visit_retained(f)?;
+        self.physical.visit_retained(f)?;
+        f.vector(&self.cutoffs)?;
+        f.vector(&self.modes)?;
+        self.m1.visit_retained(f)?;
+        self.dry.visit_retained(f)?;
+        self.wet.visit_retained(f)?;
+        Ok(())
+    }
+}

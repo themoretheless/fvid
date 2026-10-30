@@ -230,3 +230,21 @@ impl Decorrelator {
         Ok(output)
     }
 }
+
+impl Decorrelator {
+    pub(crate) fn visit_retained(
+        &self,
+        f: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        f.vector(&self.bands)?;
+        f.vector(&self.map)?;
+        for band in &self.bands {
+            f.vector(&band.design.denominator)?;
+            f.vector(&band.design.numerator)?;
+            f.vector(&band.delay)?;
+            f.vector(&band.x)?;
+            f.vector(&band.y)?;
+        }
+        Ok(())
+    }
+}

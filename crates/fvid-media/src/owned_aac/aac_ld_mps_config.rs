@@ -385,3 +385,45 @@ impl Config {
         })
     }
 }
+
+impl Config {
+    pub(crate) fn visit_retained(
+        &self,
+        f: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        f.vector(&self.tree.ott_lfe)?;
+        f.vector(&self.ott_bands)?;
+        f.vector(&self.ttt)?;
+        if let Some(hrtf) = &self.hrtf {
+            f.vector(&hrtf.channels)?;
+            for channel in &hrtf.channels {
+                f.vector(&channel.left)?;
+                f.vector(&channel.right)?;
+                if let Some(phase) = &channel.phase {
+                    f.vector(phase)?;
+                }
+            }
+        }
+        f.vector(&self.extensions)?;
+        for ext in &self.extensions {
+            f.vector(&ext.payload)?;
+            match &ext.value {
+                ExtensionValue::Residual { bands, .. } => f.vector(bands)?,
+                ExtensionValue::ArbitraryTree {
+                    nodes,
+                    ott,
+                    positions,
+                } => {
+                    f.vector(nodes)?;
+                    for row in nodes {
+                        f.vector(row)?;
+                    }
+                    f.vector(ott)?;
+                    f.vector(positions)?;
+                }
+                ExtensionValue::DownmixResidual { .. } | ExtensionValue::Unknown => {}
+            }
+        }
+        Ok(())
+    }
+}

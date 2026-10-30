@@ -1,0 +1,72 @@
+{
+  "base_commit": "7ef221594e",
+  "scope": "Owned PCM/spatial FIFO with source-clock metadata, transactional rendering, and complete retained-allocation traversal. Controlled AAC core/transport/session composition only; native spatial factory remains refused.",
+  "results": [
+    {
+      "log": "/tmp/fvid-ld-mps-session-final-media.log",
+      "sha256": "3af9a3bbd3bf472be90ed4863f7967f61152b3de203bd8099a6ee7c84131b35f",
+      "passed": 577,
+      "ignored": 1
+    },
+    {
+      "log": "/tmp/fvid-ld-mps-session-final-all.log",
+      "sha256": "b42cc03b82cd4d43a5536b43e405085049bee30674477fcce4bcf2f18d579094",
+      "passed": 69,
+      "ignored": 3
+    }
+  ],
+  "synthetic_movies": 26,
+  "successful_composition_programmes": 24,
+  "successful_composition_frames": 72,
+  "accepted_native_spatial_movies": 0,
+  "pending_native_acceptance_tests": 3,
+  "coverage": [
+    "all eight ordinary spatial trees",
+    "nonzero actual ELD core inputs",
+    "immediate, late, and ancillary-fragmented spatial messages",
+    "PCM-identical output and original source PTS despite delayed arrival",
+    "several spatial frames from one core chunk",
+    "partial core chunks across one output frame",
+    "negative PTS and 1-tick/1536-sample duration conservation",
+    "timed zero-length rounded prefixes",
+    "untimed decreasing timestamps",
+    "cross-clock/mixed timing/discontinuity refusal is atomic",
+    "late malformed frame rolls back previously rendered frames in the same call",
+    "unmatched PCM EOF retains queue",
+    "checkpoint replay/reset",
+    "nested QMF, matrix, config, parameter, decorrelator allocations",
+    "queue spare capacity and independent checkpoint ownership",
+    "alias inspection does not double-count"
+  ],
+  "retained_scope": "Owned allocation payload including spare capacity; excludes stack, allocator headers, static process QMF caches, input/output and peak working memory. No new fixed budget.",
+  "generation_audit": "aac-ld-mps-session-generation-2026-10-30.json",
+  "sha256": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_session.rs": "790c3cd2c354cfd9d3705fa3a5ab730b09b06aff685943c023c73a167c045e0f",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_config.rs": "babf3f6f196965bb172929fb026a36046a4846f4e8124ec5468cb1a149641244",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_parameters.rs": "bee2cfe621c652b68ba725a1a5a046247e75e3d3b49fa9c22817156287d5aec7",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_frame.rs": "4306136db14b09ba75b2566e816e5c9cba9ea2d0da62fbd1f1ded0341438e0a9",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_prepare.rs": "44f53573ec51edd135ece05736b7f037e6267b6e0ec46918352ea2e11c6d76a1",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_matrix_time.rs": "379f8de413165ce0c8fef2c38c2a7fb09e97b8baea667c34ff9ac18ed0c354e0",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_assemble.rs": "c6b5183ef0868705091c1e65460f799d8cbc41eeae9ff6284308695c83e9d87a",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_qmf.rs": "fc9c2d286e2f87756edd8d7e7619d85b05d3c277d8f9c34119ecdcc8e6fb024b",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_decor.rs": "3e20dd3e6a86da0f08141817d2f4718835d0f042f780d5d42f4377455bdfd36b",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_pcm.rs": "0c633e6280c974a5af389776da3aa37aea8fd3369caa4a285c10faabad34d779",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_transport.rs": "495f68b065b79a1dea4f5bc4ed28c7e3e2a18ff6349dbff575d5b70a78feb369",
+    "crates/fvid-media/src/owned_aac/aac_ld_qmf.rs": "29f68ec0ff3c437c2d90f2ab9daf220a1f64178f4b5e3d15f140dff0b5dff0f4",
+    "crates/fvid-media/src/owned_aac/memory.rs": "3b2b8cd8063ccc89ef1f4219a3e4ca844093cb3ea48c604683cc175a3ce19373",
+    "crates/fvid-media/src/owned_aac/mod.rs": "f4db8ef63d8b0e9f8e10b667299a4f96c2d73a8de2914ac2b4614cc0f0ad9587",
+    "tests/aac_ld_mps_session.rs": "136bf85976df9884923944c9aeb5ac1dc67bdd40f9da4c9f61c52d141cba532a",
+    "scripts/generate_aac_ld_mps_session_fixtures.py": "436e21001e784ce2dc603f39613764506f3a1659d093686d3f3888bc0eacd27e"
+  },
+  "remaining": [
+    "native AAC spatial extension dispatch and admission",
+    "native output channel masks",
+    "joining delayed output into native packet API and EOF",
+    "transport resynchronization/source association after dropped/replaced fragments",
+    "in-band config admission",
+    "correct coupled LD-SBR banks",
+    "residual codecs",
+    "active temporal/spatial tools",
+    "128-bin DSP"
+  ]
+}
