@@ -1,0 +1,6 @@
+{
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "member": "mp4spatialdec/src/sac_decor.c",
+  "member_sha256": "640a0e5d3a4cdf9f344f48c84c937d11f5086bc646d32fdc741c8f630f0f3f65",
+  "scope": "Numeric reflection coefficients/phases only. The LD C arrays have four explicit rows and six implicit zero rows for each used reverb band; those zero initializers are preserved."
+}

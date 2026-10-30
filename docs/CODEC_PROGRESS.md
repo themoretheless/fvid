@@ -1,3 +1,66 @@
+## Owned LD-MPS OTT mixing and QMF decorrelation, 2026-10-30
+
+The owned OTT kernel constructs output rows [direct, decorrelated, residual]
+from the channel covariance and mono-sum constraint. Decorrelated contributions
+cancel when the two outputs are summed; nonresidual row power and cross-channel
+coherence match the CLD/ICC targets. This independently derived algebra avoids
+copying the reference's trigonometric implementation. Residual bands use the
+specified inverse mono-sum gain limit 1.2, zero decor coefficients and residual
+columns +1/-1. This consumes supplied complex residual samples; it does not
+decode residual AAC. Complex basis-output checks verify row/column orientation.
+
+The new decorrelator implements the LD Schur all-pass designs for 32/64 QMF
+bins, all three reverb partitions, ten seeds and both real/complex coefficient
+modes. These modes are explicit implementation choices, not stream flags.
+Used filters have orders 15/6/3 and delays 7/2/1 slots. Reflection/phase facts
+are separately frozen from the official ISO insert. Four LD reflection rows are
+explicit; the six implicit zero rows are preserved as pure all-pass delays.
+The owned engine uses independent input/output rings and direct convolution,
+not the reference's transposed filter state.
+
+Ducking pools energies in the fixed 23 parameter groups, independent of the
+stream's selected CLD/ICC resolution. Direct/diffuse energies retain their
+histories, with alpha 0.8, gamma 1.5, an upper gain of two and a normalized
+energy floor 1e-9. Input/output QMF amplitudes are explicitly full-scale-one.
+The unmodified reference uses 16-bit PCM units and ABS_THR=1e-9*32768^2;
+its probe scales samples accordingly rather than changing the algorithm.
+All filter, delay and energy state commits atomically per bounded LD chunk.
+Invalid/nonfinite later samples, geometry and overflow preserve the original
+state. Empty chunks are no-ops, and reset restores all histories/cursors.
+
+The independent 80-digit Decimal corpus contains 496 matrices (all CLD/ICC
+indices, with/without residual mode), and 120 burst/tail sequences covering
+552960 complex samples. Covariance, residual inverse-gain limits and complex
+basis application match the saved oracle. Decorrelated signals match it within
+3e-11 absolute error. Whole/partitioned processing, checkpoint replay at slot 48
+and reset/replay agree bit-for-bit, including float sign bits. The actual filter
+polynomials also undergo inverse-Schur margin checks and unit-magnitude transfer
+checks; the recovered reflection magnitude squared remains below 0.251.
+These are component-state checks, not actual player seeking/rewinding evidence.
+
+The explicit comparison uses unmodified ISO OTT/decorrelation functions. Across
+all 496 matrices its maximum coefficient error is 1.32695e-7; across all 120
+complex signal sequences its maximum error is 6.34142e-7. The independent
+Decimal oracle qualifies the owned f64 path; original float comparison results,
+per-sequence maxima/RMS, source/archive/driver hashes and unit conversion are
+retained in the [reference report](validation/aac-ld-mps-upmix-reference-2026-10-30.json).
+No C or external DSP/codec implementation enters production, and this is not
+formal ISO conformance or a completed spatial renderer.
+
+Validation passed: 575 media unit tests (one existing ignored), all 27 LD-MPS
+integration tests, and offline compilation of all player test targets. See the
+[test report](validation/aac-ld-mps-upmix-tests-2026-10-30.json) and
+[byte-exact generation audit](validation/aac-ld-mps-upmix-generation-2026-10-30.json).
+
+Ordinary tests load saved fixtures without FFmpeg, network, reference software
+or regeneration. Numeric extraction, fixture generation and optional reference
+compilation are separate commands. The broad codec goal remains active: full
+M0/M1/M2 construction/routing for the trees, residual AAC, arbitrary-tree and
+HRTF/binaural composition, STP/GES audio processing, 128-bin decorrelation/DSP,
+LD-SBR/QMF integration and synthetic movie playback/seek/rewind remain open.
+The native spatial renderer refusal remains enabled. Zero accepted spatial
+programmes or closed spatial codec gaps are counted by these primitive tests.
+
 ## LD-MPS physical parameters, matrix smoothing and interpolation, 2026-10-30
 
 The owned preparation layer now couples spatial-frame parsing with physical

@@ -1,0 +1,29 @@
+{
+  "scope": "Byte-exact offline 80-digit Decimal covariance/convolution/ducking regeneration; process/socket creation denied by Python audit hook.",
+  "files": [
+    {
+      "file": "signals.bin",
+      "bytes": 17694720,
+      "sha256": "9925d1b7fc48d13258b6bbd8ee56a8cc88526251d6ed7018633d23eefaab6b89"
+    },
+    {
+      "file": "manifest.json",
+      "bytes": 115615,
+      "sha256": "1c2583c5273e27d76364c9aa70c0e0a88c491959bf7bcd08004fd69b74796d25"
+    }
+  ],
+  "inputs": [
+    {
+      "file": "scripts/generate_aac_ld_mps_upmix_fixtures.py",
+      "sha256": "20d9b399c546cced6816a378f9e28a70f7f4c54ac5cc07c1cb09fbbb9e041234"
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-upmix/decor-facts.json",
+      "sha256": "c5a260c681199e83399b6d4a3d6d5699cf0290e3e9bed09fff3ede344cd5050e"
+    },
+    {
+      "file": "tests/fixtures/playback-errors/aac-ld-mps-prepare/facts.json",
+      "sha256": "e5a42f5d508ec99004f8f5a495d6ffc7e7e2b8052d793dc5d49a14ed0332f171"
+    }
+  ]
+}
