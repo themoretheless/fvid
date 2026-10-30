@@ -1,11 +1,10 @@
 //! Ordinary LD-MPS PCM analysis/QMF chain/synthesis with canonical channel order.
 //! Residual QMF must already be decoded. GES is applied by the owned QMF
-//! chain; active STP remains an explicit unsupported PCM tool.
+//! chain; STP returns dry/wet rows ready for a single sum.
 use super::{
     Result,
     aac_ld_mps_config::Config,
     aac_ld_mps_decor::Mode,
-    aac_ld_mps_prepare::Shape,
     aac_ld_mps_prepare_facts as facts, aac_ld_mps_qmf,
     aac_ld_qmf::{Analysis, Synthesis},
     aac_sbr_qmf::Complex,
@@ -364,11 +363,6 @@ fn render_subbands<const B: usize>(
     gains: &[f64],
 ) -> Result<Vec<f64>> {
     let output = qmf.decode(bits, downmix, residuals)?;
-    if matches!(output.prepared.temporal_shape, Shape::Stp(_)) {
-        return Err(unsupported(
-            "LD-MPS active STP temporal PCM shaping is not yet implemented",
-        ));
-    }
     let mut planar = Vec::with_capacity(synthesis.len());
     for (c, bank) in synthesis.iter_mut().enumerate() {
         let combined = (0..slots)

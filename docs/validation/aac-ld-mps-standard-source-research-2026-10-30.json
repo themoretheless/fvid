@@ -43,5 +43,6 @@
     "ISO tree 7 leaves i_LFE uninitialized, then reads it in the unconditional channel exclusion at line 343.",
     "Pinned FDK stores STP history in STP_DEC per handle; its hybrid buffer offset and crossover must be translated explicitly before comparison with LD QMF bins."
   ],
-  "implementation_boundary": "Active STP remains refused. Do not silently patch the ISO oracle and claim unmodified-reference equivalence; resolve LD indexing and verify synthesis/navigation using owned synthetic media first."
+  "implementation_boundary_at_initial_research": "Active STP remains refused. Do not silently patch the ISO oracle and claim unmodified-reference equivalence; resolve LD indexing and verify synthesis/navigation using owned synthetic media first.",
+  "subsequent_resolution": "The low wet interval0..11 is zeroed before final mixing. The owned STP stage skips unused invalid reads and retains the defined active-bin formula exactly. The adapted ISO probe initializes absent tree7 indices and evaluates only populated tree5/6 energy groups; every adaptation is explicit. See aac-ld-mps-stp-reference-2026-10-30.json and aac-ld-mps-stp-tests-2026-10-30.json. This does not provide independent normative Annex B verification."
 }

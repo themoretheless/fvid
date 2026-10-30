@@ -217,7 +217,7 @@ fn pcm_chain_matches_reference_analysis_synthesis_order_and_all_fixed_gain_grids
     assert_eq!(native_order(4).unwrap(), [0, 3, 6, 7, 2, 5, 1, 4]);
 }
 #[test]
-fn late_active_stp_refusal_and_bad_pcm_roll_back_the_whole_pcm_chain() {
+fn active_stp_acceptance_and_bad_pcm_roll_back_the_whole_pcm_chain() {
     let r = root("aac-ld-mps-frame");
     let m: Value =
         serde_json::from_slice(&std::fs::read(r.join("manifest.json")).unwrap()).unwrap();
@@ -244,17 +244,16 @@ fn late_active_stp_refusal_and_bad_pcm_roll_back_the_whole_pcm_chain() {
     decoder
         .decode(&mut BitReader::new(frame(0)), &x, &res)
         .unwrap();
-    let saved = decoder.clone();
+    let mut replay = decoder.clone();
     let mut reader = BitReader::new(frame(1));
-    assert!(
-        decoder
-            .decode(&mut reader, &x, &res)
-            .unwrap_err()
-            .to_string()
-            .contains("STP temporal PCM shaping")
-    );
-    assert_eq!(reader.position(), 0);
-    assert_eq!(decoder, saved);
+    let expected = replay
+        .decode(&mut BitReader::new(frame(1)), &x, &res)
+        .unwrap();
+    let actual = decoder.decode(&mut reader, &x, &res).unwrap();
+    assert_eq!(actual, expected);
+    assert!(actual.samples.iter().any(|v| *v != 0.));
+    assert!(reader.position() > 0);
+    let saved = decoder.clone();
     let mut bad = x.clone();
     bad[0][0] = f64::NAN;
     assert!(

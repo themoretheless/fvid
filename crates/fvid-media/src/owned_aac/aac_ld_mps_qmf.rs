@@ -1,6 +1,6 @@
 //! Transactional spatial-frame -> M1 -> decorrelation -> W -> M2 QMF chain.
-//! Decoded residual QMF must be supplied. GES acts on dry rows here; fixed
-//! output gains, STP and PCM synthesis are downstream stages.
+//! Decoded residual QMF must be supplied. GES and STP act on dry/wet rows
+//! here; fixed output gains and PCM synthesis are downstream stages.
 use super::{
     Result, aac_ld_mps_assemble,
     aac_ld_mps_config::Config,
@@ -13,7 +13,8 @@ use super::{
 };
 #[derive(Clone, Debug, PartialEq)]
 pub struct Output {
-    /// GES configurations include guided shaping; prepared retains its signalling.
+    /// Temporal shaping is already applied. STP merges low wet bins into dry;
+    /// high wet bins carry their final gain. Combine dry+wet exactly once.
     pub dry: Samples,
     pub wet: Samples,
     pub prepared: Prepared,
@@ -22,6 +23,7 @@ pub struct Output {
 pub struct Decoder {
     config: Config,
     ges: Option<super::aac_ld_mps_ges::Decoder>,
+    stp: Option<super::aac_ld_mps_stp::Decoder>,
     matrices: aac_ld_mps_assemble::Decoder,
     decorrelators: Vec<Decorrelator>,
     qmf_bands: usize,
@@ -68,6 +70,14 @@ impl Decoder {
             } else {
                 None
             },
+            stp: if config.temporal_shape == 1 {
+                Some(super::aac_ld_mps_stp::Decoder::new(
+                    config.tree.code,
+                    qmf_bands,
+                )?)
+            } else {
+                None
+            },
             matrices,
             decorrelators,
             qmf_bands,
@@ -82,6 +92,9 @@ impl Decoder {
         if next.ges.is_some() && self.ges.is_some() {
             next.ges = self.ges.clone();
         }
+        if next.stp.is_some() && self.stp.is_some() {
+            next.stp = self.stp.clone();
+        }
         next.matrices = self.matrices.clone();
         next.matrices.reconfigure(config)?;
         if config.decorrelation == self.config.decorrelation {
@@ -92,6 +105,9 @@ impl Decoder {
     }
     pub fn reset(&mut self) {
         self.matrices.reset();
+        if let Some(stp) = &mut self.stp {
+            stp.reset();
+        }
         if let Some(ges) = &mut self.ges {
             ges.reset();
         }
@@ -179,7 +195,7 @@ impl Decoder {
             None,
             &routed.dry,
         )?;
-        let wet = aac_ld_mps_matrix_apply::apply(
+        let mut wet = aac_ld_mps_matrix_apply::apply(
             &matrices.wet,
             matrices.m2_layout,
             next.config.parameter_bands,
@@ -195,6 +211,14 @@ impl Decoder {
                 _ => return Err(invalid("unexpected STP frame in LD-MPS GES context")),
             };
             ges.apply(downmix, &mut dry, &wet, envelopes)?;
+        }
+        if let Some(stp) = &mut next.stp {
+            let flags = match &matrices.prepared.temporal_shape {
+                super::aac_ld_mps_prepare::Shape::Stp(f) => Some(f.as_slice()),
+                super::aac_ld_mps_prepare::Shape::Disabled => None,
+                _ => return Err(invalid("unexpected GES frame in LD-MPS STP context")),
+            };
+            stp.apply(&mut dry, &mut wet, flags)?;
         }
         let result = Output {
             dry,
@@ -215,6 +239,9 @@ impl Decoder {
         self.config.visit_retained(f)?;
         if let Some(ges) = &self.ges {
             ges.visit_retained(f)?;
+        }
+        if let Some(stp) = &self.stp {
+            stp.visit_retained(f)?;
         }
         self.matrices.visit_retained(f)?;
         f.vector(&self.decorrelators)?;
@@ -345,5 +372,55 @@ mod ges_context_tests {
             .unwrap();
         decoder.reset();
         assert_eq!(decoder.ges, fresh);
+    }
+    #[test]
+    fn stp_histories_survive_same_domain_grid_changes_and_restart_after_shape_changes() {
+        let mut config = Config::parse(include_bytes!(
+            "../../../../tests/fixtures/playback-errors/aac-eld-mps-core/tree7.ssc"
+        ))
+        .unwrap();
+        config.temporal_shape = 1;
+        let mut decoder = Decoder::new(&config, Mode::Complex).unwrap();
+        let fresh = decoder.stp.clone();
+        let mut dry = vec![
+            vec![
+                vec![
+                    Complex {
+                        re: 0.005,
+                        im: 0.001
+                    };
+                    64
+                ];
+                2
+            ];
+            8
+        ];
+        let mut wet = vec![vec![vec![Complex::default(); 64]; 2]; 8];
+        decoder
+            .stp
+            .as_mut()
+            .unwrap()
+            .apply(&mut dry, &mut wet, None)
+            .unwrap();
+        let warm = decoder.stp.clone();
+        assert_ne!(warm, fresh);
+        config.parameter_bands = 4;
+        config.ott_bands.fill(4);
+        decoder.reconfigure(&config, Mode::Complex).unwrap();
+        assert_eq!(decoder.stp, warm);
+        config.temporal_shape = 0;
+        decoder.reconfigure(&config, Mode::Complex).unwrap();
+        assert!(decoder.stp.is_none());
+        config.temporal_shape = 1;
+        decoder.reconfigure(&config, Mode::Complex).unwrap();
+        assert_eq!(decoder.stp, fresh);
+        decoder
+            .stp
+            .as_mut()
+            .unwrap()
+            .apply(&mut dry, &mut wet, None)
+            .unwrap();
+        decoder.reset();
+        assert_eq!(decoder.stp, fresh);
     }
 }

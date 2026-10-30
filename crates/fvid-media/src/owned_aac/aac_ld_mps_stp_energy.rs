@@ -105,12 +105,16 @@ impl EnergyTracker {
         *self = next;
         Ok(gains)
     }
+    pub(crate) fn visit_retained(&self, f: &mut Footprint) -> std::result::Result<(), String> {
+        f.vector(&self.groups)?;
+        f.vector(&self.dry)?;
+        f.vector(&self.wet)?;
+        f.vector(&self.previous)?;
+        Ok(())
+    }
     pub fn retained_payload_bytes(&self) -> Result<usize> {
         let mut f = Footprint::new();
-        f.vector(&self.groups).map_err(|e| invalid(&e))?;
-        f.vector(&self.dry).map_err(|e| invalid(&e))?;
-        f.vector(&self.wet).map_err(|e| invalid(&e))?;
-        f.vector(&self.previous).map_err(|e| invalid(&e))?;
+        self.visit_retained(&mut f).map_err(|e| invalid(&e))?;
         Ok(f.total())
     }
 }

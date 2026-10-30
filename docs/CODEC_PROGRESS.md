@@ -1,32 +1,53 @@
+## Native LD-MPS STP playback, 2026-10-30
+
+STP now runs in the owned full-complex QMF chain before PCM synthesis. Low wet bins0..11
+merge into dry before energy analysis; the defined ISO LD active-bin formula
+weights bins12..15 with BP[bin-7] and higher bins with the smoothed gain. The
+native output-row map and dry grouping cover all eight trees at32/64 bins.
+Disabled frame flags still advance energy/gain history. Reset, checkpoints,
+retained-memory accounting and same-domain grid changes include STP state;
+leaving temporal mode1 removes it and re-entering starts fresh.
+
+400 own twelve-frame MP4 movies cover plain ELD and coupled LD-SBR,480/512 core
+frames,23/9/4 parameter grids, warm-disabled and alternating flags, and40 SSC
+transition controls. ASC explicitly signals STP and ordinary first headers agree
+with it. Transition controls remain owned-API/robustness tests rather than strict
+baseline transport-conformance evidence. The previously failing acceptance movie
+reached the specific active-STP PCM refusal; that refusal is removed and its old
+test now expects PCM while retaining invalid-input rollback coverage.
+
+All400 movies pass native/owned PCM comparison, live playback, rewind/reset,
+forward/backward/EOF seeks and repeated ranges. Two own malformed movies fail on
+late trailing bytes and preserve core/SBR/STP/source history across retry and
+checkpoint restore. A separate qualified-stage assembly compares21,765,120 PCM
+samples; maximum difference is1.4551897610081549e-11. It is not an independent
+full-decoder oracle.
+
+A frozen adapted ISO component oracle covers16 programmes, all8 trees,32/64
+bins and104 slots each (including refresh boundaries33/65/97). Across1,038,336
+scalars the maximum difference is5.874768574387623e-9 at tolerance2e-7;
+85,436 real components differ from identity by more than1e-8. Disabled output
+and low-bin sums are exact; block splitting and checkpoint replay are exact.
+Malformed/nonfinite input and late bin0 overflow preserve all caller buffers and
+histories. Independent scalar-prefix and closed-form energy tests remain.
+
+The reference adaptations are explicit: final mixing skips the already-zero wet
+interval0..11, absent tree7 C/LFE indices initialize to-1, and tree5/6 process only
+the two populated dry-energy groups. The valid active-bin formula is unchanged.
+This is adapted-reference equivalence, not a claim that the original ISO C has
+no undefined behavior or that unavailable normative Annex B was independently
+checked. Frozen fixtures run without FFmpeg, a compiler or network access;
+reference compilation is an explicit separate generation step.
+
+Full gates: 1753 passed,0 failed,27 pre-existing ignored tests across
+media/root units and25 AAC/LD-MPS integration targets.
+
+See `docs/validation/aac-ld-mps-stp-reference-2026-10-30.json` and
+`docs/validation/aac-ld-mps-stp-tests-2026-10-30.json`. Other unqualified codec
+profiles/tools, nonzero time alignment and remaining broader codec gaps stay
+open; this closes the qualified native STP playback path only.
+
 ## Native LD-MPS guided envelope shaping (GES), 2026-10-30
-
-## LD-MPS STP scalar energy history — partial (2026-10-30)
-
-Added an owned, transactional scalar STP energy/gain tracker. Its old-energy
-refresh occurs before slots 33/65/97; damping, limiting and gain smoothing use
-per-instance state, with explicit reset and retained-payload accounting. It
-accepts preweighted energies and explicit dry-group assignments, and must run
-also when a frame disables shaping. Signal grouping, LD frequency weighting and
-mixing are not implemented by this component. Native STP playback remains an
-explicit refusal; this milestone is not playback/seek acceptance.
-
-The independently extracted ISO scalar prefix supplies 20 own synthetic
-programmes, 2,000 slots and 13,600 reference gains for trees 0..4. Its invalid
-final LD mixing loop is excluded, not repaired. The tree7 uninitialized channel
-indices and tree5/6 surplus uninitialized dry-energy rows are outside this
-oracle. Generator/compiler/network access is separate from ordinary tests.
-Closed-form tests cover clamp convergence and refresh ordering; invalid and
-overflowing input at a refresh boundary must preserve the complete history.
-Frozen-reference replay crosses all three refresh boundaries from a checkpoint.
-Validation: 585 media unit tests and the independent integration test passed;
-13,600 scalar gains have maximum absolute error 2.914e-7 (tolerance 2e-6).
-One pre-existing media unit test remains ignored.
-
-See `docs/validation/aac-ld-mps-standard-source-research-2026-10-30.json` and
-`docs/validation/aac-ld-mps-stp-energy-reference-2026-10-30.json`. Full normative
-Annex B is still unavailable in the inspected public previews; final LD mixing
-must be resolved before the existing PCM refusal is changed.
-
 
 GES now runs in the FVid-owned QMF chain after M2 and before synthesis. It
 tracks normalized downmix and dry+wet broadband energy, derives the signalled
@@ -36,8 +57,8 @@ signalling disables shaping, and is preserved across same-domain parameter-grid
 changes. Changing SSC from GES to disabled removes the context; enabling GES
 again starts fresh. Checkpoints, reset and retained-memory inspection include
 all owned envelope histories. Prepared metadata retains the signalled envelopes;
-the QMF dry output already includes GES processing. Active STP remains a specific
-unsupported PCM tool, with its old refusal regression narrowed accordingly.
+the QMF dry output already includes GES processing. The newer STP milestone
+above replaces its earlier PCM refusal.
 
 400 own twelve-frame movies cover all eight trees, plain 48-kHz ELD and coupled
 LD-SBR with 480/512-sample 24-kHz cores and 32/64-bin output. Matrix resolutions
