@@ -1,3 +1,38 @@
+## Residual ICC quantization and matrix application — component qualified,2026-10-31
+
+Parameter decoding now exposes the original coarse/fine flag per output set,
+including held/default and paired sets. The legacy fine-index API retains its
+behavior. Frame syntax carries the flag into preparation. Residual ICC adds the
+difference in that original domain before coarse-to-fine conversion; raw syntax
+and entropy history stay unchanged. Out-of-grid sums are invalid rather than
+saturated. Applying the physical correction a second time is idempotent.
+
+The explicit `assemble::Decoder::decode_residual_icc` entry point applies already
+decoded residual corrections before matrix interpolation, in one transaction.
+Shared ICC materializes per non-LFE OTT box; the original shared row remains
+available to siblings without corrections. A held final physical endpoint
+inherits the corrected last encoded row. Invalid later correction data preserves
+parser/smoothing/matrix contexts and the caller cursor.
+
+12 own programmes/84 frames compare1,568 corrected integer indices against
+unmodified ISO ecDataDec/mapIndexData.192 external-residual matrix controls cover
+all8 trees,4/9/23 parameter bands,32/64 QMF domains, shared/per-box ICC,
+coarse/fine and held/final endpoints.384 assembled frames match separately
+encoded ordinary fine controls, and all384 change relative to the uncorrected
+matrices.168 frames exercise shared ICC and552 OTT endpoints exercise held-row
+propagation. These matrix controls use owned assembly stages rather than an
+independent full decoder. The compressed native candidate's actual residual ICC
+prefix is also read separately and mapped to the expected physical table entries.
+
+Full gates: 1762 passed,0 failed,27 pre-existing ignored tests across
+media/root units and28 AAC/LD-MPS integration targets.
+
+This does not enable native residual playback. Source-window association,
+LD phase/bank qualification and native residual QMF dispatch/PCM/navigation
+acceptance remain open. Own fixture generation denies network/process APIs;
+ordinary tests use saved bytes only. See
+`docs/validation/aac-mps-residual-icc-tests-2026-10-31.json`.
+
 ## Residual MDCT-to-QMF and overlap — component qualified,2026-10-30
 
 Added owned full-complex64-bin MDCT-to-QMF projection for updates15/16/18/24/30/32.

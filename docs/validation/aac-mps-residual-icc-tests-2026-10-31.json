@@ -1,0 +1,99 @@
+{
+  "scope": "Residual ICC domain metadata and explicit matrix-component application. This does not enable native residual PCM playback or qualify LD phase/source dispatch.",
+  "gates": [
+    {
+      "gate": "media",
+      "status": 0,
+      "seconds": 28.40297794342041,
+      "log": "/tmp/fvid-residual-icc-gate-media.log",
+      "passed": 587,
+      "failed": 0,
+      "ignored": 1,
+      "log_sha256": "020f4034849515d90782e1927af81d8ad38675bd779bd78027c75239707cfaf7"
+    },
+    {
+      "gate": "root",
+      "status": 0,
+      "seconds": 280.8232891559601,
+      "log": "/tmp/fvid-residual-icc-gate-root.log",
+      "passed": 1061,
+      "failed": 0,
+      "ignored": 26,
+      "log_sha256": "9fa6d34c26e18cb6c13bfe9896f91f8af5fc467ae053c4634b5dac1bc21e1d55"
+    },
+    {
+      "gate": "integration",
+      "status": 0,
+      "seconds": 237.26261806488037,
+      "log": "/tmp/fvid-residual-icc-gate-integration.log",
+      "passed": 114,
+      "failed": 0,
+      "ignored": 0,
+      "log_sha256": "1584c6e89605c7a3bf777678d0e83b9085502429191f6155a7a68f4d70abf28a"
+    }
+  ],
+  "total_passed": 1762,
+  "total_failed": 0,
+  "preexisting_ignored": 27,
+  "integration_targets": [
+    "aac_eld_mps_core",
+    "aac_eld_mps_native",
+    "aac_eld_spatial_sbr",
+    "aac_eld_spatial_tail",
+    "aac_ld_mps_assemble",
+    "aac_ld_mps_config",
+    "aac_ld_mps_entropy",
+    "aac_ld_mps_frame",
+    "aac_ld_mps_ges",
+    "aac_ld_mps_grid",
+    "aac_ld_mps_inband",
+    "aac_ld_mps_matrix_apply",
+    "aac_ld_mps_parameters",
+    "aac_ld_mps_pcm",
+    "aac_ld_mps_prepare",
+    "aac_ld_mps_qmf",
+    "aac_ld_mps_residual",
+    "aac_ld_mps_route",
+    "aac_ld_mps_session",
+    "aac_ld_mps_stp",
+    "aac_ld_mps_stp_energy",
+    "aac_ld_mps_transport",
+    "aac_ld_mps_tree_matrix",
+    "aac_ld_mps_ttt",
+    "aac_ld_mps_ttt_tree",
+    "aac_ld_mps_upmix",
+    "aac_mps_mdct_qmf",
+    "aac_mps_residual_icc"
+  ],
+  "original_iso_parameter_reference": {
+    "frames": 84,
+    "exact_corrected_indices": 1568,
+    "quantization_metadata": "Independently generated known mode/coarse schedule; coarse metadata is not dumped by the C oracle.",
+    "legacy_api": "Same fine values and decoder state as decode_with_quantization."
+  },
+  "matrix_controls": {
+    "assembled_frames": 384,
+    "shared_frames": 168,
+    "held_ott_endpoints": 552,
+    "changed_relative_to_uncorrected": 384,
+    "oracle": "Separately encoded ordinary fine control streams, using owned qualified matrix assembly; not an independent full decoder."
+  },
+  "compressed_candidate": "All native candidate spatial frames are separately parsed; compressed residual ICC maps raw4 plus difference3 to index7 and value-0.99, preserving raw syntax/history. Native playback remains a separate refusal test.",
+  "lifecycle": [
+    "Coarse/fine paired and unpaired sets, hold/default transitions",
+    "Exact C index and bit-consumption comparison",
+    "Shared per-box materialization and idempotence",
+    "Corrected held final endpoint",
+    "Late invalid corrections preserve parser/smoothing/matrix contexts and caller cursor",
+    "Valid retry/checkpoint replay"
+  ],
+  "generation": "Own generation is byte-identical with socket/process APIs denied. External C extraction is explicit and separate from tests. Frozen tests need no FFmpeg, compiler or network.",
+  "fixture_sha256": {
+    "README.md": "8aecd318340bbf1eaef53bd99eddea224ed2af1de5e49fc1027bd03280a35b03",
+    "matrix-packets.bin": "ebd822631b73e529b729d9e76f4706249adf8df9667630196eda09df0f0bb859",
+    "matrix.json": "69c4f7a2d6933eddd6e6c10da7f8753bbd1215c2fb03d0f911895b11a80b89e6",
+    "parameters.bin": "fbece1557829bcd4f44954459d00820bc81da0bd42d1c7f772e3d2ae71654663",
+    "parameters.json": "097c8474eaf6f7826f3efaef1b6e9855dd559bb31c9f63747aae2f23177ff763",
+    "reference.json": "036fbd46b2b186b784e91fd3fc46eca208f603952fdd5902fe749a081455a42d"
+  }
+}

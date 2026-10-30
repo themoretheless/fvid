@@ -41,6 +41,8 @@ pub struct ParameterRows {
     pub kind: Kind,
     pub start_band: u8,
     pub values: Vec<Vec<i16>>,
+    /// Original quantization domain per encoded set, before coarse-to-fine.
+    pub coarse: Vec<bool>,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Smoothing {
@@ -123,12 +125,15 @@ impl Region {
                 ));
             }
         }
-        let values = self.state.decode(bits, slots, frame_slots, independent)?;
+        let decoded = self
+            .state
+            .decode_with_quantization(bits, slots, frame_slots, independent)?;
         Ok(ParameterRows {
             id: self.id.clone(),
             kind: self.kind,
             start_band: self.start,
-            values,
+            values: decoded.values,
+            coarse: decoded.coarse,
         })
     }
 }

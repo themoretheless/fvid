@@ -176,6 +176,24 @@ impl Decoder {
         *bits = reader;
         Ok(output)
     }
+    /// Assemble with already decoded residual ICC data in one transaction.
+    /// This does not decode residual AAC or supply residual QMF samples.
+    pub fn decode_residual_icc(
+        &mut self,
+        bits: &mut BitReader<'_>,
+        extension: &ExtensionValue,
+        residual: &super::aac_ld_mps_residual::Frame,
+    ) -> Result<Assembled> {
+        let mut next = self.clone();
+        let mut reader = bits.clone();
+        let prepared = next.physical.decode(&mut reader)?;
+        let corrected =
+            super::aac_ld_mps_residual_icc::apply(&next.config, extension, &prepared, residual)?;
+        let output = next.assemble(corrected)?;
+        *self = next;
+        *bits = reader;
+        Ok(output)
+    }
     fn assemble(&mut self, p: Prepared) -> Result<Assembled> {
         let config = &self.config;
         let tree = config.tree.code;
@@ -201,11 +219,18 @@ impl Decoder {
                     } else {
                         value(
                             &p,
-                            ParameterId::OttIcc(if config.one_icc == Some(true) {
-                                None
-                            } else {
-                                Some(b as u8)
-                            }),
+                            ParameterId::OttIcc(
+                                if config.one_icc == Some(true)
+                                    && !p
+                                        .parameters
+                                        .iter()
+                                        .any(|r| r.id == ParameterId::OttIcc(Some(b as u8)))
+                                {
+                                    None
+                                } else {
+                                    Some(b as u8)
+                                },
+                            ),
                             set,
                             band,
                         )?

@@ -119,6 +119,13 @@ fn expand(values: &[i16], groups: &[std::ops::Range<usize>]) -> Vec<i16> {
         .collect()
 }
 
+/// Mapped fine-domain values plus the original quantization domain of each set.
+/// Residual ICC correction is applied in that domain, without changing history.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Decoded {
+    pub values: Vec<Vec<i16>>,
+    pub coarse: Vec<bool>,
+}
 impl Parameters {
     /// The band region is fixed for this instance. Zero-width regions still
     /// carry data modes; unit-stride empty PCM consumes its flag but yields no
@@ -157,6 +164,17 @@ impl Parameters {
         frame_slots: u8,
         independent: bool,
     ) -> Result<Vec<Vec<i16>>> {
+        Ok(self
+            .decode_with_quantization(bits, slots, frame_slots, independent)?
+            .values)
+    }
+    pub fn decode_with_quantization(
+        &mut self,
+        bits: &mut BitReader<'_>,
+        slots: &[u8],
+        frame_slots: u8,
+        independent: bool,
+    ) -> Result<Decoded> {
         if !(1..=32).contains(&frame_slots)
             || !(1..=2).contains(&slots.len())
             || slots.iter().any(|&slot| slot >= frame_slots)
@@ -176,7 +194,7 @@ impl Parameters {
         b: &mut BitReader<'_>,
         slots: &[u8],
         independent: bool,
-    ) -> Result<Vec<Vec<i16>>> {
+    ) -> Result<Decoded> {
         let modes = (0..slots.len())
             .map(|_| b.read(2))
             .collect::<Result<Vec<_>>>()?;
@@ -246,6 +264,7 @@ impl Parameters {
             }
         }
         let mut rows = Vec::with_capacity(slots.len());
+        let mut coarse = Vec::with_capacity(slots.len());
         for (i, &mode) in modes.iter().enumerate() {
             match mode {
                 0 => {
@@ -260,12 +279,16 @@ impl Parameters {
                 _ => {}
             }
             rows.push(self.mapped.fine(self.kind));
+            coarse.push(self.mapped.coarse);
         }
         // LD has at most two sets. The only possible interpolated set is the
         // first; its left anchor is its retained row at the same slot, so the
         // interpolation fraction is zero. A final interpolated row was refused
         // above. Do not invent a virtual previous-frame time slot here.
-        Ok(rows)
+        Ok(Decoded {
+            values: rows,
+            coarse,
+        })
     }
 }
 

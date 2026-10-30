@@ -1,0 +1,10 @@
+{
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "original_source_sha256": "d9a8655b4e5efa1329d629f88bde962b640efe9d1a5c22f24f84df56eadfa64e",
+  "driver_sha256": "9d68cfaba3c0fdea7c5d644decfbf2823c902d2b29cc9a07fa16fcb3c5c67ae5",
+  "generator_sha256": "3a07e1e30db70062a42f6c775cd0f1ffcfd6446a533e6527a39204ffbf6a6fb4",
+  "input_sha256": "6217effebf0f71392ef4077240be1da25aea5fd74f8dd3530dcfcdebd9c8d2c1",
+  "stdout_sha256": "5b51f0ff7261faf4519cdf26dbd5bf6a902e9805b7a2b26b57684bbc003ed30b",
+  "frames": 84,
+  "scope": "Unmodified reference parameter mapping only. Shared-ICC per-box materialization and spatial matrix integration are separate owned tests. No residual PCM/playback claim."
+}
