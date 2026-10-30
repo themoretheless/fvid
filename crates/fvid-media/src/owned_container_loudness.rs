@@ -152,7 +152,10 @@ fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, Stri
 pub(crate) fn supports_plan(source: &Path, options: &CopyOptions) -> bool {
     match geometry(source, options) {
         Ok(_) => true,
-        Err(error) => error.starts_with("controlled memory budget exceeded:"),
+        // Resource admission failures belong to the owned execution route.
+        // Returning false would hide the refusal as an unsupported format.
+        Err(error) => error.starts_with("controlled memory budget exceeded:")
+            || matches!(error.as_str(), "MP4 packet exceeds budget" | "WebM packet exceeds budget"),
     }
 }
 pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {

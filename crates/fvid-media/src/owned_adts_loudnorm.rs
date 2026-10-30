@@ -119,7 +119,16 @@ pub fn plan_loudnorm(
     }
     let resolved = crate::owned_loudnorm::validate_request(args)?;
     crate::owned_adts_export::check_wave_metadata_budget(options)?;
-    let _ = crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options)?;
+    // Charge decoder plus output metadata without decoding packet contents.
+    let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+        std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?),
+        options.max_packet_bytes.min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+    ).map_err(|e| e.to_string())?;
+    crate::owned_aac::stream::check_adts_decode_admission(reader.audio_specific_config(), options)
+        .map_err(|e| e.to_string())?;
+    // Loudness preflight below validates configuration and encoded budgets.
+    // A generic decode plan also negotiates PCM by decoding the ADTS stream;
+    // normalization planning must leave packet-content validity to execution.
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
     let mut plan = crate::owned_adts_loudness::plan_loudness(source, &decode_options)?;
     plan.command = "loudnorm".into();

@@ -107,7 +107,9 @@ fn segment_packet_count(source: &Path, options: &fvid_media::CopyOptions) -> Res
             .max_controlled_bytes
             .map(|limit| limit / std::mem::size_of::<crate::container::webm::Packet>());
         let mut limits = crate::container::webm::Limits::default();
-        limits.packet_bytes = limits.packet_bytes.min(effective_packet_bytes);
+        // Count packet headers with the global parser/memory ceiling. The
+        // source inspector checks byte admission only on the reached prefix.
+        limits.packet_bytes = limits.packet_bytes.min(options.max_controlled_bytes.unwrap_or(usize::MAX));
         if let Some(maximum) = memory_packets {
             limits.packets = limits.packets.min(maximum);
         }
@@ -218,19 +220,19 @@ pub fn validate_concat_segments_with_options(
         }
         fvid_media::owned_budget::check_rss_budget(options).map_err(|e| invalid(&e))?;
         let mut geom_probe = default_probe.clone();
-        geom_probe.max_packets = rem_geom.filter(|&r| r > 0);
+        geom_probe.max_packets = if rem_geom == Some(0) { Some(1) } else { rem_geom };
+        if rem_geom == Some(0) {
+            // Unreached segments still need compatible stream headers, but the
+            // active encoded-packet cap must not be applied to their payloads.
+            geom_probe.max_packet_bytes = fvid_media::CopyOptions::default().max_packet_bytes;
+        }
         if !super::eligible_with_options(std::slice::from_ref(source), &geom_probe)? {
             return Err(invalid(
                 "PCM concat requires 2..=256 single audio inputs with matching sample rate and channels",
             ));
         }
-        let info = crate::native_probe::probe_with_options(source, &geom_probe)
+        crate::native_plan::audio_stream_index_from_metadata(source, None, &geom_probe)
             .map_err(|e| invalid(&e))?;
-        if info.streams.len() != 1 || info.streams[0].media_type != "audio" {
-            return Err(invalid(
-                "PCM concat requires 2..=256 single audio inputs with matching sample rate and channels",
-            ));
-        }
         let current = geometry_with_options(source, &geom_probe)?;
         if rem_geom != Some(0) {
             if expected_geometry.is_some_and(|g| g != current) {

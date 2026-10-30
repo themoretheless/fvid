@@ -2108,7 +2108,7 @@ pub fn trim_audio_pcm_with_controls(
         std::time::Duration::from_micros(to as u64),
     );
     let (index, allow_wave) = if crate::native_media::is_aac_trim_source_with_interval_and_options(source, selected, Some(interval), options)? {
-        (crate::native_plan::aac_trim_selection_with_options(source, selected, options).map_err(|e| invalid(&e))?, false)
+        (crate::native_plan::aac_trim_selection_with_interval_and_options(source, selected, Some(interval), options).map_err(|e| invalid(&e))?, false)
     } else {
         (crate::native_plan::audio_trim_selection_with_interval_and_options(source, selected, Some(interval), options).map_err(|e| invalid(&e))?, true)
     };

@@ -931,6 +931,15 @@ pub(crate) fn aac_trim_selection_with_options(
     selected: Option<usize>,
     options: &fvid_media::CopyOptions,
 ) -> Result<usize> {
+    aac_trim_selection_with_interval_and_options(source, selected, None, options)
+}
+
+pub(crate) fn aac_trim_selection_with_interval_and_options(
+    source: &std::path::Path,
+    selected: Option<usize>,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    options: &fvid_media::CopyOptions,
+) -> Result<usize> {
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
@@ -944,15 +953,9 @@ pub(crate) fn aac_trim_selection_with_options(
         return Err("controlled memory limit must be positive".into());
     }
     fvid_media::owned_budget::check_rss_budget(options)?;
-    let info=crate::native_probe::probe_with_options(source, options)?;
-    let index=match selected {
-        Some(index)=>index,
-        None if info.streams.len()==1=>info.streams[0].index,
-        None=>return Err("AAC-to-WAVE trim requires an explicit audio stream when other tracks exist".into()),
-    };
-    if !info.streams.iter().any(|s|s.index==index && s.media_type=="audio" && s.codec=="aac") {
-        return Err("selected trim stream is not AAC audio".into());
-    }
+    let index=audio_stream_index_from_metadata(source,selected,options)?;
+    crate::native_media::aac_source_info_selected_with_options(source,Some(index),interval,options)
+        .map_err(|e|e.to_string())?;
     Ok(index)
 }
 
@@ -967,6 +970,55 @@ pub fn audio_trim_selection_with_options(
     options: &fvid_media::CopyOptions,
 ) -> Result<usize> {
     audio_trim_selection_with_interval_and_options(source, selected, None, options)
+}
+
+// Selection needs stream headers, not a whole-source encoded packet probe.
+// Keep the source-wide "other streams require selection" rule while applying
+// caller packet limits later to the selected interval in the source inspector.
+pub(crate) fn audio_stream_index_from_metadata(
+    source: &std::path::Path,
+    selected: Option<usize>,
+    options: &fvid_media::CopyOptions,
+) -> Result<usize> {
+    if let Some(index) = selected { return Ok(index); }
+    use std::io::{Read, Seek, SeekFrom};
+    let mut input = std::io::BufReader::new(std::fs::File::open(source).map_err(|e|e.to_string())?);
+    let mut prefix = [0; 8];
+    let has_prefix = input.read_exact(&mut prefix).is_ok();
+    input.seek(SeekFrom::Start(0)).map_err(|e|e.to_string())?;
+    if has_prefix && (crate::container::adts::header(&prefix).is_some()
+        || matches!(&prefix[..4], b"RIFF" | b"RF64" | b"RIFX")) { return Ok(0); }
+    if has_prefix && crate::container::mp4::recognizes_prefix(&prefix) {
+        let reader = crate::container::mp4::Mp4Reader::open_indexed(input, crate::container::mp4::Limits {
+            metadata_bytes: crate::container::mp4::Limits::default().metadata_bytes
+                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+            ..Default::default()
+        }).map_err(|e|e.to_string())?;
+        if let Some(limit)=options.max_controlled_bytes && reader.estimated_index_payload_bytes().map_err(|e|e.to_string())?>limit {
+            return Err("controlled memory budget exceeded: MP4 index and metadata".into());
+        }
+        if reader.tracks().len()==1 && reader.refused().is_empty() { return Ok(0); }
+        return Err("audio-to-WAVE trim requires an explicit audio stream when other tracks exist".into());
+    }
+    if has_prefix && prefix.starts_with(&[0x1a,0x45,0xdf,0xa3]) {
+        let mut limits = crate::container::webm::Limits::default();
+        if let Some(limit)=options.max_controlled_bytes { limits.packets=limits.packets.min(limit/std::mem::size_of::<crate::container::webm::Packet>()); }
+        let map_index_limit = |error: crate::Error| {
+            if limits.packets < crate::container::webm::Limits::default().packets
+                && error.to_string().contains("WebM packet count exceeds limit") {
+                "controlled memory budget exceeded: Matroska packet index limit".to_owned()
+            } else { error.to_string() }
+        };
+        let mut reader=crate::container::webm::WebmReader::open(input,limits).map_err(map_index_limit)?;
+        reader.scan_all().map_err(map_index_limit)?;
+        if let Some(limit)=options.max_controlled_bytes && reader.estimated_index_payload_bytes().map_err(|e|e.to_string())?>limit {
+            return Err("controlled memory budget exceeded: Matroska index and metadata".into());
+        }
+        if reader.tracks.len()==1 {return Ok(0);}
+        return Err("audio-to-WAVE trim requires an explicit audio stream when other tracks exist".into());
+    }
+    let info = crate::native_probe::probe_with_options(source, options)?;
+    if info.streams.len()==1 {Ok(info.streams[0].index)}else{Err("audio-to-WAVE trim requires an explicit audio stream when other tracks exist".into())}
 }
 
 pub fn audio_trim_selection_with_interval_and_options(
@@ -988,12 +1040,7 @@ pub fn audio_trim_selection_with_interval_and_options(
         return Err("controlled memory limit must be positive".into());
     }
     fvid_media::owned_budget::check_rss_budget(options)?;
-    let info = crate::native_probe::probe_with_options(source, options)?;
-    let index = match selected {
-        Some(index) => index,
-        None if info.streams.len() == 1 => info.streams[0].index,
-        None => return Err("audio-to-WAVE trim requires an explicit audio stream when other tracks exist".into()),
-    };
+    let index = audio_stream_index_from_metadata(source, selected, options)?;
     crate::native_media::constant_audio_source_info_selected_with_interval_and_options(source, Some(index), interval, options).map_err(|e| e.to_string())?;
     Ok(index)
 }
@@ -1048,7 +1095,8 @@ pub fn trim_aac_with_options(
     options: &fvid_media::CopyOptions,
 ) -> Result<MediaPlan> {
     let selected = options.streams.first().copied();
-    let index=aac_trim_selection_with_options(source,selected,options)?;
+    let interval=(from>=0 && to>from).then(||(std::time::Duration::from_micros(from as u64),std::time::Duration::from_micros(to as u64)));
+    let index=aac_trim_selection_with_interval_and_options(source,selected,interval,options)?;
     if crate::native_export::is_adts_source(source).map_err(|e|e.to_string())? {
         return trim_adts_with_options(source,from,to,options);
     }
@@ -1602,10 +1650,9 @@ pub fn concat_mp4_matroska_with_options(
         return Err("controlled memory limit must be positive".into());
     }
     fvid_media::owned_budget::check_rss_budget(options)?;
-    if crate::container::mp4_concat::open_with_options(sources, options)
-        .map_err(|e| e.to_string())?
-        .is_none()
-    {
+    let compressed = crate::container::mp4_concat::open_with_options(sources, options)
+        .map_err(|e| e.to_string())?;
+    if compressed.is_none() {
         let mut default_opts = fvid_media::CopyOptions::default();
         default_opts.cancel = options.cancel.clone();
         if !crate::native_audio_mix::concat_eligible_with_options(sources, &default_opts)
@@ -1646,15 +1693,25 @@ pub fn concat_mp4_matroska_with_options(
             });
         }
         steps.push(PlanStep {action:"write".into(),detail:"owned float32 PCM .wav or Matroska .mka/.mkv, atomic publication without overwrite".into()});
+        let mut inspect = options.clone();
+        inspect.metadata_set.clear();inspect.metadata_delete.clear();
+        inspect.stream_metadata_set.clear();inspect.stream_metadata_delete.clear();
+        let streams = decode_audio_with_options(&sources[0], &Default::default(), &inspect)?.streams
+            .into_iter().map(|mut stream| {stream.disposition="decode_to_pcm".into();stream}).collect();
         return Ok(Some(MediaPlan {command:"concat".into(),input:sources[0].clone(),inputs:sources.to_vec(),
-            streams:crate::native_probe::probe_with_options(&sources[0], options)?.streams.into_iter().map(|s|PlanStream {
-                index:s.index,media_type:s.media_type,codec:s.codec,disposition:"decode_to_pcm".into(),
-            }).collect(),graph:None,
+            streams,graph:None,
             steps,
             notes}));
     }
-    let info=crate::native_probe::probe_with_options(&sources[0], options)?;
-    let selected = crate::container::mp4_matroska::selection(info.streams.len(), &options.streams)
+    // The concat admission already indexed every input and checked the active
+    // selected payload prefix. Reporting its stream headers must not run a new
+    // whole-file packet-budget probe over unselected tracks.
+    let first = compressed.as_ref().and_then(|segments|segments.first()).ok_or("missing admitted MP4 concat input")?;
+    let input_streams:Vec<PlanStream> = first.reader.tracks().iter().enumerate().map(|(index,track)| {
+        let codec=match &track.codec {b"avc1"|b"avc3"=>"h264",b"hvc1"|b"hev1"=>"hevc",b"mp4a"=>"aac",_=>return Err("unrepresented MP4 concat stream".to_string())};
+        Ok(PlanStream {index,media_type:if track.handler==*b"soun" {"audio"}else{"video"}.into(),codec:codec.into(),disposition:"copy".into()})
+    }).collect::<Result<_>>()?;
+    let selected = crate::container::mp4_matroska::selection(input_streams.len(), &options.streams)
         .map_err(|e| e.to_string())?;
     if options.metadata_set.len() + options.metadata_delete.len() > 64 {
         return Err("too many metadata mutations".into());
@@ -1734,7 +1791,7 @@ pub fn concat_mp4_matroska_with_options(
     let streams: Vec<_> = selected
         .iter()
         .map(|&idx| {
-            let s = &info.streams[idx];
+            let s = &input_streams[idx];
             PlanStream {
                 index: s.index,
                 media_type: s.media_type.clone(),

@@ -519,7 +519,15 @@ pub fn is_aac_source_with_metadata_limit(path: &std::path::Path, max_controlled_
                 ..Default::default()
             };
             let reader = crate::container::mp4::Mp4Reader::open_indexed(file, limits)
-                .map_err(std::io::Error::other)?;
+                .map_err(|error| {
+                    if limits.metadata_bytes < crate::container::mp4::Limits::default().metadata_bytes
+                        && error.to_string().contains("MP4 metadata exceeds budget")
+                    {
+                        std::io::Error::other("controlled memory budget exceeded: MP4 metadata exceeds budget")
+                    } else {
+                        std::io::Error::other(error)
+                    }
+                })?;
             if let Some(limit) = max_controlled_bytes
                 && reader
                     .estimated_index_payload_bytes()

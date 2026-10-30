@@ -387,6 +387,27 @@ pub(crate) fn extract_source_pcm_metadata_with_interval_packet_and_memory_limit(
     if cancel.is_some_and(|c| c.is_cancelled()) {
         return Err(invalid("media operation cancelled"));
     }
+    if crate::container::adts::header(&prefix).is_some() {
+        // Bare ADTS has no container tags. Validate only the active encoded
+        // prefix; a whole-file probe must not inspect an unreached packet just
+        // to discover that there is no metadata to copy.
+        if max_packet_bytes == Some(0) { return Err(invalid("packet byte limit must be positive")); }
+        if max_packets == Some(0) { return Err(invalid("packet work limit requires at least one packet")); }
+        if max_controlled_bytes == Some(0) { return Err(invalid("controlled memory limit must be positive")); }
+        let limit = max_packet_bytes.unwrap_or(fvid_media::CopyOptions::default().max_packet_bytes)
+            .min(max_controlled_bytes.unwrap_or(usize::MAX));
+        let mut reader = crate::container::adts::StreamReader::open_with_packet_limit(input, limit)?;
+        let rate = u128::from(reader.configuration().sample_rate);
+        let mut packets = 0u64;
+        while max_packets.is_none_or(|maximum| packets < maximum)
+            && interval.is_none_or(|(_, to)| u128::from(packets) * 1024 * 1_000_000_000 < to.as_nanos() * rate)
+        {
+            if cancel.is_some_and(|c| c.is_cancelled()) { return Err(invalid("media operation cancelled")); }
+            if reader.next_packet()?.is_none() { break; }
+            packets = packets.checked_add(1).ok_or_else(|| invalid("AAC packet count overflow"))?;
+        }
+        return Ok(default_matroska_pcm_metadata());
+    }
     let mut base = default_matroska_pcm_metadata();
     let mut probe_opts = fvid_media::CopyOptions::default();
     probe_opts.max_controlled_bytes = max_controlled_bytes;

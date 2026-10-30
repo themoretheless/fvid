@@ -50,6 +50,11 @@ fn selected_audio(source: &Path, options: &CopyOptions) -> Result<usize> {
     if crate::native_export::is_adts_source(source)? {
         return Ok(0);
     }
+    // Stream selection must use the admitted audio prefix, rather than a full
+    // container probe that also validates packets outside max_packets.
+    if let Ok(info) = crate::native_media::audio_source_info_selected_with_options(source, None, options) {
+        return Ok(info.stream_index);
+    }
     Ok(crate::native_probe::probe_with_options(source, options)
         .map_err(|e| crate::invalid(&e))?
         .streams
@@ -243,17 +248,24 @@ pub fn try_plan(
         default_opts.max_packets = options.max_packets;
         default_opts.max_rss_bytes = options.max_rss_bytes;
         default_opts.cancel = options.cancel.clone();
+        if default_opts.streams.is_empty() {
+            if let Ok(index) = selected_audio(source, &default_opts) {
+                default_opts.streams.push(index);
+            }
+        }
         if fvid_media::owned_container_loudnorm::supports_plan(
             source,
             Some(&resolved),
             &default_opts,
         ) {
+            let mut selected_options = options.clone();
+            selected_options.streams = default_opts.streams.clone();
             return Ok(Some(
                 fvid_media::owned_container_loudnorm::plan_loudnorm(
                     source,
                     Some(&resolved),
                     dual_pass,
-                    options,
+                    &selected_options,
                 )
                 .map_err(|e| crate::invalid(&e))?,
             ));
@@ -347,17 +359,24 @@ pub fn try_plan(
             default_opts.max_packets = options.max_packets;
             default_opts.max_rss_bytes = options.max_rss_bytes;
             default_opts.cancel = options.cancel.clone();
+            if default_opts.streams.is_empty() {
+                if let Ok(index) = selected_audio(source, &default_opts) {
+                    default_opts.streams.push(index);
+                }
+            }
             if fvid_media::owned_container_loudnorm::supports_plan(
                 source,
                 Some(&resolved),
                 &default_opts,
             ) {
+                let mut selected_options = options.clone();
+                selected_options.streams = default_opts.streams.clone();
                 return Ok(Some(
                     fvid_media::owned_container_loudnorm::plan_loudnorm(
                         source,
                         Some(&resolved),
                         dual_pass,
-                        options,
+                        &selected_options,
                     )
                     .map_err(|e| crate::invalid(&e))?,
                 ));
@@ -628,7 +647,16 @@ pub fn try_apply(
             .is_ok()
         });
     if !native_supported {
+        // Container normalizers require an explicit stream for multi-audio
+        // inputs; preserve loudnorm's default of the first audio stream.
+        let mut selected_options = options.clone();
+        if selected_options.streams.is_empty() {
+            if let Ok(index) = selected_audio(source, &default_opts) {
+                selected_options.streams.push(index);
+            }
+        }
         let mut plan_opts = default_opts;
+        plan_opts.streams = selected_options.streams.clone();
         plan_opts.max_controlled_bytes = options.max_controlled_bytes;
         plan_opts.max_packet_bytes = options.max_packet_bytes;
         plan_opts.max_packets = options.max_packets;
@@ -642,7 +670,7 @@ pub fn try_apply(
                     destination,
                     args,
                     dual_pass,
-                    options,
+                    &selected_options,
                 )
                 .map_err(|e| crate::invalid(&e))?,
             ));

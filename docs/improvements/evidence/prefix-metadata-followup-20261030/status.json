@@ -1,0 +1,35 @@
+{
+  "status": "verified",
+  "count_delta": 0,
+  "accepted_count": 418,
+  "follow_up_ids": [
+    "FVID-0255",
+    "FVID-0273",
+    "FVID-0274",
+    "FVID-0276",
+    "FVID-0279",
+    "FVID-0298"
+  ],
+  "confirmed": "All seven original gate failures, plus two expanded original failing tests, pass unchanged. Header selection, active-prefix budgets, combined metadata/decoder memory, truncated-tail execution refusal and successful prefix output are covered.",
+  "no_tests_modified": true,
+  "temporary_trace": "Removed from production sources; retained trace logs identify the full-probe callers.",
+  "integration": {
+    "suites": 29,
+    "passed": 175,
+    "failed": 0
+  },
+  "builds": {
+    "core": "passed",
+    "player": "passed"
+  },
+  "root_audio_tests": {
+    "full_module_passed": 14
+  },
+  "rejected_checks": [
+    "First expanded run:172 passed,3 failed; corrections requalified.",
+    "First root unit command used an empty filter:0 tests; not counted."
+  ],
+  "publication": "ready; remote ancestry and push pending",
+  "owned_admission_passed": 21,
+  "distinct_passed": 210
+}
