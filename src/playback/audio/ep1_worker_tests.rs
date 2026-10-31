@@ -579,3 +579,8 @@ fn arbitrary_aac_alignment_keeps_worker_audio_and_navigation() {
 fn nearest_ld_frequency_tables_keep_worker_audio_and_navigation() {
     check_corpus("aac-ld-nearest-rate");
 }
+
+#[test]
+fn inverse_filter_noise_range_controls_keep_worker_audio_and_navigation() {
+    check_corpus("aac-eld-sbr-noise-range");
+}

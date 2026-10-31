@@ -19,7 +19,9 @@ pub fn envelope(level: i16, coarse: bool) -> Result<f64> {
 /// Quantized noise-to-signal ratio: 2^(6-Q), with normative Q in 0..=30.
 pub fn noise(level: i16) -> Result<f64> {
     if !(0..=30).contains(&level) {
-        return Err(invalid("SBR noise level exceeds normative range"));
+        return Err(invalid(&format!(
+            "SBR noise level exceeds normative range: {level}"
+        )));
     }
     power(6.0 - f64::from(level))
 }

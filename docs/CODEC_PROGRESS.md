@@ -1,3 +1,23 @@
+## Separate ISO LD-SBR admission and Q31 boundary, 2026-10-31
+
+Audited all26 public `er_eld_sbr_*` inputs with the normal edited-track playback
+reader.20 decode completely;all six inverse-filter inputs fail specifically on
+noise Q31. AAC2009 section4.6.18.3.6 limits reconstructed noise to0..30;original
+FDK uses a different0..35 robustness clamp. No guessed widening or clamp is
+introduced. Production diagnostics now expose the offending reconstructed value.
+
+Two own480/512 controls and two CRC-correct Q31 counterexamples (both containers)
+qualify frozen PCM,strict refusal,transactional retry,worker playback/seek/rewind
+and timestamps. Refusal is explicitly not intended-playback acceptance.601
+scoped tests pass,one pre-existing ignored. The optional checksum-pinned ISO
+admission tool reports all failures and exits nonzero;it is outside normal tests.
+All128 separate ISO ELD core inputs decode completely in the discovery run and
+a second offline run with a frozen native binary;this is admission,not waveform
+conformance. Original FDK also admits all AUs of the six Q31 LD-SBR inputs
+without concealment flags,confirming a real decoder-policy difference. Raw
+packet export now supports edited constant-description tracks while retaining
+the PCM-mode edit guard. Codec-gap objective stays open. See [evidence](validation/aac-eld-sbr-noise-range-2026-10-31.md).
+
 ## AAC-LD nearest-defined rate tables, 2026-10-31
 
 Fixed a real ISO16-kHz core-admission failure using the nearest-defined table

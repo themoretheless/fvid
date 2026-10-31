@@ -1,6 +1,7 @@
 //! Decode unedited, constant-description MP4 AAC packets with either owned
 //! spatial decorrelator. Usage: aac_spatial_reference real|complex|packets INPUT OUTPUT.
 //! `packets` writes bounded length-prefixed ASC/AUs for optional external probes.
+//! Packet export intentionally ignores container edits; it exports no PCM/timeline.
 //! This numerical reference probe publishes raw decoder PCM, not player edits,
 //! priming compensation, a delay search or an automatic conformance verdict.
 use fvid_media::owned_aac::{AacDecodeOptions, NativeAacDecoder, aac_ld_mps_decor::Mode};
@@ -34,7 +35,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let index = tracks[0];
     let track = &reader.tracks()[index];
     track.ensure_constant_description()?;
-    if !track.edits.is_empty() {
+    let ignored_edits = track.edits.len();
+    if mode.is_some() && ignored_edits != 0 {
         return Err("reference probe requires an unedited AAC track".into());
     }
     let count = track.samples.len();
@@ -53,7 +55,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             output.write_all(&packet)?;
         }
         output.flush()?;
-        println!("packets={count} format=FVIDAAC1");
+        println!("packets={count} format=FVIDAAC1 ignored_edits={ignored_edits}");
         return Ok(());
     }
     let mode = mode.unwrap();

@@ -1,5 +1,13 @@
 # Audio Implementation Status
 
+All128 separately audited ISO ELD core inputs decode completely through the
+presented audio reader in two runs. This is admission,not waveform conformance.
+Separate ISO LD-SBR admission:20/26 inputs decode through presented playback;
+six inverse-filter inputs fail on reconstructed noise Q31. Known AAC2009
+requirements specify0..30,while FDK applies a bounded robustness clamp. This
+conflict remains unresolved; strict own refusal tests are not acceptance. See
+validation/aac-eld-sbr-noise-range-2026-10-31.md.
+
 AAC-LD now applies nearest-defined band/TNS tables at low/high AAC rates,
 including16 kHz. 360 own programmes (720 MP4/Matroska movies) cover frozen-core
 PCM,spatial composition and worker playback/seek/rewind. All50 public ISO

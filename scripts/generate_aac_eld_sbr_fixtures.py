@@ -95,7 +95,7 @@ def reconstruct(low,slots,noise,mode='base',channel=0,geometry=None):
                 gain_history=[gain[:]]+gain_history[:3];noise_history=[q[:]]+noise_history[:3]
     return output
 
-def sbr_bits(channels,nhigh,nlow,slots,frame,protected,mode='base',categories=False):
+def sbr_bits(channels,nhigh,nlow,slots,frame,protected,mode='base',categories=False,noise_level=None):
     coupled=channels==2 and mode.startswith('coupled')
     syntax,borders,_,coarse,fine=grid(mode,slots,frame)
     count=len(borders)-1;nq=1 if count==1 else 2
@@ -105,7 +105,7 @@ def sbr_bits(channels,nhigh,nlow,slots,frame,protected,mode='base',categories=Fa
     for ch in range(channels):
         balance=coupled and ch==1
         e=(10 if mode=='coupled-pan'else 12)if balance else (1 if coarse else 2)
-        q=(4 if mode=='coupled-pan'else 6)if balance else 7
+        q=(4 if mode=='coupled-pan'else 6)if balance else (7 if noise_level is None else noise_level)
         bands=nhigh if fine else nlow
         envelopes.append(''.join(entropy_row(([0]*bands if temporal else [e]+[0]*(bands-1)),temporal,coarse,balance,False)for _ in range(count)))
         noises.append(''.join(entropy_row([0 if temporal else q],temporal,False,balance,True)for _ in range(nq)))
