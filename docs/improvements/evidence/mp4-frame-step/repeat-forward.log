@@ -1,0 +1,18 @@
+RUN 0
+
+running 1 test
+VideoToolbox: session creation failed (-12906); using the software VP9 decoder
+forward case="cfr.mp4" from=0
+forward case="cfr.mp4" from=1
+
+thread 'player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused' (32429687) panicked at src/player_mp4_frame_step_tests.rs:10:111:
+frame operation stalled: intervalSome((20, 40, 1000)) step1 endedfalse bufferingtrue
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... FAILED
+
+failures:
+
+failures:
+    player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1087 filtered out; finished in 9.01s

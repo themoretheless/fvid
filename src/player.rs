@@ -3740,28 +3740,50 @@ impl Player {
 
     /// Show exactly one more frame, like VLC's next-frame key. Playback is
     /// paused first; the decoder runs just long enough to hand over the frame.
-    fn step_frame(&mut self, back: bool) {
+    fn step_frame(&mut self, forward: bool) {
         if self.playback.is_none() {
-            if self.item_open() {
-                self.show_osd("No picture");
-            }
+            if self.item_open() { self.show_osd("No picture"); }
             return;
         }
-        if !self.paused && !self.ended {
+        if !self.paused {
             self.paused = true;
-            if let Some(audio) = &self.audio {
-                audio.pause();
-            }
+            if let Some(audio) = &self.audio { audio.pause(); }
+        }
+        if forward && self.ended {
+            // A manual step at EOF holds the last picture and never advances
+            // the playlist or waits for a frame that cannot arrive.
+            self.step = 0;
+            self.buffering = false;
+            return;
         }
         self.ended = false;
-        if back {
-            let period = self.period;
-            self.jump(period, false);
+        if !forward {
+            // No previous picture exists yet. Show the first picture and park
+            // the producer instead of leaving a paused black window.
+            if self.interval.is_none() {
+                if let Some(playback) = &self.playback { playback.play(); }
+                self.step = 1;
+                self.buffering = true;
+                return;
+            }
+            if !self.seekable { return; }
+            let target = self.interval.and_then(|(start, _, scale)| {
+                if scale == 0 { return None; }
+                // Last representable nanosecond strictly before this picture.
+                // Using the current period fails for both CFR and VFR, and
+                // subtracting a source tick before rounding loses fractional ticks.
+                let nanos = start.checked_mul(1_000_000_000)?
+                    .div_ceil(u128::from(scale)).saturating_sub(1);
+                Some(Duration::new(u64::try_from(nanos / 1_000_000_000).ok()?, (nanos % 1_000_000_000) as u32))
+            }).or_else(|| self.timeline().0.map(|end| end.saturating_sub(self.period)));
+            if let Some(target) = target {
+                self.seek_time(target);
+                self.step = 1;
+                self.show_osd(clock(target));
+            }
             return;
         }
-        if let Some(playback) = &self.playback {
-            playback.play();
-        }
+        if let Some(playback) = &self.playback { playback.play(); }
         self.step = self.step.saturating_add(1);
         self.buffering = true;
     }
@@ -3900,6 +3922,7 @@ impl Player {
             return;
         }
         let stepping = self.step > 0;
+        let stepping_from_picture = stepping && self.presented.is_some();
         if self.paused && !self.seek_preview && !stepping {
             return;
         }
@@ -3927,7 +3950,19 @@ impl Player {
         }
         // A queue carries on by itself; the last picture of the last item is
         // where a single file stops.
-        if ran_out && !stepping {
+        if ran_out {
+            if stepping {
+                self.step = 0;
+                self.buffering = false;
+                self.seek_preview = false;
+                self.seek_target = None;
+                self.loading_since = None;
+                self.paused = true;
+                self.ended = true;
+                if let Some(playback) = &self.playback { playback.pause(); }
+                if let Some(audio) = &self.audio { audio.pause(); }
+                return;
+            }
             self.continue_queue();
         }
         let now = Instant::now();
@@ -3935,8 +3970,9 @@ impl Player {
             && let Some(frame) = &self.queued
         {
             // A decoded seek picture is ready to show even while future
-            // read-ahead is pending. Keep the lead requirement for startup.
-            if !self.seek_preview && !self.spool_primed() {
+            // read-ahead is pending. A manual step also needs only this
+            // picture; keep the lead requirement for continuous startup.
+            if !stepping && !self.seek_preview && !self.spool_primed() {
                 ctx.request_repaint();
                 return;
             }
@@ -4006,7 +4042,7 @@ impl Player {
             let time_ready = stepping
                 || (self.audio.is_some() && !self.audio_ended)
                 || now + tolerance >= self.deadline;
-            let av_ready = self.frame_ready_for_sync(frame);
+            let av_ready = stepping || self.frame_ready_for_sync(frame);
             if time_ready && av_ready {
                 let mut frame = self.queued.take().unwrap();
                 self.presented_source = Some(frame.clone());
@@ -4054,6 +4090,19 @@ impl Player {
                 // discards expired pictures instead of slowing the timeline.
                 let period = paced_period(frame.period, self.rate_milli);
                 self.presented = Some(frame);
+                if stepping_from_picture {
+                    // Sound stays paused while walking pictures. Prepare it at
+                    // the shown picture's start so an explicit resume agrees
+                    // with the visual clock, without emitting preroll audio.
+                    let target = self.interval.and_then(|(start, _, scale)| {
+                        if scale == 0 { return None; }
+                        let nanos = start.checked_mul(1_000_000_000)? / u128::from(scale);
+                        Some(Duration::new(u64::try_from(nanos / 1_000_000_000).ok()?, (nanos % 1_000_000_000) as u32))
+                    });
+                    if let (Some(target), Some(audio)) = (target, &mut self.audio) {
+                        if audio.position() != target { audio.seek(target); }
+                    }
+                }
                 self.deadline = next_frame_deadline(self.deadline, period, now, stepping);
                 if stepping {
                     self.step -= 1;
@@ -12816,3 +12865,7 @@ mod elementary_programme_factory_regressions {
         std::fs::remove_dir_all(directory).unwrap();
     }
 }
+
+#[cfg(test)]
+#[path = "player_mp4_frame_step_tests.rs"]
+mod mp4_frame_step_regressions;

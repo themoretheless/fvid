@@ -1,0 +1,42 @@
+{
+  "root_unique_passed": 340,
+  "root_duplicate_events": 12,
+  "root_overlap_names": [
+    "playback_native::tests::webm_signature_never_enters_mp4_parser",
+    "player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek",
+    "player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm",
+    "player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture",
+    "player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture",
+    "player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture",
+    "player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused",
+    "player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent",
+    "player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead",
+    "player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture",
+    "player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist",
+    "player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks"
+  ],
+  "shared_root_media_tests": [
+    "comparing_and_scaling_large_fractions_does_not_multiply_denominators",
+    "normalization_origins_keep_signed_fractional_output_phase",
+    "source_phase_and_signed_preroll_survive_fractional_container_clocks"
+  ],
+  "distinct_passed": 1475,
+  "ignored_by_gate": {
+    "integration": [],
+    "root-mp4": [
+      "player_gpu::tests::hardware_export_copies_mp4_audio_with_gapless_timing"
+    ],
+    "root-webm": [],
+    "player-units": [
+      "player::gpu_option_tests::metal_player_presents_shared_main10_and_can_snapshot_it",
+      "player::http_input_tests::native_player_hls_decodes_all_frames_and_seeks",
+      "player::http_input_tests::native_player_http_input_retains_file_for_reopen_and_seek"
+    ],
+    "media": [
+      "owned_exposure::integer_conversion_gap::complete_integer_float_rgb_pipeline_matches_reference"
+    ],
+    "core-check": [],
+    "player-check": []
+  },
+  "note": "Focused checks and 40 repeated runs are supporting evidence, not additional distinct checks or improvement IDs."
+}

@@ -1,0 +1,6 @@
+{
+  "src/player.rs": "a585762a3c795f9cd55adb929532f069ac957736d4379ce4b24e6925a2b7f20a",
+  "src/player_mp4_frame_step_tests.rs": "34ebb0ede7fa3da1e2baf64e74d8068490d9d1bb614af684b3fd56b35fe72b9f",
+  "scripts/generate_mp4_frame_step.py": "b5bac9cfc50a55eb2ce9f8fda3abc09ab03bfbbc6289a0dc871c2d08d6cb5f48",
+  "tests/fixtures/playback-errors/mp4-frame-step/manifest.json": "ab5c3243102f143cff3150a10b0703546a6ffeca7c6e55c4c21bff9134c2a836"
+}

@@ -1,0 +1,108 @@
+//! Exercise keyboard transport through the real native decoder and UI presenter.
+use super::*;
+use std::io::Cursor;
+fn root()->PathBuf{PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/mp4-frame-step")}
+fn bytes(n:&str)->Vec<u8>{std::fs::read(root().join(n)).unwrap()}
+fn cases()->Vec<serde_json::Value>{serde_json::from_slice::<serde_json::Value>(&bytes("manifest.json")).unwrap()["cases"].as_array().unwrap().clone()}
+fn tick(p:&mut Player,ctx:&egui::Context){let mut out=ctx.run_ui(Default::default(),|ui|p.present(ui.ctx()));out.textures_delta.clear();}
+fn settle(p:&mut Player,ctx:&egui::Context){
+ let until=Instant::now()+Duration::from_secs(5);
+ while p.presented.is_none()||p.buffering||p.seek_preview||p.step>0{assert!(p.error.is_none(),"{:?}",p.error);assert!(Instant::now()<until,"frame operation stalled: interval{:?} step{} ended{} buffering{}",p.interval,p.step,p.ended,p.buffering);tick(p,ctx);std::thread::sleep(Duration::from_millis(1));}
+}
+fn open(c:&serde_json::Value,ctx:&egui::Context)->Player{
+ let mut p=Player{queue:vec![root().join(c["file"].as_str().unwrap())],no_audio:true,asynchronous_open:false,start_paused:true,..Default::default()};p.play_index(0);settle(&mut p,ctx);assert!(p.paused);p
+}
+fn inside(c:&serde_json::Value,i:usize)->Duration{
+ let ticks=c["pts"][i].as_u64().unwrap()+c["durations"][i].as_u64().unwrap()/2;
+ Duration::from_nanos(ticks*1_000_000_000/c["scale"].as_u64().unwrap())
+}
+fn references(c:&serde_json::Value)->Vec<Vec<u8>>{
+ let mut r=NativeReader::software(Cursor::new(bytes(c["file"].as_str().unwrap())),32<<20).unwrap();let mut out=Vec::new();
+ while let Some(f)=r.read_frame_raw().unwrap(){out.push(f.into_rgb(32<<20).unwrap());}assert_eq!(out.len(),5);out
+}
+fn at(p:&Player,c:&serde_json::Value,i:usize,rgb:&[Vec<u8>]){
+ let start=c["pts"][i].as_u64().unwrap();let end=start+c["durations"][i].as_u64().unwrap();
+ assert_eq!(p.interval,Some((u128::from(start),u128::from(end),c["scale"].as_u64().unwrap()as u32)),"{} expected frame{i}",c["file"]);
+ assert_eq!(display_rgb(p.presented.as_ref().unwrap()).unwrap(),rgb[i],"{} frame{i}pixels",c["file"]);
+ assert_eq!(p.presented.as_ref().unwrap().generation,p.playback.as_ref().unwrap().generation());
+}
+fn key(p:&mut Player,ctx:&egui::Context,back:bool){
+ let modifiers=egui::Modifiers{shift:back,..Default::default()};
+ let mut events:Vec<_>=[true,false].into_iter().map(|pressed|egui::Event::Key{key:egui::Key::E,physical_key:None,pressed,repeat:false,modifiers}).collect();
+ events.insert(0,egui::Event::ModifiersChanged(modifiers));
+ let mut out=ctx.run_ui(egui::RawInput{events,..Default::default()},|ui|{
+  let controls=controls_pressed(ui.ctx());assert_eq!(controls.iter().filter(|c|matches!(c,Control::Frame(_))).count(),1);
+  assert!(controls.iter().any(|c|matches!(c,Control::Frame(forward)if *forward==!back)));
+  for c in controls{p.apply(c);}
+ });out.textures_delta.clear();
+}
+#[test]
+fn authored_mp4_native_controls_keep_exact_frames_and_seek(){
+ for c in cases(){let mut r=crate::playback_mp4::Mp4VideoReader::open_software(Cursor::new(bytes(c["file"].as_str().unwrap())),Default::default(),32<<20).unwrap();
+  for i in 0..5{let f=r.read_frame().unwrap().unwrap();assert_eq!((f.sample_index,f.presentation_time.ticks,f.duration.ticks),(i,c["pts"][i].as_i64().unwrap(),c["durations"][i].as_i64().unwrap()));let pixels:Vec<_>=f.picture.y.iter().chain(&f.picture.cb).chain(&f.picture.cr).flat_map(|x|x.to_le_bytes()).collect();assert_eq!(pixels,bytes(&format!("frame-{}.yuv16",i%3)));}assert!(r.read_frame().unwrap().is_none());
+  let rgb=references(&c);let mut n=NativeReader::software(Cursor::new(bytes(c["file"].as_str().unwrap())),32<<20).unwrap();for i in 0..5{assert_eq!(n.seek_raw(inside(&c,i)).unwrap().unwrap().into_rgb(32<<20).unwrap(),rgb[i]);}
+ }
+}
+#[test]
+fn keyboard_bindings_preserve_forward_and_backward_intent(){
+ let ctx=egui::Context::default();for back in [false,true]{let mut p=Player::default();key(&mut p,&ctx,back);}
+}
+#[test]
+fn e_advances_exactly_one_frame_and_stays_paused(){
+ for c in cases(){let ctx=egui::Context::default();let rgb=references(&c);let mut p=open(&c,&ctx);key(&mut p,&ctx,false);settle(&mut p,&ctx);at(&p,&c,1,&rgb);for i in [0,1,3]{p.seek_time(inside(&c,i));settle(&mut p,&ctx);at(&p,&c,i,&rgb);key(&mut p,&ctx,false);settle(&mut p,&ctx);assert!(p.paused);at(&p,&c,i+1,&rgb);}}
+}
+#[test]
+fn shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks(){
+ for c in cases(){let ctx=egui::Context::default();let rgb=references(&c);let mut p=open(&c,&ctx);for i in [1,2,3]{p.seek_time(inside(&c,i));settle(&mut p,&ctx);at(&p,&c,i,&rgb);key(&mut p,&ctx,true);settle(&mut p,&ctx);assert!(p.paused);at(&p,&c,i-1,&rgb);}}
+}
+#[test]
+fn backward_at_the_first_picture_holds_the_first_picture(){
+ for c in cases(){let ctx=egui::Context::default();let rgb=references(&c);let mut p=open(&c,&ctx);key(&mut p,&ctx,true);settle(&mut p,&ctx);assert!(p.paused);at(&p,&c,0,&rgb);}
+}
+#[test]
+fn pending_step_at_eof_finishes_without_advancing_the_playlist(){
+ let c=cases().remove(0);let ctx=egui::Context::default();let rgb=references(&c);let mut p=open(&c,&ctx);p.queue.push(root().join("vfr.mp4"));p.seek_time(inside(&c,4));settle(&mut p,&ctx);at(&p,&c,4,&rgb);
+ // Isolate the existing pending-forward-step state from keyboard polarity.
+ p.playback.as_ref().unwrap().play();p.step=1;p.buffering=true;
+ let until=Instant::now()+Duration::from_secs(5);while !p.ended||p.step>0||p.buffering{assert!(p.error.is_none(),"{:?}",p.error);assert!(Instant::now()<until,"EOF frame-step stalled");tick(&mut p,&ctx);std::thread::sleep(Duration::from_millis(1));}
+ assert!(p.paused);at(&p,&c,4,&rgb);assert_eq!(p.index,0);
+}
+#[test]
+fn backward_after_natural_eof_pauses_on_previous_picture(){
+ let c=cases().remove(1);let ctx=egui::Context::default();let rgb=references(&c);let mut p=open(&c,&ctx);p.seek_time(inside(&c,4));settle(&mut p,&ctx);p.toggle_pause();
+ let until=Instant::now()+Duration::from_secs(5);while !p.ended{assert!(p.error.is_none());assert!(Instant::now()<until,"natural EOF stalled");tick(&mut p,&ctx);std::thread::sleep(Duration::from_millis(1));}
+ key(&mut p,&ctx,true);settle(&mut p,&ctx);assert!(p.paused);at(&p,&c,3,&rgb);
+}
+
+struct ClockDevice{
+ pcm:std::sync::Arc<std::sync::Mutex<Vec<u8>>>,resumes:std::sync::Arc<std::sync::atomic::AtomicUsize>,at:Duration,
+}
+impl crate::audio::AudioBackend for ClockDevice{
+ fn start(&mut self,s:crate::audio::AudioSpec)->Result<(),crate::audio::AudioError>{assert_eq!((s.sample_rate,s.channels),(8000,1));Ok(())}
+ fn push(&mut self,p:crate::audio::AudioPacket)->Result<(),crate::audio::AudioError>{self.at=p.presentation_time()+Duration::from_nanos(p.data.len()as u64/4*125000);self.pcm.lock().unwrap().extend(p.data);Ok(())}
+ fn position(&self)->Duration{self.at}
+ fn flush(&mut self,at:Duration)->Result<(),crate::audio::AudioError>{self.at=at;self.pcm.lock().unwrap().clear();Ok(())}
+ fn pause(&mut self)->Result<(),crate::audio::AudioError>{Ok(())}
+ fn resume(&mut self)->Result<(),crate::audio::AudioError>{self.resumes.fetch_add(1,std::sync::atomic::Ordering::SeqCst);Ok(())}
+ fn stop(&mut self)->Result<(),crate::audio::AudioError>{Ok(())}
+}
+fn sound()->(crate::audio_thread::AudioPlayback,std::sync::Arc<std::sync::Mutex<Vec<u8>>>,std::sync::Arc<std::sync::atomic::AtomicUsize>){
+ let source=crate::playback_wav::WavAudioReader::open(Cursor::new(bytes("sound.wav")),Default::default()).unwrap();
+ let pcm=std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));let resumes=std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));let device=ClockDevice{pcm:pcm.clone(),resumes:resumes.clone(),at:Duration::ZERO};
+ (crate::audio_thread::AudioPlayback::start(Box::new(source),move||Box::new(device)),pcm,resumes)
+}
+fn sound_at(a:&crate::audio_thread::AudioPlayback,target:Duration){let until=Instant::now()+Duration::from_secs(5);while a.position()!=target{assert!(Instant::now()<until,"audio anchor {:?} expected{target:?}",a.position());if let Some(crate::audio_thread::AudioEvent::Error(e))=a.poll(){panic!("{e}");}std::thread::sleep(Duration::from_millis(1));}}
+fn sound_ended(a:&crate::audio_thread::AudioPlayback){let until=Instant::now()+Duration::from_secs(5);loop{assert!(Instant::now()<until);match a.poll(){Some(crate::audio_thread::AudioEvent::Ended(g))if g==a.generation()=>break,Some(crate::audio_thread::AudioEvent::Error(e))=>panic!("{e}"),_=>{}}std::thread::sleep(Duration::from_millis(1));}}
+#[test]
+fn authored_paused_audio_seek_and_resume_control_keeps_exact_pcm(){
+ let(mut a,pcm,resumes)=sound();a.seek(Duration::from_millis(100));sound_at(&a,Duration::from_millis(100));assert!(pcm.lock().unwrap().is_empty());assert_eq!(resumes.load(std::sync::atomic::Ordering::SeqCst),0);a.play();sound_ended(&a);assert_eq!(*pcm.lock().unwrap(),bytes("sound-tail.f32le"));assert_eq!(resumes.load(std::sync::atomic::Ordering::SeqCst),1);
+}
+#[test]
+fn paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture(){
+ let c=cases().remove(1);let ctx=egui::Context::default();let rgb=references(&c);let mut p=open(&c,&ctx);p.seek_time(inside(&c,1));settle(&mut p,&ctx);at(&p,&c,1,&rgb);
+ let(a,pcm,resumes)=sound();p.audio=Some(a);p.audio_ended=false;
+ // Isolate a pending forward step from keyboard polarity,with sound paused at0.
+ p.playback.as_ref().unwrap().play();p.step=1;p.buffering=true;settle(&mut p,&ctx);at(&p,&c,2,&rgb);assert!(p.paused);sound_at(p.audio.as_ref().unwrap(),Duration::from_millis(100));assert!(pcm.lock().unwrap().is_empty());assert_eq!(resumes.load(std::sync::atomic::Ordering::SeqCst),0);
+ key(&mut p,&ctx,true);settle(&mut p,&ctx);at(&p,&c,1,&rgb);sound_at(p.audio.as_ref().unwrap(),Duration::from_millis(20));assert!(pcm.lock().unwrap().is_empty());assert_eq!(resumes.load(std::sync::atomic::Ordering::SeqCst),0);
+ key(&mut p,&ctx,false);settle(&mut p,&ctx);at(&p,&c,2,&rgb);sound_at(p.audio.as_ref().unwrap(),Duration::from_millis(100));assert!(pcm.lock().unwrap().is_empty());p.toggle_pause();sound_ended(p.audio.as_ref().unwrap());assert_eq!(*pcm.lock().unwrap(),bytes("sound-tail.f32le"));assert_eq!(resumes.load(std::sync::atomic::Ordering::SeqCst),1);
+}

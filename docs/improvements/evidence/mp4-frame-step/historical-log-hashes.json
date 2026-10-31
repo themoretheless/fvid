@@ -1,0 +1,90 @@
+{
+  "repeat-forward.log": {
+    "raw_sha256": "f968cd1f724ab70370e21799a64f45986f8ccbd3ad97f4478d7d7b6f35b95477",
+    "archive_sha256": "106c68a07b28c94a845d84340477d36b980e4d4a7598a4bc7dfc189644750d6a"
+  },
+  "startup-after.log": {
+    "raw_sha256": "727e940003bc050d96a5726b05e55ade4b4e4bd9a54e83cc82006d41df410578",
+    "archive_sha256": "e74b6384ce71b7c7e522d6b0520701d448a6bd235af15a48c896e59727a1befd"
+  },
+  "startup-before.log": {
+    "raw_sha256": "4118adeac492b720df4a723664ecfd43e76f4c54a7506330c3bd5a5e8e04458c",
+    "archive_sha256": "4118adeac492b720df4a723664ecfd43e76f4c54a7506330c3bd5a5e8e04458c"
+  },
+  "pending-spool-before.log": {
+    "raw_sha256": "a731bb89d0c1d4b625b141286cfd3510ae2a44d3975c5845143942407a64b28a",
+    "archive_sha256": "a731bb89d0c1d4b625b141286cfd3510ae2a44d3975c5845143942407a64b28a"
+  },
+  "player-review.log": {
+    "raw_sha256": "776215c10850489c76165e34e327353d631a9b3eee0c1192f221d87e9b9a0c1f",
+    "archive_sha256": "776215c10850489c76165e34e327353d631a9b3eee0c1192f221d87e9b9a0c1f"
+  },
+  "after-final.log": {
+    "raw_sha256": "50b3a1ff4250ec115dfe98430e88cc2163f67720c86d47c4fd75071050b868b6",
+    "archive_sha256": "6944697d289764ce1af80cc5c1b6640e6a59d483de35e1988265e6c4e8a90329"
+  },
+  "video-before.log": {
+    "raw_sha256": "d85c356b8d9232b7c21ebc908e4a79f5c84ad9c4654483a6d8b41cbcf8f5e280",
+    "archive_sha256": "d85c356b8d9232b7c21ebc908e4a79f5c84ad9c4654483a6d8b41cbcf8f5e280"
+  },
+  "before.log": {
+    "raw_sha256": "3b02743b19102a8d1aff128f4c393340127e72cd96784419e6554007c81157e3",
+    "archive_sha256": "3b02743b19102a8d1aff128f4c393340127e72cd96784419e6554007c81157e3"
+  },
+  "initial-build-failure.log": {
+    "raw_sha256": "e7afca7ed8897bddf6e128f3736522672692782a9d3a5baa899d60eb8e028006",
+    "archive_sha256": "e7afca7ed8897bddf6e128f3736522672692782a9d3a5baa899d60eb8e028006"
+  },
+  "decoder-trace.log": {
+    "raw_sha256": "f00761369effcc9f9806e730108ef60a3671a4a069b3c2d660501c7ded9bdde2",
+    "archive_sha256": "f00761369effcc9f9806e730108ef60a3671a4a069b3c2d660501c7ded9bdde2"
+  },
+  "after.log": {
+    "raw_sha256": "cda3e39b1774b32b5436dc7f161023eeae6095a8504710d2fbf4bf03f3f7d1be",
+    "archive_sha256": "cda3e39b1774b32b5436dc7f161023eeae6095a8504710d2fbf4bf03f3f7d1be"
+  },
+  "repeat-final.log": {
+    "raw_sha256": "85b45a30288efe94d19139654aa54fb58ca523095a49eed7a5a1e7f6ce8b3c7a",
+    "archive_sha256": "85b45a30288efe94d19139654aa54fb58ca523095a49eed7a5a1e7f6ce8b3c7a"
+  },
+  "candidate-full/root-webm.log": {
+    "raw_sha256": "61d6b1c8691f50581cc278b6256864a7a3eca780f4cf386e411e4e9b6cd4549c",
+    "archive_sha256": "79114d80245d91bc31f2d180981751205ef2ebff981c2c9c8370598f7f9ecb99"
+  },
+  "candidate-full/media.log": {
+    "raw_sha256": "0b1ddab321c48ec3f558e3a6ac66b2fca9bdc2fefd46fad850cbc8dd64258c49",
+    "archive_sha256": "79f25f2bd572de6e7f7891531156b53bd781924581920b9ee090470ad73428b3"
+  },
+  "candidate-full/root-mp4.log": {
+    "raw_sha256": "e000cb21e6d8c39b7580d42b7c00210d224154e78ff930afb1007ed12f0d19b2",
+    "archive_sha256": "b0102ed1abc02da93e3be0cdf893e85516c2b00e916093ce4f74224ec34d343b"
+  },
+  "candidate-full/player-units.log": {
+    "raw_sha256": "a500ebb976b049150187a45b83dc16d29efa9d26bc83fdd6013234d78c743f2d",
+    "archive_sha256": "a500ebb976b049150187a45b83dc16d29efa9d26bc83fdd6013234d78c743f2d"
+  },
+  "candidate-full/integration.log": {
+    "raw_sha256": "df9dc617062ccc736d5ff515a58bc0a0f894a7bdb3a5855a61a04f984efb8fdf",
+    "archive_sha256": "037320a3033df0f957c388a80a8b4c9fa7e435602e263bbd701c298045a97118"
+  },
+  "candidate-full/core-check.log": {
+    "raw_sha256": "66c3917f90edbb271d596dba296035927b61c2bb40e32cef32732b04811c0dce",
+    "archive_sha256": "66c3917f90edbb271d596dba296035927b61c2bb40e32cef32732b04811c0dce"
+  },
+  "candidate-full/player-check.log": {
+    "raw_sha256": "cdc20b9db1b7558235e2cdb6f421d78bff203841dd46928258c5eab3f0b64977",
+    "archive_sha256": "cdc20b9db1b7558235e2cdb6f421d78bff203841dd46928258c5eab3f0b64977"
+  },
+  "candidate-full/before.log": {
+    "raw_sha256": "3b02743b19102a8d1aff128f4c393340127e72cd96784419e6554007c81157e3",
+    "archive_sha256": "3b02743b19102a8d1aff128f4c393340127e72cd96784419e6554007c81157e3"
+  },
+  "candidate-full/player-list.log": {
+    "raw_sha256": "a373df4671202392c1cce828437d934f2200af14fe5a513c457d99bbd6e0b050",
+    "archive_sha256": "a373df4671202392c1cce828437d934f2200af14fe5a513c457d99bbd6e0b050"
+  },
+  "candidate-full/after.log": {
+    "raw_sha256": "52a6fa09b017a636dc06dd873765da1202e4c463d2326dcd658745fd6f9fbdd2",
+    "archive_sha256": "cda3e39b1774b32b5436dc7f161023eeae6095a8504710d2fbf4bf03f3f7d1be"
+  }
+}

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 450,
-  "next_id": "FVID-0451",
+  "accepted_count": 451,
+  "next_id": "FVID-0452",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5055,6 +5055,17 @@
       "result": "Store exact32sample prefix/suffix blocks within the same charged budget;bound safe sync searches and recover exact local bounds without an additional cache. Final7paired rounds meet predeclared criteria:43.12ms to0.417ms navigation and70.40ms to26.02ms actual seek+RGB,all7wins;open median improves. Index payload150k packets1,200,000to75,008bytes,ordered0unchanged;all150k exact pictures decode at2MiB. Nine short authored videos verify all landings/suffixes,YUV,native RGB/intervals,signed/equal/reversed/boundary cases,rewind and EOF.127integration suites591pass;1259distinct checks and core/player builds pass. Pre-existing MACE observer-order race repaired with unchanged assertions and counts0. Prototype/variants add no IDs;no whole-player/RSS/GPU claim.",
       "status": "accepted",
       "validation": "batch-450-validation.json"
+    },
+    {
+      "id": "FVID-0451",
+      "batch": 451,
+      "title": "Make paused MP4 one-frame keyboard navigation exact and terminating",
+      "source": "src/player.rs",
+      "regression": "src/player_mp4_frame_step_tests.rs",
+      "before": "Publishedb5daf0e83b maps E to forward but interprets it as backward; backward subtracts a period from the frame END and repeats the picture. Pending EOF and paused audio can stall. Qualified baseline3controls pass,6acceptances fail; additional candidate review proves startup black window and ready-picture/future-spool stall before their corrections.",
+      "result": "Honor keyboard direction,seek immediately before the displayed frame START for backward CFR/VFR/fractional timing,and park after one picture. Handle first-picture and EOF boundaries without playlist advance;prepare paused sound at the shown start for exact explicit resume. Manual steps present ready pictures without waiting for future spool lead or a paused audio clock. Three authored tiny VP9 movies and scalar YUV/PCM oracles verify actual native keyboard/presenter/audio-worker behavior.11cases pass40repetitions;127integration suites591pass,1475distinct checks and both locked/offline builds pass. Five existing ignores unchanged. All variants and candidate amendments count once;no performance claim.",
+      "status": "accepted",
+      "validation": "batch-451-validation.json"
     }
   ]
 }

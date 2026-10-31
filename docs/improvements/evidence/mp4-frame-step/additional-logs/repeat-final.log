@@ -1,0 +1,679 @@
+RUN 0
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.28s
+
+RUN 1
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.26s
+
+RUN 2
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.26s
+
+RUN 3
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.26s
+
+RUN 4
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.26s
+
+RUN 5
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.26s
+
+RUN 6
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.26s
+
+RUN 7
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.29s
+
+RUN 8
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.29s
+
+RUN 9
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.34s
+
+RUN 10
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.28s
+
+RUN 11
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.27s
+
+RUN 12
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.34s
+
+RUN 13
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.28s
+
+RUN 14
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.26s
+
+RUN 15
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.30s
+
+RUN 16
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.31s
+
+RUN 17
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.32s
+
+RUN 18
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.27s
+
+RUN 19
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.27s
+
+RUN 20
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.42s
+
+RUN 21
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.28s
+
+RUN 22
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.28s
+
+RUN 23
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.53s
+
+RUN 24
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.35s
+
+RUN 25
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.37s
+
+RUN 26
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.51s
+
+RUN 27
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.50s
+
+RUN 28
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.48s
+
+RUN 29
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.46s
+
+RUN 30
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.77s
+
+RUN 31
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.60s
+
+RUN 32
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.71s
+
+RUN 33
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.69s
+
+RUN 34
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.53s
+
+RUN 35
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.68s
+
+RUN 36
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.64s
+
+RUN 37
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.47s
+
+RUN 38
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.40s
+
+RUN 39
+
+running 11 tests
+test player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm ... ok
+test player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek ... ok
+test player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture ... ok
+test player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture ... ok
+test player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture ... ok
+test player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent ... ok
+test player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead ... ok
+test player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture ... ok
+test player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused ... ok
+test player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist ... ok
+test player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1078 filtered out; finished in 0.29s
