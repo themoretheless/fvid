@@ -3361,7 +3361,7 @@
       }
     }
   ],
-  "rejected": [
+  "ep1_controls": [
     {
       "asc": "8b0d04",
       "video": {
@@ -3372,19 +3372,10 @@
         "pcm_offset": 0,
         "samples": 11520
       },
-      "error": "ER AAC LC epConfig is not yet implemented"
-    },
-    {
-      "asc": "8b0d10",
-      "video": {
-        "file": "aac-er-lc-rejected-960-0-0-1-synthetic.mp4",
-        "sha256": "9c27aa04f2dd67626ecf2fc66b5d337250f7ee6abbfa3c03c11165496bc36773",
-        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
-        "asc": "8b0d10",
-        "pcm_offset": 0,
-        "samples": 11520
-      },
-      "error": "AAC extensionFlag3 must be zero"
+      "control": "aac-er-lc-960-1-0-0-synthetic.mp4",
+      "n": 960,
+      "reference_offset": 0,
+      "reference_bytes": 46080
     },
     {
       "asc": "8b0904",
@@ -3396,7 +3387,24 @@
         "pcm_offset": 0,
         "samples": 12288
       },
-      "error": "ER AAC LC epConfig is not yet implemented"
+      "control": "aac-er-lc-1024-1-0-0-synthetic.mp4",
+      "n": 1024,
+      "reference_offset": 1566720,
+      "reference_bytes": 49152
+    }
+  ],
+  "rejected": [
+    {
+      "asc": "8b0d10",
+      "video": {
+        "file": "aac-er-lc-rejected-960-0-0-1-synthetic.mp4",
+        "sha256": "9c27aa04f2dd67626ecf2fc66b5d337250f7ee6abbfa3c03c11165496bc36773",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0d10",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "error": "AAC extensionFlag3 must be zero"
     },
     {
       "asc": "8b0910",

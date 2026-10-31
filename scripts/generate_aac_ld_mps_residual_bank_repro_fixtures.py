@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Own32/128-bank residual admission reproducers,not acceptance/conformance."""
+"""Forbidden LD/residual32/128 combinations,not missing LD codec modes."""
 import json
 from pathlib import Path
 from generate_aac_eld_fixtures import generate
@@ -37,5 +37,5 @@ def main():
      name=f'n{n}-r{rate}-tree{tree}-v{variant}';base=dict(name=name,n=n,rate=rate,bins=bins,bands=bins,slots=slots,group=group,tree=tree,variant=variant,channels=inputs,output_channels=[6,6,6,8,8,8,8,2][tree],samples=12*group*n,container_frame_samples=n,container_rate=rate,pcm_offset=0)
      control=dict(base,asc=asc(ssc).hex(),frames=rows(good));repro=dict(base,asc=asc(residual_ssc).hex(),frames=rows(bad));control_file=name+'-control.mp4';repro_file=name+'-residual.mp4'
      (OUT/control_file).write_bytes(video_fixture([control],blob,inputs,write=False)['data']);(OUT/repro_file).write_bytes(video_fixture([repro],blob,inputs,write=False)['data']);cases.append(dict(base,control=control_file,video=repro_file,ssc=residual_ssc.hex(),asc=repro['asc'],reference=reference))
- (OUT/'packets.bin').write_bytes(blob);(OUT/'manifest.json').write_text(json.dumps(dict(cases=cases,controls=controls,scope='Syntactically valid owned residual32/128 reproducers and ordinary controls. Not proof of normative bank/phase mapping or accepted residual playback.'),separators=(',',':'))+'\n');print(len(cases),'bank refusal reproducers and paired ordinary controls;',len(controls),'bare controls')
+ (OUT/'packets.bin').write_bytes(blob);(OUT/'manifest.json').write_text(json.dumps(dict(cases=cases,controls=controls,scope='Nonconforming LD/residual32/128 counterexamples and valid ordinary controls. Native LD-MPS must refuse;ordinary MPEG Surround residual is a separate profile.'),separators=(',',':'))+'\n');print(len(cases),'bank refusal reproducers and paired ordinary controls;',len(controls),'bare controls')
 if __name__=='__main__':main()

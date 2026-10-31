@@ -61,7 +61,7 @@ fn owned_cores_and_paired_ordinary_movies_accept_the_intended_bank_geometries() 
     }
 }
 #[test]
-fn residual_syntax_parses_but_native_bank_admission_is_still_a_specific_refusal() {
+fn residual_syntax_parses_but_ld_profile_is_a_specific_refusal() {
     let m = manifest();
     let mut blocks = 0;
     for c in m["cases"].as_array().unwrap() {
@@ -90,27 +90,24 @@ fn residual_syntax_parses_but_native_bank_admission_is_still_a_specific_refusal(
         .unwrap_err();
         assert!(
             e.to_string()
-                .contains("requires the qualified full-complex64-bin QMF domain"),
+                .contains("residual coding is not permitted in LD-MPS"),
             "{} wrong failure: {e}",
             c["name"]
         );
         assert!(pcm.is_empty());
     }
     assert!(blocks > 1000);
-    eprintln!("residual32/128 parsed spectral blocks: {blocks};44 precise native bank refusals");
+    eprintln!("residual32/128 parsed spectral blocks: {blocks};44 precise native LD profile refusals");
 }
 #[test]
-#[ignore = "requires independently qualified residual32/128 bank/phase mapping; refusal coverage is not acceptance"]
-fn residual32_and128_movies_decode_complete_pcm() {
+fn residual32_and128_are_not_ld_mps_profile_acceptance() {
     for c in manifest()["cases"].as_array().unwrap() {
-        let mut pcm = Vec::new();
-        let s = fvid::native_media::decode_mp4_aac_pcm(
-            &std::fs::read(root().join(c["video"].as_str().unwrap())).unwrap(),
-            &mut pcm,
-        )
-        .unwrap_or_else(|e| panic!("{} residual playback: {e}", c["name"]));
-        assert_eq!(s.sample_frames as usize, n(&c["samples"]));
-        assert_eq!(s.channels as usize, n(&c["output_channels"]));
-        assert_eq!(pcm.len(), n(&c["samples"]) * n(&c["output_channels"]) * 4);
+        let cfg = Config::parse(&hex(&c["ssc"])).unwrap();
+        let error = cfg.validate_low_delay_profile().unwrap_err();
+        assert!(
+            error
+                .to_string()
+                .contains("residual coding is not permitted in LD-MPS")
+        );
     }
 }

@@ -1,15 +1,55 @@
-## Non-SBR AAC-ELD + residual64 — two-core source windows,2026-10-31
+## LD-MPS profile correction — residual coding boundary,2026-10-31
 
-The owned runtime already accepts this domain; this checkpoint extends
-qualification rather than fixing a decoder refusal. Production sources remain
-identical to4bab56a6ad. The root change adds a test-only AudioWorker entrypoint;
+Earlier residual64 "native qualification" was a classification error. The
+LD-MPS authors exclude residual coding;see `docs/LD_MPS_PROFILE.md` and the
+pinned primary source audit. Those synthetic LD-filter/residual combinations
+are now negative codec-profile cases. Their separately checked numerical
+components remain useful,but do not establish LD-MPS or ordinary MPS conformance.
+
+Native AAC validates initial spatial configuration and replacement headers
+before admitting residual extension types 0/1, including absent/zero bands. Invalid initial profiles publish no PCM;
+late invalid replacement retains native spatial history and permits a valid retry.
+An own ordinary/initial/late-header video family reproduces the missing validation,
+including empty-band and downmix-residual cases and a reserved-type skip control.
+ISO/IEC 14496-26:2010/Amd.3:2014 independently confirms the extension-type boundary.
+The formerly ignored residual32/128 LD acceptance is replaced with an executable
+profile-refusal test;this is not implementation of ordinary MPEG Surround/HQ.
+
+The no-gap objective remains open:ordinary MPEG Surround/HQ residual integration
+and other codec/profile gaps are not completed by rejecting invalid LD profiles.
+Earlier sections below retain their historical revisions/counts,subject to this
+correction. Numerical fixtures are labelled nonconforming and native positive
+expectations were replaced,rather than being counted as codec acceptance.
+
+Evidence: `docs/validation/ld-mps-profile-source-2026-10-31.json` and
+`docs/validation/ld-mps-profile-tests-2026-10-31.json`.
+
+The broader AAC gate also exposed a stale ER AAC-LC/epConfig1 refusal test.
+Two existing own videos now have positive independent-PCM and typed player
+rewind/seek expectations. The byte-only decoder still correctly requires ESC
+association; playback tests use AudioStream::decode_source_packet. No ER-LC
+production runtime changed. Invalid extensionFlag3 and truncated epConfig2/3
+refusals remain. See the separate ER-LC reclassification generation audit.
+
+Final offline qualification: 2445 passed, 0 failed, 27 pre-existing ignored.
+Media library: 587/0/1; player library: 1069/0/26; 178 AAC/container integration
+targets: 789/0/0. Nested cold-stack child harness results are not counted twice.
+The earlier ER-LC failure and successful continuation are retained in the report.
+These counts distinguish negative native-profile tests from numerical/ordinary
+positive tests; they do not establish whole-codec conformance.
+
+## Historical nonconforming LD/residual numerical experiments,2026-10-31
+
+At9415fba54d the runtime accepted these nonconforming numerical combinations.
+That result was incorrectly described as codec-profile qualification. Current
+native decoding rejects them;the numerical component results below are historical. The root change adds a test-only AudioWorker entrypoint;
 fixture helpers add optional24-frame/temporal-control generation while preserving
 their original defaults.
 
 132 own programmes cover48kHz,480/512 ELD cores,two source packets per15/16-slot
 spatial frame,all8 trees,both TTT variants and23 parameter bands. Plain,repeated
 headers,delayed bursts,fragmentation,STP and GES are exercised. Residual MP4/MKV
-pairs provide264 acceptance movies;132 paired ordinary MP4 controls and6 bare
+pairs provide264 nonconforming numerical movies;132 paired ordinary MP4 controls and6 bare
 24-frame scalar-core controls are separate.
 
 Complete residual output matches10,570,752 compositional-oracle samples within
@@ -71,9 +111,11 @@ reference C compilation. Residual32/128,unqualified coupled-SBR geometries,
 profile output adaptation and the wider no-gap objective remain open.
 Evidence: `docs/validation/aac-ld-mps-shared128-{generation,tests}-2026-10-31.json`.
 
-## Residual32/128 — isolated bank admission reproducers,2026-10-31
+## Historical residual32/128 bank diagnosis — not allowed LD modes,2026-10-31
 
-This is diagnosis and new regression coverage,not a decoder fix. Production
+The following records the earlier diagnosis at4634f23be3. Its ignored native
+acceptance expectation is now retired:these are forbidden LD combinations,not
+missing LD modes. This historical diagnosis was not a decoder fix. Production
 sources remain identical to e7daf503b9.44 own residual MP4 reproducers cover
 24kHz/32-band and96kHz/128-band output,480/512 cores,all8 trees and both TTT
 variants. Each has a paired ordinary movie;12 additional bare ELD movies match
@@ -322,7 +364,7 @@ Full gates: 1770 passed,0 failed,27 pre-existing ignored tests
 across media/root units and29 AAC/LD-MPS integration targets.
 Earlier sections retain evidence for their original committed corpus revisions.
 
-## Native residual AAC playback — qualified64-bin path,2026-10-31
+## Historical residual64 composition — not LD profile qualification,2026-10-31
 
 Compressed residual AAC is now wired into the native source-window session.
 Each active OTT/TTT box owns its MDCT-to-QMF overlap. Residual ICC corrections

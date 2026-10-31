@@ -1,7 +1,14 @@
 //! Full worker path: typed ES group transport, queueing and navigation.
 use super::*;
 use crate::audio::AudioStream;
-fn check(packets: &[crate::audio::AudioPacket], full: &[u8], begin: usize, rate: u32, stride: usize, nanoseconds: bool) {
+fn check(
+    packets: &[crate::audio::AudioPacket],
+    full: &[u8],
+    begin: usize,
+    rate: u32,
+    stride: usize,
+    nanoseconds: bool,
+) {
     let actual: Vec<_> = packets
         .iter()
         .flat_map(|p| p.data.iter().copied())
@@ -9,14 +16,19 @@ fn check(packets: &[crate::audio::AudioPacket], full: &[u8], begin: usize, rate:
     assert_eq!(actual, full[begin.min(full.len())..]);
     let mut cursor = begin.min(full.len()) / stride;
     for p in packets {
-        let actual=u128::from(p.pts)*u128::from(p.timebase_num)*u128::from(rate);
-        let exact=(cursor as u128)*u128::from(p.timebase_den);
+        let actual = u128::from(p.pts) * u128::from(p.timebase_num) * u128::from(rate);
+        let exact = (cursor as u128) * u128::from(p.timebase_den);
         if nanoseconds {
             // Matroska's published clock is integer ns. Verify floor rounding
             // of the exact sample position, with less than one ns of error.
-            assert_eq!((p.timebase_num,p.timebase_den),(1,1_000_000_000));
-            assert!(actual<=exact && exact-actual<u128::from(rate),"ns timestamp {actual} vs exact {exact}");
-        } else { assert_eq!(actual,exact); }
+            assert_eq!((p.timebase_num, p.timebase_den), (1, 1_000_000_000));
+            assert!(
+                actual <= exact && exact - actual < u128::from(rate),
+                "ns timestamp {actual} vs exact {exact}"
+            );
+        } else {
+            assert_eq!(actual, exact);
+        }
         cursor += p.data.len() / stride;
     }
     assert_eq!(cursor, full.len() / stride);
@@ -99,17 +111,44 @@ fn check_corpus(corpus: &str) {
                 .flatten(),
         );
     for case in cases {
-        let video = case["video"].as_str().or_else(||case["file"].as_str()).map(str::to_owned)
+        let video = case["video"]
+            .as_str()
+            .or_else(|| case["file"].as_str())
+            .map(str::to_owned)
             .unwrap_or_else(|| format!("{}.mp4", case["name"].as_str().unwrap()));
-        let matroska=video.ends_with(".mkv");
+        let matroska = video.ends_with(".mkv");
         let bytes = std::fs::read(root.join(video)).unwrap();
         let mut full = Vec::new();
-        let stream:Box<dyn AudioStream>=if matroska {
-            fvid_media::owned_matroska_aac::decode_matroska_aac_pcm(std::io::Cursor::new(&bytes),&mut full,None,&Default::default()).unwrap();
-            Box::new(crate::playback_webm_audio::WebmAudioReader::open(std::io::Cursor::new(bytes),Default::default()).unwrap())
+        let stream: Box<dyn AudioStream> = if matroska {
+            fvid_media::owned_matroska_aac::decode_matroska_aac_pcm(
+                std::io::Cursor::new(&bytes),
+                &mut full,
+                None,
+                &Default::default(),
+            )
+            .unwrap();
+            Box::new(
+                crate::playback_webm_audio::WebmAudioReader::open(
+                    std::io::Cursor::new(bytes),
+                    Default::default(),
+                )
+                .unwrap(),
+            )
         } else {
-            fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(std::io::Cursor::new(&bytes),&mut full,None,&Default::default()).unwrap();
-            Box::new(crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(bytes),Default::default()).unwrap())
+            fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+                std::io::Cursor::new(&bytes),
+                &mut full,
+                None,
+                &Default::default(),
+            )
+            .unwrap();
+            Box::new(
+                crate::playback_mp4_audio::Mp4AudioReader::open(
+                    std::io::Cursor::new(bytes),
+                    Default::default(),
+                )
+                .unwrap(),
+            )
         };
         let scale = stream.timescale();
         let rate = stream.sample_rate();
@@ -156,7 +195,16 @@ fn check_corpus(corpus: &str) {
         for sample in seeks {
             // Leave a live decoder and queue before applying the next seek.
             worker.drain_commands(Some(Command::Rewind));
-            let prefix = case["live_prefix_packets"].as_u64().map(|n|n as usize).unwrap_or_else(||if case["name"].as_str().unwrap().ends_with("-edits"){4}else{2});
+            let prefix = case["live_prefix_packets"]
+                .as_u64()
+                .map(|n| n as usize)
+                .unwrap_or_else(|| {
+                    if case["name"].as_str().unwrap().ends_with("-edits") {
+                        4
+                    } else {
+                        2
+                    }
+                });
             for _ in 0..prefix {
                 assert!(!matches!(
                     worker.decode_next().0,
@@ -181,7 +229,14 @@ fn check_corpus(corpus: &str) {
                 .iter()
                 .flat_map(|p| p.data.iter().copied())
                 .collect();
-            check(&captured.lock().unwrap(), &full, begin, rate, stride, matroska);
+            check(
+                &captured.lock().unwrap(),
+                &full,
+                begin,
+                rate,
+                stride,
+                matroska,
+            );
             assert_eq!(
                 actual,
                 full[begin.min(full.len())..],
@@ -407,6 +462,55 @@ fn ld_mps128_ges_worker_keeps_source_windows_through_navigation() {
 }
 
 #[test]
-fn plain_eld_residual64_worker_keeps_both_core_source_windows() {
-    check_corpus("aac-eld-residual64-multicore");
+fn ld_residual_profile_source_factory_refuses_two_core_compositions() {
+    check_ld_residual_profile_refusal("aac-eld-residual64-multicore");
+}
+
+#[test]
+fn ld_residual_profile_source_factory_refuses_extended_compositions() {
+    check_ld_residual_profile_refusal("aac-eld-residual64-geometries");
+}
+
+fn check_ld_residual_profile_refusal(corpus: &str) {
+    let base = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors")
+        .join(corpus);
+    let m: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(base.join("manifest.json")).unwrap()).unwrap();
+    for c in m["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .chain(m["exports"].as_array().unwrap())
+    {
+        let name = c["video"].as_str().unwrap();
+        let data = std::fs::read(base.join(name)).unwrap();
+        let mut stream: Box<dyn crate::audio::AudioStream> = if name.ends_with(".mkv") {
+            Box::new(
+                crate::playback_webm_audio::WebmAudioReader::open(
+                    std::io::Cursor::new(data),
+                    Default::default(),
+                )
+                .unwrap(),
+            )
+        } else {
+            Box::new(
+                crate::playback_mp4_audio::Mp4AudioReader::open(
+                    std::io::Cursor::new(data),
+                    Default::default(),
+                )
+                .unwrap(),
+            )
+        };
+        let error = match stream.make_decoder() {
+            Err(e) => e,
+            Ok(_) => panic!("nonconforming LD residual source accepted: {name}"),
+        };
+        assert!(
+            error
+                .to_string()
+                .contains("residual coding is not permitted in LD-MPS"),
+            "{name}: {error}"
+        );
+    }
 }

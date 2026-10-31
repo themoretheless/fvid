@@ -37,6 +37,7 @@ impl Decoder {
         core: Core,
         sbr: Option<bool>,
     ) -> Result<Self> {
+        config.validate_low_delay_profile()?;
         if !matches!(core.object_type, 23 | 39) || core.downscale != 1 {
             return Err(unsupported(
                 "downscaled spatial filter banks are not yet implemented",
@@ -284,6 +285,14 @@ impl Decoder {
         let mut bits = super::bits::BitReader::new(packet);
         bits.skip(used_bits)?;
         let messages = super::aac_pce::read_eld_spatial_extensions(&mut bits, &mut next.assembler)?;
+        for message in &messages {
+            if message.kind == super::aac_ld_mps_transport::Kind::HeaderAndFrame {
+                let (replacement, _) = super::aac_ld_mps_config::Config::read_in_band(
+                    &mut super::bits::BitReader::new(&message.payload),
+                )?;
+                replacement.validate_low_delay_profile()?;
+            }
+        }
         if next.assembler.replacements() != self.assembler.replacements() {
             return Err(unsupported(
                 "AAC LD-MPS replaced-fragment source association is not yet implemented",

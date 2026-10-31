@@ -47,7 +47,7 @@ def main():
  # An extra short ICS must agree with the first window sequence.
  bits,_=payload(7,3,2,18,0,[1],True);bad=dict(tree=7,rate=48000,slots=18,frames_code=0,bands=[1],offset=len(blob),bytes=len(packed(bits)),bits=len(bits));blob.extend(packed(bits))
  (OUT/'payloads.bin').write_bytes(blob)
- # A complete owned movie exposes the remaining native-admission refusal.
+ # A complete owned movie exposes the forbidden LD residual profile.
  parent=FIX/'aac-ld-mps-stp';base=next(c for c in json.loads((parent/'manifest.json').read_text())['cases']if c['name']=='n512-c1-base-x2-crc1-bands23-on');source=(parent/'packets.bin').read_bytes()
  ssc=bytes.fromhex(base['ordinary_ssc'])+packed('0000'+length(2)+'0011001000010000')
  original=bytes.fromhex(base['ssc']);asc_bits=raw(bytes.fromhex(base['asc']));suffix='0010'+length(len(original))+raw(original)+'0000'+'00';at=asc_bits.rfind(suffix);assert at>=0
@@ -58,5 +58,5 @@ def main():
   current=bytes([len(ssc)])+ssc+body if i==0 else body
   packet=packed(prefix+envelope(9,1 if i==0 else 0,3,current,True));frames.append(dict(offset=len(packets),bytes=len(packet),prefix_bits=len(prefix),spatial=body.hex()));packets.extend(packet)
  movie=dict(base,asc=asc.hex(),frames=frames);(OUT/'native-residual-refusal.mp4').write_bytes(video_fixture([movie],packets,1,write=False)['data']);(OUT/'native-packets.bin').write_bytes(packets);(OUT/'native.asc').write_bytes(asc);(OUT/'native.ssc').write_bytes(ssc)
- (OUT/'manifest.json').write_text(json.dumps(dict(scope='Residual syntax/spectral acceptance only; native movie remains a specific refusal until MDCT-to-QMF integration.',cases=cases,extra_mismatch=bad,native=dict(frames=frames)),separators=(',',':'))+'\n');print(len(cases),'residual syntax cases; one explicit native-refusal movie')
+ (OUT/'manifest.json').write_text(json.dumps(dict(scope='Residual syntax/spectral acceptance only; native LD residual coding is forbidden by the profile.',cases=cases,extra_mismatch=bad,native=dict(frames=frames)),separators=(',',':'))+'\n');print(len(cases),'residual syntax cases; one explicit native-refusal movie')
 if __name__=='__main__':main()

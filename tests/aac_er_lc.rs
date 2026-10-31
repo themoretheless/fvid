@@ -109,8 +109,9 @@ fn play(reader: &mut dyn AudioStream) -> Vec<u8> {
     let mut decoder = reader.make_decoder().unwrap();
     let mut output = Vec::new();
     while let Some(packet) = reader.next_packet().unwrap() {
-        if let Some(frame) = decoder
-            .decode_packet(&packet.data, packet.pts, packet.duration as u64)
+        let stamp = reader.decoder_stamp(&packet);
+        if let Some(frame) = reader
+            .decode_source_packet(decoder.as_mut(), &packet, stamp)
             .unwrap()
         {
             if let Some(pcm) = reader
@@ -171,7 +172,61 @@ fn er_lc_player_ranges_rewind_seek_preserve_pcm_and_channels() {
     }
 }
 #[test]
-fn er_lc_invalid_or_unimplemented_configurations_refuse_specific_errors() {
+fn historical_ep1_refusals_now_match_scalar_pcm_and_support_navigation() {
+    let m = manifest();
+    let gold = bytes("aac-er-lc-reference.f32le");
+    let cases = m["ep1_controls"].as_array().unwrap();
+    assert_eq!(cases.len(), 2);
+    for c in cases {
+        let data = bytes(c["video"]["file"].as_str().unwrap());
+        let mut full = Vec::new();
+        fvid::native_media::decode_mp4_aac_pcm(&data, &mut full).unwrap();
+        let mut control = Vec::new();
+        fvid::native_media::decode_mp4_aac_pcm(
+            &bytes(c["control"].as_str().unwrap()),
+            &mut control,
+        )
+        .unwrap();
+        assert_eq!(full, control);
+        let at = c["reference_offset"].as_u64().unwrap() as usize;
+        assert_eq!(full.len(), c["reference_bytes"].as_u64().unwrap() as usize);
+        for (a, b) in full
+            .chunks_exact(4)
+            .zip(gold[at..at + full.len()].chunks_exact(4))
+        {
+            assert!(
+                (f32::from_le_bytes(a.try_into().unwrap())
+                    - f32::from_le_bytes(b.try_into().unwrap()))
+                .abs()
+                    < 1e-7
+            );
+        }
+        let mut owned = Vec::new();
+        fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+            std::io::Cursor::new(&data),
+            &mut owned,
+            None,
+            &Default::default(),
+        )
+        .unwrap();
+        assert_eq!(owned, full);
+        let mut reader = fvid::playback_mp4_audio::Mp4AudioReader::open(
+            std::io::Cursor::new(data),
+            Default::default(),
+        )
+        .unwrap();
+        assert_eq!(play(&mut reader), full);
+        reader.rewind();
+        assert_eq!(play(&mut reader), full);
+        for target in [1, 1100, 5800, (full.len() / 4) as i64] {
+            let landed = reader.seek_to(target);
+            assert_eq!(play(&mut reader), full[landed as usize * 4..]);
+        }
+    }
+}
+
+#[test]
+fn er_lc_malformed_configurations_refuse_specific_errors() {
     let m = manifest();
     for key in ["rejected", "malformed"] {
         for c in m[key].as_array().unwrap() {
@@ -180,8 +235,7 @@ fn er_lc_invalid_or_unimplemented_configurations_refuse_specific_errors() {
                 &bytes(c["video"]["file"].as_str().unwrap()),
                 &mut out,
             )
-            .err()
-            .unwrap();
+            .unwrap_err();
             assert!(e.to_string().contains(c["error"].as_str().unwrap()), "{e}");
         }
     }

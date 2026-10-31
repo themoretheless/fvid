@@ -1,5 +1,10 @@
 # Audio Implementation Status
 
+LD-MPS rejects residual extension types0/1, including absent/zero bands, at
+native initial/replacement headers.
+Historical LD/residual numerical tests are not codec acceptance;ordinary MPEG
+Surround/HQ residual integration remains unfinished. See [profile boundary](LD_MPS_PROFILE.md).
+
 Ordinary AAC LTP (AOT4) is now admitted by the native decoder and MP4 path.
 Mono/stereo, dependent/independent CCE, and 960/1024 long/short transitions
 are qualified on authored PCM fixtures. Mono LTP/SBR explicit/sync/implicit

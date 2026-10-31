@@ -51,7 +51,7 @@ def main():
                     name=f'{n}-{config}-{ms}-{int(extension)}'
                     c=dict(name=name,n=n,channels=channels,asc=packed(asc).hex(),frames=rows,reference_offset=start,reference_bytes=12*n*channels*4,slots=n//64,bands=32,container_rate=24000,container_frame_samples=n,samples=12*n,pcm_offset=0)
                     c['video']=video_fixture([c],blob,channels=channels,filename=f'aac-er-lc-{name}-synthetic.mp4');cases.append(c)
-    rejected=[];malformed=[];alignment=[];fill_extensions=[]
+    rejected=[];malformed=[];alignment=[];fill_extensions=[];ep1_controls=[]
     for n in (960,1024):
         base=next(c for c in cases if c['n']==n and c['channels']==1)
         for flags,ep,flag3 in [(0,ep,False) for ep in (1,2,3)]+[(0,0,True)]:
@@ -59,7 +59,10 @@ def main():
             c=dict(base,asc=packed(asc).hex())
             error='ER AAC LC resilience tools are not yet implemented' if flags else 'truncated or oversized bit field' if ep in [2,3] else 'ER AAC LC epConfig is not yet implemented' if ep else 'AAC extensionFlag3 must be zero'
             video=video_fixture([c],blob,channels=1,filename=f'aac-er-lc-rejected-{n}-{flags}-{ep}-{int(flag3)}-synthetic.mp4')
-            (malformed if ep in [2,3] else rejected).append(dict(asc=c['asc'],video=video,error=error))
+            if ep==1:
+                # Keep historical filenames byte-for-byte; EP1 is now supported.
+                ep1_controls.append(dict(asc=c['asc'],video=video,control=base['video']['file'],n=n,reference_offset=base['reference_offset'],reference_bytes=base['reference_bytes']))
+            else:(malformed if ep in [2,3] else rejected).append(dict(asc=c['asc'],video=video,error=error))
         for kind in ('trailing','padding'):
             c=next(c for c in cases if c['n']==n and c['channels']==6 and (kind=='trailing' or c['frames'][7]['padding']>0))
             row=c['frames'][7];raw=bytearray(blob[row['offset']:row['offset']+row['bytes']])
@@ -71,6 +74,6 @@ def main():
             else:alignment.append(dict(video=video,reference_offset=c['reference_offset'],reference_bytes=8*n*6*4))
     (DEST/'aac-er-lc-packets.bin').write_bytes(blob)
     (DEST/'aac-er-lc-reference.f32le').write_bytes(gold)
-    (DEST/'aac-er-lc.json').write_text(json.dumps(dict(cases=cases,rejected=rejected,malformed=malformed,alignment=alignment,fill_extensions=fill_extensions,provenance='Own ER-LC epConfig0 fixed-order tagged elements, deferred TNS syntax, 960/1024 transitions, sine/KBD, mono/stereo/3.0/5.1 and common MS modes0/1/2. Independent sparse IMDCT/window/TNS/PCM mapping; no private media, FFmpeg or network.'),indent=2)+'\n')
+    (DEST/'aac-er-lc.json').write_text(json.dumps(dict(cases=cases,ep1_controls=ep1_controls,rejected=rejected,malformed=malformed,alignment=alignment,fill_extensions=fill_extensions,provenance='Own ER-LC epConfig0 fixed-order tagged elements, deferred TNS syntax, 960/1024 transitions, sine/KBD, mono/stereo/3.0/5.1 and common MS modes0/1/2. Independent sparse IMDCT/window/TNS/PCM mapping; no private media, FFmpeg or network.'),indent=2)+'\n')
     print(len(cases),'own ER-LC videos')
 if __name__=='__main__':main()

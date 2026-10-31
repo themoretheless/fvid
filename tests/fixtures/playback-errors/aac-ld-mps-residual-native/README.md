@@ -1,44 +1,12 @@
-# Native residual AAC / LD-SBR playback
+# Historical LD/residual numerical compositions
 
-397 own twelve-frame H.264/AAC-ELD movies exercise the complete owned decoder:
-all eight spatial trees, 480/512 core frames, 15/16 shared complex64-bin QMF
-slots, 4/9/23 parameter bands, OTT and TTT residuals, partial/full cutoffs,
-shared/per-box ICC, long/start/short/stop windows and both window shapes.
-A dedicated movie accepts nonzero fill bits and extra fill bytes inside the
-bounded residual extension, matching ISO SpatialDecParseExtensionFrame.
-Plain/STP/GES, delayed/fragmented delivery, repeated headers, cutoff changes,
-and disabling/re-enabling residual boxes are included. Source core/SBR prefixes
-come only from the existing own synthetic corpus. No private data is used.
+These files are nonconforming LD profile combinations. See
+`docs/LD_MPS_PROFILE.md`. Native AAC now rejects them before PCM,including
+malformed variants whose deeper syntax remains tested separately.
 
-The full PCM comparison uses frozen independently qualified core/SBR QMF,
-separately parsed residual spectra, per-box converter histories, independently
-encoded already-corrected fine ICC controls, and explicit matrix/shaping/LD
-synthesis composition. This qualifies native wiring and timing; it is not an
-independent whole-decoder oracle: the cached ISO LD_MPS hybrid-analysis branch
-omits residual preparation. Full LD residual conformance remains open.
-The golden QMF may store only 32 active bands:
-the upper half of its 64-bin bank is zero, never the next stored slot.
-
-Playback tests compare live drain, reset/rewind, forward/backward/EOF seek,
-repeated ranges and public/owned export with identical full PCM. Five corrupt
-movies prove the specific late residual/ICC/spatial failure and preserve core,
-SBR, residual overlap, source queues and pending-frame state on retry. Two
-movies preserve explicit refusal for unqualified32-bin and update8 domains;
-these refusal tests are not acceptance.
-
-The reserved13 corrupt movie sets book13 only in residual frame3. MPEG Surround
-residuals use MPEG-2 AAC LC (ISO/IEC23003-1 §4.3.1.2); PNS is a MPEG-4 addition.
-It must report a reserved codebook, not a missing noise implementation. The
-regression separately parses the same ICS as MPEG-4 and reconstructs PNS with
-the existing owned tool, then proves atomic rejection in the residual path. Separate controls require both residual
-signal and ICC correction to measurably alter PCM.
-
-Generate explicitly from the repository root:
-
-```sh
-python3 scripts/generate_aac_ld_mps_residual_native_fixtures.py
-```
-
-Generation uses no encoder/compiler/network and is tested with socket and
-process APIs denied. Ordinary tests read saved bytes only. Phase/source evidence
-and gate counts live in `docs/validation/aac-ld-mps-residual-{native,mpeg2}-*-2026-10-31.json`.
+Standalone session/matrix/residual math tests retain controlled numerical
+comparisons,fill handling,ICC effects and transactional corruption checks.
+Those are component tests,not codec acceptance. Ordinary MPEG Surround/HQ
+residual integration remains separate and unfinished.
+Generate explicitly with `python3 scripts/generate_aac_ld_mps_residual_native_fixtures.py`.
+All media/parameters are locally authored;ordinary tests use frozen data only.

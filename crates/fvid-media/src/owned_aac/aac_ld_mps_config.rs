@@ -127,6 +127,16 @@ fn residual_rate(bits: &mut BitReader<'_>) -> Result<u32> {
     rate(bits.read(4)?)
 }
 impl Config {
+    /// Enforce the LD-MPS residual-extension boundary, including empty bands.
+    /// ISO/IEC 14496-26:2010/Amd.3:2014, 7.26.1.2.1.5 allows types 2..15.
+    /// Raw syntax remains available to diagnostics and numerical components.
+    /// This is not a complete Annex B conformance validator.
+    pub fn validate_low_delay_profile(&self) -> Result<()> {
+        if self.extensions.iter().any(|extension| extension.kind < 2) {
+            return Err(invalid("residual coding is not permitted in LD-MPS"));
+        }
+        Ok(())
+    }
     /// Byte-bounded SSC prefix of an ancillary HeaderAndFrame message.
     /// Alignment delay is returned to the timeline owner, never discarded.
     /// A failed header leaves the caller cursor unchanged.

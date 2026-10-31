@@ -154,12 +154,12 @@ fn mismatched_extra_short_ics_is_a_specific_atomic_failure() {
     assert_eq!(b.position(), 0);
 }
 #[test]
-fn native_residual_movie_accepts_owned_reconstruction_instead_of_refusing() {
+fn native_ld_residual_movie_is_syntactic_but_not_a_permitted_profile() {
     let ssc = std::fs::read(root().join("native.ssc")).unwrap();
     let cfg = Config::parse(&ssc).unwrap();
     assert!(cfg.extensions.iter().any(|e|matches!(&e.value,ExtensionValue::Residual{bands,..}if bands.iter().any(|b|b.unwrap_or(0)>0))));
     // Prove that every spatial frame and its compressed residual payload are
-    // syntactically valid; the formerly refused movie now produces owned PCM.
+    // syntactically valid; syntax does not make residual coding a valid LD-MPS profile.
     let manifest: Value =
         serde_json::from_slice(&std::fs::read(root().join("manifest.json")).unwrap()).unwrap();
     let extension = &cfg.extensions[0].value;
@@ -192,11 +192,13 @@ fn native_residual_movie_accepts_owned_reconstruction_instead_of_refusing() {
     }
     let movie = std::fs::read(root().join("native-residual-refusal.mp4")).unwrap();
     let mut pcm = Vec::new();
-    let stats = fvid::native_media::decode_mp4_aac_pcm(&movie, &mut pcm).unwrap();
-    assert_eq!(stats.sample_frames, 12288);
-    assert_eq!(stats.decoded_frames, 12);
-    assert_eq!(pcm.len(), 12288 * 2 * 4);
-    assert!(pcm.iter().any(|&v| v != 0));
+    let error = fvid::native_media::decode_mp4_aac_pcm(&movie, &mut pcm).unwrap_err();
+    assert!(
+        error
+            .to_string()
+            .contains("residual coding is not permitted in LD-MPS")
+    );
+    assert!(pcm.is_empty());
 }
 
 #[test]

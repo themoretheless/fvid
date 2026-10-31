@@ -1,3 +1,4 @@
+// Numerical residual compositions are not a permitted LD-MPS codec profile.
 use fvid_media::owned_aac::aac_sbr_qmf::Complex;
 use serde_json::Value;
 fn root() -> std::path::PathBuf {
@@ -15,27 +16,6 @@ fn hex(s: &str) -> Vec<u8> {
         .chunks_exact(2)
         .map(|b| u8::from_str_radix(std::str::from_utf8(b).unwrap(), 16).unwrap())
         .collect()
-}
-#[test]
-fn native_residual_movies_accept_active_shaping_instead_of_refusing_pcm() {
-    let m = manifest("manifest.json");
-    assert_eq!(m["cases"].as_array().unwrap().len(), 397);
-    for c in m["cases"].as_array().unwrap() {
-        let movie =
-            std::fs::read(root().join(format!("{}.mp4", c["name"].as_str().unwrap()))).unwrap();
-        let mut pcm = Vec::new();
-        fvid::native_media::decode_mp4_aac_pcm(&movie, &mut pcm)
-            .unwrap_or_else(|e| panic!("{}: {e}", c["name"]));
-        let cfg = fvid_media::owned_aac::config::AudioSpecificConfig::parse(&hex(c["asc"]
-            .as_str()
-            .unwrap()))
-        .unwrap();
-        assert_eq!(
-            pcm.len(),
-            n(&c["samples"]) * usize::from(cfg.output_channels()) * 4
-        );
-        assert!(pcm.iter().any(|&v| v != 0));
-    }
 }
 fn reconfigured_reference(c: &Value, golden: &[u8]) -> Vec<f64> {
     use fvid_media::owned_aac::{
@@ -263,230 +243,219 @@ fn reference_control(c: &Value, golden: &[u8], signal: bool, control_key: &str) 
     }
     result
 }
+
+const PROFILE_ERROR: &str = "residual coding is not permitted in LD-MPS";
+fn input(c: &Value, i: usize, gold: &[u8]) -> Vec<Vec<Vec<Complex>>> {
+    let slots = n(&c["slots"]);
+    let inputs = n(&c["channels"]);
+    let stored = n(&c["qmf"]["expected_bands"]);
+    let offset = n(&c["qmf"]["expected_offset"]);
+    (0..slots)
+        .map(|t| {
+            (0..inputs)
+                .map(|ch| {
+                    (0..64)
+                        .map(|b| {
+                            if b >= stored {
+                                Complex::default()
+                            } else {
+                                let at =
+                                    offset + ((ch * 12 * slots + i * slots + t) * stored + b) * 16;
+                                Complex {
+                                    re: f64::from_le_bytes(gold[at..at + 8].try_into().unwrap()),
+                                    im: f64::from_le_bytes(
+                                        gold[at + 8..at + 16].try_into().unwrap(),
+                                    ),
+                                }
+                            }
+                        })
+                        .collect()
+                })
+                .collect()
+        })
+        .collect()
+}
+fn message(row: &Value) -> fvid_media::owned_aac::aac_ld_mps_transport::Message {
+    use fvid_media::owned_aac::aac_ld_mps_transport::{Extension, Kind, Message};
+    let header = row["header"].as_bool().unwrap();
+    let mut payload = hex(row["spatial"].as_str().unwrap());
+    if header {
+        let cfg = hex(row["ssc"].as_str().unwrap());
+        assert!(cfg.len() < 127);
+        let mut prefix = vec![cfg.len() as u8];
+        prefix.extend(cfg);
+        prefix.extend(payload);
+        payload = prefix;
+    }
+    Message {
+        extension: Extension::LowDelay,
+        kind: if header {
+            Kind::HeaderAndFrame
+        } else {
+            Kind::Frame
+        },
+        payload,
+    }
+}
 #[test]
-fn whole_native_residual_pcm_matches_separate_qualified_chain_and_config_transitions() {
-    let golden = std::fs::read(
+fn native_codec_rejects_all_nonconforming_ld_residual_movies_before_pcm() {
+    let m = manifest("manifest.json");
+    for c in m["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .chain(m["errors"].as_array().unwrap())
+        .chain(m["refusals"].as_array().unwrap())
+    {
+        let data =
+            std::fs::read(root().join(format!("{}.mp4", c["name"].as_str().unwrap()))).unwrap();
+        let mut p = Vec::new();
+        let e = fvid::native_media::decode_mp4_aac_pcm(&data, &mut p).unwrap_err();
+        assert!(e.to_string().contains(PROFILE_ERROR), "{} {e}", c["name"]);
+        assert!(p.is_empty());
+    }
+}
+#[test]
+fn controlled_session_composition_matches_separate_stages_without_codec_profile_claim() {
+    use fvid_media::owned_aac::{
+        aac_ld_mps_config::Config,
+        aac_ld_mps_decor::Mode,
+        aac_ld_mps_session::{Session, Stamp},
+    };
+    let gold = std::fs::read(
         root()
             .parent()
             .unwrap()
             .join("aac-eld-spatial-sbr/expected.f64le"),
     )
     .unwrap();
-    let mut maximum = 0f64;
     let mut count = 0;
+    let mut maximum = 0.0f64;
     for c in manifest("manifest.json")["cases"].as_array().unwrap() {
-        let expected = reference(c, &golden);
-        let mut pcm = Vec::new();
-        fvid::native_media::decode_mp4_aac_pcm(
-            &std::fs::read(root().join(format!("{}.mp4", c["name"].as_str().unwrap()))).unwrap(),
-            &mut pcm,
-        )
-        .unwrap();
-        assert_eq!(pcm.len(), expected.len() * 4);
-        for (b, want) in pcm.chunks_exact(4).zip(expected) {
-            let got = f64::from(f32::from_le_bytes(b.try_into().unwrap()));
-            maximum = maximum.max((got - want).abs());
-            count += 1;
-            assert!((got - want).abs() < 2e-7, "{}: {got} != {want}", c["name"]);
-        }
-    }
-    eprintln!("Residual whole-chain samples {count}, maximum native/separate difference {maximum}");
-}
-fn play(
-    reader: &mut dyn fvid::audio::AudioStream,
-    decoder: &mut dyn fvid::audio::AudioDecode,
-) -> Vec<u8> {
-    let mut output = Vec::new();
-    while let Some(p) = reader.next_packet().unwrap() {
-        if let Some(frame) = decoder
-            .decode_packet(&p.data, p.pts, p.duration as u64)
-            .unwrap()
-        {
-            if let Some(pcm) = reader
-                .present_decoded(frame.packet, frame.source_pts)
-                .unwrap()
-            {
-                output.extend(pcm.data);
+        let cfg = Config::parse(&hex(c["ssc"].as_str().unwrap())).unwrap();
+        assert!(cfg.validate_low_delay_profile().is_err());
+        let mut session = Session::new_qmf(&cfg, Mode::Complex).unwrap();
+        let mut actual = Vec::new();
+        let samples = n(&c["slots"]) * 64;
+        let width = usize::from(cfg.tree.output_channels);
+        for (i, row) in c["reference"].as_array().unwrap().iter().enumerate() {
+            let qmf = input(c, i, &gold);
+            let frames = session
+                .submit_qmf(
+                    Some((
+                        &qmf,
+                        Stamp {
+                            pts: (i * samples) as i64,
+                            duration: samples as u64,
+                            timescale: 48000,
+                        },
+                    )),
+                    &[message(row)],
+                )
+                .unwrap();
+            for frame in frames {
+                for row in frame.pcm.samples.chunks_exact(width) {
+                    for wave in 0..width {
+                        let ch = if matches!(cfg.tree.code, 4 | 6) {
+                            [0, 1, 2, 3, 6, 7, 4, 5][wave]
+                        } else {
+                            wave
+                        };
+                        actual.push(row[ch]);
+                    }
+                }
             }
         }
-    }
-    while let Some(frame) = decoder.finish_packet().unwrap() {
-        if let Some(pcm) = reader
-            .present_decoded(frame.packet, frame.source_pts)
-            .unwrap()
-        {
-            output.extend(pcm.data);
+        session.finish().unwrap();
+        let want = reference(c, &gold);
+        assert_eq!(actual.len(), want.len());
+        for (a, b) in actual.iter().zip(want) {
+            let gap = (a - b).abs();
+            maximum = maximum.max(gap);
+            assert!(gap < 1e-9, "{} math {gap}", c["name"]);
+            count += 1;
         }
     }
-    assert!(decoder.finish_packet().unwrap().is_none());
-    output
+    eprintln!(
+        "NONCONFORMING numerical session/control values {count};max {maximum};not codec acceptance"
+    );
 }
 #[test]
-fn residual_movies_play_rewind_seek_and_repeat_ranges_with_the_same_pcm() {
-    use fvid::audio::AudioStream;
-    use std::{io::Cursor, time::Duration};
-    for c in manifest("manifest.json")["cases"].as_array().unwrap() {
-        let bytes =
-            std::fs::read(root().join(format!("{}.mp4", c["name"].as_str().unwrap()))).unwrap();
-        let mut full = Vec::new();
-        fvid::native_media::decode_mp4_aac_pcm(&bytes, &mut full).unwrap();
-        let mut owned = Vec::new();
-        fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
-            Cursor::new(&bytes),
-            &mut owned,
-            None,
-            &Default::default(),
-        )
-        .unwrap();
-        assert_eq!(owned, full);
-        let mut reader =
-            fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(&bytes), Default::default())
-                .unwrap();
-        let mut live = reader.make_decoder().unwrap();
-        let width = usize::from(reader.channels()) * 4;
-        assert_eq!(play(&mut reader, live.as_mut()), full);
-        reader.rewind();
-        live.reset();
-        for _ in 0..4 {
-            let p = reader.next_packet().unwrap().unwrap();
-            live.decode_packet(&p.data, p.pts, p.duration as u64)
-                .unwrap();
-        }
-        reader.rewind();
-        live.reset();
-        assert_eq!(
-            play(&mut reader, live.as_mut()),
-            full,
-            "{} reset",
-            c["name"]
-        );
-        let frame = n(&c["slots"]) * n(&c["bands"]);
-        for target in [13, (4 * frame + 7) as i64, 7, (full.len() / width) as i64] {
-            let ticks = (i128::from(target) * i128::from(reader.timescale())
-                / i128::from(reader.sample_rate())) as i64;
-            let landed = reader.seek_to(ticks);
-            let first = ((landed.max(0) as u128 * u128::from(reader.sample_rate()))
-                .div_ceil(u128::from(reader.timescale())) as usize
-                * width)
-                .min(full.len());
-            live.reset();
-            assert_eq!(
-                play(&mut reader, live.as_mut()),
-                full[first..],
-                "{} seek {target}",
-                c["name"]
-            );
-        }
-        let rate = u64::from(reader.sample_rate());
-        let ms = frame as u64 * 1000 / rate;
-        for (from, to) in [(1, 7), (3 * ms - 2, 6 * ms + 3), (1, 7)] {
-            let mut range = Vec::new();
-            fvid::native_media::decode_mp4_aac_pcm_interval(
-                &bytes,
-                &mut range,
-                Some((Duration::from_millis(from), Duration::from_millis(to))),
-            )
-            .unwrap();
-            let first = ((from * rate).div_ceil(1000) as usize * width).min(full.len());
-            let last = ((to * rate).div_ceil(1000) as usize * width).min(full.len());
-            assert_eq!(range, full[first..last], "{} ranges", c["name"]);
-        }
-    }
-}
-#[test]
-fn malformed_runs_and_late_trailing_bytes_preserve_residual_core_and_source_histories() {
-    use fvid_media::owned_aac::NativeAacDecoder;
+fn malformed_residual_math_remains_transactional_without_a_native_codec_profile() {
+    use fvid_media::owned_aac::{
+        aac_ld_mps_config::Config,
+        aac_ld_mps_decor::Mode,
+        aac_ld_mps_session::{Session, Stamp},
+    };
     let m = manifest("manifest.json");
-    let blob = std::fs::read(root().join("packets.bin")).unwrap();
-    for bad in m["errors"].as_array().unwrap() {
-        let name = bad["name"].as_str().unwrap().split("-bad-").next().unwrap();
+    let gold = std::fs::read(
+        root()
+            .parent()
+            .unwrap()
+            .join("aac-eld-spatial-sbr/expected.f64le"),
+    )
+    .unwrap();
+    for c in m["errors"].as_array().unwrap() {
         let good = m["cases"]
             .as_array()
             .unwrap()
             .iter()
-            .find(|c| c["name"] == name)
-            .unwrap();
-        let bytes =
-            std::fs::read(root().join(format!("{}.mp4", bad["name"].as_str().unwrap()))).unwrap();
-        let error = fvid::native_media::decode_mp4_aac_pcm(&bytes, &mut Vec::new())
-            .unwrap_err()
-            .to_string();
-        assert!(
-            error.contains(bad["error"].as_str().unwrap()),
-            "{}: {error}",
-            bad["name"]
-        );
-        let asc = hex(good["asc"].as_str().unwrap());
-        let mut decoder = NativeAacDecoder::new(&asc).unwrap();
-        let mut reference = NativeAacDecoder::new(&asc).unwrap();
-        let frame = n(&good["slots"]) * n(&good["bands"]);
-        for i in 0..12 {
-            let row = &good["frames"][i];
-            let at = n(&row["offset"]);
-            let packet = &blob[at..at + n(&row["bytes"])];
-            let expected = reference
-                .decode_timed(packet, (i * frame) as i64, frame as u64)
+            .find(|g| {
+                c["name"]
+                    .as_str()
+                    .unwrap()
+                    .starts_with(g["name"].as_str().unwrap())
+                    && g["mode"] == "plain"
+            })
+            .unwrap_or_else(|| {
+                m["cases"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .find(|g| {
+                        g["name"]
+                            .as_str()
+                            .unwrap()
+                            .starts_with("n512-c1-base-x2-crc1-v1-bands23-plain")
+                    })
+                    .unwrap()
+            });
+        let cfg = Config::parse(&hex(good["ssc"].as_str().unwrap())).unwrap();
+        let mut d = Session::new_qmf(&cfg, Mode::Complex).unwrap();
+        let mut control = d.clone();
+        let samples = n(&good["slots"]) * 64;
+        for (i, row) in good["reference"].as_array().unwrap().iter().enumerate() {
+            let qmf = input(good, i, &gold);
+            let stamp = Stamp {
+                pts: (i * samples) as i64,
+                duration: samples as u64,
+                timescale: 48000,
+            };
+            let want = control
+                .submit_qmf(Some((&qmf, stamp)), &[message(row)])
                 .unwrap();
             if i == 3 {
-                let saved = decoder.checkpoint();
-                let before = decoder.retained_payload_bytes().unwrap();
-                let row = &bad["frames"][i];
-                let at = n(&row["offset"]);
-                let error = decoder
-                    .decode_timed(
-                        &blob[at..at + n(&row["bytes"])],
-                        (i * frame) as i64,
-                        frame as u64,
-                    )
-                    .unwrap_err()
-                    .to_string();
-                assert!(error.contains(bad["error"].as_str().unwrap()), "{error}");
-                assert_eq!(decoder.retained_payload_bytes().unwrap(), before);
-                assert_eq!(
-                    decoder
-                        .decode_timed(packet, (i * frame) as i64, frame as u64)
-                        .unwrap(),
-                    expected
+                let before = d.clone();
+                let e = d
+                    .submit_qmf(Some((&qmf, stamp)), &[message(&c["reference"][i])])
+                    .unwrap_err();
+                assert!(
+                    e.to_string().contains(c["error"].as_str().unwrap()),
+                    "{} {e}",
+                    c["name"]
                 );
-                decoder.restore(&saved).unwrap();
+                assert_eq!(d, before);
             }
             assert_eq!(
-                decoder
-                    .decode_timed(packet, (i * frame) as i64, frame as u64)
-                    .unwrap(),
-                expected
+                d.submit_qmf(Some((&qmf, stamp)), &[message(row)]).unwrap(),
+                want
             );
         }
-        loop {
-            let actual = decoder.finish().unwrap();
-            let expected = reference.finish().unwrap();
-            assert_eq!(actual, expected);
-            if actual.is_none() {
-                break;
-            }
-        }
-        assert!(decoder.finish().unwrap().is_none());
+        d.finish().unwrap();
     }
 }
-
 #[test]
-fn unqualified_residual_banks_and_update8_are_explicit_refusals() {
-    for c in manifest("manifest.json")["refusals"].as_array().unwrap() {
-        let movie =
-            std::fs::read(root().join(format!("{}.mp4", c["name"].as_str().unwrap()))).unwrap();
-        let error = fvid::native_media::decode_mp4_aac_pcm(&movie, &mut Vec::new())
-            .unwrap_err()
-            .to_string();
-        assert!(
-            error.contains(c["error"].as_str().unwrap()),
-            "{}: {error}",
-            c["name"]
-        );
-    }
-}
-
-#[test]
-fn source_window_session_matches_the_separate_residual_controls() {
+fn controlled_source_window_math_matches_separate_residual_stages() {
     use fvid_media::owned_aac::{
         aac_ld_mps_config::Config,
         aac_ld_mps_decor::Mode,
@@ -509,7 +478,7 @@ fn source_window_session_matches_the_separate_residual_controls() {
     assert_eq!(asc.ld_mps.as_ref(), Some(&cfg));
     assert_eq!(c["mode"], "fill");
     // The bounded extension permits nonzero fill bits and complete fill bytes.
-    // The previous native check failed on this exact valid own payload.
+    // This checks bounded syntax only;the LD codec profile forbids residual coding.
     let first = hex(c["reference"][1]["spatial"].as_str().unwrap());
     let raw = fvid_media::owned_aac::aac_ld_mps_frame::Decoder::new(&cfg)
         .unwrap()
@@ -577,24 +546,6 @@ fn source_window_session_matches_the_separate_residual_controls() {
             where_max = i;
         }
     }
-    let mut native = Vec::new();
-    fvid::native_media::decode_mp4_aac_pcm(
-        &std::fs::read(root().join(format!("{}.mp4", c["name"].as_str().unwrap()))).unwrap(),
-        &mut native,
-    )
-    .unwrap();
-    for frame in 0..12 {
-        let first = frame * slots * 64 * 2;
-        let end = first + slots * 64 * 2;
-        let mut gap = 0f64;
-        for (actual, want) in native[first * 4..end * 4]
-            .chunks_exact(4)
-            .zip(&output[first..end])
-        {
-            gap = gap.max((f64::from(f32::from_le_bytes(actual.try_into().unwrap())) - want).abs());
-        }
-        assert!(gap < 2e-7, "front-end/session frame{frame}: {gap}");
-    }
     assert_eq!(output.len(), expected.len());
     assert!(
         maximum < 1e-12,
@@ -605,7 +556,7 @@ fn source_window_session_matches_the_separate_residual_controls() {
 }
 
 #[test]
-fn residual_signal_and_icc_correction_both_change_the_pcm() {
+fn controlled_residual_signal_and_icc_correction_both_change_the_pcm() {
     let golden = std::fs::read(
         root()
             .parent()

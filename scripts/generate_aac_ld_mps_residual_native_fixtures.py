@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Own native residual AAC/LD-SBR movies. Offline, no external encoder/network."""
+"""Nonconforming LD/residual numeric fixtures. Offline,no external tools."""
 import json,re
 from pathlib import Path
 from generate_aac_ld_mps_transport_fixtures import field,packed,length,envelope
@@ -12,9 +12,9 @@ from generate_aac_main_tools_fixtures import ics,channel,sc,tuple_bits
 from generate_he_aac_packet_fixtures import video_fixture
 ROOT=Path(__file__).resolve().parents[1];FIX=ROOT/'tests/fixtures/playback-errors';OUT=FIX/'aac-ld-mps-residual-native'
 SEQUENCES=[0,0,1,2,2,3,0,1,2,3,0,0]
-def residual_ics(seq,shape,box,frame,silent,reserved13=False):
- text=(ROOT/'crates/fvid-media/src/owned_aac/aac_band_tables.rs').read_text();kind='SHORT'if seq==2 else'LONG'
- offsets=[int(v)for v in re.findall(r'\d+',re.search(r'const SWB_OFFSET_48K_'+kind+r':[^=]+=\s*\[(.*?)\];',text,re.S)[1])]
+def residual_ics(seq,shape,box,frame,silent,reserved13=False,rate=48000):
+ text=(ROOT/'crates/fvid-media/src/owned_aac/aac_band_tables.rs').read_text();kind='SHORT'if seq==2 else'LONG';family={24000:'24K',32000:'48K'if seq==2 else'32K',48000:'48K'}[rate]
+ offsets=[int(v)for v in re.findall(r'\d+',re.search(r'const SWB_OFFSET_'+family+'_'+kind+r':[^=]+=\s*\[(.*?)\];',text,re.S)[1])]
  bands=[1,4,len(offsets)-1][box%3];width=3 if seq==2 else 5;escape=(1<<width)-1
  section='';left=bands
  while left>=escape:section+=field(escape,width);left-=escape
@@ -27,7 +27,7 @@ def residual_ics(seq,shape,box,frame,silent,reserved13=False):
    for window in range(8 if seq==2 else 1):
     for at in range(offsets[b],offsets[b+1],4):wire+=tuple_bits([(at+i+box+frame+window)%3-1 for i in range(4)])
  return wire
-def payload(c,frame,slots,cutoffs,bad=None):
+def payload(c,frame,slots,cutoffs,bad=None,rate=48000):
  bits='';differences=[]
  for box,count in enumerate(cutoffs):
   if not count:differences.append(None);continue
@@ -44,7 +44,8 @@ def payload(c,frame,slots,cutoffs,bad=None):
    differences.append(rows)
   else:differences.append(None)
   seq=SEQUENCES[frame];silent=frame==6
-  bits+=residual_ics(seq,(box+frame)%2,box,frame,silent,reserved13=bad=='reserved13')
+  bits+=residual_ics(seq,(box+frame)%2,box,frame,silent,reserved13=bad=='reserved13',rate=rate)
+  if seq==2 and slots in(18,24,30):bits+=residual_ics(seq,(box+frame+1)%2,box,frame+1,silent,reserved13=bad=='reserved13',rate=rate)
  data=packed(bits)if bits else b''
  if bad=='short':data=data[:-1]
  if bad=='fill':
@@ -119,9 +120,9 @@ def main():
  for kind,message in[('reserved13','reserved codebook 13 in MPEG-2 AAC residual'),('short','truncated or oversized bit field'),('spatial-trailing','trailing bytes after LD-MPS spatial frame'),('icc','residual ICC correction exceeds quantization grid')]:
   case=build(base,c,'plain',kind);case['error']=message;errors.append(case)
  case=build(base,c,'delayed','spatial-trailing');case['error']='trailing bytes after LD-MPS spatial frame';errors.append(case)
- # Explicit domain refusals remain distinct from accepted64-bin playback.
+ # Historical component-domain diagnostics; all native LD profiles here refuse.
  for name,error in [('n512-c1-base-x1-crc1-bands23-on','requires the qualified full-complex64-bin'),('plain-tree7-bands23-on','unqualified residual MDCT-to-QMF update')]:
   base=next(b for b in catalog if b['name']==name);case=build(base,c,'plain');case['error']=error;refusals.append(case)
  (OUT/'n512-c1-base-x2-crc1-v1-bands23-plain-bad-residual-trailing.mp4').unlink(missing_ok=True)
- (OUT/'packets.bin').write_bytes(blob);(OUT/'manifest.json').write_text(json.dumps(dict(scope='Own compressed residual AAC, all8 trees,matched64-bin LD-SBR15/16 slots,23/9/4 parameter grids,OTT/TTT and temporal/transport variants. Refusals are not playback acceptance.',cases=cases,errors=errors,refusals=refusals),separators=(',',':'))+'\n');print(len(cases),'native acceptance movies,',len(errors),'errors,',len(refusals),'explicit domain refusals')
+ (OUT/'packets.bin').write_bytes(blob);(OUT/'manifest.json').write_text(json.dumps(dict(scope='Nonconforming LD/residual numerical compositions across eight trees and temporal/transport variants. Every native codec path must reject the profile; raw numerical diagnostics are separate.',cases=cases,errors=errors,refusals=refusals),separators=(',',':'))+'\n');print(len(cases),'nonconforming numerical movies,',len(errors),'errors,',len(refusals),'explicit domain refusals')
 if __name__=='__main__':main()
