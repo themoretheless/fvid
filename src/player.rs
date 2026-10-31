@@ -3888,6 +3888,22 @@ impl Player {
                 }
             }
         }
+        // Once sound drains, video must continue from that last device clock.
+        // A/V presentation did not consume the silent startup deadline, so
+        // carrying it into silent presentation would hold the next picture.
+        if ran_out && !self.paused && !self.seek_preview && self.picture_audio_clock {
+            if let Some(end) = self.interval
+                .and_then(|(_, end, scale)| Self::interval_time(end, scale))
+            {
+                let clock = delayed_clock(audio.position(), self.audio_delay_ms);
+                let now = Instant::now();
+                self.deadline = if end >= clock {
+                    now.checked_add(paced_period(end - clock, self.rate_milli)).unwrap_or(now)
+                } else {
+                    now.checked_sub(paced_period(clock - end, self.rate_milli)).unwrap_or(now)
+                };
+            }
+        }
         // Failed workers cannot answer a future Seek or advance their clock.
         // Remove that handle so seeking does not re-enable a permanently stopped
         // audio gate. Keep a healthy EOF handle: it can still seek and resume.
@@ -12977,3 +12993,7 @@ mod stop_clock_regressions;
 #[cfg(test)]
 #[path = "player_seek_failure_tests.rs"]
 mod seek_failure_regressions;
+
+#[cfg(test)]
+#[path = "player_audio_handoff_tests.rs"]
+mod audio_handoff_regressions;

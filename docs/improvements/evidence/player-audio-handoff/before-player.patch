@@ -1,0 +1,7 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -12979,0 +12980,4 @@
++
++#[cfg(test)]
++#[path = "player_audio_handoff_tests.rs"]
++mod audio_handoff_regressions;

@@ -1,0 +1,7 @@
+{
+  "base_commit": "92f5df0c8329bf8c892ca128cab40ee1d8dee6f9",
+  "baseline_player_sha256": "42612a81bd3c542fde7c6c672955a0383aac93fe90b296f20f102470dbb41732",
+  "baseline_patch_sha256": "a3bd8f3e5a65236fe5d6829c49459ba39c5088093a44d3baf629f7664cb2c142",
+  "reconstruction_verified_byte_identical": true,
+  "baseline_modifies_only_test_hook": true
+}

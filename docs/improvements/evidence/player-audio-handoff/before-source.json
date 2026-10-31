@@ -1,0 +1,5 @@
+{
+  "src/player.rs": "42612a81bd3c542fde7c6c672955a0383aac93fe90b296f20f102470dbb41732",
+  "src/player_audio_handoff_tests.rs": "3b87dd3561a0af56ee6c5bedab411bd1e4b05460c8e1be56b5564272d25c9238",
+  "scripts/generate_player_audio_handoff.py": "666baa50edf1336c6cbdd5e622bdb6ae203e3390d424d179a2545c05a721345c"
+}

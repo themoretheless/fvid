@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 457,
-  "next_id": "FVID-0458",
+  "accepted_count": 458,
+  "next_id": "FVID-0459",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5132,6 +5132,17 @@
       "source": "src/playback/runtime/thread.rs",
       "before": "An actual prefetched invalid VP9 marker refusal remains queued after two valid pictures; seeking the valid first picture consumes the old error and ends the new seek. This still fails after current-error teardown is fixed.",
       "result": "Carry generation privately through decoder and converter event queues and discard only errors older than the current request, updating queue accounting for each consumed event. Public Event and Playback interfaces remain compatible. The replacement seek returns exact pixels and a subsequent current-generation bad seek still reports its specific refusal. Five tests pass twenty repetitions;all nine qualification gates pass,1531 physical-source-distinct checks and both builds. Controls and variants add no IDs;no performance claim."
+    },
+    {
+      "id": "FVID-0458",
+      "batch": 458,
+      "title": "Hand completed short-audio clock to continuing video without startup delay",
+      "source": "src/player.rs",
+      "regression": "src/player_audio_handoff_tests.rs",
+      "before": "Authored100ms MP4/40ms WAV exact native frame,timestamp,EOF and scalar PCM controls pass. After real worker completion at40ms,picture remains at0ms against the unused startup deadline. Identical strengthened baseline1pass1fail.",
+      "result": "On current healthy audio completion reanchor the silent video deadline from the final delayed device clock and current picture end,including overdue intervals and playback rate. Avoid pending seek/paused clocks. Identical test advances to at least40ms promptly,then completes exact80..100ms final picture/native RGB/EOF without loading. Two tests pass20repetitions;all9gates pass1533physical-source-distinct checks,both builds and unchanged5old ignores. No performance or physical audio/window claim.",
+      "status": "accepted",
+      "validation": "batch-458-validation.json"
     }
   ]
 }

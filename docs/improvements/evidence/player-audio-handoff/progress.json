@@ -1,0 +1,20 @@
+{
+  "status": "accepted; all gates passed; temporary artifacts removed; ready for delivery",
+  "accepted_count": 458,
+  "baseline_session": 17893,
+  "baseline_log": "/private/tmp/fvid-player-audio-handoff-before.log",
+  "target": "/private/tmp/fvid-player-audio-handoff-target-20261031",
+  "next": "Commit exact qualified paths,atomic push both refs,verify remote hashes and clean state;record receipt.",
+  "baseline_terminal_exit": 101,
+  "expanded_baseline_exit": 101,
+  "expanded_candidate_exit": 0,
+  "qualification_session": 96937,
+  "qualification_log": "/private/tmp/fvid-player-audio-handoff-integration.log",
+  "repeated_runs": 20,
+  "repeated_cases": 40,
+  "failed": 0,
+  "accepted_ids": [
+    "FVID-0458"
+  ],
+  "qualification_exit": 0
+}

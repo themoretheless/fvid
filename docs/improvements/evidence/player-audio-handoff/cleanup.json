@@ -1,0 +1,101 @@
+{
+  "completed": true,
+  "removed": [
+    {
+      "path": "/private/tmp/fvid-player-audio-handoff-after.log",
+      "bytes": 25993,
+      "raw_sha256": "61d2706c8134ab34e54e551d68af76b456e8201096a79a8e439f4d8eb6b1a502",
+      "archive": "raw-history/after.log",
+      "archive_sha256": "8b28b1c593a087746f0e607e34784ed9c5bc920b070fed0ec97634dd2480394e"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-handoff-audio-thread.log",
+      "bytes": 29880,
+      "raw_sha256": "00cb3eef8bf6bf0b9275b59ad03cdf8fa219d304d2eed9d0ac86b01490eca162",
+      "archive": "raw-history/audio-thread.log",
+      "archive_sha256": "e91c5b8e6e004f28514c24ee253c619c442d2c80042be4ce26fd8dff87e40e51"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-handoff-before.log",
+      "bytes": 36631,
+      "raw_sha256": "3a73a693e43bf1b9f5a26201f6b6d70ecbd6b6c087099cc07d6f7f0a86135bba",
+      "archive": "raw-history/before.log",
+      "archive_sha256": "3a73a693e43bf1b9f5a26201f6b6d70ecbd6b6c087099cc07d6f7f0a86135bba"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-handoff-core-check.log",
+      "bytes": 26898,
+      "raw_sha256": "c52a40a01a0a0516cb6a1c5cf7152323cfc801243a4d16bc3bd5620fb3c9da31",
+      "archive": "raw-history/core-check.log",
+      "archive_sha256": "c52a40a01a0a0516cb6a1c5cf7152323cfc801243a4d16bc3bd5620fb3c9da31"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-handoff-expanded-after.log",
+      "bytes": 25993,
+      "raw_sha256": "15dedd56aaac60f833f685d80eb0770927633742d9027ad6dec86fd8804054e1",
+      "archive": "raw-history/expanded-after.log",
+      "archive_sha256": "66c927321db5a892d383839b9639e27c4324942dd6d5875fed4414ca274ba90e"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-handoff-expanded-before.log",
+      "bytes": 26740,
+      "raw_sha256": "2971d64c32f75629f6bd8a90974e8f1c9045a90c18e489ffa08f0aaab0f2945c",
+      "archive": "raw-history/expanded-before.log",
+      "archive_sha256": "2971d64c32f75629f6bd8a90974e8f1c9045a90c18e489ffa08f0aaab0f2945c"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-handoff-integration.log",
+      "bytes": 111816,
+      "raw_sha256": "1099965e74f3cfb4ef7c4466cb100b199fe90ab690440bf8804184f3b3f9a45e",
+      "archive": "raw-history/integration.log",
+      "archive_sha256": "35c2ee2b36c3a5fa20ddf5f8e38c5a9770671e0bcbf33a723c57a8c38022ff0a"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-handoff-media.log",
+      "bytes": 71101,
+      "raw_sha256": "83699c1a3f463b244ee5de98b41f0d8a02e4b990af613fe83daccc060e9eb601",
+      "archive": "raw-history/media.log",
+      "archive_sha256": "f6c3937810ace978b7445fb9afac2818a67b29fad73ecc1b62060df2795c99bf"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-handoff-player-check.log",
+      "bytes": 32684,
+      "raw_sha256": "2737d63aa473600e3faa381f068b681fa8be5a4d8ddec604f2b776e89d8e828f",
+      "archive": "raw-history/player-check.log",
+      "archive_sha256": "2737d63aa473600e3faa381f068b681fa8be5a4d8ddec604f2b776e89d8e828f"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-handoff-player-units.log",
+      "bytes": 46455,
+      "raw_sha256": "df7f45f460085fb4f6bf4082ebc900206dc86e9e8960e2b17f2e86d40e2dae21",
+      "archive": "raw-history/player-units.log",
+      "archive_sha256": "cfe7ea26f149553d0f8a08628fc61a924f200794aa70bcfc0eb1aac28c282a7b"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-handoff-root-mp4.log",
+      "bytes": 32608,
+      "raw_sha256": "a8ed0e164d9b27f00750ca4d3f90928652ee26236270d99c9c6bf92e80ff8f30",
+      "archive": "raw-history/root-mp4.log",
+      "archive_sha256": "18397a4e00d892b0706f9986d44bf0da2d776aa8759ba0b710eb359782d7aa0a"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-handoff-root-webm.log",
+      "bytes": 31809,
+      "raw_sha256": "4d4e1ddf1be0f38e7a5d612cf5dbf58f30bb8707993c37f241a549a48b988c62",
+      "archive": "raw-history/root-webm.log",
+      "archive_sha256": "98e37c24ccc55c85916bbcc6b3cd0fabe3ef7e1579032174c55718dcd6eb3e3c"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-handoff-target-20261031",
+      "kind": "isolated build target"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-handoff-video-thread.log",
+      "bytes": 26219,
+      "raw_sha256": "a39ec9af4d3b30ea4bd5c3b6f54594bd1ba6c78c4e284f8f0776cfde9b63fa0d",
+      "archive": "raw-history/video-thread.log",
+      "archive_sha256": "9cee371624f59c00a172f120c93bf9abc26d464d17b233ac08255ba6407ebca9"
+    }
+  ],
+  "retained": "Seven authored fixtures,regression sources,and all proof logs/source reconstruction. Foreign worktrees/stashes untouched."
+}

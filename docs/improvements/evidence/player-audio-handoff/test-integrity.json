@@ -1,0 +1,14 @@
+{
+  "same_before_after_sha256": "3b87dd3561a0af56ee6c5bedab411bd1e4b05460c8e1be56b5564272d25c9238",
+  "tests_unchanged": true,
+  "baseline": {
+    "passed": 1,
+    "failed": 1
+  },
+  "candidate": {
+    "passed": 2,
+    "failed": 0
+  },
+  "specific_refusal": false,
+  "failure_kind": "timestamp pacing after successful source completion"
+}

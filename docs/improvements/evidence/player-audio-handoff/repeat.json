@@ -1,0 +1,127 @@
+{
+  "binary_sha256": "0160bdb97ae9252553a5dc6128eb6929fc1f2ae56ad5d456ef93daf802d39dc4",
+  "runs": [
+    {
+      "run": 1,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 2,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 3,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 4,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 5,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 6,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 7,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 8,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 9,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 10,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 11,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 12,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 13,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 14,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 15,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 16,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 17,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 18,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 19,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "run": 20,
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0
+    }
+  ],
+  "case_executions": 40,
+  "excluded_from_distinct_and_improvement_counts": true
+}

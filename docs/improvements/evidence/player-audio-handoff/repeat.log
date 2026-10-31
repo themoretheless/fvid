@@ -1,0 +1,139 @@
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.14s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.10s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
+
+
+running 2 tests
+test player::audio_handoff_regressions::exact_video_and_short_audio_source_controls ... ok
+test player::audio_handoff_regressions::short_audio_completion_does_not_return_video_to_the_unused_startup_deadline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1114 filtered out; finished in 0.09s
