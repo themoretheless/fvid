@@ -1,12 +1,13 @@
 {
-  "status": "accepted;qualification and artifact cleanup complete;delivery pending",
+  "status": "delivered and verified on remote main and delivery branch;temporary artifacts removed",
   "accepted_count": 465,
   "next_id": "FVID-0465",
   "base": "e612a60ed8848ea5e9acc94bfdb8bf36f635e027",
   "scope": "One chapter transport issue;forward/backward/paused/native-boundary variants and pending-seek controls add0IDs.",
   "target": "/private/tmp/fvid-player-chapter-clock-target-20261101",
-  "next": "Commit and publish qualified changes,then continue toward1000.",
+  "next": "Continue the active1000-improvement goal from accepted465,next0466.",
   "active_session": null,
   "active_pid": null,
-  "baseline_log": "/private/tmp/fvid-player-chapter-clock-before.log"
+  "baseline_log": "/private/tmp/fvid-player-chapter-clock-before.log",
+  "source_commit": "506441290ac21dd45608d520b2a578ee85054a59"
 }

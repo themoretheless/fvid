@@ -1,0 +1,18 @@
+{
+  "code_commit": "506441290ac21dd45608d520b2a578ee85054a59",
+  "atomic_push_exit_code": 0,
+  "verified_remote_heads": "506441290ac21dd45608d520b2a578ee85054a59\trefs/heads/codex/deliver-fvid-20261029\n506441290ac21dd45608d520b2a578ee85054a59\trefs/heads/main\n",
+  "own_worktree_clean_before_receipt": true,
+  "temporary_artifacts_absent": true,
+  "accepted_count": 465,
+  "new_ids": [
+    "FVID-0465"
+  ],
+  "zero_count_amendment": [
+    "FVID-0458"
+  ],
+  "preserved_other_worktrees_and_stashes": true,
+  "stash_count_observed": 4,
+  "regression_fixtures_and_evidence_retained": true,
+  "native_window_baseline_limitation": "../player-ab-clock/native-smoke/finding.json"
+}
