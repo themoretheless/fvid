@@ -1,0 +1,18 @@
+{
+  "observed_at_utc": "2026-10-31T00:03:57.353224+00:00",
+  "code_and_proof_commit": "501c7138b406267edd4b7b3666b35ab47460d040",
+  "atomic_push": "verified",
+  "remote_refs": {
+    "refs/heads/codex/deliver-fvid-20261029": "501c7138b406267edd4b7b3666b35ab47460d040",
+    "refs/heads/main": "501c7138b406267edd4b7b3666b35ab47460d040"
+  },
+  "accepted_count": 436,
+  "next_id": "FVID-0437",
+  "qualified_sources_unchanged": true,
+  "owned_build_target_removed": true,
+  "cleanup_evidence": "docs/improvements/evidence/mp4-mace-composition-runs/cleanup.json",
+  "own_tree_before_receipt": "clean",
+  "worktrees_preserved": "worktree /Users/themoretheless/Documents/Sources/fvid\nHEAD eb0c0148fe434ec8e2da425936e93467f7c6edee\nbranch refs/heads/main\n\nworktree /private/tmp/fvid-export-20261025-freeze\nHEAD ff68df1f365c8d4c77b944c95effe78ef112a303\nbranch refs/heads/codex/aac-eld-ld-sbr-20261026\nprunable gitdir file points to non-existent location\n\nworktree /Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/fvid\nHEAD 59bc07daf4e4e4a62b56025547ba9862ede1e188\nbranch refs/heads/codex/aac-ep-srcpc-20261028\n\nworktree /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid\nHEAD 501c7138b406267edd4b7b3666b35ab47460d040\nbranch refs/heads/codex/deliver-fvid-20261029\n\nworktree /Users/themoretheless/.codex/worktrees/verify-av1-alt-lf/fvid\nHEAD fcf429296df10d96bf0013e57c73a7aad688678a\nbranch refs/heads/codex/preserve-av1-active-20261009-final\n\n",
+  "stashes_preserved": "stash@{0}: On main: Preserve local Finder metadata before final consolidation\nstash@{1}: On main: Runtime SQLite sidecars preserved before branch consolidation 2026-10-04\nstash@{2}: On main: reader table cleanup\nstash@{3}: On main: save reader table\n",
+  "note": "Original occupied main worktree and active AAC/AV1 work are not reset or merged. Only this qualified delivery fast-forward is published; no branch/worktree/stash deletion."
+}
