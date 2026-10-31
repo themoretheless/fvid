@@ -207,7 +207,7 @@ fn malformed_slots_predictive_defaults_and_short_extension_children_fail_specifi
 }
 
 #[test]
-fn saved_tool_failures_and_unqualified_empty_coding_preserve_the_whole_frame() {
+fn saved_tool_failures_and_invalid_empty_coding_preserve_the_whole_frame() {
     let (manifest, configs, packets) = corpus();
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests/fixtures/playback-errors/aac-ld-mps-frame");

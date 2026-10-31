@@ -1,3 +1,50 @@
+## Empty grouped LD-MPS regions, 2026-10-31
+
+Zero-width grouped parameter regions now consume their one entropy datum and
+produce no visible parameter bands. This follows unmodified C getStrideMap and
+ecDataDec: signed division yields one group with range [0,0), while expansion
+never writes history. Real C initialization also sets compressed history cells
+to zero. The virtual datum therefore uses zero history independently of a
+region's default. Independent zero-width regions are admitted; split TTT empty grouped regions
+retain a specific refusal because their virtual cell can belong to the active
+neighboring region in the C compressed-history array. Unit-stride empty PCM and
+invalid empty Huffman retain their existing behavior. Bounds, prefix rollback and invalid PCM codewords remain
+checked by the owned entropy reader.
+
+252 own MP4/MKV programmes cover empty LFE OTT CLD regions in trees0/1 with
+strides2/5/23, paired/unpaired, fine/coarse PCM and 1D/2D Huffman data. LD/ELD
+480/512 core sources include PCM32/64/128 and shared LD-SBR QMF32/64 ingress.
+All 9,642,240 output PCM values match 28 unit-stride controls exactly. Native
+checkpoint/reset, original media stamps, opaque source IDs, both-container
+sample-boundary seek/rewind and audio-worker playback are exercised. These are
+control/association checks with shared DSP, not an independent whole-codec PCM
+oracle or a physical-device/realtime claim.
+
+864 standalone CLD/ICC/CPC units match original C consumed bits, dummy values,
+empty stride map and unchanged zero history. Every shorter prefix restores the
+reader and parameter decoder. The original Rust owner accepts all 28 controls
+and fails the parameter/movie acceptance tests at precisely its old grouped
+refusal; the tested owner is then restored byte-for-byte. 28 malformed movies
+carry unused fine CLD PCM codeword31 in a later spatial frame with valid CRC;
+correct-packet retry must preserve the complete waveform. The older frame
+corpus replaces its grouped refusal with this specific malformed-codeword
+expectation, while positive configuration/frame blobs remain unchanged. A separate
+split-TTT movie requires the specific shared-history refusal and successful
+correct-packet retry; its unit-stride control is accepted. This is explicitly a
+refusal regression, not split-TTT grouped playback acceptance.
+
+Fixture and original-C oracle generation are explicit, separate from tests.
+Both regenerate identically twice with network disabled; movie generation also
+disallows process creation. No private media, frames, audio or codec parameter
+sets are copied. Full Annex B/profile qualification, unequal HRTF grids,
+arbitrary trees, remaining energy-quantization profiles and changed-rate/layout
+or nonzero-time-alignment SSCs remain open. The codec-gap objective stays active.
+
+Fresh offline gates: 1827 passed, 0 failed, 27 ignored.
+Media/player libraries and 35 targeted integration binaries passed.
+
+Evidence: `docs/validation/aac-ld-mps-empty-groups-{source,reference,generation,tests}-2026-10-31.json`.
+
 ## Spatial frames crossing native source windows, 2026-10-31
 
 Native LD-MPS no longer requires a spatial frame to cover whole AAC input

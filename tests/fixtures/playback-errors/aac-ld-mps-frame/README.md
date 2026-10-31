@@ -28,7 +28,9 @@ a separate control qualifies three specific reference-source corrections.
 
 `errors.bin` contains five saved failures with exact reasons in the manifest:
 GES run overflow, interpolation with active/zero-band residual configuration,
-zero-width grouped coding and empty Huffman coding. The latter two are refusal
-controls, not acceptance of those representations. Empty unit-stride PCM and
-zero-width default/keep regions have positive frame acceptance tests. Residual
+an unused PCM codeword in grouped zero-width coding and empty unit-stride
+Huffman coding. Grouped zero-width acceptance now has its own movie/seek corpus
+in `aac-ld-mps-empty-groups`; the former grouped refusal was replaced by a
+specific malformed codeword. Empty unit-stride PCM and zero-width default/keep
+regions retain positive frame acceptance tests. Residual
 AAC payloads remain opaque and are not audio acceptance evidence.

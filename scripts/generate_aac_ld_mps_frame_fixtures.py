@@ -144,8 +144,12 @@ def generate():
     c=next(c for c in cases if c['name']=='tree0-res1-v0');f=c['frames'][0]
     source=''.join(field(x,8)for x in packets[f['offset']:f['offset']+f['bytes']])[:f['bits']]
     mode=next(x for x in f['mode_fields']if x['id']=='ott-cld:4')['position']
-    for name,position,width,value,reason in [('zero-width-grouped',mode+4,2,1,'zero-width grouped parameter coding is not yet qualified'),('empty-huffman',mode+6,1,0,'empty LD-MPS Huffman parameter vector')]:
-        wire=source[:position]+field(value,width)+source[position+width:];packet=packed(wire)
+    # Grouped zero-width coding is accepted. A fine CLD PCM symbol still has
+    # 31 levels, so codeword 31 is invalid even when its output range is empty.
+    grouped=source[:mode+4]+field(1,2)+source[mode+6:mode+7]+field(31,5)+source[mode+7:]
+    empty_huffman=source[:mode+6]+'0'+source[mode+7:]
+    for name,wire,reason in [('zero-width-grouped-invalid-pcm',grouped,'unused LD-MPS PCM codeword'),('empty-huffman',empty_huffman,'empty LD-MPS Huffman parameter vector')]:
+        packet=packed(wire)
         errors.append(dict(name=name,case=c['name'],seed=0,offset=len(error_packets),bytes=len(packet),bits=len(wire),reason=reason));error_packets.extend(packet)
     (OUT/'errors.bin').write_bytes(error_packets)
     (OUT/'configs.bin').write_bytes(configs);(OUT/'packets.bin').write_bytes(packets);(OUT/'manifest.json').write_text(json.dumps(dict(scope='Spatial frame syntax and parameter indices only; no spatial PCM/movie/playback acceptance.',cases=cases,errors=errors),separators=(',',':'))+'\n')

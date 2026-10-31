@@ -38,6 +38,15 @@ stamp;ordinary Session opaque-ID clients keep their strict contract. Shared SBR
 uses actual rate/mode compatibility independently of spatial frame length.
 Frequency,layout and nonzero time alignment remain unfinished.
 
+Empty grouped parameter regions now read the discarded entropy datum instead
+of refusing. Empty LFE OTT CLD trees0/1 are qualified with PCM/Huffman controls,
+MP4/MKV playback, seek/rewind, checkpoints/reset and transactional malformed
+packet retry. Standalone CLD/ICC/CPC consumed bits and zero history match
+unmodified original C. Empty grouped split-TTT regions retain an explicit
+shared-history refusal; their unit-stride movie control is accepted. Empty
+unit-stride Huffman remains invalid. This bounded
+addition does not establish full LD-MPS profile or Annex B conformance.
+
 LD-MPS rejects residual extension types0/1, including absent/zero bands, at
 native initial/replacement headers.
 Historical LD/residual numerical tests are not codec acceptance;ordinary MPEG

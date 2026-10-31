@@ -1,0 +1,75 @@
+{
+  "base": "20bff66282bb42b029ae504cfdca85024405eb37",
+  "command": [
+    "cargo",
+    "--config",
+    "profile.dev.package.fvid-media.opt-level=2",
+    "test",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--test",
+    "aac_ld_mps_empty_groups",
+    "--",
+    "--nocapture",
+    "--test-threads=2",
+    "--skip",
+    "grouped_empty_movies",
+    "--skip",
+    "grouped_empty_packets",
+    "--skip",
+    "invalid_empty_pcm_symbol",
+    "--skip",
+    "split_ttt"
+  ],
+  "status": 101,
+  "passed": 1,
+  "failed": 2,
+  "scope": "Three tests only:all28 unit-stride controls pass;parameter and movie acceptance fail at exact old grouped refusal. Seek/checkpoint/negative tests excluded from before check.",
+  "refusal": "LD-MPS zero-width grouped parameter coding is not yet qualified",
+  "original_frame_owner_sha256": "82199db27ef9178540d5fc0542f308734fef896eefa6c618ec9abef5f81d4ec9",
+  "restored_frame_owner_sha256": "c9ab74f0c08990776cb94e150d5e9f1c225a265519c713e57f8f6d218ceb0831",
+  "original_owner_sha256": "863434f4835051e12fca178993b0e3ed7c1833c48655891054f86547332a926e",
+  "restored_owner_sha256": "0ac400d209dc0cd6c79fe1ac629bdde7c982ff2349c9ec834216f12aa7c2c050",
+  "test_sha256": "f6db76b3922f48a3f5bed9c621398a9670bfb72940cbe10c360f55c7363aee19",
+  "fixture_manifest_sha256": "5f9a70dfdd155e504e4e377bfa91e4db45d36127ed838f6f1422ecf6c5dedc60",
+  "log": "/tmp/fvid-ld-mps-empty-groups-final-before.log",
+  "log_sha256": "99ed974d231dd3204cebbb684b13efa462bf10a8baa634b3e69f4b37314d3de9",
+  "sources_restored": true,
+  "retained_refusal": "Split TTT empty grouped regions can share compressed history with the active high region. Their new movie is a refusal/retry check with a playable unit-stride control,not grouped playback acceptance.",
+  "initialization_evidence": {
+    "member": "mp4spatialdec/src/sac_dec.c",
+    "lines": "105",
+    "storage_member": "mp4spatialdec/src/sac_dec.h",
+    "storage_lines": "558",
+    "meaning": "spatialDec is calloc-allocated and embeds bsFrame[2],so its compressed-history arrays start zero. Empty-region default/quantization/expansion loops never update the independent unused cell. Do not rely on the later local by-value bsFrame initialization loop as an effective owner write."
+  },
+  "reference_scope": "Unmodified C getStrideMap/ecDataDec;not whole-codec output. Real movies qualify independent zero-width LFE OTT history only.",
+  "specification_search": {
+    "date": "2026-10-31",
+    "official": "https://www.iso.org/standard/73122.html",
+    "official_access": "Paid standard;full normative text not obtained.",
+    "missing": "Full Annex B and table A.21 remain unavailable from currently retrieved normative documents.",
+    "failed_pdf_links": [
+      {
+        "url": "https://www.ieclist.ink/iso/ISO%20IEC%2023003-2-2010%20PDF.pdf",
+        "result": "404"
+      },
+      {
+        "url": "https://iso.ieclist.ink/iec/ISO%20IEC%2023003-2-2018%20PDF.pdf",
+        "result": "404"
+      },
+      {
+        "url": "https://previewnorm.com/iso/ISO%20IEC%2023003-2-2010%20PDF.pdf",
+        "result": "HTTP200 HTML,not a PDF"
+      },
+      {
+        "url": "https://previewnorm.com/iso/ISO%20IEC%2023003-2-2018%20PDF.pdf",
+        "result": "HTTP200 HTML,not a PDF"
+      }
+    ],
+    "fallback": "Unmodified pinned ISO C reference implementation,explicit component comparisons and independently authored movie controls. Not substituted for full normative/profile qualification."
+  },
+  "primary_reference_url": "https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip"
+}
