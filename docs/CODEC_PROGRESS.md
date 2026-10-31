@@ -1,3 +1,31 @@
+## Residual32/128 — isolated bank admission reproducers,2026-10-31
+
+This is diagnosis and new regression coverage,not a decoder fix. Production
+sources remain identical to e7daf503b9.44 own residual MP4 reproducers cover
+24kHz/32-band and96kHz/128-band output,480/512 cores,all8 trees and both TTT
+variants. Each has a paired ordinary movie;12 additional bare ELD movies match
+the scalar core oracle. All44 ordinary controls decode complete nonzero PCM,
+including four-core512-sample high-rate spatial windows.
+
+All1872 compressed residual spectral blocks parse independently. Residual movies
+refuse specifically at the full-complex64-bin native bank guard without publishing
+PCM. Two tests pass; one NEW acceptance test is explicitly ignored. Invoking
+that acceptance test directly still fails at the same specific guard (exit101).
+Passing reproduction tests are not accepted residual32/128 playback.
+
+The pinned primary residual MDCT-to-QMF code fixes projection to64 bands;
+the LD frontend branch does not supply a complete residual32/128 oracle.
+External twiddle support does not independently establish default phases for
+these banks. Normative bank/phase/scaling mapping and independent signal evidence
+remain required before changing runtime admission. No guessed crop,zero-pad or
+PCM substitute has been admitted. Full Annex B was not obtained in this audit.
+
+Own fixture generation reproduced115 files byte-for-byte under process/network
+denial. Ordinary tests use frozen data and require no FFmpeg,network or C compiler.
+The source audit records primary archive/member hashes and the precise pending
+acceptance failure. No claim of closed residual/profile or whole-codec gaps.
+Evidence: `docs/validation/aac-ld-mps-residual-bank-repro-2026-10-31.json`.
+
 ##128-band LD-MPS GES — guided envelope shaping,2026-10-31
 
 The owned GES constructor now accepts128 bands. Existing full-complex envelope
