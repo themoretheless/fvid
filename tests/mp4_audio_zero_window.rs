@@ -1,0 +1,298 @@
+#![cfg(feature = "player")]
+use fvid::{
+    audio::{AudioDecode, AudioStep, AudioStream},
+    playback_mp4_audio::Mp4AudioReader,
+};
+use std::{io::Cursor, path::Path, time::Duration};
+#[path = "support/audio_transitions.rs"]
+mod transitions;
+fn bytes(name: &str) -> Vec<u8> {
+    std::fs::read(
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/mp4-audio-zero-window")
+            .join(name),
+    )
+    .unwrap()
+}
+fn manifest() -> serde_json::Value {
+    serde_json::from_slice(&bytes("manifest.json")).unwrap()
+}
+fn open(name: &str) -> Mp4AudioReader<Cursor<Vec<u8>>> {
+    Mp4AudioReader::open(Cursor::new(bytes(name)), Default::default()).unwrap()
+}
+fn expected(c: &serde_json::Value) -> Vec<u8> {
+    if let Some(name) = c["oracle"].as_str() {
+        return bytes(name);
+    }
+    let mut r = fvid::container::mp4::Mp4Reader::open_indexed(
+        Cursor::new(bytes("mace-control.mp4")),
+        Default::default(),
+    )
+    .unwrap();
+    let track = r
+        .tracks()
+        .iter()
+        .position(|t| t.handler == *b"soun")
+        .unwrap();
+    let count = r.tracks()[track].samples.len();
+    let mut decoder = fvid::codec::mace_decoder::MaceDecoder::new(
+        fvid::codec::mace_decoder::MaceCoding::ThreeToOne,
+        8000,
+        1,
+    )
+    .unwrap();
+    let mut pcm = Vec::new();
+    let mut data = Vec::new();
+    for i in 0..count {
+        r.read_packet(track, i, &mut data).unwrap();
+        pcm.extend(decoder.decode_encoded(&data, 0, 0).unwrap().unwrap().data);
+    }
+    pcm.truncate(c["keep_frames"].as_u64().unwrap() as usize * 4);
+    pcm
+}
+fn compare(got: &[u8], want: &[u8], c: &serde_json::Value) {
+    assert_eq!(got.len(), want.len(), "{} PCM length", c["file"]);
+    if c["reference"] == "scalar-aac" {
+        for (a, b) in got.chunks_exact(4).zip(want.chunks_exact(4)) {
+            let a = f32::from_le_bytes(a.try_into().unwrap());
+            let b = f32::from_le_bytes(b.try_into().unwrap());
+            assert!(
+                a.is_finite() && (a - b).abs() < 2e-6,
+                "{} {a}!={b}",
+                c["file"]
+            );
+        }
+    } else {
+        assert_eq!(got, want, "{} exact PCM", c["file"]);
+    }
+}
+fn collect(stream: &mut dyn AudioStream) -> fvid::Result<transitions::Frames> {
+    fn emit(
+        stream: &dyn AudioStream,
+        mut frame: fvid::audio::DecodedAudio,
+        out: &mut transitions::Frames,
+    ) -> fvid::Result<()> {
+        if let Some(n) =
+            stream.decoded_packet_sample_limit(frame.source_pts, frame.source_duration)?
+        {
+            let size = n * usize::from(stream.channels()) * 4;
+            assert!(size <= frame.packet.data.len());
+            frame.packet.data.truncate(size);
+        }
+        if let Some(p) = stream.present_decoded(frame.packet, frame.source_pts)? {
+            out.push((
+                stream.sample_rate(),
+                stream.channels(),
+                p.presentation_time(),
+                p.data,
+            ));
+        }
+        Ok(())
+    }
+    let mut decoder = stream.make_decoder()?;
+    let mut out = Vec::new();
+    loop {
+        match stream.next_step()? {
+            Some(AudioStep::Encoded(p)) => {
+                if let Some(frame) =
+                    decoder.decode_packet(&p.data, stream.decoder_stamp(&p), p.duration as u64)?
+                {
+                    emit(stream, frame, &mut out)?;
+                }
+            }
+            Some(AudioStep::Pcm(p)) => out.push((
+                stream.sample_rate(),
+                stream.channels(),
+                p.presentation_time(),
+                p.data,
+            )),
+            Some(AudioStep::ResetDecoder) => stream.reset_decoder(&mut decoder)?,
+            Some(AudioStep::ReconfigureDecoder) => {
+                while let Some(frame) = decoder.finish_packet()? {
+                    emit(stream, frame, &mut out)?;
+                }
+                stream.advance_configuration()?;
+                decoder = stream.make_decoder()?;
+            }
+            None => {
+                if !stream.drain_decoded_at_eof() {
+                    decoder.reset();
+                    break;
+                }
+                if let Some(frame) = decoder.finish_packet()? {
+                    emit(stream, frame, &mut out)?;
+                    continue;
+                }
+                break;
+            }
+        }
+    }
+    stream.validate_eof()?;
+    Ok(out)
+}
+fn flat(frames: &transitions::Frames) -> Vec<u8> {
+    frames.iter().flat_map(|p| p.3.iter().copied()).collect()
+}
+#[test]
+fn healthy_and_rounded_zero_tick_controls_keep_full_native_pcm() {
+    for c in manifest()["cases"].as_array().unwrap() {
+        let name = c["file"].as_str().unwrap();
+        if !name.contains("control") && !c["rounded_positive_tail"].as_bool().unwrap_or(false) {
+            continue;
+        }
+        let mut r = open(name);
+        let got = collect(&mut r).unwrap_or_else(|e| panic!("{name}: {e}"));
+        compare(&flat(&got), &expected(c), c);
+        r.rewind();
+        compare(&flat(&collect(&mut r).unwrap()), &expected(c), c);
+    }
+}
+#[test]
+fn explicit_empty_terminal_window_emits_no_pcm_and_eof_seeks_stay_empty() {
+    let mut failures = Vec::new();
+    for c in manifest()["cases"].as_array().unwrap() {
+        let name = c["file"].as_str().unwrap();
+        if !name.contains("empty") {
+            continue;
+        }
+        let want = expected(c);
+        let mut r = open(name);
+        match collect(&mut r) {
+            Ok(frames) => {
+                let got = flat(&frames);
+                if got.len() != want.len() {
+                    failures.push(format!(
+                        "{name}: {} expected {} bytes",
+                        got.len(),
+                        want.len()
+                    ));
+                    continue;
+                }
+                compare(&got, &want, c);
+            }
+            Err(e) => {
+                failures.push(format!("{name}: {e}"));
+                continue;
+            }
+        }
+        let end_ticks = c["durations"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|d| d.as_i64().unwrap())
+            .sum::<i64>()
+            + c["shift"].as_i64().unwrap();
+        let end = Duration::from_nanos(
+            (end_ticks.max(0) as u128 * 1_000_000_000 / u128::from(c["scale"].as_u64().unwrap()))
+                as u64,
+        );
+        assert_eq!(r.duration(), Some(end), "{name} duration");
+        for target in [end, end + Duration::from_millis(1)] {
+            r.seek_time(target);
+            assert!(
+                collect(&mut r).unwrap().is_empty(),
+                "{name} EOF seek{target:?}"
+            );
+        }
+        r.rewind();
+        compare(&flat(&collect(&mut r).unwrap()), &want, c);
+    }
+    assert!(
+        failures.is_empty(),
+        "empty terminal PCM: {}",
+        failures.join("; ")
+    );
+}
+#[test]
+fn real_worker_does_not_publish_audible_zero_window_tail() {
+    use fvid::audio_thread::AudioPlayback;
+    use std::sync::{Arc, Mutex};
+    use transitions::{Capture, Trace, ended};
+    for c in manifest()["cases"].as_array().unwrap() {
+        let name = c["file"].as_str().unwrap();
+        if !name.contains("empty") {
+            continue;
+        }
+        let trace = Arc::new(Mutex::new(Trace::default()));
+        let shared = trace.clone();
+        let mut worker =
+            AudioPlayback::start(Box::new(open(name)), move || Box::new(Capture::new(shared)));
+        worker.play();
+        ended(&worker, 0);
+        compare(&flat(&trace.lock().unwrap().packets), &expected(c), c);
+        trace.lock().unwrap().packets.clear();
+        worker.seek(Duration::from_secs(1));
+        ended(&worker, worker.generation());
+        assert!(
+            trace.lock().unwrap().packets.is_empty(),
+            "{name} EOF worker"
+        );
+    }
+}
+#[test]
+fn terminal_payload_validation_and_packet_budget_are_not_skipped() {
+    let result = Mp4AudioReader::open(
+        Cursor::new(bytes("aac-empty-bad-body.mp4")),
+        Default::default(),
+    )
+    .and_then(|mut r| collect(&mut r));
+    let e = result.unwrap_err().to_string();
+    assert!(e.contains("AAC") && !e.contains("packet duration"), "{e}");
+    let mut r = Mp4AudioReader::open(
+        Cursor::new(bytes("ima-empty-grouped.mp4")),
+        fvid::container::mp4::Limits {
+            packet_bytes: 34,
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let e = collect(&mut r).unwrap_err().to_string();
+    assert!(e.contains("MP4 packet exceeds budget"), "{e}");
+    let e = Mp4AudioReader::open(
+        Cursor::new(bytes("ima-bad-two-zero.mp4")),
+        Default::default(),
+    )
+    .err()
+    .unwrap()
+    .to_string();
+    assert!(e.contains("invalid decode-time run"), "{e}");
+}
+#[test]
+fn raw_zero_timing_and_exact_video_companions_remain_valid() {
+    for c in manifest()["cases"].as_array().unwrap() {
+        let name = c["file"].as_str().unwrap();
+        let mut r = fvid::container::mp4::Mp4Reader::open_indexed(
+            Cursor::new(bytes(name)),
+            Default::default(),
+        )
+        .unwrap();
+        let t = r.tracks().iter().find(|t| t.handler == *b"soun").unwrap();
+        let declared: Vec<_> = (0..t.samples.len())
+            .map(|i| t.samples.get(i).unwrap().duration)
+            .collect();
+        let want: Vec<_> = c["durations"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|d| d.as_u64().unwrap() as u32)
+            .collect();
+        assert_eq!(declared, want, "{name}");
+        let mut v =
+            fvid::playback_native::NativeReader::software(Cursor::new(bytes(name)), 32 << 20)
+                .unwrap();
+        let count = c["video_frames"].as_u64().unwrap();
+        for i in 0..count {
+            match v.read_frame_raw().unwrap().unwrap() {
+                fvid::playback_native::RawFrame::Planar(p) => {
+                    assert_eq!(p.frame.data, vec![128; 384])
+                }
+                _ => panic!("owned neutral planes"),
+            };
+            assert_eq!(v.frame_interval(), Some((i as u128, i as u128 + 1, 50)));
+        }
+        assert!(v.read_frame_raw().unwrap().is_none());
+        v.rewind().unwrap();
+        assert!(v.seek_raw(Duration::from_millis(25)).unwrap().is_some());
+        assert_eq!(v.frame_interval(), Some((1, 2, 50)));
+    }
+}

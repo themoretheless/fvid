@@ -1,0 +1,6 @@
+{
+  "status": "unqualified control expectation;not a production fix",
+  "reason": "ADPCM intentionally conceals incomplete blocks by dropping the short tail. Requiring a refusal for33-byte IMA4 contradicts the existing codec contract. Preserve that behavior and use a deliberately truncated strict AAC body to verify terminal-payload validation instead.",
+  "initial_result": "2pass3fail;empty-window PCM and actual worker failures are confirmed independently;the unrelated bad-body control is excluded.",
+  "count_delta": 0
+}

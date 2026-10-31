@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 446,
-  "next_id": "FVID-0447",
+  "accepted_count": 447,
+  "next_id": "FVID-0448",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5008,6 +5008,17 @@
       "result": "Cache a selected-track playback-order check before emitting any step,silence or decoded PCM. Exact recovered clock windows avoid container-rounding false refusals. Return typed Unsupported for overlapping/reordered presentation;raw extraction and standalone decoding remain available. Seven new60ms authored video witnesses distinguish ordered/negative/gap playback acceptance from four unsupported-order refusal cases;actual workers emit Error without PCM. Existing timing,quantized clocks,raw packet navigation,seek,EOF and budgets remain green.123integration suites575pass;1243distinct checks and both builds pass. This does not add full reordered-audio playback support;full selected-track validation is documented.",
       "status": "accepted",
       "validation": "batch-446-validation.json"
+    },
+    {
+      "id": "FVID-0447",
+      "batch": 447,
+      "title": "Honor empty terminal MP4 audio windows without muting rounded native audio",
+      "source": "src/playback/audio/mp4_audio.rs",
+      "regression": "tests/mp4_audio_zero_window.rs",
+      "before": "Published7972667391 admits a single zero terminal packet,but native IMA4,PCM,MACE and ALAC emit audible PCM beyond its endpoint while AAC refuses a valid empty tail as nonaligned. Qualified baseline3controls pass,2window/actual-worker acceptances fail. Parser0433 intentionally deferred audible-window behavior;its malformed multiple-zero refusal stays intact.",
+      "result": "After recovered-clock handling,return Some(0) for an explicitly empty decoded source window. Decode/validate coded bodies and enforce packet limits before PCM clipping. Preserve the positive native window of rounded25Hz AAC durations1,1,0. Eighteen authored short videos cover five codec families,signed origins,known/unknown headers,STTS layouts and grouped blocks;exact/scalar PCM,raw clocks,video,rewind,EOF seek and actual workers pass. Corrupt terminal AAC,oversized empty packet and malformed timing still refuse.124integration suites580pass;1248distinct checks and both builds pass. All variants count once;no performance claim.",
+      "status": "accepted",
+      "validation": "batch-447-validation.json"
     }
   ]
 }

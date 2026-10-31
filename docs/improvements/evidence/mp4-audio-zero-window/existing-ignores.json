@@ -1,0 +1,9 @@
+{
+  "root-mp4": [
+    "player_gpu::tests::hardware_export_copies_mp4_audio_with_gapless_timing"
+  ],
+  "root-webm": [],
+  "media": [
+    "owned_exposure::integer_conversion_gap::complete_integer_float_rgb_pipeline_matches_reference"
+  ]
+}

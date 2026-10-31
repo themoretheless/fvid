@@ -1025,6 +1025,10 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         if self.clock_mode.get() && let Some(clock)=&self.clock {
             return clock.frames(self.track(),usize::try_from(stamp).map_err(|_|invalid("negative MP4 decoder stamp"))?).map(Some);
         }
+        // An explicit empty source window is still decoded/validated, but must
+        // not publish PCM. A recovered clock above can give a rounded zero-tick
+        // packet a positive native window, so it takes precedence.
+        if duration == 0 { return Ok(Some(0)); }
         self.packet_sample_limit(duration)
     }
     fn set_eac3_output_layout(&mut self, layout:Option<crate::codec::eac3_decoder::presentation::SpeakerLayout>)->Result<()> {

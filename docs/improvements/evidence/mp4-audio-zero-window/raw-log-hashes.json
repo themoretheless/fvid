@@ -1,0 +1,50 @@
+{
+  "integration": {
+    "path": "/private/tmp/fvid-mp4-audio-zero-window-integration.log",
+    "sha256": "8ad0cdf1775423630d983192dac5896f0deed919ad21e9939e04d140835e3d4c",
+    "archive": "integration.log",
+    "archive_sha256": "14b0d0e871456c700679df26928a64b8b3ed8822f8ed7ad25b61c8fbfbc28afe"
+  },
+  "root-mp4": {
+    "path": "/private/tmp/fvid-mp4-audio-zero-window-root-mp4.log",
+    "sha256": "821cca64ea736f37765a1f968015c9d916d2b3de96033fde2cd9ed76a8e5edfa",
+    "archive": "root-mp4.log",
+    "archive_sha256": "fadec64cfd10c86d86773381df7530c37daf675d39124c392a75e94602100a06"
+  },
+  "root-webm": {
+    "path": "/private/tmp/fvid-mp4-audio-zero-window-root-webm.log",
+    "sha256": "ac800b569550d7f8fe584aa162bd6e59193edf27dda72582316de258dd21d0bf",
+    "archive": "root-webm.log",
+    "archive_sha256": "7da364c3ccaddfbe305e3bf00b0a564f11472a74782c078a4ae82de1d277a32b"
+  },
+  "media": {
+    "path": "/private/tmp/fvid-mp4-audio-zero-window-media.log",
+    "sha256": "dc8c70b73ab0c1da940fe9b52c091ba9c4878d4810d54ab62cdaf75778265f92",
+    "archive": "media.log",
+    "archive_sha256": "7d1c055493d97bbc00c30669853b709c26267e65e6de80ec7af3a5198d5a2217"
+  },
+  "core-check": {
+    "path": "/private/tmp/fvid-mp4-audio-zero-window-core-check.log",
+    "sha256": "14dbee881e9d64c5a10fe36245691fbd77cfbb3e5cce00b5daf0935e25e8eaf8",
+    "archive": "core-check.log",
+    "archive_sha256": "14dbee881e9d64c5a10fe36245691fbd77cfbb3e5cce00b5daf0935e25e8eaf8"
+  },
+  "player-check": {
+    "path": "/private/tmp/fvid-mp4-audio-zero-window-player-check.log",
+    "sha256": "c07d84393128666ead7362f0a3c53034d1a244bd68cfd832169afd937c6f9cd5",
+    "archive": "player-check.log",
+    "archive_sha256": "c07d84393128666ead7362f0a3c53034d1a244bd68cfd832169afd937c6f9cd5"
+  },
+  "before": {
+    "path": "/private/tmp/fvid-mp4-audio-zero-window-before.log",
+    "sha256": "371153cde7b202cc93dbed11fb8b45ff6fcaddae6471eeeaf0a299016c7c9c70",
+    "archive": "before.log",
+    "archive_sha256": "371153cde7b202cc93dbed11fb8b45ff6fcaddae6471eeeaf0a299016c7c9c70"
+  },
+  "after": {
+    "path": "/private/tmp/fvid-mp4-audio-zero-window-after.log",
+    "sha256": "da399e4093ed69cc1a2445d98de6599bd8b8c0164ce97fe69ca5928ebf81adb9",
+    "archive": "after.log",
+    "archive_sha256": "ee3a90b9418e99133bbf7c41ea06097496282cbc44e802dcdadc5b030ecd6fee"
+  }
+}

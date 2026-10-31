@@ -1,0 +1,16 @@
+{
+  "removed": [
+    "/private/tmp/fvid-mp4-audio-zero-window-integration.log",
+    "/private/tmp/fvid-mp4-audio-zero-window-root-mp4.log",
+    "/private/tmp/fvid-mp4-audio-zero-window-root-webm.log",
+    "/private/tmp/fvid-mp4-audio-zero-window-media.log",
+    "/private/tmp/fvid-mp4-audio-zero-window-core-check.log",
+    "/private/tmp/fvid-mp4-audio-zero-window-player-check.log",
+    "/private/tmp/fvid-mp4-audio-zero-window-before.log",
+    "/private/tmp/fvid-mp4-audio-zero-window-after.log",
+    "/private/tmp/fvid-mp4-audio-zero-window-target-20261031",
+    "scripts/__pycache__"
+  ],
+  "verified": "source, all28 fixtures, raw and archived log hashes match before removal",
+  "preserved": "fixtures, generators, proof including rejected initial control; foreign worktrees and stashes untouched"
+}

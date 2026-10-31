@@ -1,0 +1,10 @@
+Running tests/mp4_audio_zero_window.rs (/private/tmp/fvid-mp4-audio-zero-window-target-20261031/debug/deps/mp4_audio_zero_window-fb06a42332d80e84)
+
+running 5 tests
+test explicit_empty_terminal_window_emits_no_pcm_and_eof_seeks_stay_empty ... ok
+test healthy_and_rounded_zero_tick_controls_keep_full_native_pcm ... ok
+test raw_zero_timing_and_exact_video_companions_remain_valid ... ok
+test terminal_payload_validation_and_packet_budget_are_not_skipped ... ok
+test real_worker_does_not_publish_audible_zero_window_tail ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
