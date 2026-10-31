@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 453,
-  "next_id": "FVID-0454",
+  "accepted_count": 455,
+  "next_id": "FVID-0456",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5088,6 +5088,28 @@
       "result": "Park active sources when the bound is spent and retain the final picture on subsequent repaint. Seeking out of terminal state restores the chosen unpaused transport,with video audio still held for preroll;paused navigation and queue continuation retain their behavior. Three authored CFR/VFR/fractional VP9 clips and scalar WAV/YUV controls verify exact source data,held RGB/intervals,actual worker pause/stable clock and seek-resumed playback/PCM. Six cases pass20repetitions;127integration suites591pass,1514physical-source-distinct checks and core/player builds pass. Introduced seek reentry stalls reproduced4pass2fail and amended without an extra ID. Five old ignores unchanged. Existing bound threshold selection retained;no performance claim.",
       "status": "accepted",
       "validation": "batch-453-validation.json"
+    },
+    {
+      "id": "FVID-0454",
+      "batch": 454,
+      "title": "Drive stop bounds from the active presentation clock",
+      "source": "src/player.rs",
+      "regression": "src/player_stop_clock_tests.rs",
+      "before": "Publishedcf870e8d3c compares a future picture end to the stop bound. Native exact-source control passes while3live/silent scheduling acceptances fail:live20ms spends40ms cutoff,and silent pictures lose their remaining period.",
+      "result": "Use active audio or rate-scaled interval/deadline clock;check before presenting and fence at/after-bound pictures even when A/V slack would make them ready. Preserve explicit seek/manual-step behavior and cleanup terminal loading state. Three authored CFR/VFR/fractional VP9 companions plus scalar WAV/YUV validate exact source data,before/at-cutoff clock decisions and actual remaining-period hold. Bound-only stage passes all3bound tests while independent EOF still fails. Final7cases pass20repetitions;127integration suites591pass,1521physical-source-distinct checks and both builds pass. Variants/control/probes add0;no performance claim.",
+      "status": "accepted",
+      "validation": "batch-454-validation.json"
+    },
+    {
+      "id": "FVID-0455",
+      "batch": 454,
+      "title": "Keep native EOF pending until the final picture interval completes",
+      "source": "src/player.rs",
+      "regression": "src/player_stop_clock_tests.rs",
+      "before": "Without any stop bound,publishedcf870e8d3c ends at the native decoder EOF while the final picture is still scheduled:live80ms versus100ms picture endpoint. This remains failing after the independent bound-only repair;the added silent/rate0.3x witness also fails(4pass2fail).",
+      "result": "Retain the actual worker EOF and generation until the active presentation clock completes the last picture. Manual stepping still terminates against paused clocks;natural audio tail remains unchanged. Actual native EOF/controlled audio and silent timed VFR witnesses pass. Candidate completed-audio handoff regression reproduced6pass1fail and amended by keeping a completed audio clock authoritative for its audio-paced picture;adds0IDs. Final7cases pass20repetitions;127integration suites591pass,1521physical-source-distinct checks and core/player builds pass. Five old ignores unchanged;no performance claim.",
+      "status": "accepted",
+      "validation": "batch-454-validation.json"
     }
   ]
 }

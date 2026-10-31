@@ -1,0 +1,72 @@
+{
+  "provenance": "Only committed authored16x16 VP9 CFR/VFR/fractional keyframes and independent YUV planes;200ms authored mono8kHz PCM waveform with scalar float oracle. No private media,encoder or network. Scheduling witnesses use a controlled real audio worker clock and silent frame deadlines;only authored donor material.",
+  "cases": [
+    {
+      "file": "cfr.mp4",
+      "scale": 1000,
+      "pts": [
+        0,
+        20,
+        40,
+        60,
+        80
+      ],
+      "durations": [
+        20,
+        20,
+        20,
+        20,
+        20
+      ],
+      "stop_after_picture": 1
+    },
+    {
+      "file": "vfr.mp4",
+      "scale": 1000,
+      "pts": [
+        0,
+        20,
+        100,
+        110,
+        150
+      ],
+      "durations": [
+        20,
+        80,
+        10,
+        40,
+        30
+      ],
+      "stop_after_picture": 1
+    },
+    {
+      "file": "fractional.mp4",
+      "scale": 30000,
+      "pts": [
+        0,
+        1001,
+        2002,
+        3003,
+        4004
+      ],
+      "durations": [
+        1001,
+        1001,
+        1001,
+        1001,
+        1001
+      ],
+      "stop_after_picture": 1
+    }
+  ],
+  "sha256": {
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "cfr.mp4": "208e073beeb34ca43b5db2ae0456f97fe5b2e93b61072fd8ab43f90ccf006d72",
+    "vfr.mp4": "0924909aaf1ed4e29af4252c6fb0f93a8c3eab46d009b82a11723febd4847dc2",
+    "fractional.mp4": "4a90612e6dfef02943064102a61d0754e375ad70adf47908a5842540631586f4",
+    "sound.wav": "8fc0be777d19d00fab9b509ac4d7dc102c66ee385a0ebf3de11cc38b1ac9b01e",
+    "sound.f32le": "11d1e18706d4b5a2321327f52a64a917ff2bb9b955fa7d32a53bb50dac90d78d"
+  }
+}

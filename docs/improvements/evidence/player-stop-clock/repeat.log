@@ -1,0 +1,259 @@
+RUN 0
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.48s
+
+RUN 1
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.51s
+
+RUN 2
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.53s
+
+RUN 3
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.41s
+
+RUN 4
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.37s
+
+RUN 5
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.38s
+
+RUN 6
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.51s
+
+RUN 7
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.60s
+
+RUN 8
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.43s
+
+RUN 9
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.37s
+
+RUN 10
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.50s
+
+RUN 11
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.49s
+
+RUN 12
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.42s
+
+RUN 13
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.43s
+
+RUN 14
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.40s
+
+RUN 15
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.40s
+
+RUN 16
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.39s
+
+RUN 17
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.42s
+
+RUN 18
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.44s
+
+RUN 19
+
+running 7 tests
+test player::stop_clock_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_clock_regressions::completed_audio_clock_does_not_rewind_to_a_stale_startup_deadline_at_eof ... ok
+test player::stop_clock_regressions::live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end ... ok
+test player::stop_clock_regressions::natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound ... ok
+test player::stop_clock_regressions::silent_native_eof_preserves_the_scheduled_last_picture_period ... ok
+test player::stop_clock_regressions::silent_presentation_holds_the_bound_picture_for_its_remaining_period ... ok
+test player::stop_clock_regressions::silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1102 filtered out; finished in 0.42s

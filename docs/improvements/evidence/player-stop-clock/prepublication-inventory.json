@@ -1,0 +1,8 @@
+{
+  "head": "cf870e8d3c75a4adb71a55dfb4cbec13cb38ab67\n",
+  "branch": "codex/deliver-fvid-20261029\n",
+  "worktrees": "worktree /Users/themoretheless/Documents/Sources/fvid\nHEAD eb0c0148fe434ec8e2da425936e93467f7c6edee\nbranch refs/heads/main\n\nworktree /private/tmp/fvid-export-20261025-freeze\nHEAD ff68df1f365c8d4c77b944c95effe78ef112a303\nbranch refs/heads/codex/aac-eld-ld-sbr-20261026\nprunable gitdir file points to non-existent location\n\nworktree /Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/fvid\nHEAD 012853fc15999cb37005efee28ea130429dbb9e6\nbranch refs/heads/codex/aac-ep-srcpc-20261028\n\nworktree /Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid\nHEAD cf870e8d3c75a4adb71a55dfb4cbec13cb38ab67\nbranch refs/heads/codex/deliver-fvid-20261029\n\nworktree /Users/themoretheless/.codex/worktrees/verify-av1-alt-lf/fvid\nHEAD fcf429296df10d96bf0013e57c73a7aad688678a\nbranch refs/heads/codex/preserve-av1-active-20261009-final\n\n",
+  "stashes": "stash@{0}: On main: Preserve local Finder metadata before final consolidation\nstash@{1}: On main: Runtime SQLite sidecars preserved before branch consolidation 2026-10-04\nstash@{2}: On main: reader table cleanup\nstash@{3}: On main: save reader table\n",
+  "remote_refs": "cf870e8d3c75a4adb71a55dfb4cbec13cb38ab67\trefs/heads/codex/deliver-fvid-20261029\ncf870e8d3c75a4adb71a55dfb4cbec13cb38ab67\trefs/heads/main\n",
+  "preservation": "Foreign active worktrees,branches and saved stashes remain untouched. Remove only own completed stop-clock artifacts after proof archival."
+}

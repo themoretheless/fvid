@@ -1,0 +1,141 @@
+{
+  "completed": true,
+  "removed": [
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-after-final.log",
+      "bytes": 26353,
+      "sha256": "3a52dcd755546743c91df8c1d115ea22b52757f97e5aed34c84a655fc3daced7",
+      "archive": "after.log",
+      "archive_sha256": "fb3ac9de49ae3a3973d5f450e2ca3da054cf8e15d050c2aa8810fb5822ad04be"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-after.log",
+      "bytes": 26236,
+      "sha256": "2073c3d3927ce2ce709a3ad3d4496ac417640a3ebc9b6b8824004882b605a1e7",
+      "archive": "after-six-case.log",
+      "archive_sha256": "74a771e996c44837bfbe8718452e3f11332fbca018e68dc9e6e15b1ac7d23205"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-audio-thread.log",
+      "bytes": 29675,
+      "sha256": "98d47e60858dd78804cf41d2d4d363281b9ca027a2c10d78fe9d5289cc5cb14f",
+      "archive": "qualification/audio-thread.log",
+      "archive_sha256": "1d41f13c2a201f4a4fb9d5b25b6865af09a93c76511f8eaf37eac5a9cd34adaa"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-before-expanded.log",
+      "bytes": 28444,
+      "sha256": "267b18ea36215a94c9fb3f9a7923f5657373791c430c6f16d78f607aa2f7c55c",
+      "archive": "before.log",
+      "archive_sha256": "267b18ea36215a94c9fb3f9a7923f5657373791c430c6f16d78f607aa2f7c55c"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-before.log",
+      "bytes": 37648,
+      "sha256": "439cf804c9c8836c62485e34e9c1dccc76882be914ecaade8d788653261c5491",
+      "archive": "bound-before.log",
+      "archive_sha256": "439cf804c9c8836c62485e34e9c1dccc76882be914ecaade8d788653261c5491"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-bound-only.log",
+      "bytes": 26845,
+      "sha256": "fe9c28e0c4238941260630d6fa9678080617f396861f8c4dae6132d54050cff6",
+      "archive": "bound-only.log",
+      "archive_sha256": "fe9c28e0c4238941260630d6fa9678080617f396861f8c4dae6132d54050cff6"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-bound-only.rs",
+      "bytes": 559851,
+      "sha256": "9a89902f85cbd5063115c7a601917fb488f8a2b7ccee595b57dc44d40357ce34",
+      "preserved_as": "bound-only.patch with verified byte-identical reconstruction"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-core-check.log",
+      "bytes": 25551,
+      "sha256": "8bf6c0be120d4368ff528b3c63bd2f4c8d0a9d9035dc73686ce33a9ef6333cf3",
+      "archive": "qualification/core-check.log",
+      "archive_sha256": "8bf6c0be120d4368ff528b3c63bd2f4c8d0a9d9035dc73686ce33a9ef6333cf3"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-eof-before.log",
+      "bytes": 27464,
+      "sha256": "7458dc00e130bfc4ec10798968ade9e244d4fa5794c00879c0c1b2489a4076ed",
+      "archive": "eof-before.log",
+      "archive_sha256": "7458dc00e130bfc4ec10798968ade9e244d4fa5794c00879c0c1b2489a4076ed"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-handoff-before.log",
+      "bytes": 27087,
+      "sha256": "d022a3de283634bb442bd83774430e54a142ad78e3568b900c1dd4e1e952b303",
+      "archive": "handoff-before.log",
+      "archive_sha256": "d022a3de283634bb442bd83774430e54a142ad78e3568b900c1dd4e1e952b303"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-integration.log",
+      "bytes": 111435,
+      "sha256": "f052c6dff45c50fd988607e524e4c209604dec70a8a22f6ec15fc5d7f8f5edde",
+      "archive": "qualification/integration.log",
+      "archive_sha256": "d5825c7007fd9c890b63910108c2e5f40a79225ebe40c618390d684bf676dc7c"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-media.log",
+      "bytes": 69811,
+      "sha256": "811d545a33f80dd46759c15e355e0d6f74e726d02d7cde60262c106423976c98",
+      "archive": "qualification/media.log",
+      "archive_sha256": "da74ce4f7303da696f095883774993a042faf8f797a0517cbb22e34d97e85c2a"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-player-check.log",
+      "bytes": 25119,
+      "sha256": "36423d57955ff9eadd8031ff0cd489930aae630c020ffb8b2846ac571ae8d13d",
+      "archive": "qualification/player-check.log",
+      "archive_sha256": "36423d57955ff9eadd8031ff0cd489930aae630c020ffb8b2846ac571ae8d13d"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-player-units.log",
+      "bytes": 45482,
+      "sha256": "529ab71bce44f80c1101928cff1b67d5f26cb218b525443bc857932ee3afabba",
+      "archive": "qualification/player-units.log",
+      "archive_sha256": "9cc0f533738d6eea48a567daf5243f3d782456a2aba48c72ff2c8a6748a92aa0"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-pre-handoff.rs",
+      "bytes": 560673,
+      "sha256": "a6379370b100ba604371e31cbd98b8f6e2c6321131d10b7f7d7734d22fd70b97",
+      "preserved_as": "pre-handoff.patch with verified byte-identical reconstruction"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-repeat.log",
+      "bytes": 18030,
+      "sha256": "b0433bb6359d4041497ddd5d3d23feb6f991bc8ff16e6f9d7940d89330565bf6",
+      "archive": "repeat.log",
+      "archive_sha256": "c83f4158553d9cd962fb6393653a0620b875167eeb5380d962c78d17e93587e2"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-root-mp4.log",
+      "bytes": 32288,
+      "sha256": "cf92f2ea2ec8ac516233d60c6299ba2685362449e298312a481dca5501a9e8f2",
+      "archive": "qualification/root-mp4.log",
+      "archive_sha256": "9d2f9124a5a7f32a8d84879fe9ea0dec7a5b7b270fa3767e32c716a813c212e0"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-root-webm.log",
+      "bytes": 31604,
+      "sha256": "097cb3f102914cdc35c584d27ee55634c8c94006d88ba196306f40c6eda5d8b0",
+      "archive": "qualification/root-webm.log",
+      "archive_sha256": "f686410670178e390ff60c3156b9cf514fa00c4b6955fe5028815bc03cb0fadb"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-runner.log",
+      "bytes": 128,
+      "sha256": "127bfb6f4c3f5ad29079b350d354f8514d27c77b3080b7326fb7c332ce3e20e6",
+      "archive": "diagnostics/runner.log",
+      "archive_sha256": "127bfb6f4c3f5ad29079b350d354f8514d27c77b3080b7326fb7c332ce3e20e6"
+    },
+    {
+      "path": "/private/tmp/fvid-player-stop-clock-target-20261031",
+      "kind": "isolated disposable build target"
+    }
+  ],
+  "preserved": "All authored fixtures,generator,regressions,proof logs and reconstructable stage sources. Foreign worktrees,stashes and shared caches untouched."
+}

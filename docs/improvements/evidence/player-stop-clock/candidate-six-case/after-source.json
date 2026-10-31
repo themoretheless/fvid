@@ -1,0 +1,6 @@
+{
+  "src/player.rs": "a6379370b100ba604371e31cbd98b8f6e2c6321131d10b7f7d7734d22fd70b97",
+  "src/player_stop_clock_tests.rs": "edac8d6053bb30e1288c7b49710b544f8a13c27ec85d2636b6f40466deefee11",
+  "scripts/generate_player_stop_clock.py": "206cb33f68e1535d2d30d54944b0808f23e233d331869151f9493b2ae344f439",
+  "tests/fixtures/playback-errors/player-stop-clock/manifest.json": "c42330279b1ae5908adfbcdf8bc04ea4f75af320e74d24d6411398ead10498dd"
+}

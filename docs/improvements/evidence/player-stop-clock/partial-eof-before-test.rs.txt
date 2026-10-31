@@ -1,0 +1,409 @@
+//! Stop scheduling follows the live clock, not the end of a future picture.
+use super::*;
+use std::{
+    io::Cursor,
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicU64, Ordering},
+    },
+};
+fn root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/player-stop-clock")
+}
+fn bytes(n: &str) -> Vec<u8> {
+    std::fs::read(root().join(n)).unwrap()
+}
+fn cases() -> Vec<serde_json::Value> {
+    serde_json::from_slice::<serde_json::Value>(&bytes("manifest.json")).unwrap()["cases"]
+        .as_array()
+        .unwrap()
+        .clone()
+}
+fn tick(p: &mut Player, ctx: &egui::Context) {
+    let mut o = ctx.run_ui(Default::default(), |ui| p.present(ui.ctx()));
+    o.textures_delta.clear();
+}
+fn wait(p: &mut Player, ctx: &egui::Context, pred: impl Fn(&Player) -> bool) {
+    let end = Instant::now() + Duration::from_secs(5);
+    while !pred(p) {
+        assert!(p.error.is_none(), "{:?}", p.error);
+        assert!(
+            Instant::now() < end,
+            "clock test stalled interval{:?} ended{}",
+            p.interval,
+            p.ended
+        );
+        tick(p, ctx);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+}
+fn point(c: &serde_json::Value, i: usize, end: bool) -> Duration {
+    let ticks = c["pts"][i].as_u64().unwrap()
+        + if end {
+            c["durations"][i].as_u64().unwrap()
+        } else {
+            0
+        };
+    Duration::from_nanos(ticks * 1_000_000_000 / c["scale"].as_u64().unwrap())
+}
+fn open(c: &serde_json::Value, ctx: &egui::Context) -> Player {
+    let mut p = Player {
+        queue: vec![root().join(c["file"].as_str().unwrap())],
+        no_audio: true,
+        asynchronous_open: false,
+        start_paused: true,
+        ..Default::default()
+    };
+    p.play_index(0);
+    wait(&mut p, ctx, |p| {
+        p.presented.is_some() && !p.buffering && !p.seek_preview && p.step == 0
+    });
+    p
+}
+#[test]
+fn authored_cfr_vfr_fractional_and_audio_controls_are_exact() {
+    for c in cases() {
+        let mut r = crate::playback_mp4::Mp4VideoReader::open_software(
+            Cursor::new(bytes(c["file"].as_str().unwrap())),
+            Default::default(),
+            32 << 20,
+        )
+        .unwrap();
+        for i in 0..5 {
+            let f = r.read_frame().unwrap().unwrap();
+            assert_eq!(
+                (f.sample_index, f.presentation_time.ticks, f.duration.ticks),
+                (
+                    i,
+                    c["pts"][i].as_i64().unwrap(),
+                    c["durations"][i].as_i64().unwrap()
+                )
+            );
+            let yuv: Vec<_> = f
+                .picture
+                .y
+                .iter()
+                .chain(&f.picture.cb)
+                .chain(&f.picture.cr)
+                .flat_map(|x| x.to_le_bytes())
+                .collect();
+            assert_eq!(yuv, bytes(&format!("frame-{}.yuv16", i % 3)));
+        }
+        assert!(r.read_frame().unwrap().is_none());
+    }
+    let mut r = crate::playback_wav::WavAudioReader::open(
+        Cursor::new(bytes("sound.wav")),
+        Default::default(),
+    )
+    .unwrap();
+    let mut decoder = crate::audio::AudioStream::make_decoder(&r).unwrap();
+    let mut got = Vec::new();
+    while let Some(packet) = crate::audio::AudioStream::next_packet(&mut r).unwrap() {
+        if let Some(frame) = decoder
+            .decode_packet(&packet.data, packet.pts, packet.duration as u64)
+            .unwrap()
+        {
+            got.extend(frame.packet.data);
+        }
+    }
+    while let Some(frame) = decoder.finish_packet().unwrap() {
+        got.extend(frame.packet.data);
+    }
+    let want = bytes("sound.f32le");
+    assert!(
+        got == want,
+        "WAV native PCM control differs: {} vs {} bytes",
+        got.len(),
+        want.len()
+    );
+}
+
+#[derive(Default)]
+struct Trace {
+    pcm: Vec<u8>,
+    pauses: usize,
+    resumes: usize,
+}
+struct Device {
+    clock: Arc<AtomicU64>,
+    trace: Arc<Mutex<Trace>>,
+    running: bool,
+    anchor: Duration,
+    frontier: Duration,
+}
+impl crate::audio::AudioBackend for Device {
+    fn start(&mut self, s: crate::audio::AudioSpec) -> Result<(), crate::audio::AudioError> {
+        assert_eq!((s.sample_rate, s.channels), (8000, 1));
+        Ok(())
+    }
+    fn position(&self) -> Duration {
+        if self.running {
+            Duration::from_nanos(self.clock.load(Ordering::SeqCst))
+        } else {
+            self.anchor
+        }
+    }
+    fn push(&mut self, p: crate::audio::AudioPacket) -> Result<(), crate::audio::AudioError> {
+        self.frontier =
+            p.presentation_time() + Duration::from_nanos(p.data.len() as u64 / 4 * 125000);
+        self.trace.lock().unwrap().pcm.extend(p.data);
+        Ok(())
+    }
+    fn flush(&mut self, t: Duration) -> Result<(), crate::audio::AudioError> {
+        self.anchor = t;
+        self.clock.store(t.as_nanos() as u64, Ordering::SeqCst);
+        Ok(())
+    }
+    fn pause(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.anchor = self.position();
+        self.running = false;
+        self.trace.lock().unwrap().pauses += 1;
+        Ok(())
+    }
+    fn resume(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.running = true;
+        self.trace.lock().unwrap().resumes += 1;
+        Ok(())
+    }
+    fn stop(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.running = false;
+        Ok(())
+    }
+    fn drain_status(&self) -> Result<bool, crate::audio::AudioError> {
+        Ok(self.position() >= self.frontier)
+    }
+}
+fn sound(clock: Arc<AtomicU64>, trace: Arc<Mutex<Trace>>) -> crate::audio_thread::AudioPlayback {
+    let source = crate::playback_wav::WavAudioReader::open(
+        Cursor::new(bytes("sound.wav")),
+        Default::default(),
+    )
+    .unwrap();
+    crate::audio_thread::AudioPlayback::start(Box::new(source), move || {
+        Box::new(Device {
+            clock,
+            trace,
+            running: false,
+            anchor: Duration::ZERO,
+            frontier: Duration::ZERO,
+        })
+    })
+}
+fn clock_at(a: &crate::audio_thread::AudioPlayback, clock: &AtomicU64, t: Duration) {
+    clock.store(t.as_nanos() as u64, Ordering::SeqCst);
+    let until = Instant::now() + Duration::from_secs(5);
+    while a.position() != t {
+        if let Some(crate::audio_thread::AudioEvent::Error(e)) = a.poll() {
+            panic!("{e}");
+        }
+        assert!(
+            Instant::now() < until,
+            "audio clock {:?} expected{t:?}",
+            a.position()
+        );
+        std::thread::sleep(Duration::from_millis(1));
+    }
+}
+fn at_second(p: &Player, c: &serde_json::Value) {
+    let start = c["pts"][1].as_u64().unwrap();
+    assert_eq!(
+        p.interval,
+        Some((
+            u128::from(start),
+            u128::from(start + c["durations"][1].as_u64().unwrap()),
+            c["scale"].as_u64().unwrap() as u32
+        ))
+    );
+}
+#[test]
+fn live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end() {
+    for c in cases() {
+        let ctx = egui::Context::default();
+        let mut p = open(&c, &ctx);
+        let cutoff = point(&c, 1, true);
+        let clock = Arc::new(AtomicU64::new(0));
+        let trace = Arc::new(Mutex::new(Trace::default()));
+        p.audio = Some(sound(clock.clone(), trace.clone()));
+        p.audio_ended = false;
+        p.stop_time = Some(cutoff);
+        p.toggle_pause();
+        let first = point(&c, 1, false) + Duration::from_nanos(1);
+        clock_at(p.audio.as_ref().unwrap(), &clock, first);
+        tick(&mut p, &ctx);
+        at_second(&p, &c);
+        assert!(
+            !p.ended,
+            "{} stopped at live clock{first:?} before bound{cutoff:?}",
+            c["file"]
+        );
+        assert_eq!(p.stop_time, Some(cutoff));
+        clock_at(
+            p.audio.as_ref().unwrap(),
+            &clock,
+            cutoff - Duration::from_nanos(1),
+        );
+        for _ in 0..5 {
+            tick(&mut p, &ctx);
+            at_second(&p, &c);
+            assert!(!p.ended);
+        }
+        clock_at(p.audio.as_ref().unwrap(), &clock, cutoff);
+        wait(&mut p, &ctx, |p| p.ended);
+        at_second(&p, &c);
+        assert_eq!(p.stop_time, None);
+        let until = Instant::now() + Duration::from_secs(5);
+        while trace.lock().unwrap().pauses == 0 {
+            assert!(Instant::now() < until);
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        let t = trace.lock().unwrap();
+        assert_eq!((t.resumes, t.pauses), (1, 1));
+        assert_eq!(t.pcm, bytes("sound.f32le"));
+    }
+}
+#[test]
+fn silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end() {
+    for c in cases() {
+        let ctx = egui::Context::default();
+        let mut p = open(&c, &ctx);
+        p.seek_time(point(&c, 1, false) + Duration::from_millis(1));
+        wait(&mut p, &ctx, |p| !p.seek_preview && !p.buffering);
+        at_second(&p, &c);
+        p.stop_time = Some(point(&c, 1, true));
+        p.paused = false;
+        p.deadline = Instant::now() + Duration::from_millis(10);
+        p.check_stop();
+        assert!(
+            !p.ended,
+            "{} spent a bound before the displayed frame deadline",
+            c["file"]
+        );
+        assert!(p.stop_time.is_some());
+        p.deadline = Instant::now() - Duration::from_millis(1);
+        p.check_stop();
+        assert!(p.ended);
+        assert_eq!(p.stop_time, None);
+        at_second(&p, &c);
+    }
+}
+#[test]
+fn silent_presentation_holds_the_bound_picture_for_its_remaining_period() {
+    let c = cases().remove(1);
+    let ctx = egui::Context::default();
+    let mut p = open(&c, &ctx);
+    p.seek_time(point(&c, 1, false) + Duration::from_millis(1));
+    wait(&mut p, &ctx, |p| !p.seek_preview && !p.buffering);
+    at_second(&p, &c);
+    p.stop_time = Some(point(&c, 1, true));
+    p.paused = false;
+    p.playback.as_ref().unwrap().play();
+    let start = Instant::now();
+    p.deadline = start + Duration::from_millis(80);
+    p.check_stop();
+    assert!(
+        !p.ended,
+        "future VFR picture end prematurely spent the bound"
+    );
+    wait(&mut p, &ctx, |p| p.ended);
+    assert!(start.elapsed() >= Duration::from_millis(60));
+    at_second(&p, &c);
+    assert_eq!(p.stop_time, None);
+}
+
+#[test]
+fn natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound() {
+    for c in cases() {
+        let ctx = egui::Context::default();
+        let mut p = open(&c, &ctx);
+        let clock = Arc::new(AtomicU64::new(0));
+        let trace = Arc::new(Mutex::new(Trace::default()));
+        p.audio = Some(sound(clock.clone(), trace.clone()));
+        p.audio_ended = false;
+        assert_eq!(p.stop_time, None);
+        p.toggle_pause();
+        let start = point(&c, 4, false) + Duration::from_nanos(1);
+        clock_at(p.audio.as_ref().unwrap(), &clock, start);
+        let last = c["pts"][4].as_u64().unwrap();
+        wait(&mut p, &ctx, |p| {
+            p.interval.is_some_and(|(s, _, _)| s == u128::from(last))
+        });
+        // Obtain the actual native worker EOF and preserve it on the same
+        // deferred path used by normal presentation; do not fabricate EOF.
+        let until = Instant::now() + Duration::from_secs(5);
+        loop {
+            assert!(Instant::now() < until, "native EOF did not arrive");
+            match p.playback.as_ref().unwrap().poll() {
+                Some(Event::Ended(g)) => {
+                    assert_eq!(g, p.playback.as_ref().unwrap().generation());
+                    p.deferred_event = Some(Event::Ended(g));
+                    break;
+                }
+                Some(Event::Error(e)) => panic!("{e}"),
+                Some(Event::Frame(_)) => panic!("picture after last sample"),
+                None => {}
+            }
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        for _ in 0..5 {
+            tick(&mut p, &ctx);
+            assert!(
+                !p.ended,
+                "{} ended at live clock{start:?} before last picture end{:?}",
+                c["file"],
+                point(&c, 4, true)
+            );
+            assert_eq!(p.interval.unwrap().0, u128::from(last));
+        }
+        clock_at(p.audio.as_ref().unwrap(), &clock, point(&c, 4, true));
+        wait(&mut p, &ctx, |p| p.ended);
+        assert_eq!(p.interval.unwrap().0, u128::from(last));
+        let t = trace.lock().unwrap();
+        assert_eq!((t.resumes, t.pauses), (1, 0));
+        assert_eq!(t.pcm, bytes("sound.f32le"));
+    }
+}
+
+#[test]
+fn silent_native_eof_preserves_the_scheduled_last_picture_period() {
+    let c = cases().remove(1);
+    let ctx = egui::Context::default();
+    let mut p = open(&c, &ctx);
+    p.seek_time(point(&c, 4, false) + Duration::from_millis(1));
+    wait(&mut p, &ctx, |p| !p.seek_preview && !p.buffering);
+    let last = c["pts"][4].as_u64().unwrap();
+    assert_eq!(p.interval.unwrap().0, u128::from(last));
+    p.paused = false;
+    p.playback.as_ref().unwrap().play();
+    assert_eq!(p.stop_time, None);
+    let until = Instant::now() + Duration::from_secs(5);
+    loop {
+        assert!(Instant::now() < until, "native EOF did not arrive");
+        match p.playback.as_ref().unwrap().poll() {
+            Some(Event::Ended(g)) => {
+                assert_eq!(g, p.playback.as_ref().unwrap().generation());
+                p.deferred_event = Some(Event::Ended(g));
+                break;
+            }
+            Some(Event::Error(e)) => panic!("{e}"),
+            Some(Event::Frame(_)) => panic!("picture after last sample"),
+            None => {}
+        }
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    // At 0.3x the final authored30ms picture owns a100ms display interval.
+    p.rate_milli = 300;
+    let start = Instant::now();
+    let period = Duration::from_millis(100);
+    p.deadline = start + period;
+    tick(&mut p, &ctx);
+    if start.elapsed() < period {
+        assert!(
+            !p.ended,
+            "native EOF discarded the scheduled last-picture period"
+        );
+    }
+    wait(&mut p, &ctx, |p| p.ended);
+    assert!(start.elapsed() >= Duration::from_millis(80));
+    assert_eq!(p.interval.unwrap().0, u128::from(last));
+}

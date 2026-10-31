@@ -1,0 +1,101 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -3014,8 +3014,31 @@
+-    /// End the item once the `--stop-time` it was opened with is reached, the
+-    /// same way its last frame would. Without a position yet there is nothing to
+-    /// compare against, so a seek back past the bound lets the item run on.
+-    fn check_stop(&mut self) {
+-        let Some(stop) = self.stop_time else {
+-            return;
+-        };
+-        if self.timeline().0.is_some_and(|at| at >= stop) {
++    /// Convert an interval point without narrowing its total nanoseconds.
++    fn interval_time(ticks: u128, scale: u32) -> Option<Duration> {
++        if scale == 0 { return None; }
++        let scale = u128::from(scale);
++        let Ok(seconds) = u64::try_from(ticks / scale) else { return Some(Duration::MAX); };
++        Some(Duration::new(seconds, ((ticks % scale) * 1_000_000_000 / scale) as u32))
++    }
++
++    /// The active presentation clock, distinct from the progress label's
++    /// future end of the current picture. Silent playback advances to its
++    /// scheduled deadline; audio already owns a continuously published clock.
++    fn presentation_clock(&self) -> Option<Duration> {
++        if let Some(target) = self.seek_target { return Some(target); }
++        if self.playback.is_none() { return self.audio.as_ref().map(|audio| audio.position()); }
++        if let Some(audio) = &self.audio && !self.audio_ended {
++            return Some(delayed_clock(audio.position(), self.audio_delay_ms));
++        }
++        let Some((start, end, scale)) = self.interval else { return Some(Duration::ZERO); };
++        if self.paused { return Self::interval_time(start, scale); }
++        let end = Self::interval_time(end, scale)?;
++        let remaining = self.deadline.saturating_duration_since(Instant::now()).as_nanos()
++            * u128::from(self.rate_milli) / 1_000;
++        let nanos = end.as_nanos().saturating_sub(remaining);
++        Some(Duration::new(u64::try_from(nanos / 1_000_000_000).ok()?, (nanos % 1_000_000_000) as u32))
++    }
++
++    /// Spend an explicit bound only once its live presentation clock reaches it.
++    /// Return true when the current item changed or reached terminal state.
++    fn check_stop(&mut self) -> bool {
++        let Some(stop) = self.stop_time else { return false; };
++        if self.presentation_clock().is_some_and(|at| at >= stop) {
+@@ -3023,2 +3046,4 @@
+-            // A bound can end an item before its sources reach EOF. Park the
+-            // producers as well as advancing the playlist/end state.
++            self.buffering = false;
++            self.seek_preview = false;
++            self.seek_target = None;
++            self.loading_since = None;
+@@ -3028 +3053,3 @@
+-        }
++            return true;
++        }
++        false
+@@ -3939,0 +3967,4 @@
++        if !self.paused && !self.seek_preview && !stepping && self.check_stop() {
++            ctx.request_repaint();
++            return;
++        }
+@@ -3948 +3979 @@
+-        let mut ran_out = false;
++        let mut ran_out = None;
+@@ -3955 +3986 @@
+-                        ran_out = true;
++                        ran_out = Some(at);
+@@ -3968 +3999,16 @@
+-        if ran_out {
++        if let Some(at) = ran_out {
++            if !stepping {
++                if self.check_stop() {
++                    ctx.request_repaint();
++                    return;
++                }
++                let last_end = self.interval.and_then(|(_, end, scale)| Self::interval_time(end, scale));
++                if last_end.zip(self.presentation_clock()).is_some_and(|(end, clock)| clock < end) {
++                    // Decoding can finish while the last picture is still being
++                    // displayed. Preserve the real EOF and its generation until
++                    // the active media clock completes that picture's interval.
++                    self.deferred_event = Some(Event::Ended(at));
++                    ctx.request_repaint_after(Duration::from_millis(8));
++                    return;
++                }
++            }
+@@ -4049,0 +4096,12 @@
++            // A/V slack can make a future picture ready before the exact bound.
++            // Retain the last in-range picture until the live clock catches up.
++            let beyond_bound = !self.paused && !stepping && !self.seek_preview
++                && self.stop_time.is_some_and(|stop| self.queued.as_ref()
++                    .and_then(|frame| frame.interval)
++                    .and_then(|(start, _, scale)| Self::interval_time(start, scale))
++                    .is_some_and(|start| start >= stop));
++            if beyond_bound {
++                if self.check_stop() { ctx.request_repaint(); }
++                else { ctx.request_repaint_after(Duration::from_millis(8)); }
++                return;
++            }
+@@ -12890,0 +12949,4 @@
++
++#[cfg(test)]
++#[path = "player_stop_clock_tests.rs"]
++mod stop_clock_regressions;

@@ -1,0 +1,53 @@
+{
+  "status": "accepted two independently reproduced and fully qualified fixes",
+  "FVID-0454": {
+    "problem": "Stop bound compares future picture end instead of active presentation clock.",
+    "acceptance_tests": [
+      "live_clock_does_not_spend_the_stop_bound_at_a_future_picture_end",
+      "silent_stop_uses_the_current_frame_deadline_instead_of_its_future_end",
+      "silent_presentation_holds_the_bound_picture_for_its_remaining_period"
+    ],
+    "published_baseline": "All3fail;independent exact source control passes.",
+    "bound_only_stage": "All3pass while natural EOF still fails.",
+    "evidence": [
+      "before.log",
+      "bound-only.log"
+    ]
+  },
+  "FVID-0455": {
+    "problem": "Native decoding EOF ends playback before the scheduled final picture interval is complete.",
+    "acceptance_tests": [
+      "natural_eof_waits_until_the_last_picture_has_finished_without_a_stop_bound",
+      "silent_native_eof_preserves_the_scheduled_last_picture_period"
+    ],
+    "independence": "No stop bound exists in either witness;the actual worker EOF and generation are observed and preserved. The first fails on published source and after bound-only repair;both fail after bound-only repair.",
+    "evidence": [
+      "before.log",
+      "bound-only.log",
+      "eof-before.log"
+    ]
+  },
+  "final_focused": {
+    "passed": 7,
+    "failed": 0,
+    "runs": 20,
+    "case_executions": 140
+  },
+  "controls": "Shared exact native video clocks/YUV and decoded scalar WAV PCM;not an additional improvement.",
+  "counting": "At most2accepted IDs after all full gates pass;fixture variants,control and repeated/probe runs add0.",
+  "candidate_amendments": {
+    "completed_audio_clock_handoff": {
+      "before_passed": 6,
+      "before_failed": 1,
+      "after_passed": 7,
+      "count_delta": 0,
+      "evidence": "handoff-before.log",
+      "provisional_full_run": "candidate-six-case"
+    }
+  },
+  "accepted_ids": [
+    "FVID-0454",
+    "FVID-0455"
+  ],
+  "count_delta": 2
+}

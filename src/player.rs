@@ -1895,6 +1895,8 @@ struct Player {
     audio: Option<crate::audio_thread::AudioPlayback>,
     /// Audio reached its end or failed, so it no longer gates presentation.
     audio_ended: bool,
+    /// Clock that paced the currently displayed picture.
+    picture_audio_clock: bool,
     playback_activity: Option<fvid_platform::PlaybackActivity>,
     duration: Option<Duration>,
     seekable: bool,
@@ -2120,6 +2122,7 @@ impl Default for Player {
             playback: None,
             audio: None,
             audio_ended: false,
+            picture_audio_clock: false,
             playback_activity: None,
             duration: None,
             seekable: false,
@@ -2313,6 +2316,7 @@ impl Player {
         self.container_insets = reader.insets();
         self.period = reader.frame_period();
         self.interval = None;
+        self.picture_audio_clock = false;
         // Drop the old thread before starting the new one.
         self.playback = None;
         self.audio = None;
@@ -2408,6 +2412,7 @@ impl Player {
         self.texture = None;
         self.rgb_frame = None;
         self.interval = None;
+        self.picture_audio_clock = false;
         self.dimensions = [0; 2];
         self.pixel_aspect = (1, 1);
         self.container_insets = [0; 4];
@@ -3011,21 +3016,54 @@ impl Player {
         self.show_osd(loop_osd(mark));
     }
 
-    /// End the item once the `--stop-time` it was opened with is reached, the
-    /// same way its last frame would. Without a position yet there is nothing to
-    /// compare against, so a seek back past the bound lets the item run on.
-    fn check_stop(&mut self) {
-        let Some(stop) = self.stop_time else {
-            return;
-        };
-        if self.timeline().0.is_some_and(|at| at >= stop) {
+    /// Convert an interval point without narrowing its total nanoseconds.
+    fn interval_time(ticks: u128, scale: u32) -> Option<Duration> {
+        if scale == 0 { return None; }
+        let scale = u128::from(scale);
+        let Ok(seconds) = u64::try_from(ticks / scale) else { return Some(Duration::MAX); };
+        Some(Duration::new(seconds, ((ticks % scale) * 1_000_000_000 / scale) as u32))
+    }
+
+    /// The active presentation clock, distinct from the progress label's
+    /// future end of the current picture. Silent playback advances to its
+    /// scheduled deadline; audio already owns a continuously published clock.
+    fn presentation_clock(&self) -> Option<Duration> {
+        if let Some(target) = self.seek_target { return Some(target); }
+        if self.playback.is_none() { return self.audio.as_ref().map(|audio| audio.position()); }
+        if let Some(audio) = &self.audio {
+            let clock = delayed_clock(audio.position(), self.audio_delay_ms);
+            // Device completion must not rewind an audio-paced picture to a
+            // wall deadline that A/V presentation deliberately did not use.
+            let completed_picture = self.picture_audio_clock && self.interval
+                .and_then(|(_, end, scale)| Self::interval_time(end, scale))
+                .is_some_and(|end| clock >= end);
+            if !self.audio_ended || completed_picture { return Some(clock); }
+        }
+        let Some((start, end, scale)) = self.interval else { return Some(Duration::ZERO); };
+        if self.paused { return Self::interval_time(start, scale); }
+        let end = Self::interval_time(end, scale)?;
+        let remaining = self.deadline.saturating_duration_since(Instant::now()).as_nanos()
+            * u128::from(self.rate_milli) / 1_000;
+        let nanos = end.as_nanos().saturating_sub(remaining);
+        Some(Duration::new(u64::try_from(nanos / 1_000_000_000).ok()?, (nanos % 1_000_000_000) as u32))
+    }
+
+    /// Spend an explicit bound only once its live presentation clock reaches it.
+    /// Return true when the current item changed or reached terminal state.
+    fn check_stop(&mut self) -> bool {
+        let Some(stop) = self.stop_time else { return false; };
+        if self.presentation_clock().is_some_and(|at| at >= stop) {
             self.stop_time = None;
-            // A bound can end an item before its sources reach EOF. Park the
-            // producers as well as advancing the playlist/end state.
+            self.buffering = false;
+            self.seek_preview = false;
+            self.seek_target = None;
+            self.loading_since = None;
             if let Some(playback) = &self.playback { playback.pause(); }
             if let Some(audio) = &self.audio { audio.pause(); }
             self.continue_queue();
+            return true;
         }
+        false
     }
 
     /// Replace the queue with `paths`, open the first of them, and remember
@@ -3478,6 +3516,7 @@ impl Player {
                             std::mem::swap(&mut self.stop_time, &mut ready.stop_time);
                             std::mem::swap(&mut self.buffering, &mut ready.buffering);
                             self.interval = None;
+                            self.picture_audio_clock = false;
                             self.deadline = Instant::now();
                             self.apply_audio_controls();
                             // Dispose of unused worker state off the drawing thread.
@@ -3937,6 +3976,10 @@ impl Player {
             return;
         }
         let stepping = self.step > 0;
+        if !self.paused && !self.seek_preview && !stepping && self.check_stop() {
+            ctx.request_repaint();
+            return;
+        }
         let stepping_from_picture = stepping && self.presented.is_some();
         if self.paused && !self.seek_preview && !stepping {
             return;
@@ -3945,14 +3988,14 @@ impl Player {
             return;
         };
         let generation = playback.generation();
-        let mut ran_out = false;
+        let mut ran_out = None;
         while self.queued.is_none() {
             match self.deferred_event.take().or_else(|| playback.poll()) {
                 Some(Event::Frame(frame)) if frame.generation < generation => continue,
                 Some(Event::Frame(frame)) => self.queued = Some(frame),
                 Some(Event::Ended(at)) => {
                     if at >= generation {
-                        ran_out = true;
+                        ran_out = Some(at);
                     }
                 }
                 Some(Event::Error(error)) => {
@@ -3965,7 +4008,22 @@ impl Player {
         }
         // A queue carries on by itself; the last picture of the last item is
         // where a single file stops.
-        if ran_out {
+        if let Some(at) = ran_out {
+            if !stepping {
+                if self.check_stop() {
+                    ctx.request_repaint();
+                    return;
+                }
+                let last_end = self.interval.and_then(|(_, end, scale)| Self::interval_time(end, scale));
+                if last_end.zip(self.presentation_clock()).is_some_and(|(end, clock)| clock < end) {
+                    // Decoding can finish while the last picture is still being
+                    // displayed. Preserve the real EOF and its generation until
+                    // the active media clock completes that picture's interval.
+                    self.deferred_event = Some(Event::Ended(at));
+                    ctx.request_repaint_after(Duration::from_millis(8));
+                    return;
+                }
+            }
             if stepping {
                 self.step = 0;
                 self.buffering = false;
@@ -4047,6 +4105,18 @@ impl Player {
             }
         }
         if self.queued.is_some() {
+            // A/V slack can make a future picture ready before the exact bound.
+            // Retain the last in-range picture until the live clock catches up.
+            let beyond_bound = !self.paused && !stepping && !self.seek_preview
+                && self.stop_time.is_some_and(|stop| self.queued.as_ref()
+                    .and_then(|frame| frame.interval)
+                    .and_then(|(start, _, scale)| Self::interval_time(start, scale))
+                    .is_some_and(|start| start >= stop));
+            if beyond_bound {
+                if self.check_stop() { ctx.request_repaint(); }
+                else { ctx.request_repaint_after(Duration::from_millis(8)); }
+                return;
+            }
             // Clock and vsync jitter must not postpone a ready frame by an
             // entire refresh. The media clock still advances by the exact PTS interval.
             let tolerance = (self.period / 8).min(Duration::from_millis(1));
@@ -4104,6 +4174,7 @@ impl Player {
                 // Advance the clock even after a late repaint; the next poll
                 // discards expired pictures instead of slowing the timeline.
                 let period = paced_period(frame.period, self.rate_milli);
+                self.picture_audio_clock = self.audio.is_some() && !self.audio_ended;
                 self.presented = Some(frame);
                 if stepping_from_picture {
                     // Sound stays paused while walking pictures. Prepare it at
@@ -12888,3 +12959,7 @@ mod mp4_frame_step_regressions;
 #[cfg(test)]
 #[path = "player_stop_bound_tests.rs"]
 mod stop_bound_regressions;
+
+#[cfg(test)]
+#[path = "player_stop_clock_tests.rs"]
+mod stop_clock_regressions;

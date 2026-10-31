@@ -1,0 +1,34 @@
+{
+  "binary_sha256": "a16841dea485051217205dd5815bd88ee24c11c54947f4489aaec944c37738d5",
+  "runs": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "cases_per_run": 7,
+  "source_hashes": {
+    "src/player.rs": "7edd0614e3532d169568181655ece92804e2058754cb60dff3708b13417ede4a",
+    "src/player_stop_clock_tests.rs": "d2dfa27d91f13f1632541f7f2cef5b61c4ea0e58ef1232e9094f7ac6fbb8fcee",
+    "scripts/generate_player_stop_clock.py": "206cb33f68e1535d2d30d54944b0808f23e233d331869151f9493b2ae344f439",
+    "tests/fixtures/playback-errors/player-stop-clock/manifest.json": "c42330279b1ae5908adfbcdf8bc04ea4f75af320e74d24d6411398ead10498dd"
+  },
+  "raw_log_sha256": "b0433bb6359d4041497ddd5d3d23feb6f991bc8ff16e6f9d7940d89330565bf6",
+  "archive_log_sha256": "c83f4158553d9cd962fb6393653a0620b875167eeb5380d962c78d17e93587e2"
+}

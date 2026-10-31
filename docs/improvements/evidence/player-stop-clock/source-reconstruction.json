@@ -1,0 +1,16 @@
+{
+  "bound-only": {
+    "base_commit": "cf870e8d3c75a4adb71a55dfb4cbec13cb38ab67",
+    "source_sha256": "9a89902f85cbd5063115c7a601917fb488f8a2b7ccee595b57dc44d40357ce34",
+    "patch_sha256": "a053a06a8b6080f449224c5ddab685675decc11d330b78a9327db3dc7a2c1c35",
+    "reconstruction_verified_byte_identical": true,
+    "reconstruction": "Apply zero-context patch to recorded base using git apply --unidiff-zero."
+  },
+  "pre-handoff": {
+    "base_commit": "cf870e8d3c75a4adb71a55dfb4cbec13cb38ab67",
+    "source_sha256": "a6379370b100ba604371e31cbd98b8f6e2c6321131d10b7f7d7734d22fd70b97",
+    "patch_sha256": "9995a406dbe530d9ef321474b8a1f469f9a817d87a01e9ca11abd7235390f719",
+    "reconstruction_verified_byte_identical": true,
+    "reconstruction": "Apply zero-context patch to recorded base using git apply --unidiff-zero."
+  }
+}

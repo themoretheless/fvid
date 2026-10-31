@@ -1,0 +1,934 @@
+   Compiling num-traits v0.2.19
+   Compiling once_cell v1.21.4
+   Compiling naga v30.0.1
+   Compiling objc2-metal v0.3.2
+   Compiling half v2.7.1
+   Compiling euclid v0.22.14
+   Compiling read-fonts v0.41.0
+   Compiling objc2-quartz-core v0.3.2
+   Compiling guillotiere v0.7.0
+   Compiling vello_common v0.1.0
+   Compiling wgpu-naga-bridge v30.0.1
+   Compiling raw-window-metal v1.1.0
+   Compiling tracing-core v0.1.36
+   Compiling tracing v0.1.44
+   Compiling ahash v0.8.12
+   Compiling wgpu-hal v30.0.1
+   Compiling vello_cpu v0.1.0
+   Compiling skrifa v0.44.0
+   Compiling harfrust v0.12.0
+   Compiling percent-encoding v2.3.2
+   Compiling winit v0.30.13
+   Compiling tiff v0.11.3
+   Compiling epaint v0.36.2
+   Compiling moxcms v0.8.1
+   Compiling form_urlencoded v1.2.2
+   Compiling wgpu-core-deps-apple v30.0.1
+   Compiling url v2.5.8
+   Compiling wgpu-core v30.0.1
+   Compiling image v0.25.10
+   Compiling egui v0.36.2
+   Compiling accesskit_winit v0.32.2
+   Compiling wgpu v30.0.1
+   Compiling arboard v3.6.1
+   Compiling webbrowser v1.2.4
+   Compiling egui-wgpu v0.36.2
+   Compiling egui-winit v0.36.2
+   Compiling fvid-media v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media)
+   Compiling serde_json v1.0.151
+   Compiling eframe v0.36.2
+warning: unreachable pattern
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+492 |                         _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |                         ^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+482 | ...   merge_order::Selection::Initial(i)=>{
+    |       ---------------------------------- matches some of the same values
+...
+486 | ...   merge_order::Selection::ViewSynthesis=>return Ok(Resolved::ViewSynthesis),
+    |       ------------------------------------- matches some of the same values
+487 | ...   merge_order::Selection::Texture=>return Ok(Resolved::Texture),
+    |       ------------------------------- matches some of the same values
+488 | ...   merge_order::Selection::InterView=>{selected_iv=1;(special.inter_view.copied().ok_or_else(||invalid("missing selected HEVC IV...
+    |       --------------------------------- matches some of the same values
+...
+492 | ...   _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |       ^ ...and 3 other patterns collectively make this unreachable
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `intra_plane` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/avc_deblock.rs:184:15
+    |
+184 | pub(super) fn intra_plane(
+    |               ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `read_inter_coefficients_422` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_inter_coefficients.rs:34:15
+   |
+34 | pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,pattern:u8,transform8:bool,neighbours:CoefficientNeighbours,chroma...
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `candidates` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_mv.rs:78:4
+   |
+78 | fn candidates(n: Neighbours) -> Result<[Neighbour; 3]> {
+   |    ^^^^^^^^^^
+
+warning: function `inverse2` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:190:4
+    |
+190 | fn inverse2(input: &[i32], output: &mut [i32]) {
+    |    ^^^^^^^^
+
+warning: function `inverse4` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:218:15
+    |
+218 | inverse_size!(inverse4, inverse2, 4);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse8` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:219:15
+    |
+219 | inverse_size!(inverse8, inverse4, 8);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse16` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:220:15
+    |
+220 | inverse_size!(inverse16, inverse8, 16);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse32` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:221:15
+    |
+221 | inverse_size!(inverse32, inverse16, 32);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: enum `RunKind` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:420:17
+    |
+420 | pub(crate) enum RunKind {
+    |                 ^^^^^^^
+
+warning: struct `Run` is never constructed
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:425:19
+    |
+425 | pub(crate) struct Run {
+    |                   ^^^
+
+warning: function `expand_runs` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:431:15
+    |
+431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run]) -> Result<Vec<u8>> {
+    |               ^^^^^^^^^^^
+
+warning: `fvid-codecs` (lib) generated 12 warnings
+warning: unused variable: `aspect`
+    --> crates/fvid-media/src/owned_y4m_decode.rs:1075:9
+     |
+1075 |     let aspect = presented_header.pixel_aspect()?;
+     |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_aspect`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> crates/fvid-media/src/owned_xfade.rs:462:5
+    |
+462 |     mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
+    |     ----^^^^^
+    |     |
+    |     help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable `pages` is assigned to, but never used
+  --> crates/fvid-media/src/owned_ogg_opus_export.rs:56:9
+   |
+56 |     let mut pages = 0usize;
+   |         ^^^^^^^^^
+   |
+   = note: consider using `_pages` instead
+
+warning: value assigned to `pages` is never read
+  --> crates/fvid-media/src/owned_ogg_opus_export.rs:80:9
+   |
+80 |         pages += 1;
+   |         ^^^^^^^^^^
+   |
+   = help: maybe it is overwritten before being read?
+   = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `encode` is never used
+   --> crates/fvid-media/src/owned_y4m_impl.rs:212:8
+    |
+ 31 | impl Header {
+    | ----------- method in this implementation
+...
+212 |     fn encode(&self, width: usize, height: usize) -> String {
+    |        ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `apply_pixel_filters` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:578:15
+    |
+578 | pub(crate) fn apply_pixel_filters(
+    |               ^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:585:15
+    |
+585 | pub(crate) fn apply_pixel_filters_cached(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached_at` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:594:15
+    |
+594 | pub(crate) fn apply_pixel_filters_cached_at(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `esds_for_mp4` is never used
+   --> crates/fvid-media/src/owned_aac/adts_impl.rs:334:15
+    |
+334 | pub(crate) fn esds_for_mp4(asc: &[u8]) -> Option<Vec<u8>> {
+    |               ^^^^^^^^^^^^
+
+warning: associated function `identifiers` is never used
+   --> crates/fvid-media/src/owned_avc_impl.rs:509:19
+    |
+495 | impl Pps {
+    | -------- associated function in this implementation
+...
+509 |     pub(crate) fn identifiers(nal: &[u8]) -> Result<(u32, u32)> {
+    |                   ^^^^^^^^^^^
+
+warning: type alias `Decoder` is never used
+ --> crates/fvid-media/src/owned_audio_mix.rs:8:6
+  |
+8 | type Decoder = fn(&Path) -> Result<(AudioDecodeStats, Vec<u8>)>;
+  |      ^^^^^^^
+
+warning: function `decode_owned_audio` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:226:15
+    |
+226 | pub(crate) fn decode_owned_audio(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `mix_with_decoder` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:455:15
+    |
+455 | pub(crate) fn mix_with_decoder(
+    |               ^^^^^^^^^^^^^^^^
+
+warning: function `merge_with_decoder` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:615:15
+    |
+615 | pub(crate) fn merge_with_decoder(
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `router` is never used
+  --> crates/fvid-media/src/owned_aac_export_routing.rs:11:15
+   |
+11 | pub(crate) fn router(
+   |               ^^^^^^
+
+warning: method `nul_name` is never used
+  --> crates/fvid-media/src/owned_pixel_format.rs:9:27
+   |
+ 6 |           impl PixelFormat {
+   |           ---------------- method in this implementation
+...
+ 9 |               pub(crate) fn nul_name(self) -> &'static [u8] { match self { $( Self::$variant => concat!($name, "\0").as_bytes(), )* } }
+   |                             ^^^^^^^^
+...
+16 | / formats! {
+17 | |     Yuv420p, "yuv420p", Some((1, 1)), 1;
+18 | |     Yuv422p, "yuv422p", Some((1, 0)), 1;
+19 | |     Yuv444p, "yuv444p", Some((0, 0)), 1;
+...  |
+58 | |     Gray16Be, "gray16be", None, 2;
+59 | | }
+   | |_- in this macro invocation
+   |
+   = note: this warning originates in the macro `formats` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `aac_packet_plan` is never used
+  --> crates/fvid-media/src/owned_mp4_aac_plan_impl.rs:35:15
+   |
+35 | pub(crate) fn aac_packet_plan(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `check_encoded_ffv1` is never used
+   --> crates/fvid-media/src/owned_lossless.rs:754:15
+    |
+754 | pub(crate) fn check_encoded_ffv1(
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `inspect` is never used
+ --> crates/fvid-media/src/owned_matroska_copy_impl.rs:8:15
+  |
+8 | pub(crate) fn inspect<R: Read + Seek>(
+  |               ^^^^^^^
+
+warning: function `inspect_with_packet_limit` is never used
+  --> crates/fvid-media/src/owned_matroska_copy_impl.rs:15:15
+   |
+15 | pub(crate) fn inspect_with_packet_limit<R: Read + Seek>(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_raw_flac.rs:191:15
+    |
+191 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_flac_export.rs:134:15
+    |
+134 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_mp3_export.rs:126:15
+    |
+126 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_alac_export.rs:121:15
+    |
+121 | pub(crate) fn geometry(source:&Path,options:&CopyOptions)->Result<(u32,u16)>{let (rate,channels,_)=geometry_with_mask(source,option...
+    |               ^^^^^^^^
+
+warning: function `geometry_with_mask` is never used
+   --> crates/fvid-media/src/owned_matroska_alac_export.rs:122:15
+    |
+122 | pub(crate) fn geometry_with_mask(source: &Path, options: &CopyOptions) -> Result<(u32, u16,u32)> {
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_audio_packet_budget` is never used
+   --> crates/fvid-media/src/owned_matroska_audio.rs:347:15
+    |
+347 | pub(crate) fn validate_audio_packet_budget<R: Read + Seek>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `admit_audio_reader` is never used
+   --> crates/fvid-media/src/owned_matroska_audio.rs:409:15
+    |
+409 | pub(crate) fn admit_audio_reader<R: Read + Seek>(
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `negotiate_matroska_ps` is never used
+   --> crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs:293:15
+    |
+293 | pub(crate) fn negotiate_matroska_ps<R: std::io::Read + std::io::Seek>(
+    |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `convert` is never used
+   --> crates/fvid-media/src/owned_pcm_decoder_impl.rs:139:8
+    |
+ 79 | impl PcmDecoder {
+    | --------------- method in this implementation
+...
+139 |     fn convert(&self, data: &[u8]) -> Result<Vec<u8>> {
+    |        ^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_pcm_export.rs:126:15
+    |
+126 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `decode_mp4_audio_reader_controlled` is never used
+  --> crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs:54:15
+   |
+54 | pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::Seek>(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `recognizes` is never used
+  --> crates/fvid-media/src/owned_container_loudness.rs:46:15
+   |
+46 | pub(crate) fn recognizes(source: &Path) -> Result<bool> {
+   |               ^^^^^^^^^^
+
+warning: function `pack_bgra` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:8786:15
+     |
+8786 | pub(crate) fn pack_bgra(
+     |               ^^^^^^^^^
+
+warning: function `take_aligned` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:9498:15
+     |
+9498 | pub(crate) fn take_aligned(
+     |               ^^^^^^^^^^^^
+
+warning: `fvid-media` (lib test) generated 34 warnings (run `cargo fix --lib -p fvid-media --tests` to apply 2 suggestions)
+    Finished `test` profile [unoptimized] target(s) in 1m 17s
+     Running unittests src/lib.rs (/private/tmp/fvid-player-stop-clock-target-20261031/debug/deps/fvid_media-b08d40b60e0d25c0)
+
+running 548 tests
+test owned_aac::aac_channel::memory_tests::parsed_channel_accounts_nested_tns_and_unused_capacity ... ok
+test input_policy::tests::standalone_scope_restores_nested_state_and_unwind ... ok
+test owned_aac::aac_ep::tests::ep_configuration_is_bounded_and_reserved_modes_remain_errors ... ok
+test owned_aac::aac_coupling::tests::grouped_gains_preserve_uncoupled_bands_and_failed_mix_is_atomic ... ok
+test owned_aac::aac_ep_crc::tests::inverted_parity_matches_independent_polynomial_long_division ... ok
+test owned_aac::aac_ep_srcpc::tests::distance_is_globally_minimal_against_exhaustive_short_messages ... ok
+test owned_aac::aac_ep_srcpc::tests::independent_polynomial_vectors_cover_all_rates_and_partial_periods ... ok
+test owned_aac::aac_ep_srcpc::tests::protected_movie_and_plain_companion_match_pcm_through_ep_dispatch ... ok
+test owned_aac::aac_ep_srcpc::tests::protected_movie_decodes_complete_pcm_with_ep_routing ... ok
+test owned_aac::aac_ep_srcpc::tests::protected_nonzero_eld_packets_recover_pcm_through_the_owned_channel_decoder ... ok
+test owned_aac::aac_ep_srcpc::tests::viterbi_corrects_every_single_bit_error_in_a_nonzero_terminated_class ... ok
+test owned_aac::aac_ics::quantized_deinterleave_tests::quantized_mapping_matches_independent_window_coordinates ... ok
+test owned_aac::aac_imdct::tests::dense_spectra_match_direct_basis_with_reused_scratch ... ok
+test owned_aac::aac_imdct::tests::every_aac_length_matches_direct_cosine_basis ... ok
+test owned_aac::aac_imdct::tests::forward_mdct_all_lengths_match_dense_direct_cosine_sum ... ok
+test owned_aac::aac_imdct::tests::invalid_input_does_not_change_output ... ok
+test owned_aac::aac_imdct::tests::sine_window_overlap_cancels_aliasing ... ok
+test owned_aac::aac_ld_bands::tests::ld_tables_cover_exact_frame_and_standard_band_counts ... ok
+test owned_aac::aac_ld_history::tests::commit_absence_checkpoint_reset_and_errors_are_transactional ... ok
+test owned_aac::aac_ld_history::tests::every_ld_lag_and_gain_match_absolute_pcm_timeline ... ok
+test owned_aac::aac_ld_history::tests::retained_accounting_includes_spare_capacity ... ok
+test owned_aac::aac_ld_ltp::tests::every_bit_truncation_and_invalid_geometry_leave_cursor_unchanged ... ok
+test owned_aac::aac_ld_ltp::tests::lag_update_reuse_all_bands_and_independent_histories ... ok
+test owned_aac::aac_ld_synthesis::tests::checkpoint_shape_size_and_invalid_inputs_are_transactional ... ok
+test owned_aac::aac_ld_synthesis::tests::low_overlap_is_symmetric_power_complementary_and_has_exact_support ... ok
+test owned_aac::aac_ltp_analysis::retained_tests::spare_analysis_capacity_is_counted_including_shared_windows ... ok
+test owned_aac::aac_ltp_channel::retained_tests::clone_history_is_independent_and_memory_is_stable_after_process_restore_reset ... ok
+test owned_aac::aac_ltp_channel::retained_tests::independent_clones_share_tables_but_count_all_mutable_storage ... ok
+test owned_aac::aac_main_predictor::tests::disabled_prediction_adapts_and_checkpoint_replays_exactly ... ok
+test owned_aac::aac_main_predictor::tests::invalid_frames_and_overflow_preserve_spectra_and_history ... ok
+test owned_aac::aac_main_predictor::tests::inverse_tables_preserve_the_largest_stored_variance_and_subnormals ... ok
+test owned_aac::aac_main_predictor::tests::reduced_precision_distinguishes_ties_even_and_away_from_zero ... ok
+test owned_aac::aac_main_predictor::tests::reset_groups_are_post_frame_and_cover_every_thirtieth_line ... ok
+test owned_aac::aac_native::channel_window_tests::all_standard_channels_share_immutable_synthesis_windows ... ok
+test owned_aac::aac_native::element_tag_tests::bounded_tags_distinguish_element_kinds_and_reject_repeats ... ok
+test owned_aac::aac_ep::tests::protected_headers_match_independent_oracles_and_correct_single_bit_errors ... ok
+test owned_aac::aac_native::he_aac_native_tests::complete_authored_lc_plus_sbr_blocks_match_independent_pcm_and_clock ... ok
+test owned_aac::aac_native::he_aac_native_tests::crc_failure_preserves_aac_and_sbr_histories_and_rejects_mismatched_checkpoints ... ok
+test owned_aac::aac_native::he_aac_native_tests::extended_asc_keeps_core_rate_ps_and_unspecified_flags_distinct ... ok
+test owned_aac::aac_native::he_aac_native_tests::implicit_sbr_with_container_output_clock_matches_independent_pcm ... ok
+test owned_aac::aac_native::he_aac_native_tests::missing_sbr_fill_keeps_pcm_clock_noise_history_and_checkpoint_replay ... ok
+test owned_aac::aac_native::he_aac_native_tests::complete_stereo_cpe_sbr_matches_both_independent_mono_oracles_and_crc_rollback ... ok
+test owned_aac::aac_native::he_aac_native_tests::sbr_discovery_changes_clock_atomically_and_restores_undetected_checkpoints ... ok
+test owned_aac::aac_native::ltp_dispatch_tests::authored_mono_packets_use_native_ltp_dispatch_and_checkpoints ... ok
+test owned_aac::aac_native::ltp_dispatch_tests::authored_stereo_packets_use_native_independent_ltp_states ... ok
+test owned_aac::aac_native::ltp_dispatch_tests::independent_cce_late_routing_failure_preserves_slots_histories_and_memory ... ok
+test owned_aac::aac_native::ltp_dispatch_tests::native_coupled_phase_videos_match_scalar_ltp_tns_pcm ... ok
+test owned_aac::aac_native::ltp_dispatch_tests::native_ltp_checkpoints_count_only_histories_and_right_preparation_failure_preserves_histories ... ok
+test owned_aac::aac_native::ltp_dispatch_tests::native_ltp_long_short_transitions_and_960_geometry_match_scalar_pcm ... ok
+test owned_aac::aac_native::ltp_dispatch_tests::native_target_only_phase_controls_match_scalar_ltp_tns_pcm ... ok
+test owned_aac::aac_native::ltp_sbr_tests::ltp_sbr_crc_failure_keeps_core_and_qmf_histories ... ok
+test owned_aac::aac_native::ltp_dispatch_tests::authored_cce_gain_and_selection_videos_decode_and_replay ... ok
+test owned_aac::aac_native::main_prediction_memory_tests::main_predictor_allocations_and_cloned_checkpoints_are_accounted ... ok
+test owned_aac::aac_native::retained_memory_tests::channels_and_checkpoints_count_mutable_capacity_but_share_tables ... ok
+test owned_aac::aac_native::retained_memory_tests::occupied_coupling_slot_counts_its_independent_scratch ... ok
+test owned_aac::aac_native::sbr_memory_tests::retained_payload_counts_sbr_and_checkpoint_allocations_without_shared_window_duplication ... ok
+test owned_aac::aac_pce::fill_tests::ancillary_fill_is_bounded_and_transactional_at_every_bit_offset ... ok
+test owned_aac::aac_pce::fill_tests::dynamic_range_fill_is_bounded_at_every_bit_offset ... ok
+test owned_aac::aac_pce::fill_tests::opaque_extensions_skip_only_the_declared_payload_at_every_offset ... ok
+test owned_aac::aac_ps_data::tests::both_phase_time_flags_require_frequency_rows_after_iid_mode_change ... ok
+test owned_aac::aac_ps_data::tests::malformed_modes_borders_phase_and_nested_sizes_preserve_input_and_header ... ok
+test owned_aac::aac_ps_data::tests::maximum_extension_reserved_ids_and_outer_sbr_fill_are_bounded ... ok
+test owned_aac::aac_ps_data::tests::original_modes_phase_envelopes_retained_headers_and_every_truncation ... ok
+test owned_aac::aac_ps_dequant::tests::every_quantization_level_matches_saved_normative_and_decimal_phase_oracles ... ok
+test owned_aac::aac_ps_history::tests::disabled_defaults_and_public_dequantization_dimensions_are_checked ... ok
+test owned_aac::aac_ps_history::tests::invalid_public_rows_modes_grids_and_late_numeric_failure_do_not_commit_history ... ok
+test owned_aac::aac_ps_history::tests::legal_huffman_words_with_invalid_indices_roll_back_composed_reader_and_all_area_headers ... ok
+test owned_aac::aac_native::ltp_sbr_tests::ltp_sbr_signalling_clocks_match_scalar_pcm_and_restore ... ok
+test owned_aac::aac_ps_huffman::tests::all_normative_words_and_bit_truncations_are_transactional ... ok
+test owned_aac::aac_ps_huffman::tests::books_are_complete_and_prefix_free ... ok
+test owned_aac::aac_ps_mixing::tests::every_phase_history_matches_independent_decimal_rotations_and_conjugation ... ok
+test owned_aac::aac_ps_mixing::tests::every_quantized_matrix_matches_independent_decimal_algebraic_oracle ... ok
+test owned_aac::aac_ps_mixing::tests::grids_refuse_invalid_indices_and_mode_b_clamps_only_coherence ... ok
+test owned_aac::aac_sbr_assembly::tests::cross_checked_protocol_noise_constants_match_saved_values ... ok
+test owned_aac::aac_sbr_assembly::tests::independent_decimal_multiframe_assembly_covers_smoothing_attack_reset_and_noise_wrap ... ok
+test owned_aac::aac_sbr_assembly::tests::phase_parity_seek_reset_and_failures_are_transactional ... ok
+test owned_aac::aac_sbr_bands::tests::all_qmf_bounds_and_header_fields_are_bounded ... ok
+test owned_aac::aac_sbr_bands::tests::every_rate_start_stop_pair_and_composed_tables_match_decimal_oracles ... ok
+test owned_aac::aac_sbr_bands::tests::exact_linear_adjustments_and_odd_high_projection ... ok
+test owned_aac::aac_sbr_bands::tests::logarithmic_and_derived_tables_match_high_precision_decimal_oracles ... ok
+test owned_aac::aac_sbr_bands::tests::rate_thresholds_shortcuts_and_invalid_fields ... ok
+test owned_aac::aac_sbr_buffers::tests::composed_delay_and_routing_keep_six_column_latency_across_geometry_changes ... ok
+test owned_aac::aac_sbr_buffers::tests::late_invalid_inputs_preserve_both_histories ... ok
+test owned_aac::aac_sbr_buffers::tests::low_delay_uses_previous_crossover_and_exact_eight_column_history ... ok
+test owned_aac::aac_sbr_buffers::tests::synthesis_routes_previous_overhang_with_old_geometry_and_two_column_offset ... ok
+test owned_aac::aac_sbr_chirp::tests::bands_are_independent_and_checkpoint_reset_and_refusal_preserve_history ... ok
+test owned_aac::aac_sbr_chirp::tests::independent_decimal_sequences_cover_all_transitions_and_decay ... ok
+test owned_aac::aac_sbr_coefficients::tests::independent_delta_results_cover_resolution_changes_and_balance_scale ... ok
+test owned_aac::aac_sbr_coefficients::tests::level_balance_and_both_resolutions_read_mixed_direction_rows_atomically ... ok
+test owned_aac::aac_sbr_coefficients::tests::noise_uses_dedicated_time_books_but_shared_frequency_books ... ok
+test owned_aac::aac_sbr_coefficients::tests::single_fixed_envelope_overrides_header_and_invalid_dimensions_are_atomic ... ok
+test owned_aac::aac_sbr_controls::tests::all_inverse_filter_sequences_and_truncations_are_transactional ... ok
+test owned_aac::aac_sbr_controls::tests::every_delta_pattern_at_every_bit_offset_has_exact_order_and_boundary ... ok
+test owned_aac::aac_sbr_controls::tests::invalid_external_geometry_and_payload_limits_do_not_advance ... ok
+test owned_aac::aac_sbr_data::tests::invalid_dimensions_boundaries_and_grid_preserve_reader ... ok
+test owned_aac::aac_ps_history::tests::original_absolute_targets_reconstruct_across_rows_packets_modes_and_no_envelopes ... ok
+test owned_aac::aac_sbr_dequant::tests::all_values_match_independent_high_precision_decimal_oracles ... ok
+test owned_aac::aac_sbr_dequant::tests::centered_stereo_symmetry_energy_and_noise_orientation_are_explicit ... ok
+test owned_aac::aac_sbr_dequant::tests::normative_noise_bounds_even_balance_and_numeric_extremes_are_checked ... ok
+test owned_aac::aac_sbr_downsampled_qmf::tests::all_independent_traces_and_full_rate_decimation_agree ... ok
+test owned_aac::aac_sbr_downsampled_qmf::tests::composed_analysis_checkpoint_reset_and_invalid_call_rollback ... ok
+test owned_aac::aac_sbr_dsp::tests::mono_and_coupled_uncoupled_stereo_reach_finite_pcm_across_all_grid_classes ... ok
+test owned_aac::aac_sbr_dsp::tests::original_sbr_payloads_synthesize_pcm_against_independent_noise_gain_convolution ... ok
+test owned_aac::aac_sbr_dsp::tests::parsed_headers_coefficients_reader_and_dsp_rollback_together_on_late_failure ... ok
+test owned_aac::aac_sbr_dsp::upsampling_tests::first_header_after_delay_only_nonzero_pcm_keeps_qmf_history ... ok
+test owned_aac::aac_sbr_dsp::upsampling_tests::pure_upsampling_matches_direct_nonzero_time_convolution_and_rolls_back ... ok
+test owned_aac::aac_sbr_energy::tests::exact_one_band_normalization_boundaries_and_extremes ... ok
+test owned_aac::aac_sbr_energy::tests::independent_decimal_energy_traces_cover_modes_resolution_and_hf_composition ... ok
+test owned_aac::aac_sbr_energy::tests::malformed_public_geometry_is_rejected_without_panics ... ok
+test owned_aac::aac_sbr_extension::tests::checksum_and_fill_corruption_do_not_commit_state ... ok
+test owned_aac::aac_sbr_extension::tests::initialization_replay_seek_and_format_reset ... ok
+test owned_aac::aac_sbr_extension::tests::original_extension_crc_and_header_reuse_vectors_are_transactional ... ok
+test owned_aac::aac_sbr_gain::tests::harmonic_line_is_distinct_from_presence_and_attack_suppresses_only_noise_gain_term ... ok
+test owned_aac::aac_sbr_gain::tests::independent_decimal_levels_and_all_limiter_modes_match ... ok
+test owned_aac::aac_sbr_gain::tests::invalid_public_inputs_are_rejected ... ok
+test owned_aac::aac_sbr_grid::low_delay_tests::every_ld_transient_position_matches_the_normative_envelope_table ... ok
+test owned_aac::aac_sbr_grid::low_delay_tests::ld_fixfix_amplitude_override_and_invalid_counts_are_transactional ... ok
+test owned_aac::aac_sbr_grid::tests::all_classes_match_hand_authored_fields_and_rollback_at_every_bit ... ok
+test owned_aac::aac_sbr_grid::tests::exact_time_borders_and_noise_splits_for_both_core_lengths ... ok
+test owned_aac::aac_sbr_grid::tests::malformed_geometry_rolls_back_and_public_values_cannot_panic ... ok
+test owned_aac::aac_sbr_header::tests::impossible_payload_boundaries_do_not_consume_bits ... ok
+test owned_aac::aac_sbr_header::tests::reset_tracks_exactly_the_six_geometry_fields ... ok
+test owned_aac::aac_sbr_header::tests::syntax_defaults_and_every_truncation_are_transactional ... ok
+test owned_aac::aac_sbr_hf::tests::independent_decimal_hf_trace_and_copy_mode ... ok
+test owned_aac::aac_sbr_hf::tests::patch_geometry_preserves_even_phase_and_bounded_sources ... ok
+test owned_aac::aac_sbr_history::tests::late_dequantization_failure_restores_reader_header_and_both_channels ... ok
+test owned_aac::aac_sbr_history::tests::noise_history_uses_band_indices_when_frequency_borders_change ... ok
+test owned_aac::aac_sbr_history::tests::parsed_multiframe_parameters_match_dense_bin_and_decimal_oracles ... ok
+test owned_aac::aac_sbr_history::tests::truncated_stream_reads_and_missing_history_are_transactional ... ok
+test owned_aac::aac_sbr_huffman::tests::codebooks_are_complete_and_prefix_free ... ok
+test owned_aac::aac_sbr_huffman::tests::every_normative_symbol_decodes_and_every_truncation_rolls_back ... ok
+test owned_aac::aac_sbr_limiter::tests::discarded_short_tail_still_has_limiter_interval_for_every_gain_band ... ok
+test owned_aac::aac_sbr_limiter::tests::independent_high_precision_geometry_oracles_cover_all_modes_and_patch_priority ... ok
+test owned_aac::aac_sbr_limiter::tests::mode_zero_and_close_distinct_patch_boundaries_are_preserved ... ok
+test owned_aac::aac_sbr_mapping::tests::bounded_harmonic_syntax_is_transactional_at_all_offsets_and_truncations ... ok
+test owned_aac::aac_sbr_mapping::tests::fixed_and_varvar_classes_cover_both_frame_sizes ... ok
+test owned_aac::aac_sbr_mapping::tests::history_uses_absolute_lines_and_failed_frames_do_not_change_carry_or_lines ... ok
+test owned_aac::aac_sbr_mapping::tests::original_protocol_mapping_vectors_cover_attack_and_noise_splits ... ok
+test owned_aac::aac_sbr_predictor::tests::degenerate_unstable_and_invalid_inputs_have_explicit_results ... ok
+test owned_aac::aac_sbr_predictor::tests::independent_decimal_covariance_reference_and_scale_phase_invariance ... ok
+test owned_aac::aac_sbr_prepare::tests::normalized_pcm_reaches_hf_in_standard_units_against_direct_convolution_oracles ... ok
+test owned_aac::aac_sbr_prepare::tests::parsed_four_frame_sequences_compose_analysis_hf_energy_mapping_and_replay ... ok
+test owned_aac::aac_sbr_qmf::tests::direct_time_convolution_oracles_cover_impulses_dense_signal_and_tones ... ok
+test owned_aac::aac_sbr_qmf::tests::frame_geometry_checkpoint_reset_and_failed_calls_preserve_history ... ok
+test owned_aac::aac_sbr_synthesis_qmf::tests::finite_arithmetic_overflow_is_transactional_after_a_valid_slot ... ok
+test owned_aac::aac_sbr_synthesis_qmf::tests::independent_direct_convolution_matches_real_imaginary_dense_and_analysis_inputs ... ok
+test owned_aac::aac_sbr_synthesis_qmf::tests::invalid_later_slot_rolls_back_the_entire_call_and_reset_discards_tail ... ok
+test owned_aac::aac_sbr_synthesis_qmf::tests::owned_analysis_and_synthesis_compose_against_independent_pcm_trace ... ok
+test owned_aac::aac_scalefactors::rvlc_tests::rvlc_all_signed_deltas_and_escape_words_preserve_adjacent_bits ... ok
+test owned_aac::aac_scalefactors::rvlc_tests::rvlc_forbidden_words_and_every_payload_truncation_preserve_cursor ... ok
+test owned_aac::aac_scalefactors::rvlc_tests::rvlc_short_groups_keep_separate_spectral_noise_and_intensity_accumulators ... ok
+test owned_aac::aac_spectral::hcr_header_tests::reserved_hcr_lengths_adapt_and_header_truncation_is_transactional ... ok
+test owned_aac::aac_ssr_alignment::tests::coupling_gains_follow_source_chunks_across_target_frame_boundaries ... ok
+test owned_aac::aac_ssr_alignment::tests::explicit_source_absence_preserves_ahead_behind_and_partial_extent_gains ... ok
+test owned_aac::aac_ssr_alignment::tests::late_lane_mix_overflow_preserves_every_queue_and_stamp ... ok
+test owned_aac::aac_ssr_alignment::tests::legal_window_transitions_stay_within_one_packet_lookahead ... ok
+test owned_aac::aac_ssr_alignment::tests::malformed_input_overflow_checkpoint_and_reset_are_transactional ... ok
+test owned_aac::aac_ssr_alignment::tests::new_source_count_is_bounded_and_every_old_lane_must_be_preserved ... ok
+test owned_aac::aac_ssr_alignment::tests::new_source_prefix_is_silent_and_reordering_preserves_old_samples_and_gains ... ok
+test owned_aac::aac_ssr_alignment::tests::opposite_window_switches_align_every_sample_and_keep_original_stamps ... ok
+test owned_aac::aac_ssr_alignment::tests::separate_source_failure_preserves_pending_state ... ok
+test owned_aac::aac_ssr_alignment::tests::separate_sources_defer_core_mix_overflow_to_the_extension_consumer ... ok
+test owned_aac::aac_ssr_alignment::tests::separate_sources_preserve_drift_gain_boundaries_checkpoint_and_eof ... ok
+test owned_aac::aac_ssr_alignment::tests::unfinished_drift_has_a_bounded_refusal_without_losing_pending_frame ... ok
+test owned_aac::aac_ssr_gain::tests::active_gain_survives_long_start_short_stop_and_long_history ... ok
+test owned_aac::aac_ssr_gain::tests::active_levels_interpolate_geometrically_with_strict_locations ... ok
+test owned_aac::aac_ssr_gain::tests::all_window_transitions_emit_correct_regions_and_remember_active_gain ... ok
+test owned_aac::aac_ssr_gain::tests::malformed_gain_preserves_history_and_output_and_reset_discards_it ... ok
+test owned_aac::aac_ssr_ipqf::tests::every_band_impulse_has_all_96_taps_and_no_extra_tail ... ok
+test owned_aac::aac_ssr_ipqf::tests::invalid_input_checkpoint_and_reset_preserve_streaming_state ... ok
+test owned_aac::aac_ssr_ipqf::tests::nonzero_bands_match_literal_upsampling_convolution_across_packets ... ok
+test owned_aac::aac_ssr_metadata::tests::delayed_metadata_is_bounded_atomic_and_checkpointable ... ok
+test owned_aac::aac_ssr_synthesis::tests::dense_nonzero_bands_and_all_window_transitions_match_direct_transforms ... ok
+test owned_aac::aac_ssr_synthesis::tests::failure_and_reset_preserve_all_gain_filter_and_window_history ... ok
+test owned_aac::aac_ssr_synthesis::tests::kbd_windows_match_normative_ssr_table_anchors ... ok
+test owned_aac::aac_synthesis::history_tests::history_restore_repeats_pcm_across_shapes_and_window_sequences ... ok
+test owned_aac::aac_synthesis::shared_window_tests::rollback_clones_share_windows_and_keep_mutable_state_independent ... ok
+test owned_aac::aac_synthesis::tests::failure_is_transactional_and_reset_discards_overlap ... ok
+test owned_aac::aac_synthesis::tests::invalid_frame_does_not_change_window_history ... ok
+test owned_aac::aac_synthesis::tests::kbd_windows_are_symmetric_and_power_complementary ... ok
+test owned_aac::aac_sbr_data::tests::original_sce_cpe_payloads_and_every_truncation_are_transactional ... ok
+test owned_aac::aac_synthesis::tests::long_blocks_reconstruct_an_independently_analysed_signal ... ok
+test owned_aac::aac_tns::tests::consumed_short_spectra_preserve_each_window_and_direction ... ok
+test owned_aac::aac_tns::tests::filter_direction_band_clipping_and_first_order_impulse ... ok
+test owned_aac::bits::tests::crosses_bytes_and_preserves_position_on_short_read ... ok
+test owned_aac::bits::tests::golomb_and_trailing_bits ... ok
+test owned_aac::bits::tests::short_fields_match_general_reader_and_preserve_position_on_error ... ok
+test owned_aac::bits::tests::unescapes_and_rejects_broken_sequences ... ok
+test owned_aac::config::ld_tests::ld_frame_flag_ep_config_and_resilience_fields_have_distinct_meanings ... ok
+test owned_aac::decoder_tests::standalone_checkpoint_restores_noise_overlap_and_configuration ... ok
+test owned_aac::decoder_tests::standalone_decoder_matches_saved_mono_pcm_and_exact_clock ... ok
+test owned_aac::memory::tests::spare_capacity_and_shared_owners_are_counted_once ... ok
+test owned_aac::stream::ltp_admission_tests::implicit_ltp_sbr_reserves_the_same_dsp_as_explicit_signalling ... ok
+test owned_aac::stream::ltp_admission_tests::ltp_asc_reserves_float_analysis_and_transaction_storage_before_decode ... ok
+test owned_aac::stream::tests::clock_spool_preserves_pcm_bits_and_removes_storage_on_decode_writer_error ... ok
+test owned_aac::stream::tests::pcm_serialization_preserves_bits_and_handles_short_writes ... ok
+test owned_aac::stream::tests::standalone_stream_api_retains_exact_clock_and_packet_prefix ... ok
+test owned_aac_export_routing::tests::read_only_spatial_admission_accepts_pce_and_emits_no_progress ... ok
+test owned_adts_export::admission_tests::adts_export_admits_large_policy_and_rejects_small_without_publication ... ok
+test owned_adts_loudness::admission_tests::aac_loudness_and_normalization_keep_owned_budget_policy ... ok
+test owned_audio_clock::tests::linked_fractional_durations_round_only_at_presentation_boundaries ... ok
+test owned_audio_export::admission_tests::requested_controlled_limit_is_checked_before_pcm_reads_and_large_buffers ... ok
+test owned_audio_export::control_tests::progress_counts_source_blocks_and_cancel_never_publishes_output ... ok
+test owned_audio_export::double_tests::double_wave_identity_and_transformed_export_retain_sub_float32_precision ... ok
+test owned_audio_export::integer_tests::integer_public_export_retains_precision_and_transforms_without_libav ... ok
+test owned_audio_export::integer_tests::raw_flac_mp3_and_ogg_supports_validate_budget_and_rematrix_layouts ... ok
+test owned_audio_export::limit_tests::packet_limits_bound_blocks_and_export_the_exact_prefix_for_both_float_widths ... ok
+test owned_audio_export::metadata_tests::public_float_wave_export_edits_tags_without_changing_pcm_or_losing_opaque_info ... ok
+test owned_audio_export::rss_tests::public_wave_export_checks_requested_process_limit_without_legacy_admission ... ok
+test owned_audio_export::side_data_tests::double_surround_identity_retains_explicit_masks_and_raw_info_chunks ... ok
+test owned_audio_export::tests::public_wave_export_preserves_identity_and_applies_output_clock_interval ... ok
+test owned_audio_mix::tests::wav_mix_weights_shortest_merge_and_public_entrypoints_are_owned ... ok
+test owned_avc::profile_tests::constraint_flags_have_profile_specific_names ... ok
+test owned_avc::tests::baseline_pps_and_truncated_or_wrong_reference ... ok
+test owned_avc::tests::mutations_never_panic_and_successful_geometry_is_positive ... ok
+test owned_avc::tests::reads_real_baseline_geometry_and_timing ... ok
+test owned_avc::tests::rejects_truncated_and_extra_rbsp_data ... ok
+test owned_avc_annexb::tests::framing_is_bounded_and_rejects_invalid_start_codes_and_empty_nals ... ok
+test owned_avc_annexb::tests::synthetic_encoder_framing_round_trips_owned_container_and_decoder ... ok
+test owned_backend_error::tests::tagged_errno_and_unknown_codes_have_owned_diagnostics ... ok
+test owned_bilateral::export_tests::bilateral_export_accepts_y4m_and_ffv1_and_keeps_packet_clock ... ok
+test owned_bilateral::tests::odd_high_depth_constant_frame_and_validation ... ok
+test owned_bilateral::tests::strong_edge_is_retained_and_zero_sigmas_are_identity ... ok
+test owned_bilateral::tests::two_samples_have_analytic_weighted_mean_and_keep_unselected_planes ... ok
+test owned_budget::tests::optional_rss_and_memory_parsers_keep_the_existing_policy ... ok
+test owned_budget::wave_estimate_tests::admission_covers_observed_sinc_history_and_output_capacities ... ok
+test owned_capabilities::tests::public_inventory_reports_shared_bitstream_components_without_legacy ... ok
+test owned_cas::reference_acceptance::synthetic_rgba_video_matches_saved_reference_including_alpha_mask ... ok
+test owned_cas::reference_acceptance::synthetic_yuv_video_matches_saved_reference ... ok
+test owned_cas::tests::black_edges_masks_and_invalid_precision_are_atomic ... ok
+test owned_cas::tests::rgb_plane_mask_matches_gbr_order_and_preserves_alpha ... ok
+test owned_codec_config::tests::library_configuration_records_and_nal_lengths_are_checked ... ok
+test owned_codec_metadata::tests::profile_identifiers_are_codec_specific_and_flags_remain_distinct ... ok
+test owned_colorbalance::reference_acceptance::synthetic_rgba_video_matches_saved_reference ... ok
+test owned_colorbalance::synthetic_acceptance::synthetic_video_decodes_and_transforms_all_frames_without_legacy ... ok
+test owned_colorbalance::tests::identity_alpha_and_atomic_validation ... ok
+test owned_colorchannelmixer::float_reference_acceptance::synthetic_headroom_rgba_matches_saved_float_reference_with_precision_bound ... ok
+test owned_colorchannelmixer::rgb_reference_acceptance::power_preservation_keeps_synthetic_halfway_pixels_platform_independent ... ok
+test owned_colorchannelmixer::rgb_reference_acceptance::three_frame_synthetic_rgba_matches_committed_references ... ok
+test owned_colorchannelmixer::synthetic_acceptance::synthetic_video_decodes_and_transforms_all_frames_without_legacy ... ok
+test owned_colorchannelmixer::tests::float_matrix_keeps_headroom_and_errors_are_atomic ... ok
+test owned_colorchannelmixer::tests::matrix_reads_original_rgba_and_rounds_each_contribution ... ok
+test owned_colorcontrast::synthetic_acceptance::synthetic_video_decodes_and_transforms_all_frames_without_legacy ... ok
+test owned_colorcontrast::tests::opponent_contrast_preserves_alpha_and_lightness ... ok
+test owned_colorcontrast::tests::zero_weights_are_identity_and_invalid_input_is_atomic ... ok
+test owned_colorcorrect::reference_acceptance::synthetic_video_all_analysis_modes_match_saved_single_thread_reference ... ok
+test owned_colorcorrect::reference_acceptance::zero_adjustment_chroma_rounding_regression ... ok
+test owned_colorcorrect::tests::neutral_saturation_preserves_luma_and_validation_is_atomic ... ok
+test owned_colorcorrect::tests::odd_chroma_cells_and_precision_validation_cover_all_integer_depths ... ok
+test owned_colorhold::conversion_acceptance_tests::full_synthetic_filter_matches_reference_frames ... ok
+test owned_colorhold::conversion_gap_tests::synthetic_blend_conversion_matches_reference ... ok
+test owned_colorhold::key_syntax_tests::key_alpha_does_not_change_rgb_distance_or_source_alpha ... ok
+test owned_colorhold::tests::blend_and_rejection ... ok
+test owned_colorhold::tests::preserves_selected_colour_and_alpha_and_desaturates_other_pixels ... ok
+test owned_colorhold::yuv_tests::failed_rgb_filter_is_atomic_and_noop_keeps_out_of_range_samples ... ok
+test owned_colorhold::yuv_tests::selected_red_is_unchanged_and_odd_chroma_cells_match_reference ... ok
+test owned_colorize::export_tests::colorize_y4m_and_ffv1_export_acceptance_preserves_precision_and_timestamps ... ok
+test owned_colorize::tests::green_half_mix_matches_committed_reference_values ... ok
+test owned_colorize::tests::malformed_parameters_and_samples_refuse_before_mutation ... ok
+test owned_colorize::tests::red_tint_preserves_or_replaces_luma_at_every_integer_depth ... ok
+test owned_colorlevels::rgb_reference_acceptance::three_frame_synthetic_rgba_matches_committed_references ... ok
+test owned_colorlevels::synthetic_acceptance::synthetic_video_decodes_and_transforms_all_frames_without_legacy ... ok
+test owned_colorlevels::tests::automatic_ranges_use_whole_frame_and_alpha_can_be_adjusted ... ok
+test owned_colorlevels::tests::identity_and_invalid_input_are_atomic ... ok
+test owned_aac::aac_synthesis::tests::transitions_reconstruct_signal_with_eight_short_windows ... ok
+test owned_container_loudness::admission_tests::matroska_aac_loudness_and_normalization_keep_owned_budget_policy ... ok
+test owned_dynamic_loudnorm::tests::limiter_anticipates_peaks_links_channels_and_flushes_both_edges ... ok
+test owned_dynamic_loudnorm::tests::malformed_limiter_input_is_rejected_before_changes ... ok
+test owned_ebml::tests::bounded_values_preserve_offsets_and_stop_before_next_header ... ok
+test owned_ebml::tests::library_reads_synthetic_file_tags_and_chapter_atoms ... ok
+test owned_ebml::tests::malformed_headers_unknown_values_and_parent_overflow_are_distinct ... ok
+test owned_eq::export_tests::high_depth_eq_exports_y4m_and_ffv1_without_fallback ... ok
+test owned_eq::tests::constant_contrast_and_saturation_have_exact_independent_plane_values ... ok
+test owned_eq::tests::high_depth_gamma_uses_full_precision_and_reuses_tables ... ok
+test owned_eq::tests::high_depth_identity_precision_and_neutral_plane_tables ... ok
+test owned_eq::tests::invalid_parameters_and_storage_cannot_mutate_samples ... ok
+test owned_exposure::float_reference_acceptance::synthetic_headroom_rgba_matches_saved_float_reference_exactly ... ok
+test owned_exposure::headroom_acceptance::exposure_preserves_highlights_until_final_yuv_quantization ... ok
+test owned_exposure::integer_conversion_gap::complete_integer_float_rgb_pipeline_matches_reference ... ignored, acceptance pending complete integer-float RGB conversion compatibility
+test owned_exposure::integer_conversion_gap::synthetic_half_exposure_reproduces_eight_bit_conversion_difference ... ok
+test owned_exposure::integer_conversion_gap::synthetic_identity_reproduces_sixteen_bit_conversion_difference ... ok
+test owned_exposure::synthetic_acceptance::synthetic_video_decodes_and_transforms_all_frames_without_legacy ... ok
+test owned_exposure::tests::float_headroom_alpha_and_zero_denominator ... ok
+test owned_exposure::tests::integer_clipping_and_atomic_validation ... ok
+test owned_expression::lut_context_tests::lut_functions_use_their_component_range ... ok
+test owned_expression::tests::arithmetic_precedence_constants_functions_and_lazy_branches ... ok
+test owned_expression::tests::malformed_unsupported_and_excessive_nesting_refuse ... ok
+test owned_expression::tests::nonfinite_values_propagate_instead_of_becoming_valid_filter_parameters ... ok
+test owned_expression::tests::numeric_hex_suffixes_and_exponent_ambiguity ... ok
+test owned_fade::duration_tests::units_precision_and_checked_bounds ... ok
+test owned_ffv1_decoder::gray_tests::gray_encoding_validates_storage_depth_and_geometry ... ok
+test owned_ffv1_decoder::gray_tests::gray_fixtures_preserve_luma_and_expand_neutral_chroma ... ok
+test owned_ffv1_export::tests::compressed_overlay_uses_presentation_times_through_ranges_steps_and_reverse ... ok
+test owned_ffv1_export::tests::compressed_temporal_export_preserves_source_payload_order_and_forward_positions ... ok
+test owned_ffv1_export::tests::failed_or_cancelled_export_never_publishes_partial_output ... ok
+test owned_ffv1_export::tests::own_export_edits_and_removes_track_name_and_language ... ok
+test owned_ffv1_export::tests::own_export_mutates_track_tags_without_leaking_to_file_metadata ... ok
+test owned_ffv1_export::tests::owned_export_edits_and_deletes_custom_file_tags_case_insensitively ... ok
+test owned_ffv1_export::tests::owned_export_preserves_track_name_ietf_language_and_disposition_flags ... ok
+test owned_ffv1_export::tests::owned_export_preserves_unlisted_file_tags_and_applies_canonical_overrides ... ok
+test owned_ffv1_export::tests::owned_interval_export_clips_and_rebases_chapters ... ok
+test owned_ffv1_export::tests::public_export_preserves_gray_samples_source_pts_and_interval_preroll ... ok
+test owned_ffv1_export::tests::scoped_tags_survive_owned_export_with_track_uid_remapping ... ok
+test owned_ffv1_export::tests::variable_duration_reverse_keeps_position_timing_while_shuffle_maps_source_duration ... ok
+test owned_ffv1_export::tests::variable_frame_durations_aspect_and_fractional_selection_survive_export ... ok
+test owned_flac::index_growth_tests::index_capacity_does_not_reserve_past_the_packet_limit ... ok
+test owned_flac::index_growth_tests::index_capacity_respects_controlled_memory_even_between_growth_steps ... ok
+test owned_flac_layout::tests::comment_names_hex_case_padding_and_unassigned_positions ... ok
+test owned_flac_layout::tests::invalid_masks_lengths_and_conflicting_metadata_refuse_specifically ... ok
+test owned_frame_layout::tests::independently_rounded_chroma_planes ... ok
+test owned_frame_layout::tests::rejects_empty_and_overflowing_storage ... ok
+test owned_framestep::tests::decimal_options_and_clock_reduction ... ok
+test owned_gblur::export_tests::gaussian_export_accepts_y4m_and_ffv1_and_keeps_packet_clock ... ok
+test owned_gblur::tests::constant_odd_high_depth_planes_remain_constant ... ok
+test owned_gblur::tests::impulse_spreads_symmetrically_and_unselected_chroma_is_untouched ... ok
+test owned_gblur::tests::invalid_options_are_refused ... ok
+test owned_grayworld::reference_acceptance::native_yuv_filter_visits_all_frames_without_legacy ... ok
+test owned_grayworld::reference_acceptance::synthetic_float_video_matches_saved_reference_with_bounded_rounding ... ok
+test owned_grayworld::tests::black_alpha_and_invalid_input_are_atomic ... ok
+test owned_grayworld::timeline_qualification::invalid_timeline_is_refused_without_claiming_acceptance ... ok
+test owned_grayworld::timeline_qualification::timeline_enable_changes_only_selected_frames ... ok
+test owned_hevc_annexb::tests::framing_rejects_empty_reserved_and_over_budget_packets ... ok
+test owned_hevc_annexb::tests::main_and_main10_annex_b_preserve_all_synthetic_ipb_pixels ... ok
+test owned_hls::tests::assembly_checks_limit_cancellation_and_range_bounds ... ok
+test owned_hls::tests::finite_fmp4_resources_and_ranges_preserve_every_packet_and_timestamp ... ok
+test owned_hls::tests::quoted_codec_lists_and_external_renditions_are_retained ... ok
+test owned_hls::tests::unsupported_media_changes_and_invalid_ranges_refuse_specific_cause ... ok
+test owned_hue::export_tests::high_depth_hue_exports_y4m_and_ffv1_without_fallback ... ok
+test owned_hue::tests::all_integer_depths_rotate_chroma_and_reject_excess_precision ... ok
+test owned_hue::tests::rejects_expressions_conflicts_and_invalid_storage_without_mutation ... ok
+test owned_hue::tests::rotates_chroma_and_keeps_luma ... ok
+test owned_ima4::tests::block_headers_nibble_order_channels_and_restart_have_exact_samples ... ok
+test owned_ima4::tests::low_step_delta_rounds_each_term_before_summing ... ok
+test owned_ima_wav::tests::predictor_headers_stereo_groups_restart_and_refusal_are_exact ... ok
+test owned_k_weight::tests::stream_boundaries_channels_and_rejected_input_preserve_state ... ok
+test owned_lossless::framestep_tests::stepped_export_checks_discarded_payloads_and_input_packet_limit ... ok
+test owned_lossless::framestep_tests::stepped_file_export_counts_consumed_frames_and_preserves_packet_timing ... ok
+test owned_lossless::plan_tests::owned_plan_matches_executed_filter_export ... ok
+test owned_lossless::plan_tests::plan_refuses_unsupported_execution_and_inexact_interval ... ok
+test owned_lossless::plan_tests::rotation_library_export_and_reexport_preserve_pixels_and_timing ... ok
+test owned_lossless::reverse_tests::reverse_rejects_damaged_input_before_any_final_file_is_published ... ok
+test owned_lossless::reverse_tests::reversed_files_preserve_forward_packet_timing_and_source_counts ... ok
+test owned_lossless::shuffleframes_tests::all_dropped_or_incomplete_groups_do_not_publish_empty_video ... ok
+test owned_lossless::shuffleframes_tests::discarded_shuffle_tail_still_validates_payload_before_publication ... ok
+test owned_lossless::shuffleframes_tests::shuffled_files_preserve_samples_timing_and_consumed_counts ... ok
+test owned_loudness::tests::normalization_threshold_uses_absolute_gated_energy ... ok
+test owned_loudness::tests::peak_is_unweighted_and_rejected_input_does_not_change_it ... ok
+test owned_loudness::tests::silence_short_stream_chunking_and_layout_weights ... ok
+test owned_loudness::true_peak_tests::optional_true_peak_does_not_change_loudness_and_keeps_lfe_peak ... ok
+test owned_loudnorm::tests::dual_measurement_cancel_does_not_publish_or_signal_completion ... ok
+test owned_loudnorm::tests::dual_zero_lra_uses_dynamic_fallback_without_ffmpeg ... ok
+test owned_loudnorm::tests::feedback_fixture_recovers_loudness_between_isolated_peaks ... ok
+test owned_loudnorm::tests::histogram_fixture_accepts_expected_gain_instead_of_exact_energy_gain ... ok
+test owned_loudnorm::tests::linear_mode_preserves_gain_rules_and_dynamic_mode_boundaries ... ok
+test owned_dynamic_loudnorm::tests::dynamic_normalization_reduces_range_and_keeps_linked_stereo_ratios ... ok
+test owned_loudnorm::tests::owned_float_export_keeps_rate_frames_gain_and_controls ... ok
+test owned_loudnorm::tests::public_entrypoint_decodes_integer_depths_and_preserves_layout ... ok
+test owned_loudnorm::tests::public_wave_plan_uses_owned_backend_with_or_without_legacy ... ok
+test owned_loudnorm::tests::short_dynamic_peak_gain_silence_dual_mono_and_duration_boundary ... ok
+test owned_lutyuv::cache_tests::reuse_and_geometry_range_precision_changes_do_not_leave_stale_tables ... ok
+test owned_lutyuv::export_tests::synthetic_y4m_and_ffv1_lut_acceptance ... ok
+test owned_lutyuv::tests::failure_does_not_mutate_samples ... ok
+test owned_lutyuv::tests::ranges_precision_and_odd_chroma ... ok
+test owned_mace::tests::codebook_pcm_and_packet_boundaries_match_existing_static_references ... ok
+test owned_matroska::adts_mux_tests::synthetic_adts_segments_keep_nanosecond_clock_and_payload ... ok
+test owned_matroska::reverse_cancel_tests::cancellation_stops_reverse_input_before_any_replay_or_packet_write ... ok
+test owned_matroska::usability_admission_tests::default_count_mismatch_is_atomic_before_header_publication ... ok
+test owned_matroska::usability_admission_tests::usability_count_mismatch_is_atomic_before_header_publication ... ok
+test owned_loudnorm::tests::long_dynamic_fixture_accepts_public_processing_at_three_seconds ... ok
+test owned_matroska_alac_export::admission_tests::matroska_alac_workflows_keep_owned_budget ... ok
+test owned_matroska_grid_clock::rational_oracle_tests::bounded_dyadic_grids_match_an_independent_i128_rational_oracle ... ok
+test owned_matroska_grid_clock::tests::lace_offsets_and_signed_coordinates_preserve_the_same_sample_point ... ok
+test owned_matroska_grid_clock::tests::near_unit_and_third_factors_cannot_be_rounded_into_a_different_quantum ... ok
+test owned_matroska_grid_clock::tests::nonunit_and_cluster_shifted_ticks_use_their_exact_grid ... ok
+test owned_matroska_grid_clock::tests::wide_cancellation_and_extreme_ieee_factors_do_not_overflow ... ok
+test owned_matroska_pcm_export::admission_tests::matroska_float64_workflows_keep_owned_budget_and_precision ... ok
+test owned_matroska_aac_export::admission_tests::matroska_aac_export_admits_combined_index_and_decoder_policy ... ok
+test owned_matroska_sample_clock::tests::delay_offsets_and_integer_nanosecond_rounding_do_not_change_the_bracket ... ok
+test owned_matroska_sample_clock::tests::extreme_coordinates_are_bounded_without_wrapping_or_panicking ... ok
+test owned_matroska_sample_clock::tests::floor_and_ceil_are_allowed_but_a_tick_at_an_exact_boundary_is_real ... ok
+test owned_monochrome::export_tests::monochrome_y4m_and_ffv1_export_acceptance_preserves_precision_and_timestamps ... ok
+test owned_monochrome::tests::highlight_strength_retains_white_and_chroma_filter_attenuates_midtones ... ok
+test owned_monochrome::tests::invalid_options_geometry_and_precision_refuse_before_mutation ... ok
+test owned_monochrome::tests::neutral_input_keeps_luma_and_clears_chroma_at_every_integer_depth ... ok
+test owned_mp4::admission_tests::index_payload_accounts_for_spare_capacity_and_both_sample_forms ... ok
+test owned_mp4_audio::admission_tests::mp4_aac_pcm_admits_index_decoder_and_edit_checkpoint ... ok
+test owned_mp4_audio::gap_tests::precise_rational_pcm_keeps_f64_silence_and_refuses_non_pcm ... ok
+test owned_mp4_audio::gap_tests::rational_gap_destinations_preserve_native_history_and_strict_silence_at_two_rates ... ok
+test owned_mp4_audio::mp4_export_clock::tests::comparing_and_scaling_large_fractions_does_not_multiply_denominators ... ok
+test owned_mp4_audio::mp4_export_clock::tests::normalization_origins_keep_signed_fractional_output_phase ... ok
+test owned_mp4_audio::mp4_export_clock::tests::source_phase_and_signed_preroll_survive_fractional_container_clocks ... ok
+test owned_mp4_audio_export::admission_tests::ima4_export_keeps_owned_backend_and_budget_policy ... ok
+test owned_mp4_audio_export::admission_tests::ima_wav_export_keeps_owned_backend_and_budget_policy ... ok
+test owned_mp4_audio_export::admission_tests::mp4_aac_export_loudness_and_normalization_keep_owned_budget ... ok
+test owned_mp4_audio_export::admission_tests::mp4_alac_export_loudness_and_normalization_keep_owned_budget ... ok
+test owned_matroska_pcm_export::admission_tests::matroska_pcm_workflows_keep_owned_budget ... ok
+test owned_mp4_audio_export::admission_tests::ms_adpcm_export_keeps_owned_backend_and_budget_policy ... ok
+test owned_mp4_audio_export::admission_tests::quicktime_pcm_precision_export_preserves_silence_and_repeated_edits ... ok
+test owned_mp4_probe::average_rate_tests::average_uses_total_clock_and_exact_reduced_ratio ... ok
+test owned_mp4_probe::average_rate_tests::unknown_or_unrepresentable_timing_is_not_guessed ... ok
+test owned_mp4_probe::payload_rate_tests::unknown_clock_and_overflow_remain_unknown ... ok
+test owned_mp4_probe::payload_rate_tests::uses_payload_bytes_and_total_source_clock ... ok
+test owned_mp4_video_decode::tests::complementary_fields_preserve_first_timing_and_pixels ... ok
+test owned_mp4_video_decode::tests::duplicate_pts_replace_metadata_and_keep_terminal_nominal_span ... ok
+test owned_ms_adpcm::tests::signed_prediction_truncation_saturation_and_delta_adaptation ... ok
+test owned_ms_adpcm::tests::synthetic_blocks_restart_and_reject_incomplete_geometry ... ok
+test owned_normalize::tests::gain_preserves_pcm_ratios_and_obeys_peak_ceiling ... ok
+test owned_normalize::tests::invalid_measurements_and_chunks_do_not_publish_partial_pcm ... ok
+test owned_ogg::tests::a_chain_is_named_by_the_packet_it_opens_with ... ok
+test owned_ogg::tests::a_packet_spanning_pages_is_reassembled_from_its_segments ... ok
+test owned_ogg::tests::a_page_failing_its_own_checksum_is_refused ... ok
+test owned_ogg::tests::a_stream_cut_off_mid_packet_holds_back_the_tail ... ok
+test owned_ogg::tests::framing_that_does_not_add_up_is_refused_rather_than_guessed ... ok
+test owned_ogg::tests::the_packet_limit_stops_a_file_that_states_too_many ... ok
+test owned_ogg::tests::two_bitstreams_interleaved_page_by_page_stay_apart ... ok
+test owned_opus_packet::header_transport_tests::transport_accepts_standard_mono_stereo_and_surround_without_relabelling ... ok
+test owned_opus_packet::header_transport_tests::transport_uses_the_owned_identification_headers_version_rules ... ok
+test owned_overlay::tests::invalid_foreground_or_alignment_leaves_destination_unchanged ... ok
+test owned_overlay::tests::mixed_depth_clipping_and_invalid_source_are_atomic ... ok
+test owned_overlay::tests::odd_yuv420_preserves_plane_borders_and_high_depth ... ok
+test owned_overlay::tests::precision_conversion_preserves_range_endpoints_and_neutral_chroma ... ok
+test owned_overlay::tests::rgb_negative_offsets_clip_exact_pixels ... ok
+test owned_pcm_channels::default_tests::custom_order_matches_speakers_but_reordering_remains_distinct ... ok
+test owned_pcm_channels::default_tests::layout_identity_preserves_speaker_assignment_and_unspecified_order ... ok
+test owned_pcm_channels::default_tests::unknown_counts_remain_unspecified_in_descriptions ... ok
+test owned_pcm_channels::default_tests::unspecified_three_channels_retain_lfe_without_changing_explicit_surround ... ok
+test owned_pcm_decoder::constructor_width_regressions::public_width_constructors_keep_defaults_and_refuse_narrowing ... ok
+test owned_pcm_decoder::precision_tests::quicktime_float64_byte_orders_preserve_bits_beyond_f32 ... ok
+test owned_pcm_format::tests::all_formats_have_explicit_sizes_names_and_checked_frame_geometry ... ok
+test owned_pcm_gain::quad_speaker_acceptance::quad_impulses_route_rear_pairs_independently_across_partial_frames ... ok
+test owned_pcm_gain::surround_tests::each_surround_speaker_has_the_expected_stereo_and_mono_contribution ... ok
+test owned_pcm_gain::tests::invalid_parameters_are_rejected_before_writes ... ok
+test owned_pcm_gain::tests::split_surround_frame_omits_lfe_and_applies_gain ... ok
+test owned_pcm_gain::upmix_tests::mono_uses_center_and_stereo_uses_front_without_inventing_surround ... ok
+test owned_pcm_gain_f64::quad_speaker_acceptance::quad_impulses_route_rear_pairs_independently_across_partial_frames ... ok
+test owned_pcm_gain_f64::surround_tests::each_surround_speaker_has_the_expected_stereo_and_mono_contribution ... ok
+test owned_pcm_gain_f64::tests::invalid_parameters_are_rejected_before_writes ... ok
+test owned_pcm_gain_f64::tests::split_double_surround_frame_omits_lfe_and_applies_gain ... ok
+test owned_pcm_gain_f64::upmix_tests::mono_uses_center_and_stereo_uses_front_without_inventing_surround ... ok
+test owned_pcm_integer::s64_tests::double_precision_s64_quantization_saturates_and_rounds_ties ... ok
+test owned_pcm_integer::tests::integer_roundtrip_is_exact_at_boundaries_and_interior ... ok
+test owned_pcm_integer::tests::saturation_ties_and_invalid_samples ... ok
+test owned_pcm_layout::checked_tests::geometry_errors_preserve_output_and_24_bit_packing_is_exact ... ok
+test owned_pcm_layout::tests::interleave_preserves_bits_unaligned_tails_and_guards ... ok
+test owned_pixel_format::tests::checked_storage_handles_odd_chroma_and_high_depth ... ok
+test owned_probe::tests::own_float_wave_probe ... ok
+test owned_probe::tests::public_adts_probe_and_reader_use_owned_synthetic_packets ... ok
+test owned_probe::tests::public_mp4_probe_keeps_owned_metadata_and_explicit_gap_selection ... ok
+test owned_probe::tests::public_probe_preserves_integer_storage_and_valid_bits ... ok
+test owned_resample::phase_tests::fractional_origin_preserves_rational_phase_and_chunk_independence ... ok
+test owned_resample::tests::downsampling_rejects_out_of_band_tone_and_preserves_passband ... ok
+test owned_resample::tests::exact_clock_dc_channel_isolation_and_chunk_independence ... ok
+test owned_resample_f64::origin_tests::fractional_origin_and_trim_retain_double_precision_on_one_output_grid ... ok
+test owned_resample_f64::precision_tests::fractional_dc_retains_double_precision_across_drain ... ok
+test owned_resample_f64::tests::downsampling_rejects_out_of_band_tone_and_preserves_passband ... ok
+test owned_resample_f64::tests::exact_clock_dc_channel_isolation_and_chunk_independence ... ok
+test owned_reverse::tests::replay_callback_failure_is_terminal_and_removes_the_spool ... ok
+test owned_reverse::tests::reverses_payloads_but_keeps_forward_timing_and_cleans_storage ... ok
+test owned_rgb_transform::tests::all_transposes_keep_three_distinct_channels_at_every_depth ... ok
+test owned_rgb_transform::tests::invalid_geometry_and_samples_fail_before_output ... ok
+test owned_rgba::tests::malformed_colors_and_opacity_are_refused ... ok
+test owned_rgba::tests::named_hex_and_alpha_forms_share_one_parser ... ok
+test owned_rgba::tests::random_color_forms_still_obey_explicit_alpha ... ok
+test owned_rotate::tests::oblique_rotation_fits_canvas_and_fills_limited_black ... ok
+test owned_rotate::tests::packed_rgb_keeps_channels_in_their_pixels ... ok
+test owned_rotate::tests::quarter_turn_reorders_samples_exactly ... ok
+test owned_rotate::tests::synthetic_video_rotates_each_frame_without_changing_source_clock ... ok
+test owned_shuffleframes::tests::maps_duplicates_drops_and_source_duration_without_emitting_partial_groups ... ok
+test owned_stereo_router::explicit_position_capacity::sixty_four_coefficients_preserve_source_order_without_mask_truncation ... ok
+test owned_stereo_router::tests::equal_channel_geometry_still_routes_rear_speakers_and_directout ... ok
+test owned_stereo_router::tests::routing_admission_and_malformed_pcm_fail_before_output ... ok
+test owned_subtitle::tests::entities_are_literal_text_not_ass_or_html_commands ... ok
+test owned_subtitle_burn::tests::synthetic_srt_burn_respects_half_open_cue_and_preserves_timestamps ... ok
+test owned_text_raster::tests::bundled_font_raster_is_deterministic_and_supports_cyrillic ... ok
+test owned_text_raster::tests::odd_chroma_footprints_and_ten_bit_luma_blend_exactly ... ok
+test owned_time::capacity_tests::upward_rounding_for_signed_values_and_audio_capacity ... ok
+test owned_time::frame_rate_tests::declared_duration_is_reduced_without_rounding_to_a_nominal_rate ... ok
+test owned_time::rounded_tests::signed_halfway_rounding_packet_sentinels_and_duration_rules ... ok
+test owned_time::tests::exact_signed_boundaries_fractional_refusal_and_overflow ... ok
+test owned_timeline::reference_acceptance::ffv1_scheduler_passes_frame_number_and_pts_to_filter ... ok
+test owned_timeline::reference_acceptance::float_video_enable_cases_match_saved_reference ... ok
+test owned_timeline::tests::frame_time_dimensions_nan_and_threshold ... ok
+test owned_true_peak::tests::low_rate_sinc_keeps_analytic_tone_and_matches_offline_tail ... ok
+test owned_true_peak::tests::quarter_rate_tone_exposes_intersample_peak_and_is_chunk_independent ... ok
+test owned_true_peak::tests::silence_rejected_chunks_and_storage_are_bounded ... ok
+test owned_true_peak::tests::tail_and_exact_rational_convolution_match_without_counting_padding ... ok
+test owned_unsharp::tests::impulse_blur_and_sharpen_match_independent_binomial_values ... ok
+test owned_unsharp::tests::invalid_matrix_and_sample_storage_fail_atomically ... ok
+test owned_vibrance::rgb_reference_acceptance::three_frame_synthetic_rgba_matches_committed_references ... ok
+test owned_vibrance::synthetic_acceptance::synthetic_video_decodes_and_transforms_all_frames_without_legacy ... ok
+test owned_vibrance::tests::channel_balance_preserves_alpha_and_validates_before_mutation ... ok
+test owned_video_decode::tests::compressed_frames_use_owned_filters_with_exact_luma_and_source_selection ... ok
+test owned_video_decode::tests::positive_start_uses_container_origin_and_damage_is_not_a_capability_refusal ... ok
+test owned_video_decode::tests::public_matroska_ffv1_decode_and_interval_are_owned ... ok
+test owned_video_timeline::tests::cumulative_fractional_rounding_does_not_drift ... ok
+test owned_video_timeline::tests::export_clock_retains_leading_and_interior_blank_spans ... ok
+test owned_video_timeline::tests::impossible_clocks_endpoints_and_empty_ranges_are_errors ... ok
+test owned_video_timeline::tests::leading_empty_edits_and_half_open_media_boundaries ... ok
+test owned_wav_file::double_tests::writer_retains_all_ieee_double_bits_and_sizes ... ok
+test owned_wav_file::integer_tests::integer_precision_padding_and_masks_roundtrip ... ok
+test owned_wav_file::tests::concurrent_synthetic_pcm_exports_keep_independent_payloads ... ok
+test owned_wav_file::tests::synthetic_float_wav_preserves_bits_and_refuses_overwrite ... ok
+test owned_wave_loudness::tests::all_pcm_precisions_have_identical_full_loudness_results ... ok
+test owned_wave_loudness::tests::range_bounds_controls_and_metadata_only_plan_are_owned ... ok
+test owned_wave_loudness::tests::silence_lfe_peak_and_numeric_refusal_are_explicit ... ok
+test owned_mp4_audio_export::admission_tests::mp4_pcm_export_loudness_and_normalization_keep_owned_budget ... ok
+test owned_wave_metadata::tests::edits_preserve_opaque_entries_and_assignment_wins_after_deletion ... ok
+test owned_wave_plan::tests::public_plans_share_execution_preflight_without_outputs_or_progress ... ok
+test owned_wave_remux::tests::budgets_and_cancellation_refuse_publication_and_done_is_after_publish ... ok
+test owned_wave_remux::tests::concat_opens_inputs_sequentially_and_cancellation_never_publishes ... ok
+test owned_wave_remux::tests::public_concat_preserves_pcm_seams_padding_and_global_packet_limits ... ok
+test owned_wave_remux::tests::public_remux_preserves_integer_storage_valid_bits_and_float_nan_payloads ... ok
+test owned_wave_remux::tests::public_trim_is_sample_exact_and_keeps_all_pcm_storage_widths ... ok
+test owned_webm::index_allocation_tests::admitted_scan_preserves_full_scan_metadata_and_timestamps ... ok
+test owned_webm::index_allocation_tests::index_estimate_counts_metadata_and_codec_private_spare_capacity ... ok
+test owned_webm::index_allocation_tests::packet_capacity_respects_non_power_of_two_index_limit ... ok
+test owned_webm::lace_integer_tests::lace_integers_keep_all_ones_data_and_obey_block_boundary ... ok
+test owned_webm::scaled_aac_clock_memory_tests::retained_scaled_aac_clock_records_are_charged_and_unit_scale_allocates_none ... ok
+test owned_webm::tests::library_indexes_synthetic_video_and_reads_packet ... ok
+test owned_webm_codec::avc_pipeline_tests::separate_fields_expose_pair_binding_state ... ok
+test owned_webm_probe::tests::arbitrary_file_tags_and_writing_app_reach_owned_probe_without_track_tag_leakage ... ok
+test owned_webm_probe::tests::public_probe_routes_clear_metadata_and_preserves_encoding_gap ... ok
+test owned_webm_probe::tests::synthetic_container_reaches_owned_probe_dispatch ... ok
+test owned_xfade::tests::all_planar_depths_preserve_samples_and_fail_atomically ... ok
+test owned_xfade::tests::atomic_export_preserves_existing_output_and_cleans_failed_decode ... ok
+test owned_xfade::tests::composed_stream_keeps_secondary_tail_and_exact_frame_clock ... ok
+test owned_xfade::tests::endpoints_midpoint_and_full_timestamp_range ... ok
+test owned_xfade::tests::matroska_export_roundtrips_transition_pixels_and_secondary_tail ... ok
+test owned_xfade::tests::secondary_reader_selects_exact_fractional_clock_and_retains_last_frame ... ok
+test owned_xfade::tests::streaming_transition_blends_on_primary_clock_then_uses_secondary_pixels ... ok
+test owned_xfade::tests::timeline_preserves_submicrosecond_pts_and_secondary_clock ... ok
+test owned_xfade::tests::truncated_secondary_frame_poison_is_specific_and_persistent ... ok
+test owned_y4m_decode::framestep_tests::selects_frames_and_restarts_count_at_the_selected_interval ... ok
+test owned_y4m_decode::framestep_tests::stepped_overlay_reaches_owned_ffv1_encoder_on_the_source_clock ... ok
+test owned_y4m_decode::reverse_tests::reversed_payloads_keep_forward_timing_in_full_and_interval_decode ... ok
+test owned_y4m_decode::shuffleframes_tests::shuffled_group_pixels_keep_position_timestamps_and_discard_incomplete_tail ... ok
+test owned_y4m_overlay::tests::empty_overlay_passes_primary_frames_and_exports_without_fallback ... ok
+test owned_y4m_overlay::tests::exports_overlay_through_owned_public_api ... ok
+test owned_y4m_overlay::tests::nearly_equal_rates_choose_frames_on_the_shared_comparison_clock ... ok
+test owned_y4m_overlay::tests::synchronizes_rates_repeats_last_frame_and_preserves_interval_clock ... ok
+test owned_y4m_overlay::tests::unaligned_placement_rounds_down_and_clips_without_fallback ... ok
+test owned_y4m_overlay::tests::unsupported_colour_conversion_keeps_legacy_route ... ok
+test owned_yuv_rgb::float_frame_tests::whole_float_frame_has_raster_order_and_failure_preserves_input ... ok
+test owned_yuv_rgb::forward_acceptance_tests::quantized_forward_stage_matches_committed_synthetic_rgb_references ... ok
+test owned_yuv_rgb::nominal_range_tests::limited_nominal_white_retains_rgb_headroom_at_all_yuv_precisions ... ok
+test owned_yuv_rgb::tests::point_sampling_and_cell_average_remain_distinct_at_subsampled_edges ... ok
+test owned_yuv_rgb::whole_frame_tests::whole_frame_callback_sees_all_odd_edge_pixels_once_and_failure_is_atomic ... ok
+test owned_wave_loudness::tests::standard_rates_keep_original_clock_and_chunk_independent_peaks ... ok
+
+test result: ok. 547 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 61.29s
