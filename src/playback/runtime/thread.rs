@@ -138,7 +138,7 @@ enum Stage {
         /// turned, shaped that way by the reader.
         rotation: u16,
     },
-    Event(Event),
+    Event(Event, u64),
 }
 
 /// The picture a stage carries, in the form the window draws it.
@@ -290,7 +290,7 @@ pub struct Playback {
     seek_cache_status: Option<crate::playback_webm::SeekCacheStatus>,
     cache_packets: CachePackets,
     commands: SyncSender<Command>,
-    events: Receiver<Event>,
+    events: Receiver<(u64, Event)>,
     /// How many pictures the event queue can hold; `filled` is measured against it.
     depth: usize,
     /// Pictures sitting in the queue: the converter raises it as one goes in,
@@ -366,6 +366,9 @@ impl Playback {
                     // Freeing a slot must wake the producer immediately. A full
                     // control queue already contains messages that will wake it.
                     let _ = stage_ready.try_send(Command::StageReady);
+                    let generation = match &stage {
+                        Stage::Raw { generation, .. } | Stage::Event(_, generation) => *generation,
+                    };
                     let event = match stage {
                         Stage::Raw {
                             raw,
@@ -391,13 +394,13 @@ impl Playback {
                             }
                             Err(error) => Event::Error(error.to_string()),
                         },
-                        Stage::Event(event) => event,
+                        Stage::Event(event, _) => event,
                     };
                     // Counted before the send: the window can take the picture
                     // out of the channel before this thread is scheduled again,
                     // and a count raised after that would leave it high forever.
                     queued.fetch_add(1, Ordering::Relaxed);
-                    if event_tx.send(event).is_err() {
+                    if event_tx.send((generation, event)).is_err() {
                         return;
                     }
                 }
@@ -470,15 +473,20 @@ impl Playback {
     }
     /// Take the next event, counting it out of the queue the fill display reads.
     pub fn poll(&self) -> Option<Event> {
-        let event = self.events.try_recv().ok();
-        if event.is_some() {
+        loop {
+            let (generation, event) = self.events.try_recv().ok()?;
             let _ = self
                 .filled
                 .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| {
                     Some(n.saturating_sub(1))
                 });
+            // A queued decoder or converter refusal belongs to its navigation
+            // request. It must not terminate a newer seek or rewind.
+            if generation < self.generation && matches!(&event, Event::Error(_)) {
+                continue;
+            }
+            return Some(event);
         }
-        event
     }
 }
 
@@ -578,12 +586,12 @@ impl<R: BufRead + Seek> Worker<R> {
             Ok(None) => {
                 self.sync_cache_packets();
                 self.ended = true;
-                Stage::Event(Event::Ended(self.generation))
+                Stage::Event(Event::Ended(self.generation), self.generation)
             }
             Err(error) => {
                 self.sync_cache_packets();
                 self.ended = true;
-                Stage::Event(Event::Error(error.to_string()))
+                Stage::Event(Event::Error(error.to_string()), self.generation)
             }
         }
     }
@@ -630,7 +638,7 @@ impl<R: BufRead + Seek> Worker<R> {
                     Ok(()) => self.decode_next(),
                     Err(error) => {
                         self.ended = true;
-                        Stage::Event(Event::Error(error.to_string()))
+                        Stage::Event(Event::Error(error.to_string()), self.generation)
                     }
                 });
             }
@@ -641,12 +649,12 @@ impl<R: BufRead + Seek> Worker<R> {
                     Ok(None) => {
                         self.sync_cache_packets();
                         self.ended = true;
-                        Stage::Event(Event::Ended(self.generation))
+                        Stage::Event(Event::Ended(self.generation), self.generation)
                     }
                     Err(error) => {
                         self.sync_cache_packets();
                         self.ended = true;
-                        Stage::Event(Event::Error(error.to_string()))
+                        Stage::Event(Event::Error(error.to_string()), self.generation)
                     }
                 });
             }

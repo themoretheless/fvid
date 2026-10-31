@@ -1,0 +1,289 @@
+//! Decoder refusal and successful replacement seeks must finish their own epoch.
+use super::*;
+use std::{
+    io::Cursor,
+    sync::{Arc, Mutex},
+};
+fn root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/player-seek-failures")
+}
+fn bytes(n: &str) -> Vec<u8> {
+    std::fs::read(root().join(n)).unwrap()
+}
+fn tick(p: &mut Player, ctx: &egui::Context) {
+    let mut out = ctx.run_ui(Default::default(), |ui| p.present(ui.ctx()));
+    out.textures_delta.clear();
+}
+fn wait(p: &mut Player, ctx: &egui::Context, pred: impl Fn(&Player) -> bool) {
+    let until = Instant::now() + Duration::from_secs(5);
+    while !pred(p) {
+        assert!(
+            Instant::now() < until,
+            "seek operation stalled error{:?} ended{} preview{} buffer{}",
+            p.error,
+            p.ended,
+            p.seek_preview,
+            p.buffering
+        );
+        tick(p, ctx);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+}
+fn open(name: &str, ctx: &egui::Context) -> Player {
+    let mut p = Player {
+        queue: vec![root().join(name)],
+        no_audio: true,
+        asynchronous_open: false,
+        start_paused: true,
+        ..Default::default()
+    };
+    p.play_index(0);
+    wait(&mut p, ctx, |p| {
+        p.presented.is_some() && !p.buffering && !p.seek_preview && p.step == 0
+    });
+    assert!(p.error.is_none());
+    p
+}
+fn expect_marker(s: &str) {
+    assert!(s.contains("invalid VP9 frame marker"), "wrong refusal:{s}");
+}
+#[test]
+fn native_source_controls_keep_exact_pixels_refusal_and_recovery() {
+    for name in ["valid.mp4", "bad-tail.mp4"] {
+        let mut r = crate::playback_mp4::Mp4VideoReader::open_software(
+            Cursor::new(bytes(name)),
+            Default::default(),
+            32 << 20,
+        )
+        .unwrap();
+        for i in 0..if name == "valid.mp4" { 5 } else { 3 } {
+            let f = r.read_frame().unwrap().unwrap();
+            assert_eq!(
+                (f.sample_index, f.presentation_time.ticks, f.duration.ticks),
+                (i, i as i64, 1)
+            );
+            let yuv: Vec<_> = f
+                .picture
+                .y
+                .iter()
+                .chain(&f.picture.cb)
+                .chain(&f.picture.cr)
+                .flat_map(|x| x.to_le_bytes())
+                .collect();
+            assert_eq!(yuv, bytes(&format!("frame-{}.yuv16", i % 3)));
+        }
+        if name == "valid.mp4" {
+            assert!(r.read_frame().unwrap().is_none());
+        } else {
+            expect_marker(&r.read_frame().err().unwrap().to_string());
+        }
+    }
+    let mut r = NativeReader::software(Cursor::new(bytes("bad-tail.mp4")), 32 << 20).unwrap();
+    let first = r
+        .read_frame_raw()
+        .unwrap()
+        .unwrap()
+        .into_rgb(32 << 20)
+        .unwrap();
+    assert!(r.read_frame_raw().unwrap().is_some());
+    assert!(r.read_frame_raw().unwrap().is_some());
+    expect_marker(&r.read_frame_raw().err().unwrap().to_string());
+    assert_eq!(
+        r.seek_raw(Duration::ZERO)
+            .unwrap()
+            .unwrap()
+            .into_rgb(32 << 20)
+            .unwrap(),
+        first
+    );
+}
+#[test]
+fn ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading() {
+    let ctx = egui::Context::default();
+    let mut p = open("valid.mp4", &ctx);
+    let mut r = NativeReader::software(Cursor::new(bytes("valid.mp4")), 32 << 20).unwrap();
+    let mut last = Vec::new();
+    while let Some(f) = r.read_frame_raw().unwrap() {
+        last = f.into_rgb(32 << 20).unwrap();
+    }
+    p.seek_time(p.duration.unwrap());
+    wait(&mut p, &ctx, |p| {
+        p.error.is_some() || !p.seek_preview && !p.buffering
+    });
+    assert!(p.error.is_none());
+    assert!(!p.seek_preview && !p.buffering);
+    assert_eq!(p.interval, Some((4, 5, 50)));
+    assert_eq!(display_rgb(p.presented.as_ref().unwrap()).unwrap(), last);
+}
+fn drain_prefetched_refusal(p: &Player) {
+    p.playback.as_ref().unwrap().play();
+    let until = Instant::now() + Duration::from_secs(5);
+    loop {
+        assert!(Instant::now() < until);
+        match p.playback.as_ref().unwrap().poll() {
+            Some(Event::Error(e)) => {
+                expect_marker(&e);
+                break;
+            }
+            Some(Event::Ended(_)) => panic!("bad media silently accepted"),
+            _ => {}
+        }
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    p.playback.as_ref().unwrap().pause();
+}
+#[test]
+fn current_failed_seek_clears_navigation_loading_state_after_specific_refusal() {
+    let ctx = egui::Context::default();
+    let mut p = open("bad-tail.mp4", &ctx);
+    drain_prefetched_refusal(&p);
+    // The old error was explicitly consumed. This seek must generate its own
+    // decoder refusal at the authored bad sample,not reuse an unrelated error.
+    p.seek_time(Duration::from_millis(80));
+    wait(&mut p, &ctx, |p| p.error.is_some());
+    expect_marker(p.error.as_ref().unwrap());
+    assert!(p.ended);
+    assert!(!p.buffering, "failed seek left buffering active");
+    assert!(!p.seek_preview, "failed seek left preview pending");
+    assert_eq!(p.seek_target, None);
+    assert_eq!(p.step, 0);
+}
+#[derive(Default)]
+struct Trace {
+    pcm: Vec<u8>,
+    pauses: usize,
+    resumes: usize,
+}
+struct Device {
+    trace: Arc<Mutex<Trace>>,
+    running: bool,
+    at: Duration,
+    frontier: Duration,
+}
+impl crate::audio::AudioBackend for Device {
+    fn start(&mut self, s: crate::audio::AudioSpec) -> Result<(), crate::audio::AudioError> {
+        assert_eq!((s.sample_rate, s.channels), (8000, 1));
+        Ok(())
+    }
+    fn push(&mut self, p: crate::audio::AudioPacket) -> Result<(), crate::audio::AudioError> {
+        self.frontier =
+            p.presentation_time() + Duration::from_nanos(p.data.len() as u64 / 4 * 125000);
+        self.trace.lock().unwrap().pcm.extend(p.data);
+        Ok(())
+    }
+    fn position(&self) -> Duration {
+        self.at
+    }
+    fn flush(&mut self, at: Duration) -> Result<(), crate::audio::AudioError> {
+        self.at = at;
+        Ok(())
+    }
+    fn pause(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.running = false;
+        self.trace.lock().unwrap().pauses += 1;
+        Ok(())
+    }
+    fn resume(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.running = true;
+        self.trace.lock().unwrap().resumes += 1;
+        Ok(())
+    }
+    fn stop(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.running = false;
+        Ok(())
+    }
+    fn drain_status(&self) -> Result<bool, crate::audio::AudioError> {
+        Ok(self.at >= self.frontier)
+    }
+}
+#[test]
+fn fatal_current_video_refusal_parks_the_actual_audio_worker() {
+    let ctx = egui::Context::default();
+    let mut p = open("bad-tail.mp4", &ctx);
+    let trace = Arc::new(Mutex::new(Trace::default()));
+    let seen = trace.clone();
+    let source = crate::playback_wav::WavAudioReader::open(
+        Cursor::new(bytes("sound.wav")),
+        Default::default(),
+    )
+    .unwrap();
+    p.audio = Some(crate::audio_thread::AudioPlayback::start(
+        Box::new(source),
+        move || {
+            Box::new(Device {
+                trace: seen,
+                running: false,
+                at: Duration::ZERO,
+                frontier: Duration::ZERO,
+            })
+        },
+    ));
+    p.audio_ended = false;
+    p.toggle_pause();
+    let until = Instant::now() + Duration::from_secs(5);
+    loop {
+        let t = trace.lock().unwrap();
+        if t.resumes == 1 && t.pcm.len() == bytes("sound.f32le").len() {
+            break;
+        }
+        drop(t);
+        assert!(Instant::now() < until);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    wait(&mut p, &ctx, |p| p.error.is_some());
+    expect_marker(p.error.as_ref().unwrap());
+    assert!(p.ended);
+    let until = Instant::now() + Duration::from_secs(5);
+    while trace.lock().unwrap().pauses == 0 && Instant::now() < until {
+        tick(&mut p, &ctx);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    let t = trace.lock().unwrap();
+    assert_eq!(
+        (t.resumes, t.pauses),
+        (1, 1),
+        "fatal video refusal left audio running"
+    );
+    assert_eq!(t.pcm, bytes("sound.f32le"));
+}
+#[test]
+fn old_prefetch_error_does_not_poison_a_new_valid_paused_seek() {
+    let ctx = egui::Context::default();
+    let mut p = open("bad-tail.mp4", &ctx);
+    let rgb = display_rgb(p.presented.as_ref().unwrap()).unwrap();
+    p.playback.as_ref().unwrap().play();
+    let until = Instant::now() + Duration::from_secs(5);
+    while p.playback.as_ref().unwrap().filled() < 3 {
+        assert!(
+            Instant::now() < until,
+            "two valid pending frames and native decoder refusal were not queued"
+        );
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    p.playback.as_ref().unwrap().pause();
+    let old = p.playback.as_ref().unwrap().generation();
+    p.seek_time(Duration::ZERO);
+    let generation = p.playback.as_ref().unwrap().generation();
+    assert_eq!(generation, old + 1);
+    wait(&mut p, &ctx, |p| {
+        p.error.is_some()
+            || p.presented
+                .as_ref()
+                .is_some_and(|f| f.generation == generation)
+                && !p.seek_preview
+                && !p.buffering
+    });
+    assert!(
+        p.error.is_none(),
+        "old decode error poisoned new seek:{:?}",
+        p.error
+    );
+    assert_eq!(p.interval, Some((0, 1, 50)));
+    assert_eq!(display_rgb(p.presented.as_ref().unwrap()).unwrap(), rgb);
+    // A real error in a later current epoch must still be delivered.
+    p.seek_time(Duration::from_millis(80));
+    wait(&mut p, &ctx, |p| p.error.is_some());
+    expect_marker(p.error.as_ref().unwrap());
+    assert!(p.ended);
+}

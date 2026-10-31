@@ -1,0 +1,18 @@
+{
+  "provenance": "Only authored16x16 VP9 colored keyframes,YUV oracles,and200ms mono8kHz PCM/scalar oracle. Valid complete movie and explicit one-byte invalid VP9 marker in the last packet. No private media,encoder or network.",
+  "timescale": 50,
+  "valid_coded_prefix": 4,
+  "visible_prefix": 3,
+  "bad_sample": 4,
+  "bad_target_ms": 80,
+  "expected_error": "invalid VP9 frame marker",
+  "sha256": {
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "valid.mp4": "315fae6449f5d9e53c3ceeda429404e0527cedf82f3bc403dd748ef4e6a27a91",
+    "bad-tail.mp4": "72e2f8d7a72935095cc6fbcfbbff586c04d27963759591709b7b695470cc80dd",
+    "sound.wav": "8fc0be777d19d00fab9b509ac4d7dc102c66ee385a0ebf3de11cc38b1ac9b01e",
+    "sound.f32le": "11d1e18706d4b5a2321327f52a64a917ff2bb9b955fa7d32a53bb50dac90d78d"
+  }
+}

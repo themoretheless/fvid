@@ -1,0 +1,8 @@
+{
+  "base_commit": "2d8aca00a8a9a27d55e74fd6f8d89fcfb7559691",
+  "source": "src/player.rs",
+  "ui_only_sha256": "801ffcf658562bafd4518f01cfd4c1451d826e49d5803f0bd4ec50e68c05cbf7",
+  "patch_sha256": "f426688b9529513a70e27c0bfc8af1d41c1a0a5be69dba3bcaf49b30f7827091",
+  "reconstructed_byte_identical": true,
+  "command": "git apply --unidiff-zero ui-only.patch"
+}

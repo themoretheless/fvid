@@ -1,0 +1,199 @@
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.11s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s
+
+
+running 5 tests
+test player::seek_failure_regressions::current_failed_seek_clears_navigation_loading_state_after_specific_refusal ... ok
+test player::seek_failure_regressions::fatal_current_video_refusal_parks_the_actual_audio_worker ... ok
+test player::seek_failure_regressions::native_source_controls_keep_exact_pixels_refusal_and_recovery ... ok
+test player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading ... ok
+test player::seek_failure_regressions::old_prefetch_error_does_not_poison_a_new_valid_paused_seek ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1109 filtered out; finished in 0.05s

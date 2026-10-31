@@ -1,0 +1,20 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -4001,0 +4002,2 @@
++                    // A current decoder/converter refusal ends the whole
++                    // transport,including any pending seek and running sound.
+@@ -4003,0 +4006,4 @@
++                    self.seek_preview = false;
++                    self.buffering = false;
++                    self.loading_since = None;
++                    self.step = 0;
+@@ -4004,0 +4011,4 @@
++                    if let Some(playback) = &self.playback { playback.pause(); }
++                    if let Some(audio) = &self.audio { audio.pause(); }
++                    ctx.request_repaint();
++                    return;
+@@ -12965,0 +12976,4 @@
++
++#[cfg(test)]
++#[path = "player_seek_failure_tests.rs"]
++mod seek_failure_regressions;

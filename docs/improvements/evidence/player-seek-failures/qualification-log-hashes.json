@@ -1,0 +1,47 @@
+{
+  "integration": {
+    "raw_sha256": "3a72bcb539c67ff7f39990db42f0e2ee94ee30c22af4af15182e995ca997089a",
+    "archived_sha256": "5e25d217e37ff48d4d4be05a3f25cfe6de964603a03efc2649f9537dea92ab16",
+    "archive": "qualification/integration.log"
+  },
+  "root-mp4": {
+    "raw_sha256": "4a193cb8bd6d312a957f010344155f81180fcd03a4d1341e5f843a1c916cac05",
+    "archived_sha256": "8cc2d0397206a9156b14d1ec633cad8171592891f3c8d34a14786c1e77d5a077",
+    "archive": "qualification/root-mp4.log"
+  },
+  "root-webm": {
+    "raw_sha256": "4b2cd9a9ad31d7262edea329ab01c354cdd811fe75ace4b83de049988d474ac4",
+    "archived_sha256": "c049cab544bc871d4453b9a52098ecb648e51cce7cd723a4a29fba454d53a961",
+    "archive": "qualification/root-webm.log"
+  },
+  "player-units": {
+    "raw_sha256": "1cd0f4b4dee7020f566a29f86c1a38e5c8a0fd5ac233f89c57487e1e7946c7a5",
+    "archived_sha256": "5b1ff11f6ef02d5607e9b22400a4eaf4602392da5431e3213acf4754d3b9ef9c",
+    "archive": "qualification/player-units.log"
+  },
+  "media": {
+    "raw_sha256": "d0f99b93330d245dc7f937709624c9f9388faf8dde08566f5122a1e933861a26",
+    "archived_sha256": "74990c7908bd6a6119874159f19f8d2464496765cbf29dc65637638422961456",
+    "archive": "qualification/media.log"
+  },
+  "core-check": {
+    "raw_sha256": "7ee58a054d644cad46804cc2e9b02b45aceda60685c752a89552bd1687ce5488",
+    "archived_sha256": "7ee58a054d644cad46804cc2e9b02b45aceda60685c752a89552bd1687ce5488",
+    "archive": "qualification/core-check.log"
+  },
+  "player-check": {
+    "raw_sha256": "deb3d4093e7ed7231bce6d830fa1ae596f9e8ad0d19db608929b7661f2fd7ad0",
+    "archived_sha256": "deb3d4093e7ed7231bce6d830fa1ae596f9e8ad0d19db608929b7661f2fd7ad0",
+    "archive": "qualification/player-check.log"
+  },
+  "audio-thread": {
+    "raw_sha256": "9cf4ec5c22ad73f9ae57f0fc20c5216799321228394d9244b77dea3229ae54aa",
+    "archived_sha256": "aca9b94cb525abd9c5ed2c627a997a16de6b4194e82211b9969685738cf2ec53",
+    "archive": "qualification/audio-thread.log"
+  },
+  "video-thread": {
+    "raw_sha256": "15d278c75b353c280fd86ceec976e32a0ee8c95ebf97a2d06f8454e63e402897",
+    "archived_sha256": "26e981c796de66cdee16236eaab5f67c8a9d84d21fedab120b74d28c12f2d66a",
+    "archive": "qualification/video-thread.log"
+  }
+}

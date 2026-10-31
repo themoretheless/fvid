@@ -1,0 +1,22 @@
+{
+  "status": "accepted; all gates passed; temporary artifacts removed; ready for delivery",
+  "accepted_count": 457,
+  "qualified_baseline": "before.log:2passed3failed",
+  "ui_only": "ui-only.log:4passed1failed",
+  "candidate": "after-focused.log:5passed0failed",
+  "qualification_session": 88954,
+  "qualification_log": "/private/tmp/fvid-player-seek-failures-integration.log",
+  "qualification_plan": "qualification-plan.json",
+  "target": "/private/tmp/fvid-player-seek-failures-target-20261031",
+  "repetitions": {
+    "runs": 20,
+    "cases": 100,
+    "failed": 0
+  },
+  "next": "Commit exact qualified paths and atomic push after cached check.",
+  "accepted_ids": [
+    "FVID-0456",
+    "FVID-0457"
+  ],
+  "qualification_terminal_exit": 0
+}

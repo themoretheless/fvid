@@ -3999,9 +3999,19 @@ impl Player {
                     }
                 }
                 Some(Event::Error(error)) => {
+                    // A current decoder/converter refusal ends the whole
+                    // transport,including any pending seek and running sound.
                     self.error = Some(error);
                     self.seek_target = None;
+                    self.seek_preview = false;
+                    self.buffering = false;
+                    self.loading_since = None;
+                    self.step = 0;
                     self.ended = true;
+                    if let Some(playback) = &self.playback { playback.pause(); }
+                    if let Some(audio) = &self.audio { audio.pause(); }
+                    ctx.request_repaint();
+                    return;
                 }
                 None => break,
             }
@@ -12963,3 +12973,7 @@ mod stop_bound_regressions;
 #[cfg(test)]
 #[path = "player_stop_clock_tests.rs"]
 mod stop_clock_regressions;
+
+#[cfg(test)]
+#[path = "player_seek_failure_tests.rs"]
+mod seek_failure_regressions;

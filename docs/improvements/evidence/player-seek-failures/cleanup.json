@@ -1,0 +1,115 @@
+{
+  "completed": true,
+  "removed": [
+    {
+      "path": "/private/tmp/fvid-player-seek-failures-after.log",
+      "bytes": 26130,
+      "sha256": "27640b8bc179a5a05d523fdb1d77907f3cda757f7af6aee06b737b79b9604f74",
+      "archive": "after-focused.log",
+      "archive_sha256": "d62b067e28fe430b7014bad0f572b8bbba00d12b1d290649c8a98a0e77009b45"
+    },
+    {
+      "path": "/private/tmp/fvid-player-seek-failures-audio-thread.log",
+      "bytes": 29678,
+      "sha256": "9cf4ec5c22ad73f9ae57f0fc20c5216799321228394d9244b77dea3229ae54aa",
+      "archive": "qualification/audio-thread.log",
+      "archive_sha256": "aca9b94cb525abd9c5ed2c627a997a16de6b4194e82211b9969685738cf2ec53"
+    },
+    {
+      "path": "/private/tmp/fvid-player-seek-failures-before-qualified.log",
+      "bytes": 27898,
+      "sha256": "8231b2ebfb4a9a9be5262a701fb153ef3d969dde946637006f366358ae9b1f22",
+      "archive": "before.log",
+      "archive_sha256": "8231b2ebfb4a9a9be5262a701fb153ef3d969dde946637006f366358ae9b1f22"
+    },
+    {
+      "path": "/private/tmp/fvid-player-seek-failures-before.log",
+      "bytes": 38251,
+      "sha256": "1fc05f19f8e493d4d35e63fc290aec96ea91b1677087824f77b85ddc6ad7759c",
+      "archive": "initial-before.log",
+      "archive_sha256": "1fc05f19f8e493d4d35e63fc290aec96ea91b1677087824f77b85ddc6ad7759c"
+    },
+    {
+      "path": "/private/tmp/fvid-player-seek-failures-core-check.log",
+      "bytes": 26898,
+      "sha256": "7ee58a054d644cad46804cc2e9b02b45aceda60685c752a89552bd1687ce5488",
+      "archive": "qualification/core-check.log",
+      "archive_sha256": "7ee58a054d644cad46804cc2e9b02b45aceda60685c752a89552bd1687ce5488"
+    },
+    {
+      "path": "/private/tmp/fvid-player-seek-failures-integration.log",
+      "bytes": 111816,
+      "sha256": "3a72bcb539c67ff7f39990db42f0e2ee94ee30c22af4af15182e995ca997089a",
+      "archive": "qualification/integration.log",
+      "archive_sha256": "5e25d217e37ff48d4d4be05a3f25cfe6de964603a03efc2649f9537dea92ab16"
+    },
+    {
+      "path": "/private/tmp/fvid-player-seek-failures-media.log",
+      "bytes": 71101,
+      "sha256": "d0f99b93330d245dc7f937709624c9f9388faf8dde08566f5122a1e933861a26",
+      "archive": "qualification/media.log",
+      "archive_sha256": "74990c7908bd6a6119874159f19f8d2464496765cbf29dc65637638422961456"
+    },
+    {
+      "path": "/private/tmp/fvid-player-seek-failures-minimal.log",
+      "bytes": 26130,
+      "sha256": "d17ada4b112e293c8828e223420578016405beb176620d035790181ba9b1c646",
+      "archive": "minimal-focused.log",
+      "archive_sha256": "25067604450725a68ab32e9ab55efd57174849974b9987b9eabc222023329faf"
+    },
+    {
+      "path": "/private/tmp/fvid-player-seek-failures-player-check.log",
+      "bytes": 32684,
+      "sha256": "deb3d4093e7ed7231bce6d830fa1ae596f9e8ad0d19db608929b7661f2fd7ad0",
+      "archive": "qualification/player-check.log",
+      "archive_sha256": "deb3d4093e7ed7231bce6d830fa1ae596f9e8ad0d19db608929b7661f2fd7ad0"
+    },
+    {
+      "path": "/private/tmp/fvid-player-seek-failures-player-units.log",
+      "bytes": 46038,
+      "sha256": "1cd0f4b4dee7020f566a29f86c1a38e5c8a0fd5ac233f89c57487e1e7946c7a5",
+      "archive": "qualification/player-units.log",
+      "archive_sha256": "5b1ff11f6ef02d5607e9b22400a4eaf4602392da5431e3213acf4754d3b9ef9c"
+    },
+    {
+      "path": "/private/tmp/fvid-player-seek-failures-root-mp4.log",
+      "bytes": 32406,
+      "sha256": "4a193cb8bd6d312a957f010344155f81180fcd03a4d1341e5f843a1c916cac05",
+      "archive": "qualification/root-mp4.log",
+      "archive_sha256": "8cc2d0397206a9156b14d1ec633cad8171592891f3c8d34a14786c1e77d5a077"
+    },
+    {
+      "path": "/private/tmp/fvid-player-seek-failures-root-webm.log",
+      "bytes": 31659,
+      "sha256": "4b2cd9a9ad31d7262edea329ab01c354cdd811fe75ace4b83de049988d474ac4",
+      "archive": "qualification/root-webm.log",
+      "archive_sha256": "c049cab544bc871d4453b9a52098ecb648e51cce7cd723a4a29fba454d53a961"
+    },
+    {
+      "path": "/private/tmp/fvid-player-seek-failures-target-20261031",
+      "kind": "isolated build target"
+    },
+    {
+      "path": "/private/tmp/fvid-player-seek-failures-ui-only.log",
+      "bytes": 26906,
+      "sha256": "8727728c525d398558fb84cc156262b647c537276a5b8b7fb5785fe57254a4d1",
+      "archive": "ui-only.log",
+      "archive_sha256": "8727728c525d398558fb84cc156262b647c537276a5b8b7fb5785fe57254a4d1"
+    },
+    {
+      "path": "/private/tmp/fvid-player-seek-failures-ui-only.rs",
+      "bytes": 562084,
+      "sha256": "801ffcf658562bafd4518f01cfd4c1451d826e49d5803f0bd4ec50e68c05cbf7",
+      "archive": "ui-only.patch",
+      "archive_sha256": "f426688b9529513a70e27c0bfc8af1d41c1a0a5be69dba3bcaf49b30f7827091"
+    },
+    {
+      "path": "/private/tmp/fvid-player-seek-failures-video-thread.log",
+      "bytes": 26017,
+      "sha256": "15d278c75b353c280fd86ceec976e32a0ee8c95ebf97a2d06f8454e63e402897",
+      "archive": "qualification/video-thread.log",
+      "archive_sha256": "26e981c796de66cdee16236eaab5f67c8a9d84d21fedab120b74d28c12f2d66a"
+    }
+  ],
+  "retained": "All eight authored regression files and evidence/reconstruction logs. Other worktrees/stashes untouched."
+}

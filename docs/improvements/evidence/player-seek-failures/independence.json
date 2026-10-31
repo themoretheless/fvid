@@ -1,0 +1,22 @@
+{
+  "accepted_count_delta": 2,
+  "pending_candidates": 0,
+  "qualified_baseline": {
+    "passed": 2,
+    "failed": 3,
+    "log": "before.log"
+  },
+  "teardown_only": {
+    "passed": 4,
+    "failed": 1,
+    "remaining": "old_prefetch_error_does_not_poison_a_new_valid_paused_seek",
+    "log": "ui-only.log",
+    "source_patch": "ui-only.patch"
+  },
+  "combined_focused": {
+    "passed": 5,
+    "failed": 0,
+    "log": "after-focused.log"
+  },
+  "counting": "Fatal current-error loading/audio teardown is one cause; stale navigation-generation error delivery is another. Native controls, EOF control and extra assertions add no improvement IDs."
+}

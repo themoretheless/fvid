@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 455,
-  "next_id": "FVID-0456",
+  "accepted_count": 457,
+  "next_id": "FVID-0458",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5110,6 +5110,28 @@
       "result": "Retain the actual worker EOF and generation until the active presentation clock completes the last picture. Manual stepping still terminates against paused clocks;natural audio tail remains unchanged. Actual native EOF/controlled audio and silent timed VFR witnesses pass. Candidate completed-audio handoff regression reproduced6pass1fail and amended by keeping a completed audio clock authoritative for its audio-paced picture;adds0IDs. Final7cases pass20repetitions;127integration suites591pass,1521physical-source-distinct checks and core/player builds pass. Five old ignores unchanged;no performance claim.",
       "status": "accepted",
       "validation": "batch-454-validation.json"
+    },
+    {
+      "batch": 456,
+      "regression": "src/player_seek_failure_tests.rs",
+      "status": "accepted",
+      "validation": "batch-456-validation.json",
+      "id": "FVID-0456",
+      "title": "Finish failed video navigation and park audio on current decoder refusal",
+      "source": "src/player.rs",
+      "before": "Qualified published baseline passes native pixels/refusal/recovery and valid EOF controls, but a current bad seek leaves buffering active and a fatal video refusal leaves the actual resumed audio worker running (1 resume,0 pauses).",
+      "result": "Clear pending seek, preview, loading and step state on a current decoder/converter refusal; park video and audio while retaining the specific error and seek-recoverable handles. Teardown-only stage passes four of five tests; stale generation error remains independent."
+    },
+    {
+      "batch": 456,
+      "regression": "src/player_seek_failure_tests.rs",
+      "status": "accepted",
+      "validation": "batch-456-validation.json",
+      "id": "FVID-0457",
+      "title": "Keep queued video refusals attached to their navigation generation",
+      "source": "src/playback/runtime/thread.rs",
+      "before": "An actual prefetched invalid VP9 marker refusal remains queued after two valid pictures; seeking the valid first picture consumes the old error and ends the new seek. This still fails after current-error teardown is fixed.",
+      "result": "Carry generation privately through decoder and converter event queues and discard only errors older than the current request, updating queue accounting for each consumed event. Public Event and Playback interfaces remain compatible. The replacement seek returns exact pixels and a subsequent current-generation bad seek still reports its specific refusal. Five tests pass twenty repetitions;all nine qualification gates pass,1531 physical-source-distinct checks and both builds. Controls and variants add no IDs;no performance claim."
     }
   ]
 }

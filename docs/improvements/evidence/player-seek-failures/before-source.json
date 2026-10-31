@@ -1,0 +1,7 @@
+{
+  "src/player.rs": "110680beb1fced3b3793cfba56ac239afde1f3f5499490822d002f7e0e947c75",
+  "src/playback/runtime/thread.rs": "ea670e417ff016629739b9999771f2cf9313bcc7ee42f7c18ec58cf2acc736cb",
+  "src/player_seek_failure_tests.rs": "881f3f7334f09bd363313af04d796a4ef4d15be0fa134c68af4078680e032598",
+  "scripts/generate_player_seek_failures.py": "e440cd215d09cdee8e7639637764baa3a8db1a7fa8cf49afa1166c6de0c06505",
+  "tests/fixtures/playback-errors/player-seek-failures/manifest.json": "ce035d7c6b0128933c4c260c64ea9eb01fbddcba1f681a921703c29647668d2a"
+}

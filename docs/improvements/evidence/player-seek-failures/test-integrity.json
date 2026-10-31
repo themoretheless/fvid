@@ -1,0 +1,8 @@
+{
+  "baseline_and_final_same_test_sha256": "881f3f7334f09bd363313af04d796a4ef4d15be0fa134c68af4078680e032598",
+  "baseline_test_copy": "before-test.rs.txt",
+  "qualified_test_source": "src/player_seek_failure_tests.rs",
+  "expectations_relaxed": false,
+  "fixture_generation_separate": true,
+  "ordinary_tests_require_network_or_ffmpeg": false
+}
