@@ -941,4 +941,3 @@ test owned_yuv_rgb::whole_frame_tests::whole_frame_callback_sees_all_odd_edge_pi
 test owned_wave_loudness::tests::standard_rates_keep_original_clock_and_chunk_independent_peaks ... ok
 
 test result: ok. 547 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 26.80s
-

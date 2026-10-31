@@ -767,4 +767,3 @@ test player_gpu::tests::hardware_export_copies_mp4_audio_with_gapless_timing ...
 test audio_thread::ps_edit_worker_tests::core_clock_ps_mp4_uses_asc_output_rate_for_pcm_edits_seek_and_rewind ... ok
 
 test result: ok. 57 passed; 0 failed; 1 ignored; 0 measured; 1019 filtered out; finished in 1.25s
-
