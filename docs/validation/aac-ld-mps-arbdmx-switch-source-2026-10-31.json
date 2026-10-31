@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-31",
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "members": {
+    "mp4spatialdec/src/sac_calcM1andM2.c": "ebdb752a1d74a5f7e5638366867b3b477918aa9f4d94169ee3b2e30bfbce6153",
+    "mp4spatialdec/src/sac_bitdec.c": "d9a8655b4e5efa1329d629f88bde962b640efe9d1a5c22f24f84df56eadfa64e"
+  },
+  "selective_initialization_audit": "docs/validation/aac-ld-mps-inband-source-2026-10-30.json",
+  "facts": [
+    "Ordinary arbitrary-downmix mode1 adds gains without changing the downmix input dimension. Zero dB produces a unit M1 compensation in5151/5152 and525/7271/7272;M2 is unchanged.",
+    "sac_bitdec.c initializes arbdmxGainDefault to0;held gain regions after actual SSC changes start at that default. Identical configuration continuation retains the previous parameter context.",
+    "Same tree/rate/fixed gains/decorrelation preserve filter and M1/M2 interpolation history under the separately pinned selective-initialization contract."
+  ],
+  "control": "A continuous always-on stream explicitly codes effective gains every frame,including0dB where the changing stream disables the mode. It uses no repeated/replacement SSCs. Both paths must preserve the same raw matrices and uninterrupted filters.",
+  "independence": "Original C raw matrices plus80-digit Decimal smoothing qualify132 unique effective-gain geometries;absolute-coded continuous controls do not reuse the tested in-band reconfiguration path or held-parameter syntax.",
+  "negative_control_pcm_gap": 0.00030249619045931024,
+  "runtime_changed": false,
+  "qualification": "330 own programmes,trees0..4,all six TTT modes through three paired configurations,23/9/4 bands,quantization0,512-sample ELD/LD-SBR PCM at12/24/48/96kHz. Eight valid-header/late-truncated-frame counterexamples.",
+  "not_newly_qualified": [
+    "trees5/6/7 downmix interpretation",
+    "shared-QMF ingress",
+    "480-sample cores",
+    "energy-quantization combinations",
+    "STP/GES combined gain-mode transitions",
+    "HRTF and arbitrary-tree/downmix-residual extensions",
+    "full normative Annex B or whole-codec/profile conformance",
+    "physical output/realtime performance"
+  ],
+  "other_tree_finding": "Available212/7571/7572 routines do not apply the same gains. This does not prove a normative prohibition or justify silently ignoring gain data. Explicit refusal is retained pending authoritative semantics."
+}

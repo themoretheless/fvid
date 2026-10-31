@@ -1,3 +1,43 @@
+## In-band arbitrary-downmix mode transitions qualified, 2026-10-31
+
+The existing runtime now has acceptance evidence for enabling/disabling ordinary
+arbitrary-downmix compensation inside a stream. No decoder implementation changed.
+330 own MP4/MKV programmes cover trees0..4,all six TTT modes through three paired
+configurations,23/9/4 parameter bands,quantization0 and512-sample ELD/LD-SBR PCM
+at12/24/48/96kHz (32/64/128 spatial banks). Both initial mode states alternate at
+packets3/6/9;identical headers repeat at2/5/8/11.
+
+Dependent gain sets hold prior values across identical SSCs. Re-enabled parameter
+contexts must instead hold their default0dB. Absolute-coded continuous always-on
+control movies use zero dB when the changing mode is disabled;they avoid the
+reconfiguration and hold paths. All14,376,960 compositional PCM values match
+exactly. The original C/Decimal matrix oracle checks5,253,120 endpoints over132
+unique geometries,maximum error2.9541119e-6. A full-filter reset negative control
+changes PCM by3.0249619e-4,so accidentally resetting everything cannot pass.
+
+Eight own short movies truncate frame data after a valid changed SSC,including
+returning to a previously used gain mode. Prefix publication and valid retry must
+retain AAC core,spatial,configuration and timing state. Reader checks cover both
+transports,source/spatial-edge seeks,rewind/EOF and checkpoints. AudioWorker
+qualification is recorded with the final focused gates.
+
+Movie/input and original C/Decimal generation are separately byte-identical twice
+in isolated folders. Ordinary tests use frozen outputs without generation,FFmpeg,
+network or C reference compilation. The prior1765-test media/player and targeted-integration gate remains the
+unchanged-runtime baseline;new focused qualification is reported separately.
+
+Shared-QMF ingress,480-sample cores,energy-quantization combinations and combined
+STP/GES gain-mode transitions are not newly qualified. Trees5/6/7 remain explicit
+refusals:absence of matching gain application in available reference routines is
+not a normative prohibition and is not permission to ignore coded parameters.
+The wider no-codec-gaps objective remains active.
+
+Fresh focused checks:9 passed,0 failed,0 ignored (8 integration tests and1
+AudioWorker test over all660 dynamic transports). Production-source hashes match
+the previous baseline;the added Rust runtime-path module is cfg(test) only.
+
+Evidence: `docs/validation/aac-ld-mps-arbdmx-switch-{source,reference,generation,tests}-2026-10-31.json`.
+
 ## Stereo arbitrary-downmix before TTT inversion, 2026-10-31
 
 Native LD-MPS now accepts independent L/R arbitrary-downmix gains for TTT trees

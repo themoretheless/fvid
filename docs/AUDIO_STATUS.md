@@ -17,6 +17,11 @@ Stereo TTT trees2/3/4 now also accept independent L/R gains before matrix
 inversion,with all six modes checked. Trees5/6/7,HRTF and residual/arbitrary-tree
 extensions remain unfinished.
 
+Same-format in-band gain-mode enable/disable is now qualified for PCM-ingress
+ELD/LD-SBR trees0..4,including dependent held gains,default reset on re-enable,
+identical-header continuation and failure/retry. Continuous absolute-coded
+controls preserve the same waveform without using that reconfiguration path.
+
 LD-MPS rejects residual extension types0/1, including absent/zero bands, at
 native initial/replacement headers.
 Historical LD/residual numerical tests are not codec acceptance;ordinary MPEG

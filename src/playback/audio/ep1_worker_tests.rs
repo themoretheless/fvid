@@ -539,3 +539,8 @@ fn mono_arbitrary_downmix_worker_keeps_gain_history_and_navigation_stamps() {
 fn stereo_arbitrary_downmix_ttt_worker_keeps_gain_history_and_navigation_stamps() {
     check_corpus("aac-ld-mps-arbdmx-ttt");
 }
+
+#[test]
+fn arbitrary_downmix_gain_mode_switch_worker_keeps_live_state_and_navigation_stamps() {
+    check_corpus("aac-ld-mps-arbdmx-switch");
+}
