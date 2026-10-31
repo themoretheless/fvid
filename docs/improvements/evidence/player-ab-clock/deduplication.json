@@ -1,0 +1,61 @@
+{
+  "root_unique_passed": 426,
+  "root_duplicate_events": 21,
+  "root_overlap_names": [
+    "audio_thread::mp4_edit_scheduler_tests::gap_and_repeat_playback_matches_owned_pcm_export",
+    "audio_thread::mp4_edit_scheduler_tests::nonzero_media_range_repeats_restore_aac_overlap_before_seek",
+    "audio_thread::ps_edit_worker_tests::core_clock_ps_mp4_uses_asc_output_rate_for_pcm_edits_seek_and_rewind",
+    "playback_native::tests::webm_signature_never_enters_mp4_parser",
+    "player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control",
+    "player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof",
+    "player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control",
+    "player::mp4_frame_step_regressions::authored_mp4_native_controls_keep_exact_frames_and_seek",
+    "player::mp4_frame_step_regressions::authored_paused_audio_seek_and_resume_control_keeps_exact_pcm",
+    "player::mp4_frame_step_regressions::backward_after_natural_eof_pauses_on_previous_picture",
+    "player::mp4_frame_step_regressions::backward_at_the_first_picture_holds_the_first_picture",
+    "player::mp4_frame_step_regressions::backward_before_first_picture_shows_and_parks_first_picture",
+    "player::mp4_frame_step_regressions::e_advances_exactly_one_frame_and_stays_paused",
+    "player::mp4_frame_step_regressions::keyboard_bindings_preserve_forward_and_backward_intent",
+    "player::mp4_frame_step_regressions::paused_frame_step_presents_ready_picture_without_future_spool_lead",
+    "player::mp4_frame_step_regressions::paused_sound_does_not_block_a_frame_step_and_resumes_at_shown_picture",
+    "player::mp4_frame_step_regressions::pending_step_at_eof_finishes_without_advancing_the_playlist",
+    "player::mp4_frame_step_regressions::shift_e_returns_to_previous_frame_for_cfr_vfr_and_fractional_clocks",
+    "player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control",
+    "player::seek_failure_regressions::ordinary_valid_mp4_eof_seek_returns_the_last_picture_without_loading",
+    "player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls"
+  ],
+  "shared_implementation_tests": [
+    "comparing_and_scaling_large_fractions_does_not_multiply_denominators",
+    "normalization_origins_keep_signed_fractional_output_phase",
+    "source_phase_and_signed_preroll_survive_fractional_container_clocks"
+  ],
+  "shared_source": "crates/fvid-media/src/owned_mp4_edit_clock_impl.rs",
+  "shared_source_duplicate_events": 6,
+  "counting_method_evidence": "deduplication-method.json",
+  "shared_contexts": [
+    "native_media::mp4_export_clock",
+    "playback_mp4_audio::edit_clock",
+    "owned_mp4_audio::mp4_export_clock"
+  ],
+  "distinct_passed": 1558,
+  "ignored_by_gate": {
+    "integration": [],
+    "root-mp4": [
+      "player_gpu::tests::hardware_export_copies_mp4_audio_with_gapless_timing"
+    ],
+    "root-webm": [],
+    "player-units": [
+      "player::gpu_option_tests::metal_player_presents_shared_main10_and_can_snapshot_it",
+      "player::http_input_tests::native_player_hls_decodes_all_frames_and_seeks",
+      "player::http_input_tests::native_player_http_input_retains_file_for_reopen_and_seek"
+    ],
+    "media": [
+      "owned_exposure::integer_conversion_gap::complete_integer_float_rgb_pipeline_matches_reference"
+    ],
+    "core-check": [],
+    "player-check": [],
+    "audio-thread": [],
+    "video-thread": []
+  },
+  "note": "Focused checks and 20 repeated runs are supporting evidence, not additional distinct checks or improvement IDs."
+}

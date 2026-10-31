@@ -1,0 +1,239 @@
+run 1
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 2.00s
+
+run 2
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 1.99s
+
+run 3
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 2.01s
+
+run 4
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 2.00s
+
+run 5
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 2.07s
+
+run 6
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 1.99s
+
+run 7
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 1.99s
+
+run 8
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 1.99s
+
+run 9
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 1.99s
+
+run 10
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 2.00s
+
+run 11
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 2.00s
+
+run 12
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 1.99s
+
+run 13
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 1.99s
+
+run 14
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 2.00s
+
+run 15
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 2.02s
+
+run 16
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 2.00s
+
+run 17
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 1.99s
+
+run 18
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 1.99s
+
+run 19
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 2.07s
+
+run 20
+
+running 6 tests
+test player::ab_clock_regressions::ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture ... ok
+test player::ab_clock_regressions::ab_range_ending_at_native_eof_repeats_without_ending ... ok
+test player::ab_clock_regressions::exact_mp4_ab_source_pixels_intervals_seek_and_eof_control ... ok
+test player::ab_clock_regressions::actual_loop_control_marks_current_phase_inside_one_picture ... ok
+test player::ab_clock_regressions::hard_stop_inside_ab_range_parks_before_the_loop_boundary ... ok
+test player::ab_clock_regressions::valid_single_picture_ab_range_waits_for_b_and_repeats ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1135 filtered out; finished in 2.04s

@@ -1,0 +1,17 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -2956,0 +2957 @@
++        eprintln!("AUDIT_CONTROL {:?}",std::mem::discriminant(&control));
+@@ -5869,0 +5871,3 @@
++    fn on_exit(&mut self) {
++        eprintln!("AUDIT_EXIT paused={} ended={} interval={:?} clock={:?} rate={} error={:?}",self.paused,self.ended,self.interval,self.presentation_clock(),self.rate_milli,self.error);
++    }
+@@ -5870,0 +5875,2 @@
++        if ctx.input(|i|i.viewport().close_requested()) { eprintln!("AUDIT_CLOSE_REQUEST"); }
++        if ctx.input(|i|i.key_pressed(egui::Key::Escape)) { eprintln!("AUDIT_ESCAPE"); }
+@@ -5929 +5935,4 @@
+-        if self.should_quit() { ctx.send_viewport_cmd(egui::ViewportCommand::Close); }
++        if self.should_quit() {
++            eprintln!("AUDIT_SOURCE_DONE interval={:?} clock={:?} paused={}",self.interval,self.presentation_clock(),self.paused);
++            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
++        }

@@ -1,0 +1,20 @@
+{
+  "status": "accepted FVID-0464;all required headless gates passed;separate baseline native-close limitation retained;own temporary artifacts removed",
+  "accepted_count": 464,
+  "baseline_session": "historical;final six-case baseline archived",
+  "baseline_log": "before.log",
+  "target": "/private/tmp/fvid-player-ab-clock-target-20261101",
+  "next": "Commit and publish only qualified A-B paths;chapter audit drafts remain unaccepted.",
+  "scope": "One proposed A-B feature cause:future picture endpoint used instead of active clock in mark capture and rewind. Normal/EOF/paused-boundary variants add0IDs.",
+  "implementation_considerations": "After confirmation,inspect press_loop(),present() on-frame loop_rewind(),and per-poll boundary timing. Preserve paused/manual-step/pending-seek priority,rewind before native EOF closes the item,and fence out-of-region queued pictures under presentation tolerance/A-V slack. Use existing active clock,not new fabricated frames. Full9gates and20 repeats needed before counting.",
+  "baseline_terminal_exit": 101,
+  "baseline": {
+    "passed": 1,
+    "failed": 5
+  },
+  "active_session": null,
+  "active_pid": 30158,
+  "headless_distinct_passed": 1558,
+  "headless_repeat_case_executions": 120,
+  "native_diagnostics": "native-smoke/"
+}

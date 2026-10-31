@@ -1,0 +1,45 @@
+{
+  "arguments": [
+    "/usr/bin/open",
+    "-g",
+    "-W",
+    "-n",
+    "/private/tmp/fvid-player-ab-clock-target-20261101/native-app/FvidABAudit.app",
+    "--args",
+    "play",
+    "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/player-jump-clock/movie.mp4",
+    "--no-audio",
+    "--rate",
+    "1",
+    "--play-and-exit"
+  ],
+  "binary_sha256": "e0b1720806d648589ff35aac8c8143c585338d6aaeb26327481ab83ca854bdaf",
+  "fixture_sha256": "57806f95893fda2a47ac7fbf90fa08cbe08351396fde258006bfac3160b99068",
+  "captures": [
+    {
+      "image": "background-frame-0.png",
+      "window": {
+        "bounds": {
+          "Height": 800,
+          "Width": 1280,
+          "X": 388,
+          "Y": 162
+        },
+        "pid": 66145,
+        "title": "FVid",
+        "window_id": 3571
+      },
+      "elapsed_seconds": 4.920557457999166,
+      "sha256": "a42b567080ff2252b130f55488ece863ba046fb9e3c661783cdd3d6d69332816"
+    }
+  ],
+  "scope": "Background LaunchServices wait plus exact bundle/PID/launch-date ownership. The open wait status is not a claimed direct app-process exit code.",
+  "lease": {
+    "bundle_path": "/private/tmp/fvid-player-ab-clock-target-20261101/native-app/FvidABAudit.app",
+    "launch_date": 1793482732.201922,
+    "pid": 66145,
+    "terminated": false
+  },
+  "wait_process_exited": true,
+  "unregister_exit_code": 0
+}

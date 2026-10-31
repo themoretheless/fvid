@@ -1,0 +1,127 @@
+{
+  "runs": [
+    {
+      "run": 1,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 2,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 3,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 4,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 5,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 6,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 7,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 8,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 9,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 10,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 11,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 12,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 13,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 14,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 15,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 16,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 17,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 18,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 19,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "run": 20,
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0
+    }
+  ],
+  "total_case_executions": 120,
+  "excluded_from_distinct_checks": true,
+  "binary_sha256": "1d1ce7947452b7240a0e0a8646df3a42150fef40ed9abfd6230cdf4dc3065ed3"
+}

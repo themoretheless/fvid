@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/scripts/check_improvements_registry.py", line 36, in <module>
+    main()
+    ~~~~^^
+  File "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/scripts/check_improvements_registry.py", line 24, in main
+    assert path.is_relative_to(root) and path.is_file(), f"missing {field}: {entry['id']}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: missing source: FVID-0437

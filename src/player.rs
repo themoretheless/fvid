@@ -3023,7 +3023,7 @@ impl Player {
             self.show_osd("Loop needs seeking");
             return;
         }
-        let Some(now) = self.timeline().0 else {
+        let Some(now) = self.presentation_clock() else {
             return;
         };
         let mark = loop_press(now, self.loop_a, self.loop_b);
@@ -4045,6 +4045,16 @@ impl Player {
             ctx.request_repaint();
             return;
         }
+        // B can fall inside the displayed picture, or coincide with native
+        // EOF. Spend it from the live clock before waiting for another frame.
+        if !self.paused && !self.seek_preview && !stepping
+            && let Some(target) = self.presentation_clock()
+                .and_then(|at| loop_rewind(at, self.loop_a, self.loop_b))
+        {
+            self.seek_time(target);
+            ctx.request_repaint();
+            return;
+        }
         let stepping_from_picture = stepping && self.presented.is_some();
         if self.paused && !self.seek_preview && !stepping {
             return;
@@ -4192,6 +4202,21 @@ impl Player {
                 else { ctx.request_repaint_after(Duration::from_millis(8)); }
                 return;
             }
+            // Presentation tolerance and A/V slack cannot expose a picture
+            // at/after B while the clock is still completing the valid range.
+            let outside_loop = !self.paused && !stepping && !self.seek_preview
+                && self.loop_a.is_some()
+                && self.loop_b.is_some_and(|b| self.queued.as_ref()
+                    .and_then(|frame| frame.interval)
+                    .and_then(|(start, _, scale)| Self::interval_time(start, scale))
+                    .is_some_and(|start| start >= b));
+            if outside_loop {
+                if let Some(target) = self.presentation_clock()
+                    .and_then(|at| loop_rewind(at, self.loop_a, self.loop_b))
+                { self.seek_time(target); ctx.request_repaint(); }
+                else { ctx.request_repaint_after(Duration::from_millis(1)); }
+                return;
+            }
             // Clock and vsync jitter must not postpone a ready frame by an
             // entire refresh. The media clock still advances by the exact PTS interval.
             let tolerance = (self.period / 8).min(Duration::from_millis(1));
@@ -4299,20 +4324,16 @@ impl Player {
                         }
                     }
                 }
-                // A closed A–B region sends the picture back to A once it has
-                // shown B. Stepping by hand is an explicit walk, so it does not
-                // trigger the loop.
-                if !stepping
+                // Re-check after a late presentation, keeping hard stop bounds
+                // ahead of looping. Paused seeks and manual steps stay explicit.
+                if !stepping && !self.check_stop() && !self.paused
                     && let Some(target) = loop_rewind(
-                        self.timeline().0.unwrap_or_default(),
+                        self.presentation_clock().unwrap_or_default(),
                         self.loop_a,
                         self.loop_b,
                     )
                 {
                     self.seek_time(target);
-                }
-                if !stepping {
-                    self.check_stop();
                 }
                 ctx.request_repaint_after(self.deadline.saturating_duration_since(Instant::now()));
             } else {
@@ -13086,3 +13107,7 @@ mod seek_phase_regressions;
 #[cfg(test)]
 #[path = "player_late_clock_tests.rs"]
 mod late_clock_regressions;
+
+#[cfg(test)]
+#[path = "player_ab_clock_tests.rs"]
+mod ab_clock_regressions;

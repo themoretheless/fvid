@@ -1,0 +1,252 @@
+//! Native A-B playback uses the live range,not the future picture endpoint.
+use super::*;
+use std::io::Cursor;
+fn root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/player-ab-clock")
+}
+fn bytes(n: &str) -> Vec<u8> {
+    std::fs::read(root().join(n)).unwrap()
+}
+fn tick(p: &mut Player, ctx: &egui::Context) {
+    let mut o = ctx.run_ui(Default::default(), |ui| p.present(ui.ctx()));
+    o.textures_delta.clear();
+}
+fn generation(p: &Player) -> u64 {
+    p.playback.as_ref().unwrap().generation()
+}
+fn open(ctx: &egui::Context) -> Player {
+    let mut p = Player {
+        queue: vec![root().join("movie.mp4")],
+        no_audio: true,
+        asynchronous_open: false,
+        start_paused: false,
+        ..Default::default()
+    };
+    p.play_index(0);
+    let until = Instant::now() + Duration::from_secs(5);
+    while p.presented.is_none() || p.buffering || p.seek_preview {
+        assert!(Instant::now() < until);
+        assert!(p.error.is_none(), "{:?}", p.error);
+        tick(&mut p, ctx);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert_eq!(p.interval, Some((0, 300, 1000)));
+    assert!(p.seekable);
+    p
+}
+fn settle(p: &mut Player, ctx: &egui::Context, expected: u64) {
+    let until = Instant::now() + Duration::from_secs(2);
+    while (p.seek_preview || p.buffering) && generation(p) <= expected + 1 && Instant::now() < until
+    {
+        assert!(p.error.is_none(), "{:?}", p.error);
+        tick(p, ctx);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert!(
+        !p.seek_preview && !p.buffering,
+        "A-B repeatedly re-seeks its valid first picture:g{} expected{expected} interval{:?} target{:?}",
+        generation(p),
+        p.interval,
+        p.seek_target
+    );
+    assert_eq!(generation(p), expected);
+    assert!(!p.ended);
+}
+#[test]
+fn exact_mp4_ab_source_pixels_intervals_seek_and_eof_control() {
+    let mut r = crate::playback_mp4::Mp4VideoReader::open_software(
+        Cursor::new(bytes("movie.mp4")),
+        Default::default(),
+        32 << 20,
+    )
+    .unwrap();
+    for i in 0..5 {
+        let f = r.read_frame().unwrap().unwrap();
+        assert_eq!(
+            (f.sample_index, f.presentation_time.ticks, f.duration.ticks),
+            (i, i as i64 * 300, 300)
+        );
+        let yuv: Vec<_> = f
+            .picture
+            .y
+            .iter()
+            .chain(&f.picture.cb)
+            .chain(&f.picture.cr)
+            .flat_map(|v| v.to_le_bytes())
+            .collect();
+        assert_eq!(yuv, bytes(&format!("frame-{}.yuv16", i % 3)));
+    }
+    assert!(r.read_frame().unwrap().is_none());
+    let mut r = NativeReader::software(Cursor::new(bytes("movie.mp4")), 32 << 20).unwrap();
+    for (at, start) in [(300, 300), (1200, 1200), (1500, 1200)] {
+        assert!(r.seek_raw(Duration::from_millis(at)).unwrap().is_some());
+        assert_eq!(r.frame_interval(), Some((start, start + 300, 1000)));
+    }
+}
+#[test]
+fn actual_loop_control_marks_current_phase_inside_one_picture() {
+    let ctx = egui::Context::default();
+    let mut p = open(&ctx);
+    let until = Instant::now() + Duration::from_secs(2);
+    while p.presentation_clock().unwrap() < Duration::from_millis(75) {
+        assert!(Instant::now() < until);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    let a = p.presentation_clock().unwrap();
+    p.apply(Control::Loop);
+    assert!(
+        p.loop_a.unwrap().abs_diff(a) < Duration::from_millis(15),
+        "A uses future picture end:{:?} expected{a:?}",
+        p.loop_a
+    );
+    assert!(p.loop_b.is_none());
+    while p.presentation_clock().unwrap() < Duration::from_millis(175) {
+        assert!(Instant::now() < until);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    let b = p.presentation_clock().unwrap();
+    p.apply(Control::Loop);
+    assert!(p.loop_b.unwrap().abs_diff(b) < Duration::from_millis(15));
+    assert!(p.loop_b.unwrap() > p.loop_a.unwrap());
+    p.apply(Control::Loop);
+    assert_eq!((p.loop_a, p.loop_b), (None, None));
+}
+fn range_case(start: u64, stop: u64) {
+    let ctx = egui::Context::default();
+    let mut p = open(&ctx);
+    let a = Duration::from_millis(start);
+    let b = Duration::from_millis(stop);
+    p.loop_a = Some(a);
+    p.loop_b = Some(b);
+    p.seek_time(a);
+    let first = generation(&p);
+    settle(&mut p, &ctx, first);
+    assert_eq!(
+        p.interval,
+        Some((
+            u128::from(start / 300 * 300),
+            u128::from(start / 300 * 300 + 300),
+            1000
+        ))
+    );
+    let initial_phase = p.presentation_clock().unwrap();
+    assert!(initial_phase >= a && initial_phase < b);
+    let expected_span = b - initial_phase;
+    let held = Instant::now();
+    while held.elapsed() < expected_span / 2 {
+        tick(&mut p, &ctx);
+        assert_eq!(
+            generation(&p),
+            first,
+            "A-B rewound before the live clock reached B"
+        );
+        assert!(!p.ended);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    let until = Instant::now() + Duration::from_secs(2);
+    while generation(&p) == first {
+        assert!(Instant::now() < until, "A-B never rewound at B");
+        assert!(
+            held.elapsed() <= expected_span + Duration::from_millis(100),
+            "A-B waited past its live B boundary"
+        );
+        tick(&mut p, &ctx);
+        if generation(&p) == first {
+            assert_eq!(
+                p.interval,
+                Some((
+                    u128::from(start / 300 * 300),
+                    u128::from(start / 300 * 300 + 300),
+                    1000
+                )),
+                "outside-range picture appeared before rewind"
+            );
+        }
+        assert!(!p.ended, "A-B at native EOF ended instead of looping");
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert!(
+        held.elapsed() + Duration::from_millis(15) >= expected_span,
+        "A-B rewound before B"
+    );
+    settle(&mut p, &ctx, first + 1);
+    assert!(p.presentation_clock().unwrap().abs_diff(a) < Duration::from_millis(20));
+    let mut reference = NativeReader::software(Cursor::new(bytes("movie.mp4")), 32 << 20).unwrap();
+    let rgb = reference
+        .seek_raw(a)
+        .unwrap()
+        .unwrap()
+        .into_rgb(32 << 20)
+        .unwrap();
+    assert_eq!(display_rgb(p.presented.as_ref().unwrap()).unwrap(), rgb);
+    // Explicit pause wins even when the clock crossed B without a repaint.
+    std::thread::sleep((b - a) + Duration::from_millis(50));
+    assert!(p.presentation_clock().unwrap() >= b);
+    p.toggle_pause();
+    let paused = p.presentation_clock().unwrap();
+    tick(&mut p, &ctx);
+    assert!(p.paused);
+    assert_eq!(generation(&p), first + 1);
+    assert_eq!(p.presentation_clock(), Some(paused));
+    p.toggle_pause();
+    tick(&mut p, &ctx);
+    settle(&mut p, &ctx, first + 2);
+    assert!(p.presentation_clock().unwrap().abs_diff(a) < Duration::from_millis(20));
+    assert!(p.error.is_none());
+}
+#[test]
+fn valid_single_picture_ab_range_waits_for_b_and_repeats() {
+    range_case(300, 600);
+}
+#[test]
+fn ab_range_ending_at_native_eof_repeats_without_ending() {
+    range_case(1200, 1500);
+}
+
+#[test]
+fn ab_subpicture_range_repeats_at_b_without_waiting_for_a_new_picture() {
+    range_case(75, 175);
+}
+
+#[test]
+fn hard_stop_inside_ab_range_parks_before_the_loop_boundary() {
+    let ctx = egui::Context::default();
+    let mut p = Player {
+        queue: vec![root().join("movie.mp4")],
+        no_audio: true,
+        asynchronous_open: false,
+        start_paused: false,
+        bounds: PlayBounds {
+            start: None,
+            stop: Some(Duration::from_millis(450)),
+        },
+        ..Default::default()
+    };
+    p.play_index(0);
+    let until = Instant::now() + Duration::from_secs(5);
+    while p.presented.is_none() {
+        assert!(Instant::now() < until);
+        assert!(p.error.is_none());
+        tick(&mut p, &ctx);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    p.loop_a = Some(Duration::from_millis(300));
+    p.loop_b = Some(Duration::from_millis(600));
+    p.seek_time(Duration::from_millis(300));
+    let first = generation(&p);
+    settle(&mut p, &ctx, first);
+    while !p.ended {
+        assert!(Instant::now() < until, "hard stop lost to A-B loop");
+        tick(&mut p, &ctx);
+        assert_eq!(
+            generation(&p),
+            first,
+            "A-B rewound instead of spending earlier stop bound"
+        );
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert_eq!(p.presentation_clock(), Some(Duration::from_millis(450)));
+    assert_eq!(p.interval, Some((300, 600, 1000)));
+    assert!(p.stop_time.is_none());
+    assert!(p.error.is_none());
+}

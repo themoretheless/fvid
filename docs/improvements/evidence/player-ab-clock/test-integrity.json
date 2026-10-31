@@ -1,0 +1,13 @@
+{
+  "identical_six_case_baseline_and_candidate": true,
+  "test_sha256": "6d91d8ee8322f907824592b10e94d80bd255eec07d5c34d096c75ca41540b5f9",
+  "baseline_source": "baseline.patch",
+  "candidate_source_sha256": "e19dd944e8ad691010acd3e8c179d94f9875b9404340f11368b492e01c3207c1",
+  "new_test_module_only": true,
+  "existing_tests_modified": false,
+  "baseline_passed": 1,
+  "baseline_failed": 5,
+  "candidate_passed": 6,
+  "candidate_failed": 0,
+  "fixture_generation": "fixture-generation.json"
+}

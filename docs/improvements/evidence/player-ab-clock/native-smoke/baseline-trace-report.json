@@ -1,0 +1,44 @@
+{
+  "qualified_source_sha256": "e19dd944e8ad691010acd3e8c179d94f9875b9404340f11368b492e01c3207c1",
+  "temporary_trace_sha256": "db1fb264dacddcef3a4d44b68c8c0fd5be1a0a62bf1dad42b09034f50e828ad0",
+  "baseline_commit": "8b7e0c9292d8498742cf4d101380f537f3a01a8e",
+  "baseline_source_sha256": "ef7c7f6203560ce7c00f207df8826a6dc3bf6cdf5c989df5e06af36553625072",
+  "runs": [
+    {
+      "arguments": [
+        "/private/tmp/fvid-player-ab-clock-target-20261101/debug/fvid",
+        "play",
+        "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/player-jump-clock/movie.mp4",
+        "--no-audio",
+        "--rate",
+        "1",
+        "--play-and-exit"
+      ],
+      "pid": 66884,
+      "elapsed_seconds": 4.227609749999829,
+      "exit_code_before_owned_cleanup": 0,
+      "alive_at_deadline": false,
+      "process_exited_after_cleanup": true
+    },
+    {
+      "arguments": [
+        "/private/tmp/fvid-player-ab-clock-target-20261101/debug/fvid",
+        "play",
+        "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/player-jump-clock/movie.mp4",
+        "--no-audio",
+        "--rate",
+        "1",
+        "--play-and-exit",
+        "--start-paused"
+      ],
+      "pid": 66919,
+      "elapsed_seconds": 1.549985542000286,
+      "exit_code_before_owned_cleanup": 0,
+      "alive_at_deadline": false,
+      "process_exited_after_cleanup": true
+    }
+  ],
+  "build_exit_code": 0,
+  "binary_sha256": "8bb1fdd423b68dc7c382dd898d39bbe163dd53a75845646968964fb841785abf",
+  "qualified_source_restored": true
+}

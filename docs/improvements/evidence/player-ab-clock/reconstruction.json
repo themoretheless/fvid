@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "sha256": "03c66ce51bf626d9907bd8643a242ba386d4b4c32127416ce944de4ca31289b0",
+    "patch": "baseline.patch",
+    "byte_identical_reconstruction": true
+  },
+  "onframe-only": {
+    "sha256": "14c1be8a43069c9561844a5c21723d032a2a4646c8fbba380c480a18c1accf76",
+    "patch": "onframe-only.patch",
+    "byte_identical_reconstruction": true
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "status": "pre-existing native window close-request limitation;not a new qualified media failure",
+  "new_improvement_count_delta": 0,
+  "baseline_commit": "8b7e0c9292d8498742cf4d101380f537f3a01a8e",
+  "qualified_source_restored": true,
+  "temporary_instrumentation_removed": true,
+  "candidate_trace": "trace-report.json",
+  "baseline_trace": "baseline-trace-report.json",
+  "finding": "Both baseline and candidate receive native viewport close requests while ended=false,error=None. Paused controls retain0ns. No AUDIT_SOURCE_DONE is emitted. Origin of the close request is unestablished;do not attribute it to media EOF or a particular external actor.",
+  "uninterrupted_native_duration": "NOT qualified;all failed>=10s assertions retained without changes",
+  "actual_native_observation": "Two owned-window screenshots were inspected;decoded picture content changes. This proves basic native rendering only. Exact A-B playback/clock/seek/EOF acceptance uses real native workers and headless egui controller.",
+  "background_attempt": "Also ended before duration;launchservices wait status is not a claimed direct app exit code. Owned temporary app unregistered;no active unrelated app touched."
+}

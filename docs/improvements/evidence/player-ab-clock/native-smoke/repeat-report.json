@@ -1,0 +1,16 @@
+{
+  "arguments": [
+    "/private/tmp/fvid-player-ab-clock-target-20261101/debug/fvid",
+    "play",
+    "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/player-jump-clock/movie.mp4",
+    "--no-audio",
+    "--rate",
+    "1",
+    "--play-and-exit"
+  ],
+  "pid": 59146,
+  "exit_code": 0,
+  "elapsed_seconds": 4.563126875000307,
+  "binary_sha256": "7747eec2bd0b3b3dc4e690dca68d28d79f297c057775150d19a94df8e8f19d68",
+  "process_exited": true
+}

@@ -1,0 +1,7 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -13088,0 +13089,4 @@
++
++#[cfg(test)]
++#[path = "player_ab_clock_tests.rs"]
++mod ab_clock_regressions;

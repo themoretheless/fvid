@@ -1,0 +1,17 @@
+{
+  "arguments": [
+    "/private/tmp/fvid-player-ab-clock-target-20261101/debug/fvid",
+    "play",
+    "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/player-jump-clock/movie.mp4",
+    "--no-audio",
+    "--start-paused",
+    "--rate",
+    "1",
+    "--play-and-exit"
+  ],
+  "pid": 61295,
+  "elapsed_seconds": 5.48297279200051,
+  "alive_at_six_seconds": false,
+  "exit_code_before_owned_cleanup": 0,
+  "process_exited_after_cleanup": true
+}

@@ -1,0 +1,5 @@
+VideoToolbox: session creation failed (-12906); using the software VP9 decoder
+player timeline: movie.mp4 duration=Some(10s)
+AUDIT_PRESENT interval=Some((0, 2000, 1000)) clock=Some(0ns) deadline_future=0ns paused=true stepping=true
+AUDIT_CLOSE_REQUEST
+AUDIT_EXIT paused=true ended=false interval=Some((0, 2000, 1000)) clock=Some(0ns) rate=1000 error=None

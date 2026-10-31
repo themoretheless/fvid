@@ -1,0 +1,5 @@
+{
+  "src/player.rs": "03c66ce51bf626d9907bd8643a242ba386d4b4c32127416ce944de4ca31289b0",
+  "src/player_ab_clock_tests.rs": "6a6bc2a1d0a733dce3e814de251e48f8b9466aa45723b8dab4b035064dd645dc",
+  "scripts/generate_player_ab_clock.py": "7fdb646eefacd0cd33fad5c649fc4dad7c721d2da4ba76993e6c41eca37316b4"
+}

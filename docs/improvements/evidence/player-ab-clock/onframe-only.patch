@@ -1,0 +1,13 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -3026 +3026 @@
+-        let Some(now) = self.timeline().0 else {
++        let Some(now) = self.presentation_clock() else {
+@@ -4307 +4307 @@
+-                        self.timeline().0.unwrap_or_default(),
++                        self.presentation_clock().unwrap_or_default(),
+@@ -13088,0 +13089,4 @@
++
++#[cfg(test)]
++#[path = "player_ab_clock_tests.rs"]
++mod ab_clock_regressions;

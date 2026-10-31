@@ -1,0 +1,30 @@
+{
+  "count_delta": 0,
+  "baseline_commit": "8b7e0c9292d8498742cf4d101380f537f3a01a8e",
+  "preexisting_on_baseline": true,
+  "cause": "Two source fields contain semicolon-separated lists,although the existing unchanged checker requires one real source path. Keep the first as primary source and preserve other paths in related_sources.",
+  "checker_changed": false,
+  "changes": [
+    {
+      "id": "FVID-0437",
+      "old_source": "crates/fvid-media/src/owned_mp4_impl.rs; crates/fvid-media/src/owned_matroska_tracks_impl.rs; crates/fvid-media/src/owned_webm_reader_impl.rs",
+      "primary_source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "related_sources": [
+        "crates/fvid-media/src/owned_matroska_tracks_impl.rs",
+        "crates/fvid-media/src/owned_webm_reader_impl.rs"
+      ],
+      "all_paths_exist": true
+    },
+    {
+      "id": "FVID-0440",
+      "old_source": "crates/fvid-media/src/owned_mp4_impl.rs; crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs",
+      "primary_source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "related_sources": [
+        "crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs"
+      ],
+      "all_paths_exist": true
+    }
+  ],
+  "before_exit_code": 1,
+  "after_exit_code": 0
+}

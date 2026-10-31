@@ -1,0 +1,55 @@
+{
+  "arguments": [
+    "/private/tmp/fvid-player-ab-clock-target-20261101/debug/fvid",
+    "play",
+    "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/player-jump-clock/movie.mp4",
+    "--no-audio",
+    "--play-and-exit"
+  ],
+  "binary_sha256": "7747eec2bd0b3b3dc4e690dca68d28d79f297c057775150d19a94df8e8f19d68",
+  "fixture_sha256": "57806f95893fda2a47ac7fbf90fa08cbe08351396fde258006bfac3160b99068",
+  "source_hashes": {
+    "src/player.rs": "e19dd944e8ad691010acd3e8c179d94f9875b9404340f11368b492e01c3207c1",
+    "src/player_ab_clock_tests.rs": "6d91d8ee8322f907824592b10e94d80bd255eec07d5c34d096c75ca41540b5f9",
+    "scripts/generate_player_ab_clock.py": "b95abce50341ef21767898e04e1c0012ceca53f058c4171f9ae8f670b7aa54eb"
+  },
+  "captures": [
+    {
+      "window": {
+        "bounds": {
+          "Height": 800,
+          "Width": 1280,
+          "X": 388,
+          "Y": 162
+        },
+        "pid": 53697,
+        "title": "FVid",
+        "window_id": 2289
+      },
+      "elapsed_seconds": 4.134735458999785,
+      "image": "frame-0.png",
+      "sha256": "02c8374306bf929602bad564630d7683f5af1954f906f5d58331c9936dafd832"
+    },
+    {
+      "window": {
+        "bounds": {
+          "Height": 800,
+          "Width": 1280,
+          "X": 388,
+          "Y": 162
+        },
+        "pid": 53697,
+        "title": "FVid",
+        "window_id": 2289
+      },
+      "elapsed_seconds": 7.110220124999614,
+      "image": "frame-1.png",
+      "sha256": "67a2441e1a8800342ecb5e56fd36d234330e1c4b07888976d38fe7ccea355416"
+    }
+  ],
+  "scope": "Basic native-window autoplay of authored10s movie;A-B control behavior separately proven by native worker/controller tests. No physical audio or hardware-codec claim.",
+  "pid": 53697,
+  "exit_code": 0,
+  "elapsed_seconds": 8.594152458999815,
+  "process_exited": true
+}

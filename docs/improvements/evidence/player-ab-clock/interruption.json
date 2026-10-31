@@ -1,0 +1,9 @@
+{
+  "previous_session": 98345,
+  "session_handle": "missing",
+  "previous_pid": 3738,
+  "process": "absent",
+  "temporary_target_and_logs": "absent",
+  "source_hashes": "unchanged",
+  "action": "rerun all nine gates;partial run excluded from acceptance"
+}
