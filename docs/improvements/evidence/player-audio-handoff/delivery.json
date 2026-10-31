@@ -1,0 +1,10 @@
+{
+  "code_commit": "54c37948e9b409b8530cd6bd56a39cb68776d8ae",
+  "atomic_push_exit_code": 0,
+  "verified_remote_heads": "54c37948e9b409b8530cd6bd56a39cb68776d8ae\trefs/heads/codex/deliver-fvid-20261029\n54c37948e9b409b8530cd6bd56a39cb68776d8ae\trefs/heads/main\n",
+  "own_worktree_clean_before_receipt": true,
+  "temporary_artifacts_absent": true,
+  "accepted_count": 458,
+  "preserved_other_worktrees_and_four_stashes": true,
+  "regression_fixtures_and_evidence_retained": true
+}
