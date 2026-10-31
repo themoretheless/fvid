@@ -1,0 +1,10 @@
+{
+  "base_commit": "5f5cb5b6e260564a89950472efba0a1f5c264174",
+  "rate_only_player_sha256": "f7c77d376ac200a32204c9301832c6fe59614a6605ccb8870665cbdf6a7dd0d8",
+  "patch_sha256": "60d4bed93762a002394429e7003eac20f8580651fc6045b2ed36f5c352b2b43b",
+  "reconstruction_verified_byte_identical": true,
+  "baseline_player_sha256": "f2c8862af51e80ad82e791506bc97d0358d602fa629cc8fd1971ad88d76c7fa4",
+  "baseline_patch_sha256": "1eb9e37cf614c715b236144f0d6583803176fdb0db8193612f6acd3a22f5dc97",
+  "baseline_reconstruction_verified_byte_identical": true,
+  "baseline_modifies_only_test_hook": true
+}

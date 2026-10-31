@@ -1,0 +1,17 @@
+{
+  "provenance": "Five authored16x16 VP9 colored keyframes;300ms each,1.5s total. Exact independent YUV planes. No private media,encoder,FFmpeg or network.",
+  "timescale": 1000,
+  "durations": [
+    300,
+    300,
+    300,
+    300,
+    300
+  ],
+  "sha256": {
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "movie.mp4": "c40d1df373b5e56c3780a3950d0f8e51bd989cdfeac30c6d4805e51fec381f8a"
+  }
+}

@@ -1,0 +1,179 @@
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 2.12s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.98s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.98s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.98s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.98s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.98s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.99s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.98s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.98s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 2.02s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.98s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.98s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.98s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.99s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.98s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.99s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.98s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.99s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.98s
+
+
+running 4 tests
+test player::rate_clock_regressions::exact_slow_mp4_pixels_intervals_seek_and_eof_control ... ok
+test player::rate_clock_regressions::faster_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+test player::rate_clock_regressions::silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change ... ok
+test player::rate_clock_regressions::slower_live_rate_change_keeps_phase_and_real_seek_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1116 filtered out; finished in 1.98s

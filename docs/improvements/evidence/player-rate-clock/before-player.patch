@@ -1,0 +1,7 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -12999,0 +13000,4 @@
++
++#[cfg(test)]
++#[path = "player_rate_clock_tests.rs"]
++mod rate_clock_regressions;

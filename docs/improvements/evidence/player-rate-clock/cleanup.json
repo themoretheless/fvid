@@ -1,0 +1,115 @@
+{
+  "completed": true,
+  "removed": [
+    {
+      "path": "/private/tmp/fvid-player-rate-clock-after-final.log",
+      "bytes": 26196,
+      "raw_sha256": "034adc8fa62b17c6d6d7efdb05de62be471735f7bb91b65ce5b2959b1c9ba60a",
+      "archive": "raw-history/after-final.log",
+      "archive_sha256": "9fe02a6cf2bf71cdfc04cee408a5724fa705ef86148513681ac024597469e8c0"
+    },
+    {
+      "path": "/private/tmp/fvid-player-rate-clock-after.log",
+      "bytes": 26196,
+      "raw_sha256": "0507e8fc60a82775d1bdaea923fcfb1770bca8af0a4876798d7eb83be09499c7",
+      "archive": "raw-history/after.log",
+      "archive_sha256": "ecdac0f6b58efeaed23e91bd9230f2057c3fab3128e22ee389db20da3c998172"
+    },
+    {
+      "path": "/private/tmp/fvid-player-rate-clock-audio-thread.log",
+      "bytes": 29877,
+      "raw_sha256": "8d67196ece9b7e6fdd097cc15a8a9e180b898efe3c6b8a0b1c63cdce9dadde63",
+      "archive": "raw-history/audio-thread.log",
+      "archive_sha256": "abfb84fc86dcefaa7c52d08834d9f7b9844ed099e7b7ea41ecf5ba3a7bbef446"
+    },
+    {
+      "path": "/private/tmp/fvid-player-rate-clock-before-qualified.log",
+      "bytes": 27886,
+      "raw_sha256": "8553b4982d0bd4a2cc499227c7bbdeafbf11e8ae079ad2d106e007181de15c45",
+      "archive": "raw-history/before-qualified.log",
+      "archive_sha256": "8553b4982d0bd4a2cc499227c7bbdeafbf11e8ae079ad2d106e007181de15c45"
+    },
+    {
+      "path": "/private/tmp/fvid-player-rate-clock-before.log",
+      "bytes": 36560,
+      "raw_sha256": "0ffd424c42c4b539ec090a4123d4e20607d22d7eb696eac558a7922d10d47d52",
+      "archive": "raw-history/before.log",
+      "archive_sha256": "0ffd424c42c4b539ec090a4123d4e20607d22d7eb696eac558a7922d10d47d52"
+    },
+    {
+      "path": "/private/tmp/fvid-player-rate-clock-core-check.log",
+      "bytes": 26898,
+      "raw_sha256": "19445ea406f724c4a22c2e430ff80d4795f3310c9f95310ce7f0c5dd6865c997",
+      "archive": "raw-history/core-check.log",
+      "archive_sha256": "19445ea406f724c4a22c2e430ff80d4795f3310c9f95310ce7f0c5dd6865c997"
+    },
+    {
+      "path": "/private/tmp/fvid-player-rate-clock-integration.log",
+      "bytes": 111421,
+      "raw_sha256": "57f03bea929de832826ed3361fbba570b9fd401e93187b5be78b96588ebe5b89",
+      "archive": "raw-history/integration.log",
+      "archive_sha256": "c4285c57cd32d75ecd3ac943cb49ff73107b157a4a40fcdf84df2084732a7d84"
+    },
+    {
+      "path": "/private/tmp/fvid-player-rate-clock-media.log",
+      "bytes": 71098,
+      "raw_sha256": "e921d2830aa6fcc644b84525bfecd28f18a0761806ef0528678b031849acc417",
+      "archive": "raw-history/media.log",
+      "archive_sha256": "0d6e3e28a09f72acd6baae4f580ce2e5656628c3d87a43795919502d1ccff70c"
+    },
+    {
+      "path": "/private/tmp/fvid-player-rate-clock-player-check.log",
+      "bytes": 32684,
+      "raw_sha256": "561747bc1ebee08ca7aaf2bea2ad9a030676f940e9edf0e70bcac19d5637701a",
+      "archive": "raw-history/player-check.log",
+      "archive_sha256": "561747bc1ebee08ca7aaf2bea2ad9a030676f940e9edf0e70bcac19d5637701a"
+    },
+    {
+      "path": "/private/tmp/fvid-player-rate-clock-player-units.log",
+      "bytes": 46872,
+      "raw_sha256": "7ef30d3fff2acfeacb6ba3cf03afb94be503df77cc44e038d707a19b651419ec",
+      "archive": "raw-history/player-units.log",
+      "archive_sha256": "0d0eb842aabcba43dfbba4f50eb540f88f45b49705636c01e1a643d967901551"
+    },
+    {
+      "path": "/private/tmp/fvid-player-rate-clock-rate-only.log",
+      "bytes": 26912,
+      "raw_sha256": "860d8acfdaf4519eac01b87930ffcd07d48e45bbecedb26972f42242478bf4d2",
+      "archive": "raw-history/rate-only.log",
+      "archive_sha256": "860d8acfdaf4519eac01b87930ffcd07d48e45bbecedb26972f42242478bf4d2"
+    },
+    {
+      "path": "/private/tmp/fvid-player-rate-clock-rate-only.rs",
+      "bytes": 564002,
+      "raw_sha256": "f7c77d376ac200a32204c9301832c6fe59614a6605ccb8870665cbdf6a7dd0d8",
+      "archive": "rate-only.patch",
+      "archive_sha256": "60d4bed93762a002394429e7003eac20f8580651fc6045b2ed36f5c352b2b43b"
+    },
+    {
+      "path": "/private/tmp/fvid-player-rate-clock-root-mp4.log",
+      "bytes": 32702,
+      "raw_sha256": "33f4ae4b794e6fa80a83d5258bca5af8e6a4941a6baf910c8dc8cf315ce6e2b0",
+      "archive": "raw-history/root-mp4.log",
+      "archive_sha256": "a5f621371a266b456e4534f5c37cc3779694bb00453dc9d12a70e6706dd6808f"
+    },
+    {
+      "path": "/private/tmp/fvid-player-rate-clock-root-webm.log",
+      "bytes": 31806,
+      "raw_sha256": "7cebdc963950b82e3e732ab89ae0851e9446b120babe70f516a5797e64948de8",
+      "archive": "raw-history/root-webm.log",
+      "archive_sha256": "9a0313c7c6b049cd8901f9f06625f773407dc3f244bd7241aa35f17567a9f078"
+    },
+    {
+      "path": "/private/tmp/fvid-player-rate-clock-target-20261031",
+      "kind": "isolated build target"
+    },
+    {
+      "path": "/private/tmp/fvid-player-rate-clock-video-thread.log",
+      "bytes": 26216,
+      "raw_sha256": "3c83cf671729053550f3bccff7206cecef462acbe349090fe1b0a7caf6bd3e93",
+      "archive": "raw-history/video-thread.log",
+      "archive_sha256": "76adedee60169373d7966f87942c00dfefbbf01b3695acdef5c1a44eb45a9a4a"
+    }
+  ],
+  "retained": "Five authored media/oracle/manifest files,regressions,and all evidence/reconstruction. Foreign worktrees and stashes untouched."
+}

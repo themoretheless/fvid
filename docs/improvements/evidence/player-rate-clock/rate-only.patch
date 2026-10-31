@@ -1,0 +1,23 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -2624,0 +2625,15 @@
++        // Silent presentation owns a wall deadline. Retain its media phase
++        // when changing speed, including lateness awaiting the next repaint.
++        if !self.paused && !self.buffering && !self.seek_preview
++            && self.presented.is_some() && (self.audio.is_none() || self.audio_ended)
++            && self.rate_milli != 0 && milli != 0
++        {
++            let now = Instant::now();
++            let future = self.deadline >= now;
++            let span = if future { self.deadline - now } else { now - self.deadline };
++            let adjusted = Duration::try_from_secs_f64(
++                span.as_secs_f64() * f64::from(self.rate_milli) / f64::from(milli),
++            ).unwrap_or(span);
++            self.deadline = if future { now.checked_add(adjusted) }
++                else { now.checked_sub(adjusted) }.unwrap_or(self.deadline);
++        }
+@@ -12999,0 +13015,4 @@
++
++#[cfg(test)]
++#[path = "player_rate_clock_tests.rs"]
++mod rate_clock_regressions;

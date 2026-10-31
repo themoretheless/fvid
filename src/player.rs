@@ -1897,6 +1897,8 @@ struct Player {
     audio_ended: bool,
     /// Clock that paced the currently displayed picture.
     picture_audio_clock: bool,
+    /// Media position retained while a silent picture is paused.
+    paused_picture_time: Option<Duration>,
     playback_activity: Option<fvid_platform::PlaybackActivity>,
     duration: Option<Duration>,
     seekable: bool,
@@ -2123,6 +2125,7 @@ impl Default for Player {
             audio: None,
             audio_ended: false,
             picture_audio_clock: false,
+            paused_picture_time: None,
             playback_activity: None,
             duration: None,
             seekable: false,
@@ -2317,6 +2320,7 @@ impl Player {
         self.period = reader.frame_period();
         self.interval = None;
         self.picture_audio_clock = false;
+        self.paused_picture_time = None;
         // Drop the old thread before starting the new one.
         self.playback = None;
         self.audio = None;
@@ -2413,6 +2417,7 @@ impl Player {
         self.rgb_frame = None;
         self.interval = None;
         self.picture_audio_clock = false;
+        self.paused_picture_time = None;
         self.dimensions = [0; 2];
         self.pixel_aspect = (1, 1);
         self.container_insets = [0; 4];
@@ -2622,6 +2627,21 @@ impl Player {
     }
 
     fn set_rate(&mut self, milli: u32) {
+        // Silent presentation owns a wall deadline. Retain its media phase
+        // when changing speed, including lateness awaiting the next repaint.
+        if !self.paused && !self.buffering && !self.seek_preview
+            && self.presented.is_some() && (self.audio.is_none() || self.audio_ended)
+            && self.rate_milli != 0 && milli != 0
+        {
+            let now = Instant::now();
+            let future = self.deadline >= now;
+            let span = if future { self.deadline - now } else { now - self.deadline };
+            let adjusted = Duration::try_from_secs_f64(
+                span.as_secs_f64() * f64::from(self.rate_milli) / f64::from(milli),
+            ).unwrap_or(span);
+            self.deadline = if future { now.checked_add(adjusted) }
+                else { now.checked_sub(adjusted) }.unwrap_or(self.deadline);
+        }
         self.rate_milli = milli;
         self.apply_audio_controls();
         self.show_osd(rate_osd(self.rate_milli));
@@ -3040,7 +3060,7 @@ impl Player {
             if !self.audio_ended || completed_picture { return Some(clock); }
         }
         let Some((start, end, scale)) = self.interval else { return Some(Duration::ZERO); };
-        if self.paused { return Self::interval_time(start, scale); }
+        if self.paused { return self.paused_picture_time.or_else(|| Self::interval_time(start, scale)); }
         let end = Self::interval_time(end, scale)?;
         let remaining = self.deadline.saturating_duration_since(Instant::now()).as_nanos()
             * u128::from(self.rate_milli) / 1_000;
@@ -3517,6 +3537,7 @@ impl Player {
                             std::mem::swap(&mut self.buffering, &mut ready.buffering);
                             self.interval = None;
                             self.picture_audio_clock = false;
+                            self.paused_picture_time = None;
                             self.deadline = Instant::now();
                             self.apply_audio_controls();
                             // Dispose of unused worker state off the drawing thread.
@@ -3608,8 +3629,10 @@ impl Player {
             self.restart();
             return;
         }
+        let phase = self.presentation_clock();
         self.paused = !self.paused;
         if self.paused {
+            self.paused_picture_time = phase;
             playback.pause();
             if let Some(audio) = &self.audio {
                 audio.pause();
@@ -3619,7 +3642,15 @@ impl Player {
             if !self.buffering && let Some(audio) = &self.audio {
                 audio.play();
             }
-            self.deadline = Instant::now();
+            let now = Instant::now();
+            let held = self.paused_picture_time.take();
+            self.deadline = if self.audio.is_none() || self.audio_ended {
+                self.interval.and_then(|(_, end, scale)| Self::interval_time(end, scale))
+                    .zip(held)
+                    .and_then(|(end, at)| now.checked_add(paced_period(
+                        end.saturating_sub(at), self.rate_milli,
+                    ))).unwrap_or(now)
+            } else { now };
             if let Some((_, count)) = &mut self.presentation_stats {
                 *count = 0;
             }
@@ -3669,6 +3700,7 @@ impl Player {
         self.buffering = true;
         self.seek_preview = false;
         self.seek_target = None;
+        self.paused_picture_time = None;
         self.ended = false;
         self.paused = false;
         self.error = None;
@@ -3714,6 +3746,7 @@ impl Player {
             if resume_after_terminal && self.playback.is_none() { audio.play(); }
         }
         self.audio_ended = false;
+        self.paused_picture_time = None;
         self.prioritize_swap(target);
         // The placeholder position stands in until the decoder hands over the
         // frame at the other end of the seek; an audio thread answers at once.
@@ -4197,6 +4230,10 @@ impl Player {
                 self.dimensions = frame.dimensions;
                 self.period = frame.period;
                 self.interval = frame.interval;
+                if self.paused {
+                    self.paused_picture_time = self.interval
+                        .and_then(|(start, _, scale)| Self::interval_time(start, scale));
+                }
                 // Advance the clock even after a late repaint; the next poll
                 // discards expired pictures instead of slowing the timeline.
                 let period = paced_period(frame.period, self.rate_milli);
@@ -12997,3 +13034,7 @@ mod seek_failure_regressions;
 #[cfg(test)]
 #[path = "player_audio_handoff_tests.rs"]
 mod audio_handoff_regressions;
+
+#[cfg(test)]
+#[path = "player_rate_clock_tests.rs"]
+mod rate_clock_regressions;

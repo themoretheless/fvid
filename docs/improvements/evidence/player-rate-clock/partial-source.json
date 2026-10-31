@@ -1,0 +1,5 @@
+{
+  "src/player.rs": "f7c77d376ac200a32204c9301832c6fe59614a6605ccb8870665cbdf6a7dd0d8",
+  "src/player_rate_clock_tests.rs": "39c6e5bf1b25d8b20df27785648526a7b11563fd2da6fed3f02b00eebda5cac2",
+  "scripts/generate_player_rate_clock.py": "b0535acd1781d8965fff033170ccbb988cb118c02fddfff255dfa43049f14922"
+}

@@ -1,0 +1,29 @@
+{
+  "status": "accepted; nine gates passed; temporary artifacts removed; ready for delivery",
+  "accepted_count": 460,
+  "baseline_session": 43441,
+  "baseline_log": "/private/tmp/fvid-player-rate-clock-before.log",
+  "target": "/private/tmp/fvid-player-rate-clock-target-20261031",
+  "next": "Verify hashes,stage exact qualified paths,cached-check,commit,atomic push both refs,verify remote and clean state,record receipt.",
+  "baseline_terminal_exit": 101,
+  "baseline_passed": 1,
+  "baseline_failed": 3,
+  "rate_only": {
+    "passed": 3,
+    "failed": 1
+  },
+  "candidate": {
+    "passed": 4,
+    "failed": 0
+  },
+  "qualification_session": 63326,
+  "qualification_log": "/private/tmp/fvid-player-rate-clock-integration.log",
+  "repeated_runs": 20,
+  "repeated_cases": 80,
+  "repeat_failures": 0,
+  "accepted_ids": [
+    "FVID-0459",
+    "FVID-0460"
+  ],
+  "qualification_terminal_exit": 0
+}

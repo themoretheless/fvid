@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 458,
-  "next_id": "FVID-0459",
+  "accepted_count": 460,
+  "next_id": "FVID-0461",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5143,6 +5143,28 @@
       "result": "On current healthy audio completion reanchor the silent video deadline from the final delayed device clock and current picture end,including overdue intervals and playback rate. Avoid pending seek/paused clocks. Identical test advances to at least40ms promptly,then completes exact80..100ms final picture/native RGB/EOF without loading. Two tests pass20repetitions;all9gates pass1533physical-source-distinct checks,both builds and unchanged5old ignores. No performance or physical audio/window claim.",
       "status": "accepted",
       "validation": "batch-458-validation.json"
+    },
+    {
+      "batch": 459,
+      "source": "src/player.rs",
+      "regression": "src/player_rate_clock_tests.rs",
+      "status": "accepted",
+      "validation": "batch-459-validation.json",
+      "id": "FVID-0459",
+      "title": "Preserve silent picture phase across live playback-rate changes",
+      "before": "Qualified four-test baseline passes exact MP4 pixels/timestamps/seek/EOF control but live2x jumps about75ms to0 and live0.5x jumps about75ms to188ms. The wall deadline remains expressed at the old speed while its phase is interpreted at the new speed.",
+      "result": "Rescale future or overdue silent presentation deadline around the transition instant before installing the new rate. Active audio retains its device-owned clock;preroll and paused controls remain separate. Rate-only repair passes both rate acceptances and source control while independent pause remains failing. Both variants hold remaining picture duration,seek to the actual final frame and reach natural EOF. Final4tests pass20repetitions and all9gates pass1537physical-source-distinct checks plus core/player builds. Variants and repeats add0IDs;no performance claim."
+    },
+    {
+      "batch": 459,
+      "source": "src/player.rs",
+      "regression": "src/player_rate_clock_tests.rs",
+      "status": "accepted",
+      "validation": "batch-459-validation.json",
+      "id": "FVID-0460",
+      "title": "Retain paused silent picture phase and resume its remaining interval",
+      "before": "Qualified baseline loses about75ms of a300ms silent picture on pause,publishing0ms instead,and resume resets its deadline to now. The pause failure remains after independent live-rate repair(3pass1fail).",
+      "result": "Retain the silent media position on pause and reconstruct the remaining picture deadline on resume at the chosen rate. A paused rate change leaves the held position unchanged;new media,seek,restart and shown paused/stepped pictures reset retained state appropriately. Identical acceptance checks paused phase stability,remaining-period hold after a paused0.5x change,exact next interval,real seek and natural final EOF. Final4tests pass20repetitions;9gates pass1537physical-source-distinct checks and both builds. Five old ignores unchanged;no physical audio/window or performance claim."
     }
   ]
 }

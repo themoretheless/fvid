@@ -1,0 +1,24 @@
+{
+  "pending_causes": 0,
+  "accepted_count_delta": 2,
+  "baseline": {
+    "passed": 1,
+    "failed": 3,
+    "log": "before.log"
+  },
+  "rate_only": {
+    "passed": 3,
+    "failed": 1,
+    "log": "rate-only.log",
+    "remaining_failure": "silent_pause_resume_holds_phase_and_remaining_picture_even_with_paused_rate_change"
+  },
+  "candidate": {
+    "passed": 4,
+    "failed": 0
+  },
+  "counting": "Faster/slower rate variants are one cause. Pause/resume phase loss is independent. Exact source/seek/EOF controls and repeat executions add no IDs.",
+  "accepted_ids": [
+    "FVID-0459",
+    "FVID-0460"
+  ]
+}
