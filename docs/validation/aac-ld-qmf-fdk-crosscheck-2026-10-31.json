@@ -1,0 +1,258 @@
+{
+  "conformance_verdict": null,
+  "source_commit": "ee76460efbdb147e26d804c798949c23f174460b",
+  "source_archive_sha256": "4f41fba1e55dc554ccd0166f550d7c0c83ae0f22d7f2ed76001537f4b62f7325",
+  "source_files": {
+    "libFDK/src/qmf.cpp": "1ee2fa20785016ea55a6e575e73dea2238b77df90cea45b84d4dffa6f04fd0cc",
+    "libFDK/src/FDK_tools_rom.cpp": "c0280c294fb3966d090a34d7ca2d6f2a8f6494b30872946d72ba02724432f138",
+    "libFDK/src/FDK_qmf_domain.cpp": "f1a2aba3d7ab7d8cc77a3409c2cdae39707992014239444790df74173c27ee5b",
+    "libAACdec/src/aacdecoder.cpp": "8886d6d8934467ea553bd1f5e9c92ea7291bb160cef141a08691eb740774b7fa",
+    "libSACdec/src/sac_dec.cpp": "e753d7660c6e99798afd32b7fb2e8513d154f77e323218b987c13e7b99bca2d3"
+  },
+  "cases": [
+    {
+      "name": "er_eld_ldmps_ldqmf_1",
+      "rate": 48000,
+      "channels": 2,
+      "input_mp4_sha256": "7cbcf115460136d855d9e336e2ae65adbff9cb96777bd3c4a8278132836af032",
+      "records_sha256": "43eb7980494c220246ca262a93490e1668f8267675e2371e59061b5ddfd94ae0",
+      "native_sha256": "8f5fde2e9c49fce1295e04a039050f5eb05a9a8768f8c52770a5647aa8f81bf4",
+      "fdk_sha256": "4d0accf977a318c1b6edc6525e9a476465906b768c0d5dd45dcac916849a0369",
+      "external_status": "rate=48000 channels=2 frame=1024 outputDelay=256 pcm_bits=16\npackets=47 scalars=96256\n",
+      "comparisons": [
+        {
+          "pair": "FVid-vs-FDK",
+          "from_frame": 0,
+          "compared_scalars": 96256,
+          "rmse": 0.0023604819646520486,
+          "max_abs_error": 0.12175530195236206,
+          "snr_db": 31.421650244643796
+        },
+        {
+          "pair": "FVid-vs-FDK",
+          "from_frame": 512,
+          "compared_scalars": 95232,
+          "rmse": 0.0019442619702849358,
+          "max_abs_error": 0.12175530195236206,
+          "snr_db": 33.15084635292933
+        },
+        {
+          "pair": "FVid-vs-FDK",
+          "from_frame": 1024,
+          "compared_scalars": 94208,
+          "rmse": 0.0002758066754554954,
+          "max_abs_error": 0.04168543219566345,
+          "snr_db": 50.13947948511004
+        },
+        {
+          "pair": "FVid-vs-FDK",
+          "from_frame": 2048,
+          "compared_scalars": 92160,
+          "rmse": 2.0706270260677476e-05,
+          "max_abs_error": 8.448958396911621e-05,
+          "snr_db": 72.6304751253075
+        },
+        {
+          "pair": "FVid-vs-FDK",
+          "from_frame": 4096,
+          "compared_scalars": 88064,
+          "rmse": 2.0708734831282116e-05,
+          "max_abs_error": 8.448958396911621e-05,
+          "snr_db": 72.62944094545014
+        },
+        {
+          "pair": "FDK-vs-ISO",
+          "from_frame": 0,
+          "compared_scalars": 96256,
+          "rmse": 0.002360491175171454,
+          "max_abs_error": 0.12176513671875,
+          "snr_db": 31.40977305248512
+        },
+        {
+          "pair": "FDK-vs-ISO",
+          "from_frame": 512,
+          "compared_scalars": 95232,
+          "rmse": 0.0019443121253492992,
+          "max_abs_error": 0.12176513671875,
+          "snr_db": 33.140714910583704
+        },
+        {
+          "pair": "FDK-vs-ISO",
+          "from_frame": 1024,
+          "compared_scalars": 94208,
+          "rmse": 0.0002761236059753048,
+          "max_abs_error": 0.04168701171875,
+          "snr_db": 50.12935204994175
+        },
+        {
+          "pair": "FDK-vs-ISO",
+          "from_frame": 2048,
+          "compared_scalars": 92160,
+          "rmse": 2.3896895567134557e-05,
+          "max_abs_error": 9.1552734375e-05,
+          "snr_db": 71.38630087289997
+        },
+        {
+          "pair": "FDK-vs-ISO",
+          "from_frame": 4096,
+          "compared_scalars": 88064,
+          "rmse": 2.3899009868892036e-05,
+          "max_abs_error": 9.1552734375e-05,
+          "snr_db": 71.38553241411374
+        }
+      ]
+    },
+    {
+      "name": "er_eld_ldmps_ldqmf_2",
+      "rate": 24000,
+      "channels": 2,
+      "input_mp4_sha256": "907d37c0953b31198701c36a3a4f127c1aed48e3db105b3ed1b5c46d3d444fce",
+      "records_sha256": "38dc4559ad2e026f8cc784afa0d00f58b5f547991c82c916ee29a6c77724f244",
+      "native_sha256": "d63f5aac74427a9a697604e2212eef13d60747e909e9d134cd6f3e0017c5d1d4",
+      "fdk_sha256": "fa45d81a7a72a575c709c62ec84ed13b5c3e21327c48d37f80da242b78efe32c",
+      "external_status": "rate=24000 channels=2 frame=512 outputDelay=256 pcm_bits=16\npackets=47 scalars=48128\n",
+      "comparisons": [
+        {
+          "pair": "FVid-vs-FDK",
+          "from_frame": 0,
+          "compared_scalars": 48128,
+          "rmse": 0.0017703247610202867,
+          "max_abs_error": 0.07146186381578445,
+          "snr_db": 31.421009957793164
+        },
+        {
+          "pair": "FVid-vs-FDK",
+          "from_frame": 512,
+          "compared_scalars": 47104,
+          "rmse": 0.00020392721656806002,
+          "max_abs_error": 0.02388875186443329,
+          "snr_db": 50.2624917444315
+        },
+        {
+          "pair": "FVid-vs-FDK",
+          "from_frame": 1024,
+          "compared_scalars": 46080,
+          "rmse": 1.392297289815018e-05,
+          "max_abs_error": 3.764033317565918e-05,
+          "snr_db": 73.57827788072802
+        },
+        {
+          "pair": "FVid-vs-FDK",
+          "from_frame": 2048,
+          "compared_scalars": 44032,
+          "rmse": 1.3924935436165703e-05,
+          "max_abs_error": 3.764033317565918e-05,
+          "snr_db": 73.5770534410662
+        },
+        {
+          "pair": "FVid-vs-FDK",
+          "from_frame": 4096,
+          "compared_scalars": 39936,
+          "rmse": 1.3924935436165703e-05,
+          "max_abs_error": 3.764033317565918e-05,
+          "snr_db": 73.5770534410662
+        },
+        {
+          "pair": "FDK-vs-ISO",
+          "from_frame": 0,
+          "compared_scalars": 48128,
+          "rmse": 0.0965753891509868,
+          "max_abs_error": 0.298004150390625,
+          "snr_db": -3.3622297801676755
+        },
+        {
+          "pair": "FDK-vs-ISO",
+          "from_frame": 512,
+          "compared_scalars": 47104,
+          "rmse": 0.09743527260608549,
+          "max_abs_error": 0.298004150390625,
+          "snr_db": -3.355352345690505
+        },
+        {
+          "pair": "FDK-vs-ISO",
+          "from_frame": 1024,
+          "compared_scalars": 46080,
+          "rmse": 0.0974534085604124,
+          "max_abs_error": 0.294708251953125,
+          "snr_db": -3.3546526046181087
+        },
+        {
+          "pair": "FDK-vs-ISO",
+          "from_frame": 2048,
+          "compared_scalars": 44032,
+          "rmse": 0.09745340779721225,
+          "max_abs_error": 0.294708251953125,
+          "snr_db": -3.354652536595118
+        },
+        {
+          "pair": "FDK-vs-ISO",
+          "from_frame": 4096,
+          "compared_scalars": 39936,
+          "rmse": 0.09745340779721225,
+          "max_abs_error": 0.294708251953125,
+          "snr_db": -3.354652536595118
+        }
+      ]
+    }
+  ],
+  "window_tables": {
+    "fdk320_coefficients": 320,
+    "fdk640_coefficients": 640,
+    "max_interpolation_error": 2.981000013502211e-08,
+    "max_native64_vs_reversed_fdk640_error": 4.977573908604427e-12,
+    "max_native32_vs_reversed_fdk320_error": 2.9807193047126646e-08,
+    "native_window_sha256": "302fd83209c364ffee936f65f3b5c771549fb0ca3b681d63a00b39a63958f8a4"
+  },
+  "protocol_admission": [
+    {
+      "name": "magic",
+      "status": 1,
+      "stderr": "invalid FVIDAAC1 magic\n"
+    },
+    {
+      "name": "empty-asc",
+      "status": 1,
+      "stderr": "reference record exceeds admission bound\n"
+    },
+    {
+      "name": "truncated",
+      "status": 1,
+      "stderr": "truncated FVIDAAC1 payload\n"
+    },
+    {
+      "name": "trailing",
+      "status": 1,
+      "stderr": "trailing/error bytes in FVIDAAC1 input\n"
+    },
+    {
+      "name": "decode-error",
+      "status": 1,
+      "stderr": "decode error=0x5 AU=0\nexternal FDK reference refused input\n"
+    }
+  ],
+  "limitations": [
+    "FDK is a separately built external fixed-point cross-check, not a normative whole-codec oracle.",
+    "All windows use zero comparison lag. Later windows are diagnostic observations, not discarded errors in a pass/fail test.",
+    "The large FDK/ISO single-rate discrepancy also needs a verified normative phase/timing procedure.",
+    "This optional tool is not linked by production or invoked by ordinary tests."
+  ],
+  "repeat_build_outputs_identical": true,
+  "base": "0477f6d81bc72267df5c29a039a7e954ae8d8a5a",
+  "host": {
+    "platform": "Darwin",
+    "machine": "arm64",
+    "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+    "cmake": "cmake version 4.4.5"
+  },
+  "authored_stream_acceptance": {
+    "fixture": "tests/fixtures/playback-errors/aac-eld-mps-core/tree7.mp4",
+    "fixture_sha256": "dd877c40cd5d91325d3e8d6d2c2d0d36eb12714342973f67c002af9ee5c6a732",
+    "status": 0,
+    "rate": 48000,
+    "channels": 2,
+    "frame_samples": 512,
+    "packets": 3,
+    "scalars": 3072,
+    "scope": "Existing authored ELD/LD-MPS stream accepted by standalone FDK; not a waveform-accuracy assertion."
+  }
+}

@@ -5,6 +5,9 @@ Native AAC construction now exposes both owned spatial decorrelators through
 Mode selection survives reset and is checked before restoring checkpoints.
 ISO's default Real renderer explains most LD tree5151 WAV differences;
 ELD timing and shared32-bin LD-QMF phase/window qualification remain open.
+The24-kHz ISO WAV mismatch also occurs in independently built FDK. Owned/FDK
+window coefficients agree to their table-rounding precision,so this is still
+a reference-coupling/timing investigation rather than an isolated FVid defect.
 
 AAC-LD/ELD terminal byte alignment now accepts arbitrary padding values.
 33 authored programmes (132 variants in MP4/Matroska) preserve exact PCM,

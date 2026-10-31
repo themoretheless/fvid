@@ -1,3 +1,40 @@
+## Independent LD-QMF32 phase cross-check, 2026-10-31
+
+The large24-kHz ISO WAV difference is not isolated to FVid: an independently
+built,pinned AOSP FDK decoder also differs substantially from that WAV. Its
+full-stream RMS is0.096575,versus the earlier FVid/ISO0.096510. FVid/FDK full
+RMS is0.001770; after sample2048 it is0.000013925,max0.000037640. Full startup
+differences remain in the report. Later windows are observations,not a
+normative prefix exclusion or a passing conformance test. The48-kHz vector
+also has startup differences between the floating and fixed-point decoders.
+
+The independent FDK640-window numbers agree with the reversed owned window
+within5e-12. Its320-window uses the same adjacent-pair interpolation; observed
+rounding differences are below3e-8. This rules out changing the prototype
+coefficients merely to fit this WAV. It does not qualify the shared-SBR phase
+convention or establish that either implementation meets the normative procedure.
+The original ISO decoder can receive external fi/beta twiddles; the appropriate
+reference coupling/timing remains to be established before changing production.
+
+The optional `validate_aac_ld_mps_fdk_reference.py` builds the original decoder
+from pinned source,checks both official MP4/WAV inputs,decodes all47 AUs each,
+and reports full and explicitly named later-window comparisons. No source math
+patches,concealment flags,phase/delay fitting or automatic accuracy verdict are
+used. The `aac_spatial_reference packets` mode exports original ASC/AUs with
+checked lengths for this external probe. External sources and media remain
+outside the repository and ordinary tests require neither them nor a network.
+
+Two builds reproduce identical native and FDK PCM bytes. Five protocol controls
+reject bad magic,zero ASC length,truncation,trailing data and an actual FDK
+decode error. The existing own3-AU tree7 ELD/MPS movie is also accepted by FDK;
+this is syntax/decode admission,not new waveform accuracy qualification.
+Five focused Rust regression tests pass. Production codec behavior is unchanged
+in this milestone. The full codec-gap objective and LD-MPS reference qualification
+remain open.
+
+Evidence: `docs/validation/aac-ld-qmf-fdk-{crosscheck,tests}-2026-10-31.json`
+and [reproduction instructions](validation/aac-ld-qmf-fdk-reference-2026-10-31.md).
+
 ## Explicit native LD-MPS decorrelation and reference diagnosis, 2026-10-31
 
 `NativeAacDecoder::new_with_options` now accepts `AacDecodeOptions` containing

@@ -1,0 +1,52 @@
+{
+  "sources": {
+    "examples/aac_spatial_reference.rs": "df271ca49f117300ebe4b44deeaa570e45a7b45fb178a65a3038edbdfda706d8",
+    "scripts/support/aac_ld_mps_fdk_reference_probe.cpp": "41b9cf9db9ee8d93ec5e22f0591f37d12a4a0dc0e6856ac7ff54931d78d8e9d6",
+    "scripts/validate_aac_ld_mps_fdk_reference.py": "9cea3351d3e2ce83daa51ecb03ec3a4cb663292b3aca4754dfe740e5a984b498"
+  },
+  "runs": {
+    "native-tests": {
+      "log": "/tmp/fvid-fdk-phase-native-tests.log",
+      "sha256": "74ad76908ebcc93f5dffaacf1329203b49a345ee32f260d09461c3882fc4fac4",
+      "results": [
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.56s",
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.48s"
+      ]
+    },
+    "native-example-build": {
+      "log": "/tmp/fvid-ld-mps-research/fdk-protocol-native-build.log",
+      "sha256": "c42d17aeb7f7e0faa4f8299cf63c19c256e68ba18a134a67490366e816be5f1f",
+      "results": []
+    },
+    "reference-workflow": {
+      "log": "/tmp/fvid-ld-mps-research/fdk-crosscheck-final.log",
+      "sha256": "e605babc013bb6653ca2fd306d3063a9ca97f2cc48040b4f21c1ba4859621d49",
+      "results": []
+    }
+  },
+  "counts": {
+    "rust_tests_passed": 5,
+    "rust_tests_failed": 0,
+    "external_full_streams": 2,
+    "protocol_refusals_checked": 5,
+    "authored_external_streams": 1
+  },
+  "authored_record_export": {
+    "asc_and_three_aus_byte_exact": true,
+    "records_sha256": "8ac62c5569da4a1cab8e133aa359f6834c7f2084186e3a20d8dff47480521b63"
+  },
+  "native_example_modes": [
+    {
+      "mode": "real",
+      "status": 0,
+      "sha256": "214592107695e409b46068da7b8d9baf182e948cd14ea3f46454fb5059831532",
+      "stdout": "mode=Real packets=3 rate=48000 channels=2 scalars=3072\n"
+    },
+    {
+      "mode": "complex",
+      "status": 0,
+      "sha256": "843ebfdcc11419f8a1972942bf264e3af14d2804f1f287281bad81197183025d",
+      "stdout": "mode=Complex packets=3 rate=48000 channels=2 scalars=3072\n"
+    }
+  ]
+}

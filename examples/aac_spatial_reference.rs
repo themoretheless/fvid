@@ -1,5 +1,6 @@
 //! Decode unedited, constant-description MP4 AAC packets with either owned
-//! spatial decorrelator. Usage: aac_spatial_reference real|complex INPUT OUTPUT.
+//! spatial decorrelator. Usage: aac_spatial_reference real|complex|packets INPUT OUTPUT.
+//! `packets` writes bounded length-prefixed ASC/AUs for optional external probes.
 //! This numerical reference probe publishes raw decoder PCM, not player edits,
 //! priming compensation, a delay search or an automatic conformance verdict.
 use fvid_media::owned_aac::{AacDecodeOptions, NativeAacDecoder, aac_ld_mps_decor::Mode};
@@ -8,12 +9,13 @@ use std::io::{BufReader, BufWriter, Write};
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<_> = std::env::args_os().skip(1).collect();
     if args.len() != 3 {
-        return Err("usage: aac_spatial_reference real|complex INPUT.mp4 OUTPUT.f32le".into());
+        return Err("usage: aac_spatial_reference real|complex|packets INPUT.mp4 OUTPUT".into());
     }
     let mode = match args[0].to_str() {
-        Some("real") => Mode::Real,
-        Some("complex") => Mode::Complex,
-        _ => return Err("expected real or complex spatial decorrelation".into()),
+        Some("real") => Some(Mode::Real),
+        Some("complex") => Some(Mode::Complex),
+        Some("packets") => None,
+        _ => return Err("expected real, complex or packets".into()),
     };
     let mut reader = fvid::container::mp4::Mp4Reader::open(
         BufReader::new(std::fs::File::open(&args[1])?),
@@ -38,6 +40,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let count = track.samples.len();
     let timescale = track.timescale;
     let asc = fvid::codec::config::aac_specific_config(&track.configuration)?;
+    if mode.is_none() {
+        let mut output = BufWriter::new(std::fs::File::create(&args[2])?);
+        output.write_all(b"FVIDAAC1")?;
+        output.write_all(&u32::try_from(asc.len())?.to_le_bytes())?;
+        output.write_all(asc)?;
+        output.write_all(&u32::try_from(count)?.to_le_bytes())?;
+        let mut packet = Vec::new();
+        for i in 0..count {
+            reader.read_packet(index, i, &mut packet)?;
+            output.write_all(&u32::try_from(packet.len())?.to_le_bytes())?;
+            output.write_all(&packet)?;
+        }
+        output.flush()?;
+        println!("packets={count} format=FVIDAAC1");
+        return Ok(());
+    }
+    let mode = mode.unwrap();
     let mut decoder = NativeAacDecoder::new_with_options(
         asc,
         AacDecodeOptions {
