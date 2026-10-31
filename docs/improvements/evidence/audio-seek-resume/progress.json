@@ -1,10 +1,10 @@
 {
-  "status": "accepted FVID-0452;final eight gates passed;publication pending",
+  "status": "accepted FVID-0452;code published and delivery verified",
   "accepted_count": 452,
   "baseline_session": null,
   "baseline_log": "/private/tmp/fvid-audio-seek-resume-before-expanded.log",
   "target": "/private/tmp/fvid-audio-seek-resume-target-20261031",
-  "next": "Verify archived proof and corpus;remove only own completed audio-seek-resume artifacts;commit exact scope and atomic-push main/delivery;verify refs and clean own worktree,then continue next independent audit.",
+  "next": "Publish delivery receipt,verify both remote refs and clean own worktree;continue independent confirmed-defect audit toward1000.",
   "baseline_exit": 101,
   "baseline_passed": 2,
   "baseline_failed": 5,
@@ -33,5 +33,6 @@
   "focused_final_passed": 39,
   "focused_final_exit": 0,
   "repeat_final_runs": 20,
-  "repeat_final_failures": 0
+  "repeat_final_failures": 0,
+  "delivery_code_commit": "6ce3bc42a8af55e6baad571a6a9d21d6c62edd53"
 }
