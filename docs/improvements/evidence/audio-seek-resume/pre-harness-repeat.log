@@ -1,0 +1,259 @@
+RUN 0
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 1
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 2
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 3
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 4
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 5
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 6
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.02s
+
+RUN 7
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 8
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 9
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 10
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 11
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 12
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 13
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 14
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 15
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 16
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 17
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 18
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s
+
+RUN 19
+
+running 7 tests
+test audio_thread::seek_resume_regressions::coalesced_rewind_and_play_resume_from_zero ... ok
+test audio_thread::seek_resume_regressions::coalesced_seek_and_play_resume_only_after_selected_clock_is_installed ... ok
+test audio_thread::seek_resume_regressions::authored_video_and_continuous_pcm_controls ... ok
+test audio_thread::seek_resume_regressions::final_pause_in_seek_burst_does_not_start_the_device ... ok
+test audio_thread::seek_resume_regressions::queued_play_seek_play_uses_only_the_final_navigation_clock ... ok
+test audio_thread::seek_resume_regressions::separate_seek_and_play_commands_resume_at_selected_sample ... ok
+test audio_thread::seek_resume_regressions::real_audio_thread_resumes_at_the_selected_sample_after_queued_seek ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1089 filtered out; finished in 0.01s

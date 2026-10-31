@@ -583,6 +583,9 @@ impl Worker {
         let mut nav: Option<DeferredNav> = None;
         let mut latest_level: Option<u32> = None;
         let mut latest_tempo: Option<u32> = None;
+        // Install the final navigation clock before starting the device. A
+        // later Pause in this burst cancels an unobserved start request.
+        let mut resume_requested = false;
         let mut next = first;
         loop {
             let cmd = match next.take() {
@@ -594,8 +597,9 @@ impl Worker {
                 },
             };
             match cmd {
-                Command::Play => { if !self.resume_clock() { return false; } },
+                Command::Play => resume_requested = true,
                 Command::Pause => {
+                    resume_requested = false;
                     if self.playing {
                         self.playing = false;
                         if let Err(error) = self.backend.pause() {
@@ -668,6 +672,9 @@ impl Worker {
                 let at=self.stream.seek_to(pts);if !self.finish_seek(at){return false;}
             }
             None => {}
+        }
+        if resume_requested && !self.resume_clock() {
+            return false;
         }
         true
     }
@@ -928,6 +935,15 @@ mod tests {
 
 #[cfg(test)]
 mod presentation_window_tests {
+    // Compare exact packet time in native samples, independent of a reduced
+    // rational stamp's numerator/denominator spelling.
+    pub(super) fn native_sample(packet: &crate::audio::AudioPacket, rate: u32) -> u64 {
+        assert!(packet.timebase_num > 0 && packet.timebase_den > 0);
+        let scaled = u128::try_from(packet.pts).unwrap()
+            * u128::from(packet.timebase_num) * u128::from(rate);
+        assert_eq!(scaled % u128::from(packet.timebase_den), 0);
+        u64::try_from(scaled / u128::from(packet.timebase_den)).unwrap()
+    }
     /// Independent PCM oracle for a seek inside a saved nanosecond packet.
     /// Trim sample boundaries directly; do not call production seek helpers.
     pub(super) fn matroska_suffix(packets:&[(u64,Vec<u8>)],target:u64,rate:u32,channels:u16)->Vec<(u64,Vec<u8>)>{
@@ -987,7 +1003,7 @@ mod presentation_window_tests {
         worker.drain_commands(Some(Command::Seek(2400)));
         for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
         let packets = counts.lock().unwrap();
-        assert_eq!(packets[0].pts,2400);
+        assert_eq!(super::presentation_window_tests::native_sample(&packets[0],worker.stream.sample_rate()),2400);
         let actual:Vec<u8> = packets.iter().flat_map(|p|p.data.iter().copied()).collect();
         assert!(actual==expected[2400*8..],"seek PCM differs from continuous decode");
         drop(packets);
@@ -1021,7 +1037,7 @@ mod no_edit_seek_tests {
         worker.drain_commands(Some(Command::Seek(2400)));
         for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
         let packets = captured.lock().unwrap();
-        assert_eq!(packets[0].pts,2400);
+        assert_eq!(super::presentation_window_tests::native_sample(&packets[0],worker.stream.sample_rate()),2400);
         let actual:Vec<u8> = packets.iter().flat_map(|p|p.data.iter().copied()).collect();
         assert!(actual==expected[2400*8..],"un-edited seek PCM differs from continuous decode");
     }
@@ -1312,7 +1328,7 @@ mod checkpoint_seek_tests {
         let seek_steps=finish(&mut worker);
         assert!(seek_steps<full_steps*3/4,"checkpoint did not skip preroll: {seek_steps}/{full_steps}");
         eprintln!("AAC warm seek packet steps: {seek_steps}; full decode steps: {full_steps}");
-        let captured=packets.lock().unwrap();let start=captured[0].pts as usize;
+        let captured=packets.lock().unwrap();let start=super::presentation_window_tests::native_sample(&captured[0],worker.stream.sample_rate()) as usize;
         let actual:Vec<_>=captured.iter().flat_map(|p|p.data.iter().copied()).collect();
         assert!(actual==expected[start*channels*4..],"checkpoint seek changed PCM");drop(captured);
         packets.lock().unwrap().clear();worker.drain_commands(Some(Command::Seek(0)));finish(&mut worker);
@@ -1348,7 +1364,7 @@ mod ps_eof_tests {
             for count in 1..=3 {assert!(worker.decode_next().0.is_none());assert!(!worker.ended);assert_eq!(captured.lock().unwrap().len(),count);}
             assert!(matches!(worker.decode_next().0,Some(AudioEvent::Ended(7))));assert!(worker.ended);
             let actual=captured.lock().unwrap();assert_eq!(actual.len(),3);
-            for (a,e) in actual.iter().zip(expected) {assert_eq!(a.pts,e.pts);assert_eq!(a.data,e.data);assert_eq!(a.timebase_den,e.timebase_den);}
+            for (a,e) in actual.iter().zip(expected) {assert_eq!(super::presentation_window_tests::native_sample(a,48000),super::presentation_window_tests::native_sample(&e,48000));assert_eq!(a.data,e.data);}
         }
     }
     #[test]
@@ -1395,7 +1411,7 @@ mod ps_edit_worker_tests {
             let captured=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let (events,_)=sync_channel(1);
             let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
             run(&mut worker);
-            let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(p.pts,cursor);assert_eq!(p.timebase_den,48000);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,9600);assert_eq!(bytes,&expected[from*8..]);};
+            let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(super::presentation_window_tests::native_sample(p,48000),cursor);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,9600);assert_eq!(bytes,&expected[from*8..]);};
             check(0);
             for request in [4000,6000,9000,0] {captured.lock().unwrap().clear();worker.drain_commands(Some(Command::Seek(request)));run(&mut worker);check(request as usize);}
             captured.lock().unwrap().clear();worker.drain_commands(Some(Command::Rewind));run(&mut worker);check(0);
@@ -1421,7 +1437,7 @@ mod ps_edit_worker_tests {
             let decoder=stream.make_decoder().unwrap();
             let captured=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let (events,_)=sync_channel(1);
             let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
-            let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(p.pts,cursor);assert_eq!(p.timebase_den,48000);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,total as u64);assert!(bytes==expected[from*8..],"implicit PS presentation differs from independently qualified export");};
+            let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(super::presentation_window_tests::native_sample(p,48000),cursor);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,total as u64);assert!(bytes==expected[from*8..],"implicit PS presentation differs from independently qualified export");};
             run(&mut worker);check(0);
             for request in [4000,(total*2/3) as i64,(total-480) as i64,0] {captured.lock().unwrap().clear();worker.drain_commands(Some(Command::Seek(request)));run(&mut worker);check(request as usize);}
             captured.lock().unwrap().clear();worker.drain_commands(Some(Command::Rewind));run(&mut worker);check(0);
@@ -1457,12 +1473,13 @@ mod ps_edit_worker_tests {
     fn source_gap_is_rejected_after_pending_ps_pcm_is_drained() {
         for bytes in [include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-worker-source-gap-1024-synthetic.mp4").as_slice(),include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-worker-source-gap-960-synthetic.mp4").as_slice()] {
             let stream=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(bytes),Default::default()).unwrap();let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
-            let captured=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let (events,_)=sync_channel(1);
+            let captured=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let (events,observer)=sync_channel(1);
             let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
-            let mut saw_error=false;for _ in 0..16 {match worker.decode_next().0 {Some(AudioEvent::Error(e))=>{assert!(e.contains("AAC edit extends beyond source packets"),"{e}");saw_error=true;break;},Some(AudioEvent::Ended(_))=>panic!("silently accepted a source gap"),_=>{}}}
+            let mut saw_error=false;for _ in 0..16 {match worker.decode_next().0.or_else(||observer.try_recv().ok()) {Some(AudioEvent::Error(e))=>{assert_eq!(e,"Audio configuration change: MP4 audio edit extends beyond source packets");saw_error=true;break;},Some(AudioEvent::Ended(_))=>panic!("silently accepted a source gap"),_=>{}}}
             assert!(saw_error);assert_eq!(captured.lock().unwrap().len(),3);
         }
     }
+
 }
 
 #[cfg(test)]
@@ -2002,3 +2019,7 @@ mod sample_seek_clock_regressions {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "audio_thread_seek_resume_tests.rs"]
+mod seek_resume_regressions;

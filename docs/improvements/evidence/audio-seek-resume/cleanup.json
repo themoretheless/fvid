@@ -1,0 +1,147 @@
+{
+  "completed": true,
+  "removed": [
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-after.log",
+      "bytes": 26323,
+      "sha256": "2c9c0a0345d27fd97e7a51281d82dada2741e2515e80ebcc1ba010ca905987a7",
+      "archive": "after.log",
+      "archive_sha256": "0167951fb5e1aee3400d7da23ce3aa54494661f47ee834f446acd95172a63b1b"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-audio-thread.log",
+      "bytes": 29675,
+      "sha256": "2cfd99b7d36fc67dba6336fb963549fc4f47447e6f7336f0c122b555d25e04bb",
+      "archive": "qualification/audio-thread.log",
+      "archive_sha256": "0080044ec4ea0eaadc7ecc705a3b449de6993ed0358535dfd4bea74e6300e467"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-before-expanded.log",
+      "bytes": 29030,
+      "sha256": "e61f3a8c239f7d45e03069924162c93f144203cd927de043f69217c1f65a6d8f",
+      "archive": "before.log",
+      "archive_sha256": "e61f3a8c239f7d45e03069924162c93f144203cd927de043f69217c1f65a6d8f"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-before-harness.rs",
+      "bytes": 107277,
+      "sha256": "6b2736ac4f257919fdbe6b40a70d334b2e5ac4d4dde70a7ec61563646afcc6b3",
+      "preserved_as": "before-harness.patch with verified byte-identical reconstruction"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-before.log",
+      "bytes": 37548,
+      "sha256": "b7d4d1ad6e2feb99f85a3dbbd17570ad18d6db34c7f32e47f444b3ac97ef9870",
+      "archive": "initial-before.log",
+      "archive_sha256": "b7d4d1ad6e2feb99f85a3dbbd17570ad18d6db34c7f32e47f444b3ac97ef9870"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-candidate.rs",
+      "bytes": 108218,
+      "sha256": "49f0efc57d816d17345780007cf9800b026151831e1038c9a635cdf98ebbf070",
+      "preserved_as": "final tracked src/audio_thread.rs"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-core-check.log",
+      "bytes": 25551,
+      "sha256": "a7c0dcf7d0e7a410de0fca304080bdca785c2bdaca282a5e5a7aac2c3bf274c4",
+      "archive": "qualification/core-check.log",
+      "archive_sha256": "a7c0dcf7d0e7a410de0fca304080bdca785c2bdaca282a5e5a7aac2c3bf274c4"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-focused-final.log",
+      "bytes": 29767,
+      "sha256": "2b3ab89c904240427e2e653465b49388996a6aefd07f7f62c6962792b11cdee6",
+      "archive": "focused-final.log",
+      "archive_sha256": "815024cfffbed930026862e0e1cdc9cd71615e5733d567938415ec71dcb6c049"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-harness-probe.log",
+      "bytes": 42727,
+      "sha256": "de3900bf54e3806b721c200d5eedd3edc811a304074aea55696e4c3211eda32c",
+      "archive": "harness-probe.log",
+      "archive_sha256": "de3900bf54e3806b721c200d5eedd3edc811a304074aea55696e4c3211eda32c"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-integration.log",
+      "bytes": 111435,
+      "sha256": "9117a090fdd8792c344e0c11d673f69717adaf3bb811842560a57a7b4a59fa6e",
+      "archive": "qualification/integration.log",
+      "archive_sha256": "4b8dfeac67df519a415746ab07c73b004a62eddb6032f1896b13d19b4bcb1685"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-media.log",
+      "bytes": 69811,
+      "sha256": "1d16212cb6b7620a544646c2e70f5ca8a4811f84ce2e54c9b97d8f72fdbcf8d6",
+      "archive": "qualification/media.log",
+      "archive_sha256": "ae4ebf89ee537339e09f29e8cee4b24e2c914d073b571ef6b22de6fd22e96944"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-player-check.log",
+      "bytes": 25119,
+      "sha256": "c70fb98ce58746346db934a05543dab3fd8afbb564ec460b81851bec2b97cd6b",
+      "archive": "qualification/player-check.log",
+      "archive_sha256": "c70fb98ce58746346db934a05543dab3fd8afbb564ec460b81851bec2b97cd6b"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-player-units.log",
+      "bytes": 44110,
+      "sha256": "7aa83fc1852dd7b9696741df0bf9da13e037ceb8acb786c53586895283c99df8",
+      "archive": "qualification/player-units.log",
+      "archive_sha256": "4e448710723d2d84f81a0fb448fa164d4d31d84c854c32cdc66a515496984738"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-published-baseline.log",
+      "bytes": 32218,
+      "sha256": "acca3fb07eb7e8400526bcb8d053bcf2b86b09a4906234943b337bb3440acec8",
+      "archive": "published-baseline.log",
+      "archive_sha256": "acca3fb07eb7e8400526bcb8d053bcf2b86b09a4906234943b337bb3440acec8"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-repeat.log",
+      "bytes": 17430,
+      "sha256": "cefc7935d8b7ebac39bc1744e953ca369610d28315ba1a323a638c65873309a5",
+      "archive": "repeat.log",
+      "archive_sha256": "65a507fc41aa88cec8201df33d4f7d9609d98f604b76fa70bd79f1ee99fc5bea"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-root-mp4.log",
+      "bytes": 32288,
+      "sha256": "1cb43cb168960c9f76e90c47ebeaf41a449aec8408d915d2347d74602056672c",
+      "archive": "qualification/root-mp4.log",
+      "archive_sha256": "7e48869d01c9e3a91b035d5de15c309ad1d02ceeb9f5ffcbc77f5a9587b14fd3"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-root-webm.log",
+      "bytes": 31604,
+      "sha256": "41e2c8179c9af9f27ddf344c862d4f66415617410549ceebab1062e72dde9c8f",
+      "archive": "qualification/root-webm.log",
+      "archive_sha256": "1990fd4f986b0905afc67e5d6cf6775c08327ecd2d8b2e969ca030074ebe24b5"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-runner.log",
+      "bytes": 128,
+      "sha256": "59eb40c1e1785b1778cb5309e828be13d3f9c7db90866e1ab4d825d11254e806",
+      "archive": "diagnostics/runner.log",
+      "archive_sha256": "59eb40c1e1785b1778cb5309e828be13d3f9c7db90866e1ab4d825d11254e806"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-target-20261031",
+      "kind": "isolated disposable build target"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-test-only-baseline.log",
+      "bytes": 29017,
+      "sha256": "ee4b16240ad24c5765189a44c7935a4bf3d71e218c3045d5bb453e3ed8196657",
+      "archive": "test-only-baseline.log",
+      "archive_sha256": "6bf6abf77f5c4479e68676f57d8f5b19e39a041a2738b560bcde3bb81acf476f"
+    },
+    {
+      "path": "/private/tmp/fvid-audio-seek-resume-test-only-baseline.rs",
+      "bytes": 107823,
+      "sha256": "89dfe34e5403c68a59035bcca22beffb84cd66142af1301b8da4b3ce24d38c14",
+      "preserved_as": "test-only-baseline.patch with verified byte-identical reconstruction"
+    }
+  ],
+  "preserved": "All synthetic fixtures,generator,regressions,proof logs and reconstructable baseline sources. Foreign worktrees,stashes and shared caches untouched."
+}

@@ -1,0 +1,16 @@
+{
+  "test-only-baseline": {
+    "base_commit": "e67a009f9e9dc7ae3ad903cc75af95a061ea31e0",
+    "source_sha256": "89dfe34e5403c68a59035bcca22beffb84cd66142af1301b8da4b3ce24d38c14",
+    "patch_sha256": "5409ba987226e467d3afea497c3e0087b8d4072ae608da972e1df025e4db2bf9",
+    "reconstruction": "Apply zero-context patch to published base using git apply --unidiff-zero.",
+    "reconstruction_verified_byte_identical": true
+  },
+  "before-harness": {
+    "base_commit": "e67a009f9e9dc7ae3ad903cc75af95a061ea31e0",
+    "source_sha256": "6b2736ac4f257919fdbe6b40a70d334b2e5ac4d4dde70a7ec61563646afcc6b3",
+    "patch_sha256": "83b5434032f00f1cbdd84dce080d23694a2a8e40426c1bbfd784ab989ba9f0d6",
+    "reconstruction": "Apply zero-context patch to published base using git apply --unidiff-zero.",
+    "reconstruction_verified_byte_identical": true
+  }
+}

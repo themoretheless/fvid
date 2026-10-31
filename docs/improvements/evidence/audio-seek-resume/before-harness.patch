@@ -1,0 +1,20 @@
+--- a/src/audio_thread.rs
++++ b/src/audio_thread.rs
+@@ -585,0 +586,3 @@
++        // Install the final navigation clock before starting the device. A
++        // later Pause in this burst cancels an unobserved start request.
++        let mut resume_requested = false;
+@@ -597 +600 @@
+-                Command::Play => { if !self.resume_clock() { return false; } },
++                Command::Play => resume_requested = true,
+@@ -598,0 +602 @@
++                    resume_requested = false;
+@@ -670,0 +675,3 @@
++        }
++        if resume_requested && !self.resume_clock() {
++            return false;
+@@ -2004,0 +2012,4 @@
++
++#[cfg(test)]
++#[path = "audio_thread_seek_resume_tests.rs"]
++mod seek_resume_regressions;

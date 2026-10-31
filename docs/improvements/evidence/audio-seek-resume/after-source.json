@@ -1,0 +1,6 @@
+{
+  "src/audio_thread.rs": "49f0efc57d816d17345780007cf9800b026151831e1038c9a635cdf98ebbf070",
+  "src/audio_thread_seek_resume_tests.rs": "3acdda7df31ff9a49f48aaedd4b87809287ecd9f3ed8d45268673eb2a35bfbbf",
+  "scripts/generate_audio_seek_resume.py": "7c07b6d81911dede90d7dd5aeb22a9f2438295330d7e601f35cab610a23cd474",
+  "tests/fixtures/playback-errors/audio-seek-resume/manifest.json": "870dba601d5bd222eb5f9137c22f9767eb94efc75133e820203ec022cfb7bbe7"
+}

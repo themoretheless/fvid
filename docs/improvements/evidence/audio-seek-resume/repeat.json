@@ -1,0 +1,34 @@
+{
+  "binary_sha256": "c4922d5a0e2218462f23a4c9763dba1e93760cc610ece6f561134f20a0c9f0f6",
+  "runs": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "cases_per_run": 7,
+  "source_hashes": {
+    "src/audio_thread.rs": "49f0efc57d816d17345780007cf9800b026151831e1038c9a635cdf98ebbf070",
+    "src/audio_thread_seek_resume_tests.rs": "3acdda7df31ff9a49f48aaedd4b87809287ecd9f3ed8d45268673eb2a35bfbbf",
+    "scripts/generate_audio_seek_resume.py": "7c07b6d81911dede90d7dd5aeb22a9f2438295330d7e601f35cab610a23cd474",
+    "tests/fixtures/playback-errors/audio-seek-resume/manifest.json": "870dba601d5bd222eb5f9137c22f9767eb94efc75133e820203ec022cfb7bbe7"
+  },
+  "raw_log_sha256": "cefc7935d8b7ebac39bc1744e953ca369610d28315ba1a323a638c65873309a5",
+  "archive_log_sha256": "65a507fc41aa88cec8201df33d4f7d9609d98f604b76fa70bd79f1ee99fc5bea"
+}

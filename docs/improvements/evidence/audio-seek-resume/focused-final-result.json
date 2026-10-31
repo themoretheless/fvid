@@ -1,0 +1,16 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--lib",
+    "audio_thread::",
+    "--",
+    "--test-threads=2"
+  ],
+  "exit_code": 0
+}

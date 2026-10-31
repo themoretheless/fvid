@@ -1,0 +1,38 @@
+--- a/src/audio_thread.rs
++++ b/src/audio_thread.rs
+@@ -930,0 +931,9 @@
++    // Compare exact packet time in native samples, independent of a reduced
++    // rational stamp's numerator/denominator spelling.
++    pub(super) fn native_sample(packet: &crate::audio::AudioPacket, rate: u32) -> u64 {
++        assert!(packet.timebase_num > 0 && packet.timebase_den > 0);
++        let scaled = u128::try_from(packet.pts).unwrap()
++            * u128::from(packet.timebase_num) * u128::from(rate);
++        assert_eq!(scaled % u128::from(packet.timebase_den), 0);
++        u64::try_from(scaled / u128::from(packet.timebase_den)).unwrap()
++    }
+@@ -990 +999 @@
+-        assert_eq!(packets[0].pts,2400);
++        assert_eq!(super::presentation_window_tests::native_sample(&packets[0],worker.stream.sample_rate()),2400);
+@@ -1024 +1033 @@
+-        assert_eq!(packets[0].pts,2400);
++        assert_eq!(super::presentation_window_tests::native_sample(&packets[0],worker.stream.sample_rate()),2400);
+@@ -1315 +1324 @@
+-        let captured=packets.lock().unwrap();let start=captured[0].pts as usize;
++        let captured=packets.lock().unwrap();let start=super::presentation_window_tests::native_sample(&captured[0],worker.stream.sample_rate()) as usize;
+@@ -1351 +1360 @@
+-            for (a,e) in actual.iter().zip(expected) {assert_eq!(a.pts,e.pts);assert_eq!(a.data,e.data);assert_eq!(a.timebase_den,e.timebase_den);}
++            for (a,e) in actual.iter().zip(expected) {assert_eq!(super::presentation_window_tests::native_sample(a,48000),super::presentation_window_tests::native_sample(&e,48000));assert_eq!(a.data,e.data);}
+@@ -1398 +1407 @@
+-            let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(p.pts,cursor);assert_eq!(p.timebase_den,48000);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,9600);assert_eq!(bytes,&expected[from*8..]);};
++            let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(super::presentation_window_tests::native_sample(p,48000),cursor);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,9600);assert_eq!(bytes,&expected[from*8..]);};
+@@ -1424 +1433 @@
+-            let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(p.pts,cursor);assert_eq!(p.timebase_den,48000);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,total as u64);assert!(bytes==expected[from*8..],"implicit PS presentation differs from independently qualified export");};
++            let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(super::presentation_window_tests::native_sample(p,48000),cursor);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,total as u64);assert!(bytes==expected[from*8..],"implicit PS presentation differs from independently qualified export");};
+@@ -1460 +1469 @@
+-            let captured=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let (events,_)=sync_channel(1);
++            let captured=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let (events,observer)=sync_channel(1);
+@@ -1462 +1471 @@
+-            let mut saw_error=false;for _ in 0..16 {match worker.decode_next().0 {Some(AudioEvent::Error(e))=>{assert!(e.contains("AAC edit extends beyond source packets"),"{e}");saw_error=true;break;},Some(AudioEvent::Ended(_))=>panic!("silently accepted a source gap"),_=>{}}}
++            let mut saw_error=false;for _ in 0..16 {match worker.decode_next().0.or_else(||observer.try_recv().ok()) {Some(AudioEvent::Error(e))=>{assert_eq!(e,"Audio configuration change: MP4 audio edit extends beyond source packets");saw_error=true;break;},Some(AudioEvent::Ended(_))=>panic!("silently accepted a source gap"),_=>{}}}
+@@ -1465,0 +1475 @@
++

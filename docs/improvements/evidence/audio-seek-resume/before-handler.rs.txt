@@ -1,0 +1,98 @@
+    fn drain_commands(&mut self, first: Option<Command>) -> bool {
+        enum DeferredNav {
+            Rewind,
+            #[cfg(test)]
+            Seek(i64),
+            SeekTime(Duration),
+        }
+        let mut nav: Option<DeferredNav> = None;
+        let mut latest_level: Option<u32> = None;
+        let mut latest_tempo: Option<u32> = None;
+        let mut next = first;
+        loop {
+            let cmd = match next.take() {
+                Some(c) => c,
+                None => match self.commands.try_recv() {
+                    Ok(c) => c,
+                    Err(TryRecvError::Empty) => break,
+                    Err(TryRecvError::Disconnected) => return false,
+                },
+            };
+            match cmd {
+                Command::Play => { if !self.resume_clock() { return false; } },
+                Command::Pause => {
+                    if self.playing {
+                        self.playing = false;
+                        if let Err(error) = self.backend.pause() {
+                            self.fail_output("pause", error);
+                            return false;
+                        }
+                    }
+                }
+                Command::Rewind => {
+                    self.generation += 1;
+                    self.ended = false;
+                    self.draining = false;
+                    self.reconfiguration = None;
+                    nav = Some(DeferredNav::Rewind);
+                }
+                Command::SeekTime(target) => {
+                    self.generation += 1;self.ended=false;self.draining=false;self.reconfiguration=None;
+                    nav=Some(DeferredNav::SeekTime(target));
+                }
+                #[cfg(test)]
+                Command::Seek(pts) => {
+                    self.generation += 1;
+                    self.ended = false;
+                    self.draining = false;
+                    self.reconfiguration = None;
+                    nav = Some(DeferredNav::Seek(pts));
+                }
+                Command::Level(milli) => latest_level = Some(milli),
+                Command::Tempo(milli) => latest_tempo = Some(milli),
+                Command::Stop => return false,
+            }
+        }
+        if let Some(milli) = latest_level {
+            if let Err(error) = self.backend.set_volume(milli) {
+                self.fail_output("volume", error);
+                return false;
+            }
+        }
+        if let Some(milli) = latest_tempo {
+            if let Err(error) = self.backend.set_rate(milli) {
+                self.fail_output("rate", error);
+                return false;
+            }
+        }
+        match nav {
+            Some(DeferredNav::Rewind) => {
+                self.stream.rewind();
+                if let Err(error) = self.reset_decoder() {
+                    self.fail_output("rewind decoder reset", error);
+                    return false;
+                }
+                if let Err(error) = self.backend.flush(Duration::ZERO) {
+                    self.fail_output("rewind flush", error);
+                    return false;
+                }
+                if let Err(error) = self.sync_output(Duration::ZERO) {
+                    self.fail_output("rewind output configuration", error);return false;
+                }
+                self.queued_frontier = Duration::ZERO;
+
+                if let Ok(mut pos) = self.position.lock() {
+                    *pos = Duration::ZERO;
+                }
+            }
+            Some(DeferredNav::SeekTime(target)) => {
+                let at=self.stream.seek_time(target);if !self.finish_seek(at){return false;}
+            }
+            #[cfg(test)]
+            Some(DeferredNav::Seek(pts)) => {
+                let at=self.stream.seek_to(pts);if !self.finish_seek(at){return false;}
+            }
+            None => {}
+        }
+        true
+    }

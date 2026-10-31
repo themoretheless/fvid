@@ -1,0 +1,20 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--lib",
+    "audio_thread::",
+    "--",
+    "--test-threads=2"
+  ],
+  "exit_code": 0,
+  "source_sha256": "89dfe34e5403c68a59035bcca22beffb84cd66142af1301b8da4b3ce24d38c14",
+  "candidate_sha256": "49f0efc57d816d17345780007cf9800b026151831e1038c9a635cdf98ebbf070",
+  "runtime": "published HEAD;exact rational-clock and public error observer repairs only",
+  "count_delta": 0
+}

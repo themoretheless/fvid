@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 451,
-  "next_id": "FVID-0452",
+  "accepted_count": 452,
+  "next_id": "FVID-0453",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5066,6 +5066,17 @@
       "result": "Honor keyboard direction,seek immediately before the displayed frame START for backward CFR/VFR/fractional timing,and park after one picture. Handle first-picture and EOF boundaries without playlist advance;prepare paused sound at the shown start for exact explicit resume. Manual steps present ready pictures without waiting for future spool lead or a paused audio clock. Three authored tiny VP9 movies and scalar YUV/PCM oracles verify actual native keyboard/presenter/audio-worker behavior.11cases pass40repetitions;127integration suites591pass,1475distinct checks and both locked/offline builds pass. Five existing ignores unchanged. All variants and candidate amendments count once;no performance claim.",
       "status": "accepted",
       "validation": "batch-451-validation.json"
+    },
+    {
+      "id": "FVID-0452",
+      "batch": 452,
+      "title": "Install selected audio clock before resuming a queued navigation burst",
+      "source": "src/audio_thread.rs",
+      "regression": "src/audio_thread_seek_resume_tests.rs",
+      "before": "Publishede67a009f9e resumes a paused backend immediately while deferring Seek/Rewind until the command drain ends. Qualified baseline2source/sequential controls pass and5clock-order acceptances fail,including an actual AudioPlayback worker deterministically receiving queued Seek+Play. Rewind resumes8ms before flush0;Seek resumes0 before flush8ms.",
+      "result": "Coalesce requested device start until navigation and final controls are installed;a laterPause cancels the pending start while pausing an already running device remains immediate. Two short authored VP9/IMA4/ALAC movies preserve exact continuous/seek-suffix PCM and valid3picture video controls. Seven order/real-thread tests pass20repetitions;all39audio-thread tests,127integration suites591pass,1511distinct checks and both locked/offline builds pass. Seven pre-existing observer failures reproduced on published source and repaired with exact rational clocks/public error observation count0. Five old ignores unchanged;variants count once,no performance claim.",
+      "status": "accepted",
+      "validation": "batch-452-validation.json"
     }
   ]
 }

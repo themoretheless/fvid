@@ -1,0 +1,13 @@
+{
+  "files": 5,
+  "movies": 2,
+  "byte_identical": true,
+  "sha256": {
+    "ima.mp4": "83a3500029cac93f262ab5a1d293cee55d91cff2e10ee34e8159cfebde08d6c5",
+    "ima.f32le": "286bc442f76950c5f97d11959dcb5d62415806588c6e18c1d0f97feb04ccf0a1",
+    "alac.mp4": "6a8dfb2a7060a95796abdcb0e52e932455ef9fd737afbdea0c4543cba6cf4dd4",
+    "alac.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "manifest.json": "870dba601d5bd222eb5f9137c22f9767eb94efc75133e820203ec022cfb7bbe7"
+  },
+  "ordinary_tests_generate_nothing": true
+}
