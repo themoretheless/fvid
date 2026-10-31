@@ -1,0 +1,7 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -13044,0 +13045,4 @@
++
++#[cfg(test)]
++#[path = "player_seek_phase_tests.rs"]
++mod seek_phase_regressions;

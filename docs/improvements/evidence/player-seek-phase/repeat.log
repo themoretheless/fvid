@@ -1,0 +1,199 @@
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.68s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.64s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.67s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.65s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.65s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.67s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.67s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.65s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.66s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.72s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.74s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.72s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.64s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.65s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.64s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.64s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.67s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.64s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.64s
+
+
+running 5 tests
+test player::seek_phase_regressions::exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls ... ok
+test player::seek_phase_regressions::faster_playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::paused_seek_and_resume_preserve_requested_phase_and_remaining_picture ... ok
+test player::seek_phase_regressions::seek_inside_picture_reaches_the_stop_bound_from_requested_phase ... ok
+test player::seek_phase_regressions::playing_seek_preserves_requested_phase_and_remaining_picture ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1125 filtered out; finished in 1.69s

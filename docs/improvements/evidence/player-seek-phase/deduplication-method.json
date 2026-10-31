@@ -1,0 +1,30 @@
+{
+  "method": "One physical test body counts once across compiled module contexts;root-filter reruns are also excluded.",
+  "shared_source": "crates/fvid-media/src/owned_mp4_edit_clock_impl.rs",
+  "shared_source_sha256": "005da95be0581658f771bc01ebe15191329ab4c9132964d55ade45da71cba628",
+  "contexts": {
+    "native_media::mp4_export_clock": {
+      "file": "src/native_media.rs",
+      "sha256": "2731d2e8bb794d2f62b2d47d96acf388a866902f74023bb183a9334b7473fcb1"
+    },
+    "playback_mp4_audio::edit_clock": {
+      "file": "src/playback/audio/mp4_edit_clock.rs",
+      "sha256": "6f6461c67fed4156de3290494a1f1c4cf2ea801af6e0f1b5b1a9ad076aee129a"
+    },
+    "owned_mp4_audio::mp4_export_clock": {
+      "file": "crates/fvid-media/src/owned_mp4_audio.rs",
+      "sha256": "1d06b8d0e4fe3dbf88febcc4598455346919274680573a3f222def47eb257d5a"
+    }
+  },
+  "shared_tests": 3,
+  "compiled_contexts": 3,
+  "duplicate_shared_executions": 6,
+  "earlier_method_excluded": 3,
+  "previous_batch_452": {
+    "legacy_context_method_passed": 1511,
+    "physical_source_method_passed": 1508,
+    "source": "../audio-seek-resume/qualification-results.json"
+  },
+  "accepted_improvement_count_delta": 0,
+  "note": "Reporting refinement only;no test removed or expectation relaxed. Prior contextual totals are not used as the physical-source total for this batch."
+}

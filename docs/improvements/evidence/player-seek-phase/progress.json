@@ -1,0 +1,26 @@
+{
+  "status": "accepted;all9gates passed;own temporary artifacts removed;ready for delivery",
+  "accepted_count": 462,
+  "baseline_session": 99094,
+  "baseline_log": "/private/tmp/fvid-player-seek-phase-before.log",
+  "target": "/private/tmp/fvid-player-seek-phase-target-20261031",
+  "next": "Verify hashes,stage qualified paths,cached-check,commit/atomic push/verify receipt. Next unconfirmed audit:silent presentation_clock after delayed repaint across a stop bound(current picture end<stop<queued picture start);then A-B loop boundaries.",
+  "baseline_terminal_exit": 101,
+  "qualified_baseline": {
+    "passed": 1,
+    "failed": 4
+  },
+  "candidate": {
+    "passed": 5,
+    "failed": 0
+  },
+  "qualification_session": 98287,
+  "qualification_log": "/private/tmp/fvid-player-seek-phase-integration.log",
+  "repeated_runs": 20,
+  "repeated_cases": 100,
+  "repeat_failures": 0,
+  "accepted_ids": [
+    "FVID-0462"
+  ],
+  "qualification_terminal_exit": 0
+}

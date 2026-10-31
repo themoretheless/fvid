@@ -1,0 +1,180 @@
+//! Showing a covering picture must retain the requested sub-frame media clock.
+use super::*;
+use std::io::Cursor;
+fn root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/player-seek-phase")
+}
+fn bytes(n: &str) -> Vec<u8> {
+    std::fs::read(root().join(n)).unwrap()
+}
+fn tick(p: &mut Player, ctx: &egui::Context) {
+    let mut o = ctx.run_ui(Default::default(), |ui| p.present(ui.ctx()));
+    o.textures_delta.clear();
+}
+fn wait(p: &mut Player, ctx: &egui::Context, pred: impl Fn(&Player) -> bool) {
+    let until = Instant::now() + Duration::from_secs(5);
+    while !pred(p) {
+        assert!(
+            Instant::now() < until,
+            "seek phase stalled interval{:?} target{:?} ended{}",
+            p.interval,
+            p.seek_target,
+            p.ended
+        );
+        assert!(p.error.is_none(), "{:?}", p.error);
+        tick(p, ctx);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+}
+#[test]
+fn exact_mp4_covering_picture_pixels_pts_and_native_seek_eof_controls() {
+    let mut r = crate::playback_mp4::Mp4VideoReader::open_software(
+        Cursor::new(bytes("movie.mp4")),
+        Default::default(),
+        32 << 20,
+    )
+    .unwrap();
+    for i in 0..5 {
+        let f = r.read_frame().unwrap().unwrap();
+        assert_eq!(
+            (f.sample_index, f.presentation_time.ticks, f.duration.ticks),
+            (i, i as i64 * 2000, 2000)
+        );
+        let yuv: Vec<_> = f
+            .picture
+            .y
+            .iter()
+            .chain(&f.picture.cb)
+            .chain(&f.picture.cr)
+            .flat_map(|v| v.to_le_bytes())
+            .collect();
+        assert_eq!(yuv, bytes(&format!("frame-{}.yuv16", i % 3)));
+    }
+    assert!(r.read_frame().unwrap().is_none());
+    let mut r = NativeReader::software(Cursor::new(bytes("movie.mp4")), 32 << 20).unwrap();
+    for (at, start) in [(3300, 2000), (0, 0), (10000, 8000)] {
+        assert!(r.seek_raw(Duration::from_millis(at)).unwrap().is_some());
+        assert_eq!(r.frame_interval(), Some((start, start + 2000, 1000)));
+    }
+}
+fn seek_phase(paused: bool, rate: u32) {
+    let ctx = egui::Context::default();
+    let mut p = Player {
+        queue: vec![root().join("movie.mp4")],
+        no_audio: true,
+        asynchronous_open: false,
+        start_paused: paused,
+        ..Default::default()
+    };
+    p.play_index(0);
+    wait(&mut p, &ctx, |p| {
+        p.presented.is_some() && !p.buffering && !p.seek_preview
+    });
+    p.set_rate(rate);
+    let target = Duration::from_millis(3300);
+    p.seek_time(target);
+    assert_eq!(p.presentation_clock(), Some(target));
+    wait(&mut p, &ctx, |p| !p.seek_preview && !p.buffering);
+    assert_eq!(p.interval, Some((2000, 4000, 1000)));
+    let at = p.presentation_clock().unwrap();
+    assert!(
+        at.abs_diff(target) < Duration::from_millis(20),
+        "paused{paused} rate{rate} lost requested{target:?} after showing covering picture:clock{at:?}"
+    );
+    let mut reference = NativeReader::software(Cursor::new(bytes("movie.mp4")), 32 << 20).unwrap();
+    let rgb = reference
+        .seek_raw(target)
+        .unwrap()
+        .unwrap()
+        .into_rgb(32 << 20)
+        .unwrap();
+    assert_eq!(display_rgb(p.presented.as_ref().unwrap()).unwrap(), rgb);
+    if paused {
+        std::thread::sleep(Duration::from_millis(30));
+        tick(&mut p, &ctx);
+        assert_eq!(p.presentation_clock().unwrap(), at);
+        p.toggle_pause();
+    }
+    let start = Instant::now();
+    let remaining = paced_period(
+        Duration::from_secs(4).saturating_sub(p.presentation_clock().unwrap()),
+        rate,
+    );
+    while start.elapsed() + Duration::from_millis(25) < remaining {
+        tick(&mut p, &ctx);
+        assert_eq!(
+            p.interval,
+            Some((2000, 4000, 1000)),
+            "covering picture ended before remaining phase elapsed"
+        );
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    wait(&mut p, &ctx, |p| {
+        p.interval.is_some_and(|(s, _, _)| s >= 4000)
+    });
+    assert!(start.elapsed() + Duration::from_millis(25) >= remaining);
+    assert_eq!(p.interval, Some((4000, 6000, 1000)));
+    p.seek_time(Duration::from_secs(10));
+    wait(&mut p, &ctx, |p| p.ended);
+    assert_eq!(p.interval, Some((8000, 10000, 1000)));
+    assert!(p.error.is_none());
+    assert!(!p.buffering && !p.seek_preview);
+}
+#[test]
+fn playing_seek_preserves_requested_phase_and_remaining_picture() {
+    seek_phase(false, 1000);
+}
+#[test]
+fn faster_playing_seek_preserves_requested_phase_and_remaining_picture() {
+    seek_phase(false, 2000);
+}
+#[test]
+fn paused_seek_and_resume_preserve_requested_phase_and_remaining_picture() {
+    seek_phase(true, 1000);
+}
+
+#[test]
+fn seek_inside_picture_reaches_the_stop_bound_from_requested_phase() {
+    let ctx = egui::Context::default();
+    let bound = Duration::from_millis(3500);
+    let mut p = Player {
+        queue: vec![root().join("movie.mp4")],
+        no_audio: true,
+        asynchronous_open: false,
+        start_paused: false,
+        bounds: PlayBounds {
+            start: None,
+            stop: Some(bound),
+        },
+        ..Default::default()
+    };
+    p.play_index(0);
+    wait(&mut p, &ctx, |p| p.presented.is_some() && !p.buffering);
+    p.seek_time(Duration::from_millis(3300));
+    wait(&mut p, &ctx, |p| !p.seek_preview && !p.buffering);
+    let at = p.presentation_clock().unwrap();
+    assert!(
+        at.abs_diff(Duration::from_millis(3300)) < Duration::from_millis(20),
+        "stop source lost requested seek phase:{at:?}"
+    );
+    let remaining = bound.saturating_sub(at);
+    let start = Instant::now();
+    while start.elapsed() + Duration::from_millis(25) < remaining {
+        tick(&mut p, &ctx);
+        assert!(
+            !p.ended,
+            "stop bound spent before requested phase reached it"
+        );
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    wait(&mut p, &ctx, |p| p.ended);
+    assert!(
+        start.elapsed() <= remaining + Duration::from_millis(200),
+        "stop bound kept stale covering-frame phase"
+    );
+    assert_eq!(p.interval, Some((2000, 4000, 1000)));
+    assert!(p.stop_time.is_none());
+    assert!(!p.buffering && !p.seek_preview);
+    assert!(p.error.is_none());
+}

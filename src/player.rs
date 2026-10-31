@@ -4197,6 +4197,17 @@ impl Player {
                     if let Some(audio) = &self.audio { audio.pause(); }
                     return;
                 }
+                // A covering picture keeps its encoded PTS, but continuous
+                // playback must start at the requested position inside it.
+                // Manual frame steps intentionally select the picture's start.
+                let sought_phase = if self.seek_preview && !stepping {
+                    self.seek_target.and_then(|target| {
+                        let (start, end, scale) = frame.interval?;
+                        let start = Self::interval_time(start, scale)?;
+                        let end = Self::interval_time(end, scale)?;
+                        (start <= target && target <= end).then_some(target)
+                    })
+                } else { None };
                 self.seek_preview = false;
                 self.seek_target = None;
                 self.upload_frame(&frame);
@@ -4231,8 +4242,8 @@ impl Player {
                 self.period = frame.period;
                 self.interval = frame.interval;
                 if self.paused {
-                    self.paused_picture_time = self.interval
-                        .and_then(|(start, _, scale)| Self::interval_time(start, scale));
+                    self.paused_picture_time = sought_phase.or_else(|| self.interval
+                        .and_then(|(start, _, scale)| Self::interval_time(start, scale)));
                 }
                 // Advance the clock even after a late repaint; the next poll
                 // discards expired pictures instead of slowing the timeline.
@@ -4252,7 +4263,16 @@ impl Player {
                         if audio.position() != target { audio.seek(target); }
                     }
                 }
-                self.deadline = next_frame_deadline(self.deadline, period, now, stepping);
+                self.deadline = if !self.picture_audio_clock
+                    && let Some(phase) = sought_phase
+                    && let Some(end) = self.interval
+                        .and_then(|(_, end, scale)| Self::interval_time(end, scale))
+                {
+                    now.checked_add(paced_period(end.saturating_sub(phase), self.rate_milli))
+                        .unwrap_or(now)
+                } else {
+                    next_frame_deadline(self.deadline, period, now, stepping)
+                };
                 if stepping {
                     self.step -= 1;
                     if self.step == 0 {
@@ -13042,3 +13062,7 @@ mod rate_clock_regressions;
 #[cfg(test)]
 #[path = "player_jump_clock_tests.rs"]
 mod jump_clock_regressions;
+
+#[cfg(test)]
+#[path = "player_seek_phase_tests.rs"]
+mod seek_phase_regressions;
