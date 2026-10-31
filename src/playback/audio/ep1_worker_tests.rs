@@ -554,3 +554,8 @@ fn signalled_3d_ttt_worker_keeps_inverse_history_and_navigation_stamps() {
 fn variable_spatial_frame_length_worker_keeps_packet_windows_through_navigation() {
     check_corpus("aac-ld-mps-frame-length");
 }
+
+#[test]
+fn split_spatial_frames_worker_keeps_complete_source_windows_through_navigation() {
+    check_corpus("aac-ld-mps-source-slices");
+}

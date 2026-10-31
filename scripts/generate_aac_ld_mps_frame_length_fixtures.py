@@ -51,7 +51,7 @@ def main():
   else:head,_=asc_prefix(source['asc'])
   if not is_ld:assert packed(head+'000000').hex()==source['asc']
   stem=corpus+'-'+name
-  base=dict(source,name=stem,frames=rows(prefixes),samples=FRAMES*source['out_n'],video=stem+'-bare.mp4',golden=stem+'-bare.f32le')
+  base=dict(source,source_corpus=corpus,name=stem,frames=rows(prefixes),samples=FRAMES*source['out_n'],video=stem+'-bare.mp4',golden=None if shared else stem+'-bare.f32le')
   if not shared:
    (OUT/base['video']).write_bytes(video_fixture([base],blob,source['channels'],write=False)['data'])
    (OUT/base['golden']).write_bytes((parent/source['golden']).read_bytes()[:FRAMES*source['out_n']*source['channels']*4]);controls.append(base)
@@ -106,7 +106,7 @@ def main():
    prefixes=[raw(blob[r['offset']:r['offset']+r['bytes']])[:r['prefix_bits']]for r in good['frames']]
    frames=rows([p+''.join(messages.get(i,[]))for i,p in enumerate(prefixes)])
    name=good['name']+'-bad-'+failure
-   bad=dict(good,name=name,frames=frames,video=name+'.mp4',good_video=good['video'],error='trailing bytes after LD-MPS spatial frame'if failure=='trailing'else'in-band frame length splits an AAC core packet')
+   bad=dict(good,name=name,frames=frames,video=name+'.mp4',good_video=good['video'],error='trailing bytes after LD-MPS spatial frame'if failure=='trailing'else'unfinished LD-MPS PCM/spatial association')
    (OUT/bad['video']).write_bytes(video_fixture([bad],blob,bad['channels'],write=False)['data']);errors.append(bad)
  (OUT/'packets.bin').write_bytes(blob)
  (OUT/'manifest.json').write_text(json.dumps(dict(controls=controls,fixed=fixed,cases=cases,errors=errors,exports=[dict(c,video=c['file'],name=c['name']+'-matroska')for c in cases],scope='Authored same-format SSC frame-length switches,32/64/128-bin PCM ingress,AAC-LD/ELD480/512 and LD-SBR;whole-core packet grouping. Early,late and batched headers. Fixed-partition independently decodable controls have the same constant spatial parameters and waveform. No private media,no FFmpeg.'),separators=(',',':'))+'\n')

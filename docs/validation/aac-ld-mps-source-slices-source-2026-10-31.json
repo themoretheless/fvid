@@ -1,0 +1,127 @@
+{
+  "date": "2026-10-31",
+  "base_commit": "c09c8d0c3ae9889fe18800fda7230e30b815204c",
+  "counterfactual": {
+    "base_commit": "c09c8d0c3ae9889fe18800fda7230e30b815204c",
+    "command": [
+      "cargo",
+      "--config",
+      "profile.dev.package.fvid-media.opt-level=2",
+      "test",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "aac_ld_mps_source_slices",
+      "--",
+      "--nocapture"
+    ],
+    "status": 101,
+    "old_sources": {
+      "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "c2302cc14cfa29637cbf1b1415831afeb676443c12eecf0fc6cdc6e4f3f3ed7d",
+      "crates/fvid-media/src/owned_aac/aac_ld_mps_session.rs": "e365162951f5d42084401f246d529100775070714856e0086d9a4126d7d1bde6"
+    },
+    "restored_sources": {
+      "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "0a0da8d9ae0135d3340b1d7063a2af590c510d13dde9352a1e853fa833ffc0e7",
+      "crates/fvid-media/src/owned_aac/aac_ld_mps_session.rs": "b5bbc87f98e6c8dc978ded7456b42cff354eb1507464accdb4a127734a050542"
+    },
+    "restored": true,
+    "full_test_source_sha256": "762115ec96686f70878229dd3bf86324b70ec7f9eff4457763f291b14931939e",
+    "baseline_wrapper_sha256": "5cc659121b9c622df7552e824a4f0ea78a0e3ac6fecc3263d05bc30a12495608",
+    "log_sha256": "c37b3d96c9ab724c353c72eb70ecd3efffe25b284d0c204d0cf5d83310040bab",
+    "qualification": "Final movies;first three tests compiled in a temporary wrapper because later tests use newly added SourceSpan fields.112 unchanged controls pass;valid partial initial SSC and valid in-band partial frames reproduce the exact two old native geometry refusals. Both production owners and full test source restored byte-for-byte."
+  },
+  "primary_geometry_reference": {
+    "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+    "member": "mp4spatialdec/src/sac_bitdec.c",
+    "sha256": "d9a8655b4e5efa1329d629f88bde962b640efe9d1a5c22f24f84df56eadfa64e",
+    "routine": "SpatialDecDecodeHeader",
+    "finding": "timeSlots=bsFrameLength+1;frameLength=timeSlots*qmfBands;LD bank selected from samplingFreq. A frame partition is distinct from frequency/channel layout. This code reference is not a proof of complete normative in-band/profile coverage."
+  },
+  "production_changes": [
+    "SourceSpan now carries offset,source_samples and original_stamp for a caller-submitted source chunk. Existing stamp keeps slice-clock semantics or opaque ID semantics.",
+    "Native explicitly opts in to packet slicing;ordinary Session opaque-ID callers retain strict whole-chunk association.",
+    "Native coalesces contiguous slices by offset/full size/original stamp,retains partial PCM through checkpoints,and emits the original complete source window before container edits/padding.",
+    "Partial buffer capacity is included in retained payload accounting;reset clears it;finish refuses incomplete association.",
+    "Shared LD-SBR bank selection is frame-independent,using actual rate/mode compatibility. Previously PCM-routed matched-clock long initial SSCs now use the shared LD-QMF interface,qualified against frozen independent spatial-bank SBR QMF. Other clocks retain PCM ingress."
+  ],
+  "programmes": 448,
+  "controls": 112,
+  "domains": {
+    "PCM": 320,
+    "shared-QMF": 128
+  },
+  "patterns": {
+    "staggered": 112,
+    "batch": 112,
+    "initial": 112,
+    "straddling": 112
+  },
+  "initial_partitions": {
+    "short": 56,
+    "long": 56
+  },
+  "trees": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "banks": [
+    32,
+    64,
+    128
+  ],
+  "frame_slots": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    13,
+    15,
+    16,
+    18,
+    19,
+    29,
+    30,
+    31,
+    32
+  ],
+  "malformed_movies": 4,
+  "component_input_references": {
+    "analytical_pcm": 30,
+    "independent_spatial_sbr_qmf": 12
+  },
+  "composition": {
+    "values": 18570240,
+    "max_absolute_error": 3.5527137e-15,
+    "tolerance": 1e-09
+  },
+  "invariants": [
+    "Each span stays within its submitted source chunk;offsets are contiguous during native assembly.",
+    "Each returned native window has exactly the original sample count,PTS,duration and source order.",
+    "Original media stamps survive zero-tick rounded slices;opaque IDs near i64::MAX never enter timestamp arithmetic.",
+    "Checkpoint/restore,reset and malformed-suffix retry retain the correct partial source prefix and every pending input/frame."
+  ],
+  "parent_fixture_update": "Binary movies and inputs unchanged. Two incomplete old partial-core suffixes now report unfinished association at EOF rather than unsupported codec geometry. Parent source provenance and unused shared golden metadata clarified. Valid complete split-frame acceptance is in the new corpus.",
+  "qualification": "Source association and composition of saved independent inputs with existing owned spatial DSP,not independent whole-codec PCM truth. Same-waveform fixed-partition controls cover all non-initial patterns. Initial SSCs use direct saved-input composition because their initial matrix interpolation differs. All8 trees,480/512 LD/ELD and LD-SBR PCM/shared domains. No production FFmpeg.",
+  "not_newly_qualified": [
+    "Rate/channel-layout transitions",
+    "Nonzero time alignment",
+    "Nominal SSC downscale remapping",
+    "Other quantization profiles and every combined shaping/HRTF mode",
+    "Complete ISO23003-2 Annex B/profile conformance",
+    "Physical audio and realtime performance"
+  ]
+}

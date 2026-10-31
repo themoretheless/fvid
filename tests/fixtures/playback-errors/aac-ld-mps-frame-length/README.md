@@ -18,9 +18,11 @@ not independent whole-codec PCM truth. The bare controls separately compare
 saved analytical input PCM. The old production owners accept all fixed/bare
 controls and refuse the variable-length movies at the exact old format guard.
 
-The native AAC interface retains whole-core-packet frame grouping. Two movies
-exercise its specific partial-core refusal;two others append a late trailing
-byte after earlier changed-length frames in a batched submit. The latter tests
+Valid frames crossing core packets are now accepted by the sibling
+`aac-ld-mps-source-slices` corpus. Two movies here intentionally leave source
+PCM without enough spatial parameters and now check the specific EOF association
+error;they are not complete split-frame acceptance controls. Two others append
+a late trailing byte after earlier changed-length frames in a batched submit. The latter tests
 compare the exact Session queue/DSP state on failure and retry the repaired
 suffix. They also verify native output/checkpoint behavior. A deliberately
 incorrect full bank reset at each frame header is an observable negative control.
@@ -33,6 +35,6 @@ Ordinary tests consume frozen artifacts without generation,FFmpeg,network or
 external reference programs.
 
 This does not qualify changes to sample rate or channel layout,nonzero time
-alignment,fractional-core native AAC frames,other quantization profiles or all
+alignment,other quantization profiles or all
 combinations with shaping/HRTF tools. No physical audio,realtime performance or
 complete ISO23003-2 Annex B/profile claim.

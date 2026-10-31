@@ -31,8 +31,12 @@ Same-format in-band spatial frame-length changes now retain filter history and
 resolve queued input using the next frame's SSC before testing readiness.
 Owned480/512 AAC-LD/ELD,LD-SBR PCM32/64/128 and shared-QMF32/64 movies cover
 grow/shrink,early/late/batched headers,opaque source windows,seek/rewind and reset.
-Native AAC still requires spatial frames to span whole core packets. Frequency,
-layout and nonzero time-alignment transitions remain separate unfinished work.
+Native AAC now reassembles spatial slices into complete submitted source windows,
+including sub-core and multi-core initial SSCs. Original sample counts,PTS/duration
+and opaque IDs survive slicing. SourceSpan exposes offset,full size and original
+stamp;ordinary Session opaque-ID clients keep their strict contract. Shared SBR
+uses actual rate/mode compatibility independently of spatial frame length.
+Frequency,layout and nonzero time alignment remain unfinished.
 
 LD-MPS rejects residual extension types0/1, including absent/zero bands, at
 native initial/replacement headers.

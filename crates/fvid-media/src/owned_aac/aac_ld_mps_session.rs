@@ -21,6 +21,12 @@ pub struct Stamp {
 /// Exact source-chunk slice represented by part of one rendered spatial frame.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct SourceSpan {
+    /// Offset and full size in the submitted source chunk, in sample frames.
+    pub offset: usize,
+    pub source_samples: usize,
+    /// Original unsliced stamp. `stamp` below describes the represented slice
+    /// in a media clock, or retains the opaque ID in packet-association mode.
+    pub original_stamp: Stamp,
     pub samples: usize,
     pub stamp: Stamp,
 }
@@ -65,6 +71,7 @@ pub struct Session {
     pending: VecDeque<Pending>,
     queued_samples: usize,
     packet_ids: bool,
+    packet_slices: bool,
 }
 impl Session {
     pub fn new(config: &Config, mode: Mode) -> Result<Self> {
@@ -103,6 +110,7 @@ impl Session {
             pending: VecDeque::new(),
             queued_samples: 0,
             packet_ids: false,
+            packet_slices: false,
         })
     }
     pub fn reset(&mut self) {
@@ -122,6 +130,11 @@ impl Session {
         }
         self.packet_ids = enabled;
         Ok(())
+    }
+    /// Native AAC reassembles these spans before exposing a source window.
+    /// Ordinary opaque-ID clients retain the strict whole-chunk contract.
+    pub(crate) fn enable_packet_slices(&mut self) {
+        self.packet_slices = true;
     }
     pub fn queued_samples(&self) -> usize {
         self.queued_samples
@@ -348,7 +361,7 @@ impl Session {
                     endpoint(chunk.stamp, chunk.offset + take, total)?,
                 )
             };
-            if self.packet_ids && (chunk.offset != 0 || take != total) {
+            if self.packet_ids && !self.packet_slices && (chunk.offset != 0 || take != total) {
                 return Err(invalid("LD-MPS packet association splits a source window"));
             }
             let timed = self.packet_ids || chunk.stamp.duration != 0;
@@ -378,6 +391,9 @@ impl Session {
                 .try_reserve(1)
                 .map_err(|_| invalid("LD-MPS source span allocation failed"))?;
             sources.push(SourceSpan {
+                offset: chunk.offset,
+                source_samples: total,
+                original_stamp: chunk.stamp,
                 samples: take,
                 stamp: Stamp {
                     pts: if self.packet_ids {
@@ -400,8 +416,12 @@ impl Session {
             let out = stamp.as_mut().unwrap();
             if timed {
                 out.duration = if self.packet_ids {
+                    let begin =
+                        u128::from(chunk.stamp.duration) * chunk.offset as u128 / total as u128;
+                    let end = u128::from(chunk.stamp.duration) * (chunk.offset + take) as u128
+                        / total as u128;
                     out.duration
-                        .checked_add(chunk.stamp.duration)
+                        .checked_add((end - begin) as u64)
                         .ok_or_else(|| invalid("LD-MPS output duration overflow"))?
                 } else {
                     u64::try_from(i128::from(end) - i128::from(out.pts))

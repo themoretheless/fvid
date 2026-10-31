@@ -1,3 +1,54 @@
+## Spatial frames crossing native source windows, 2026-10-31
+
+Native LD-MPS no longer requires a spatial frame to cover whole AAC input
+chunks. SourceSpan carries offset,full source size and original unsliced stamp.
+A native partial-window owner collects contiguous spans and exposes each complete
+submitted source window with its original PTS/duration. Container edits/padding
+and opaque packet IDs therefore retain the same association. Ordinary Session
+opaque-ID clients retain the old strict whole-chunk contract;native explicitly
+opts in. Partial PCM participates in checkpoint ownership,retained-capacity
+accounting,reset and EOF validation.
+
+Shared LD-SBR ingress now depends on actual clock/bank compatibility,not an SSC
+frame-length coincidence. Matched-clock long initial SSCs use shared LD-QMF in
+place of the old PCM-interface fallback. Frozen independent spatial-bank SBR QMF
+qualifies that intentional domain choice;unmatched clocks keep PCM ingress.
+
+448 own MP4/MKV programmes plus112 unchanged fixed controls and42 saved input
+references cover all8 trees,480/512 cores and PCM32/64/128/shared-QMF32/64. There
+are112 staggered,112 batched,112 initial and112 straddling schedules. Initial
+SSCs include56 sub-core and56 multi-core frames. Straddling frames combine a
+partial head,several whole sources and a tail. Original production owners pass
+all112 fixed controls and reproduce both the initial and in-band geometry
+refusals on the selected three-test wrapper. Full sources are restored exactly.
+
+Direct saved-input composition bypasses native scheduling/reassembly and checks
+18570240 PCM values with max absolute error3.5527137e-15 (bound1e-9). Remaining
+spatial DSP is shared,so this is component/association evidence,not independent
+whole-codec truth. Non-initial schedules additionally preserve fixed-control
+waveforms exactly. Checks include100 Hz media clocks with zero-tick slices,
+opaque IDs near i64::MAX,partial checkpoint/reset,MP4/MKV seek/rewind and late
+failure/retry with an already retained prefix. A library unit checks exact spare
+capacity accounting and partial completion/reset. SourceSpan users in the prior
+spatial-SBR tests are updated for the new explicit metadata.
+
+Four malformed movies exercise the bounded trailing-byte error. Two older
+frame-length fixtures intentionally omit final spatial parameters:they now fail
+at EOF instead of codec refusal and have updated expectations. Their binary
+movies/inputs remain unchanged. Generation is separate from tests:1056 new and
+962 parent artifacts regenerate identically twice with process/network creation
+denied. Source provenance and unused shared golden metadata are clarified.
+
+Rate/layout changes,nonzero time alignment,nominal-SSC downscale remapping and
+remaining codec/profile limits stay open. This does not establish physical
+playback,realtime performance or complete Annex B/profile conformance. The
+original codec-gap goal remains active.
+
+Fresh offline gates: 1819 passed,0 failed,27 ignored.
+Media/player libraries and34 targeted integration binaries passed.
+
+Evidence: `docs/validation/aac-ld-mps-source-slices-{source,generation,tests}-2026-10-31.json`.
+
 ## Same-format SSC frame-length transitions, 2026-10-31
 
 LD-MPS now accepts in-band frame_slots changes without treating them as an

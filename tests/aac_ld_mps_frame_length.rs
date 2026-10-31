@@ -253,7 +253,12 @@ fn late_bad_frame_rolls_back_every_queued_length_change_and_accepts_repaired_suf
     let manifest = m();
     let blob = std::fs::read(root().join("packets.bin")).unwrap();
     assert_eq!(manifest["errors"].as_array().unwrap().len(), 4);
-    for bad in manifest["errors"].as_array().unwrap() {
+    for bad in manifest["errors"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["name"].as_str().unwrap().ends_with("-trailing"))
+    {
         let mut out = Vec::new();
         let error = fvid::native_media::decode_mp4_aac_pcm(&read(&bad["video"]), &mut out)
             .unwrap_err()
@@ -491,4 +496,37 @@ fn session_bad_batched_suffix_retains_the_exact_queue_and_dsp_state() {
         assert_eq!(got, want);
         session.finish().unwrap();
     }
+}
+
+#[test]
+fn incomplete_partial_core_suffix_is_an_eof_error_not_a_codec_refusal() {
+    let manifest = m();
+    let blob = std::fs::read(root().join("packets.bin")).unwrap();
+    let mut count = 0;
+    for bad in manifest["errors"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["name"].as_str().unwrap().ends_with("-partial-core"))
+    {
+        let mut decoder =
+            NativeAacDecoder::new_with_output_rate(&hex(&bad["asc"]), n(&bad["rate"]) as u32)
+                .unwrap();
+        for row in bad["frames"].as_array().unwrap() {
+            let at = n(&row["offset"]);
+            decoder.decode(&blob[at..at + n(&row["bytes"])]).unwrap();
+        }
+        let error = decoder.finish().unwrap_err().to_string();
+        assert!(
+            error.contains("unfinished LD-MPS PCM/spatial association"),
+            "{error}"
+        );
+        let mut pcm = Vec::new();
+        let error = fvid::native_media::decode_mp4_aac_pcm(&read(&bad["video"]), &mut pcm)
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains(bad["error"].as_str().unwrap()), "{error}");
+        count += 1;
+    }
+    assert_eq!(count, 2);
 }

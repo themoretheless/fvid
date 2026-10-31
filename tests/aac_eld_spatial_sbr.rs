@@ -236,10 +236,16 @@ fn spatial_ld_sbr_subbands_match_independent_convolution_hf_noise_and_gain_contr
                 parts[0].sources,
                 vec![
                     SourceSpan {
+                        offset: 0,
+                        source_samples: count * bands,
+                        original_stamp: first,
                         samples: count * bands,
                         stamp: first
                     },
                     SourceSpan {
+                        offset: 0,
+                        source_samples: (slots - count) * bands,
+                        original_stamp: second,
                         samples: (slots - count) * bands,
                         stamp: second
                     },
@@ -248,6 +254,9 @@ fn spatial_ld_sbr_subbands_match_independent_convolution_hf_noise_and_gain_contr
             assert_eq!(
                 complete[0].sources,
                 vec![SourceSpan {
+                    offset: 0,
+                    source_samples: slots * bands,
+                    original_stamp: stamp,
                     samples: slots * bands,
                     stamp
                 }]
