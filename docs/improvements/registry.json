@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 444,
-  "next_id": "FVID-0445",
+  "accepted_count": 445,
+  "next_id": "FVID-0446",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4986,6 +4986,17 @@
       "result": "Perform the packet lookup only when no mandatory preroll is needed; retain requested-floor clamping and complete history replay. Seven paired baseline/after runs meet predeclared criteria:1000 warm seek setups137.64ms to0.004833ms,all7 pairs win. Real seek-to-first-PCM26.54ms versus26.17ms is practically unchanged,not a whole-player speedup claim. Eight short authored controls preserve exact independently decoded PCM,fractional/backward/EOF seeks,direct packet landing and actual AudioPlayback worker output.121 integration suites566 pass;1234 distinct checks and core/player builds pass.",
       "status": "accepted",
       "validation": "batch-444-validation.json"
+    },
+    {
+      "id": "FVID-0445",
+      "batch": 445,
+      "title": "Accelerate repeated packet seek for verified ordered MP4 audio",
+      "source": "src/playback/audio/mp4_audio.rs",
+      "regression": "tests/mp4_audio_packet_seek.rs",
+      "before": "Published29fe6037f8 performs a full expanded-index max-PTS scan for each necessary packet seek. Four controls pass;seven standalone release runs on160000 authored IMA4 blocks show1000 lookups138.21ms and actual seek-to-analytic-PCM139.02ms. This is distinct from the discarded mandatory-preroll lookup removed by0444.",
+      "result": "Lazily certify nondecreasing immutable PTS and partition inclusively,retaining the last equal-PTS sample. Reordered inputs retain original max-PTS search and compact inputs retain existing lookup;no per-sample heap index. Seven paired runs:1000lookups137.178→0.180ms(760.9x),actual software seek-to-PCM137.682→0.908ms(151.6x),all7pairs win. Cold direct/AudioStream seek improve;opening+3.92%passes predeclared10%guard. Five authored120ms clips preserve raw reordered/equal/negative packet landings,ordered analytic PCM,video seek/EOF and actual audio worker behavior.122integration suites570pass;1238distinct checks and both builds pass. Scope is this memory-resident IMA4 workload,not whole-player throughput.",
+      "status": "accepted",
+      "validation": "batch-445-validation.json"
     }
   ]
 }

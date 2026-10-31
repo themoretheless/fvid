@@ -1,0 +1,9 @@
+Running tests/mp4_audio_packet_seek.rs (/private/tmp/fvid-mp4-audio-packet-seek-target-20261031/debug/deps/mp4_audio_packet_seek-eedbd4dc7ed73265)
+
+running 4 tests
+test every_synthetic_companion_keeps_exact_video_and_seek ... ok
+test ordered_playback_and_fractional_seeks_keep_analytic_pcm_and_eof ... ok
+test packet_navigation_preserves_reordered_negative_and_last_duplicate_landings ... ok
+test actual_ima4_worker_preserves_pcm_after_repeated_seek ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s

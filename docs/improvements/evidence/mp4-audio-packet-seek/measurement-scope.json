@@ -1,0 +1,34 @@
+{
+  "paired_rounds": 7,
+  "warmups_excluded": 2,
+  "packets": 160000,
+  "queries": 1000,
+  "medians": {
+    "baseline": {
+      "open_ns": 995000,
+      "first_seek_ns": 286792,
+      "cold_direct_seek_ns": 134917,
+      "navigation_ns": 137178041,
+      "seek_pcm_ns": 137681875
+    },
+    "after": {
+      "open_ns": 1034000,
+      "first_seek_ns": 211542,
+      "cold_direct_seek_ns": 57583,
+      "navigation_ns": 180292,
+      "seek_pcm_ns": 908250
+    }
+  },
+  "wins": {
+    "open_ns": 2,
+    "first_seek_ns": 7,
+    "cold_direct_seek_ns": 7,
+    "navigation_ns": 7,
+    "seek_pcm_ns": 7
+  },
+  "criteria_met": true,
+  "opening_regression_percent": 3.9195979899497413,
+  "scope": "One memory-resident mono IMA4 expanded-index workload. Analytic first-block PCM and timestamps verified on every timed seek. Not GPU,storage,physical-device or whole-player throughput.",
+  "ordering_cost": "One lazy ordering pass per expanded table. Reordered inputs retain linear lookup; first unordered lookup may pay an extra verification pass. No per-sample heap index is added.",
+  "relationship_to_FVID_0444": "0444 removed a discarded lookup in mandatory-preroll seek. This candidate accelerates the necessary lookup for block-independent audio and direct packet seeking; it does not count the earlier removal again."
+}

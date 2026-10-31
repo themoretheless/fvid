@@ -1,0 +1,24 @@
+{
+  "scope": "Optional local audit only; ordinary tests never invoke FFmpeg. Full ordered short-control PCM equals analytic oracle. No new unordered playback acceptance claim.",
+  "command": [
+    "ffmpeg",
+    "-v",
+    "error",
+    "-i",
+    "tests/fixtures/playback-errors/mp4-audio-packet-seek/ordered.mp4",
+    "-map",
+    "0:a:0",
+    "-c:a",
+    "pcm_f32le",
+    "-f",
+    "f32le",
+    "-"
+  ],
+  "version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "exit_code": 0,
+  "sample_frames": 384,
+  "pcm_bytes": 1536,
+  "pcm_sha256": "a22bdd9f04b80e5e3f1dbcec99772e538cffc6c623d872c0f4679cda3bce5cab",
+  "matches_analytic": true,
+  "fixture_sha256": "5045bc4b28ebde3d547dfa5232b76d088880e8fe1d40c4e9971d4a310ad83993"
+}

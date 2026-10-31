@@ -1,0 +1,6 @@
+{
+  "short_control_files": 6,
+  "fixtures": "all byte-identical second generation",
+  "manual_workload_sha256": "475f317e9a506a6d903fe0d4b9d2d6512f15e980a46651c78652e330ed5b0508",
+  "manual_workload": "byte-identical second generation"
+}

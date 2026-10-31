@@ -1,0 +1,265 @@
+{
+  "scope": "Memory-resident authored160000-packet IMA4 workload; exact analytic PCM and timestamps. No GPU or whole-player claim.",
+  "binary_sha256": {
+    "baseline": "0506ba39ddc68b6c80c9a0a507560e7115ae81acea6e3cba7288f2b0dd17bef3",
+    "after": "5c2091b669b5b2d8f43eab68c902817ef897ac545d31429adf3fb71d01eeffbc"
+  },
+  "workload_sha256": "475f317e9a506a6d903fe0d4b9d2d6512f15e980a46651c78652e330ed5b0508",
+  "queries": 1000,
+  "rounds": 7,
+  "warmup_excluded": {
+    "baseline": {
+      "cold_direct_seek_ns": 135250,
+      "first_seek_ns": 357125,
+      "navigation_ns": 136336958,
+      "open_ns": 1250417,
+      "packets": 160000,
+      "queries": 1000,
+      "scope": "Memory-resident IMA4 index; exact analytic first PCM/timestamps,rewind/EOF. Setup and actual software seek measured separately. No GPU or whole-player throughput claim.",
+      "seek_pcm_ns": 137606250
+    },
+    "after": {
+      "cold_direct_seek_ns": 55250,
+      "first_seek_ns": 210166,
+      "navigation_ns": 162583,
+      "open_ns": 1228166,
+      "packets": 160000,
+      "queries": 1000,
+      "scope": "Memory-resident IMA4 index; exact analytic first PCM/timestamps,rewind/EOF. Setup and actual software seek measured separately. No GPU or whole-player throughput claim.",
+      "seek_pcm_ns": 965416
+    }
+  },
+  "samples": [
+    {
+      "round": 0,
+      "order": [
+        "baseline",
+        "after"
+      ],
+      "baseline": {
+        "cold_direct_seek_ns": 134917,
+        "first_seek_ns": 286375,
+        "navigation_ns": 138662500,
+        "open_ns": 974875,
+        "packets": 160000,
+        "queries": 1000,
+        "scope": "Memory-resident IMA4 index; exact analytic first PCM/timestamps,rewind/EOF. Setup and actual software seek measured separately. No GPU or whole-player throughput claim.",
+        "seek_pcm_ns": 137681875
+      },
+      "after": {
+        "cold_direct_seek_ns": 57583,
+        "first_seek_ns": 209958,
+        "navigation_ns": 159042,
+        "open_ns": 1014083,
+        "packets": 160000,
+        "queries": 1000,
+        "scope": "Memory-resident IMA4 index; exact analytic first PCM/timestamps,rewind/EOF. Setup and actual software seek measured separately. No GPU or whole-player throughput claim.",
+        "seek_pcm_ns": 845875
+      }
+    },
+    {
+      "round": 1,
+      "order": [
+        "after",
+        "baseline"
+      ],
+      "after": {
+        "cold_direct_seek_ns": 55541,
+        "first_seek_ns": 211542,
+        "navigation_ns": 134041,
+        "open_ns": 987916,
+        "packets": 160000,
+        "queries": 1000,
+        "scope": "Memory-resident IMA4 index; exact analytic first PCM/timestamps,rewind/EOF. Setup and actual software seek measured separately. No GPU or whole-player throughput claim.",
+        "seek_pcm_ns": 1090333
+      },
+      "baseline": {
+        "cold_direct_seek_ns": 135084,
+        "first_seek_ns": 286792,
+        "navigation_ns": 137178041,
+        "open_ns": 982292,
+        "packets": 160000,
+        "queries": 1000,
+        "scope": "Memory-resident IMA4 index; exact analytic first PCM/timestamps,rewind/EOF. Setup and actual software seek measured separately. No GPU or whole-player throughput claim.",
+        "seek_pcm_ns": 178269250
+      }
+    },
+    {
+      "round": 2,
+      "order": [
+        "baseline",
+        "after"
+      ],
+      "baseline": {
+        "cold_direct_seek_ns": 249375,
+        "first_seek_ns": 292042,
+        "navigation_ns": 187198792,
+        "open_ns": 1121166,
+        "packets": 160000,
+        "queries": 1000,
+        "scope": "Memory-resident IMA4 index; exact analytic first PCM/timestamps,rewind/EOF. Setup and actual software seek measured separately. No GPU or whole-player throughput claim.",
+        "seek_pcm_ns": 137590666
+      },
+      "after": {
+        "cold_direct_seek_ns": 58042,
+        "first_seek_ns": 213125,
+        "navigation_ns": 288125,
+        "open_ns": 1046083,
+        "packets": 160000,
+        "queries": 1000,
+        "scope": "Memory-resident IMA4 index; exact analytic first PCM/timestamps,rewind/EOF. Setup and actual software seek measured separately. No GPU or whole-player throughput claim.",
+        "seek_pcm_ns": 890583
+      }
+    },
+    {
+      "round": 3,
+      "order": [
+        "after",
+        "baseline"
+      ],
+      "after": {
+        "cold_direct_seek_ns": 57708,
+        "first_seek_ns": 211667,
+        "navigation_ns": 190084,
+        "open_ns": 1037291,
+        "packets": 160000,
+        "queries": 1000,
+        "scope": "Memory-resident IMA4 index; exact analytic first PCM/timestamps,rewind/EOF. Setup and actual software seek measured separately. No GPU or whole-player throughput claim.",
+        "seek_pcm_ns": 1102625
+      },
+      "baseline": {
+        "cold_direct_seek_ns": 138250,
+        "first_seek_ns": 291541,
+        "navigation_ns": 138447875,
+        "open_ns": 1006916,
+        "packets": 160000,
+        "queries": 1000,
+        "scope": "Memory-resident IMA4 index; exact analytic first PCM/timestamps,rewind/EOF. Setup and actual software seek measured separately. No GPU or whole-player throughput claim.",
+        "seek_pcm_ns": 137483958
+      }
+    },
+    {
+      "round": 4,
+      "order": [
+        "baseline",
+        "after"
+      ],
+      "baseline": {
+        "cold_direct_seek_ns": 133667,
+        "first_seek_ns": 287209,
+        "navigation_ns": 136873750,
+        "open_ns": 1035334,
+        "packets": 160000,
+        "queries": 1000,
+        "scope": "Memory-resident IMA4 index; exact analytic first PCM/timestamps,rewind/EOF. Setup and actual software seek measured separately. No GPU or whole-player throughput claim.",
+        "seek_pcm_ns": 137993458
+      },
+      "after": {
+        "cold_direct_seek_ns": 57375,
+        "first_seek_ns": 211250,
+        "navigation_ns": 180292,
+        "open_ns": 1034000,
+        "packets": 160000,
+        "queries": 1000,
+        "scope": "Memory-resident IMA4 index; exact analytic first PCM/timestamps,rewind/EOF. Setup and actual software seek measured separately. No GPU or whole-player throughput claim.",
+        "seek_pcm_ns": 908250
+      }
+    },
+    {
+      "round": 5,
+      "order": [
+        "after",
+        "baseline"
+      ],
+      "after": {
+        "cold_direct_seek_ns": 55542,
+        "first_seek_ns": 203917,
+        "navigation_ns": 117542,
+        "open_ns": 1001583,
+        "packets": 160000,
+        "queries": 1000,
+        "scope": "Memory-resident IMA4 index; exact analytic first PCM/timestamps,rewind/EOF. Setup and actual software seek measured separately. No GPU or whole-player throughput claim.",
+        "seek_pcm_ns": 813834
+      },
+      "baseline": {
+        "cold_direct_seek_ns": 132167,
+        "first_seek_ns": 280250,
+        "navigation_ns": 136657250,
+        "open_ns": 995000,
+        "packets": 160000,
+        "queries": 1000,
+        "scope": "Memory-resident IMA4 index; exact analytic first PCM/timestamps,rewind/EOF. Setup and actual software seek measured separately. No GPU or whole-player throughput claim.",
+        "seek_pcm_ns": 137746250
+      }
+    },
+    {
+      "round": 6,
+      "order": [
+        "baseline",
+        "after"
+      ],
+      "baseline": {
+        "cold_direct_seek_ns": 133500,
+        "first_seek_ns": 283625,
+        "navigation_ns": 136627834,
+        "open_ns": 971292,
+        "packets": 160000,
+        "queries": 1000,
+        "scope": "Memory-resident IMA4 index; exact analytic first PCM/timestamps,rewind/EOF. Setup and actual software seek measured separately. No GPU or whole-player throughput claim.",
+        "seek_pcm_ns": 137073959
+      },
+      "after": {
+        "cold_direct_seek_ns": 57917,
+        "first_seek_ns": 212292,
+        "navigation_ns": 223167,
+        "open_ns": 1038625,
+        "packets": 160000,
+        "queries": 1000,
+        "scope": "Memory-resident IMA4 index; exact analytic first PCM/timestamps,rewind/EOF. Setup and actual software seek measured separately. No GPU or whole-player throughput claim.",
+        "seek_pcm_ns": 1015042
+      }
+    }
+  ],
+  "medians": {
+    "baseline": {
+      "open_ns": 995000,
+      "first_seek_ns": 286792,
+      "cold_direct_seek_ns": 134917,
+      "navigation_ns": 137178041,
+      "seek_pcm_ns": 137681875
+    },
+    "after": {
+      "open_ns": 1034000,
+      "first_seek_ns": 211542,
+      "cold_direct_seek_ns": 57583,
+      "navigation_ns": 180292,
+      "seek_pcm_ns": 908250
+    }
+  },
+  "wins": {
+    "open_ns": 2,
+    "first_seek_ns": 7,
+    "cold_direct_seek_ns": 7,
+    "navigation_ns": 7,
+    "seek_pcm_ns": 7
+  },
+  "ratios_baseline_over_after": {
+    "open_ns": 0.9622823984526112,
+    "first_seek_ns": 1.3557213224796967,
+    "cold_direct_seek_ns": 2.3430005383533334,
+    "navigation_ns": 760.8659341512657,
+    "seek_pcm_ns": 151.59028351224882
+  },
+  "criteria": {
+    "navigation_minimum_speedup": 1.2,
+    "seek_pcm_minimum_speedup": 1.1,
+    "minimum_wins_each": 6,
+    "opening_and_first_seek_regression_limit_percent": 10
+  },
+  "nonregression_guards": {
+    "open_ns": true,
+    "first_seek_ns": true,
+    "cold_direct_seek_ns": true
+  },
+  "criteria_met": true
+}

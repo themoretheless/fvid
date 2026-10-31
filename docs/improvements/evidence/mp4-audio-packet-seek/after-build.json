@@ -1,0 +1,9 @@
+{
+  "exit_code": 0,
+  "session": 65801,
+  "command": "cargo bench --locked --offline --no-default-features --features player --bench mp4_audio_packet_seek --no-run",
+  "binary_path": "/private/tmp/fvid-mp4-audio-packet-seek-target-20261031/release/deps/mp4_audio_packet_seek-17a63bfdbba572cd",
+  "binary_sha256": "5c2091b669b5b2d8f43eab68c902817ef897ac545d31429adf3fb71d01eeffbc",
+  "raw_log_sha256": "ae9f03e41b07a0b66270581c117085d1379da4cbea1c4b6832c0f3527d0afd72",
+  "sources": "after-source.json"
+}

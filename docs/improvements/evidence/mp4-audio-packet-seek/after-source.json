@@ -1,0 +1,9 @@
+{
+  "src/playback/audio/mp4_audio.rs": "e78fd554a1f28caa3a6fc2b94b54370cea89fbabc5d005e3e94930c289835cc2",
+  "benches/mp4_audio_packet_seek.rs": "15ad0619c41fb9bfb0d5b27d734b8b2ada548f35a225d38764351b7958279849",
+  "scripts/generate_mp4_audio_packet_seek.py": "08ead42385be1590d2fd36318c5b049e3902fa899929156862c0ce8a6e65ab52",
+  "scripts/compare_mp4_audio_packet_seek.py": "f9f56c3d40f1ffdb965ffa70ce2504f1fc3bc8782c137386d6da735fba084943",
+  "tests/mp4_audio_packet_seek.rs": "e30c3a637561be6b1c89859f129813af5f0fb08868be12f664bdda3035c30fcf",
+  "tests/fixtures/playback-errors/mp4-audio-packet-seek/manifest.json": "4360622e452717bad611094fd82895040aa4acff600bee4067b689398a6ca736",
+  "Cargo.toml": "842cba866db074d1f3cd2338f918a07be8963452de7c4624781417a4e300144a"
+}

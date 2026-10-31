@@ -1,0 +1,7 @@
+{
+  "exit_code": 0,
+  "stdout": "{\"cold_direct_seek_ns\":147125,\"first_seek_ns\":313042,\"navigation_ns\":148000,\"open_ns\":1305750,\"packets\":160000,\"queries\":1,\"scope\":\"Memory-resident IMA4 index; exact analytic first PCM/timestamps,rewind/EOF. Setup and actual software seek measured separately. No GPU or whole-player throughput claim.\",\"seek_pcm_ns\":244542}\n",
+  "stderr": "",
+  "excluded_from_measurements": true,
+  "scope": "One correctness probe while the build may still be live; not timing evidence."
+}

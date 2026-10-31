@@ -1,0 +1,175 @@
+{
+  "provenance": "New analytic IMA4 ramps and neutral16x16 VP9 authored in code; no private media/codec parameters, encoder or network.",
+  "scope": "Ordered audio playback acceptance; all variants preserve direct raw-packet navigation and independently decoded block PCM. Reordered/equal variants do not assert new full-playback support.",
+  "predictors": [
+    128,
+    1152,
+    2176
+  ],
+  "sample_rate": 8000,
+  "samples_per_packet": 64,
+  "cases": [
+    {
+      "file": "ordered.mp4",
+      "pts": [
+        0,
+        64,
+        128,
+        192,
+        256,
+        320
+      ],
+      "queries": [
+        -1,
+        0,
+        63,
+        64,
+        65,
+        127,
+        128,
+        9223372036854775807
+      ],
+      "expected_indices": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        2,
+        5
+      ]
+    },
+    {
+      "file": "reordered.mp4",
+      "pts": [
+        0,
+        128,
+        64,
+        192,
+        256,
+        320
+      ],
+      "queries": [
+        -1,
+        0,
+        63,
+        64,
+        65,
+        127,
+        128,
+        9223372036854775807
+      ],
+      "expected_indices": [
+        0,
+        0,
+        0,
+        2,
+        2,
+        2,
+        1,
+        5
+      ]
+    },
+    {
+      "file": "duplicate.mp4",
+      "pts": [
+        0,
+        64,
+        64,
+        192,
+        256,
+        320
+      ],
+      "queries": [
+        -1,
+        0,
+        63,
+        64,
+        65,
+        127,
+        128,
+        9223372036854775807
+      ],
+      "expected_indices": [
+        0,
+        0,
+        0,
+        2,
+        2,
+        2,
+        2,
+        5
+      ]
+    },
+    {
+      "file": "negative.mp4",
+      "pts": [
+        -64,
+        0,
+        64,
+        128,
+        192,
+        256
+      ],
+      "queries": [
+        -65,
+        -64,
+        -1,
+        0,
+        1,
+        63,
+        64,
+        9223372036854775807
+      ],
+      "expected_indices": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        2,
+        5
+      ]
+    },
+    {
+      "file": "equal.mp4",
+      "pts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "queries": [
+        -1,
+        0,
+        63,
+        64,
+        65,
+        127,
+        128,
+        9223372036854775807
+      ],
+      "expected_indices": [
+        0,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ]
+    }
+  ],
+  "sha256": {
+    "ordered.mp4": "5045bc4b28ebde3d547dfa5232b76d088880e8fe1d40c4e9971d4a310ad83993",
+    "reordered.mp4": "4a92bf3a4195abd7f1bfeee45b4f3e65ba6fe07aad5ca08cf853c1d0c537d809",
+    "duplicate.mp4": "3660958bd31fbdd6225759af18a4a9ddc435843fc5daaf9c59f012c88d9ed2dd",
+    "negative.mp4": "e2de8d0fdcbd83a83ded14ff611c8101e454c6bd034b6c07220a5fe6569c2c53",
+    "equal.mp4": "6cb49fb58ba52cf1fd81cc08f82fa61075375b355bf909d07d8eaa34218c0d64"
+  }
+}

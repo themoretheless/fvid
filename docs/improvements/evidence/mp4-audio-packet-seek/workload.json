@@ -1,0 +1,8 @@
+{
+  "provenance": "Authored analytic IMA4 ramps and neutral VP9; separately generated manual benchmark input, no encoder/network/private media.",
+  "packets": 160000,
+  "sample_rate": 8000,
+  "packet_ticks": 64,
+  "sha256": "475f317e9a506a6d903fe0d4b9d2d6512f15e980a46651c78652e330ed5b0508",
+  "bytes": 5465890
+}

@@ -1,0 +1,23 @@
+{
+  "status": "Owned artifacts removed after source/archive/binary/workload verification;all jobs terminal",
+  "removed": [
+    "/private/tmp/fvid-mp4-audio-packet-seek-integration.log",
+    "/private/tmp/fvid-mp4-audio-packet-seek-root-mp4.log",
+    "/private/tmp/fvid-mp4-audio-packet-seek-root-webm.log",
+    "/private/tmp/fvid-mp4-audio-packet-seek-media.log",
+    "/private/tmp/fvid-mp4-audio-packet-seek-core-check.log",
+    "/private/tmp/fvid-mp4-audio-packet-seek-player-check.log",
+    "/private/tmp/fvid-mp4-audio-packet-seek-before.log",
+    "/private/tmp/fvid-mp4-audio-packet-seek-after.log",
+    "/private/tmp/fvid-mp4-audio-packet-seek-baseline-build.log",
+    "/private/tmp/fvid-mp4-audio-packet-seek-after-build.log",
+    "/private/tmp/fvid-mp4-audio-packet-seek-baseline",
+    "/private/tmp/fvid-mp4-audio-packet-seek-after",
+    "/private/tmp/fvid-mp4-audio-packet-seek-input.mp4",
+    "/private/tmp/fvid-mp4-audio-packet-seek-input.json",
+    "/private/tmp/fvid-mp4-audio-packet-seek-target-20261031",
+    "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/scripts/__pycache__"
+  ],
+  "preserved": "Five short regression movies,their manifest,generators,all measurement samples and proof archives. Foreign worktrees,stashes,jobs and caches untouched.",
+  "plain_log_normalization": "Trailing whitespace and final empty lines removed;original raw hashes and final archive hashes retained."
+}

@@ -32,6 +32,9 @@ enum EditAction { Encoded, Step(crate::audio::AudioStep), End }
 pub struct Mp4AudioReader<R> {
     navigation_error: Option<crate::Error>,
     presentation_end_ticks: std::sync::OnceLock<Option<u128>>,
+    // Sample metadata is immutable for this reader's lifetime. Equal PTS are
+    // ordered too: packet seek must select the last member of that group.
+    pts_nondecreasing: std::sync::OnceLock<bool>,
     clock: Option<PlaybackClock>,
     clock_mode: std::cell::Cell<bool>,
     clock_floor: std::cell::Cell<EditTime>,
@@ -357,6 +360,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         demuxer.invalidate_position();
         Ok(Self {
             presentation_end_ticks: std::sync::OnceLock::new(),
+            pts_nondecreasing: std::sync::OnceLock::new(),
             source_gaps: false,
             gap_scan: Default::default(), deferred_pcm: Default::default(),
             navigation_error:None,
@@ -527,6 +531,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         let tracks = demuxer.tracks().len();
         let mut source = Self {
             presentation_end_ticks: std::sync::OnceLock::new(),
+            pts_nondecreasing: std::sync::OnceLock::new(),
             source_gaps,
             gap_scan: Default::default(), deferred_pcm: Default::default(),
             navigation_error:None,
@@ -949,7 +954,12 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
     pub fn seek(&mut self, pts: i64) -> i64 {
         self.deferred_pcm.get_mut().clear(); self.gap_scan.set(0);
         let track = self.track();
-        let index = track.samples.at_or_before(pts);
+        let index = match track.samples.expanded() {
+            Some(samples) if *self.pts_nondecreasing.get_or_init(|| {
+                samples.windows(2).all(|pair| pair[0].pts <= pair[1].pts)
+            }) => samples.partition_point(|sample| sample.pts <= pts).saturating_sub(1),
+            _ => track.samples.at_or_before(pts),
+        };
         let result_pts = track.samples.get(index).map_or(0, |s| s.pts);
         self.rewind();
         self.sample_index = index;
