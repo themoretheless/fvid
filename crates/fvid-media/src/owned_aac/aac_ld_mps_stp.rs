@@ -45,7 +45,7 @@ pub struct Decoder {
 }
 impl Decoder {
     pub fn new(tree: u8, bands: usize) -> Result<Self> {
-        if tree > 7 || !matches!(bands, 32 | 64) {
+        if tree > 7 || !matches!(bands, 32 | 64 | 128) {
             return Err(invalid("invalid LD-MPS STP geometry"));
         }
         let inputs = groups(tree);

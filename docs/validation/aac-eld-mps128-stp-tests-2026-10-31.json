@@ -1,0 +1,167 @@
+{
+  "baseline": "4e5447a6fb",
+  "scope": "Enable full-complex128-band STP geometry; no change to GES128,residual128 or output adaptation qualifications.",
+  "before": {
+    "log_sha256": "b3a9491bbee1d4df54bed7e77fcd67b05c3753ed011df123c801a26cd4ea8218",
+    "case": "n512-r64000-tree0-v1-plain",
+    "specific_error": "invalid LD-MPS STP geometry",
+    "refusal_test": false,
+    "acceptance_test": "aac_eld_mps128_stp"
+  },
+  "coverage": {
+    "programmes": 396,
+    "acceptance_videos": 792,
+    "late_corruption_refusals": 24,
+    "bare_core_controls": 18,
+    "pcm_oracle_samples": 15856128,
+    "pcm_oracle_max_error": 2.9035633814823714e-11,
+    "independent_stp_scalars": 1384448,
+    "independent_stp_max_error": 5.874768574387623e-09,
+    "changed_component_scalars": 155422,
+    "bin127_active_observations": 1416,
+    "bin127_max_signal_effect": 0.015131513588130474,
+    "signal_effect_comparisons": 66,
+    "worker_programmes": 792,
+    "worker_live_seeks_per_programme": 13,
+    "shape_switch": "STP -> ordinary -> STP",
+    "rates": [
+      64000,
+      88200,
+      96000
+    ],
+    "core_frames": [
+      480,
+      512
+    ]
+  },
+  "oracle_scope": "Audited ISO STP component extraction with documented UB removals; controlled complex QMF inputs. Whole PCM is analytical core plus previously qualified spatial session,not independent whole-decoder conformance.",
+  "gates": [
+    {
+      "gate": "media",
+      "command": [
+        "cargo",
+        "--config",
+        "profile.dev.package.fvid-media.opt-level=2",
+        "test",
+        "--offline",
+        "-p",
+        "fvid-media",
+        "--lib"
+      ],
+      "status": 0,
+      "seconds": 38.83461362501839,
+      "log": "/tmp/fvid-stp128-gate-media.log",
+      "log_sha256": "573e6a26258eabe8257b7a181ed9939daded8b8156c01780cdd89f1451295572",
+      "results": {
+        "passed": 587,
+        "failed": 0,
+        "ignored": 1
+      }
+    },
+    {
+      "gate": "worker",
+      "command": [
+        "cargo",
+        "--config",
+        "profile.dev.package.fvid-media.opt-level=2",
+        "test",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "ld_mps128_stp_worker",
+        "--",
+        "--nocapture"
+      ],
+      "status": 0,
+      "seconds": 326.4360565409879,
+      "log": "/tmp/fvid-stp128-gate-worker.log",
+      "log_sha256": "730952ae23b025732e38f794f571d11d6eeb496fa8f66769f31a8b297a15ed17",
+      "results": {
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0
+      }
+    },
+    {
+      "gate": "integration",
+      "command": [
+        "cargo",
+        "--config",
+        "profile.dev.package.fvid-media.opt-level=2",
+        "test",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "aac_eld_mps128",
+        "--test",
+        "aac_eld_mps128_stp",
+        "--test",
+        "aac_ld_mps_stp128",
+        "--test",
+        "aac_ld_mps_stp",
+        "--test",
+        "aac_ld_mps_stp_energy",
+        "--test",
+        "aac_ld_mps_qmf128",
+        "--test",
+        "aac_ld_mps_upmix",
+        "--",
+        "--nocapture"
+      ],
+      "status": 0,
+      "seconds": 211.62123275001068,
+      "log": "/tmp/fvid-stp128-gate-integration.log",
+      "log_sha256": "b8a6335cc8f31177e23a44aa21a2866fe0387232de9aa10386ff29265347a305",
+      "results": {
+        "passed": 26,
+        "failed": 0,
+        "ignored": 0
+      }
+    }
+  ],
+  "totals": {
+    "passed": 614,
+    "failed": 0,
+    "ignored": 1
+  },
+  "qualification": "All media library units; selected AudioWorker test; seven integration targets. This turn does not claim a freshly rerun entire player library suite.",
+  "generation_control": {
+    "ordinary_corpus_byte_identical": true,
+    "baseline_report": "docs/validation/aac-eld-mps128-generation-2026-10-31.json",
+    "baseline_report_sha256": "b723412ddac7736e14fbe1fdc582a184f89d7553a64f976555c7b7a7b42bbe5a",
+    "current_generator_sha256": "0fd58da0c1dea766208f1c7c8090558d0ac4854ce9ae09f2bc1dab5a856c93aa"
+  },
+  "files": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_stp.rs": "fa6b2e30ce51d9d84fa81ce4d1af78cd39ecb7cfbce4def0ae0e0a9445c4d9fb",
+    "docs/CODEC_PROGRESS.md": "b00491c178414bdf6af3cc68a186615cc469d8c47b1039a385c66590c852356d",
+    "docs/validation/aac-eld-mps128-stp-generation-2026-10-31.json": "00a8aadaee7aee47a7cf93c8c525f6bea017c852b25a938d726cef9be7b58d85",
+    "docs/validation/aac-eld-mps128-stp-reference-2026-10-31.json": "adc05597d6cbcb61a19552deb76dddfd9c77b351e5dfddc38c0a4a2b91b95f2c",
+    "scripts/generate_aac_eld_fixtures.py": "bb65a3bf09e5d6b4e8ebd96ac454fa788b6133b26354b3cda314a3e806bb5c6d",
+    "scripts/generate_aac_eld_mps128_fixtures.py": "0fd58da0c1dea766208f1c7c8090558d0ac4854ce9ae09f2bc1dab5a856c93aa",
+    "scripts/generate_aac_eld_mps128_stp_fixtures.py": "c835186961d99d2d80d14c2852c891c31a47e2faf00c36b8b7e39b9fbd9a4812",
+    "scripts/generate_aac_ld_mps_assemble_fixtures.py": "ca81d65f14fc2b521ede22b157993492a4faf9f7d675bdd09e9e942274acd538",
+    "scripts/generate_aac_ld_mps_stp128_reference.py": "7ca8bbbb7033cfbd090803bfea9f41fc87e71fb0c2717ee31e3b298a6fb77923",
+    "scripts/generate_aac_ld_mps_stp_fixtures.py": "f11549a94f841dc94000b962b348a540c7e1a3da76dd00189d996e575b6ed5d3",
+    "src/playback/audio/ep1_worker_tests.rs": "c667b12b1f631fdce610d1194ea22d093c0e9aee7caee343cce6df564b3661df",
+    "tests/aac_eld_mps128.rs": "8c9961aa5104532f7c0898f951a717f92b07d703abdc58bd04a23b5763858f33",
+    "tests/aac_eld_mps128_stp.rs": "8555761cfc3f91e3b06ec1cae7a1c5334242b192a3f0c538c9eb92874a6fa87c",
+    "tests/aac_ld_mps_stp128.rs": "9a8ffd95187c3118151dc7f7e0583b56e13141223927d90a92c34c4f9ea31dc0",
+    "tests/support/aac_eld_mps128_suite.rs": "fe196a3e85362d60561304b257472b45cfb8093966e3f732155d827a7f177800",
+    "tests/support/aac_ld_mps_stp_component_suite.rs": "d8e7e2ddd86e8da076f5b745de1ccaee4633793d87e0546fa637143f615115bc"
+  },
+  "unqualified": [
+    "GES128",
+    "residual32/128",
+    "update8",
+    "LFE/time alignment",
+    "HRTF/arbitrary downmix",
+    "profile-specific output adaptation <=48kHz",
+    "full Annex B/whole-codec conformance",
+    "physical output",
+    "real-time throughput"
+  ]
+}

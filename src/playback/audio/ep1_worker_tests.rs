@@ -395,3 +395,8 @@ fn ld_mps_multicore_worker_keeps_source_windows_through_navigation() {
 fn ld_mps128_worker_keeps_source_windows_through_navigation() {
     check_corpus("aac-eld-mps128");
 }
+
+#[test]
+fn ld_mps128_stp_worker_keeps_source_windows_through_navigation() {
+    check_corpus("aac-eld-mps128-stp");
+}

@@ -1,0 +1,11 @@
+{
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "original_member_sha256": "fc18e7e5851122c24d2c1317e39cf5269343f367bfe5446bd9833e06d772c9fe",
+  "adapted_probe_sha256": "dcb7949c5369c9939a359ca0ff0cf16c76aecc21e508300a1f16f0fda652f8fb",
+  "generator_sha256": "7ca8bbbb7033cfbd090803bfea9f41fc87e71fb0c2717ee31e3b298a6fb77923",
+  "input_sha256": "4cb08c8c946f82353f1a66e87106d2cc1cd94c453d575a7af1ac97ce14da5844",
+  "expected_sha256": "0f225d3cbfaafbd31b68c2d7c8c8ef0e980f633a5366935130fbeb022147bd01",
+  "programmes": 8,
+  "scalar_values": 1384448,
+  "scope": "Explicit component oracle generation using an audited ISO STP extraction.\n\nThe final active-bin formula is unchanged. Three reference-only UB removals:\n* Skip bins0..11 in the final mix (wet already merged and zero there).\n* Initialize absent tree7 C/LFE indices to -1.\n* Process only the two populated dry groups for trees5/6.\nThis is an adapted reference, not an unmodified/full normative decoder oracle.\n"
+}

@@ -1,3 +1,37 @@
+##128-band LD-MPS STP — active temporal shaping,2026-10-31
+
+The owned STP constructor now accepts128 bands. The existing full-complex
+frequency weights,energy refresh,limiting/smoothing and complete-bank mixing
+match the independently frozen audited ISO STP extraction. The runtime change
+is geometry admission; this is not a replacement shaping formula.
+
+396 own programmes in both MP4 and Matroska (792 acceptance videos) cover
+64/88.2/96kHz,480/512 core geometry,all8 trees,both TTT variants,parameter-grid
+changes,repeat/delayed/fragmented transport and in-band STP -> ordinary -> STP
+switches.18 bare controls and24 precise corruption refusals remain distinct.
+The first pre-fix movie refused specifically with invalid STP geometry.
+Acceptance requires PCM/layout/count,owned/frontend exports,playback,seek,
+rewind,repeated ranges and source-window rollback.66 paired ordinary movies
+separately prove active STP has an actual signal effect.
+
+The component oracle covers1,384,448 scalars including upper-bank output and
+history refresh boundaries; the full PCM composition covers15,856,128 samples.
+The former is an adapted ISO component reference with the explicitly retained
+reference-only UB removals; the latter is analytical core plus qualified spatial
+session,not independent whole-codec PCM conformance. Frozen ordinary tests use
+no FFmpeg,network or C compilation. Optional research regeneration is separate.
+
+Final offline checks:614 passed,0 failed,1 pre-existing ignored across all
+media library units,the new AudioWorker case and7 integration targets. This
+is not a freshly rerun entire player library suite. Own generation reproduced
+841 new and706 retained ordinary fixture files byte-for-byte under process/
+network denial; retained bytes also match the previous committed report.
+
+This supersedes older STP128 refusals only in the listed full-complex native-rate
+domain. GES128,residual128,profile output-rate adaptation and the other codec
+limitations remain open; physical output and real-time performance are unqualified.
+Evidence: `docs/validation/aac-eld-mps128-stp-{reference,generation,tests}-2026-10-31.json`.
+
 ## Ordinary128-band AAC-ELD / LD-MPS — native-rate reconstruction,2026-10-31
 
 The owned decoder now accepts ordinary no-SBR128-band LD-MPS on AAC-ELD

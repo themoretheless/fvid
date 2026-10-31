@@ -8,7 +8,7 @@ from generate_aac_ld_mps_inband_fixtures import raw
 from generate_aac_ld_mps_transport_fixtures import envelope,length
 from generate_aac_ld_mps_stp_fixtures import config,body
 from generate_aac_ps_matroska_fixtures import element,number,child
-ROOT=Path(__file__).resolve().parents[1];FIX=ROOT/'tests/fixtures/playback-errors';OUT=FIX/'aac-eld-mps128'
+ROOT=Path(__file__).resolve().parents[1];FIX=ROOT/'tests/fixtures/playback-errors';OUT=FIX/'aac-eld-mps128';SHAPE=0
 def main():
  OUT.mkdir(exist_ok=True)
  cores=generate(include_payload_bits=True,specs=[(n,rate,c,'high',0,0,True)for n in(512,480)for rate in(64000,88200,96000)for c in(1,2,6)])
@@ -19,11 +19,11 @@ def main():
  def build(n,rate,tree,variant,mode,bad=None):
   inputs=1 if tree in(0,1,7)else 2 if tree in(2,3,4)else 6;core=next(c for c in cm if c['n']==n and c['rate']==rate and c['channels']==inputs);group=1 if n==512 else 4;slots=n*group//128
   def select(bands):return next(c for c in am if c['tree']==tree and c['variant']==variant and c['bands']==bands)
-  def ssc(c):
-   data=config(c,48000,slots,cfg[c['config_offset']:c['config_offset']+c['config_bytes']],0);return packed(frequency(rate)+raw(data)[4:])
+  def ssc(c,shape=SHAPE):
+   data=config(c,48000,slots,cfg[c['config_offset']:c['config_offset']+c['config_bytes']],shape);return packed(frequency(rate)+raw(data)[4:])
   initial=ssc(select(23));asc=packed(field(31,5)+field(7,6)+frequency(rate)+field(core['configuration'],4)+field(n==480,1)+'0000'+field(2,4)+length(len(initial))+raw(initial)+'0000'+'00');refs=[];suffix=['']*12;previous=None;count=12//group
   for i in range(count):
-   bands=(23 if i==0 else 9 if i<count-1 else 4)if mode=='grid'else 23;c=select(bands);current=ssc(c);spatial,_=body(c,i,slots,'alternating',False)
+   bands=(23 if i==0 else 9 if i<count-1 else 4)if mode=='grid'else 23;c=select(bands);shape=0 if SHAPE and mode=='shape-switch' and (i==1 if count==3 else 3<=i<6) else SHAPE;current=ssc(c,shape);spatial,_=body(c,i,slots,'alternating',shape==1)
    if bad=='trailing'and i==1:spatial+=b'\xff'
    if bad=='inband-rate'and i==1:current=packed(field(3,4)+raw(current)[4:])
    header=i==0 or mode=='repeat'or current!=previous;payload=packed('0'+field(len(current),7))+current+spatial if header else spatial;suffix[(i+1)*group-1]=envelope(9,1 if header else 0,3,payload,True);refs.append(dict(ssc=current.hex(),spatial=spatial.hex(),header=header));previous=current
@@ -49,7 +49,7 @@ def main():
   for rate in(64000,88200,96000):
    for tree in range(8):
     for variant in((0,1)if tree in(2,3,4)else(1,)):
-     for mode in('plain','repeat','grid','delayed','fragmented'):cases.append(build(n,rate,tree,variant,mode))
+     for mode in(('plain','repeat','grid','delayed','fragmented','shape-switch')if SHAPE else('plain','repeat','grid','delayed','fragmented')):cases.append(build(n,rate,tree,variant,mode))
    for bad in('trailing','inband-rate'):errors.append(build(n,rate,7,1,'plain',bad))
- (OUT/'packets.bin').write_bytes(packets);(OUT/'core-reference.f32le').write_bytes(gold);(OUT/'manifest.json').write_text(json.dumps(dict(cases=cases,exports=[dict(c,video=c['file'],name=c['name']+'-matroska')for c in cases],errors=errors,controls=controls,provenance='Own high-band ELD spectral packets, analytical core PCM and authored spatial parameters; ordinary128-bin MPS only, no residual/STP/GES/SBR. No private media/process/network.'),separators=(',',':'))+'\n');print(len(cases),'ordinary128-bin programmes;',len(errors),'corrupt;',len(controls),'bare ELD controls')
+ (OUT/'packets.bin').write_bytes(packets);(OUT/'core-reference.f32le').write_bytes(gold);(OUT/'manifest.json').write_text(json.dumps(dict(cases=cases,exports=[dict(c,video=c['file'],name=c['name']+'-matroska')for c in cases],errors=errors,controls=controls,provenance='Own high-band ELD spectral packets, analytical core PCM and authored spatial parameters; ordinary128-bin MPS only, no residual/STP/GES/SBR. No private media/process/network.' if SHAPE==0 else 'Own high-rate ELD and active STP128 syntax; no private media/process/network.'),separators=(',',':'))+'\n');print(len(cases),'ordinary128-bin programmes;',len(errors),'corrupt;',len(controls),'bare ELD controls')
 if __name__=='__main__':main()
