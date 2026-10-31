@@ -1,0 +1,10 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -3811 +3811 @@
+-        let Some(now) = self.timeline().0 else {
++        let Some(now) = self.presentation_clock() else {
+@@ -13113,0 +13114,4 @@
++
++#[cfg(test)]
++#[path = "player_chapter_clock_tests.rs"]
++mod chapter_clock_regressions;

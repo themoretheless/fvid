@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 464,
-  "next_id": "FVID-0465",
+  "accepted_count": 465,
+  "next_id": "FVID-0466",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5149,7 +5149,15 @@
       "before": "Authored100ms MP4/40ms WAV exact native frame,timestamp,EOF and scalar PCM controls pass. After real worker completion at40ms,picture remains at0ms against the unused startup deadline. Identical strengthened baseline1pass1fail.",
       "result": "On current healthy audio completion reanchor the silent video deadline from the final delayed device clock and current picture end,including overdue intervals and playback rate. Avoid pending seek/paused clocks. Identical test advances to at least40ms promptly,then completes exact80..100ms final picture/native RGB/EOF without loading. Two tests pass20repetitions;all9gates pass1533physical-source-distinct checks,both builds and unchanged5old ignores. No performance or physical audio/window claim.",
       "status": "accepted",
-      "validation": "batch-458-validation.json"
+      "validation": "batch-458-validation.json",
+      "amendments": [
+        {
+          "validation": "batch-465-validation.json",
+          "regression": "src/player_audio_failure_clock_tests.rs",
+          "count_delta": 0,
+          "result": "Extend the existing last-device-clock handoff to an output-drain failure before dropping the failed handle. Correct device-error refusal and both75/350ms video continuations pass. Preserve remaining picture duration,exact RGB,seek recovery and natural EOF;source controls cover200/400ms PCM. Four unchanged tests pass20repetitions and the shared9gates pass1569physical-source-distinct checks. Initial stand pacing timeouts are excluded and retained separately. No new improvement ID."
+        }
+      ]
     },
     {
       "batch": 459,
@@ -5216,6 +5224,17 @@
       "result": "Use active clock for marks and rewind;spend B before awaiting a new frame or closing native EOF,and fence queued pictures starting at/after B. Explicit pause,seek preview,manual steps and earlier hard stop retain priority. Same six cases verify exact native RGB,remaining hold,no out-of-range picture,pause/resume,EOF loop and450ms hard stop. All20repetitions(120case executions) and9gates pass1558physical-source-distinct checks plus both builds;five old ignores unchanged. Variants/repeats add0IDs. Basic native rendering observed;uninterrupted window duration remains an explicitly separate pre-existing close-request limitation reproduced on baseline and candidate,including paused0ms. No performance,physical audio or hardware-codec claim.",
       "status": "accepted",
       "validation": "batch-464-validation.json"
+    },
+    {
+      "id": "FVID-0465",
+      "batch": 465,
+      "title": "Navigate chapters from the active media phase instead of the future picture end",
+      "source": "src/player.rs",
+      "regression": "src/player_chapter_clock_tests.rs",
+      "before": "Identical seven-case baseline passes exact root/owned chapter metadata,video pixels/PTS/seek/EOF control and two pending-seek controls,but fails four current-phase transports. At about451ms,next skips600ms and requests1200ms. At about76ms,next skips100ms and requests600ms. Backward/paused at about176ms request future200ms instead of100ms.",
+      "result": "Use presentation_clock as chapter request origin,retaining pending-seek and paused positions. Seven unchanged tests verify precise target,post-preroll phase,selected native interval and exact RGB,paused state,and actual final-chapter playback to natural EOF. Twenty repetitions pass140case executions. Shared9gates pass1569physical-source-distinct checks and both builds;five old ignores unchanged. Complete existing FVID-0458 output-error clock boundary in the same qualified batch without another ID. Controls,variants and repeats add0IDs;no performance,physical audio/GPU or new full native-window duration claim.",
+      "status": "accepted",
+      "validation": "batch-465-validation.json"
     }
   ]
 }

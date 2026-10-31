@@ -1,0 +1,8 @@
+{
+  "baseline_and_candidate_test_sha256": "ac5585c70bfb7e39bc5fede34cd39caadfa666c548fa93fb07d95398e74c6352",
+  "test_unchanged": true,
+  "existing_tests_modified": false,
+  "final_qualification_source_record": "after-source.json",
+  "focused_source_record": "chapter-only-source.json",
+  "fixture_generation": "fixture-generation.json"
+}

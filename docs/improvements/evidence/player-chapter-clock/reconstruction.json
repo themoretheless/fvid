@@ -1,0 +1,6 @@
+{
+  "base": "e612a60ed8848ea5e9acc94bfdb8bf36f635e027",
+  "baseline_sha256": "fe0c07a1743a13d8a3608e4fbda1e59ab1dc7099c9774bde7da61dbe8b398515",
+  "patch": "baseline.patch",
+  "byte_identical_reconstruction": true
+}

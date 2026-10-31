@@ -1,0 +1,8 @@
+{
+  "initial_attempt": "initial-pacing-before.log",
+  "initial_result": "0pass4timeout;not a reproduction of the proposed media-clock failure",
+  "cause": "400ms source at clock0 cannot prefetch all PCM past the worker200ms LEAD. A75ms clock cannot reach that source drain.",
+  "repair": "Drive the source-control clock to its endpoint before waiting for all PCM;advance the playback clock before awaiting long-source PCM;use authored200ms source at75ms so actual drain is reachable. Keep400ms source at350ms. Error event,phase,remaining hold,RGB,seek and EOF assertions retained.",
+  "production_audio_code_changed": false,
+  "count_delta": 0
+}

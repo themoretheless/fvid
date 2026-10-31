@@ -1,0 +1,28 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--lib",
+    "audio_failure_clock_regressions",
+    "--",
+    "--test-threads=2"
+  ],
+  "before": {
+    "passed": 2,
+    "failed": 2,
+    "exit_code": 101
+  },
+  "after": {
+    "passed": 4,
+    "failed": 0,
+    "exit_code": 0
+  },
+  "test_unchanged": true,
+  "amends_id": "FVID-0458",
+  "count_delta": 0
+}

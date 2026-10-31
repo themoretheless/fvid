@@ -1,0 +1,10 @@
+{
+  "status": "accepted amendment",
+  "id": "FVID-0458",
+  "count_delta": 0,
+  "shared_validation": "../../batch-465-validation.json",
+  "shared_results": "../player-chapter-clock/qualification-results.json",
+  "shared_deduplication": "../player-chapter-clock/deduplication.json",
+  "physical_source_distinct_passed": 1569,
+  "ignored_tests_unchanged": true
+}

@@ -1,0 +1,199 @@
+run 1
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.64s
+
+run 2
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.65s
+
+run 3
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.65s
+
+run 4
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.65s
+
+run 5
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.64s
+
+run 6
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.65s
+
+run 7
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.64s
+
+run 8
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.64s
+
+run 9
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.64s
+
+run 10
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.64s
+
+run 11
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.64s
+
+run 12
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.64s
+
+run 13
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.64s
+
+run 14
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.64s
+
+run 15
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.65s
+
+run 16
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.65s
+
+run 17
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.65s
+
+run 18
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.65s
+
+run 19
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.65s
+
+run 20
+
+running 4 tests
+test player::audio_failure_clock_regressions::exact_valid_video_and_pcm_source_controls ... ok
+test player::audio_failure_clock_regressions::failed_audio_inside_first_picture_keeps_its_last_clock ... ok
+test player::audio_failure_clock_regressions::injected_output_drain_failure_is_reported_before_audio_eof ... ok
+test player::audio_failure_clock_regressions::failed_audio_after_next_picture_keeps_its_last_clock ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.65s

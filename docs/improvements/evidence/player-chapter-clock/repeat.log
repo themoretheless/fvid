@@ -1,0 +1,259 @@
+run 1
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.94s
+
+run 2
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.90s
+
+run 3
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.91s
+
+run 4
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.90s
+
+run 5
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.89s
+
+run 6
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.89s
+
+run 7
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.90s
+
+run 8
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.90s
+
+run 9
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.90s
+
+run 10
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.91s
+
+run 11
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.89s
+
+run 12
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.91s
+
+run 13
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.90s
+
+run 14
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.90s
+
+run 15
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.90s
+
+run 16
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.90s
+
+run 17
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.94s
+
+run 18
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.93s
+
+run 19
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.89s
+
+run 20
+
+running 7 tests
+test player::chapter_clock_regressions::exact_mp4_chapter_source_metadata_pixels_seek_and_eof_control ... ok
+test player::chapter_clock_regressions::next_chapter_at_next_picture_start_is_not_skipped ... ok
+test player::chapter_clock_regressions::next_chapter_inside_current_picture_is_not_skipped ... ok
+test player::chapter_clock_regressions::paused_previous_chapter_uses_retained_media_phase ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_next_chapter ... ok
+test player::chapter_clock_regressions::pending_seek_is_the_origin_of_the_previous_chapter ... ok
+test player::chapter_clock_regressions::previous_chapter_does_not_move_forward_within_picture ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1145 filtered out; finished in 1.90s

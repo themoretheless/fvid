@@ -1,0 +1,16 @@
+{
+  "exit_code": 101,
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--lib",
+    "audio_failure_clock_regressions",
+    "--",
+    "--test-threads=2"
+  ]
+}

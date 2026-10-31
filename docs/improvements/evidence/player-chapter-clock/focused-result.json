@@ -1,0 +1,26 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--lib",
+    "chapter_clock_regressions",
+    "--",
+    "--test-threads=2"
+  ],
+  "before": {
+    "passed": 3,
+    "failed": 4,
+    "exit_code": 101
+  },
+  "after": {
+    "passed": 7,
+    "failed": 0,
+    "exit_code": 0
+  },
+  "test_unchanged": true
+}

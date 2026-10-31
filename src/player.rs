@@ -3808,7 +3808,7 @@ impl Player {
             self.show_osd("Cannot seek");
             return;
         }
-        let Some(now) = self.timeline().0 else {
+        let Some(now) = self.presentation_clock() else {
             return;
         };
         let starts: Vec<Duration> = self.chapters.iter().map(|mark| mark.start).collect();
@@ -3940,7 +3940,7 @@ impl Player {
         // Once sound drains, video must continue from that last device clock.
         // A/V presentation did not consume the silent startup deadline, so
         // carrying it into silent presentation would hold the next picture.
-        if ran_out && !self.paused && !self.seek_preview && self.picture_audio_clock {
+        if (ran_out || failure.is_some()) && !self.paused && !self.seek_preview && self.picture_audio_clock {
             if let Some(end) = self.interval
                 .and_then(|(_, end, scale)| Self::interval_time(end, scale))
             {
@@ -13111,3 +13111,11 @@ mod late_clock_regressions;
 #[cfg(test)]
 #[path = "player_ab_clock_tests.rs"]
 mod ab_clock_regressions;
+
+#[cfg(test)]
+#[path = "player_chapter_clock_tests.rs"]
+mod chapter_clock_regressions;
+
+#[cfg(test)]
+#[path = "player_audio_failure_clock_tests.rs"]
+mod audio_failure_clock_regressions;

@@ -1,0 +1,8 @@
+{
+  "completed": true,
+  "shared_owned_build_target_removed": true,
+  "shared_cleanup": "../player-chapter-clock/cleanup.json",
+  "own_temporary_prefix_absent": true,
+  "regression_fixtures_and_evidence_preserved": true,
+  "foreign_worktrees_branches_stashes_preserved": true
+}

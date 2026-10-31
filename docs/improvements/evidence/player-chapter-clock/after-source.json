@@ -1,0 +1,7 @@
+{
+  "src/player.rs": "f3c93c70578ea92108b27a9eff38cc126cb5bf7c13a1639a20a779bad750874f",
+  "src/player_chapter_clock_tests.rs": "ac5585c70bfb7e39bc5fede34cd39caadfa666c548fa93fb07d95398e74c6352",
+  "scripts/generate_player_chapter_clock.py": "9b1144029f8a5d9fdca39004b22fe1d0b8fe179ec69811c2421c0a12943f9d30",
+  "src/player_audio_failure_clock_tests.rs": "e12baf3edfbc696d4aa784bc25d8c28c2bb944f2fd214849b61e82e9812d61b5",
+  "scripts/generate_player_audio_failure_clock.py": "b92cc595d0e464d7fbc8a598b311a2e6eff67fcf9f2e1ad42d92f857e6d349ba"
+}

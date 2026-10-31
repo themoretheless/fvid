@@ -1,0 +1,5 @@
+{
+  "src/player.rs": "fe0c07a1743a13d8a3608e4fbda1e59ab1dc7099c9774bde7da61dbe8b398515",
+  "src/player_chapter_clock_tests.rs": "ac5585c70bfb7e39bc5fede34cd39caadfa666c548fa93fb07d95398e74c6352",
+  "scripts/generate_player_chapter_clock.py": "9b1144029f8a5d9fdca39004b22fe1d0b8fe179ec69811c2421c0a12943f9d30"
+}

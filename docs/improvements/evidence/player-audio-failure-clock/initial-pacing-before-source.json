@@ -1,0 +1,5 @@
+{
+  "src/player.rs": "af7614324a1e1e2dc0bc9071a95746914114891d93bb2cfb212aadf0faf5d2fd",
+  "src/player_audio_failure_clock_tests.rs": "7fe6acd0ad38852104b6e1e07a1a58de1835795e200c68a0bd82263ce0fd4322",
+  "scripts/generate_player_audio_failure_clock.py": "398c597f7f2780b72f9d8223e59fa752f248db84cf7441e621dca6f2aaaafadd"
+}

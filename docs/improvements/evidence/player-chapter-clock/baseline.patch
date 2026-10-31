@@ -1,0 +1,7 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -13113,0 +13114,4 @@
++
++#[cfg(test)]
++#[path = "player_chapter_clock_tests.rs"]
++mod chapter_clock_regressions;

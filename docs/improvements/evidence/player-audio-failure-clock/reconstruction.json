@@ -1,0 +1,8 @@
+{
+  "base": "e612a60ed8848ea5e9acc94bfdb8bf36f635e027",
+  "baseline_sha256": "af7614324a1e1e2dc0bc9071a95746914114891d93bb2cfb212aadf0faf5d2fd",
+  "baseline_patch": "baseline.patch",
+  "byte_identical_reconstruction": true,
+  "context": "Chapter fix applied;production audio failure handoff still unchanged before this repair.",
+  "count_delta": 0
+}

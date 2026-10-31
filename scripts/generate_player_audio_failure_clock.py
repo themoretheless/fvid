@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+"""Authored valid AV sources for a controlled output-drain failure;offline."""
+from pathlib import Path
+import hashlib,json,struct
+from generate_player_rate_clock import generate as video
+OUT=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/player-audio-failure-clock'
+def generate():
+    files={n:b for n,b in video().items()if n!='manifest.json'}
+    samples=[i*17%1024-512 for i in range(3200)];raw=struct.pack('<3200h',*samples)
+    files['sound.wav']=b'RIFF'+struct.pack('<I',36+len(raw))+b'WAVEfmt '+struct.pack('<IHHIIHH',16,1,1,8000,16000,2,16)+b'data'+struct.pack('<I',len(raw))+raw
+    files['sound.f32le']=b''.join(struct.pack('<f',v/32768)for v in samples)
+    short=samples[:1600];short_raw=struct.pack('<1600h',*short)
+    files['sound-short.wav']=b'RIFF'+struct.pack('<I',36+len(short_raw))+b'WAVEfmt '+struct.pack('<IHHIIHH',16,1,1,8000,16000,2,16)+b'data'+struct.pack('<I',len(short_raw))+short_raw
+    files['sound-short.f32le']=b''.join(struct.pack('<f',v/32768)for v in short)
+    files['manifest.json']=(json.dumps({'provenance':'Five authored16x16 VP9 keyframes,300ms each,and200ms/400ms mono8kHz scalar PCM. Sources are valid;the regression injects a named failure in a controlled output backend drain. No private media,encoder,FFmpeg or network.','video_ms':1500,'audio_ms':[200,400],'fault_clock_ms':[75,350],'sha256':{n:hashlib.sha256(b).hexdigest()for n,b in files.items()}},indent=2)+'\n').encode()
+    return files
+if __name__=='__main__':
+    OUT.mkdir(parents=True,exist_ok=True)
+    for n,b in generate().items():(OUT/n).write_bytes(b)

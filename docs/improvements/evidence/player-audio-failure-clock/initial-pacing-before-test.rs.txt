@@ -1,0 +1,316 @@
+//! A failed output must hand its last device clock to continuing video.
+use super::*;
+use std::{
+    io::Cursor,
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicBool, AtomicU64, Ordering},
+    },
+};
+fn root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/player-audio-failure-clock")
+}
+fn bytes(n: &str) -> Vec<u8> {
+    std::fs::read(root().join(n)).unwrap()
+}
+fn tick(p: &mut Player, ctx: &egui::Context) {
+    let mut out = ctx.run_ui(Default::default(), |ui| p.present(ui.ctx()));
+    out.textures_delta.clear();
+}
+#[derive(Default)]
+struct Trace {
+    pcm: Vec<u8>,
+    pauses: usize,
+    resumes: usize,
+}
+struct Device {
+    clock: Arc<AtomicU64>,
+    trace: Arc<Mutex<Trace>>,
+    fail: Arc<AtomicBool>,
+    running: bool,
+    anchor: Duration,
+    frontier: Duration,
+}
+impl crate::audio::AudioBackend for Device {
+    fn start(&mut self, s: crate::audio::AudioSpec) -> Result<(), crate::audio::AudioError> {
+        assert_eq!((s.sample_rate, s.channels), (8000, 1));
+        Ok(())
+    }
+    fn position(&self) -> Duration {
+        if self.running {
+            Duration::from_nanos(self.clock.load(Ordering::SeqCst))
+        } else {
+            self.anchor
+        }
+    }
+    fn push(&mut self, p: crate::audio::AudioPacket) -> Result<(), crate::audio::AudioError> {
+        self.frontier =
+            p.presentation_time() + Duration::from_nanos(p.data.len() as u64 / 4 * 125000);
+        self.trace.lock().unwrap().pcm.extend(p.data);
+        Ok(())
+    }
+    fn flush(&mut self, t: Duration) -> Result<(), crate::audio::AudioError> {
+        self.anchor = t;
+        self.clock.store(t.as_nanos() as u64, Ordering::SeqCst);
+        Ok(())
+    }
+    fn pause(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.anchor = self.position();
+        self.running = false;
+        self.trace.lock().unwrap().pauses += 1;
+        Ok(())
+    }
+    fn resume(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.running = true;
+        self.trace.lock().unwrap().resumes += 1;
+        Ok(())
+    }
+    fn stop(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.running = false;
+        Ok(())
+    }
+    fn drain_status(&self) -> Result<bool, crate::audio::AudioError> {
+        if self.fail.load(Ordering::SeqCst) {
+            Err(crate::audio::AudioError::PlaybackError(
+                "synthetic output drain failure".into(),
+            ))
+        } else {
+            Ok(self.position() >= self.frontier)
+        }
+    }
+}
+fn sound(
+    clock: Arc<AtomicU64>,
+    trace: Arc<Mutex<Trace>>,
+    fail: Arc<AtomicBool>,
+) -> crate::audio_thread::AudioPlayback {
+    let source = crate::playback_wav::WavAudioReader::open(
+        Cursor::new(bytes("sound.wav")),
+        Default::default(),
+    )
+    .unwrap();
+    crate::audio_thread::AudioPlayback::start(Box::new(source), move || {
+        Box::new(Device {
+            clock,
+            trace,
+            fail,
+            running: false,
+            anchor: Duration::ZERO,
+            frontier: Duration::ZERO,
+        })
+    })
+}
+fn clock_at(a: &crate::audio_thread::AudioPlayback, clock: &AtomicU64, t: Duration) {
+    clock.store(t.as_nanos() as u64, Ordering::SeqCst);
+    let until = Instant::now() + Duration::from_secs(5);
+    while a.position() != t {
+        if let Some(crate::audio_thread::AudioEvent::Error(e)) = a.poll() {
+            panic!("{e}");
+        }
+        assert!(
+            Instant::now() < until,
+            "audio clock {:?} expected{t:?}",
+            a.position()
+        );
+        std::thread::sleep(Duration::from_millis(1));
+    }
+}
+
+#[test]
+fn exact_valid_video_and_pcm_source_controls() {
+    let mut r = crate::playback_mp4::Mp4VideoReader::open_software(
+        Cursor::new(bytes("movie.mp4")),
+        Default::default(),
+        32 << 20,
+    )
+    .unwrap();
+    for i in 0..5 {
+        let f = r.read_frame().unwrap().unwrap();
+        assert_eq!(
+            (f.sample_index, f.presentation_time.ticks, f.duration.ticks),
+            (i, i as i64 * 300, 300)
+        );
+        let yuv: Vec<_> = f
+            .picture
+            .y
+            .iter()
+            .chain(&f.picture.cb)
+            .chain(&f.picture.cr)
+            .flat_map(|v| v.to_le_bytes())
+            .collect();
+        assert_eq!(yuv, bytes(&format!("frame-{}.yuv16", i % 3)));
+    }
+    assert!(r.read_frame().unwrap().is_none());
+    let clock = Arc::new(AtomicU64::new(0));
+    let trace = Arc::new(Mutex::new(Trace::default()));
+    let a = sound(
+        clock.clone(),
+        trace.clone(),
+        Arc::new(AtomicBool::new(false)),
+    );
+    a.play();
+    let until = Instant::now() + Duration::from_secs(5);
+    while trace.lock().unwrap().pcm.len() != bytes("sound.f32le").len() {
+        assert!(Instant::now() < until);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert_eq!(trace.lock().unwrap().pcm, bytes("sound.f32le"));
+    clock.store(400_000_000, Ordering::SeqCst);
+    loop {
+        assert!(Instant::now() < until);
+        match a.poll() {
+            Some(crate::audio_thread::AudioEvent::Ended(_)) => break,
+            Some(crate::audio_thread::AudioEvent::Error(e)) => panic!("{e}"),
+            _ => {}
+        }
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert_eq!(a.position(), Duration::from_millis(400));
+}
+
+#[test]
+fn injected_output_drain_failure_is_reported_before_audio_eof() {
+    let clock = Arc::new(AtomicU64::new(0));
+    let trace = Arc::new(Mutex::new(Trace::default()));
+    let fail = Arc::new(AtomicBool::new(false));
+    let a = sound(clock.clone(), trace.clone(), fail.clone());
+    a.play();
+    let until = Instant::now() + Duration::from_secs(5);
+    while trace.lock().unwrap().pcm.len() != bytes("sound.f32le").len() {
+        assert!(Instant::now() < until);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    clock_at(&a, &clock, Duration::from_millis(75));
+    fail.store(true, Ordering::SeqCst);
+    loop {
+        assert!(Instant::now() < until);
+        match a.poll() {
+            Some(crate::audio_thread::AudioEvent::Error(e)) => {
+                assert!(e.contains("synthetic output drain failure"), "{e}");
+                break;
+            }
+            Some(crate::audio_thread::AudioEvent::Ended(_)) => {
+                panic!("output failure became natural EOF")
+            }
+            _ => {}
+        }
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert_eq!(trace.lock().unwrap().pcm, bytes("sound.f32le"));
+    assert_eq!(a.position(), Duration::from_millis(75));
+}
+fn failure_case(at: u64) {
+    let ctx = egui::Context::default();
+    let mut p = Player {
+        queue: vec![root().join("movie.mp4")],
+        no_audio: true,
+        asynchronous_open: false,
+        start_paused: false,
+        ..Default::default()
+    };
+    p.play_index(0);
+    let clock = Arc::new(AtomicU64::new(0));
+    let trace = Arc::new(Mutex::new(Trace::default()));
+    let fail = Arc::new(AtomicBool::new(false));
+    p.audio = Some(sound(clock.clone(), trace.clone(), fail.clone()));
+    p.audio_ended = false;
+    let until = Instant::now() + Duration::from_secs(5);
+    while p.presented.is_none() {
+        assert!(Instant::now() < until);
+        assert!(p.error.is_none());
+        tick(&mut p, &ctx);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert_eq!(p.interval, Some((0, 300, 1000)));
+    while trace.lock().unwrap().pcm.len() != bytes("sound.f32le").len() {
+        assert!(Instant::now() < until);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    let wanted = Duration::from_millis(at);
+    clock_at(p.audio.as_ref().unwrap(), &clock, wanted);
+    let start = at / 300 * 300;
+    while p.interval.unwrap().0 != u128::from(start) {
+        assert!(Instant::now() < until);
+        tick(&mut p, &ctx);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert!(p.picture_audio_clock);
+    assert!(!p.audio_ended);
+    assert_eq!(p.presentation_clock(), Some(wanted));
+    fail.store(true, Ordering::SeqCst);
+    let mut last_poll = Instant::now();
+    while p.audio.is_some() {
+        assert!(Instant::now() < until);
+        last_poll = Instant::now();
+        p.poll_audio();
+        if p.audio.is_some() {
+            std::thread::sleep(Duration::from_millis(1));
+        }
+    }
+    let phase = p.presentation_clock().unwrap();
+    assert!(
+        phase >= wanted && phase.abs_diff(wanted) <= last_poll.elapsed() + Duration::from_millis(5),
+        "failed audio clock {wanted:?} became silent {phase:?};unused deadline {:?}",
+        p.deadline.saturating_duration_since(Instant::now())
+    );
+    assert!(p.audio_ended && !p.paused && !p.ended && p.error.is_none());
+    assert_eq!(trace.lock().unwrap().pcm, bytes("sound.f32le"));
+    let end = Duration::from_millis(start + 300);
+    assert!(phase < end);
+    let remaining = end - phase;
+    let held = Instant::now();
+    while p.interval.unwrap().0 == u128::from(start) {
+        assert!(
+            held.elapsed() <= remaining + Duration::from_millis(100),
+            "failed-device silent tail stalled"
+        );
+        tick(&mut p, &ctx);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert!(
+        held.elapsed() + Duration::from_millis(15) >= remaining,
+        "remaining picture interval was skipped"
+    );
+    assert_eq!(
+        p.interval,
+        Some((u128::from(start + 300), u128::from(start + 600), 1000))
+    );
+    let mut reference = NativeReader::software(Cursor::new(bytes("movie.mp4")), 32 << 20).unwrap();
+    let rgb = reference
+        .seek_raw(Duration::from_millis(start + 300))
+        .unwrap()
+        .unwrap()
+        .into_rgb(32 << 20)
+        .unwrap();
+    assert_eq!(display_rgb(p.presented.as_ref().unwrap()).unwrap(), rgb);
+    p.seek_time(Duration::from_millis(1200));
+    let tail = Instant::now() + Duration::from_secs(3);
+    while !p.ended {
+        assert!(
+            Instant::now() < tail,
+            "removed failed device re-enabled audio gating"
+        );
+        assert!(p.error.is_none());
+        tick(&mut p, &ctx);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert_eq!(p.interval, Some((1200, 1500, 1000)));
+    assert_eq!(p.presentation_clock(), Some(Duration::from_millis(1500)));
+    assert!(p.audio.is_none());
+    let rgb = reference
+        .seek_raw(Duration::from_millis(1200))
+        .unwrap()
+        .unwrap()
+        .into_rgb(32 << 20)
+        .unwrap();
+    assert_eq!(display_rgb(p.presented.as_ref().unwrap()).unwrap(), rgb);
+}
+#[test]
+fn failed_audio_inside_first_picture_keeps_its_last_clock() {
+    failure_case(75);
+}
+#[test]
+fn failed_audio_after_next_picture_keeps_its_last_clock() {
+    failure_case(350);
+}
