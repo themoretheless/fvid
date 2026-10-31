@@ -1,5 +1,5 @@
 {
-  "status": "accepted FVID-0444; all gates passed; owned temporary artifacts removed; publication pending",
+  "status": "accepted FVID-0444 and published to both delivery refs; all gates passed; own artifacts removed",
   "base": "ba574b83d397148aa1df3fd434468ad1b12327e9",
   "source_sha256": "20c647c43b49b16aad880d931b83cd243c93deee929992eb72fbafd8ed6c7ce2",
   "target": "/private/tmp/fvid-mp4-audio-preroll-target-20261031",
@@ -8,7 +8,7 @@
   "count_delta": 1,
   "baseline_session": 63053,
   "baseline_log": "/private/tmp/fvid-mp4-audio-preroll-baseline-build.log",
-  "next": "Commit qualified source and evidence,atomic push both authorized delivery refs,and verify remote state.",
+  "next": "Continue next independent verified improvement; target1000 remains active.",
   "regression_scope": [
     "independent MACE primitive decoder vs PCM after fractional/backward/EOF seek",
     "direct packet seek landing contract unchanged",

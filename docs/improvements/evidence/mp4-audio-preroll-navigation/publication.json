@@ -1,0 +1,12 @@
+{
+  "status": "qualified code delivery verified",
+  "qualified_code_commit": "43f27f5d099cb7a3fe8f404bd5091ff6e5b3ee58",
+  "observed_refs_before_receipt_commit": [
+    "43f27f5d099cb7a3fe8f404bd5091ff6e5b3ee58\trefs/heads/codex/deliver-fvid-20261029",
+    "43f27f5d099cb7a3fe8f404bd5091ff6e5b3ee58\trefs/heads/main"
+  ],
+  "source_hashes": "after-source.json",
+  "qualification": "batch-444-validation.json",
+  "own_worktree_clean_after_code_push": true,
+  "receipt_only_commit_does_not_change_runtime_or_tests": true
+}
