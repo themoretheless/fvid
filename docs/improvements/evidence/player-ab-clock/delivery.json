@@ -1,0 +1,16 @@
+{
+  "code_commit": "4570550e839bb7fcd4ca43cd041a972cea8fbda3",
+  "atomic_push_exit_code": 0,
+  "verified_remote_heads": "4570550e839bb7fcd4ca43cd041a972cea8fbda3\trefs/heads/codex/deliver-fvid-20261029\n4570550e839bb7fcd4ca43cd041a972cea8fbda3\trefs/heads/main\n",
+  "qualified_tracked_worktree_clean_before_receipt": true,
+  "untracked_active_next_audit_drafts_preserved": [
+    "?? scripts/generate_player_chapter_clock.py",
+    "?? src/player_chapter_clock_tests.rs",
+    "?? tests/fixtures/playback-errors/player-chapter-clock/"
+  ],
+  "temporary_artifacts_absent": true,
+  "accepted_count": 464,
+  "preserved_other_worktrees_and_four_stashes": true,
+  "regression_fixtures_and_evidence_retained": true,
+  "native_window_baseline_limitation": "native-smoke/finding.json"
+}
