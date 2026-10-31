@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 448,
-  "next_id": "FVID-0449",
+  "accepted_count": 449,
+  "next_id": "FVID-0450",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5033,6 +5033,17 @@
       "additional_validation": [
         "batch-448-interior-validation.json"
       ]
+    },
+    {
+      "id": "FVID-0449",
+      "batch": 449,
+      "title": "Preserve representable wide MP4 audio times and seek stamps",
+      "source": "src/playback/audio/mp4_audio.rs",
+      "regression": "tests/mp4_audio_wide_time.rs",
+      "before": "Published95114ab958 admits valid wide fragmented IMA4 coordinates but duration/time_of clamp to u64 nanoseconds,and seeking one native sample into the source fails as negative MP4 audio presentation time. Baseline1packet/video/true-overflow control passes;2clock/PCM-seek acceptances fail.",
+      "result": "Convert exact time into Duration seconds/remainder without narrowing total nanoseconds. Retain normal seek stamp spelling;use exact reduced source fraction when wide native ticks fit but nanoseconds do not. Five authored tiny VP9/IMA4 movies cover ordinary,boundary,near-signed-limit and actual-overflow cases without huge allocation. Scalar PCM,raw clocks,video,rewind,sample seek,EOF and actual worker PCM/PTS pass;real signed PTS overflow still refuses.126integration suites588pass;1256distinct checks and locked/offline core/player builds pass. All variants and conversion paths count once;no performance claim.",
+      "status": "accepted",
+      "validation": "batch-449-validation.json"
     }
   ]
 }

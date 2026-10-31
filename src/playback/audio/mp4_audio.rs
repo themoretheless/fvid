@@ -1142,12 +1142,10 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         let track = self.track();
         if (track.codec == *b"mp4a" || self.timeline.is_some()) && !track.edits.is_empty() && self.demuxer.movie_timescale() != 0 {
             let ticks = track.edits.iter().try_fold(0u128, |sum, edit| sum.checked_add(u128::from(edit.duration)))?;
-            let nanos = ticks.checked_mul(1_000_000_000)? / u128::from(self.demuxer.movie_timescale());
-            return Some(std::time::Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX)));
+            return EditTime::new(i128::try_from(ticks).ok()?, u128::from(self.demuxer.movie_timescale())).ok()?.duration();
         }
         let end = self.presentation_end_ticks()?;
-        let nanos = end * 1_000_000_000 / u128::from(track.timescale);
-        Some(std::time::Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX)))
+        EditTime::new(i128::try_from(end).ok()?, u128::from(track.timescale)).ok()?.duration()
     }
 
     fn time_of(&self, pts: i64) -> std::time::Duration {
@@ -1155,8 +1153,8 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         let track = self.track();
         let shift = if self.variable_edits.is_none() && track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0 { track.edits[0].media_time } else { 0 };
         if track.timescale == 0 { return std::time::Duration::ZERO; }
-        let nanos = pts.saturating_sub(shift).max(0) as u128 * 1_000_000_000 / u128::from(track.timescale);
-        std::time::Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX))
+        EditTime::signed_ticks(pts.saturating_sub(shift).max(0), track.timescale)
+            .ok().and_then(|time| time.duration()).unwrap_or(std::time::Duration::MAX)
     }
 
     fn packet_sample_limit(&self, duration: u64) -> Result<Option<usize>> {
@@ -1258,8 +1256,17 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
                 let numerator = i128::from(source_pts) * i128::from(rate)
                     + skip as i128 * i128::from(scale);
                 let at = numerator * 1_000_000_000 / (i128::from(rate) * i128::from(scale));
-                packet.pts = u64::try_from(at).map_err(|_| invalid("negative MP4 audio presentation time"))?;
-                packet.timebase_den = 1_000_000_000;
+                if let Ok(nanos) = u64::try_from(at) {
+                    packet.pts = nanos;
+                    packet.timebase_den = 1_000_000_000;
+                } else {
+                    // Wide source ticks can fit the packet clock even when
+                    // their nanosecond spelling does not. Preserve the exact
+                    // reduced native fraction instead of rejecting a valid seek.
+                    let (pts, den) = EditTime::new(numerator, u128::from(rate) * u128::from(scale))?.stamp()?;
+                    packet.pts = pts;
+                    packet.timebase_den = den;
+                }
             } else {
                 // Decoder output labels the integer PTS with a sample clock;
                 // the caller supplied track media units, which need not match.

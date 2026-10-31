@@ -1,0 +1,16 @@
+{
+  "removed": [
+    "/private/tmp/fvid-mp4-audio-wide-time-integration.log",
+    "/private/tmp/fvid-mp4-audio-wide-time-root-mp4.log",
+    "/private/tmp/fvid-mp4-audio-wide-time-root-webm.log",
+    "/private/tmp/fvid-mp4-audio-wide-time-media.log",
+    "/private/tmp/fvid-mp4-audio-wide-time-core-check.log",
+    "/private/tmp/fvid-mp4-audio-wide-time-player-check.log",
+    "/private/tmp/fvid-mp4-audio-wide-time-before.log",
+    "/private/tmp/fvid-mp4-audio-wide-time-after.log",
+    "/private/tmp/fvid-mp4-audio-wide-time-target-20261031",
+    "scripts/__pycache__"
+  ],
+  "verified": "frozen source and raw/archive log hashes match;all6gates terminal0",
+  "preserved": "all7corpus files,generator,regression,before-test snapshot and proof;foreign worktrees/stashes untouched"
+}

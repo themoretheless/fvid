@@ -1,0 +1,21 @@
+{
+  "status": "accepted FVID-0449;verified;owned artifacts removed;ready to publish",
+  "base": "95114ab958f6f801aaae546143317e47fa8fe01e",
+  "scope": "Wide audio Duration conversion and sample seek; authored short hybrid VP9/fragmented IMA4 witnesses across u64 nanosecond boundary; true signed PTS overflow still must refuse.",
+  "accepted_count_unchanged": 448,
+  "next": "Verify archives;remove only owned artifacts;publish qualified code/proof.",
+  "baseline_session": 89121,
+  "baseline_log": "/private/tmp/fvid-mp4-audio-wide-time-before.log",
+  "target": "/private/tmp/fvid-mp4-audio-wide-time-target-20261031",
+  "baseline_exit": 101,
+  "baseline_passed": 1,
+  "baseline_failed": 2,
+  "result": "Duration/time_of clamp valid seconds to u64 nanos;sample seek falsely returns negative-time error. Packet/video and true-overflow control passed. Actual worker assertion added after baseline.",
+  "focused_session": 28408,
+  "focused_exit": 0,
+  "focused_passed": 20,
+  "qualification_session": 89714,
+  "qualification_exit": 0,
+  "distinct_passed": 1256,
+  "count_delta": 1
+}

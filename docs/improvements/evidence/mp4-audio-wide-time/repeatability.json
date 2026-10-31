@@ -1,0 +1,14 @@
+{
+  "files": 7,
+  "movies": 5,
+  "result": "byte-identical second generation",
+  "sha256": {
+    "expected.f32le": "286bc442f76950c5f97d11959dcb5d62415806588c6e18c1d0f97feb04ccf0a1",
+    "control.mp4": "4c64f5817f9060e2727de5aed106831f4cdb30338289c3ecd922bc8e807589f5",
+    "below-nanosecond-limit.mp4": "d30799ffbc62a740b6764358897b0821dded15e6020bc454506544f1400cc223",
+    "above-nanosecond-limit.mp4": "31f17fad31bb6902c4900430935590e8210b0713c39cf0d45b4873f128c64a35",
+    "near-signed-tick-limit.mp4": "5d388a08e413e3b9c2460cf284d060fc810b073defd0e3267ac91670f83eec30",
+    "signed-overflow.mp4": "e916640785e7407510673a1cf9999c24193c250a73ea5900ded47e5169276f35",
+    "manifest.json": "9a2d266ac2d374cc00b9750becf52cdc3f810d9b851e1c16ccbb9e875dad000d"
+  }
+}
