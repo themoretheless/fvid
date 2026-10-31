@@ -313,6 +313,25 @@ impl Decoder {
                     &mut super::bits::BitReader::new(&message.payload),
                 )?;
                 replacement.validate_low_delay_profile()?;
+                if replacement.sample_rate == self.config.sample_rate
+                    && replacement.tree.code == self.config.tree.code
+                {
+                    let bins = if replacement.sample_rate < 27713 {
+                        32
+                    } else if replacement.sample_rate >= 55426 {
+                        128
+                    } else {
+                        64
+                    };
+                    let core_samples =
+                        usize::from(self.core.frame_samples / u16::from(self.core.downscale))
+                            * usize::from(self.output_multiplier);
+                    if !(usize::from(replacement.frame_slots) * bins).is_multiple_of(core_samples) {
+                        return Err(invalid(
+                            "LD-MPS in-band frame length splits an AAC core packet",
+                        ));
+                    }
+                }
             }
         }
         if next.assembler.replacements() != self.assembler.replacements() {

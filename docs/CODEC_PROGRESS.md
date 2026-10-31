@@ -1,3 +1,45 @@
+## Same-format SSC frame-length transitions, 2026-10-31
+
+LD-MPS now accepts in-band frame_slots changes without treating them as an
+output-format change. PCM/QMF banks and matrix interpolation history remain
+continuous. The queue previously tested readiness and sliced input using the
+old frame length before examining the pending header. It now derives each
+head frame's sample count from that header,waits for enough input,and uses the
+same count for slicing and retirement. Reset restores the initial length before
+a headerless initial frame. Native AAC preserves whole-core packet association
+and rejects replacement lengths that split an access unit.
+
+336 own transition programmes,each in MP4 and MKV,cover all8 trees,480/512
+AAC-LD/ELD cores,PCM32/64/128 and shared LD-SBR QMF32/64. Early,late and fully
+batched headers exercise grow/shrink at8/15/16/30/32 slots.112 independently
+decodable fixed-partition controls use the same constant coded parameters and
+common initial frame;the waveform must remain exactly equal after partitioning.
+30 saved analytical bare-core controls isolate ingress. This is partition
+invariance,not independent whole-codec PCM truth. Original production owners
+accept fixed/bare controls and reproduce the exact old format refusal on the
+transition acceptance test.
+
+New integration checks compare13927680 PCM values exactly,cover MP4/MKV source
+windows and seek/rewind,checkpoint replay and opaque packet IDs. Reset is checked
+from a completed longer frame with pending ready output into a headerless first
+frame. Two malformed batched suffix movies fail after earlier changed-length
+frames render;exact Session queues/DSP and native retry behavior are retained.
+Two other movies specifically refuse partial-core native association. Incorrect
+full bank reset at every header changes PCM by0.000011949642,so it cannot replace
+history retention. Generation is separate from tests and reproduces962 artifacts
+identically twice with process/network creation denied.
+
+Still open: frequency/channel-layout transitions,nonzero time alignment,
+fractional-core native AAC spatial frames,other quantization/combined shaping
+and HRTF configurations and complete Annex B/profile qualification. No physical
+audio or realtime-performance claim. The overall codec-gap goal remains open.
+
+Fresh offline gates: 1800 passed,0 failed,27 ignored.
+Media/player libraries and32 targeted integration binaries passed. New frame-
+length integration8 and audio worker1 passed,including seek/rewind.
+
+Evidence: `docs/validation/aac-ld-mps-frame-length-{source,generation,tests}-2026-10-31.json`.
+
 ## Signalled 3D-stereo TTT inversion, 2026-10-31
 
 Owned LD-MPS now applies SSC HRTF set0 to the TTT inverse for trees2/3/4.

@@ -549,3 +549,8 @@ fn arbitrary_downmix_gain_mode_switch_worker_keeps_live_state_and_navigation_sta
 fn signalled_3d_ttt_worker_keeps_inverse_history_and_navigation_stamps() {
     check_corpus("aac-ld-mps-3d");
 }
+
+#[test]
+fn variable_spatial_frame_length_worker_keeps_packet_windows_through_navigation() {
+    check_corpus("aac-ld-mps-frame-length");
+}

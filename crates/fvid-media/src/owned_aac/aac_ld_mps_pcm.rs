@@ -132,10 +132,7 @@ impl Decoder {
         if config == &self.config {
             return Ok(());
         }
-        if config.sample_rate != self.config.sample_rate
-            || config.frame_slots != self.config.frame_slots
-            || config.tree != self.config.tree
-        {
+        if config.sample_rate != self.config.sample_rate || config.tree != self.config.tree {
             return Err(unsupported(
                 "LD-MPS in-band output format change requires stream reconfiguration",
             ));
@@ -556,12 +553,17 @@ mod inband_state_tests {
         assert_ne!(synthesis, old_s);
         let saved = decoder.clone();
         let mut changed = gain.clone();
-        changed.frame_slots += 1;
+        changed.sample_rate += 1;
         assert!(decoder.reconfigure(&changed).is_err());
         assert_eq!(decoder, saved);
         let mut changed = gain;
         changed.surround_gain = None; // stereo has no surround field: unchanged SSC.
         decoder.reconfigure(&changed).unwrap();
         assert_eq!(decoder, saved);
+        let mut longer = decoder.config.clone();
+        longer.frame_slots *= 2;
+        decoder.reconfigure(&longer).unwrap();
+        assert_eq!(decoder.banks, saved.banks);
+        assert_eq!(decoder.config.frame_slots, longer.frame_slots);
     }
 }

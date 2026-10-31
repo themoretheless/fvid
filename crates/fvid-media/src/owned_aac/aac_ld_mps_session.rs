@@ -109,6 +109,7 @@ impl Session {
         self.pcm = Self::new_domain(&self.initial_config, self.mode, self.qmf_input)
             .expect("previously validated LD-MPS reset configuration")
             .pcm;
+        self.frame_samples = usize::from(self.initial_config.frame_slots) * self.bins;
         self.chunks.clear();
         self.pending.clear();
         self.queued_samples = 0;
@@ -239,7 +240,6 @@ impl Session {
                     ));
                 }
                 if config.sample_rate != next.initial_config.sample_rate
-                    || config.frame_slots != next.initial_config.frame_slots
                     || config.tree.code != next.initial_config.tree.code
                 {
                     return Err(unsupported(
@@ -263,7 +263,21 @@ impl Session {
             });
         }
         let mut output = Vec::new();
-        while next.queued_samples >= next.frame_samples && !next.pending.is_empty() {
+        while let Some(pending) = next.pending.front() {
+            // HeaderAndFrame owns the length of this frame, including when
+            // its header arrived before enough core packets were available.
+            // Do not use the preceding frame's length to test readiness or
+            // slice the queued source spans.
+            let samples = pending
+                .replacement
+                .as_ref()
+                .map_or(next.frame_samples, |c| {
+                    usize::from(c.frame_slots) * next.bins
+                });
+            if next.queued_samples < samples {
+                break;
+            }
+            next.frame_samples = samples;
             let (signal, stamp, sources) = next.front_signal()?;
             let pending = next.pending.front().unwrap();
             if let Some(candidate) = &pending.replacement {

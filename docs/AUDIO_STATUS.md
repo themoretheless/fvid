@@ -27,6 +27,13 @@ ELD/LD-SBR trees0..4,including dependent held gains,default reset on re-enable,
 identical-header continuation and failure/retry. Continuous absolute-coded
 controls preserve the same waveform without using that reconfiguration path.
 
+Same-format in-band spatial frame-length changes now retain filter history and
+resolve queued input using the next frame's SSC before testing readiness.
+Owned480/512 AAC-LD/ELD,LD-SBR PCM32/64/128 and shared-QMF32/64 movies cover
+grow/shrink,early/late/batched headers,opaque source windows,seek/rewind and reset.
+Native AAC still requires spatial frames to span whole core packets. Frequency,
+layout and nonzero time-alignment transitions remain separate unfinished work.
+
 LD-MPS rejects residual extension types0/1, including absent/zero bands, at
 native initial/replacement headers.
 Historical LD/residual numerical tests are not codec acceptance;ordinary MPEG
