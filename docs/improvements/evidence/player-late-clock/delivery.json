@@ -1,0 +1,11 @@
+{
+  "code_commit": "9128c3ab38b01dca7e1b2c62cc95203e5d2fc93f",
+  "atomic_push_exit_code": 0,
+  "verified_remote_heads": "9128c3ab38b01dca7e1b2c62cc95203e5d2fc93f\trefs/heads/codex/deliver-fvid-20261029\n9128c3ab38b01dca7e1b2c62cc95203e5d2fc93f\trefs/heads/main\n",
+  "own_worktree_clean_before_receipt": true,
+  "temporary_artifacts_absent": true,
+  "accepted_count": 463,
+  "preserved_other_worktrees_and_four_stashes": true,
+  "regression_fixtures_and_evidence_retained": true,
+  "native_window_followup": "../native-player-clock-smoke/report.json"
+}
