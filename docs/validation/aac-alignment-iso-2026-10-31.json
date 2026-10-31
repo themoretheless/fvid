@@ -1,0 +1,224 @@
+{
+  "scope": "Independent public ISO input admission and unaligned PCM observations; not a full conformance result.",
+  "checksum_inventory_url": "https://standards.iso.org/iso-iec/14496/-26/ed-2/en/mpeg4audio-conformance2ndEd_20230125.md5",
+  "checksum_inventory_sha256": "865521883bbc19db177c71c00fcb57bd3619a8ae73a05a21532c3fc22cc13e92",
+  "files": [
+    {
+      "archive": "compressedMp4.zip",
+      "member": "../mpeg4audio-conformance2ndEd_20230125/compressedMp4/er_ad_ldmps_tree_5151.mp4",
+      "bytes": 494575,
+      "sha256": "d226163325605ebc73a6aaaaf6fd1a0c4d7ef70a998068f34ee8402f6859ce64",
+      "iso_md5": "9195fbdc7765e9ac77407c4a4a85647a",
+      "url": "https://standards.iso.org/iso-iec/14496/-26/ed-2/en/compressedMp4.zip"
+    },
+    {
+      "archive": "compressedMp4.zip",
+      "member": "../mpeg4audio-conformance2ndEd_20230125/compressedMp4/er_eld_ldmps_tree_5151.mp4",
+      "bytes": 488096,
+      "sha256": "c64d7fd39c0c6c60a36f87f32e810573e1711225bead38a484bd6cf0ea750bfd",
+      "iso_md5": "3b491ca34afe31a99d007dbf4c795ef7",
+      "url": "https://standards.iso.org/iso-iec/14496/-26/ed-2/en/compressedMp4.zip"
+    },
+    {
+      "archive": "compressedMp4.zip",
+      "member": "../mpeg4audio-conformance2ndEd_20230125/compressedMp4/er_eld_ldmps_ldqmf_2.mp4",
+      "bytes": 3651,
+      "sha256": "907d37c0953b31198701c36a3a4f127c1aed48e3db105b3ed1b5c46d3d444fce",
+      "iso_md5": "b0df996e02a77e710a510c5dc3e679c8",
+      "url": "https://standards.iso.org/iso-iec/14496/-26/ed-2/en/compressedMp4.zip"
+    },
+    {
+      "archive": "compressedMp4.zip",
+      "member": "../mpeg4audio-conformance2ndEd_20230125/compressedMp4/er_eld_ldmps_ldqmf_1.mp4",
+      "bytes": 3651,
+      "sha256": "7cbcf115460136d855d9e336e2ae65adbff9cb96777bd3c4a8278132836af032",
+      "iso_md5": "584287932e63a673e47f7d811efe966b",
+      "url": "https://standards.iso.org/iso-iec/14496/-26/ed-2/en/compressedMp4.zip"
+    },
+    {
+      "archive": "referencesWav.zip",
+      "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/er_ad_ldmps_tree_5151.wav",
+      "bytes": 17326234,
+      "sha256": "a2732ae529d50f0ce7e6e6258911bf2985846e02df19ce67939b3131252c2e9f",
+      "iso_md5": "565fa14e301f3ceb52a2d5b4fb9e75f4",
+      "url": "https://standards.iso.org/iso-iec/14496/-26/ed-2/en/referencesWav.zip"
+    },
+    {
+      "archive": "referencesWav.zip",
+      "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/er_eld_ldmps_tree_5151.wav",
+      "bytes": 17326234,
+      "sha256": "f53c0a9af713864f991ea3e231c8893a7533b984fc49772d6fd8520cacf6d028",
+      "iso_md5": "c7837215f2726061527159d1afa33d01",
+      "url": "https://standards.iso.org/iso-iec/14496/-26/ed-2/en/referencesWav.zip"
+    },
+    {
+      "archive": "referencesWav.zip",
+      "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/er_eld_ldmps_ldqmf_2.wav",
+      "bytes": 96386,
+      "sha256": "e6c1f7f8eb015d492d02c6282994b812d77fa876f7bcf21a4d8f61415bad30aa",
+      "iso_md5": "7546e12495fce793e26d9ebc990e9a1a",
+      "url": "https://standards.iso.org/iso-iec/14496/-26/ed-2/en/referencesWav.zip"
+    },
+    {
+      "archive": "referencesWav.zip",
+      "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/er_eld_ldmps_ldqmf_1.wav",
+      "bytes": 192642,
+      "sha256": "13bb0d478229d67605b7d661693635d2b0c1b16e74dcd26e7a7f16b64a53dbff",
+      "iso_md5": "776a220b3e3765186ed54095a1ebb82d",
+      "url": "https://standards.iso.org/iso-iec/14496/-26/ed-2/en/referencesWav.zip"
+    }
+  ],
+  "before": [
+    {
+      "file": "er_ad_ldmps_tree_5151.mp4",
+      "status": 1,
+      "stdout": "",
+      "stderr": "Error: Invalid(\"AAC decode: nonzero AAC ELD alignment bits\")\n"
+    },
+    {
+      "file": "er_eld_ldmps_ldqmf_1.mp4",
+      "status": 1,
+      "stdout": "",
+      "stderr": "Error: Invalid(\"AAC decode: nonzero AAC ELD alignment bits\")\n"
+    },
+    {
+      "file": "er_eld_ldmps_ldqmf_2.mp4",
+      "status": 1,
+      "stdout": "",
+      "stderr": "Error: Invalid(\"AAC decode: nonzero AAC ELD alignment bits\")\n"
+    },
+    {
+      "file": "er_eld_ldmps_tree_5151.mp4",
+      "status": 1,
+      "stdout": "",
+      "stderr": "Error: Invalid(\"AAC decode: nonzero AAC ELD alignment bits\")\n"
+    }
+  ],
+  "after_prefix": [
+    {
+      "file": "er_ad_ldmps_tree_5151.mp4",
+      "command": [
+        "/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target/debug/examples/audio_probe",
+        "--packets",
+        "4",
+        "--pcm",
+        "/tmp/fvid-ld-mps-research/iso-conformance/er_ad_ldmps_tree_5151.f32le",
+        "/tmp/fvid-ld-mps-research/iso-conformance/er_ad_ldmps_tree_5151.mp4"
+      ],
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=6\npackets=4 decoded=4 frames=2048\nstamped=0.043s\naudio=0.043s first=0ns last=32ms\n",
+      "stderr": ""
+    },
+    {
+      "file": "er_eld_ldmps_ldqmf_1.mp4",
+      "command": [
+        "/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target/debug/examples/audio_probe",
+        "--packets",
+        "4",
+        "--pcm",
+        "/tmp/fvid-ld-mps-research/iso-conformance/er_eld_ldmps_ldqmf_1.f32le",
+        "/tmp/fvid-ld-mps-research/iso-conformance/er_eld_ldmps_ldqmf_1.mp4"
+      ],
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=2\npackets=4 decoded=4 frames=4096\nstamped=0.085s\naudio=0.085s first=0ns last=64ms\n",
+      "stderr": ""
+    },
+    {
+      "file": "er_eld_ldmps_ldqmf_2.mp4",
+      "command": [
+        "/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target/debug/examples/audio_probe",
+        "--packets",
+        "4",
+        "--pcm",
+        "/tmp/fvid-ld-mps-research/iso-conformance/er_eld_ldmps_ldqmf_2.f32le",
+        "/tmp/fvid-ld-mps-research/iso-conformance/er_eld_ldmps_ldqmf_2.mp4"
+      ],
+      "status": 0,
+      "stdout": "codec=mp4a rate=24000 channels=2\npackets=4 decoded=4 frames=2048\nstamped=0.085s\naudio=0.085s first=0ns last=64ms\n",
+      "stderr": ""
+    },
+    {
+      "file": "er_eld_ldmps_tree_5151.mp4",
+      "command": [
+        "/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target/debug/examples/audio_probe",
+        "--packets",
+        "4",
+        "--pcm",
+        "/tmp/fvid-ld-mps-research/iso-conformance/er_eld_ldmps_tree_5151.f32le",
+        "/tmp/fvid-ld-mps-research/iso-conformance/er_eld_ldmps_tree_5151.mp4"
+      ],
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=6\npackets=4 decoded=4 frames=4096\nstamped=0.085s\naudio=0.085s first=0ns last=64ms\n",
+      "stderr": ""
+    }
+  ],
+  "after_full": [
+    {
+      "file": "er_ad_ldmps_tree_5151.mp4",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=6\npackets=2820 decoded=2820 frames=1443840\nstamped=30.080s\naudio=30.080s first=0ns last=30.069333333s\n",
+      "stderr": ""
+    },
+    {
+      "file": "er_eld_ldmps_ldqmf_1.mp4",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=2\npackets=47 decoded=47 frames=48128\nstamped=1.003s\naudio=1.003s first=0ns last=981.333333ms\n",
+      "stderr": ""
+    },
+    {
+      "file": "er_eld_ldmps_ldqmf_2.mp4",
+      "status": 0,
+      "stdout": "codec=mp4a rate=24000 channels=2\npackets=47 decoded=47 frames=24064\nstamped=1.003s\naudio=1.003s first=0ns last=981.333333ms\n",
+      "stderr": ""
+    },
+    {
+      "file": "er_eld_ldmps_tree_5151.mp4",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=6\npackets=1410 decoded=1410 frames=1443840\nstamped=30.080s\naudio=30.080s first=0ns last=30.058666666s\n",
+      "stderr": ""
+    }
+  ],
+  "unaligned_pcm": [
+    {
+      "name": "er_ad_ldmps_tree_5151",
+      "scalars": 8663040,
+      "rate": 48000,
+      "channels": 6,
+      "max_abs_error": 0.2563506346195936,
+      "rmse": 0.018207136467205846,
+      "snr_db": 3.0056111536891112
+    },
+    {
+      "name": "er_eld_ldmps_ldqmf_1",
+      "scalars": 96256,
+      "rate": 48000,
+      "channels": 2,
+      "max_abs_error": 1.5307217836380005e-05,
+      "rmse": 8.99346343956616e-06,
+      "snr_db": 79.79128120533474
+    },
+    {
+      "name": "er_eld_ldmps_ldqmf_2",
+      "scalars": 48128,
+      "rate": 24000,
+      "channels": 2,
+      "max_abs_error": 0.29806426260620356,
+      "rmse": 0.09650983603591896,
+      "snr_db": -3.3563319995970913
+    },
+    {
+      "name": "er_eld_ldmps_tree_5151",
+      "scalars": 8663040,
+      "rate": 48000,
+      "channels": 6,
+      "max_abs_error": 0.4310675859451294,
+      "rmse": 0.04096708618679546,
+      "snr_db": -4.095345011875072
+    }
+  ],
+  "limitations": [
+    "PCM observations compare same-position, same-channel normalized PCM16 with float output, without normative timing or accuracy-category qualification.",
+    "No conclusion that all observed sample differences are decoder defects; core delay, filterbank delay, speaker order and reference comparison procedure require investigation.",
+    "ISO conformance vectors are external optional references; no media or codec parameter sets copied to regression fixtures."
+  ]
+}

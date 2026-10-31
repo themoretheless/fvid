@@ -569,3 +569,8 @@ fn ld_mps_empty_grouped_symbols_preserve_worker_audio() {
 fn empty_split_ttt_groups_keep_worker_audio_and_navigation() {
     check_corpus("aac-ld-mps-discard");
 }
+
+#[test]
+fn arbitrary_aac_alignment_keeps_worker_audio_and_navigation() {
+    check_corpus("aac-alignment");
+}

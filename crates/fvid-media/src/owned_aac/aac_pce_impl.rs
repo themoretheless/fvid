@@ -459,7 +459,8 @@ pub(crate) fn read_er_extensions(
 /// ELD's explicit LD-SBR prefix is already consumed by the core owner. Parse
 /// the remaining ER records, collecting spatial messages and preserving bounded
 /// children and following ordinary records. Implicit SBR in this ELD tail is
-/// opaque, as ELD signals SBR explicitly. Final zero alignment belongs here.
+/// opaque, as ELD signals SBR explicitly. Final AAC byte alignment belongs here;
+/// these transport padding bits have no prescribed value (ISO 14496-3, 4.4.2.9).
 /// Any error retains both the input cursor and ancillary assembly history.
 pub fn read_eld_spatial_extensions(
     bits: &mut BitReader<'_>,
@@ -482,11 +483,7 @@ pub fn read_eld_spatial_extensions(
         },
         Some(&mut spatial),
     )?;
-    while input.remaining() != 0 {
-        if input.bit()? {
-            return Err(invalid("nonzero AAC ELD alignment bits"));
-        }
-    }
+    input.skip(input.remaining())?;
     *bits = input;
     *assembler = spatial.assembler;
     Ok(spatial.messages)

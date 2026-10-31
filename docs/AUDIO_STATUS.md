@@ -1,5 +1,12 @@
 # Audio Implementation Status
 
+AAC-LD/ELD terminal byte alignment now accepts arbitrary padding values.
+33 authored programmes (132 variants in MP4/Matroska) preserve exact PCM,
+playback and navigation, including coupled LD-SBR and adapted PCM ingress.
+Four public ISO LD-MPS streams decode fully after this fix. Their unaligned
+PCM comparisons are observations, not full conformance qualification; reference
+timing and remaining waveform differences still require investigation.
+
 Native LD/ELD supports explicitly adapted short-core PCM clocks into LD-MPS.
 Downscaled LD-SBR additionally uses owned CLDFB PCM synthesis followed by the
 LD-MPS PCM interface, including stereo coupling. The existing shared LD-QMF

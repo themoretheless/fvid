@@ -19,7 +19,7 @@ def main():
   modes=[('direct9',0,None),('direct12',0,None),('wrapped9',0,None),('wrapped12',0,None)]
   if tree==7:
    modes += [('length',n,None)for n in(1,14,15,269,270,65805)]
-   modes += [(kind,0,error)for kind,error in [('bad-drc','AAC extension exceeds fill payload'),('nested','nested AAC EXT_DATA_LENGTH'),('overlong','AAC spatial child exceeds parent'),('empty-child','AAC spatial child exceeds parent'),('alignment','nonzero AAC ELD alignment'),('orphan','continuation/stop without start')]]
+   modes += [(kind,0,error)for kind,error in [('bad-drc','AAC extension exceeds fill payload'),('nested','nested AAC EXT_DATA_LENGTH'),('overlong','AAC spatial child exceeds parent'),('empty-child','AAC spatial child exceeds parent'),('alignment',None),('orphan','continuation/stop without start')]]
   for mode,size,error in modes:
    frames=[]
    for i,core in enumerate(cores):
@@ -50,5 +50,5 @@ def main():
    case=dict(name=name,tree=tree,mode=mode,length=size,error=error,error_frame=1 if error else None,asc=(source/f'tree{tree}.spatial.asc').read_bytes().hex(),channels=channels,frames=frames,slots=8,bands=64,container_rate=48000,container_frame_samples=512,pcm_offset=0,samples=1536)
    (OUT/(name+'.mp4')).write_bytes(video_fixture([case],blob,channels,write=False)['data']);cases.append(case)
  (OUT/'packets.bin').write_bytes(blob)
- (OUT/'manifest.json').write_text(json.dumps(dict(scope='Native AAC-ELD spatial playback with mixed bounded ER tails and specific malformed-tail/alignment controls.',cases=cases),indent=2)+'\n')
+ (OUT/'manifest.json').write_text(json.dumps(dict(scope='Native AAC-ELD spatial playback with mixed bounded ER tails and arbitrary AAC alignment and specific malformed-tail controls.',cases=cases),indent=2)+'\n')
 if __name__=='__main__':main()

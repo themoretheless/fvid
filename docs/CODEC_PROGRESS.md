@@ -1,3 +1,46 @@
+## AAC transport byte alignment and public ISO inputs, 2026-10-31
+
+Official ISO LD-MPS streams exposed a false rejection of nonzero terminal AAC
+byte-alignment bits. AAC er_raw_data_block_eld ends with byte_alignment(),
+not a zero-valued field (ISO/IEC14496-3:2009,4.4.2.9,Table4.75). Pinned FDK
+`libAACdec/src/aacdecoder.cpp` also consumes alignment without a zero check:
+commit `ee76460efbdb147e26d804c798949c23f174460b`,source SHA-256
+`8886d6d8934467ea553bd1f5e9c92ea7291bb160cef141a08691eb740774b7fa`.
+The spatial extension owner is shared by LD/ELD; the plain ELD owner now uses
+the same terminal-padding rule. Internal spatial frame alignment,CRC fields,
+fill-data bytes and ASC downscale fill nibbles retain their checks.
+
+An authored movie reproduces exactly `nonzero AAC ELD alignment bits` before
+the change; all22 initial zero controls pass unchanged owners. The final corpus
+has33 programmes/four padding patterns in MP4 and Matroska (132 variants,
+264 movies):LD/ELD trees0–7,plain480/512 ELD,coupled shared LD-SBR32/64,and
+adapted/high-rate LD-SBR through PCM ingress. Tests prove every syntax bit and
+ASC is unchanged,then compare exact whole PCM,player playback,seek and rewind.
+The actual worker also exercises both containers. All254 possible nonempty
+sub-byte padding values pass direct spatial assembly controls.
+The older tree7-alignment refusal becomes acceptance without changing any of
+its movie/packet bytes. Five malformed-tail cases remain specific errors.
+
+`scripts/fetch_iso_ld_mps_conformance.py OUTPUT` independently fetches four
+public ISO streams and four reference WAVs using bounded HTTP ranges,ZIP CRCs
+and the pinned ISO checksum inventory. No full9-GiB download is needed. No ISO
+media or codec parameter sets enter synthetic fixtures or ordinary tests.
+All four inputs previously fail the alignment check; after the fix they decode
+fully (2820/1410 AAC packets for the two30.08-second tree5151 inputs,and47 each
+for LD-QMF1/2). This is admission/finite-output evidence,not a conformance claim.
+Same-position normalized PCM16 comparisons show rounding-scale error for
+LD-QMF1 and larger differences for the other three. Those observations still
+need normative delay,channel-order and waveform investigation. They must not
+be treated as validated full-codec accuracy or as diagnosed DSP defects yet.
+
+Validation:613 passed,0 failed,1 pre-existing ignored across the full media
+library,19 targeted integration tests and6 root alignment/worker tests.
+Fixture generation reproduced312 generated artifacts with network/process
+creation denied. Both independent ISO extractions yield identical verified bytes.
+Full Annex B qualification and the codec-gap objective remain open.
+
+Evidence: `docs/validation/aac-alignment-{generation,iso,iso-fetch,tests}-2026-10-31.json`.
+
 ## Discarded split-TTT grouped parameters, 2026-10-31
 
 Zero-width grouped regions now consume their one entropy datum without

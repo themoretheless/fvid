@@ -101,10 +101,10 @@ fn mixed_er_tail_records_preserve_spatial_pcm_and_following_extensions() {
             successes += 1;
         }
     }
-    assert_eq!((successes, failures), (38, 6));
+    assert_eq!((successes, failures), (39, 5));
 }
 #[test]
-fn late_bad_drc_and_alignment_restore_pending_fragments_and_cursor() {
+fn late_bad_drc_restores_state_and_arbitrary_alignment_finishes_pending_fragments() {
     let mut assembler = Assembler::default();
     let mut start = BitReader::new(&[0x92, 0xa1]);
     assert!(
@@ -122,17 +122,19 @@ fn late_bad_drc_and_alignment_restore_pending_fragments_and_cursor() {
         assert_eq!(bits.position(), 0);
         assert_eq!(assembler, saved);
     }
-    // Three zero alignment bits follow a valid bounded stop, then one bad bit.
-    let bytes = [0x32, 0x91, 0xb2, 0x10];
-    let mut bits = BitReader::with_bit_len(&bytes, 28).unwrap();
-    assert!(
-        read_eld_spatial_extensions(&mut bits, &mut assembler)
-            .unwrap_err()
-            .to_string()
-            .contains("alignment")
-    );
-    assert_eq!(assembler, saved);
-    assert_eq!(bits.position(), 0);
+    // Every terminal AAC padding value is permitted, at all sub-byte lengths.
+    // The completed message and final position must be independent of it.
+    for count in 1u8..=7 {
+        for padding in 0..(1u8 << count) {
+            let bytes = [0x32, 0x91, 0xb2, padding << (8 - count)];
+            let mut bits = BitReader::with_bit_len(&bytes, 24 + usize::from(count)).unwrap();
+            let mut candidate = saved.clone();
+            let messages = read_eld_spatial_extensions(&mut bits, &mut candidate).unwrap();
+            assert_eq!(messages[0].payload, [0xa1, 0xb2]);
+            assert_eq!(bits.remaining(), 0);
+            candidate.finish().unwrap();
+        }
+    }
     let mut valid = BitReader::new(&[0x32, 0x91, 0xb2, 0xb0, 0x00]);
     let messages = read_eld_spatial_extensions(&mut valid, &mut assembler).unwrap();
     assert_eq!(messages[0].payload, [0xa1, 0xb2]);

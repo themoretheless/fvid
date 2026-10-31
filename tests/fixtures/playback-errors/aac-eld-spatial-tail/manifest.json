@@ -1,5 +1,5 @@
 {
-  "scope": "Native AAC-ELD spatial playback with mixed bounded ER tails and specific malformed-tail/alignment controls.",
+  "scope": "Native AAC-ELD spatial playback with mixed bounded ER tails and arbitrary AAC alignment and specific malformed-tail controls.",
   "cases": [
     {
       "name": "tree0-direct9",
@@ -1518,8 +1518,8 @@
       "tree": 7,
       "mode": "alignment",
       "length": 0,
-      "error": "nonzero AAC ELD alignment",
-      "error_frame": 1,
+      "error": null,
+      "error_frame": null,
       "asc": "f8e620243397000000",
       "channels": 1,
       "frames": [

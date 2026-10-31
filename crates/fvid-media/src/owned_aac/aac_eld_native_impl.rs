@@ -156,11 +156,9 @@ impl NativeAacDecoder {
                 "trailing bytes or channel mismatch after AAC ELD block",
             ));
         }
-        while bits.remaining() > 0 {
-            if bits.bit()? {
-                return Err(invalid("nonzero AAC ELD alignment bits"));
-            }
-        }
+        // er_raw_data_block_eld ends with byte_alignment(), not a zero-valued
+        // syntax field. Only the preceding bounded extension bytes are syntax.
+        bits.skip(bits.remaining())?;
         Ok(Some(AacFrame {
             samples: self.commit_eld_core(core),
             pts,

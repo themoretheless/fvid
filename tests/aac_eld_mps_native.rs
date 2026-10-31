@@ -384,7 +384,7 @@ fn all_enabled_native_movie_controls_play_seek_and_reset_a_live_decoder() {
         }
     }
     movies.push(fixtures.join("aac-eld-mps-native/clock90000.mp4"));
-    assert_eq!(movies.len(), 71);
+    assert_eq!(movies.len(), 72);
     for path in movies {
         let movie = std::fs::read(&path).unwrap();
         let mut full = Vec::new();

@@ -728,13 +728,18 @@ mod eld_core_boundary_tests {
                 let core_bits = u32::from_le_bytes(lengths[..4].try_into().unwrap()) as usize;
                 let end = u32::from_le_bytes(lengths[4..].try_into().unwrap()) as usize;
                 if end % 8 != 0 {
-                    let mut invalid_alignment = packet.clone();
-                    *invalid_alignment.last_mut().unwrap() |= 1;
-                    let error = decoder
-                        .decode_eld_timed(&invalid_alignment, frame as i64 * 512, 512, 48000)
-                        .unwrap_err()
-                        .to_string();
-                    assert!(error.contains("nonzero AAC ELD alignment"), "{error}");
+                    let saved = decoder.checkpoint();
+                    let mut padded = packet.clone();
+                    *padded.last_mut().unwrap() |= 1;
+                    let actual = decoder
+                        .decode_eld_timed(&padded, frame as i64 * 512, 512, 48000)
+                        .unwrap();
+                    decoder.restore(&saved).unwrap();
+                    let expected = decoder
+                        .decode_eld_timed(&packet, frame as i64 * 512, 512, 48000)
+                        .unwrap();
+                    assert_eq!(actual, expected);
+                    decoder.restore(&saved).unwrap();
                 }
                 // Preparing, rejecting a suffix, and retrying must not advance core history.
                 let abandoned = decoder.prepare_eld_core(&packet).unwrap();
