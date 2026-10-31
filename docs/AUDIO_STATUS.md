@@ -1,5 +1,11 @@
 # Audio Implementation Status
 
+Native AAC construction now exposes both owned spatial decorrelators through
+`AacDecodeOptions`,alongside an optional output clock. The default stays Complex.
+Mode selection survives reset and is checked before restoring checkpoints.
+ISO's default Real renderer explains most LD tree5151 WAV differences;
+ELD timing and shared32-bin LD-QMF phase/window qualification remain open.
+
 AAC-LD/ELD terminal byte alignment now accepts arbitrary padding values.
 33 authored programmes (132 variants in MP4/Matroska) preserve exact PCM,
 playback and navigation, including coupled LD-SBR and adapted PCM ingress.

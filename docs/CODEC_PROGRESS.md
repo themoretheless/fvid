@@ -1,3 +1,44 @@
+## Explicit native LD-MPS decorrelation and reference diagnosis, 2026-10-31
+
+`NativeAacDecoder::new_with_options` now accepts `AacDecodeOptions` containing
+an optional output sample-rate hint and explicit spatial decorrelation mode.
+The existing constructors retain Complex as their default. Both modes use
+the same owned spatial/core implementations; this is a renderer choice,not
+a new coded syntax tool or a foreign-decoder fallback. Reset retains the
+selected mode. Cross-mode checkpoints are rejected before any history changes.
+The shared native frontend and fvid-media entrypoint both support this policy.
+
+Three acceptance tests use existing authored movies/parameters. All8 trees
+match the explicitly selected PCM spatial renderer; the default still equals
+Complex. The33-programme alignment corpus checks both modes with negotiated
+output clocks,packet checkpoints,replay and reset,including coupled spatial
+LD-SBR and downscaled PCM ingress. Existing output-rate constructors match
+the new default options exactly. No private/reference parameter sets are copied.
+
+The ISO reference frontend defaults to decType0 (real coefficients),whereas
+native playback defaults to complex coefficients. This explains most of the
+large waveform difference in the LD tree5151 input: selecting Real reduces its
+full-stream normalized RMS error from0.018207 to0.000009233 (about0.303 PCM16
+LSB); maximum error is0.000057945. These are measurements,not an assigned
+normative accuracy category. A diagnostic256-sample lag reduces the ELD
+tree5151 difference,but its remaining RMS0.001642 is still unresolved; that
+lag is not established normative compensation. Single-rate LD-QMF32 waveform
+alignment also remains open. Full Annex B conformance is not established.
+
+The `aac_spatial_reference` example selects either owned renderer for unedited,
+constant-description MP4 inputs and publishes raw f32le. All four ISO inputs
+decode fully in both modes; outputs match the preceding diagnostic builds
+byte-for-byte. `scripts/compare_aac_reference_pcm.py` measures PCM16 WAV error
+at an explicitly supplied lag,without searching for a better fit or declaring
+conformance. Exact,known1-LSB error,explicit-delay and nonfinite controls pass.
+
+Validation:626 passed,0 failed,1 existing ignored:full media library,
+32 integration tests and6 root alignment/worker tests. The codec-gap goal
+remains open; next reference work must isolate ELD timing and shared32-bin
+phase/window behavior independently of this renderer-choice diagnosis.
+
+Evidence: `docs/validation/aac-decorrelation-{iso,comparison-controls,tests}-2026-10-31.json`.
+
 ## AAC transport byte alignment and public ISO inputs, 2026-10-31
 
 Official ISO LD-MPS streams exposed a false rejection of nonzero terminal AAC

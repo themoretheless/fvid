@@ -121,7 +121,7 @@ pub mod aac_native;
 
 mod aac_huffman_tables;
 
-pub use aac_native::{AacCheckpoint, NativeAacDecoder};
+pub use aac_native::{AacCheckpoint, AacDecodeOptions, NativeAacDecoder};
 #[cfg(test)]
 mod decoder_tests;
 

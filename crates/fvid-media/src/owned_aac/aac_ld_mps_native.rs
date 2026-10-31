@@ -1,5 +1,6 @@
 //! Owned AAC-LD/AAC-ELD spatial stream context shared by native AAC frontends.
 pub use super::aac_ld_mps_session::Stamp;
+pub use super::aac_ld_mps_decor::Mode as DecorrelationMode;
 pub type Subbands = Vec<Vec<Vec<super::aac_sbr_qmf::Complex>>>;
 use super::{Result, aac_native::AacFrame, invalid, unsupported};
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -21,6 +22,7 @@ struct PartialSource {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Decoder {
     core: Core,
+    mode: super::aac_ld_mps_decor::Mode,
     output_multiplier: u8,
     shared_qmf: bool,
     config: super::aac_ld_mps_config::Config,
@@ -32,19 +34,22 @@ pub struct Decoder {
 }
 impl Decoder {
     pub fn new(config: &super::aac_ld_mps_config::Config, core: Core) -> Result<Self> {
-        Self::new_domain(config, core, None)
+        Self::new_with_decorrelation(config, core, None, super::aac_ld_mps_decor::Mode::Complex)
     }
     pub fn new_with_sbr(
         config: &super::aac_ld_mps_config::Config,
         core: Core,
         double_rate: bool,
     ) -> Result<Self> {
-        Self::new_domain(config, core, Some(double_rate))
+        Self::new_with_decorrelation(config, core, Some(double_rate), super::aac_ld_mps_decor::Mode::Complex)
     }
-    fn new_domain(
+    /// Construct a spatial context with an explicit filter design. `sbr` is
+    /// None for PCM cores, or the configured SBR double-rate flag.
+    pub fn new_with_decorrelation(
         config: &super::aac_ld_mps_config::Config,
         core: Core,
         sbr: Option<bool>,
+        mode: super::aac_ld_mps_decor::Mode,
     ) -> Result<Self> {
         config.validate_low_delay_profile()?;
         if !matches!(core.object_type, 23 | 39)
@@ -102,14 +107,15 @@ impl Decoder {
         let mut session = if shared_qmf {
             super::aac_ld_mps_session::Session::new_qmf(
                 config,
-                super::aac_ld_mps_decor::Mode::Complex,
+                mode,
             )?
         } else {
-            super::aac_ld_mps_session::Session::new(config, super::aac_ld_mps_decor::Mode::Complex)?
+            super::aac_ld_mps_session::Session::new(config, mode)?
         };
         session.enable_packet_slices();
         Ok(Self {
             core,
+            mode,
             output_multiplier: factor as u8,
             shared_qmf,
             config: config.clone(),
@@ -123,6 +129,9 @@ impl Decoder {
     /// Required ingress domain, not the presence of LD-SBR in the bitstream.
     pub fn expects_shared_qmf(&self) -> bool {
         self.shared_qmf
+    }
+    pub fn decorrelation_mode(&self) -> super::aac_ld_mps_decor::Mode {
+        self.mode
     }
     pub fn mask(&self) -> u32 {
         match self.config.tree.code {

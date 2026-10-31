@@ -104,6 +104,10 @@ name = "audio_probe"
 required-features = ["player"]
 
 [[example]]
+name = "aac_spatial_reference"
+required-features = ["player"]
+
+[[example]]
 name = "av_sync"
 required-features = ["player"]
 

@@ -258,6 +258,18 @@ pub struct NativeAacDecoder {
     sbr_detection_rate: Option<u32>,
     sbr_elements: Vec<Option<ElementSbr>>,
 }
+/// Construction-time output policy. Spatial decorrelation is a renderer choice,
+/// not an ASC flag. Both choices use the owned LD-MPS implementation.
+#[derive(Clone, Copy, Debug)]
+pub struct AacDecodeOptions {
+    pub output_sample_rate: Option<u32>,
+    pub spatial_decorrelation: super::aac_ld_mps_native::DecorrelationMode,
+}
+impl Default for AacDecodeOptions {
+    fn default() -> Self {
+        Self { output_sample_rate: None, spatial_decorrelation: super::aac_ld_mps_native::DecorrelationMode::Complex }
+    }
+}
 /// Opaque complete packet-boundary state. Configuration and layout are retained
 /// to reject restoring into a decoder with another configuration. The caller
 /// must associate checkpoints with the corresponding stream and packet cursor.
@@ -309,10 +321,13 @@ impl NativeAacDecoder {
         Self::from_parsed_downscaled(parsed,1)
     }
     fn from_parsed_downscaled(parsed:AudioSpecificConfig,output_downscale_factor:u8)->Result<Self> {
+        Self::from_parsed_downscaled_mode(parsed, output_downscale_factor, super::aac_ld_mps_native::DecorrelationMode::Complex)
+    }
+    fn from_parsed_downscaled_mode(parsed:AudioSpecificConfig,output_downscale_factor:u8,mode:super::aac_ld_mps_native::DecorrelationMode)->Result<Self> {
         let ld_mps=parsed.ld_mps.as_ref().map(|config| {
             let core=super::aac_ld_mps_native::Core {object_type:parsed.core.object_type,sample_rate:parsed.core.sample_rate,
                 frame_samples:parsed.core.frame_samples,channels:parsed.core.channels,has_sbr:parsed.eld_sbr.is_some(),downscale:output_downscale_factor};
-            let decoder=if let Some(sbr)=&parsed.eld_sbr {NativeSpatial::new_with_sbr(config,core,sbr.double_rate)}else{NativeSpatial::new(config,core)};
+            let decoder=NativeSpatial::new_with_decorrelation(config,core,parsed.eld_sbr.as_ref().map(|sbr|sbr.double_rate),mode);
             decoder.map_err(|e|unsupported(&format!("AAC LD-MPS spatial reconstruction: {e}")))
         }).transpose()?;
         if parsed.ps_present == Some(true) {
@@ -423,10 +438,20 @@ impl NativeAacDecoder {
     /// discovery must not change this hint. Explicit disable flags are honored.
     /// An exact ELD hint or AAC-LD output clock selects short filterbanks.
     pub fn new_with_output_rate(asc:&[u8], output_rate:u32) -> Result<Self> {
+        Self::new_with_options(asc, AacDecodeOptions { output_sample_rate: Some(output_rate), ..Default::default() })
+    }
+    /// Select the output clock and LD-MPS decorrelator before decoding starts.
+    /// The default preserves the existing complex-coefficient renderer. The
+    /// real-coefficient option permits comparison with the ISO frontend's
+    /// default decType=0, without changing bitstream syntax or core decoding.
+    pub fn new_with_options(asc:&[u8], options:AacDecodeOptions) -> Result<Self> {
         let parsed=AudioSpecificConfig::parse(asc)?;
+        let Some(output_rate)=options.output_sample_rate else {
+            return Self::from_parsed_downscaled_mode(parsed,1,options.spatial_decorrelation);
+        };
         parsed.resolve_output_rate(output_rate)?;
         let factor=parsed.output_downscale_factor(output_rate).unwrap_or(1);
-        let mut decoder=Self::from_parsed_downscaled(parsed.clone(),factor)?;
+        let mut decoder=Self::from_parsed_downscaled_mode(parsed.clone(),factor,options.spatial_decorrelation)?;
         if decoder.sample_rate()!=output_rate {
             if !sbr_layout(&parsed)? {
                 return Err(unsupported("implicit SBR AAC coupling synthesis is not yet implemented"));
@@ -494,7 +519,7 @@ impl NativeAacDecoder {
     }
     /// Restore without changing the decoder if configuration/layout differs.
     pub fn restore(&mut self, state:&AacCheckpoint) -> Result<()> {
-        if self.ld_mps.as_ref().map(|s|s.initial_config())!=state.ld_mps.as_ref().map(|s|s.initial_config()) {return Err(invalid("AAC LD-MPS checkpoint configuration mismatch"));}
+        if self.ld_mps.as_ref().map(|s|(s.initial_config(),s.decorrelation_mode()))!=state.ld_mps.as_ref().map(|s|(s.initial_config(),s.decorrelation_mode())) {return Err(invalid("AAC LD-MPS checkpoint configuration mismatch"));}
         if self.output_downscale_factor!=state.output_downscale_factor {return Err(invalid("AAC checkpoint output geometry mismatch"));}
         if self.separate_esc!=state.separate_esc || self.protection!=state.protection || self.direct_mapping!=state.direct_mapping {return Err(invalid("AAC EP checkpoint configuration mismatch"));}
         if self.config!=state.config || self.initial_program!=state.initial_program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask || self.detect_sbr!=state.detect_sbr || self.sbr_detection_rate!=state.sbr_detection_rate || (!self.detect_sbr && self.sbr_rate!=state.sbr_rate) {
