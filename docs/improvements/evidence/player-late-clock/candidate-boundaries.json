@@ -1,0 +1,47 @@
+{
+  "count_delta": 0,
+  "cause": "One clock-continuity invariant across overdue presentation and transport state.",
+  "initial_four_cases": {
+    "baseline": {
+      "passed": 1,
+      "failed": 3,
+      "test": "initial-before-test.rs.txt"
+    },
+    "clock_only": {
+      "passed": 2,
+      "failed": 2,
+      "test": "initial-before-test.rs.txt",
+      "log": "clock-only.log",
+      "new_boundary_failures": [
+        "terminal clock kept advancing",
+        "resume discarded overdue phase"
+      ]
+    },
+    "candidate_four": {
+      "passed": 4,
+      "failed": 0,
+      "log": "candidate-four.log"
+    }
+  },
+  "candidate_five": {
+    "passed": 4,
+    "failed": 1,
+    "test": "candidate-five-test.rs.txt",
+    "log": "candidate-five.log",
+    "new_boundary_failure": "explicit frame navigation retained zero terminal clock"
+  },
+  "qualified_identical_five": {
+    "baseline": {
+      "passed": 2,
+      "failed": 3
+    },
+    "candidate": {
+      "passed": 5,
+      "failed": 0
+    },
+    "also_checks": [
+      "seek releases parked bound",
+      "natural silent EOF clock remains frozen"
+    ]
+  }
+}

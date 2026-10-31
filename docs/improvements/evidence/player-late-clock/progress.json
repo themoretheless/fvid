@@ -1,0 +1,38 @@
+{
+  "status": "accepted;all9gates passed;own temporary artifacts removed;ready for delivery",
+  "accepted_count": 463,
+  "baseline_session": 97705,
+  "baseline_log": "/private/tmp/fvid-player-late-clock-before.log",
+  "target": "/private/tmp/fvid-player-late-clock-target-20261031",
+  "next": "Commit exact qualified code/evidence paths,atomic push both refs,verify and record receipt. Continue unconfirmed A-B loop endpoint audit from FVID-0464.",
+  "scope": "One proposed cause:overdue silent phase is clipped to stale picture end. Clock-read continuity,stop after stalled repaint,and paused/resumed overdue phase are variants;candidate boundary regressions add0IDs.",
+  "subsequent_unconfirmed_audit": "A-B loop compares future picture end instead of active clock;verify with authored valid loop range and actual worker generations after this audit.",
+  "baseline_terminal_exit": 101,
+  "baseline": {
+    "passed": 1,
+    "failed": 3
+  },
+  "clock_only": {
+    "passed": 2,
+    "failed": 2,
+    "log": "clock-only.log"
+  },
+  "qualified_baseline": {
+    "passed": 2,
+    "failed": 3
+  },
+  "candidate": {
+    "passed": 5,
+    "failed": 0
+  },
+  "qualification_session": 92021,
+  "qualification_log": "/private/tmp/fvid-player-late-clock-integration.log",
+  "repeated_runs": 20,
+  "repeated_cases": 100,
+  "repeat_failures": 0,
+  "accepted_ids": [
+    "FVID-0463"
+  ],
+  "qualification_terminal_exit": 0,
+  "native_window_followup": "../native-player-clock-smoke/report.json"
+}

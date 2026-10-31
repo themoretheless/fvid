@@ -1,0 +1,13 @@
+{
+  "pid": 52690,
+  "arguments": [
+    "/private/tmp/fvid-player-native-ui-smoke.app/Contents/MacOS/fvid",
+    "play",
+    "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/player-jump-clock/movie.mp4",
+    "--no-audio",
+    "--play-and-exit"
+  ],
+  "start_epoch": 1793456296.434728,
+  "exit_code": 0,
+  "elapsed_seconds": 10.532631874957588
+}

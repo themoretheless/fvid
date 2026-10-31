@@ -1,0 +1,5 @@
+{
+  "src/player.rs": "ef7c7f6203560ce7c00f207df8826a6dc3bf6cdf5c989df5e06af36553625072",
+  "src/player_late_clock_tests.rs": "d5f0a39587611d3027480048610b9f71fe85a904809547c6fb0171a77c9142ce",
+  "scripts/generate_player_late_clock.py": "1623253a78963c6210e2ac7d2c9a25ff9b295247fc3bb47c03e5b5d7aea667dd"
+}

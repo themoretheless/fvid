@@ -1,0 +1,13 @@
+{
+  "test_sha256": "d5f0a39587611d3027480048610b9f71fe85a904809547c6fb0171a77c9142ce",
+  "baseline_and_final_identical": true,
+  "expectations_relaxed": false,
+  "baseline": {
+    "passed": 2,
+    "failed": 3
+  },
+  "candidate": {
+    "passed": 5,
+    "failed": 0
+  }
+}

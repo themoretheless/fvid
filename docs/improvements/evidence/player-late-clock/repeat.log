@@ -1,0 +1,199 @@
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.32s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.35s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.38s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.27s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.27s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.28s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.27s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.28s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.27s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.28s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.28s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.28s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.28s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.28s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.28s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.26s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.28s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.28s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.29s
+
+
+running 5 tests
+test player::late_clock_regressions::exact_mp4_late_callback_source_pixels_seek_and_eof_control ... ok
+test player::late_clock_regressions::manual_picture_navigation_leaves_zero_stop_before_first_picture ... ok
+test player::late_clock_regressions::late_callback_consumes_passed_stop_bound_without_presenting_future_picture ... ok
+test player::late_clock_regressions::pausing_and_resuming_overdue_picture_preserves_phase_at_new_rate ... ok
+test player::late_clock_regressions::silent_clock_advances_past_stale_picture_end_during_missed_refresh ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1130 filtered out; finished in 2.30s

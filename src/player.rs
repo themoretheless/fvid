@@ -1899,6 +1899,8 @@ struct Player {
     picture_audio_clock: bool,
     /// Media position retained while a silent picture is paused.
     paused_picture_time: Option<Duration>,
+    /// Explicit terminal position until navigation or another item takes over.
+    terminal_clock: Option<Duration>,
     playback_activity: Option<fvid_platform::PlaybackActivity>,
     duration: Option<Duration>,
     seekable: bool,
@@ -2126,6 +2128,7 @@ impl Default for Player {
             audio_ended: false,
             picture_audio_clock: false,
             paused_picture_time: None,
+            terminal_clock: None,
             playback_activity: None,
             duration: None,
             seekable: false,
@@ -2320,6 +2323,7 @@ impl Player {
         self.period = reader.frame_period();
         self.interval = None;
         self.picture_audio_clock = false;
+        self.terminal_clock = None;
         self.paused_picture_time = None;
         // Drop the old thread before starting the new one.
         self.playback = None;
@@ -2417,6 +2421,7 @@ impl Player {
         self.rgb_frame = None;
         self.interval = None;
         self.picture_audio_clock = false;
+        self.terminal_clock = None;
         self.paused_picture_time = None;
         self.dimensions = [0; 2];
         self.pixel_aspect = (1, 1);
@@ -3049,6 +3054,7 @@ impl Player {
     /// scheduled deadline; audio already owns a continuously published clock.
     fn presentation_clock(&self) -> Option<Duration> {
         if let Some(target) = self.seek_target { return Some(target); }
+        if let Some(at) = self.terminal_clock { return Some(at); }
         if self.playback.is_none() { return self.audio.as_ref().map(|audio| audio.position()); }
         if let Some(audio) = &self.audio {
             let clock = delayed_clock(audio.position(), self.audio_delay_ms);
@@ -3061,11 +3067,15 @@ impl Player {
         }
         let Some((start, end, scale)) = self.interval else { return Some(Duration::ZERO); };
         if self.paused { return self.paused_picture_time.or_else(|| Self::interval_time(start, scale)); }
+        if self.ended { return Self::interval_time(end, scale); }
         let end = Self::interval_time(end, scale)?;
-        let remaining = self.deadline.saturating_duration_since(Instant::now()).as_nanos()
-            * u128::from(self.rate_milli) / 1_000;
-        let nanos = end.as_nanos().saturating_sub(remaining);
-        Some(Duration::new(u64::try_from(nanos / 1_000_000_000).ok()?, (nanos % 1_000_000_000) as u32))
+        let now = Instant::now();
+        let late = now >= self.deadline;
+        let span = if late { now - self.deadline } else { self.deadline - now };
+        let media = span.as_nanos() * u128::from(self.rate_milli) / 1_000;
+        let nanos = if late { end.as_nanos().saturating_add(media) }
+            else { end.as_nanos().saturating_sub(media) };
+        Self::interval_time(nanos, 1_000_000_000)
     }
 
     /// Spend an explicit bound only once its live presentation clock reaches it.
@@ -3073,6 +3083,7 @@ impl Player {
     fn check_stop(&mut self) -> bool {
         let Some(stop) = self.stop_time else { return false; };
         if self.presentation_clock().is_some_and(|at| at >= stop) {
+            self.terminal_clock = Some(stop);
             self.stop_time = None;
             self.buffering = false;
             self.seek_preview = false;
@@ -3537,6 +3548,7 @@ impl Player {
                             std::mem::swap(&mut self.buffering, &mut ready.buffering);
                             self.interval = None;
                             self.picture_audio_clock = false;
+                            self.terminal_clock = None;
                             self.paused_picture_time = None;
                             self.deadline = Instant::now();
                             self.apply_audio_controls();
@@ -3647,9 +3659,10 @@ impl Player {
             self.deadline = if self.audio.is_none() || self.audio_ended {
                 self.interval.and_then(|(_, end, scale)| Self::interval_time(end, scale))
                     .zip(held)
-                    .and_then(|(end, at)| now.checked_add(paced_period(
-                        end.saturating_sub(at), self.rate_milli,
-                    ))).unwrap_or(now)
+                    .and_then(|(end, at)| {
+                        if end >= at { now.checked_add(paced_period(end - at, self.rate_milli)) }
+                        else { now.checked_sub(paced_period(at - end, self.rate_milli)) }
+                    }).unwrap_or(now)
             } else { now };
             if let Some((_, count)) = &mut self.presentation_stats {
                 *count = 0;
@@ -3701,6 +3714,7 @@ impl Player {
         self.seek_preview = false;
         self.seek_target = None;
         self.paused_picture_time = None;
+        self.terminal_clock = None;
         self.ended = false;
         self.paused = false;
         self.error = None;
@@ -3747,6 +3761,7 @@ impl Player {
         }
         self.audio_ended = false;
         self.paused_picture_time = None;
+        self.terminal_clock = None;
         self.prioritize_swap(target);
         // The placeholder position stands in until the decoder hands over the
         // frame at the other end of the seek; an audio thread answers at once.
@@ -3839,6 +3854,7 @@ impl Player {
             return;
         }
         self.ended = false;
+        self.terminal_clock = None;
         if !forward {
             // No previous picture exists yet. Show the first picture and park
             // the producer instead of leaving a paused black window.
@@ -13066,3 +13082,7 @@ mod jump_clock_regressions;
 #[cfg(test)]
 #[path = "player_seek_phase_tests.rs"]
 mod seek_phase_regressions;
+
+#[cfg(test)]
+#[path = "player_late_clock_tests.rs"]
+mod late_clock_regressions;

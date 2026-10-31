@@ -1,0 +1,19 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -3065,4 +3065,7 @@
+-        let remaining = self.deadline.saturating_duration_since(Instant::now()).as_nanos()
+-            * u128::from(self.rate_milli) / 1_000;
+-        let nanos = end.as_nanos().saturating_sub(remaining);
+-        Some(Duration::new(u64::try_from(nanos / 1_000_000_000).ok()?, (nanos % 1_000_000_000) as u32))
++        let now = Instant::now();
++        let late = now >= self.deadline;
++        let span = if late { now - self.deadline } else { self.deadline - now };
++        let media = span.as_nanos() * u128::from(self.rate_milli) / 1_000;
++        let nanos = if late { end.as_nanos().saturating_add(media) }
++            else { end.as_nanos().saturating_sub(media) };
++        Self::interval_time(nanos, 1_000_000_000)
+@@ -13068,0 +13072,4 @@
++
++#[cfg(test)]
++#[path = "player_late_clock_tests.rs"]
++mod late_clock_regressions;

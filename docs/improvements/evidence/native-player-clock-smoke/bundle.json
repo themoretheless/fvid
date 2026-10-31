@@ -1,0 +1,18 @@
+{
+  "app": "/private/tmp/fvid-player-native-ui-smoke.app",
+  "executable": "/private/tmp/fvid-player-native-ui-smoke.app/Contents/MacOS/fvid",
+  "binary_sha256": "f2d5274c698dbec3974c699facf9e590ffb73bceae14fbe738fbd72c0536c5fa",
+  "same_binary_bytes": true,
+  "launch": [
+    "open",
+    "-n",
+    "-g",
+    "/private/tmp/fvid-player-native-ui-smoke.app",
+    "--args",
+    "play",
+    "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/player-jump-clock/movie.mp4",
+    "--no-audio",
+    "--start-paused"
+  ],
+  "prior_cli_exit_code": 0
+}

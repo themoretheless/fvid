@@ -1,0 +1,71 @@
+{
+  "arguments": [
+    "/private/tmp/fvid-player-native-ui-smoke.app/Contents/MacOS/fvid",
+    "play",
+    "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/tests/fixtures/playback-errors/player-jump-clock/movie.mp4",
+    "--no-audio",
+    "--play-and-exit"
+  ],
+  "binary_sha256": "f2d5274c698dbec3974c699facf9e590ffb73bceae14fbe738fbd72c0536c5fa",
+  "fixture_sha256": "57806f95893fda2a47ac7fbf90fa08cbe08351396fde258006bfac3160b99068",
+  "captures": [
+    {
+      "elapsed_seconds": 1.9517007499816827,
+      "window": {
+        "bounds": {
+          "Height": 800,
+          "Width": 1280,
+          "X": 388,
+          "Y": 162
+        },
+        "pid": 57928,
+        "title": "FVid",
+        "window_id": 25545
+      },
+      "exit_code": 0,
+      "output": "",
+      "image": "/private/tmp/fvid-player-native-ui-frame-0.png",
+      "sha256": "a42b567080ff2252b130f55488ece863ba046fb9e3c661783cdd3d6d69332816"
+    },
+    {
+      "elapsed_seconds": 4.610388375003822,
+      "window": {
+        "bounds": {
+          "Height": 800,
+          "Width": 1280,
+          "X": 388,
+          "Y": 162
+        },
+        "pid": 57928,
+        "title": "FVid",
+        "window_id": 25545
+      },
+      "exit_code": 0,
+      "output": "",
+      "image": "/private/tmp/fvid-player-native-ui-frame-1.png",
+      "sha256": "67a2441e1a8800342ecb5e56fd36d234330e1c4b07888976d38fe7ccea355416"
+    },
+    {
+      "elapsed_seconds": 7.949435124988668,
+      "window": {
+        "bounds": {
+          "Height": 800,
+          "Width": 1280,
+          "X": 388,
+          "Y": 162
+        },
+        "pid": 57928,
+        "title": "FVid",
+        "window_id": 25545
+      },
+      "exit_code": 0,
+      "output": "",
+      "image": "/private/tmp/fvid-player-native-ui-frame-2.png",
+      "sha256": "60dc8f44b2a8d571a2be1659526c9085c72603b8a82c8a1083920806e550ea7b"
+    }
+  ],
+  "ownership": "Parent retains the Popen child handle;checks poll() before each PID-filtered window query and selected-window capture. No other app windows captured.",
+  "pid": 57928,
+  "exit_code": 0,
+  "elapsed_seconds": 10.520466791000217
+}

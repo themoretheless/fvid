@@ -1,0 +1,10 @@
+{
+  "operation": "observe_native_ui",
+  "pid": 44425,
+  "window_id": 25386,
+  "status": "capability_unavailable",
+  "reason": "process-identity-unavailable: Selected application does not expose a launch time; stable PID reuse checks are unavailable",
+  "policy_rejection": false,
+  "fallback": "Owned Popen handle,PID-filtered CoreGraphics window enumeration,and selected-window screencapture. No other app window captured.",
+  "rea_sessions_closed": true
+}

@@ -1,0 +1,21 @@
+{
+  "clock-only": {
+    "base_commit": "9ca4c32089c216f82574c0895da3a0bdbbd76c57",
+    "player_sha256": "d63965c27c1b628ecd35d0909654315b2b7cc786f96f81e79be1861042d42fc6",
+    "patch_sha256": "09db318f3da2103b47802a036f561e3a0feec1738f0916877def9e88b464774e",
+    "reconstruction_verified_byte_identical": true
+  },
+  "candidate-pre-nav-clear": {
+    "base_commit": "9ca4c32089c216f82574c0895da3a0bdbbd76c57",
+    "player_sha256": "29c5c05007b616d0c952d81eaf034585aef0ebb80fc7d3d1d8bcabf70039e8f5",
+    "patch_sha256": "30276e8c5dc939ad45d239eb4f95f9b19d933316937e2cba82b1e7c780af4976",
+    "reconstruction_verified_byte_identical": true
+  },
+  "baseline": {
+    "base_commit": "9ca4c32089c216f82574c0895da3a0bdbbd76c57",
+    "player_sha256": "9b1a582a2855bd30119fe41ca2919aa755d6900023345a211faf8fff9e723904",
+    "patch_sha256": "4e938c41780c80492a534d49c6a460a44a1e7c356378994f149262f53b4a4085",
+    "reconstruction_verified_byte_identical": true,
+    "baseline_modifies_only_test_hook": true
+  }
+}

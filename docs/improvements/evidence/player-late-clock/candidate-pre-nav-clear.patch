@@ -1,0 +1,48 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -1901,0 +1902,2 @@
++    /// Explicit terminal position until navigation or another item takes over.
++    terminal_clock: Option<Duration>,
+@@ -2128,0 +2131 @@
++            terminal_clock: None,
+@@ -2322,0 +2326 @@
++        self.terminal_clock = None;
+@@ -2419,0 +2424 @@
++        self.terminal_clock = None;
+@@ -3051,0 +3057 @@
++        if let Some(at) = self.terminal_clock { return Some(at); }
+@@ -3063,0 +3070 @@
++        if self.ended { return Self::interval_time(end, scale); }
+@@ -3065,4 +3072,7 @@
+-        let remaining = self.deadline.saturating_duration_since(Instant::now()).as_nanos()
+-            * u128::from(self.rate_milli) / 1_000;
+-        let nanos = end.as_nanos().saturating_sub(remaining);
+-        Some(Duration::new(u64::try_from(nanos / 1_000_000_000).ok()?, (nanos % 1_000_000_000) as u32))
++        let now = Instant::now();
++        let late = now >= self.deadline;
++        let span = if late { now - self.deadline } else { self.deadline - now };
++        let media = span.as_nanos() * u128::from(self.rate_milli) / 1_000;
++        let nanos = if late { end.as_nanos().saturating_add(media) }
++            else { end.as_nanos().saturating_sub(media) };
++        Self::interval_time(nanos, 1_000_000_000)
+@@ -3075,0 +3086 @@
++            self.terminal_clock = Some(stop);
+@@ -3539,0 +3551 @@
++                            self.terminal_clock = None;
+@@ -3650,3 +3662,4 @@
+-                    .and_then(|(end, at)| now.checked_add(paced_period(
+-                        end.saturating_sub(at), self.rate_milli,
+-                    ))).unwrap_or(now)
++                    .and_then(|(end, at)| {
++                        if end >= at { now.checked_add(paced_period(end - at, self.rate_milli)) }
++                        else { now.checked_sub(paced_period(at - end, self.rate_milli)) }
++                    }).unwrap_or(now)
+@@ -3703,0 +3717 @@
++        self.terminal_clock = None;
+@@ -3749,0 +3764 @@
++        self.terminal_clock = None;
+@@ -13068,0 +13084,4 @@
++
++#[cfg(test)]
++#[path = "player_late_clock_tests.rs"]
++mod late_clock_regressions;

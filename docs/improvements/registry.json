@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 462,
-  "next_id": "FVID-0463",
+  "accepted_count": 463,
+  "next_id": "FVID-0464",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5187,6 +5187,17 @@
       "result": "Retain the requested phase within the returned covering interval when seek preroll finishes. Anchor only the remaining silent picture duration at selected rate and preserve paused target phase for resume. Manual frame steps retain picture-start semantics;active audio retains its device clock. Identical tests verify post-preroll3300ms phase,exact native RGB,remaining700ms scaled hold,next interval,natural EOF,and timely stop3500ms. Five tests pass20repetitions;all9gates pass1547physical-source-distinct checks and both builds. Four phase variants/control/repeats add0IDs;no performance or physical audio/GPU/window claim.",
       "status": "accepted",
       "validation": "batch-462-validation.json"
+    },
+    {
+      "id": "FVID-0463",
+      "batch": 463,
+      "title": "Advance the silent media clock through missed refreshes without stalling stop bounds",
+      "source": "src/player.rs",
+      "regression": "src/player_late_clock_tests.rs",
+      "before": "Qualified identical5test baseline passes exact native MP4 pixel/PTS/seek/EOF and zero-bound manual-navigation controls,but all3late acceptances fail. After actual800ms gap,clock clips300ms instead of about880ms. A450ms stop bound stalls behind queued600..900ms picture while the visible old picture ends300ms.",
+      "result": "Extrapolate both future and overdue deadlines in rate-scaled integer media time. Preserve signed overdue phase across paused rate change/resume. Park explicit terminal clock and clamp natural silent EOF;release parked state on source/navigation changes,including manual pictures. Exact native RGB catch-up,stop-before-future-picture,stable terminal/EOF clock,seek recovery,and zero-stop manual navigation pass. Candidate terminal/resume/manual-clock leaks reproduced and amended add0IDs. Five identical tests pass20repetitions;all9gates pass1552physical-source-distinct checks and both builds. Five old ignores unchanged. Additional native-window10s autoplay and three inspected screenshots add0IDs;no performance,physical audio or hardware-codec claim.",
+      "status": "accepted",
+      "validation": "batch-463-validation.json"
     }
   ]
 }

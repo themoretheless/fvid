@@ -1,0 +1,100 @@
+{
+  "completed": true,
+  "owned_processes_remaining": [],
+  "launchservices_unregister_exit_code": 0,
+  "removed": [
+    {
+      "path": "/private/tmp/fvid-player-native-ui-autoplay.json",
+      "bytes": 389,
+      "sha256": "506c28a0ad98b764ca6ecf7eea548d794ee97e364e12ed1dd87d8f85da609650",
+      "archive": "autoplay.json"
+    },
+    {
+      "path": "/private/tmp/fvid-player-native-ui-autoplay.log",
+      "bytes": 79,
+      "sha256": "275a5616b4f31b34ea996a0281f59afa13f988343f631cd5efae67efe71032e5",
+      "archive": "autoplay.log"
+    },
+    {
+      "path": "/private/tmp/fvid-player-native-ui-build.log",
+      "bytes": 34381,
+      "sha256": "05d78523af68d7f584001099cd065d8fe61dea6548a050a155f9305731f330ae",
+      "archive": "build.log"
+    },
+    {
+      "path": "/private/tmp/fvid-player-native-ui-bundle-window.swift",
+      "bytes": 897,
+      "sha256": "191531e4104189c082dbd2595d6730a43c680c10e61fd7b9eb91733263281ba5",
+      "archive": "bundle-window.swift"
+    },
+    {
+      "path": "/private/tmp/fvid-player-native-ui-bundle.json",
+      "bytes": 585,
+      "sha256": "689e3ee9ea8c7f10b6c900e13ac402e809337f3016d3995de1abd8b0d28260fe",
+      "archive": "bundle.json"
+    },
+    {
+      "path": "/private/tmp/fvid-player-native-ui-capture.json",
+      "bytes": 2121,
+      "sha256": "0c4483032484e124d86b7bdb7b33dcf7ebe2d87ab760ed172598e59ae09fefdc",
+      "archive": "capture.json"
+    },
+    {
+      "path": "/private/tmp/fvid-player-native-ui-capture.log",
+      "bytes": 79,
+      "sha256": "275a5616b4f31b34ea996a0281f59afa13f988343f631cd5efae67efe71032e5",
+      "archive": "capture.log"
+    },
+    {
+      "path": "/private/tmp/fvid-player-native-ui-capture.py",
+      "bytes": 2397,
+      "sha256": "de8509df665bd2e06e855c787dca57450bbf9aa9c9f1b0745c1e0f68e23a7890",
+      "archive": "capture.py"
+    },
+    {
+      "path": "/private/tmp/fvid-player-native-ui-frame-0.png",
+      "bytes": 655855,
+      "sha256": "a42b567080ff2252b130f55488ece863ba046fb9e3c661783cdd3d6d69332816",
+      "archive": "frame-0.png"
+    },
+    {
+      "path": "/private/tmp/fvid-player-native-ui-frame-1.png",
+      "bytes": 674298,
+      "sha256": "67a2441e1a8800342ecb5e56fd36d234330e1c4b07888976d38fe7ccea355416",
+      "archive": "frame-1.png"
+    },
+    {
+      "path": "/private/tmp/fvid-player-native-ui-frame-2.png",
+      "bytes": 536564,
+      "sha256": "60dc8f44b2a8d571a2be1659526c9085c72603b8a82c8a1083920806e550ea7b",
+      "archive": "frame-2.png"
+    },
+    {
+      "path": "/private/tmp/fvid-player-native-ui-process.json",
+      "bytes": 465,
+      "sha256": "d64abbf790e32ff61dab6e2e9df0992a4f45bcec431378bfe4831c9853cc7fcc",
+      "archive": "process.json"
+    },
+    {
+      "path": "/private/tmp/fvid-player-native-ui-run.log",
+      "bytes": 79,
+      "sha256": "275a5616b4f31b34ea996a0281f59afa13f988343f631cd5efae67efe71032e5",
+      "archive": "run.log"
+    },
+    {
+      "path": "/private/tmp/fvid-player-native-ui-windows.swift",
+      "bytes": 611,
+      "sha256": "4095c99f9b51f4b1e6892d01fe2745154c8d85d1cc7c76c947eaa84e336a12a4",
+      "archive": "windows.swift"
+    },
+    {
+      "path": "/private/tmp/fvid-player-native-ui-smoke.app",
+      "kind": "owned temporary app/build directory"
+    },
+    {
+      "path": "/private/tmp/fvid-player-native-ui-target-20261031",
+      "kind": "owned temporary app/build directory"
+    }
+  ],
+  "retained": "Three authored-content window screenshots,source hashes,launch/capture scripts,Info.plist,and logs/metadata. Other apps untouched."
+}

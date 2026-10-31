@@ -1,0 +1,7 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -13068,0 +13069,4 @@
++
++#[cfg(test)]
++#[path = "player_late_clock_tests.rs"]
++mod late_clock_regressions;
