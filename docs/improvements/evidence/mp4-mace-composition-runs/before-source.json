@@ -1,0 +1,10 @@
+{
+  "commit": "c84a39e8bd2492da4ce7b54b36573253c2636ec4",
+  "sha256": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": "57af29858645c18c0f720fa4a7f947648c70a4a8a95d22013c3c1d64d189dda1",
+    "tests/mp4_mace_composition_runs.rs": "5fc89d7b32ac2a7873073c6b183d3f75fe09cf820d2bd0f8fa8fc02bae28ba6e",
+    "tests/support/audio_transitions.rs": "15581a6596247fe67c4da14a33b65538df26652b94b059b39aef56a9ca514b96",
+    "scripts/generate_mp4_mace_composition_runs.py": "c5cdbaf2ad9dd2096a6a1a50323015aec16cf319f1683a6ca6f318868baad7a5",
+    "tests/fixtures/playback-errors/mp4-mace-composition-runs/manifest.json": "d9ced27f798e0610e395ecca488960c913855c2c891ea07beadb81c8bd5f618f"
+  }
+}

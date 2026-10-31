@@ -1,0 +1,83 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0436"
+  ],
+  "batch": 436,
+  "count_delta": 1,
+  "accepted_count": 436,
+  "summary": "Preserve equivalent equal-offset MACE CTTS runs across codec block boundaries",
+  "before": "c84a39e8bd2492da4ce7b54b36573253c2636ec4",
+  "checks": {
+    "before": {
+      "suites": 1,
+      "passed": 2,
+      "failed": 1,
+      "ignored": 0
+    },
+    "after": {
+      "suites": 1,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    "integration": {
+      "suites": 17,
+      "passed": 93,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-mp4": {
+      "suites": 1,
+      "passed": 57,
+      "failed": 0,
+      "ignored": 1
+    },
+    "media": {
+      "suites": 1,
+      "passed": 547,
+      "failed": 0,
+      "ignored": 1
+    },
+    "core-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "expanded": {
+      "suites": 103,
+      "passed": 494,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "distinct_passed": 1095,
+  "shared_include_duplicates_excluded": 3,
+  "focused_and_related_repeats_not_added": 96,
+  "fixtures": {
+    "valid_grouped_controls": 17,
+    "equivalent_split_acceptances": 17,
+    "malformed_or_unsupported_refusals": 20,
+    "manifest_files": 1,
+    "total_files": 55,
+    "repeatability": "identical after all jobs terminal"
+  },
+  "builds": "locked/offline/no-default-features core and player passed",
+  "ignored": [
+    "physical Metal/VideoToolbox required",
+    "existing integer/float RGB compatibility acceptance"
+  ],
+  "limits": [
+    "Different composition offsets inside one codec block remain unsupported and explicitly refused",
+    "No speed/allocation-performance/RSS or physical-device claim"
+  ],
+  "reference": "https://developer.apple.com/documentation/quicktime-file-format/composition_offset_atom/entry_count",
+  "evidence": "docs/improvements/evidence/mp4-mace-composition-runs/README.md"
+}

@@ -1,0 +1,26 @@
+{
+  "integration": {
+    "exit_code": 0,
+    "log": "/private/tmp/fvid-mp4-mace-composition-integration.log"
+  },
+  "root-mp4": {
+    "exit_code": 0,
+    "log": "/private/tmp/fvid-mp4-mace-composition-root-mp4.log"
+  },
+  "media": {
+    "exit_code": 0,
+    "log": "/private/tmp/fvid-mp4-mace-composition-media.log"
+  },
+  "core-check": {
+    "exit_code": 0,
+    "log": "/private/tmp/fvid-mp4-mace-composition-core-check.log"
+  },
+  "player-check": {
+    "exit_code": 0,
+    "log": "/private/tmp/fvid-mp4-mace-composition-player-check.log"
+  },
+  "expanded": {
+    "exit_code": 0,
+    "log": "/private/tmp/fvid-mp4-mace-composition-expanded.log"
+  }
+}

@@ -2097,13 +2097,27 @@ fn changing_mace_index(
         let v = version(ctts, 1)?;
         let mut at = 0usize;
         let mut raw = 0usize;
-        for i in 0..table(ctts, 8, count)? {
-            let n = u32be(ctts, 8 + i * 8)? as usize;
+        let entries = table(ctts, 8, count)?;
+        let mut i = 0;
+        while i < entries {
+            let mut n = u32be(ctts, 8 + i * 8)? as usize;
+            let value = u32be(ctts, 12 + i * 8)?;
             if n == 0 || n > count - raw {
                 return Err(invalid("MACE composition run must cover whole blocks"));
             }
+            i += 1;
+            // CTTS rows compress consecutive equal offsets; their boundaries
+            // need not coincide with codec blocks. Only an actual offset
+            // change inside a block is unrepresentable by one packet PTS.
+            while i < entries && u32be(ctts, 12 + i * 8)? == value {
+                let next = u32be(ctts, 8 + i * 8)? as usize;
+                if next == 0 || next > count - raw - n {
+                    return Err(invalid("MACE composition run must cover whole blocks"));
+                }
+                n += next;
+                i += 1;
+            }
             let end = raw + n;
-            let value = u32be(ctts, 12 + i * 8)?;
             let shift = if v == 1 {
                 i64::from(value as i32)
             } else {

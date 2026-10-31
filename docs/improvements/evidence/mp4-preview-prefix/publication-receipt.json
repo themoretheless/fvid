@@ -1,0 +1,19 @@
+{
+  "commit": "c84a39e8bd2492da4ce7b54b36573253c2636ec4",
+  "remote_main": "c84a39e8bd2492da4ce7b54b36573253c2636ec4",
+  "remote_delivery": "c84a39e8bd2492da4ce7b54b36573253c2636ec4",
+  "atomic_push": "verified",
+  "raw_logs_removed_after_hash_check": [
+    "/private/tmp/fvid-mp4-preview-before.log",
+    "/private/tmp/fvid-mp4-preview-after.log",
+    "/private/tmp/fvid-mp4-preview-integration.log",
+    "/private/tmp/fvid-mp4-preview-root-mp4.log",
+    "/private/tmp/fvid-mp4-preview-media.log",
+    "/private/tmp/fvid-mp4-preview-core-check.log",
+    "/private/tmp/fvid-mp4-preview-player-check.log"
+  ],
+  "build_target": "/private/tmp/fvid-mp4-preview-prefix-20261031",
+  "build_target_state": "Removed after the following MACE qualification also completed; shared owned cache is no longer needed.",
+  "parallel_worktrees_and_stashes": "preserved",
+  "cleanup_evidence": "docs/improvements/evidence/mp4-mace-composition-runs/cleanup.json"
+}

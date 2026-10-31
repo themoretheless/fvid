@@ -1,0 +1,17 @@
+{
+  "build_target": "/private/tmp/fvid-mp4-preview-prefix-20261031",
+  "build_target_removed": true,
+  "all_qualification_jobs_terminal": true,
+  "raw_logs_removed_after_hash_check": [
+    "/private/tmp/fvid-mp4-mace-composition-before.log",
+    "/private/tmp/fvid-mp4-mace-composition-after.log",
+    "/private/tmp/fvid-mp4-mace-composition-integration.log",
+    "/private/tmp/fvid-mp4-mace-composition-root-mp4.log",
+    "/private/tmp/fvid-mp4-mace-composition-media.log",
+    "/private/tmp/fvid-mp4-mace-composition-core-check.log",
+    "/private/tmp/fvid-mp4-mace-composition-player-check.log",
+    "/private/tmp/fvid-mp4-mace-composition-expanded.log"
+  ],
+  "regressions_and_archived_proof": "retained",
+  "foreign_artifacts_worktrees_stashes": "untouched"
+}

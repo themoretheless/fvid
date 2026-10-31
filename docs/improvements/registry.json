@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 435,
-  "next_id": "FVID-0436",
+  "accepted_count": 436,
+  "next_id": "FVID-0437",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4887,6 +4887,17 @@
       "result": "Add only pnot and PICT to the common opening-atom predicate; all box/track validation stays in the parser. Five valid MOV orders retain exact packets/pictures, native playback, rewind, EOF and seven seeks each. Four malformed/empty companions retain parser-specific refusals; JPEG/PNG/GIF-specific refusals stay intact.16 offline authored files regenerate identically; independent ffprobe validates15 packets/clocks.1092 distinct checks pass across102 integration suites and deduplicated root/media units, plus locked/offline core/player builds. No standalone PICT, preview-rendering, performance or physical-device claim.",
       "status": "accepted",
       "validation": "batch-435-validation.json"
+    },
+    {
+      "id": "FVID-0436",
+      "batch": 436,
+      "title": "Preserve equivalent equal-offset MACE composition runs across codec block boundaries",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_mace_composition_runs.rs",
+      "before": "Splitting a supported CTTS row into adjacent equal-offset rows rejects the complete authored MACE/VP9 movie at an artificial row boundary, although its expanded timestamps and media payloads are unchanged. Original c84a39e8 passes2 control/refusal checks and fails1 valid split-table acceptance.",
+      "result": "Join only consecutive equal-offset CTTS runs before the existing whole-block check, validating every positive run against remaining raw samples without an expanded temporary table.17 equivalent pairs cover MAC3/MAC6 mono/stereo, mixed PCM/MACE, unsigned zero/positive and signed negative offsets, and real block-boundary changes. Both reader APIs preserve packet bytes/index clocks; native audio retains exact PCM/times across playback, rewind and seven seeks; VP9 pictures/seek/EOF pass.20 damaged or unrepresentable companions retain exact refusals.55 offline authored files regenerate identically.1095 distinct checks pass across103 integration suites and deduplicated root/media units; locked/offline core/player builds pass. Existing ignores unchanged. No performance or physical-device claim.",
+      "status": "accepted",
+      "validation": "batch-436-validation.json"
     }
   ]
 }
