@@ -1,3 +1,33 @@
+## Mono arbitrary-downmix compensation, 2026-10-31
+
+Native ordinary LD-MPS now admits mono arbitrary-downmix gains for trees0/1
+(5.1). The decoded dB compensation multiplies M1 coefficients before smoothing
+and interpolation,following original5151/5152 routines. M2 and already rendered
+PCM are not substitutes for this stage. Other trees/HRTF and downmix-residual
+extensions still refuse explicitly;TTT requires gain before inversion.
+
+60 own MP4/MKV pairs cover23/9/4 parameter bands,unity and time/frequency-varying
+gains. Five independent saved core/LD-SBR PCM controls cover12/24/48/96kHz and
+32/64/128-band spatial PCM ingress. Before the fix all bare controls pass and
+three spatial tests refuse at the exact old arbitrary-downmix admission.
+With the fix,2,211,840 compositional PCM values match exactly. Original C raw
+matrices plus80-digit Decimal temporal smoothing independently qualify1,209,600
+matrix endpoints,maximum difference8.9097386e-7 (tolerance2e-6).
+
+Checks cover timed/untimed native decode,MP4/MKV exports and playback,source/
+spatial edge seeks,rewind/EOF,checkpoint replay,suffix-error retry and rollback
+of truncated gain data with an unchanged assembler/cursor. AudioWorker tests
+qualify queues/source stamps and live-history navigation. Movie/input generation
+and C/Decimal oracle generation are separately byte-identical twice in isolated
+folders. Ordinary offline tests consume frozen files without generation or C.
+
+This is component integration,not independent whole-decoder/profile conformance.
+Dynamic SSC enable/disable,shared-QMF LD-SBR ingress and physical/realtime output
+are not newly qualified by this corpus. The wider codec-gap objective stays open.
+
+Fresh offline gates: 1757 passed, 0 failed, 27 ignored.
+Evidence: `docs/validation/aac-ld-mps-arbdmx-{source,reference,generation,tests}-2026-10-31.json`.
+
 ## Odd LD-SBR downscale audit, 2026-10-31
 
 Factor3 SBR was previously listed too broadly as a pending codec feature.

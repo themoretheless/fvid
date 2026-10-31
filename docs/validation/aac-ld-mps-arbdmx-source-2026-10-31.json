@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-31",
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "reference_audit": "docs/validation/aac-ld-mps-arbdmx-reference-2026-10-31.json",
+  "members": {
+    "mp4spatialdec/src/sac_calcM1andM2.c": "ebdb752a1d74a5f7e5638366867b3b477918aa9f4d94169ee3b2e30bfbce6153",
+    "mp4spatialdec/src/sac_bitdec.c": "d9a8655b4e5efa1329d629f88bde962b640efe9d1a5c22f24f84df56eadfa64e"
+  },
+  "routines": [
+    "CalculateArbDmxMtx",
+    "SpatialDecCalculateM1andM2_5151",
+    "SpatialDecCalculateM1andM2_5152",
+    "decodeAndMapFrameArbdmx"
+  ],
+  "finding": "Ordinary mono arbitrary-downmix mode1 maps CLD-coded gain indices to dB.5151/5152 multiply all five real M1 input coefficients by10^(gain_dB/20) before temporal smoothing/interpolation. No residual compensation or alternate input columns apply in mode1.",
+  "runtime_change": "Admit arbitrary_downmix for trees0/1,read prepared DownmixGain(0) per set/band and apply to raw M1 before existing MatrixTime. M2 and PCM remain separately owned.",
+  "why_not_all_trees": "TTT paths apply downmix gain before matrix inversion;not equivalent to generic post-M1 column scaling. Other reference routines do not share the same gain application. They retain explicit refusal.",
+  "qualified": "Mono5.1 trees0/1,23/9/4 parameter bands,unity and time/frequency-varying gains;plain short ELD and LD-SBR PCM interfaces at12/24/48/96kHz with32/64/128 spatial bins.",
+  "not_newly_qualified": [
+    "TTT/stereo/multichannel arbitrary-downmix",
+    "HRTF",
+    "arbitrary-tree and downmix-residual extensions",
+    "shared-QMF LD-SBR ingress",
+    "dynamic SSC arbitrary-downmix enable/disable",
+    "full Annex B or whole-codec/profile conformance",
+    "physical audio output and realtime performance"
+  ],
+  "ordinary_runtime_external_decoder": false
+}
