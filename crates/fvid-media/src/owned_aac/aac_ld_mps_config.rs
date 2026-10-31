@@ -225,7 +225,7 @@ impl Config {
         let matrix_mode = if tree.code == 7 { None } else { Some(b.bit()?) };
         let temporal_shape = limited(b, 2, 2, "reserved LD-MPS temporal shape")?;
         let decorrelation = limited(b, 2, 2, "reserved LD-MPS decorrelation")?;
-        let binaural = tree.code != 7 && b.bit()?;
+        let three_d = tree.code != 7 && b.bit()?;
         let mut ott_bands = Vec::new();
         for &lfe in &tree.ott_lfe {
             ott_bands.push(if lfe {
@@ -251,7 +251,7 @@ impl Config {
         if temporal_shape == 2 && b.bit()? {
             return Err(invalid("reserved LD-MPS envelope quantization"));
         }
-        let hrtf = if binaural {
+        let hrtf = if three_d {
             if b.read(2)? != 0 {
                 return Err(invalid("reserved LD-MPS HRTF set"));
             }

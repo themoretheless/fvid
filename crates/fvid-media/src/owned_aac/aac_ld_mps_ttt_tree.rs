@@ -46,6 +46,23 @@ pub fn build_with_downmix(
     lfe_active: bool,
     downmix: [f64; 2],
 ) -> Result<Matrices> {
+    build_with_spatial(tree, bands, ttt, lfe_active, downmix, None)
+}
+#[derive(Clone, Copy, Debug)]
+pub struct ThreeD<'a> {
+    pub hrtf: &'a super::aac_ld_mps_config::Hrtf,
+    pub band: usize,
+    pub surround_gain: f64,
+}
+/// Signalled standard inversion has priority;3D inversion serves its bypass.
+pub fn build_with_spatial(
+    tree: u8,
+    bands: &[Band],
+    ttt: Ttt,
+    lfe_active: bool,
+    downmix: [f64; 2],
+    three_d: Option<ThreeD<'_>>,
+) -> Result<Matrices> {
     if downmix.iter().any(|gain| !gain.is_finite() || *gain < 0.0) {
         return Err(invalid("invalid LD-MPS TTT downmix gain"));
     }
@@ -91,6 +108,27 @@ pub fn build_with_downmix(
                     re: raw[r][0] * h[0][col].re + raw[r][1] * h[1][col].re,
                     im: raw[r][0] * h[0][col].im + raw[r][1] * h[1][col].im,
                 };
+            }
+        }
+    }
+    // The two inverse tools are alternative branches in the reference.
+    if !(ttt.inversion && matches!(ttt.mode, 0 | 1 | 2 | 4)) {
+        if let Some(context) = three_d {
+            let q = super::aac_ld_mps_3d::project(
+                raw,
+                [bands[1].cld_db, bands[2].cld_db],
+                context.hrtf,
+                context.band,
+                context.surround_gain,
+            )?
+            .inverse;
+            for r in 0..3 {
+                for col in 0..2 {
+                    base[r][col] = Complex {
+                        re: raw[r][0] * q[0][col].re + raw[r][1] * q[1][col].re,
+                        im: raw[r][0] * q[0][col].im + raw[r][1] * q[1][col].im,
+                    };
+                }
             }
         }
     }

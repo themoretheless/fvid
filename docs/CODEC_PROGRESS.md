@@ -1,3 +1,46 @@
+## Signalled 3D-stereo TTT inversion, 2026-10-31
+
+Owned LD-MPS now applies SSC HRTF set0 to the TTT inverse for trees2/3/4.
+The flag means signalled 3D-stereo inversion, not binaural output selection:
+six/eight output channels are retained. The transform includes five-direction
+levels/IPD, energy-weighted cross-ear phase below band12, surround energy,
+arbitrary-downmix before inversion and standard-inverse priority. Regularization
+floors determinant magnitude to0.1 through singular values, with explicit
+rank-deficient orthogonal completion and finite-result guards. Shape checks in
+the per-band projection are constant-size; full grid validation is at admission.
+
+540 own twelve-packet programmes in MP4 and MKV cover all six modes, equal
+23/9/4 grids, symmetric/asymmetric responses and five ELD/LD-SBR input clocks
+through32/64/128-bin PCM ingress. Five saved independent stereo controls isolate
+spatial admission. Replacing the assembler and TTT owner with base104373aff7
+makes the initial three spatial tests fail at the exact old HRTF refusal while
+the bare control passes. The extra valid unequal-grid movie reproduces the
+specific remaining mapping refusal in both ASC and first in-band SSC.
+
+Independent component evidence combines original pinned MPEG C raw bases/M2
+with an owned80-digit Decimal polar inverse and smoothing, for every selected
+3D branch. Rust uses a separate Hermitian eigenbasis formulation. The stock
+float C SVD loses orthogonality near rank deficiency:5072 nonfinite terms and
+large finite deviations are recorded, not promoted to golden truth. Analytic
+rank-one,zero and diagonal controls independently check the determinant floor.
+The9538560 endpoint comparison has max absolute error0.000212200326 with a
+fixed3e-4 bound reflecting amplified C float basis error. Native compositional
+PCM is exact over24330240 values; it is not independent whole-codec truth.
+Movie/input artifacts and C/Decimal gold each regenerate identically twice,
+separately from tests. Ordinary tests require no FFmpeg,network or C compiler.
+
+Still open: unequal HRTF grids,other HRTF trees and newly unqualified parameter
+resolutions/quantization modes,nominal-SSC downscale remapping,direct downscaled
+shared-QMF,binaural rendering and whole-profile qualification. Full Annex B and
+table A.21 were not obtained from the official ISO catalogue/sample. No physical
+audio or realtime performance claim. The overall codec-gap goal remains open.
+
+Fresh offline gates: 1791 passed,0 failed,27 ignored.
+Media587;player1076;31 targeted integration binaries. New3D integration8
+and worker1 passed,including seek/rewind and exact source-window stamps.
+
+Evidence: `docs/validation/aac-ld-mps-3d-{source,reference,generation,tests}-2026-10-31.json`.
+
 ## In-band arbitrary-downmix mode transitions qualified, 2026-10-31
 
 The existing runtime now has acceptance evidence for enabling/disabling ordinary

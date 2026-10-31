@@ -79,7 +79,7 @@ impl Decoder {
     pub fn new(config: &Config) -> Result<Self> {
         let physical = aac_ld_mps_prepare::Decoder::new(config)?;
         if (config.arbitrary_downmix && config.tree.code > 4)
-            || config.hrtf.is_some()
+            || config.hrtf.is_some() && !matches!(config.tree.code, 2..=4)
             || config.extensions.iter().any(|e| {
                 matches!(
                     &e.value,
@@ -90,6 +90,9 @@ impl Decoder {
             return Err(unsupported(
                 "LD-MPS arbitrary-downmix/HRTF matrix composition is not yet implemented",
             ));
+        }
+        if let Some(hrtf) = &config.hrtf {
+            super::aac_ld_mps_3d::validate(hrtf, config.parameter_bands)?;
         }
         let boxes = config.tree.ott_lfe.len() + usize::from(config.tree.ttt_boxes);
         let mut cutoffs = vec![0; boxes];
@@ -331,7 +334,7 @@ impl Decoder {
                     } else {
                         [1.0, 1.0]
                     };
-                    let a = aac_ld_mps_ttt_tree::build_with_downmix(
+                    let a = aac_ld_mps_ttt_tree::build_with_spatial(
                         tree,
                         &boxes,
                         Ttt {
@@ -343,6 +346,14 @@ impl Decoder {
                         },
                         lfe_active,
                         downmix,
+                        config
+                            .hrtf
+                            .as_ref()
+                            .map(|hrtf| aac_ld_mps_ttt_tree::ThreeD {
+                                hrtf,
+                                band: usize::from(band),
+                                surround_gain: p.surround_gain,
+                            }),
                     )?;
                     m1.extend(a.m1.iter().flatten().map(|z| z.re));
                     m1.extend(a.m1.iter().flatten().map(|z| z.im));

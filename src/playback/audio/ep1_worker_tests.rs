@@ -544,3 +544,8 @@ fn stereo_arbitrary_downmix_ttt_worker_keeps_gain_history_and_navigation_stamps(
 fn arbitrary_downmix_gain_mode_switch_worker_keeps_live_state_and_navigation_stamps() {
     check_corpus("aac-ld-mps-arbdmx-switch");
 }
+
+#[test]
+fn signalled_3d_ttt_worker_keeps_inverse_history_and_navigation_stamps() {
+    check_corpus("aac-ld-mps-3d");
+}

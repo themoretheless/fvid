@@ -154,6 +154,7 @@ pub mod aac_ld_mps_prepare;
 pub mod aac_ld_mps_matrix_time;
 pub mod aac_ld_mps_matrix_apply;
 pub mod aac_ld_mps_tree_matrix;
+pub mod aac_ld_mps_3d;
 pub mod aac_ld_mps_ttt;
 pub mod aac_ld_mps_ttt_tree;
 pub mod aac_ld_mps_route;

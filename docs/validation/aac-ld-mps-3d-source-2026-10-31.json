@@ -1,0 +1,68 @@
+{
+  "date": "2026-10-31",
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "members": {
+    "mp4spatialdec/src/sac_calcM1andM2.c": "ebdb752a1d74a5f7e5638366867b3b477918aa9f4d94169ee3b2e30bfbce6153",
+    "mp4spatialdec/src/sac_bitdec.c": "d9a8655b4e5efa1329d629f88bde962b640efe9d1a5c22f24f84df56eadfa64e"
+  },
+  "routines": [
+    "Calculate3Dinv",
+    "Unsingularize3DMatrix",
+    "SpatialDecCalculateM1andM2_5251",
+    "SpatialDecCalculateM1andM2_7271",
+    "SpatialDecCalculateM1andM2_7272"
+  ],
+  "finding": "bs3DaudioMode selects signalled 3D-stereo TTT matrix inversion, not binaural output. Five directions, amplitude=10^((index-16)/20), IPD=index*pi/16. Cross-ear front/rear phase is energy weighted; phase only below parameter band12. Fixed surround gain enters rear energy. Arbitrary-downmix gains precede inversion. Standard inverse has priority in modes0/1/2/4;otherwise signalled3D is selected.",
+  "regularization": "Floor determinant magnitude at0.1 via singular values; preserve larger singular value unless both below sqrt(0.1). Rust uses Hermitian eigenbasis with determinant-derived small singular value;independent Decimal reference uses polar factor. Rank-deficient phase completion fixed explicitly and checked analytically.",
+  "reference_limitation": "Stock float C SVD loses orthogonality and produces nonfinite results near rank deficiency. These are retained in the reference audit,not used as stable truth. Original C raw basis and M2 remain independent controls.",
+  "qualification": "HRTF set0,equal23/9/4 grids,trees2/3/4,all six modes,symmetric/asymmetric authored responses,PCM32/64/128. Synthetic matrix/PCM/playback/seek evidence only.",
+  "not_newly_qualified": [
+    "Unequal HRTF grid conversion",
+    "HRTF on non-TTT trees",
+    "Other parameter grids and quantization modes",
+    "Binaural output",
+    "Nominal SSC downscale remapping",
+    "Direct downscaled shared-QMF ingress",
+    "Complete ISO23003-2 Annex B/profile conformance",
+    "Physical audio and realtime performance"
+  ],
+  "normative_search": {
+    "date": "2026-10-31",
+    "official_catalogue": "https://www.iso.org/standard/73122.html",
+    "result": "Official catalogue offers paid full publication and sample. Full Annex B and table A.21 not obtained;no claim that reference-software qualification closes normative profile coverage.",
+    "additional_lead": {
+      "url": "https://www.ieclist.ink/iso/ISO%20IEC%2023003-2-2010%20PDF.pdf",
+      "result": "Search index exposes a fragment labelled table A.21,but direct web and curl fetch both returned404. Indexed snippets are not treated as an obtained complete normative document."
+    }
+  },
+  "counterfactual": {
+    "base_commit": "104373aff75ab4b3fdf762fa1ec20495be751c74",
+    "command": [
+      "cargo",
+      "--config",
+      "profile.dev.package.fvid-media.opt-level=2",
+      "test",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "aac_ld_mps_3d",
+      "--",
+      "--nocapture"
+    ],
+    "status": 101,
+    "old_sources": {
+      "crates/fvid-media/src/owned_aac/aac_ld_mps_assemble.rs": "8b6606cdd244b37810b9fe9216143b92821607005d744220102102fb08a09bc9",
+      "crates/fvid-media/src/owned_aac/aac_ld_mps_ttt_tree.rs": "174102c480c340207fdc993863f32875bc67b4dff60f783af94116fceaace599"
+    },
+    "restored_sources": {
+      "crates/fvid-media/src/owned_aac/aac_ld_mps_assemble.rs": "53b6b3bd1d89d12f47a08f2bc8250da5a256f993c2f671c0ce70edbd63a13198",
+      "crates/fvid-media/src/owned_aac/aac_ld_mps_ttt_tree.rs": "06f67a24cf5095d0510fbc88ee7d72cc918a80bcfaeb15eb9f1e65146e5a4471"
+    },
+    "restored": true,
+    "log_sha256": "355d170ccde5f7f78263f874fee7244e537e797b67c80061fd9614666d89fd61",
+    "qualification": "Original assembler/TTT owners temporarily restored. New unreferenced3D math module remains compiled;initial four integration tests isolate the old HRTF constructor refusal.",
+    "outcome": "One bare-control test passed;three spatial acceptance tests failed at the exact old arbitrary-downmix/HRTF admission. This used the initial four-test wrapper,not the final expanded test count."
+  }
+}

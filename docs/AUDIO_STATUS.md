@@ -14,8 +14,13 @@ Ordinary mono arbitrary-downmix compensation is now integrated for LD-MPS
 5.1 trees0/1: decoded dB gain enters M1 before temporal smoothing/interpolation.
 Independent C/Decimal matrices and own playback/seek fixtures cover PCM ingress.
 Stereo TTT trees2/3/4 now also accept independent L/R gains before matrix
-inversion,with all six modes checked. Trees5/6/7,HRTF and residual/arbitrary-tree
-extensions remain unfinished.
+inversion,with all six modes checked. Signalled 3D-stereo HRTF set0 now enters
+the TTT inverse for trees2/3/4 with equal23/9/4 parameter grids. This retains
+six/eight output channels; it does not select binaural output. Phase cutoff,
+standard-inverse priority and determinant-floor regularization have independent
+component controls plus owned playback/seek movies. Unequal HRTF grids,other
+HRTF trees,trees5/6/7 arbitrary-downmix and residual/arbitrary-tree extensions
+remain unfinished.
 
 Same-format in-band gain-mode enable/disable is now qualified for PCM-ingress
 ELD/LD-SBR trees0..4,including dependent held gains,default reset on re-enable,
