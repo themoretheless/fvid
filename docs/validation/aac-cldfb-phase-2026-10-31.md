@@ -1,5 +1,11 @@
 # Canonical nominal LD-SBR CLDFB phase
 
+November1 follow-up:the historical ordinary-ELD FDK automatic renderer was Low
+Power. The [explicit complex audit](aac-ld-sbr-qmf-reference-2026-11-01.md) explains
+the two zero-core waveform differences. Historical before/after numbers are
+preserved as cross-renderer observations. The independent canonical-phase fix
+and its acceptance remain valid;AAC-core time-origin qualification remains open.
+
 ## Defect and primary source
 
 The nominal analysis matrix used `2n-96`. ISO/IEC14496-3:2009 section4.6.19.4.1

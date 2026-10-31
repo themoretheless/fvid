@@ -16,7 +16,7 @@ import struct
 import subprocess
 import sys
 from validate_iso_eld_admission import INVENTORY, INVENTORY_SHA256, selected
-from validate_aac_ld_mps_fdk_reference import ARCHIVE_SHA256, COMMIT
+from fdk_reference_source import COMMIT, verify_source_archive
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -112,9 +112,12 @@ def main():
     parser.add_argument('--fdk-archive', type=Path, required=True)
     parser.add_argument('--work', type=Path, required=True)
     parser.add_argument('--report', type=Path, required=True)
+    parser.add_argument('--fdk-qmf', choices=['complex', 'lowpower', 'auto'], default='complex',
+                        help='explicit reference renderer; native PCM always uses complex QMF')
     args = parser.parse_args()
-    if sha(args.fdk_archive) != ARCHIVE_SHA256:
-        raise ValueError('FDK source archive pin mismatch')
+    args.native_probe = args.native_probe.resolve()
+    args.fdk_probe = args.fdk_probe.resolve()
+    source_pin = verify_source_archive(args.fdk_archive)
     inputs, work = args.inputs.resolve(), args.work.resolve()
     if work == inputs or work.is_relative_to(inputs) or 'playback-errors' in work.parts:
         raise ValueError('reference work must be outside original inputs and authored fixtures')
@@ -138,7 +141,8 @@ def main():
     work.mkdir(parents=True, exist_ok=True)
     args.report.parent.mkdir(parents=True, exist_ok=True)
     report = dict(scope='Native f32 versus original FDK PCM16;raw compressed tracks,zero lag;not conformance',
-                  complete=False, source_archive_sha256=ARCHIVE_SHA256, fdk_source_commit=COMMIT,
+                  complete=False, source_archive_sha256=source_pin['archive_sha256'],
+                  source_git_tree=source_pin, fdk_source_commit=COMMIT, fdk_qmf_requested=args.fdk_qmf,
                   fdk_driver_sha256=sha(ROOT/'scripts/support/aac_ld_mps_fdk_reference_probe.cpp'),
                   fdk_probe_sha256=sha(args.fdk_probe), native_probe_sha256=sha(args.native_probe),
                   iso_inventory_sha256=INVENTORY_SHA256, cases=[])
@@ -154,7 +158,9 @@ def main():
             raise ValueError('hiding edits changed original ASC/AUs')
         native, fixed = work/(name+'.f32le'), work/(name+'.s16le')
         native_log = run([args.native_probe, 'complex', stripped, native])
-        fdk_log = run([args.fdk_probe, records, fixed])
+        fdk_log = run([args.fdk_probe, records, fixed, '--qmf='+args.fdk_qmf])
+        if 'qmf_requested='+args.fdk_qmf not in fdk_log:
+            raise ValueError('FDK probe did not confirm requested QMF mode')
         rate, channels = map(int, re.search(r'rate=(\d+) channels=(\d+)', fdk_log).groups())
         actual, reference = samples(native, 'f'), samples(fixed, 'h')
         geometry = tuple(map(int, re.search(r'rate=(\d+) channels=(\d+)', native_log).groups()))

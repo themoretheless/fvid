@@ -1,0 +1,1438 @@
+{
+  "complete": true,
+  "scope": "Optional offline reference-mode isolation on own zero-core LD-SBR movies.\n\nNormal tests need neither FDK nor this tool. Complex PCM has a separately frozen\nindependent float oracle. External PCM16 comparisons are observations, without\nfitted delay, gain normalization, skipped prefixes or a conformance verdict.\n",
+  "source_git_tree": {
+    "commit": "ee76460efbdb147e26d804c798949c23f174460b",
+    "archive_sha256": "d018f6356b7d7bca5af4df9eca076fe21ece81e5251854882989c51e37af6286",
+    "git_tree_sha1": "c3900d70bbdf4129d37f8cd5ab4a6589a34eb95b",
+    "files": 425,
+    "source_bytes": 9746870
+  },
+  "native_probe_sha256": "31a4adc02fa53ece13f9885ce65ffcc29d432503670cf6f9a0e78c621447bc9b",
+  "fdk_probe_sha256": "811f39fb89134b65cc220eb5d7b0c85c79ac27a9ef2873e528e2f57ad35eee80",
+  "fdk_driver_sha256": "f3d2d12dd5db7560900701d59b159b059fd2f911dae79a94c48fb598a4c790e2",
+  "fixture_manifest_sha256": "9291cbbe86873a21ee7561308a1c1cd7bfdb6b3f5c10e8bcf91d81a701c0c494",
+  "cases": [
+    {
+      "name": "n480-e24-q7-x1",
+      "input_sha256": "c8181e9e391c6bac4385c8636f475928783d79955917f8fd63ec2119a686c430",
+      "records_sha256": "621be57250acd88a37389d96904319f3e3b56c02096c19f6e92c3625a1a5bd38",
+      "native_pcm_sha256": "8b0a65c62cf67f1f4c5dd4a8276d31be367f8e467988ba786d9a2dcb687ec496",
+      "native_stdout": "mode=Complex packets=8 rate=24000 channels=1 scalars=3840\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "ad78627c2d0fcc5c0917e835957787dcc239c56c062a1d6d96014ef553d62179",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 8.982202522791927e-06,
+                "max_abs_error": 1.751538729877211e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "f3453fc1e7353fcca17b0b9155082d430288122e8df8d542bae419451897f8a1",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 0.00017496051075075678,
+                "max_abs_error": 0.0023081413237378
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "f3453fc1e7353fcca17b0b9155082d430288122e8df8d542bae419451897f8a1",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 0.00017496051075075678,
+                "max_abs_error": 0.0023081413237378
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n480-e24-q7-x2",
+      "input_sha256": "f59a8c60f345fd991617800c52e9e32d83ec100b457f3cc4fdbb52721d343532",
+      "records_sha256": "49483f6f75a45587ef832f1cf9f681009353760548345bef145b7d77a108ec0a",
+      "native_pcm_sha256": "6f791b54d53cad7925768ad3ca1287e315b47c3b03c0c9ba2709180aad2b09fe",
+      "native_stdout": "mode=Complex packets=8 rate=48000 channels=1 scalars=7680\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "d1252946b01ba4efc2f29586e0287ba349801544aca721700b188d9e98c1ad73",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 9.46823958829552e-06,
+                "max_abs_error": 2.0473300537560135e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "56980aba879ae4cca7ebf60910c860ce77011086590627c6a92f160e24a4f552",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 0.00017489202299051477,
+                "max_abs_error": 0.0027584623312577605
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "56980aba879ae4cca7ebf60910c860ce77011086590627c6a92f160e24a4f552",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 0.00017489202299051477,
+                "max_abs_error": 0.0027584623312577605
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n480-e24-q30-x1",
+      "input_sha256": "3be825e7331c99f7ceeaa593d0aec922ddaa77f0226b333a72e6f8717955fca6",
+      "records_sha256": "44618b471a5b0e1bd96322058823148596715626ac06d427166775b24ac26f8d",
+      "native_pcm_sha256": "17d9593d0392b7ba55f21d9ee867cf65018e4ba959dc98906597966423fc25f8",
+      "native_stdout": "mode=Complex packets=8 rate=24000 channels=1 scalars=3840\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "85803c9b41e510878c5180a09cfda510624e9956336f676c5271a1f7113a687d",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 9.221874283764387e-06,
+                "max_abs_error": 1.6344929463230073e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "02be80a4fc7ab874bc18b3065e62ae9b6534259ce73584f004b399113b721080",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 0.00010793213577323258,
+                "max_abs_error": 0.0023359903134405613
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "02be80a4fc7ab874bc18b3065e62ae9b6534259ce73584f004b399113b721080",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 0.00010793213577323258,
+                "max_abs_error": 0.0023359903134405613
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n480-e24-q30-x2",
+      "input_sha256": "2bee60ecb66a1a59ed9165cf846b728330536d6da33b244056f95464734c0905",
+      "records_sha256": "ab25cf78562e5e804ca2850eead966d9c45d6c354536235cbf34303aba611771",
+      "native_pcm_sha256": "ff923154543167efdb0d929d35cd5649198d5dcffd868c865f4f10d06e38276f",
+      "native_stdout": "mode=Complex packets=8 rate=48000 channels=1 scalars=7680\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "47f15b723d14517d048dfaa727f49473c20ebe875c9e7cba7b0dba75e66feae0",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 9.856507925409863e-06,
+                "max_abs_error": 1.95774482563138e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "0895ba17e04ed509a1193f909d4c58ea2af4bce57da26763ffa59c12ecde9080",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 0.00010725448356669358,
+                "max_abs_error": 0.002797971945255995
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "0895ba17e04ed509a1193f909d4c58ea2af4bce57da26763ffa59c12ecde9080",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 0.00010725448356669358,
+                "max_abs_error": 0.002797971945255995
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n480-e36-q7-x1",
+      "input_sha256": "f8f80be990379fa895c1c2e1ddc7316c5b842849caa5fa42d5809349152d1403",
+      "records_sha256": "65386bcf3350f5c12f646e8c5b99443e1a92557d8cb68462280a35e5aea313b8",
+      "native_pcm_sha256": "21892ac9e70adcd16bde46ff95c7f2b171d32d11bc0dd6a9c1d1f8c8b4d9babd",
+      "native_stdout": "mode=Complex packets=8 rate=24000 channels=1 scalars=3840\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "99ad1422ea75a49bc381079f47fe1f13f8a826ad16eef9a88cec120478a9b33a",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 8.81697721707402e-06,
+                "max_abs_error": 1.8998980522155762e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "cdc5a2d6bb3abeeb1064f863e8094000bb12aadb364103926c109b815e09cd07",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 0.0013962981323267388,
+                "max_abs_error": 0.0184040954336524
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "cdc5a2d6bb3abeeb1064f863e8094000bb12aadb364103926c109b815e09cd07",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 0.0013962981323267388,
+                "max_abs_error": 0.0184040954336524
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n480-e36-q7-x2",
+      "input_sha256": "f66d275c576df1f1c0cac16d5ffe6b6d230c85414d7adbcfb8e19c46d6ebc74c",
+      "records_sha256": "4d8a081314232c552c4579689a9bdb34b272d0b914a61c38a086ff9998448107",
+      "native_pcm_sha256": "df482149bb9a8c4c0521cdc0f64e683b6efc37ba26797dc3395d05aa7f3de32c",
+      "native_stdout": "mode=Complex packets=8 rate=48000 channels=1 scalars=7680\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "05ebe62fb3a8e30d7c9025c953e9409c9b9a3f4f1a8bc671edde4dd56600ad99",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 9.476850752056573e-06,
+                "max_abs_error": 2.2118911147117615e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "69cdcd17887684f054a0799209b03ebf5366c704a7d53ab45b25de3cb5d7a5df",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 0.0013961668393033047,
+                "max_abs_error": 0.022098216228187084
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "69cdcd17887684f054a0799209b03ebf5366c704a7d53ab45b25de3cb5d7a5df",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 0.0013961668393033047,
+                "max_abs_error": 0.022098216228187084
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n480-e36-q30-x1",
+      "input_sha256": "56c8973595b1340843125558e1cca52576c998c0765d8200cb8cbfe055d31c7b",
+      "records_sha256": "9b1a12715777c31a76f4c3b01b63c5f57432fe8ba1cb462a0299b079b8125e6e",
+      "native_pcm_sha256": "f76fad28f6d40da5017dc61acdb013a7c1740c4a6d1abba76ade3aa516127bc8",
+      "native_stdout": "mode=Complex packets=8 rate=24000 channels=1 scalars=3840\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "939fd7757d4dcbd1aeec701f3c4c9735da2f7a48ecb128acfca8507dfc68a100",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 8.496754462902054e-06,
+                "max_abs_error": 1.7508980818092823e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "688f3143b3ef5fe6e397da4ade6d0fc1dbe426c50a8421e6b3a0b0cd09284720",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 0.0008572241973366083,
+                "max_abs_error": 0.01862688735127449
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "688f3143b3ef5fe6e397da4ade6d0fc1dbe426c50a8421e6b3a0b0cd09284720",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 0.0008572241973366083,
+                "max_abs_error": 0.01862688735127449
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n480-e36-q30-x2",
+      "input_sha256": "74f78318418aeeef9b48a7303b95b4e98b9c1fc42025fd43c55a3569323b0514",
+      "records_sha256": "0beed18a45497c9b67663830fd9a50c3b5a9bc9bf3aa23876f09f1a0788b733a",
+      "native_pcm_sha256": "80a403dc1b7e53902b7c9f87941b07de5400ac57745f5c294306466006de17e4",
+      "native_stdout": "mode=Complex packets=8 rate=48000 channels=1 scalars=7680\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "5065a65d3a920eadeea17e3ec1016f3254d05217e71178539cd212471e353aa5",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 9.251664467557455e-06,
+                "max_abs_error": 2.2724270820617676e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "b884499abc059cb4758bb802920896f769af3d428eca092e096f3e937e48192f",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 0.0008552681896919599,
+                "max_abs_error": 0.02232274040579796
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "b884499abc059cb4758bb802920896f769af3d428eca092e096f3e937e48192f",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 0.0008552681896919599,
+                "max_abs_error": 0.02232274040579796
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n480-e48-q7-x1",
+      "input_sha256": "e3ca44bcb313434c4dc358c895d39c810f183f183e642cb8e84179e2ba39d512",
+      "records_sha256": "d089142f5efc56c625e233fa9c7668f691709be78ac76687bfa3d77a00929e4c",
+      "native_pcm_sha256": "ea2c66e5b534258da77b8aad146fe92a6ab20ec560286f62a980210c4b9370aa",
+      "native_stdout": "mode=Complex packets=8 rate=24000 channels=1 scalars=3840\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "f42e35e95fcec20be0c3988fc5524df8b5d4342580b2b5626e3395e35f0e0cca",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 9.676752713628408e-06,
+                "max_abs_error": 3.819167613983154e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "0c3e1b9f2bb83b0d7d942084f47b093f8c27063b24068306a9f0bcd6c9847503",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 0.011170565483667351,
+                "max_abs_error": 0.1472327634692192
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "0c3e1b9f2bb83b0d7d942084f47b093f8c27063b24068306a9f0bcd6c9847503",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 0.011170565483667351,
+                "max_abs_error": 0.1472327634692192
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n480-e48-q7-x2",
+      "input_sha256": "965460f86b455aae5b3cdcbfe5303b516207aca24c95a2c68292cf96b7e384df",
+      "records_sha256": "e5d70ba50423ef353fc1e496a2b5bc97d222f45a74a31199a068a77930ba6c34",
+      "native_pcm_sha256": "16b7171404730bab6d11f272d146e29e419e9156ea117490c6a28ed56fe1e1f3",
+      "native_stdout": "mode=Complex packets=8 rate=48000 channels=1 scalars=7680\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "87153288456bb5ba14b2598f24659dc50511f422aaf41276f93768451deaba78",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 1.0646654693947204e-05,
+                "max_abs_error": 4.747509956359863e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "e4c25fa44012bbd4ef940382c3b70f4254562c93a188a09c12b01a8ac67bf198",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 0.011169563011013564,
+                "max_abs_error": 0.17675521224737167
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "e4c25fa44012bbd4ef940382c3b70f4254562c93a188a09c12b01a8ac67bf198",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 0.011169563011013564,
+                "max_abs_error": 0.17675521224737167
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n480-e48-q30-x1",
+      "input_sha256": "47499a7df1f04a5e27198fe3a9ceeaaef91e9bef05953a55ea08caa36dc71211",
+      "records_sha256": "86d03fb8777a3db44618a9c7d883a6bcd9e4f9a678bdcb4dd905c5b9e99844c5",
+      "native_pcm_sha256": "b9a011af391cc3b771db33ec51c9dc95538ad598f2ff2ef9482aabfcd0601d4f",
+      "native_stdout": "mode=Complex packets=8 rate=24000 channels=1 scalars=3840\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "039296b5fca2b77111cc0fe6e8fd46fcd60606324494e9e050dba5b3fb5b6466",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 1.0228855431259803e-05,
+                "max_abs_error": 3.7476420402526855e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "34b7ccf14b77866b413ffb0a9701b25c0f9e04e70d1036767bd4a92af970c5f1",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 0.006846850571158843,
+                "max_abs_error": 0.14895406365394592
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "34b7ccf14b77866b413ffb0a9701b25c0f9e04e70d1036767bd4a92af970c5f1",
+          "stdout": "rate=24000 channels=1 frame=480 outputDelay=32 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=3840\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 3840,
+                "rmse": 0.006846850571158843,
+                "max_abs_error": 0.14895406365394592
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n480-e48-q30-x2",
+      "input_sha256": "8051124e0cff842a4ac5a2e6f2e2d2fcfc232dce88b18e96c0fbd23063911378",
+      "records_sha256": "fd3f3bbe8c284887737b8cbaa87666b206f3726892a0f38677d874758abed55b",
+      "native_pcm_sha256": "6d274d7aae4a88279c8875cd4b2f753ed7352efcc60a574641b1419e74f36cc1",
+      "native_stdout": "mode=Complex packets=8 rate=48000 channels=1 scalars=7680\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "0420547b2d0a87cf83a4e3b0c86f788c12f16d9a71cb73d4b36e9a2f8982f634",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 1.1124666332121084e-05,
+                "max_abs_error": 5.167722702026367e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "d7623f08ccc96251d5b1768d66dce38a1c8226a2d4c5b6f83a31c804f11d1531",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 0.006843772565037537,
+                "max_abs_error": 0.17861244082450867
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "d7623f08ccc96251d5b1768d66dce38a1c8226a2d4c5b6f83a31c804f11d1531",
+          "stdout": "rate=48000 channels=1 frame=960 outputDelay=64 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=7680\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 7680,
+                "rmse": 0.006843772565037537,
+                "max_abs_error": 0.17861244082450867
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n512-e24-q7-x1",
+      "input_sha256": "48e587f2f87a4cbed93e45cb0163025f64025f7166ba725e67ffa2be588cafc4",
+      "records_sha256": "d5352832998057cff954079015bbfbc57bd3ae8c68ed132a51d40e91c190ed1c",
+      "native_pcm_sha256": "fe6ecfcb5367bb08870a13c921da86ef67fdd800af74009113445372cc03a351",
+      "native_stdout": "mode=Complex packets=8 rate=24000 channels=1 scalars=4096\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "6c823b622f2f5d34158ffbe4697053929e40e29d0d3cbcfd4cbdfa202a126e91",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 9.004798143524077e-06,
+                "max_abs_error": 1.751538729877211e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "c0b56207740030d40f37ed7b0bd8febc76be9a9b4efc7af12afea8e1f3abbed1",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 0.00017352612137013618,
+                "max_abs_error": 0.0023081413237378
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "c0b56207740030d40f37ed7b0bd8febc76be9a9b4efc7af12afea8e1f3abbed1",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 0.00017352612137013618,
+                "max_abs_error": 0.0023081413237378
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n512-e24-q7-x2",
+      "input_sha256": "c37ba3aca899e05e2b82723f82830d5983655af148ed55bb096d677b7f9d2f2f",
+      "records_sha256": "97440b3e7906a769d09e4fb5826b6cf5b950c5159fd6c2bbaa1f70f294a4461d",
+      "native_pcm_sha256": "b6c2f91740c43853842d044efa325b39363d2cd56be96c504dcd78b56702ff73",
+      "native_stdout": "mode=Complex packets=8 rate=48000 channels=1 scalars=8192\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "6fb8b53c308891250131168dd05b3ff73141f9513e54c4a99a3d12b5e3f2321f",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 9.44067409232981e-06,
+                "max_abs_error": 2.0473300537560135e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "e69b3fbc8b362c699b4c2e56c11ee176692e6c76b73047906e772d5106b5b4db",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 0.00017348031623760443,
+                "max_abs_error": 0.0027584623312577605
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "e69b3fbc8b362c699b4c2e56c11ee176692e6c76b73047906e772d5106b5b4db",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 0.00017348031623760443,
+                "max_abs_error": 0.0027584623312577605
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n512-e24-q30-x1",
+      "input_sha256": "ca999c4540ef8cde3496b1d7ce00105c9f22f3749d71ce4e18a7ca47e875fc36",
+      "records_sha256": "dbcd948dff48b02776cf08fba3222213eaa683dad79315156ae0228c0ff72458",
+      "native_pcm_sha256": "8a0571cc7d6997a4f4e440867e421dc0334337fadf7fea13270f3f076eb915cf",
+      "native_stdout": "mode=Complex packets=8 rate=24000 channels=1 scalars=4096\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "39fe91c0259a0a4ced37688c094ea6781b54701a6666cfe48d1c60f4b6870d09",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 9.223110647072533e-06,
+                "max_abs_error": 1.6344929463230073e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "577a6124f0cef860d2b2a491a7904c57f9308e1510be75776d24099ef6fcea70",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 0.00010652774384972383,
+                "max_abs_error": 0.0023359903134405613
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "577a6124f0cef860d2b2a491a7904c57f9308e1510be75776d24099ef6fcea70",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 0.00010652774384972383,
+                "max_abs_error": 0.0023359903134405613
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n512-e24-q30-x2",
+      "input_sha256": "36b5b5d4e7ab56f09384a97bdfc3f1880bc271ec51b56049c434c7e9754ed709",
+      "records_sha256": "f88828ab4562767adb15240efa2d618ce81f92a217330b0fc366e78c5e614d1f",
+      "native_pcm_sha256": "5916e3f0fdbcffd7c4663e830ce85e753cc5acf7cdf6c70bf38ae8ce7d29ea8e",
+      "native_stdout": "mode=Complex packets=8 rate=48000 channels=1 scalars=8192\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "2389b689f0191b4fd06b1beda45f15f066165cfca7c477d84e971beb851d2a03",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 9.85686056032868e-06,
+                "max_abs_error": 1.95774482563138e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "9ef45ff35b3eccc599f5bc1b56f62aeb6401d03aaecf6f1c4466f793a23cc046",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 0.00010584443683338449,
+                "max_abs_error": 0.002797971945255995
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "9ef45ff35b3eccc599f5bc1b56f62aeb6401d03aaecf6f1c4466f793a23cc046",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 0.00010584443683338449,
+                "max_abs_error": 0.002797971945255995
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n512-e36-q7-x1",
+      "input_sha256": "957cb33bca15c412ea943d3a1de6fa75fdb982280d1cb354e7e5e647fc2088d2",
+      "records_sha256": "8d820448109250690d8b589139047dc611949c958e8f6f8cf0a3338f483a453b",
+      "native_pcm_sha256": "b115fcc673d5d4c1162a1b104bde2307edd131f7b97ec381d8131780e8c89830",
+      "native_stdout": "mode=Complex packets=8 rate=24000 channels=1 scalars=4096\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "0b05e00c8c9212f9e6937e9f7887cec4e374c5617ae40e5bfb7369d8516cfedf",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 8.818307376441892e-06,
+                "max_abs_error": 1.8998980522155762e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "be838e213a2d02f3eedb155b53cb73b95b0859a60b04cbf60751264465b2febf",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 0.0013849855314098513,
+                "max_abs_error": 0.0184040954336524
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "be838e213a2d02f3eedb155b53cb73b95b0859a60b04cbf60751264465b2febf",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 0.0013849855314098513,
+                "max_abs_error": 0.0184040954336524
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n512-e36-q7-x2",
+      "input_sha256": "18b9042f43b56339c839af8f2c660a89ec6548cd342ac1b4dbd89d856917e14b",
+      "records_sha256": "1a7acb48bec98cec82ed9151f2732d444b37864cef4b988bc65ee2dde91c263f",
+      "native_pcm_sha256": "3fdd25d1bc6f7fb8ad7eed472538b79cfc0afbe92d93c72a3ad8ff18b762697f",
+      "native_stdout": "mode=Complex packets=8 rate=48000 channels=1 scalars=8192\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "b956acd297c2171c7ef5dc26ff14c5c9a5758b7d0ea18d679751a8bfde203d8a",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 9.4698156859457e-06,
+                "max_abs_error": 2.2118911147117615e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "f822c765be3db2141c51dc9dfb9f15091f121cea00d12ef13aa737737c33fa0e",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 0.0013848418040058833,
+                "max_abs_error": 0.022098216228187084
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "f822c765be3db2141c51dc9dfb9f15091f121cea00d12ef13aa737737c33fa0e",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 0.0013848418040058833,
+                "max_abs_error": 0.022098216228187084
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n512-e36-q30-x1",
+      "input_sha256": "f30ac89ec9a5636d4003d7e417dc79b39fe42bfa1b754937f1d927b1393b1162",
+      "records_sha256": "e8d7305eb371912ddbf8666a5c076209cf85a4d8c78c36b8cc43ac771fa1847c",
+      "native_pcm_sha256": "2d558f3a311aa58f7ab016bed89aae132e257b34b020d09088a6812574e1d205",
+      "native_stdout": "mode=Complex packets=8 rate=24000 channels=1 scalars=4096\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "54dc9b1a4d5cc5fe3a363ee04abd59ae7520411986cb19362c533725d1548af1",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 8.4952925755655e-06,
+                "max_abs_error": 1.7508980818092823e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "b57fef964e1cb204ba6e0bfb93b0700a0afb184240f619e92a23f489c601f5de",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 0.0008458448999631443,
+                "max_abs_error": 0.01862688735127449
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "b57fef964e1cb204ba6e0bfb93b0700a0afb184240f619e92a23f489c601f5de",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 0.0008458448999631443,
+                "max_abs_error": 0.01862688735127449
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n512-e36-q30-x2",
+      "input_sha256": "3f5e31e8b15ef8387f91c78af31f93fe35b7ee59717d5dc58d13dc755a66a03b",
+      "records_sha256": "98d56a4dc35a4e27186bcdcee8404642c2ac8634ec61482c4384c11a9abf0e2b",
+      "native_pcm_sha256": "8a9c75e8b4154e11e5e1244d6de82f934023563df0c933c0c8af206adad64a6d",
+      "native_stdout": "mode=Complex packets=8 rate=48000 channels=1 scalars=8192\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "6d0b646f162829bdadfb5c4a0bf3b17556d597d40615c40ad224709f16223a7f",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 9.251766087528978e-06,
+                "max_abs_error": 2.2724270820617676e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "503c6ed2aa414d7f4d1ca7726c3914efdbd28a6d6acb2833b2dc9f3e8b1a6d94",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 0.0008438675884494136,
+                "max_abs_error": 0.02232274040579796
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "503c6ed2aa414d7f4d1ca7726c3914efdbd28a6d6acb2833b2dc9f3e8b1a6d94",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 0.0008438675884494136,
+                "max_abs_error": 0.02232274040579796
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n512-e48-q7-x1",
+      "input_sha256": "f9c3d0bd67de98af047a7a9a06df51560f309def8b74923f2521e6b918abd4a5",
+      "records_sha256": "1548a9045f85c658179ce58dfdf9bfa3a19f66688e9f4f9806af806cd00e3018",
+      "native_pcm_sha256": "9514fdacc1f2439e6dd87a796599c81b6b05bf03b81291b08dd4c096fa115010",
+      "native_stdout": "mode=Complex packets=8 rate=24000 channels=1 scalars=4096\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "2abf6b9ca5bfe258f8e122224f36228db4f225902a05fe19eecc64b548ee08c3",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 9.696024890246582e-06,
+                "max_abs_error": 3.819167613983154e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "fbefa4c9f92f24c56698ce6698e3885c40204ef8f99eb64c8da5551ab9fd4034",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 0.011080058116305812,
+                "max_abs_error": 0.1472327634692192
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "fbefa4c9f92f24c56698ce6698e3885c40204ef8f99eb64c8da5551ab9fd4034",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 0.011080058116305812,
+                "max_abs_error": 0.1472327634692192
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n512-e48-q7-x2",
+      "input_sha256": "b888ee60826e05da4937bac6098a876f9f7f64cf11e777fbe538e130bf561b90",
+      "records_sha256": "5bd371209b0d581f0171e42c3a4b4ae3928ff95ec40c0bf5ef6c23d031651c7a",
+      "native_pcm_sha256": "f9314dc2c6b182229da30a4dfe03fe47ebcfdbe00bfd1dc2ed3c8952f7176850",
+      "native_stdout": "mode=Complex packets=8 rate=48000 channels=1 scalars=8192\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "2c28a8bef9db62b9660d99701934bbd2932922fd5b0228e69f895ea7e22859e8",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 1.0628844981130793e-05,
+                "max_abs_error": 4.747509956359863e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "8d2953d7050a250d618740122159cd1a57b396aa30b686e64413884b0d2c3149",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 0.011079077810166659,
+                "max_abs_error": 0.17675521224737167
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "8d2953d7050a250d618740122159cd1a57b396aa30b686e64413884b0d2c3149",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 0.011079077810166659,
+                "max_abs_error": 0.17675521224737167
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n512-e48-q30-x1",
+      "input_sha256": "03a61e7fa734036ee88f27bea2b8a66fbd3e3b5b9fa4cb1ccf8bb1f1dab364f3",
+      "records_sha256": "88d61a578ed6057a47f8325012e963347ebae2afb047dabb67cbbb56ad04a99b",
+      "native_pcm_sha256": "e5265749695a0a019ed3257eb9580d400682c4a5304d8c4949580c2a54080310",
+      "native_stdout": "mode=Complex packets=8 rate=24000 channels=1 scalars=4096\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "fc6e1be976a44df23c1853858aa77a0080f2a0e97e6b7ebf5da360c77ac66dd0",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 1.0228249399887128e-05,
+                "max_abs_error": 3.7476420402526855e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "a1ddcb33c32a3f768d136fb37c589abe5c3f7d30b59f6682e6517b92f410c66e",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 0.006755748428174238,
+                "max_abs_error": 0.14895406365394592
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "a1ddcb33c32a3f768d136fb37c589abe5c3f7d30b59f6682e6517b92f410c66e",
+          "stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=4096\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 4096,
+                "rmse": 0.006755748428174238,
+                "max_abs_error": 0.14895406365394592
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "n512-e48-q30-x2",
+      "input_sha256": "d6a16d9d0f77e32faa104c9a225040eafb2cdf3c4789658a5b6ac38d3aabaeb7",
+      "records_sha256": "d59c3a3e8ddce9ec8f85c1df80871553643d20cb2aa90a9b4db652c3297d1c06",
+      "native_pcm_sha256": "6cb5358a20c65d41e9f3e529f7cbe495871d8587a9d4ce8f7fe0e5e20c7943d1",
+      "native_stdout": "mode=Complex packets=8 rate=48000 channels=1 scalars=8192\n",
+      "independent_float_max_error": 0.0,
+      "comparisons": {
+        "complex": {
+          "pcm_sha256": "2bb1662e36976682f2457e047a8e0a167227d4bbd3ea937a17fab0db57a51b23",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=complex\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 1.1138437044757309e-05,
+                "max_abs_error": 5.167722702026367e-05
+              }
+            ]
+          }
+        },
+        "lowpower": {
+          "pcm_sha256": "756b15259cc3fe9d3349c088cdb75d2aa27ee1c757410785313758cc20125986",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=lowpower\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 0.006752591707092674,
+                "max_abs_error": 0.17861244082450867
+              }
+            ]
+          }
+        },
+        "auto": {
+          "pcm_sha256": "756b15259cc3fe9d3349c088cdb75d2aa27ee1c757410785313758cc20125986",
+          "stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16 qmf_requested=auto\npackets=8 scalars=8192\n",
+          "full": {
+            "from_frame": 0,
+            "explicit_lag": 0,
+            "per_channel": [
+              {
+                "channel": 0,
+                "compared_frames": 8192,
+                "rmse": 0.006752591707092674,
+                "max_abs_error": 0.17861244082450867
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "default_complex_matches_explicit": true,
+  "invalid_mode_error": "expected --qmf=complex|lowpower|auto\n",
+  "protocol_admission": [
+    {
+      "name": "magic",
+      "status": 1,
+      "stderr": "invalid FVIDAAC1 magic\n"
+    },
+    {
+      "name": "empty-asc",
+      "status": 1,
+      "stderr": "reference record exceeds admission bound\n"
+    },
+    {
+      "name": "truncated",
+      "status": 1,
+      "stderr": "truncated FVIDAAC1 payload\n"
+    },
+    {
+      "name": "trailing",
+      "status": 1,
+      "stderr": "trailing/error bytes in FVIDAAC1 input\n"
+    },
+    {
+      "name": "decode-error",
+      "status": 1,
+      "stderr": "decode error=0x5 AU=0\nexternal FDK reference refused input\n"
+    }
+  ]
+}

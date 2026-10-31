@@ -1,0 +1,6 @@
+{
+  "complete": true,
+  "scope": "actual default macOS device drain;not listening quality",
+  "fixture": "aac-ld-sbr-silent-harmonics/n480-e36-q7-x2.mp4",
+  "stdout": "platform_device=started source_channels=1 rate=48000 duration=0.160000\nphase=full generation=0 from=0.000000 position=0.160000 wall=0.178782 device_drain=complete\nphase=seek-quarter generation=1 from=0.040000 position=0.160000 wall=0.145256 device_drain=complete\nphase=seek-60-percent generation=2 from=0.096000 position=0.160000 wall=0.088994 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.160000 wall=0.181214 device_drain=complete\n"
+}

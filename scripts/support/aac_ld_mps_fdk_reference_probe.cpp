@@ -34,8 +34,21 @@ static void check(AAC_DECODER_ERROR error, const char *stage, uint32_t frame) {
   }
 }
 int main(int argc, char **argv) {
-  if (argc != 3) return 2;
+  if (argc != 3 && argc != 4) return 2;
   try {
+    // Native reference PCM uses complex QMF. FDK's automatic ordinary ELD
+    // selection is Low Power, which is a different numerical renderer.
+    const char *qmfName = "complex";
+    int qmfMode = 0;
+    if (argc == 4) {
+      if (!strcmp(argv[3], "--qmf=auto")) {
+        qmfName = "auto"; qmfMode = -1;
+      } else if (!strcmp(argv[3], "--qmf=lowpower")) {
+        qmfName = "lowpower"; qmfMode = 1;
+      } else if (strcmp(argv[3], "--qmf=complex")) {
+        throw std::runtime_error("expected --qmf=complex|lowpower|auto");
+      }
+    }
     static_assert(sizeof(INT_PCM) == 2, "probe requires PCM16 FDK build");
     using File = std::unique_ptr<FILE, int (*)(FILE *)>;
     File in(fopen(argv[1], "rb"), fclose), out(fopen(argv[2], "wb"), fclose);
@@ -46,6 +59,8 @@ int main(int argc, char **argv) {
     auto asc = bytes(in.get(), word(in.get()), 65536);
     Decoder decoder;
     if (!decoder.value) throw std::runtime_error("FDK allocation failed");
+    check(aacDecoder_SetParam(decoder.value, AAC_QMF_LOWPOWER, qmfMode),
+          "QMF mode", 0);
     UCHAR *pointer = asc.data();
     UINT size = UINT(asc.size());
     check(aacDecoder_ConfigRaw(decoder.value, &pointer, &size), "config", 0);
@@ -70,8 +85,8 @@ int main(int argc, char **argv) {
         throw std::runtime_error("invalid external PCM geometry");
       const size_t scalars = size_t(info->frameSize) * info->numChannels;
       if (i == 0)
-        printf("rate=%d channels=%d frame=%d outputDelay=%u pcm_bits=16\n",
-               info->sampleRate, info->numChannels, info->frameSize, info->outputDelay);
+        printf("rate=%d channels=%d frame=%d outputDelay=%u pcm_bits=16 qmf_requested=%s\n",
+               info->sampleRate, info->numChannels, info->frameSize, info->outputDelay, qmfName);
       std::vector<unsigned char> encoded(scalars * 2);
       for (size_t j = 0; j < scalars; ++j) {
         const uint16_t value = uint16_t(pcm[j]);

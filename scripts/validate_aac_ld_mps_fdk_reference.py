@@ -20,10 +20,9 @@ import tarfile
 import tempfile
 
 from compare_aac_reference_pcm import pcm16_wave
+from fdk_reference_source import COMMIT, verify_source_archive
 
 ROOT = Path(__file__).resolve().parents[1]
-COMMIT = 'ee76460efbdb147e26d804c798949c23f174460b'
-ARCHIVE_SHA256 = '4f41fba1e55dc554ccd0166f550d7c0c83ae0f22d7f2ed76001537f4b62f7325'
 NAMES = ['er_eld_ldmps_ldqmf_1', 'er_eld_ldmps_ldqmf_2']
 LIBRARIES = ['libAACdec', 'libPCMutils', 'libFDK', 'libSYS', 'libMpegTPDec',
              'libSBRdec', 'libArithCoding', 'libDRCdec', 'libSACdec']
@@ -124,8 +123,7 @@ def main():
     parser.add_argument('--native-probe', type=Path, required=True)
     parser.add_argument('--output-dir', type=Path, required=True)
     args = parser.parse_args()
-    if sha(args.source_archive) != ARCHIVE_SHA256:
-        raise ValueError('FDK archive differs from pinned AOSP commit')
+    source_pin = verify_source_archive(args.source_archive)
     # Verify public inputs against the inventory already qualified by the ISO
     # fetch tool. No private media or substitute codec parameter sets are used.
     inventory = json.loads((ROOT/'docs/validation/aac-alignment-iso-fetch-2026-10-31.json').read_text())
@@ -138,7 +136,8 @@ def main():
     out = args.output_dir.resolve()
     out.mkdir(parents=True, exist_ok=True)
     report = dict(conformance_verdict=None, source_commit=COMMIT,
-                  source_archive_sha256=ARCHIVE_SHA256, source_files={}, cases=[])
+                  source_archive_sha256=source_pin['archive_sha256'],
+                  source_git_tree=source_pin, fdk_qmf_requested='complex', source_files={}, cases=[])
     probe = args.native_probe.resolve()
     with tempfile.TemporaryDirectory(prefix='fdk-reference-', dir=out) as scratch:
         work = Path(scratch)
@@ -174,7 +173,7 @@ def main():
             external = out/(stem+'.fdk.s16le')
             run([probe, 'packets', movie, records], out/(stem+'.extract.log'))
             run([probe, 'complex', movie, actual], out/(stem+'.native.log'))
-            run([build/'fdk_probe', records, external], out/(stem+'.fdk.log'))
+            run([build/'fdk_probe', records, external, '--qmf=complex'], out/(stem+'.fdk.log'))
             channels, rate, reference_pcm = pcm16_wave((args.vectors_dir/(stem+'.wav')).read_bytes())
             reference = [v/32768 for v in reference_pcm]
             fdk = [v/32768 for v in native_floats(external, 'h')]

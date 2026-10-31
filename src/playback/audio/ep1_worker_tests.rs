@@ -594,3 +594,8 @@ fn q31_ld_sbr_keeps_worker_audio_and_live_history_navigation() {
 fn canonical_cldfb_phase_keeps_worker_audio_and_navigation() {
     check_corpus("aac-eld-cldfb-phase");
 }
+
+#[test]
+fn silent_core_harmonics_keep_worker_phase_across_seek_and_rewind() {
+    check_corpus("aac-ld-sbr-silent-harmonics");
+}

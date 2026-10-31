@@ -1,3 +1,20 @@
+## Explicit complex LD-SBR reference and silent-core harmonics, 2026-11-01
+
+Corrected the optional FDK reference configuration:automatic ordinary ELD selects
+Low Power,whereas FVid ordinary LD-SBR uses complex QMF. The probe/workflows now
+select complex explicitly and retain auto/Low Power as labelled controls. With
+unchanged native/input/AU bytes,the two ISO zero-core twi comparisons improve
+from0.0074/0.0165 RMSE to9e-6/1e-5. The other24 original raw comparisons still
+require AAC-core time-origin qualification. No native DSP is changed to fit FDK.
+
+24 own programmes/48 movies qualify independent zero-core harmonic PCM,exact8x
+amplitude scaling,480/512 single/dual-rate CRC and actual worker/device navigation.
+Ordinary tests use frozen independent assets with no foreign codec or network.
+23 scoped tests pass. Original reference sources are pinned by their complete
+immutable Git tree,independent of download-time archive metadata;all425 files
+match and nine pure-stdlib pin tests pass. Full codec scope remains open.
+[Evidence](validation/aac-ld-sbr-qmf-reference-2026-11-01.md).
+
 ## Canonical nominal LD-SBR CLDFB phase, 2026-10-31
 
 Corrected the nominal analysis matrix from 2n-96 to canonical 2n-95

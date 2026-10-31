@@ -1,9 +1,17 @@
 # Audio Implementation Status
 
-Nominal LD-SBR analysis now uses the canonical CLDFB phase 2n-95. Own nonzero
-PCM regression movies and independent oracles cover the correction. Raw
-zero-lag FDK waveform differences and decoder time-origin coupling remain
-Scoped gates:1138 pass,0 fail,1 existing ignored. unqualified; see validation/aac-cldfb-phase-2026-10-31.md.
+Ordinary LD-SBR external comparisons now explicitly select complex QMF in FDK.
+Its automatic ELD mode is Low Power;that explained the two zero-core twi waveform
+mismatches. Complex full-stream RMS errors are about9e-6/1e-5 with unchanged
+native PCM.24 new own programmes/48 movies qualify zero-core harmonic energy,
+exact8x amplitude steps,MP4/Matroska and worker navigation;real macOS device drain
+also passes.23 scoped tests pass. Other24 original inputs still have raw waveform
+differences. Core time-origin qualification,full waveform conformance and
+codec-gap completion remain open. See validation/aac-ld-sbr-qmf-reference-2026-11-01.md.
+
+Nominal LD-SBR analysis uses canonical CLDFB phase2n-95. Own nonzero PCM
+regressions qualify the correction. The October31 scoped gate passed1138 tests,
+with one existing ignored. See validation/aac-cldfb-phase-2026-10-31.md.
 
 All128 separately audited ISO ELD core inputs decode completely through the
 presented audio reader in two runs. This is admission,not waveform conformance.

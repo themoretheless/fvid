@@ -1,0 +1,2695 @@
+{
+  "cases": [
+    {
+      "name": "n480-e24-q7-x1",
+      "n": 480,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec314460c05800",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 12
+        },
+        {
+          "offset": 12,
+          "bytes": 11
+        },
+        {
+          "offset": 23,
+          "bytes": 11
+        },
+        {
+          "offset": 34,
+          "bytes": 11
+        },
+        {
+          "offset": 45,
+          "bytes": 11
+        },
+        {
+          "offset": 56,
+          "bytes": 11
+        },
+        {
+          "offset": 67,
+          "bytes": 11
+        },
+        {
+          "offset": 78,
+          "bytes": 11
+        }
+      ],
+      "samples": 3840,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "envelope_level": 24,
+      "noise_level": 7,
+      "video": "n480-e24-q7-x1.mp4",
+      "file": "n480-e24-q7-x1.mkv",
+      "golden": "n480-e24-q7-x1.f32le",
+      "edges": [
+        480,
+        1440
+      ]
+    },
+    {
+      "name": "n480-e24-q7-x2",
+      "n": 480,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec31c460c05800",
+      "frames": [
+        {
+          "offset": 89,
+          "bytes": 12
+        },
+        {
+          "offset": 101,
+          "bytes": 11
+        },
+        {
+          "offset": 112,
+          "bytes": 11
+        },
+        {
+          "offset": 123,
+          "bytes": 11
+        },
+        {
+          "offset": 134,
+          "bytes": 11
+        },
+        {
+          "offset": 145,
+          "bytes": 11
+        },
+        {
+          "offset": 156,
+          "bytes": 11
+        },
+        {
+          "offset": 167,
+          "bytes": 11
+        }
+      ],
+      "samples": 7680,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "envelope_level": 24,
+      "noise_level": 7,
+      "video": "n480-e24-q7-x2.mp4",
+      "file": "n480-e24-q7-x2.mkv",
+      "golden": "n480-e24-q7-x2.f32le",
+      "edges": [
+        960,
+        2880
+      ]
+    },
+    {
+      "name": "n480-e24-q30-x1",
+      "n": 480,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec314460c05800",
+      "frames": [
+        {
+          "offset": 178,
+          "bytes": 12
+        },
+        {
+          "offset": 190,
+          "bytes": 11
+        },
+        {
+          "offset": 201,
+          "bytes": 11
+        },
+        {
+          "offset": 212,
+          "bytes": 11
+        },
+        {
+          "offset": 223,
+          "bytes": 11
+        },
+        {
+          "offset": 234,
+          "bytes": 11
+        },
+        {
+          "offset": 245,
+          "bytes": 11
+        },
+        {
+          "offset": 256,
+          "bytes": 11
+        }
+      ],
+      "samples": 3840,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "envelope_level": 24,
+      "noise_level": 30,
+      "video": "n480-e24-q30-x1.mp4",
+      "file": "n480-e24-q30-x1.mkv",
+      "golden": "n480-e24-q30-x1.f32le",
+      "edges": [
+        480,
+        1440
+      ]
+    },
+    {
+      "name": "n480-e24-q30-x2",
+      "n": 480,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec31c460c05800",
+      "frames": [
+        {
+          "offset": 267,
+          "bytes": 12
+        },
+        {
+          "offset": 279,
+          "bytes": 11
+        },
+        {
+          "offset": 290,
+          "bytes": 11
+        },
+        {
+          "offset": 301,
+          "bytes": 11
+        },
+        {
+          "offset": 312,
+          "bytes": 11
+        },
+        {
+          "offset": 323,
+          "bytes": 11
+        },
+        {
+          "offset": 334,
+          "bytes": 11
+        },
+        {
+          "offset": 345,
+          "bytes": 11
+        }
+      ],
+      "samples": 7680,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "envelope_level": 24,
+      "noise_level": 30,
+      "video": "n480-e24-q30-x2.mp4",
+      "file": "n480-e24-q30-x2.mkv",
+      "golden": "n480-e24-q30-x2.f32le",
+      "edges": [
+        960,
+        2880
+      ]
+    },
+    {
+      "name": "n480-e36-q7-x1",
+      "n": 480,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec314460c05800",
+      "frames": [
+        {
+          "offset": 356,
+          "bytes": 12
+        },
+        {
+          "offset": 368,
+          "bytes": 11
+        },
+        {
+          "offset": 379,
+          "bytes": 11
+        },
+        {
+          "offset": 390,
+          "bytes": 11
+        },
+        {
+          "offset": 401,
+          "bytes": 11
+        },
+        {
+          "offset": 412,
+          "bytes": 11
+        },
+        {
+          "offset": 423,
+          "bytes": 11
+        },
+        {
+          "offset": 434,
+          "bytes": 11
+        }
+      ],
+      "samples": 3840,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "envelope_level": 36,
+      "noise_level": 7,
+      "video": "n480-e36-q7-x1.mp4",
+      "file": "n480-e36-q7-x1.mkv",
+      "golden": "n480-e36-q7-x1.f32le",
+      "edges": [
+        480,
+        1440
+      ]
+    },
+    {
+      "name": "n480-e36-q7-x2",
+      "n": 480,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec31c460c05800",
+      "frames": [
+        {
+          "offset": 445,
+          "bytes": 12
+        },
+        {
+          "offset": 457,
+          "bytes": 11
+        },
+        {
+          "offset": 468,
+          "bytes": 11
+        },
+        {
+          "offset": 479,
+          "bytes": 11
+        },
+        {
+          "offset": 490,
+          "bytes": 11
+        },
+        {
+          "offset": 501,
+          "bytes": 11
+        },
+        {
+          "offset": 512,
+          "bytes": 11
+        },
+        {
+          "offset": 523,
+          "bytes": 11
+        }
+      ],
+      "samples": 7680,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "envelope_level": 36,
+      "noise_level": 7,
+      "video": "n480-e36-q7-x2.mp4",
+      "file": "n480-e36-q7-x2.mkv",
+      "golden": "n480-e36-q7-x2.f32le",
+      "edges": [
+        960,
+        2880
+      ]
+    },
+    {
+      "name": "n480-e36-q30-x1",
+      "n": 480,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec314460c05800",
+      "frames": [
+        {
+          "offset": 534,
+          "bytes": 12
+        },
+        {
+          "offset": 546,
+          "bytes": 11
+        },
+        {
+          "offset": 557,
+          "bytes": 11
+        },
+        {
+          "offset": 568,
+          "bytes": 11
+        },
+        {
+          "offset": 579,
+          "bytes": 11
+        },
+        {
+          "offset": 590,
+          "bytes": 11
+        },
+        {
+          "offset": 601,
+          "bytes": 11
+        },
+        {
+          "offset": 612,
+          "bytes": 11
+        }
+      ],
+      "samples": 3840,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "envelope_level": 36,
+      "noise_level": 30,
+      "video": "n480-e36-q30-x1.mp4",
+      "file": "n480-e36-q30-x1.mkv",
+      "golden": "n480-e36-q30-x1.f32le",
+      "edges": [
+        480,
+        1440
+      ]
+    },
+    {
+      "name": "n480-e36-q30-x2",
+      "n": 480,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec31c460c05800",
+      "frames": [
+        {
+          "offset": 623,
+          "bytes": 12
+        },
+        {
+          "offset": 635,
+          "bytes": 11
+        },
+        {
+          "offset": 646,
+          "bytes": 11
+        },
+        {
+          "offset": 657,
+          "bytes": 11
+        },
+        {
+          "offset": 668,
+          "bytes": 11
+        },
+        {
+          "offset": 679,
+          "bytes": 11
+        },
+        {
+          "offset": 690,
+          "bytes": 11
+        },
+        {
+          "offset": 701,
+          "bytes": 11
+        }
+      ],
+      "samples": 7680,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "envelope_level": 36,
+      "noise_level": 30,
+      "video": "n480-e36-q30-x2.mp4",
+      "file": "n480-e36-q30-x2.mkv",
+      "golden": "n480-e36-q30-x2.f32le",
+      "edges": [
+        960,
+        2880
+      ]
+    },
+    {
+      "name": "n480-e48-q7-x1",
+      "n": 480,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec314460c05800",
+      "frames": [
+        {
+          "offset": 712,
+          "bytes": 12
+        },
+        {
+          "offset": 724,
+          "bytes": 11
+        },
+        {
+          "offset": 735,
+          "bytes": 11
+        },
+        {
+          "offset": 746,
+          "bytes": 11
+        },
+        {
+          "offset": 757,
+          "bytes": 11
+        },
+        {
+          "offset": 768,
+          "bytes": 11
+        },
+        {
+          "offset": 779,
+          "bytes": 11
+        },
+        {
+          "offset": 790,
+          "bytes": 11
+        }
+      ],
+      "samples": 3840,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "envelope_level": 48,
+      "noise_level": 7,
+      "video": "n480-e48-q7-x1.mp4",
+      "file": "n480-e48-q7-x1.mkv",
+      "golden": "n480-e48-q7-x1.f32le",
+      "edges": [
+        480,
+        1440
+      ]
+    },
+    {
+      "name": "n480-e48-q7-x2",
+      "n": 480,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec31c460c05800",
+      "frames": [
+        {
+          "offset": 801,
+          "bytes": 12
+        },
+        {
+          "offset": 813,
+          "bytes": 11
+        },
+        {
+          "offset": 824,
+          "bytes": 11
+        },
+        {
+          "offset": 835,
+          "bytes": 11
+        },
+        {
+          "offset": 846,
+          "bytes": 11
+        },
+        {
+          "offset": 857,
+          "bytes": 11
+        },
+        {
+          "offset": 868,
+          "bytes": 11
+        },
+        {
+          "offset": 879,
+          "bytes": 11
+        }
+      ],
+      "samples": 7680,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "envelope_level": 48,
+      "noise_level": 7,
+      "video": "n480-e48-q7-x2.mp4",
+      "file": "n480-e48-q7-x2.mkv",
+      "golden": "n480-e48-q7-x2.f32le",
+      "edges": [
+        960,
+        2880
+      ]
+    },
+    {
+      "name": "n480-e48-q30-x1",
+      "n": 480,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec314460c05800",
+      "frames": [
+        {
+          "offset": 890,
+          "bytes": 12
+        },
+        {
+          "offset": 902,
+          "bytes": 11
+        },
+        {
+          "offset": 913,
+          "bytes": 11
+        },
+        {
+          "offset": 924,
+          "bytes": 11
+        },
+        {
+          "offset": 935,
+          "bytes": 11
+        },
+        {
+          "offset": 946,
+          "bytes": 11
+        },
+        {
+          "offset": 957,
+          "bytes": 11
+        },
+        {
+          "offset": 968,
+          "bytes": 11
+        }
+      ],
+      "samples": 3840,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "envelope_level": 48,
+      "noise_level": 30,
+      "video": "n480-e48-q30-x1.mp4",
+      "file": "n480-e48-q30-x1.mkv",
+      "golden": "n480-e48-q30-x1.f32le",
+      "edges": [
+        480,
+        1440
+      ]
+    },
+    {
+      "name": "n480-e48-q30-x2",
+      "n": 480,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec31c460c05800",
+      "frames": [
+        {
+          "offset": 979,
+          "bytes": 12
+        },
+        {
+          "offset": 991,
+          "bytes": 11
+        },
+        {
+          "offset": 1002,
+          "bytes": 11
+        },
+        {
+          "offset": 1013,
+          "bytes": 11
+        },
+        {
+          "offset": 1024,
+          "bytes": 11
+        },
+        {
+          "offset": 1035,
+          "bytes": 11
+        },
+        {
+          "offset": 1046,
+          "bytes": 11
+        },
+        {
+          "offset": 1057,
+          "bytes": 11
+        }
+      ],
+      "samples": 7680,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "envelope_level": 48,
+      "noise_level": 30,
+      "video": "n480-e48-q30-x2.mp4",
+      "file": "n480-e48-q30-x2.mkv",
+      "golden": "n480-e48-q30-x2.f32le",
+      "edges": [
+        960,
+        2880
+      ]
+    },
+    {
+      "name": "n512-e24-q7-x1",
+      "n": 512,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec214460c05800",
+      "frames": [
+        {
+          "offset": 1068,
+          "bytes": 12
+        },
+        {
+          "offset": 1080,
+          "bytes": 11
+        },
+        {
+          "offset": 1091,
+          "bytes": 11
+        },
+        {
+          "offset": 1102,
+          "bytes": 11
+        },
+        {
+          "offset": 1113,
+          "bytes": 11
+        },
+        {
+          "offset": 1124,
+          "bytes": 11
+        },
+        {
+          "offset": 1135,
+          "bytes": 11
+        },
+        {
+          "offset": 1146,
+          "bytes": 11
+        }
+      ],
+      "samples": 4096,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "envelope_level": 24,
+      "noise_level": 7,
+      "video": "n512-e24-q7-x1.mp4",
+      "file": "n512-e24-q7-x1.mkv",
+      "golden": "n512-e24-q7-x1.f32le",
+      "edges": [
+        512,
+        1536
+      ]
+    },
+    {
+      "name": "n512-e24-q7-x2",
+      "n": 512,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec21c460c05800",
+      "frames": [
+        {
+          "offset": 1157,
+          "bytes": 12
+        },
+        {
+          "offset": 1169,
+          "bytes": 11
+        },
+        {
+          "offset": 1180,
+          "bytes": 11
+        },
+        {
+          "offset": 1191,
+          "bytes": 11
+        },
+        {
+          "offset": 1202,
+          "bytes": 11
+        },
+        {
+          "offset": 1213,
+          "bytes": 11
+        },
+        {
+          "offset": 1224,
+          "bytes": 11
+        },
+        {
+          "offset": 1235,
+          "bytes": 11
+        }
+      ],
+      "samples": 8192,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "envelope_level": 24,
+      "noise_level": 7,
+      "video": "n512-e24-q7-x2.mp4",
+      "file": "n512-e24-q7-x2.mkv",
+      "golden": "n512-e24-q7-x2.f32le",
+      "edges": [
+        1024,
+        3072
+      ]
+    },
+    {
+      "name": "n512-e24-q30-x1",
+      "n": 512,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec214460c05800",
+      "frames": [
+        {
+          "offset": 1246,
+          "bytes": 12
+        },
+        {
+          "offset": 1258,
+          "bytes": 11
+        },
+        {
+          "offset": 1269,
+          "bytes": 11
+        },
+        {
+          "offset": 1280,
+          "bytes": 11
+        },
+        {
+          "offset": 1291,
+          "bytes": 11
+        },
+        {
+          "offset": 1302,
+          "bytes": 11
+        },
+        {
+          "offset": 1313,
+          "bytes": 11
+        },
+        {
+          "offset": 1324,
+          "bytes": 11
+        }
+      ],
+      "samples": 4096,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "envelope_level": 24,
+      "noise_level": 30,
+      "video": "n512-e24-q30-x1.mp4",
+      "file": "n512-e24-q30-x1.mkv",
+      "golden": "n512-e24-q30-x1.f32le",
+      "edges": [
+        512,
+        1536
+      ]
+    },
+    {
+      "name": "n512-e24-q30-x2",
+      "n": 512,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec21c460c05800",
+      "frames": [
+        {
+          "offset": 1335,
+          "bytes": 12
+        },
+        {
+          "offset": 1347,
+          "bytes": 11
+        },
+        {
+          "offset": 1358,
+          "bytes": 11
+        },
+        {
+          "offset": 1369,
+          "bytes": 11
+        },
+        {
+          "offset": 1380,
+          "bytes": 11
+        },
+        {
+          "offset": 1391,
+          "bytes": 11
+        },
+        {
+          "offset": 1402,
+          "bytes": 11
+        },
+        {
+          "offset": 1413,
+          "bytes": 11
+        }
+      ],
+      "samples": 8192,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "envelope_level": 24,
+      "noise_level": 30,
+      "video": "n512-e24-q30-x2.mp4",
+      "file": "n512-e24-q30-x2.mkv",
+      "golden": "n512-e24-q30-x2.f32le",
+      "edges": [
+        1024,
+        3072
+      ]
+    },
+    {
+      "name": "n512-e36-q7-x1",
+      "n": 512,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec214460c05800",
+      "frames": [
+        {
+          "offset": 1424,
+          "bytes": 12
+        },
+        {
+          "offset": 1436,
+          "bytes": 11
+        },
+        {
+          "offset": 1447,
+          "bytes": 11
+        },
+        {
+          "offset": 1458,
+          "bytes": 11
+        },
+        {
+          "offset": 1469,
+          "bytes": 11
+        },
+        {
+          "offset": 1480,
+          "bytes": 11
+        },
+        {
+          "offset": 1491,
+          "bytes": 11
+        },
+        {
+          "offset": 1502,
+          "bytes": 11
+        }
+      ],
+      "samples": 4096,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "envelope_level": 36,
+      "noise_level": 7,
+      "video": "n512-e36-q7-x1.mp4",
+      "file": "n512-e36-q7-x1.mkv",
+      "golden": "n512-e36-q7-x1.f32le",
+      "edges": [
+        512,
+        1536
+      ]
+    },
+    {
+      "name": "n512-e36-q7-x2",
+      "n": 512,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec21c460c05800",
+      "frames": [
+        {
+          "offset": 1513,
+          "bytes": 12
+        },
+        {
+          "offset": 1525,
+          "bytes": 11
+        },
+        {
+          "offset": 1536,
+          "bytes": 11
+        },
+        {
+          "offset": 1547,
+          "bytes": 11
+        },
+        {
+          "offset": 1558,
+          "bytes": 11
+        },
+        {
+          "offset": 1569,
+          "bytes": 11
+        },
+        {
+          "offset": 1580,
+          "bytes": 11
+        },
+        {
+          "offset": 1591,
+          "bytes": 11
+        }
+      ],
+      "samples": 8192,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "envelope_level": 36,
+      "noise_level": 7,
+      "video": "n512-e36-q7-x2.mp4",
+      "file": "n512-e36-q7-x2.mkv",
+      "golden": "n512-e36-q7-x2.f32le",
+      "edges": [
+        1024,
+        3072
+      ]
+    },
+    {
+      "name": "n512-e36-q30-x1",
+      "n": 512,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec214460c05800",
+      "frames": [
+        {
+          "offset": 1602,
+          "bytes": 12
+        },
+        {
+          "offset": 1614,
+          "bytes": 11
+        },
+        {
+          "offset": 1625,
+          "bytes": 11
+        },
+        {
+          "offset": 1636,
+          "bytes": 11
+        },
+        {
+          "offset": 1647,
+          "bytes": 11
+        },
+        {
+          "offset": 1658,
+          "bytes": 11
+        },
+        {
+          "offset": 1669,
+          "bytes": 11
+        },
+        {
+          "offset": 1680,
+          "bytes": 11
+        }
+      ],
+      "samples": 4096,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "envelope_level": 36,
+      "noise_level": 30,
+      "video": "n512-e36-q30-x1.mp4",
+      "file": "n512-e36-q30-x1.mkv",
+      "golden": "n512-e36-q30-x1.f32le",
+      "edges": [
+        512,
+        1536
+      ]
+    },
+    {
+      "name": "n512-e36-q30-x2",
+      "n": 512,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec21c460c05800",
+      "frames": [
+        {
+          "offset": 1691,
+          "bytes": 12
+        },
+        {
+          "offset": 1703,
+          "bytes": 11
+        },
+        {
+          "offset": 1714,
+          "bytes": 11
+        },
+        {
+          "offset": 1725,
+          "bytes": 11
+        },
+        {
+          "offset": 1736,
+          "bytes": 11
+        },
+        {
+          "offset": 1747,
+          "bytes": 11
+        },
+        {
+          "offset": 1758,
+          "bytes": 11
+        },
+        {
+          "offset": 1769,
+          "bytes": 11
+        }
+      ],
+      "samples": 8192,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "envelope_level": 36,
+      "noise_level": 30,
+      "video": "n512-e36-q30-x2.mp4",
+      "file": "n512-e36-q30-x2.mkv",
+      "golden": "n512-e36-q30-x2.f32le",
+      "edges": [
+        1024,
+        3072
+      ]
+    },
+    {
+      "name": "n512-e48-q7-x1",
+      "n": 512,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec214460c05800",
+      "frames": [
+        {
+          "offset": 1780,
+          "bytes": 12
+        },
+        {
+          "offset": 1792,
+          "bytes": 11
+        },
+        {
+          "offset": 1803,
+          "bytes": 11
+        },
+        {
+          "offset": 1814,
+          "bytes": 11
+        },
+        {
+          "offset": 1825,
+          "bytes": 11
+        },
+        {
+          "offset": 1836,
+          "bytes": 11
+        },
+        {
+          "offset": 1847,
+          "bytes": 11
+        },
+        {
+          "offset": 1858,
+          "bytes": 11
+        }
+      ],
+      "samples": 4096,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "envelope_level": 48,
+      "noise_level": 7,
+      "video": "n512-e48-q7-x1.mp4",
+      "file": "n512-e48-q7-x1.mkv",
+      "golden": "n512-e48-q7-x1.f32le",
+      "edges": [
+        512,
+        1536
+      ]
+    },
+    {
+      "name": "n512-e48-q7-x2",
+      "n": 512,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec21c460c05800",
+      "frames": [
+        {
+          "offset": 1869,
+          "bytes": 12
+        },
+        {
+          "offset": 1881,
+          "bytes": 11
+        },
+        {
+          "offset": 1892,
+          "bytes": 11
+        },
+        {
+          "offset": 1903,
+          "bytes": 11
+        },
+        {
+          "offset": 1914,
+          "bytes": 11
+        },
+        {
+          "offset": 1925,
+          "bytes": 11
+        },
+        {
+          "offset": 1936,
+          "bytes": 11
+        },
+        {
+          "offset": 1947,
+          "bytes": 11
+        }
+      ],
+      "samples": 8192,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "envelope_level": 48,
+      "noise_level": 7,
+      "video": "n512-e48-q7-x2.mp4",
+      "file": "n512-e48-q7-x2.mkv",
+      "golden": "n512-e48-q7-x2.f32le",
+      "edges": [
+        1024,
+        3072
+      ]
+    },
+    {
+      "name": "n512-e48-q30-x1",
+      "n": 512,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec214460c05800",
+      "frames": [
+        {
+          "offset": 1958,
+          "bytes": 12
+        },
+        {
+          "offset": 1970,
+          "bytes": 11
+        },
+        {
+          "offset": 1981,
+          "bytes": 11
+        },
+        {
+          "offset": 1992,
+          "bytes": 11
+        },
+        {
+          "offset": 2003,
+          "bytes": 11
+        },
+        {
+          "offset": 2014,
+          "bytes": 11
+        },
+        {
+          "offset": 2025,
+          "bytes": 11
+        },
+        {
+          "offset": 2036,
+          "bytes": 11
+        }
+      ],
+      "samples": 4096,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "envelope_level": 48,
+      "noise_level": 30,
+      "video": "n512-e48-q30-x1.mp4",
+      "file": "n512-e48-q30-x1.mkv",
+      "golden": "n512-e48-q30-x1.f32le",
+      "edges": [
+        512,
+        1536
+      ]
+    },
+    {
+      "name": "n512-e48-q30-x2",
+      "n": 512,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec21c460c05800",
+      "frames": [
+        {
+          "offset": 2047,
+          "bytes": 12
+        },
+        {
+          "offset": 2059,
+          "bytes": 11
+        },
+        {
+          "offset": 2070,
+          "bytes": 11
+        },
+        {
+          "offset": 2081,
+          "bytes": 11
+        },
+        {
+          "offset": 2092,
+          "bytes": 11
+        },
+        {
+          "offset": 2103,
+          "bytes": 11
+        },
+        {
+          "offset": 2114,
+          "bytes": 11
+        },
+        {
+          "offset": 2125,
+          "bytes": 11
+        }
+      ],
+      "samples": 8192,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "envelope_level": 48,
+      "noise_level": 30,
+      "video": "n512-e48-q30-x2.mp4",
+      "file": "n512-e48-q30-x2.mkv",
+      "golden": "n512-e48-q30-x2.f32le",
+      "edges": [
+        1024,
+        3072
+      ]
+    }
+  ],
+  "exports": [
+    {
+      "name": "n480-e24-q7-x1-matroska",
+      "n": 480,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec314460c05800",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 12
+        },
+        {
+          "offset": 12,
+          "bytes": 11
+        },
+        {
+          "offset": 23,
+          "bytes": 11
+        },
+        {
+          "offset": 34,
+          "bytes": 11
+        },
+        {
+          "offset": 45,
+          "bytes": 11
+        },
+        {
+          "offset": 56,
+          "bytes": 11
+        },
+        {
+          "offset": 67,
+          "bytes": 11
+        },
+        {
+          "offset": 78,
+          "bytes": 11
+        }
+      ],
+      "samples": 3840,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "envelope_level": 24,
+      "noise_level": 7,
+      "video": "n480-e24-q7-x1.mkv",
+      "file": "n480-e24-q7-x1.mkv",
+      "golden": "n480-e24-q7-x1.f32le",
+      "edges": [
+        480,
+        1440
+      ]
+    },
+    {
+      "name": "n480-e24-q7-x2-matroska",
+      "n": 480,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec31c460c05800",
+      "frames": [
+        {
+          "offset": 89,
+          "bytes": 12
+        },
+        {
+          "offset": 101,
+          "bytes": 11
+        },
+        {
+          "offset": 112,
+          "bytes": 11
+        },
+        {
+          "offset": 123,
+          "bytes": 11
+        },
+        {
+          "offset": 134,
+          "bytes": 11
+        },
+        {
+          "offset": 145,
+          "bytes": 11
+        },
+        {
+          "offset": 156,
+          "bytes": 11
+        },
+        {
+          "offset": 167,
+          "bytes": 11
+        }
+      ],
+      "samples": 7680,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "envelope_level": 24,
+      "noise_level": 7,
+      "video": "n480-e24-q7-x2.mkv",
+      "file": "n480-e24-q7-x2.mkv",
+      "golden": "n480-e24-q7-x2.f32le",
+      "edges": [
+        960,
+        2880
+      ]
+    },
+    {
+      "name": "n480-e24-q30-x1-matroska",
+      "n": 480,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec314460c05800",
+      "frames": [
+        {
+          "offset": 178,
+          "bytes": 12
+        },
+        {
+          "offset": 190,
+          "bytes": 11
+        },
+        {
+          "offset": 201,
+          "bytes": 11
+        },
+        {
+          "offset": 212,
+          "bytes": 11
+        },
+        {
+          "offset": 223,
+          "bytes": 11
+        },
+        {
+          "offset": 234,
+          "bytes": 11
+        },
+        {
+          "offset": 245,
+          "bytes": 11
+        },
+        {
+          "offset": 256,
+          "bytes": 11
+        }
+      ],
+      "samples": 3840,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "envelope_level": 24,
+      "noise_level": 30,
+      "video": "n480-e24-q30-x1.mkv",
+      "file": "n480-e24-q30-x1.mkv",
+      "golden": "n480-e24-q30-x1.f32le",
+      "edges": [
+        480,
+        1440
+      ]
+    },
+    {
+      "name": "n480-e24-q30-x2-matroska",
+      "n": 480,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec31c460c05800",
+      "frames": [
+        {
+          "offset": 267,
+          "bytes": 12
+        },
+        {
+          "offset": 279,
+          "bytes": 11
+        },
+        {
+          "offset": 290,
+          "bytes": 11
+        },
+        {
+          "offset": 301,
+          "bytes": 11
+        },
+        {
+          "offset": 312,
+          "bytes": 11
+        },
+        {
+          "offset": 323,
+          "bytes": 11
+        },
+        {
+          "offset": 334,
+          "bytes": 11
+        },
+        {
+          "offset": 345,
+          "bytes": 11
+        }
+      ],
+      "samples": 7680,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "envelope_level": 24,
+      "noise_level": 30,
+      "video": "n480-e24-q30-x2.mkv",
+      "file": "n480-e24-q30-x2.mkv",
+      "golden": "n480-e24-q30-x2.f32le",
+      "edges": [
+        960,
+        2880
+      ]
+    },
+    {
+      "name": "n480-e36-q7-x1-matroska",
+      "n": 480,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec314460c05800",
+      "frames": [
+        {
+          "offset": 356,
+          "bytes": 12
+        },
+        {
+          "offset": 368,
+          "bytes": 11
+        },
+        {
+          "offset": 379,
+          "bytes": 11
+        },
+        {
+          "offset": 390,
+          "bytes": 11
+        },
+        {
+          "offset": 401,
+          "bytes": 11
+        },
+        {
+          "offset": 412,
+          "bytes": 11
+        },
+        {
+          "offset": 423,
+          "bytes": 11
+        },
+        {
+          "offset": 434,
+          "bytes": 11
+        }
+      ],
+      "samples": 3840,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "envelope_level": 36,
+      "noise_level": 7,
+      "video": "n480-e36-q7-x1.mkv",
+      "file": "n480-e36-q7-x1.mkv",
+      "golden": "n480-e36-q7-x1.f32le",
+      "edges": [
+        480,
+        1440
+      ]
+    },
+    {
+      "name": "n480-e36-q7-x2-matroska",
+      "n": 480,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec31c460c05800",
+      "frames": [
+        {
+          "offset": 445,
+          "bytes": 12
+        },
+        {
+          "offset": 457,
+          "bytes": 11
+        },
+        {
+          "offset": 468,
+          "bytes": 11
+        },
+        {
+          "offset": 479,
+          "bytes": 11
+        },
+        {
+          "offset": 490,
+          "bytes": 11
+        },
+        {
+          "offset": 501,
+          "bytes": 11
+        },
+        {
+          "offset": 512,
+          "bytes": 11
+        },
+        {
+          "offset": 523,
+          "bytes": 11
+        }
+      ],
+      "samples": 7680,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "envelope_level": 36,
+      "noise_level": 7,
+      "video": "n480-e36-q7-x2.mkv",
+      "file": "n480-e36-q7-x2.mkv",
+      "golden": "n480-e36-q7-x2.f32le",
+      "edges": [
+        960,
+        2880
+      ]
+    },
+    {
+      "name": "n480-e36-q30-x1-matroska",
+      "n": 480,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec314460c05800",
+      "frames": [
+        {
+          "offset": 534,
+          "bytes": 12
+        },
+        {
+          "offset": 546,
+          "bytes": 11
+        },
+        {
+          "offset": 557,
+          "bytes": 11
+        },
+        {
+          "offset": 568,
+          "bytes": 11
+        },
+        {
+          "offset": 579,
+          "bytes": 11
+        },
+        {
+          "offset": 590,
+          "bytes": 11
+        },
+        {
+          "offset": 601,
+          "bytes": 11
+        },
+        {
+          "offset": 612,
+          "bytes": 11
+        }
+      ],
+      "samples": 3840,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "envelope_level": 36,
+      "noise_level": 30,
+      "video": "n480-e36-q30-x1.mkv",
+      "file": "n480-e36-q30-x1.mkv",
+      "golden": "n480-e36-q30-x1.f32le",
+      "edges": [
+        480,
+        1440
+      ]
+    },
+    {
+      "name": "n480-e36-q30-x2-matroska",
+      "n": 480,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec31c460c05800",
+      "frames": [
+        {
+          "offset": 623,
+          "bytes": 12
+        },
+        {
+          "offset": 635,
+          "bytes": 11
+        },
+        {
+          "offset": 646,
+          "bytes": 11
+        },
+        {
+          "offset": 657,
+          "bytes": 11
+        },
+        {
+          "offset": 668,
+          "bytes": 11
+        },
+        {
+          "offset": 679,
+          "bytes": 11
+        },
+        {
+          "offset": 690,
+          "bytes": 11
+        },
+        {
+          "offset": 701,
+          "bytes": 11
+        }
+      ],
+      "samples": 7680,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "envelope_level": 36,
+      "noise_level": 30,
+      "video": "n480-e36-q30-x2.mkv",
+      "file": "n480-e36-q30-x2.mkv",
+      "golden": "n480-e36-q30-x2.f32le",
+      "edges": [
+        960,
+        2880
+      ]
+    },
+    {
+      "name": "n480-e48-q7-x1-matroska",
+      "n": 480,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec314460c05800",
+      "frames": [
+        {
+          "offset": 712,
+          "bytes": 12
+        },
+        {
+          "offset": 724,
+          "bytes": 11
+        },
+        {
+          "offset": 735,
+          "bytes": 11
+        },
+        {
+          "offset": 746,
+          "bytes": 11
+        },
+        {
+          "offset": 757,
+          "bytes": 11
+        },
+        {
+          "offset": 768,
+          "bytes": 11
+        },
+        {
+          "offset": 779,
+          "bytes": 11
+        },
+        {
+          "offset": 790,
+          "bytes": 11
+        }
+      ],
+      "samples": 3840,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "envelope_level": 48,
+      "noise_level": 7,
+      "video": "n480-e48-q7-x1.mkv",
+      "file": "n480-e48-q7-x1.mkv",
+      "golden": "n480-e48-q7-x1.f32le",
+      "edges": [
+        480,
+        1440
+      ]
+    },
+    {
+      "name": "n480-e48-q7-x2-matroska",
+      "n": 480,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec31c460c05800",
+      "frames": [
+        {
+          "offset": 801,
+          "bytes": 12
+        },
+        {
+          "offset": 813,
+          "bytes": 11
+        },
+        {
+          "offset": 824,
+          "bytes": 11
+        },
+        {
+          "offset": 835,
+          "bytes": 11
+        },
+        {
+          "offset": 846,
+          "bytes": 11
+        },
+        {
+          "offset": 857,
+          "bytes": 11
+        },
+        {
+          "offset": 868,
+          "bytes": 11
+        },
+        {
+          "offset": 879,
+          "bytes": 11
+        }
+      ],
+      "samples": 7680,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "envelope_level": 48,
+      "noise_level": 7,
+      "video": "n480-e48-q7-x2.mkv",
+      "file": "n480-e48-q7-x2.mkv",
+      "golden": "n480-e48-q7-x2.f32le",
+      "edges": [
+        960,
+        2880
+      ]
+    },
+    {
+      "name": "n480-e48-q30-x1-matroska",
+      "n": 480,
+      "slots": 15,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec314460c05800",
+      "frames": [
+        {
+          "offset": 890,
+          "bytes": 12
+        },
+        {
+          "offset": 902,
+          "bytes": 11
+        },
+        {
+          "offset": 913,
+          "bytes": 11
+        },
+        {
+          "offset": 924,
+          "bytes": 11
+        },
+        {
+          "offset": 935,
+          "bytes": 11
+        },
+        {
+          "offset": 946,
+          "bytes": 11
+        },
+        {
+          "offset": 957,
+          "bytes": 11
+        },
+        {
+          "offset": 968,
+          "bytes": 11
+        }
+      ],
+      "samples": 3840,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "pcm_offset": 0,
+      "envelope_level": 48,
+      "noise_level": 30,
+      "video": "n480-e48-q30-x1.mkv",
+      "file": "n480-e48-q30-x1.mkv",
+      "golden": "n480-e48-q30-x1.f32le",
+      "edges": [
+        480,
+        1440
+      ]
+    },
+    {
+      "name": "n480-e48-q30-x2-matroska",
+      "n": 480,
+      "slots": 15,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec31c460c05800",
+      "frames": [
+        {
+          "offset": 979,
+          "bytes": 12
+        },
+        {
+          "offset": 991,
+          "bytes": 11
+        },
+        {
+          "offset": 1002,
+          "bytes": 11
+        },
+        {
+          "offset": 1013,
+          "bytes": 11
+        },
+        {
+          "offset": 1024,
+          "bytes": 11
+        },
+        {
+          "offset": 1035,
+          "bytes": 11
+        },
+        {
+          "offset": 1046,
+          "bytes": 11
+        },
+        {
+          "offset": 1057,
+          "bytes": 11
+        }
+      ],
+      "samples": 7680,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "envelope_level": 48,
+      "noise_level": 30,
+      "video": "n480-e48-q30-x2.mkv",
+      "file": "n480-e48-q30-x2.mkv",
+      "golden": "n480-e48-q30-x2.f32le",
+      "edges": [
+        960,
+        2880
+      ]
+    },
+    {
+      "name": "n512-e24-q7-x1-matroska",
+      "n": 512,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec214460c05800",
+      "frames": [
+        {
+          "offset": 1068,
+          "bytes": 12
+        },
+        {
+          "offset": 1080,
+          "bytes": 11
+        },
+        {
+          "offset": 1091,
+          "bytes": 11
+        },
+        {
+          "offset": 1102,
+          "bytes": 11
+        },
+        {
+          "offset": 1113,
+          "bytes": 11
+        },
+        {
+          "offset": 1124,
+          "bytes": 11
+        },
+        {
+          "offset": 1135,
+          "bytes": 11
+        },
+        {
+          "offset": 1146,
+          "bytes": 11
+        }
+      ],
+      "samples": 4096,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "envelope_level": 24,
+      "noise_level": 7,
+      "video": "n512-e24-q7-x1.mkv",
+      "file": "n512-e24-q7-x1.mkv",
+      "golden": "n512-e24-q7-x1.f32le",
+      "edges": [
+        512,
+        1536
+      ]
+    },
+    {
+      "name": "n512-e24-q7-x2-matroska",
+      "n": 512,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec21c460c05800",
+      "frames": [
+        {
+          "offset": 1157,
+          "bytes": 12
+        },
+        {
+          "offset": 1169,
+          "bytes": 11
+        },
+        {
+          "offset": 1180,
+          "bytes": 11
+        },
+        {
+          "offset": 1191,
+          "bytes": 11
+        },
+        {
+          "offset": 1202,
+          "bytes": 11
+        },
+        {
+          "offset": 1213,
+          "bytes": 11
+        },
+        {
+          "offset": 1224,
+          "bytes": 11
+        },
+        {
+          "offset": 1235,
+          "bytes": 11
+        }
+      ],
+      "samples": 8192,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "envelope_level": 24,
+      "noise_level": 7,
+      "video": "n512-e24-q7-x2.mkv",
+      "file": "n512-e24-q7-x2.mkv",
+      "golden": "n512-e24-q7-x2.f32le",
+      "edges": [
+        1024,
+        3072
+      ]
+    },
+    {
+      "name": "n512-e24-q30-x1-matroska",
+      "n": 512,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec214460c05800",
+      "frames": [
+        {
+          "offset": 1246,
+          "bytes": 12
+        },
+        {
+          "offset": 1258,
+          "bytes": 11
+        },
+        {
+          "offset": 1269,
+          "bytes": 11
+        },
+        {
+          "offset": 1280,
+          "bytes": 11
+        },
+        {
+          "offset": 1291,
+          "bytes": 11
+        },
+        {
+          "offset": 1302,
+          "bytes": 11
+        },
+        {
+          "offset": 1313,
+          "bytes": 11
+        },
+        {
+          "offset": 1324,
+          "bytes": 11
+        }
+      ],
+      "samples": 4096,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "envelope_level": 24,
+      "noise_level": 30,
+      "video": "n512-e24-q30-x1.mkv",
+      "file": "n512-e24-q30-x1.mkv",
+      "golden": "n512-e24-q30-x1.f32le",
+      "edges": [
+        512,
+        1536
+      ]
+    },
+    {
+      "name": "n512-e24-q30-x2-matroska",
+      "n": 512,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec21c460c05800",
+      "frames": [
+        {
+          "offset": 1335,
+          "bytes": 12
+        },
+        {
+          "offset": 1347,
+          "bytes": 11
+        },
+        {
+          "offset": 1358,
+          "bytes": 11
+        },
+        {
+          "offset": 1369,
+          "bytes": 11
+        },
+        {
+          "offset": 1380,
+          "bytes": 11
+        },
+        {
+          "offset": 1391,
+          "bytes": 11
+        },
+        {
+          "offset": 1402,
+          "bytes": 11
+        },
+        {
+          "offset": 1413,
+          "bytes": 11
+        }
+      ],
+      "samples": 8192,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "envelope_level": 24,
+      "noise_level": 30,
+      "video": "n512-e24-q30-x2.mkv",
+      "file": "n512-e24-q30-x2.mkv",
+      "golden": "n512-e24-q30-x2.f32le",
+      "edges": [
+        1024,
+        3072
+      ]
+    },
+    {
+      "name": "n512-e36-q7-x1-matroska",
+      "n": 512,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec214460c05800",
+      "frames": [
+        {
+          "offset": 1424,
+          "bytes": 12
+        },
+        {
+          "offset": 1436,
+          "bytes": 11
+        },
+        {
+          "offset": 1447,
+          "bytes": 11
+        },
+        {
+          "offset": 1458,
+          "bytes": 11
+        },
+        {
+          "offset": 1469,
+          "bytes": 11
+        },
+        {
+          "offset": 1480,
+          "bytes": 11
+        },
+        {
+          "offset": 1491,
+          "bytes": 11
+        },
+        {
+          "offset": 1502,
+          "bytes": 11
+        }
+      ],
+      "samples": 4096,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "envelope_level": 36,
+      "noise_level": 7,
+      "video": "n512-e36-q7-x1.mkv",
+      "file": "n512-e36-q7-x1.mkv",
+      "golden": "n512-e36-q7-x1.f32le",
+      "edges": [
+        512,
+        1536
+      ]
+    },
+    {
+      "name": "n512-e36-q7-x2-matroska",
+      "n": 512,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec21c460c05800",
+      "frames": [
+        {
+          "offset": 1513,
+          "bytes": 12
+        },
+        {
+          "offset": 1525,
+          "bytes": 11
+        },
+        {
+          "offset": 1536,
+          "bytes": 11
+        },
+        {
+          "offset": 1547,
+          "bytes": 11
+        },
+        {
+          "offset": 1558,
+          "bytes": 11
+        },
+        {
+          "offset": 1569,
+          "bytes": 11
+        },
+        {
+          "offset": 1580,
+          "bytes": 11
+        },
+        {
+          "offset": 1591,
+          "bytes": 11
+        }
+      ],
+      "samples": 8192,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "envelope_level": 36,
+      "noise_level": 7,
+      "video": "n512-e36-q7-x2.mkv",
+      "file": "n512-e36-q7-x2.mkv",
+      "golden": "n512-e36-q7-x2.f32le",
+      "edges": [
+        1024,
+        3072
+      ]
+    },
+    {
+      "name": "n512-e36-q30-x1-matroska",
+      "n": 512,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec214460c05800",
+      "frames": [
+        {
+          "offset": 1602,
+          "bytes": 12
+        },
+        {
+          "offset": 1614,
+          "bytes": 11
+        },
+        {
+          "offset": 1625,
+          "bytes": 11
+        },
+        {
+          "offset": 1636,
+          "bytes": 11
+        },
+        {
+          "offset": 1647,
+          "bytes": 11
+        },
+        {
+          "offset": 1658,
+          "bytes": 11
+        },
+        {
+          "offset": 1669,
+          "bytes": 11
+        },
+        {
+          "offset": 1680,
+          "bytes": 11
+        }
+      ],
+      "samples": 4096,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "envelope_level": 36,
+      "noise_level": 30,
+      "video": "n512-e36-q30-x1.mkv",
+      "file": "n512-e36-q30-x1.mkv",
+      "golden": "n512-e36-q30-x1.f32le",
+      "edges": [
+        512,
+        1536
+      ]
+    },
+    {
+      "name": "n512-e36-q30-x2-matroska",
+      "n": 512,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec21c460c05800",
+      "frames": [
+        {
+          "offset": 1691,
+          "bytes": 12
+        },
+        {
+          "offset": 1703,
+          "bytes": 11
+        },
+        {
+          "offset": 1714,
+          "bytes": 11
+        },
+        {
+          "offset": 1725,
+          "bytes": 11
+        },
+        {
+          "offset": 1736,
+          "bytes": 11
+        },
+        {
+          "offset": 1747,
+          "bytes": 11
+        },
+        {
+          "offset": 1758,
+          "bytes": 11
+        },
+        {
+          "offset": 1769,
+          "bytes": 11
+        }
+      ],
+      "samples": 8192,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "envelope_level": 36,
+      "noise_level": 30,
+      "video": "n512-e36-q30-x2.mkv",
+      "file": "n512-e36-q30-x2.mkv",
+      "golden": "n512-e36-q30-x2.f32le",
+      "edges": [
+        1024,
+        3072
+      ]
+    },
+    {
+      "name": "n512-e48-q7-x1-matroska",
+      "n": 512,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec214460c05800",
+      "frames": [
+        {
+          "offset": 1780,
+          "bytes": 12
+        },
+        {
+          "offset": 1792,
+          "bytes": 11
+        },
+        {
+          "offset": 1803,
+          "bytes": 11
+        },
+        {
+          "offset": 1814,
+          "bytes": 11
+        },
+        {
+          "offset": 1825,
+          "bytes": 11
+        },
+        {
+          "offset": 1836,
+          "bytes": 11
+        },
+        {
+          "offset": 1847,
+          "bytes": 11
+        },
+        {
+          "offset": 1858,
+          "bytes": 11
+        }
+      ],
+      "samples": 4096,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "envelope_level": 48,
+      "noise_level": 7,
+      "video": "n512-e48-q7-x1.mkv",
+      "file": "n512-e48-q7-x1.mkv",
+      "golden": "n512-e48-q7-x1.f32le",
+      "edges": [
+        512,
+        1536
+      ]
+    },
+    {
+      "name": "n512-e48-q7-x2-matroska",
+      "n": 512,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec21c460c05800",
+      "frames": [
+        {
+          "offset": 1869,
+          "bytes": 12
+        },
+        {
+          "offset": 1881,
+          "bytes": 11
+        },
+        {
+          "offset": 1892,
+          "bytes": 11
+        },
+        {
+          "offset": 1903,
+          "bytes": 11
+        },
+        {
+          "offset": 1914,
+          "bytes": 11
+        },
+        {
+          "offset": 1925,
+          "bytes": 11
+        },
+        {
+          "offset": 1936,
+          "bytes": 11
+        },
+        {
+          "offset": 1947,
+          "bytes": 11
+        }
+      ],
+      "samples": 8192,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "envelope_level": 48,
+      "noise_level": 7,
+      "video": "n512-e48-q7-x2.mkv",
+      "file": "n512-e48-q7-x2.mkv",
+      "golden": "n512-e48-q7-x2.f32le",
+      "edges": [
+        1024,
+        3072
+      ]
+    },
+    {
+      "name": "n512-e48-q30-x1-matroska",
+      "n": 512,
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "rate": 24000,
+      "asc": "f8ec214460c05800",
+      "frames": [
+        {
+          "offset": 1958,
+          "bytes": 12
+        },
+        {
+          "offset": 1970,
+          "bytes": 11
+        },
+        {
+          "offset": 1981,
+          "bytes": 11
+        },
+        {
+          "offset": 1992,
+          "bytes": 11
+        },
+        {
+          "offset": 2003,
+          "bytes": 11
+        },
+        {
+          "offset": 2014,
+          "bytes": 11
+        },
+        {
+          "offset": 2025,
+          "bytes": 11
+        },
+        {
+          "offset": 2036,
+          "bytes": 11
+        }
+      ],
+      "samples": 4096,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "pcm_offset": 0,
+      "envelope_level": 48,
+      "noise_level": 30,
+      "video": "n512-e48-q30-x1.mkv",
+      "file": "n512-e48-q30-x1.mkv",
+      "golden": "n512-e48-q30-x1.f32le",
+      "edges": [
+        512,
+        1536
+      ]
+    },
+    {
+      "name": "n512-e48-q30-x2-matroska",
+      "n": 512,
+      "slots": 16,
+      "bands": 64,
+      "channels": 1,
+      "rate": 48000,
+      "asc": "f8ec21c460c05800",
+      "frames": [
+        {
+          "offset": 2047,
+          "bytes": 12
+        },
+        {
+          "offset": 2059,
+          "bytes": 11
+        },
+        {
+          "offset": 2070,
+          "bytes": 11
+        },
+        {
+          "offset": 2081,
+          "bytes": 11
+        },
+        {
+          "offset": 2092,
+          "bytes": 11
+        },
+        {
+          "offset": 2103,
+          "bytes": 11
+        },
+        {
+          "offset": 2114,
+          "bytes": 11
+        },
+        {
+          "offset": 2125,
+          "bytes": 11
+        }
+      ],
+      "samples": 8192,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "envelope_level": 48,
+      "noise_level": 30,
+      "video": "n512-e48-q30-x2.mkv",
+      "file": "n512-e48-q30-x2.mkv",
+      "golden": "n512-e48-q30-x2.f32le",
+      "edges": [
+        1024,
+        3072
+      ]
+    }
+  ],
+  "scope": "24 authored eight-AU480/512 single/dual-rate CRC LD-SBR programmes. Zero AAC core,fine harmonic centers,noise7/30,envelope24/36/48. Independent direct complex CLDFB PCM and energy formulas. Not an ISO conformance verdict or new native tool implementation."
+}

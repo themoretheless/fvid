@@ -13,10 +13,15 @@ curl --fail --location 'https://android.googlesource.com/platform/external/aac/+
 ```
 
 The [pinned primary AOSP source](https://android.googlesource.com/platform/external/aac/+/ee76460efbdb147e26d804c798949c23f174460b/)
-archive SHA-256 must be
+historical archive SHA-256 was
 `4f41fba1e55dc554ccd0166f550d7c0c83ae0f22d7f2ed76001537f4b62f7325`.
-The validator checks this and the previously qualified ISO member hashes before
-building. It generates external build metadata without editing decoder math.
+Gitiles stamps archives at download time. The current validator checks every
+source file against the pinned commit Git tree
+`c3900d70bbdf4129d37f8cd5ab4a6589a34eb95b` and verifies the qualified ISO member
+hashes before building. It records the actual transport SHA256 and explicitly
+requests complex QMF. Historical results retain their original hashes. See the
+[November1 source/mode audit](aac-ld-sbr-qmf-reference-2026-11-01.md).
+External build metadata does not edit decoder math.
 
 Build the native probe and run the offline cross-check:
 
