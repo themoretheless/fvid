@@ -1,9 +1,9 @@
 {
-  "status": "accepted FVID-0451; final seven gates passed; publication pending",
+  "status": "accepted FVID-0451; code published and remote refs verified; docs receipt pending",
   "base": "b5daf0e83b7e9df9fbdc0095d85f279ebc224385",
   "accepted_count_unchanged": null,
   "scope": "Real E/ShiftE controls through Player/native decoder/UI presenter;direction,previous VFR frame,first boundary and pending-step EOF handling. Authored CFR/VFR/fractional5picture clips and scalar oracles.",
-  "next": "Archive and verify evidence,remove only own completed test artifacts,stage exact paths,commit and atomic-push main/delivery,verify refs and clean own worktree;then audit next independent defect.",
+  "next": "Publish docs receipt,verify remote refs and clean own worktree,then continue next independent audit.",
   "baseline_session": 26051,
   "baseline_log": "/private/tmp/fvid-mp4-frame-step-before.log",
   "target": "/private/tmp/fvid-mp4-frame-step-target-20261031",
@@ -31,5 +31,6 @@
   "qualification_live_verified": false,
   "collector": "collect-qualification.py",
   "accepted_count": 451,
-  "qualification_exit": 0
+  "qualification_exit": 0,
+  "delivery_code_commit": "b1d7b1abdedf5515a5c2c555ec0963d1d8cbc5aa"
 }

@@ -1,0 +1,17 @@
+{
+  "status": "verified delivered",
+  "code_commit": "b1d7b1abdedf5515a5c2c555ec0963d1d8cbc5aa",
+  "remote_refs": [
+    "b1d7b1abdedf5515a5c2c555ec0963d1d8cbc5aa\trefs/heads/codex/deliver-fvid-20261029",
+    "b1d7b1abdedf5515a5c2c555ec0963d1d8cbc5aa\trefs/heads/main"
+  ],
+  "registry_accepted_count": 451,
+  "next_id": "FVID-0452",
+  "source_hashes_verified": true,
+  "qualification_archives_verified": true,
+  "own_worktree_clean_at_verification": true,
+  "own_test_artifacts_absent": true,
+  "foreign_worktrees_and_four_stashes_preserved": true,
+  "goal_complete": false,
+  "next_audit": "Inspect actual audio seek/resume command ordering; hypothesis only until independently reproduced with a synthetic media witness."
+}
