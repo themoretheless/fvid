@@ -183,6 +183,21 @@ fn differences(
 /// vectors and the first independent set do not consult it. The cursor and
 /// history are unchanged on any failure, including a later paired vector/LSB.
 pub fn decode(bits: &mut BitReader<'_>, history: &[i16], options: Options) -> Result<Pair> {
+    decode_inner(bits, history, options, false)
+}
+/// One coded datum belongs to an empty stride range. Only its syntax and cursor
+/// are observable. A split TTT neighbor may own the C virtual history cell, but
+/// that value only affects numeric reconstruction after Huffman symbols are read.
+/// Keep codeword/PCM bounds and all LSB reads; discard the unused numeric index.
+pub(crate) fn discard_empty_group(bits: &mut BitReader<'_>, options: Options) -> Result<Pair> {
+    decode_inner(bits, &[0], options, true)
+}
+fn decode_inner(
+    bits: &mut BitReader<'_>,
+    history: &[i16],
+    options: Options,
+    discarded: bool,
+) -> Result<Pair> {
     let count = history.len();
     if count > 23 || options.set_index > 1 || options.paired && options.set_index != 0 {
         return Err(invalid("invalid LD-MPS parameter-pair geometry"));
@@ -256,6 +271,13 @@ pub fn decode(bits: &mut BitReader<'_>, history: &[i16], options: Options) -> Re
                     - offset;
             }
         }
+    }
+    if discarded {
+        *bits = b;
+        return Ok(Pair {
+            first: Vec::new(),
+            second: options.paired.then(Vec::new),
+        });
     }
     if data
         .iter()

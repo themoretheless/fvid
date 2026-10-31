@@ -82,8 +82,7 @@ def main():
   frames[packet_index]=rows([prefix+envelope(9,0,3,packed(bits),True)])[0]
   bad=dict(good,name=good['name']+'-invalid-pcm',video=good['name']+'-invalid-pcm.mp4',frames=frames,good_video=good['video'],bad_packet=packet_index,error='unused LD-MPS PCM codeword')
   (OUT/bad['video']).write_bytes(video_fixture([bad],blob,bad['channels'],write=False)['data']);errors.append(bad)
- # Split TTT low/high regions can share the virtual history cell. Preserve a
- # specific refusal until borrowed-history semantics have independent proof.
+ # Preserve the original split-TTT reproducer payload; it is now accepted.
  base=next(c for c in parent['fixed']if c['tree']==2 and c['n']==480 and c.get('profile')==39 and c['rate']==48000)
  model=next(c for c in models if c['tree']==2 and c['variant']==1 and c['bands']==23)
  original=config(model,48000,base['slots'],configs[model['config_offset']:model['config_offset']+model['config_bytes']],0)
@@ -91,8 +90,8 @@ def main():
  old=bytes.fromhex(base['ssc']);asc_bits=raw(bytes.fromhex(base['asc']));marker=field(2,4)+length(len(old))+raw(old);at=asc_bits.rfind(marker);assert at>=0
  asc=packed(asc_bits[:at]+field(2,4)+length(len(ssc))+raw(ssc)+asc_bits[at+len(marker):])
  prefixes=[raw(data[r['offset']:r['offset']+r['bytes']])[:r['prefix_bits']]for r in base['frames']]
- regions=model['frames'][0]['parameters'];ttt_controls=[];refusals=[]
- for refusal in(False,True):
+ regions=model['frames'][0]['parameters'];ttt_controls=[];ttt_cases=[]
+ for grouped in(False,True):
   suffix=['']*12
   for i in range(12//base['group']):
    independent=i%4==0;bits='01'+field(independent,1);first=True
@@ -104,13 +103,13 @@ def main():
       low=next(v for v in regions if v['id']==':'.join(parts[:2]+['0']+parts[3:]));values=low['values'][0]+values
     if values:
      offset,levels={'CLD':(15,31),'ICC':(0,8),'CPC':(20,51)}[r['kind']];bits+='1111'+'1000'+'1'+pcm([v+offset for v in values for _ in range(2)],levels)
-    elif refusal and i==3 and first:
+    elif grouped and i==3 and first:
      bits+=block('CLD',False,True,independent,'pcm',0,1)[0];first=False
     else:bits+='1111'+'1000'+'1'
    suffix[(i+1)*base['group']-1]=envelope(9,0,3,packed(bits+'0000'),True)
-  name='split-ttt-empty-history-'+('refusal'if refusal else'control');frames=rows([p+s for p,s in zip(prefixes,suffix)]);case={k:base[k]for k in('n','out_n','rate','samples','channels','input_channels','tree','qmf_bins','group','slots')};case.update(name=name,asc=asc.hex(),ssc=ssc.hex(),frames=frames,video=name+'.mp4',pcm_offset=0,container_rate=base['rate'],container_frame_samples=base['out_n'])
+  name='split-ttt-empty-history-'+('grouped'if grouped else'control');frames=rows([p+s for p,s in zip(prefixes,suffix)]);case={k:base[k]for k in('n','out_n','rate','samples','channels','input_channels','tree','qmf_bins','group','slots')};case.update(name=name,asc=asc.hex(),ssc=ssc.hex(),frames=frames,video=name+'.mp4',pcm_offset=0,container_rate=base['rate'],container_frame_samples=base['out_n'])
   (OUT/case['video']).write_bytes(video_fixture([case],blob,case['channels'],write=False)['data'])
-  if refusal:refusals.append(dict(case,good_video=ttt_controls[0]['video'],bad_packet=4*base['group']-1,error='zero-width TTT grouped history is not yet qualified'))
+  if grouped:ttt_cases.append(dict(case,control=ttt_controls[0]['video']))
   else:ttt_controls.append(case)
  for kind in('CLD','ICC','CPC'):
   for stride in(1,2,3):
@@ -120,5 +119,5 @@ def main():
       for scheme in('pcm','1d','2d'):
        for seed in range(4):
         bits,wanted=block(kind,coarse,paired,independent,scheme,seed,stride);units.append(dict(kind=kind,stride_code=stride,coarse=coarse,paired=paired,independent=independent,scheme=scheme,seed=seed,bits=len(bits),wire=packed(bits).hex(),dummy=wanted,default={'CLD':15,'ICC':0,'CPC':10}[kind]))
- (OUT/'packets.bin').write_bytes(blob);(OUT/'manifest.json').write_text(json.dumps(dict(cases=cases,controls=controls,units=units,errors=errors,ttt_controls=ttt_controls,refusals=refusals,exports=[dict(c,video=c['file'],name=c['name']+'-matroska')for c in cases],scope='Authored empty LFE OTT grouped coding for CLD,paired/unpaired,coarse/fine,PCM/Huffman1D/2D and dependent/independent contexts. Unit CLD/ICC/CPC dummy symbols;owned movies and unchanged zero-band audio controls. No private media,FFmpeg or network.'),separators=(',',':'))+'\n');print(len(cases),'programmes;',len(controls),'controls;',len(units),'parameter units')
+ (OUT/'packets.bin').write_bytes(blob);(OUT/'manifest.json').write_text(json.dumps(dict(cases=cases,controls=controls,units=units,errors=errors,ttt_controls=ttt_controls,ttt_cases=ttt_cases,exports=[dict(c,video=c['file'],name=c['name']+'-matroska')for c in cases],scope='Authored empty LFE OTT grouped coding for CLD,paired/unpaired,coarse/fine,PCM/Huffman1D/2D and dependent/independent contexts. Unit CLD/ICC/CPC dummy symbols;owned movies and unchanged zero-band audio controls. No private media,FFmpeg or network.'),separators=(',',':'))+'\n');print(len(cases),'programmes;',len(controls),'controls;',len(units),'parameter units')
 if __name__=='__main__':main()

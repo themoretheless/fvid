@@ -1,0 +1,73 @@
+{
+  "base": "012853fc15999cb37005efee28ea130429dbb9e6",
+  "runs": [
+    {
+      "command": [
+        "cargo",
+        "--config",
+        "profile.dev.package.fvid-media.opt-level=2",
+        "test",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "aac_ld_mps_discard",
+        "--",
+        "--nocapture",
+        "--test-threads=2",
+        "--skip",
+        "discarded_groups_keep",
+        "--skip",
+        "discarded_groups_still",
+        "--skip",
+        "split_ttt_movies_play_seek_and_rewind_with_exact_audio"
+      ],
+      "status": 101,
+      "log": "/tmp/fvid-ld-mps-discard-before-original.log",
+      "log_sha256": "ff428dad0690e8d4838d4b0494a37bcd75326748e6ee2160b5df978618fe7ae6"
+    },
+    {
+      "command": [
+        "cargo",
+        "--config",
+        "profile.dev.package.fvid-media.opt-level=2",
+        "test",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "aac_ld_mps_discard",
+        "grouped_split_ttt_movies",
+        "--",
+        "--nocapture"
+      ],
+      "status": 101,
+      "log": "/tmp/fvid-ld-mps-discard-before-guard-only.log",
+      "log_sha256": "4637c08174c0a4a3fbf193ac8e0aebdc43990b755d6658569e68980cbd894210"
+    }
+  ],
+  "original_sources": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_frame.rs": "c9ab74f0c08990776cb94e150d5e9f1c225a265519c713e57f8f6d218ceb0831",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_parameters.rs": "0ac400d209dc0cd6c79fe1ac629bdde7c982ff2349c9ec834216f12aa7c2c050",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_entropy.rs": "ba947eeb6ebb5d18fc928f2a31a1ea9b3929e36da6429436535fec9e50f18907"
+  },
+  "restored_sources": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_frame.rs": "82199db27ef9178540d5fc0542f308734fef896eefa6c618ec9abef5f81d4ec9",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_parameters.rs": "b4340f4504e0fd00c876363785f3fbed813eae1e5b68e7600b5df0ea1dc685ca",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_entropy.rs": "df05b1c08f9a98c401de086faebe946bafedd0cb9160633813891d1132f7b95b"
+  },
+  "sources_restored": true,
+  "test_sha256": "81f7a70a6ab69988a81603e62d4b9e83dc684c380447e8d6517bfc3415342ffc",
+  "manifest_sha256": "97cfb12f9301a4824c0ce526abaa99747da2aa499c84c329bfcfaedea17b939b",
+  "scope": "All84 controls pass original owners;936-unit and756-movie acceptance tests reproduce the two specific refusals. Removing only the TTT guard still rejects a discarded index. Seek/checkpoint/corruption tests excluded from the before check.",
+  "structural_evidence": {
+    "primary": "https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip",
+    "members": {
+      "sac_nlc_dec.c": "EcDataPairDec 915-1169:entropy is read before history is used;attach_lsb 887-912 reads a fixed number of bits.",
+      "sac_bitdec.c": "ecDataDec 800-894:empty stride is one datum with[start,start) mapping;history gather is a self-assignment and expansion writes no bands."
+    }
+  },
+  "not_claimed": "Whole-codec PCM conformance,undefined C numeric cases or remaining profiles."
+}

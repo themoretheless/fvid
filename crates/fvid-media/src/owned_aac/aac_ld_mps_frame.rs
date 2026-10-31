@@ -93,18 +93,11 @@ impl Region {
         default: i16,
         forbid_default: bool,
     ) -> Result<Self> {
-        let mut state = Parameters::new(kind, usize::from(stop - start), default)?;
-        if matches!(
-            id,
-            ParameterId::TttCpc { .. } | ParameterId::TttCld { .. } | ParameterId::TttIcc { .. }
-        ) {
-            state = state.without_empty_grouped();
-        }
         Ok(Self {
             id,
             kind,
             start,
-            state,
+            state: Parameters::new(kind, usize::from(stop - start), default)?,
             forbid_default,
         })
     }

@@ -1,4 +1,53 @@
+## Discarded split-TTT grouped parameters, 2026-10-31
+
+Zero-width grouped regions now consume their one entropy datum without
+materializing a numeric parameter index. The prior split-TTT refusal is removed.
+Original C reads Huffman syntax before consulting numeric history,then reads a
+fixed CPC LSB count. getStrideMap gives [start,start),so history gathering is a
+self-assignment and expansion writes no band. Only cursor and data/quantization
+flags are observable; the unused numeric result can vary with the active high
+region or exceed the current quantization bounds. Normal nonempty indices keep
+their bounds; unused PCM codewords and malformed syntax remain invalid.
+
+936 authored standalone units have10,920 comparisons with unmodified original
+C under UBSan,across seeded histories and previous quantization flags. All bit
+positions match;1,632 unused numeric results exceed current index bounds. The
+fine-CPC raw-history -20 row is excluded because some original C paths left-shift
+a negative unused MSB. No source correction or wraparound flag is used to turn
+undefined arithmetic into a numerical oracle. Native admission is not restricted
+by these reference exclusions. Component cursor evidence and the source's fixed
+read structure do not establish independent whole-codec PCM conformance.
+
+756 own MP4/MKV programmes and84 unit-stride controls cover trees2/3/4,480/512
+LD/ELD cores,PCM32/64/128 and shared LD-SBR QMF32/64. Empty low CLD or CPC+ICC
+regions share a virtual history cell with an active same-kind high region whose
+coarse/fine domain changes. Strides2/5/23,PCM/Huffman1D/2D,paired/unpaired and
+dependent/independent frames are covered. Deliberate time deltas require nonzero
+history for an in-range dummy index; reconstructing from a fake zero would fail.
+All35,354,880 PCM values match controls exactly. This comparison shares spatial
+DSP and is not an external whole-codec waveform oracle.
+
+The original84 controls pass unchanged production owners; movie/parameter
+acceptance reproduces both the old TTT refusal and the discarded-index range
+error. Removing only the TTT guard still fails the native Huffman movie. The
+old split-TTT refusal movie is renamed as an acceptance fixture with identical
+movie and packet bytes. 84 malformed movies insert unused CLD31/CPC63 PCM words
+with valid recomputed CRC and require transactional correct-packet retry.
+
+Generation and the optional C reference remain separate from ordinary tests.
+No private media,frames,audio or codec parameter sets are copied. Unequal HRTF
+grids,changed frequency/layout,nonzero alignment,remaining energy profiles and
+full Annex B qualification remain open. The codec-gap objective stays active.
+
+Fresh offline gates: 1834 passed, 0 failed, 27 ignored.
+Media/player libraries and 36 targeted integration binaries passed.
+
+Evidence: `docs/validation/aac-ld-mps-discard-{source,reference,generation,tests}-2026-10-31.json`.
+
 ## Empty grouped LD-MPS regions, 2026-10-31
+
+The split-TTT refusal described in this historical milestone is superseded by
+the discarded-parameter milestone above.
 
 Zero-width grouped parameter regions now consume their one entropy datum and
 produce no visible parameter bands. This follows unmodified C getStrideMap and

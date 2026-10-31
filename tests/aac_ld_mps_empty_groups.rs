@@ -376,96 +376,11 @@ fn invalid_empty_pcm_symbol_is_rejected_transactionally_and_can_be_retried() {
 }
 
 #[test]
-fn split_ttt_borrowed_history_refusal_preserves_state_and_keeps_control_playable() {
+fn historical_split_ttt_refusal_movie_now_preserves_the_control_waveform() {
     let manifest = m();
-    let blob = std::fs::read(root().join("packets.bin")).unwrap();
-    assert_eq!(manifest["refusals"].as_array().unwrap().len(), 1);
-    for bad in manifest["refusals"].as_array().unwrap() {
-        let mut pcm = Vec::new();
-        let error = fvid::native_media::decode_mp4_aac_pcm(&read(&bad["video"]), &mut pcm)
-            .unwrap_err()
-            .to_string();
-        assert!(
-            error.contains(bad["error"].as_str().unwrap()),
-            "{}: {error}",
-            bad["name"]
-        );
-        let good = manifest["ttt_controls"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .find(|c| c["video"] == bad["good_video"])
-            .unwrap();
-        let mut decoder =
-            NativeAacDecoder::new_with_output_rate(&hex(&good["asc"]), n(&good["rate"]) as u32)
-                .unwrap();
-        decoder.set_source_packet_ids(true).unwrap();
-        let mut reference =
-            NativeAacDecoder::new_with_output_rate(&hex(&good["asc"]), n(&good["rate"]) as u32)
-                .unwrap();
-        reference.set_source_packet_ids(true).unwrap();
-        let mut result = Vec::new();
-        for (i, (a, b)) in good["frames"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .zip(bad["frames"].as_array().unwrap())
-            .enumerate()
-        {
-            let packet = |r: &Value| {
-                let at = n(&r["offset"]);
-                &blob[at..at + n(&r["bytes"])]
-            };
-            let pts = i as i64 * 13 - 11;
-            let duration = n(&good["out_n"]) as u64;
-            let clock = n(&good["rate"]) as u32;
-            if i == n(&bad["bad_packet"]) {
-                let saved = decoder.checkpoint();
-                let error = decoder
-                    .decode_timed_in_clock(packet(b), pts, duration, clock)
-                    .unwrap_err()
-                    .to_string();
-                assert!(error.contains(bad["error"].as_str().unwrap()), "{error}");
-                let want = decoder
-                    .decode_timed_in_clock(packet(a), pts, duration, clock)
-                    .unwrap();
-                decoder.restore(&saved).unwrap();
-                assert_eq!(
-                    decoder
-                        .decode_timed_in_clock(packet(a), pts, duration, clock)
-                        .unwrap(),
-                    want
-                );
-                decoder.restore(&saved).unwrap();
-            }
-            let got = decoder
-                .decode_timed_in_clock(packet(a), pts, duration, clock)
-                .unwrap();
-            assert_eq!(
-                got,
-                reference
-                    .decode_timed_in_clock(packet(a), pts, duration, clock)
-                    .unwrap()
-            );
-            if let Some(frame) = got {
-                result.extend(frame.samples);
-            }
-        }
-        loop {
-            let got = decoder.finish().unwrap();
-            assert_eq!(got, reference.finish().unwrap());
-            if let Some(frame) = got {
-                result.extend(frame.samples);
-            } else {
-                break;
-            }
-        }
-        assert_eq!(
-            result
-                .iter()
-                .flat_map(|v| v.to_le_bytes())
-                .collect::<Vec<_>>(),
-            movie(&good["video"])
-        );
+    let cases = manifest["ttt_cases"].as_array().unwrap();
+    assert_eq!(cases.len(), 1);
+    for c in cases {
+        assert_eq!(movie(&c["video"]), movie(&c["control"]));
     }
 }

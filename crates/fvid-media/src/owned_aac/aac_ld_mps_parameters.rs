@@ -22,7 +22,6 @@ pub struct Parameters {
     default: i16,
     parsed: History,
     mapped: History,
-    empty_grouped: bool,
 }
 
 fn bounds(kind: Kind, coarse: bool) -> (i16, i16) {
@@ -144,7 +143,6 @@ impl Parameters {
         Ok(Self {
             kind,
             default,
-            empty_grouped: true,
             parsed: history.clone(),
             mapped: history,
         })
@@ -153,12 +151,6 @@ impl Parameters {
         self.parsed.indices.fill(self.default);
         self.parsed.coarse = false;
         self.mapped = self.parsed.clone();
-    }
-    // A frame's split TTT regions share a compressed-history array in the
-    // reference decoder. Its neighboring region may own the virtual cell.
-    pub(crate) fn without_empty_grouped(mut self) -> Self {
-        self.empty_grouped = false;
-        self
     }
     /// Decode one ecData block: all two-bit data modes precede coded sets.
     /// Slots are zero-based and strictly increasing within a 1..32-slot frame.
@@ -223,38 +215,32 @@ impl Parameters {
                 let paired = b.bit()?;
                 let coarse = b.bit()?;
                 let stride = [1, 2, 5, 23][b.read(2)? as usize];
-                if self.parsed.indices.is_empty() && stride != 1 && !self.empty_grouped {
-                    return Err(super::unsupported(
-                        "LD-MPS zero-width TTT grouped history is not yet qualified",
-                    ));
-                }
                 if paired && (i + 1 >= slots.len() || modes[i + 1] != 3) {
                     return Err(invalid("LD-MPS data pair lacks a second coded set"));
                 }
                 self.parsed.requantize(self.kind, coarse);
                 let map = history_groups(self.parsed.indices.len(), stride);
                 let output_map = groups(self.parsed.indices.len(), stride);
-                // ISO getStrideMap uses signed integer division:
-                // (stop-start-1)/stride+1 is one for an empty grouped region.
-                // Its sole range is [start,start), so reconstruction reads a
-                // datum but never updates a band. The unused C history cell
-                // stays zero, independently of this region's default value.
-                let history = if self.parsed.indices.is_empty() && stride != 1 {
-                    vec![0]
-                } else {
-                    map.iter().map(|r| self.parsed.indices[r.start]).collect()
+                let options = Options {
+                    kind: self.kind,
+                    coarse,
+                    paired,
+                    independent,
+                    set_index: i as u8,
                 };
-                let pair = entropy::decode(
-                    b,
-                    &history,
-                    Options {
-                        kind: self.kind,
-                        coarse,
-                        paired,
-                        independent,
-                        set_index: i as u8,
-                    },
-                )?;
+                // Signed C stride division yields one datum for a grouped
+                // empty region. Its [start,start) expansion writes no bands.
+                // The numeric result can depend on another region's history,
+                // so consume the syntax without materializing an unused index.
+                let pair = if self.parsed.indices.is_empty() && stride != 1 {
+                    entropy::discard_empty_group(b, options)?
+                } else {
+                    let history = map
+                        .iter()
+                        .map(|r| self.parsed.indices[r.start])
+                        .collect::<Vec<_>>();
+                    entropy::decode(b, &history, options)?
+                };
                 let first = History {
                     indices: expand(&pair.first, &output_map),
                     coarse,

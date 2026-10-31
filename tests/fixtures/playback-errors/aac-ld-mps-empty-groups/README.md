@@ -20,10 +20,11 @@ then retry the correct packet and compare the entire waveform. They do not
 stand in for positive playback acceptance. Empty unit-stride Huffman remains
 invalid and has a refusal in the older frame corpus.
 
-A separate split-TTT pair preserves the shared-history refusal and accepts
-the empty unit-stride control. Original C aliases the virtual cell with the
-neighboring active region; standalone zero-history units do not qualify that
-case. This is a refusal/retry test, not grouped split-TTT acceptance.
+The former split-TTT refusal is now an acceptance case named
+`split-ttt-empty-history-grouped.mp4`. Its movie payload and the packet blob
+are unchanged. The owned parser consumes but does not reconstruct discarded
+numeric indices; the wider split-TTT corpus in `aac-ld-mps-discard` qualifies
+nonzero shared-history and out-of-range dummy results.
 
 Tests cover both containers, sample-boundary seek, rewind, opaque source IDs,
 100 Hz media-clock stamps, checkpoint/reset and worker playback. No private
