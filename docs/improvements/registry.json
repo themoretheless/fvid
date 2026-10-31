@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 452,
-  "next_id": "FVID-0453",
+  "accepted_count": 453,
+  "next_id": "FVID-0454",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5077,6 +5077,17 @@
       "result": "Coalesce requested device start until navigation and final controls are installed;a laterPause cancels the pending start while pausing an already running device remains immediate. Two short authored VP9/IMA4/ALAC movies preserve exact continuous/seek-suffix PCM and valid3picture video controls. Seven order/real-thread tests pass20repetitions;all39audio-thread tests,127integration suites591pass,1511distinct checks and both locked/offline builds pass. Seven pre-existing observer failures reproduced on published source and repaired with exact rational clocks/public error observation count0. Five old ignores unchanged;variants count once,no performance claim.",
       "status": "accepted",
       "validation": "batch-452-validation.json"
+    },
+    {
+      "id": "FVID-0453",
+      "batch": 453,
+      "title": "Hold terminal stop-bound output and park active playback producers",
+      "source": "src/player.rs",
+      "regression": "src/player_stop_bound_tests.rs",
+      "before": "Published3bed435500 marks an explicit stop bound ended but still presents prefetched pictures and keeps sound running. Qualified baseline2exact-source/queue controls pass,2actual terminal-hold/device-pause acceptances fail:20..40ms CFR advances to40..60ms after ended,and the real audio worker receives no Pause.",
+      "result": "Park active sources when the bound is spent and retain the final picture on subsequent repaint. Seeking out of terminal state restores the chosen unpaused transport,with video audio still held for preroll;paused navigation and queue continuation retain their behavior. Three authored CFR/VFR/fractional VP9 clips and scalar WAV/YUV controls verify exact source data,held RGB/intervals,actual worker pause/stable clock and seek-resumed playback/PCM. Six cases pass20repetitions;127integration suites591pass,1514physical-source-distinct checks and core/player builds pass. Introduced seek reentry stalls reproduced4pass2fail and amended without an extra ID. Five old ignores unchanged. Existing bound threshold selection retained;no performance claim.",
+      "status": "accepted",
+      "validation": "batch-453-validation.json"
     }
   ]
 }

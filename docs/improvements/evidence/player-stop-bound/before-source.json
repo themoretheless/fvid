@@ -1,0 +1,6 @@
+{
+  "src/player.rs": "c85bca9822ffacee3da8dd1e39bb8e28b320b1d3500f12e1eaf89a0f1a0b7e7d",
+  "src/player_stop_bound_tests.rs": "749b3e602c82a9e1556bcf3124b0eebcb3c56117d371f91a60ee2c518efa7519",
+  "scripts/generate_player_stop_bound.py": "f24a7176222f5153f3a3a6abc93fe3ae4a6d089fc91b97245792fade13cb8e28",
+  "tests/fixtures/playback-errors/player-stop-bound/manifest.json": "b8f667a1e463d96a50100ce59d79876b902ac3ca866a0dc4e1b61fe3272adb73"
+}

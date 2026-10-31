@@ -1,0 +1,9 @@
+{
+  "before-seek": {
+    "base_commit": "3bed435500b27575477867f6a4d5eeab87a250e4",
+    "source_sha256": "921740483b18ef2e93ebcdd9231728abd41b9594556ce1d3241f15791aa3859c",
+    "patch_sha256": "d6aef75476346b0543715d7f7138bd83a8b07782dfc77184b998e477a9c96b38",
+    "reconstruction_verified_byte_identical": true,
+    "reconstruction": "Apply zero-context patch to the recorded base using git apply --unidiff-zero."
+  }
+}

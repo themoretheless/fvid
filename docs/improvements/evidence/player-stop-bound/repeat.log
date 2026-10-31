@@ -1,0 +1,239 @@
+RUN 0
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.70s
+
+RUN 1
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.63s
+
+RUN 2
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.71s
+
+RUN 3
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.90s
+
+RUN 4
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.97s
+
+RUN 5
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 2.01s
+
+RUN 6
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.99s
+
+RUN 7
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.81s
+
+RUN 8
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 2.13s
+
+RUN 9
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.85s
+
+RUN 10
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.73s
+
+RUN 11
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.95s
+
+RUN 12
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.68s
+
+RUN 13
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.84s
+
+RUN 14
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.76s
+
+RUN 15
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.81s
+
+RUN 16
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.77s
+
+RUN 17
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.88s
+
+RUN 18
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.83s
+
+RUN 19
+
+running 6 tests
+test player::stop_bound_regressions::authored_cfr_vfr_fractional_and_audio_controls_are_exact ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_audio_transport ... ok
+test player::stop_bound_regressions::sound_only_stop_bound_pauses_the_actual_audio_worker ... ok
+test player::stop_bound_regressions::seek_after_stop_bound_resumes_an_unpaused_video_transport ... ok
+test player::stop_bound_regressions::stop_bound_still_advances_to_a_queued_item ... ok
+test player::stop_bound_regressions::stop_bound_holds_the_selected_picture_during_later_repaints ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1096 filtered out; finished in 1.69s

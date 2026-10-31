@@ -1,0 +1,18 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -3022,0 +3023,4 @@
++            // A bound can end an item before its sources reach EOF. Park the
++            // producers as well as advancing the playlist/end state.
++            if let Some(playback) = &self.playback { playback.pause(); }
++            if let Some(audio) = &self.audio { audio.pause(); }
+@@ -3921,0 +3926,5 @@
++            return;
++        }
++        // A stop bound can leave prefetched pictures in the decoder queue.
++        // Repaints keep the final picture until explicit navigation clears EOF.
++        if self.ended {
+@@ -12871,0 +12881,4 @@
++
++#[cfg(test)]
++#[path = "player_stop_bound_tests.rs"]
++mod stop_bound_regressions;

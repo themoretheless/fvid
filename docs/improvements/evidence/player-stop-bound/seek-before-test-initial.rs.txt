@@ -1,0 +1,267 @@
+//! Stop-time must stop the actual producers and presenter, not just its UI flag.
+use super::*;
+use std::{
+    io::Cursor,
+    sync::{Arc, Mutex},
+};
+fn root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/player-stop-bound")
+}
+fn bytes(n: &str) -> Vec<u8> {
+    std::fs::read(root().join(n)).unwrap()
+}
+fn cases() -> Vec<serde_json::Value> {
+    serde_json::from_slice::<serde_json::Value>(&bytes("manifest.json")).unwrap()["cases"]
+        .as_array()
+        .unwrap()
+        .clone()
+}
+fn tick(p: &mut Player, ctx: &egui::Context) {
+    let mut out = ctx.run_ui(Default::default(), |ui| p.present(ui.ctx()));
+    out.textures_delta.clear();
+}
+fn wait(p: &mut Player, ctx: &egui::Context, done: impl Fn(&Player) -> bool) {
+    let until = Instant::now() + Duration::from_secs(5);
+    while !done(p) {
+        assert!(p.error.is_none(), "{:?}", p.error);
+        assert!(
+            Instant::now() < until,
+            "transport stalled ended{} paused{} interval{:?}",
+            p.ended,
+            p.paused,
+            p.interval
+        );
+        tick(p, ctx);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+}
+fn stop(c: &serde_json::Value) -> Duration {
+    let end = c["pts"][1].as_u64().unwrap() + c["durations"][1].as_u64().unwrap();
+    Duration::from_nanos(end * 1_000_000_000 / c["scale"].as_u64().unwrap())
+}
+fn open(c: &serde_json::Value, ctx: &egui::Context, queued: bool) -> Player {
+    let mut queue = vec![root().join(c["file"].as_str().unwrap())];
+    if queued {
+        queue.push(root().join("vfr.mp4"));
+    }
+    let mut p = Player {
+        queue,
+        no_audio: true,
+        asynchronous_open: false,
+        start_paused: true,
+        bounds: PlayBounds {
+            start: None,
+            stop: Some(stop(c)),
+        },
+        ..Default::default()
+    };
+    p.play_index(0);
+    wait(&mut p, ctx, |p| {
+        p.presented.is_some() && !p.buffering && !p.seek_preview && p.step == 0
+    });
+    p
+}
+#[test]
+fn authored_cfr_vfr_fractional_and_audio_controls_are_exact() {
+    for c in cases() {
+        let mut r = crate::playback_mp4::Mp4VideoReader::open_software(
+            Cursor::new(bytes(c["file"].as_str().unwrap())),
+            Default::default(),
+            32 << 20,
+        )
+        .unwrap();
+        for i in 0..5 {
+            let f = r.read_frame().unwrap().unwrap();
+            assert_eq!(
+                (f.sample_index, f.presentation_time.ticks, f.duration.ticks),
+                (
+                    i,
+                    c["pts"][i].as_i64().unwrap(),
+                    c["durations"][i].as_i64().unwrap()
+                )
+            );
+            let yuv: Vec<_> = f
+                .picture
+                .y
+                .iter()
+                .chain(&f.picture.cb)
+                .chain(&f.picture.cr)
+                .flat_map(|x| x.to_le_bytes())
+                .collect();
+            assert_eq!(yuv, bytes(&format!("frame-{}.yuv16", i % 3)));
+        }
+        assert!(r.read_frame().unwrap().is_none());
+    }
+    let mut r = crate::playback_wav::WavAudioReader::open(
+        Cursor::new(bytes("sound.wav")),
+        Default::default(),
+    )
+    .unwrap();
+    let mut decoder = crate::audio::AudioStream::make_decoder(&r).unwrap();
+    let mut got = Vec::new();
+    while let Some(packet) = crate::audio::AudioStream::next_packet(&mut r).unwrap() {
+        if let Some(frame) = decoder
+            .decode_packet(&packet.data, packet.pts, packet.duration as u64)
+            .unwrap()
+        {
+            got.extend(frame.packet.data);
+        }
+    }
+    while let Some(frame) = decoder.finish_packet().unwrap() {
+        got.extend(frame.packet.data);
+    }
+    let want = bytes("sound.f32le");
+    assert!(
+        got == want,
+        "WAV native PCM control differs: {} vs {} bytes",
+        got.len(),
+        want.len()
+    );
+}
+#[test]
+fn stop_bound_holds_the_selected_picture_during_later_repaints() {
+    for c in cases() {
+        let ctx = egui::Context::default();
+        let mut p = open(&c, &ctx, false);
+        p.toggle_pause();
+        wait(&mut p, &ctx, |p| p.ended);
+        let start = c["pts"][1].as_u64().unwrap();
+        let end = start + c["durations"][1].as_u64().unwrap();
+        let interval = Some((
+            u128::from(start),
+            u128::from(end),
+            c["scale"].as_u64().unwrap() as u32,
+        ));
+        assert_eq!(p.interval, interval, "stop picture {}", c["file"]);
+        assert_eq!(p.stop_time, None);
+        assert_eq!(p.index, 0);
+        let rgb = display_rgb(p.presented.as_ref().unwrap()).unwrap();
+        let until = Instant::now() + Duration::from_millis(400);
+        while Instant::now() < until {
+            tick(&mut p, &ctx);
+            assert_eq!(
+                p.interval, interval,
+                "{} advanced after --stop-time",
+                c["file"]
+            );
+            assert_eq!(display_rgb(p.presented.as_ref().unwrap()).unwrap(), rgb);
+            assert!(p.ended);
+            std::thread::sleep(Duration::from_millis(1));
+        }
+    }
+}
+#[test]
+fn stop_bound_still_advances_to_a_queued_item() {
+    let c = cases().remove(0);
+    let ctx = egui::Context::default();
+    let mut p = open(&c, &ctx, true);
+    p.toggle_pause();
+    wait(&mut p, &ctx, |p| p.index == 1);
+    assert!(p.error.is_none());
+    assert_eq!(p.stop_time, None);
+    assert_eq!(p.index, 1);
+}
+#[derive(Default)]
+struct SoundTrace {
+    pcm: Vec<u8>,
+    pauses: usize,
+    resumes: usize,
+}
+struct TimedDevice {
+    trace: Arc<Mutex<SoundTrace>>,
+    anchor: Duration,
+    started: Option<Instant>,
+    frontier: Duration,
+}
+impl crate::audio::AudioBackend for TimedDevice {
+    fn start(&mut self, s: crate::audio::AudioSpec) -> Result<(), crate::audio::AudioError> {
+        assert_eq!((s.sample_rate, s.channels), (8000, 1));
+        Ok(())
+    }
+    fn position(&self) -> Duration {
+        self.started.map_or(self.anchor, |s| {
+            self.anchor.saturating_add(s.elapsed()).min(self.frontier)
+        })
+    }
+    fn push(&mut self, p: crate::audio::AudioPacket) -> Result<(), crate::audio::AudioError> {
+        self.frontier =
+            p.presentation_time() + Duration::from_nanos(p.data.len() as u64 / 4 * 125000);
+        self.trace.lock().unwrap().pcm.extend(p.data);
+        Ok(())
+    }
+    fn flush(&mut self, at: Duration) -> Result<(), crate::audio::AudioError> {
+        self.anchor = at;
+        self.frontier = at;
+        if self.started.is_some() {
+            self.started = Some(Instant::now());
+        }
+        Ok(())
+    }
+    fn pause(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.anchor = self.position();
+        self.started = None;
+        self.trace.lock().unwrap().pauses += 1;
+        Ok(())
+    }
+    fn resume(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.started = Some(Instant::now());
+        self.trace.lock().unwrap().resumes += 1;
+        Ok(())
+    }
+    fn stop(&mut self) -> Result<(), crate::audio::AudioError> {
+        self.started = None;
+        Ok(())
+    }
+    fn drain_status(&self) -> Result<bool, crate::audio::AudioError> {
+        Ok(self.position() >= self.frontier)
+    }
+}
+#[test]
+fn sound_only_stop_bound_pauses_the_actual_audio_worker() {
+    let trace = Arc::new(Mutex::new(SoundTrace::default()));
+    let seen = trace.clone();
+    let source = crate::playback_wav::WavAudioReader::open(
+        Cursor::new(bytes("sound.wav")),
+        Default::default(),
+    )
+    .unwrap();
+    let audio = crate::audio_thread::AudioPlayback::start(Box::new(source), move || {
+        Box::new(TimedDevice {
+            trace: seen,
+            anchor: Duration::ZERO,
+            started: None,
+            frontier: Duration::ZERO,
+        })
+    });
+    let ctx = egui::Context::default();
+    let mut p = Player {
+        queue: vec![root().join("sound.wav")],
+        audio: Some(audio),
+        duration: Some(Duration::from_millis(200)),
+        stop_time: Some(Duration::from_millis(40)),
+        paused: false,
+        ..Default::default()
+    };
+    p.audio.as_ref().unwrap().play();
+    wait(&mut p, &ctx, |p| p.ended);
+    assert_eq!(p.stop_time, None);
+    let until = Instant::now() + Duration::from_secs(5);
+    while trace.lock().unwrap().pauses == 0 && Instant::now() < until {
+        tick(&mut p, &ctx);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    let t = trace.lock().unwrap();
+    assert_eq!(t.resumes, 1);
+    assert_eq!(
+        t.pauses, 1,
+        "stop flag did not pause the actual audio producer"
+    );
+    assert_eq!(t.pcm, bytes("sound.f32le"));
+    drop(t);
+    let at = p.audio.as_ref().unwrap().position();
+    assert!(at < Duration::from_millis(200));
+    std::thread::sleep(Duration::from_millis(50));
+    tick(&mut p, &ctx);
+    assert_eq!(p.audio.as_ref().unwrap().position(), at);
+}

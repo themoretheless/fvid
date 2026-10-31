@@ -3020,6 +3020,10 @@ impl Player {
         };
         if self.timeline().0.is_some_and(|at| at >= stop) {
             self.stop_time = None;
+            // A bound can end an item before its sources reach EOF. Park the
+            // producers as well as advancing the playlist/end state.
+            if let Some(playback) = &self.playback { playback.pause(); }
+            if let Some(audio) = &self.audio { audio.pause(); }
             self.continue_queue();
         }
     }
@@ -3648,12 +3652,16 @@ impl Player {
     /// Playback state is kept, and a track without a known duration can only
     /// move forward.
     fn seek_time(&mut self, target: Duration) {
+        // Explicit stop bounds park the producers while preserving the chosen
+        // play/pause mode. Leaving that terminal state must restore that mode.
+        let resume_after_terminal = self.ended && !self.paused;
         let target = match self.duration {
             Some(total) => target.min(total),
             None => target,
         };
         if let Some(playback) = &mut self.playback {
             playback.seek(target);
+            if resume_after_terminal { playback.play(); }
         } else if self.audio.is_none() {
             return;
         }
@@ -3663,6 +3671,8 @@ impl Player {
                 audio.pause();
             }
             audio.seek(target);
+            // With video, present() resumes sound after the seek picture.
+            if resume_after_terminal && self.playback.is_none() { audio.play(); }
         }
         self.audio_ended = false;
         self.prioritize_swap(target);
@@ -3919,6 +3929,11 @@ impl Player {
         self.poll_audio();
         if self.playback.is_none() {
             self.tick_sound(ctx);
+            return;
+        }
+        // A stop bound can leave prefetched pictures in the decoder queue.
+        // Repaints keep the final picture until explicit navigation clears EOF.
+        if self.ended {
             return;
         }
         let stepping = self.step > 0;
@@ -12869,3 +12884,7 @@ mod elementary_programme_factory_regressions {
 #[cfg(test)]
 #[path = "player_mp4_frame_step_tests.rs"]
 mod mp4_frame_step_regressions;
+
+#[cfg(test)]
+#[path = "player_stop_bound_tests.rs"]
+mod stop_bound_regressions;

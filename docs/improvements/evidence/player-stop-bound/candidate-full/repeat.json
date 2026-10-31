@@ -1,0 +1,34 @@
+{
+  "binary_sha256": "9a58c3ebf81dd8960bd3271143b833c5ef771478ee1ea57b45de5bc5d5b867c3",
+  "runs": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "cases_per_run": 4,
+  "source_hashes": {
+    "src/player.rs": "921740483b18ef2e93ebcdd9231728abd41b9594556ce1d3241f15791aa3859c",
+    "src/player_stop_bound_tests.rs": "749b3e602c82a9e1556bcf3124b0eebcb3c56117d371f91a60ee2c518efa7519",
+    "scripts/generate_player_stop_bound.py": "f24a7176222f5153f3a3a6abc93fe3ae4a6d089fc91b97245792fade13cb8e28",
+    "tests/fixtures/playback-errors/player-stop-bound/manifest.json": "b8f667a1e463d96a50100ce59d79876b902ac3ca866a0dc4e1b61fe3272adb73"
+  },
+  "raw_log_sha256": "a63ff743be45402f702940ba66763346aacaab8ae676887663cd51fe595e5b73",
+  "archive_log_sha256": "2b5ae4daecd76d821c38a75a1de372d8b44f4686f6db5996edf8e79a40def573"
+}
