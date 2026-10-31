@@ -1,0 +1,69 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0439"
+  ],
+  "count_delta": 1,
+  "accepted_count": 439,
+  "before_commit": "291a8286c3cf459c3c1f533117571becaf5dd1b1",
+  "checks": {
+    "before": {
+      "suites": 1,
+      "passed": 1,
+      "failed": 1,
+      "ignored": 0
+    },
+    "after": {
+      "suites": 1,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    "integration": {
+      "suites": 116,
+      "passed": 549,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-mp4": {
+      "suites": 1,
+      "passed": 57,
+      "failed": 0,
+      "ignored": 1
+    },
+    "root-webm": {
+      "suites": 1,
+      "passed": 67,
+      "failed": 0,
+      "ignored": 0
+    },
+    "media": {
+      "suites": 1,
+      "passed": 547,
+      "failed": 0,
+      "ignored": 1
+    },
+    "core-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "distinct_passed": 1216,
+  "duplicate_events_excluded": 4,
+  "focused_repeat_not_added": 2,
+  "fixtures": {
+    "movies": 2,
+    "total_files": 9,
+    "independent_packet_and_pts_verified": 2,
+    "repeatability": "identical"
+  },
+  "limitations": "No performance/GPU/UI claim. Existing two ignored tests unchanged. Fix concerns the common single-layer MP4 sync selection; layered operation-point preroll is retained and related regression passes."
+}

@@ -1,0 +1,14 @@
+{
+  "removed_logs": [
+    "/private/tmp/fvid-mp4-seek-reordered-coverage-before.log",
+    "/private/tmp/fvid-mp4-seek-reordered-coverage-after.log",
+    "/private/tmp/fvid-mp4-seek-reordered-coverage-integration.log",
+    "/private/tmp/fvid-mp4-seek-reordered-coverage-root-mp4.log",
+    "/private/tmp/fvid-mp4-seek-reordered-coverage-root-webm.log",
+    "/private/tmp/fvid-mp4-seek-reordered-coverage-media.log",
+    "/private/tmp/fvid-mp4-seek-reordered-coverage-core-check.log",
+    "/private/tmp/fvid-mp4-seek-reordered-coverage-player-check.log"
+  ],
+  "removed_target": "/private/tmp/fvid-mp4-seek-reordered-coverage-20261031",
+  "preserved": "All synthetic media, oracles, generators, regression tests and archived proof. Foreign jobs/worktrees/stashes untouched."
+}

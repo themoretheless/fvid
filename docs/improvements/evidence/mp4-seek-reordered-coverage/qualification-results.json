@@ -1,0 +1,26 @@
+{
+  "integration": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-seek-reordered-coverage-integration.log"
+  },
+  "root-mp4": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-seek-reordered-coverage-root-mp4.log"
+  },
+  "root-webm": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-seek-reordered-coverage-root-webm.log"
+  },
+  "media": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-seek-reordered-coverage-media.log"
+  },
+  "core-check": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-seek-reordered-coverage-core-check.log"
+  },
+  "player-check": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-seek-reordered-coverage-player-check.log"
+  }
+}

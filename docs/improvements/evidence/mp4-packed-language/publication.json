@@ -1,0 +1,10 @@
+{
+  "verified_utc": "2026-10-31T01:54:53.571040+00:00",
+  "head": "291a8286c3cf459c3c1f533117571becaf5dd1b1",
+  "remote_refs": {
+    "refs/heads/codex/deliver-fvid-20261029": "291a8286c3cf459c3c1f533117571becaf5dd1b1",
+    "refs/heads/main": "291a8286c3cf459c3c1f533117571becaf5dd1b1"
+  },
+  "delivery": "atomic main and codex/deliver-fvid-20261029 push; active foreign worktrees/stashes retained",
+  "cleanup": "cleanup.json"
+}

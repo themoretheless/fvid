@@ -1,0 +1,6 @@
+{
+  "src/playback/video/mp4.rs": "b5712f1d5bc7f36f217290ef09ed4288e706b0f74362221ba351812f6de876b9",
+  "tests/mp4_seek_reordered_coverage.rs": "b0d99dc22d8a0c354f73884989a1a5c1c44cc6939e0ef5be8a3161037495001a",
+  "scripts/generate_mp4_seek_reordered_coverage.py": "a82e8c68bd07e2609c0a3a8ab71a9e9bc94be4018c6b0811042de42c3ae1d905",
+  "tests/fixtures/playback-errors/mp4-seek-reordered-coverage/manifest.json": "47c0624401e83490d0d40758e0862c4d6e547581328d32d59167183702f3f638"
+}

@@ -1,0 +1,13 @@
+{
+  "status": "accepted FVID-0439; all qualification jobs terminal; publication pending",
+  "base": "291a8286c3cf459c3c1f533117571becaf5dd1b1",
+  "session": 45889,
+  "target": "/private/tmp/fvid-mp4-seek-reordered-coverage-20261031",
+  "log": "/private/tmp/fvid-mp4-seek-reordered-coverage-before.log",
+  "hypothesis": "One-step sync fallback can return landing8 while omitting earlier decode-order non-sync sample with PTS9. Compare actual decoded sequential suffix after returned landing, not merely requested target picture.",
+  "prior_source": "git blame d07985753a2 original MP4 decoder reconfiguration; review counting eligibility if reproduced",
+  "production_fix": "Admit sync candidates only when all earlier sample PTS are strictly smaller; retain all rewind/preroll handling",
+  "qualification_session": 9081,
+  "expected_gate": "116 full integration suites, root MP4/WebM and media units, locked/offline core/player checks",
+  "counting_review": "No existing accepted entry describes this incomplete one-step fallback; FVID0409 concerns decode-only output recovery, and FVID0396 layered ordering. Count only after qualification."
+}

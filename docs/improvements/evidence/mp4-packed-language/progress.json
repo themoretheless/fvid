@@ -1,5 +1,5 @@
 {
-  "status": "accepted FVID-0438; publication pending",
+  "status": "accepted FVID-0438; published main and delivery branch, artifacts removed",
   "base": "6f1944608bc0f79efc1c75e0d497f3c54edee237",
   "cases": 48,
   "scope": "Packed mdhd v0/v1: unspecified, reserved high bit and nonletter 5-bit groups; valid language controls; actual packets, software decoded frames, seek and EOF",

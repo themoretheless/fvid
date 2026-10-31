@@ -1,0 +1,49 @@
+{
+  "tool": "ffprobe version 9.0.2 Copyright (c) 2007-2026 the FFmpeg developers",
+  "cases": {
+    "ordered.mp4": [
+      {
+        "pts": 0,
+        "data_hash": "SHA256:d586e4311a14b4eeebf2c61fadc917a6dc99aeccb87ceffb1e5166c318e67346"
+      },
+      {
+        "pts": 1,
+        "data_hash": "SHA256:81a6bc19b3f2ed2d203a852e97b487c13712d0a3d9730d8cadf902a5cbda05c4"
+      },
+      {
+        "pts": 2,
+        "data_hash": "SHA256:338d4038d521a4e55109198d490b0f8ac78bbb13d41591848bbe2ac879988144"
+      },
+      {
+        "pts": 3,
+        "data_hash": "SHA256:d586e4311a14b4eeebf2c61fadc917a6dc99aeccb87ceffb1e5166c318e67346"
+      },
+      {
+        "pts": 4,
+        "data_hash": "SHA256:81a6bc19b3f2ed2d203a852e97b487c13712d0a3d9730d8cadf902a5cbda05c4"
+      }
+    ],
+    "reordered.mp4": [
+      {
+        "pts": 7,
+        "data_hash": "SHA256:d586e4311a14b4eeebf2c61fadc917a6dc99aeccb87ceffb1e5166c318e67346"
+      },
+      {
+        "pts": 9,
+        "data_hash": "SHA256:81a6bc19b3f2ed2d203a852e97b487c13712d0a3d9730d8cadf902a5cbda05c4"
+      },
+      {
+        "pts": 8,
+        "data_hash": "SHA256:338d4038d521a4e55109198d490b0f8ac78bbb13d41591848bbe2ac879988144"
+      },
+      {
+        "pts": 12,
+        "data_hash": "SHA256:d586e4311a14b4eeebf2c61fadc917a6dc99aeccb87ceffb1e5166c318e67346"
+      },
+      {
+        "pts": 10,
+        "data_hash": "SHA256:81a6bc19b3f2ed2d203a852e97b487c13712d0a3d9730d8cadf902a5cbda05c4"
+      }
+    ]
+  }
+}

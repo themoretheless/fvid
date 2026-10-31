@@ -904,23 +904,20 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         // A video track always indexes one record per sample; with no such index
         // there is nothing to restart from but the first sample.
         let samples = self.track().samples.expanded().unwrap_or(&[]);
-        let index = samples
-            .iter()
-            .enumerate()
-            .filter(|(_, s)| s.sync && s.pts <= pts)
-            // Start before the entire equal-PTS group so seek agrees with
-            // sequential playback, including its accumulated final interval.
-            .max_by_key(|(index, s)| (s.pts, std::cmp::Reverse(*index)))
-            .map_or(0, |(i, _)| i);
-        // A sync sample can have an earlier PTS than a packet that precedes it
-        // in decode order. Starting there would omit that later display frame
-        // and incorrectly extend the preceding interval across the hole.
-        let landing = samples.get(index).map_or(pts, |s| s.pts);
-        let required = samples.iter().position(|s| s.pts >= landing).unwrap_or(index);
-        let index = samples.iter().enumerate().take(index.min(required) + 1)
-            .filter(|(_, s)| s.sync && s.pts <= pts)
-            .max_by_key(|(i, s)| (s.pts, std::cmp::Reverse(*i)))
-            .map_or(0, |(i, _)| i);
+        // A sync candidate must precede every output at or after its own
+        // presentation time. Checking only the initial candidate is insufficient:
+        // falling back to an earlier PTS can expose another omitted frame.
+        // A prefix maximum also keeps the first member of equal-PTS groups.
+        let mut index = 0;
+        let mut earlier_pts = None;
+        for (i, sample) in samples.iter().enumerate() {
+            if sample.sync && sample.pts <= pts
+                && earlier_pts.is_none_or(|earlier| earlier < sample.pts)
+            {
+                index = i;
+            }
+            earlier_pts = Some(earlier_pts.map_or(sample.pts, |earlier: i64| earlier.max(sample.pts)));
+        }
         self.rewind();
         self.sample_index = index;
         let setup = self.track().description_for_sample(index);

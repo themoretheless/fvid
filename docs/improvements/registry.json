@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 438,
-  "next_id": "FVID-0439",
+  "accepted_count": 439,
+  "next_id": "FVID-0440",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4920,6 +4920,17 @@
       "result": "Optional language metadata falls back to unknown for reserved-bit or nonletter codes, preserving valid three-letter codes and existing und behavior.48 authored mdhd v0/v1 movies pass root/owned readers and probe, exact packets/PTS, actual decoded pictures, seven seeks, rewind and EOF.1206 distinct checks and locked/offline core/player builds pass. Extended-language precedence regressions unchanged.",
       "status": "accepted",
       "validation": "batch-438-validation.json"
+    },
+    {
+      "id": "FVID-0439",
+      "batch": 439,
+      "title": "Preserve every presentation frame after single-layer MP4 sync fallback",
+      "source": "src/playback/video/mp4.rs",
+      "regression": "tests/mp4_seek_reordered_coverage.rs",
+      "before": "Original291a8286c3 passes ordered control and fails reordered acceptance. Five authored VP9 keyframes with conservative stss1,3,5 and PTS7,9,8,12,10: seek10 returns8 but omits PTS9 and stretches interval8 to10.",
+      "result": "Choose only sync candidates whose presentation time exceeds all earlier decode-order PTS, retaining full sequential suffix and equal-PTS group coverage. Existing rewind/reference/parameter preroll remains. Exact decoded color planes, sample indexes, presentation intervals and EOF pass for ordered and reordered movies; independent packet hashes and PTS match.116 integration suites549 pass, root MP4/WebM and media units pass,1216 distinct checks after4 duplicate events, and locked/offline core/player builds pass. No throughput claim.",
+      "status": "accepted",
+      "validation": "batch-439-validation.json"
     }
   ]
 }

@@ -1,0 +1,34 @@
+{
+  "before": {
+    "path": "/private/tmp/fvid-mp4-seek-reordered-coverage-before.log",
+    "sha256": "538e1002fa9d5f1f38840b559af2af6a06714eb49e3dbf320d9a0566d4ee9980"
+  },
+  "after": {
+    "path": "/private/tmp/fvid-mp4-seek-reordered-coverage-after.log",
+    "sha256": "516865c712f2cbc654944d56dfc1634574bad7fbca0323a8e5fcd57e77484be6"
+  },
+  "integration": {
+    "path": "/private/tmp/fvid-mp4-seek-reordered-coverage-integration.log",
+    "sha256": "123513d71aeebd909173e947d8d772970f5eefff20d7cc95b2840dbad17cdd75"
+  },
+  "root-mp4": {
+    "path": "/private/tmp/fvid-mp4-seek-reordered-coverage-root-mp4.log",
+    "sha256": "728e399af73dc5b2f4fc830da4c77bcfc738ebabba1150afd30fe624c9659213"
+  },
+  "root-webm": {
+    "path": "/private/tmp/fvid-mp4-seek-reordered-coverage-root-webm.log",
+    "sha256": "0b6001a4cc4463ea4b18b662b88b4942ba9678d1b7026fbf920cb8d5a1479edc"
+  },
+  "media": {
+    "path": "/private/tmp/fvid-mp4-seek-reordered-coverage-media.log",
+    "sha256": "943ff77ad8d7c3f8c6d268baa0f371b4a8b7a7f1d51d6f0b51e3284bb129d11c"
+  },
+  "core-check": {
+    "path": "/private/tmp/fvid-mp4-seek-reordered-coverage-core-check.log",
+    "sha256": "b12221d178077931bce9e2437598d49f37e4e38977f5bef1618293f8cd560ff9"
+  },
+  "player-check": {
+    "path": "/private/tmp/fvid-mp4-seek-reordered-coverage-player-check.log",
+    "sha256": "4487f46ced163cc6fea2f206aad0453aef8f9f90a08874497cd55c87e88696a8"
+  }
+}
