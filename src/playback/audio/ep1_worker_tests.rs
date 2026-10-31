@@ -405,3 +405,8 @@ fn ld_mps128_stp_worker_keeps_source_windows_through_navigation() {
 fn ld_mps128_ges_worker_keeps_source_windows_through_navigation() {
     check_corpus("aac-eld-mps128-ges");
 }
+
+#[test]
+fn plain_eld_residual64_worker_keeps_both_core_source_windows() {
+    check_corpus("aac-eld-residual64-multicore");
+}

@@ -1,0 +1,127 @@
+{
+  "baseline": "4bab56a6ad",
+  "runtime_changed": false,
+  "scope": "New qualification of already working48kHz no-SBR ELD residual64 with two-core15/16-slot windows,all trees/TTT variants,23 parameter bands,six transport/tool modes.",
+  "coverage": {
+    "programmes": 132,
+    "residual_acceptance_movies": 264,
+    "ordinary_mp4_controls": 132,
+    "bare_scalar_core_controls": 6,
+    "core_packets_per_programme": 24,
+    "pcm_oracle_values": 10570752,
+    "pcm_max_error": 2.6683023629167635e-11,
+    "residual_signal_min": 8.217572726451974e-06,
+    "icc_signal_min": 2.534847504055153e-06,
+    "worker_programmes": 264,
+    "worker_live_seeks_per_programme": 16,
+    "source_edges": [
+      "4*n",
+      "8*n",
+      "16*n"
+    ],
+    "live_prefix_calls": 4
+  },
+  "qualification": "Analytical core plus qualified separate residual and spatial stages;not independent whole-codec or normative-profile conformance. No physical-device or real-time qualification.",
+  "gates": {
+    "targets": [
+      "aac_eld_residual64_multicore",
+      "aac_eld",
+      "aac_ld_mps_residual_native",
+      "aac_ld_mps_residual_bank_repro",
+      "aac_ld_mps_shared128"
+    ],
+    "gates": [
+      {
+        "gate": "worker",
+        "command": [
+          "cargo",
+          "--config",
+          "profile.dev.package.fvid-media.opt-level=2",
+          "test",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "player",
+          "--lib",
+          "plain_eld_residual64_worker",
+          "--",
+          "--nocapture"
+        ],
+        "log": "/tmp/fvid-plain-residual64-gate-worker.log",
+        "status": 0,
+        "seconds": 220.84367833301076,
+        "log_sha256": "93b4cb8f04cb91de411e950aa3d0353e68483f3bd8f5ce6401d9cc4937b58af4",
+        "results": {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      },
+      {
+        "gate": "integration",
+        "command": [
+          "cargo",
+          "--config",
+          "profile.dev.package.fvid-media.opt-level=2",
+          "test",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "player",
+          "--test",
+          "aac_eld_residual64_multicore",
+          "--test",
+          "aac_eld",
+          "--test",
+          "aac_ld_mps_residual_native",
+          "--test",
+          "aac_ld_mps_residual_bank_repro",
+          "--test",
+          "aac_ld_mps_shared128",
+          "--",
+          "--nocapture"
+        ],
+        "log": "/tmp/fvid-plain-residual64-gate-integration.log",
+        "status": 0,
+        "seconds": 182.58457504201215,
+        "log_sha256": "af43b738c78aba2057f852d33b8e1a05749e66abdc93fe6cd9a4733cf92fd735",
+        "results": {
+          "passed": 18,
+          "failed": 0,
+          "ignored": 1
+        }
+      }
+    ]
+  },
+  "totals": {
+    "passed": 19,
+    "failed": 0,
+    "ignored": 1
+  },
+  "ignored": "Explicitly pending residual32/128 acceptance,not playback acceptance.",
+  "files": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_native.rs": "1dfa4c2f0d7fd6760c69aecf74b497f486c756c56e90cf7de50705cc1d2e2309",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_residual_native.rs": "981aec05d8f6b0f5a730a1ce939e73f094756210c1c17ad8f81982489b61ff33",
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_session.rs": "0bf427bc29743a03d11ade9f75956635313a62d109f9cc5dfb4d8b70ebf34e3f",
+    "crates/fvid-media/src/owned_aac/aac_mps_mdct_qmf.rs": "6549ceacd1bbb168633da6187a565457e3eeda96761533d4f2747e324bdd1377",
+    "docs/CODEC_PROGRESS.md": "44a1d6dfe93871349f811f681ccec346f676e1a4c42c773d38107777fd31ee4a",
+    "docs/validation/aac-eld-residual64-multicore-generation-2026-10-31.json": "ab5f0d39d9ac979b92d6c189fd6f798574b3770e4cb972b66f5b38899d7ce098",
+    "docs/validation/aac-mps-mdct-qmf-reference-2026-10-30.json": "ee25a441ea0e6ac0f78df8fb06fbce661f0bc7e94e702390da009c63dc0848b0",
+    "docs/validation/aac-mps-residual-icc-reference-2026-10-31.json": "08d79a6159f9a6ee7edd29a3c1ee4d46731b28e631cf6127f4c331e49d0669f7",
+    "scripts/generate_aac_eld_fixtures.py": "faa1c4a7f2049feea447ec055d01a791abea46f51206f384a0c5cb0a6b96fd08",
+    "scripts/generate_aac_eld_residual64_multicore_fixtures.py": "98e09c47ec74ee4a56cf86ded6db2dc7323f77debd39e52137b9c19aa13d4780",
+    "scripts/generate_aac_ld_mps_residual_native_fixtures.py": "ddfab9da7099c45a2e1ad861137772fe6162abe884d4625264728a974b441d3b",
+    "src/playback/audio/ep1_worker_tests.rs": "1820a149349ffda908120966224045b408a5b4532e322b9463997bda2caac428",
+    "tests/aac_eld_residual64_multicore.rs": "660856f37cd33d63d6db24fd77955b94ab0f1cc83501a2cec319aeec23968af6"
+  },
+  "unqualified": [
+    "additional core grouping/rates",
+    "other spatial parameter grids",
+    "protected spatial AAC",
+    "residual32/128",
+    "LFE residual",
+    "time alignment",
+    "physical output",
+    "real-time throughput"
+  ]
+}

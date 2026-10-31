@@ -1,3 +1,42 @@
+## Non-SBR AAC-ELD + residual64 — two-core source windows,2026-10-31
+
+The owned runtime already accepts this domain; this checkpoint extends
+qualification rather than fixing a decoder refusal. Production sources remain
+identical to4bab56a6ad. The root change adds a test-only AudioWorker entrypoint;
+fixture helpers add optional24-frame/temporal-control generation while preserving
+their original defaults.
+
+132 own programmes cover48kHz,480/512 ELD cores,two source packets per15/16-slot
+spatial frame,all8 trees,both TTT variants and23 parameter bands. Plain,repeated
+headers,delayed bursts,fragmentation,STP and GES are exercised. Residual MP4/MKV
+pairs provide264 acceptance movies;132 paired ordinary MP4 controls and6 bare
+24-frame scalar-core controls are separate.
+
+Complete residual output matches10,570,752 compositional-oracle samples within
+2.669e-11. Minimum isolated signal effects are8.217e-6 for residual spectra and
+2.534e-6 for ICC correction. The oracle uses analytical ELD core,separate
+residual parsing/qualified MDCT-QMF state and explicitly pre-corrected matrix
+syntax. STP/GES temporal controls are independently encoded. This is not an
+independent full-decoder or normative-profile conformance oracle.
+
+Both owned/frontend container exports,AudioStream playback,forward/backward/
+middle/EOF seek,rewind and repeated ranges compare exact PCM. AudioWorker
+capture checks264 programmes and16 live-history seeks each,including both sides
+of three source boundaries,with exact MP4 clocks and<1ns Matroska publication
+rounding. Physical audio output and real-time performance remain unqualified.
+
+Final gate:19 passed,0 failed,1 explicitly pending residual32/128 acceptance
+across five selected integration targets and the new AudioWorker test. The
+full player/media unit suites are not presented as freshly rerun here,as no
+production source changed. The test-only worker module is cfg(test).
+
+Own generation reproduces411 files under process/network denial and preserves
+706 ordinary128-band and115 residual32/128 reproduction files byte-for-byte.
+Tests use frozen files,without FFmpeg,network or C reference compilation.
+Additional core grouping/rates,other parameter grids,protected spatial AAC,
+residual32/128,LFE residual and time alignment remain unqualified here.
+Evidence: `docs/validation/aac-eld-residual64-multicore-{generation,tests}-2026-10-31.json`.
+
 ## Shared normalized QMF128 — corrected input admission,2026-10-31
 
 A constructor/validator mismatch rejected valid128-band input:the constructor

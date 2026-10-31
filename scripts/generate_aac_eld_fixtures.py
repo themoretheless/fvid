@@ -64,7 +64,7 @@ def specifications():
     specs += [(n,24000,2,t,0,1,False)for n in [512,480]for t in ['pns','correlated-pns','intensity','tns']]
     return specs
 
-def generate(include_payload_bits=False, specs=None, include_category_bits=False, output_samples=None, synthesis_window=None):
+def generate(include_payload_bits=False, specs=None, include_category_bits=False, output_samples=None, synthesis_window=None, frame_count=12):
     files={};cases=[];blob=bytearray()
     for n,rate,configuration,tool,flags,ms,high in (specifications() if specs is None else specs):
         elements,mapping,mask=LAYOUTS[configuration];channels=len(mapping)
@@ -83,7 +83,7 @@ def generate(include_payload_bits=False, specs=None, include_category_bits=False
         if not high:offsets=[0,4,8]
         positions=(0,1,2,3,last,last+1,last+2,last+3)
         cos=cosines(sn,positions)
-        for frame in range(12):
+        for frame in range(frame_count):
             bits='';spectra=[];ch=0;instances=[]
             for element in elements:
                 width=2 if element==1 else 1
@@ -157,7 +157,7 @@ def generate(include_payload_bits=False, specs=None, include_category_bits=False
                 pcm.append(struct.pack('<'+'f'*channels,*row))
         name=f'n{n}-c{configuration}'if tool=='base'else f'n{n}-r{rate}-c{configuration}-{tool}-f{flags}'
         config=asc(n,configuration,rate,flags);files[name+'.asc']=config;files[name+'.f32le']=b''.join(pcm)
-        case=dict(name=name,n=n,rate=output_rate,configuration=configuration,mask=mask,tool=tool,flags=flags,asc=config.hex(),channels=channels,frames=rows,container_rate=output_rate,container_frame_samples=sn,samples=12*sn,pcm_offset=0,slots=n//64,bands=32)
+        case=dict(name=name,n=n,rate=output_rate,configuration=configuration,mask=mask,tool=tool,flags=flags,asc=config.hex(),channels=channels,frames=rows,container_rate=output_rate,container_frame_samples=sn,samples=frame_count*sn,pcm_offset=0,slots=n//64,bands=32)
         movie=video_fixture([case],blob,channels,filename=name+'.mp4',write=False)
         files[name+'.mp4']=movie.pop('data');case['video']=name+'.mp4'
         files[name+'.mka']=mkv(config,packets,output_rate,sn,channels);case['matroska']=name+'.mka'

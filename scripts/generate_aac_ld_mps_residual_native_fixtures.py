@@ -52,7 +52,7 @@ def payload(c,frame,slots,cutoffs,bad=None):
   data+=b'\xff\x55'
  return data,differences
 
-def control_body(c,differences):
+def control_body(c,differences,temporal_bits=''):
  rows=[]
  for r in c['frames'][0]['parameters']:
   if r['id']=='ott-icc:all':
@@ -69,7 +69,7 @@ def control_body(c,differences):
      for b,v in enumerate(diff):values[ps][b]+=v
   levels,offset={'CLD':(31,15),'ICC':(8,0),'CPC':(51,20)}[r['kind']]
   wire+='1111'+'10001'+pcm([values[ps][b]+offset for b in range(len(values[0]))for ps in range(2)],levels)
- return packed(wire+'00'+'1001')+b'\0'
+ return packed(wire+'00'+'1001'+temporal_bits)+b'\0'
 
 def main():
  OUT.mkdir(exist_ok=True);parent=FIX/'aac-ld-mps-stp';catalog=json.loads((parent/'manifest.json').read_text())['cases'];pb=(parent/'packets.bin').read_bytes();assembly=FIX/'aac-ld-mps-assemble';am=json.loads((assembly/'manifest.json').read_text())['cases'];configs=(assembly/'configs.bin').read_bytes();book=json.loads((FIX/'aac-ld-mps-frame/reshape-codewords.json').read_text());blob=bytearray();cases=[];errors=[];refusals=[]
