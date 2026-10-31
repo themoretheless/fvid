@@ -1,0 +1,8 @@
+{
+  "provenance": "Authored arithmetic MACE blocks and existing authored neutral VP9 only; no private media, encoder or network. Manual benchmark input.",
+  "blocks": 160000,
+  "timescale": 48000,
+  "block_ticks": 36,
+  "sha256": "e76b6e366cbddc880557abbeb443fef020aa8a1af373cff4967e6a58016ad208",
+  "bytes": 345914
+}

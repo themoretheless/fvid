@@ -1,0 +1,68 @@
+{
+  "exit_code": 0,
+  "binary_sha256": "3ce86850613c5adbbafa0e1ee813a8e07e96f2118dd58684b1664526a72258f8",
+  "workload_sha256": "e76b6e366cbddc880557abbeb443fef020aa8a1af373cff4967e6a58016ad208",
+  "warmup_excluded": {
+    "navigation_ns": 136588208,
+    "packets": 160000,
+    "queries": 1000,
+    "scope": "memory-resident MACE MP4; seek setup and real preroll to first PCM measured separately; no whole-player or hardware claim",
+    "seek_pcm_ns": 26116209
+  },
+  "samples": [
+    {
+      "navigation_ns": 136098209,
+      "packets": 160000,
+      "queries": 1000,
+      "scope": "memory-resident MACE MP4; seek setup and real preroll to first PCM measured separately; no whole-player or hardware claim",
+      "seek_pcm_ns": 26934458
+    },
+    {
+      "navigation_ns": 138219750,
+      "packets": 160000,
+      "queries": 1000,
+      "scope": "memory-resident MACE MP4; seek setup and real preroll to first PCM measured separately; no whole-player or hardware claim",
+      "seek_pcm_ns": 26338125
+    },
+    {
+      "navigation_ns": 135376792,
+      "packets": 160000,
+      "queries": 1000,
+      "scope": "memory-resident MACE MP4; seek setup and real preroll to first PCM measured separately; no whole-player or hardware claim",
+      "seek_pcm_ns": 25796042
+    },
+    {
+      "navigation_ns": 136299916,
+      "packets": 160000,
+      "queries": 1000,
+      "scope": "memory-resident MACE MP4; seek setup and real preroll to first PCM measured separately; no whole-player or hardware claim",
+      "seek_pcm_ns": 26857667
+    },
+    {
+      "navigation_ns": 136037708,
+      "packets": 160000,
+      "queries": 1000,
+      "scope": "memory-resident MACE MP4; seek setup and real preroll to first PCM measured separately; no whole-player or hardware claim",
+      "seek_pcm_ns": 28391625
+    },
+    {
+      "navigation_ns": 136100833,
+      "packets": 160000,
+      "queries": 1000,
+      "scope": "memory-resident MACE MP4; seek setup and real preroll to first PCM measured separately; no whole-player or hardware claim",
+      "seek_pcm_ns": 26235584
+    },
+    {
+      "navigation_ns": 136263916,
+      "packets": 160000,
+      "queries": 1000,
+      "scope": "memory-resident MACE MP4; seek setup and real preroll to first PCM measured separately; no whole-player or hardware claim",
+      "seek_pcm_ns": 26616000
+    }
+  ],
+  "medians": {
+    "navigation_ns": 136100833,
+    "seek_pcm_ns": 26616000
+  },
+  "scope": "Standalone baseline evidence only. Paired comparison still required."
+}

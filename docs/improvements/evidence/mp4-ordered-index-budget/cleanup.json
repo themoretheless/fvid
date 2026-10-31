@@ -18,7 +18,8 @@
     "/private/tmp/fvid-mp4-ordered-index-budget-baseline-build.log",
     "/private/tmp/fvid-mp4-ordered-index-budget-after-build.log",
     "/private/tmp/fvid-mp4-ordered-index-budget-cpu-comparison.json",
-    "/private/tmp/fvid-mp4-ordered-index-budget-20261031"
+    "/private/tmp/fvid-mp4-ordered-index-budget-20261031",
+    "/private/tmp/fvid-mp4-ordered-index-budget-cpu-input.json"
   ],
   "preserved": "regression corpus, generators, proof archives, foreign jobs/worktrees/stashes"
 }

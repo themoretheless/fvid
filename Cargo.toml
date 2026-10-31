@@ -318,3 +318,8 @@ harness = false
 name = "mp4_seek_navigation"
 harness = false
 required-features = ["player"]
+
+[[bench]]
+name = "mp4_audio_preroll_navigation"
+harness = false
+required-features = ["player"]

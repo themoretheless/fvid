@@ -1,0 +1,8 @@
+Running tests/mp4_audio_preroll_navigation.rs (/private/tmp/fvid-mp4-audio-preroll-target-20261031/debug/deps/mp4_audio_preroll_navigation-a3e370a546960fcf)
+
+running 3 tests
+test direct_packet_seek_keeps_its_public_landing_contract ... ok
+test preroll_seeks_preserve_exact_predictor_pcm_and_endpoints ... ok
+test actual_audio_worker_replays_history_after_repeated_seeks ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.74s

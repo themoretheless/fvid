@@ -1,0 +1,8 @@
+{
+  "exit_code": 0,
+  "session": 15399,
+  "command": "cargo rustc --release --locked --offline --no-default-features --features player --bench mp4_audio_preroll_navigation",
+  "binary_sha256": "a56f64a6fee6904460ffb86d198fe9ea4be2354c491515cb97468a6dbc5c089c",
+  "raw_log_sha256": "f00d572ef670e6eab10638045807e68674d9fe6f848139a694cb9be5127e5c00",
+  "sources_verified": "after-source.json"
+}

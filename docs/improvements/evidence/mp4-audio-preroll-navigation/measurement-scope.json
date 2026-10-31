@@ -1,0 +1,14 @@
+{
+  "predeclared_protocol": "progress.json; comparator script frozen before comparison",
+  "paired_rounds": 7,
+  "warmups_excluded": 2,
+  "samples_per_binary": 7,
+  "navigation_before_ms": 137.638875,
+  "navigation_after_ms": 0.004833,
+  "seek_pcm_before_ms": 26.537834,
+  "seek_pcm_after_ms": 26.172459,
+  "criteria_met": true,
+  "limitation": "Setup-only microbenchmark on one memory-resident MACE expanded index. First-PCM cost practically unchanged; no sustained throughput or whole-player speedup claim.",
+  "baseline_compilers_terminal_before_timing": true,
+  "after_compilers_terminal_before_timing": true
+}

@@ -1,0 +1,56 @@
+{
+  "before": {
+    "path": "/private/tmp/fvid-mp4-audio-preroll-before.log",
+    "sha256": "261efffdf4ce1c6151f61a07a03b35e50e7a9d6e469d1f421a0e47bcf3f543fb",
+    "archive": "before.log",
+    "archive_sha256": "825e962c67e4870c31aae0611f9ba31782e6709748fde9890a1ab55b5cb9233c"
+  },
+  "baseline-build": {
+    "path": "/private/tmp/fvid-mp4-audio-preroll-baseline-build.log",
+    "sha256": "ec9587f1ca940a2a13963673129808258e1f6f759d7cec59f076a1f95873c18c",
+    "archive": "baseline-build.log.gz",
+    "archive_sha256": "aba588cb3906ea88b06a599354a4d8ef0adde7347665f526572d86cc5a4d6856"
+  },
+  "after-build": {
+    "path": "/private/tmp/fvid-mp4-audio-preroll-after-build.log",
+    "sha256": "f00d572ef670e6eab10638045807e68674d9fe6f848139a694cb9be5127e5c00",
+    "archive": "after-build.log.gz",
+    "archive_sha256": "c20ee02ed997a858d85e6ba2068acf10aa5f06cfb5f3a1719c8281253bf8bc04"
+  },
+  "integration": {
+    "path": "/private/tmp/fvid-mp4-audio-preroll-integration.log",
+    "sha256": "d049e23ed0ff5dcb31f2176c3dc2495cba48d7c176c22af526bae601e60a23ce",
+    "archive": "integration.log",
+    "archive_sha256": "f9f2cd12933a788114377e8b266902b2966c6af006ee5d59b03e419a706c2e60"
+  },
+  "root-mp4": {
+    "path": "/private/tmp/fvid-mp4-audio-preroll-root-mp4.log",
+    "sha256": "15e90a83d394404b337b1046d749817cefa74018310530131ba8c6fbbd99cbda",
+    "archive": "root-mp4.log",
+    "archive_sha256": "975ae9e25ae0786b3e71db6697cbc2ffb6e19e58035040b463608b49be85389f"
+  },
+  "root-webm": {
+    "path": "/private/tmp/fvid-mp4-audio-preroll-root-webm.log",
+    "sha256": "277023b08c4c3c575514834103033dac870d46fa55beca61d622069a1c128431",
+    "archive": "root-webm.log",
+    "archive_sha256": "9d553609289b0fae44bad0624d19823fe43e9f610f8832c4fb1ffaad22807f0c"
+  },
+  "media": {
+    "path": "/private/tmp/fvid-mp4-audio-preroll-media.log",
+    "sha256": "587f28eebd65d864ae8a59a3df983fa634477610c8bea783d63c30ec7715f56b",
+    "archive": "media.log",
+    "archive_sha256": "989bb5d0881a4a5a19c2316fadcf0d364dd9f4a68306416b70d6fb46e11b79e4"
+  },
+  "core-check": {
+    "path": "/private/tmp/fvid-mp4-audio-preroll-core-check.log",
+    "sha256": "5e2c2b0a9cb7ddbe83abe62b42c20acdec59af9bf30d61f551eb34a83f10b1ff",
+    "archive": "core-check.log",
+    "archive_sha256": "5e2c2b0a9cb7ddbe83abe62b42c20acdec59af9bf30d61f551eb34a83f10b1ff"
+  },
+  "player-check": {
+    "path": "/private/tmp/fvid-mp4-audio-preroll-player-check.log",
+    "sha256": "58c0a231a6581b0a8cdb21a5cd6459ef53eefe509bf1a78828ea142cb22cd3c9",
+    "archive": "player-check.log",
+    "archive_sha256": "58c0a231a6581b0a8cdb21a5cd6459ef53eefe509bf1a78828ea142cb22cd3c9"
+  }
+}

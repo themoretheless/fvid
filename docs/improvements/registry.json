@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 443,
-  "next_id": "FVID-0444",
+  "accepted_count": 444,
+  "next_id": "FVID-0445",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4975,6 +4975,17 @@
       "result": "Use immutable next-sample PTS for strict order without retaining a suffix array; keep the charged array for reordered/equal PTS and refuse zero reorder working budget. Safe private payload/ledger measurements show ordered1200000→0 bytes,general case1200000 unchanged. Actual150000 pictures and seven opens/seeks pass at2MiB; intrinsic VP9 and general reorder refusals remain. Seven default-release CPU pairs meet predeclared<=10% median regression guard: navigation+4.3%,actual seek+RGB effectively unchanged,opening faster.120 integration suites563 pass;1231 distinct checks and both builds pass. Scope is retained index/decoder budget,not total RAM or player throughput.",
       "status": "accepted",
       "validation": "batch-443-validation.json"
+    },
+    {
+      "id": "FVID-0444",
+      "batch": 444,
+      "title": "Avoid discarded packet-index searches during mandatory MP4 audio preroll",
+      "source": "src/playback/audio/mp4_audio.rs",
+      "regression": "tests/mp4_audio_preroll_navigation.rs",
+      "before": "Publishedba574b83d3 searches the packet index and rewinds,then discards the landed packet and rewinds again for mandatory history restoration. Seven standalone default-release baseline runs show136.10ms for1000 seek setups on160000 authored MACE blocks; independent PCM,direct-packet contract and actual worker controls pass. Initial compact-index workload rejected before timing.",
+      "result": "Perform the packet lookup only when no mandatory preroll is needed; retain requested-floor clamping and complete history replay. Seven paired baseline/after runs meet predeclared criteria:1000 warm seek setups137.64ms to0.004833ms,all7 pairs win. Real seek-to-first-PCM26.54ms versus26.17ms is practically unchanged,not a whole-player speedup claim. Eight short authored controls preserve exact independently decoded PCM,fractional/backward/EOF seeks,direct packet landing and actual AudioPlayback worker output.121 integration suites566 pass;1234 distinct checks and core/player builds pass.",
+      "status": "accepted",
+      "validation": "batch-444-validation.json"
     }
   ]
 }

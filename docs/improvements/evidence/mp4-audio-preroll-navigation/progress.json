@@ -1,0 +1,38 @@
+{
+  "status": "accepted FVID-0444; all gates passed; owned temporary artifacts removed; publication pending",
+  "base": "ba574b83d397148aa1df3fd434468ad1b12327e9",
+  "source_sha256": "20c647c43b49b16aad880d931b83cd243c93deee929992eb72fbafd8ed6c7ce2",
+  "target": "/private/tmp/fvid-mp4-audio-preroll-target-20261031",
+  "hypothesis": "Mandatory-preroll branch discards a linear at_or_before lookup and rewinds twice. Verify actual cost before any runtime fix.",
+  "criteria": "7 interleaved AB/BA pairs after excluded warmups; navigation median >=1.2x faster and >=6/7 wins; actual seek-to-first-PCM median regression <=10%; exact PCM regression and subsystem builds/tests required. No CPU improvement accepted before all evidence.",
+  "count_delta": 1,
+  "baseline_session": 63053,
+  "baseline_log": "/private/tmp/fvid-mp4-audio-preroll-baseline-build.log",
+  "next": "Commit qualified source and evidence,atomic push both authorized delivery refs,and verify remote state.",
+  "regression_scope": [
+    "independent MACE primitive decoder vs PCM after fractional/backward/EOF seek",
+    "direct packet seek landing contract unchanged",
+    "actual AudioPlayback worker PCM after repeated seeks"
+  ],
+  "workload_duration_seconds": 120,
+  "committed_regressions_reused": "Existing short authored mp4-mace-transitions movies, no new media failure claimed",
+  "production_changes": true,
+  "baseline_build_exit": 0,
+  "baseline_sampling_session": 66994,
+  "workload_representation": "Expanded MACE table using equivalent explicit zero CTTS; initial Uniform witness rejected before timing",
+  "before_terminal_exit": 0,
+  "before_passed": 3,
+  "baseline_medians": {
+    "navigation_ns": 136100833,
+    "seek_pcm_ns": 26616000
+  },
+  "after_build_session": 15399,
+  "after_build_log": "/private/tmp/fvid-mp4-audio-preroll-after-build.log",
+  "after_build_exit": 0,
+  "comparison_session": 24203,
+  "comparison_exit": 0,
+  "cpu_criteria_met": true,
+  "qualification_session": 20478,
+  "qualification_exit": 0,
+  "distinct_passed": 1234
+}

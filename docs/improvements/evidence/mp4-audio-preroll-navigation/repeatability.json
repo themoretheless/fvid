@@ -1,0 +1,6 @@
+{
+  "manual_workload": "byte-identical second generation",
+  "blocks": 160000,
+  "representation": "expanded by explicit zero CTTS; decode/presentation clocks unchanged",
+  "sha256": "e76b6e366cbddc880557abbeb443fef020aa8a1af373cff4967e6a58016ad208"
+}

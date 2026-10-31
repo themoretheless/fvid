@@ -1,0 +1,22 @@
+{
+  "status": "owned artifacts removed after source/archive/binary/workload verification; all jobs terminal",
+  "removed": [
+    "/private/tmp/fvid-mp4-audio-preroll-before.log",
+    "/private/tmp/fvid-mp4-audio-preroll-baseline-build.log",
+    "/private/tmp/fvid-mp4-audio-preroll-after-build.log",
+    "/private/tmp/fvid-mp4-audio-preroll-integration.log",
+    "/private/tmp/fvid-mp4-audio-preroll-root-mp4.log",
+    "/private/tmp/fvid-mp4-audio-preroll-root-webm.log",
+    "/private/tmp/fvid-mp4-audio-preroll-media.log",
+    "/private/tmp/fvid-mp4-audio-preroll-core-check.log",
+    "/private/tmp/fvid-mp4-audio-preroll-player-check.log",
+    "/private/tmp/fvid-mp4-audio-preroll-baseline",
+    "/private/tmp/fvid-mp4-audio-preroll-after",
+    "/private/tmp/fvid-mp4-audio-preroll-input.mp4",
+    "/private/tmp/fvid-mp4-audio-preroll-input.json",
+    "/private/tmp/fvid-mp4-audio-preroll-target-20261031",
+    "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/scripts/__pycache__"
+  ],
+  "preserved": "Generators,short authored regression movies,measurement samples and proof archives. Foreign worktrees,stashes,jobs,caches untouched.",
+  "plain_log_normalization": "Trailing line whitespace and final empty lines removed after raw/archive verification; original raw hashes preserved and final archive hashes recorded."
+}

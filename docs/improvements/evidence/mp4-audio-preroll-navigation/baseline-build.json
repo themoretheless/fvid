@@ -1,0 +1,9 @@
+{
+  "exit_code": 0,
+  "session": 63053,
+  "command": "cargo bench --locked --offline --no-default-features --features player --bench mp4_audio_preroll_navigation --no-run",
+  "base": "ba574b83d397148aa1df3fd434468ad1b12327e9",
+  "sources": "before-source.json",
+  "binary_sha256": "3ce86850613c5adbbafa0e1ee813a8e07e96f2118dd58684b1664526a72258f8",
+  "raw_log_sha256": "ec9587f1ca940a2a13963673129808258e1f6f759d7cec59f076a1f95873c18c"
+}

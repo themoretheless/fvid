@@ -1389,14 +1389,15 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         }else{source_end};
         let requested=pts.max(0).saturating_add(shift).max(0);
         let requested=if preroll {requested.min(end.min(i64::MAX as u128)as i64)}else{requested};
-        let landed = Mp4AudioReader::seek(self, requested);
         if preroll {
             // Restore all decoder overlap/history before exposing the landed
-            // packet. Preroll PCM is discarded by present_decoded.
+            // packet. Preroll PCM is discarded by present_decoded. A packet
+            // lookup here would be discarded when restoring history from zero.
             self.rewind();
             self.presentation_floor = requested;
             return requested;
         }
+        let landed = Mp4AudioReader::seek(self, requested);
         self.presentation_floor = requested;
         landed
     }

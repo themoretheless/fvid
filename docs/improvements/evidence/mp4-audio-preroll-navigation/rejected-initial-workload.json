@@ -1,0 +1,13 @@
+{
+  "reason": "Initial plain MACE workload selects compact Uniform index, not the expanded-index path under audit. Untimed admission probe correctly rejected it before timing. No runtime change or accepted improvement.",
+  "old_manifest": {
+    "provenance": "Authored arithmetic MACE blocks and existing authored neutral VP9 only; no private media, encoder or network. Manual benchmark input.",
+    "blocks": 160000,
+    "timescale": 48000,
+    "block_ticks": 36,
+    "sha256": "58f8524e243ea1f56a3d90816f8eef7d3de7d236359f333273bf33502444d260",
+    "bytes": 345890
+  },
+  "probe_exit": 101,
+  "probe_message": "must exercise expanded index"
+}

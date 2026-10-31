@@ -1,0 +1,11 @@
+{
+  "status": "verified",
+  "commit": "ba574b83d397148aa1df3fd434468ad1b12327e9",
+  "remote": "origin",
+  "refs": [
+    "ba574b83d397148aa1df3fd434468ad1b12327e9\trefs/heads/codex/deliver-fvid-20261029",
+    "ba574b83d397148aa1df3fd434468ad1b12327e9\trefs/heads/main"
+  ],
+  "qualification": "batch-443-validation.json",
+  "own_worktree_clean_after_push": true
+}

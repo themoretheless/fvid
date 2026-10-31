@@ -1,11 +1,11 @@
 {
-  "status": "accepted FVID-0443; all jobs terminal; publication pending",
+  "status": "accepted FVID-0443 and published to both refs; own artifacts removed",
   "base": "cfe3571176d8027ad893a39fafa0a17ccc35f03e",
   "before_session": 62778,
   "target": "/private/tmp/fvid-mp4-ordered-index-budget-20261031",
   "before_log": "/private/tmp/fvid-mp4-ordered-index-budget-before.log",
   "scope": "150000 authored frames in150ms,2MiB decoder/reorder budget. Actual suffix payload1.2MB exceeds1MiB reorder half. Small same-codec positive control passes;512KiB intrinsic VP9 refusal is explicitly preserved.",
-  "next": "Publish qualified FVID-0443 and continue the next audit.",
+  "next": "Continue next independent verified improvement.",
   "hypothesis": "For strict PTS,the future suffix minimum equals next sample PTS,so a private direct lookup may replace the retained suffix vector. Keep existing charged vector for reordered/equal input. No new memory ID unless behavior and retained payload reduction are proved.",
   "before_terminal_exit": 101,
   "memory_after_session": 35298,
