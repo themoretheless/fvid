@@ -61,9 +61,9 @@ impl Decoder {
             .ok_or_else(|| invalid("LD-MPS output rate overflow"))?;
         let spatial_samples = usize::from(config.frame_slots) * bins;
         let core_samples = usize::from(core.frame_samples) * factor as usize;
-        // A 480-sample AAC-LD core at48kHz needs two core packets for a
-        // complete15-slot64-bin spatial frame. Session owns those source spans.
-        let frame_geometry = if core.object_type == 23 {
+        // Without SBR,a spatial frame may cover several whole LD/ELD
+        // packets (e.g.480-sample ELD with128 bins). Session retains each span.
+        let frame_geometry = if !core.has_sbr {
             spatial_samples != 0 && core_samples != 0 && spatial_samples % core_samples == 0
         } else {
             spatial_samples == core_samples

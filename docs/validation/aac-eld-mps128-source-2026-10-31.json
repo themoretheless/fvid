@@ -1,0 +1,22 @@
+{
+  "reference_archive": "https://standards.iso.org/iso-iec/23003/-2/ed-2/en/SAOC_IS7_ReferenceSoftware__20160603.zip",
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "members": {
+    "sac_bitdec.c": "d9a8655b4e5efa1329d629f88bde962b640efe9d1a5c22f24f84df56eadfa64e",
+    "sac_decor.c": "640a0e5d3a4cdf9f344f48c84c937d11f5086bc646d32fdc741c8f630f0f3f65",
+    "sac_hybfilter.c": "3783733c9376b173c5eabd0e06838deba359eb579648ca10595f7fd13332d7a2",
+    "sac_polyphase.c": "7d5c4f41ebfb9c9ed789af3ec3cb8892f1ee6ec89037fc31fb3077a73d3b30df"
+  },
+  "facts": [
+    "LD header selects32/64/128 QMF bands using27713/55426 sampling-rate thresholds.",
+    "LD polyphase non64 branch averages adjacent coefficients at integer k*64/resolution;640 explicit values in a1280-sized zero-initialized array.",
+    "Ordinary decorrelator rows>=71 preserve the configured input delay but bypass the all-pass and duck gain; energy estimation still includes the complete bank."
+  ],
+  "profile_boundary": {
+    "source": "https://norm.isodoc.my/iso/ISO%20IEC%2014496-3-2019%20PDF.pdf",
+    "section": "Table1.16,Low Delay AAC v2 profile,footnote a",
+    "finding": "Coded rates above48kHz are contemplated,but this profile requires output-rate adaptation to<=48kHz. Native-rate decoding is not proof of profile-level output conformance.",
+    "qualification": "This milestone verifies ordinary raw native-rate output. Profile-specific mandatory output adaptation/downscale remains separately unqualified; no full LD AAC v2 conformance claim."
+  },
+  "scope": "Primary-reference audit for ordinary128-bin runtime only. Full Annex B,whole-codec conformance,residual128,STP/GES128,HRTF and time alignment are not newly qualified."
+}

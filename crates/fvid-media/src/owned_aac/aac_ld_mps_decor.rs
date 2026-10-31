@@ -3,7 +3,7 @@
 //! This component is independent of spatial bitstream parsing and PCM routing.
 use super::{
     Result, aac_ld_mps_decor_facts as facts, aac_ld_mps_prepare::qmf_map, aac_sbr_qmf::Complex,
-    invalid, unsupported,
+    invalid,
 };
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mode {
@@ -40,13 +40,18 @@ fn finite(x: Complex) -> bool {
 /// Reflection-to-polynomial Schur recursion, then conjugate-reversed numerator.
 /// The two filter modes are explicit implementation choices, not stream flags.
 pub fn design(bands: usize, seed: u8, configuration: u8, mode: Mode, bin: usize) -> Result<Design> {
-    if bands == 128 {
-        return Err(unsupported(
-            "LD-MPS 128-band decorrelation is not yet qualified",
-        ));
-    }
-    if !matches!(bands, 32 | 64) || seed >= 10 || configuration > 2 || bin >= bands {
+    if !matches!(bands, 32 | 64 | 128) || seed >= 10 || configuration > 2 || bin >= bands {
         return Err(invalid("invalid LD-MPS decorrelator design"));
+    }
+    // The ISO ordinary decorrelator bypasses the all-pass above row70;
+    // those rows retain their one-slot input delay and stay in energy sums.
+    if bin >= 71 {
+        let unit = Complex { re: 1.0, im: 0.0 };
+        return Ok(Design {
+            delay: 1,
+            denominator: vec![unit],
+            numerator: vec![unit],
+        });
     }
     let boundary = match configuration {
         0 => [14, 23],
@@ -137,9 +142,11 @@ impl Band {
         if !finite(y) {
             return Err(invalid("overflowing LD-MPS all-pass output"));
         }
-        self.x[self.at] = x;
-        self.y[self.at] = y;
-        self.at = (self.at + 1) % n;
+        if n != 0 {
+            self.x[self.at] = x;
+            self.y[self.at] = y;
+            self.at = (self.at + 1) % n;
+        }
         Ok(y)
     }
 }
@@ -216,7 +223,9 @@ impl Decorrelator {
                     gain[p] = (d / (1.5 * r + 1e-9)).sqrt().min(2.0);
                 }
             }
-            for (bin, y) in raw.iter_mut().enumerate() {
+            // The reference estimates energy from the complete bank but
+            // applies ducking only to the first71 hybrid/QMF rows.
+            for (bin, y) in raw.iter_mut().enumerate().take(71) {
                 let g = gain[usize::from(next.map[bin])];
                 y.re *= g;
                 y.im *= g;

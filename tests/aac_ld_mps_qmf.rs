@@ -239,12 +239,9 @@ fn late_missing_ott_residual_rolls_back_filters_matrices_and_reader() {
     let at = c["config_offset"].as_u64().unwrap() as usize;
     let n = c["config_bytes"].as_u64().unwrap() as usize;
     let config = Config::parse(&configs[at..at + n]).unwrap();
-    assert!(
-        Decoder::new(&config, Mode::Complex)
-            .unwrap_err()
-            .to_string()
-            .contains("128-band")
-    );
+    // The formerly refused128-bin domain has independent component acceptance
+    // in aac_ld_mps_qmf128; keep admission here alongside invalid-input checks.
+    assert!(Decoder::new(&config, Mode::Complex).is_ok());
     assert_eq!(seeds(2).unwrap(), [0, 1, 3]);
     assert_eq!(seeds(7).unwrap(), [2]);
 }

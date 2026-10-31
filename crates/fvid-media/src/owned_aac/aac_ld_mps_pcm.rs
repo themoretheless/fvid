@@ -29,6 +29,10 @@ enum Banks {
         analysis: Vec<Analysis<64>>,
         synthesis: Vec<Synthesis<64>>,
     },
+    B128 {
+        analysis: Vec<Analysis<128>>,
+        synthesis: Vec<Synthesis<128>>,
+    },
 }
 #[derive(Clone, Debug, PartialEq)]
 pub struct Decoder {
@@ -70,6 +74,15 @@ impl Decoder {
         let outputs = order.len();
         let banks = if config.sample_rate < 27713 {
             Banks::B32 {
+                analysis: (0..inputs)
+                    .map(|_| Analysis::new())
+                    .collect::<Result<_>>()?,
+                synthesis: (0..outputs)
+                    .map(|_| Synthesis::new())
+                    .collect::<Result<_>>()?,
+            }
+        } else if config.sample_rate >= 55426 {
+            Banks::B128 {
                 analysis: (0..inputs)
                     .map(|_| Analysis::new())
                     .collect::<Result<_>>()?,
@@ -162,6 +175,21 @@ impl Decoder {
                     *s = old_s.clone();
                 }
             }
+            (
+                Banks::B128 {
+                    analysis: a,
+                    synthesis: s,
+                },
+                Banks::B128 {
+                    analysis: old_a,
+                    synthesis: old_s,
+                },
+            ) => {
+                *a = old_a.clone();
+                if keep_synthesis {
+                    *s = old_s.clone();
+                }
+            }
             _ => return Err(invalid("LD-MPS in-band filter bank changed")),
         }
         *self = next;
@@ -182,6 +210,17 @@ impl Decoder {
                 }
             }
             Banks::B64 {
+                analysis,
+                synthesis,
+            } => {
+                for a in analysis {
+                    a.reset();
+                }
+                for s in synthesis {
+                    s.reset();
+                }
+            }
+            Banks::B128 {
                 analysis,
                 synthesis,
             } => {
@@ -226,6 +265,21 @@ impl Decoder {
                 next.clip_gain,
             )?,
             Banks::B64 {
+                analysis,
+                synthesis,
+            } => render(
+                &mut next.qmf,
+                &mut reader,
+                downmix,
+                residuals,
+                slots,
+                analysis,
+                synthesis,
+                &next.order,
+                &next.gains,
+                next.clip_gain,
+            )?,
+            Banks::B128 {
                 analysis,
                 synthesis,
             } => render(
@@ -303,6 +357,16 @@ impl Decoder {
                 &next.gains,
             )?,
             Banks::B64 { synthesis, .. } => render_subbands(
+                &mut next.qmf,
+                &mut reader,
+                &scaled,
+                residuals,
+                slots,
+                synthesis,
+                &next.order,
+                &next.gains,
+            )?,
+            Banks::B128 { synthesis, .. } => render_subbands(
                 &mut next.qmf,
                 &mut reader,
                 &scaled,
@@ -415,6 +479,19 @@ impl Decoder {
                 }
             }
             Banks::B64 {
+                analysis,
+                synthesis,
+            } => {
+                f.vector(analysis)?;
+                f.vector(synthesis)?;
+                for a in analysis {
+                    a.visit_retained(f)?;
+                }
+                for s in synthesis {
+                    s.visit_retained(f)?;
+                }
+            }
+            Banks::B128 {
                 analysis,
                 synthesis,
             } => {

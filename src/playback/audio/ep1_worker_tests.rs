@@ -156,11 +156,7 @@ fn check_corpus(corpus: &str) {
         for sample in seeks {
             // Leave a live decoder and queue before applying the next seek.
             worker.drain_commands(Some(Command::Rewind));
-            let prefix = if case["name"].as_str().unwrap().ends_with("-edits") {
-                4
-            } else {
-                2
-            };
+            let prefix = case["live_prefix_packets"].as_u64().map(|n|n as usize).unwrap_or_else(||if case["name"].as_str().unwrap().ends_with("-edits"){4}else{2});
             for _ in 0..prefix {
                 assert!(!matches!(
                     worker.decode_next().0,
@@ -393,4 +389,9 @@ fn ld_mps_matroska_worker_keeps_source_windows_through_navigation() {
 #[test]
 fn ld_mps_multicore_worker_keeps_source_windows_through_navigation() {
     check_corpus("aac-ld-mps-multicore");
+}
+
+#[test]
+fn ld_mps128_worker_keeps_source_windows_through_navigation() {
+    check_corpus("aac-eld-mps128");
 }

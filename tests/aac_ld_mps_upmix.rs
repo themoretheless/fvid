@@ -191,12 +191,7 @@ fn nonfinite_later_slots_bad_geometry_and_overflow_never_advance_any_decorrelati
     for (b, seed, cfg) in [(0, 0, 0), (31, 0, 0), (65, 0, 0), (64, 10, 0), (64, 0, 3)] {
         assert!(Decorrelator::new(b, seed, cfg, Mode::Real).is_err());
     }
-    assert!(
-        Decorrelator::new(128, 0, 0, Mode::Real)
-            .unwrap_err()
-            .to_string()
-            .contains("128-band decorrelation is not yet qualified")
-    );
+    assert!(Decorrelator::new(128, 0, 0, Mode::Real).is_ok());
     for (cld, rho) in [
         (f64::NAN, 0.0),
         (151.0, 0.0),

@@ -1,0 +1,37 @@
+{
+  "cases": [
+    {
+      "name": "impulse",
+      "bands": 128,
+      "slots": 40
+    },
+    {
+      "name": "tones",
+      "bands": 128,
+      "slots": 40
+    },
+    {
+      "name": "dense",
+      "bands": 128,
+      "slots": 40
+    }
+  ],
+  "synthesis_cases": [
+    {
+      "name": "low-real",
+      "bands": 128,
+      "slots": 40
+    },
+    {
+      "name": "high-imag",
+      "bands": 128,
+      "slots": 40
+    },
+    {
+      "name": "complex-dense",
+      "bands": 128,
+      "slots": 40
+    }
+  ],
+  "scope": "Own128-bin scalar bank traces; component qualification only,not whole codec acceptance."
+}

@@ -5,7 +5,7 @@ use super::{Result, aac_ld_qmf_window::WINDOW, aac_sbr_qmf::Complex, invalid};
 use std::sync::OnceLock;
 
 fn geometry<const B: usize>() -> Result<()> {
-    if !matches!(B, 32 | 64) {
+    if !matches!(B, 32 | 64 | 128) {
         return Err(invalid("invalid LD-QMF band count"));
     }
     Ok(())
@@ -14,12 +14,17 @@ fn coefficient<const B: usize>(i: usize) -> f64 {
     if B == 64 {
         WINDOW[i]
     } else {
-        (WINDOW[2 * i] + WINDOW[2 * i + 1]) * 0.5
+        // ISO's non64 branch uses integer k*64/resolution indexing.
+        // The128-bank final neighbour is the implicit zero initializer.
+        let j = i * 64 / B;
+        (WINDOW[j] + WINDOW.get(j + 1).copied().unwrap_or(0.0)) * 0.5
     }
 }
 fn matrix<const B: usize>(synthesis: bool) -> &'static [Complex] {
     static A32: OnceLock<Vec<Complex>> = OnceLock::new();
     static A64: OnceLock<Vec<Complex>> = OnceLock::new();
+    static A128: OnceLock<Vec<Complex>> = OnceLock::new();
+    static S128: OnceLock<Vec<Complex>> = OnceLock::new();
     static S32: OnceLock<Vec<Complex>> = OnceLock::new();
     static S64: OnceLock<Vec<Complex>> = OnceLock::new();
     let cache = match (B, synthesis) {
@@ -27,6 +32,8 @@ fn matrix<const B: usize>(synthesis: bool) -> &'static [Complex] {
         (64, false) => &A64,
         (32, true) => &S32,
         (64, true) => &S64,
+        (128, false) => &A128,
+        (128, true) => &S128,
         _ => unreachable!(),
     };
     cache.get_or_init(|| {
@@ -345,7 +352,7 @@ mod tests {
         rollback::<32>();
         rollback::<64>();
         assert!(Analysis::<0>::new().is_err());
-        assert!(Synthesis::<128>::new().is_err());
+        assert!(Synthesis::<96>::new().is_err());
     }
 }
 

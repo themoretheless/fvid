@@ -1,3 +1,41 @@
+## Ordinary128-band AAC-ELD / LD-MPS — native-rate reconstruction,2026-10-31
+
+The owned decoder now accepts ordinary no-SBR128-band LD-MPS on AAC-ELD
+at64/88.2/96kHz. Analysis/synthesis use the reference non64 coefficient rule;
+ordinary decorrelator rows71..127 retain their one-slot delay and bypass
+all-pass/duck gain while remaining in energy estimation.512-sample core frames
+and integral four-core480-sample windows are supported. Coupled-SBR and
+unqualified downscale geometries retain their explicit refusals.
+
+330 own programmes in both MP4 and Matroska (660 acceptance movies) exercise
+all8 trees,TTT variants,parameter-grid changes,repeat/delayed/fragmented
+transport.18 independent bare-core controls and24 precise late-corruption
+refusals remain separate from playback acceptance. AudioStream and AudioWorker
+checks cover playback,forward/backward/EOF seek,rewind,repeated ranges and
+live-history source windows. These are captured PCM/timestamp tests,not physical
+audio-device or real-time throughput qualification.
+
+Independent frozen ISO C outputs qualify the128-band bank and112 controlled
+QMF-chain sequences. The complete compressed-stream PCM oracle composes the
+analytical core with the separately qualified spatial session; it is not an
+independent full-decoder conformance oracle. Ordinary tests run offline without
+FFmpeg,network access or a C compiler; optional reference regeneration is separate.
+
+This supersedes older blanket128-bin refusals only for this ordinary domain.
+Residual128,STP/GES128,update8,LFE/time alignment,HRTF/arbitrary-downmix and
+profile-specific output-rate adaptation remain open. Raw native-rate output
+above48kHz is not full Low Delay AAC v2 profile conformance; the audited profile
+requires output adaptation to at most48kHz. Full Annex B/conformance remains
+unqualified.
+
+Final offline gate:1810 passed,0 failed,27 pre-existing ignored across all
+media/player library tests and39 AAC/Matroska integration targets. Native
+fixture regeneration reproduced706 files byte-for-byte under process/network
+denial; the scalar bank generator reproduced35 files under the same restriction.
+
+Evidence: `docs/validation/aac-eld-mps128-{source,generation,tests}-2026-10-31.json`,
+`docs/validation/aac-ld-{qmf128,mps-qmf128}-reference-2026-10-31.json`.
+
 ## Multi-core AAC-LD / LD-MPS — extended acceptance,2026-10-31
 
 The previously unqualified multi-core geometries already work in the owned
