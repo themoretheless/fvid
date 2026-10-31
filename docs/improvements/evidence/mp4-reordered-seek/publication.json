@@ -1,0 +1,13 @@
+{
+  "qualified_code_commit": "1301810169b74b4ecfbe57383ed88070e4c86872",
+  "observed_refs_before_receipt_commit": [
+    "1301810169b74b4ecfbe57383ed88070e4c86872\trefs/heads/codex/deliver-fvid-20261029",
+    "1301810169b74b4ecfbe57383ed88070e4c86872\trefs/heads/main"
+  ],
+  "own_worktree_clean_after_code_push": true,
+  "source_corpus_and_archives_match": true,
+  "removed_artifacts_absent": true,
+  "accepted_count": 450,
+  "target": 1000,
+  "observed_utc": "2026-10-31T08:17:42.310579+00:00"
+}
