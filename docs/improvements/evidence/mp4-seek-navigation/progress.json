@@ -1,5 +1,5 @@
 {
-  "status": "accepted FVID-0442; all qualification jobs terminal; publication pending",
+  "status": "accepted FVID-0442; published main and delivery branch, artifacts removed",
   "base": "1d2ad76abf50171a65deadcf991958cf6e063371",
   "build_session": 11981,
   "target": "/private/tmp/fvid-mp4-seek-navigation-20261031",

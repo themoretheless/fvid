@@ -1,0 +1,8 @@
+{
+  "base": "cfe3571176d8027ad893a39fafa0a17ccc35f03e",
+  "fixed_blob": "dced328e6cb17450d7da0df5b75ba0c5e66cc57c",
+  "fixed_sha256": "043e8729aeba12f9f8c61ff01bfe96f45dad90417c5a8920eb29c4232822c216",
+  "backup": "/private/tmp/fvid-mp4-ordered-index-budget-fixed.rs",
+  "baseline_source_sha256": "68667cfabed44f88902a9951cd0d5670db3c30f34dc5491aa0743bd3b99e52d0",
+  "protocol": "Only owned source replayed; finally restores exact checked source if baseline bytes remain unchanged. Concurrent edits are preserved,never overwritten."
+}

@@ -1,0 +1,19 @@
+{
+  "provenance": "Three authored independent16x16 VP9 keyframes repeat; no private media/parameters,encoder or network. Dense50000-sample clips last50ms using a1MHz container clock. Reordered companion swaps only the second/third PTS via signed CTTS, all packet bytes retained.",
+  "samples": 50000,
+  "duration_ns": 50000000,
+  "tight_decoder_budget": 524288,
+  "existing_suffix_index_payload_bytes": 400000,
+  "scope": "Decoder/reorder working budget, not total process or demux metadata RAM.",
+  "sha256": {
+    "frame-0.packet": "d586e4311a14b4eeebf2c61fadc917a6dc99aeccb87ceffb1e5166c318e67346",
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.packet": "81a6bc19b3f2ed2d203a852e97b487c13712d0a3d9730d8cadf902a5cbda05c4",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.packet": "338d4038d521a4e55109198d490b0f8ac78bbb13d41591848bbe2ac879988144",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "small-control.mp4": "9a66db89528b084c0f3812deaa088efaa03988ab1dba20de119919f78b7a007b",
+    "ordered.mp4": "de5a1877ac8fb04a05c4a15b80597233d50ecceb6aff6e90626a33e91f9fae3c",
+    "reordered.mp4": "1fbc729d02dfefcfcb2e5e3f3d608f8c2e0c5b161246a4b3ed53d477d2e3df0b"
+  }
+}

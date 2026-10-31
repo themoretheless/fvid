@@ -1,0 +1,6 @@
+{
+  "src/playback/video/mp4.rs": "46762f02a1f050b3adbf3c0390a59db41855b87f815e4503a6d8854c29aea947",
+  "scripts/generate_mp4_ordered_index_budget.py": "656384f25f0a3f7c624c8d7a572cf95be4ad5c13da39807a6c6c1b81cfd746eb",
+  "tests/mp4_ordered_index_budget.rs": "c19dcea21e8ad3499ac5a7e8a3277771c2deaf4c6478e935e5bdfe275e7b8ab5",
+  "tests/fixtures/playback-errors/mp4-ordered-index-budget/manifest.json": "b24aeab8fecbdd54428fb3ab73368679eda27be3d8baa9a310135e639c753abe"
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "charged_bytes": 0,
+    "decoder_budget": 33554432,
+    "file": "ordered.mp4",
+    "payload_bytes": 0,
+    "samples": 150000
+  },
+  {
+    "charged_bytes": 1200000,
+    "decoder_budget": 33554432,
+    "file": "reordered.mp4",
+    "payload_bytes": 1200000,
+    "samples": 150000
+  }
+]

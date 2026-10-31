@@ -1,0 +1,44 @@
+{
+  "tool": "ffprobe version 9.0.2 Copyright (c) 2007-2026 the FFmpeg developers",
+  "streams": {
+    "small-control.mp4": {
+      "time_base": "1/1000000",
+      "duration": "0.000003",
+      "nb_frames": "3",
+      "side_data_list": [
+        {}
+      ]
+    },
+    "ordered.mp4": {
+      "time_base": "1/1000000",
+      "duration": "0.150000",
+      "nb_frames": "150000",
+      "side_data_list": [
+        {}
+      ]
+    },
+    "reordered.mp4": {
+      "time_base": "1/1000000",
+      "duration": "0.150000",
+      "nb_frames": "150000",
+      "side_data_list": [
+        {}
+      ]
+    }
+  },
+  "mdat": {
+    "small-control.mp4": {
+      "bytes": 207,
+      "sha256": "9103bde2e3b156ca585f332ff83ec7e3e9b4beea900ee87236024af28216c06b"
+    },
+    "ordered.mp4": {
+      "bytes": 10350000,
+      "sha256": "e0ca5bcb656d54f9d4f12737843c3992f30a78a8b9973a6c3828214a4cbd5185"
+    },
+    "reordered.mp4": {
+      "bytes": 10350000,
+      "sha256": "e0ca5bcb656d54f9d4f12737843c3992f30a78a8b9973a6c3828214a4cbd5185"
+    }
+  },
+  "scope": "Independent frame counts,clock,duration,and exact payload continuity; ordinary tests do not need ffprobe."
+}

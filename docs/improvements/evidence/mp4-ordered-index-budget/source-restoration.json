@@ -1,0 +1,5 @@
+{
+  "status": "baseline replay terminal0; exact checked fix restored",
+  "fixed_sha256": "043e8729aeba12f9f8c61ff01bfe96f45dad90417c5a8920eb29c4232822c216",
+  "all_after_source_hashes_match": true
+}

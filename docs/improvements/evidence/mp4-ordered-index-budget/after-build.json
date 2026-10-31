@@ -1,0 +1,58 @@
+{
+  "exit": 0,
+  "source_sha256": "043e8729aeba12f9f8c61ff01bfe96f45dad90417c5a8920eb29c4232822c216",
+  "binary": "/private/tmp/fvid-mp4-ordered-index-budget-after",
+  "binary_sha256": "f2be1f5151774a8542d67397140ba5daff837aa820a97dcfdcd7169647d90999",
+  "artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid#0.1.0",
+    "manifest_path": "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/Cargo.toml",
+    "target": {
+      "kind": [
+        "bench"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "mp4_seek_navigation",
+      "src_path": "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/benches/mp4_seek_navigation.rs",
+      "edition": "2024",
+      "required-features": [
+        "player"
+      ],
+      "doc": false,
+      "doctest": false,
+      "test": false
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": true
+    },
+    "features": [
+      "player",
+      "videotoolbox"
+    ],
+    "filenames": [
+      "/private/tmp/fvid-mp4-ordered-index-budget-20261031/release/deps/mp4_seek_navigation-f446733e2ed54596"
+    ],
+    "executable": "/private/tmp/fvid-mp4-ordered-index-budget-20261031/release/deps/mp4_seek_navigation-f446733e2ed54596",
+    "fresh": false
+  },
+  "command": [
+    "cargo",
+    "bench",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--bench",
+    "mp4_seek_navigation",
+    "--no-run",
+    "--message-format=json"
+  ],
+  "raw_sha256": "202c8654f38c25f2cb84c6e526aa7c86e928b8d99f2415c9ad394b55ab6cb24d"
+}

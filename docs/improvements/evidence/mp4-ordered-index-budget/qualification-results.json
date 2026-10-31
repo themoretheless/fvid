@@ -1,0 +1,26 @@
+{
+  "integration": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-ordered-index-budget-integration.log"
+  },
+  "root-mp4": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-ordered-index-budget-root-mp4.log"
+  },
+  "root-webm": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-ordered-index-budget-root-webm.log"
+  },
+  "media": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-ordered-index-budget-media.log"
+  },
+  "core-check": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-ordered-index-budget-core-check.log"
+  },
+  "player-check": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-ordered-index-budget-player-check.log"
+  }
+}

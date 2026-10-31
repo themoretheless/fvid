@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 442,
-  "next_id": "FVID-0443",
+  "accepted_count": 443,
+  "next_id": "FVID-0444",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4964,6 +4964,17 @@
       "result": "Derive a conservative strict-order flag in the existing suffix-index pass; partition the target and search backward within its sync interval. Reordered/equal-PTS inputs retain full prefix coverage, with no added heap index. Seven interleaved baseline/after pairs meet predeclared criteria: navigation35.94→0.434ms (82.77x),actual seek+RGB54.55→18.49ms (2.95x),all7 pairs win,no opening regression. Scope is this memory-resident16x16 all-keyframe workload,not whole-player throughput. Three new black-box tests and existing fixtures preserve sparse sync bounds,reordered/equal PTS,exact pictures/intervals,rewind/EOF and budget refusal.119 integration suites558 pass;1225 distinct checks plus both builds pass.",
       "status": "accepted",
       "validation": "batch-442-validation.json"
+    },
+    {
+      "id": "FVID-0443",
+      "batch": 443,
+      "title": "Avoid redundant reorder-index storage for ordered MP4 video",
+      "source": "src/playback/video/mp4.rs",
+      "regression": "tests/mp4_ordered_index_budget.rs",
+      "before": "Publishedcfe3571176 retains an8-byte suffix-minimum entry per video sample even with strict PTS. Qualified150ms/150000-sample witness:4 controls pass,ordered2MiB admission fails specifically on1.2MB index exceeding1MiB reorder half. A smaller512KiB probe was rejected because its same-codec control also hit the legitimate VP9 work limit.",
+      "result": "Use immutable next-sample PTS for strict order without retaining a suffix array; keep the charged array for reordered/equal PTS and refuse zero reorder working budget. Safe private payload/ledger measurements show ordered1200000→0 bytes,general case1200000 unchanged. Actual150000 pictures and seven opens/seeks pass at2MiB; intrinsic VP9 and general reorder refusals remain. Seven default-release CPU pairs meet predeclared<=10% median regression guard: navigation+4.3%,actual seek+RGB effectively unchanged,opening faster.120 integration suites563 pass;1231 distinct checks and both builds pass. Scope is retained index/decoder budget,not total RAM or player throughput.",
+      "status": "accepted",
+      "validation": "batch-443-validation.json"
     }
   ]
 }

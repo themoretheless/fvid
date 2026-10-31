@@ -1,0 +1,11 @@
+{
+  "status": "not a qualified reproduction; no ID",
+  "reason": "512KiB decoder/reorder budget leaves256KiB codec work; VP9 supplies one tenth to picture decoding (~25KiB), below the actual68544-byte16x16 picture requirement. Small control fails VP9 picture exceeds memory budget. Dense ordered simultaneously fails suffix-index admission, so this witness cannot establish useful tight-budget playback.",
+  "original_cases": {
+    "samples": 50000,
+    "budget": 524288,
+    "passed": 2,
+    "failed": 2
+  },
+  "corrected_witness": "Use2MiB total decoder budget (1MiB codec work,~104857-byte picture allowance),and150000 samples whose1.2MB suffix array exceeds the1MiB reorder half. Keep the512KiB intrinsic-codec refusal as an explicit negative regression. Production code remains unchanged."
+}

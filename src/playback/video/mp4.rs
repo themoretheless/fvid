@@ -213,6 +213,9 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         // Reserve half the supplied budget for output reordering and its index.
         // Reference storage and reconstruction use the other half.
         let queue_budget = decoder_budget / 2;
+        if queue_budget == 0 {
+            return Err(invalid("MP4 reorder budget is zero"));
+        }
         // A video track indexes one record per sample; the compact form belongs
         // to uncompressed audio, which this source never decodes.
         let Some(samples) = track.samples.expanded() else {
@@ -220,25 +223,28 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                 "selected MP4 track is not AVC, HEVC, VP9 or AV1 video",
             ));
         };
-        let index_bytes = samples
-            .len()
-            .checked_mul(std::mem::size_of::<i64>())
-            .ok_or_else(|| invalid("MP4 reorder index overflow"))?;
-        let queue_budget = queue_budget
-            .checked_sub(index_bytes)
+        // With strict presentation order the suffix minimum is simply the
+        // next sample's timestamp; retaining a second array is unnecessary.
+        let strictly_ordered_pts = samples.windows(2).all(|pair| pair[0].pts < pair[1].pts);
+        let index_bytes = if strictly_ordered_pts {
+            0
+        } else {
+            samples.len().checked_mul(std::mem::size_of::<i64>())
+                .ok_or_else(|| invalid("MP4 reorder index overflow"))?
+        };
+        let queue_budget = queue_budget.checked_sub(index_bytes)
             .ok_or_else(|| invalid("MP4 reorder index exceeds budget"))?;
         let mut future_pts = Vec::new();
-        future_pts
-            .try_reserve_exact(samples.len())
-            .map_err(|_| invalid("cannot allocate MP4 reorder index"))?;
-        let mut minimum = i64::MAX;
-        let mut strictly_ordered_pts = true;
-        for sample in samples.iter().rev() {
-            strictly_ordered_pts &= sample.pts < minimum;
-            minimum = minimum.min(sample.pts);
-            future_pts.push(minimum);
+        if !strictly_ordered_pts {
+            future_pts.try_reserve_exact(samples.len())
+                .map_err(|_| invalid("cannot allocate MP4 reorder index"))?;
+            let mut minimum = i64::MAX;
+            for sample in samples.iter().rev() {
+                minimum = minimum.min(sample.pts);
+                future_pts.push(minimum);
+            }
+            future_pts.reverse();
         }
-        future_pts.reverse();
         let work_budget = decoder_budget - decoder_budget / 2;
         let decoder_description = samples
             .first()
@@ -984,7 +990,12 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                     )
                 })
             {
-                let mut future = self.future_pts.get(self.sample_index).copied();
+                let mut future = if self.strictly_ordered_pts {
+                    self.track().samples.expanded()
+                        .and_then(|samples| samples.get(self.sample_index)).map(|sample| sample.pts)
+                } else {
+                    self.future_pts.get(self.sample_index).copied()
+                };
                 if let Decoder::Layered(d) = &self.decoder {
                     future = future.into_iter().chain(d.pending_pts(&self.demuxer)).min();
                 }
@@ -1611,5 +1622,39 @@ mod tests {
         // A decoded picture that selects the very same SPS changes nothing.
         assert!(source.read_frame().unwrap().is_some());
         assert_eq!(source.bitstream_colour(), stated);
+    }
+}
+
+#[cfg(all(test, feature = "player"))]
+mod ordered_index_budget_measurements {
+    use super::*;
+    #[test]
+    fn retained_index_payload_matches_reserved_queue_charge() {
+        for name in ["ordered.mp4", "reordered.mp4"] {
+            let data = std::fs::read(
+                std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                    .join("tests/fixtures/playback-errors/mp4-ordered-index-budget")
+                    .join(name),
+            )
+            .unwrap();
+            let demuxer =
+                Mp4Reader::open_indexed(std::io::Cursor::new(data), Limits::default()).unwrap();
+            let budget = 32usize << 20;
+            let mut source = SingleLayerMp4VideoReader::from_demuxer_with_hardware(
+                demuxer, 0, budget, false, false,
+            )
+            .unwrap();
+            let payload = source.future_pts.capacity() * std::mem::size_of::<i64>();
+            let charged = budget / 2 - source.queue_budget;
+            assert_eq!(
+                payload, charged,
+                "retained allocation and budget ledger diverge"
+            );
+            println!(
+                "FVID_INDEX_PAYLOAD {}",
+                serde_json::json!({"file":name,"samples":source.track().samples.len(),"payload_bytes":payload,"charged_bytes":charged,"decoder_budget":budget})
+            );
+            assert!(source.read_frame().unwrap().is_some());
+        }
     }
 }

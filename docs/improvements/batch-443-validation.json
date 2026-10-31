@@ -1,0 +1,104 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0443"
+  ],
+  "count_delta": 1,
+  "accepted_count": 443,
+  "before_commit": "cfe3571176d8027ad893a39fafa0a17ccc35f03e",
+  "checks": {
+    "before": {
+      "suites": 1,
+      "passed": 4,
+      "failed": 1,
+      "ignored": 0
+    },
+    "after": {
+      "suites": 4,
+      "passed": 15,
+      "failed": 0,
+      "ignored": 0
+    },
+    "memory-before": {
+      "suites": 1,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "memory-after": {
+      "suites": 1,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "integration": {
+      "suites": 120,
+      "passed": 563,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-mp4": {
+      "suites": 1,
+      "passed": 58,
+      "failed": 0,
+      "ignored": 1
+    },
+    "root-webm": {
+      "suites": 1,
+      "passed": 67,
+      "failed": 0,
+      "ignored": 0
+    },
+    "media": {
+      "suites": 1,
+      "passed": 547,
+      "failed": 0,
+      "ignored": 1
+    },
+    "core-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "distinct_passed": 1231,
+  "duplicate_events_excluded": 4,
+  "focused_and_measurement_repeats_not_added": true,
+  "memory": {
+    "samples": 150000,
+    "ordered_retained_index_payload_before": 1200000,
+    "ordered_retained_index_payload_after": 0,
+    "reordered_retained_index_payload_unchanged": 1200000,
+    "tight_decoder_reorder_budget": 2097152,
+    "all_pictures_verified": 150000,
+    "repeated_opens_and_seeks": 7,
+    "scope": "Decoder/reorder working budget and actual Vec payload; excludes demux metadata,input buffer and total process RSS"
+  },
+  "cpu_guard": {
+    "criteria_met": true,
+    "queries": 10000,
+    "paired_rounds": 7,
+    "maximum_allowed_median_regression_percent": 10,
+    "observed_navigation_regression_percent": 4.330868007848521,
+    "ratios_baseline_over_after": {
+      "open_ns": 1.1486828307654138,
+      "navigation_ns": 0.9584891021176714,
+      "seek_rgb_ns": 1.0016632329414366
+    },
+    "proof": "evidence/mp4-ordered-index-budget/cpu-comparison.json"
+  },
+  "fixtures": {
+    "movies": 3,
+    "total_files": 10,
+    "duration_ms": 150,
+    "repeatability": "identical"
+  },
+  "limitations": "No total process RSS or whole-player throughput claim. Observed navigation cost+4.3% within predeclared10% guard; actual seek+RGB effectively unchanged. Original512KiB probe rejected as nonspecific; intrinsic VP9 refusal preserved. Existing2 ignored tests unchanged."
+}
