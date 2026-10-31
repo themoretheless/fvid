@@ -1,0 +1,26 @@
+{
+  "integration": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-seek-navigation-integration.log"
+  },
+  "root-mp4": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-seek-navigation-root-mp4.log"
+  },
+  "root-webm": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-seek-navigation-root-webm.log"
+  },
+  "media": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-seek-navigation-media.log"
+  },
+  "core-check": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-seek-navigation-core-check.log"
+  },
+  "player-check": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-mp4-seek-navigation-player-check.log"
+  }
+}

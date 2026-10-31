@@ -1,0 +1,60 @@
+{
+  "exit": 0,
+  "raw_sha256": "0bd1cec38ccab6cf07bef527cdf5ec90984d50a4872222d1e32ed427b9da7ab7",
+  "artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid#0.1.0",
+    "manifest_path": "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/Cargo.toml",
+    "target": {
+      "kind": [
+        "bench"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "mp4_seek_navigation",
+      "src_path": "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/benches/mp4_seek_navigation.rs",
+      "edition": "2024",
+      "required-features": [
+        "player"
+      ],
+      "doc": false,
+      "doctest": false,
+      "test": false
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": true
+    },
+    "features": [
+      "player",
+      "videotoolbox"
+    ],
+    "filenames": [
+      "/private/tmp/fvid-mp4-seek-navigation-20261031/release/deps/mp4_seek_navigation-f446733e2ed54596"
+    ],
+    "executable": "/private/tmp/fvid-mp4-seek-navigation-20261031/release/deps/mp4_seek_navigation-f446733e2ed54596",
+    "fresh": false
+  },
+  "command": [
+    "cargo",
+    "bench",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--bench",
+    "mp4_seek_navigation",
+    "--no-run",
+    "--message-format=json"
+  ],
+  "env": {
+    "CARGO_TARGET_DIR": "/private/tmp/fvid-mp4-seek-navigation-20261031",
+    "CARGO_BUILD_JOBS": "2"
+  },
+  "ordinary_invocation_guard": "no arguments and --test both exit0, print usage and execute no measurement"
+}

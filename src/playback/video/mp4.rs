@@ -166,6 +166,7 @@ struct SingleLayerMp4VideoReader<R> {
     open_signal: Option<(ColourDescription, HdrMetadata)>,
     failed: bool,
     future_pts: Vec<i64>,
+    strictly_ordered_pts: bool,
     pending: Vec<QueuedFrame>,
     presented_hdr: Option<HdrMetadata>,
     decoded_planar: Option<Arc<crate::playback_native::PackedPlanar>>,
@@ -231,7 +232,9 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             .try_reserve_exact(samples.len())
             .map_err(|_| invalid("cannot allocate MP4 reorder index"))?;
         let mut minimum = i64::MAX;
+        let mut strictly_ordered_pts = true;
         for sample in samples.iter().rev() {
+            strictly_ordered_pts &= sample.pts < minimum;
             minimum = minimum.min(sample.pts);
             future_pts.push(minimum);
         }
@@ -295,6 +298,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             open_signal: None,
             failed: false,
             future_pts,
+            strictly_ordered_pts,
             pending: Vec::new(),
             presented_hdr: None,
             decoded_planar: None,
@@ -904,20 +908,25 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         // A video track always indexes one record per sample; with no such index
         // there is nothing to restart from but the first sample.
         let samples = self.track().samples.expanded().unwrap_or(&[]);
-        // A sync candidate must precede every output at or after its own
-        // presentation time. Checking only the initial candidate is insufficient:
-        // falling back to an earlier PTS can expose another omitted frame.
-        // A prefix maximum also keeps the first member of equal-PTS groups.
-        let mut index = 0;
-        let mut earlier_pts = None;
-        for (i, sample) in samples.iter().enumerate() {
-            if sample.sync && sample.pts <= pts
-                && earlier_pts.is_none_or(|earlier| earlier < sample.pts)
-            {
-                index = i;
+        let index = if self.strictly_ordered_pts {
+            // Strict presentation order makes every sync point coverage-safe.
+            // Bound the target logarithmically, then walk only its sync interval.
+            let end = samples.partition_point(|sample| sample.pts <= pts);
+            samples[..end].iter().rposition(|sample| sample.sync).unwrap_or(0)
+        } else {
+            // Reordered and equal-PTS samples require full prefix coverage.
+            let mut index = 0;
+            let mut earlier_pts = None;
+            for (i, sample) in samples.iter().enumerate() {
+                if sample.sync && sample.pts <= pts
+                    && earlier_pts.is_none_or(|earlier| earlier < sample.pts)
+                {
+                    index = i;
+                }
+                earlier_pts = Some(earlier_pts.map_or(sample.pts, |earlier: i64| earlier.max(sample.pts)));
             }
-            earlier_pts = Some(earlier_pts.map_or(sample.pts, |earlier: i64| earlier.max(sample.pts)));
-        }
+            index
+        };
         self.rewind();
         self.sample_index = index;
         let setup = self.track().description_for_sample(index);

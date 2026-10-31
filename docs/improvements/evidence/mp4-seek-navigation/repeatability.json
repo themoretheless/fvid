@@ -1,0 +1,7 @@
+{
+  "result": "Generated workload and manifest identical after all jobs terminal",
+  "sha256": "b4ba1fc61974d4476489f970c66a1fba485c401ced8c268d80a6de45a660feb8",
+  "packets": 50000,
+  "bytes": 3850622,
+  "temporary_repeat_removed": true
+}

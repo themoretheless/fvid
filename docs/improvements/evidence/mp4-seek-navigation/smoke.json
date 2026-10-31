@@ -1,0 +1,12 @@
+{
+  "status": "correctness smoke only; release build still live, timings excluded from performance qualification",
+  "executable_sha256": "11a478af6fbfb2d4734f02dee03f433f94fec45897a830cd5dcd643e0ea07d80",
+  "result": {
+    "navigation_ns": 388583,
+    "open_ns": 935333,
+    "packets": 50000,
+    "queries": 10,
+    "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+    "seek_rgb_ns": 579834
+  }
+}

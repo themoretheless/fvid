@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 441,
-  "next_id": "FVID-0442",
+  "accepted_count": 442,
+  "next_id": "FVID-0443",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4953,6 +4953,17 @@
       "result": "Read a fixed-size major brand without scanning/allocating compatible brands; decode all105 numeric values in the current Apple table only for a complete unique qt brand. Preserve explicit script distinctions, ISO behavior, und and elng precedence, and unknown values.459 authored short movies cover both mdhd versions,105 languages, unknown values, extended-size and invalid optional branding, and elng fallback. Both readers/probe, exact packet/decoded planes/RGB, seven seeks, rewind and EOF pass; all459 independently retain video packet hashes/PTS.118 integration suites555 pass, root/media units and locked/offline core/player builds pass,1222 distinct checks after4 duplicate events. Mapping variants add no IDs.",
       "status": "accepted",
       "validation": "batch-441-validation.json"
+    },
+    {
+      "id": "FVID-0442",
+      "batch": 442,
+      "title": "Reduce CPU seek overhead for presentation-ordered MP4 video",
+      "source": "src/playback/video/mp4.rs",
+      "regression": "tests/mp4_seek_navigation.rs",
+      "before": "Published1d2ad76abf scans the complete sample index for every sync search. Seven standalone default-release runs on50000 authored VP9 keyframes:1000 navigation queries median35.57ms and actual software seek+RGB54.09ms; all exact output assertions pass.",
+      "result": "Derive a conservative strict-order flag in the existing suffix-index pass; partition the target and search backward within its sync interval. Reordered/equal-PTS inputs retain full prefix coverage, with no added heap index. Seven interleaved baseline/after pairs meet predeclared criteria: navigation35.94→0.434ms (82.77x),actual seek+RGB54.55→18.49ms (2.95x),all7 pairs win,no opening regression. Scope is this memory-resident16x16 all-keyframe workload,not whole-player throughput. Three new black-box tests and existing fixtures preserve sparse sync bounds,reordered/equal PTS,exact pictures/intervals,rewind/EOF and budget refusal.119 integration suites558 pass;1225 distinct checks plus both builds pass.",
+      "status": "accepted",
+      "validation": "batch-442-validation.json"
     }
   ]
 }

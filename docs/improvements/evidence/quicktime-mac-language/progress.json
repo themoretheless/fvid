@@ -1,5 +1,5 @@
 {
-  "status": "accepted FVID-0441; all qualification jobs terminal; publication pending",
+  "status": "accepted FVID-0441; published main and delivery branch, artifacts removed",
   "base": "2ac13b33a173ee6395ff66966b3ffa27e3fbf3ff",
   "session": 8322,
   "target": "/private/tmp/fvid-quicktime-mac-language-20261031",

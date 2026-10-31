@@ -1,0 +1,5 @@
+{
+  "exit": 0,
+  "raw_sha256": "10769d718e4ce15d3db1d49cdc370f6a0816d530d4fef88fa7e3384215d55703",
+  "note": "Initial manual benchmark smoke only; excluded from performance qualification. Benchmark argument guard and constructor timing boundary are finalized before baseline measurement."
+}

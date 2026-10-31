@@ -1,0 +1,12 @@
+{
+  "provenance": "Three authored colored16x16 VP9 packets repeat periodically;50Hz, all sync, no private media, encoder or network. Manual benchmark input, not a regression fixture.",
+  "packets": 50000,
+  "timescale": 50,
+  "bytes": 3850622,
+  "sha256": "b4ba1fc61974d4476489f970c66a1fba485c401ced8c268d80a6de45a660feb8",
+  "packet_sha256": [
+    "d586e4311a14b4eeebf2c61fadc917a6dc99aeccb87ceffb1e5166c318e67346",
+    "81a6bc19b3f2ed2d203a852e97b487c13712d0a3d9730d8cadf902a5cbda05c4",
+    "338d4038d521a4e55109198d490b0f8ac78bbb13d41591848bbe2ac879988144"
+  ]
+}

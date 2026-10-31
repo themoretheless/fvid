@@ -312,3 +312,9 @@ harness = false
 [[bench]]
 name = "ffmpeg_perspective_reference"
 harness = false
+
+# Explicit manual CPU navigation measurements, never ordinary test execution.
+[[bench]]
+name = "mp4_seek_navigation"
+harness = false
+required-features = ["player"]

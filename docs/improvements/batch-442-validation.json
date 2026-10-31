@@ -1,0 +1,77 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0442"
+  ],
+  "count_delta": 1,
+  "accepted_count": 442,
+  "before_commit": "1d2ad76abf50171a65deadcf991958cf6e063371",
+  "checks": {
+    "focused": {
+      "suites": 4,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    "integration": {
+      "suites": 119,
+      "passed": 558,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-mp4": {
+      "suites": 1,
+      "passed": 57,
+      "failed": 0,
+      "ignored": 1
+    },
+    "root-webm": {
+      "suites": 1,
+      "passed": 67,
+      "failed": 0,
+      "ignored": 0
+    },
+    "media": {
+      "suites": 1,
+      "passed": 547,
+      "failed": 0,
+      "ignored": 1
+    },
+    "core-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "distinct_passed": 1225,
+  "duplicate_events_excluded": 4,
+  "focused_pass_events_not_added": 12,
+  "performance": {
+    "workload": "50000 authored16x16 VP9 all-sync samples,50Hz,memory-resident input",
+    "queries_per_run": 1000,
+    "paired_rounds": 7,
+    "warmups_excluded_per_binary": 1,
+    "navigation_speedup": 82.76639997420591,
+    "seek_rgb_speedup": 2.950934458859499,
+    "paired_wins": {
+      "open_ns": 7,
+      "navigation_ns": 7,
+      "seek_rgb_ns": 7
+    },
+    "criteria_met": true,
+    "profile": "default release,opt3,thinLTO,codegen-units1",
+    "proof": "evidence/mp4-seek-navigation/comparison.json"
+  },
+  "regression_fixtures": [
+    "tests/fixtures/playback-errors/mp4-seek-reordered-coverage",
+    "tests/fixtures/playback-errors/mp4-presentation-endpoint"
+  ],
+  "limitations": "No storage,GPU,high-resolution or whole-player throughput claim. Tight/ordered/reordered/equal-PTS behavior checked; no extra heap index. Existing2 ignored tests unchanged. Manual benchmark needs separately generated workload; ordinary tests do not."
+}

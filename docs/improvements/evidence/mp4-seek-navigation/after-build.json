@@ -1,0 +1,45 @@
+{
+  "exit": 0,
+  "raw_sha256": "da39734e9b11aa83682e2272d3765dff8b46f4030a8ebdc56d71964ee36ef290",
+  "artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid#0.1.0",
+    "manifest_path": "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/Cargo.toml",
+    "target": {
+      "kind": [
+        "bench"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "mp4_seek_navigation",
+      "src_path": "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/benches/mp4_seek_navigation.rs",
+      "edition": "2024",
+      "required-features": [
+        "player"
+      ],
+      "doc": false,
+      "doctest": false,
+      "test": false
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": true
+    },
+    "features": [
+      "player",
+      "videotoolbox"
+    ],
+    "filenames": [
+      "/private/tmp/fvid-mp4-seek-navigation-20261031/release/deps/mp4_seek_navigation-f446733e2ed54596"
+    ],
+    "executable": "/private/tmp/fvid-mp4-seek-navigation-20261031/release/deps/mp4_seek_navigation-f446733e2ed54596",
+    "fresh": false
+  },
+  "binary": "/private/tmp/fvid-mp4-seek-navigation-after",
+  "binary_sha256": "fc36960cd64783eadc868cc777ab63d262d61f6e182ca1c4ac490f8b31205530",
+  "profile": "Repository default release:opt3,thinLTO,codegen-units1; same features/toolchain and benchmark source as baseline"
+}

@@ -1,0 +1,76 @@
+{
+  "removed_files": [
+    {
+      "path": "/private/tmp/fvid-mp4-seek-navigation-focused.log",
+      "sha256": "0c8507a70e3d53d83a99b31a20eb184a23fdcd1f9cc7ad7df56f765826591fef",
+      "archive": "focused.log"
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-seek-navigation-integration.log",
+      "sha256": "1bad2b29352edf7445d27ba250e9b9bae3a80e5b2900795f2f05768b6626b151",
+      "archive": "integration.log"
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-seek-navigation-root-mp4.log",
+      "sha256": "1c6bb018d0ba62cb93a393ef6989fdd1c476330925ff8de42c279637cc5371ee",
+      "archive": "root-mp4.log"
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-seek-navigation-root-webm.log",
+      "sha256": "dd0aaa6ba9af38d983e8f607936aa25447824fbae134e02d212f3605f3a6fdcb",
+      "archive": "root-webm.log"
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-seek-navigation-media.log",
+      "sha256": "1635881bbde70f74960bc02a4412d55e3298cbec1ed18953acb33b3dd2cf55cb",
+      "archive": "media.log"
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-seek-navigation-core-check.log",
+      "sha256": "4c9a40c259e894f973e76f25e33941e4d3c3c7afe737dee30fcbda3f2c679d91",
+      "archive": "core-check.log"
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-seek-navigation-player-check.log",
+      "sha256": "eee64449629e9d574f3ff93834bc6c172abc2444d9a42eca4409a5faf5c3925b",
+      "archive": "player-check.log"
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-seek-navigation-baseline-build.log",
+      "sha256": "0bd1cec38ccab6cf07bef527cdf5ec90984d50a4872222d1e32ed427b9da7ab7",
+      "archive": "baseline-build.log.gz"
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-seek-navigation-after-build.log",
+      "sha256": "da39734e9b11aa83682e2272d3765dff8b46f4030a8ebdc56d71964ee36ef290",
+      "archive": "after-build.log.gz"
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-seek-navigation-baseline",
+      "sha256": "7584ecbcd058ad61d6e6cce946b5a4bf277cc7c2a96d20f87cf672ce91a444ac",
+      "proof": "comparison.json"
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-seek-navigation-after",
+      "sha256": "fc36960cd64783eadc868cc777ab63d262d61f6e182ca1c4ac490f8b31205530",
+      "proof": "comparison.json"
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-seek-navigation-input.mp4",
+      "sha256": "b4ba1fc61974d4476489f970c66a1fba485c401ced8c268d80a6de45a660feb8",
+      "proof": "workload.json and repeatability.json; generator retained"
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-seek-navigation-input.json",
+      "sha256": "f543726b71133b1168878fbba65503899e981e07bc68640ae9e507d25d722166",
+      "archive": "workload.json"
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-seek-navigation-comparison.json",
+      "sha256": "7ab574a74eea66fa354877352f1d18bf79d134cfff8923d1282d80f0a8fe89b2",
+      "archive": "comparison.json"
+    }
+  ],
+  "removed_target": "/private/tmp/fvid-mp4-seek-navigation-20261031",
+  "preserved": "Manual generation/comparison/benchmark source, existing short media regressions, workload metadata and every archived measurement/build/test proof. Foreign jobs/worktrees/stashes untouched."
+}

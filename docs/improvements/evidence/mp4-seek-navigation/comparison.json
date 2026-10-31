@@ -1,0 +1,245 @@
+{
+  "scope": "Memory-resident input; public software sync navigation and actual seek+RGB with exact frame/interval assertions. No disk/GPU/whole-player claim.",
+  "criteria": "Navigation median>=1.2x,seek+RGB median>=1.1x,both win all but at most1 paired rounds,open median regresses<=10%; criteria fixed before implementation.",
+  "accepted_by_criteria": true,
+  "queries": 1000,
+  "rounds": 7,
+  "binary_sha256": {
+    "baseline": "7584ecbcd058ad61d6e6cce946b5a4bf277cc7c2a96d20f87cf672ce91a444ac",
+    "after": "fc36960cd64783eadc868cc777ab63d262d61f6e182ca1c4ac490f8b31205530"
+  },
+  "workload_sha256": "b4ba1fc61974d4476489f970c66a1fba485c401ced8c268d80a6de45a660feb8",
+  "warmup_excluded": {
+    "baseline": {
+      "navigation_ns": 35718083,
+      "open_ns": 695958,
+      "packets": 50000,
+      "queries": 1000,
+      "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+      "seek_rgb_ns": 54478292
+    },
+    "after": {
+      "navigation_ns": 439334,
+      "open_ns": 687750,
+      "packets": 50000,
+      "queries": 1000,
+      "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+      "seek_rgb_ns": 18381708
+    }
+  },
+  "samples": [
+    {
+      "round": 0,
+      "order": [
+        "baseline",
+        "after"
+      ],
+      "baseline": {
+        "navigation_ns": 35937833,
+        "open_ns": 540458,
+        "packets": 50000,
+        "queries": 1000,
+        "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+        "seek_rgb_ns": 54493917
+      },
+      "after": {
+        "navigation_ns": 434208,
+        "open_ns": 508750,
+        "packets": 50000,
+        "queries": 1000,
+        "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+        "seek_rgb_ns": 18586750
+      }
+    },
+    {
+      "round": 1,
+      "order": [
+        "after",
+        "baseline"
+      ],
+      "after": {
+        "navigation_ns": 391333,
+        "open_ns": 481916,
+        "packets": 50000,
+        "queries": 1000,
+        "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+        "seek_rgb_ns": 18072375
+      },
+      "baseline": {
+        "navigation_ns": 35942042,
+        "open_ns": 553208,
+        "packets": 50000,
+        "queries": 1000,
+        "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+        "seek_rgb_ns": 54543250
+      }
+    },
+    {
+      "round": 2,
+      "order": [
+        "baseline",
+        "after"
+      ],
+      "baseline": {
+        "navigation_ns": 35734208,
+        "open_ns": 555125,
+        "packets": 50000,
+        "queries": 1000,
+        "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+        "seek_rgb_ns": 54575667
+      },
+      "after": {
+        "navigation_ns": 419250,
+        "open_ns": 518125,
+        "packets": 50000,
+        "queries": 1000,
+        "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+        "seek_rgb_ns": 18485458
+      }
+    },
+    {
+      "round": 3,
+      "order": [
+        "after",
+        "baseline"
+      ],
+      "after": {
+        "navigation_ns": 469375,
+        "open_ns": 515500,
+        "packets": 50000,
+        "queries": 1000,
+        "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+        "seek_rgb_ns": 18131583
+      },
+      "baseline": {
+        "navigation_ns": 35793667,
+        "open_ns": 541792,
+        "packets": 50000,
+        "queries": 1000,
+        "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+        "seek_rgb_ns": 54549375
+      }
+    },
+    {
+      "round": 4,
+      "order": [
+        "baseline",
+        "after"
+      ],
+      "baseline": {
+        "navigation_ns": 35941334,
+        "open_ns": 540417,
+        "packets": 50000,
+        "queries": 1000,
+        "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+        "seek_rgb_ns": 54529959
+      },
+      "after": {
+        "navigation_ns": 429667,
+        "open_ns": 525042,
+        "packets": 50000,
+        "queries": 1000,
+        "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+        "seek_rgb_ns": 18248375
+      }
+    },
+    {
+      "round": 5,
+      "order": [
+        "after",
+        "baseline"
+      ],
+      "after": {
+        "navigation_ns": 478167,
+        "open_ns": 500875,
+        "packets": 50000,
+        "queries": 1000,
+        "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+        "seek_rgb_ns": 18557000
+      },
+      "baseline": {
+        "navigation_ns": 59737875,
+        "open_ns": 573792,
+        "packets": 50000,
+        "queries": 1000,
+        "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+        "seek_rgb_ns": 54554125
+      }
+    },
+    {
+      "round": 6,
+      "order": [
+        "baseline",
+        "after"
+      ],
+      "baseline": {
+        "navigation_ns": 35847083,
+        "open_ns": 585459,
+        "packets": 50000,
+        "queries": 1000,
+        "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+        "seek_rgb_ns": 54578708
+      },
+      "after": {
+        "navigation_ns": 468792,
+        "open_ns": 490833,
+        "packets": 50000,
+        "queries": 1000,
+        "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+        "seek_rgb_ns": 18754834
+      }
+    }
+  ],
+  "statistics": {
+    "baseline": {
+      "open_ns": {
+        "median": 553208,
+        "mad": 12750,
+        "minimum": 540417,
+        "maximum": 585459
+      },
+      "navigation_ns": {
+        "median": 35937833,
+        "mad": 90750,
+        "minimum": 35734208,
+        "maximum": 59737875
+      },
+      "seek_rgb_ns": {
+        "median": 54549375,
+        "mad": 19416,
+        "minimum": 54493917,
+        "maximum": 54578708
+      }
+    },
+    "after": {
+      "open_ns": {
+        "median": 508750,
+        "mad": 9375,
+        "minimum": 481916,
+        "maximum": 525042
+      },
+      "navigation_ns": {
+        "median": 434208,
+        "mad": 34584,
+        "minimum": 391333,
+        "maximum": 478167
+      },
+      "seek_rgb_ns": {
+        "median": 18485458,
+        "mad": 237083,
+        "minimum": 18072375,
+        "maximum": 18754834
+      }
+    }
+  },
+  "baseline_over_after": {
+    "open_ns": 1.087386732186732,
+    "navigation_ns": 82.76639997420591,
+    "seek_rgb_ns": 2.950934458859499
+  },
+  "paired_wins": {
+    "open_ns": 7,
+    "navigation_ns": 7,
+    "seek_rgb_ns": 7
+  }
+}

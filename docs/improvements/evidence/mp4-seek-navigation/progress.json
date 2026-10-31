@@ -1,0 +1,25 @@
+{
+  "status": "accepted FVID-0442; all qualification jobs terminal; publication pending",
+  "base": "1d2ad76abf50171a65deadcf991958cf6e063371",
+  "build_session": 11981,
+  "target": "/private/tmp/fvid-mp4-seek-navigation-20261031",
+  "build_log": "/private/tmp/fvid-mp4-seek-navigation-baseline-build.log",
+  "workload": "/private/tmp/fvid-mp4-seek-navigation-input.mp4",
+  "next": "Verify executable and repeated baseline timings before choosing an optimization. Compare interleaved preserved baseline/after binaries, actual seek+RGB and open cost; revert if unconvincing.",
+  "note": "Initial build/smoke archived and excluded. Missing/--test arguments now print usage; constructor timing excludes input clone. Acceptance thresholds fixed in README/comparison script before optimization.",
+  "after_build_session": 87680,
+  "baseline_medians_ns": {
+    "open_ns": 537958,
+    "navigation_ns": 35568084,
+    "seek_rgb_ns": 54087500
+  },
+  "candidate": "Strict-order flag in existing suffix-index pass; partition target and reverse sync lookup. Reordered/equal-PTS coverage unchanged; no added heap index.",
+  "comparison_session": 18554,
+  "comparison_ratios": {
+    "open_ns": 1.087386732186732,
+    "navigation_ns": 82.76639997420591,
+    "seek_rgb_ns": 2.950934458859499
+  },
+  "focused_passed": 12,
+  "qualification_session": 2295
+}

@@ -1,0 +1,79 @@
+{
+  "utc": "2026-10-31T02:47:08.565201+00:00",
+  "platform": "macOS-26.7.2-arm64-arm-64bit-Mach-O",
+  "binary": "/private/tmp/fvid-mp4-seek-navigation-baseline",
+  "binary_sha256": "7584ecbcd058ad61d6e6cce946b5a4bf277cc7c2a96d20f87cf672ce91a444ac",
+  "workload_sha256": "b4ba1fc61974d4476489f970c66a1fba485c401ced8c268d80a6de45a660feb8",
+  "warmup_excluded": {
+    "navigation_ns": 35769291,
+    "open_ns": 675667,
+    "packets": 50000,
+    "queries": 1000,
+    "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+    "seek_rgb_ns": 54327500
+  },
+  "samples": [
+    {
+      "navigation_ns": 35328500,
+      "open_ns": 537958,
+      "packets": 50000,
+      "queries": 1000,
+      "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+      "seek_rgb_ns": 53791333
+    },
+    {
+      "navigation_ns": 35215750,
+      "open_ns": 482458,
+      "packets": 50000,
+      "queries": 1000,
+      "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+      "seek_rgb_ns": 54057917
+    },
+    {
+      "navigation_ns": 37516625,
+      "open_ns": 506167,
+      "packets": 50000,
+      "queries": 1000,
+      "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+      "seek_rgb_ns": 54723792
+    },
+    {
+      "navigation_ns": 35568084,
+      "open_ns": 601583,
+      "packets": 50000,
+      "queries": 1000,
+      "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+      "seek_rgb_ns": 54087500
+    },
+    {
+      "navigation_ns": 36370459,
+      "open_ns": 500292,
+      "packets": 50000,
+      "queries": 1000,
+      "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+      "seek_rgb_ns": 55328625
+    },
+    {
+      "navigation_ns": 35228250,
+      "open_ns": 550667,
+      "packets": 50000,
+      "queries": 1000,
+      "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+      "seek_rgb_ns": 53732250
+    },
+    {
+      "navigation_ns": 36763458,
+      "open_ns": 558750,
+      "packets": 50000,
+      "queries": 1000,
+      "scope": "memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim",
+      "seek_rgb_ns": 54148417
+    }
+  ],
+  "medians_ns": {
+    "open_ns": 537958,
+    "navigation_ns": 35568084,
+    "seek_rgb_ns": 54087500
+  },
+  "scope": "Standalone pre-implementation baseline,not final paired qualification. Constructor excludes input clone. Exact seek/RGB/interval checks pass in every run."
+}
