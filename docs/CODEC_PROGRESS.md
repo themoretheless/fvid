@@ -1,3 +1,37 @@
+## Shared normalized QMF128 — corrected input admission,2026-10-31
+
+A constructor/validator mismatch rejected valid128-band input:the constructor
+selected128-band banks,but decode_qmf still validated rows as64. Its band
+selection now uses the same27713/55426 thresholds as construction. Existing
+32/64 selection is unchanged. This is a runtime admission fix,not residual32/128
+or coupled LD-SBR128 qualification.
+
+66 own short AAC-ELD/MPS videos cover all8 trees,both TTT variants,
+64/88.2/96kHz and480/512 cores. The first movie passes native PCM decoding
+before the pre-fix shared-QMF call refuses specifically with invalid shared QMF
+frame. After the fix,2,642,688 shared-input output values match PCM-session
+analysis exactly and complete native movie PCM within1e-9.
+
+The session test checks identical full-window stamps/source spans,slot-edge
+splitting with two conserved source spans,checkpoint cloning,nonfinite bin127
+and late spatial-corruption rollback,EOF drain,reset and complete replay.
+These are direct normalized-input/session checks; no new physical-device or GUI
+seek claim is made. The independent frozen ISO128-band bank/chain oracles are
+rerun separately. Full compressed-stream comparison uses analytical core plus
+qualified owned spatial stages,not independent whole-codec conformance.
+
+Final offline gate:635 passed,0 failed,2 ignored across all media library
+units and11 selected AAC/MPS integration targets. The ignored cases are one
+existing media test and the explicitly pending residual32/128 acceptance;
+neither is counted as accepted playback. This is not a fresh full-player suite.
+
+Own generation copies only separately authored synthetic media and scalar core
+traces from the existing corpus;69 files regenerate byte-for-byte with process
+and network creation forbidden. Ordinary tests require no FFmpeg,network or
+reference C compilation. Residual32/128,unqualified coupled-SBR geometries,
+profile output adaptation and the wider no-gap objective remain open.
+Evidence: `docs/validation/aac-ld-mps-shared128-{generation,tests}-2026-10-31.json`.
+
 ## Residual32/128 — isolated bank admission reproducers,2026-10-31
 
 This is diagnosis and new regression coverage,not a decoder fix. Production

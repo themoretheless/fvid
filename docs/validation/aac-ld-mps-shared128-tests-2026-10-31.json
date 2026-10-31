@@ -1,0 +1,146 @@
+{
+  "baseline": "4634f23be3",
+  "runtime_fix": "Shared normalized QMF validator now admits128-band rows selected by construction.",
+  "before": {
+    "case": "n512-r64000-tree0-v1-plain",
+    "native_pcm_control_accepted": true,
+    "specific_failure": "invalid LD-MPS shared QMF frame",
+    "log_sha256": "86db30cbf6eb8bbc20a13c1f7b51c091e3781e737b6367ba81e6a86eee5a9d09"
+  },
+  "coverage": {
+    "own_videos": 66,
+    "pcm_samples": 2642688,
+    "shared_vs_pcm_analysis_max_error": 0,
+    "native_movie_pcm_tolerance": 1e-09,
+    "trees": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "rates": [
+      64000,
+      88200,
+      96000
+    ],
+    "core_frames": [
+      480,
+      512
+    ],
+    "checks": [
+      "PCM/QMF composition",
+      "source/stamp conservation",
+      "slot-edge splitting",
+      "clone checkpoints",
+      "last-bin nonfinite rollback",
+      "late spatial corruption rollback",
+      "EOF",
+      "reset/replay"
+    ]
+  },
+  "qualification": "Normalized QMF/session API only. Frozen independent C bank/chain controls are rerun;whole movie PCM uses analytical core plus qualified spatial stages. No new coupled-SBR128,residual32/128,physical audio or GUI seek qualification.",
+  "gates": {
+    "targets": [
+      "aac_ld_mps_shared128",
+      "aac_ld_mps_pcm",
+      "aac_ld_mps_session",
+      "aac_eld_mps_native",
+      "aac_eld_spatial_sbr",
+      "aac_ld_mps_residual_native",
+      "aac_ld_mps_residual_bank_repro",
+      "aac_ld_mps_qmf128",
+      "aac_ld_qmf128",
+      "aac_ld_mps_stp",
+      "aac_ld_mps_ges"
+    ],
+    "gates": [
+      {
+        "gate": "media",
+        "command": [
+          "cargo",
+          "--config",
+          "profile.dev.package.fvid-media.opt-level=2",
+          "test",
+          "--offline",
+          "-p",
+          "fvid-media",
+          "--lib"
+        ],
+        "log": "/tmp/fvid-shared128-gate-media.log",
+        "status": 0,
+        "seconds": 28.65486670800601,
+        "log_sha256": "4758e39db7436cd2a20da7a41e0579daba079680453c7bc6a5beaf6b3ddefcee",
+        "results": {
+          "passed": 587,
+          "failed": 0,
+          "ignored": 1
+        }
+      },
+      {
+        "gate": "integration",
+        "command": [
+          "cargo",
+          "--config",
+          "profile.dev.package.fvid-media.opt-level=2",
+          "test",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "player",
+          "--test",
+          "aac_ld_mps_shared128",
+          "--test",
+          "aac_ld_mps_pcm",
+          "--test",
+          "aac_ld_mps_session",
+          "--test",
+          "aac_eld_mps_native",
+          "--test",
+          "aac_eld_spatial_sbr",
+          "--test",
+          "aac_ld_mps_residual_native",
+          "--test",
+          "aac_ld_mps_residual_bank_repro",
+          "--test",
+          "aac_ld_mps_qmf128",
+          "--test",
+          "aac_ld_qmf128",
+          "--test",
+          "aac_ld_mps_stp",
+          "--test",
+          "aac_ld_mps_ges",
+          "--",
+          "--nocapture"
+        ],
+        "log": "/tmp/fvid-shared128-gate-integration.log",
+        "status": 0,
+        "seconds": 259.30229070800124,
+        "log_sha256": "00053e9f5eedc6c0aaac36b5f9759fdc0b59ff4aa3b2a339883e4452c1413b5f",
+        "results": {
+          "passed": 48,
+          "failed": 0,
+          "ignored": 1
+        }
+      }
+    ]
+  },
+  "totals": {
+    "passed": 635,
+    "failed": 0,
+    "ignored": 2
+  },
+  "ignored": "One existing media test and one explicitly pending residual32/128 acceptance test;not playback acceptance.",
+  "files": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_pcm.rs": "29ca1f014693927b7fad08de012fe73912bcbfcd07a412175369844440b19d2b",
+    "docs/CODEC_PROGRESS.md": "73d0557f6b3a16e4c30079dac84081b6cc979c4160b7345449e3f80804363363",
+    "docs/validation/aac-ld-mps-qmf128-reference-2026-10-31.json": "1852acf7198d505eea284720e7d8e22f18c564e72ff5fe14ddcc3297b856bea5",
+    "docs/validation/aac-ld-mps-shared128-generation-2026-10-31.json": "4eea8381f0332e153f531dcff4e06b7cc5b8540c4e5b1b31a967bed4f769fa18",
+    "docs/validation/aac-ld-qmf128-reference-2026-10-31.json": "ad5928a95f59d8e1823024bb1f612d75d59d98b838cebaca161146e00ef9b187",
+    "scripts/generate_aac_ld_mps_shared128_fixtures.py": "165f723517b1db5d23ae4900a6b409098b0dedf1d2e0b8c6b76812e822a783c4",
+    "tests/aac_ld_mps_shared128.rs": "98fea2688d595a0e67222c4f6879f7013b445f7e8a37c85434910b99551b61d0"
+  }
+}

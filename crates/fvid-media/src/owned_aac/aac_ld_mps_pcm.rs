@@ -321,6 +321,8 @@ impl Decoder {
         let slots = usize::from(self.config.frame_slots);
         let bins = if self.config.sample_rate < 27713 {
             32
+        } else if self.config.sample_rate >= 55426 {
+            128
         } else {
             64
         };
