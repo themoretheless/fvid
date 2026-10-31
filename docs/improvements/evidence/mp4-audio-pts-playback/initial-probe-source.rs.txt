@@ -1,0 +1,41 @@
+#![cfg(feature = "player")]
+#[path = "support/audio_transitions.rs"]
+mod transitions;
+use std::{io::Cursor, path::Path};
+#[test]
+fn observe_authored_audio_pts_playback_before_selecting_a_fix() {
+    for name in ["ordered", "reordered", "duplicate", "negative", "equal"] {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/mp4-audio-packet-seek")
+            .join(format!("{name}.mp4"));
+        let data = std::fs::read(path).unwrap();
+        let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let mut reader = fvid::playback_mp4_audio::Mp4AudioReader::open(
+                Cursor::new(data),
+                Default::default(),
+            )
+            .unwrap();
+            transitions::collect(&mut reader)
+        }));
+        match outcome {
+            Ok(frames) => {
+                let total: usize = frames
+                    .iter()
+                    .map(|p| p.3.len() / 4 / usize::from(p.1))
+                    .sum();
+                let windows: Vec<_> = frames.iter().map(|p| serde_json::json!({"at_ns":p.2.as_nanos(),"frames":p.3.len()/4/usize::from(p.1),"first":f32::from_le_bytes(p.3[..4].try_into().unwrap())})).collect();
+                println!(
+                    "FVID_PTS_PROBE {}",
+                    serde_json::json!({"case":name,"result":"success","sample_frames":total,"windows":windows})
+                );
+                if name == "ordered" {
+                    assert_eq!(total, 384);
+                }
+            }
+            Err(_) => println!(
+                "FVID_PTS_PROBE {}",
+                serde_json::json!({"case":name,"result":"refusal;see original panic/error above"})
+            ),
+        }
+    }
+}

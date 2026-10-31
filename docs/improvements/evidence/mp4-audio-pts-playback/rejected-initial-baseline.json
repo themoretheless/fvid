@@ -1,0 +1,5 @@
+{
+  "status": "unqualified initial control;not accepted",
+  "summary": "2pass3fail included an unrelated raw-test initial-position assumption. Opening an ambiguous composition may select a later initial sample. Correct the test by explicitly seeking before all PTS before raw extraction. Existing raw selection contract is preserved;no production change or extra ID.",
+  "intended_failures": "Playback-step and actual-worker refusal assertions both failed;silent-corruption diagnostic is independently archived."
+}

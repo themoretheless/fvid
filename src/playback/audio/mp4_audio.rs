@@ -35,6 +35,7 @@ pub struct Mp4AudioReader<R> {
     // Sample metadata is immutable for this reader's lifetime. Equal PTS are
     // ordered too: packet seek must select the last member of that group.
     pts_nondecreasing: std::sync::OnceLock<bool>,
+    playback_composition_linear: std::cell::Cell<Option<bool>>,
     clock: Option<PlaybackClock>,
     clock_mode: std::cell::Cell<bool>,
     clock_floor: std::cell::Cell<EditTime>,
@@ -361,6 +362,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         Ok(Self {
             presentation_end_ticks: std::sync::OnceLock::new(),
             pts_nondecreasing: std::sync::OnceLock::new(),
+            playback_composition_linear: Default::default(),
             source_gaps: false,
             gap_scan: Default::default(), deferred_pcm: Default::default(),
             navigation_error:None,
@@ -532,6 +534,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         let mut source = Self {
             presentation_end_ticks: std::sync::OnceLock::new(),
             pts_nondecreasing: std::sync::OnceLock::new(),
+            playback_composition_linear: Default::default(),
             source_gaps,
             gap_scan: Default::default(), deferred_pcm: Default::default(),
             navigation_error:None,
@@ -950,6 +953,45 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         })
     }
 
+    // The playback scheduler cannot reorder or mix overlapping source spans.
+    // Certify before even emitting gap silence. Raw packet extraction remains
+    // independent of this playback capability. Recovered native clocks must be
+    // checked in their exact coordinates, not their rounded container ticks.
+    fn ensure_playback_composition_order(&self) -> Result<()> {
+        let supported = match self.playback_composition_linear.get() {
+            Some(supported) => supported,
+            None => {
+                let track = self.track();
+                let supported = if let Some(clock) = &self.clock {
+                    let mut end: Option<EditTime> = None;
+                    let mut supported = true;
+                    for i in 0..clock.count() {
+                        let frames = clock.frames(track, i)?;
+                        if frames == 0 { continue; }
+                        let start = clock.point(track, i)?;
+                        if end.is_some_and(|end| start.cmp(end) == std::cmp::Ordering::Less) {
+                            supported = false;
+                            break;
+                        }
+                        let frames = u64::try_from(frames).map_err(|_| invalid("MP4 playback window overflow"))?;
+                        end = Some(start.add(EditTime::ticks(frames, clock.rate(i)?)?)?);
+                    }
+                    supported
+                } else {
+                    track.samples.expanded().is_none_or(|samples| samples.windows(2).all(|pair| {
+                        i128::from(pair[0].pts) + i128::from(pair[0].duration) <= i128::from(pair[1].pts)
+                    }))
+                };
+                self.playback_composition_linear.set(Some(supported));
+                supported
+            }
+        };
+        if !supported {
+            return Err(unsupported("MP4 audio composition order is unsupported for linear playback"));
+        }
+        Ok(())
+    }
+
     /// Seek to the sample with the greatest PTS at or before `pts`.
     pub fn seek(&mut self, pts: i64) -> i64 {
         self.deferred_pcm.get_mut().clear(); self.gap_scan.set(0);
@@ -1304,6 +1346,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     fn next_step(&mut self)->Result<Option<crate::audio::AudioStep>> {
         use crate::audio::{AudioStep,AudioPacket};
         if let Some(error)=self.navigation_error.take() {return Err(error);}
+        self.ensure_playback_composition_order()?;
         if !self.deferred_pcm.get_mut().is_empty() {
             if let Some(step)=self.next_source_silence()? {return Ok(Some(step));}
             let (packet,pts)=self.deferred_pcm.get_mut().pop_front().unwrap();

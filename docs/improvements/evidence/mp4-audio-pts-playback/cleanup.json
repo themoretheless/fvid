@@ -1,0 +1,18 @@
+{
+  "status": "Own artifacts removed after archive/source verification;all jobs terminal",
+  "removed": [
+    "/private/tmp/fvid-mp4-audio-pts-playback-integration.log",
+    "/private/tmp/fvid-mp4-audio-pts-playback-root-mp4.log",
+    "/private/tmp/fvid-mp4-audio-pts-playback-root-webm.log",
+    "/private/tmp/fvid-mp4-audio-pts-playback-media.log",
+    "/private/tmp/fvid-mp4-audio-pts-playback-core-check.log",
+    "/private/tmp/fvid-mp4-audio-pts-playback-player-check.log",
+    "/private/tmp/fvid-mp4-audio-pts-playback-before.log",
+    "/private/tmp/fvid-mp4-audio-pts-playback-after.log",
+    "/private/tmp/fvid-mp4-audio-pts-playback-initial-probe.log",
+    "/private/tmp/fvid-mp4-audio-pts-playback-target-20261031",
+    "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/scripts/__pycache__"
+  ],
+  "preserved": "All14regression files,generator,qualified and rejected baseline proof,initial observations and full validation archives. Foreign worktrees/stashes/jobs/caches untouched.",
+  "plain_log_normalization": "Only trailing whitespace and final empty lines removed;raw and archive hashes retained."
+}

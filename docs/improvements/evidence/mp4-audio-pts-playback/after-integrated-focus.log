@@ -1,0 +1,10 @@
+Running tests/mp4_audio_composition_order.rs (/private/tmp/fvid-mp4-audio-pts-playback-target-20261031/debug/deps/mp4_audio_composition_order-364b7ee49bcb51f5)
+
+running 5 tests
+test every_witness_keeps_valid_packets_and_exact_video_without_playback_order_claims ... ok
+test ordered_negative_and_forward_gap_pcm_seeks_and_eof_remain_accepted ... ok
+test unsupported_composition_refuses_before_any_playback_step_and_after_seek ... ok
+test actual_worker_reports_unsupported_without_publishing_pcm ... ok
+test valid_worker_controls_keep_exact_pcm_after_repeated_seeks ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.33s

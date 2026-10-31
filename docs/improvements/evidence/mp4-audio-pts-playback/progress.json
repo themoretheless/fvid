@@ -1,0 +1,22 @@
+{
+  "status": "accepted FVID-0446;all gates passed;own artifacts removed;publication pending",
+  "base": "90e1e09b64d10e1d98b2359f07e806dcb381e06f",
+  "count_delta": 1,
+  "target": "/private/tmp/fvid-mp4-audio-pts-playback-target-20261031",
+  "scope": "Observe actual full AudioStream PCM and presentation intervals for the earlier authored packet-navigation controls. Unsupported refusals are distinct from acceptance;do not infer full playback from raw packet selection.",
+  "source_sha256": "e78fd554a1f28caa3a6fc2b94b54370cea89fbabc5d005e3e94930c289835cc2",
+  "next": "Commit and atomically publish qualified source and proof to both delivery refs,then verify state.",
+  "probe_session": 4250,
+  "probe_log": "/private/tmp/fvid-mp4-audio-pts-playback-initial-probe.log",
+  "probe_exit": 0,
+  "before_session": 10004,
+  "before_exit": 101,
+  "before_passed": 3,
+  "before_failed": 2,
+  "after_focused_session": 22623,
+  "after_focused_exit": 0,
+  "after_passed": 16,
+  "qualification_session": 59037,
+  "qualification_exit": 0,
+  "distinct_passed": 1243
+}

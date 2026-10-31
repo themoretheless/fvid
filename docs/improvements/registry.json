@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 445,
-  "next_id": "FVID-0446",
+  "accepted_count": 446,
+  "next_id": "FVID-0447",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4997,6 +4997,17 @@
       "result": "Lazily certify nondecreasing immutable PTS and partition inclusively,retaining the last equal-PTS sample. Reordered inputs retain original max-PTS search and compact inputs retain existing lookup;no per-sample heap index. Seven paired runs:1000lookups137.178→0.180ms(760.9x),actual software seek-to-PCM137.682→0.908ms(151.6x),all7pairs win. Cold direct/AudioStream seek improve;opening+3.92%passes predeclared10%guard. Five authored120ms clips preserve raw reordered/equal/negative packet landings,ordered analytic PCM,video seek/EOF and actual audio worker behavior.122integration suites570pass;1238distinct checks and both builds pass. Scope is this memory-resident IMA4 workload,not whole-player throughput.",
       "status": "accepted",
       "validation": "batch-445-validation.json"
+    },
+    {
+      "id": "FVID-0446",
+      "batch": 446,
+      "title": "Refuse unsupported native MP4 audio composition before silent PCM corruption",
+      "source": "src/playback/audio/mp4_audio.rs",
+      "regression": "tests/mp4_audio_composition_order.rs",
+      "before": "Published90e1e09b64 reports successful playback for reordered IMA4 while replacing nonempty packets with fabricated silence. Fresh three-packet witness captures64 zero PCM frames instead of the scheduled packet and a successful worker Ended event. Qualified baseline3controls pass,2explicit-refusal tests fail;an unrelated raw-start assumption in an initial run was corrected and excluded.",
+      "result": "Cache a selected-track playback-order check before emitting any step,silence or decoded PCM. Exact recovered clock windows avoid container-rounding false refusals. Return typed Unsupported for overlapping/reordered presentation;raw extraction and standalone decoding remain available. Seven new60ms authored video witnesses distinguish ordered/negative/gap playback acceptance from four unsupported-order refusal cases;actual workers emit Error without PCM. Existing timing,quantized clocks,raw packet navigation,seek,EOF and budgets remain green.123integration suites575pass;1243distinct checks and both builds pass. This does not add full reordered-audio playback support;full selected-track validation is documented.",
+      "status": "accepted",
+      "validation": "batch-446-validation.json"
     }
   ]
 }

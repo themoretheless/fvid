@@ -1,0 +1,204 @@
+#![cfg(feature = "player")]
+#[path = "support/audio_transitions.rs"]
+mod transitions;
+use fvid::{audio::AudioStream, playback_mp4_audio::Mp4AudioReader};
+use std::{io::Cursor, path::Path, time::Duration};
+fn bytes(name: &str) -> Vec<u8> {
+    std::fs::read(
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/mp4-audio-composition-order")
+            .join(name),
+    )
+    .unwrap()
+}
+fn open(name: &str) -> Mp4AudioReader<Cursor<Vec<u8>>> {
+    Mp4AudioReader::open(
+        Cursor::new(bytes(&format!("{name}.mp4"))),
+        Default::default(),
+    )
+    .unwrap()
+}
+fn assert_refusal(result: fvid::Result<Option<fvid::audio::AudioStep>>, name: &str) {
+    match result {
+        Err(fvid::Error::Unsupported(message)) => assert!(
+            message.contains("MP4 audio composition order"),
+            "{name}: {message}"
+        ),
+        Err(other) => panic!("{name}: unrelated refusal: {other}"),
+        Ok(_) => panic!(
+            "{name}: unsupported composition exposed a playback step instead of an explicit refusal"
+        ),
+    }
+}
+#[test]
+fn unsupported_composition_refuses_before_any_playback_step_and_after_seek() {
+    for name in ["reordered", "duplicate", "equal", "overlap"] {
+        let mut reader = open(name);
+        assert_refusal(reader.next_step(), name);
+        reader.rewind();
+        assert_refusal(reader.next_step(), name);
+        for ms in [0, 8, 16, 100] {
+            reader.seek_time(Duration::from_millis(ms));
+            assert_refusal(reader.next_step(), name);
+        }
+    }
+}
+#[test]
+fn ordered_negative_and_forward_gap_pcm_seeks_and_eof_remain_accepted() {
+    for name in ["ordered", "negative", "gap"] {
+        let expected = bytes(&format!("{name}.f32le"));
+        let mut reader = open(name);
+        for ms in [0, 1, 7, 8, 9, 16, 23, 24, 32, 100, 0] {
+            reader.seek_time(Duration::from_millis(ms));
+            let frames = transitions::collect(&mut reader);
+            let got: Vec<_> = frames.iter().flat_map(|p| p.3.iter().copied()).collect();
+            let first = (ms as usize * 8 * 4).min(expected.len());
+            assert_eq!(got, expected[first..], "{name} seek{ms}");
+            if let Some(p) = frames.first() {
+                assert_eq!(p.2, Duration::from_millis(ms));
+            }
+        }
+        reader.rewind();
+        assert_eq!(
+            transitions::collect(&mut reader)
+                .into_iter()
+                .flat_map(|p| p.3)
+                .collect::<Vec<_>>(),
+            expected
+        );
+    }
+}
+#[test]
+fn every_witness_keeps_valid_packets_and_exact_video_without_playback_order_claims() {
+    let manifest: serde_json::Value = serde_json::from_slice(&bytes("manifest.json")).unwrap();
+    for c in manifest["cases"].as_array().unwrap() {
+        let name = c["file"].as_str().unwrap().strip_suffix(".mp4").unwrap();
+        let mut reader = open(name);
+        // Opening may select a later equal-PTS sample for presentation. The
+        // raw contract explicitly selects the first record before every PTS.
+        reader.seek(i64::MIN);
+        for i in 0..3 {
+            let p = reader.read_packet().unwrap().unwrap();
+            assert_eq!(
+                (p.sample_index, p.pts, p.duration),
+                (i, c["pts"][i].as_i64().unwrap(), 64)
+            );
+            assert_eq!(p.data, bytes(&format!("packet-{i}.ima4")));
+            let mut decoder = reader.make_decoder().unwrap();
+            let pcm = decoder
+                .decode_packet(&p.data, p.pts, p.duration as u64)
+                .unwrap()
+                .unwrap()
+                .packet
+                .data;
+            let pred = [384, 1408, 2432][i];
+            let expected: Vec<_> = (1..=64)
+                .flat_map(|j| ((pred + j) as f32 / 32768.0).to_le_bytes())
+                .collect();
+            assert_eq!(pcm, expected);
+        }
+        assert!(reader.read_packet().unwrap().is_none());
+        let mut video = fvid::playback_native::NativeReader::software(
+            Cursor::new(bytes(c["file"].as_str().unwrap())),
+            32 << 20,
+        )
+        .unwrap();
+        for i in 0..3 {
+            match video.read_frame_raw().unwrap().unwrap() {
+                fvid::playback_native::RawFrame::Planar(p) => {
+                    assert_eq!(p.frame.data, vec![128; 384])
+                }
+                _ => panic!("expected authored neutral planes"),
+            }
+            assert_eq!(video.frame_interval(), Some((i, i + 1, 50)));
+        }
+        assert!(video.read_frame_raw().unwrap().is_none());
+        video.rewind().unwrap();
+        assert!(video.seek_raw(Duration::from_millis(25)).unwrap().is_some());
+        assert_eq!(video.frame_interval(), Some((1, 2, 50)));
+    }
+}
+#[test]
+fn actual_worker_reports_unsupported_without_publishing_pcm() {
+    use fvid::audio_thread::{AudioEvent, AudioPlayback};
+    use std::{
+        sync::{Arc, Mutex},
+        time::Instant,
+    };
+    use transitions::{Capture, Trace};
+    for name in ["reordered", "duplicate", "equal", "overlap"] {
+        let trace = Arc::new(Mutex::new(Trace::default()));
+        let shared = trace.clone();
+        let mut worker =
+            AudioPlayback::start(Box::new(open(name)), move || Box::new(Capture::new(shared)));
+        worker.play();
+        let until = Instant::now() + Duration::from_secs(3);
+        'wait: loop {
+            assert!(Instant::now() < until, "{name}: missing refusal event");
+            while let Some(event) = worker.poll() {
+                match event {
+                    AudioEvent::Error(e) => {
+                        assert!(e.contains("MP4 audio composition order"), "{name}: {e}");
+                        break 'wait;
+                    }
+                    AudioEvent::Ended(_) => {
+                        let packets = &trace.lock().unwrap().packets;
+                        println!(
+                            "FVID_BAD_PCM {}",
+                            serde_json::json!({"case":name,"windows":packets.iter().map(|p|serde_json::json!({"at_ns":p.2.as_nanos(),"frames":p.3.len()/4,"first":f32::from_le_bytes(p.3[..4].try_into().unwrap())})).collect::<Vec<_>>() })
+                        );
+                        panic!("{name}: completed corrupt presentation instead of refusing")
+                    }
+                    _ => {}
+                }
+            }
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        assert!(
+            trace.lock().unwrap().packets.is_empty(),
+            "{name}: wrong PCM escaped before refusal"
+        );
+    }
+}
+#[test]
+fn valid_worker_controls_keep_exact_pcm_after_repeated_seeks() {
+    use fvid::audio_thread::AudioPlayback;
+    use std::sync::{Arc, Mutex};
+    use transitions::{Capture, Trace, ended};
+    for name in ["ordered", "negative", "gap"] {
+        let expected = bytes(&format!("{name}.f32le"));
+        let trace = Arc::new(Mutex::new(Trace::default()));
+        let shared = trace.clone();
+        let mut worker =
+            AudioPlayback::start(Box::new(open(name)), move || Box::new(Capture::new(shared)));
+        worker.play();
+        ended(&worker, 0);
+        assert_eq!(
+            trace
+                .lock()
+                .unwrap()
+                .packets
+                .iter()
+                .flat_map(|p| p.3.iter().copied())
+                .collect::<Vec<_>>(),
+            expected
+        );
+        for ms in [1, 8, 16, 24, 100, 0] {
+            trace.lock().unwrap().packets.clear();
+            worker.seek(Duration::from_millis(ms));
+            ended(&worker, worker.generation());
+            let first = (ms as usize * 8 * 4).min(expected.len());
+            assert_eq!(
+                trace
+                    .lock()
+                    .unwrap()
+                    .packets
+                    .iter()
+                    .flat_map(|p| p.3.iter().copied())
+                    .collect::<Vec<_>>(),
+                expected[first..],
+                "{name} seek{ms}"
+            );
+        }
+    }
+}

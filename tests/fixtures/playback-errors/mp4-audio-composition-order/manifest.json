@@ -1,0 +1,91 @@
+{
+  "provenance": "Fresh analytic IMA4 ramps with predictors384,1408,2432 and three authored neutral16x16 VP9 frames. No private media,codec parameter sets,encoder or network.",
+  "policy": "Ordered,negative-origin and positive-gap movies are playback acceptance controls. Reordered/overlapping composition is unsupported by the linear playback scheduler: require an explicit refusal before PCM,not a false successful decode. Raw packet extraction remains supported.",
+  "cases": [
+    {
+      "file": "ordered.mp4",
+      "pts": [
+        0,
+        64,
+        128
+      ],
+      "playback_acceptance": true
+    },
+    {
+      "file": "negative.mp4",
+      "pts": [
+        -64,
+        0,
+        64
+      ],
+      "playback_acceptance": true
+    },
+    {
+      "file": "gap.mp4",
+      "pts": [
+        0,
+        128,
+        192
+      ],
+      "playback_acceptance": true
+    },
+    {
+      "file": "reordered.mp4",
+      "pts": [
+        0,
+        128,
+        64
+      ],
+      "playback_acceptance": false
+    },
+    {
+      "file": "duplicate.mp4",
+      "pts": [
+        0,
+        0,
+        128
+      ],
+      "playback_acceptance": false
+    },
+    {
+      "file": "equal.mp4",
+      "pts": [
+        0,
+        0,
+        0
+      ],
+      "playback_acceptance": false
+    },
+    {
+      "file": "overlap.mp4",
+      "pts": [
+        0,
+        32,
+        128
+      ],
+      "playback_acceptance": false
+    }
+  ],
+  "rate": 8000,
+  "packet_frames": 64,
+  "predictors": [
+    384,
+    1408,
+    2432
+  ],
+  "sha256": {
+    "ordered.mp4": "83a3500029cac93f262ab5a1d293cee55d91cff2e10ee34e8159cfebde08d6c5",
+    "negative.mp4": "868cd1ce0ad8b00cc3deeab54fef3b00a5397c32978cf954f0d6a8b978d0bd83",
+    "gap.mp4": "fd724997a0a7bc5e2ae85a4561519c6fe662a8aac935ebe316c6055c5ae7b896",
+    "reordered.mp4": "0458b952aa73ba88c74161232f9a28f533c654f6b26acf20ddf53716ba39724a",
+    "duplicate.mp4": "d4a522b6b277c89a87624e914919b0b7cf30485bd6a312c795db46645462dfb0",
+    "equal.mp4": "a093eab02943351fbc31c8ea09e62186951ba5b799030d23cb5cc1720f3316e2",
+    "overlap.mp4": "90147f734075e36dbea9c61515d992ddd51dee736d710d86f92d49be44494ce3",
+    "packet-0.ima4": "483d18eeabd9267db58c56baa5c7c239b49633625a3b0d4f715b299c995e4688",
+    "packet-1.ima4": "759d6eb54bf7c008b3ed7bf49cc89cde30a049df03bc2dd3959f90e837af131a",
+    "packet-2.ima4": "4dde1b15b914474c526476b053f8bcbf72e406f6082de8be4953705361ab80f6",
+    "ordered.f32le": "286bc442f76950c5f97d11959dcb5d62415806588c6e18c1d0f97feb04ccf0a1",
+    "negative.f32le": "6f22c7d32c2a0a540eb6e7aa14a3eefd13b9ba7d7cf21f351331f724505bf214",
+    "gap.f32le": "58b0872a971479a869d2f6fec2bb850b2d4424104b9d12271b23fa8075b61534"
+  }
+}

@@ -1,0 +1,186 @@
+{
+  "probe_exit_code": 0,
+  "scope": "Observational diagnostic only,not a playback acceptance or refused-layout regression. Production unchanged.",
+  "rows": [
+    {
+      "case": "ordered",
+      "result": "success",
+      "sample_frames": 384,
+      "windows": [
+        {
+          "at_ns": 0,
+          "first": 0.003936767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 8000000,
+          "first": 0.035186767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 16000000,
+          "first": 0.066436767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 24000000,
+          "first": 0.003936767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 32000000,
+          "first": 0.035186767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 40000000,
+          "first": 0.066436767578125,
+          "frames": 64
+        }
+      ]
+    },
+    {
+      "case": "reordered",
+      "result": "success",
+      "sample_frames": 384,
+      "windows": [
+        {
+          "at_ns": 0,
+          "first": 0.003936767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 8000000,
+          "first": 0.0,
+          "frames": 64
+        },
+        {
+          "at_ns": 16000000,
+          "first": 0.0,
+          "frames": 64
+        },
+        {
+          "at_ns": 24000000,
+          "first": 0.003936767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 32000000,
+          "first": 0.035186767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 40000000,
+          "first": 0.066436767578125,
+          "frames": 64
+        }
+      ]
+    },
+    {
+      "case": "duplicate",
+      "result": "success",
+      "sample_frames": 384,
+      "windows": [
+        {
+          "at_ns": 0,
+          "first": 0.003936767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 8000000,
+          "first": 0.035186767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 16000000,
+          "first": 0.0,
+          "frames": 64
+        },
+        {
+          "at_ns": 24000000,
+          "first": 0.003936767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 32000000,
+          "first": 0.035186767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 40000000,
+          "first": 0.066436767578125,
+          "frames": 64
+        }
+      ]
+    },
+    {
+      "case": "negative",
+      "result": "success",
+      "sample_frames": 320,
+      "windows": [
+        {
+          "at_ns": 0,
+          "first": 0.035186767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 8000000,
+          "first": 0.066436767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 16000000,
+          "first": 0.003936767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 24000000,
+          "first": 0.035186767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 32000000,
+          "first": 0.066436767578125,
+          "frames": 64
+        }
+      ]
+    },
+    {
+      "case": "equal",
+      "result": "success",
+      "sample_frames": 384,
+      "windows": [
+        {
+          "at_ns": 0,
+          "first": 0.003936767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 0,
+          "first": 0.035186767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 0,
+          "first": 0.066436767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 0,
+          "first": 0.003936767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 0,
+          "first": 0.035186767578125,
+          "frames": 64
+        },
+        {
+          "at_ns": 0,
+          "first": 0.066436767578125,
+          "frames": 64
+        }
+      ]
+    }
+  ]
+}
