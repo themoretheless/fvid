@@ -4,8 +4,8 @@ import json,struct,hashlib,subprocess,tempfile,zipfile,sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'tests/fixtures/playback-errors/aac-ld-mps-ges'
 def sha(b):return hashlib.sha256(b).hexdigest()
-def main(archive):
- assert sys.byteorder=='little';manifest=json.loads((OUT/'component.json').read_text());samples=(OUT/'component-input.f32le').read_bytes();data=bytearray(struct.pack('<I',len(manifest['cases'])));cases=[];offset=0
+def main(archive,out=OUT,report_name='aac-ld-mps-ges-reference-2026-10-30.json'):
+ assert sys.byteorder=='little';manifest=json.loads((out/'component.json').read_text());samples=(out/'component-input.f32le').read_bytes();data=bytearray(struct.pack('<I',len(manifest['cases'])));cases=[];offset=0
  for case in manifest['cases']:
   tree,bands,inputs,outputs=(case[k]for k in('tree','bands','inputs','outputs'));data.extend(struct.pack('<5I',tree,bands,inputs,outputs,len(case['blocks'])));blocks=[]
   for block in case['blocks']:
@@ -26,7 +26,7 @@ def main(archive):
   subprocess.run(args+['-lm','-o',str(exe)],check=True,capture_output=True,timeout=60)
   (work/'input.bin').write_bytes(data);subprocess.run([str(exe),str(work/'input.bin'),str(work/'output.bin')],check=True,timeout=60);expected=(work/'output.bin').read_bytes()
  assert len(expected)==offset
- (OUT/'component-expected.f32le').write_bytes(expected);(OUT/'component-oracle.json').write_text(json.dumps(dict(scope='Unmodified ISO LD GES shaping, normalized input/output, original ISO mapper and a fully initialized23-band envelope workspace. Component reference only, not a full foreign decoder.',cases=cases),separators=(',',':'))+'\n')
+ (out/'component-expected.f32le').write_bytes(expected);(out/'component-oracle.json').write_text(json.dumps(dict(scope='Unmodified ISO LD GES shaping, normalized input/output, original ISO mapper and a fully initialized23-band envelope workspace. Component reference only, not a full foreign decoder.',cases=cases),separators=(',',':'))+'\n')
  report=dict(archive_sha256=sha(Path(archive).read_bytes()),reference_members=members,driver_sha256=sha(driver.read_bytes()),generator_sha256=sha(Path(__file__).read_bytes()),input_sha256=sha(data),expected_sha256=sha(expected),programmes=len(cases),blocks=sum(len(c['blocks'])for c in cases),scope='Unmodified ISO GES algorithm; reference-only compiler invocation with the unmodified ISO channel mapper. Ordinary tests require only saved byte fixtures and FVid-owned Rust.')
- (ROOT/'docs/validation/aac-ld-mps-ges-reference-2026-10-30.json').write_text(json.dumps(report,indent=2)+'\n');print(len(expected),'independent GES bytes')
+ (ROOT/'docs/validation'/report_name).write_text(json.dumps(report,indent=2)+'\n');print(len(expected),'independent GES bytes')
 if __name__=='__main__':main(sys.argv[1])

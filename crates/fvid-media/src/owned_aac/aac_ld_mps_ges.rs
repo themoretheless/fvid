@@ -79,7 +79,7 @@ pub struct Decoder {
 }
 impl Decoder {
     pub fn new(tree: u8, bands: usize) -> Result<Self> {
-        if tree > 7 || !matches!(bands, 32 | 64) {
+        if tree > 7 || !matches!(bands, 32 | 64 | 128) {
             return Err(invalid("invalid LD-MPS GES geometry"));
         }
         let inputs = [1, 1, 2, 2, 2, 6, 6, 1][usize::from(tree)];

@@ -1,0 +1,164 @@
+{
+  "baseline": "943f19f8dc",
+  "scope": "Enable full-complex128-band GES; residual/profile output adaptation remain unqualified.",
+  "before": {
+    "log_sha256": "366a2a1bb07a39755c085ea7de125c720a275244220bc99754257f92d88acb6b",
+    "case": "n512-r64000-tree0-v1-plain",
+    "specific_error": "invalid LD-MPS GES geometry",
+    "acceptance_test": "aac_eld_mps128_ges"
+  },
+  "coverage": {
+    "programmes": 396,
+    "acceptance_videos": 792,
+    "late_corruption_refusals": 36,
+    "bare_core_controls": 18,
+    "pcm_oracle_samples": 15856128,
+    "pcm_oracle_max_error": 2.907885976281832e-11,
+    "independent_ges_sequences": 48,
+    "independent_ges_scalars": 1837056,
+    "independent_ges_max_error": 1.0230076452621972e-08,
+    "signal_effect_comparisons": 66,
+    "upper_only_bin127_changed_observations": 336,
+    "upper_only_bin127_max_signal_effect": 0.020226183347404003,
+    "worker_programmes": 792,
+    "worker_live_seeks_per_programme": 13,
+    "shape_switch": "GES -> ordinary -> GES",
+    "rates": [
+      64000,
+      88200,
+      96000
+    ],
+    "core_frames": [
+      480,
+      512
+    ]
+  },
+  "oracle_scope": "Unmodified ISO GES component and mapper with initialized23-band workspace; complex controlled inputs. Complete PCM is analytical core plus qualified spatial session,not independent whole-decoder conformance.",
+  "gates": [
+    {
+      "gate": "media",
+      "command": [
+        "cargo",
+        "--config",
+        "profile.dev.package.fvid-media.opt-level=2",
+        "test",
+        "--offline",
+        "-p",
+        "fvid-media",
+        "--lib"
+      ],
+      "status": 0,
+      "seconds": 34.48495337498025,
+      "log": "/tmp/fvid-ges128-gate-media.log",
+      "log_sha256": "a67dfba9ae13104b6b977ce374f65eb2843babff240557fb34cd53384ccc1155",
+      "results": {
+        "passed": 587,
+        "failed": 0,
+        "ignored": 1
+      }
+    },
+    {
+      "gate": "worker",
+      "command": [
+        "cargo",
+        "--config",
+        "profile.dev.package.fvid-media.opt-level=2",
+        "test",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "ld_mps128_ges_worker",
+        "--",
+        "--nocapture"
+      ],
+      "status": 0,
+      "seconds": 347.2137354160077,
+      "log": "/tmp/fvid-ges128-gate-worker.log",
+      "log_sha256": "6a66c4af77c6531cdc465ed8914ecccf1147408aa68e99457db6fdba82e6fd7d",
+      "results": {
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0
+      }
+    },
+    {
+      "gate": "integration",
+      "command": [
+        "cargo",
+        "--config",
+        "profile.dev.package.fvid-media.opt-level=2",
+        "test",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--test",
+        "aac_eld_mps128",
+        "--test",
+        "aac_eld_mps128_stp",
+        "--test",
+        "aac_eld_mps128_ges",
+        "--test",
+        "aac_ld_mps_ges128",
+        "--test",
+        "aac_ld_mps_ges",
+        "--test",
+        "aac_ld_mps_stp128",
+        "--test",
+        "aac_ld_mps_stp",
+        "--test",
+        "aac_ld_mps_qmf128",
+        "--test",
+        "aac_ld_mps_upmix",
+        "--",
+        "--nocapture"
+      ],
+      "status": 0,
+      "seconds": 357.4369786659954,
+      "log": "/tmp/fvid-ges128-gate-integration.log",
+      "log_sha256": "76933879683a27c98a8027d649ab329bbc3872fe2a0e423414b4c9eb8d7b22ac",
+      "results": {
+        "passed": 38,
+        "failed": 0,
+        "ignored": 0
+      }
+    }
+  ],
+  "totals": {
+    "passed": 626,
+    "failed": 0,
+    "ignored": 1
+  },
+  "qualification": "All media library units; selected AudioWorker test; nine integration targets. Not a freshly rerun entire player library suite.",
+  "files": {
+    "crates/fvid-media/src/owned_aac/aac_ld_mps_ges.rs": "447725f9acb56a65401cb7087027bc4514850f7d7e732b38711352742c618284",
+    "docs/CODEC_PROGRESS.md": "d5b3ba3d8db916dd8495af1797092d154380e57a078ad5e1ca54e3cad02a6957",
+    "docs/validation/aac-eld-mps128-ges-generation-2026-10-31.json": "1c28edbece65cef4d7204e0877bfffaad3f60c0bfc3ff39d9b7446809677ca58",
+    "docs/validation/aac-eld-mps128-ges-reference-2026-10-31.json": "d423b0656684b4b21f539de0869093775d1bea049164d15cae2a9dffc6afe555",
+    "scripts/generate_aac_eld_fixtures.py": "bb65a3bf09e5d6b4e8ebd96ac454fa788b6133b26354b3cda314a3e806bb5c6d",
+    "scripts/generate_aac_eld_mps128_fixtures.py": "47a073552a6930e91ab14ff9f62abd3a7cb81879d44d836eb5c673d9e5310d8f",
+    "scripts/generate_aac_eld_mps128_ges_fixtures.py": "d7eb0f157673994e9aa8b61774e7992cb75def111a4fc22f6f9e76545651d79a",
+    "scripts/generate_aac_ld_mps_ges128_component_fixtures.py": "bb01da32d80de1d9d82b5385c477c271ba6b9c80ed194b38ece1164898a8cdad",
+    "scripts/generate_aac_ld_mps_ges128_reference.py": "3321e0f397e3a44346b53e7c250c128cde6078f9259c073ac5e4f2bae8febf7c",
+    "scripts/generate_aac_ld_mps_ges_fixtures.py": "78cac17c3a5f90ff032110472d2fb42ce5645853b4e092fd51bb8639b3fd6770",
+    "scripts/generate_aac_ld_mps_ges_reference.py": "31fb0c7943b05bad0f23ee7b0e89feb7a122d10f48fdbd5d3d4455813e391dca",
+    "scripts/generate_aac_ld_mps_stp_fixtures.py": "f11549a94f841dc94000b962b348a540c7e1a3da76dd00189d996e575b6ed5d3",
+    "scripts/support/aac_ld_mps_ges_reference_probe.c": "0f1a453bcc1cbbb1cca20a6df4afe358057808fde0f088c5a7fd1db234e3c707",
+    "src/playback/audio/ep1_worker_tests.rs": "700e78c0d518e71b8608e89916b9c73e2edd8eb1d788a04e581cec8984790dfb",
+    "tests/aac_eld_mps128_ges.rs": "b2d83136f24bc68939c24aeba44ae3600ce10340344f095934847770f251ff55",
+    "tests/aac_ld_mps_ges128.rs": "0daa6377e55885bf9bcf705e0fcf53ac7cc6ab44f57e2f1a4cf50b152491013a",
+    "tests/support/aac_eld_mps128_suite.rs": "fe196a3e85362d60561304b257472b45cfb8093966e3f732155d827a7f177800"
+  },
+  "unqualified": [
+    "residual32/128",
+    "update8",
+    "LFE/time alignment",
+    "HRTF/arbitrary downmix",
+    "profile-specific output adaptation <=48kHz",
+    "full Annex B/whole-codec conformance",
+    "physical output",
+    "real-time throughput"
+  ]
+}

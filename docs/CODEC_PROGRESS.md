@@ -1,3 +1,39 @@
+##128-band LD-MPS GES — guided envelope shaping,2026-10-31
+
+The owned GES constructor now accepts128 bands. Existing full-complex envelope
+analysis,channel mapping,wet/dry energy ratio and gain limiting match frozen
+unmodified ISO GES outputs,including upper-only signals in bins64..127.
+The runtime change admits geometry; it does not replace the shaping formula.
+
+396 own programmes in MP4 and Matroska (792 acceptance movies) cover
+64/88.2/96kHz,480/512 core geometry,all8 trees,both TTT variants,parameter grids,
+repeat/delayed/fragmented transport and in-band GES -> ordinary -> GES switches.
+18 bare controls and36 late-corruption refusals are separate from acceptance;
+reshape runs exceeding4/15 slots reach their specific parser error and preserve
+state for retries.66 paired ordinary movies prove active GES changes PCM.
+The initial pre-fix movie refused specifically with invalid GES geometry.
+
+48 independent component sequences cover1,837,056 scalar outputs,including
+silence,cancellation,low/high/upper-only signals,disabled history,chunking,
+checkpoints,reset and atomic rejection. The complete compressed-stream PCM
+comparison covers15,856,128 samples using analytical core plus qualified
+spatial session. This is not independent whole-codec conformance. The C oracle
+uses the original GES algorithm and mapper with a fully initialized23-band
+envelope workspace; reference compilation is an optional separate research step.
+Own generators and ordinary tests require no FFmpeg,network or external process.
+
+Final offline checks:626 passed,0 failed,1 pre-existing ignored across all
+media library units,the new AudioWorker case and9 integration targets. This
+is not a freshly rerun entire player library suite. Own generation reproduced
+854 new,706 retained ordinary and841 retained STP fixture files byte-for-byte
+under process/network denial; retained bytes match their committed reports.
+
+This supersedes earlier GES128 refusals only for the listed raw native-rate
+full-complex domain. Residual32/128,update8,LFE/time alignment,HRTF/arbitrary
+downmix,profile-specific output adaptation and whole-codec conformance remain
+open. Physical audio-device output and real-time throughput remain unqualified.
+Evidence: `docs/validation/aac-eld-mps128-ges-{reference,generation,tests}-2026-10-31.json`.
+
 ##128-band LD-MPS STP — active temporal shaping,2026-10-31
 
 The owned STP constructor now accepts128 bands. The existing full-complex
