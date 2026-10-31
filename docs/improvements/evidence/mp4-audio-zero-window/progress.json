@@ -1,10 +1,10 @@
 {
-  "status": "accepted FVID-0447; verified; owned temporary artifacts removed; ready to publish",
+  "status": "published FVID-0447; verified both remote refs and clean own worktree",
   "base": "7972667391f18ed01de3dd3f3e885056a80b99f0",
   "count_delta": 1,
   "target": "/private/tmp/fvid-mp4-audio-zero-window-target-20261031",
   "scope": "Single explicitly empty terminal window admitted by parser0433 must not emit audible PCM. Preserve recovered positive native duration when a zero container tick is only quantization. Validate terminal coded body and packet limits.",
-  "next": "Verify archives,remove only owned artifacts,and publish qualified code and proof to both delivery refs.",
+  "next": "Continue structured MP4 timestamp/seek audit toward1000; no new item accepted without reproduction and qualification.",
   "before_session": 66948,
   "before_log": "/private/tmp/fvid-mp4-audio-zero-window-before.log",
   "before_exit": 101,
