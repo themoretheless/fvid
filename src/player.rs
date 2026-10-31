@@ -3770,7 +3770,7 @@ impl Player {
         if !self.seekable {
             return;
         }
-        let Some(now) = self.timeline().0 else {
+        let Some(now) = self.presentation_clock() else {
             return;
         };
         let target = if forward {
@@ -13038,3 +13038,7 @@ mod audio_handoff_regressions;
 #[cfg(test)]
 #[path = "player_rate_clock_tests.rs"]
 mod rate_clock_regressions;
+
+#[cfg(test)]
+#[path = "player_jump_clock_tests.rs"]
+mod jump_clock_regressions;

@@ -1,0 +1,5 @@
+{
+  "src/player.rs": "2785b7a9e9f1c077157678029fa5a0583d77cbce986d0b62a9175531392bd1d2",
+  "src/player_jump_clock_tests.rs": "19246d70c91878fd6d1253e2599a8b61c2c657f0917d8fa57d5d3a136b44f0b5",
+  "scripts/generate_player_jump_clock.py": "84d9221541c17fe994f2d8dfe62ac5505bb321f1441264e8654a4b927c1d76d1"
+}

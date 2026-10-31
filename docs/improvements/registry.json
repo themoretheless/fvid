@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 460,
-  "next_id": "FVID-0461",
+  "accepted_count": 461,
+  "next_id": "FVID-0462",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5165,6 +5165,17 @@
       "title": "Retain paused silent picture phase and resume its remaining interval",
       "before": "Qualified baseline loses about75ms of a300ms silent picture on pause,publishing0ms instead,and resume resets its deadline to now. The pause failure remains after independent live-rate repair(3pass1fail).",
       "result": "Retain the silent media position on pause and reconstruct the remaining picture deadline on resume at the chosen rate. A paused rate change leaves the held position unchanged;new media,seek,restart and shown paused/stepped pictures reset retained state appropriately. Identical acceptance checks paused phase stability,remaining-period hold after a paused0.5x change,exact next interval,real seek and natural final EOF. Final4tests pass20repetitions;9gates pass1537physical-source-distinct checks and both builds. Five old ignores unchanged;no physical audio/window or performance claim."
+    },
+    {
+      "id": "FVID-0461",
+      "batch": 461,
+      "title": "Use the active media clock as the origin of relative jump requests",
+      "source": "src/player.rs",
+      "regression": "src/player_jump_clock_tests.rs",
+      "before": "Qualified identical5test baseline passes exact MP4 pixels/PTS/seek/EOF and actual EOF/zero clamp controls,but all3actual3s jump requests use the current picture future endpoint:forward at0.30s requests5s instead of3.30s,backward at4.30s requests3s instead of1.30s,and paused forward repeats the error.",
+      "result": "Derive relative jump target from presentation_clock,which includes current pending seek and retained paused position. Three forward/back/paused transport variants verify requested timestamp,correct resulting native interval and exact RGB;EOF/zero clamping preserves paused state. Five identical tests pass20repetitions;all9gates pass1542physical-source-distinct checks and both builds. Variants/control/repeats add0IDs. No performance or physical audio/GPU/window claim.",
+      "status": "accepted",
+      "validation": "batch-461-validation.json"
     }
   ]
 }

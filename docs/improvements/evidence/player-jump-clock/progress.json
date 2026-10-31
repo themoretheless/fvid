@@ -1,0 +1,22 @@
+{
+  "status": "accepted; all9gates passed; own temporary artifacts removed; ready for delivery",
+  "accepted_count": 461,
+  "baseline_session": 97790,
+  "baseline_log": "/private/tmp/fvid-player-jump-clock-before.log",
+  "target": "/private/tmp/fvid-player-jump-clock-target-20261031",
+  "next": "Verify hashes,stage qualified paths,cached-check,commit/atomic push/verify receipt. Next independent audit:requested sub-frame playback position after seek preroll.",
+  "baseline_terminal_exit": 101,
+  "candidate": {
+    "passed": 5,
+    "failed": 0
+  },
+  "qualification_session": 2883,
+  "qualification_log": "/private/tmp/fvid-player-jump-clock-integration.log",
+  "repeated_runs": 20,
+  "repeated_cases": 100,
+  "repeat_failures": 0,
+  "accepted_ids": [
+    "FVID-0461"
+  ],
+  "qualification_terminal_exit": 0
+}

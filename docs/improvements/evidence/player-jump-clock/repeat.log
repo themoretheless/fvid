@@ -1,0 +1,199 @@
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.08s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.08s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.08s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.08s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.10s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.09s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.10s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.08s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.09s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.08s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.09s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.08s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.08s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.11s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.13s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.08s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.09s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.10s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.08s
+
+
+running 5 tests
+test player::jump_clock_regressions::exact_mp4_long_picture_controls_seek_and_eof ... ok
+test player::jump_clock_regressions::forward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::backward_three_second_jump_uses_live_clock ... ok
+test player::jump_clock_regressions::relative_navigation_clamps_at_native_eof_and_zero_without_changing_pause ... ok
+test player::jump_clock_regressions::paused_three_second_jump_uses_held_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1120 filtered out; finished in 1.08s

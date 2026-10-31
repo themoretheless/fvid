@@ -1,0 +1,7 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -13040,0 +13041,4 @@
++
++#[cfg(test)]
++#[path = "player_jump_clock_tests.rs"]
++mod jump_clock_regressions;
