@@ -64,6 +64,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         AacDecodeOptions {
             output_sample_rate: Some(track.sample_rate),
             spatial_decorrelation: mode,
+            ..Default::default()
         },
     )?;
     let mut output = BufWriter::new(std::fs::File::create(&args[2])?);

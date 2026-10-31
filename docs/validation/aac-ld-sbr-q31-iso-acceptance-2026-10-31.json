@@ -1,0 +1,248 @@
+{
+  "scope": "Presented PCM decoder admission, not waveform conformance or device playback",
+  "suite": "eld-sbr",
+  "expected_files": 26,
+  "concurrent_jobs": 4,
+  "started_at": "2026-10-31T14:02:22.214666+00:00",
+  "complete": true,
+  "source": "https://standards.iso.org/iso-iec/14496/-26/ed-2/en/compressedMp4.zip",
+  "inventory_sha256": "865521883bbc19db177c71c00fcb57bd3619a8ae73a05a21532c3fc22cc13e92",
+  "probe_sha256": "a19ddbefa0bfb24f8fb2ab88fccbab65e74d5fca61d8697be0ad160827d8816f",
+  "cases": [
+    {
+      "name": "er_eld_sbr_e_1_32.mp4",
+      "iso_md5": "d95d223d6a748153484a9337674b4c7f",
+      "sha256": "5a08d12a43855894a06ee1bd15104c621f329a2322fb464df1af5bbf78f345df",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=1\npackets=602 decoded=602 frames=616400\nstamped=12.843s\naudio=12.842s first=0ns last=12.821333333s\n",
+      "stderr": "",
+      "wall_seconds": 1.30059879203327
+    },
+    {
+      "name": "er_eld_sbr_e_1_44.mp4",
+      "iso_md5": "3fc96d7927e5fed87f6d9006ccefc2c0",
+      "sha256": "82db49e9853abf4e0881f9f4170c55c673d041c617cf29200e6a08986b76d6bc",
+      "status": 0,
+      "stdout": "codec=mp4a rate=44100 channels=1\npackets=402 decoded=402 frames=411600\nstamped=9.334s\naudio=9.333s first=0ns last=9.311201814s\n",
+      "stderr": "",
+      "wall_seconds": 1.1573747920338064
+    },
+    {
+      "name": "er_eld_sbr_e_1_48.mp4",
+      "iso_md5": "f209b40878a70869667b0780283f0879",
+      "sha256": "6229ca1181207202bca9a192edc956f184d7f6fff0315313a66e4b4b7c963776",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=1\npackets=402 decoded=402 frames=411600\nstamped=8.576s\naudio=8.575s first=0ns last=8.554666666s\n",
+      "stderr": "",
+      "wall_seconds": 1.1305235409527086
+    },
+    {
+      "name": "er_eld_sbr_e_2_32.mp4",
+      "iso_md5": "d503db7e8e57754eaf1d5967fe3f324b",
+      "sha256": "c1233e0e2b01085d23c65ef7aea3953ab64e4c3bc2b4a9e1f86208f19131e70b",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=2\npackets=602 decoded=602 frames=616400\nstamped=12.843s\naudio=12.842s first=0ns last=12.821333333s\n",
+      "stderr": "",
+      "wall_seconds": 1.3899016249924898
+    },
+    {
+      "name": "er_eld_sbr_e_2_44.mp4",
+      "iso_md5": "bd7b9ac75607c431a0aa8c7bfca1540b",
+      "sha256": "21c027c5e7276b709e1c52f01b3d7122b0a4bffbfc4aa031614ad8a1568178ae",
+      "status": 0,
+      "stdout": "codec=mp4a rate=44100 channels=2\npackets=402 decoded=402 frames=411600\nstamped=9.334s\naudio=9.333s first=0ns last=9.311201814s\n",
+      "stderr": "",
+      "wall_seconds": 0.5166030409745872
+    },
+    {
+      "name": "er_eld_sbr_e_2_48.mp4",
+      "iso_md5": "b59c1b77af88736997afba398eef038a",
+      "sha256": "f0d2c49226f95b4398d32b5aa9008178858c47b4c3508d6ddbebda8a78400aac",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=2\npackets=402 decoded=402 frames=411600\nstamped=8.576s\naudio=8.575s first=0ns last=8.554666666s\n",
+      "stderr": "",
+      "wall_seconds": 0.5130169579642825
+    },
+    {
+      "name": "er_eld_sbr_gh_1_32.mp4",
+      "iso_md5": "4c053f041c3db37c15a1093dfef39b22",
+      "sha256": "967f1e0bfe44531c250f7cc83454551e2106aadcca9b15e4d64600ca9c17ca23",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=1\npackets=1502 decoded=1502 frames=1538000\nstamped=32.043s\naudio=32.042s first=0ns last=32.021333333s\n",
+      "stderr": "",
+      "wall_seconds": 1.4792064169887453
+    },
+    {
+      "name": "er_eld_sbr_gh_1_44.mp4",
+      "iso_md5": "d7e6daa0a2e4538ee2632b17e4995917",
+      "sha256": "9b9b8c1a8e1ded1f2db6c6b5efa8067cc5cc81382003b03a5a83d5f1c9374e8e",
+      "status": 0,
+      "stdout": "codec=mp4a rate=44100 channels=1\npackets=1002 decoded=1002 frames=1025987\nstamped=23.266s\naudio=23.265s first=0ns last=23.243174603s\n",
+      "stderr": "",
+      "wall_seconds": 1.0952967919874936
+    },
+    {
+      "name": "er_eld_sbr_gh_1_48.mp4",
+      "iso_md5": "742f2dacc0a5ab477de2930390b87325",
+      "sha256": "bcb019f4fe7522661c69b4ea5291a8c05dfeae54810f1074ff8a58bd2c027d64",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=1\npackets=1002 decoded=1002 frames=1026000\nstamped=21.376s\naudio=21.375s first=0ns last=21.354666666s\n",
+      "stderr": "",
+      "wall_seconds": 0.9944074579980224
+    },
+    {
+      "name": "er_eld_sbr_gh_2_32.mp4",
+      "iso_md5": "5be8c15b71c416a7662ae17d0a3627ac",
+      "sha256": "30266adf890b21ff4b09bbe429344c9fff9410c0df9baae271d47781b52b10cd",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=2\npackets=1502 decoded=1502 frames=1538000\nstamped=32.043s\naudio=32.042s first=0ns last=32.021333333s\n",
+      "stderr": "",
+      "wall_seconds": 1.6903610830195248
+    },
+    {
+      "name": "er_eld_sbr_gh_2_44.mp4",
+      "iso_md5": "54c98974e42d5ede3acad5ef60024b9a",
+      "sha256": "c771a9f60638ab1a2688336cb022f5d708c09c34f11482aad75d4a5e02686058",
+      "status": 0,
+      "stdout": "codec=mp4a rate=44100 channels=2\npackets=1002 decoded=1002 frames=1025987\nstamped=23.266s\naudio=23.265s first=0ns last=23.243174603s\n",
+      "stderr": "",
+      "wall_seconds": 1.275210916006472
+    },
+    {
+      "name": "er_eld_sbr_gh_2_48.mp4",
+      "iso_md5": "abf49c2c7fa07fac26eae88c1b6a1b85",
+      "sha256": "8c3f8b12b84a0ef98d34d92a5a1d94d773056a660551fa91a5040426136f279b",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=2\npackets=1002 decoded=1002 frames=1026000\nstamped=21.376s\naudio=21.375s first=0ns last=21.354666666s\n",
+      "stderr": "",
+      "wall_seconds": 1.2390555419842713
+    },
+    {
+      "name": "er_eld_sbr_i_1_32.mp4",
+      "iso_md5": "c39bb21139295259a135bdd028b2789c",
+      "sha256": "b6a0d9c65fa4a8d1fb91f765a20c703073a233f06047dde9c8abcaca0ab93e47",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=1\npackets=602 decoded=602 frames=616400\nstamped=12.843s\naudio=12.842s first=0ns last=12.821333333s\n",
+      "stderr": "",
+      "wall_seconds": 0.6185484169982374
+    },
+    {
+      "name": "er_eld_sbr_i_1_44.mp4",
+      "iso_md5": "cfb1cd65e203c6ca50cad8c2e37b0d98",
+      "sha256": "1589fc6b53f78d14cfb287a0c129ba3d4972e932e185bd38a35be1e73e875fed",
+      "status": 0,
+      "stdout": "codec=mp4a rate=44100 channels=1\npackets=402 decoded=402 frames=411600\nstamped=9.334s\naudio=9.333s first=0ns last=9.311201814s\n",
+      "stderr": "",
+      "wall_seconds": 0.49037591699743643
+    },
+    {
+      "name": "er_eld_sbr_i_1_48.mp4",
+      "iso_md5": "47f1172e76028b3fe63941abf36f0914",
+      "sha256": "dbb4ea8b4826e31254c927914ddfeb2460ca762334cc7314591f42548842f05f",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=1\npackets=402 decoded=402 frames=411600\nstamped=8.576s\naudio=8.575s first=0ns last=8.554666666s\n",
+      "stderr": "",
+      "wall_seconds": 0.4362698330078274
+    },
+    {
+      "name": "er_eld_sbr_i_2_32.mp4",
+      "iso_md5": "c3bee5b91c3f274241e6244d3811b4d3",
+      "sha256": "0a31c899240190ce7241c69f5b23d765d207a3e7ab1efa15b9cda24ce252c523",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=2\npackets=602 decoded=602 frames=616400\nstamped=12.843s\naudio=12.842s first=0ns last=12.821333333s\n",
+      "stderr": "",
+      "wall_seconds": 0.7404199580196291
+    },
+    {
+      "name": "er_eld_sbr_i_2_44.mp4",
+      "iso_md5": "0a4cf985f143bbbf81559d06f67319a0",
+      "sha256": "df33405b0354dfd4ed338d6b13bb79fe8fb6fdb90ec8c44af0dd585297a45963",
+      "status": 0,
+      "stdout": "codec=mp4a rate=44100 channels=2\npackets=402 decoded=402 frames=411600\nstamped=9.334s\naudio=9.333s first=0ns last=9.311201814s\n",
+      "stderr": "",
+      "wall_seconds": 0.5504614579840563
+    },
+    {
+      "name": "er_eld_sbr_i_2_48.mp4",
+      "iso_md5": "9d3cc30f2d370701202500c7676d3aef",
+      "sha256": "17570f8d6bafb94ac1120e2f4f3a124dc7de41bcd4626f6a70151b5b73707f6f",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=2\npackets=402 decoded=402 frames=411600\nstamped=8.576s\naudio=8.575s first=0ns last=8.554666666s\n",
+      "stderr": "",
+      "wall_seconds": 0.5017092080088332
+    },
+    {
+      "name": "er_eld_sbr_s_1_32.mp4",
+      "iso_md5": "42278f53fd987c847e018ad4127321e3",
+      "sha256": "83ee5a66baca057d89478b9e7b6f5a5b7a568404736380cf00307568ba373ba0",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=1\npackets=601 decoded=601 frames=615360\nstamped=12.821s\naudio=12.820s first=0ns last=12.8s\n",
+      "stderr": "",
+      "wall_seconds": 0.5457505829981528
+    },
+    {
+      "name": "er_eld_sbr_s_1_44.mp4",
+      "iso_md5": "ce0030b3c9829a3b2810577b76018eb9",
+      "sha256": "60d6f969cca1b3e83e7ac2c80d18debec5dcd4648ade3279617fe2912719d2e0",
+      "status": 0,
+      "stdout": "codec=mp4a rate=44100 channels=1\npackets=401 decoded=401 frames=410571\nstamped=9.311s\naudio=9.310s first=0ns last=9.287981859s\n",
+      "stderr": "",
+      "wall_seconds": 0.4041760419495404
+    },
+    {
+      "name": "er_eld_sbr_s_1_48.mp4",
+      "iso_md5": "e866dfaa676b2d0dac5f6ebc428f7c8d",
+      "sha256": "99847dfe7c968c279f4fc7dd151b2b28ef41624289d2fab29ada8a67c6016aac",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=1\npackets=401 decoded=401 frames=410560\nstamped=8.555s\naudio=8.553s first=0ns last=8.533333333s\n",
+      "stderr": "",
+      "wall_seconds": 0.37546249997103587
+    },
+    {
+      "name": "er_eld_sbr_s_2_32.mp4",
+      "iso_md5": "d35be9e6dc562aeb3964b490defea28c",
+      "sha256": "dcbd09453e319ca09da4039f2b5c776a4202fda856b182d4530584c3c01efb14",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=2\npackets=601 decoded=601 frames=615360\nstamped=12.821s\naudio=12.820s first=0ns last=12.8s\n",
+      "stderr": "",
+      "wall_seconds": 0.6413852500263602
+    },
+    {
+      "name": "er_eld_sbr_s_2_44.mp4",
+      "iso_md5": "b8c8d716856455f15e156ea7c3a95b69",
+      "sha256": "75c53ac9c5ff99d2e16f23a4243b4c8435dbab886d15d496feaeb9b6e440ee4c",
+      "status": 0,
+      "stdout": "codec=mp4a rate=44100 channels=2\npackets=401 decoded=401 frames=410571\nstamped=9.311s\naudio=9.310s first=0ns last=9.287981859s\n",
+      "stderr": "",
+      "wall_seconds": 0.45424983400152996
+    },
+    {
+      "name": "er_eld_sbr_s_2_48.mp4",
+      "iso_md5": "e61555a66af30e617b75986b1453fc66",
+      "sha256": "dafd68ac71331f60376fc8cf465542468205183954ff169b0206b6a676c1a285",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=2\npackets=401 decoded=401 frames=410560\nstamped=8.555s\naudio=8.553s first=0ns last=8.533333333s\n",
+      "stderr": "",
+      "wall_seconds": 0.422738166002091
+    },
+    {
+      "name": "er_eld_sbr_twi_1_24.mp4",
+      "iso_md5": "b62c3e54d2296c272c7a6c62f8a06947",
+      "sha256": "4c0c5fd6a03bfcdf8497c5270b229ca8213226939cee75881c867784c2a66a44",
+      "status": 0,
+      "stdout": "codec=mp4a rate=24000 channels=1\npackets=48 decoded=48 frames=24560\nstamped=1.024s\naudio=1.023s first=0ns last=1.002666666s\n",
+      "stderr": "",
+      "wall_seconds": 0.012258207949344069
+    },
+    {
+      "name": "er_eld_sbr_twi_1_48.mp4",
+      "iso_md5": "b8bb4908e4da5faff407bdca7b052d7b",
+      "sha256": "6f2290f439f22b3e85196520a896c4702ff1d9e28a3486a5bb027bfa27622c5c",
+      "status": 0,
+      "stdout": "codec=mp4a rate=48000 channels=1\npackets=48 decoded=48 frames=49120\nstamped=1.024s\naudio=1.023s first=0ns last=1.002666666s\n",
+      "stderr": "",
+      "wall_seconds": 0.017017792037222534
+    }
+  ],
+  "finished_at": "2026-10-31T14:02:27.405167+00:00"
+}

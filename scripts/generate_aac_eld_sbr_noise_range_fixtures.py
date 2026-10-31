@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Own LD-SBR Q31 refusal movies and exact nominal inverse-filter controls.
+"""Own explicit-Strict LD-SBR Q31 movies and exact inverse-filter controls.
 
-This reproduces a strict normative noise-range refusal, not missing acceptance.
+Default Q31 acceptance is qualified separately in aac-ld-sbr-q31.
 No ISO/private AAC bits or parameter sets are copied. Explicit offline generation.
 """
 import json
@@ -46,15 +46,15 @@ def main():
             (OUT/c['file']).write_bytes(mkv(bytes.fromhex(c['asc']), packets, 48000, n*2, 2))
             if poison:
                 c.update(error='SBR noise level exceeds normative range: 31', bad_frame=3,
-                         expectation='strict normative refusal; not codec acceptance')
+                         expectation='explicit Strict policy refusal; default AllowQ31 accepts')
                 errors.append(c)
             else:
                 (OUT/c['golden']).write_bytes((parent/(model['name']+'.f32le')).read_bytes()[:8*n*2*2*4])
                 cases.append(c)
     (OUT/'packets.bin').write_bytes(blob)
-    (OUT/'manifest.json').write_text(json.dumps(dict(cases=cases, errors=errors,
+    (OUT/'manifest.json').write_text(json.dumps(dict(cases=cases, strict_errors=errors,
         exports=[dict(c, video=c['file'], name=c['name']+'-matroska') for c in cases],
-        scope='Own stereo480/512 inverse filtering,8 AUs,dual-rate LD-SBR/CRC. Only fourth-frame noise absolute scalefactors change from7 to31; CRC regenerated. Q31 refusal is not acceptance for the six original ISO inverse-filter streams.'), separators=(',', ':'))+'\n')
+        scope='Own stereo480/512 inverse filtering,8 AUs,dual-rate LD-SBR/CRC. Only fourth-frame noise absolute scalefactors change from7 to31; CRC regenerated. Q31 metadata denotes explicit Strict refusal; default acceptance is qualified by sibling aac-ld-sbr-q31.'), separators=(',', ':'))+'\n')
     print(len(cases), 'controls;', len(errors), 'normative Q31 refusal movies; both containers')
 
 

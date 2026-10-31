@@ -130,6 +130,7 @@ fn mode_survives_reset_and_checkpoint_with_output_rate_negotiation() {
             let options = AacDecodeOptions {
                 output_sample_rate: Some(rate),
                 spatial_decorrelation: mode,
+                ..Default::default()
             };
             let mut decoder = NativeAacDecoder::new_with_options(&asc, options).unwrap();
             let mut legacy = NativeAacDecoder::new_with_output_rate(&asc, rate).unwrap();

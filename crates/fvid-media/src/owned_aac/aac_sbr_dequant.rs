@@ -25,6 +25,16 @@ pub fn noise(level: i16) -> Result<f64> {
     }
     power(6.0 - f64::from(level))
 }
+// Bounded interoperability extension used only by explicitly selected LD-SBR
+// policy. Original ISO LD-SBR inverse-filter inputs use Q31. Preserve its exact
+// 2^(6-Q) value; do not clamp it or widen the normative helper's contract.
+pub(crate) fn noise_with_q31(level: i16, allow_q31: bool) -> Result<f64> {
+    if allow_q31 && level == 31 {
+        power(-25.0)
+    } else {
+        noise(level)
+    }
+}
 fn split(total: f64, score: f64) -> Result<Stereo> {
     // Calculate both independently: subtracting the dominant channel from total
     // would lose the quiet channel at strongly asymmetric panning.
@@ -46,13 +56,19 @@ pub fn coupled_envelope(level: i16, balance: i16, coarse: bool) -> Result<Stereo
     split(total, (f64::from(balance) - pan) / divisor)
 }
 pub fn coupled_noise(level: i16, balance: i16) -> Result<Stereo> {
+    coupled_noise_with_q31(level, balance, false)
+}
+pub(crate) fn coupled_noise_with_q31(level: i16, balance: i16, allow_q31: bool) -> Result<Stereo> {
     if !(0..=24).contains(&balance) || balance % 2 != 0 {
         return Err(invalid(
             "SBR noise balance exceeds normative range or parity",
         ));
     }
     // Noise has the opposite balance orientation to envelope energy.
-    split(2.0 * noise(level)?, 12.0 - f64::from(balance))
+    split(
+        2.0 * noise_with_q31(level, allow_q31)?,
+        12.0 - f64::from(balance),
+    )
 }
 
 #[cfg(test)]
@@ -63,6 +79,28 @@ mod tests {
             (actual - expected).abs() <= expected.abs() * 3e-14,
             "{actual} != {expected}"
         );
+    }
+    #[test]
+    fn ld_q31_extension_preserves_the_formula_and_strict_balance_bounds() {
+        let q31 = 1.0 / 33_554_432.0;
+        assert_eq!(noise_with_q31(31, true).unwrap(), q31);
+        assert!(noise(31).is_err());
+        let centered = coupled_noise_with_q31(31, 12, true).unwrap();
+        assert_eq!(centered.left, q31);
+        assert_eq!(centered.right, q31);
+        let panned = coupled_noise_with_q31(31, 8, true).unwrap();
+        close(panned.left, 2.0 * q31 * 16.0 / 17.0);
+        close(panned.right, 2.0 * q31 / 17.0);
+        for balance in [-2, 1, 13, 25, 26] {
+            assert!(coupled_noise_with_q31(31, balance, true).is_err());
+        }
+        for level in [-1, 32, i16::MIN, i16::MAX] {
+            assert!(noise_with_q31(level, true).is_err());
+            assert!(coupled_noise_with_q31(level, 12, true).is_err());
+        }
+        for level in 0..=30 {
+            assert_eq!(noise_with_q31(level, true).unwrap(), noise(level).unwrap());
+        }
     }
     #[test]
     fn all_values_match_independent_high_precision_decimal_oracles() {

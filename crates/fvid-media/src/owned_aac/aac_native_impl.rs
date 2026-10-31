@@ -258,16 +258,18 @@ pub struct NativeAacDecoder {
     sbr_detection_rate: Option<u32>,
     sbr_elements: Vec<Option<ElementSbr>>,
 }
-/// Construction-time output policy. Spatial decorrelation is a renderer choice,
+/// Construction-time decoding/output policy. Spatial decorrelation is a renderer choice,
 /// not an ASC flag. Both choices use the owned LD-MPS implementation.
 #[derive(Clone, Copy, Debug)]
 pub struct AacDecodeOptions {
+    /// Bounded LD-SBR interoperability; strict legacy SBR is unaffected.
+    pub ld_sbr_noise: super::aac_eld_sbr::NoisePolicy,
     pub output_sample_rate: Option<u32>,
     pub spatial_decorrelation: super::aac_ld_mps_native::DecorrelationMode,
 }
 impl Default for AacDecodeOptions {
     fn default() -> Self {
-        Self { output_sample_rate: None, spatial_decorrelation: super::aac_ld_mps_native::DecorrelationMode::Complex }
+        Self { ld_sbr_noise: super::aac_eld_sbr::NoisePolicy::default(), output_sample_rate: None, spatial_decorrelation: super::aac_ld_mps_native::DecorrelationMode::Complex }
     }
 }
 /// Opaque complete packet-boundary state. Configuration and layout are retained
@@ -321,9 +323,9 @@ impl NativeAacDecoder {
         Self::from_parsed_downscaled(parsed,1)
     }
     fn from_parsed_downscaled(parsed:AudioSpecificConfig,output_downscale_factor:u8)->Result<Self> {
-        Self::from_parsed_downscaled_mode(parsed, output_downscale_factor, super::aac_ld_mps_native::DecorrelationMode::Complex)
+        Self::from_parsed_downscaled_mode(parsed, output_downscale_factor, super::aac_ld_mps_native::DecorrelationMode::Complex, super::aac_eld_sbr::NoisePolicy::default())
     }
-    fn from_parsed_downscaled_mode(parsed:AudioSpecificConfig,output_downscale_factor:u8,mode:super::aac_ld_mps_native::DecorrelationMode)->Result<Self> {
+    fn from_parsed_downscaled_mode(parsed:AudioSpecificConfig,output_downscale_factor:u8,mode:super::aac_ld_mps_native::DecorrelationMode,noise_policy:super::aac_eld_sbr::NoisePolicy)->Result<Self> {
         let ld_mps=parsed.ld_mps.as_ref().map(|config| {
             let core=super::aac_ld_mps_native::Core {object_type:parsed.core.object_type,sample_rate:parsed.core.sample_rate,
                 frame_samples:parsed.core.frame_samples,channels:parsed.core.channels,has_sbr:parsed.eld_sbr.is_some(),downscale:output_downscale_factor};
@@ -337,7 +339,7 @@ impl NativeAacDecoder {
         let direct_mapping=parsed.direct_mapping;
         let separate_esc=parsed.separate_esc;
         let protection=parsed.protection.clone();
-        let eld_sbr=parsed.eld_sbr.clone().map(|config|if ld_mps.as_ref().is_some_and(|spatial| spatial.expects_shared_qmf()) {super::aac_eld_sbr::Decoder::new_spatial(config,parsed.core.sample_rate,parsed.core.frame_samples,parsed.core.channel_configuration)}else{super::aac_eld_sbr::Decoder::new_downscaled(config,parsed.core.sample_rate,parsed.core.frame_samples,parsed.core.channel_configuration,usize::from(output_downscale_factor))}).transpose()?;
+        let eld_sbr=parsed.eld_sbr.clone().map(|config|if ld_mps.as_ref().is_some_and(|spatial| spatial.expects_shared_qmf()) {super::aac_eld_sbr::Decoder::new_spatial(config,parsed.core.sample_rate,parsed.core.frame_samples,parsed.core.channel_configuration)}else{super::aac_eld_sbr::Decoder::new_downscaled(config,parsed.core.sample_rate,parsed.core.frame_samples,parsed.core.channel_configuration,usize::from(output_downscale_factor))}).transpose()?.map(|sbr|sbr.with_noise_policy(noise_policy));
         let sbr_rate = if parsed.sbr_present == Some(true) && eld_sbr.is_none() {
             let rate = parsed.extension_sample_rate.ok_or_else(|| invalid("missing SBR output frequency"))?;
             let core = parsed.core.sample_rate;
@@ -447,11 +449,11 @@ impl NativeAacDecoder {
     pub fn new_with_options(asc:&[u8], options:AacDecodeOptions) -> Result<Self> {
         let parsed=AudioSpecificConfig::parse(asc)?;
         let Some(output_rate)=options.output_sample_rate else {
-            return Self::from_parsed_downscaled_mode(parsed,1,options.spatial_decorrelation);
+            return Self::from_parsed_downscaled_mode(parsed,1,options.spatial_decorrelation,options.ld_sbr_noise);
         };
         parsed.resolve_output_rate(output_rate)?;
         let factor=parsed.output_downscale_factor(output_rate).unwrap_or(1);
-        let mut decoder=Self::from_parsed_downscaled_mode(parsed.clone(),factor,options.spatial_decorrelation)?;
+        let mut decoder=Self::from_parsed_downscaled_mode(parsed.clone(),factor,options.spatial_decorrelation,options.ld_sbr_noise)?;
         if decoder.sample_rate()!=output_rate {
             if !sbr_layout(&parsed)? {
                 return Err(unsupported("implicit SBR AAC coupling synthesis is not yet implemented"));
@@ -525,7 +527,7 @@ impl NativeAacDecoder {
         if self.config!=state.config || self.initial_program!=state.initial_program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask || self.detect_sbr!=state.detect_sbr || self.sbr_detection_rate!=state.sbr_detection_rate || (!self.detect_sbr && self.sbr_rate!=state.sbr_rate) {
             return Err(invalid("AAC checkpoint configuration mismatch"));
         }
-        if self.eld_sbr.as_ref().map(|s|s.initial_config())!=state.eld_sbr.as_ref().map(|s|s.initial_config()) {return Err(invalid("AAC ELD low-delay SBR checkpoint configuration mismatch"));}
+        if self.eld_sbr.as_ref().map(|s|(s.initial_config(),s.noise_policy()))!=state.eld_sbr.as_ref().map(|s|(s.initial_config(),s.noise_policy())) {return Err(invalid("AAC ELD low-delay SBR checkpoint configuration mismatch"));}
         if self.eld_full_synthesis.len()!=state.eld_full_synthesis.len(){return Err(invalid("AAC ELD companion checkpoint channel mismatch"));}
         for(channel,saved)in self.eld_full_synthesis.iter_mut().zip(&state.eld_full_synthesis){channel.restore(saved)?;}
         if self.eld_synthesis.len()!=state.eld_synthesis.len(){return Err(invalid("AAC ELD checkpoint channel count mismatch"));}

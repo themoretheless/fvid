@@ -47,6 +47,9 @@ impl History {
     /// references; temporal rows require a compatible previous reference.
     /// No state is committed on any reconstruction or dequantization failure.
     pub fn decode(&mut self, data: &Data, header_amplitude: bool, slots: u8) -> Result<Parameters> {
+        self.decode_with_q31(data, header_amplitude, slots, false)
+    }
+    fn decode_with_q31(&mut self, data: &Data, header_amplitude: bool, slots: u8, allow_q31: bool) -> Result<Parameters> {
         let tables = &data.frequency;
         let count = data.channels.len();
         if !(1..=2).contains(&count)
@@ -161,7 +164,7 @@ impl History {
                 let mut l = Vec::with_capacity(levels.len());
                 let mut r = Vec::with_capacity(levels.len());
                 for (&level, &balance) in levels.iter().zip(balances) {
-                    let value = aac_sbr_dequant::coupled_noise(level, balance)?;
+                    let value = aac_sbr_dequant::coupled_noise_with_q31(level, balance, allow_q31)?;
                     l.push(value.left);
                     r.push(value.right);
                 }
@@ -184,7 +187,7 @@ impl History {
                     .iter()
                     .map(|row| {
                         row.iter()
-                            .map(|&v| aac_sbr_dequant::noise(v))
+                            .map(|&v| aac_sbr_dequant::noise_with_q31(v, allow_q31))
                             .collect::<Result<Vec<_>>>()
                     })
                     .collect::<Result<Vec<_>>>()?;
@@ -276,6 +279,7 @@ impl Stream {
         sbr_rate: u32,
         slots: u8,
         channels: usize,
+        allow_q31: bool,
     ) -> Result<Frame> {
         let mut state = self.clone();
         let mut trial = bits.clone();
@@ -288,7 +292,7 @@ impl Stream {
         let parameters =
             state
                 .coefficients
-                .decode(&syntax.data, syntax.header.amplitude_resolution, slots)?;
+                .decode_with_q31(&syntax.data, syntax.header.amplitude_resolution, slots, allow_q31)?;
         *self = state;
         *bits = trial;
         Ok(Frame { syntax, parameters })

@@ -34,7 +34,7 @@ def grid(mode,slots,frame):
     borders=[i*((slots+count//2)//count)for i in range(count)]+[slots]
     return '0'+field({1:0,2:1,4:2}[count],2)+(field(coarse,1)if count==1 else '')+field(fine,1),borders,None,coarse,fine
 
-def reconstruct(low,slots,noise,mode='base',channel=0,geometry=None):
+def reconstruct(low,slots,noise,mode='base',channel=0,geometry=None,noise_levels=None):
     source=list(range(2,10))+list(range(2,9))+[None,None]
     kx,stop=10,27
     if geometry is not None:kx,stop,source=geometry
@@ -43,11 +43,13 @@ def reconstruct(low,slots,noise,mode='base',channel=0,geometry=None):
     if mode=='coupled-pan':
         target=256/(1+2**(2 if channel==0 else -2))
         ratio=1/(1+2**(-4 if channel==0 else 4))
+    base_ratio=ratio
     output=[];index=0;bandwidth=0.;previous_mode=0;gain_history=[];noise_history=[]
     _,hb,_,_=tables(kx,stop,0,False,0,0)
     centers={(a+b)//2 for a,b in zip(hb,hb[1:])}
     for frame,start in enumerate(range(0,len(low),slots)):
         rows=low[start:start+slots]
+        if noise_levels is not None:ratio=base_ratio*2**(7-noise_levels[frame])
         hf=[[r[k]if k is not None else 0j for k in source]for r in rows]
         if mode=='invf':
             current_mode=frame%4
@@ -95,12 +97,13 @@ def reconstruct(low,slots,noise,mode='base',channel=0,geometry=None):
                 gain_history=[gain[:]]+gain_history[:3];noise_history=[q[:]]+noise_history[:3]
     return output
 
-def sbr_bits(channels,nhigh,nlow,slots,frame,protected,mode='base',categories=False,noise_level=None):
+def sbr_bits(channels,nhigh,nlow,slots,frame,protected,mode='base',categories=False,noise_level=None,noise_delta=None):
     coupled=channels==2 and mode.startswith('coupled')
     syntax,borders,_,coarse,fine=grid(mode,slots,frame)
     count=len(borders)-1;nq=1 if count==1 else 2
     temporal=mode=='base'and frame>0
-    flags=field(temporal,1)*(count+nq)
+    noise_temporal=temporal if noise_delta is None else True
+    flags=field(temporal,1)*count+field(noise_temporal,1)*nq
     envelopes=[];noises=[]
     for ch in range(channels):
         balance=coupled and ch==1
@@ -108,7 +111,7 @@ def sbr_bits(channels,nhigh,nlow,slots,frame,protected,mode='base',categories=Fa
         q=(4 if mode=='coupled-pan'else 6)if balance else (7 if noise_level is None else noise_level)
         bands=nhigh if fine else nlow
         envelopes.append(''.join(entropy_row(([0]*bands if temporal else [e]+[0]*(bands-1)),temporal,coarse,balance,False)for _ in range(count)))
-        noises.append(''.join(entropy_row([0 if temporal else q],temporal,False,balance,True)for _ in range(nq)))
+        noises.append(''.join(entropy_row([((0 if balance else noise_delta) if noise_delta is not None else 0) if noise_temporal else q],noise_temporal,False,balance,True)for _ in range(nq)))
     controls='0'+(field(coupled,1)if channels==2 else '')+syntax*(1 if coupled else channels)+flags*channels
     data=field(frame%4 if mode=='invf'else 0,2)*(1 if coupled else channels)
     data+=(''.join(a+b for a,b in zip(envelopes,noises))if coupled else ''.join(envelopes)+''.join(noises))+('1'+'1'*nhigh if mode=='harmonic'and frame%3!=2 else '0')*channels+'0'

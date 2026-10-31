@@ -1,0 +1,8 @@
+{
+  "scope": "Actual default platform backend callback/drain and navigation;not listening or waveform conformance",
+  "input": "tests/fixtures/playback-errors/aac-ld-sbr-q31/n512-coupled-pan-q31.mp4",
+  "input_sha256": "75e45849abdca42869b532737f9f301fb5d84167b0d3005172fa87b0c1b2d114",
+  "command": "audio_probe --play-device INPUT",
+  "status": 0,
+  "stdout": "platform_device=started source_channels=2 rate=48000 duration=0.170667\nphase=full generation=0 from=0.000000 position=0.170667 wall=0.190180 device_drain=complete\nphase=seek-quarter generation=1 from=0.042667 position=0.170667 wall=0.156747 device_drain=complete\nphase=seek-60-percent generation=2 from=0.102400 position=0.170667 wall=0.099025 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.170667 wall=0.195947 device_drain=complete\n"
+}

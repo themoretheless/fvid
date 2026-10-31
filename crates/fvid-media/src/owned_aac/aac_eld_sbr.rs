@@ -3,6 +3,18 @@ use super::{
     Result, aac_eld_sbr_dsp::Dsp, aac_sbr_header::Header, aac_sbr_history::Stream, bits::BitReader,
     invalid, memory::Footprint,
 };
+/// Noise-range admission is independent of ASC syntax. Strict follows the
+/// normative 0..=30 range. AllowQ31 additionally reconstructs the original ISO
+/// LD-SBR inverse-filter streams' five-bit 31 exactly, without clamping. Other
+/// values and coupled balance limits remain strict; this is not a new profile.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum NoisePolicy {
+    /// Enforce the normative reconstructed noise range.
+    Strict,
+    /// Also admit Q31 as an interoperability extension, preserving 2^-25.
+    #[default]
+    AllowQ31,
+}
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Config {
     pub double_rate: bool,
@@ -70,6 +82,7 @@ enum Output {
 }
 #[derive(Clone, Debug, PartialEq)]
 pub struct Decoder {
+    noise_policy: NoisePolicy,
     spatial: bool,
     config: Config,
     core_rate: u32,
@@ -125,6 +138,7 @@ impl Decoder {
             .contains(&3)
             .then(|| Dsp::new_downscaled(config.double_rate, factor));
         Ok(Self {
+            noise_policy: NoisePolicy::default(),
             spatial: false,
             config,
             core_rate,
@@ -208,6 +222,9 @@ impl Decoder {
             })
             .collect()
     }
+    pub fn noise_policy(&self) -> NoisePolicy { self.noise_policy }
+    /// Select future noise admission while retaining the owned stream history.
+    pub fn with_noise_policy(mut self, policy: NoisePolicy) -> Self { self.noise_policy = policy; self }
     pub fn initial_config(&self) -> &Config {
         &self.config
     }
@@ -343,6 +360,7 @@ impl Decoder {
                 rate,
                 state.slots,
                 width,
+                state.noise_policy == NoisePolicy::AllowQ31,
             )?;
             let refs: Vec<_> = core[at..at + width].iter().map(Vec::as_slice).collect();
             let full_refs = full.map(|p| {

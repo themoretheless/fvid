@@ -584,3 +584,8 @@ fn nearest_ld_frequency_tables_keep_worker_audio_and_navigation() {
 fn inverse_filter_noise_range_controls_keep_worker_audio_and_navigation() {
     check_corpus("aac-eld-sbr-noise-range");
 }
+
+#[test]
+fn q31_ld_sbr_keeps_worker_audio_and_live_history_navigation() {
+    check_corpus("aac-ld-sbr-q31");
+}

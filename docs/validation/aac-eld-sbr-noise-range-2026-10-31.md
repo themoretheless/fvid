@@ -1,5 +1,9 @@
 # ISO LD-SBR admission and reconstructed noise-range investigation
 
+Historical strict-default audit. The current bounded Q31 policy closes these
+six refusals;see [current acceptance](aac-ld-sbr-q31-2026-10-31.md). The original
+checksums,strict failures and source findings below are retained as evidence.
+
 A separate audit covers all26 `er_eld_sbr_*` compressed MP4 inputs from the
 original ISO checksum inventory.20 decode completely through the normal audio
 reader with presented,finite PCM. Six inverse-filter inputs fail with exactly

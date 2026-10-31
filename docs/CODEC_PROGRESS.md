@@ -1,3 +1,21 @@
+## Exact LD-SBR Q31 interoperability with strict validation, 2026-10-31
+
+Closed all six observed original ISO LD-SBR Q31 refusals:26/26 inputs now decode
+fully with unchanged source checksums. Default LD-only NoisePolicy::AllowQ31
+uses exact2^(6-Q),retains31 for temporal deltas and does not clamp/substitute
+output. AacDecodeOptions::ld_sbr_noise=Strict preserves normative0..30 admission;
+legacy SBR,coupled balance and Q32 refusal retain their previous bounds. Policy
+survives reset and incompatible-policy checkpoint restore is transactional.
+
+18 own480/512 inverse-filter/centered-coupled/asymmetric-coupled programmes in
+MP4/Matroska match independent direct PCM. Q31-to-Q7 temporal history detects
+clamping;Q32 controls retain history for retries. Original Q31 refusal movie/AU
+bytes remain unchanged and now have default acceptance plus explicit Strict
+refusal. Worker navigation and a real macOS full/seek/seek/rewind drain pass.
+Scoped gates:618 unique pass,0 fail,1 pre-existing ignored. This is not a new
+normative noise range,full LD-SBR/LD-MPS waveform conformance or completion of
+all codec gaps. [Evidence](validation/aac-ld-sbr-q31-2026-10-31.md).
+
 ## Separate ISO LD-SBR admission and Q31 boundary, 2026-10-31
 
 Audited all26 public `er_eld_sbr_*` inputs with the normal edited-track playback
