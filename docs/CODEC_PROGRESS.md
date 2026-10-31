@@ -1,3 +1,38 @@
+## Stereo arbitrary-downmix before TTT inversion, 2026-10-31
+
+Native LD-MPS now accepts independent L/R arbitrary-downmix gains for TTT trees
+2/3/4. Gain multiplies the raw TTT input basis before the inverse,then ordinary
+OTT composition and matrix smoothing/interpolation continue. Existing unity
+builder API is preserved. M2 and already rendered PCM are not scaled instead.
+A deterministic negative control shows0.28311 error for the wrong post-column
+ordering. Odd energy modes retain their existing inversion bypass.
+
+270 own MP4/MKV pairs cover all six TTT mode combinations,signalled inversion/
+bypass,23/9/4 parameter bands,initial unity and unequal time/frequency-varying
+L/R gains at quantization mode0. Five independent saved stereo PCM controls span
+short plain ELD and
+LD-SBR PCM at12/24/48/96kHz with32/64/128 spatial banks. Before the fix bare
+controls pass and three spatial tests reproduce the exact old admission refusal.
+After the fix,12,165,120 compositional PCM values match exactly. The original
+525/7271/7272 C routines plus80-digit Decimal smoothing independently qualify
+4,769,280 endpoints (108 unique matrix geometries),maximum error3.4774853e-6
+at tolerance1e-5. Repeated matrices are not duplicated across PCM clocks.
+
+Checks cover timed/untimed decode,exports,MP4/MKV playback,source/spatial edge
+seeks,rewind/EOF,checkpoints,suffix retry and late truncated-gain rollback. Direct
+builder checks include all six modes with inversion on/off,unity identity,
+unchanged M2 and invalid gains. The old TTT constructor refusal expectation is
+updated to acceptance;trees5/6/7 retain executable refusals. AudioWorker checks
+queue/source stamps and live-history navigation.
+
+This is component integration,not complete independent whole-codec/profile
+conformance. Trees5/6/7,HRTF,arbitrary-tree/downmix-residual extensions remain
+unfinished. Shared-QMF ingress,dynamic SSC gain-mode changes and physical/realtime
+output are not newly qualified. The no-codec-gaps objective remains active.
+
+Fresh offline gates: 1765 passed, 0 failed, 27 ignored.
+Evidence: `docs/validation/aac-ld-mps-arbdmx-ttt-{source,reference,generation,tests}-2026-10-31.json`.
+
 ## Mono arbitrary-downmix compensation, 2026-10-31
 
 Native ordinary LD-MPS now admits mono arbitrary-downmix gains for trees0/1

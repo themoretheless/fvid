@@ -227,10 +227,5 @@ fn late_singular_matrix_failure_rolls_back_the_successfully_parsed_frame() {
     );
     let mut cfg = config.clone();
     cfg.arbitrary_downmix = true;
-    assert!(
-        Decoder::new(&cfg)
-            .unwrap_err()
-            .to_string()
-            .contains("arbitrary-downmix")
-    );
+    assert!(Decoder::new(&cfg).is_ok());
 }

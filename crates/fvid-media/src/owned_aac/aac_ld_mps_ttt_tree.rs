@@ -1,5 +1,5 @@
 //! Ordinary full-output TTT trees 2/3/4, composed from shared OTT basis nodes.
-//! Optional arbitrary downmix, HRTF and 3D-stereo inversion are separate.
+//! Arbitrary-downmix gains enter before inversion;HRTF/3D stereo are separate.
 use super::{
     Result,
     aac_ld_mps_ott::Ott,
@@ -35,6 +35,20 @@ pub struct Matrices {
 /// LF/LC/LS/RF/RC/RS/C/LFE; tree4 LF/LS1/LS2/RF/RS1/RS2/C/LFE.
 /// Fixed channel gains and optional rendering tools are applied elsewhere.
 pub fn build(tree: u8, bands: &[Band], ttt: Ttt, lfe_active: bool) -> Result<Matrices> {
+    build_with_downmix(tree, bands, ttt, lfe_active, [1.0, 1.0])
+}
+/// Linear L/R compensation gains scale the TTT input basis before inversion.
+/// Scaling final M1 columns instead would also scale the inverse's cross terms.
+pub fn build_with_downmix(
+    tree: u8,
+    bands: &[Band],
+    ttt: Ttt,
+    lfe_active: bool,
+    downmix: [f64; 2],
+) -> Result<Matrices> {
+    if downmix.iter().any(|gain| !gain.is_finite() || *gain < 0.0) {
+        return Err(invalid("invalid LD-MPS TTT downmix gain"));
+    }
     let boxes = match tree {
         2 => 3,
         3 | 4 => 5,
@@ -51,13 +65,17 @@ pub fn build(tree: u8, bands: &[Band], ttt: Ttt, lfe_active: bool) -> Result<Mat
     for b in bands {
         Ott::physical(b.cld_db, b.coherence, b.residual)?;
     }
-    let raw = aac_ld_mps_ttt::transform(
+    let mut raw = aac_ld_mps_ttt::transform(
         ttt.mode,
         ttt.parameters[0],
         ttt.parameters[1],
         ttt.coherence,
         ttt.residual,
     )?;
+    for row in &mut raw {
+        row[0] *= downmix[0];
+        row[1] *= downmix[1];
+    }
     let mut base = raw.map(|row| row.map(|re| Complex { re, im: 0.0 }));
     // Odd energy modes deliberately bypass the signalled inversion tool.
     if ttt.inversion && (ttt.mode < 2 || ttt.mode == 2 || ttt.mode == 4) {

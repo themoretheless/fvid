@@ -534,3 +534,8 @@ fn nominal_high_rate_ld_sbr_pcm_to_mps_worker_keeps_queue_and_navigation_stamps(
 fn mono_arbitrary_downmix_worker_keeps_gain_history_and_navigation_stamps() {
     check_corpus("aac-ld-mps-arbdmx");
 }
+
+#[test]
+fn stereo_arbitrary_downmix_ttt_worker_keeps_gain_history_and_navigation_stamps() {
+    check_corpus("aac-ld-mps-arbdmx-ttt");
+}

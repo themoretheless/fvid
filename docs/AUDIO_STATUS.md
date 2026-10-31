@@ -13,7 +13,9 @@ The codec-gap objective stays open. See CODEC_PROGRESS.md for the source audit.
 Ordinary mono arbitrary-downmix compensation is now integrated for LD-MPS
 5.1 trees0/1: decoded dB gain enters M1 before temporal smoothing/interpolation.
 Independent C/Decimal matrices and own playback/seek fixtures cover PCM ingress.
-Other downmix trees,HRTF and residual/arbitrary-tree extensions remain unfinished.
+Stereo TTT trees2/3/4 now also accept independent L/R gains before matrix
+inversion,with all six modes checked. Trees5/6/7,HRTF and residual/arbitrary-tree
+extensions remain unfinished.
 
 LD-MPS rejects residual extension types0/1, including absent/zero bands, at
 native initial/replacement headers.

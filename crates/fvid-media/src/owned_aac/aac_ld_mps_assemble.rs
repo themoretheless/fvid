@@ -78,7 +78,7 @@ fn value(p: &Prepared, id: ParameterId, set: usize, band: u8) -> Result<f64> {
 impl Decoder {
     pub fn new(config: &Config) -> Result<Self> {
         let physical = aac_ld_mps_prepare::Decoder::new(config)?;
-        if (config.arbitrary_downmix && config.tree.code > 1)
+        if (config.arbitrary_downmix && config.tree.code > 4)
             || config.hrtf.is_some()
             || config.extensions.iter().any(|e| {
                 matches!(
@@ -323,7 +323,15 @@ impl Decoder {
                     } else {
                         1.0
                     };
-                    let a = aac_ld_mps_ttt_tree::build(
+                    let downmix = if config.arbitrary_downmix {
+                        [
+                            10.0f64.powf(value(&p, ParameterId::DownmixGain(0), set, band)? / 20.0),
+                            10.0f64.powf(value(&p, ParameterId::DownmixGain(1), set, band)? / 20.0),
+                        ]
+                    } else {
+                        [1.0, 1.0]
+                    };
+                    let a = aac_ld_mps_ttt_tree::build_with_downmix(
                         tree,
                         &boxes,
                         Ttt {
@@ -334,6 +342,7 @@ impl Decoder {
                             inversion: config.matrix_mode == Some(true),
                         },
                         lfe_active,
+                        downmix,
                     )?;
                     m1.extend(a.m1.iter().flatten().map(|z| z.re));
                     m1.extend(a.m1.iter().flatten().map(|z| z.im));
