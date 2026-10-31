@@ -1,0 +1,41 @@
+{
+  "runs": [
+    {
+      "name": "before-fix",
+      "passed": 1,
+      "failed": 2,
+      "ignored": 0,
+      "log_sha256": "7fe98fea85ddcf9289d17d074ec610a386be7307775523f15170993b3b15992f"
+    },
+    {
+      "name": "media",
+      "passed": 588,
+      "failed": 0,
+      "ignored": 1,
+      "log_sha256": "4a9c8d35c8a9de5f29a4068d7beeb805912250ef2734db75d27dc23298b16bed"
+    },
+    {
+      "name": "integration",
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "log_sha256": "753db8c281d60fd0d4ca970b59e2d1fba67f847aea7452bf7ccb4173906f06af"
+    },
+    {
+      "name": "worker",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "log_sha256": "83d081434ec751039c442cf3d8eb8fb7bed5569ffc1c2cc20bc63c6a8e883ce9"
+    }
+  ],
+  "after_fix_passed": 601,
+  "after_fix_failed": 0,
+  "preexisting_ignored": 1,
+  "fixture_programmes": 360,
+  "movies": 720,
+  "offline_deterministic_runs": 2,
+  "fixture_manifest_sha256": "f2b0ba7b381ec72df6916f4db6567bb5e22c128ec130313d074e77fb060a5ba9",
+  "fixture_packets_sha256": "79faf9e3644d9ccfdef17dea9c4fc3e394286a4a1f2d848929046d918a4555a1",
+  "golden_sha256": "a3636ddb5ef5dd7e08922d85c941cc11e7eb679d98797fb0a5d4ba673afa00eb"
+}

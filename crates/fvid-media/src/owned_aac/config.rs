@@ -16,6 +16,7 @@ mod ld_tests {
         assert!(c.section_data_resilience && c.scalefactor_data_resilience && c.spectral_data_resilience);
         assert!(AacConfig::parse(&[0xbb,0x08,0x40]).unwrap_err().to_string().contains("separate ESC"));
         assert!(AacConfig::parse(&[0xbb,0x00,0]).is_err());
-        assert!(AacConfig::parse(&[0xbc,0x08,0]).unwrap_err().to_string().contains("LD band geometry"));
+        let c=AacConfig::parse(&[0xbc,0x08,0]).unwrap();
+        assert_eq!((c.object_type,c.sample_rate,c.channels,c.frame_samples),(23,16000,1,512));
     }
 }

@@ -1,4 +1,4 @@
-//! AAC-LD long-window geometry, ISO/IEC 14496-3 tables 4.86–4.91.
+//! AAC-LD long-window geometry, ISO/IEC 14496-3 sections 4.5.1.1 and 4.6.17.
 use super::{Result, invalid};
 
 const B480_48: &[usize] = &[
@@ -32,15 +32,22 @@ pub struct LdBands {
     pub tns_max_bands: usize,
 }
 impl LdBands {
-    /// ELD extends the outer LD frequency groups to the full AAC rate range.
-    pub fn for_eld(sample_rate:u32,frame_samples:usize)->Result<Self>{
-        if sample_rate==0 {return Err(invalid("zero AAC ELD sample rate"));}
-        Self::new(sample_rate.clamp(22050,48000),frame_samples)
+    /// ELD uses the same nearest-defined frequency tables as LD.
+    pub fn for_eld(sample_rate: u32, frame_samples: usize) -> Result<Self> {
+        if sample_rate == 0 {
+            return Err(invalid("zero AAC ELD sample rate"));
+        }
+        Self::new(sample_rate.clamp(22050, 48000), frame_samples)
     }
     pub fn new(sample_rate: u32, frame_samples: usize) -> Result<Self> {
-        // LD has no short windows. Do not invent tables for rates outside
-        // the standardized LD range; explicit rates use the ordinary intervals.
-        let offsets = match (frame_samples, sample_rate) {
+        // Section 4.5.1.1 requires the nearest defined frequency table when
+        // a nominal frequency group has no entry. LD defines only 22.05–48 kHz;
+        // extend those outer tables, including their TNS limits, to other rates.
+        if sample_rate == 0 {
+            return Err(invalid("unsupported AAC LD band geometry"));
+        }
+        let table_rate = sample_rate.clamp(22050, 48000);
+        let offsets = match (frame_samples, table_rate) {
             (480, 37566..=55425) => B480_48,
             (512, 37566..=55425) => B512_48,
             (480, 27713..=37565) => B480_32,
@@ -49,7 +56,7 @@ impl LdBands {
             (512, 18783..=27712) => B512_24,
             _ => return Err(invalid("unsupported AAC LD band geometry")),
         };
-        let tns_max_bands = match sample_rate {
+        let tns_max_bands = match table_rate {
             46009..=55425 => 31,
             37566..=46008 => 32,
             27713..=37565 => 37,
@@ -96,9 +103,21 @@ mod tests {
                     .all(|w| w[0] < w[1] && (w[1] - w[0]) % 4 == 0)
             );
         }
-        for rate in [0, 8000, 16000, 18782, 55426, 96000] {
-            assert!(LdBands::new(rate, 512).is_err());
+        for rate in [7350, 8000, 11025, 12000, 16000, 18782, 22050] {
+            for (size, offsets, tns) in [(480, B480_24, 30), (512, B512_24, 31)] {
+                let bands = LdBands::new(rate, size).unwrap();
+                assert_eq!(bands.offsets, offsets);
+                assert_eq!(bands.tns_max_bands, tns);
+            }
         }
+        for rate in [48000, 55426, 64000, 88200, 96000] {
+            for (size, offsets) in [(480, B480_48), (512, B512_48)] {
+                let bands = LdBands::new(rate, size).unwrap();
+                assert_eq!(bands.offsets, offsets);
+                assert_eq!(bands.tns_max_bands, 31);
+            }
+        }
+        assert!(LdBands::new(0, 512).is_err());
         assert!(LdBands::new(24000, 1024).is_err());
     }
 }

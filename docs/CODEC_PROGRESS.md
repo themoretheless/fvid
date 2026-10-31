@@ -1,3 +1,17 @@
+## AAC-LD nearest-defined rate tables, 2026-10-31
+
+Fixed a real ISO16-kHz core-admission failure using the nearest-defined table
+rule in ISO/IEC14496-3 section4.5.1.1. Existing LD outer band/TNS tables now
+cover the remaining nominal/explicit frequency groups; zero rate stays invalid.
+360 own programmes/720 movies verify frozen cosine PCM,spatial composition,
+actual audio-worker playback,live-history seeks,rewind and timestamps. All50
+public ISO LD-MPS MP4 inputs now decode fully,versus49 before. This is not
+whole-profile waveform conformance. Scoped gates:601 pass,0 fail,1 pre-existing
+ignored. Full LD-SBR/LD-MPS reference qualification remains open.
+
+Evidence: [validation](validation/aac-ld-nearest-rate-2026-10-31.md),
+`validation/aac-ld-nearest-rate-{iso,tests}-2026-10-31.json`.
+
 ## Independent LD-QMF32 phase cross-check, 2026-10-31
 
 The large24-kHz ISO WAV difference is not isolated to FVid: an independently

@@ -574,3 +574,8 @@ fn empty_split_ttt_groups_keep_worker_audio_and_navigation() {
 fn arbitrary_aac_alignment_keeps_worker_audio_and_navigation() {
     check_corpus("aac-alignment");
 }
+
+#[test]
+fn nearest_ld_frequency_tables_keep_worker_audio_and_navigation() {
+    check_corpus("aac-ld-nearest-rate");
+}

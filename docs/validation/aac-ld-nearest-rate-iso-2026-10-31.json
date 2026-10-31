@@ -1,0 +1,963 @@
+{
+  "scope": "Full compressed MP4 decoder admission, not waveform conformance or device playback",
+  "source": "https://standards.iso.org/iso-iec/14496/-26/ed-2/en/compressedMp4.zip",
+  "checksum_inventory": "mpeg4audio-conformance2ndEd_20230125.md5",
+  "checksum_inventory_sha256": "865521883bbc19db177c71c00fcb57bd3619a8ae73a05a21532c3fc22cc13e92",
+  "mode": "Complex",
+  "files": [
+    {
+      "name": "er_eld_ldmps_param_23.mp4",
+      "sha256": "e342a3823053c988e37c526d4d014f4ea3f4e3c260eed4d1c888bd0f36b7fa72",
+      "iso_md5": "93512e5dd4cf018d097291d52293cf01"
+    },
+    {
+      "name": "er_eld_ldmps_quant1.mp4",
+      "sha256": "3ef6d352f92f035ab1bfe2358ad98c0b0180108c9332b0e7aa3ed0781baafdfc",
+      "iso_md5": "cf7aa593ede1a44eb26cdaa3a4bb40fe"
+    },
+    {
+      "name": "er_ad_ldmps_arbDmx.mp4",
+      "sha256": "d48f5dfa931dfeeb6361859fe5f6172cb2f687210746186fb9d549c4f330e54a",
+      "iso_md5": "75e8147650efebf7792c6ace963a98f1"
+    },
+    {
+      "name": "er_ad_ldmps_param_15.mp4",
+      "sha256": "a1828e50b26dae9e6e353bf87fa0c58b1a0d07869594c4fafd5aad87f1921895",
+      "iso_md5": "3e1ca6555e05c006ecc7ea36f7b23510"
+    },
+    {
+      "name": "er_ad_ldmps_shapeStp.mp4",
+      "sha256": "176e673ff8c60ba64667e2eaa306f60b709b75c12b05655cd1f55088b1a7d606",
+      "iso_md5": "3cf6d1a5735ac0c92d3ca32d2534cf6b"
+    },
+    {
+      "name": "er_eld_ldmps_tree_525.mp4",
+      "sha256": "1e6f92c91886859d6d1629e4bef93e1748b69ec8c8e1a9739c575e0c2287fdb3",
+      "iso_md5": "f3326ebcc7aea2f70640fc0c1184d289"
+    },
+    {
+      "name": "er_eld_ldmps_quant2.mp4",
+      "sha256": "b2d2fec6e8e112e2d2894bfd1dfce7862d1abda78cc38bf2b7ed159171b4a0bc",
+      "iso_md5": "f7a20392a27d68eecd15c9eebff76c71"
+    },
+    {
+      "name": "er_ad_ldmps_smooth.mp4",
+      "sha256": "59f8b8bfe17e844ad4969d6f2e869d619e47f229bb0dee74d5cfc9ac2e43a956",
+      "iso_md5": "afa91cdda7b3066a513aef91a831db23"
+    },
+    {
+      "name": "er_ad_ldmps_param_12.mp4",
+      "sha256": "010b437ca30f3f9a578e6db2d4b796f1b5192d22672d3408b0752ebcc16691d7",
+      "iso_md5": "14ab1cfa2c7e7b08110e9708f0210c9e"
+    },
+    {
+      "name": "er_ad_ldmps_shapeGes.mp4",
+      "sha256": "e900e4c8f9edb925662d59c784134d042ccfc18135cae1b001071d7041c2ae16",
+      "iso_md5": "7092f1a0421322c2f4c877fcd87d95a4"
+    },
+    {
+      "name": "er_eld_ldmps_15_ts.mp4",
+      "sha256": "374a29676c3fc02d5fb163200ba22e25a8f5b5c9654e1131b120adacabaf4b70",
+      "iso_md5": "3603074757e25acf005c926cbc7fbeb6"
+    },
+    {
+      "name": "er_ad_ldmps_44khz.mp4",
+      "sha256": "43cf3de8b4afed06ec3cb0959117347de0c5dee1684582c132def44a04906a54",
+      "iso_md5": "14f6cae873afec29bba1c4b6f3f5d4a1"
+    },
+    {
+      "name": "er_eld_ldmps_24khz.mp4",
+      "sha256": "9802860d614d2eacb42c1b0d7e879495456177d0dd02c051a7c05a06267cdfd1",
+      "iso_md5": "648174651b427055266f81004034eead"
+    },
+    {
+      "name": "er_ad_ldmps_16_ts.mp4",
+      "sha256": "2dfe1e56c2c4910c5124d03d80045572fa96438f894ed4cafb501bf719785167",
+      "iso_md5": "18483039de17f3fb18ccf4169cd3d7e3"
+    },
+    {
+      "name": "er_eld_ldmps_16khz.mp4",
+      "sha256": "8eea9d7c32bd09af034fae58c85b8425ba990babad773662c0c25b731d9481e5",
+      "iso_md5": "024323ca49af17c22e100aa58aa2dcf9"
+    },
+    {
+      "name": "er_eld_ldmps_32khz.mp4",
+      "sha256": "9927fb115c911f874dd0d3cb4eb1d88fe8de69d222df6e8651ed4e08823751ca",
+      "iso_md5": "5b89866471b2db6c38010ff1779ad075"
+    },
+    {
+      "name": "er_ad_ldmps_param_5.mp4",
+      "sha256": "42ef5e81653d386fbd717430fc10fb7e2fbb047f6390e5e5a19ecbc6767ede49",
+      "iso_md5": "6ed6d9291550d5b311e19cfb51c16f5a"
+    },
+    {
+      "name": "er_ad_ldmps_param_4.mp4",
+      "sha256": "ce05fed14a46e6f827e7a6dc3e0235bd51ee6242c407b51fd03801f30039e811",
+      "iso_md5": "58b992604a43b6334b9a731940d17900"
+    },
+    {
+      "name": "er_eld_ldmps_22khz.mp4",
+      "sha256": "c7a8b3e7b8e5f25cf9546e434d8b672f84c5c4725a1bc9a5f01d13f993200411",
+      "iso_md5": "9fa874984bb3ad0a9e1ab5c14b60b669"
+    },
+    {
+      "name": "er_eld_ldmps_param_7.mp4",
+      "sha256": "07af4844e7badb81ca23ed009d2a7e0e954d6ab8f915f7c315070c98a0eafcd5",
+      "iso_md5": "5272ae0a41032f613efc658acafa7516"
+    },
+    {
+      "name": "er_eld_ldmps_param_5.mp4",
+      "sha256": "b21f90333ed6d74e3bc556605ba3fbfbf4b157e5fef2a0e82465943fdc2eaba9",
+      "iso_md5": "e5e073deda52bab730351b569ebaba80"
+    },
+    {
+      "name": "er_ad_ldmps_param_7.mp4",
+      "sha256": "4369ceca80eea29b732c9fa550f901e219fc4b6a77c1bd97f00f206aac4925f9",
+      "iso_md5": "04079de9857d5529ec5190c7c2bf501f"
+    },
+    {
+      "name": "er_eld_ldmps_param_4.mp4",
+      "sha256": "ca583990650441e14def98f9e070e7a0f5dc988ba6f4424362aa0835f4d12cd4",
+      "iso_md5": "fb8e79e2c4d77cebf5ea2a48f93f9d10"
+    },
+    {
+      "name": "er_ad_ldmps_24khz.mp4",
+      "sha256": "f2b467c43a659f16b907a5c42839ec68f809c55cce738ca44f1ecd900d4c3e28",
+      "iso_md5": "382e330040d0bb860c318b55c2a97ab2"
+    },
+    {
+      "name": "er_eld_ldmps_8_ts.mp4",
+      "sha256": "202797765950626de3ab9b6db728ed5b30b42c416f5a4f9bdc2f97e4212b4abb",
+      "iso_md5": "e75334290bdc3b05619e578e97f9d974"
+    },
+    {
+      "name": "er_eld_ldmps_param_9.mp4",
+      "sha256": "58aad1a7bb237f6de73fb5b31975d05594425d3a4c06c8b5e1f7e6a06eeee315",
+      "iso_md5": "69f257f01410ff4acf0b726c60290a6b"
+    },
+    {
+      "name": "er_ad_ldmps_param_9.mp4",
+      "sha256": "4157bf2ea5f7827ab7c3927f8c5548876801dc18d2cabd36f194787157914d98",
+      "iso_md5": "44a0e71bbcc644366b5e3c1527eedcac"
+    },
+    {
+      "name": "er_ad_ldmps_15_ts.mp4",
+      "sha256": "eca34f4448d0b7d52cc4b8c71fb38f1bd0c91931b0fa33838e524aadecffdeea",
+      "iso_md5": "3af91c6f63f696b87ad92672c21ccd2a"
+    },
+    {
+      "name": "er_eld_ldmps_44khz.mp4",
+      "sha256": "d8c421339a901fa64dd9a1b7de3ffaa15248ad5597ae37a0a58126f0a9be738a",
+      "iso_md5": "db3e9918b1904253516e3f5ed4d71c0d"
+    },
+    {
+      "name": "er_ad_ldmps_tree_5152.mp4",
+      "sha256": "a6119d805e8670a2ec48b77686cb8ef84c75103182eb551aabd2f4a5510cfda5",
+      "iso_md5": "56993386b1d7d7ce35a5f6d84a56a360"
+    },
+    {
+      "name": "er_ad_ldmps_tree_5151.mp4",
+      "sha256": "d226163325605ebc73a6aaaaf6fd1a0c4d7ef70a998068f34ee8402f6859ce64",
+      "iso_md5": "9195fbdc7765e9ac77407c4a4a85647a"
+    },
+    {
+      "name": "er_eld_ldmps_arbDmx.mp4",
+      "sha256": "954a120a09abe7f06dc026528317f937719991a964fa4c50cf39a86d6f00812d",
+      "iso_md5": "342760a5e8fa9eaa038e06714e6b06bc"
+    },
+    {
+      "name": "er_ad_ldmps_tree_525.mp4",
+      "sha256": "61f933aeb2daf9400af6368d2b7741d5c39e68b1ce684d2ea0fc439aa50c4a1c",
+      "iso_md5": "23c15bae7e0d6de2f85a016b6f87b347"
+    },
+    {
+      "name": "er_eld_ldmps_shapeStp.mp4",
+      "sha256": "6287096bce0102dd724dc05fdf4f2b4c2a9d42a488149f1b64f8132e70c474df",
+      "iso_md5": "4b12e7fe9020509050dcfd6c22d97e07"
+    },
+    {
+      "name": "er_eld_ldmps_tree_5152.mp4",
+      "sha256": "c8afbc891f9d22c1b6bc304a20161af51fb43427d3c0c6fef8cdb740634285c9",
+      "iso_md5": "1bc28cace0763c24fc792b38375b5879"
+    },
+    {
+      "name": "er_ad_ldmps_quant1.mp4",
+      "sha256": "9e8cf945f7472572e318210019a449667b8cb60d3d145830f5bb0a804a2e6085",
+      "iso_md5": "043d68c42968b044a6b72ef579852eab"
+    },
+    {
+      "name": "er_eld_ldmps_param_15.mp4",
+      "sha256": "e02a46245727edd6977b0f5b80fc26aa43c6d6772111d92bf12f685d14d5138d",
+      "iso_md5": "c79ae6d0277fa844695e756c03b02b17"
+    },
+    {
+      "name": "er_ad_ldmps_param_23.mp4",
+      "sha256": "9b56d7f0036868ac3536d80ec19e3e608f6ee77350ca4e34496848d9f9a6c8ee",
+      "iso_md5": "a6f3f1bc297ac8896a5568946c377bc2"
+    },
+    {
+      "name": "er_ad_ldmps_22khz.mp4",
+      "sha256": "41e0ebd50aa0634db4ae583fa28fd6629e80841d31ae857f84a525773b1dd543",
+      "iso_md5": "90b76d747084942c0e2d76a0ca3d83e0"
+    },
+    {
+      "name": "er_eld_ldmps_tree_5151.mp4",
+      "sha256": "c64d7fd39c0c6c60a36f87f32e810573e1711225bead38a484bd6cf0ea750bfd",
+      "iso_md5": "3b491ca34afe31a99d007dbf4c795ef7"
+    },
+    {
+      "name": "er_ad_ldmps_quant2.mp4",
+      "sha256": "136ea65449db7f190b37037629484d765489d397feae1e8ae4dbd3ca1507318a",
+      "iso_md5": "0af08f67fbb53c8f18d1c7c7f6964190"
+    },
+    {
+      "name": "er_ad_ldmps_16khz.mp4",
+      "sha256": "8f2f042d27db2e5089cf40545b33015c5e99e382cbdd117656c31ba5c7219129",
+      "iso_md5": "7c0c4a2d74e8efb4fd9778e1c245c6d1"
+    },
+    {
+      "name": "er_eld_ldmps_one_ICC.mp4",
+      "sha256": "838fcf6ef180ff2f6342dfc17773be3b321e8be139bafe4c665787fd0b51d68c",
+      "iso_md5": "9186660684d26a13a6a37ecab25dd7df"
+    },
+    {
+      "name": "er_ad_ldmps_32khz.mp4",
+      "sha256": "0c43427b00c945dd1dd8c515717013d5e0d38eaea18e27f0876d93b22d2b1bf0",
+      "iso_md5": "b5839e8831f07b396a9332040b319f83"
+    },
+    {
+      "name": "er_eld_ldmps_ldqmf_2.mp4",
+      "sha256": "907d37c0953b31198701c36a3a4f127c1aed48e3db105b3ed1b5c46d3d444fce",
+      "iso_md5": "b0df996e02a77e710a510c5dc3e679c8"
+    },
+    {
+      "name": "er_eld_ldmps_smooth.mp4",
+      "sha256": "3984202f6346d970811af079eda029b7fa464251fd88895b025d82d0ada8abe5",
+      "iso_md5": "f48da665d6e0d09c6a3e0719a257cbd5"
+    },
+    {
+      "name": "er_ad_ldmps_one_ICC.mp4",
+      "sha256": "8f5e72b15aa7905b91ad5027cdf7109677584ff5e0e3661bb832d5e52933aebe",
+      "iso_md5": "111b1a0e2927a2534a779fb8ab3f837a"
+    },
+    {
+      "name": "er_eld_ldmps_ldqmf_1.mp4",
+      "sha256": "7cbcf115460136d855d9e336e2ae65adbff9cb96777bd3c4a8278132836af032",
+      "iso_md5": "584287932e63a673e47f7d811efe966b"
+    },
+    {
+      "name": "er_eld_ldmps_shapeGes.mp4",
+      "sha256": "8003d7faed36cd643c5689ee307afcb284b986a45d0d5c2bbf60a4652d8b64c0",
+      "iso_md5": "fbda0b09decbd57b8a5f32541a87d75e"
+    },
+    {
+      "name": "er_eld_ldmps_param_12.mp4",
+      "sha256": "e77e1122d50ed09a8859b3e2f835ec56f9280447e3b74db1c9f95b867b391f03",
+      "iso_md5": "bbf81e68352ac592706d9f234f6c2aba"
+    }
+  ],
+  "before": [
+    {
+      "name": "er_ad_ldmps_15_ts.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1459 rate=24000 channels=2 scalars=1400640\n",
+      "stderr": "",
+      "output_bytes": 5602560
+    },
+    {
+      "name": "er_ad_ldmps_16_ts.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=24000 channels=2 scalars=1400832\n",
+      "stderr": "",
+      "output_bytes": 5603328
+    },
+    {
+      "name": "er_ad_ldmps_16khz.mp4",
+      "status": 1,
+      "stdout": "",
+      "stderr": "Error: BitstreamError(\"unsupported AAC LD band geometry\")\n",
+      "output_bytes": 0
+    },
+    {
+      "name": "er_ad_ldmps_22khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1257 rate=22050 channels=2 scalars=1287168\n",
+      "stderr": "",
+      "output_bytes": 5148672
+    },
+    {
+      "name": "er_ad_ldmps_24khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=24000 channels=2 scalars=1400832\n",
+      "stderr": "",
+      "output_bytes": 5603328
+    },
+    {
+      "name": "er_ad_ldmps_32khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1824 rate=32000 channels=2 scalars=1867776\n",
+      "stderr": "",
+      "output_bytes": 7471104
+    },
+    {
+      "name": "er_ad_ldmps_44khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2513 rate=44100 channels=2 scalars=2573312\n",
+      "stderr": "",
+      "output_bytes": 10293248
+    },
+    {
+      "name": "er_ad_ldmps_arbDmx.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_one_ICC.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_param_12.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2735 rate=48000 channels=2 scalars=2800640\n",
+      "stderr": "",
+      "output_bytes": 11202560
+    },
+    {
+      "name": "er_ad_ldmps_param_15.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2735 rate=48000 channels=2 scalars=2800640\n",
+      "stderr": "",
+      "output_bytes": 11202560
+    },
+    {
+      "name": "er_ad_ldmps_param_23.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2735 rate=48000 channels=2 scalars=2800640\n",
+      "stderr": "",
+      "output_bytes": 11202560
+    },
+    {
+      "name": "er_ad_ldmps_param_4.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2735 rate=48000 channels=2 scalars=2800640\n",
+      "stderr": "",
+      "output_bytes": 11202560
+    },
+    {
+      "name": "er_ad_ldmps_param_5.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2735 rate=48000 channels=2 scalars=2800640\n",
+      "stderr": "",
+      "output_bytes": 11202560
+    },
+    {
+      "name": "er_ad_ldmps_param_7.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2735 rate=48000 channels=2 scalars=2800640\n",
+      "stderr": "",
+      "output_bytes": 11202560
+    },
+    {
+      "name": "er_ad_ldmps_param_9.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2735 rate=48000 channels=2 scalars=2800640\n",
+      "stderr": "",
+      "output_bytes": 11202560
+    },
+    {
+      "name": "er_ad_ldmps_quant1.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_quant2.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_shapeGes.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_shapeStp.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_smooth.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_tree_5151.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_tree_5152.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_tree_525.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_15_ts.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1459 rate=48000 channels=2 scalars=2801280\n",
+      "stderr": "",
+      "output_bytes": 11205120
+    },
+    {
+      "name": "er_eld_ldmps_16khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=912 rate=16000 channels=2 scalars=933888\n",
+      "stderr": "",
+      "output_bytes": 3735552
+    },
+    {
+      "name": "er_eld_ldmps_22khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1257 rate=22050 channels=2 scalars=1287168\n",
+      "stderr": "",
+      "output_bytes": 5148672
+    },
+    {
+      "name": "er_eld_ldmps_24khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=24000 channels=2 scalars=1400832\n",
+      "stderr": "",
+      "output_bytes": 5603328
+    },
+    {
+      "name": "er_eld_ldmps_32khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=912 rate=32000 channels=2 scalars=1867776\n",
+      "stderr": "",
+      "output_bytes": 7471104
+    },
+    {
+      "name": "er_eld_ldmps_44khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1257 rate=44100 channels=2 scalars=2574336\n",
+      "stderr": "",
+      "output_bytes": 10297344
+    },
+    {
+      "name": "er_eld_ldmps_8_ts.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2735 rate=48000 channels=2 scalars=2800640\n",
+      "stderr": "",
+      "output_bytes": 11202560
+    },
+    {
+      "name": "er_eld_ldmps_arbDmx.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_ldqmf_1.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=47 rate=48000 channels=2 scalars=96256\n",
+      "stderr": "",
+      "output_bytes": 385024
+    },
+    {
+      "name": "er_eld_ldmps_ldqmf_2.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=47 rate=24000 channels=2 scalars=48128\n",
+      "stderr": "",
+      "output_bytes": 192512
+    },
+    {
+      "name": "er_eld_ldmps_one_ICC.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_param_12.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=48000 channels=2 scalars=2801664\n",
+      "stderr": "",
+      "output_bytes": 11206656
+    },
+    {
+      "name": "er_eld_ldmps_param_15.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=48000 channels=2 scalars=2801664\n",
+      "stderr": "",
+      "output_bytes": 11206656
+    },
+    {
+      "name": "er_eld_ldmps_param_23.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=48000 channels=2 scalars=2801664\n",
+      "stderr": "",
+      "output_bytes": 11206656
+    },
+    {
+      "name": "er_eld_ldmps_param_4.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=48000 channels=2 scalars=2801664\n",
+      "stderr": "",
+      "output_bytes": 11206656
+    },
+    {
+      "name": "er_eld_ldmps_param_5.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=48000 channels=2 scalars=2801664\n",
+      "stderr": "",
+      "output_bytes": 11206656
+    },
+    {
+      "name": "er_eld_ldmps_param_7.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=48000 channels=2 scalars=2801664\n",
+      "stderr": "",
+      "output_bytes": 11206656
+    },
+    {
+      "name": "er_eld_ldmps_param_9.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=48000 channels=2 scalars=2801664\n",
+      "stderr": "",
+      "output_bytes": 11206656
+    },
+    {
+      "name": "er_eld_ldmps_quant1.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_quant2.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_shapeGes.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_shapeStp.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_smooth.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_tree_5151.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_tree_5152.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_tree_525.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    }
+  ],
+  "after": [
+    {
+      "name": "er_eld_ldmps_param_23.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=48000 channels=2 scalars=2801664\n",
+      "stderr": "",
+      "output_bytes": 11206656
+    },
+    {
+      "name": "er_eld_ldmps_quant1.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_arbDmx.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_param_15.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2735 rate=48000 channels=2 scalars=2800640\n",
+      "stderr": "",
+      "output_bytes": 11202560
+    },
+    {
+      "name": "er_ad_ldmps_shapeStp.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_tree_525.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_quant2.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_smooth.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_param_12.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2735 rate=48000 channels=2 scalars=2800640\n",
+      "stderr": "",
+      "output_bytes": 11202560
+    },
+    {
+      "name": "er_ad_ldmps_shapeGes.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_15_ts.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1459 rate=48000 channels=2 scalars=2801280\n",
+      "stderr": "",
+      "output_bytes": 11205120
+    },
+    {
+      "name": "er_ad_ldmps_44khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2513 rate=44100 channels=2 scalars=2573312\n",
+      "stderr": "",
+      "output_bytes": 10293248
+    },
+    {
+      "name": "er_eld_ldmps_24khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=24000 channels=2 scalars=1400832\n",
+      "stderr": "",
+      "output_bytes": 5603328
+    },
+    {
+      "name": "er_ad_ldmps_16_ts.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=24000 channels=2 scalars=1400832\n",
+      "stderr": "",
+      "output_bytes": 5603328
+    },
+    {
+      "name": "er_eld_ldmps_16khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=912 rate=16000 channels=2 scalars=933888\n",
+      "stderr": "",
+      "output_bytes": 3735552
+    },
+    {
+      "name": "er_eld_ldmps_32khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=912 rate=32000 channels=2 scalars=1867776\n",
+      "stderr": "",
+      "output_bytes": 7471104
+    },
+    {
+      "name": "er_ad_ldmps_param_5.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2735 rate=48000 channels=2 scalars=2800640\n",
+      "stderr": "",
+      "output_bytes": 11202560
+    },
+    {
+      "name": "er_ad_ldmps_param_4.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2735 rate=48000 channels=2 scalars=2800640\n",
+      "stderr": "",
+      "output_bytes": 11202560
+    },
+    {
+      "name": "er_eld_ldmps_22khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1257 rate=22050 channels=2 scalars=1287168\n",
+      "stderr": "",
+      "output_bytes": 5148672
+    },
+    {
+      "name": "er_eld_ldmps_param_7.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=48000 channels=2 scalars=2801664\n",
+      "stderr": "",
+      "output_bytes": 11206656
+    },
+    {
+      "name": "er_eld_ldmps_param_5.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=48000 channels=2 scalars=2801664\n",
+      "stderr": "",
+      "output_bytes": 11206656
+    },
+    {
+      "name": "er_ad_ldmps_param_7.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2735 rate=48000 channels=2 scalars=2800640\n",
+      "stderr": "",
+      "output_bytes": 11202560
+    },
+    {
+      "name": "er_eld_ldmps_param_4.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=48000 channels=2 scalars=2801664\n",
+      "stderr": "",
+      "output_bytes": 11206656
+    },
+    {
+      "name": "er_ad_ldmps_24khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=24000 channels=2 scalars=1400832\n",
+      "stderr": "",
+      "output_bytes": 5603328
+    },
+    {
+      "name": "er_eld_ldmps_8_ts.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2735 rate=48000 channels=2 scalars=2800640\n",
+      "stderr": "",
+      "output_bytes": 11202560
+    },
+    {
+      "name": "er_eld_ldmps_param_9.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=48000 channels=2 scalars=2801664\n",
+      "stderr": "",
+      "output_bytes": 11206656
+    },
+    {
+      "name": "er_ad_ldmps_param_9.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2735 rate=48000 channels=2 scalars=2800640\n",
+      "stderr": "",
+      "output_bytes": 11202560
+    },
+    {
+      "name": "er_ad_ldmps_15_ts.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1459 rate=24000 channels=2 scalars=1400640\n",
+      "stderr": "",
+      "output_bytes": 5602560
+    },
+    {
+      "name": "er_eld_ldmps_44khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1257 rate=44100 channels=2 scalars=2574336\n",
+      "stderr": "",
+      "output_bytes": 10297344
+    },
+    {
+      "name": "er_ad_ldmps_tree_5152.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_tree_5151.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_arbDmx.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_tree_525.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_shapeStp.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_tree_5152.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_quant1.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_param_15.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=48000 channels=2 scalars=2801664\n",
+      "stderr": "",
+      "output_bytes": 11206656
+    },
+    {
+      "name": "er_ad_ldmps_param_23.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2735 rate=48000 channels=2 scalars=2800640\n",
+      "stderr": "",
+      "output_bytes": 11202560
+    },
+    {
+      "name": "er_ad_ldmps_22khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1257 rate=22050 channels=2 scalars=1287168\n",
+      "stderr": "",
+      "output_bytes": 5148672
+    },
+    {
+      "name": "er_eld_ldmps_tree_5151.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_quant2.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_16khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=912 rate=16000 channels=2 scalars=933888\n",
+      "stderr": "",
+      "output_bytes": 3735552
+    },
+    {
+      "name": "er_eld_ldmps_one_ICC.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_32khz.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1824 rate=32000 channels=2 scalars=1867776\n",
+      "stderr": "",
+      "output_bytes": 7471104
+    },
+    {
+      "name": "er_eld_ldmps_ldqmf_2.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=47 rate=24000 channels=2 scalars=48128\n",
+      "stderr": "",
+      "output_bytes": 192512
+    },
+    {
+      "name": "er_eld_ldmps_smooth.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_ad_ldmps_one_ICC.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_ldqmf_1.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=47 rate=48000 channels=2 scalars=96256\n",
+      "stderr": "",
+      "output_bytes": 385024
+    },
+    {
+      "name": "er_eld_ldmps_shapeGes.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1410 rate=48000 channels=6 scalars=8663040\n",
+      "stderr": "",
+      "output_bytes": 34652160
+    },
+    {
+      "name": "er_eld_ldmps_param_12.mp4",
+      "status": 0,
+      "stdout": "mode=Complex packets=1368 rate=48000 channels=2 scalars=2801664\n",
+      "stderr": "",
+      "output_bytes": 11206656
+    }
+  ]
+}

@@ -1,5 +1,11 @@
 # Audio Implementation Status
 
+AAC-LD now applies nearest-defined band/TNS tables at low/high AAC rates,
+including16 kHz. 360 own programmes (720 MP4/Matroska movies) cover frozen-core
+PCM,spatial composition and worker playback/seek/rewind. All50 public ISO
+LD-MPS MP4 inputs decode fully; this is admission,not waveform conformance.
+See validation/aac-ld-nearest-rate-2026-10-31.md.
+
 Native AAC construction now exposes both owned spatial decorrelators through
 `AacDecodeOptions`,alongside an optional output clock. The default stays Complex.
 Mode selection survives reset and is checked before restoring checkpoints.
