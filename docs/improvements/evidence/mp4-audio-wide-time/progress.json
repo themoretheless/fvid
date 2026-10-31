@@ -1,9 +1,9 @@
 {
-  "status": "accepted FVID-0449;verified;owned artifacts removed;ready to publish",
+  "status": "published FVID-0449;verified both remote refs and clean own worktree",
   "base": "95114ab958f6f801aaae546143317e47fa8fe01e",
   "scope": "Wide audio Duration conversion and sample seek; authored short hybrid VP9/fragmented IMA4 witnesses across u64 nanosecond boundary; true signed PTS overflow still must refuse.",
   "accepted_count_unchanged": 448,
-  "next": "Verify archives;remove only owned artifacts;publish qualified code/proof.",
+  "next": "Continue structured MP4 timestamp/seek audit toward1000;no extra count for variants of accepted causes.",
   "baseline_session": 89121,
   "baseline_log": "/private/tmp/fvid-mp4-audio-wide-time-before.log",
   "target": "/private/tmp/fvid-mp4-audio-wide-time-target-20261031",
