@@ -1,11 +1,11 @@
 {
-  "status": "accepted FVID-0445;all gates passed;own artifacts removed;publication pending",
+  "status": "accepted FVID-0445 and published to both delivery refs;all gates passed;own artifacts removed",
   "base": "29fe6037f847d9efebb9503ec5554ddf73d5d202",
   "target": "/private/tmp/fvid-mp4-audio-packet-seek-target-20261031",
   "hypothesis": "Block-independent ordered audio still performs a linear packet search on every seek. Consider a lazy private ordering certificate and partition only for verified nondecreasing PTS; preserve max-PTS fallback for reordered inputs. No new heap index.",
   "criteria": "Seven interleaved pairs after excluded warmups;1000 queries;navigation>=1.2x,actual seek-to-analytic-PCM>=1.1x,and>=6/7 wins each. Opening,first trait seek and cold direct packet seek median regressions each<=10%. Otherwise revert experiment. Full correctness and both builds required.",
   "count_delta": 1,
-  "next": "Commit and atomically publish qualified code and evidence to both delivery refs;verify Git state.",
+  "next": "Continue next independent verified improvement;target1000 remains active.",
   "baseline_session": 63327,
   "baseline_log": "/private/tmp/fvid-mp4-audio-packet-seek-baseline-build.log",
   "baseline_build_exit": 0,
