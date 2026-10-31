@@ -1,0 +1,18 @@
+{
+  "root_filter_overlap": [
+    "playback_native::tests::webm_signature_never_enters_mp4_parser"
+  ],
+  "common_source": "crates/fvid-media/src/owned_mp4_edit_clock_impl.rs",
+  "common_root_tests": [
+    "native_media::mp4_export_clock::tests::comparing_and_scaling_large_fractions_does_not_multiply_denominators",
+    "native_media::mp4_export_clock::tests::normalization_origins_keep_signed_fractional_output_phase",
+    "native_media::mp4_export_clock::tests::source_phase_and_signed_preroll_survive_fractional_container_clocks"
+  ],
+  "common_media_tests": [
+    "owned_mp4_audio::mp4_export_clock::tests::comparing_and_scaling_large_fractions_does_not_multiply_denominators",
+    "owned_mp4_audio::mp4_export_clock::tests::normalization_origins_keep_signed_fractional_output_phase",
+    "owned_mp4_audio::mp4_export_clock::tests::source_phase_and_signed_preroll_survive_fractional_container_clocks"
+  ],
+  "duplicate_events_excluded": 4,
+  "distinct_passed": 1259
+}

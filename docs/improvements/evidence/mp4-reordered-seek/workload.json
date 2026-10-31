@@ -1,0 +1,7 @@
+{
+  "provenance": "Authored three colored16x16 VP9 keyframes repeat with PTS permutation0,2,1;all packets sync. Manual CPU workload,not ordinary test input. No private media,encoder or network.",
+  "packets": 60000,
+  "timescale": 50,
+  "sha256": "6994f2b39fa079bfe86c3f55fc0480033d06fc0c8634292b4f49e15f29dc12dc",
+  "bytes": 5100638
+}

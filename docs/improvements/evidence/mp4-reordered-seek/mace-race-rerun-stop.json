@@ -1,0 +1,9 @@
+{
+  "owned_repeated_diagnostic_interrupted": [
+    {
+      "parent": 73544,
+      "child": 78058
+    }
+  ],
+  "reason": "Long probabilistic repetition replaced by bounded deterministic capture-order reproduction; no test assertion relaxed, no pass count inferred."
+}

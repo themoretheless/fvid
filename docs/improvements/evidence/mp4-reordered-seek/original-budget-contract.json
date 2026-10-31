@@ -1,0 +1,13 @@
+{
+  "base": "72085cf33e48938dcbd332205dff45f7a66ce105",
+  "video_source_sha256": "043e8729aeba12f9f8c61ff01bfe96f45dad90417c5a8920eb29c4232822c216",
+  "regression_sha256": "c19dcea21e8ad3499ac5a7e8a3277771c2deaf4c6478e935e5bdfe275e7b8ab5",
+  "original_refusal_budget": 2097152,
+  "original_dense_samples": 150000,
+  "original_auxiliary_bytes": 1200000,
+  "new_independently_derived_bytes": 75008,
+  "positive_acceptance_is_now_full_decode_under_same_budget": true,
+  "remaining_negative_gate_bytes": 65536,
+  "intrinsic_picture_budget_gate_unchanged": true,
+  "count_delta": 0
+}

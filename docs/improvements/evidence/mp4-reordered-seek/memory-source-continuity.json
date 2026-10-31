@@ -1,0 +1,8 @@
+{
+  "before_source_sha256": "043e8729aeba12f9f8c61ff01bfe96f45dad90417c5a8920eb29c4232822c216",
+  "historical_measured_source_sha256": "043e8729aeba12f9f8c61ff01bfe96f45dad90417c5a8920eb29c4232822c216",
+  "byte_identical": true,
+  "measured_baseline": "../mp4-ordered-index-budget/memory-after.json",
+  "historical_log_sha256": "34cd4d4e102e5af2af23b25563a1f13e602dcb0a6f216ec08bc5ae16acb7f779",
+  "scope": "Same unchanged video-source implementation before this experiment. Historical ordered0/reordered1200000byte retained allocation and queue charge apply to the same150000sample corpus. Final allocation measurement still required."
+}

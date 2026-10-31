@@ -1,0 +1,79 @@
+{
+  "integration": {
+    "path": "/private/tmp/fvid-mp4-reordered-seek-integration.log",
+    "sha256": "922ec119e8971a4544aaefbe60244463fc5b1300a51959dde341ab34f2351992",
+    "archive": "integration.log",
+    "archive_sha256": "79e5179fbb76eb2028515ca588c68b8ef6dcfdb9911ae24f6dca98ccc6ac092b",
+    "kind": "qualification or measurement"
+  },
+  "root-mp4": {
+    "path": "/private/tmp/fvid-mp4-reordered-seek-root-mp4.log",
+    "sha256": "90c99d1f8e752b0458854fcb41dcbe43c5f6a63994169333a61ade2b8e8dbc92",
+    "archive": "root-mp4.log",
+    "archive_sha256": "6ffa8f3c57199fb19097bf48c19a45ef73a05da34007af61062afda462cae31e",
+    "kind": "qualification or measurement"
+  },
+  "root-webm": {
+    "path": "/private/tmp/fvid-mp4-reordered-seek-root-webm.log",
+    "sha256": "feebf713d1f990516be61f2a0f7fd5083182450e12e184d275653035fcbf7c8f",
+    "archive": "root-webm.log",
+    "archive_sha256": "4d0b3b77926a97f5111c87ededf345f141f49ec03f2b4fa11fbd90cb8f482259",
+    "kind": "qualification or measurement"
+  },
+  "media": {
+    "path": "/private/tmp/fvid-mp4-reordered-seek-media.log",
+    "sha256": "a92771577efbac5c3743e52bc482a53415f6393458649a204606ddab88b25c36",
+    "archive": "media.log",
+    "archive_sha256": "e8b99c7fa29b19fd953bcad696f9300bd4594916c22f5db3ad77b5eb8318dfc2",
+    "kind": "qualification or measurement"
+  },
+  "core-check": {
+    "path": "/private/tmp/fvid-mp4-reordered-seek-core-check.log",
+    "sha256": "50c9e429d1152e2037634c6693ae66d8e176f768895d6e23c160f90a86776e05",
+    "archive": "core-check.log",
+    "archive_sha256": "50c9e429d1152e2037634c6693ae66d8e176f768895d6e23c160f90a86776e05",
+    "kind": "qualification or measurement"
+  },
+  "player-check": {
+    "path": "/private/tmp/fvid-mp4-reordered-seek-player-check.log",
+    "sha256": "f470f351737d6a6dc522dd1a197457d187942b1cdc976c86a0be7da80863c37a",
+    "archive": "player-check.log",
+    "archive_sha256": "f470f351737d6a6dc522dd1a197457d187942b1cdc976c86a0be7da80863c37a",
+    "kind": "qualification or measurement"
+  },
+  "focused": {
+    "path": "/private/tmp/fvid-mp4-reordered-seek-focused.log",
+    "sha256": "cdb8f32b440d7242dc44a1e1dea666ecc86dde6760fae115dbc2d5e44fba0ac2",
+    "archive": "focused.log",
+    "archive_sha256": "5ba0ccb766196ff53f57afcc14310e88b0952c65adf001650e08834669d9eba0",
+    "kind": "qualification or measurement"
+  },
+  "memory": {
+    "path": "/private/tmp/fvid-mp4-reordered-seek-memory.log",
+    "sha256": "e160362eaed0a90084ce878cdc9de5ac3999e7121ff8710c31a5226936ac6fc9",
+    "archive": "memory.log",
+    "archive_sha256": "09bd6eb9cf6b23dce0c8559e4ed81ee3d9eec1a79efc8256c42adc6b2c29679e",
+    "kind": "qualification or measurement"
+  },
+  "baseline_build": {
+    "path": "/private/tmp/fvid-mp4-reordered-seek-baseline-build.log",
+    "sha256": "9e8074f915defb6da915a679bdc44aa18924e195cc0aca38eac466754fd66b6d",
+    "archive": "baseline_build.log",
+    "archive_sha256": "9e8074f915defb6da915a679bdc44aa18924e195cc0aca38eac466754fd66b6d",
+    "kind": "qualification or measurement"
+  },
+  "final_after_build": {
+    "path": "/private/tmp/fvid-mp4-reordered-seek-after-build.log",
+    "sha256": "b2167a096210173ad4c5103c241b3b192e04d98cf115c09ec1e8b1e7a33a7cfb",
+    "archive": "final_after_build.log",
+    "archive_sha256": "b2167a096210173ad4c5103c241b3b192e04d98cf115c09ec1e8b1e7a33a7cfb",
+    "kind": "qualification or measurement"
+  },
+  "mace_baseline_probe": {
+    "path": "/private/tmp/fvid-mp4-reordered-seek-mace-baseline-probe.log",
+    "sha256": "e3e4ef575a444e30d52a8a68f2743337b03a749223c5f177b75b67ae8e41d23e",
+    "archive": "mace_baseline_probe.log",
+    "archive_sha256": "e3e4ef575a444e30d52a8a68f2743337b03a749223c5f177b75b67ae8e41d23e",
+    "kind": "expected failing test-observer demonstration,not production failure"
+  }
+}

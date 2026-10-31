@@ -131,8 +131,8 @@ fn mace_workers_and_seek_preserve_predictors_across_changes_and_repeated_edits()
         audio.play();
         ended(&audio, 0);
         compare(&trace.lock().unwrap().packets, &wanted);
-        audio.rewind();
         trace.lock().unwrap().packets.clear();
+        audio.rewind();
         audio.play();
         ended(&audio, audio.generation());
         compare(&trace.lock().unwrap().packets, &wanted);

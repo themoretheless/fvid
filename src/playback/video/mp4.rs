@@ -134,6 +134,70 @@ impl Decoder {
         }
     }
 }
+// Exact prefix/suffix bounds at block boundaries. Queries scan at most one
+// small block for a local bound; no second per-sample seek index is retained.
+const REORDER_BLOCK_SAMPLES: usize = 32;
+struct ReorderBlock {
+    prefix_max: i64,
+    following_min: i64,
+}
+#[derive(Default)]
+struct ReorderBounds {
+    blocks: Vec<ReorderBlock>,
+}
+impl ReorderBounds {
+    fn build(samples: &[crate::container::mp4::Sample]) -> Result<Self> {
+        let mut blocks = Vec::new();
+        blocks.try_reserve_exact(samples.len().div_ceil(REORDER_BLOCK_SAMPLES))
+            .map_err(|_| invalid("cannot allocate MP4 reorder index"))?;
+        let mut prefix = i64::MIN;
+        for chunk in samples.chunks(REORDER_BLOCK_SAMPLES) {
+            blocks.push(ReorderBlock { prefix_max: prefix, following_min: i64::MAX });
+            prefix = chunk.iter().fold(prefix, |bound, sample| bound.max(sample.pts));
+        }
+        let mut suffix = i64::MAX;
+        for (chunk, block) in samples.chunks(REORDER_BLOCK_SAMPLES).rev().zip(blocks.iter_mut().rev()) {
+            block.following_min = suffix;
+            suffix = chunk.iter().fold(suffix, |bound, sample| bound.min(sample.pts));
+        }
+        Ok(Self { blocks })
+    }
+    fn storage_bytes(&self) -> usize {
+        self.blocks.capacity() * std::mem::size_of::<ReorderBlock>()
+    }
+    fn future(&self, samples: &[crate::container::mp4::Sample], index: usize) -> Option<i64> {
+        samples.get(index)?;
+        let block = self.blocks.get(index / REORDER_BLOCK_SAMPLES)?;
+        let end = (index / REORDER_BLOCK_SAMPLES + 1).saturating_mul(REORDER_BLOCK_SAMPLES).min(samples.len());
+        Some(samples[index..end].iter().fold(block.following_min, |bound, sample| bound.min(sample.pts)))
+    }
+    fn sync_index(&self, samples: &[crate::container::mp4::Sample], target: i64) -> usize {
+        // After a prefix has reached target, no following sample at or below
+        // target can strictly exceed that prefix. Such blocks cannot qualify.
+        let blocks = self.blocks.partition_point(|block| block.prefix_max < target);
+        for block in (0..blocks).rev() {
+            let before = self.blocks[block].prefix_max;
+            // No prefix growth means no sample can strictly exceed all its
+            // predecessors. Skip these blocks, including long descending runs.
+            if self.blocks.get(block + 1).is_some_and(|next| next.prefix_max == before) { continue; }
+            let begin = block * REORDER_BLOCK_SAMPLES;
+            let end = begin.saturating_add(REORDER_BLOCK_SAMPLES).min(samples.len());
+            let mut prefix = before;
+            let mut selected = None;
+            // Compute each local prefix once, not once per candidate. A long
+            // failed search therefore remains linear rather than O(N*block).
+            for index in begin..end {
+                let sample = &samples[index];
+                if sample.sync && sample.pts <= target && (index == 0 || prefix < sample.pts) {
+                    selected = Some(index);
+                }
+                prefix = prefix.max(sample.pts);
+            }
+            if let Some(index) = selected { return index; }
+        }
+        0
+    }
+}
 /// Indexed MP4 source with AVC and HEVC codec dispatch.
 struct SingleLayerMp4VideoReader<R> {
     demuxer: Mp4Reader<R>,
@@ -165,7 +229,7 @@ struct SingleLayerMp4VideoReader<R> {
     /// coding answers from its parameter sets instead.
     open_signal: Option<(ColourDescription, HdrMetadata)>,
     failed: bool,
-    future_pts: Vec<i64>,
+    reorder_bounds: ReorderBounds,
     strictly_ordered_pts: bool,
     pending: Vec<QueuedFrame>,
     presented_hdr: Option<HdrMetadata>,
@@ -229,22 +293,14 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         let index_bytes = if strictly_ordered_pts {
             0
         } else {
-            samples.len().checked_mul(std::mem::size_of::<i64>())
+            samples.len().div_ceil(REORDER_BLOCK_SAMPLES).checked_mul(std::mem::size_of::<ReorderBlock>())
                 .ok_or_else(|| invalid("MP4 reorder index overflow"))?
         };
-        let queue_budget = queue_budget.checked_sub(index_bytes)
+        if index_bytes > queue_budget { return Err(invalid("MP4 reorder index exceeds budget")); }
+        let reorder_bounds = if strictly_ordered_pts { ReorderBounds::default() } else { ReorderBounds::build(samples)? };
+        // Charge retained capacity, not just the requested element count.
+        let queue_budget = queue_budget.checked_sub(reorder_bounds.storage_bytes())
             .ok_or_else(|| invalid("MP4 reorder index exceeds budget"))?;
-        let mut future_pts = Vec::new();
-        if !strictly_ordered_pts {
-            future_pts.try_reserve_exact(samples.len())
-                .map_err(|_| invalid("cannot allocate MP4 reorder index"))?;
-            let mut minimum = i64::MAX;
-            for sample in samples.iter().rev() {
-                minimum = minimum.min(sample.pts);
-                future_pts.push(minimum);
-            }
-            future_pts.reverse();
-        }
         let work_budget = decoder_budget - decoder_budget / 2;
         let decoder_description = samples
             .first()
@@ -303,7 +359,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             packet: Vec::new(),
             open_signal: None,
             failed: false,
-            future_pts,
+            reorder_bounds,
             strictly_ordered_pts,
             pending: Vec::new(),
             presented_hdr: None,
@@ -920,18 +976,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             let end = samples.partition_point(|sample| sample.pts <= pts);
             samples[..end].iter().rposition(|sample| sample.sync).unwrap_or(0)
         } else {
-            // Reordered and equal-PTS samples require full prefix coverage.
-            let mut index = 0;
-            let mut earlier_pts = None;
-            for (i, sample) in samples.iter().enumerate() {
-                if sample.sync && sample.pts <= pts
-                    && earlier_pts.is_none_or(|earlier| earlier < sample.pts)
-                {
-                    index = i;
-                }
-                earlier_pts = Some(earlier_pts.map_or(sample.pts, |earlier: i64| earlier.max(sample.pts)));
-            }
-            index
+            self.reorder_bounds.sync_index(samples, pts)
         };
         self.rewind();
         self.sample_index = index;
@@ -994,7 +1039,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                     self.track().samples.expanded()
                         .and_then(|samples| samples.get(self.sample_index)).map(|sample| sample.pts)
                 } else {
-                    self.future_pts.get(self.sample_index).copied()
+                    self.track().samples.expanded().and_then(|samples| self.reorder_bounds.future(samples, self.sample_index))
                 };
                 if let Decoder::Layered(d) = &self.decoder {
                     future = future.into_iter().chain(d.pending_pts(&self.demuxer)).min();
@@ -1644,7 +1689,9 @@ mod ordered_index_budget_measurements {
                 demuxer, 0, budget, false, false,
             )
             .unwrap();
-            let payload = source.future_pts.capacity() * std::mem::size_of::<i64>();
+            let payload = source.reorder_bounds.storage_bytes();
+            let expected = if name == "ordered.mp4" { 0 } else { 150000usize.div_ceil(32) * 16 };
+            assert_eq!(payload, expected, "independently derived block allocation");
             let charged = budget / 2 - source.queue_budget;
             assert_eq!(
                 payload, charged,

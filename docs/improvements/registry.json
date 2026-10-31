@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 449,
-  "next_id": "FVID-0450",
+  "accepted_count": 450,
+  "next_id": "FVID-0451",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5044,6 +5044,17 @@
       "result": "Convert exact time into Duration seconds/remainder without narrowing total nanoseconds. Retain normal seek stamp spelling;use exact reduced source fraction when wide native ticks fit but nanoseconds do not. Five authored tiny VP9/IMA4 movies cover ordinary,boundary,near-signed-limit and actual-overflow cases without huge allocation. Scalar PCM,raw clocks,video,rewind,sample seek,EOF and actual worker PCM/PTS pass;real signed PTS overflow still refuses.126integration suites588pass;1256distinct checks and locked/offline core/player builds pass. All variants and conversion paths count once;no performance claim.",
       "status": "accepted",
       "validation": "batch-449-validation.json"
+    },
+    {
+      "id": "FVID-0450",
+      "batch": 450,
+      "title": "Compact exact MP4 reorder bounds and accelerate coverage-safe seek",
+      "source": "src/playback/video/mp4.rs",
+      "regression": "tests/mp4_reordered_seek.rs",
+      "before": "Published72085cf33e uses a full suffix array and rescans every sample prefix for nonmonotonic/equal video seeks. Correct baseline60k-packet/1000query measurements establish43.12ms navigation and70.40ms actual seek+RGB. Same unchanged source previously measured1.2MB retained/charged index for150k packets and refused2MiB reorder/decoder budget.",
+      "result": "Store exact32sample prefix/suffix blocks within the same charged budget;bound safe sync searches and recover exact local bounds without an additional cache. Final7paired rounds meet predeclared criteria:43.12ms to0.417ms navigation and70.40ms to26.02ms actual seek+RGB,all7wins;open median improves. Index payload150k packets1,200,000to75,008bytes,ordered0unchanged;all150k exact pictures decode at2MiB. Nine short authored videos verify all landings/suffixes,YUV,native RGB/intervals,signed/equal/reversed/boundary cases,rewind and EOF.127integration suites591pass;1259distinct checks and core/player builds pass. Pre-existing MACE observer-order race repaired with unchanged assertions and counts0. Prototype/variants add no IDs;no whole-player/RSS/GPU claim.",
+      "status": "accepted",
+      "validation": "batch-450-validation.json"
     }
   ]
 }

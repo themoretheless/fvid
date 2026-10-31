@@ -1,0 +1,6 @@
+{
+  "baseline_video_source_sha256": "043e8729aeba12f9f8c61ff01bfe96f45dad90417c5a8920eb29c4232822c216",
+  "saved_final_source_sha256": "c3b1dd3b293409d7a1f0dc2b4a6474d544f1cfbc4393198a43c8b303ac490a63",
+  "probe_sha256": "28f9a92b1f911d2185cfe59736dbd6a678427956ba362e3f937c9ddcdcfce238",
+  "scope": "Intentionally bad capture clearing after rewind on unchanged original video/audio runtime. Expected failure demonstrates test observer erasing valid output,not media decoding failure."
+}

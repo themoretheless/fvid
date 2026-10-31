@@ -1,0 +1,6 @@
+{
+  "exit_code": 0,
+  "stdout": "{\"navigation_ns\":43397625,\"open_ns\":936541,\"packets\":60000,\"queries\":1000,\"scope\":\"memory-resident input,software decoding; exact RGB/interval checks included; no disk/GPU/player-global speed claim\",\"seek_rgb_ns\":69851084}\n",
+  "stderr": "",
+  "binary_sha256": "cccbe00f95ced12a06f9ac494ec3fb7f4998e78868cbaf9280391199b57236af"
+}

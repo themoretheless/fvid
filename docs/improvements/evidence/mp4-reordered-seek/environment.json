@@ -1,0 +1,12 @@
+{
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+  "baseline_and_after_release_env": {
+    "CARGO_BUILD_JOBS": "2",
+    "CARGO_PROFILE_BENCH_DEBUG": "0",
+    "CARGO_PROFILE_RELEASE_DEBUG": "0"
+  },
+  "benchmark_scope": "Memory-resident authored VP9;software safe sync navigation and actual native seek+RGB;no disk/GPU/whole-player claim",
+  "mace_observer_fixture": "tests/fixtures/playback-errors/mp4-mace-transitions/changes.mp4",
+  "mace_observer_fixture_sha256": "26d9ac9638ea02bcda7a488d16bc3eba9d1b25f323a972a6653a5769f3c7c89c"
+}

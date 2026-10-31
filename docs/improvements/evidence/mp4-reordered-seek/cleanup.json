@@ -1,0 +1,27 @@
+{
+  "removed": [
+    "/private/tmp/fvid-mp4-reordered-seek-integration.log",
+    "/private/tmp/fvid-mp4-reordered-seek-root-mp4.log",
+    "/private/tmp/fvid-mp4-reordered-seek-root-webm.log",
+    "/private/tmp/fvid-mp4-reordered-seek-media.log",
+    "/private/tmp/fvid-mp4-reordered-seek-core-check.log",
+    "/private/tmp/fvid-mp4-reordered-seek-player-check.log",
+    "/private/tmp/fvid-mp4-reordered-seek-focused.log",
+    "/private/tmp/fvid-mp4-reordered-seek-memory.log",
+    "/private/tmp/fvid-mp4-reordered-seek-baseline-build.log",
+    "/private/tmp/fvid-mp4-reordered-seek-after-build.log",
+    "/private/tmp/fvid-mp4-reordered-seek-mace-baseline-probe.log",
+    "/private/tmp/fvid-mp4-reordered-seek-baseline-20261031",
+    "/private/tmp/fvid-mp4-reordered-seek-after-20261031",
+    "/private/tmp/fvid-mp4-reordered-seek-prototype-after-20261031",
+    "/private/tmp/fvid-mp4-reordered-seek-input-20261031.mp4",
+    "/private/tmp/fvid-mp4-reordered-seek-input-20261031.json",
+    "/private/tmp/fvid-mp4-reordered-seek-comparison.json",
+    "/private/tmp/fvid-mp4-reordered-seek-after-source-20261031.rs",
+    "/private/tmp/fvid-mp4-reordered-seek-target-20261031",
+    "scripts/__pycache__"
+  ],
+  "verified": "Final source/corpus/log/binary/input hashes and7paired criteria match before removal;all six gates terminal0;own jobs terminal.",
+  "preserved": "All13regression corpus files,generators,bench,strict tests,prototype/final measurements,initial failure,original-source observer proof and archived logs. Foreign worktrees/branches/stashes untouched.",
+  "runnable_temporary_probe_removed_earlier": true
+}

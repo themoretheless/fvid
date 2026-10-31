@@ -1,0 +1,8 @@
+{
+  "final_video_source_sha256": "c3b1dd3b293409d7a1f0dc2b4a6474d544f1cfbc4393198a43c8b303ac490a63",
+  "matches_final_release_source": true,
+  "only_mace_test_change_is_setup_order_swap": true,
+  "production_audio_unchanged": true,
+  "temporary_probe_removed": true,
+  "focused_passed": 21
+}

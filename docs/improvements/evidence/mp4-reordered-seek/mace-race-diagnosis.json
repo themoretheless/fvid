@@ -1,0 +1,13 @@
+{
+  "cause": "Test clears its captured packet vector after rewind can resume the worker;this deletes already valid output.",
+  "baseline_runtime": "72085cf33e48938dcbd332205dff45f7a66ce105",
+  "reproduction": "Deterministically wait for post-flush rewind output then perform the same observer clear;all other comparisons unchanged.",
+  "erased_packets": 1,
+  "remaining_packets": 159,
+  "expected_packets": 160,
+  "all_output_accounted_for": true,
+  "repair": "Clear test observer before enqueueing rewind. No expected PCM,timestamp,packet count,seek,timeout or worker assertion changed.",
+  "temporary_probe_removed": true,
+  "count_delta": 0,
+  "original_failure_archived": "initial-integration.log"
+}

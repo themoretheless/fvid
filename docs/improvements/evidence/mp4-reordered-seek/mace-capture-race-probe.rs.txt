@@ -1,0 +1,18 @@
+#![cfg(feature="player")]
+use fvid::{audio_thread::AudioPlayback,playback_mp4_audio::Mp4AudioReader};
+use std::{io::Cursor,path::Path,sync::{Arc,Mutex},time::{Duration,Instant}};
+#[path="support/audio_transitions.rs"]mod transitions;
+#[test]
+fn demonstrate_test_owned_clear_can_erase_rewind_output(){
+ let data=std::fs::read(Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/mp4-mace-transitions/changes.mp4")).unwrap();
+ let open=||Mp4AudioReader::open(Cursor::new(data.clone()),Default::default()).unwrap();
+ let wanted=transitions::collect(&mut open());let trace=Arc::new(Mutex::new(transitions::Trace::default()));let shared=trace.clone();
+ let mut a=AudioPlayback::start(Box::new(open()),move||Box::new(transitions::Capture::new(shared)));a.play();transitions::ended(&a,0);transitions::compare(&trace.lock().unwrap().packets,&wanted);
+ a.rewind();let until=Instant::now()+Duration::from_secs(3);
+ loop{
+  let mut t=trace.lock().unwrap();
+  if t.flushes>0&&!t.packets.is_empty(){println!("TEST_CAPTURE_ERASES {} packets after rewind;expected total {}",t.packets.len(),wanted.len());t.packets.clear();break;}
+  drop(t);assert!(Instant::now()<until,"rewind did not resume");std::thread::yield_now();
+ }
+ a.play();transitions::ended(&a,a.generation());println!("TEST_CAPTURE_REMAINING {} expected {}",trace.lock().unwrap().packets.len(),wanted.len());transitions::compare(&trace.lock().unwrap().packets,&wanted);
+}

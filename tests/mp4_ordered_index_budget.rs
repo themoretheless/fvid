@@ -86,7 +86,7 @@ fn reordered_dense_input_still_refuses_insufficient_reorder_budget() {
     let e = fvid::playback_mp4::Mp4VideoReader::open_software(
         Cursor::new(bytes("reordered.mp4")),
         Default::default(),
-        TIGHT,
+        64 << 10,
     )
     .err()
     .expect("reordered index must retain its budget charge");
