@@ -1,0 +1,6 @@
+{
+  "src/playback/audio/mp4_audio.rs": "89ee79f173bf15a6c81ade2e3e2309792828939f5fcb47cb75b705e946559519",
+  "scripts/generate_mp4_audio_partial_window.py": "f271dbab3fc536cbcfedfc25ef6c9b2360741e49c3d32565738149651b8db3ca",
+  "tests/mp4_audio_partial_window.rs": "07e6edf24645f7b7a9715828abcfe6aa07f9681a4c9dc648edf1fc7373fe5122",
+  "tests/fixtures/playback-errors/mp4-audio-partial-window/manifest.json": "84370724b80e338de44d45e1ac297e9d9af2012a70fa40f73efda92162d6fa3f"
+}

@@ -1,0 +1,11 @@
+{
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+  "base": "6c44f835169e11f73f74866f9bd15f2ea8af900d",
+  "before_log_sha256": "f4a8f80e5054fade8658a49c18be8476ad0d3e5b75c0ff57dcb367c1549bf209",
+  "after_focused_log_sha256": "9014b25d9f3e763fa6765286b1c6d71542518627b8346446d6c05ab7d3770eec",
+  "baseline_test_snapshot": "before-test.rs.txt",
+  "tests_added_after_baseline": [
+    "real_audio_worker_respects_partial_tail_and_eof"
+  ]
+}

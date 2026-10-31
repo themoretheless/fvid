@@ -1,0 +1,19 @@
+{
+  "status": "accepted FVID-0448; verified; owned artifacts removed; ready to publish",
+  "base": "6c44f835169e11f73f74866f9bd15f2ea8af900d",
+  "session": 60615,
+  "log": "/private/tmp/fvid-mp4-audio-partial-window-before.log",
+  "hypothesis": "Positive partial terminal audio windows may publish the entire decoded native block, exceeding the actual source presentation endpoint. IMA4 and ALAC independent scalar PCM and full-block controls; raw coded packets unchanged.",
+  "next": "Verify archived logs and hashes; delete only owned temporary artifacts; publish own qualified changes.",
+  "baseline_exit": 101,
+  "baseline_passed": 2,
+  "baseline_failed": 1,
+  "result": "ALAC480 samples instead of360; EOF still120samples. IMA4 is healthy control, not a newly fixed failure.",
+  "focused_session": 72163,
+  "focused_exit": 0,
+  "focused_passed": 21,
+  "qualification_session": 24884,
+  "qualification_exit": 0,
+  "distinct_passed": 1252,
+  "count_delta": 1
+}

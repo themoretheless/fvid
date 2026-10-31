@@ -1229,6 +1229,17 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             if rate == 0 || scale == 0 || stride == 0 || !packet.data.len().is_multiple_of(stride) {
                 return Err(invalid("invalid MP4 decoded audio geometry"));
             }
+            // A final coded block can contain more native samples than its
+            // positive source window. Keep PCM inside the presentation endpoint,
+            // including when seeking exactly to EOF. Decode validation precedes
+            // this clipping, and declared empty tails remain available for silence.
+            if let Some(end) = self.presentation_end_ticks() {
+                let end = i128::try_from(end).map_err(|_| invalid("MP4 audio presentation endpoint overflow"))?;
+                let remaining = EditTime::new(end, u128::from(scale))?
+                    .sub(EditTime::signed_ticks(source_pts, scale)?)?.ceil_frames(rate)?;
+                let last = remaining.clamp(0, (packet.data.len() / stride) as i128) as usize;
+                packet.data.truncate(last * stride);
+            }
             let frames = packet.data.len() / stride;
             if frames == 0 { return Ok(None); }
             if source_pts < self.presentation_floor {

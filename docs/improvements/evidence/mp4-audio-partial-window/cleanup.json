@@ -1,0 +1,16 @@
+{
+  "removed": [
+    "/private/tmp/fvid-mp4-audio-partial-window-integration.log",
+    "/private/tmp/fvid-mp4-audio-partial-window-root-mp4.log",
+    "/private/tmp/fvid-mp4-audio-partial-window-root-webm.log",
+    "/private/tmp/fvid-mp4-audio-partial-window-media.log",
+    "/private/tmp/fvid-mp4-audio-partial-window-core-check.log",
+    "/private/tmp/fvid-mp4-audio-partial-window-player-check.log",
+    "/private/tmp/fvid-mp4-audio-partial-window-before.log",
+    "/private/tmp/fvid-mp4-audio-partial-window-after.log",
+    "/private/tmp/fvid-mp4-audio-partial-window-target-20261031",
+    "scripts/__pycache__"
+  ],
+  "verified": "source,corpus,raw and archived log hashes match; all six gates terminal0",
+  "preserved": "all9corpus files,generator,regression,before-test snapshot and proof; foreign worktrees/stashes untouched"
+}
