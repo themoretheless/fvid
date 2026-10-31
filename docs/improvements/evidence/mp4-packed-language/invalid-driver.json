@@ -1,0 +1,7 @@
+{
+  "status": "excluded from qualification",
+  "reason": "Cargo selector incorrectly after harness separator; zero executed tests despite exit0",
+  "suites": 113,
+  "passed": 0,
+  "correction": "Move --test mp4_packed_language before --; repeat full integration gate"
+}

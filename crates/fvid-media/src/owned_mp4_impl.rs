@@ -555,10 +555,15 @@ fn media_time(data: &[u8], size_v0: usize) -> Result<(u32, u64)> {
 fn media_language(mdhd: &[u8]) -> Option<String> {
     let at = if version(mdhd, 1).ok()? == 0 { 20 } else { 32 };
     let packed = u16be(mdhd, at).ok()?;
+    // Packed ISO language codes reserve the top bit and encode lowercase letters.
+    // Unspecified Macintosh 0x7fff consequently has no ISO interpretation.
+    if packed & 0x8000 != 0 {
+        return None;
+    }
     let mut letters = String::with_capacity(3);
     for shift in [10, 5, 0] {
         let letter = ((packed >> shift) & 31) as u8;
-        if letter == 0 {
+        if !(1..=26).contains(&letter) {
             return None;
         }
         letters.push(char::from(letter + 0x60));

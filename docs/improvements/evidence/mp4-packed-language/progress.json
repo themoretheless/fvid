@@ -1,0 +1,16 @@
+{
+  "status": "accepted FVID-0438; publication pending",
+  "base": "6f1944608bc0f79efc1c75e0d497f3c54edee237",
+  "cases": 48,
+  "scope": "Packed mdhd v0/v1: unspecified, reserved high bit and nonletter 5-bit groups; valid language controls; actual packets, software decoded frames, seek and EOF",
+  "baseline_session": 31986,
+  "target": "/private/tmp/fvid-mp4-packed-language-20261031",
+  "before_log": "/private/tmp/fvid-mp4-packed-language-before.log",
+  "before": {
+    "passed": 1,
+    "failed": 1,
+    "exit": 101
+  },
+  "qualification_session": 24059,
+  "qualification_warning": "Initial integration command accidentally filtered tests due to --test selector after --. Even exit0 is invalid evidence. Corrected plan saved; rerun after live session terminal. No checks weakened; focused13 actually ran."
+}

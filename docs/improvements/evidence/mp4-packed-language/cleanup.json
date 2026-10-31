@@ -1,0 +1,69 @@
+{
+  "removed_logs": [
+    {
+      "path": "/private/tmp/fvid-mp4-packed-language-root-mp4.log",
+      "sha256": "3e06417eae49476ba00ec42ef4c38e4d0ac9067ed0a8dc457a0584700b91c94e",
+      "archived": [
+        "root-mp4.log"
+      ]
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-packed-language-before.log",
+      "sha256": "6cddf04114c6c355d2128e5f0cf17e5ccba713966995bf9d2a9f89d6423fee71",
+      "archived": [
+        "before.log"
+      ]
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-packed-language-root-webm.log",
+      "sha256": "2f54fb603db51f8b6f7691b7049afeb28c2fb8a0f1653c0c39c27281de7a62b4",
+      "archived": [
+        "root-webm.log"
+      ]
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-packed-language-media.log",
+      "sha256": "98f27d710c981370a26f9dd5569ef7032f48314305cbe684603f6206e712fdd0",
+      "archived": [
+        "media.log"
+      ]
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-packed-language-core-check.log",
+      "sha256": "dd9dc6a55edfd61b391e8cc552dda04baf93f868b8bb3dca7a7a0f375c7fb7bb",
+      "archived": [
+        "core-check.log"
+      ]
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-packed-language-integration-corrected.log",
+      "sha256": "3eee5c43a1e5606393e9cb4eb330eb8cb57fd1d484b7c9c251a7f0724f3dc4d0",
+      "archived": [
+        "integration.log"
+      ]
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-packed-language-integration.log",
+      "sha256": "fbad73b2e92b806bc2121462109121e8cbdad032001beb3ab63fdcb5b2604038",
+      "archived": [
+        "invalid-filtered-integration.log"
+      ]
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-packed-language-after.log",
+      "sha256": "2204d500ee10bbaec5579a82916e9ed56f2f408391813285730af091c4645553",
+      "archived": [
+        "after.log"
+      ]
+    },
+    {
+      "path": "/private/tmp/fvid-mp4-packed-language-player-check.log",
+      "sha256": "b1e082632ad1a10bae9f3417c01c5fd057f7fbfedf602945ef2f162648266797",
+      "archived": [
+        "player-check.log"
+      ]
+    }
+  ],
+  "removed_target": "/private/tmp/fvid-mp4-packed-language-20261031",
+  "preserved": "All55 authored fixture files, generators, regressions and evidence; foreign worktrees/stashes/jobs untouched"
+}

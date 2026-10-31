@@ -1,0 +1,64 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0438"
+  ],
+  "count_delta": 1,
+  "accepted_count": 438,
+  "before_commit": "6f1944608bc0f79efc1c75e0d497f3c54edee237",
+  "before": {
+    "passed": 1,
+    "failed": 1,
+    "exit": 101
+  },
+  "focused_after": {
+    "passed": 13,
+    "failed": 0
+  },
+  "checks": {
+    "integration": {
+      "suites": 114,
+      "passed": 539,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-mp4": {
+      "suites": 1,
+      "passed": 57,
+      "failed": 0,
+      "ignored": 1
+    },
+    "root-webm": {
+      "suites": 1,
+      "passed": 67,
+      "failed": 0,
+      "ignored": 0
+    },
+    "media": {
+      "suites": 1,
+      "passed": 547,
+      "failed": 0,
+      "ignored": 1
+    },
+    "core-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "distinct_passed": 1206,
+  "fixtures": {
+    "movies": 48,
+    "files": 55,
+    "independent_packet_and_pts_verified": 48,
+    "repeatability": "identical"
+  },
+  "limitations": "No Macintosh numeric language mapping, IANA validation, physical GPU or performance claim. Existing two ignored tests unchanged. Invalid filtered integration attempt excluded; corrected full gate passed."
+}
