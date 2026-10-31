@@ -1,0 +1,40 @@
+{
+  "tool": "ffprobe version 9.0.2 Copyright (c) 2007-2026 the FFmpeg developers",
+  "scope": "Independent audio packet hashes, identical PTS and intentionally different DTS",
+  "cases": {
+    "decode-gap.mp4": [
+      {
+        "pts": 0,
+        "dts": 0,
+        "data_hash": "SHA256:7c6d96462280976236a964fd867520d533f4a2df33e98874636fcf82d3d06f83"
+      },
+      {
+        "pts": 320,
+        "dts": 320,
+        "data_hash": "SHA256:f0b449a54f056291da6376c32c18e694e9ff52011447a082f83aea3725573c23"
+      },
+      {
+        "pts": 480,
+        "dts": 480,
+        "data_hash": "SHA256:a39f787866801c6090d0ea6c85e40794246d2fd4a87481a8487f12678283955e"
+      }
+    ],
+    "composition-gap.mp4": [
+      {
+        "pts": 0,
+        "dts": 0,
+        "data_hash": "SHA256:7c6d96462280976236a964fd867520d533f4a2df33e98874636fcf82d3d06f83"
+      },
+      {
+        "pts": 320,
+        "dts": 160,
+        "data_hash": "SHA256:f0b449a54f056291da6376c32c18e694e9ff52011447a082f83aea3725573c23"
+      },
+      {
+        "pts": 480,
+        "dts": 320,
+        "data_hash": "SHA256:a39f787866801c6090d0ea6c85e40794246d2fd4a87481a8487f12678283955e"
+      }
+    ]
+  }
+}

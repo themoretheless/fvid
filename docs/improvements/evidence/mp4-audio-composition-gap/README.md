@@ -1,0 +1,13 @@
+# Audio composition-gap equivalence audit (unaccepted)
+
+Two authored80ms MP4s contain identical neutral VP9 pictures and three nonzero PCM packets. Both present audio packets at media points0,320,480, duration160, at8kHz. The control declares a packet-free fragment interval in decode time. The companion uses continuous decode points0,160,320 with trun composition offsets0,160,160. Its trun data offsets include the added4-byte sample field. Both reader/probe timelines should preserve presentation time independently of how the decoder clock reaches it.
+
+Independent ffprobe verifies every PCM packet hash and both sets of DTS/PTS. Offline tests check both parser facades, actual video decoding,640 output PCM frames with literal middle silence, native audio output and nine seek positions including the gap and EOF. Generation does not need FFmpeg or network, and no private media/parameters are included.
+
+The suspected limitation is Track::declared_gap_after requiring a DTS gap as well as a PTS gap. Its current callers are audio timeline/recovery paths; continuous decoding can still have packet-free presentation time. Baseline session22837 is running on unchanged production. No fix or ID is accepted yet. The test control must pass before treating any companion failure as specific evidence.
+
+Baseline finished: decode-gap control passed; composition-gap companion specifically failed with non-contiguous MP4 audio timeline. Recognizing the PTS gap alone removed refusal but still produced480 frames (640 required), exposing the decode-duration clipping in the normalized default schedule. The partial failure is archived separately. The completed fix uses the presentation endpoint and keeps the original video gap condition. Both PCM cases, three trims, nine seeks, explicit resource/cancellation refusals and actual AudioPlayback worker checks pass. Related middle-gap13 and AAC fractional-origin3 tests also pass. No physical speaker qualification or performance claim.
+
+Expanded qualification117 suites and both library/build configurations is running on frozen source hashes. New coverage is specifically PCM composition gaps; compressed gap history remains covered by the existing decode-gap corpus and is not separately claimed for this new witness. Ordinary tests remain offline and independent of FFmpeg.
+
+Final: accepted FVID-0440 after all six qualification gates exit0.117 integration suites553 pass; MP4 57+1 existing ignore, WebM67, media547+1 existing ignore. Excluding4 duplicate events yields1220 distinct passes. All7 fixture files regenerate identically. Raw-log hashes refer to original bytes; archives normalize trailing whitespace to one final newline. Partial repair and extra test variants count as no additional IDs.

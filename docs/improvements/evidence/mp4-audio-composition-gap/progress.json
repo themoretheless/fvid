@@ -1,0 +1,9 @@
+{
+  "status": "accepted FVID-0440; all qualification jobs terminal; publication pending",
+  "session": 22837,
+  "base": "9c5dae60447d37e1f229a35aebc7df713403723c",
+  "target": "/private/tmp/fvid-mp4-audio-composition-gap-20261031",
+  "log": "/private/tmp/fvid-mp4-audio-composition-gap-before.log",
+  "fix": "Audio-only PTS gap detection and presentation endpoint for normalized default timeline. Video gap rule preserved.",
+  "qualification_session": 81012
+}

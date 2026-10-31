@@ -231,10 +231,13 @@ fn decode_mp4_audio_normalized<R: std::io::Read + std::io::Seek>(
     let mut timeline =
         Mp4ExportTimeline::new(edit_clock.edits(), track.timescale, edit_clock.timescale)?;
     if track.edits.is_empty() {
-        let mut end = Mp4ExportTime::ticks(track.duration, track.timescale)?;
+        // An audio presentation gap can be expressed solely by CTS offsets:
+        // the decode-duration endpoint then precedes the final audible window.
+        let endpoint = track.presentation_endpoint()?;
+        let mut end = Mp4ExportTime::new(endpoint, u128::from(track.timescale))?;
         if track.samples.get(0).is_some_and(|s|s.pts==0) {
             if let Some(last)=packet_clocks.last() {
-                if last.last==track.samples.len() && last.quantized && mp4_tick_matches(last.end,i128::from(track.duration),track.timescale)? {end=last.end;}
+                if last.last==track.samples.len() && last.quantized && mp4_tick_matches(last.end,endpoint,track.timescale)? {end=last.end;}
             }
         }
         timeline.segments.push(mp4_export_clock::Segment {

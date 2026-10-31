@@ -1,0 +1,11 @@
+{
+  "crates/fvid-media/src/owned_mp4_impl.rs": "08261529165bafdff799e1501652a8247d640376fdc87631abaeb7bc313f445a",
+  "src/playback/audio/mp4_audio.rs": "20c647c43b49b16aad880d931b83cd243c93deee929992eb72fbafd8ed6c7ce2",
+  "src/playback/audio/mp4_clock_recovery.rs": "22dc76dd820a65a5e623bd15a50c38d218c7835b1c67e9dfa714b692bd5fd90e",
+  "crates/fvid-media/src/owned_mp4_audio_clock_runs_impl.rs": "15976cc280931ed6f664c90b2cb7e6043028e8af57e15d11eda235fc00aea37a",
+  "tests/mp4_audio_composition_gap.rs": "6eeff5c4a7bd451767c9a5e93d7bb30763981a43a4b1cf28b45140e2ede7d1cc",
+  "scripts/generate_mp4_audio_composition_gap.py": "e5a1faba9f8fc573ba7f62fab483e02d122c6e95914d720f7ed09b48a4211b76",
+  "tests/fixtures/playback-errors/mp4-audio-composition-gap/manifest.json": "90288a312359166a1c7d751bee8c7213580e54a17fd7496f9d1d7fa85be45981",
+  "tests/support/audio_transitions.rs": "15581a6596247fe67c4da14a33b65538df26652b94b059b39aef56a9ca514b96",
+  "crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs": "065110af38bcc0ff3f92bf81f2d5f2d2846310f37c4b25dabaf2085fd771b3f0"
+}

@@ -1,0 +1,15 @@
+{
+  "removed_logs": [
+    "/private/tmp/fvid-mp4-audio-composition-gap-before.log",
+    "/private/tmp/fvid-mp4-audio-composition-gap-after.log",
+    "/private/tmp/fvid-mp4-audio-composition-gap-expanded-after.log",
+    "/private/tmp/fvid-mp4-audio-composition-gap-integration.log",
+    "/private/tmp/fvid-mp4-audio-composition-gap-root-mp4.log",
+    "/private/tmp/fvid-mp4-audio-composition-gap-root-webm.log",
+    "/private/tmp/fvid-mp4-audio-composition-gap-media.log",
+    "/private/tmp/fvid-mp4-audio-composition-gap-core-check.log",
+    "/private/tmp/fvid-mp4-audio-composition-gap-player-check.log"
+  ],
+  "removed_target": "/private/tmp/fvid-mp4-audio-composition-gap-20261031",
+  "preserved": "All7 authored fixture files, generator, regressions and evidence. Foreign jobs/worktrees/stashes retained."
+}

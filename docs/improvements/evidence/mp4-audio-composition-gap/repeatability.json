@@ -1,0 +1,13 @@
+{
+  "sha256": {
+    "composition-gap.mp4": "ff9582b08d31dcc1b0d5a9c80a3d6aa3dd83b8ef653bbb1cfed2871b919e7e2e",
+    "decode-gap.mp4": "721d396656248b37f010d7af3f1c0bf01f56d264ffeca4623b423b063498ce58",
+    "pcm-1.packet": "f0b449a54f056291da6376c32c18e694e9ff52011447a082f83aea3725573c23",
+    "expected.f32le": "89a896a11e82badf847be2d6f674e58d435ddb4c2e9042ee3320f07a315615bf",
+    "manifest.json": "90288a312359166a1c7d751bee8c7213580e54a17fd7496f9d1d7fa85be45981",
+    "pcm-2.packet": "a39f787866801c6090d0ea6c85e40794246d2fd4a87481a8487f12678283955e",
+    "pcm-0.packet": "7c6d96462280976236a964fd867520d533f4a2df33e98874636fcf82d3d06f83"
+  },
+  "files": 7,
+  "result": "identical after all qualification jobs terminal"
+}

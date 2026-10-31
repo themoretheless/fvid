@@ -260,7 +260,11 @@ impl Track {
         let a = samples.get(index)?;
         let b = samples.get(index.checked_add(1)?)?;
         let start = i128::from(a.pts) + i128::from(a.duration);
-        (i128::from(b.dts) > i128::from(a.dts) + i128::from(a.duration)
+        // Audio can decode continuously while composition offsets leave a
+        // packet-free presentation interval. Keep the stricter decode-gap
+        // condition for other handlers, whose samples may be reordered.
+        ((self.handler == *b"soun"
+            || i128::from(b.dts) > i128::from(a.dts) + i128::from(a.duration))
             && i128::from(b.pts) > start).then_some(start..i128::from(b.pts))
     }
     pub(crate) fn has_declared_gaps(&self) -> bool {

@@ -1,0 +1,46 @@
+{
+  "scope": "All3 video packet hashes, DTS, PTS and durations identical between control and composition companion",
+  "movies": {
+    "decode-gap.mp4": [
+      {
+        "pts": 0,
+        "dts": 0,
+        "duration": 1,
+        "data_hash": "SHA256:217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c"
+      },
+      {
+        "pts": 1,
+        "dts": 1,
+        "duration": 1,
+        "data_hash": "SHA256:217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c"
+      },
+      {
+        "pts": 2,
+        "dts": 2,
+        "duration": 1,
+        "data_hash": "SHA256:217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c"
+      }
+    ],
+    "composition-gap.mp4": [
+      {
+        "pts": 0,
+        "dts": 0,
+        "duration": 1,
+        "data_hash": "SHA256:217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c"
+      },
+      {
+        "pts": 1,
+        "dts": 1,
+        "duration": 1,
+        "data_hash": "SHA256:217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c"
+      },
+      {
+        "pts": 2,
+        "dts": 2,
+        "duration": 1,
+        "data_hash": "SHA256:217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c"
+      }
+    ]
+  },
+  "audit_note": "An initial evidence-only assertion incorrectly assumed16 packets from the AAC source manifest; PCM source has3. Both movies match exactly; regression tests and fixtures unchanged."
+}

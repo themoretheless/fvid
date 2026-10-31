@@ -1,0 +1,11 @@
+{
+  "provenance": "Existing authored integer PCM and neutral VP9. Three PCM packets retain presentation positions0,320,480, durations160 at8kHz. Composition companion removes empty traf, uses contiguous decode0,160,320 and trun CTS0,160,160; data offsets adjusted for new field. No private data/parameters, encoder or network.",
+  "sha256": {
+    "decode-gap.mp4": "721d396656248b37f010d7af3f1c0bf01f56d264ffeca4623b423b063498ce58",
+    "composition-gap.mp4": "ff9582b08d31dcc1b0d5a9c80a3d6aa3dd83b8ef653bbb1cfed2871b919e7e2e",
+    "expected.f32le": "89a896a11e82badf847be2d6f674e58d435ddb4c2e9042ee3320f07a315615bf",
+    "pcm-0.packet": "7c6d96462280976236a964fd867520d533f4a2df33e98874636fcf82d3d06f83",
+    "pcm-1.packet": "f0b449a54f056291da6376c32c18e694e9ff52011447a082f83aea3725573c23",
+    "pcm-2.packet": "a39f787866801c6090d0ea6c85e40794246d2fd4a87481a8487f12678283955e"
+  }
+}

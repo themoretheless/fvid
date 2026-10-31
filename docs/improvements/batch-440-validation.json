@@ -1,0 +1,77 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0440"
+  ],
+  "count_delta": 1,
+  "accepted_count": 440,
+  "before_commit": "9c5dae60447d37e1f229a35aebc7df713403723c",
+  "checks": {
+    "before": {
+      "suites": 1,
+      "passed": 1,
+      "failed": 1,
+      "ignored": 0
+    },
+    "after": {
+      "suites": 3,
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0
+    },
+    "expanded-after": {
+      "suites": 1,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    "integration": {
+      "suites": 117,
+      "passed": 553,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-mp4": {
+      "suites": 1,
+      "passed": 57,
+      "failed": 0,
+      "ignored": 1
+    },
+    "root-webm": {
+      "suites": 1,
+      "passed": 67,
+      "failed": 0,
+      "ignored": 0
+    },
+    "media": {
+      "suites": 1,
+      "passed": 547,
+      "failed": 0,
+      "ignored": 1
+    },
+    "core-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "distinct_passed": 1220,
+  "duplicate_events_excluded": 4,
+  "focused_pass_events_not_added": 22,
+  "fixtures": {
+    "movies": 2,
+    "total_files": 7,
+    "independent_audio_packet_and_pts_verified": 2,
+    "video_continuity": "all3 packets identical",
+    "repeatability": "identical"
+  },
+  "actual_playback": "AudioPlayback worker through capture backend, full PCM and seek into gap; no physical-speaker claim",
+  "limitations": "New presentation-equivalence witness is PCM. Existing compressed decode-gap history coverage passes; no claim of independent new compressed CTS-gap qualification. Existing2 ignored tests unchanged. No performance/GPU/UI claim."
+}

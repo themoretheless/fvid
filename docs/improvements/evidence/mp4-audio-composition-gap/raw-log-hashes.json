@@ -1,0 +1,38 @@
+{
+  "before": {
+    "path": "/private/tmp/fvid-mp4-audio-composition-gap-before.log",
+    "sha256": "2650f7465167c0b54ba37d73f2c30efeb6bf291292ca7cf2ada9b93511af6283"
+  },
+  "after": {
+    "path": "/private/tmp/fvid-mp4-audio-composition-gap-after.log",
+    "sha256": "c8b6dadb2d6972912525cd0e11cb2c46b3f50182eb81938b5f31ac928710f91b"
+  },
+  "expanded-after": {
+    "path": "/private/tmp/fvid-mp4-audio-composition-gap-expanded-after.log",
+    "sha256": "7677634aace362b1096e847b35dc746b271281c748f735945b55a2ec99dd343f"
+  },
+  "integration": {
+    "path": "/private/tmp/fvid-mp4-audio-composition-gap-integration.log",
+    "sha256": "92e2d28346b59398cb77c32214190eb41d87ba2419261d6e4104b20afcfc2ee7"
+  },
+  "root-mp4": {
+    "path": "/private/tmp/fvid-mp4-audio-composition-gap-root-mp4.log",
+    "sha256": "9d350a85f3c51803eb5fb44819526b74ac296c2ab2465141a5ba11c2b8ee9fc9"
+  },
+  "root-webm": {
+    "path": "/private/tmp/fvid-mp4-audio-composition-gap-root-webm.log",
+    "sha256": "af40af0fec8c9eb9269276aa1b52d1f342bd322ba2e330e3113172f9a9224c6c"
+  },
+  "media": {
+    "path": "/private/tmp/fvid-mp4-audio-composition-gap-media.log",
+    "sha256": "2c71444e2d008b3d1ecf448bb310e163d71f3e9607dd3a64c24a888e8e600ff3"
+  },
+  "core-check": {
+    "path": "/private/tmp/fvid-mp4-audio-composition-gap-core-check.log",
+    "sha256": "ee44e1ff468f7631ac88bc3b357c0e083cd958f18f7a2a16e96cfa6bcc283ed0"
+  },
+  "player-check": {
+    "path": "/private/tmp/fvid-mp4-audio-composition-gap-player-check.log",
+    "sha256": "000152bd99ec131c6a8844f393bda8e581c3f4c67461afcd86a2a2d1f6816b1f"
+  }
+}

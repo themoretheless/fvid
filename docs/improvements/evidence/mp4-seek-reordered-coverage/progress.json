@@ -1,5 +1,5 @@
 {
-  "status": "accepted FVID-0439; all qualification jobs terminal; publication pending",
+  "status": "accepted FVID-0439; published main and delivery branch, artifacts removed",
   "base": "291a8286c3cf459c3c1f533117571becaf5dd1b1",
   "session": 45889,
   "target": "/private/tmp/fvid-mp4-seek-reordered-coverage-20261031",

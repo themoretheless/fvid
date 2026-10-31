@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 439,
-  "next_id": "FVID-0440",
+  "accepted_count": 440,
+  "next_id": "FVID-0441",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4931,6 +4931,17 @@
       "result": "Choose only sync candidates whose presentation time exceeds all earlier decode-order PTS, retaining full sequential suffix and equal-PTS group coverage. Existing rewind/reference/parameter preroll remains. Exact decoded color planes, sample indexes, presentation intervals and EOF pass for ordered and reordered movies; independent packet hashes and PTS match.116 integration suites549 pass, root MP4/WebM and media units pass,1216 distinct checks after4 duplicate events, and locked/offline core/player builds pass. No throughput claim.",
       "status": "accepted",
       "validation": "batch-439-validation.json"
+    },
+    {
+      "id": "FVID-0440",
+      "batch": 440,
+      "title": "Preserve PCM pauses represented solely by MP4 audio composition offsets",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs; crates/fvid-media/src/owned_mp4_audio_normalized_impl.rs",
+      "regression": "tests/mp4_audio_composition_gap.rs",
+      "before": "Original9c5dae6044 passes decode-gap control and refuses identical-PTS continuous-DTS PCM with non-contiguous MP4 audio timeline. Partial PTS-gap recognition removes refusal but clips output480 instead of640 frames at the decode-duration endpoint; partial failure archived.",
+      "result": "Recognize positive audio presentation gaps independently of DTS and use the presentation endpoint for the normalized default schedule, preserving the stricter non-audio gap rule and exact recovered-clock boundary handling. Two authored short videos preserve identical PCM packet bytes/PTS and video packets. Native/owned exact640-frame PCM including middle silence, nine seeks, trim intervals, cancellation/resource refusals and actual AudioPlayback worker pass.117 integration suites553 pass; root/media units and locked/offline core/player builds pass,1220 distinct checks after4 duplicate events. No extra count for the partial repair or test variants.",
+      "status": "accepted",
+      "validation": "batch-440-validation.json"
     }
   ]
 }
