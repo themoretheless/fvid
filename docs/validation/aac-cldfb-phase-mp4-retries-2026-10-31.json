@@ -1,0 +1,65 @@
+{
+  "complete": true,
+  "cases": [
+    {
+      "name": "mp4_ep1",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "d043f05a83868974537f5c3579a20ebea2a75a8873e94ac54e850e0a40ead367",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    },
+    {
+      "name": "mp4_ep1_active_chain",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "e1af45dd4a2a2c207c8e1ac1483609a621faff7ebaad853a27d96d12f6ef0794",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    },
+    {
+      "name": "mp4_ep1_ps",
+      "status": "ok",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "df1e09a4b27396959f5bc5cacfe65d4803f3653f41e765986c4d4460dd4d77fd",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    },
+    {
+      "name": "mp4_ep1_grouped_sbr",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "5651eb9f1a95fd83ed799a6e4b0af354c80fc2c469b5fbea3ca8127a5ccd29ee",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    },
+    {
+      "name": "mp4_ep1_od_context",
+      "status": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "65e1b0dc34f769bb67c7700aaaf5e3ce81a9cc7afed559e468faf541d6f0eef5",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    },
+    {
+      "name": "aac_ep1",
+      "status": "ok",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "765e9128b067269c6566362d3b3020dfb0269de6ae7b30783bcb6aa4616c072d",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    }
+  ]
+}

@@ -19,7 +19,7 @@ OUT=ROOT/'tests/fixtures/playback-errors/aac-eld-sbr'
 
 def analysis(pcm,c,bands=10):
     ci=[(a+b)/2 for a,b in zip(c[::2],c[1::2])]
-    weights=[[ci[lag]*2*complex(math.cos(math.pi*(k+.5)*(2*(lag%64)-96)/64),math.sin(math.pi*(k+.5)*(2*(lag%64)-96)/64))for lag in range(320)]for k in range(bands)]
+    weights=[[ci[lag]*2*complex(math.cos(math.pi*(k+.5)*(2*(lag%64)-95)/64),math.sin(math.pi*(k+.5)*(2*(lag%64)-95)/64))for lag in range(320)]for k in range(bands)]
     return [[sum(pcm[t*32+31-lag]*w[lag]for lag in range(min(320,t*32+32)))*32768 for w in weights]for t in range(len(pcm)//32)]
 
 def grid(mode,slots,frame):

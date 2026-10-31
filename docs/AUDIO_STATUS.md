@@ -1,5 +1,10 @@
 # Audio Implementation Status
 
+Nominal LD-SBR analysis now uses the canonical CLDFB phase 2n-95. Own nonzero
+PCM regression movies and independent oracles cover the correction. Raw
+zero-lag FDK waveform differences and decoder time-origin coupling remain
+Scoped gates:1138 pass,0 fail,1 existing ignored. unqualified; see validation/aac-cldfb-phase-2026-10-31.md.
+
 All128 separately audited ISO ELD core inputs decode completely through the
 presented audio reader in two runs. This is admission,not waveform conformance.
 All26 original ISO LD-SBR inputs now decode completely,including the six

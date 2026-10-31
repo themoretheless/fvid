@@ -58,15 +58,14 @@ fn downscaled_ld_sbr_matches_independent_cosine_overlap_and_rejects_cross_mode_c
             assert!(short.decode(&invalid).is_err());
             if let Some(bits) = r["end_bits"].as_u64() {
                 if bits < ((end - start) * 8) as u64 {
-                    let mut bad_alignment = blob[start..end].to_vec();
-                    *bad_alignment.last_mut().unwrap() |= 1;
-                    assert!(
-                        short
-                            .decode(&bad_alignment)
-                            .unwrap_err()
-                            .to_string()
-                            .contains("alignment")
-                    );
+                    let mut nonzero_alignment = blob[start..end].to_vec();
+                    *nonzero_alignment.last_mut().unwrap() |= 1;
+                    // ELD byte_alignment() carries no zero-valued syntax.
+                    // Changing only padding must preserve the decoded frame.
+                    let padded = short.decode(&nonzero_alignment).unwrap();
+                    short.restore(&save).unwrap();
+                    assert_eq!(short.decode(&blob[start..end]).unwrap(), padded);
+                    short.restore(&save).unwrap();
                 }
             }
             let f = short.decode(&blob[start..end]).unwrap();

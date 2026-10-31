@@ -1,0 +1,35 @@
+{
+  "complete": true,
+  "cases": [
+    {
+      "name": "aac_ep_concatenated_playback",
+      "status": "ok",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "290a3fb4e032aa5b2181e5deea7dbcb0750e510efceb17218cba336e42317a3c",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    },
+    {
+      "name": "aac_ep_rs_group_playback",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "6a963d55fd7f1957525eaf9ea730cda4225149359440cb302a6e6784b75da439",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    },
+    {
+      "name": "aac_ep_rs_group_concatenated",
+      "status": "ok",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "exit_code": 0,
+      "executable_sha256": "e38efaf1e71684c383b914197cdb87648403784e71a386462d26e80779092f37",
+      "source": "freshly rebuilt standalone harness after independent RS oracle/ELD alignment expectation correction"
+    }
+  ]
+}

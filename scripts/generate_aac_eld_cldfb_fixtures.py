@@ -35,7 +35,7 @@ def generate():
                 for lag in range(320):
                     at=t*32+31-lag
                     if at<0:continue
-                    phase=math.pi*(k+.5)*(2*(lag%64)-96)/64
+                    phase=math.pi*(k+.5)*(2*(lag%64)-95)/64
                     value+=pcm[at]*ci[lag]*2*complex(math.cos(phase),math.sin(phase))
                 row.append(value)
             rows.append(row+[0j]*32)

@@ -1,3 +1,15 @@
+## Canonical nominal LD-SBR CLDFB phase, 2026-10-31
+
+Corrected the nominal analysis matrix from 2n-96 to canonical 2n-95
+(ISO/IEC14496-3:2009,4.6.19.4.1). The centered factor-one analysis already used
+this phase. Eight own programmes/16 movies reproduce the specific PCM defect
+and match an independent direct-convolution oracle after the fix. Existing
+compressed inputs remain unchanged; dependent PCM oracles are regenerated
+independently. Actual macOS device full/seek/seek/rewind drain passes.
+Raw zero-lag PCM differences against original FDK remain: this correction does
+not qualify full waveform conformance or resolve decoder time-origin coupling.
+Scoped gates:1138 pass,0 fail,1 existing ignored. See [evidence](validation/aac-cldfb-phase-2026-10-31.md).
+
 ## Exact LD-SBR Q31 interoperability with strict validation, 2026-10-31
 
 Closed all six observed original ISO LD-SBR Q31 refusals:26/26 inputs now decode

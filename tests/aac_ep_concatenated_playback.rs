@@ -295,6 +295,58 @@ fn complete_packet_checkpoint_and_timestamp_overflow_are_transactional() {
     }
 }
 #[test]
+fn concatenated_eld_nonzero_alignment_recovers_identical_syntax_and_pcm() {
+    let m = manifest();
+    let cases = m["cases"].as_array().unwrap();
+    let blob = read("packets.bin");
+    let mut controls = 0;
+    for c in cases {
+        let Some(name) = c["name"].as_str().unwrap().strip_suffix("-aac-alignment") else {
+            continue;
+        };
+        controls += 1;
+        let good = cases.iter().find(|v| v["name"] == name).unwrap();
+        assert_eq!(c["asc"], good["asc"]);
+        let ep = AudioSpecificConfig::parse(&hex(c["asc"].as_str().unwrap()))
+            .unwrap()
+            .protection
+            .unwrap();
+        let mut changed = 0;
+        for (a, b) in c["frames"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .zip(good["frames"].as_array().unwrap())
+        {
+            let a = ep.decode_raw_access_units(packet(&blob, a)).unwrap();
+            let b = ep.decode_raw_access_units(packet(&blob, b)).unwrap();
+            assert_eq!(a.len(), b.len());
+            for (a, b) in a.iter().zip(&b) {
+                assert_eq!(a.len(), b.len());
+                if a != b {
+                    assert_eq!(&a[..a.len() - 1], &b[..b.len() - 1]);
+                    assert_eq!(a.last().unwrap() ^ b.last().unwrap(), 1);
+                    changed += 1;
+                }
+            }
+        }
+        assert_eq!(changed, 1, "exactly one final padding bit differs");
+        let mut actual = Vec::new();
+        let mut expected = Vec::new();
+        fvid::native_media::decode_mp4_aac_pcm(&read(c["video"].as_str().unwrap()), &mut actual)
+            .unwrap();
+        fvid::native_media::decode_mp4_aac_pcm(
+            &read(good["video"].as_str().unwrap()),
+            &mut expected,
+        )
+        .unwrap();
+        assert_eq!(actual, expected, "{name}");
+        near(c, &actual);
+    }
+    assert_eq!(controls, 12);
+}
+
+#[test]
 fn malformed_protected_movies_have_specific_failures_and_preserve_history() {
     let m = manifest();
     let blob = read("packets.bin");
@@ -312,26 +364,6 @@ fn malformed_protected_movies_have_specific_failures_and_preserve_history() {
             d.decode(packet(&blob, row)).unwrap();
         }
         let saved = d.checkpoint();
-        if c["error"].as_str().unwrap().contains("AAC ELD alignment") {
-            let ep = AudioSpecificConfig::parse(&hex(c["asc"].as_str().unwrap()))
-                .unwrap()
-                .protection
-                .unwrap();
-            let units = ep
-                .decode_raw_access_units(packet(&blob, &c["frames"][index]))
-                .unwrap();
-            let plain = read("plain-packets.bin");
-            for (unit, row) in units
-                .iter()
-                .zip(c["frames"][index]["units"].as_array().unwrap())
-            {
-                assert_eq!(
-                    unit,
-                    packet(&plain, row),
-                    "AAC refusal must follow successful EP recovery"
-                );
-            }
-        }
         let error = d
             .decode(packet(&blob, &c["frames"][index]))
             .unwrap_err()

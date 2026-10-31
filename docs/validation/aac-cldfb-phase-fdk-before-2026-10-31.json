@@ -1,0 +1,1222 @@
+{
+  "scope": "Native f32 versus original FDK PCM16;raw compressed tracks,zero lag;not conformance",
+  "complete": true,
+  "source_archive_sha256": "4f41fba1e55dc554ccd0166f550d7c0c83ae0f22d7f2ed76001537f4b62f7325",
+  "fdk_source_commit": "ee76460efbdb147e26d804c798949c23f174460b",
+  "fdk_driver_sha256": "41b9cf9db9ee8d93ec5e22f0591f37d12a4a0dc0e6856ac7ff54931d78d8e9d6",
+  "fdk_probe_sha256": "f6e2431081dfc058c44f6fa8fb4d0b78a103b5744fbbd880b6a5c3e7e3559371",
+  "native_probe_sha256": "deaab85a0047654cffa4165259948c94a1f3936086aa96d60777f8ce1125445f",
+  "iso_inventory_sha256": "865521883bbc19db177c71c00fcb57bd3619a8ae73a05a21532c3fc22cc13e92",
+  "cases": [
+    {
+      "name": "er_eld_sbr_e_1_32.mp4",
+      "input_sha256": "5a08d12a43855894a06ee1bd15104c621f329a2322fb464df1af5bbf78f345df",
+      "iso_md5": "d95d223d6a748153484a9337674b4c7f",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "032d335cfcaa18e643d7831242a8c81b8d18628fcf02af3c8847b53e743f02ac",
+      "native_stdout": "mode=Complex packets=602 rate=48000 channels=1 scalars=616448\n",
+      "fdk_stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16\npackets=602 scalars=616448\n",
+      "rate": 48000,
+      "channels": 1,
+      "sample_frames": 616448,
+      "native_pcm_sha256": "a8df7f99cecf4ea61e0e9c1026b6b2623dd985649de623795caeb55056f75c44",
+      "fdk_pcm_sha256": "a68b5b4ab180279da3e7e2ab2a9aa39abe2767877e30ac7d67b8bfd7f96255a7",
+      "native_peak": 0.6970117688179016,
+      "fdk_peak": 0.623291015625,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 616448,
+            "rmse": 0.06902734532266945,
+            "max_abs_error": 0.6506043076515198
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 614400,
+            "rmse": 0.06914229517688222,
+            "max_abs_error": 0.6506043076515198
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_e_1_44.mp4",
+      "input_sha256": "82db49e9853abf4e0881f9f4170c55c673d041c617cf29200e6a08986b76d6bc",
+      "iso_md5": "3fc96d7927e5fed87f6d9006ccefc2c0",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "da68aacb4f0eefaa774de641b064ff81eb51ed020a0b4efd06fa8f1f53e79516",
+      "native_stdout": "mode=Complex packets=402 rate=44100 channels=1 scalars=411648\n",
+      "fdk_stdout": "rate=44100 channels=1 frame=1024 outputDelay=64 pcm_bits=16\npackets=402 scalars=411648\n",
+      "rate": 44100,
+      "channels": 1,
+      "sample_frames": 411648,
+      "native_pcm_sha256": "66b087123f634a8159d78133dbaba309c6d03f76aa4cd1021d474d3274cb7695",
+      "fdk_pcm_sha256": "ba10afee4faeb69281020a69666f7760905155f7740f945f717b74faa2b56aca",
+      "native_peak": 0.6993805766105652,
+      "fdk_peak": 0.672393798828125,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 411648,
+            "rmse": 0.193452613353167,
+            "max_abs_error": 1.3638092875480652
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 409600,
+            "rmse": 0.19393564184789963,
+            "max_abs_error": 1.3638092875480652
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_e_1_48.mp4",
+      "input_sha256": "6229ca1181207202bca9a192edc956f184d7f6fff0315313a66e4b4b7c963776",
+      "iso_md5": "f209b40878a70869667b0780283f0879",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "3d609424a269e1a29832b26029ccb88f6a190985763957325ff12457063b7033",
+      "native_stdout": "mode=Complex packets=402 rate=48000 channels=1 scalars=411648\n",
+      "fdk_stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16\npackets=402 scalars=411648\n",
+      "rate": 48000,
+      "channels": 1,
+      "sample_frames": 411648,
+      "native_pcm_sha256": "b8554b1950a8a4cdf160179c5cc6c3ffa063d8502e7b8b5023c241433983d55a",
+      "fdk_pcm_sha256": "c3c43664dc78f52f35add843698a9cd3688f5f558a3647e708ebcea3a961bcd8",
+      "native_peak": 0.6079169511795044,
+      "fdk_peak": 0.61602783203125,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 411648,
+            "rmse": 0.19292258895951028,
+            "max_abs_error": 1.0972139835357666
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 409600,
+            "rmse": 0.1934042940462568,
+            "max_abs_error": 1.0972139835357666
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_e_2_32.mp4",
+      "input_sha256": "c1233e0e2b01085d23c65ef7aea3953ab64e4c3bc2b4a9e1f86208f19131e70b",
+      "iso_md5": "d503db7e8e57754eaf1d5967fe3f324b",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "9ffce77ea1093be2383c512bfecb037bffc46f9b148830980bc38dbca9e215d9",
+      "native_stdout": "mode=Complex packets=602 rate=48000 channels=2 scalars=1232896\n",
+      "fdk_stdout": "rate=48000 channels=2 frame=1024 outputDelay=64 pcm_bits=16\npackets=602 scalars=1232896\n",
+      "rate": 48000,
+      "channels": 2,
+      "sample_frames": 616448,
+      "native_pcm_sha256": "a57664e3365e48bd7a097e8330f99be9caa1e31ada0473cb58cefc847ec4297a",
+      "fdk_pcm_sha256": "3eb3519c7055ebaa9e85b14917a0248afd2924363f1b5a26871cdc3d92921825",
+      "native_peak": 0.7027071118354797,
+      "fdk_peak": 0.661590576171875,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 616448,
+            "rmse": 0.07176047323125867,
+            "max_abs_error": 0.6312078833580017
+          },
+          {
+            "channel": 1,
+            "compared_frames": 616448,
+            "rmse": 0.06866443877462601,
+            "max_abs_error": 0.5144533105194569
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 614400,
+            "rmse": 0.07187997450858996,
+            "max_abs_error": 0.6312078833580017
+          },
+          {
+            "channel": 1,
+            "compared_frames": 614400,
+            "rmse": 0.06877878428698235,
+            "max_abs_error": 0.5144533105194569
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_e_2_44.mp4",
+      "input_sha256": "21c027c5e7276b709e1c52f01b3d7122b0a4bffbfc4aa031614ad8a1568178ae",
+      "iso_md5": "bd7b9ac75607c431a0aa8c7bfca1540b",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "ac51b22600d60b290d1b0f19c82ca9c1c8cc63324e54b88baf43042f42f51aa1",
+      "native_stdout": "mode=Complex packets=402 rate=44100 channels=2 scalars=823296\n",
+      "fdk_stdout": "rate=44100 channels=2 frame=1024 outputDelay=64 pcm_bits=16\npackets=402 scalars=823296\n",
+      "rate": 44100,
+      "channels": 2,
+      "sample_frames": 411648,
+      "native_pcm_sha256": "6bdf4a2d2e502595061b6553742647111fdc37d3f87346efa0c9aabdb844fcab",
+      "fdk_pcm_sha256": "5926cec621787740cc927634d3cbe43fa9420d401287162a98f72efe0c368eaa",
+      "native_peak": 0.7561671137809753,
+      "fdk_peak": 0.66217041015625,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 411648,
+            "rmse": 0.19424234434589757,
+            "max_abs_error": 1.2598917484283447
+          },
+          {
+            "channel": 1,
+            "compared_frames": 411648,
+            "rmse": 0.19232513530667392,
+            "max_abs_error": 1.021169364452362
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 409600,
+            "rmse": 0.1947273447063546,
+            "max_abs_error": 1.2598917484283447
+          },
+          {
+            "channel": 1,
+            "compared_frames": 409600,
+            "rmse": 0.192805348620821,
+            "max_abs_error": 1.021169364452362
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_e_2_48.mp4",
+      "input_sha256": "f0d2c49226f95b4398d32b5aa9008178858c47b4c3508d6ddbebda8a78400aac",
+      "iso_md5": "b59c1b77af88736997afba398eef038a",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "c8ec52c733ff6f1bcda82554e265ac824769cf92870cc89ab7d30a5236f2fb62",
+      "native_stdout": "mode=Complex packets=402 rate=48000 channels=2 scalars=823296\n",
+      "fdk_stdout": "rate=48000 channels=2 frame=1024 outputDelay=64 pcm_bits=16\npackets=402 scalars=823296\n",
+      "rate": 48000,
+      "channels": 2,
+      "sample_frames": 411648,
+      "native_pcm_sha256": "79adcd63fdf7898b8ee0f98a323c83f11aa8c6e9890aa93231631d0741a816ff",
+      "fdk_pcm_sha256": "0ba46c9487bf0dec6cf74c1f22391415242b0a49452234483e9ae490f16e45f5",
+      "native_peak": 0.7030509114265442,
+      "fdk_peak": 0.6329345703125,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 411648,
+            "rmse": 0.19504333849648883,
+            "max_abs_error": 1.324506163597107
+          },
+          {
+            "channel": 1,
+            "compared_frames": 411648,
+            "rmse": 0.19323541596749022,
+            "max_abs_error": 1.0781385898590088
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 409600,
+            "rmse": 0.19553033884590737,
+            "max_abs_error": 1.324506163597107
+          },
+          {
+            "channel": 1,
+            "compared_frames": 409600,
+            "rmse": 0.19371790214621307,
+            "max_abs_error": 1.0781385898590088
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_gh_1_32.mp4",
+      "input_sha256": "967f1e0bfe44531c250f7cc83454551e2106aadcca9b15e4d64600ca9c17ca23",
+      "iso_md5": "4c053f041c3db37c15a1093dfef39b22",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "f0a2dd19bbab7c8d2c281aeb8261d5d19df870d2cc27604c4b668e8fc022916b",
+      "native_stdout": "mode=Complex packets=1502 rate=48000 channels=1 scalars=1538048\n",
+      "fdk_stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16\npackets=1502 scalars=1538048\n",
+      "rate": 48000,
+      "channels": 1,
+      "sample_frames": 1538048,
+      "native_pcm_sha256": "b52fb4491e851a1857afaf9a16af3a0e3573adac3f176639b5d1b6dc71444959",
+      "fdk_pcm_sha256": "9828232cc0efc6ebdb900d8393567032731a12259e9a380344f8583ea8230375",
+      "native_peak": 0.37572240829467773,
+      "fdk_peak": 0.370025634765625,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 1538048,
+            "rmse": 0.06626074087070591,
+            "max_abs_error": 0.36312809586524963
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 1536000,
+            "rmse": 0.0663048999831522,
+            "max_abs_error": 0.36312809586524963
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_gh_1_44.mp4",
+      "input_sha256": "9b9b8c1a8e1ded1f2db6c6b5efa8067cc5cc81382003b03a5a83d5f1c9374e8e",
+      "iso_md5": "d7e6daa0a2e4538ee2632b17e4995917",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "0524de96adb3900f40f2cdd25ecad8a9d9a5562a151bc32d461f111ef9a796c5",
+      "native_stdout": "mode=Complex packets=1002 rate=44100 channels=1 scalars=1026048\n",
+      "fdk_stdout": "rate=44100 channels=1 frame=1024 outputDelay=64 pcm_bits=16\npackets=1002 scalars=1026048\n",
+      "rate": 44100,
+      "channels": 1,
+      "sample_frames": 1026048,
+      "native_pcm_sha256": "8c373a3e37b6bad4a07b675e49a61c5193d4832a0f2207c583aff808e4a112a0",
+      "fdk_pcm_sha256": "d5abf7be3722906e5425c9103a37a6824694dce137af8ea422478a9798760ea1",
+      "native_peak": 0.35643693804740906,
+      "fdk_peak": 0.34515380859375,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 1026048,
+            "rmse": 0.1934314514549829,
+            "max_abs_error": 0.6919471919536591
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 1024000,
+            "rmse": 0.19362478628730714,
+            "max_abs_error": 0.6919471919536591
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_gh_1_48.mp4",
+      "input_sha256": "bcb019f4fe7522661c69b4ea5291a8c05dfeae54810f1074ff8a58bd2c027d64",
+      "iso_md5": "742f2dacc0a5ab477de2930390b87325",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "385d86b2f16177103db16a6598d69916e1581e50988896387ca9e6e75da36004",
+      "native_stdout": "mode=Complex packets=1002 rate=48000 channels=1 scalars=1026048\n",
+      "fdk_stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16\npackets=1002 scalars=1026048\n",
+      "rate": 48000,
+      "channels": 1,
+      "sample_frames": 1026048,
+      "native_pcm_sha256": "43a373d2dfa2f89d14a26825d34844f44f7c57d104a55ce3a75b786c66a5501c",
+      "fdk_pcm_sha256": "41cb14baeabf10411481db4672d9563b9be7e2c8400e3e58d0a793ce693e3d59",
+      "native_peak": 0.34759974479675293,
+      "fdk_peak": 0.341827392578125,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 1026048,
+            "rmse": 0.1933984415637364,
+            "max_abs_error": 0.6842391490936279
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 1024000,
+            "rmse": 0.1935917434026579,
+            "max_abs_error": 0.6842391490936279
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_gh_2_32.mp4",
+      "input_sha256": "30266adf890b21ff4b09bbe429344c9fff9410c0df9baae271d47781b52b10cd",
+      "iso_md5": "5be8c15b71c416a7662ae17d0a3627ac",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "a6c6dcb8c441e5949ff00175ea465f9a0eba61feb67b9127d6bbe3ca52683af0",
+      "native_stdout": "mode=Complex packets=1502 rate=48000 channels=2 scalars=3076096\n",
+      "fdk_stdout": "rate=48000 channels=2 frame=1024 outputDelay=64 pcm_bits=16\npackets=1502 scalars=3076096\n",
+      "rate": 48000,
+      "channels": 2,
+      "sample_frames": 1538048,
+      "native_pcm_sha256": "51c67a9b1bdbe748493989bfe3fd316c22718989db5d47b71e56eb026b656a2f",
+      "fdk_pcm_sha256": "c55ca0fe3c0c4e3088e938bc3fae3c3934bc96d3b722cc115e16b0a42974fd87",
+      "native_peak": 0.386452317237854,
+      "fdk_peak": 0.37396240234375,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 1538048,
+            "rmse": 0.06808337058138789,
+            "max_abs_error": 0.354530930519104
+          },
+          {
+            "channel": 1,
+            "compared_frames": 1538048,
+            "rmse": 0.06808337054855178,
+            "max_abs_error": 0.354530930519104
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 1536000,
+            "rmse": 0.06812874437554893,
+            "max_abs_error": 0.354530930519104
+          },
+          {
+            "channel": 1,
+            "compared_frames": 1536000,
+            "rmse": 0.06812874434269094,
+            "max_abs_error": 0.354530930519104
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_gh_2_44.mp4",
+      "input_sha256": "c771a9f60638ab1a2688336cb022f5d708c09c34f11482aad75d4a5e02686058",
+      "iso_md5": "54c98974e42d5ede3acad5ef60024b9a",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "e3b8f672929379d3e187adb29694d46d085b0f601daf02ac42544248950ef2aa",
+      "native_stdout": "mode=Complex packets=1002 rate=44100 channels=2 scalars=2052096\n",
+      "fdk_stdout": "rate=44100 channels=2 frame=1024 outputDelay=64 pcm_bits=16\npackets=1002 scalars=2052096\n",
+      "rate": 44100,
+      "channels": 2,
+      "sample_frames": 1026048,
+      "native_pcm_sha256": "091456ab7fff8a559f2bcbed667fa31c5b1999a7d68869ee57e69685ce6c0c73",
+      "fdk_pcm_sha256": "02834494a8bdf453d4ff51587984550639b24291a201c6bdd8d9eaba0e96317b",
+      "native_peak": 0.355898380279541,
+      "fdk_peak": 0.34600830078125,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 1026048,
+            "rmse": 0.19344545229555776,
+            "max_abs_error": 0.6914480626583099
+          },
+          {
+            "channel": 1,
+            "compared_frames": 1026048,
+            "rmse": 0.19344545296116564,
+            "max_abs_error": 0.6914480626583099
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 1024000,
+            "rmse": 0.19363880112172918,
+            "max_abs_error": 0.6914480626583099
+          },
+          {
+            "channel": 1,
+            "compared_frames": 1024000,
+            "rmse": 0.1936388017880023,
+            "max_abs_error": 0.6914480626583099
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_gh_2_48.mp4",
+      "input_sha256": "8c3f8b12b84a0ef98d34d92a5a1d94d773056a660551fa91a5040426136f279b",
+      "iso_md5": "abf49c2c7fa07fac26eae88c1b6a1b85",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "a6ed3ccf7a7f5d7e8629fe9868d42ecc0006c38aacb1ad193e390bc95857fd52",
+      "native_stdout": "mode=Complex packets=1002 rate=48000 channels=2 scalars=2052096\n",
+      "fdk_stdout": "rate=48000 channels=2 frame=1024 outputDelay=64 pcm_bits=16\npackets=1002 scalars=2052096\n",
+      "rate": 48000,
+      "channels": 2,
+      "sample_frames": 1026048,
+      "native_pcm_sha256": "6d9d0266b0e2e9855a76a71da426a068196b09fb8bfa229977bcd5f73071f8e5",
+      "fdk_pcm_sha256": "0bc15f884d8c5fcf72aa3bf35b9718a3be45aa0808c6e703aa29599012eca0b0",
+      "native_peak": 0.3493098020553589,
+      "fdk_peak": 0.342315673828125,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 1026048,
+            "rmse": 0.19438686157930707,
+            "max_abs_error": 0.6849726438522339
+          },
+          {
+            "channel": 1,
+            "compared_frames": 1026048,
+            "rmse": 0.1943868604229249,
+            "max_abs_error": 0.6849726438522339
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 1024000,
+            "rmse": 0.1945811513445277,
+            "max_abs_error": 0.6849726438522339
+          },
+          {
+            "channel": 1,
+            "compared_frames": 1024000,
+            "rmse": 0.19458115018698974,
+            "max_abs_error": 0.6849726438522339
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_i_1_32.mp4",
+      "input_sha256": "b6a0d9c65fa4a8d1fb91f765a20c703073a233f06047dde9c8abcaca0ab93e47",
+      "iso_md5": "c39bb21139295259a135bdd028b2789c",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "5c4b6048217765d9f4aab86ca1daabf337f9a8d607a481de35c051867204f563",
+      "native_stdout": "mode=Complex packets=602 rate=48000 channels=1 scalars=616448\n",
+      "fdk_stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16\npackets=602 scalars=616448\n",
+      "rate": 48000,
+      "channels": 1,
+      "sample_frames": 616448,
+      "native_pcm_sha256": "ccd074051a02cc7e443781db9fabb22c11109824cdfa5c95af91643d264507a0",
+      "fdk_pcm_sha256": "ea582fc6788028ce62c7c10d82ac45fee5238f5382e6b9d77773e5135a162f80",
+      "native_peak": 0.37845689058303833,
+      "fdk_peak": 0.360321044921875,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 616448,
+            "rmse": 0.06850628500227714,
+            "max_abs_error": 0.31049928069114685
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 614400,
+            "rmse": 0.0686203671545793,
+            "max_abs_error": 0.31049928069114685
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_i_1_44.mp4",
+      "input_sha256": "1589fc6b53f78d14cfb287a0c129ba3d4972e932e185bd38a35be1e73e875fed",
+      "iso_md5": "cfb1cd65e203c6ca50cad8c2e37b0d98",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "761e0e5c8639dc5cbe206a46f34b1ef7733c8bf2ac48241a5d89080f1a746406",
+      "native_stdout": "mode=Complex packets=402 rate=44100 channels=1 scalars=411648\n",
+      "fdk_stdout": "rate=44100 channels=1 frame=1024 outputDelay=64 pcm_bits=16\npackets=402 scalars=411648\n",
+      "rate": 44100,
+      "channels": 1,
+      "sample_frames": 411648,
+      "native_pcm_sha256": "4807f4279f3854699f91408789186c545b048acd9f4e03341b739d8761d26b41",
+      "fdk_pcm_sha256": "cc955449299f0fcdc91d508a84fbc35b78583381669dd3c4e483a42ff78e6e88",
+      "native_peak": 0.3874887228012085,
+      "fdk_peak": 0.380706787109375,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 411648,
+            "rmse": 0.19251036283921968,
+            "max_abs_error": 0.7384229600429535
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 409600,
+            "rmse": 0.1929910386507375,
+            "max_abs_error": 0.7384229600429535
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_i_1_48.mp4",
+      "input_sha256": "dbb4ea8b4826e31254c927914ddfeb2460ca762334cc7314591f42548842f05f",
+      "iso_md5": "47f1172e76028b3fe63941abf36f0914",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "a47702c61e44ff4ba553ba47070fcdf3ff1be8d2e30b0f23cbb8a7306a0f8f62",
+      "native_stdout": "mode=Complex packets=402 rate=48000 channels=1 scalars=411648\n",
+      "fdk_stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16\npackets=402 scalars=411648\n",
+      "rate": 48000,
+      "channels": 1,
+      "sample_frames": 411648,
+      "native_pcm_sha256": "5eed0d7e1f39c430e298b47e45b5e12f59b8dee7ed489f4718ff07da51dde033",
+      "fdk_pcm_sha256": "5fc72163d2ca2c0682bc512383ed8dc00c5cfb2433aa91ec17eb48497f2f9410",
+      "native_peak": 0.3781694769859314,
+      "fdk_peak": 0.372039794921875,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 411648,
+            "rmse": 0.19242838757387568,
+            "max_abs_error": 0.723055899143219
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 409600,
+            "rmse": 0.1929088587027644,
+            "max_abs_error": 0.723055899143219
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_i_2_32.mp4",
+      "input_sha256": "0a31c899240190ce7241c69f5b23d765d207a3e7ab1efa15b9cda24ce252c523",
+      "iso_md5": "c3bee5b91c3f274241e6244d3811b4d3",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "361c8bea6a776ce61dc38bce55454d8d61443093750120bd985bb45a85eef7a9",
+      "native_stdout": "mode=Complex packets=602 rate=48000 channels=2 scalars=1232896\n",
+      "fdk_stdout": "rate=48000 channels=2 frame=1024 outputDelay=64 pcm_bits=16\npackets=602 scalars=1232896\n",
+      "rate": 48000,
+      "channels": 2,
+      "sample_frames": 616448,
+      "native_pcm_sha256": "0d409fc19e8d9eaaa9f4a652d1f31c701985dcea152e36f23b592b7a96ec4653",
+      "fdk_pcm_sha256": "aefae7038f18af5578d4a20b251f0628525b5e7c19e2eb7f6361dfd77646c469",
+      "native_peak": 0.38783830404281616,
+      "fdk_peak": 0.385040283203125,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 616448,
+            "rmse": 0.06881323478336522,
+            "max_abs_error": 0.3434540033340454
+          },
+          {
+            "channel": 1,
+            "compared_frames": 616448,
+            "rmse": 0.06881323597597072,
+            "max_abs_error": 0.3434540033340454
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 614400,
+            "rmse": 0.06892782809302578,
+            "max_abs_error": 0.3434540033340454
+          },
+          {
+            "channel": 1,
+            "compared_frames": 614400,
+            "rmse": 0.0689278292876173,
+            "max_abs_error": 0.3434540033340454
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_i_2_44.mp4",
+      "input_sha256": "df33405b0354dfd4ed338d6b13bb79fe8fb6fdb90ec8c44af0dd585297a45963",
+      "iso_md5": "0a4cf985f143bbbf81559d06f67319a0",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "37d506417b079fe3ee7a3087627b503ff80ed0772acac73c742a19cdbfb9300a",
+      "native_stdout": "mode=Complex packets=402 rate=44100 channels=2 scalars=823296\n",
+      "fdk_stdout": "rate=44100 channels=2 frame=1024 outputDelay=64 pcm_bits=16\npackets=402 scalars=823296\n",
+      "rate": 44100,
+      "channels": 2,
+      "sample_frames": 411648,
+      "native_pcm_sha256": "e84bc9c12b3ad54418173c9a130694ae1c1a6792e57fd72a87cccff35b0bf034",
+      "fdk_pcm_sha256": "2ddf4d0865172c6c9e6a2fb562eb6d4a298f8598e45614de8b7c5567871eb292",
+      "native_peak": 0.3455536961555481,
+      "fdk_peak": 0.323333740234375,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 411648,
+            "rmse": 0.19275274156591135,
+            "max_abs_error": 0.6374611258506775
+          },
+          {
+            "channel": 1,
+            "compared_frames": 411648,
+            "rmse": 0.19275274213145724,
+            "max_abs_error": 0.6374611258506775
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 409600,
+            "rmse": 0.19323402256870006,
+            "max_abs_error": 0.6374611258506775
+          },
+          {
+            "channel": 1,
+            "compared_frames": 409600,
+            "rmse": 0.19323402313565807,
+            "max_abs_error": 0.6374611258506775
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_i_2_48.mp4",
+      "input_sha256": "17570f8d6bafb94ac1120e2f4f3a124dc7de41bcd4626f6a70151b5b73707f6f",
+      "iso_md5": "9d3cc30f2d370701202500c7676d3aef",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "7534a6897feccee2808dbc3f17c7f40fd2d08c11fa17710d999fe26fec034314",
+      "native_stdout": "mode=Complex packets=402 rate=48000 channels=2 scalars=823296\n",
+      "fdk_stdout": "rate=48000 channels=2 frame=1024 outputDelay=64 pcm_bits=16\npackets=402 scalars=823296\n",
+      "rate": 48000,
+      "channels": 2,
+      "sample_frames": 411648,
+      "native_pcm_sha256": "188951b38be79916baa6001f0dbe77ee9bca85c835e99612ee5bc52e77bc3982",
+      "fdk_pcm_sha256": "1b0e75f2ecb7d85993fcbf7abe0a2962f0ebf51b15fb58e1156902d8735856d8",
+      "native_peak": 0.3344760239124298,
+      "fdk_peak": 0.326019287109375,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 411648,
+            "rmse": 0.19284680789602623,
+            "max_abs_error": 0.6158435940742493
+          },
+          {
+            "channel": 1,
+            "compared_frames": 411648,
+            "rmse": 0.19284680706426413,
+            "max_abs_error": 0.6158435940742493
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 409600,
+            "rmse": 0.19332832377141557,
+            "max_abs_error": 0.6158435940742493
+          },
+          {
+            "channel": 1,
+            "compared_frames": 409600,
+            "rmse": 0.19332832293757665,
+            "max_abs_error": 0.6158435940742493
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_s_1_32.mp4",
+      "input_sha256": "83ee5a66baca057d89478b9e7b6f5a5b7a568404736380cf00307568ba373ba0",
+      "iso_md5": "42278f53fd987c847e018ad4127321e3",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "f63e117cff0e860062fa92c370171c93f0f4b4f3bca17f6bb5d30ac713008009",
+      "native_stdout": "mode=Complex packets=601 rate=48000 channels=1 scalars=615424\n",
+      "fdk_stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16\npackets=601 scalars=615424\n",
+      "rate": 48000,
+      "channels": 1,
+      "sample_frames": 615424,
+      "native_pcm_sha256": "b64826693c804f7937d1c6ee52299b9135f9478c9337ee8ec7ba0331c16b4fd4",
+      "fdk_pcm_sha256": "919b4e75072087fa968eac2b83e360439c122e17be37ef812583a21778d4d3ca",
+      "native_peak": 0.20254534482955933,
+      "fdk_peak": 0.204681396484375,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 615424,
+            "rmse": 0.05141639245614206,
+            "max_abs_error": 0.31148163974285126
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 613376,
+            "rmse": 0.051502157971526005,
+            "max_abs_error": 0.31148163974285126
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_s_1_44.mp4",
+      "input_sha256": "60d6f969cca1b3e83e7ac2c80d18debec5dcd4648ade3279617fe2912719d2e0",
+      "iso_md5": "ce0030b3c9829a3b2810577b76018eb9",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "fe4e504e98b01ae80b4e67c4ad778d8fc6052aa7a3625d4b98b62bb9b7372e28",
+      "native_stdout": "mode=Complex packets=401 rate=44100 channels=1 scalars=410624\n",
+      "fdk_stdout": "rate=44100 channels=1 frame=1024 outputDelay=64 pcm_bits=16\npackets=401 scalars=410624\n",
+      "rate": 44100,
+      "channels": 1,
+      "sample_frames": 410624,
+      "native_pcm_sha256": "99957d27253c13464544a69a1cc137ef0a7510c49e9744fb41648ea1c785eb2e",
+      "fdk_pcm_sha256": "117777c347fb03790fb8bbed3d887f628a0b3d10255b9365efcfb64a837173dd",
+      "native_peak": 0.2072622925043106,
+      "fdk_peak": 0.207763671875,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 410624,
+            "rmse": 0.04910665440634665,
+            "max_abs_error": 0.2565430998802185
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 408576,
+            "rmse": 0.04922957488048747,
+            "max_abs_error": 0.2565430998802185
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_s_1_48.mp4",
+      "input_sha256": "99847dfe7c968c279f4fc7dd151b2b28ef41624289d2fab29ada8a67c6016aac",
+      "iso_md5": "e866dfaa676b2d0dac5f6ebc428f7c8d",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "81b6122882f75b55b8f11cc81dfb8672217e3d36b6a63bb843030d427f971d00",
+      "native_stdout": "mode=Complex packets=401 rate=48000 channels=1 scalars=410624\n",
+      "fdk_stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16\npackets=401 scalars=410624\n",
+      "rate": 48000,
+      "channels": 1,
+      "sample_frames": 410624,
+      "native_pcm_sha256": "8d308b94e58e18881972a93c1b3ebecb0a4b7c5b9a00df4584f3d6e87ad76453",
+      "fdk_pcm_sha256": "f9b70fec3ec1dee767f42a16fbd7a447d3fa8847108cf2ab11b590f52af93ed0",
+      "native_peak": 0.19473077356815338,
+      "fdk_peak": 0.19573974609375,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 410624,
+            "rmse": 0.050614837900973784,
+            "max_abs_error": 0.2743084281682968
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 408576,
+            "rmse": 0.050741533558896844,
+            "max_abs_error": 0.2743084281682968
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_s_2_32.mp4",
+      "input_sha256": "dcbd09453e319ca09da4039f2b5c776a4202fda856b182d4530584c3c01efb14",
+      "iso_md5": "d35be9e6dc562aeb3964b490defea28c",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "5fe7d1b2dd4567e3de994ffc5cab17c110ac8debfa9964f9781601c696f51e45",
+      "native_stdout": "mode=Complex packets=601 rate=48000 channels=2 scalars=1230848\n",
+      "fdk_stdout": "rate=48000 channels=2 frame=1024 outputDelay=64 pcm_bits=16\npackets=601 scalars=1230848\n",
+      "rate": 48000,
+      "channels": 2,
+      "sample_frames": 615424,
+      "native_pcm_sha256": "307a08e9d564d58ce3800fdab59cb5409ae3d12395479a996d6f8d1927eef815",
+      "fdk_pcm_sha256": "c7f3e9a7a3819402daaa120d6ec488cce88a774a5b2c739c191b4c056e29bd67",
+      "native_peak": 0.33138740062713623,
+      "fdk_peak": 0.3272705078125,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 615424,
+            "rmse": 0.06415405237949023,
+            "max_abs_error": 0.4222080558538437
+          },
+          {
+            "channel": 1,
+            "compared_frames": 615424,
+            "rmse": 0.06878517963455534,
+            "max_abs_error": 0.469037264585495
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 613376,
+            "rmse": 0.0642610650490838,
+            "max_abs_error": 0.4222080558538437
+          },
+          {
+            "channel": 1,
+            "compared_frames": 613376,
+            "rmse": 0.06889991729300632,
+            "max_abs_error": 0.469037264585495
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_s_2_44.mp4",
+      "input_sha256": "75c53ac9c5ff99d2e16f23a4243b4c8435dbab886d15d496feaeb9b6e440ee4c",
+      "iso_md5": "b8c8d716856455f15e156ea7c3a95b69",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "1c9288140eec26ce8e9e2e8b51f59e5f9938f15a474db7a9f288fe7db8b99c08",
+      "native_stdout": "mode=Complex packets=401 rate=44100 channels=2 scalars=821248\n",
+      "fdk_stdout": "rate=44100 channels=2 frame=1024 outputDelay=64 pcm_bits=16\npackets=401 scalars=821248\n",
+      "rate": 44100,
+      "channels": 2,
+      "sample_frames": 410624,
+      "native_pcm_sha256": "a383cee07c09cdfd8e16fe560ef0a1b58b3ebf28e32c922c9a79f4179238012a",
+      "fdk_pcm_sha256": "cc626096f87374e21f28c55ac7c8bab58d9ee528b2bd1ea8cba9b023ca863760",
+      "native_peak": 0.2693978548049927,
+      "fdk_peak": 0.268463134765625,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 410624,
+            "rmse": 0.06126899524397105,
+            "max_abs_error": 0.4098261147737503
+          },
+          {
+            "channel": 1,
+            "compared_frames": 410624,
+            "rmse": 0.06701459213776506,
+            "max_abs_error": 0.4251900911331177
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 408576,
+            "rmse": 0.061422359673684486,
+            "max_abs_error": 0.4098261147737503
+          },
+          {
+            "channel": 1,
+            "compared_frames": 408576,
+            "rmse": 0.06718233856009943,
+            "max_abs_error": 0.4251900911331177
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_s_2_48.mp4",
+      "input_sha256": "dafd68ac71331f60376fc8cf465542468205183954ff169b0206b6a676c1a285",
+      "iso_md5": "e61555a66af30e617b75986b1453fc66",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "9e1f5acc71fcc3b40dfa0b4c04663743a85b5ae73f0ff7f655cd9878b1d35b6b",
+      "native_stdout": "mode=Complex packets=401 rate=48000 channels=2 scalars=821248\n",
+      "fdk_stdout": "rate=48000 channels=2 frame=1024 outputDelay=64 pcm_bits=16\npackets=401 scalars=821248\n",
+      "rate": 48000,
+      "channels": 2,
+      "sample_frames": 410624,
+      "native_pcm_sha256": "8bd6cfaf51c55c2108e855b9b39cd9a54a764efe657803ab69aabb6aa82a7d0e",
+      "fdk_pcm_sha256": "f7dead722b8f49d6a4ae2be1da180d0dc38a2f23315ab58544a65a4c3a0cd017",
+      "native_peak": 0.2560395896434784,
+      "fdk_peak": 0.251220703125,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 410624,
+            "rmse": 0.06191285337483037,
+            "max_abs_error": 0.3299923241138458
+          },
+          {
+            "channel": 1,
+            "compared_frames": 410624,
+            "rmse": 0.06828913859185767,
+            "max_abs_error": 0.38452860713005066
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 408576,
+            "rmse": 0.06206782946652732,
+            "max_abs_error": 0.3299923241138458
+          },
+          {
+            "channel": 1,
+            "compared_frames": 408576,
+            "rmse": 0.06846007537338135,
+            "max_abs_error": 0.38452860713005066
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_twi_1_24.mp4",
+      "input_sha256": "4c0c5fd6a03bfcdf8497c5270b229ca8213226939cee75881c867784c2a66a44",
+      "iso_md5": "b62c3e54d2296c272c7a6c62f8a06947",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "93c6c808204e51ce00463eac6751be7aecc8103efeccc0cc6c56d9f09e132fc2",
+      "native_stdout": "mode=Complex packets=48 rate=24000 channels=1 scalars=24576\n",
+      "fdk_stdout": "rate=24000 channels=1 frame=512 outputDelay=32 pcm_bits=16\npackets=48 scalars=24576\n",
+      "rate": 24000,
+      "channels": 1,
+      "sample_frames": 24576,
+      "native_pcm_sha256": "c13c8dab8bbad01cd13517c9113e371940281d6f5db4b5672924406f7b4ab892",
+      "fdk_pcm_sha256": "01387241567d27c177ceb3acbdcf3885b41a6b8ac343c861f0c3e112a8d5547c",
+      "native_peak": 0.30761274695396423,
+      "fdk_peak": 0.2816162109375,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 24576,
+            "rmse": 0.0073781289244363845,
+            "max_abs_error": 0.16680986434221268
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 22528,
+            "rmse": 0.007157009302760861,
+            "max_abs_error": 0.026591897010803223
+          }
+        ]
+      }
+    },
+    {
+      "name": "er_eld_sbr_twi_1_48.mp4",
+      "input_sha256": "6f2290f439f22b3e85196520a896c4702ff1d9e28a3486a5bb027bfa27622c5c",
+      "iso_md5": "b8bb4908e4da5faff407bdca7b052d7b",
+      "hidden_edit_boxes": 1,
+      "original_records_sha256": "e2da0a9da118c2b866c250387cc6b2b82c05250af080c66a703ba8c78432e317",
+      "native_stdout": "mode=Complex packets=48 rate=48000 channels=1 scalars=49152\n",
+      "fdk_stdout": "rate=48000 channels=1 frame=1024 outputDelay=64 pcm_bits=16\npackets=48 scalars=49152\n",
+      "rate": 48000,
+      "channels": 1,
+      "sample_frames": 49152,
+      "native_pcm_sha256": "733405ce4e36c59b3532d246e925520bf84fe94bd52218c952fba3300a751899",
+      "fdk_pcm_sha256": "7de68a9a284c6d86c0449fd76a1cc2f35b2e63dc2e889b865a1d05c6b66052eb",
+      "native_peak": 0.5226655006408691,
+      "fdk_peak": 0.438201904296875,
+      "native_full_scale_overshoots": 0,
+      "full": {
+        "from_frame": 0,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 49152,
+            "rmse": 0.016493538354241073,
+            "max_abs_error": 0.23362500965595245
+          }
+        ]
+      },
+      "later_diagnostic": {
+        "from_frame": 2048,
+        "explicit_lag": 0,
+        "per_channel": [
+          {
+            "channel": 0,
+            "compared_frames": 47104,
+            "rmse": 0.016370565011034628,
+            "max_abs_error": 0.08738470077514648
+          }
+        ]
+      }
+    }
+  ]
+}

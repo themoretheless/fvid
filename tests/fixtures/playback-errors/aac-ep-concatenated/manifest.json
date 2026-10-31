@@ -757,6 +757,258 @@
       "matroska": "eld-n480-c1-ld0-f2-srcpc-i0-mixed.mka"
     },
     {
+      "name": "eld-n480-c1-ld0-f2-srcpc-i0-mixed-aac-alignment",
+      "n": 480,
+      "aot": 39,
+      "channels": 1,
+      "rate": 24000,
+      "source_frames": 2,
+      "frame_samples": 480,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 7,
+      "bands": 32,
+      "asc": "f8ec30080c284100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
+      "plain_asc": "f8ec3000",
+      "frames": [
+        {
+          "offset": 1673,
+          "bytes": 95,
+          "choice": 0,
+          "units": [
+            {
+              "offset": 540,
+              "bytes": 9
+            },
+            {
+              "offset": 549,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 1768,
+          "bytes": 34,
+          "choice": 1,
+          "units": [
+            {
+              "offset": 558,
+              "bytes": 9
+            },
+            {
+              "offset": 567,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 1802,
+          "bytes": 37,
+          "choice": 2,
+          "units": [
+            {
+              "offset": 576,
+              "bytes": 9
+            },
+            {
+              "offset": 585,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 1839,
+          "bytes": 95,
+          "choice": 0,
+          "units": [
+            {
+              "offset": 594,
+              "bytes": 9
+            },
+            {
+              "offset": 603,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 1934,
+          "bytes": 34,
+          "choice": 1,
+          "units": [
+            {
+              "offset": 612,
+              "bytes": 9
+            },
+            {
+              "offset": 621,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 1968,
+          "bytes": 37,
+          "choice": 2,
+          "units": [
+            {
+              "offset": 630,
+              "bytes": 9
+            },
+            {
+              "offset": 639,
+              "bytes": 9
+            }
+          ]
+        }
+      ],
+      "golden": "eld-n480-c1-ld0-f2.f32le",
+      "configs": [
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 3,
+              "crc": 4,
+              "terminated": false,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 10,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 17,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 24,
+              "crc": 16,
+              "terminated": true,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 4,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 11,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 18,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 0,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            1,
+            2,
+            3,
+            0
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 5,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 12,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 19,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 1,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            3,
+            2,
+            1,
+            0
+          ]
+        }
+      ],
+      "video": "eld-n480-c1-ld0-f2-srcpc-i0-mixed-aac-alignment.mp4",
+      "matroska": "eld-n480-c1-ld0-f2-srcpc-i0-mixed-aac-alignment.mka"
+    },
+    {
       "name": "eld-n480-c1-ld0-f2-srcpc-i1-joined",
       "n": 480,
       "aot": 39,
@@ -4495,6 +4747,244 @@
       "matroska": "eld-n480-c1-ld0-f3-srcpc-i0-mixed.mka"
     },
     {
+      "name": "eld-n480-c1-ld0-f3-srcpc-i0-mixed-aac-alignment",
+      "n": 480,
+      "aot": 39,
+      "channels": 1,
+      "rate": 24000,
+      "source_frames": 3,
+      "frame_samples": 480,
+      "container_rate": 24000,
+      "container_frame_samples": 1440,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 7,
+      "bands": 32,
+      "asc": "f8ec30080c2c4100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
+      "plain_asc": "f8ec3000",
+      "frames": [
+        {
+          "offset": 7988,
+          "bytes": 140,
+          "choice": 0,
+          "units": [
+            {
+              "offset": 2484,
+              "bytes": 9
+            },
+            {
+              "offset": 2493,
+              "bytes": 9
+            },
+            {
+              "offset": 2502,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 8128,
+          "bytes": 47,
+          "choice": 1,
+          "units": [
+            {
+              "offset": 2511,
+              "bytes": 9
+            },
+            {
+              "offset": 2520,
+              "bytes": 9
+            },
+            {
+              "offset": 2529,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 8175,
+          "bytes": 52,
+          "choice": 2,
+          "units": [
+            {
+              "offset": 2538,
+              "bytes": 9
+            },
+            {
+              "offset": 2547,
+              "bytes": 9
+            },
+            {
+              "offset": 2556,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 8227,
+          "bytes": 140,
+          "choice": 0,
+          "units": [
+            {
+              "offset": 2565,
+              "bytes": 9
+            },
+            {
+              "offset": 2574,
+              "bytes": 9
+            },
+            {
+              "offset": 2583,
+              "bytes": 9
+            }
+          ]
+        }
+      ],
+      "golden": "eld-n480-c1-ld0-f3.f32le",
+      "configs": [
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 3,
+              "crc": 4,
+              "terminated": false,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 10,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 17,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 24,
+              "crc": 16,
+              "terminated": true,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 4,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 11,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 18,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 0,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            1,
+            2,
+            3,
+            0
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 5,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 12,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 19,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 1,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            3,
+            2,
+            1,
+            0
+          ]
+        }
+      ],
+      "video": "eld-n480-c1-ld0-f3-srcpc-i0-mixed-aac-alignment.mp4",
+      "matroska": "eld-n480-c1-ld0-f3-srcpc-i0-mixed-aac-alignment.mka"
+    },
+    {
       "name": "eld-n480-c1-ld0-f3-srcpc-i1-joined",
       "n": 480,
       "aot": 39,
@@ -8044,6 +8534,237 @@
       "matroska": "eld-n480-c1-ld0-f4-srcpc-i0-mixed.mka"
     },
     {
+      "name": "eld-n480-c1-ld0-f4-srcpc-i0-mixed-aac-alignment",
+      "n": 480,
+      "aot": 39,
+      "channels": 1,
+      "rate": 24000,
+      "source_frames": 4,
+      "frame_samples": 480,
+      "container_rate": 24000,
+      "container_frame_samples": 1920,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 7,
+      "bands": 32,
+      "asc": "f8ec30080c304100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
+      "plain_asc": "f8ec3000",
+      "frames": [
+        {
+          "offset": 14029,
+          "bytes": 185,
+          "choice": 0,
+          "units": [
+            {
+              "offset": 4428,
+              "bytes": 9
+            },
+            {
+              "offset": 4437,
+              "bytes": 9
+            },
+            {
+              "offset": 4446,
+              "bytes": 9
+            },
+            {
+              "offset": 4455,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 14214,
+          "bytes": 59,
+          "choice": 1,
+          "units": [
+            {
+              "offset": 4464,
+              "bytes": 9
+            },
+            {
+              "offset": 4473,
+              "bytes": 9
+            },
+            {
+              "offset": 4482,
+              "bytes": 9
+            },
+            {
+              "offset": 4491,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 14273,
+          "bytes": 65,
+          "choice": 2,
+          "units": [
+            {
+              "offset": 4500,
+              "bytes": 9
+            },
+            {
+              "offset": 4509,
+              "bytes": 9
+            },
+            {
+              "offset": 4518,
+              "bytes": 9
+            },
+            {
+              "offset": 4527,
+              "bytes": 9
+            }
+          ]
+        }
+      ],
+      "golden": "eld-n480-c1-ld0-f4.f32le",
+      "configs": [
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 3,
+              "crc": 4,
+              "terminated": false,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 10,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 17,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 24,
+              "crc": 16,
+              "terminated": true,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 4,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 11,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 18,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 0,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            1,
+            2,
+            3,
+            0
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 5,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 12,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 19,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 1,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            3,
+            2,
+            1,
+            0
+          ]
+        }
+      ],
+      "video": "eld-n480-c1-ld0-f4-srcpc-i0-mixed-aac-alignment.mp4",
+      "matroska": "eld-n480-c1-ld0-f4-srcpc-i0-mixed-aac-alignment.mka"
+    },
+    {
       "name": "eld-n480-c1-ld0-f4-srcpc-i1-joined",
       "n": 480,
       "aot": 39,
@@ -11464,6 +12185,222 @@
       "matroska": "eld-n480-c1-ld0-f5-srcpc-i0-mixed.mka"
     },
     {
+      "name": "eld-n480-c1-ld0-f5-srcpc-i0-mixed-aac-alignment",
+      "n": 480,
+      "aot": 39,
+      "channels": 1,
+      "rate": 24000,
+      "source_frames": 5,
+      "frame_samples": 480,
+      "container_rate": 24000,
+      "container_frame_samples": 2400,
+      "samples": 4800,
+      "pcm_offset": 0,
+      "slots": 7,
+      "bands": 32,
+      "asc": "f8ec30080c344100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
+      "plain_asc": "f8ec3000",
+      "frames": [
+        {
+          "offset": 19528,
+          "bytes": 229,
+          "choice": 0,
+          "units": [
+            {
+              "offset": 6282,
+              "bytes": 9
+            },
+            {
+              "offset": 6291,
+              "bytes": 9
+            },
+            {
+              "offset": 6300,
+              "bytes": 9
+            },
+            {
+              "offset": 6309,
+              "bytes": 9
+            },
+            {
+              "offset": 6318,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 19757,
+          "bytes": 72,
+          "choice": 1,
+          "units": [
+            {
+              "offset": 6327,
+              "bytes": 9
+            },
+            {
+              "offset": 6336,
+              "bytes": 9
+            },
+            {
+              "offset": 6345,
+              "bytes": 9
+            },
+            {
+              "offset": 6354,
+              "bytes": 9
+            },
+            {
+              "offset": 6363,
+              "bytes": 9
+            }
+          ]
+        }
+      ],
+      "golden": "eld-n480-c1-ld0-f5.f32le",
+      "configs": [
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 3,
+              "crc": 4,
+              "terminated": false,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 10,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 17,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 24,
+              "crc": 16,
+              "terminated": true,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 4,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 11,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 18,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 0,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            1,
+            2,
+            3,
+            0
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 5,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 12,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 19,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 1,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            3,
+            2,
+            1,
+            0
+          ]
+        }
+      ],
+      "video": "eld-n480-c1-ld0-f5-srcpc-i0-mixed-aac-alignment.mp4",
+      "matroska": "eld-n480-c1-ld0-f5-srcpc-i0-mixed-aac-alignment.mka"
+    },
+    {
       "name": "eld-n480-c1-ld0-f5-srcpc-i1-joined",
       "n": 480,
       "aot": 39,
@@ -14726,6 +15663,230 @@
       ],
       "video": "eld-n480-c1-ld0-f6-srcpc-i0-mixed.mp4",
       "matroska": "eld-n480-c1-ld0-f6-srcpc-i0-mixed.mka"
+    },
+    {
+      "name": "eld-n480-c1-ld0-f6-srcpc-i0-mixed-aac-alignment",
+      "n": 480,
+      "aot": 39,
+      "channels": 1,
+      "rate": 24000,
+      "source_frames": 6,
+      "frame_samples": 480,
+      "container_rate": 24000,
+      "container_frame_samples": 2880,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 7,
+      "bands": 32,
+      "asc": "f8ec30080c384100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
+      "plain_asc": "f8ec3000",
+      "frames": [
+        {
+          "offset": 24797,
+          "bytes": 274,
+          "choice": 0,
+          "units": [
+            {
+              "offset": 7992,
+              "bytes": 9
+            },
+            {
+              "offset": 8001,
+              "bytes": 9
+            },
+            {
+              "offset": 8010,
+              "bytes": 9
+            },
+            {
+              "offset": 8019,
+              "bytes": 9
+            },
+            {
+              "offset": 8028,
+              "bytes": 9
+            },
+            {
+              "offset": 8037,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 25071,
+          "bytes": 85,
+          "choice": 1,
+          "units": [
+            {
+              "offset": 8046,
+              "bytes": 9
+            },
+            {
+              "offset": 8055,
+              "bytes": 9
+            },
+            {
+              "offset": 8064,
+              "bytes": 9
+            },
+            {
+              "offset": 8073,
+              "bytes": 9
+            },
+            {
+              "offset": 8082,
+              "bytes": 9
+            },
+            {
+              "offset": 8091,
+              "bytes": 9
+            }
+          ]
+        }
+      ],
+      "golden": "eld-n480-c1-ld0-f6.f32le",
+      "configs": [
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 3,
+              "crc": 4,
+              "terminated": false,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 10,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 17,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 24,
+              "crc": 16,
+              "terminated": true,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 4,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 11,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 18,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 0,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            1,
+            2,
+            3,
+            0
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 5,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 12,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 19,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 1,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            3,
+            2,
+            1,
+            0
+          ]
+        }
+      ],
+      "video": "eld-n480-c1-ld0-f6-srcpc-i0-mixed-aac-alignment.mp4",
+      "matroska": "eld-n480-c1-ld0-f6-srcpc-i0-mixed-aac-alignment.mka"
     },
     {
       "name": "eld-n480-c1-ld0-f6-srcpc-i1-joined",
@@ -18005,6 +19166,203 @@
       ],
       "video": "eld-n480-c1-ld0-f7-srcpc-i0-mixed.mp4",
       "matroska": "eld-n480-c1-ld0-f7-srcpc-i0-mixed.mka"
+    },
+    {
+      "name": "eld-n480-c1-ld0-f7-srcpc-i0-mixed-aac-alignment",
+      "n": 480,
+      "aot": 39,
+      "channels": 1,
+      "rate": 24000,
+      "source_frames": 7,
+      "frame_samples": 480,
+      "container_rate": 24000,
+      "container_frame_samples": 3360,
+      "samples": 3360,
+      "pcm_offset": 0,
+      "slots": 7,
+      "bands": 32,
+      "asc": "f8ec30080c3c4100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
+      "plain_asc": "f8ec3000",
+      "frames": [
+        {
+          "offset": 30476,
+          "bytes": 317,
+          "choice": 0,
+          "units": [
+            {
+              "offset": 9711,
+              "bytes": 9
+            },
+            {
+              "offset": 9720,
+              "bytes": 9
+            },
+            {
+              "offset": 9729,
+              "bytes": 9
+            },
+            {
+              "offset": 9738,
+              "bytes": 9
+            },
+            {
+              "offset": 9747,
+              "bytes": 9
+            },
+            {
+              "offset": 9756,
+              "bytes": 9
+            },
+            {
+              "offset": 9765,
+              "bytes": 9
+            }
+          ]
+        }
+      ],
+      "golden": "eld-n480-c1-ld0-f7.f32le",
+      "configs": [
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 3,
+              "crc": 4,
+              "terminated": false,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 10,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 17,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 24,
+              "crc": 16,
+              "terminated": true,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 4,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 11,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 18,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 0,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            1,
+            2,
+            3,
+            0
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 5,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 12,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 19,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 1,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            3,
+            2,
+            1,
+            0
+          ]
+        }
+      ],
+      "video": "eld-n480-c1-ld0-f7-srcpc-i0-mixed-aac-alignment.mp4",
+      "matroska": "eld-n480-c1-ld0-f7-srcpc-i0-mixed-aac-alignment.mka"
     },
     {
       "name": "eld-n480-c1-ld0-f7-srcpc-i1-joined",
@@ -41497,6 +42855,258 @@
       "matroska": "eld-n512-c1-ld0-f2-srcpc-i0-mixed.mka"
     },
     {
+      "name": "eld-n512-c1-ld0-f2-srcpc-i0-mixed-aac-alignment",
+      "n": 512,
+      "aot": 39,
+      "channels": 1,
+      "rate": 24000,
+      "source_frames": 2,
+      "frame_samples": 512,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 8,
+      "bands": 32,
+      "asc": "f8ec20080c284100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
+      "plain_asc": "f8ec2000",
+      "frames": [
+        {
+          "offset": 73814,
+          "bytes": 95,
+          "choice": 0,
+          "units": [
+            {
+              "offset": 25695,
+              "bytes": 9
+            },
+            {
+              "offset": 25704,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 73909,
+          "bytes": 34,
+          "choice": 1,
+          "units": [
+            {
+              "offset": 25713,
+              "bytes": 9
+            },
+            {
+              "offset": 25722,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 73943,
+          "bytes": 37,
+          "choice": 2,
+          "units": [
+            {
+              "offset": 25731,
+              "bytes": 9
+            },
+            {
+              "offset": 25740,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 73980,
+          "bytes": 95,
+          "choice": 0,
+          "units": [
+            {
+              "offset": 25749,
+              "bytes": 9
+            },
+            {
+              "offset": 25758,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 74075,
+          "bytes": 34,
+          "choice": 1,
+          "units": [
+            {
+              "offset": 25767,
+              "bytes": 9
+            },
+            {
+              "offset": 25776,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 74109,
+          "bytes": 37,
+          "choice": 2,
+          "units": [
+            {
+              "offset": 25785,
+              "bytes": 9
+            },
+            {
+              "offset": 25794,
+              "bytes": 9
+            }
+          ]
+        }
+      ],
+      "golden": "eld-n512-c1-ld0-f2.f32le",
+      "configs": [
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 3,
+              "crc": 4,
+              "terminated": false,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 10,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 17,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 24,
+              "crc": 16,
+              "terminated": true,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 4,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 11,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 18,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 0,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            1,
+            2,
+            3,
+            0
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 5,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 12,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 19,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 1,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            3,
+            2,
+            1,
+            0
+          ]
+        }
+      ],
+      "video": "eld-n512-c1-ld0-f2-srcpc-i0-mixed-aac-alignment.mp4",
+      "matroska": "eld-n512-c1-ld0-f2-srcpc-i0-mixed-aac-alignment.mka"
+    },
+    {
       "name": "eld-n512-c1-ld0-f2-srcpc-i1-joined",
       "n": 512,
       "aot": 39,
@@ -45235,6 +46845,244 @@
       "matroska": "eld-n512-c1-ld0-f3-srcpc-i0-mixed.mka"
     },
     {
+      "name": "eld-n512-c1-ld0-f3-srcpc-i0-mixed-aac-alignment",
+      "n": 512,
+      "aot": 39,
+      "channels": 1,
+      "rate": 24000,
+      "source_frames": 3,
+      "frame_samples": 512,
+      "container_rate": 24000,
+      "container_frame_samples": 1536,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 8,
+      "bands": 32,
+      "asc": "f8ec20080c2c4100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
+      "plain_asc": "f8ec2000",
+      "frames": [
+        {
+          "offset": 80129,
+          "bytes": 140,
+          "choice": 0,
+          "units": [
+            {
+              "offset": 27639,
+              "bytes": 9
+            },
+            {
+              "offset": 27648,
+              "bytes": 9
+            },
+            {
+              "offset": 27657,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 80269,
+          "bytes": 47,
+          "choice": 1,
+          "units": [
+            {
+              "offset": 27666,
+              "bytes": 9
+            },
+            {
+              "offset": 27675,
+              "bytes": 9
+            },
+            {
+              "offset": 27684,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 80316,
+          "bytes": 52,
+          "choice": 2,
+          "units": [
+            {
+              "offset": 27693,
+              "bytes": 9
+            },
+            {
+              "offset": 27702,
+              "bytes": 9
+            },
+            {
+              "offset": 27711,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 80368,
+          "bytes": 140,
+          "choice": 0,
+          "units": [
+            {
+              "offset": 27720,
+              "bytes": 9
+            },
+            {
+              "offset": 27729,
+              "bytes": 9
+            },
+            {
+              "offset": 27738,
+              "bytes": 9
+            }
+          ]
+        }
+      ],
+      "golden": "eld-n512-c1-ld0-f3.f32le",
+      "configs": [
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 3,
+              "crc": 4,
+              "terminated": false,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 10,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 17,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 24,
+              "crc": 16,
+              "terminated": true,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 4,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 11,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 18,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 0,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            1,
+            2,
+            3,
+            0
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 5,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 12,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 19,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 1,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            3,
+            2,
+            1,
+            0
+          ]
+        }
+      ],
+      "video": "eld-n512-c1-ld0-f3-srcpc-i0-mixed-aac-alignment.mp4",
+      "matroska": "eld-n512-c1-ld0-f3-srcpc-i0-mixed-aac-alignment.mka"
+    },
+    {
       "name": "eld-n512-c1-ld0-f3-srcpc-i1-joined",
       "n": 512,
       "aot": 39,
@@ -48784,6 +50632,237 @@
       "matroska": "eld-n512-c1-ld0-f4-srcpc-i0-mixed.mka"
     },
     {
+      "name": "eld-n512-c1-ld0-f4-srcpc-i0-mixed-aac-alignment",
+      "n": 512,
+      "aot": 39,
+      "channels": 1,
+      "rate": 24000,
+      "source_frames": 4,
+      "frame_samples": 512,
+      "container_rate": 24000,
+      "container_frame_samples": 2048,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 8,
+      "bands": 32,
+      "asc": "f8ec20080c304100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
+      "plain_asc": "f8ec2000",
+      "frames": [
+        {
+          "offset": 86170,
+          "bytes": 185,
+          "choice": 0,
+          "units": [
+            {
+              "offset": 29583,
+              "bytes": 9
+            },
+            {
+              "offset": 29592,
+              "bytes": 9
+            },
+            {
+              "offset": 29601,
+              "bytes": 9
+            },
+            {
+              "offset": 29610,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 86355,
+          "bytes": 59,
+          "choice": 1,
+          "units": [
+            {
+              "offset": 29619,
+              "bytes": 9
+            },
+            {
+              "offset": 29628,
+              "bytes": 9
+            },
+            {
+              "offset": 29637,
+              "bytes": 9
+            },
+            {
+              "offset": 29646,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 86414,
+          "bytes": 65,
+          "choice": 2,
+          "units": [
+            {
+              "offset": 29655,
+              "bytes": 9
+            },
+            {
+              "offset": 29664,
+              "bytes": 9
+            },
+            {
+              "offset": 29673,
+              "bytes": 9
+            },
+            {
+              "offset": 29682,
+              "bytes": 9
+            }
+          ]
+        }
+      ],
+      "golden": "eld-n512-c1-ld0-f4.f32le",
+      "configs": [
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 3,
+              "crc": 4,
+              "terminated": false,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 10,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 17,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 24,
+              "crc": 16,
+              "terminated": true,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 4,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 11,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 18,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 0,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            1,
+            2,
+            3,
+            0
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 5,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 12,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 19,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 1,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            3,
+            2,
+            1,
+            0
+          ]
+        }
+      ],
+      "video": "eld-n512-c1-ld0-f4-srcpc-i0-mixed-aac-alignment.mp4",
+      "matroska": "eld-n512-c1-ld0-f4-srcpc-i0-mixed-aac-alignment.mka"
+    },
+    {
       "name": "eld-n512-c1-ld0-f4-srcpc-i1-joined",
       "n": 512,
       "aot": 39,
@@ -52204,6 +54283,222 @@
       "matroska": "eld-n512-c1-ld0-f5-srcpc-i0-mixed.mka"
     },
     {
+      "name": "eld-n512-c1-ld0-f5-srcpc-i0-mixed-aac-alignment",
+      "n": 512,
+      "aot": 39,
+      "channels": 1,
+      "rate": 24000,
+      "source_frames": 5,
+      "frame_samples": 512,
+      "container_rate": 24000,
+      "container_frame_samples": 2560,
+      "samples": 5120,
+      "pcm_offset": 0,
+      "slots": 8,
+      "bands": 32,
+      "asc": "f8ec20080c344100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
+      "plain_asc": "f8ec2000",
+      "frames": [
+        {
+          "offset": 91669,
+          "bytes": 229,
+          "choice": 0,
+          "units": [
+            {
+              "offset": 31437,
+              "bytes": 9
+            },
+            {
+              "offset": 31446,
+              "bytes": 9
+            },
+            {
+              "offset": 31455,
+              "bytes": 9
+            },
+            {
+              "offset": 31464,
+              "bytes": 9
+            },
+            {
+              "offset": 31473,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 91898,
+          "bytes": 72,
+          "choice": 1,
+          "units": [
+            {
+              "offset": 31482,
+              "bytes": 9
+            },
+            {
+              "offset": 31491,
+              "bytes": 9
+            },
+            {
+              "offset": 31500,
+              "bytes": 9
+            },
+            {
+              "offset": 31509,
+              "bytes": 9
+            },
+            {
+              "offset": 31518,
+              "bytes": 9
+            }
+          ]
+        }
+      ],
+      "golden": "eld-n512-c1-ld0-f5.f32le",
+      "configs": [
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 3,
+              "crc": 4,
+              "terminated": false,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 10,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 17,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 24,
+              "crc": 16,
+              "terminated": true,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 4,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 11,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 18,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 0,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            1,
+            2,
+            3,
+            0
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 5,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 12,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 19,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 1,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            3,
+            2,
+            1,
+            0
+          ]
+        }
+      ],
+      "video": "eld-n512-c1-ld0-f5-srcpc-i0-mixed-aac-alignment.mp4",
+      "matroska": "eld-n512-c1-ld0-f5-srcpc-i0-mixed-aac-alignment.mka"
+    },
+    {
       "name": "eld-n512-c1-ld0-f5-srcpc-i1-joined",
       "n": 512,
       "aot": 39,
@@ -55466,6 +57761,230 @@
       ],
       "video": "eld-n512-c1-ld0-f6-srcpc-i0-mixed.mp4",
       "matroska": "eld-n512-c1-ld0-f6-srcpc-i0-mixed.mka"
+    },
+    {
+      "name": "eld-n512-c1-ld0-f6-srcpc-i0-mixed-aac-alignment",
+      "n": 512,
+      "aot": 39,
+      "channels": 1,
+      "rate": 24000,
+      "source_frames": 6,
+      "frame_samples": 512,
+      "container_rate": 24000,
+      "container_frame_samples": 3072,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 8,
+      "bands": 32,
+      "asc": "f8ec20080c384100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
+      "plain_asc": "f8ec2000",
+      "frames": [
+        {
+          "offset": 96938,
+          "bytes": 274,
+          "choice": 0,
+          "units": [
+            {
+              "offset": 33147,
+              "bytes": 9
+            },
+            {
+              "offset": 33156,
+              "bytes": 9
+            },
+            {
+              "offset": 33165,
+              "bytes": 9
+            },
+            {
+              "offset": 33174,
+              "bytes": 9
+            },
+            {
+              "offset": 33183,
+              "bytes": 9
+            },
+            {
+              "offset": 33192,
+              "bytes": 9
+            }
+          ]
+        },
+        {
+          "offset": 97212,
+          "bytes": 85,
+          "choice": 1,
+          "units": [
+            {
+              "offset": 33201,
+              "bytes": 9
+            },
+            {
+              "offset": 33210,
+              "bytes": 9
+            },
+            {
+              "offset": 33219,
+              "bytes": 9
+            },
+            {
+              "offset": 33228,
+              "bytes": 9
+            },
+            {
+              "offset": 33237,
+              "bytes": 9
+            },
+            {
+              "offset": 33246,
+              "bytes": 9
+            }
+          ]
+        }
+      ],
+      "golden": "eld-n512-c1-ld0-f6.f32le",
+      "configs": [
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 3,
+              "crc": 4,
+              "terminated": false,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 10,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 17,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 24,
+              "crc": 16,
+              "terminated": true,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 4,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 11,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 18,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 0,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            1,
+            2,
+            3,
+            0
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 5,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 12,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 19,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 1,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            3,
+            2,
+            1,
+            0
+          ]
+        }
+      ],
+      "video": "eld-n512-c1-ld0-f6-srcpc-i0-mixed-aac-alignment.mp4",
+      "matroska": "eld-n512-c1-ld0-f6-srcpc-i0-mixed-aac-alignment.mka"
     },
     {
       "name": "eld-n512-c1-ld0-f6-srcpc-i1-joined",
@@ -58745,6 +61264,203 @@
       ],
       "video": "eld-n512-c1-ld0-f7-srcpc-i0-mixed.mp4",
       "matroska": "eld-n512-c1-ld0-f7-srcpc-i0-mixed.mka"
+    },
+    {
+      "name": "eld-n512-c1-ld0-f7-srcpc-i0-mixed-aac-alignment",
+      "n": 512,
+      "aot": 39,
+      "channels": 1,
+      "rate": 24000,
+      "source_frames": 7,
+      "frame_samples": 512,
+      "container_rate": 24000,
+      "container_frame_samples": 3584,
+      "samples": 3584,
+      "pcm_offset": 0,
+      "slots": 8,
+      "bands": 32,
+      "asc": "f8ec20080c3c4100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
+      "plain_asc": "f8ec2000",
+      "frames": [
+        {
+          "offset": 102617,
+          "bytes": 317,
+          "choice": 0,
+          "units": [
+            {
+              "offset": 34866,
+              "bytes": 9
+            },
+            {
+              "offset": 34875,
+              "bytes": 9
+            },
+            {
+              "offset": 34884,
+              "bytes": 9
+            },
+            {
+              "offset": 34893,
+              "bytes": 9
+            },
+            {
+              "offset": 34902,
+              "bytes": 9
+            },
+            {
+              "offset": 34911,
+              "bytes": 9
+            },
+            {
+              "offset": 34920,
+              "bytes": 9
+            }
+          ]
+        }
+      ],
+      "golden": "eld-n512-c1-ld0-f7.f32le",
+      "configs": [
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 3,
+              "crc": 4,
+              "terminated": false,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 10,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 17,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 24,
+              "crc": 16,
+              "terminated": true,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 4,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 11,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 18,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 0,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            1,
+            2,
+            3,
+            0
+          ]
+        },
+        {
+          "classes": [
+            {
+              "fec": 0,
+              "rate": 5,
+              "crc": 4,
+              "terminated": true,
+              "interleave": 0,
+              "length": 3,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 12,
+              "crc": 8,
+              "terminated": false,
+              "interleave": 1,
+              "length": 0,
+              "joined": false
+            },
+            {
+              "fec": 0,
+              "rate": 19,
+              "crc": 12,
+              "terminated": false,
+              "interleave": 2,
+              "length": 5,
+              "joined": true
+            },
+            {
+              "fec": 0,
+              "rate": 1,
+              "crc": 16,
+              "terminated": false,
+              "interleave": 3,
+              "length": 64,
+              "joined": false
+            }
+          ],
+          "order": [
+            3,
+            2,
+            1,
+            0
+          ]
+        }
+      ],
+      "video": "eld-n512-c1-ld0-f7-srcpc-i0-mixed-aac-alignment.mp4",
+      "matroska": "eld-n512-c1-ld0-f7-srcpc-i0-mixed-aac-alignment.mka"
     },
     {
       "name": "eld-n512-c1-ld0-f7-srcpc-i1-joined",
@@ -304224,261 +306940,6 @@
       "error": "EP class/packet length mismatch"
     },
     {
-      "name": "eld-n480-c1-ld0-f2-srcpc-i0-mixed-aac-alignment",
-      "n": 480,
-      "aot": 39,
-      "channels": 1,
-      "rate": 24000,
-      "source_frames": 2,
-      "frame_samples": 480,
-      "container_rate": 24000,
-      "container_frame_samples": 960,
-      "samples": 5760,
-      "pcm_offset": 0,
-      "slots": 7,
-      "bands": 32,
-      "asc": "f8ec30080c284100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
-      "plain_asc": "f8ec3000",
-      "frames": [
-        {
-          "offset": 1673,
-          "bytes": 95,
-          "choice": 0,
-          "units": [
-            {
-              "offset": 540,
-              "bytes": 9
-            },
-            {
-              "offset": 549,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 1768,
-          "bytes": 34,
-          "choice": 1,
-          "units": [
-            {
-              "offset": 558,
-              "bytes": 9
-            },
-            {
-              "offset": 567,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 1802,
-          "bytes": 37,
-          "choice": 2,
-          "units": [
-            {
-              "offset": 576,
-              "bytes": 9
-            },
-            {
-              "offset": 585,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 1839,
-          "bytes": 95,
-          "choice": 0,
-          "units": [
-            {
-              "offset": 594,
-              "bytes": 9
-            },
-            {
-              "offset": 603,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 1934,
-          "bytes": 34,
-          "choice": 1,
-          "units": [
-            {
-              "offset": 612,
-              "bytes": 9
-            },
-            {
-              "offset": 621,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 1968,
-          "bytes": 37,
-          "choice": 2,
-          "units": [
-            {
-              "offset": 630,
-              "bytes": 9
-            },
-            {
-              "offset": 639,
-              "bytes": 9
-            }
-          ]
-        }
-      ],
-      "golden": "eld-n480-c1-ld0-f2.f32le",
-      "configs": [
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 3,
-              "crc": 4,
-              "terminated": false,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 10,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 17,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 24,
-              "crc": 16,
-              "terminated": true,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            0,
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 4,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 11,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 18,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 0,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            1,
-            2,
-            3,
-            0
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 5,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 12,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 19,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 1,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            3,
-            2,
-            1,
-            0
-          ]
-        }
-      ],
-      "video": "eld-n480-c1-ld0-f2-srcpc-i0-mixed-aac-alignment.mp4",
-      "matroska": "eld-n480-c1-ld0-f2-srcpc-i0-mixed-aac-alignment.mka",
-      "good": "eld-n480-c1-ld0-f2-srcpc-i0-mixed",
-      "bad_index": 3,
-      "error": "nonzero AAC ELD alignment bits"
-    },
-    {
       "name": "eld-n480-c1-ld0-f3-srcpc-i0-mixed-crc",
       "n": 480,
       "aot": 39,
@@ -304961,247 +307422,6 @@
       "error": "EP class/packet length mismatch"
     },
     {
-      "name": "eld-n480-c1-ld0-f3-srcpc-i0-mixed-aac-alignment",
-      "n": 480,
-      "aot": 39,
-      "channels": 1,
-      "rate": 24000,
-      "source_frames": 3,
-      "frame_samples": 480,
-      "container_rate": 24000,
-      "container_frame_samples": 1440,
-      "samples": 5760,
-      "pcm_offset": 0,
-      "slots": 7,
-      "bands": 32,
-      "asc": "f8ec30080c2c4100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
-      "plain_asc": "f8ec3000",
-      "frames": [
-        {
-          "offset": 7988,
-          "bytes": 140,
-          "choice": 0,
-          "units": [
-            {
-              "offset": 2484,
-              "bytes": 9
-            },
-            {
-              "offset": 2493,
-              "bytes": 9
-            },
-            {
-              "offset": 2502,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 8128,
-          "bytes": 47,
-          "choice": 1,
-          "units": [
-            {
-              "offset": 2511,
-              "bytes": 9
-            },
-            {
-              "offset": 2520,
-              "bytes": 9
-            },
-            {
-              "offset": 2529,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 8175,
-          "bytes": 52,
-          "choice": 2,
-          "units": [
-            {
-              "offset": 2538,
-              "bytes": 9
-            },
-            {
-              "offset": 2547,
-              "bytes": 9
-            },
-            {
-              "offset": 2556,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 8227,
-          "bytes": 140,
-          "choice": 0,
-          "units": [
-            {
-              "offset": 2565,
-              "bytes": 9
-            },
-            {
-              "offset": 2574,
-              "bytes": 9
-            },
-            {
-              "offset": 2583,
-              "bytes": 9
-            }
-          ]
-        }
-      ],
-      "golden": "eld-n480-c1-ld0-f3.f32le",
-      "configs": [
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 3,
-              "crc": 4,
-              "terminated": false,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 10,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 17,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 24,
-              "crc": 16,
-              "terminated": true,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            0,
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 4,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 11,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 18,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 0,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            1,
-            2,
-            3,
-            0
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 5,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 12,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 19,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 1,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            3,
-            2,
-            1,
-            0
-          ]
-        }
-      ],
-      "video": "eld-n480-c1-ld0-f3-srcpc-i0-mixed-aac-alignment.mp4",
-      "matroska": "eld-n480-c1-ld0-f3-srcpc-i0-mixed-aac-alignment.mka",
-      "good": "eld-n480-c1-ld0-f3-srcpc-i0-mixed",
-      "bad_index": 3,
-      "error": "nonzero AAC ELD alignment bits"
-    },
-    {
       "name": "eld-n480-c1-ld0-f4-srcpc-i0-mixed-crc",
       "n": 480,
       "aot": 39,
@@ -305670,240 +307890,6 @@
       "error": "EP class/packet length mismatch"
     },
     {
-      "name": "eld-n480-c1-ld0-f4-srcpc-i0-mixed-aac-alignment",
-      "n": 480,
-      "aot": 39,
-      "channels": 1,
-      "rate": 24000,
-      "source_frames": 4,
-      "frame_samples": 480,
-      "container_rate": 24000,
-      "container_frame_samples": 1920,
-      "samples": 5760,
-      "pcm_offset": 0,
-      "slots": 7,
-      "bands": 32,
-      "asc": "f8ec30080c304100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
-      "plain_asc": "f8ec3000",
-      "frames": [
-        {
-          "offset": 14029,
-          "bytes": 185,
-          "choice": 0,
-          "units": [
-            {
-              "offset": 4428,
-              "bytes": 9
-            },
-            {
-              "offset": 4437,
-              "bytes": 9
-            },
-            {
-              "offset": 4446,
-              "bytes": 9
-            },
-            {
-              "offset": 4455,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 14214,
-          "bytes": 59,
-          "choice": 1,
-          "units": [
-            {
-              "offset": 4464,
-              "bytes": 9
-            },
-            {
-              "offset": 4473,
-              "bytes": 9
-            },
-            {
-              "offset": 4482,
-              "bytes": 9
-            },
-            {
-              "offset": 4491,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 14273,
-          "bytes": 65,
-          "choice": 2,
-          "units": [
-            {
-              "offset": 4500,
-              "bytes": 9
-            },
-            {
-              "offset": 4509,
-              "bytes": 9
-            },
-            {
-              "offset": 4518,
-              "bytes": 9
-            },
-            {
-              "offset": 4527,
-              "bytes": 9
-            }
-          ]
-        }
-      ],
-      "golden": "eld-n480-c1-ld0-f4.f32le",
-      "configs": [
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 3,
-              "crc": 4,
-              "terminated": false,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 10,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 17,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 24,
-              "crc": 16,
-              "terminated": true,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            0,
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 4,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 11,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 18,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 0,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            1,
-            2,
-            3,
-            0
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 5,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 12,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 19,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 1,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            3,
-            2,
-            1,
-            0
-          ]
-        }
-      ],
-      "video": "eld-n480-c1-ld0-f4-srcpc-i0-mixed-aac-alignment.mp4",
-      "matroska": "eld-n480-c1-ld0-f4-srcpc-i0-mixed-aac-alignment.mka",
-      "good": "eld-n480-c1-ld0-f4-srcpc-i0-mixed",
-      "bad_index": 2,
-      "error": "nonzero AAC ELD alignment bits"
-    },
-    {
       "name": "eld-n480-c1-ld0-f5-srcpc-i0-mixed-crc",
       "n": 480,
       "aot": 39,
@@ -306340,225 +308326,6 @@
       "good": "eld-n480-c1-ld0-f5-srcpc-i0-mixed",
       "bad_index": 1,
       "error": "EP class/packet length mismatch"
-    },
-    {
-      "name": "eld-n480-c1-ld0-f5-srcpc-i0-mixed-aac-alignment",
-      "n": 480,
-      "aot": 39,
-      "channels": 1,
-      "rate": 24000,
-      "source_frames": 5,
-      "frame_samples": 480,
-      "container_rate": 24000,
-      "container_frame_samples": 2400,
-      "samples": 4800,
-      "pcm_offset": 0,
-      "slots": 7,
-      "bands": 32,
-      "asc": "f8ec30080c344100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
-      "plain_asc": "f8ec3000",
-      "frames": [
-        {
-          "offset": 19528,
-          "bytes": 229,
-          "choice": 0,
-          "units": [
-            {
-              "offset": 6282,
-              "bytes": 9
-            },
-            {
-              "offset": 6291,
-              "bytes": 9
-            },
-            {
-              "offset": 6300,
-              "bytes": 9
-            },
-            {
-              "offset": 6309,
-              "bytes": 9
-            },
-            {
-              "offset": 6318,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 19757,
-          "bytes": 72,
-          "choice": 1,
-          "units": [
-            {
-              "offset": 6327,
-              "bytes": 9
-            },
-            {
-              "offset": 6336,
-              "bytes": 9
-            },
-            {
-              "offset": 6345,
-              "bytes": 9
-            },
-            {
-              "offset": 6354,
-              "bytes": 9
-            },
-            {
-              "offset": 6363,
-              "bytes": 9
-            }
-          ]
-        }
-      ],
-      "golden": "eld-n480-c1-ld0-f5.f32le",
-      "configs": [
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 3,
-              "crc": 4,
-              "terminated": false,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 10,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 17,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 24,
-              "crc": 16,
-              "terminated": true,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            0,
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 4,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 11,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 18,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 0,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            1,
-            2,
-            3,
-            0
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 5,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 12,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 19,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 1,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            3,
-            2,
-            1,
-            0
-          ]
-        }
-      ],
-      "video": "eld-n480-c1-ld0-f5-srcpc-i0-mixed-aac-alignment.mp4",
-      "matroska": "eld-n480-c1-ld0-f5-srcpc-i0-mixed-aac-alignment.mka",
-      "good": "eld-n480-c1-ld0-f5-srcpc-i0-mixed",
-      "bad_index": 1,
-      "error": "nonzero AAC ELD alignment bits"
     },
     {
       "name": "eld-n480-c1-ld0-f6-srcpc-i0-mixed-crc",
@@ -307015,233 +308782,6 @@
       "error": "EP class/packet length mismatch"
     },
     {
-      "name": "eld-n480-c1-ld0-f6-srcpc-i0-mixed-aac-alignment",
-      "n": 480,
-      "aot": 39,
-      "channels": 1,
-      "rate": 24000,
-      "source_frames": 6,
-      "frame_samples": 480,
-      "container_rate": 24000,
-      "container_frame_samples": 2880,
-      "samples": 5760,
-      "pcm_offset": 0,
-      "slots": 7,
-      "bands": 32,
-      "asc": "f8ec30080c384100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
-      "plain_asc": "f8ec3000",
-      "frames": [
-        {
-          "offset": 24797,
-          "bytes": 274,
-          "choice": 0,
-          "units": [
-            {
-              "offset": 7992,
-              "bytes": 9
-            },
-            {
-              "offset": 8001,
-              "bytes": 9
-            },
-            {
-              "offset": 8010,
-              "bytes": 9
-            },
-            {
-              "offset": 8019,
-              "bytes": 9
-            },
-            {
-              "offset": 8028,
-              "bytes": 9
-            },
-            {
-              "offset": 8037,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 25071,
-          "bytes": 85,
-          "choice": 1,
-          "units": [
-            {
-              "offset": 8046,
-              "bytes": 9
-            },
-            {
-              "offset": 8055,
-              "bytes": 9
-            },
-            {
-              "offset": 8064,
-              "bytes": 9
-            },
-            {
-              "offset": 8073,
-              "bytes": 9
-            },
-            {
-              "offset": 8082,
-              "bytes": 9
-            },
-            {
-              "offset": 8091,
-              "bytes": 9
-            }
-          ]
-        }
-      ],
-      "golden": "eld-n480-c1-ld0-f6.f32le",
-      "configs": [
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 3,
-              "crc": 4,
-              "terminated": false,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 10,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 17,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 24,
-              "crc": 16,
-              "terminated": true,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            0,
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 4,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 11,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 18,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 0,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            1,
-            2,
-            3,
-            0
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 5,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 12,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 19,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 1,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            3,
-            2,
-            1,
-            0
-          ]
-        }
-      ],
-      "video": "eld-n480-c1-ld0-f6-srcpc-i0-mixed-aac-alignment.mp4",
-      "matroska": "eld-n480-c1-ld0-f6-srcpc-i0-mixed-aac-alignment.mka",
-      "good": "eld-n480-c1-ld0-f6-srcpc-i0-mixed",
-      "bad_index": 1,
-      "error": "nonzero AAC ELD alignment bits"
-    },
-    {
       "name": "eld-n480-c1-ld0-f7-srcpc-i0-mixed-crc",
       "n": 480,
       "aot": 39,
@@ -307640,206 +309180,6 @@
       "good": "eld-n480-c1-ld0-f7-srcpc-i0-mixed",
       "bad_index": 0,
       "error": "EP class/packet length mismatch"
-    },
-    {
-      "name": "eld-n480-c1-ld0-f7-srcpc-i0-mixed-aac-alignment",
-      "n": 480,
-      "aot": 39,
-      "channels": 1,
-      "rate": 24000,
-      "source_frames": 7,
-      "frame_samples": 480,
-      "container_rate": 24000,
-      "container_frame_samples": 3360,
-      "samples": 3360,
-      "pcm_offset": 0,
-      "slots": 7,
-      "bands": 32,
-      "asc": "f8ec30080c3c4100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
-      "plain_asc": "f8ec3000",
-      "frames": [
-        {
-          "offset": 30476,
-          "bytes": 317,
-          "choice": 0,
-          "units": [
-            {
-              "offset": 9711,
-              "bytes": 9
-            },
-            {
-              "offset": 9720,
-              "bytes": 9
-            },
-            {
-              "offset": 9729,
-              "bytes": 9
-            },
-            {
-              "offset": 9738,
-              "bytes": 9
-            },
-            {
-              "offset": 9747,
-              "bytes": 9
-            },
-            {
-              "offset": 9756,
-              "bytes": 9
-            },
-            {
-              "offset": 9765,
-              "bytes": 9
-            }
-          ]
-        }
-      ],
-      "golden": "eld-n480-c1-ld0-f7.f32le",
-      "configs": [
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 3,
-              "crc": 4,
-              "terminated": false,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 10,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 17,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 24,
-              "crc": 16,
-              "terminated": true,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            0,
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 4,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 11,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 18,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 0,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            1,
-            2,
-            3,
-            0
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 5,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 12,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 19,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 1,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            3,
-            2,
-            1,
-            0
-          ]
-        }
-      ],
-      "video": "eld-n480-c1-ld0-f7-srcpc-i0-mixed-aac-alignment.mp4",
-      "matroska": "eld-n480-c1-ld0-f7-srcpc-i0-mixed-aac-alignment.mka",
-      "good": "eld-n480-c1-ld0-f7-srcpc-i0-mixed",
-      "bad_index": 0,
-      "error": "nonzero AAC ELD alignment bits"
     },
     {
       "name": "eld-n512-c1-ld0-f2-srcpc-i0-mixed-crc",
@@ -308352,261 +309692,6 @@
       "error": "EP class/packet length mismatch"
     },
     {
-      "name": "eld-n512-c1-ld0-f2-srcpc-i0-mixed-aac-alignment",
-      "n": 512,
-      "aot": 39,
-      "channels": 1,
-      "rate": 24000,
-      "source_frames": 2,
-      "frame_samples": 512,
-      "container_rate": 24000,
-      "container_frame_samples": 1024,
-      "samples": 6144,
-      "pcm_offset": 0,
-      "slots": 8,
-      "bands": 32,
-      "asc": "f8ec20080c284100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
-      "plain_asc": "f8ec2000",
-      "frames": [
-        {
-          "offset": 73814,
-          "bytes": 95,
-          "choice": 0,
-          "units": [
-            {
-              "offset": 25695,
-              "bytes": 9
-            },
-            {
-              "offset": 25704,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 73909,
-          "bytes": 34,
-          "choice": 1,
-          "units": [
-            {
-              "offset": 25713,
-              "bytes": 9
-            },
-            {
-              "offset": 25722,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 73943,
-          "bytes": 37,
-          "choice": 2,
-          "units": [
-            {
-              "offset": 25731,
-              "bytes": 9
-            },
-            {
-              "offset": 25740,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 73980,
-          "bytes": 95,
-          "choice": 0,
-          "units": [
-            {
-              "offset": 25749,
-              "bytes": 9
-            },
-            {
-              "offset": 25758,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 74075,
-          "bytes": 34,
-          "choice": 1,
-          "units": [
-            {
-              "offset": 25767,
-              "bytes": 9
-            },
-            {
-              "offset": 25776,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 74109,
-          "bytes": 37,
-          "choice": 2,
-          "units": [
-            {
-              "offset": 25785,
-              "bytes": 9
-            },
-            {
-              "offset": 25794,
-              "bytes": 9
-            }
-          ]
-        }
-      ],
-      "golden": "eld-n512-c1-ld0-f2.f32le",
-      "configs": [
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 3,
-              "crc": 4,
-              "terminated": false,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 10,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 17,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 24,
-              "crc": 16,
-              "terminated": true,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            0,
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 4,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 11,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 18,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 0,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            1,
-            2,
-            3,
-            0
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 5,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 12,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 19,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 1,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            3,
-            2,
-            1,
-            0
-          ]
-        }
-      ],
-      "video": "eld-n512-c1-ld0-f2-srcpc-i0-mixed-aac-alignment.mp4",
-      "matroska": "eld-n512-c1-ld0-f2-srcpc-i0-mixed-aac-alignment.mka",
-      "good": "eld-n512-c1-ld0-f2-srcpc-i0-mixed",
-      "bad_index": 3,
-      "error": "nonzero AAC ELD alignment bits"
-    },
-    {
       "name": "eld-n512-c1-ld0-f3-srcpc-i0-mixed-crc",
       "n": 512,
       "aot": 39,
@@ -309089,247 +310174,6 @@
       "error": "EP class/packet length mismatch"
     },
     {
-      "name": "eld-n512-c1-ld0-f3-srcpc-i0-mixed-aac-alignment",
-      "n": 512,
-      "aot": 39,
-      "channels": 1,
-      "rate": 24000,
-      "source_frames": 3,
-      "frame_samples": 512,
-      "container_rate": 24000,
-      "container_frame_samples": 1536,
-      "samples": 6144,
-      "pcm_offset": 0,
-      "slots": 8,
-      "bands": 32,
-      "asc": "f8ec20080c2c4100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
-      "plain_asc": "f8ec2000",
-      "frames": [
-        {
-          "offset": 80129,
-          "bytes": 140,
-          "choice": 0,
-          "units": [
-            {
-              "offset": 27639,
-              "bytes": 9
-            },
-            {
-              "offset": 27648,
-              "bytes": 9
-            },
-            {
-              "offset": 27657,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 80269,
-          "bytes": 47,
-          "choice": 1,
-          "units": [
-            {
-              "offset": 27666,
-              "bytes": 9
-            },
-            {
-              "offset": 27675,
-              "bytes": 9
-            },
-            {
-              "offset": 27684,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 80316,
-          "bytes": 52,
-          "choice": 2,
-          "units": [
-            {
-              "offset": 27693,
-              "bytes": 9
-            },
-            {
-              "offset": 27702,
-              "bytes": 9
-            },
-            {
-              "offset": 27711,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 80368,
-          "bytes": 140,
-          "choice": 0,
-          "units": [
-            {
-              "offset": 27720,
-              "bytes": 9
-            },
-            {
-              "offset": 27729,
-              "bytes": 9
-            },
-            {
-              "offset": 27738,
-              "bytes": 9
-            }
-          ]
-        }
-      ],
-      "golden": "eld-n512-c1-ld0-f3.f32le",
-      "configs": [
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 3,
-              "crc": 4,
-              "terminated": false,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 10,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 17,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 24,
-              "crc": 16,
-              "terminated": true,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            0,
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 4,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 11,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 18,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 0,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            1,
-            2,
-            3,
-            0
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 5,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 12,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 19,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 1,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            3,
-            2,
-            1,
-            0
-          ]
-        }
-      ],
-      "video": "eld-n512-c1-ld0-f3-srcpc-i0-mixed-aac-alignment.mp4",
-      "matroska": "eld-n512-c1-ld0-f3-srcpc-i0-mixed-aac-alignment.mka",
-      "good": "eld-n512-c1-ld0-f3-srcpc-i0-mixed",
-      "bad_index": 3,
-      "error": "nonzero AAC ELD alignment bits"
-    },
-    {
       "name": "eld-n512-c1-ld0-f4-srcpc-i0-mixed-crc",
       "n": 512,
       "aot": 39,
@@ -309798,240 +310642,6 @@
       "error": "EP class/packet length mismatch"
     },
     {
-      "name": "eld-n512-c1-ld0-f4-srcpc-i0-mixed-aac-alignment",
-      "n": 512,
-      "aot": 39,
-      "channels": 1,
-      "rate": 24000,
-      "source_frames": 4,
-      "frame_samples": 512,
-      "container_rate": 24000,
-      "container_frame_samples": 2048,
-      "samples": 6144,
-      "pcm_offset": 0,
-      "slots": 8,
-      "bands": 32,
-      "asc": "f8ec20080c304100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
-      "plain_asc": "f8ec2000",
-      "frames": [
-        {
-          "offset": 86170,
-          "bytes": 185,
-          "choice": 0,
-          "units": [
-            {
-              "offset": 29583,
-              "bytes": 9
-            },
-            {
-              "offset": 29592,
-              "bytes": 9
-            },
-            {
-              "offset": 29601,
-              "bytes": 9
-            },
-            {
-              "offset": 29610,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 86355,
-          "bytes": 59,
-          "choice": 1,
-          "units": [
-            {
-              "offset": 29619,
-              "bytes": 9
-            },
-            {
-              "offset": 29628,
-              "bytes": 9
-            },
-            {
-              "offset": 29637,
-              "bytes": 9
-            },
-            {
-              "offset": 29646,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 86414,
-          "bytes": 65,
-          "choice": 2,
-          "units": [
-            {
-              "offset": 29655,
-              "bytes": 9
-            },
-            {
-              "offset": 29664,
-              "bytes": 9
-            },
-            {
-              "offset": 29673,
-              "bytes": 9
-            },
-            {
-              "offset": 29682,
-              "bytes": 9
-            }
-          ]
-        }
-      ],
-      "golden": "eld-n512-c1-ld0-f4.f32le",
-      "configs": [
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 3,
-              "crc": 4,
-              "terminated": false,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 10,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 17,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 24,
-              "crc": 16,
-              "terminated": true,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            0,
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 4,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 11,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 18,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 0,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            1,
-            2,
-            3,
-            0
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 5,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 12,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 19,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 1,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            3,
-            2,
-            1,
-            0
-          ]
-        }
-      ],
-      "video": "eld-n512-c1-ld0-f4-srcpc-i0-mixed-aac-alignment.mp4",
-      "matroska": "eld-n512-c1-ld0-f4-srcpc-i0-mixed-aac-alignment.mka",
-      "good": "eld-n512-c1-ld0-f4-srcpc-i0-mixed",
-      "bad_index": 2,
-      "error": "nonzero AAC ELD alignment bits"
-    },
-    {
       "name": "eld-n512-c1-ld0-f5-srcpc-i0-mixed-crc",
       "n": 512,
       "aot": 39,
@@ -310468,225 +311078,6 @@
       "good": "eld-n512-c1-ld0-f5-srcpc-i0-mixed",
       "bad_index": 1,
       "error": "EP class/packet length mismatch"
-    },
-    {
-      "name": "eld-n512-c1-ld0-f5-srcpc-i0-mixed-aac-alignment",
-      "n": 512,
-      "aot": 39,
-      "channels": 1,
-      "rate": 24000,
-      "source_frames": 5,
-      "frame_samples": 512,
-      "container_rate": 24000,
-      "container_frame_samples": 2560,
-      "samples": 5120,
-      "pcm_offset": 0,
-      "slots": 8,
-      "bands": 32,
-      "asc": "f8ec20080c344100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
-      "plain_asc": "f8ec2000",
-      "frames": [
-        {
-          "offset": 91669,
-          "bytes": 229,
-          "choice": 0,
-          "units": [
-            {
-              "offset": 31437,
-              "bytes": 9
-            },
-            {
-              "offset": 31446,
-              "bytes": 9
-            },
-            {
-              "offset": 31455,
-              "bytes": 9
-            },
-            {
-              "offset": 31464,
-              "bytes": 9
-            },
-            {
-              "offset": 31473,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 91898,
-          "bytes": 72,
-          "choice": 1,
-          "units": [
-            {
-              "offset": 31482,
-              "bytes": 9
-            },
-            {
-              "offset": 31491,
-              "bytes": 9
-            },
-            {
-              "offset": 31500,
-              "bytes": 9
-            },
-            {
-              "offset": 31509,
-              "bytes": 9
-            },
-            {
-              "offset": 31518,
-              "bytes": 9
-            }
-          ]
-        }
-      ],
-      "golden": "eld-n512-c1-ld0-f5.f32le",
-      "configs": [
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 3,
-              "crc": 4,
-              "terminated": false,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 10,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 17,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 24,
-              "crc": 16,
-              "terminated": true,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            0,
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 4,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 11,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 18,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 0,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            1,
-            2,
-            3,
-            0
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 5,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 12,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 19,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 1,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            3,
-            2,
-            1,
-            0
-          ]
-        }
-      ],
-      "video": "eld-n512-c1-ld0-f5-srcpc-i0-mixed-aac-alignment.mp4",
-      "matroska": "eld-n512-c1-ld0-f5-srcpc-i0-mixed-aac-alignment.mka",
-      "good": "eld-n512-c1-ld0-f5-srcpc-i0-mixed",
-      "bad_index": 1,
-      "error": "nonzero AAC ELD alignment bits"
     },
     {
       "name": "eld-n512-c1-ld0-f6-srcpc-i0-mixed-crc",
@@ -311143,233 +311534,6 @@
       "error": "EP class/packet length mismatch"
     },
     {
-      "name": "eld-n512-c1-ld0-f6-srcpc-i0-mixed-aac-alignment",
-      "n": 512,
-      "aot": 39,
-      "channels": 1,
-      "rate": 24000,
-      "source_frames": 6,
-      "frame_samples": 512,
-      "container_rate": 24000,
-      "container_frame_samples": 3072,
-      "samples": 6144,
-      "pcm_offset": 0,
-      "slots": 8,
-      "bands": 32,
-      "asc": "f8ec20080c384100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
-      "plain_asc": "f8ec2000",
-      "frames": [
-        {
-          "offset": 96938,
-          "bytes": 274,
-          "choice": 0,
-          "units": [
-            {
-              "offset": 33147,
-              "bytes": 9
-            },
-            {
-              "offset": 33156,
-              "bytes": 9
-            },
-            {
-              "offset": 33165,
-              "bytes": 9
-            },
-            {
-              "offset": 33174,
-              "bytes": 9
-            },
-            {
-              "offset": 33183,
-              "bytes": 9
-            },
-            {
-              "offset": 33192,
-              "bytes": 9
-            }
-          ]
-        },
-        {
-          "offset": 97212,
-          "bytes": 85,
-          "choice": 1,
-          "units": [
-            {
-              "offset": 33201,
-              "bytes": 9
-            },
-            {
-              "offset": 33210,
-              "bytes": 9
-            },
-            {
-              "offset": 33219,
-              "bytes": 9
-            },
-            {
-              "offset": 33228,
-              "bytes": 9
-            },
-            {
-              "offset": 33237,
-              "bytes": 9
-            },
-            {
-              "offset": 33246,
-              "bytes": 9
-            }
-          ]
-        }
-      ],
-      "golden": "eld-n512-c1-ld0-f6.f32le",
-      "configs": [
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 3,
-              "crc": 4,
-              "terminated": false,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 10,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 17,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 24,
-              "crc": 16,
-              "terminated": true,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            0,
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 4,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 11,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 18,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 0,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            1,
-            2,
-            3,
-            0
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 5,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 12,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 19,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 1,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            3,
-            2,
-            1,
-            0
-          ]
-        }
-      ],
-      "video": "eld-n512-c1-ld0-f6-srcpc-i0-mixed-aac-alignment.mp4",
-      "matroska": "eld-n512-c1-ld0-f6-srcpc-i0-mixed-aac-alignment.mka",
-      "good": "eld-n512-c1-ld0-f6-srcpc-i0-mixed",
-      "bad_index": 1,
-      "error": "nonzero AAC ELD alignment bits"
-    },
-    {
       "name": "eld-n512-c1-ld0-f7-srcpc-i0-mixed-crc",
       "n": 512,
       "aot": 39,
@@ -311768,206 +311932,6 @@
       "good": "eld-n512-c1-ld0-f7-srcpc-i0-mixed",
       "bad_index": 0,
       "error": "EP class/packet length mismatch"
-    },
-    {
-      "name": "eld-n512-c1-ld0-f7-srcpc-i0-mixed-aac-alignment",
-      "n": 512,
-      "aot": 39,
-      "channels": 1,
-      "rate": 24000,
-      "source_frames": 7,
-      "frame_samples": 512,
-      "container_rate": 24000,
-      "container_frame_samples": 3584,
-      "samples": 3584,
-      "pcm_offset": 0,
-      "slots": 8,
-      "bands": 32,
-      "asc": "f8ec20080c3c4100003190000001481000058b00801031080084188240006420000002d020000b260000200210420c01048000ca40000006204000166c0000400c2184081c40",
-      "plain_asc": "f8ec2000",
-      "frames": [
-        {
-          "offset": 102617,
-          "bytes": 317,
-          "choice": 0,
-          "units": [
-            {
-              "offset": 34866,
-              "bytes": 9
-            },
-            {
-              "offset": 34875,
-              "bytes": 9
-            },
-            {
-              "offset": 34884,
-              "bytes": 9
-            },
-            {
-              "offset": 34893,
-              "bytes": 9
-            },
-            {
-              "offset": 34902,
-              "bytes": 9
-            },
-            {
-              "offset": 34911,
-              "bytes": 9
-            },
-            {
-              "offset": 34920,
-              "bytes": 9
-            }
-          ]
-        }
-      ],
-      "golden": "eld-n512-c1-ld0-f7.f32le",
-      "configs": [
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 3,
-              "crc": 4,
-              "terminated": false,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 10,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 17,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 24,
-              "crc": 16,
-              "terminated": true,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            0,
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 4,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 11,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 18,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 0,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            1,
-            2,
-            3,
-            0
-          ]
-        },
-        {
-          "classes": [
-            {
-              "fec": 0,
-              "rate": 5,
-              "crc": 4,
-              "terminated": true,
-              "interleave": 0,
-              "length": 3,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 12,
-              "crc": 8,
-              "terminated": false,
-              "interleave": 1,
-              "length": 0,
-              "joined": false
-            },
-            {
-              "fec": 0,
-              "rate": 19,
-              "crc": 12,
-              "terminated": false,
-              "interleave": 2,
-              "length": 5,
-              "joined": true
-            },
-            {
-              "fec": 0,
-              "rate": 1,
-              "crc": 16,
-              "terminated": false,
-              "interleave": 3,
-              "length": 64,
-              "joined": false
-            }
-          ],
-          "order": [
-            3,
-            2,
-            1,
-            0
-          ]
-        }
-      ],
-      "video": "eld-n512-c1-ld0-f7-srcpc-i0-mixed-aac-alignment.mp4",
-      "matroska": "eld-n512-c1-ld0-f7-srcpc-i0-mixed-aac-alignment.mka",
-      "good": "eld-n512-c1-ld0-f7-srcpc-i0-mixed",
-      "bad_index": 0,
-      "error": "nonzero AAC ELD alignment bits"
     },
     {
       "name": "eld-n480-c1-ld1-f2-srcpc-i0-mixed-crc",

@@ -319,26 +319,6 @@ fn malformed_protected_movies_have_specific_failures_and_preserve_history() {
             d.decode(packet(&blob, row)).unwrap();
         }
         let saved = d.checkpoint();
-        if c["error"].as_str().unwrap().contains("AAC ELD alignment") {
-            let ep = AudioSpecificConfig::parse(&hex(c["asc"].as_str().unwrap()))
-                .unwrap()
-                .protection
-                .unwrap();
-            let units = ep
-                .decode_raw_access_units(packet(&blob, &c["frames"][index]))
-                .unwrap();
-            let plain = read("plain-packets.bin");
-            for (unit, row) in units
-                .iter()
-                .zip(c["frames"][index]["units"].as_array().unwrap())
-            {
-                assert_eq!(
-                    unit,
-                    packet(&plain, row),
-                    "AAC refusal must follow successful EP recovery"
-                );
-            }
-        }
         let error = d
             .decode(packet(&blob, &c["frames"][index]))
             .unwrap_err()

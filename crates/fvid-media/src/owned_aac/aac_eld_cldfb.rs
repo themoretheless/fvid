@@ -5,6 +5,8 @@ use super::{
     Result, aac_eld_cldfb_window::WINDOW, aac_sbr_qmf::Complex, invalid, memory::Footprint,
 };
 use std::sync::OnceLock;
+// ISO/IEC14496-3:2009 section4.6.19.4.1 uses 2*n-95. This also
+// matches the centered factor-one bank; no unmatched extra phase is introduced.
 fn analysis_matrix() -> &'static [[Complex; 64]] {
     static M: OnceLock<Vec<[Complex; 64]>> = OnceLock::new();
     M.get_or_init(|| {
@@ -12,7 +14,7 @@ fn analysis_matrix() -> &'static [[Complex; 64]] {
             .map(|k| {
                 std::array::from_fn(|n| {
                     let phase =
-                        std::f64::consts::PI * (k as f64 + 0.5) * (2.0 * n as f64 - 96.0) / 64.0;
+                        std::f64::consts::PI * (k as f64 + 0.5) * (2.0 * n as f64 - 95.0) / 64.0;
                     let (im, re) = phase.sin_cos();
                     Complex {
                         re: 2.0 * re,
@@ -84,7 +86,7 @@ impl Default for Analysis {
     }
 }
 impl Analysis {
-    /// Explicit centered, downscaled analysis. Legacy analysis remains the default.
+    /// Explicit centered, downscaled analysis. Factor one matches nominal analysis.
     pub fn new_downscaled(factor: usize) -> Result<Self> {
         if !matches!(factor, 1 | 2 | 4 | 8) {
             return Err(invalid("ELD CLDFB analysis requires factor 1, 2, 4 or 8"));

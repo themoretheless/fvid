@@ -1,0 +1,6 @@
+{
+  "complete": true,
+  "fixture": "aac-eld-cldfb-phase/n512-c2-x2.mp4",
+  "scope": "actual macOS default device drain; not listening quality",
+  "stdout": "platform_device=started source_channels=2 rate=48000 duration=0.170667\nphase=full generation=0 from=0.000000 position=0.170667 wall=0.194727 device_drain=complete\nphase=seek-quarter generation=1 from=0.042667 position=0.170667 wall=0.145982 device_drain=complete\nphase=seek-60-percent generation=2 from=0.102400 position=0.170667 wall=0.089887 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.170667 wall=0.192487 device_drain=complete\n"
+}

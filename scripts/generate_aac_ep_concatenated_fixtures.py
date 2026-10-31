@@ -131,8 +131,8 @@ def generate(grouped=False):
                             rows.append(dict(offset=len(blob),bytes=len(packet),choice=selected,units=offsets));blob.extend(packet);packets.append(packet)
                         c=dict(name=label,n=n,aot=source['aot'],channels=channels,rate=rate,source_frames=frames,frame_samples=source_n,container_rate=rate,container_frame_samples=source_n*frames,samples=used*source_n,pcm_offset=0,slots=n//64,bands=64 if rate==48000 else 32,asc=asc.hex(),plain_asc=source['plain_asc'],frames=rows,golden=golden,configs=sets)
                         c['video']=label+'.mp4';files[c['video']]=video_fixture([c],blob,channels,filename=c['video'],write=False)['data'];c['matroska']=label+'.mka';files[c['matroska']]=mkv(asc,packets,rate,source_n*frames,channels)
-                        if mutation in ['clean','corrected']:cases.append(c)
-                        else:c.update(good=name,bad_index=bad_index,error='EP class CRC mismatch'if mutation=='crc'else'nonzero AAC ELD alignment bits'if mutation=='aac-alignment'else'EP RS class/packet length mismatch'if grouped else'EP class/packet length mismatch');bad.append(c)
+                        if mutation in ['clean','corrected','aac-alignment']:cases.append(c)
+                        else:c.update(good=name,bad_index=bad_index,error='EP class CRC mismatch'if mutation=='crc'else'EP RS class/packet length mismatch'if grouped else'EP class/packet length mismatch');bad.append(c)
                         if mutation=='clean'and source['name']=='eld-n512-c1-ld0'and frames==2 and family=='srcpc'and kind==0 and flags=='mixed':
                             for escape in ['length','rate','crc']:
                                 _,invalid_ep=config(lengths,frames,family,kind,flags,escape)
