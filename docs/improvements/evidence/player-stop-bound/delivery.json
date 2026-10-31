@@ -1,0 +1,20 @@
+{
+  "status": "verified delivered",
+  "code_commit": "8f9c136bd6d3ce7e0cbbaa271e455d97e7361c3f",
+  "remote_refs": [
+    "8f9c136bd6d3ce7e0cbbaa271e455d97e7361c3f\trefs/heads/codex/deliver-fvid-20261029",
+    "8f9c136bd6d3ce7e0cbbaa271e455d97e7361c3f\trefs/heads/main"
+  ],
+  "registry_accepted_count": 453,
+  "next_id": "FVID-0454",
+  "eight_gates_exit_zero": true,
+  "distinct_physical_source_passed": 1514,
+  "final_cases": 6,
+  "repeat_runs": 20,
+  "source_and_archived_proof_hashes_verified": true,
+  "own_worktree_clean_at_verification": true,
+  "own_test_artifacts_absent": true,
+  "foreign_worktrees_and_stashes_untouched": true,
+  "candidate_amendments_count_delta": 0,
+  "goal_complete": false
+}
