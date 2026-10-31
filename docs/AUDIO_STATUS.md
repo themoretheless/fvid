@@ -5,9 +5,10 @@ Downscaled LD-SBR additionally uses owned CLDFB PCM synthesis followed by the
 LD-MPS PCM interface, including stereo coupling. The existing shared LD-QMF
 path is retained when bank and packet geometry match SSC. Nominal48kHz ELD
 with single/dual-rate SBR now uses the PCM interface at48/96kHz,including
-64/128-band spatial output. Nominal-rate SSC remapping, direct
-shared-QMF downscale and factor-three SBR remain unsupported. The codec-gap
-objective stays open. See CODEC_PROGRESS.md.
+64/128-band spatial output. Nominal-rate SSC remapping and direct shared-QMF
+downscale remain unsupported. Odd-factor SBR is explicitly refused, consistent
+with the pinned Fraunhofer parser; it is not an established valid missing mode.
+The codec-gap objective stays open. See CODEC_PROGRESS.md for the source audit.
 
 LD-MPS rejects residual extension types0/1, including absent/zero bands, at
 native initial/replacement headers.

@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-31",
+  "source_kind": "Fraunhofer FDK AAC source distributed by Android upstream;implementation evidence,not normative ISO text",
+  "commit": "ee76460efbdb147e26d804c798949c23f174460b",
+  "url": "https://android.googlesource.com/platform/external/aac/+/ee76460efbdb147e26d804c798949c23f174460b/libMpegTPDec/src/tpdec_asc.cpp?format=TEXT",
+  "sha256": "3f7948766cc48319020de85deeace1f12676ed166fef55ae937b97732535c3ac",
+  "function": "EldSpecificConfig_Parse",
+  "finding": "When SBR headers are present,integer downscale ratio is checked;odd ratios other than1 are rejected. Unsupported even factors beyond2/4 are not applied by this reference. Frame length must divide the selected ratio.",
+  "fvid_scope": "FVid supports factor3 short ELD without SBR. Its standalone public SBR rate negotiation already refuses factor3;native MPS also refuses it explicitly. Do not list factor3 SBR as an established valid missing profile merely because plain ELD supports factor3.",
+  "normative_qualification": "Full relevant ISO text is not available;this audit does not prove a universal normative prohibition of every hypothetical rational bank.",
+  "next_action": "Retain explicit refusal;investigate documented admissible tools and SSC adaptation instead of inventing fractional CLDFB behavior.",
+  "no_external_decoder_dependency": true
+}

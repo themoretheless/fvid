@@ -1,3 +1,22 @@
+## Odd LD-SBR downscale audit, 2026-10-31
+
+Factor3 SBR was previously listed too broadly as a pending codec feature.
+A pinned upstream Fraunhofer transport parser explicitly rejects odd downscale
+ratios other than1 when SBR headers are present. FVid separately accepts
+plain ELD factor3. This is primary implementation evidence,not proof of a universal
+normative restriction without the relevant full ISO text. Retain the explicit
+SBR refusal;do not invent fractional CLDFB geometry or count refusal as playback
+acceptance. Nominal SSC adaptation and documented remaining tools stay open.
+
+Existing own `aac-eld-third` movies already distinguish accepted480-sample
+plain ELD at factor3 from rejected512 geometry and LD-SBR requests. The
+`aac-ld-mps-downscaled` test also checks explicit native spatial/SBR refusal.
+No new media failure or new runtime behavior was introduced by this audit.
+Fresh offline verification:13 passed,0 failed,0 ignored;existing frozen fixtures
+need no network,FFmpeg or generation.
+
+Evidence: `docs/validation/aac-eld-sbr-odd-factor-{source,tests}-2026-10-31.json`.
+
 ## Nominal high-rate LD-SBR through LD-MPS PCM, 2026-10-31
 
 The native owner now selects shared LD-QMF only when its actual bank and
