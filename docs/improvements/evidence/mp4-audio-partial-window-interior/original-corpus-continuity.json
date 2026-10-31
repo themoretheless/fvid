@@ -1,0 +1,14 @@
+{
+  "files_preserved_byte_identically": [
+    "ima-control.mp4",
+    "ima-control.f32le",
+    "ima-partial.mp4",
+    "ima-partial.f32le",
+    "alac-control.mp4",
+    "alac-control.f32le",
+    "alac-partial.mp4",
+    "alac-partial.f32le"
+  ],
+  "changed_manifest_adds_two_middle_cases": true,
+  "original_qualification_commit": "5534f01cb5463a7f6c15a1d4f815d13db137ce61"
+}

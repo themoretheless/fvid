@@ -1,0 +1,50 @@
+{
+  "integration": {
+    "path": "/private/tmp/fvid-mp4-audio-partial-interior-integration.log",
+    "sha256": "87812a1e23f7cacdbb7ae8b55774ff07af9b0d80e4826ca1e10c0c113333aacd",
+    "archive": "integration.log",
+    "archive_sha256": "44c07adedbda67b78d9538e15ad3f41972ee8e6c6d71b3c8b0f606f01185953b"
+  },
+  "root-mp4": {
+    "path": "/private/tmp/fvid-mp4-audio-partial-interior-root-mp4.log",
+    "sha256": "3322dbb735824686d2556b97837b221b77da9ac8c5f4f50e06e0b3d74e1f05dc",
+    "archive": "root-mp4.log",
+    "archive_sha256": "e76d6d31dd511d3dbefc3a363dd1129c74fee750838d1f07c5684a86ddd7d0c0"
+  },
+  "root-webm": {
+    "path": "/private/tmp/fvid-mp4-audio-partial-interior-root-webm.log",
+    "sha256": "5bf95b300462ea378d7837929e7456e997091c157377a660f74bd284884474ec",
+    "archive": "root-webm.log",
+    "archive_sha256": "06d0d163183e472abc2561208ecd9bafd30d0319445e968402c21491c8bb04df"
+  },
+  "media": {
+    "path": "/private/tmp/fvid-mp4-audio-partial-interior-media.log",
+    "sha256": "79b9678c261fa2071be98447d5ebc128929eb15740e95c494265ea55aed73242",
+    "archive": "media.log",
+    "archive_sha256": "2d74aa26d7816b426e0858f4c7f3270b8419c7c5c19bb36e864dcc389204995b"
+  },
+  "core-check": {
+    "path": "/private/tmp/fvid-mp4-audio-partial-interior-core-check.log",
+    "sha256": "4bafa1e198b9cf0abed8a7b392ba243441aecb2aacde1179416ef68ce9d3c9fb",
+    "archive": "core-check.log",
+    "archive_sha256": "4bafa1e198b9cf0abed8a7b392ba243441aecb2aacde1179416ef68ce9d3c9fb"
+  },
+  "player-check": {
+    "path": "/private/tmp/fvid-mp4-audio-partial-interior-player-check.log",
+    "sha256": "351117f6b73cb041dec328fc754ae0bd0d6106768bda63f03add3dca46903089",
+    "archive": "player-check.log",
+    "archive_sha256": "351117f6b73cb041dec328fc754ae0bd0d6106768bda63f03add3dca46903089"
+  },
+  "before": {
+    "path": "/private/tmp/fvid-mp4-audio-partial-interior-before.log",
+    "sha256": "d076cba84eefddc0d36f2614710ab401d71ce3d185b6e8bad238f4adf5d8f823",
+    "archive": "before.log",
+    "archive_sha256": "d076cba84eefddc0d36f2614710ab401d71ce3d185b6e8bad238f4adf5d8f823"
+  },
+  "after": {
+    "path": "/private/tmp/fvid-mp4-audio-partial-interior-after.log",
+    "sha256": "f8f82cd6274660cafb6e2c9e83340bdfb4e6e0e082441ff947a301ec414b3afb",
+    "archive": "after.log",
+    "archive_sha256": "8c369a4892fb254ee45fe0fabe233bc12b5e81c72cf7037e5fc0a86e4ad7e153"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "removed": [
+    "/private/tmp/fvid-mp4-audio-partial-interior-integration.log",
+    "/private/tmp/fvid-mp4-audio-partial-interior-root-mp4.log",
+    "/private/tmp/fvid-mp4-audio-partial-interior-root-webm.log",
+    "/private/tmp/fvid-mp4-audio-partial-interior-media.log",
+    "/private/tmp/fvid-mp4-audio-partial-interior-core-check.log",
+    "/private/tmp/fvid-mp4-audio-partial-interior-player-check.log",
+    "/private/tmp/fvid-mp4-audio-partial-interior-before.log",
+    "/private/tmp/fvid-mp4-audio-partial-interior-after.log",
+    "/private/tmp/fvid-mp4-audio-partial-interior-target-20261031",
+    "scripts/__pycache__"
+  ],
+  "verified": "frozen sources,raw and archived log hashes match;all6gates terminal0",
+  "preserved": "all13corpus files,generator,tests,original proof and new evidence; foreign worktrees and4stashes untouched"
+}

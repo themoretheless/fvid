@@ -1,0 +1,1015 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.24
+   Compiling libc v0.2.189
+   Compiling syn v3.0.5
+   Compiling syn v2.0.119
+   Compiling bitflags v2.13.2
+   Compiling cfg-if v1.0.4
+   Compiling libm v0.2.16
+   Compiling autocfg v1.5.1
+   Compiling num-traits v0.2.19
+   Compiling smallvec v1.16.1
+   Compiling objc2-encode v4.1.0
+   Compiling bytemuck_derive v1.12.1
+   Compiling once_cell v1.21.4
+   Compiling objc2 v0.6.4
+   Compiling bytemuck v1.25.2
+   Compiling log v0.4.34
+   Compiling cfg_aliases v0.2.2
+   Compiling foldhash v0.2.0
+   Compiling synstructure v0.13.2
+   Compiling block2 v0.6.2
+   Compiling objc2-core-foundation v0.3.2
+   Compiling zerocopy v0.8.57
+   Compiling thiserror v2.0.20
+   Compiling zerofrom-derive v0.1.7
+   Compiling zerocopy-derive v0.8.57
+   Compiling thiserror-impl v2.0.20
+   Compiling zerofrom v0.1.8
+   Compiling objc2-foundation v0.3.2
+   Compiling yoke-derive v0.8.2
+   Compiling stable_deref_trait v1.2.1
+   Compiling arrayvec v0.7.8
+   Compiling yoke v0.8.3
+   Compiling hashbrown v0.17.1
+   Compiling zerovec-derive v0.11.6
+   Compiling pin-project-lite v0.2.17
+   Compiling objc2-core-graphics v0.3.2
+   Compiling libloading v0.8.9
+   Compiling displaydoc v0.2.7
+   Compiling zerovec v0.11.8
+   Compiling half v2.7.1
+   Compiling parking_lot_core v0.9.12
+   Compiling raw-window-handle v0.6.2
+   Compiling equivalent v1.0.2
+   Compiling scopeguard v1.2.0
+   Compiling lock_api v0.4.14
+   Compiling indexmap v2.14.2
+   Compiling tinystr v0.8.4
+   Compiling dispatch2 v0.3.1
+   Compiling objc-sys v0.3.5
+   Compiling rustc-hash v1.1.0
+   Compiling litemap v0.8.3
+   Compiling writeable v0.6.4
+   Compiling naga-types v30.0.1
+   Compiling icu_locale_core v2.3.0
+   Compiling parking_lot v0.12.5
+   Compiling potential_utf v0.1.6
+   Compiling zerotrie v0.2.5
+   Compiling naga v30.0.1
+   Compiling itoa v1.0.18
+   Compiling bit-vec v0.9.1
+   Compiling icu_normalizer_data v2.3.0
+   Compiling unicode-width v0.2.2
+   Compiling icu_properties_data v2.3.0
+   Compiling utf8_iter v1.0.4
+   Compiling profiling v1.0.18
+   Compiling bytes v1.12.1
+   Compiling icu_collections v2.3.0
+   Compiling codespan-reporting v0.13.1
+   Compiling bit-set v0.10.0
+   Compiling icu_provider v2.3.1
+   Compiling objc2-metal v0.3.2
+   Compiling spirv v0.4.0+sdk-1.4.341.0
+   Compiling core-foundation-sys v0.8.7
+   Compiling find-msvc-tools v0.1.12
+   Compiling glob v0.3.4
+   Compiling percent-encoding v2.3.2
+   Compiling futures-core v0.3.34
+   Compiling shlex v2.0.1
+   Compiling static_assertions v1.1.0
+   Compiling simd-adler32 v0.3.10
+   Compiling wgpu-types v30.0.1
+   Compiling objc2-quartz-core v0.3.2
+   Compiling cc v1.4.6
+   Compiling clang-sys v1.9.1
+   Compiling objc2 v0.5.2
+   Compiling polycool v0.4.0
+   Compiling wgpu-hal v30.0.1
+   Compiling tracing-core v0.1.36
+   Compiling adler2 v2.0.1
+   Compiling bitflags v1.3.2
+   Compiling crc32fast v1.5.2
+   Compiling rustc-hash v2.1.3
+   Compiling tracing v0.1.44
+   Compiling kurbo v0.13.1
+   Compiling icu_properties v2.3.0
+   Compiling icu_normalizer v2.3.0
+   Compiling block2 v0.5.1
+   Compiling wgpu-naga-bridge v30.0.1
+   Compiling ring v0.17.14
+   Compiling raw-window-metal v1.1.0
+   Compiling color v0.3.3
+   Compiling font-types v0.12.5
+   Compiling euclid v0.22.14
+   Compiling socket2 v0.6.5
+   Compiling mio v1.2.3
+   Compiling dispatch v0.2.0
+   Compiling version_check v0.9.5
+   Compiling memchr v2.8.3
+   Compiling minimal-lexical v0.2.1
+   Compiling uuid v1.26.1
+   Compiling regex-syntax v0.8.11
+   Compiling futures-sink v0.3.34
+   Compiling linebender_resource_handle v0.1.1
+   Compiling serde_core v1.0.229
+   Compiling regex-automata v0.4.18
+   Compiling peniko v0.6.1
+   Compiling accesskit v0.24.1
+   Compiling nom v7.1.3
+   Compiling ahash v0.8.12
+   Compiling objc2-foundation v0.2.2
+   Compiling tokio v1.53.1
+   Compiling guillotiere v0.7.0
+   Compiling read-fonts v0.41.0
+   Compiling idna_adapter v1.2.2
+   Compiling miniz_oxide v0.9.1
+   Compiling form_urlencoded v1.2.2
+   Compiling core-foundation v0.9.4
+   Compiling http v1.5.0
+   Compiling wgpu-core v30.0.1
+   Compiling foreign-types-macros v0.2.4
+   Compiling zeroize v1.9.0
+   Compiling unicode-general-category v1.1.0
+   Compiling bindgen v0.72.1
+   Compiling either v1.18.0
+   Compiling foreign-types-shared v0.3.1
+   Compiling fearless_simd v0.4.1
+   Compiling litrs v1.0.0
+   Compiling document-features v0.2.12
+   Compiling itertools v0.13.0
+   Compiling foreign-types v0.5.0
+   Compiling vello_common v0.1.0
+   Compiling rustls-pki-types v1.15.1
+   Compiling http-body v1.1.0
+   Compiling core-graphics-types v0.1.3
+   Compiling flate2 v1.1.10
+   Compiling idna v1.1.0
+   Compiling wgpu-core-deps-apple v30.0.1
+   Compiling objc2-app-kit v0.2.2
+   Compiling cexpr v0.6.0
+   Compiling regex v1.13.1
+   Compiling winit v0.30.13
+   Compiling wgpu v30.0.1
+   Compiling emath v0.36.2
+   Compiling num-integer v0.1.47
+   Compiling getrandom v0.2.17
+   Compiling httparse v1.10.1
+   Compiling serde v1.0.229
+   Compiling futures-io v0.3.34
+   Compiling shlex v1.3.0
+   Compiling untrusted v0.9.0
+   Compiling slab v0.4.12
+   Compiling futures-task v0.3.34
+   Compiling zune-core v0.5.3
+   Compiling futures-util v0.3.34
+   Compiling zune-jpeg v0.5.15
+   Compiling ecolor v0.36.2
+   Compiling url v2.5.8
+   Compiling core-graphics v0.23.2
+   Compiling vello_cpu v0.1.0
+   Compiling harfrust v0.12.0
+   Compiling skrifa v0.44.0
+   Compiling miniz_oxide v0.8.9
+   Compiling fdeflate v0.3.7
+   Compiling objc2-app-kit v0.3.2
+   Compiling hashbrown v0.16.1
+   Compiling serde_derive v1.0.229
+   Compiling self_cell v1.3.0
+   Compiling tower-service v0.3.3
+   Compiling quick-error v2.0.1
+   Compiling epaint_default_fonts v0.36.2
+   Compiling pxfm v0.1.30
+   Compiling smol_str v0.2.2
+   Compiling rustls v0.23.44
+   Compiling nohash-hasher v0.2.0
+   Compiling try-lock v0.2.5
+   Compiling weezl v0.1.12
+   Compiling strength_reduce v0.2.4
+   Compiling dpi v0.1.2
+   Compiling unicode-segmentation v1.13.3
+   Compiling fax v0.2.7
+   Compiling cursor-icon v1.2.0
+   Compiling tiff v0.11.3
+   Compiling moxcms v0.8.1
+   Compiling epaint v0.36.2
+   Compiling transpose v0.2.3
+   Compiling want v0.3.1
+   Compiling itertools v0.15.0
+   Compiling accesskit_consumer v0.38.0
+   Compiling png v0.18.1
+   Compiling coreaudio-sys v0.2.18
+   Compiling rustls-webpki v0.103.15
+   Compiling primal-check v0.3.4
+   Compiling futures-channel v0.3.34
+   Compiling num-complex v0.4.6
+   Compiling byteorder-lite v0.1.0
+   Compiling atomic-waker v1.1.2
+   Compiling zmij v1.0.23
+   Compiling subtle v2.6.1
+   Compiling hyper v1.11.1
+   Compiling image v0.25.10
+   Compiling rustfft v6.4.1
+   Compiling egui v0.36.2
+   Compiling accesskit_macos v0.26.3
+   Compiling sync_wrapper v1.0.2
+   Compiling tower-layer v0.3.3
+   Compiling serde_json v1.0.151
+   Compiling web-time v1.1.0
+   Compiling lazy_static v1.5.0
+   Compiling ipnet v2.12.2
+   Compiling base64 v0.22.1
+   Compiling symphonia-core v0.6.1
+   Compiling hyper-util v0.1.20
+   Compiling tower v0.5.3
+   Compiling accesskit_winit v0.32.2
+   Compiling arboard v3.6.1
+   Compiling tokio-rustls v0.26.5
+   Compiling webbrowser v1.2.4
+   Compiling webpki-roots v1.0.9
+   Compiling type-map v0.5.1
+   Compiling cpal v0.15.3
+   Compiling typenum v1.20.1
+   Compiling ttf-parser v0.25.1
+   Compiling rfd v0.17.2
+   Compiling gpu-shader v0.1.0 (https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067)
+   Compiling ryu v1.0.23
+   Compiling serde_urlencoded v0.7.1
+   Compiling owned_ttf_parser v0.25.1
+   Compiling gpu-runtime v0.1.0 (https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067)
+   Compiling hybrid-array v0.4.15
+   Compiling egui-wgpu v0.36.2
+   Compiling hyper-rustls v0.27.9
+   Compiling egui-winit v0.36.2
+   Compiling coreaudio-rs v0.11.3
+   Compiling tower-http v0.6.11
+   Compiling http-body-util v0.1.5
+   Compiling fvid-platform v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-platform)
+   Compiling mach2 v0.4.3
+   Compiling dasp_sample v0.11.0
+   Compiling fvid-control v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-control)
+   Compiling pollster v1.0.1
+   Compiling ab_glyph_rasterizer v0.1.10
+   Compiling fvid-media v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media)
+   Compiling regex-lite v0.1.9
+   Compiling fvid-cpu v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-cpu)
+   Compiling symphonia-metadata v0.6.1
+   Compiling fvid-codecs v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-codecs)
+   Compiling ab_glyph v0.2.32
+   Compiling eframe v0.36.2
+   Compiling reqwest v0.12.28
+warning: unreachable pattern
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+492 |                         _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |                         ^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+482 | ...   merge_order::Selection::Initial(i)=>{
+    |       ---------------------------------- matches some of the same values
+...
+486 | ...   merge_order::Selection::ViewSynthesis=>return Ok(Resolved::ViewSynthesis),
+    |       ------------------------------------- matches some of the same values
+487 | ...   merge_order::Selection::Texture=>return Ok(Resolved::Texture),
+    |       ------------------------------- matches some of the same values
+488 | ...   merge_order::Selection::InterView=>{selected_iv=1;(special.inter_view.copied().ok_or_else(||invalid("missing selected HEVC IV...
+    |       --------------------------------- matches some of the same values
+...
+492 | ...   _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |       ^ ...and 3 other patterns collectively make this unreachable
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+   Compiling gpu-compute v0.1.0 (https://github.com/themoretheless/forma.git?rev=82ff6067546bdc11bc8d415b97dd1cf10c5fc5a9#82ff6067)
+   Compiling symphonia-bundle-mp3 v0.6.1
+   Compiling fvid-media-info v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media-info)
+warning: function `intra_plane` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/avc_deblock.rs:184:15
+    |
+184 | pub(super) fn intra_plane(
+    |               ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `read_inter_coefficients_422` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_inter_coefficients.rs:34:15
+   |
+34 | pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,pattern:u8,transform8:bool,neighbours:CoefficientNeighbours,chroma...
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `candidates` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_mv.rs:78:4
+   |
+78 | fn candidates(n: Neighbours) -> Result<[Neighbour; 3]> {
+   |    ^^^^^^^^^^
+
+warning: function `inverse2` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:190:4
+    |
+190 | fn inverse2(input: &[i32], output: &mut [i32]) {
+    |    ^^^^^^^^
+
+warning: function `inverse4` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:218:15
+    |
+218 | inverse_size!(inverse4, inverse2, 4);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse8` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:219:15
+    |
+219 | inverse_size!(inverse8, inverse4, 8);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse16` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:220:15
+    |
+220 | inverse_size!(inverse16, inverse8, 16);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse32` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:221:15
+    |
+221 | inverse_size!(inverse32, inverse16, 32);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: enum `RunKind` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:420:17
+    |
+420 | pub(crate) enum RunKind {
+    |                 ^^^^^^^
+
+warning: struct `Run` is never constructed
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:425:19
+    |
+425 | pub(crate) struct Run {
+    |                   ^^^
+
+warning: function `expand_runs` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:431:15
+    |
+431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run]) -> Result<Vec<u8>> {
+    |               ^^^^^^^^^^^
+
+   Compiling fvid-opus v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-opus)
+   Compiling fvid v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid)
+   Compiling symphonia v0.6.1
+   Compiling fvid-vt v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-vt)
+warning: unused variable: `aspect`
+    --> crates/fvid-media/src/owned_y4m_decode.rs:1075:9
+     |
+1075 |     let aspect = presented_header.pixel_aspect()?;
+     |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_aspect`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> crates/fvid-media/src/owned_xfade.rs:462:5
+    |
+462 |     mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
+    |     ----^^^^^
+    |     |
+    |     help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable `pages` is assigned to, but never used
+  --> crates/fvid-media/src/owned_ogg_opus_export.rs:56:9
+   |
+56 |     let mut pages = 0usize;
+   |         ^^^^^^^^^
+   |
+   = note: consider using `_pages` instead
+
+warning: value assigned to `pages` is never read
+  --> crates/fvid-media/src/owned_ogg_opus_export.rs:80:9
+   |
+80 |         pages += 1;
+   |         ^^^^^^^^^^
+   |
+   = help: maybe it is overwritten before being read?
+   = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `encode` is never used
+   --> crates/fvid-media/src/owned_y4m_impl.rs:212:8
+    |
+ 31 | impl Header {
+    | ----------- method in this implementation
+...
+212 |     fn encode(&self, width: usize, height: usize) -> String {
+    |        ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `apply_pixel_filters` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:578:15
+    |
+578 | pub(crate) fn apply_pixel_filters(
+    |               ^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:585:15
+    |
+585 | pub(crate) fn apply_pixel_filters_cached(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached_at` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:594:15
+    |
+594 | pub(crate) fn apply_pixel_filters_cached_at(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `esds_for_mp4` is never used
+   --> crates/fvid-media/src/owned_aac/adts_impl.rs:334:15
+    |
+334 | pub(crate) fn esds_for_mp4(asc: &[u8]) -> Option<Vec<u8>> {
+    |               ^^^^^^^^^^^^
+
+warning: method `read_short` is never used
+  --> crates/fvid-media/src/owned_aac/bits_impl.rs:45:19
+   |
+ 7 | impl<'a> BitReader<'a> {
+   | ---------------------- method in this implementation
+...
+45 |     pub(crate) fn read_short(&mut self, count: u8) -> Result<u16> {
+   |                   ^^^^^^^^^^
+
+warning: associated function `identifiers` is never used
+   --> crates/fvid-media/src/owned_avc_impl.rs:509:19
+    |
+495 | impl Pps {
+    | -------- associated function in this implementation
+...
+509 |     pub(crate) fn identifiers(nal: &[u8]) -> Result<(u32, u32)> {
+    |                   ^^^^^^^^^^^
+
+warning: function `try_mp4_as` is never used
+   --> crates/fvid-media/src/owned_probe.rs:106:15
+    |
+106 | pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    |               ^^^^^^^^^^
+
+warning: function `try_webm_as` is never used
+   --> crates/fvid-media/src/owned_probe.rs:127:15
+    |
+127 | pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    |               ^^^^^^^^^^^
+
+warning: function `try_adts_as` is never used
+   --> crates/fvid-media/src/owned_probe.rs:147:15
+    |
+147 | pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    |               ^^^^^^^^^^^
+
+warning: type alias `Decoder` is never used
+ --> crates/fvid-media/src/owned_audio_mix.rs:8:6
+  |
+8 | type Decoder = fn(&Path) -> Result<(AudioDecodeStats, Vec<u8>)>;
+  |      ^^^^^^^
+
+warning: function `decode_owned_audio` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:226:15
+    |
+226 | pub(crate) fn decode_owned_audio(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `decode_float_wave` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:283:15
+    |
+283 | pub(crate) fn decode_float_wave(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
+    |               ^^^^^^^^^^^^^^^^^
+
+warning: function `decode_float_wave_controlled` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:287:15
+    |
+287 | pub(crate) fn decode_float_wave_controlled<F: FnMut(usize) -> Result<()>>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `read_float_wave_controlled` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:294:15
+    |
+294 | pub(crate) fn read_float_wave_controlled<F: FnMut(usize) -> Result<()>>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `read_float_wave_with_limits` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:302:15
+    |
+302 | pub(crate) fn read_float_wave_with_limits<F: FnMut(usize) -> Result<()>>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `mix_with_decoder` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:455:15
+    |
+455 | pub(crate) fn mix_with_decoder(
+    |               ^^^^^^^^^^^^^^^^
+
+warning: function `merge_with_decoder` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:615:15
+    |
+615 | pub(crate) fn merge_with_decoder(
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_audio_export.rs:8:15
+  |
+8 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_audio_plan.rs:94:15
+   |
+94 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_export.rs:69:15
+   |
+69 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `router` is never used
+  --> crates/fvid-media/src/owned_aac_export_routing.rs:11:15
+   |
+11 | pub(crate) fn router(
+   |               ^^^^^^
+
+warning: function `supports_concat` is never used
+   --> crates/fvid-media/src/owned_wave_remux.rs:122:15
+    |
+122 | pub(crate) fn supports_concat(
+    |               ^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_adts_loudness.rs:107:15
+    |
+107 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_loudnorm.rs:30:15
+   |
+30 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: method `nul_name` is never used
+  --> crates/fvid-media/src/owned_pixel_format.rs:9:27
+   |
+ 6 |           impl PixelFormat {
+   |           ---------------- method in this implementation
+...
+ 9 |               pub(crate) fn nul_name(self) -> &'static [u8] { match self { $( Self::$variant => concat!($name, "\0").as_bytes(), )* } }
+   |                             ^^^^^^^^
+...
+16 | / formats! {
+17 | |     Yuv420p, "yuv420p", Some((1, 1)), 1;
+18 | |     Yuv422p, "yuv422p", Some((1, 0)), 1;
+19 | |     Yuv444p, "yuv444p", Some((0, 0)), 1;
+...  |
+58 | |     Gray16Be, "gray16be", None, 2;
+59 | | }
+   | |_- in this macro invocation
+   |
+   = note: this warning originates in the macro `formats` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `aac_packet_plan` is never used
+  --> crates/fvid-media/src/owned_mp4_aac_plan_impl.rs:35:15
+   |
+35 | pub(crate) fn aac_packet_plan(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `check_encoded_ffv1` is never used
+   --> crates/fvid-media/src/owned_lossless.rs:754:15
+    |
+754 | pub(crate) fn check_encoded_ffv1(
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_ogg_opus_export.rs:200:15
+    |
+200 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_opus_export.rs:34:15
+   |
+34 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `inspect` is never used
+ --> crates/fvid-media/src/owned_matroska_copy_impl.rs:8:15
+  |
+8 | pub(crate) fn inspect<R: Read + Seek>(
+  |               ^^^^^^^
+
+warning: function `inspect_with_packet_limit` is never used
+  --> crates/fvid-media/src/owned_matroska_copy_impl.rs:15:15
+   |
+15 | pub(crate) fn inspect_with_packet_limit<R: Read + Seek>(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_raw_flac.rs:191:15
+    |
+191 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_raw_flac.rs:198:15
+    |
+198 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_flac_export.rs:46:15
+   |
+46 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_flac_export.rs:134:15
+    |
+134 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_raw_mp3.rs:265:15
+    |
+265 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_mp3_export.rs:46:15
+   |
+46 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_mp3_export.rs:126:15
+    |
+126 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_alac_export.rs:38:15
+   |
+38 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_alac_export.rs:121:15
+    |
+121 | pub(crate) fn geometry(source:&Path,options:&CopyOptions)->Result<(u32,u16)>{let (rate,channels,_)=geometry_with_mask(source,option...
+    |               ^^^^^^^^
+
+warning: function `geometry_with_mask` is never used
+   --> crates/fvid-media/src/owned_matroska_alac_export.rs:122:15
+    |
+122 | pub(crate) fn geometry_with_mask(source: &Path, options: &CopyOptions) -> Result<(u32, u16,u32)> {
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_audio_packet_budget` is never used
+   --> crates/fvid-media/src/owned_matroska_audio.rs:347:15
+    |
+347 | pub(crate) fn validate_audio_packet_budget<R: Read + Seek>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `admit_audio_reader` is never used
+   --> crates/fvid-media/src/owned_matroska_audio.rs:409:15
+    |
+409 | pub(crate) fn admit_audio_reader<R: Read + Seek>(
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `negotiate_matroska_ps` is never used
+   --> crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs:293:15
+    |
+293 | pub(crate) fn negotiate_matroska_ps<R: std::io::Read + std::io::Seek>(
+    |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_aac_export.rs:38:15
+   |
+38 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: method `convert` is never used
+   --> crates/fvid-media/src/owned_pcm_decoder_impl.rs:139:8
+    |
+ 79 | impl PcmDecoder {
+    | --------------- method in this implementation
+...
+139 |     fn convert(&self, data: &[u8]) -> Result<Vec<u8>> {
+    |        ^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_pcm_export.rs:42:15
+   |
+42 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_pcm_export.rs:126:15
+    |
+126 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `decode_mp4_audio_reader_controlled` is never used
+  --> crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs:54:15
+   |
+54 | pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::Seek>(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_mp4_audio_export.rs:285:15
+    |
+285 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `recognizes` is never used
+  --> crates/fvid-media/src/owned_container_loudness.rs:46:15
+   |
+46 | pub(crate) fn recognizes(source: &Path) -> Result<bool> {
+   |               ^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_container_loudness.rs:161:15
+    |
+161 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_container_loudnorm.rs:30:15
+   |
+30 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `input` is never used
+ --> crates/fvid-media/src/owned_ffv1_export.rs:7:4
+  |
+7 | fn input(source: &Path) -> Result<crate::owned_webm::WebmReader<BufReader<File>>> {
+  |    ^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_ffv1_export.rs:49:15
+   |
+49 | pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
+   |               ^^^^^^^^
+
+warning: function `pack_bgra` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:8786:15
+     |
+8786 | pub(crate) fn pack_bgra(
+     |               ^^^^^^^^^
+
+warning: function `take_aligned` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:9498:15
+     |
+9498 | pub(crate) fn take_aligned(
+     |               ^^^^^^^^^^^^
+
+warning: associated function `new` is never used
+  --> crates/fvid-media/src/owned_webm_codec.rs:42:12
+   |
+41 | impl Decoder {
+   | ------------ associated function in this implementation
+42 |     pub fn new(codec: &str, private: &[u8], width: usize, height: usize) -> Result<Option<Self>> {
+   |            ^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_ogg_vorbis_export.rs:134:15
+    |
+134 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_ogg_joint_export.rs:98:15
+   |
+98 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_g711_wave_export.rs:181:15
+    |
+181 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: `fvid-media` (lib) generated 66 warnings (run `cargo fix --lib -p fvid-media` to apply 2 suggestions)
+   Compiling crypto-common v0.2.2
+   Compiling block-buffer v0.12.1
+   Compiling const-oid v0.10.2
+   Compiling pollster v0.4.0
+warning: method `iter` is never used
+  --> src/codec/../../crates/fvid-media/src/owned_aac/aac_ssr_metadata_impl.rs:17:19
+   |
+16 | impl<T> PacketQueue<T> {
+   | ---------------------- method in this implementation
+17 |     pub(crate) fn iter(&self) -> impl Iterator<Item = &T> {
+   |                   ^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `trimmed_audio_sample_frames` is never read
+  --> src/container/../../crates/fvid-media/src/owned_mp4_matroska_impl.rs:43:16
+   |
+40 | pub(crate) struct TrackPlan {
+   |                   --------- field in this struct
+...
+43 |     pub(crate) trimmed_audio_sample_frames: u64,
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `inspect` is never used
+ --> src/container/../../crates/fvid-media/src/owned_matroska_copy_impl.rs:8:15
+  |
+8 | pub(crate) fn inspect<R: Read + Seek>(
+  |               ^^^^^^^
+
+warning: function `inspect_with_packet_limit` is never used
+  --> src/container/../../crates/fvid-media/src/owned_matroska_copy_impl.rs:15:15
+   |
+15 | pub(crate) fn inspect_with_packet_limit<R: Read + Seek>(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: field `length_size` is never read
+   --> src/playback/video/mp4_layered.rs:264:5
+    |
+248 | pub(super) struct LayeredPipeline {
+    |                   --------------- field in this struct
+...
+264 |     length_size: u8,
+    |     ^^^^^^^^^^^
+
+warning: function `adjust_luma` is never used
+    --> src/player.rs:1649:4
+     |
+1649 | fn adjust_luma(y: f32, s: &[f32; 5]) -> f32 {
+     |    ^^^^^^^^^^^
+
+warning: function `adjust_rgb` is never used
+    --> src/player.rs:1660:15
+     |
+1660 | pub(crate) fn adjust_rgb(source: &[u8], out: &mut Vec<u8>, s: &[f32; 5]) {
+     |               ^^^^^^^^^^
+
+warning: function `covered_span` is never used
+    --> src/player.rs:4402:4
+     |
+4402 | fn covered_span(covered: (u64, u64), total: u64) -> [f32; 2] {
+     |    ^^^^^^^^^^^^
+
+warning: function `inspect_first_y4m_frame` is never used
+   --> src/native_export.rs:173:15
+    |
+173 | pub(crate) fn inspect_first_y4m_frame(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `inspect_first_y4m_frame_with_filters` is never used
+   --> src/native_export.rs:184:15
+    |
+184 | pub(crate) fn inspect_first_y4m_frame_with_filters(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_y4m_concat_compatibility` is never used
+   --> src/native_export.rs:325:15
+    |
+325 | pub(crate) fn validate_y4m_concat_compatibility(sources: &[PathBuf]) -> Result<()> {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_video_selection` is never used
+   --> src/native_export.rs:360:15
+    |
+360 | pub(crate) fn validate_video_selection(source: &Path, selected: Option<usize>) -> Result<()> {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_video_packet_budget` is never used
+   --> src/native_export.rs:385:15
+    |
+385 | pub(crate) fn validate_video_packet_budget(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_video_packet_budget_with_geometry` is never used
+   --> src/native_export.rs:397:15
+    |
+397 | pub(crate) fn validate_video_packet_budget_with_geometry(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `y4m_segment_frame_upper_bound` is never used
+   --> src/native_export.rs:718:15
+    |
+718 | pub(crate) fn y4m_segment_frame_upper_bound(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `export_y4m_sources` is never used
+   --> src/native_export.rs:834:4
+    |
+834 | fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
+    |    ^^^^^^^^^^^^^^^^^^
+
+warning: associated function `validate_pair_with_geometry` is never used
+   --> src/native_export/overlay.rs:176:19
+    |
+117 | impl TimedOverlay {
+    | ----------------- associated function in this implementation
+...
+176 |     pub(crate) fn validate_pair_with_geometry(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `mp4` is never used
+  --> src/../crates/fvid-media/src/owned_mp4_probe_impl.rs:49:15
+   |
+49 | pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
+   |               ^^^
+
+warning: function `mp4_with_metadata_limit` is never used
+  --> src/../crates/fvid-media/src/owned_mp4_probe_impl.rs:53:15
+   |
+53 | pub(crate) fn mp4_with_metadata_limit(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `try_mp4` is never used
+  --> src/../crates/fvid-media/src/owned_mp4_probe_impl.rs:73:15
+   |
+73 | pub(crate) fn try_mp4(path: &Path) -> Result<Option<MediaInfo>> {
+   |               ^^^^^^^
+
+warning: function `try_mp4_with_metadata_limit` is never used
+  --> src/../crates/fvid-media/src/owned_mp4_probe_impl.rs:77:15
+   |
+77 | pub(crate) fn try_mp4_with_metadata_limit(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `matroska` is never used
+  --> src/media_probe.rs:50:15
+   |
+50 | pub(crate) fn matroska(path: &Path) -> Result<MediaInfo> {
+   |               ^^^^^^^^
+
+warning: function `matroska_with_packet_limit` is never used
+  --> src/media_probe.rs:54:15
+   |
+54 | pub(crate) fn matroska_with_packet_limit(path: &Path, packet_bytes: usize) -> Result<MediaInfo> {
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `matroska_with_packet_and_memory_limit` is never used
+  --> src/media_probe.rs:58:15
+   |
+58 | pub(crate) fn matroska_with_packet_and_memory_limit(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `fvid` (lib) generated 24 warnings
+   Compiling digest v0.11.3
+   Compiling cpufeatures v0.3.1
+   Compiling sha2 v0.11.0
+   Compiling airbug-bench-macros v0.8.0 (https://github.com/themoretheless/airbug?branch=release#06b74ea5)
+   Compiling airbug-bench v0.8.0 (https://github.com/themoretheless/airbug?branch=release#06b74ea5)
+   Compiling airbug v0.6.2 (https://github.com/themoretheless/airbug?branch=release#06b74ea5)
+warning: `fvid-codecs` (lib) generated 12 warnings
+warning: function `compare` is never used
+  --> tests/support/audio_transitions.rs:13:8
+   |
+13 | pub fn compare(actual: &Frames, expected: &Frames) {
+   |        ^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `fvid` (test "mp4_audio_partial_window") generated 1 warning
+    Finished `test` profile [unoptimized] target(s) in 2m 20s
+     Running tests/mp4_audio_partial_window.rs (/private/tmp/fvid-mp4-audio-partial-interior-target-20261031/debug/deps/mp4_audio_partial_window-431b974bbb4ee037)
+
+running 4 tests
+test full_native_block_controls_keep_exact_pcm ... ok
+test authored_timing_retains_coded_packets_and_decodable_video ... ok
+test positive_partial_terminal_windows_clip_pcm_and_seek_suffix ... FAILED
+test real_audio_worker_respects_partial_tail_and_eof ... FAILED
+
+failures:
+
+---- positive_partial_terminal_windows_clip_pcm_and_seek_suffix stdout ----
+
+thread 'positive_partial_terminal_windows_clip_pcm_and_seek_suffix' (31069648) panicked at tests/mp4_audio_partial_window.rs:38:5:
+PCM beyond positive terminal window: ["alac-partial-middle.mp4 phase0: 1920 bytes expected 1440", "alac-partial-middle.mp4 phase1: 1920 bytes expected 1440", "alac-partial-middle.mp4 phase2: 1916 bytes expected 1436"]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- real_audio_worker_respects_partial_tail_and_eof stdout ----
+
+thread 'real_audio_worker_respects_partial_tail_and_eof' (31069649) panicked at tests/mp4_audio_partial_window.rs:73:9:
+assertion `left == right` failed: alac-partial-middle.mp4: worker
+  left: [0, 0, 0, 191, 0, 108, 255, 190, 0, 216, 254, 190, 0, 68, 254, 190, 0, 176, 253, 190, 0, 28, 253, 190, 0, 136, 252, 190, 0, 244, 251, 190, 0, 96, 251, 190, 0, 204, 250, 190, 0, 56, 250, 190, 0, 164, 249, 190, 0, 16, 249, 190, 0, 124, 248, 190, 0, 232, 247, 190, 0, 84, 247, 190, 0, 192, 246, 190, 0, 44, 246, 190, 0, 152, 245, 190, 0, 4, 245, 190, 0, 112, 244, 190, 0, 220, 243, 190, 0, 72, 243, 190, 0, 180, 242, 190, 0, 32, 242, 190, 0, 140, 241, 190, 0, 248, 240, 190, 0, 100, 240, 190, 0, 208, 239, 190, 0, 60, 239, 190, 0, 168, 238, 190, 0, 20, 238, 190, 0, 128, 237, 190, 0, 236, 236, 190, 0, 88, 236, 190, 0, 196, 235, 190, 0, 48, 235, 190, 0, 156, 234, 190, 0, 8, 234, 190, 0, 116, 233, 190, 0, 224, 232, 190, 0, 76, 232, 190, 0, 184, 231, 190, 0, 36, 231, 190, 0, 144, 230, 190, 0, 252, 229, 190, 0, 104, 229, 190, 0, 212, 228, 190, 0, 64, 228, 190, 0, 172, 227, 190, 0, 24, 227, 190, 0, 132, 226, 190, 0, 240, 225, 190, 0, 92, 225, 190, 0, 200, 224, 190, 0, 52, 224, 190, 0, 160, 223, 190, 0, 12, 223, 190, 0, 120, 222, 190, 0, 228, 221, 190, 0, 80, 221, 190, 0, 188, 220, 190, 0, 40, 220, 190, 0, 148, 219, 190, 0, 0, 219, 190, 0, 108, 218, 190, 0, 216, 217, 190, 0, 68, 217, 190, 0, 176, 216, 190, 0, 28, 216, 190, 0, 136, 215, 190, 0, 244, 214, 190, 0, 96, 214, 190, 0, 204, 213, 190, 0, 56, 213, 190, 0, 164, 212, 190, 0, 16, 212, 190, 0, 124, 211, 190, 0, 232, 210, 190, 0, 84, 210, 190, 0, 192, 209, 190, 0, 44, 209, 190, 0, 152, 208, 190, 0, 4, 208, 190, 0, 112, 207, 190, 0, 220, 206, 190, 0, 72, 206, 190, 0, 180, 205, 190, 0, 32, 205, 190, 0, 140, 204, 190, 0, 248, 203, 190, 0, 100, 203, 190, 0, 208, 202, 190, 0, 60, 202, 190, 0, 168, 201, 190, 0, 20, 201, 190, 0, 128, 200, 190, 0, 236, 199, 190, 0, 88, 199, 190, 0, 196, 198, 190, 0, 48, 198, 190, 0, 156, 197, 190, 0, 8, 197, 190, 0, 116, 196, 190, 0, 224, 195, 190, 0, 76, 195, 190, 0, 184, 194, 190, 0, 36, 194, 190, 0, 144, 193, 190, 0, 252, 192, 190, 0, 104, 192, 190, 0, 212, 191, 190, 0, 64, 191, 190, 0, 172, 190, 190, 0, 24, 190, 190, 0, 132, 189, 190, 0, 240, 188, 190, 0, 92, 188, 190, 0, 200, 187, 190, 0, 52, 187, 190, 0, 160, 186, 190, 0, 12, 186, 190, 0, 120, 185, 190, 0, 228, 184, 190, 0, 80, 184, 190, 0, 188, 183, 190, 0, 40, 183, 190, 0, 148, 182, 190, 0, 0, 182, 190, 0, 108, 181, 190, 0, 216, 180, 190, 0, 68, 180, 190, 0, 176, 179, 190, 0, 28, 179, 190, 0, 136, 178, 190, 0, 244, 177, 190, 0, 96, 177, 190, 0, 204, 176, 190, 0, 56, 176, 190, 0, 164, 175, 190, 0, 16, 175, 190, 0, 124, 174, 190, 0, 232, 173, 190, 0, 84, 173, 190, 0, 192, 172, 190, 0, 44, 172, 190, 0, 152, 171, 190, 0, 4, 171, 190, 0, 112, 170, 190, 0, 220, 169, 190, 0, 72, 169, 190, 0, 180, 168, 190, 0, 32, 168, 190, 0, 140, 167, 190, 0, 248, 166, 190, 0, 100, 166, 190, 0, 208, 165, 190, 0, 60, 165, 190, 0, 168, 164, 190, 0, 20, 164, 190, 0, 128, 163, 190, 0, 236, 162, 190, 0, 88, 162, 190, 0, 196, 161, 190, 0, 48, 161, 190, 0, 156, 160, 190, 0, 8, 160, 190, 0, 116, 159, 190, 0, 224, 158, 190, 0, 76, 158, 190, 0, 184, 157, 190, 0, 36, 157, 190, 0, 144, 156, 190, 0, 252, 155, 190, 0, 104, 155, 190, 0, 212, 154, 190, 0, 64, 154, 190, 0, 172, 153, 190, 0, 24, 153, 190, 0, 132, 152, 190, 0, 240, 151, 190, 0, 92, 151, 190, 0, 200, 150, 190, 0, 52, 150, 190, 0, 160, 149, 190, 0, 12, 149, 190, 0, 120, 148, 190, 0, 228, 147, 190, 0, 80, 147, 190, 0, 188, 146, 190, 0, 40, 146, 190, 0, 148, 145, 190, 0, 0, 145, 190, 0, 108, 144, 190, 0, 216, 143, 190, 0, 68, 143, 190, 0, 176, 142, 190, 0, 28, 142, 190, 0, 136, 141, 190, 0, 244, 140, 190, 0, 96, 140, 190, 0, 204, 139, 190, 0, 56, 139, 190, 0, 164, 138, 190, 0, 16, 138, 190, 0, 124, 137, 190, 0, 232, 136, 190, 0, 84, 136, 190, 0, 192, 135, 190, 0, 44, 135, 190, 0, 152, 134, 190, 0, 4, 134, 190, 0, 112, 133, 190, 0, 220, 132, 190, 0, 72, 132, 190, 0, 180, 131, 190, 0, 32, 131, 190, 0, 140, 130, 190, 0, 248, 129, 190, 0, 100, 129, 190, 0, 208, 128, 190, 0, 60, 128, 190, 0, 80, 127, 190, 0, 40, 126, 190, 0, 0, 125, 190, 0, 216, 123, 190, 0, 176, 122, 190, 0, 136, 121, 190, 0, 96, 120, 190, 0, 56, 119, 190, 0, 16, 118, 190, 0, 232, 116, 190, 0, 192, 115, 190, 0, 152, 114, 190, 0, 112, 113, 190, 0, 72, 112, 190, 0, 32, 111, 190, 0, 248, 109, 190, 0, 208, 108, 190, 0, 168, 107, 190, 0, 128, 106, 190, 0, 88, 105, 190, 0, 48, 104, 190, 0, 8, 103, 190, 0, 224, 101, 190, 0, 184, 100, 190, 0, 144, 99, 190, 0, 104, 98, 190, 0, 64, 97, 190, 0, 24, 96, 190, 0, 240, 94, 190, 0, 200, 93, 190, 0, 160, 92, 190, 0, 120, 91, 190, 0, 80, 90, 190, 0, 40, 89, 190, 0, 0, 88, 190, 0, 216, 86, 190, 0, 176, 85, 190, 0, 136, 84, 190, 0, 96, 83, 190, 0, 56, 82, 190, 0, 16, 81, 190, 0, 232, 79, 190, 0, 192, 78, 190, 0, 152, 77, 190, 0, 112, 76, 190, 0, 72, 75, 190, 0, 32, 74, 190, 0, 248, 72, 190, 0, 208, 71, 190, 0, 168, 70, 190, 0, 128, 69, 190, 0, 88, 68, 190, 0, 48, 67, 190, 0, 8, 66, 190, 0, 224, 64, 190, 0, 184, 63, 190, 0, 144, 62, 190, 0, 104, 61, 190, 0, 64, 60, 190, 0, 24, 59, 190, 0, 240, 57, 190, 0, 200, 56, 190, 0, 160, 55, 190, 0, 120, 54, 190, 0, 80, 53, 190, 0, 40, 52, 190, 0, 0, 51, 190, 0, 216, 49, 190, 0, 176, 48, 190, 0, 136, 47, 190, 0, 96, 46, 190, 0, 56, 45, 190, 0, 16, 44, 190, 0, 232, 42, 190, 0, 192, 41, 190, 0, 152, 40, 190, 0, 112, 39, 190, 0, 72, 38, 190, 0, 32, 37, 190, 0, 248, 35, 190, 0, 208, 34, 190, 0, 168, 33, 190, 0, 128, 32, 190, 0, 88, 31, 190, 0, 48, 30, 190, 0, 8, 29, 190, 0, 224, 27, 190, 0, 184, 26, 190, 0, 144, 25, 190, 0, 104, 24, 190, 0, 64, 23, 190, 0, 24, 22, 190, 0, 240, 20, 190, 0, 200, 19, 190, 0, 160, 18, 190, 0, 120, 17, 190, 0, 80, 16, 190, 0, 40, 15, 190, 0, 0, 14, 190, 0, 216, 12, 190, 0, 176, 11, 190, 0, 136, 10, 190, 0, 96, 9, 190, 0, 56, 8, 190, 0, 16, 7, 190, 0, 232, 5, 190, 0, 192, 4, 190, 0, 152, 3, 190, 0, 112, 2, 190, 0, 72, 1, 190, 0, 32, 0, 190, 0, 240, 253, 189, 0, 160, 251, 189, 0, 80, 249, 189, 0, 0, 247, 189, 0, 176, 244, 189, 0, 96, 242, 189, 0, 16, 240, 189, 0, 192, 237, 189, 0, 112, 235, 189, 0, 32, 233, 189, 0, 208, 230, 189, 0, 128, 228, 189, 0, 48, 226, 189, 0, 224, 223, 189, 0, 144, 221, 189, 0, 64, 219, 189, 0, 240, 216, 189, 0, 160, 214, 189, 0, 80, 212, 189, 0, 0, 210, 189, 0, 176, 207, 189, 0, 96, 205, 189, 0, 16, 203, 189, 0, 192, 200, 189, 0, 112, 198, 189, 0, 32, 196, 189, 0, 208, 193, 189, 0, 128, 191, 189, 0, 48, 189, 189, 0, 224, 186, 189, 0, 144, 184, 189, 0, 64, 182, 189, 0, 240, 179, 189, 0, 160, 177, 189, 0, 80, 175, 189, 0, 0, 173, 189, 0, 176, 170, 189, 0, 96, 168, 189, 0, 16, 166, 189, 0, 192, 163, 189, 0, 112, 161, 189, 0, 32, 159, 189, 0, 208, 156, 189, 0, 128, 154, 189, 0, 48, 152, 189, 0, 224, 149, 189, 0, 144, 147, 189, 0, 64, 145, 189, 0, 240, 142, 189, 0, 160, 140, 189, 0, 80, 138, 189, 0, 0, 136, 189, 0, 176, 133, 189, 0, 96, 131, 189, 0, 16, 129, 189, 0, 128, 125, 189, 0, 224, 120, 189, 0, 64, 116, 189, 0, 160, 111, 189, 0, 0, 107, 189, 0, 96, 102, 189, 0, 192, 97, 189, 0, 32, 93, 189, 0, 128, 88, 189, 0, 224, 83, 189, 0, 64, 79, 189, 0, 160, 74, 189, 0, 0, 70, 189, 0, 96, 65, 189, 0, 192, 60, 189, 0, 32, 56, 189, 0, 128, 51, 189, 0, 224, 46, 189, 0, 64, 42, 189, 0, 160, 37, 189, 0, 0, 33, 189, 0, 96, 28, 189, 0, 192, 23, 189, 0, 32, 19, 189, 0, 128, 14, 189, 0, 224, 9, 189, 0, 64, 5, 189, 0, 160, 0, 189, 0, 0, 248, 188, 0, 192, 238, 188, 0, 128, 229, 188, 0, 64, 220, 188, 0, 0, 211, 188, 0, 192, 201, 188, 0, 128, 192, 188, 0, 64, 183, 188, 0, 0, 174, 188, 0, 192, 164, 188, 0, 128, 155, 188, 0, 64, 146, 188, 0, 0, 137, 188, 0, 128, 127, 188, 0, 0, 109, 188, 0, 128, 90, 188, 0, 0, 72, 188, 0, 128, 53, 188, 0, 0, 35, 188, 0, 128, 16, 188, 0, 0, 252, 187, 0, 0, 215, 187, 0, 0, 178, 187, 0, 0, 141, 187, 0, 0, 80, 187, 0, 0, 6, 187, 0, 0, 112, 186, 0, 0, 96, 57, 0, 0, 176, 58, 0, 0, 34, 59, 0, 0, 108, 59, 0, 0, 155, 59, 0, 0, 192, 59, 0, 0, 229, 59, 0, 0, 5, 60, 0, 128, 23, 60, 0, 0, 42, 60, 0, 128, 60, 60, 0, 0, 79, 60, 0, 128, 97, 60, 0, 0, 116, 60, 0, 64, 131, 60, 0, 128, 140, 60, 0, 192, 149, 60, 0, 0, 159, 60, 0, 64, 168, 60, 0, 128, 177, 60, 0, 192, 186, 60, 0, 0, 196, 60, 0, 64, 205, 60, 0, 128, 214, 60, 0, 192, 223, 60, 0, 0, 233, 60, 0, 64, 242, 60, 0, 128, 251, 60, 0, 96, 2, 61, 0, 0, 7, 61, 0, 160, 11, 61, 0, 64, 16, 61, 0, 224, 20, 61, 0, 128, 25, 61, 0, 32, 30, 61, 0, 192, 34, 61, 0, 96, 39, 61]
+ right: [0, 0, 0, 191, 0, 108, 255, 190, 0, 216, 254, 190, 0, 68, 254, 190, 0, 176, 253, 190, 0, 28, 253, 190, 0, 136, 252, 190, 0, 244, 251, 190, 0, 96, 251, 190, 0, 204, 250, 190, 0, 56, 250, 190, 0, 164, 249, 190, 0, 16, 249, 190, 0, 124, 248, 190, 0, 232, 247, 190, 0, 84, 247, 190, 0, 192, 246, 190, 0, 44, 246, 190, 0, 152, 245, 190, 0, 4, 245, 190, 0, 112, 244, 190, 0, 220, 243, 190, 0, 72, 243, 190, 0, 180, 242, 190, 0, 32, 242, 190, 0, 140, 241, 190, 0, 248, 240, 190, 0, 100, 240, 190, 0, 208, 239, 190, 0, 60, 239, 190, 0, 168, 238, 190, 0, 20, 238, 190, 0, 128, 237, 190, 0, 236, 236, 190, 0, 88, 236, 190, 0, 196, 235, 190, 0, 48, 235, 190, 0, 156, 234, 190, 0, 8, 234, 190, 0, 116, 233, 190, 0, 224, 232, 190, 0, 76, 232, 190, 0, 184, 231, 190, 0, 36, 231, 190, 0, 144, 230, 190, 0, 252, 229, 190, 0, 104, 229, 190, 0, 212, 228, 190, 0, 64, 228, 190, 0, 172, 227, 190, 0, 24, 227, 190, 0, 132, 226, 190, 0, 240, 225, 190, 0, 92, 225, 190, 0, 200, 224, 190, 0, 52, 224, 190, 0, 160, 223, 190, 0, 12, 223, 190, 0, 120, 222, 190, 0, 228, 221, 190, 0, 80, 221, 190, 0, 188, 220, 190, 0, 40, 220, 190, 0, 148, 219, 190, 0, 0, 219, 190, 0, 108, 218, 190, 0, 216, 217, 190, 0, 68, 217, 190, 0, 176, 216, 190, 0, 28, 216, 190, 0, 136, 215, 190, 0, 244, 214, 190, 0, 96, 214, 190, 0, 204, 213, 190, 0, 56, 213, 190, 0, 164, 212, 190, 0, 16, 212, 190, 0, 124, 211, 190, 0, 232, 210, 190, 0, 84, 210, 190, 0, 192, 209, 190, 0, 44, 209, 190, 0, 152, 208, 190, 0, 4, 208, 190, 0, 112, 207, 190, 0, 220, 206, 190, 0, 72, 206, 190, 0, 180, 205, 190, 0, 32, 205, 190, 0, 140, 204, 190, 0, 248, 203, 190, 0, 100, 203, 190, 0, 208, 202, 190, 0, 60, 202, 190, 0, 168, 201, 190, 0, 20, 201, 190, 0, 128, 200, 190, 0, 236, 199, 190, 0, 88, 199, 190, 0, 196, 198, 190, 0, 48, 198, 190, 0, 156, 197, 190, 0, 8, 197, 190, 0, 116, 196, 190, 0, 224, 195, 190, 0, 76, 195, 190, 0, 184, 194, 190, 0, 36, 194, 190, 0, 144, 193, 190, 0, 252, 192, 190, 0, 104, 192, 190, 0, 212, 191, 190, 0, 64, 191, 190, 0, 172, 190, 190, 0, 24, 190, 190, 0, 132, 189, 190, 0, 240, 188, 190, 0, 92, 188, 190, 0, 200, 187, 190, 0, 52, 187, 190, 0, 160, 186, 190, 0, 12, 186, 190, 0, 120, 185, 190, 0, 228, 184, 190, 0, 80, 184, 190, 0, 188, 183, 190, 0, 40, 183, 190, 0, 148, 182, 190, 0, 0, 182, 190, 0, 108, 181, 190, 0, 216, 180, 190, 0, 68, 180, 190, 0, 176, 179, 190, 0, 28, 179, 190, 0, 136, 178, 190, 0, 244, 177, 190, 0, 96, 177, 190, 0, 204, 176, 190, 0, 56, 176, 190, 0, 164, 175, 190, 0, 16, 175, 190, 0, 124, 174, 190, 0, 232, 173, 190, 0, 84, 173, 190, 0, 192, 172, 190, 0, 44, 172, 190, 0, 152, 171, 190, 0, 4, 171, 190, 0, 112, 170, 190, 0, 220, 169, 190, 0, 72, 169, 190, 0, 180, 168, 190, 0, 32, 168, 190, 0, 140, 167, 190, 0, 248, 166, 190, 0, 100, 166, 190, 0, 208, 165, 190, 0, 60, 165, 190, 0, 168, 164, 190, 0, 20, 164, 190, 0, 128, 163, 190, 0, 236, 162, 190, 0, 88, 162, 190, 0, 196, 161, 190, 0, 48, 161, 190, 0, 156, 160, 190, 0, 8, 160, 190, 0, 116, 159, 190, 0, 224, 158, 190, 0, 76, 158, 190, 0, 184, 157, 190, 0, 36, 157, 190, 0, 144, 156, 190, 0, 252, 155, 190, 0, 104, 155, 190, 0, 212, 154, 190, 0, 64, 154, 190, 0, 172, 153, 190, 0, 24, 153, 190, 0, 132, 152, 190, 0, 240, 151, 190, 0, 92, 151, 190, 0, 200, 150, 190, 0, 52, 150, 190, 0, 160, 149, 190, 0, 12, 149, 190, 0, 120, 148, 190, 0, 228, 147, 190, 0, 80, 147, 190, 0, 188, 146, 190, 0, 40, 146, 190, 0, 148, 145, 190, 0, 0, 145, 190, 0, 108, 144, 190, 0, 216, 143, 190, 0, 68, 143, 190, 0, 176, 142, 190, 0, 28, 142, 190, 0, 136, 141, 190, 0, 244, 140, 190, 0, 0, 14, 190, 0, 216, 12, 190, 0, 176, 11, 190, 0, 136, 10, 190, 0, 96, 9, 190, 0, 56, 8, 190, 0, 16, 7, 190, 0, 232, 5, 190, 0, 192, 4, 190, 0, 152, 3, 190, 0, 112, 2, 190, 0, 72, 1, 190, 0, 32, 0, 190, 0, 240, 253, 189, 0, 160, 251, 189, 0, 80, 249, 189, 0, 0, 247, 189, 0, 176, 244, 189, 0, 96, 242, 189, 0, 16, 240, 189, 0, 192, 237, 189, 0, 112, 235, 189, 0, 32, 233, 189, 0, 208, 230, 189, 0, 128, 228, 189, 0, 48, 226, 189, 0, 224, 223, 189, 0, 144, 221, 189, 0, 64, 219, 189, 0, 240, 216, 189, 0, 160, 214, 189, 0, 80, 212, 189, 0, 0, 210, 189, 0, 176, 207, 189, 0, 96, 205, 189, 0, 16, 203, 189, 0, 192, 200, 189, 0, 112, 198, 189, 0, 32, 196, 189, 0, 208, 193, 189, 0, 128, 191, 189, 0, 48, 189, 189, 0, 224, 186, 189, 0, 144, 184, 189, 0, 64, 182, 189, 0, 240, 179, 189, 0, 160, 177, 189, 0, 80, 175, 189, 0, 0, 173, 189, 0, 176, 170, 189, 0, 96, 168, 189, 0, 16, 166, 189, 0, 192, 163, 189, 0, 112, 161, 189, 0, 32, 159, 189, 0, 208, 156, 189, 0, 128, 154, 189, 0, 48, 152, 189, 0, 224, 149, 189, 0, 144, 147, 189, 0, 64, 145, 189, 0, 240, 142, 189, 0, 160, 140, 189, 0, 80, 138, 189, 0, 0, 136, 189, 0, 176, 133, 189, 0, 96, 131, 189, 0, 16, 129, 189, 0, 128, 125, 189, 0, 224, 120, 189, 0, 64, 116, 189, 0, 160, 111, 189, 0, 0, 107, 189, 0, 96, 102, 189, 0, 192, 97, 189, 0, 32, 93, 189, 0, 128, 88, 189, 0, 224, 83, 189, 0, 64, 79, 189, 0, 160, 74, 189, 0, 0, 70, 189, 0, 96, 65, 189, 0, 192, 60, 189, 0, 32, 56, 189, 0, 128, 51, 189, 0, 224, 46, 189, 0, 64, 42, 189, 0, 160, 37, 189, 0, 0, 33, 189, 0, 96, 28, 189, 0, 192, 23, 189, 0, 32, 19, 189, 0, 128, 14, 189, 0, 224, 9, 189, 0, 64, 5, 189, 0, 160, 0, 189, 0, 0, 248, 188, 0, 192, 238, 188, 0, 128, 229, 188, 0, 64, 220, 188, 0, 0, 211, 188, 0, 192, 201, 188, 0, 128, 192, 188, 0, 64, 183, 188, 0, 0, 174, 188, 0, 192, 164, 188, 0, 128, 155, 188, 0, 64, 146, 188, 0, 0, 137, 188, 0, 128, 127, 188, 0, 0, 109, 188, 0, 128, 90, 188, 0, 0, 72, 188, 0, 128, 53, 188, 0, 0, 35, 188, 0, 128, 16, 188, 0, 0, 252, 187, 0, 0, 215, 187, 0, 0, 178, 187, 0, 0, 141, 187, 0, 0, 80, 187, 0, 0, 6, 187, 0, 0, 112, 186, 0, 0, 96, 57, 0, 0, 176, 58, 0, 0, 34, 59, 0, 0, 108, 59, 0, 0, 155, 59, 0, 0, 192, 59, 0, 0, 229, 59, 0, 0, 5, 60, 0, 128, 23, 60, 0, 0, 42, 60, 0, 128, 60, 60, 0, 0, 79, 60, 0, 128, 97, 60, 0, 0, 116, 60, 0, 64, 131, 60, 0, 128, 140, 60, 0, 192, 149, 60, 0, 0, 159, 60, 0, 64, 168, 60, 0, 128, 177, 60, 0, 192, 186, 60, 0, 0, 196, 60, 0, 64, 205, 60, 0, 128, 214, 60, 0, 192, 223, 60, 0, 0, 233, 60, 0, 64, 242, 60, 0, 128, 251, 60, 0, 96, 2, 61, 0, 0, 7, 61, 0, 160, 11, 61, 0, 64, 16, 61, 0, 224, 20, 61, 0, 128, 25, 61, 0, 32, 30, 61, 0, 192, 34, 61, 0, 96, 39, 61]
+
+
+failures:
+    positive_partial_terminal_windows_clip_pcm_and_seek_suffix
+    real_audio_worker_respects_partial_tail_and_eof
+
+test result: FAILED. 2 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+error: test failed, to rerun pass `--test mp4_audio_partial_window`

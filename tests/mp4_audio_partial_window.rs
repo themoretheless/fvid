@@ -17,7 +17,7 @@ fn full_native_block_controls_keep_exact_pcm() {
     }
 }
 #[test]
-fn positive_partial_terminal_windows_clip_pcm_and_seek_suffix() {
+fn positive_partial_source_windows_clip_pcm_and_seek_suffix() {
     let mut failures=Vec::new();
     for c in cases().into_iter().filter(|c| c["file"].as_str().unwrap().contains("partial")) {
         let name=c["file"].as_str().unwrap();
@@ -35,7 +35,7 @@ fn positive_partial_terminal_windows_clip_pcm_and_seek_suffix() {
         let eof:Vec<u8>=transitions::collect(&mut r).into_iter().flat_map(|f|f.3).collect();
         if !eof.is_empty() {failures.push(format!("{name} EOF: {} unexpected bytes",eof.len()));}
     }
-    assert!(failures.is_empty(),"PCM beyond positive terminal window: {failures:?}");
+    assert!(failures.is_empty(),"PCM beyond positive source window: {failures:?}");
 }
 #[test]
 fn authored_timing_retains_coded_packets_and_decodable_video() {
@@ -71,6 +71,10 @@ fn real_audio_worker_respects_partial_tail_and_eof() {
         worker.play();ended(&worker,0);
         let got:Vec<u8>=trace.lock().unwrap().packets.iter().flat_map(|p|p.3.iter().copied()).collect();
         assert_eq!(got,bytes(c["oracle"].as_str().unwrap()),"{name}: worker");
+        let durations=c["durations"].as_array().unwrap();
+        let expected_times=[0,durations[0].as_u64().unwrap(),durations[0].as_u64().unwrap()+durations[1].as_u64().unwrap()];
+        let actual_times:Vec<_>=trace.lock().unwrap().packets.iter().map(|p|p.2).collect();
+        assert_eq!(actual_times,expected_times.map(|n|Duration::from_nanos(n*125000)),"{name}: worker source clock");
         trace.lock().unwrap().packets.clear();
         worker.seek(end);ended(&worker,worker.generation());
         assert!(trace.lock().unwrap().packets.is_empty(),"{name}: worker EOF");

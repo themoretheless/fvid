@@ -992,17 +992,21 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         Ok(())
     }
 
-    /// Seek to the sample with the greatest PTS at or before `pts`.
-    pub fn seek(&mut self, pts: i64) -> i64 {
-        self.deferred_pcm.get_mut().clear(); self.gap_scan.set(0);
+    fn sample_index_at_or_before(&self, pts: i64) -> usize {
         let track = self.track();
-        let index = match track.samples.expanded() {
+        match track.samples.expanded() {
             Some(samples) if *self.pts_nondecreasing.get_or_init(|| {
                 samples.windows(2).all(|pair| pair[0].pts <= pair[1].pts)
             }) => samples.partition_point(|sample| sample.pts <= pts).saturating_sub(1),
             _ => track.samples.at_or_before(pts),
-        };
-        let result_pts = track.samples.get(index).map_or(0, |s| s.pts);
+        }
+    }
+
+    /// Seek to the sample with the greatest PTS at or before `pts`.
+    pub fn seek(&mut self, pts: i64) -> i64 {
+        self.deferred_pcm.get_mut().clear(); self.gap_scan.set(0);
+        let index = self.sample_index_at_or_before(pts);
+        let result_pts = self.track().samples.get(index).map_or(0, |s| s.pts);
         self.rewind();
         self.sample_index = index;
         result_pts
@@ -1229,12 +1233,15 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             if rate == 0 || scale == 0 || stride == 0 || !packet.data.len().is_multiple_of(stride) {
                 return Err(invalid("invalid MP4 decoded audio geometry"));
             }
-            // A final coded block can contain more native samples than its
-            // positive source window. Keep PCM inside the presentation endpoint,
-            // including when seeking exactly to EOF. Decode validation precedes
-            // this clipping, and declared empty tails remain available for silence.
-            if let Some(end) = self.presentation_end_ticks() {
-                let end = i128::try_from(end).map_err(|_| invalid("MP4 audio presentation endpoint overflow"))?;
+            // A coded block can contain more native samples than its source
+            // window, including inside the track. Bound each decoded packet at
+            // its own endpoint before floor trimming. Decode validation precedes
+            // clipping; recovered clocks use their exact earlier path.
+            let packet_end = track.samples.get(self.sample_index_at_or_before(source_pts))
+                .filter(|sample| sample.pts == source_pts)
+                .map(|sample| i128::from(sample.pts) + i128::from(sample.duration));
+            let end = packet_end.or_else(|| self.presentation_end_ticks().and_then(|end| i128::try_from(end).ok()));
+            if let Some(end) = end {
                 let remaining = EditTime::new(end, u128::from(scale))?
                     .sub(EditTime::signed_ticks(source_pts, scale)?)?.ceil_frames(rate)?;
                 let last = remaining.clamp(0, (packet.data.len() / stride) as i128) as usize;

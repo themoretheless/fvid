@@ -23,6 +23,11 @@ def generate():
             files[name + '.mp4'] = control if label == 'control' else rewrite(control, [(2, block), (1, last)], 8000, frames)
             files[name + '.f32le'] = pcm[:frames * 4]
             cases.append({'file': name + '.mp4', 'oracle': name + '.f32le', 'durations': [block, block, last], 'frames': frames, 'rate': 8000})
+        name = f'{codec}-partial-middle'
+        frames = block * 2 + tail
+        files[name + '.mp4'] = rewrite(control, [(1, block), (1, tail), (1, block)], 8000, frames)
+        files[name + '.f32le'] = pcm[:block*4] + pcm[block*4:(block+tail)*4] + pcm[block*8:block*12]
+        cases.append({'file': name + '.mp4', 'oracle': name + '.f32le', 'durations': [block, tail, block], 'frames': frames, 'rate': 8000})
     files['manifest.json'] = (json.dumps({'provenance': 'Committed authored neutral VP9 with analytic IMA4 and authored ALAC scalar PCM. Only audio timing/header duration changes; coded packets unchanged.', 'cases': cases, 'sha256': {n: hashlib.sha256(b).hexdigest() for n,b in files.items()}}, indent=2) + '\n').encode()
     return files
 

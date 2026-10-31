@@ -5023,13 +5023,16 @@
     {
       "id": "FVID-0448",
       "batch": 448,
-      "title": "Bound partial terminal ALAC playback by its presentation endpoint",
+      "title": "Bound decoded MP4 audio by its declared source windows",
       "source": "src/playback/audio/mp4_audio.rs",
       "regression": "tests/mp4_audio_partial_window.rs",
       "before": "Published6c44f83516 reports360 native frames for a three-packet authored ALAC track but emits480,including120 frames after seeking exactly to EOF. Baseline2controls pass and1PCM/rewind/seek acceptance fails. Full-block ALAC and IMA4,raw packet identity,timing and decodable synthetic video controls pass;IMA4 partial tails were already correct.",
-      "result": "Before floor trimming,bound decoded non-AAC/changing PCM at the exact source presentation endpoint using ceiling native-frame coordinates. Codec validation occurs first;recovered clocks keep their existing path. Four short synthetic video controls/witnesses retain coded audio bytes and scalar PCM,rewind,sample seek,EOF and actual worker output.125integration suites584pass;1252distinct checks plus locked/offline core/player builds pass. All variants count once;no performance claim.",
+      "result": "Bind decoded non-AAC/changing PCM at the matching source sample endpoint before seek-floor trimming,including terminal and interior positive partial ALAC windows. Reuse the cached ordered packet lookup;preserve exact signed native-frame ceiling,decoder validation and the recovered-clock path. Six short synthetic video controls/witnesses preserve raw timing and coded audio bytes,scalar PCM,rewind,sample seek,EOF and actual worker PCM/PTS. Original8media/oracle files unchanged.125integration suites584pass;1252distinct checks and locked/offline core/player builds pass. Interior baseline2pass2fail becomes green. This extends the same cause and adds no ID;IMA4 already correct. No performance claim.",
       "status": "accepted",
-      "validation": "batch-448-validation.json"
+      "validation": "batch-448-validation.json",
+      "additional_validation": [
+        "batch-448-interior-validation.json"
+      ]
     }
   ]
 }
