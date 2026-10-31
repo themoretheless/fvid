@@ -15,6 +15,7 @@ pub struct Core {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Decoder {
     core: Core,
+    output_multiplier: u8,
     config: super::aac_ld_mps_config::Config,
     session: super::aac_ld_mps_session::Session,
     assembler: super::aac_ld_mps_transport::Assembler,
@@ -47,9 +48,9 @@ impl Decoder {
                 "invalid downscaled AAC LD/ELD spatial core geometry",
             ));
         }
-        if core.has_sbr && core.downscale != 1 {
+        if core.has_sbr && core.downscale == 3 {
             return Err(unsupported(
-                "downscaled coupled LD-SBR spatial filter banks are not yet implemented",
+                "LD-SBR downscale factor three has no integral filter-bank geometry",
             ));
         }
         let bins = if config.sample_rate < 27713 {
@@ -60,10 +61,12 @@ impl Decoder {
             64
         };
         if core.has_sbr != sbr.is_some() {
-            return Err(invalid(
-                "LD-MPS SBR context requires explicit shared QMF mode",
-            ));
+            return Err(invalid("LD-MPS SBR context requires explicit rate mode"));
         }
+        // Preserve the shared LD bank for nominal geometries. Reduced CLDFB
+        // output uses the standard PCM interface instead of reinterpreting its
+        // phase/window as an LD-MPS QMF frame.
+        let shared_qmf = core.has_sbr && core.downscale == 1;
         let factor = if sbr == Some(true) { 2 } else { 1 };
         let rate = core
             .sample_rate
@@ -75,9 +78,9 @@ impl Decoder {
         // short PCM at the explicitly selected output clock.
         let core_samples =
             usize::from(core.frame_samples / u16::from(core.downscale)) * factor as usize;
-        // Without SBR,a spatial frame may cover several whole LD/ELD
+        // In the PCM domain,a spatial frame may cover several whole LD/ELD
         // packets (e.g.480-sample ELD with128 bins). Session retains each span.
-        let frame_geometry = if !core.has_sbr {
+        let frame_geometry = if !shared_qmf {
             spatial_samples != 0 && core_samples != 0 && spatial_samples % core_samples == 0
         } else {
             spatial_samples == core_samples
@@ -90,7 +93,7 @@ impl Decoder {
                 "LD-MPS rate, downmix channels or frame geometry disagree with AAC LD/ELD core",
             ));
         }
-        if let Some(double) = sbr {
+        if let Some(double) = sbr.filter(|_| shared_qmf) {
             if bins != if double { 64 } else { 32 }
                 || usize::from(config.frame_slots) != usize::from(core.frame_samples) / 32
             {
@@ -101,8 +104,9 @@ impl Decoder {
         }
         Ok(Self {
             core,
+            output_multiplier: factor as u8,
             config: config.clone(),
-            session: if core.has_sbr {
+            session: if shared_qmf {
                 super::aac_ld_mps_session::Session::new_qmf(
                     config,
                     super::aac_ld_mps_decor::Mode::Complex,
@@ -117,6 +121,10 @@ impl Decoder {
             ready: Default::default(),
             source_clock: None,
         })
+    }
+    /// Required ingress domain, not the presence of LD-SBR in the bitstream.
+    pub fn expects_shared_qmf(&self) -> bool {
+        self.core.has_sbr && self.core.downscale == 1
     }
     pub fn mask(&self) -> u32 {
         match self.config.tree.code {
@@ -238,8 +246,9 @@ impl Decoder {
     pub fn channels(&self) -> u8 {
         self.config.tree.output_channels
     }
-    /// Canonical core PCM and its exact consumed syntax boundary. All stream
-    /// state remains unchanged on a malformed suffix, timing or render error.
+    /// Canonical decoded PCM at the selected output clock. In the LD-SBR PCM
+    /// domain this includes SBR synthesis, and used_bits includes its syntax.
+    /// A malformed suffix, timing or render error retains all stream state.
     pub fn decode_core(
         &mut self,
         packet: &[u8],
@@ -247,12 +256,14 @@ impl Decoder {
         samples: &[f32],
         stamp: Stamp,
     ) -> Result<Option<AacFrame>> {
-        if self.core.has_sbr {
+        if self.expects_shared_qmf() {
             return Err(invalid("LD-SBR spatial decoder requires shared QMF input"));
         }
         let channels = usize::from(self.config.tree.input_channels);
         if samples.len()
-            != usize::from(self.core.frame_samples / u16::from(self.core.downscale)) * channels
+            != usize::from(self.core.frame_samples / u16::from(self.core.downscale))
+                * usize::from(self.output_multiplier)
+                * channels
         {
             return Err(invalid("AAC LD-MPS core PCM channel mismatch"));
         }
@@ -273,8 +284,8 @@ impl Decoder {
         qmf: &[Vec<Vec<super::aac_sbr_qmf::Complex>>],
         stamp: Stamp,
     ) -> Result<Option<AacFrame>> {
-        if !self.core.has_sbr {
-            return Err(invalid("AAC spatial decoder requires core PCM input"));
+        if !self.expects_shared_qmf() {
+            return Err(invalid("AAC spatial decoder requires decoded PCM input"));
         }
         if qmf.len() != usize::from(self.config.frame_slots) {
             return Err(invalid("AAC LD-MPS shared QMF slot mismatch"));

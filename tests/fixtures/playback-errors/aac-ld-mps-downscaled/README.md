@@ -18,7 +18,8 @@ cover public/owned exports, MP4/MKV reader playback, frame-boundary seek, EOF,
 rewind, full native checkpoints and failed-suffix retry. Root worker coverage
 checks queue/source stamps and live-history navigation.
 
-Nominal-rate SSC adaptation and downscaled coupled LD-SBR are still unsupported.
-The explicit input-clock handoff must not be counted as implementing those modes.
+Nominal-rate SSC adaptation remains unsupported. Downscaled LD-SBR is now
+covered separately by `aac-ld-mps-sbr-pcm` through the owned PCM interface;
+direct downscaled shared-QMF ingress remains unsupported.
 All media, parameters and PCM are authored locally. Generation uses no external
 process or network;ordinary tests use saved files without FFmpeg or generation.

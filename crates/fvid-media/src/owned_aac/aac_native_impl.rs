@@ -322,7 +322,7 @@ impl NativeAacDecoder {
         let direct_mapping=parsed.direct_mapping;
         let separate_esc=parsed.separate_esc;
         let protection=parsed.protection.clone();
-        let eld_sbr=parsed.eld_sbr.clone().map(|config|if ld_mps.is_some() {super::aac_eld_sbr::Decoder::new_spatial(config,parsed.core.sample_rate,parsed.core.frame_samples,parsed.core.channel_configuration)}else{super::aac_eld_sbr::Decoder::new_downscaled(config,parsed.core.sample_rate,parsed.core.frame_samples,parsed.core.channel_configuration,usize::from(output_downscale_factor))}).transpose()?;
+        let eld_sbr=parsed.eld_sbr.clone().map(|config|if ld_mps.as_ref().is_some_and(|spatial| spatial.expects_shared_qmf()) {super::aac_eld_sbr::Decoder::new_spatial(config,parsed.core.sample_rate,parsed.core.frame_samples,parsed.core.channel_configuration)}else{super::aac_eld_sbr::Decoder::new_downscaled(config,parsed.core.sample_rate,parsed.core.frame_samples,parsed.core.channel_configuration,usize::from(output_downscale_factor))}).transpose()?;
         let sbr_rate = if parsed.sbr_present == Some(true) && eld_sbr.is_none() {
             let rate = parsed.extension_sample_rate.ok_or_else(|| invalid("missing SBR output frequency"))?;
             let core = parsed.core.sample_rate;

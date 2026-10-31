@@ -1,3 +1,31 @@
+## Downscaled LD-SBR through the LD-MPS PCM interface, 2026-10-31
+
+Owned LD-SBR CLDFB synthesis now feeds ordinary LD-MPS PCM analysis/synthesis
+for factors2/4/8 with an explicitly adapted SSC. Both single/dual-rate modes,
+480/512 ELD, all8 trees, stereo coupling, CRC and changing wide-LF crossover
+are covered. Nominal streams retain the existing shared LD-QMF path.
+
+152 own MP4/MKV pairs and55 bare independent PCM controls qualify component
+composition.7,147,264 spatial PCM values differ by at most1.5544533e-26.
+Tests exercise untimed/timed decode, playback readers, seek/rewind/EOF,
+checkpoint replay, malformed spatial suffix and SBR CRC failure followed by
+valid retry. The AudioWorker test covers queue stamps and live-history seeks.
+Before this fix, the same bare controls pass but three spatial tests fail at
+exactly the old downscaled-bank admission refusal. The CRC test is separately
+qualified after the fix. Frozen generation reproduces418 generated files twice
+under network/process denial, separately from ordinary offline tests.
+
+This is component integration evidence, not complete independent whole-codec
+or profile conformance. Nominal-rate SSC remapping, direct downscaled shared-QMF
+banks and factor-three SBR remain open. Physical audio output/realtime performance
+are not established by these tests. Full ISO23003-2 Annex B has not been obtained.
+The codec-gap objective stays open.
+
+Fresh offline gates: 1741 passed, 0 failed, 27 pre-existing ignored.
+Media:587/0/1; player:1071/0/26;15 targeted integration suites: 83/0/0.
+
+Evidence: `docs/validation/aac-ld-mps-sbr-pcm-{source,generation,tests}-2026-10-31.json`.
+
 ## Explicit short-core PCM ingress for LD-MPS,2026-10-31
 
 Native AAC-LD/ELD without SBR can now hand short core PCM to ordinary LD-MPS

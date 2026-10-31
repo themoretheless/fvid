@@ -519,3 +519,8 @@ fn check_ld_residual_profile_refusal(corpus: &str) {
 fn explicitly_downscaled_ld_mps_worker_keeps_core_source_windows_and_exact_navigation() {
     check_corpus("aac-ld-mps-downscaled");
 }
+
+#[test]
+fn downscaled_ld_sbr_pcm_to_mps_worker_keeps_queue_and_navigation_stamps() {
+    check_corpus("aac-ld-mps-sbr-pcm");
+}
