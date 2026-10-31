@@ -1,0 +1,430 @@
+{
+  "apple_source": "https://developer.apple.com/documentation/quicktime-file-format/language_code_values.md",
+  "apple_sha256": "b8c5d2964704d738fbe5e06cc8e3c94c5430edbee87201e97b708bfe17d14dd6",
+  "apple_documented_numeric_codes": 105,
+  "iso_source": "https://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt",
+  "iso_sha256": "42b71885e4dc885559fda5ad059fd81838cf4782cedb5fd08cc3431f7d067371",
+  "scope": "Numeric-code coverage and canonical language-code existence. Explicit script distinctions derive from Apple names. No source implementation copied.",
+  "verified": {
+    "0": {
+      "tag": "eng",
+      "iso_name": "English"
+    },
+    "1": {
+      "tag": "fra",
+      "iso_name": "French"
+    },
+    "2": {
+      "tag": "deu",
+      "iso_name": "German"
+    },
+    "3": {
+      "tag": "ita",
+      "iso_name": "Italian"
+    },
+    "4": {
+      "tag": "nld",
+      "iso_name": "Dutch; Flemish"
+    },
+    "5": {
+      "tag": "swe",
+      "iso_name": "Swedish"
+    },
+    "6": {
+      "tag": "spa",
+      "iso_name": "Spanish; Castilian"
+    },
+    "7": {
+      "tag": "dan",
+      "iso_name": "Danish"
+    },
+    "8": {
+      "tag": "por",
+      "iso_name": "Portuguese"
+    },
+    "9": {
+      "tag": "nor",
+      "iso_name": "Norwegian"
+    },
+    "10": {
+      "tag": "heb",
+      "iso_name": "Hebrew"
+    },
+    "11": {
+      "tag": "jpn",
+      "iso_name": "Japanese"
+    },
+    "12": {
+      "tag": "ara",
+      "iso_name": "Arabic"
+    },
+    "13": {
+      "tag": "fin",
+      "iso_name": "Finnish"
+    },
+    "14": {
+      "tag": "ell",
+      "iso_name": "Modern Greek (1453-)"
+    },
+    "15": {
+      "tag": "isl",
+      "iso_name": "Icelandic"
+    },
+    "16": {
+      "tag": "mlt",
+      "iso_name": "Maltese"
+    },
+    "17": {
+      "tag": "tur",
+      "iso_name": "Turkish"
+    },
+    "18": {
+      "tag": "hrv",
+      "iso_name": "Croatian"
+    },
+    "19": {
+      "tag": "zh-Hant",
+      "iso_name": "Chinese"
+    },
+    "20": {
+      "tag": "urd",
+      "iso_name": "Urdu"
+    },
+    "21": {
+      "tag": "hin",
+      "iso_name": "Hindi"
+    },
+    "22": {
+      "tag": "tha",
+      "iso_name": "Thai"
+    },
+    "23": {
+      "tag": "kor",
+      "iso_name": "Korean"
+    },
+    "24": {
+      "tag": "lit",
+      "iso_name": "Lithuanian"
+    },
+    "25": {
+      "tag": "pol",
+      "iso_name": "Polish"
+    },
+    "26": {
+      "tag": "hun",
+      "iso_name": "Hungarian"
+    },
+    "27": {
+      "tag": "est",
+      "iso_name": "Estonian"
+    },
+    "28": {
+      "tag": "lav",
+      "iso_name": "Latvian"
+    },
+    "29": {
+      "tag": "smi",
+      "iso_name": "Sami languages"
+    },
+    "30": {
+      "tag": "fao",
+      "iso_name": "Faroese"
+    },
+    "31": {
+      "tag": "fas",
+      "iso_name": "Persian"
+    },
+    "32": {
+      "tag": "rus",
+      "iso_name": "Russian"
+    },
+    "33": {
+      "tag": "zh-Hans",
+      "iso_name": "Chinese"
+    },
+    "34": {
+      "tag": "nld",
+      "iso_name": "Dutch; Flemish"
+    },
+    "35": {
+      "tag": "gle",
+      "iso_name": "Irish"
+    },
+    "36": {
+      "tag": "sqi",
+      "iso_name": "Albanian"
+    },
+    "37": {
+      "tag": "ron",
+      "iso_name": "Romanian; Moldavian; Moldovan"
+    },
+    "38": {
+      "tag": "ces",
+      "iso_name": "Czech"
+    },
+    "39": {
+      "tag": "slk",
+      "iso_name": "Slovak"
+    },
+    "40": {
+      "tag": "slv",
+      "iso_name": "Slovenian"
+    },
+    "41": {
+      "tag": "yid",
+      "iso_name": "Yiddish"
+    },
+    "42": {
+      "tag": "srp",
+      "iso_name": "Serbian"
+    },
+    "43": {
+      "tag": "mkd",
+      "iso_name": "Macedonian"
+    },
+    "44": {
+      "tag": "bul",
+      "iso_name": "Bulgarian"
+    },
+    "45": {
+      "tag": "ukr",
+      "iso_name": "Ukrainian"
+    },
+    "46": {
+      "tag": "bel",
+      "iso_name": "Belarusian"
+    },
+    "47": {
+      "tag": "uzb",
+      "iso_name": "Uzbek"
+    },
+    "48": {
+      "tag": "kaz",
+      "iso_name": "Kazakh"
+    },
+    "49": {
+      "tag": "aze",
+      "iso_name": "Azerbaijani"
+    },
+    "50": {
+      "tag": "az-Arab",
+      "iso_name": "Azerbaijani"
+    },
+    "51": {
+      "tag": "hye",
+      "iso_name": "Armenian"
+    },
+    "52": {
+      "tag": "kat",
+      "iso_name": "Georgian"
+    },
+    "53": {
+      "tag": "ron",
+      "iso_name": "Romanian; Moldavian; Moldovan"
+    },
+    "54": {
+      "tag": "kir",
+      "iso_name": "Kirghiz; Kyrgyz"
+    },
+    "55": {
+      "tag": "tgk",
+      "iso_name": "Tajik"
+    },
+    "56": {
+      "tag": "tuk",
+      "iso_name": "Turkmen"
+    },
+    "57": {
+      "tag": "mon",
+      "iso_name": "Mongolian"
+    },
+    "58": {
+      "tag": "mn-Cyrl",
+      "iso_name": "Mongolian"
+    },
+    "59": {
+      "tag": "pus",
+      "iso_name": "Pushto; Pashto"
+    },
+    "60": {
+      "tag": "kur",
+      "iso_name": "Kurdish"
+    },
+    "61": {
+      "tag": "kas",
+      "iso_name": "Kashmiri"
+    },
+    "62": {
+      "tag": "snd",
+      "iso_name": "Sindhi"
+    },
+    "63": {
+      "tag": "bod",
+      "iso_name": "Tibetan"
+    },
+    "64": {
+      "tag": "nep",
+      "iso_name": "Nepali"
+    },
+    "65": {
+      "tag": "san",
+      "iso_name": "Sanskrit"
+    },
+    "66": {
+      "tag": "mar",
+      "iso_name": "Marathi"
+    },
+    "67": {
+      "tag": "ben",
+      "iso_name": "Bengali"
+    },
+    "68": {
+      "tag": "asm",
+      "iso_name": "Assamese"
+    },
+    "69": {
+      "tag": "guj",
+      "iso_name": "Gujarati"
+    },
+    "70": {
+      "tag": "pan",
+      "iso_name": "Panjabi; Punjabi"
+    },
+    "71": {
+      "tag": "ori",
+      "iso_name": "Oriya"
+    },
+    "72": {
+      "tag": "mal",
+      "iso_name": "Malayalam"
+    },
+    "73": {
+      "tag": "kan",
+      "iso_name": "Kannada"
+    },
+    "74": {
+      "tag": "tam",
+      "iso_name": "Tamil"
+    },
+    "75": {
+      "tag": "tel",
+      "iso_name": "Telugu"
+    },
+    "76": {
+      "tag": "sin",
+      "iso_name": "Sinhala; Sinhalese"
+    },
+    "77": {
+      "tag": "mya",
+      "iso_name": "Burmese"
+    },
+    "78": {
+      "tag": "khm",
+      "iso_name": "Central Khmer"
+    },
+    "79": {
+      "tag": "lao",
+      "iso_name": "Lao"
+    },
+    "80": {
+      "tag": "vie",
+      "iso_name": "Vietnamese"
+    },
+    "81": {
+      "tag": "ind",
+      "iso_name": "Indonesian"
+    },
+    "82": {
+      "tag": "tgl",
+      "iso_name": "Tagalog"
+    },
+    "83": {
+      "tag": "ms-Latn",
+      "iso_name": "Malay"
+    },
+    "84": {
+      "tag": "ms-Arab",
+      "iso_name": "Malay"
+    },
+    "85": {
+      "tag": "amh",
+      "iso_name": "Amharic"
+    },
+    "87": {
+      "tag": "orm",
+      "iso_name": "Oromo"
+    },
+    "88": {
+      "tag": "som",
+      "iso_name": "Somali"
+    },
+    "89": {
+      "tag": "swa",
+      "iso_name": "Swahili"
+    },
+    "90": {
+      "tag": "kin",
+      "iso_name": "Kinyarwanda"
+    },
+    "91": {
+      "tag": "run",
+      "iso_name": "Rundi"
+    },
+    "92": {
+      "tag": "nya",
+      "iso_name": "Chichewa; Chewa; Nyanja"
+    },
+    "93": {
+      "tag": "mlg",
+      "iso_name": "Malagasy"
+    },
+    "94": {
+      "tag": "epo",
+      "iso_name": "Esperanto"
+    },
+    "128": {
+      "tag": "cym",
+      "iso_name": "Welsh"
+    },
+    "129": {
+      "tag": "eus",
+      "iso_name": "Basque"
+    },
+    "130": {
+      "tag": "cat",
+      "iso_name": "Catalan; Valencian"
+    },
+    "131": {
+      "tag": "lat",
+      "iso_name": "Latin"
+    },
+    "132": {
+      "tag": "que",
+      "iso_name": "Quechua"
+    },
+    "133": {
+      "tag": "grn",
+      "iso_name": "Guarani"
+    },
+    "134": {
+      "tag": "aym",
+      "iso_name": "Aymara"
+    },
+    "135": {
+      "tag": "tat",
+      "iso_name": "Tatar"
+    },
+    "136": {
+      "tag": "uig",
+      "iso_name": "Uighur; Uyghur"
+    },
+    "137": {
+      "tag": "dzo",
+      "iso_name": "Dzongkha"
+    },
+    "138": {
+      "tag": "jv-Latn",
+      "iso_name": "Javanese"
+    }
+  }
+}

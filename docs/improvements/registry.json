@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 440,
-  "next_id": "FVID-0441",
+  "accepted_count": 441,
+  "next_id": "FVID-0442",
   "entries": [
     {
       "id": "FVID-0001",
@@ -4942,6 +4942,17 @@
       "result": "Recognize positive audio presentation gaps independently of DTS and use the presentation endpoint for the normalized default schedule, preserving the stricter non-audio gap rule and exact recovered-clock boundary handling. Two authored short videos preserve identical PCM packet bytes/PTS and video packets. Native/owned exact640-frame PCM including middle silence, nine seeks, trim intervals, cancellation/resource refusals and actual AudioPlayback worker pass.117 integration suites553 pass; root/media units and locked/offline core/player builds pass,1220 distinct checks after4 duplicate events. No extra count for the partial repair or test variants.",
       "status": "accepted",
       "validation": "batch-440-validation.json"
+    },
+    {
+      "id": "FVID-0441",
+      "batch": 441,
+      "title": "Preserve Macintosh numeric languages in explicitly branded QuickTime files",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/quicktime_mac_language.rs",
+      "before": "Original2ac13b33a1 passes actual video/seek controls but loses QuickTime numeric mdhd language0 and32; initial and448-movie expanded baseline each1pass1fail. ISO controls preserve unknown metadata.",
+      "result": "Read a fixed-size major brand without scanning/allocating compatible brands; decode all105 numeric values in the current Apple table only for a complete unique qt brand. Preserve explicit script distinctions, ISO behavior, und and elng precedence, and unknown values.459 authored short movies cover both mdhd versions,105 languages, unknown values, extended-size and invalid optional branding, and elng fallback. Both readers/probe, exact packet/decoded planes/RGB, seven seeks, rewind and EOF pass; all459 independently retain video packet hashes/PTS.118 integration suites555 pass, root/media units and locked/offline core/player builds pass,1222 distinct checks after4 duplicate events. Mapping variants add no IDs.",
+      "status": "accepted",
+      "validation": "batch-441-validation.json"
     }
   ]
 }

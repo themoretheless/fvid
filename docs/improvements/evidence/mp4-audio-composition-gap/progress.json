@@ -1,5 +1,5 @@
 {
-  "status": "accepted FVID-0440; all qualification jobs terminal; publication pending",
+  "status": "accepted FVID-0440; published main and delivery branch, artifacts removed",
   "session": 22837,
   "base": "9c5dae60447d37e1f229a35aebc7df713403723c",
   "target": "/private/tmp/fvid-mp4-audio-composition-gap-20261031",

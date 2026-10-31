@@ -1,0 +1,26 @@
+{
+  "integration": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-quicktime-mac-language-integration.log"
+  },
+  "root-mp4": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-quicktime-mac-language-root-mp4.log"
+  },
+  "root-webm": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-quicktime-mac-language-root-webm.log"
+  },
+  "media": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-quicktime-mac-language-media.log"
+  },
+  "core-check": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-quicktime-mac-language-core-check.log"
+  },
+  "player-check": {
+    "exit": 0,
+    "log": "/private/tmp/fvid-quicktime-mac-language-player-check.log"
+  }
+}

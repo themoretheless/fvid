@@ -1,0 +1,11 @@
+{
+  "status": "accepted FVID-0441; all qualification jobs terminal; publication pending",
+  "base": "2ac13b33a173ee6395ff66966b3ffa27e3fbf3ff",
+  "session": 8322,
+  "target": "/private/tmp/fvid-quicktime-mac-language-20261031",
+  "log": "/private/tmp/fvid-quicktime-mac-language-before.log",
+  "scope": "All105 numeric codes published by Apple, mdhd v0/v1,459 movie cases; explicit major brand only. No unbranded/compatible-brand inference.",
+  "baseline_cases_unchanged": 448,
+  "qualification_session": 54600,
+  "independent_packet_session": 61435
+}

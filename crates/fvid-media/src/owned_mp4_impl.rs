@@ -552,13 +552,42 @@ fn media_time(data: &[u8], size_v0: usize) -> Result<(u32, u64)> {
     }
     Ok((scale, duration))
 }
-/// The language `mdhd` states as three packed 5-bit groups, one per letter
-/// counted from the code just below `a`. `und` is what writers put there when
-/// nothing was said, and a group left at zero is padding rather than a letter,
-/// so both come back as nothing for the player to show.
-fn media_language(mdhd: &[u8]) -> Option<String> {
+/// Apple's numeric language table applies to explicitly branded QuickTime.
+/// Script distinctions stated by that table survive as extended language tags.
+fn macintosh_media_language(code: u16) -> Option<String> {
+    const LOW: &[&str] = &[
+        "eng", "fra", "deu", "ita", "nld", "swe", "spa", "dan",
+        "por", "nor", "heb", "jpn", "ara", "fin", "ell", "isl",
+        "mlt", "tur", "hrv", "zh-Hant", "urd", "hin", "tha", "kor",
+        "lit", "pol", "hun", "est", "lav", "smi", "fao", "fas",
+        "rus", "zh-Hans", "nld", "gle", "sqi", "ron", "ces", "slk",
+        "slv", "yid", "srp", "mkd", "bul", "ukr", "bel", "uzb",
+        "kaz", "aze", "az-Arab", "hye", "kat", "ron", "kir", "tgk",
+        "tuk", "mon", "mn-Cyrl", "pus", "kur", "kas", "snd", "bod",
+        "nep", "san", "mar", "ben", "asm", "guj", "pan", "ori",
+        "mal", "kan", "tam", "tel", "sin", "mya", "khm", "lao",
+        "vie", "ind", "tgl", "ms-Latn", "ms-Arab", "amh", "", "orm",
+        "som", "swa", "kin", "run", "nya", "mlg", "epo",
+    ];
+    const HIGH: &[&str] = &[
+        "cym", "eus", "cat", "lat", "que", "grn", "aym", "tat",
+        "uig", "dzo", "jv-Latn",
+    ];
+    let tag = match code {
+        0..=94 => LOW[usize::from(code)],
+        128..=138 => HIGH[usize::from(code - 128)],
+        _ => return None,
+    };
+    (!tag.is_empty()).then(|| tag.to_owned())
+}
+/// Read explicitly branded QuickTime numeric codes or packed ISO letters.
+/// Unspecified, unassigned and malformed optional values remain unknown.
+fn media_language(mdhd: &[u8], quicktime: bool) -> Option<String> {
     let at = if version(mdhd, 1).ok()? == 0 { 20 } else { 32 };
     let packed = u16be(mdhd, at).ok()?;
+    if quicktime && packed < 0x400 {
+        return macintosh_media_language(packed);
+    }
     // Packed ISO language codes reserve the top bit and encode lowercase letters.
     // Unspecified Macintosh 0x7fff consequently has no ISO interpretation.
     if packed & 0x8000 != 0 {
@@ -683,6 +712,8 @@ impl<R: Read + Seek> Mp4Reader<R> {
         let end = seek_uninterrupted(&mut reader, SeekFrom::End(0))?;
         let mut at = 0u64;
         let mut moov = None;
+        let mut quicktime_brand = false;
+        let mut ftyp_seen = false;
         let mut mdats = Vec::new();
         let mut fragments: Vec<Fragment> = Vec::new();
         let mut fragment_bytes = 0usize;
@@ -713,6 +744,20 @@ impl<R: Read + Seek> Mp4Reader<R> {
                 )));
             }
             match &h[4..] {
+                b"ftyp" => {
+                    // Read only the fixed major brand: an arbitrarily large
+                    // compatible-brand list needs no allocation or scan.
+                    let mut brand = [0u8; 4];
+                    if !ftyp_seen && size - header >= 8 {
+                        reader.read_exact(&mut brand)?;
+                        quicktime_brand = brand == *b"qt  ";
+                    } else {
+                        // Ambiguous duplicate or incomplete brand metadata
+                        // must not turn an ISO unknown code into a language.
+                        quicktime_brand = false;
+                    }
+                    ftyp_seen = true;
+                }
                 b"moov" => {
                     if moov.is_some() {
                         return Err(invalid("duplicate moov"));
@@ -776,7 +821,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             if tracks.len() >= limits.tracks {
                 return Err(invalid("MP4 track limit exceeded"));
             }
-            let Some((track, flags, duration)) = parse_track(atom.data, &mdats, remaining, fragmented, &mut refused)?
+            let Some((track, flags, duration)) = parse_track(atom.data, &mdats, remaining, fragmented, quicktime_brand, &mut refused)?
             else {
                 skipped += 1;
                 continue;
@@ -1492,6 +1537,7 @@ fn parse_track(
     mdats: &[Range<u64>],
     limit: usize,
     fragmented: bool,
+    quicktime: bool,
     refused: &mut Vec<SkippedTrack>,
 ) -> Result<Option<(Track, u32, Option<u64>)>> {
     let track = atoms(data)?;
@@ -1531,7 +1577,7 @@ fn parse_track(
         duration == u64::MAX
     };
     let duration = if duration_unknown { 0 } else { duration };
-    let language = extended_media_language(&mdia).or_else(|| media_language(mdhd)).unwrap_or_default();
+    let language = extended_media_language(&mdia).or_else(|| media_language(mdhd, quicktime)).unwrap_or_default();
     let name = track_name(&track).unwrap_or_default();
     let handler: [u8; 4] = required(&mdia, b"hdlr")?
         .get(8..12)

@@ -1,0 +1,81 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0441"
+  ],
+  "count_delta": 1,
+  "accepted_count": 441,
+  "before_commit": "2ac13b33a173ee6395ff66966b3ffa27e3fbf3ff",
+  "checks": {
+    "initial-before": {
+      "suites": 1,
+      "passed": 1,
+      "failed": 1,
+      "ignored": 0
+    },
+    "before": {
+      "suites": 1,
+      "passed": 1,
+      "failed": 1,
+      "ignored": 0
+    },
+    "after": {
+      "suites": 4,
+      "passed": 17,
+      "failed": 0,
+      "ignored": 0
+    },
+    "integration": {
+      "suites": 118,
+      "passed": 555,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-mp4": {
+      "suites": 1,
+      "passed": 57,
+      "failed": 0,
+      "ignored": 1
+    },
+    "root-webm": {
+      "suites": 1,
+      "passed": 67,
+      "failed": 0,
+      "ignored": 0
+    },
+    "media": {
+      "suites": 1,
+      "passed": 547,
+      "failed": 0,
+      "ignored": 1
+    },
+    "core-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "distinct_passed": 1222,
+  "duplicate_events_excluded": 4,
+  "focused_pass_events_not_added": 17,
+  "fixtures": {
+    "movies": 459,
+    "total_files": 466,
+    "apple_numeric_codes": 105,
+    "mdhd_versions": [
+      0,
+      1
+    ],
+    "unchanged_baseline_movies": 448,
+    "independently_packet_verified": 459,
+    "repeatability": "identical"
+  },
+  "limitations": "Requires explicit unique complete QuickTime major brand. No inference for unbranded/compatible-only/ambiguous branding. Only current published Apple code values; unlisted86 remains unknown. Public signatures/types unchanged. Existing2 ignored tests unchanged. No performance/GPU/UI claim."
+}

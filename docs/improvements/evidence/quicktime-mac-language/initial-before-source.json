@@ -1,0 +1,6 @@
+{
+  "crates/fvid-media/src/owned_mp4_impl.rs": "a751998fedca2855b9b78e76bc626ed953ebf49daf4e50365beaed74df915ffc",
+  "scripts/generate_quicktime_mac_language.py": "29acd72d3db00bc3a622b17a597f6b477c6f895b4d24f8da6531eb1b40e1678e",
+  "tests/quicktime_mac_language.rs": "18efeda26f0b67039e1727f34dc26ad32f8d0f688b6b9568f5ef7144f32b031b",
+  "tests/fixtures/playback-errors/quicktime-mac-language/manifest.json": "11195a6e5b79baf7466d18810f1a20fc4703169232ba4696a14b3adb575a901b"
+}

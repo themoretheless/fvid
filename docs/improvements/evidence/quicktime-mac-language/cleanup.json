@@ -1,0 +1,16 @@
+{
+  "removed_files": [
+    "/private/tmp/fvid-quicktime-mac-language-before.log",
+    "/private/tmp/fvid-quicktime-mac-language-expanded-before.log",
+    "/private/tmp/fvid-quicktime-mac-language-after.log",
+    "/private/tmp/fvid-quicktime-mac-language-integration.log",
+    "/private/tmp/fvid-quicktime-mac-language-root-mp4.log",
+    "/private/tmp/fvid-quicktime-mac-language-root-webm.log",
+    "/private/tmp/fvid-quicktime-mac-language-media.log",
+    "/private/tmp/fvid-quicktime-mac-language-core-check.log",
+    "/private/tmp/fvid-quicktime-mac-language-player-check.log",
+    "/private/tmp/fvid-quicktime-mac-language-iso.txt"
+  ],
+  "removed_target": "/private/tmp/fvid-quicktime-mac-language-20261031",
+  "preserved": "All466 authored fixture files, mapping facts/generator, regressions and archived evidence. Foreign jobs/worktrees/stashes retained."
+}
