@@ -1,5 +1,9 @@
 # Audio Implementation Status
 
+Native LD/ELD without SBR now supports explicitly adapted short-core PCM clocks
+into LD-MPS. Nominal-rate SSC remapping and downscaled coupled LD-SBR remain
+unsupported;the codec-gap objective stays open. See CODEC_PROGRESS.md.
+
 LD-MPS rejects residual extension types0/1, including absent/zero bands, at
 native initial/replacement headers.
 Historical LD/residual numerical tests are not codec acceptance;ordinary MPEG

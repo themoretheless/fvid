@@ -38,9 +38,18 @@ impl Decoder {
         sbr: Option<bool>,
     ) -> Result<Self> {
         config.validate_low_delay_profile()?;
-        if !matches!(core.object_type, 23 | 39) || core.downscale != 1 {
+        if !matches!(core.object_type, 23 | 39)
+            || !matches!(core.downscale, 1 | 2 | 3 | 4 | 8)
+            || !core.sample_rate.is_multiple_of(u32::from(core.downscale))
+            || !core.frame_samples.is_multiple_of(u16::from(core.downscale))
+        {
+            return Err(invalid(
+                "invalid downscaled AAC LD/ELD spatial core geometry",
+            ));
+        }
+        if core.has_sbr && core.downscale != 1 {
             return Err(unsupported(
-                "downscaled spatial filter banks are not yet implemented",
+                "downscaled coupled LD-SBR spatial filter banks are not yet implemented",
             ));
         }
         let bins = if config.sample_rate < 27713 {
@@ -58,10 +67,14 @@ impl Decoder {
         let factor = if sbr == Some(true) { 2 } else { 1 };
         let rate = core
             .sample_rate
-            .checked_mul(factor)
+            .checked_div(u32::from(core.downscale))
+            .and_then(|rate| rate.checked_mul(factor))
             .ok_or_else(|| invalid("LD-MPS output rate overflow"))?;
         let spatial_samples = usize::from(config.frame_slots) * bins;
-        let core_samples = usize::from(core.frame_samples) * factor as usize;
+        // Entropy/prediction retain nominal geometry; the spatial owner receives
+        // short PCM at the explicitly selected output clock.
+        let core_samples =
+            usize::from(core.frame_samples / u16::from(core.downscale)) * factor as usize;
         // Without SBR,a spatial frame may cover several whole LD/ELD
         // packets (e.g.480-sample ELD with128 bins). Session retains each span.
         let frame_geometry = if !core.has_sbr {
@@ -238,7 +251,9 @@ impl Decoder {
             return Err(invalid("LD-SBR spatial decoder requires shared QMF input"));
         }
         let channels = usize::from(self.config.tree.input_channels);
-        if samples.len() != usize::from(self.core.frame_samples) * channels {
+        if samples.len()
+            != usize::from(self.core.frame_samples / u16::from(self.core.downscale)) * channels
+        {
             return Err(invalid("AAC LD-MPS core PCM channel mismatch"));
         }
         let planar: Vec<Vec<f64>> = (0..channels)

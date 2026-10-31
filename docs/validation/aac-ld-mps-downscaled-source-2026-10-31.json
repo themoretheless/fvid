@@ -1,0 +1,12 @@
+{
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "reference_audit": "docs/validation/aac-ld-mps-pcm-reference-2026-10-30.json",
+  "sources": {
+    "sac_calcM1andM2.c": "ebdb752a1d74a5f7e5638366867b3b477918aa9f4d94169ee3b2e30bfbce6153",
+    "spatial_frontend.c": "03322c8bd0b0c67c9ec1f9a1781fa19e239986569608b4b6eacd2244b9c81fde"
+  },
+  "arbitrary_downmix_finding": "CalculateArbDmxMtx applies dB gain in several matrix routines;TTT applies gain before inversion. LD_212 and7571/7572 routines do not contain corresponding application. Do not copy a blanket post-M1 column scaling rule or infer all-tree behavior from one tree.",
+  "arbitrary_downmix_status": "No runtime change. Full normative semantics and whole-mode qualification remain open.",
+  "pcm_interface_finding": "spatial_frontend passes actual PCM sampleFreq to SpatialDecOpen and asserts sampleFreq==ourDec->samplingFreq when input is PCM. Current new ingress keeps this match using explicitly adapted SSC and short core clock.",
+  "qualification": "Reference PCM-interface contract and source investigation;not normative validation of every combined ASC/profile. Nominal-rate SSC adaptation and downscaled coupled LD-SBR remain unimplemented."
+}

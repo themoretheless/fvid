@@ -1,3 +1,33 @@
+## Explicit short-core PCM ingress for LD-MPS,2026-10-31
+
+Native AAC-LD/ELD without SBR can now hand short core PCM to ordinary LD-MPS
+when the SSC explicitly describes that adapted clock. The owner validates integral
+sample-rate/frame reductions, retains nominal core prediction/entropy geometry,
+and uses adapted sample counts for spatial frame grouping and input admission.
+Nominal-rate SSC remapping and downscaled coupled LD-SBR remain unsupported.
+This is an input-interface integration slice,not completion of LD-SBR or codec
+profile conformance.
+
+112 own MP4/MKV pairs cover both cores,480/512 nominal lengths,all8 trees and
+factors2/3/4/8 where integral.42 bare controls independently reconstruct short
+core PCM.3,421,184 compositional spatial PCM values match exactly. The old runtime
+passes all bare controls but rejects the two spatial acceptance tests specifically
+at downscaled-bank admission. Current tests additionally check packet/source
+edges,seek,rewind,EOF,checkpoint replay and suffix-error retry. Root AudioWorker
+qualification is recorded separately with the final gates.
+
+Frozen generation is isolated from tests and reproducible under network/process
+denial. It uses own analytical short core PCM and previously qualified spatial
+stages,not an independent whole-codec oracle. Source audit also records why
+arbitrary-downmix gain integration needs further all-tree normative verification;
+no speculative change to that mode was made.
+
+Fresh offline gates:1718 passed,0 failed,27 pre-existing ignored. Media:587/0/1;
+player:1070/0/26;11 targeted AAC integrations:61/0/0. The new worker test passed
+all224 transport programmes with live-history navigation.
+
+Evidence: `docs/validation/aac-ld-mps-downscaled-{source,generation,tests}-2026-10-31.json`.
+
 ## LD-MPS profile correction — residual coding boundary,2026-10-31
 
 Earlier residual64 "native qualification" was a classification error. The
