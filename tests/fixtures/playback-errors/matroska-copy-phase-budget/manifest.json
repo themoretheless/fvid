@@ -1,0 +1,5 @@
+{
+  "provenance": "Author-written standard Matroska track/header and three analytic VP9 color frames. No private media/parameters, encoder or network.",
+  "purpose": "Uncounted FVID-0337 repair: inspect reader and64KiB raw copy buffer do not overlap.70KiB is enough for each phase;64KiB and200-byte controls still refuse.",
+  "sha256": "d551bd4597305ca246f7884583f2addd6b57b31461230c940df160ee830a411b"
+}

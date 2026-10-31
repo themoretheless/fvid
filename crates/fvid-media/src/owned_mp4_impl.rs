@@ -214,7 +214,7 @@ pub struct Track {
     pub codec: [u8; 4],
     /// The title from `trak/udta/name`, empty when the file names no track.
     pub name: String,
-    /// The language `mdhd` states as three letters, empty when the field says
+    /// The preferred `elng` BCP47 tag or legacy `mdhd` code, empty when it says
     /// `und` or states nothing that reads as letters.
     pub language: String,
     pub timescale: u32,
@@ -564,6 +564,87 @@ fn media_language(mdhd: &[u8]) -> Option<String> {
         letters.push(char::from(letter + 0x60));
     }
     (letters != "und").then_some(letters)
+}
+/// Check BCP47 structure without a network registry or canonicalizing the
+/// author's tag. Private-use subtags stream directly; variant duplicate checks
+/// sort fixed-size ASCII keys, avoiding quadratic scans or per-subtag strings.
+fn well_formed_language_tag(tag: &str) -> bool {
+    if tag.is_empty() || !tag.is_ascii() { return false; }
+    const GRANDFATHERED: &[&str] = &[
+        "en-GB-oed", "i-ami", "i-bnn", "i-default", "i-enochian", "i-hak",
+        "i-klingon", "i-lux", "i-mingo", "i-navajo", "i-pwn", "i-tao",
+        "i-tay", "i-tsu", "sgn-BE-FR", "sgn-BE-NL", "sgn-CH-DE",
+        "art-lojban", "cel-gaulish", "no-bok", "no-nyn", "zh-guoyu",
+        "zh-hakka", "zh-min", "zh-min-nan", "zh-xiang",
+    ];
+    if GRANDFATHERED.iter().any(|old| tag.eq_ignore_ascii_case(old)) { return true; }
+    fn alpha(s: &str) -> bool { s.bytes().all(|c| c.is_ascii_alphabetic()) }
+    fn alnum(s: &str) -> bool { s.bytes().all(|c| c.is_ascii_alphanumeric()) }
+    fn private<'a>(parts: impl Iterator<Item = &'a str>) -> bool {
+        let mut any = false;
+        for part in parts {
+            if !(1..=8).contains(&part.len()) || !alnum(part) { return false; }
+            any = true;
+        }
+        any
+    }
+    let mut parts = tag.split('-').peekable();
+    let first = parts.next().unwrap_or("");
+    if first.eq_ignore_ascii_case("x") { return private(parts); }
+    if !(2..=8).contains(&first.len()) || !alpha(first) { return false; }
+    if first.len() <= 3 {
+        for _ in 0..3 {
+            if parts.peek().is_some_and(|p| p.len() == 3 && alpha(p)) { parts.next(); }
+            else { break; }
+        }
+    }
+    if parts.peek().is_some_and(|p| p.len() == 4 && alpha(p)) { parts.next(); }
+    if parts.peek().is_some_and(|p| (p.len() == 2 && alpha(p))
+        || (p.len() == 3 && p.bytes().all(|c| c.is_ascii_digit()))) { parts.next(); }
+    let mut variants = Vec::<[u8; 8]>::new();
+    while parts.peek().is_some_and(|p| alnum(p) && ((5..=8).contains(&p.len())
+        || (p.len() == 4 && p.as_bytes()[0].is_ascii_digit())))
+    {
+        let part = parts.next().unwrap();
+        let mut key = [0u8; 8];
+        for (dst, c) in key.iter_mut().zip(part.bytes()) { *dst = c.to_ascii_lowercase(); }
+        if variants.try_reserve(1).is_err() { return false; }
+        variants.push(key);
+    }
+    variants.sort_unstable();
+    if variants.windows(2).any(|pair| pair[0] == pair[1]) { return false; }
+    let mut extensions = 0u64;
+    while parts.peek().is_some_and(|p| p.len() == 1 && alnum(p)
+        && !p.eq_ignore_ascii_case("x"))
+    {
+        let c = parts.next().unwrap().as_bytes()[0].to_ascii_lowercase();
+        let bit = if c.is_ascii_digit() { c - b'0' } else { c - b'a' + 10 };
+        let mask = 1u64 << bit;
+        if extensions & mask != 0 { return false; }
+        extensions |= mask;
+        let mut any = false;
+        while parts.peek().is_some_and(|p| (2..=8).contains(&p.len()) && alnum(p)) {
+            parts.next(); any = true;
+        }
+        if !any { return false; }
+    }
+    if parts.peek().is_some_and(|p| p.eq_ignore_ascii_case("x")) {
+        parts.next(); return private(parts);
+    }
+    parts.next().is_none()
+}
+
+/// Malformed optional language metadata costs only its tag, like a malformed
+/// optional track title. Mandatory atom extents were already checked by atoms().
+fn extended_media_language(mdia: &[Atom<'_>]) -> Option<String> {
+    let data = optional(mdia, b"elng").ok()??;
+    if u32be(data, 0).ok()? != 0 { return None; }
+    // A CString ends at its first NUL; later atom bytes are not tag text.
+    let tag = std::ffi::CStr::from_bytes_until_nul(data.get(4..)?).ok()?.to_str().ok()?;
+    if !well_formed_language_tag(tag) { return None; }
+    // An explicit unknown-language override must not fall back to a conflicting
+    // legacy language. Retain the reader's empty-string unknown convention.
+    Some(if tag.eq_ignore_ascii_case("und") { String::new() } else { tag.to_owned() })
 }
 /// The title of a track, from `trak/udta/name`: plain UTF-8 with no length
 /// prefix, which is what both ffmpeg and QuickTime write. A `udta` this reader
@@ -1441,7 +1522,7 @@ fn parse_track(
         duration == u64::MAX
     };
     let duration = if duration_unknown { 0 } else { duration };
-    let language = media_language(mdhd).unwrap_or_default();
+    let language = extended_media_language(&mdia).or_else(|| media_language(mdhd)).unwrap_or_default();
     let name = track_name(&track).unwrap_or_default();
     let handler: [u8; 4] = required(&mdia, b"hdlr")?
         .get(8..12)

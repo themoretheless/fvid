@@ -66,6 +66,19 @@ pub(crate) fn inspect_with_packet_and_memory_limits<R: Read + Seek>(
             ".mka output requires audio-only Matroska input; no tracks are dropped",
         ));
     }
+    // Enforce full inspection admission before releasing any parsed metadata.
+    if let Some(limit) = max_controlled_bytes {
+        if reader.estimated_index_payload_bytes()? > limit {
+            return Err(invalid("controlled memory budget exceeded"));
+        }
+    }
+    // Identity copy needs only validated packet boundaries and track kinds.
+    // Release these derived lookup tables before forming the compact index;
+    // retain file/scoped user metadata for the existing conservative budget.
+    drop(std::mem::take(&mut reader.track_uids));
+    drop(std::mem::take(&mut reader.track_dispositions));
+    drop(std::mem::take(&mut reader.track_languages));
+    drop(std::mem::take(&mut reader.track_legacy_languages));
     let reader_index_bytes = reader.estimated_index_payload_bytes()?;
     let index_bytes = reader
         .packets

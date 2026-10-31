@@ -90,10 +90,7 @@ fn track_title_and_language_edits_use_original_indexes_after_reordering() {
     let options = fvid_media::CopyOptions {
         streams: vec![1, 0],
         max_packets: Some(3),
-        stream_metadata_delete: vec![
-            (0, "TITLE".into()),
-            (0, "language".into()),
-        ],
+        stream_metadata_delete: vec![(0, "TITLE".into()), (0, "language".into())],
         stream_metadata_set: vec![
             (0, "title".into(), "Transient track 0 title".into()),
             (1, "title".into(), "Discarded title".into()),
@@ -154,12 +151,46 @@ fn track_title_and_language_edits_use_original_indexes_after_reordering() {
         streams: vec![1],
         max_packets: Some(0),
         stream_metadata_set: vec![(1, "LANGUAGE".into(), "rus".into())],
+        progress: Some(fvid_media::ProgressHook::new(|_| {
+            panic!("a refused public zero-limit request must emit no progress")
+        })),
         ..Default::default()
     };
     let language_output = folder.0.join("language.mkv");
-    fvid_media::remux(&source, &language_output, &language_options).unwrap();
+    for error in [
+        fvid_media::owned_mp4_remux::plan_remux(&source, &language_options).unwrap_err(),
+        fvid_media::remux(&source, &language_output, &language_options).unwrap_err(),
+    ] {
+        assert!(error.contains("packet work limit requires at least one packet"));
+    }
+    assert!(!language_output.exists());
+    // Header-only output belongs to the explicit low-level writer, rather
+    // than a public CopyOptions request with an invalid zero work limit.
+    let mut header_input =
+        fvid_media::owned_mp4::Mp4Reader::open(Cursor::new(bytes), Default::default()).unwrap();
+    let header_metadata = fvid_media::owned_matroska::FileMetadata::from_mp4(&header_input);
+    let language_edit = fvid_media::owned_mp4_matroska::TrackMetadataOverride {
+        index: 1,
+        name: None,
+        language: Some("rus"),
+    };
+    let mut header = Cursor::new(Vec::new());
+    let event = fvid_media::owned_mp4_matroska::write_selected_with_metadata_overrides(
+        &mut header_input,
+        &mut header,
+        None,
+        None,
+        Some(0),
+        &[1],
+        fvid_media::owned_mp4_matroska::RemuxMetadata {
+            file: &header_metadata,
+            tracks: &[language_edit],
+        },
+    )
+    .unwrap();
+    assert_eq!(event.packets, 0);
     let mut language = fvid_media::owned_webm::WebmReader::open(
-        Cursor::new(std::fs::read(language_output).unwrap()),
+        Cursor::new(header.into_inner()),
         Default::default(),
     )
     .unwrap();
@@ -213,7 +244,53 @@ fn container_tag_edits_keep_selected_packet_prefix_and_source_metadata() {
         fvid_media::owned_mp4::Mp4Reader::open(Cursor::new(bytes), Default::default()).unwrap();
     assert_eq!(input.tags().title, "Synthetic original title");
     assert_eq!(input.tags().artist, "Synthetic original artist");
-    for cap in [0, 3] {
+    let public_zero = fvid_media::CopyOptions {
+        streams: vec![1],
+        max_packets: Some(0),
+        ..Default::default()
+    };
+    let zero_destination = folder.0.join("public-zero.mkv");
+    for error in [
+        fvid_media::owned_mp4_remux::plan_remux(&source, &public_zero).unwrap_err(),
+        fvid_media::remux(&source, &zero_destination, &public_zero).unwrap_err(),
+    ] {
+        assert!(error.contains("packet work limit requires at least one packet"));
+    }
+    assert!(!zero_destination.exists());
+    let mut header_input =
+        fvid_media::owned_mp4::Mp4Reader::open(Cursor::new(bytes), Default::default()).unwrap();
+    let mut header_metadata = fvid_media::owned_matroska::FileMetadata::from_mp4(&header_input);
+    header_metadata.tags.title = "Synthetic replacement".into();
+    header_metadata.tags.artist.clear();
+    header_metadata.tags.comment = "Тест".into();
+    let mut header = Cursor::new(Vec::new());
+    let event = fvid_media::owned_mp4_matroska::write_selected_with_metadata_overrides(
+        &mut header_input,
+        &mut header,
+        None,
+        None,
+        Some(0),
+        &[1],
+        fvid_media::owned_mp4_matroska::RemuxMetadata {
+            file: &header_metadata,
+            tracks: &[],
+        },
+    )
+    .unwrap();
+    assert_eq!(event.packets, 0);
+    let mut header = fvid_media::owned_webm::WebmReader::open(
+        Cursor::new(header.into_inner()),
+        Default::default(),
+    )
+    .unwrap();
+    header.scan_all().unwrap();
+    assert_eq!(header.tags.title, "Synthetic replacement");
+    assert!(header.tags.artist.is_empty());
+    assert_eq!(header.tags.album, "Synthetic retained album");
+    assert_eq!(header.tags.comment, "Тест");
+    assert_eq!(header.tracks.len(), 1);
+    assert!(header.packets.is_empty());
+    for cap in [1, 3] {
         let events = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
         let seen = events.clone();
         let options = fvid_media::CopyOptions {
@@ -253,6 +330,7 @@ fn container_tag_edits_keep_selected_packet_prefix_and_source_metadata() {
         )
         .unwrap();
         output.scan_all().unwrap();
+        assert_eq!(output.packets.len(), cap as usize);
         assert_eq!(output.tags.title, "Synthetic replacement");
         assert!(output.tags.artist.is_empty());
         assert_eq!(output.tags.album, "Synthetic retained album");

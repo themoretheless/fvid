@@ -1,0 +1,101 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0437"
+  ],
+  "batch": 437,
+  "count_delta": 1,
+  "accepted_count": 437,
+  "summary": "Preserve MP4 extended language tags through readers, probing and bounded Matroska transport",
+  "before_commit": "b220fbc34617c26030ece9cb3f3f9ba2c1d750db",
+  "checks": {
+    "before": {
+      "suites": 1,
+      "passed": 2,
+      "failed": 6,
+      "ignored": 0
+    },
+    "after": {
+      "suites": 1,
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    "integration": {
+      "suites": 113,
+      "passed": 537,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-mp4": {
+      "suites": 1,
+      "passed": 57,
+      "failed": 0,
+      "ignored": 1
+    },
+    "root-webm": {
+      "suites": 1,
+      "passed": 67,
+      "failed": 0,
+      "ignored": 0
+    },
+    "media": {
+      "suites": 1,
+      "passed": 547,
+      "failed": 0,
+      "ignored": 1
+    },
+    "core-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "player-check": {
+      "suites": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "distinct_passed": 1204,
+  "root_filter_duplicates_excluded": 1,
+  "shared_include_duplicates_excluded": 3,
+  "focused_repeats_not_added": 8,
+  "ignored": {
+    "root-mp4": [
+      "player_gpu::tests::hardware_export_copies_mp4_audio_with_gapless_timing"
+    ],
+    "media": [
+      "owned_exposure::integer_conversion_gap::complete_integer_float_rgb_pipeline_matches_reference"
+    ]
+  },
+  "fixtures": {
+    "main_files": 150,
+    "primary_vp9_movies": 86,
+    "avc_copy_companions": 46,
+    "muxed_pcm_text_movies": 4,
+    "independent_matroska_movies": 4,
+    "oracles": 9,
+    "manifest": 1,
+    "independent_packet_verified_movies": 140,
+    "uncounted_phase_repair_files": 2,
+    "repeatability": "identical after all jobs terminal"
+  },
+  "uncounted_repairs": [
+    "FVID-0337: full inspection admission plus early release of unused lookup maps, preserving conservative custom-metadata/copy-buffer budget",
+    "Stale owned_mp4_metadata zero-CopyOptions tests migrated to explicit low-level header-only acceptance plus public zero refusal and real1/3-packet prefixes",
+    "CString padding and case-insensitive fixture-name corrections complete the same feature, without extra IDs"
+  ],
+  "rejected_experiments": [
+    "Max-of-disjoint-phase copy admission was reverted because it broke an existing custom-metadata guard"
+  ],
+  "builds": "locked/offline/no-default-features core and player passed",
+  "migration": "Track.language may carry BCP47 text; no field/signature changes. Common Matroska writer explicitly refuses language fields beyond16KiB; existing smaller description-path limits remain outside this capability.",
+  "limits": [
+    "No IANA registry lookup or language canonicalization",
+    "No arbitrary-long Matroska language support;16KiB bound is explicit",
+    "No performance, RSS, physical-device or UI-rendering claim"
+  ],
+  "evidence": "docs/improvements/evidence/mp4-extended-language/README.md"
+}

@@ -1,0 +1,14 @@
+{
+  "commit": "b220fbc34617c26030ece9cb3f3f9ba2c1d750db",
+  "restored_files": [
+    "owned_mp4_impl.rs",
+    "owned_matroska_tracks_impl.rs",
+    "owned_webm_reader_impl.rs"
+  ],
+  "test": "matroska_packet_index_budget_is_enforced_in_remux_subtitle_convert_and_audio_concat",
+  "passed": 0,
+  "failed": 1,
+  "failure": "controlled memory budget exceeded at tests/mp4_metadata_admission.rs:517 on 70KiB plan_remux control",
+  "raw_sha256": "d1b8c05a5bdd88697a4eeaeae6e1940a28e80595f8d87e767af2f5c2cd6d7e14",
+  "classification": "confirmed pre-existing baseline failure; test and budget unchanged; full qualification not accepted"
+}

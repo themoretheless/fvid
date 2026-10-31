@@ -539,7 +539,10 @@ impl<R: Read + Seek> WebmReader<R> {
                                 }
                                 0x22b59d => {
                                     language_present = true;
-                                    ietf = Some(text(&mut *reader, f, 128)?);
+                                    // BCP47 private-use/variant sequences have no
+                                    // 128-byte format limit. Match the bounded
+                                    // writer allowance; legacy fields stay small.
+                                    ietf = Some(text(&mut *reader, f, 16 * 1024)?);
                                 }
                                 // Keep the historical TagLanguage-in-TrackEntry alias lenient.
                                 0x447a => {

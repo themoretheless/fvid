@@ -21,6 +21,11 @@ fn track_entry(
 fn track_entry_with_usability(
     spec: &TrackSpec<'_>, number: u64, options: Option<&TrackOptions>, enabled: bool, default_track: bool,
 ) -> Result<Vec<u8>> {
+    // Keep language metadata bounded before writing any container bytes. BCP47
+    // tags can exceed the old 128-byte control-string limit (private use).
+    if spec.language.len() > 16 * 1024 {
+        return Err(invalid("Matroska language tag exceeds limit"));
+    }
     let metadata = options.and_then(|o| o.video.as_ref());
     let rotation = options.map_or(0, |o| o.rotation);
     let delay = options.map_or(0, |o| o.codec_delay_ns);
@@ -146,14 +151,14 @@ fn track_entry_with_usability(
     if !spec.name.is_empty() {
         data.extend(element(0x536e, spec.name.as_bytes())?);
     }
-    // Write an explicit undetermined language instead of Matroska's default eng.
-    data.extend(element(
-        0x22b59c,
-        if spec.language.is_empty() {
-            b"und"
-        } else {
-            spec.language.as_bytes()
-        },
-    )?);
+    // Keep legacy ISO639 codes compatible. Extended tags belong in the BCP47
+    // element; older readers receive an explicit unknown-language fallback.
+    let language = if spec.language.is_empty() { "und" } else { spec.language };
+    if language.len() == 3 && language.bytes().all(|c| c.is_ascii_alphabetic()) {
+        data.extend(element(0x22b59c, language.as_bytes())?);
+    } else {
+        data.extend(element(0x22b59c, b"und")?);
+        data.extend(element(0x22b59d, language.as_bytes())?);
+    }
     element(0xae, &data)
 }

@@ -1,0 +1,118 @@
+{
+  "status": "accepted FVID-0437; publication pending",
+  "accepted_count_unchanged": 437,
+  "candidate_id": "FVID-0437",
+  "base_commit": "b220fbc34617c26030ece9cb3f3f9ba2c1d750db",
+  "before": {
+    "passed": 2,
+    "failed": 2,
+    "specific_failures": [
+      "root v0-en-AU.mp4: eng instead of en-AU",
+      "AVC direct remux avc-v0-en-AU.mp4: eng instead of en-AU"
+    ]
+  },
+  "current_after": {
+    "passed": 8,
+    "failed": 0,
+    "status": "focused only, full final gates pending CString correction"
+  },
+  "finding": [
+    "MP4 elng read/probe, optional malformed fallback, explicit und, long tags, exact video and seek currently pass.",
+    "Generic Matroska track writer puts spec.language directly in legacy Language (0x22b59c), including extended BCP47 tags; inspect and preserve in LanguageIETF instead.",
+    "Owned WebM reader currently caps both language fields at128 bytes. Long valid elng copy exposes this additional compatibility boundary. Keep the long-tag copy acceptance enabled; decide bounded support and verify independently.",
+    "Do not count downstream integration repairs as separate improvements automatically.",
+    "Preliminary direct-remux VP9 fixture was an unsupported route; replaced only copy companions with authored AVC I_PCM. Final original-source run now fails on actual language loss for both read/probe and copy."
+  ],
+  "before_command": {
+    "argv": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--test",
+      "mp4_extended_language"
+    ],
+    "env": {
+      "CARGO_TARGET_DIR": "/private/tmp/fvid-mp4-extended-language-20261031",
+      "CARGO_BUILD_JOBS": "2",
+      "CARGO_PROFILE_TEST_DEBUG": "0",
+      "CARGO_PROFILE_DEV_DEBUG": "0"
+    }
+  },
+  "jobs": "All six final qualification jobs terminal0; snapshots and reproducibility verified.",
+  "current_sha256": {
+    "crates/fvid-media/src/owned_mp4_impl.rs": "d4b257e3a2156885a14f865a366c56ff390645b3221316924a0f183c65b84d9f",
+    "scripts/generate_mp4_extended_language.py": "89d3ce00e12bdb28d01e664f59385fc274c0b9037cb2056c2144a07b5bff721f",
+    "tests/mp4_extended_language.rs": "19a819ffdd1a1dcd12de291240b4883289897f19cfcabdcb2ac1aca217809e39",
+    "tests/fixtures/playback-errors/mp4-extended-language/manifest.json": "8ae25b0c956640b588f38250b03a8a06d468574f00a779d4ff901285a9764cf5",
+    "crates/fvid-media/src/owned_matroska_tracks_impl.rs": "bbbc639b06f8b2f9cbf0f161288f3660e90c7e63f6f09bfa065ef865d1bc9ea6",
+    "crates/fvid-media/src/owned_webm_reader_impl.rs": "795b25985cc70f4f3346f80597f349ae7645d00824fa6855f13b0932356bbc35",
+    "crates/fvid-media/src/owned_matroska_copy_impl.rs": "318cf8e5cab0b42a3b487f9a4169ab4a42cf34d7a03301827f3fbee9fc224a47",
+    "scripts/generate_matroska_copy_phase_budget.py": "bf61d2396b5e5f2380c214fd009d8e02a383fb611cd7336400c3dfb4749f384b",
+    "tests/matroska_copy_phase_budget.rs": "b9e0f721a4c53ecf126907bbaa1d77fc9d2743705539dd474708e894ca21f28c",
+    "tests/fixtures/playback-errors/matroska-copy-phase-budget/manifest.json": "1315fb33351be110b387f7406095c13e4bbe07cb193208b283a320beaa7afd73",
+    "tests/owned_mp4_metadata.rs": "105f94135efc0e0006cb927503f96173fbba57df43ca7ac6f658f67410e4b819",
+    "tests/support/audio_transitions.rs": "15581a6596247fe67c4da14a33b65538df26652b94b059b39aef56a9ca514b96"
+  },
+  "owned_temporary_files": [
+    "/private/tmp/fvid-mp4-extended-language-fixed.rs",
+    "/private/tmp/fvid-mp4-extended-language-before.log",
+    "/private/tmp/fvid-mp4-extended-language-after.log"
+  ],
+  "owned_build_target": "/private/tmp/fvid-mp4-extended-language-20261031",
+  "next": "Wait current qualification session; no source or fixture edits while qualifying. Archive results, repeat generation after jobs terminal, count only if all required gates pass.",
+  "findings_resolved": "LanguageBCP47 carries extended tags; legacy fallback und, existing three-letter legacy output unchanged. Writer/IETF-reader both bounded16KiB. Independent valid Matroska fixtures isolate old128-byte reader limit; bound+1 refusal stays explicit. Case-sensitive tag fixtures use case-insensitively unique paths.",
+  "preliminary_logs_not_acceptance_evidence": [
+    "pending-before.log",
+    "pending-after.log"
+  ],
+  "final_focused_results": {
+    "before": {
+      "passed": 2,
+      "failed": 6
+    },
+    "after": {
+      "passed": 8,
+      "failed": 0
+    }
+  },
+  "fixture_files": 150,
+  "uncounted_baseline_repair": {
+    "id": "FVID-0337",
+    "baseline": "original b220fbc346 reproduces the same70KiB failure",
+    "specific_before": {
+      "passed": 1,
+      "failed": 1
+    },
+    "related_after": {
+      "passed": 78,
+      "failed": 0
+    },
+    "change": "Admit the full inspection first; release derived UID/disposition/language lookup maps before compacting packet boundaries. Keep remaining metadata plus64KiB conservative copy charge and all old test budgets. A max-of-disjoint-phases variant was rejected because it violated the existing custom-metadata guard."
+  },
+  "uncounted_zero_cap_test_migration": {
+    "baseline": {
+      "passed": 1,
+      "failed": 2
+    },
+    "after": {
+      "passed": 3,
+      "failed": 0
+    },
+    "policy": "Public CopyOptions zero remains refused; metadata-only header success moves to existing explicit low-level API. Public prefix1/3, final progress, cancellation, metadata precedence, source immutability and invalid overrides remain verified.",
+    "production_policy_unchanged": true
+  },
+  "pre_cstring_full_qualification": "all6 jobs passed; snapshot explicitly not final after the CString padding correction",
+  "preserved_sources": "preserved-working-source-blobs.json",
+  "cstring_boundary_repair": {
+    "within_feature_before": {
+      "passed": 4,
+      "failed": 3
+    },
+    "semantics": "First NUL terminates the tag; later atom bytes are outside the CString. Missing terminator, invalid prefix and malformed tags still fall back."
+  },
+  "independent_packet_movies": 140
+}

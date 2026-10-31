@@ -1,0 +1,6 @@
+{
+  "integration": {
+    "exit_code": 101,
+    "log": "/private/tmp/fvid-mp4-extended-language-integration.log"
+  }
+}

@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 436,
-  "next_id": "FVID-0437",
+  "accepted_count": 437,
+  "next_id": "FVID-0438",
   "entries": [
     {
       "id": "FVID-0001",
@@ -3784,7 +3784,7 @@
       "source": "crates/fvid-media/src/owned_matroska_copy_impl.rs",
       "regression": "tests/mp4_metadata_admission.rs",
       "before": "In `owned_matroska_copy_impl::inspect_with_packet_and_memory_limits` (`crates/fvid-media/src/owned_matroska_copy_impl.rs`), `owned_subtitle_impl::try_plan_with_controls` and `try_convert_matroska_inner` (`crates/fvid-media/src/owned_subtitle_impl.rs`), `segment_packet_count` (`src/native_audio_mix/concat.rs`), and `owned_mp4_multitrack_export::try_export` (`crates/fvid-media/src/owned_mp4_multitrack_export.rs`), `WebmReader::open` and `scan_more()`/`scan_all()` used `Limits::default().packets` (1,000,000) without clamping `packets` to `max_controlled_bytes / size_of::<Packet>()`, allowing all packets to be indexed in `reader.packets` before post-scan checks, and `concat_audio_with_options` called `extract_source_pcm_metadata_with_packet_limit` without forwarding `options.max_controlled_bytes`.",
-      "result": "Clamp Matroska `Limits::packets` to `max_controlled_bytes / size_of::<Packet>()` and map clamped packet-count refusals to `\"controlled memory budget exceeded: Matroska packet index limit\"` across `owned_matroska_copy_impl::inspect_with_packet_and_memory_limits`, `owned_subtitle_impl::try_plan_with_controls`/`try_convert_matroska_inner`, `segment_packet_count`, and `owned_mp4_multitrack_export::try_export`, and forward `options.max_controlled_bytes` to `extract_source_pcm_metadata_with_interval_packet_and_memory_limit` in `concat_audio_with_options`. Nine integration tests in `mp4_metadata_admission` and ten related tests pass.",
+      "result": "Clamp Matroska `Limits::packets` to `max_controlled_bytes / size_of::<Packet>()` and map clamped packet-count refusals to `\"controlled memory budget exceeded: Matroska packet index limit\"` across `owned_matroska_copy_impl::inspect_with_packet_and_memory_limits`, `owned_subtitle_impl::try_plan_with_controls`/`try_convert_matroska_inner`, `segment_packet_count`, and `owned_mp4_multitrack_export::try_export`, and forward `options.max_controlled_bytes` to `extract_source_pcm_metadata_with_interval_packet_and_memory_limit` in `concat_audio_with_options`. Nine integration tests in `mp4_metadata_admission` and ten related tests pass. Uncounted batch-437 requalification repairs the existing70KiB control by admitting full inspection then releasing derived lookup maps before compact indexing; conservative custom-metadata/copy-buffer checks remain intact. Both original metadata-admission suites and the new synthetic copy regression pass; no extra ID.",
       "status": "accepted",
       "validation": "batch-330-validation.json"
     },
@@ -4898,6 +4898,17 @@
       "result": "Join only consecutive equal-offset CTTS runs before the existing whole-block check, validating every positive run against remaining raw samples without an expanded temporary table.17 equivalent pairs cover MAC3/MAC6 mono/stereo, mixed PCM/MACE, unsigned zero/positive and signed negative offsets, and real block-boundary changes. Both reader APIs preserve packet bytes/index clocks; native audio retains exact PCM/times across playback, rewind and seven seeks; VP9 pictures/seek/EOF pass.20 damaged or unrepresentable companions retain exact refusals.55 offline authored files regenerate identically.1095 distinct checks pass across103 integration suites and deduplicated root/media units; locked/offline core/player builds pass. Existing ignores unchanged. No performance or physical-device claim.",
       "status": "accepted",
       "validation": "batch-436-validation.json"
+    },
+    {
+      "id": "FVID-0437",
+      "batch": 437,
+      "title": "Preserve MP4 extended language tags through bounded Matroska transport",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs; crates/fvid-media/src/owned_matroska_tracks_impl.rs; crates/fvid-media/src/owned_webm_reader_impl.rs",
+      "regression": "tests/mp4_extended_language.rs",
+      "before": "Original b220fbc346 passes2 controls and fails6 checks: ignored elng loses region/script/private-use data in read/probe and eligible AVC copy, and a valid independent Matroska IETF tag hits the old128-byte limit. Padding within the unfinished feature separately reproduces a first-NUL interpretation error.",
+      "result": "Read valid/well-formed BCP47 CString prefixes with preferred-language precedence and explicit und override; preserve case and ignore malformed optional metadata. Write extended tags in LanguageBCP47 with legacy und fallback, preserving existing3-letter output; enforce an explicit16KiB writer/reader bound with exact-bound acceptance and bound+1 refusal before output.150 authored offline files cover VP9/AVC, PCM/subtitles, both mdhd versions, invalid tags, padding and independent Matroska. Actual video/PCM/cues, exact packet bytes/times, seek/rewind/EOF and metadata transport pass.140 movies independently retain packet hashes/PTS.1204 distinct checks pass across113 integration suites and deduplicated root/media units; locked/offline core/player builds pass. Existing ignores unchanged. FVID-0337 and zero-cap test-contract repairs add no IDs; a failed phase-budget variant is reverted. No performance/RSS/hardware claim.",
+      "status": "accepted",
+      "validation": "batch-437-validation.json"
     }
   ]
 }

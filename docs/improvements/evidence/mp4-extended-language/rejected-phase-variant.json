@@ -1,0 +1,6 @@
+{
+  "status": "rejected and reverted; no ID or performance claim",
+  "reason": "max-of-phases admission allowed the existing70_000-byte six-custom-tag copy that mp4_audio_metadata_admission explicitly requires to refuse. Retain the conservative custom-metadata contract.",
+  "copy_impl_sha256": "277c93e53d4c460f7010d48b2e19b4f9de44ba4eaa4b77ab638ef67e2eb564f9",
+  "raw_log_sha256": "dc9fc5db40d6934353b356b75753a581cbe9df77f58c10794c22528a3c395dfb"
+}

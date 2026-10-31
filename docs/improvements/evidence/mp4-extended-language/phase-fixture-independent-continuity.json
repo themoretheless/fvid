@@ -1,0 +1,7 @@
+{
+  "phase_fixture": "tests/fixtures/playback-errors/matroska-copy-phase-budget/three-colors.mkv",
+  "independently_verified_fixture": "tests/fixtures/playback-errors/mp4-extended-language/ietf-normal.mkv",
+  "identical_bytes": true,
+  "sha256": "d551bd4597305ca246f7884583f2addd6b57b31461230c940df160ee830a411b",
+  "packet_check_evidence": "independent-packets.json"
+}

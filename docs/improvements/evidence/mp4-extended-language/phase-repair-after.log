@@ -1,0 +1,809 @@
+warning: unreachable pattern
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+492 |                         _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |                         ^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+482 | ...   merge_order::Selection::Initial(i)=>{
+    |       ---------------------------------- matches some of the same values
+...
+486 | ...   merge_order::Selection::ViewSynthesis=>return Ok(Resolved::ViewSynthesis),
+    |       ------------------------------------- matches some of the same values
+487 | ...   merge_order::Selection::Texture=>return Ok(Resolved::Texture),
+    |       ------------------------------- matches some of the same values
+488 | ...   merge_order::Selection::InterView=>{selected_iv=1;(special.inter_view.copied().ok_or_else(||invalid("missing selected HEVC IV...
+    |       --------------------------------- matches some of the same values
+...
+492 | ...   _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |       ^ ...and 3 other patterns collectively make this unreachable
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `intra_plane` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/avc_deblock.rs:184:15
+    |
+184 | pub(super) fn intra_plane(
+    |               ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `read_inter_coefficients_422` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_inter_coefficients.rs:34:15
+   |
+34 | pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,pattern:u8,transform8:bool,neighbours:CoefficientNeighbours,chroma...
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `candidates` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_mv.rs:78:4
+   |
+78 | fn candidates(n: Neighbours) -> Result<[Neighbour; 3]> {
+   |    ^^^^^^^^^^
+
+warning: function `inverse2` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:190:4
+    |
+190 | fn inverse2(input: &[i32], output: &mut [i32]) {
+    |    ^^^^^^^^
+
+warning: function `inverse4` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:218:15
+    |
+218 | inverse_size!(inverse4, inverse2, 4);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse8` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:219:15
+    |
+219 | inverse_size!(inverse8, inverse4, 8);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse16` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:220:15
+    |
+220 | inverse_size!(inverse16, inverse8, 16);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse32` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:221:15
+    |
+221 | inverse_size!(inverse32, inverse16, 32);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: enum `RunKind` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:420:17
+    |
+420 | pub(crate) enum RunKind {
+    |                 ^^^^^^^
+
+warning: struct `Run` is never constructed
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:425:19
+    |
+425 | pub(crate) struct Run {
+    |                   ^^^
+
+warning: function `expand_runs` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:431:15
+    |
+431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run]) -> Result<Vec<u8>> {
+    |               ^^^^^^^^^^^
+
+warning: `fvid-codecs` (lib) generated 12 warnings
+   Compiling fvid-media v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/crates/fvid-media)
+warning: unused variable: `aspect`
+    --> crates/fvid-media/src/owned_y4m_decode.rs:1075:9
+     |
+1075 |     let aspect = presented_header.pixel_aspect()?;
+     |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_aspect`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> crates/fvid-media/src/owned_xfade.rs:462:5
+    |
+462 |     mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
+    |     ----^^^^^
+    |     |
+    |     help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable `pages` is assigned to, but never used
+  --> crates/fvid-media/src/owned_ogg_opus_export.rs:56:9
+   |
+56 |     let mut pages = 0usize;
+   |         ^^^^^^^^^
+   |
+   = note: consider using `_pages` instead
+
+warning: value assigned to `pages` is never read
+  --> crates/fvid-media/src/owned_ogg_opus_export.rs:80:9
+   |
+80 |         pages += 1;
+   |         ^^^^^^^^^^
+   |
+   = help: maybe it is overwritten before being read?
+   = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `encode` is never used
+   --> crates/fvid-media/src/owned_y4m_impl.rs:212:8
+    |
+ 31 | impl Header {
+    | ----------- method in this implementation
+...
+212 |     fn encode(&self, width: usize, height: usize) -> String {
+    |        ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `apply_pixel_filters` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:578:15
+    |
+578 | pub(crate) fn apply_pixel_filters(
+    |               ^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:585:15
+    |
+585 | pub(crate) fn apply_pixel_filters_cached(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached_at` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:594:15
+    |
+594 | pub(crate) fn apply_pixel_filters_cached_at(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `esds_for_mp4` is never used
+   --> crates/fvid-media/src/owned_aac/adts_impl.rs:334:15
+    |
+334 | pub(crate) fn esds_for_mp4(asc: &[u8]) -> Option<Vec<u8>> {
+    |               ^^^^^^^^^^^^
+
+warning: method `read_short` is never used
+  --> crates/fvid-media/src/owned_aac/bits_impl.rs:45:19
+   |
+ 7 | impl<'a> BitReader<'a> {
+   | ---------------------- method in this implementation
+...
+45 |     pub(crate) fn read_short(&mut self, count: u8) -> Result<u16> {
+   |                   ^^^^^^^^^^
+
+warning: associated function `identifiers` is never used
+   --> crates/fvid-media/src/owned_avc_impl.rs:509:19
+    |
+495 | impl Pps {
+    | -------- associated function in this implementation
+...
+509 |     pub(crate) fn identifiers(nal: &[u8]) -> Result<(u32, u32)> {
+    |                   ^^^^^^^^^^^
+
+warning: function `try_mp4_as` is never used
+   --> crates/fvid-media/src/owned_probe.rs:106:15
+    |
+106 | pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    |               ^^^^^^^^^^
+
+warning: function `try_webm_as` is never used
+   --> crates/fvid-media/src/owned_probe.rs:127:15
+    |
+127 | pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    |               ^^^^^^^^^^^
+
+warning: function `try_adts_as` is never used
+   --> crates/fvid-media/src/owned_probe.rs:147:15
+    |
+147 | pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    |               ^^^^^^^^^^^
+
+warning: type alias `Decoder` is never used
+ --> crates/fvid-media/src/owned_audio_mix.rs:8:6
+  |
+8 | type Decoder = fn(&Path) -> Result<(AudioDecodeStats, Vec<u8>)>;
+  |      ^^^^^^^
+
+warning: function `decode_owned_audio` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:226:15
+    |
+226 | pub(crate) fn decode_owned_audio(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `decode_float_wave` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:283:15
+    |
+283 | pub(crate) fn decode_float_wave(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
+    |               ^^^^^^^^^^^^^^^^^
+
+warning: function `decode_float_wave_controlled` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:287:15
+    |
+287 | pub(crate) fn decode_float_wave_controlled<F: FnMut(usize) -> Result<()>>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `read_float_wave_controlled` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:294:15
+    |
+294 | pub(crate) fn read_float_wave_controlled<F: FnMut(usize) -> Result<()>>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `read_float_wave_with_limits` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:302:15
+    |
+302 | pub(crate) fn read_float_wave_with_limits<F: FnMut(usize) -> Result<()>>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `mix_with_decoder` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:455:15
+    |
+455 | pub(crate) fn mix_with_decoder(
+    |               ^^^^^^^^^^^^^^^^
+
+warning: function `merge_with_decoder` is never used
+   --> crates/fvid-media/src/owned_audio_mix.rs:615:15
+    |
+615 | pub(crate) fn merge_with_decoder(
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_audio_export.rs:8:15
+  |
+8 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_audio_plan.rs:94:15
+   |
+94 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_export.rs:69:15
+   |
+69 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `router` is never used
+  --> crates/fvid-media/src/owned_aac_export_routing.rs:11:15
+   |
+11 | pub(crate) fn router(
+   |               ^^^^^^
+
+warning: function `supports_concat` is never used
+   --> crates/fvid-media/src/owned_wave_remux.rs:122:15
+    |
+122 | pub(crate) fn supports_concat(
+    |               ^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_adts_loudness.rs:107:15
+    |
+107 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_loudnorm.rs:30:15
+   |
+30 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: method `nul_name` is never used
+  --> crates/fvid-media/src/owned_pixel_format.rs:9:27
+   |
+ 6 |           impl PixelFormat {
+   |           ---------------- method in this implementation
+...
+ 9 |               pub(crate) fn nul_name(self) -> &'static [u8] { match self { $( Self::$variant => concat!($name, "\0").as_bytes(), )* } }
+   |                             ^^^^^^^^
+...
+16 | / formats! {
+17 | |     Yuv420p, "yuv420p", Some((1, 1)), 1;
+18 | |     Yuv422p, "yuv422p", Some((1, 0)), 1;
+19 | |     Yuv444p, "yuv444p", Some((0, 0)), 1;
+...  |
+58 | |     Gray16Be, "gray16be", None, 2;
+59 | | }
+   | |_- in this macro invocation
+   |
+   = note: this warning originates in the macro `formats` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `aac_packet_plan` is never used
+  --> crates/fvid-media/src/owned_mp4_aac_plan_impl.rs:35:15
+   |
+35 | pub(crate) fn aac_packet_plan(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `check_encoded_ffv1` is never used
+   --> crates/fvid-media/src/owned_lossless.rs:754:15
+    |
+754 | pub(crate) fn check_encoded_ffv1(
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_ogg_opus_export.rs:200:15
+    |
+200 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_opus_export.rs:34:15
+   |
+34 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `inspect` is never used
+ --> crates/fvid-media/src/owned_matroska_copy_impl.rs:8:15
+  |
+8 | pub(crate) fn inspect<R: Read + Seek>(
+  |               ^^^^^^^
+
+warning: function `inspect_with_packet_limit` is never used
+  --> crates/fvid-media/src/owned_matroska_copy_impl.rs:15:15
+   |
+15 | pub(crate) fn inspect_with_packet_limit<R: Read + Seek>(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_raw_flac.rs:191:15
+    |
+191 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_raw_flac.rs:198:15
+    |
+198 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_flac_export.rs:46:15
+   |
+46 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_flac_export.rs:134:15
+    |
+134 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_raw_mp3.rs:265:15
+    |
+265 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_mp3_export.rs:46:15
+   |
+46 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_mp3_export.rs:126:15
+    |
+126 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_alac_export.rs:38:15
+   |
+38 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_alac_export.rs:121:15
+    |
+121 | pub(crate) fn geometry(source:&Path,options:&CopyOptions)->Result<(u32,u16)>{let (rate,channels,_)=geometry_with_mask(source,option...
+    |               ^^^^^^^^
+
+warning: function `geometry_with_mask` is never used
+   --> crates/fvid-media/src/owned_matroska_alac_export.rs:122:15
+    |
+122 | pub(crate) fn geometry_with_mask(source: &Path, options: &CopyOptions) -> Result<(u32, u16,u32)> {
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_audio_packet_budget` is never used
+   --> crates/fvid-media/src/owned_matroska_audio.rs:347:15
+    |
+347 | pub(crate) fn validate_audio_packet_budget<R: Read + Seek>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `admit_audio_reader` is never used
+   --> crates/fvid-media/src/owned_matroska_audio.rs:409:15
+    |
+409 | pub(crate) fn admit_audio_reader<R: Read + Seek>(
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `negotiate_matroska_ps` is never used
+   --> crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs:293:15
+    |
+293 | pub(crate) fn negotiate_matroska_ps<R: std::io::Read + std::io::Seek>(
+    |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_aac_export.rs:38:15
+   |
+38 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: method `convert` is never used
+   --> crates/fvid-media/src/owned_pcm_decoder_impl.rs:139:8
+    |
+ 79 | impl PcmDecoder {
+    | --------------- method in this implementation
+...
+139 |     fn convert(&self, data: &[u8]) -> Result<Vec<u8>> {
+    |        ^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_pcm_export.rs:42:15
+   |
+42 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+   --> crates/fvid-media/src/owned_matroska_pcm_export.rs:126:15
+    |
+126 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    |               ^^^^^^^^
+
+warning: method `presentation_endpoint` is never used
+   --> crates/fvid-media/src/owned_mp4_impl.rs:270:19
+    |
+256 | impl Track {
+    | ---------- method in this implementation
+...
+270 |     pub(crate) fn presentation_endpoint(&self) -> Result<i128> {
+    |                   ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `decode_mp4_audio_reader_controlled` is never used
+  --> crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs:54:15
+   |
+54 | pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::Seek>(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_mp4_audio_export.rs:285:15
+    |
+285 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `recognizes` is never used
+  --> crates/fvid-media/src/owned_container_loudness.rs:46:15
+   |
+46 | pub(crate) fn recognizes(source: &Path) -> Result<bool> {
+   |               ^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_container_loudness.rs:161:15
+    |
+161 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_container_loudnorm.rs:30:15
+   |
+30 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `input` is never used
+ --> crates/fvid-media/src/owned_ffv1_export.rs:7:4
+  |
+7 | fn input(source: &Path) -> Result<crate::owned_webm::WebmReader<BufReader<File>>> {
+  |    ^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_ffv1_export.rs:49:15
+   |
+49 | pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
+   |               ^^^^^^^^
+
+warning: function `pack_bgra` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:8786:15
+     |
+8786 | pub(crate) fn pack_bgra(
+     |               ^^^^^^^^^
+
+warning: function `take_aligned` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:9498:15
+     |
+9498 | pub(crate) fn take_aligned(
+     |               ^^^^^^^^^^^^
+
+warning: associated function `new` is never used
+  --> crates/fvid-media/src/owned_webm_codec.rs:42:12
+   |
+41 | impl Decoder {
+   | ------------ associated function in this implementation
+42 |     pub fn new(codec: &str, private: &[u8], width: usize, height: usize) -> Result<Option<Self>> {
+   |            ^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_ogg_vorbis_export.rs:134:15
+    |
+134 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_ogg_joint_export.rs:98:15
+   |
+98 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_g711_wave_export.rs:181:15
+    |
+181 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+   Compiling fvid v0.1.0 (/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid)
+warning: method `iter` is never used
+  --> src/codec/../../crates/fvid-media/src/owned_aac/aac_ssr_metadata_impl.rs:17:19
+   |
+16 | impl<T> PacketQueue<T> {
+   | ---------------------- method in this implementation
+17 |     pub(crate) fn iter(&self) -> impl Iterator<Item = &T> {
+   |                   ^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `trimmed_audio_sample_frames` is never read
+  --> src/container/../../crates/fvid-media/src/owned_mp4_matroska_impl.rs:43:16
+   |
+40 | pub(crate) struct TrackPlan {
+   |                   --------- field in this struct
+...
+43 |     pub(crate) trimmed_audio_sample_frames: u64,
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `inspect` is never used
+ --> src/container/../../crates/fvid-media/src/owned_matroska_copy_impl.rs:8:15
+  |
+8 | pub(crate) fn inspect<R: Read + Seek>(
+  |               ^^^^^^^
+
+warning: function `inspect_with_packet_limit` is never used
+  --> src/container/../../crates/fvid-media/src/owned_matroska_copy_impl.rs:15:15
+   |
+15 | pub(crate) fn inspect_with_packet_limit<R: Read + Seek>(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: field `length_size` is never read
+   --> src/playback/video/mp4_layered.rs:264:5
+    |
+248 | pub(super) struct LayeredPipeline {
+    |                   --------------- field in this struct
+...
+264 |     length_size: u8,
+    |     ^^^^^^^^^^^
+
+warning: function `adjust_luma` is never used
+    --> src/player.rs:1649:4
+     |
+1649 | fn adjust_luma(y: f32, s: &[f32; 5]) -> f32 {
+     |    ^^^^^^^^^^^
+
+warning: function `adjust_rgb` is never used
+    --> src/player.rs:1660:15
+     |
+1660 | pub(crate) fn adjust_rgb(source: &[u8], out: &mut Vec<u8>, s: &[f32; 5]) {
+     |               ^^^^^^^^^^
+
+warning: function `covered_span` is never used
+    --> src/player.rs:4402:4
+     |
+4402 | fn covered_span(covered: (u64, u64), total: u64) -> [f32; 2] {
+     |    ^^^^^^^^^^^^
+
+warning: function `inspect_first_y4m_frame` is never used
+   --> src/native_export.rs:173:15
+    |
+173 | pub(crate) fn inspect_first_y4m_frame(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `inspect_first_y4m_frame_with_filters` is never used
+   --> src/native_export.rs:184:15
+    |
+184 | pub(crate) fn inspect_first_y4m_frame_with_filters(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_y4m_concat_compatibility` is never used
+   --> src/native_export.rs:325:15
+    |
+325 | pub(crate) fn validate_y4m_concat_compatibility(sources: &[PathBuf]) -> Result<()> {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_video_selection` is never used
+   --> src/native_export.rs:360:15
+    |
+360 | pub(crate) fn validate_video_selection(source: &Path, selected: Option<usize>) -> Result<()> {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_video_packet_budget` is never used
+   --> src/native_export.rs:385:15
+    |
+385 | pub(crate) fn validate_video_packet_budget(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `validate_video_packet_budget_with_geometry` is never used
+   --> src/native_export.rs:397:15
+    |
+397 | pub(crate) fn validate_video_packet_budget_with_geometry(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `y4m_segment_frame_upper_bound` is never used
+   --> src/native_export.rs:718:15
+    |
+718 | pub(crate) fn y4m_segment_frame_upper_bound(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `export_y4m_sources` is never used
+   --> src/native_export.rs:834:4
+    |
+834 | fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
+    |    ^^^^^^^^^^^^^^^^^^
+
+warning: associated function `validate_pair_with_geometry` is never used
+   --> src/native_export/overlay.rs:176:19
+    |
+117 | impl TimedOverlay {
+    | ----------------- associated function in this implementation
+...
+176 |     pub(crate) fn validate_pair_with_geometry(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `mp4` is never used
+  --> src/../crates/fvid-media/src/owned_mp4_probe_impl.rs:49:15
+   |
+49 | pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
+   |               ^^^
+
+warning: function `mp4_with_metadata_limit` is never used
+  --> src/../crates/fvid-media/src/owned_mp4_probe_impl.rs:53:15
+   |
+53 | pub(crate) fn mp4_with_metadata_limit(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `try_mp4` is never used
+  --> src/../crates/fvid-media/src/owned_mp4_probe_impl.rs:73:15
+   |
+73 | pub(crate) fn try_mp4(path: &Path) -> Result<Option<MediaInfo>> {
+   |               ^^^^^^^
+
+warning: function `try_mp4_with_metadata_limit` is never used
+  --> src/../crates/fvid-media/src/owned_mp4_probe_impl.rs:77:15
+   |
+77 | pub(crate) fn try_mp4_with_metadata_limit(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `matroska` is never used
+  --> src/media_probe.rs:50:15
+   |
+50 | pub(crate) fn matroska(path: &Path) -> Result<MediaInfo> {
+   |               ^^^^^^^^
+
+warning: function `matroska_with_packet_limit` is never used
+  --> src/media_probe.rs:54:15
+   |
+54 | pub(crate) fn matroska_with_packet_limit(path: &Path, packet_bytes: usize) -> Result<MediaInfo> {
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `matroska_with_packet_and_memory_limit` is never used
+  --> src/media_probe.rs:58:15
+   |
+58 | pub(crate) fn matroska_with_packet_and_memory_limit(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `fvid-media` (lib) generated 67 warnings (run `cargo fix --lib -p fvid-media` to apply 2 suggestions)
+warning: `fvid` (lib) generated 24 warnings
+    Finished `test` profile [unoptimized] target(s) in 18.40s
+     Running tests/matroska_copy_phase_budget.rs (/private/tmp/fvid-mp4-extended-language-20261031/debug/deps/matroska_copy_phase_budget-4af60690b187f89d)
+
+running 2 tests
+test genuinely_small_budgets_still_refuse_before_copying ... ok
+test disjoint_inspection_and_copy_phases_fit_the_existing_seventy_kib_budget ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/mp4_audio_metadata_admission.rs (/private/tmp/fvid-mp4-extended-language-20261031/debug/deps/mp4_audio_metadata_admission-7a25f00b4b69d699)
+
+running 54 tests
+test audio_geometry_respects_parser_metadata_ceiling ... ok
+test audio_decode_plan_respects_parser_metadata_ceiling ... ok
+test decode_refuses_before_output_and_leaves_no_temporary_files ... ok
+test lossless_xfade_subtitle_burn_convert_and_y4m_export_enforce_zero_limits ... ok
+test audio_export_plan_source_geometry_and_adts_concat_enforce_zero_limits ... ok
+test audio_mix_merge_concat_native_loudnorm_and_multitrack_supports_enforce_options_before_input_count_or_args ... ok
+test adts_packet_limit_clamps_to_controlled_memory_and_wave_loudness_plan_notes_report_budgets ... ok
+test matroska_pcm_f64_codec_check_and_stream_selection_enforce_kind_and_cardinality ... ok
+test matroska_remux_zero_packets_and_native_export_wave_metadata_budgets_are_enforced ... ok
+test canonical_file_tags_are_charged_in_matroska_metadata_working_set_across_lossless_remux_and_subtitle_routes ... ok
+test audio_mix_simultaneous_pcm_buffers_and_native_plan_export_index_payload_budget_are_enforced ... ok
+test loudness_loudnorm_and_audio_mix_merge_concat_enforce_zero_limits_and_metadata_budgets ... ok
+test adts_source_info_and_native_plan_wave_trim_concat_and_remux_enforce_budgets_and_cancellation ... ok
+test container_wave_metadata_working_set_and_matroska_source_geometry_errors_are_enforced ... ok
+test mp4_and_matroska_audio_export_supports_and_admission_preserve_budget_and_packet_policies ... ok
+test mp4_probe_remux_concat_video_decode_and_native_source_info_enforce_estimated_index_payload_budget ... ok
+test mp4_and_adts_matroska_remux_and_concat_charge_simultaneous_plan_cue_and_packet_working_sets ... ok
+test native_export_native_plan_and_video_decode_enforce_options_before_extension_input_count_or_interval_checks ... ok
+test media_entrypoints_matroska_probe_and_subtitle_conversion_enforce_options_and_memory_packet_bounds ... ok
+test native_export_adts_concat_audio_trim_and_wave_concat_honor_packet_and_cancellation_controls ... ok
+test native_audio_trim_mix_merge_and_source_admission_enforce_zero_limits ... ok
+test native_plan_adts_concat_and_wave_inspection_honor_cancellation_and_packet_budgets ... ok
+test native_pcm_loudness_normalize_and_audio_source_info_enforce_zero_limits ... ok
+test native_probes_respect_the_same_metadata_ceiling ... ok
+test overlay_pcm_export_mp4_concat_and_wave_loudness_enforce_canonical_option_order ... ok
+test ogg_opus_plan_decode_and_supports_enforce_wave_metadata_budget_and_nonempty_interval_prefix ... ok
+test native_pcm_native_media_and_owned_remux_video_bridge_burn_and_xfade_enforce_canonical_option_order ... ok
+test owned_loudness_loudnorm_audio_export_supports_and_ogg_y4m_probe_enforce_options_before_policy_or_io ... ok
+test ample_budget_decodes_exactly_the_same_pcm_as_unpadded_input ... ok
+test matroska_probe_copy_and_subtitle_conversion_enforce_estimated_index_payload_budget ... ok
+test probe_flac_adts_wave_webm_mp4_and_y4m_enforce_zero_limits_and_rss_budgets ... ok
+test raw_flac_and_mp3_plan_decode_and_standalone_loudness_admission_enforce_pcm_and_copy_policies ... ok
+test raw_mp3_flac_ogg_source_info_and_decoded_pcm_budgets_are_enforced ... ok
+test matroska_lossless_multitrack_video_decode_and_subtitle_burn_enforce_estimated_index_payload_budget ... ok
+test raw_pcm_stream_decoders_enforce_zero_limits ... ok
+test raw_pcm_decoders_and_audio_export_backends_enforce_options_before_stream_metadata_or_destination_checks ... ok
+test owned_remux_plan_and_wave_remux_trim_concat_enforce_zero_limits_and_rss_before_policy_errors ... ok
+test remux_adts_concat_mp4_relocate_and_matroska_copy_enforce_canonical_option_order ... ok
+test pcm_matroska_all_canonical_file_tags_and_mp4_relocate_index_payload_budget_are_enforced ... ok
+test native_probe_and_pcm_matroska_metadata_extraction_enforce_budget_across_wave_ogg_flac_mpeg_adts_and_spool_exports ... ok
+test public_media_routes_validate_copy_options_before_unbounded_source_io ... ok
+test owned_lossless_supports_ffv1_export_and_mp4_video_decode_enforce_zero_limits_and_preserve_plan_budgets ... ok
+test wave_metadata_matroska_scan_errors_and_audio_reader_rss_cancellation_budgets_are_enforced ... ok
+test native_plan_audio_trim_and_decode_entrypoints_enforce_mp4_metadata_and_matroska_packet_index_budgets ... ok
+test wave_loudnorm_plan_and_concat_segment_validation_preserve_budget_and_cancellation_controls ... ok
+test wave_adts_and_mp4_remux_trim_and_concat_enforce_zero_limits_and_metadata_budgets ... ok
+test xfade_three_frame_working_set_and_adts_pce_open_packet_limits_are_enforced_before_allocating ... ok
+test owned_audio_mix_and_merge_with_controls_and_native_loudnorm_fallback_enforce_budgets_and_cancellation ... ok
+test small_and_ample_budget_audio_controls_are_valid ... ok
+test adts_wave_metadata_budget_and_container_loudnorm_admission_preserve_metadata_working_set ... ok
+test mp4_matroska_and_adts_plan_decode_and_supports_enforce_source_metadata_budget_and_nonempty_interval_prefix ... ok
+test decode_audio_to_f32le_and_loudnorm_try_plan_preserve_rss_and_canonical_option_order ... ok
+test mix_merge_concat_and_loudnorm_matroska_output_and_eligibility_propagate_controlled_memory_budgets ... ok
+test loudness_loudnorm_mix_merge_concat_and_spatial_routing_respect_mp4_metadata_ceiling ... ok
+
+test result: ok. 54 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.61s
+
+     Running tests/mp4_extended_language.rs (/private/tmp/fvid-mp4-extended-language-20261031/debug/deps/mp4_extended_language-a07ebc8917f7b4a1)
+
+running 6 tests
+test oversized_copy_metadata_refuses_without_truncating_the_source_tag ... ok
+test independent_matroska_ietf_tags_obey_precedence_and_explicit_bound ... ok
+test absent_and_invalid_extended_tags_keep_the_legacy_language ... ok
+test extended_language_preserves_region_script_extensions_and_private_use ... ok
+test extended_tags_survive_owned_mp4_to_matroska_copy ... ok
+test all_language_cases_preserve_actual_video_packets_pictures_and_seek ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/mp4_metadata_admission.rs (/private/tmp/fvid-mp4-extended-language-20261031/debug/deps/mp4_metadata_admission-8ae08c7ccc778ac0)
+
+running 16 tests
+test parser_metadata_limit_rejects_padding_before_loading_it ... ok
+test controlled_remux_plan_does_not_bypass_parser_metadata_limit ... ok
+test unsupported_sample_entry_keeps_its_existing_refusal_route ... ok
+test remux_budget_errors_remain_specific_and_preserve_destination ... ok
+test route_inspection_and_concat_propagate_metadata_admission ... ok
+test ffv1_and_webm_multitrack_supports_checks_enforce_copy_options_before_full_decode ... ok
+test probe_and_probe_as_with_options_enforce_packet_count_and_per_packet_bytes_across_containers ... ok
+test probe_with_options_and_subtitle_burn_prepare_enforce_packet_and_memory_budgets_before_allocating ... ok
+test small_metadata_and_ample_budget_controls_are_valid ... ok
+test adts_and_matroska_remux_and_concat_enforce_memory_budget_and_cancellation ... ok
+test ample_budget_remux_retains_pixels_timestamps_and_seek ... ok
+test matroska_packet_index_budget_is_enforced_across_video_subtitle_and_playback_entrypoints ... ok
+test y4m_export_trim_and_concat_propagate_controlled_memory_budget_to_native_reader ... ok
+test matroska_packet_index_budget_is_enforced_in_remux_subtitle_convert_and_audio_concat ... ok
+test video_decode_and_lossless_routes_propagate_controlled_memory_budget_to_codec_decoders ... ok
+test lossless_subtitle_burn_and_y4m_routes_propagate_mp4_metadata_admission ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s

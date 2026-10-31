@@ -1,0 +1,8 @@
+{
+  "commit": "b220fbc34617c26030ece9cb3f3f9ba2c1d750db",
+  "passed": 1,
+  "failed": 2,
+  "cause": "Both original tests request public max_packets=Some(0), which canonical CopyOptions validation already rejects. Low-level header-only writer remains available.",
+  "raw_sha256": "3c5533ff9276a8b6a6cff3ed59d599d093296442e2bbefbc4fc6892fe100d98b",
+  "migration": "Preserve zero-packet metadata header acceptance through the explicit low-level writer; add public zero-limit refusal/no-publication assertions and retain positive public packet-prefix/progress coverage."
+}

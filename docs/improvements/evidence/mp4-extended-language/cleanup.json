@@ -1,0 +1,25 @@
+{
+  "removed": [
+    "/private/tmp/fvid-mp4-extended-language-before.log",
+    "/private/tmp/fvid-mp4-extended-language-after.log",
+    "/private/tmp/fvid-mp4-extended-language-integration.log",
+    "/private/tmp/fvid-mp4-extended-language-root-mp4.log",
+    "/private/tmp/fvid-mp4-extended-language-root-webm.log",
+    "/private/tmp/fvid-mp4-extended-language-media.log",
+    "/private/tmp/fvid-mp4-extended-language-core-check.log",
+    "/private/tmp/fvid-mp4-extended-language-player-check.log",
+    "/private/tmp/fvid-mp4-extended-language-budget-baseline.log",
+    "/private/tmp/fvid-matroska-copy-phase-before.log",
+    "/private/tmp/fvid-matroska-copy-phase-after.log",
+    "/private/tmp/fvid-mp4-zero-cap-metadata-baseline.log",
+    "/private/tmp/fvid-mp4-zero-cap-metadata-after.log",
+    "/private/tmp/fvid-mp4-extended-language-cstring-before.log",
+    "/private/tmp/fvid-extended-language-fixed-owned_mp4_impl.rs",
+    "/private/tmp/fvid-extended-language-fixed-owned_matroska_tracks_impl.rs",
+    "/private/tmp/fvid-extended-language-fixed-owned_webm_reader_impl.rs",
+    "/private/tmp/fvid-extended-language-fixed-owned_matroska_copy_impl.rs",
+    "/private/tmp/fvid-mp4-extended-language-fixed.rs",
+    "/private/tmp/fvid-mp4-extended-language-20261031"
+  ],
+  "preserved": "All synthetic fixtures, regression sources and archived evidence; foreign jobs/worktrees/stashes untouched"
+}

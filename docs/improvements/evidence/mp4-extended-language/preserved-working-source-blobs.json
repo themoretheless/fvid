@@ -1,0 +1,22 @@
+{
+  "crates/fvid-media/src/owned_mp4_impl.rs": {
+    "git_blob": "eda438b8e263ec7721dc3c9219d24e611b3ddbf5",
+    "sha256": "d4b257e3a2156885a14f865a366c56ff390645b3221316924a0f183c65b84d9f",
+    "temporary_copy": "/private/tmp/fvid-extended-language-fixed-owned_mp4_impl.rs"
+  },
+  "crates/fvid-media/src/owned_matroska_tracks_impl.rs": {
+    "git_blob": "f7fc4aeef57c65e48b9a34a628a9797d8bb18f40",
+    "sha256": "bbbc639b06f8b2f9cbf0f161288f3660e90c7e63f6f09bfa065ef865d1bc9ea6",
+    "temporary_copy": "/private/tmp/fvid-extended-language-fixed-owned_matroska_tracks_impl.rs"
+  },
+  "crates/fvid-media/src/owned_webm_reader_impl.rs": {
+    "git_blob": "abd7d85f8d9c67d1f2bec95a9767a741c8061072",
+    "sha256": "795b25985cc70f4f3346f80597f349ae7645d00824fa6855f13b0932356bbc35",
+    "temporary_copy": "/private/tmp/fvid-extended-language-fixed-owned_webm_reader_impl.rs"
+  },
+  "crates/fvid-media/src/owned_matroska_copy_impl.rs": {
+    "git_blob": "eb4008a1f8ae80605b2babc39fc79551928ccd2c",
+    "sha256": "318cf8e5cab0b42a3b487f9a4169ab4a42cf34d7a03301827f3fbee9fc224a47",
+    "temporary_copy": "/private/tmp/fvid-extended-language-fixed-owned_matroska_copy_impl.rs"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "status": "all green, not accepted pending CString boundary audit",
+  "checks": {
+    "integration": {
+      "suites": 113,
+      "passed": 535,
+      "failed": 0,
+      "ignored": 0
+    },
+    "root-mp4": {
+      "suites": 1,
+      "passed": 57,
+      "failed": 0,
+      "ignored": 1
+    },
+    "root-webm": {
+      "suites": 1,
+      "passed": 67,
+      "failed": 0,
+      "ignored": 0
+    },
+    "media": {
+      "suites": 1,
+      "passed": 547,
+      "failed": 0,
+      "ignored": 1
+    }
+  },
+  "distinct_passed": 1202
+}
