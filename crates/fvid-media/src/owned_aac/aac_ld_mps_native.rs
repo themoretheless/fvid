@@ -16,6 +16,7 @@ pub struct Core {
 pub struct Decoder {
     core: Core,
     output_multiplier: u8,
+    shared_qmf: bool,
     config: super::aac_ld_mps_config::Config,
     session: super::aac_ld_mps_session::Session,
     assembler: super::aac_ld_mps_transport::Assembler,
@@ -63,11 +64,14 @@ impl Decoder {
         if core.has_sbr != sbr.is_some() {
             return Err(invalid("LD-MPS SBR context requires explicit rate mode"));
         }
-        // Preserve the shared LD bank for nominal geometries. Reduced CLDFB
-        // output uses the standard PCM interface instead of reinterpreting its
-        // phase/window as an LD-MPS QMF frame.
-        let shared_qmf = core.has_sbr && core.downscale == 1;
+        // Share LD QMF only when its actual bank and packet geometry match
+        // the spatial configuration. Other supported SBR geometries use the
+        // time-domain interface after complete CLDFB PCM synthesis.
         let factor = if sbr == Some(true) { 2 } else { 1 };
+        let shared_qmf = core.has_sbr
+            && core.downscale == 1
+            && bins == if factor == 2 { 64 } else { 32 }
+            && usize::from(config.frame_slots) == usize::from(core.frame_samples) / 32;
         let rate = core
             .sample_rate
             .checked_div(u32::from(core.downscale))
@@ -93,18 +97,10 @@ impl Decoder {
                 "LD-MPS rate, downmix channels or frame geometry disagree with AAC LD/ELD core",
             ));
         }
-        if let Some(double) = sbr.filter(|_| shared_qmf) {
-            if bins != if double { 64 } else { 32 }
-                || usize::from(config.frame_slots) != usize::from(core.frame_samples) / 32
-            {
-                return Err(unsupported(
-                    "LD-MPS coupled QMF bank geometry is not yet implemented",
-                ));
-            }
-        }
         Ok(Self {
             core,
             output_multiplier: factor as u8,
+            shared_qmf,
             config: config.clone(),
             session: if shared_qmf {
                 super::aac_ld_mps_session::Session::new_qmf(
@@ -124,7 +120,7 @@ impl Decoder {
     }
     /// Required ingress domain, not the presence of LD-SBR in the bitstream.
     pub fn expects_shared_qmf(&self) -> bool {
-        self.core.has_sbr && self.core.downscale == 1
+        self.shared_qmf
     }
     pub fn mask(&self) -> u32 {
         match self.config.tree.code {

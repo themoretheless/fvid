@@ -1,3 +1,26 @@
+## Nominal high-rate LD-SBR through LD-MPS PCM, 2026-10-31
+
+The native owner now selects shared LD-QMF only when its actual bank and
+per-packet geometry match SSC. Other supported geometries use complete owned
+CLDFB SBR PCM followed by owned MPS PCM analysis/synthesis.48kHz ELD with
+single/dual-rate SBR now reaches64/128-band spatial output at48/96kHz.
+480-sample cores group two packets;512-sample cores group one.
+
+32 own MP4/MKV pairs cover all8 trees and mono/stereo/5.1 downmix input.
+12 independent bare controls pass before the fix;three spatial tests reproduce
+the old admission failure. All2,476,032 compositional PCM values match exactly
+with the fix. Tests cover timed/untimed output,playback,seek,rewind,EOF,
+checkpoint replay and malformed suffix retry. Generation reproduces90 files
+byte-identically twice under network/process denial,separately from tests.
+
+Fresh offline gates: 1746 passed, 0 failed, 27 pre-existing ignored.
+Media:587/0/1; player:1072/0/26;16 targeted integration suites:87/0/0.
+
+Evidence: `docs/validation/aac-ld-mps-sbr-rates-{source,generation,tests}-2026-10-31.json`.
+Physical output,realtime performance and whole-profile conformance are not
+qualified here. Nominal SSC downscale remapping,direct downscaled shared-QMF
+and factor-three SBR remain open;the codec-gap objective remains active.
+
 ## Downscaled LD-SBR through the LD-MPS PCM interface, 2026-10-31
 
 Owned LD-SBR CLDFB synthesis now feeds ordinary LD-MPS PCM analysis/synthesis
