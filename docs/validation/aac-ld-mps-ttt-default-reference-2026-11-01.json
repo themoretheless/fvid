@@ -1,4 +1,13 @@
 {
+  "count_control_source_patch": {
+    "file": "mp4spatialdec/src/sac_bitdec.c",
+    "original_sha256": "d9a8655b4e5efa1329d629f88bde962b640efe9d1a5c22f24f84df56eadfa64e",
+    "changed_sha256": "260d15b7b0d7e1196b1946eeee3fd00e205bdf15e0c4055697490387fe1cc960",
+    "before": "self->numDecorSignals = 2;",
+    "after": "self->numDecorSignals = self->tttConfig[0][0].mode == 0 ? 3 : 2;",
+    "scope": "TREE_525 case only; diagnostic, not a normative oracle"
+  },
+  "count_control_sha256": "d0ba81f59184533b2cc4a78fe57cc8c3f48bb54970af426943491720f79044ca",
   "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
   "reference_members": {
     "mp4spatialdec/include/sac_dec_interface.h": "e336a7aa66afa61b05f567853603882c542cbbbed0da60ac8fce8e3f485cd7a9",
@@ -81,15 +90,15 @@
     "mp4spatialdec/src/spatial_hrtfreader.h": "7580430be6f3f24b183d584d21160d4368fa973c843fe8432698b54d9c6b5739"
   },
   "driver_sha256": "3f0443a05287c0ed5cd8ba87f77f0a889775b5841210e745c36f8b820b2c8f3f",
-  "generator_sha256": "a7d869b1d03636e31f82cdf2a12d94e46b1fa2aebd93939a90548590745999b2",
-  "manifest_sha256": "5cba032c7ce88cca0ee95f20115ea4675af50e4209816aa9b9da96c42f855c3f",
+  "generator_sha256": "6afb27209e067951d1739448596063017fa111b50cd43c268e32ec126b9230e3",
+  "manifest_sha256": "0beb413845dd375171c7a847db043b2b814aa7fa8ecb5216869e35f3f989b59b",
   "input_core_sha256": {
     "tests/fixtures/playback-errors/aac-eld-mps-core/tree2.pcm": "2d0cf5850c3c4099d3f29a62bdaf27d3c7d01fda9d62badf2e03672c427df483",
     "tests/fixtures/playback-errors/aac-eld-mps-core/tree3.pcm": "2d0cf5850c3c4099d3f29a62bdaf27d3c7d01fda9d62badf2e03672c427df483",
     "tests/fixtures/playback-errors/aac-eld-mps-core/tree4.pcm": "2d0cf5850c3c4099d3f29a62bdaf27d3c7d01fda9d62badf2e03672c427df483"
   },
-  "pcm_sha256": "5a4315cff92f730cd6d783af8bb69ff4d0d38587cab84b7880c8dfaa12a5a1ac",
-  "cases": 72,
+  "pcm_sha256": "03470ac1f011346b5dd67b0960324e5dcad40f9ae1b121d6693af2fbde33cb7d",
+  "cases": 96,
   "default_control_byte_identical": true,
   "conformance_verdict": null
 }

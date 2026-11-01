@@ -42,10 +42,13 @@ fn predictive_icc_defaults_match_explicit_unity_through_playback_and_seek() {
         serde_json::from_slice(&std::fs::read(root().join("manifest.json")).unwrap()).unwrap();
     let blob = std::fs::read(root().join("packets.bin")).unwrap();
     let cases = m["cases"].as_array().unwrap();
-    assert_eq!(cases.len(), 36);
+    assert_eq!(cases.len(), 48);
+    assert_eq!(cases.iter().filter(|c| !c["split"].is_null()).count(), 12);
     let oracle: Value =
         serde_json::from_slice(&std::fs::read(root().join("oracle.json")).unwrap()).unwrap();
     let golden = std::fs::read(root().join("reference.f32le")).unwrap();
+    let count_control = std::fs::read(root().join("count-control.f32le")).unwrap();
+    let mut count_reproducers = 0;
     let mut maximum = 0.0f32;
     let mut scalars = 0;
     for c in cases {
@@ -87,8 +90,7 @@ fn predictive_icc_defaults_match_explicit_unity_through_playback_and_seek() {
                 spatial_decorrelation: mode,
                 ..Default::default()
             };
-            let mut decoder =
-                NativeAacDecoder::new_with_options(&hex(&c["asc"]), opts).unwrap();
+            let mut decoder = NativeAacDecoder::new_with_options(&hex(&c["asc"]), opts).unwrap();
             let mut reference = NativeAacDecoder::new_with_options(&hex(&c["asc"]), opts).unwrap();
             for i in 0..3 {
                 let packet = |key: &str| {
@@ -138,7 +140,34 @@ fn predictive_icc_defaults_match_explicit_unity_through_playback_and_seek() {
             let at = saved["offset"].as_u64().unwrap() as usize;
             let size = saved["bytes"].as_u64().unwrap() as usize;
             assert_eq!(produced.len() * 4, size);
-            for (sample, bytes) in produced.iter().zip(golden[at..at + size].chunks_exact(4)) {
+            let baseline = &golden[at..at + size];
+            let expected = if let Some(offset) = saved["count_control_offset"].as_u64() {
+                // The unmodified ISO TREE_525 configuration loop overwrites
+                // the global decorrelator count with the upper-region mode.
+                // Preserve that discrepancy as a reproduction, independently
+                // from playback acceptance against explicit-unity coding.
+                assert_eq!(c["tree"], 2);
+                assert_eq!(c["mode"], 0);
+                assert_eq!(c["split"], 4);
+                assert_eq!(
+                    saved["unmodified_reference_count_overwrite_reproducer"],
+                    true
+                );
+                let difference = produced
+                    .iter()
+                    .zip(baseline.chunks_exact(4))
+                    .map(|(x, b)| (x - f32::from_le_bytes(b.try_into().unwrap())).abs())
+                    .fold(0.0f32, f32::max);
+                assert!(difference > 1e-7 && difference < 1e-3);
+                count_reproducers += 1;
+                let at = offset as usize;
+                // This source variant is explicitly a diagnostic control,
+                // not an unmodified or normative ISO waveform oracle.
+                &count_control[at..at + size]
+            } else {
+                baseline
+            };
+            for (sample, bytes) in produced.iter().zip(expected.chunks_exact(4)) {
                 let want = f32::from_le_bytes(bytes.try_into().unwrap());
                 let error = (sample - want).abs();
                 assert!(
@@ -150,26 +179,44 @@ fn predictive_icc_defaults_match_explicit_unity_through_playback_and_seek() {
                 scalars += 1;
             }
         }
-        let mut reader =
-            fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(&bytes), Default::default())
-                .unwrap();
-        let width = usize::from(reader.channels()) * 4;
-        let mut decoder = reader.make_decoder().unwrap();
-        assert_eq!(play(&mut reader, decoder.as_mut()), expected);
-        reader.rewind();
-        decoder.reset();
-        assert_eq!(play(&mut reader, decoder.as_mut()), expected);
-        for target in [13, 512, 1024, 1536, 7] {
-            let ticks = (i128::from(target) * i128::from(reader.timescale())
-                / i128::from(reader.sample_rate())) as i64;
-            let landed = reader.seek_to(ticks);
-            let first = ((landed.max(0) as u128 * u128::from(reader.sample_rate()))
-                .div_ceil(u128::from(reader.timescale())) as usize
-                * width)
-                .min(expected.len());
+        let mkv = std::fs::read(root().join(c["default"]["file"].as_str().unwrap())).unwrap();
+        let readers: [Box<dyn AudioStream>; 2] = [
+            Box::new(
+                fvid::playback_mp4_audio::Mp4AudioReader::open(
+                    Cursor::new(bytes.clone()),
+                    Default::default(),
+                )
+                .unwrap(),
+            ),
+            Box::new(
+                fvid::playback_webm_audio::WebmAudioReader::open(
+                    Cursor::new(mkv),
+                    Default::default(),
+                )
+                .unwrap(),
+            ),
+        ];
+        for mut reader in readers {
+            let width = usize::from(reader.channels()) * 4;
+            let mut decoder = reader.make_decoder().unwrap();
+            assert_eq!(play(reader.as_mut(), decoder.as_mut()), expected);
+            reader.rewind();
             decoder.reset();
-            assert_eq!(play(&mut reader, decoder.as_mut()), expected[first..]);
+            assert_eq!(play(reader.as_mut(), decoder.as_mut()), expected);
+            for target in [13, 512, 1024, 1536, 7] {
+                let ticks = (i128::from(target) * i128::from(reader.timescale())
+                    / i128::from(reader.sample_rate())) as i64;
+                let landed = reader.seek_to(ticks);
+                let first = ((landed.max(0) as u128 * u128::from(reader.sample_rate()))
+                    .div_ceil(u128::from(reader.timescale()))
+                    as usize
+                    * width)
+                    .min(expected.len());
+                decoder.reset();
+                assert_eq!(play(reader.as_mut(), decoder.as_mut()), expected[first..]);
+            }
         }
+        let width = c["channels"].as_u64().unwrap() as usize * 4;
         for (from, to) in [(1, 7), (10, 25), (1, 7)] {
             let mut range = Vec::new();
             fvid::native_media::decode_mp4_aac_pcm_interval(
@@ -184,5 +231,9 @@ fn predictive_icc_defaults_match_explicit_unity_through_playback_and_seek() {
         }
     }
     assert_eq!(scalars * 4, golden.len());
-    eprintln!("predictive-default original ISO PCM: {scalars} scalars;max error {maximum}");
+    assert_eq!(count_reproducers, 4);
+    assert_eq!(count_control.len(), 4 * 1536 * 6 * 4);
+    eprintln!(
+        "predictive-default original ISO/count-diagnostic PCM: {scalars} scalars;max error {maximum}"
+    );
 }

@@ -113,397 +113,573 @@
       "default_control_byte_identical": true
     },
     {
-      "name": "tree2-b23-m0-initial",
+      "name": "tree2-b9-m0-high1-split4-initial",
       "mode": "real",
       "offset": 589824,
       "bytes": 36864,
-      "default_control_byte_identical": true
+      "default_control_byte_identical": true,
+      "count_control_offset": 0,
+      "unmodified_reference_count_overwrite_reproducer": true
     },
     {
-      "name": "tree2-b23-m0-initial",
+      "name": "tree2-b9-m0-high1-split4-initial",
       "mode": "complex",
       "offset": 626688,
       "bytes": 36864,
-      "default_control_byte_identical": true
+      "default_control_byte_identical": true,
+      "count_control_offset": 36864,
+      "unmodified_reference_count_overwrite_reproducer": true
     },
     {
-      "name": "tree2-b23-m0-reset-hold",
+      "name": "tree2-b9-m0-high1-split4-reset-hold",
       "mode": "real",
       "offset": 663552,
       "bytes": 36864,
-      "default_control_byte_identical": true
+      "default_control_byte_identical": true,
+      "count_control_offset": 73728,
+      "unmodified_reference_count_overwrite_reproducer": true
     },
     {
-      "name": "tree2-b23-m0-reset-hold",
+      "name": "tree2-b9-m0-high1-split4-reset-hold",
       "mode": "complex",
       "offset": 700416,
       "bytes": 36864,
-      "default_control_byte_identical": true
+      "default_control_byte_identical": true,
+      "count_control_offset": 110592,
+      "unmodified_reference_count_overwrite_reproducer": true
     },
     {
-      "name": "tree2-b23-m1-initial",
+      "name": "tree2-b9-m1-high0-split4-initial",
       "mode": "real",
       "offset": 737280,
       "bytes": 36864,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree2-b23-m1-initial",
+      "name": "tree2-b9-m1-high0-split4-initial",
       "mode": "complex",
       "offset": 774144,
       "bytes": 36864,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree2-b23-m1-reset-hold",
+      "name": "tree2-b9-m1-high0-split4-reset-hold",
       "mode": "real",
       "offset": 811008,
       "bytes": 36864,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree2-b23-m1-reset-hold",
+      "name": "tree2-b9-m1-high0-split4-reset-hold",
       "mode": "complex",
       "offset": 847872,
       "bytes": 36864,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b4-m0-initial",
+      "name": "tree2-b23-m0-initial",
       "mode": "real",
       "offset": 884736,
-      "bytes": 49152,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b23-m0-initial",
+      "mode": "complex",
+      "offset": 921600,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b23-m0-reset-hold",
+      "mode": "real",
+      "offset": 958464,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b23-m0-reset-hold",
+      "mode": "complex",
+      "offset": 995328,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b23-m1-initial",
+      "mode": "real",
+      "offset": 1032192,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b23-m1-initial",
+      "mode": "complex",
+      "offset": 1069056,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b23-m1-reset-hold",
+      "mode": "real",
+      "offset": 1105920,
+      "bytes": 36864,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree2-b23-m1-reset-hold",
+      "mode": "complex",
+      "offset": 1142784,
+      "bytes": 36864,
       "default_control_byte_identical": true
     },
     {
       "name": "tree3-b4-m0-initial",
-      "mode": "complex",
-      "offset": 933888,
-      "bytes": 49152,
-      "default_control_byte_identical": true
-    },
-    {
-      "name": "tree3-b4-m0-reset-hold",
-      "mode": "real",
-      "offset": 983040,
-      "bytes": 49152,
-      "default_control_byte_identical": true
-    },
-    {
-      "name": "tree3-b4-m0-reset-hold",
-      "mode": "complex",
-      "offset": 1032192,
-      "bytes": 49152,
-      "default_control_byte_identical": true
-    },
-    {
-      "name": "tree3-b4-m1-initial",
-      "mode": "real",
-      "offset": 1081344,
-      "bytes": 49152,
-      "default_control_byte_identical": true
-    },
-    {
-      "name": "tree3-b4-m1-initial",
-      "mode": "complex",
-      "offset": 1130496,
-      "bytes": 49152,
-      "default_control_byte_identical": true
-    },
-    {
-      "name": "tree3-b4-m1-reset-hold",
       "mode": "real",
       "offset": 1179648,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b4-m1-reset-hold",
+      "name": "tree3-b4-m0-initial",
       "mode": "complex",
       "offset": 1228800,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b9-m0-initial",
+      "name": "tree3-b4-m0-reset-hold",
       "mode": "real",
       "offset": 1277952,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b9-m0-initial",
+      "name": "tree3-b4-m0-reset-hold",
       "mode": "complex",
       "offset": 1327104,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b9-m0-reset-hold",
+      "name": "tree3-b4-m1-initial",
       "mode": "real",
       "offset": 1376256,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b9-m0-reset-hold",
+      "name": "tree3-b4-m1-initial",
       "mode": "complex",
       "offset": 1425408,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b9-m1-initial",
+      "name": "tree3-b4-m1-reset-hold",
       "mode": "real",
       "offset": 1474560,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b9-m1-initial",
+      "name": "tree3-b4-m1-reset-hold",
       "mode": "complex",
       "offset": 1523712,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b9-m1-reset-hold",
+      "name": "tree3-b9-m0-initial",
       "mode": "real",
       "offset": 1572864,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b9-m1-reset-hold",
+      "name": "tree3-b9-m0-initial",
       "mode": "complex",
       "offset": 1622016,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b23-m0-initial",
+      "name": "tree3-b9-m0-reset-hold",
       "mode": "real",
       "offset": 1671168,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b23-m0-initial",
+      "name": "tree3-b9-m0-reset-hold",
       "mode": "complex",
       "offset": 1720320,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b23-m0-reset-hold",
+      "name": "tree3-b9-m1-initial",
       "mode": "real",
       "offset": 1769472,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b23-m0-reset-hold",
+      "name": "tree3-b9-m1-initial",
       "mode": "complex",
       "offset": 1818624,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b23-m1-initial",
+      "name": "tree3-b9-m1-reset-hold",
       "mode": "real",
       "offset": 1867776,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b23-m1-initial",
+      "name": "tree3-b9-m1-reset-hold",
       "mode": "complex",
       "offset": 1916928,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b23-m1-reset-hold",
+      "name": "tree3-b9-m0-high1-split4-initial",
       "mode": "real",
       "offset": 1966080,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree3-b23-m1-reset-hold",
+      "name": "tree3-b9-m0-high1-split4-initial",
       "mode": "complex",
       "offset": 2015232,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b4-m0-initial",
+      "name": "tree3-b9-m0-high1-split4-reset-hold",
       "mode": "real",
       "offset": 2064384,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b4-m0-initial",
+      "name": "tree3-b9-m0-high1-split4-reset-hold",
       "mode": "complex",
       "offset": 2113536,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b4-m0-reset-hold",
+      "name": "tree3-b9-m1-high0-split4-initial",
       "mode": "real",
       "offset": 2162688,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b4-m0-reset-hold",
+      "name": "tree3-b9-m1-high0-split4-initial",
       "mode": "complex",
       "offset": 2211840,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b4-m1-initial",
+      "name": "tree3-b9-m1-high0-split4-reset-hold",
       "mode": "real",
       "offset": 2260992,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b4-m1-initial",
+      "name": "tree3-b9-m1-high0-split4-reset-hold",
       "mode": "complex",
       "offset": 2310144,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b4-m1-reset-hold",
+      "name": "tree3-b23-m0-initial",
       "mode": "real",
       "offset": 2359296,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b4-m1-reset-hold",
+      "name": "tree3-b23-m0-initial",
       "mode": "complex",
       "offset": 2408448,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b9-m0-initial",
+      "name": "tree3-b23-m0-reset-hold",
       "mode": "real",
       "offset": 2457600,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b9-m0-initial",
+      "name": "tree3-b23-m0-reset-hold",
       "mode": "complex",
       "offset": 2506752,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b9-m0-reset-hold",
+      "name": "tree3-b23-m1-initial",
       "mode": "real",
       "offset": 2555904,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b9-m0-reset-hold",
+      "name": "tree3-b23-m1-initial",
       "mode": "complex",
       "offset": 2605056,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b9-m1-initial",
+      "name": "tree3-b23-m1-reset-hold",
       "mode": "real",
       "offset": 2654208,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b9-m1-initial",
+      "name": "tree3-b23-m1-reset-hold",
       "mode": "complex",
       "offset": 2703360,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b9-m1-reset-hold",
+      "name": "tree4-b4-m0-initial",
       "mode": "real",
       "offset": 2752512,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b9-m1-reset-hold",
+      "name": "tree4-b4-m0-initial",
       "mode": "complex",
       "offset": 2801664,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b23-m0-initial",
+      "name": "tree4-b4-m0-reset-hold",
       "mode": "real",
       "offset": 2850816,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b23-m0-initial",
+      "name": "tree4-b4-m0-reset-hold",
       "mode": "complex",
       "offset": 2899968,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b23-m0-reset-hold",
+      "name": "tree4-b4-m1-initial",
       "mode": "real",
       "offset": 2949120,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b23-m0-reset-hold",
+      "name": "tree4-b4-m1-initial",
       "mode": "complex",
       "offset": 2998272,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b23-m1-initial",
+      "name": "tree4-b4-m1-reset-hold",
       "mode": "real",
       "offset": 3047424,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b23-m1-initial",
+      "name": "tree4-b4-m1-reset-hold",
       "mode": "complex",
       "offset": 3096576,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b23-m1-reset-hold",
+      "name": "tree4-b9-m0-initial",
       "mode": "real",
       "offset": 3145728,
       "bytes": 49152,
       "default_control_byte_identical": true
     },
     {
-      "name": "tree4-b23-m1-reset-hold",
+      "name": "tree4-b9-m0-initial",
       "mode": "complex",
       "offset": 3194880,
       "bytes": 49152,
       "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m0-reset-hold",
+      "mode": "real",
+      "offset": 3244032,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m0-reset-hold",
+      "mode": "complex",
+      "offset": 3293184,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m1-initial",
+      "mode": "real",
+      "offset": 3342336,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m1-initial",
+      "mode": "complex",
+      "offset": 3391488,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m1-reset-hold",
+      "mode": "real",
+      "offset": 3440640,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m1-reset-hold",
+      "mode": "complex",
+      "offset": 3489792,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m0-high1-split4-initial",
+      "mode": "real",
+      "offset": 3538944,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m0-high1-split4-initial",
+      "mode": "complex",
+      "offset": 3588096,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m0-high1-split4-reset-hold",
+      "mode": "real",
+      "offset": 3637248,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m0-high1-split4-reset-hold",
+      "mode": "complex",
+      "offset": 3686400,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m1-high0-split4-initial",
+      "mode": "real",
+      "offset": 3735552,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m1-high0-split4-initial",
+      "mode": "complex",
+      "offset": 3784704,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m1-high0-split4-reset-hold",
+      "mode": "real",
+      "offset": 3833856,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b9-m1-high0-split4-reset-hold",
+      "mode": "complex",
+      "offset": 3883008,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b23-m0-initial",
+      "mode": "real",
+      "offset": 3932160,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b23-m0-initial",
+      "mode": "complex",
+      "offset": 3981312,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b23-m0-reset-hold",
+      "mode": "real",
+      "offset": 4030464,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b23-m0-reset-hold",
+      "mode": "complex",
+      "offset": 4079616,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b23-m1-initial",
+      "mode": "real",
+      "offset": 4128768,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b23-m1-initial",
+      "mode": "complex",
+      "offset": 4177920,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b23-m1-reset-hold",
+      "mode": "real",
+      "offset": 4227072,
+      "bytes": 49152,
+      "default_control_byte_identical": true
+    },
+    {
+      "name": "tree4-b23-m1-reset-hold",
+      "mode": "complex",
+      "offset": 4276224,
+      "bytes": 49152,
+      "default_control_byte_identical": true
     }
   ],
-  "scope": "Full original spatial decoder on authored core PCM and authored SSC/frames; both decorrelators, default and explicit-unity outputs byte-identical. 7272 outputs explicitly reordered to WAVE mask0x63f. Not an AAC core oracle or complete-profile conformance."
+  "scope": "Full original spatial decoder on authored core PCM and authored SSC/frames; both decorrelators, default and explicit-unity outputs byte-identical. 7272 outputs explicitly reordered to WAVE mask0x63f. Four TREE_525 low0/high1 outputs additionally have a separately labelled decorrelator-count source diagnostic; original outputs remain intact. Not an AAC core oracle or complete-profile conformance."
 }

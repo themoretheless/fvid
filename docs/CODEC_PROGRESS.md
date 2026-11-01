@@ -24436,3 +24436,16 @@ creation forbidden. Six role-map patterns exercise raw/container controls and
 index metadata, 16-role padding and the AAC 2 MiB stack regression pass.
 These gates qualify the explicitly negotiated output contract, not universal
 codec completion or automatic layout discovery.
+
+### 2026-11-01: LD-MPS predictive split-region evidence
+
+Twelve additional authored split-TTT programmes and coded controls now test
+low/high default/hold histories through both MP4 and Matroska navigation.
+The full original ISO spatial frontend matches92/96 outputs; four TREE_525
+lower0/upper1 outputs specifically reproduce its configuration-loop overwrite
+of the global decorrelator count. A separate modified-source count diagnostic
+isolates the difference; it is not presented as normative conformance.
+All original outputs remain available. See
+`validation/aac-ld-mps-ttt-split-2026-11-01.md`. Unequal HRTF grids, remaining
+EBQ configurations and replaced-fragment association remain open. The global
+codec-gap goal is not complete.

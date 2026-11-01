@@ -5,6 +5,7 @@
       "tree": 2,
       "bands": 4,
       "mode": 0,
+      "split": null,
       "pattern": "initial",
       "asc": "f8e6402633f20000040000",
       "ssc": "33f200000400",
@@ -63,6 +64,7 @@
       "tree": 2,
       "bands": 4,
       "mode": 0,
+      "split": null,
       "pattern": "reset-hold",
       "asc": "f8e6402633f20000040000",
       "ssc": "33f200000400",
@@ -121,6 +123,7 @@
       "tree": 2,
       "bands": 4,
       "mode": 1,
+      "split": null,
       "pattern": "initial",
       "asc": "f8e6402633f20000041000",
       "ssc": "33f200000410",
@@ -179,6 +182,7 @@
       "tree": 2,
       "bands": 4,
       "mode": 1,
+      "split": null,
       "pattern": "reset-hold",
       "asc": "f8e6402633f20000041000",
       "ssc": "33f200000410",
@@ -237,6 +241,7 @@
       "tree": 2,
       "bands": 9,
       "mode": 0,
+      "split": null,
       "pattern": "initial",
       "asc": "f8e6402633c20000090000",
       "ssc": "33c200000900",
@@ -295,6 +300,7 @@
       "tree": 2,
       "bands": 9,
       "mode": 0,
+      "split": null,
       "pattern": "reset-hold",
       "asc": "f8e6402633c20000090000",
       "ssc": "33c200000900",
@@ -353,6 +359,7 @@
       "tree": 2,
       "bands": 9,
       "mode": 1,
+      "split": null,
       "pattern": "initial",
       "asc": "f8e6402633c20000091000",
       "ssc": "33c200000910",
@@ -411,6 +418,7 @@
       "tree": 2,
       "bands": 9,
       "mode": 1,
+      "split": null,
       "pattern": "reset-hold",
       "asc": "f8e6402633c20000091000",
       "ssc": "33c200000910",
@@ -465,10 +473,247 @@
       }
     },
     {
+      "name": "tree2-b9-m0-high1-split4-initial",
+      "tree": 2,
+      "bands": 9,
+      "mode": 0,
+      "split": 4,
+      "pattern": "initial",
+      "asc": "f8e6402733c2000009824000",
+      "ssc": "33c20000098240",
+      "rate": 48000,
+      "samples": 1536,
+      "channels": 6,
+      "default": {
+        "video": "tree2-b9-m0-high1-split4-initial.mp4",
+        "file": "tree2-b9-m0-high1-split4-initial.mkv",
+        "frames": [
+          {
+            "offset": 4056,
+            "bytes": 110
+          },
+          {
+            "offset": 4166,
+            "bytes": 110
+          },
+          {
+            "offset": 4276,
+            "bytes": 102
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b741520000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f14924924800",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b741520000"
+        ]
+      },
+      "control": {
+        "video": "tree2-b9-m0-high1-split4-initial-control.mp4",
+        "file": "tree2-b9-m0-high1-split4-initial-control.mkv",
+        "frames": [
+          {
+            "offset": 4378,
+            "bytes": 118
+          },
+          {
+            "offset": 4496,
+            "bytes": 110
+          },
+          {
+            "offset": 4606,
+            "bytes": 110
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f10000000000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f14924924800",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f10000000000"
+        ]
+      }
+    },
+    {
+      "name": "tree2-b9-m0-high1-split4-reset-hold",
+      "tree": 2,
+      "bands": 9,
+      "mode": 0,
+      "split": 4,
+      "pattern": "reset-hold",
+      "asc": "f8e6402733c2000009824000",
+      "ssc": "33c20000098240",
+      "rate": 48000,
+      "samples": 1536,
+      "channels": 6,
+      "default": {
+        "video": "tree2-b9-m0-high1-split4-reset-hold.mp4",
+        "file": "tree2-b9-m0-high1-split4-reset-hold.mkv",
+        "frames": [
+          {
+            "offset": 4716,
+            "bytes": 118
+          },
+          {
+            "offset": 4834,
+            "bytes": 102
+          },
+          {
+            "offset": 4936,
+            "bytes": 102
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f14924924800",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b741520000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add05f8bdeff07bdfe0c31f16b5ba0d6b741521400"
+        ]
+      },
+      "control": {
+        "video": "tree2-b9-m0-high1-split4-reset-hold-control.mp4",
+        "file": "tree2-b9-m0-high1-split4-reset-hold-control.mkv",
+        "frames": [
+          {
+            "offset": 5038,
+            "bytes": 118
+          },
+          {
+            "offset": 5156,
+            "bytes": 110
+          },
+          {
+            "offset": 5266,
+            "bytes": 110
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f14924924800",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f10000000000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f10000000000"
+        ]
+      }
+    },
+    {
+      "name": "tree2-b9-m1-high0-split4-initial",
+      "tree": 2,
+      "bands": 9,
+      "mode": 1,
+      "split": 4,
+      "pattern": "initial",
+      "asc": "f8e6402733c2000009904000",
+      "ssc": "33c20000099040",
+      "rate": 48000,
+      "samples": 1536,
+      "channels": 6,
+      "default": {
+        "video": "tree2-b9-m1-high0-split4-initial.mp4",
+        "file": "tree2-b9-m1-high0-split4-initial.mkv",
+        "frames": [
+          {
+            "offset": 5376,
+            "bytes": 110
+          },
+          {
+            "offset": 5486,
+            "bytes": 110
+          },
+          {
+            "offset": 5596,
+            "bytes": 102
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b741520000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f14924924800",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b741520000"
+        ]
+      },
+      "control": {
+        "video": "tree2-b9-m1-high0-split4-initial-control.mp4",
+        "file": "tree2-b9-m1-high0-split4-initial-control.mkv",
+        "frames": [
+          {
+            "offset": 5698,
+            "bytes": 118
+          },
+          {
+            "offset": 5816,
+            "bytes": 110
+          },
+          {
+            "offset": 5926,
+            "bytes": 110
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f10000000000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f14924924800",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f10000000000"
+        ]
+      }
+    },
+    {
+      "name": "tree2-b9-m1-high0-split4-reset-hold",
+      "tree": 2,
+      "bands": 9,
+      "mode": 1,
+      "split": 4,
+      "pattern": "reset-hold",
+      "asc": "f8e6402733c2000009904000",
+      "ssc": "33c20000099040",
+      "rate": 48000,
+      "samples": 1536,
+      "channels": 6,
+      "default": {
+        "video": "tree2-b9-m1-high0-split4-reset-hold.mp4",
+        "file": "tree2-b9-m1-high0-split4-reset-hold.mkv",
+        "frames": [
+          {
+            "offset": 6036,
+            "bytes": 118
+          },
+          {
+            "offset": 6154,
+            "bytes": 102
+          },
+          {
+            "offset": 6256,
+            "bytes": 102
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f14924924800",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b741520000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add05f8bdeff07bdfe0c31f16b5ba0d6b741521400"
+        ]
+      },
+      "control": {
+        "video": "tree2-b9-m1-high0-split4-reset-hold-control.mp4",
+        "file": "tree2-b9-m1-high0-split4-reset-hold-control.mkv",
+        "frames": [
+          {
+            "offset": 6358,
+            "bytes": 118
+          },
+          {
+            "offset": 6476,
+            "bytes": 110
+          },
+          {
+            "offset": 6586,
+            "bytes": 110
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f14924924800",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f10000000000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f10000000000"
+        ]
+      }
+    },
+    {
       "name": "tree2-b23-m0-initial",
       "tree": 2,
       "bands": 23,
       "mode": 0,
+      "split": null,
       "pattern": "initial",
       "asc": "f8e6402633920000170000",
       "ssc": "339200001700",
@@ -480,15 +725,15 @@
         "file": "tree2-b23-m0-initial.mkv",
         "frames": [
           {
-            "offset": 4056,
+            "offset": 6696,
             "bytes": 220
           },
           {
-            "offset": 4276,
+            "offset": 6916,
             "bytes": 231
           },
           {
-            "offset": 4507,
+            "offset": 7147,
             "bytes": 213
           }
         ],
@@ -503,15 +748,15 @@
         "file": "tree2-b23-m0-initial-control.mkv",
         "frames": [
           {
-            "offset": 4720,
+            "offset": 7360,
             "bytes": 238
           },
           {
-            "offset": 4958,
+            "offset": 7598,
             "bytes": 231
           },
           {
-            "offset": 5189,
+            "offset": 7829,
             "bytes": 231
           }
         ],
@@ -527,6 +772,7 @@
       "tree": 2,
       "bands": 23,
       "mode": 0,
+      "split": null,
       "pattern": "reset-hold",
       "asc": "f8e6402633920000170000",
       "ssc": "339200001700",
@@ -538,15 +784,15 @@
         "file": "tree2-b23-m0-reset-hold.mkv",
         "frames": [
           {
-            "offset": 5420,
+            "offset": 8060,
             "bytes": 238
           },
           {
-            "offset": 5658,
+            "offset": 8298,
             "bytes": 213
           },
           {
-            "offset": 5871,
+            "offset": 8511,
             "bytes": 213
           }
         ],
@@ -561,15 +807,15 @@
         "file": "tree2-b23-m0-reset-hold-control.mkv",
         "frames": [
           {
-            "offset": 6084,
+            "offset": 8724,
             "bytes": 238
           },
           {
-            "offset": 6322,
+            "offset": 8962,
             "bytes": 231
           },
           {
-            "offset": 6553,
+            "offset": 9193,
             "bytes": 231
           }
         ],
@@ -585,6 +831,7 @@
       "tree": 2,
       "bands": 23,
       "mode": 1,
+      "split": null,
       "pattern": "initial",
       "asc": "f8e6402633920000171000",
       "ssc": "339200001710",
@@ -596,15 +843,15 @@
         "file": "tree2-b23-m1-initial.mkv",
         "frames": [
           {
-            "offset": 6784,
+            "offset": 9424,
             "bytes": 220
           },
           {
-            "offset": 7004,
+            "offset": 9644,
             "bytes": 231
           },
           {
-            "offset": 7235,
+            "offset": 9875,
             "bytes": 213
           }
         ],
@@ -619,15 +866,15 @@
         "file": "tree2-b23-m1-initial-control.mkv",
         "frames": [
           {
-            "offset": 7448,
+            "offset": 10088,
             "bytes": 238
           },
           {
-            "offset": 7686,
+            "offset": 10326,
             "bytes": 231
           },
           {
-            "offset": 7917,
+            "offset": 10557,
             "bytes": 231
           }
         ],
@@ -643,6 +890,7 @@
       "tree": 2,
       "bands": 23,
       "mode": 1,
+      "split": null,
       "pattern": "reset-hold",
       "asc": "f8e6402633920000171000",
       "ssc": "339200001710",
@@ -654,15 +902,15 @@
         "file": "tree2-b23-m1-reset-hold.mkv",
         "frames": [
           {
-            "offset": 8148,
+            "offset": 10788,
             "bytes": 238
           },
           {
-            "offset": 8386,
+            "offset": 11026,
             "bytes": 213
           },
           {
-            "offset": 8599,
+            "offset": 11239,
             "bytes": 213
           }
         ],
@@ -677,15 +925,15 @@
         "file": "tree2-b23-m1-reset-hold-control.mkv",
         "frames": [
           {
-            "offset": 8812,
+            "offset": 11452,
             "bytes": 238
           },
           {
-            "offset": 9050,
+            "offset": 11690,
             "bytes": 231
           },
           {
-            "offset": 9281,
+            "offset": 11921,
             "bytes": 231
           }
         ],
@@ -701,6 +949,7 @@
       "tree": 3,
       "bands": 4,
       "mode": 0,
+      "split": null,
       "pattern": "initial",
       "asc": "f8e6402633f30000040000",
       "ssc": "33f300000400",
@@ -712,15 +961,15 @@
         "file": "tree3-b4-m0-initial.mkv",
         "frames": [
           {
-            "offset": 9512,
+            "offset": 12152,
             "bytes": 86
           },
           {
-            "offset": 9598,
+            "offset": 12238,
             "bytes": 82
           },
           {
-            "offset": 9680,
+            "offset": 12320,
             "bytes": 79
           }
         ],
@@ -735,15 +984,15 @@
         "file": "tree3-b4-m0-initial-control.mkv",
         "frames": [
           {
-            "offset": 9759,
+            "offset": 12399,
             "bytes": 89
           },
           {
-            "offset": 9848,
+            "offset": 12488,
             "bytes": 82
           },
           {
-            "offset": 9930,
+            "offset": 12570,
             "bytes": 82
           }
         ],
@@ -759,6 +1008,7 @@
       "tree": 3,
       "bands": 4,
       "mode": 0,
+      "split": null,
       "pattern": "reset-hold",
       "asc": "f8e6402633f30000040000",
       "ssc": "33f300000400",
@@ -770,15 +1020,15 @@
         "file": "tree3-b4-m0-reset-hold.mkv",
         "frames": [
           {
-            "offset": 10012,
+            "offset": 12652,
             "bytes": 89
           },
           {
-            "offset": 10101,
+            "offset": 12741,
             "bytes": 79
           },
           {
-            "offset": 10180,
+            "offset": 12820,
             "bytes": 79
           }
         ],
@@ -793,15 +1043,15 @@
         "file": "tree3-b4-m0-reset-hold-control.mkv",
         "frames": [
           {
-            "offset": 10259,
+            "offset": 12899,
             "bytes": 89
           },
           {
-            "offset": 10348,
+            "offset": 12988,
             "bytes": 82
           },
           {
-            "offset": 10430,
+            "offset": 13070,
             "bytes": 82
           }
         ],
@@ -817,6 +1067,7 @@
       "tree": 3,
       "bands": 4,
       "mode": 1,
+      "split": null,
       "pattern": "initial",
       "asc": "f8e6402633f30000041000",
       "ssc": "33f300000410",
@@ -828,15 +1079,15 @@
         "file": "tree3-b4-m1-initial.mkv",
         "frames": [
           {
-            "offset": 10512,
+            "offset": 13152,
             "bytes": 86
           },
           {
-            "offset": 10598,
+            "offset": 13238,
             "bytes": 82
           },
           {
-            "offset": 10680,
+            "offset": 13320,
             "bytes": 79
           }
         ],
@@ -851,15 +1102,15 @@
         "file": "tree3-b4-m1-initial-control.mkv",
         "frames": [
           {
-            "offset": 10759,
+            "offset": 13399,
             "bytes": 89
           },
           {
-            "offset": 10848,
+            "offset": 13488,
             "bytes": 82
           },
           {
-            "offset": 10930,
+            "offset": 13570,
             "bytes": 82
           }
         ],
@@ -875,6 +1126,7 @@
       "tree": 3,
       "bands": 4,
       "mode": 1,
+      "split": null,
       "pattern": "reset-hold",
       "asc": "f8e6402633f30000041000",
       "ssc": "33f300000410",
@@ -886,15 +1138,15 @@
         "file": "tree3-b4-m1-reset-hold.mkv",
         "frames": [
           {
-            "offset": 11012,
+            "offset": 13652,
             "bytes": 89
           },
           {
-            "offset": 11101,
+            "offset": 13741,
             "bytes": 79
           },
           {
-            "offset": 11180,
+            "offset": 13820,
             "bytes": 79
           }
         ],
@@ -909,15 +1161,15 @@
         "file": "tree3-b4-m1-reset-hold-control.mkv",
         "frames": [
           {
-            "offset": 11259,
+            "offset": 13899,
             "bytes": 89
           },
           {
-            "offset": 11348,
+            "offset": 13988,
             "bytes": 82
           },
           {
-            "offset": 11430,
+            "offset": 14070,
             "bytes": 82
           }
         ],
@@ -933,6 +1185,7 @@
       "tree": 3,
       "bands": 9,
       "mode": 0,
+      "split": null,
       "pattern": "initial",
       "asc": "f8e6402633c30000090000",
       "ssc": "33c300000900",
@@ -944,15 +1197,15 @@
         "file": "tree3-b9-m0-initial.mkv",
         "frames": [
           {
-            "offset": 11512,
+            "offset": 14152,
             "bytes": 146
           },
           {
-            "offset": 11658,
+            "offset": 14298,
             "bytes": 147
           },
           {
-            "offset": 11805,
+            "offset": 14445,
             "bytes": 139
           }
         ],
@@ -965,180 +1218,6 @@
       "control": {
         "video": "tree3-b9-m0-initial-control.mp4",
         "file": "tree3-b9-m0-initial-control.mkv",
-        "frames": [
-          {
-            "offset": 11944,
-            "bytes": 154
-          },
-          {
-            "offset": 12098,
-            "bytes": 147
-          },
-          {
-            "offset": 12245,
-            "bytes": 147
-          }
-        ],
-        "spatial": [
-          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f88000000000000000",
-          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f8a492492492492400",
-          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f88000000000000000"
-        ]
-      }
-    },
-    {
-      "name": "tree3-b9-m0-reset-hold",
-      "tree": 3,
-      "bands": 9,
-      "mode": 0,
-      "pattern": "reset-hold",
-      "asc": "f8e6402633c30000090000",
-      "ssc": "33c300000900",
-      "rate": 48000,
-      "samples": 1536,
-      "channels": 8,
-      "default": {
-        "video": "tree3-b9-m0-reset-hold.mp4",
-        "file": "tree3-b9-m0-reset-hold.mkv",
-        "frames": [
-          {
-            "offset": 12392,
-            "bytes": 154
-          },
-          {
-            "offset": 12546,
-            "bytes": 139
-          },
-          {
-            "offset": 12685,
-            "bytes": 139
-          }
-        ],
-        "spatial": [
-          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f8a492492492492400",
-          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add054800",
-          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add054850"
-        ]
-      },
-      "control": {
-        "video": "tree3-b9-m0-reset-hold-control.mp4",
-        "file": "tree3-b9-m0-reset-hold-control.mkv",
-        "frames": [
-          {
-            "offset": 12824,
-            "bytes": 154
-          },
-          {
-            "offset": 12978,
-            "bytes": 147
-          },
-          {
-            "offset": 13125,
-            "bytes": 147
-          }
-        ],
-        "spatial": [
-          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f8a492492492492400",
-          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f88000000000000000",
-          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f88000000000000000"
-        ]
-      }
-    },
-    {
-      "name": "tree3-b9-m1-initial",
-      "tree": 3,
-      "bands": 9,
-      "mode": 1,
-      "pattern": "initial",
-      "asc": "f8e6402633c30000091000",
-      "ssc": "33c300000910",
-      "rate": 48000,
-      "samples": 1536,
-      "channels": 8,
-      "default": {
-        "video": "tree3-b9-m1-initial.mp4",
-        "file": "tree3-b9-m1-initial.mkv",
-        "frames": [
-          {
-            "offset": 13272,
-            "bytes": 146
-          },
-          {
-            "offset": 13418,
-            "bytes": 147
-          },
-          {
-            "offset": 13565,
-            "bytes": 139
-          }
-        ],
-        "spatial": [
-          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add054800",
-          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f8a492492492492400",
-          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add054800"
-        ]
-      },
-      "control": {
-        "video": "tree3-b9-m1-initial-control.mp4",
-        "file": "tree3-b9-m1-initial-control.mkv",
-        "frames": [
-          {
-            "offset": 13704,
-            "bytes": 154
-          },
-          {
-            "offset": 13858,
-            "bytes": 147
-          },
-          {
-            "offset": 14005,
-            "bytes": 147
-          }
-        ],
-        "spatial": [
-          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f88000000000000000",
-          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f8a492492492492400",
-          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f88000000000000000"
-        ]
-      }
-    },
-    {
-      "name": "tree3-b9-m1-reset-hold",
-      "tree": 3,
-      "bands": 9,
-      "mode": 1,
-      "pattern": "reset-hold",
-      "asc": "f8e6402633c30000091000",
-      "ssc": "33c300000910",
-      "rate": 48000,
-      "samples": 1536,
-      "channels": 8,
-      "default": {
-        "video": "tree3-b9-m1-reset-hold.mp4",
-        "file": "tree3-b9-m1-reset-hold.mkv",
-        "frames": [
-          {
-            "offset": 14152,
-            "bytes": 154
-          },
-          {
-            "offset": 14306,
-            "bytes": 139
-          },
-          {
-            "offset": 14445,
-            "bytes": 139
-          }
-        ],
-        "spatial": [
-          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f8a492492492492400",
-          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add054800",
-          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add054850"
-        ]
-      },
-      "control": {
-        "video": "tree3-b9-m1-reset-hold-control.mp4",
-        "file": "tree3-b9-m1-reset-hold-control.mkv",
         "frames": [
           {
             "offset": 14584,
@@ -1154,9 +1233,422 @@
           }
         ],
         "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f88000000000000000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f8a492492492492400",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f88000000000000000"
+        ]
+      }
+    },
+    {
+      "name": "tree3-b9-m0-reset-hold",
+      "tree": 3,
+      "bands": 9,
+      "mode": 0,
+      "split": null,
+      "pattern": "reset-hold",
+      "asc": "f8e6402633c30000090000",
+      "ssc": "33c300000900",
+      "rate": 48000,
+      "samples": 1536,
+      "channels": 8,
+      "default": {
+        "video": "tree3-b9-m0-reset-hold.mp4",
+        "file": "tree3-b9-m0-reset-hold.mkv",
+        "frames": [
+          {
+            "offset": 15032,
+            "bytes": 154
+          },
+          {
+            "offset": 15186,
+            "bytes": 139
+          },
+          {
+            "offset": 15325,
+            "bytes": 139
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f8a492492492492400",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add054800",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add054850"
+        ]
+      },
+      "control": {
+        "video": "tree3-b9-m0-reset-hold-control.mp4",
+        "file": "tree3-b9-m0-reset-hold-control.mkv",
+        "frames": [
+          {
+            "offset": 15464,
+            "bytes": 154
+          },
+          {
+            "offset": 15618,
+            "bytes": 147
+          },
+          {
+            "offset": 15765,
+            "bytes": 147
+          }
+        ],
+        "spatial": [
           "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f8a492492492492400",
           "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f88000000000000000",
           "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f88000000000000000"
+        ]
+      }
+    },
+    {
+      "name": "tree3-b9-m1-initial",
+      "tree": 3,
+      "bands": 9,
+      "mode": 1,
+      "split": null,
+      "pattern": "initial",
+      "asc": "f8e6402633c30000091000",
+      "ssc": "33c300000910",
+      "rate": 48000,
+      "samples": 1536,
+      "channels": 8,
+      "default": {
+        "video": "tree3-b9-m1-initial.mp4",
+        "file": "tree3-b9-m1-initial.mkv",
+        "frames": [
+          {
+            "offset": 15912,
+            "bytes": 146
+          },
+          {
+            "offset": 16058,
+            "bytes": 147
+          },
+          {
+            "offset": 16205,
+            "bytes": 139
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add054800",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f8a492492492492400",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add054800"
+        ]
+      },
+      "control": {
+        "video": "tree3-b9-m1-initial-control.mp4",
+        "file": "tree3-b9-m1-initial-control.mkv",
+        "frames": [
+          {
+            "offset": 16344,
+            "bytes": 154
+          },
+          {
+            "offset": 16498,
+            "bytes": 147
+          },
+          {
+            "offset": 16645,
+            "bytes": 147
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f88000000000000000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f8a492492492492400",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f88000000000000000"
+        ]
+      }
+    },
+    {
+      "name": "tree3-b9-m1-reset-hold",
+      "tree": 3,
+      "bands": 9,
+      "mode": 1,
+      "split": null,
+      "pattern": "reset-hold",
+      "asc": "f8e6402633c30000091000",
+      "ssc": "33c300000910",
+      "rate": 48000,
+      "samples": 1536,
+      "channels": 8,
+      "default": {
+        "video": "tree3-b9-m1-reset-hold.mp4",
+        "file": "tree3-b9-m1-reset-hold.mkv",
+        "frames": [
+          {
+            "offset": 16792,
+            "bytes": 154
+          },
+          {
+            "offset": 16946,
+            "bytes": 139
+          },
+          {
+            "offset": 17085,
+            "bytes": 139
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f8a492492492492400",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add054800",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add054850"
+        ]
+      },
+      "control": {
+        "video": "tree3-b9-m1-reset-hold-control.mp4",
+        "file": "tree3-b9-m1-reset-hold-control.mkv",
+        "frames": [
+          {
+            "offset": 17224,
+            "bytes": 154
+          },
+          {
+            "offset": 17378,
+            "bytes": 147
+          },
+          {
+            "offset": 17525,
+            "bytes": 147
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f8a492492492492400",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f88000000000000000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f83deff07bdfe0c31f16b5ba0d6b741ad6e835add0548f88000000000000000"
+        ]
+      }
+    },
+    {
+      "name": "tree3-b9-m0-high1-split4-initial",
+      "tree": 3,
+      "bands": 9,
+      "mode": 0,
+      "split": 4,
+      "pattern": "initial",
+      "asc": "f8e6402733c3000009824000",
+      "ssc": "33c30000098240",
+      "rate": 48000,
+      "samples": 1536,
+      "channels": 8,
+      "default": {
+        "video": "tree3-b9-m0-high1-split4-initial.mp4",
+        "file": "tree3-b9-m0-high1-split4-initial.mkv",
+        "frames": [
+          {
+            "offset": 17672,
+            "bytes": 150
+          },
+          {
+            "offset": 17822,
+            "bytes": 150
+          },
+          {
+            "offset": 17972,
+            "bytes": 142
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b74152000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f1492492480",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b74152000"
+        ]
+      },
+      "control": {
+        "video": "tree3-b9-m0-high1-split4-initial-control.mp4",
+        "file": "tree3-b9-m0-high1-split4-initial-control.mkv",
+        "frames": [
+          {
+            "offset": 18114,
+            "bytes": 158
+          },
+          {
+            "offset": 18272,
+            "bytes": 150
+          },
+          {
+            "offset": 18422,
+            "bytes": 150
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f1000000000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f1492492480",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f1000000000"
+        ]
+      }
+    },
+    {
+      "name": "tree3-b9-m0-high1-split4-reset-hold",
+      "tree": 3,
+      "bands": 9,
+      "mode": 0,
+      "split": 4,
+      "pattern": "reset-hold",
+      "asc": "f8e6402733c3000009824000",
+      "ssc": "33c30000098240",
+      "rate": 48000,
+      "samples": 1536,
+      "channels": 8,
+      "default": {
+        "video": "tree3-b9-m0-high1-split4-reset-hold.mp4",
+        "file": "tree3-b9-m0-high1-split4-reset-hold.mkv",
+        "frames": [
+          {
+            "offset": 18572,
+            "bytes": 158
+          },
+          {
+            "offset": 18730,
+            "bytes": 142
+          },
+          {
+            "offset": 18872,
+            "bytes": 142
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f1492492480",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b74152000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add05f8bdeff07bdfe0c31f16b5ba0d6b74152140"
+        ]
+      },
+      "control": {
+        "video": "tree3-b9-m0-high1-split4-reset-hold-control.mp4",
+        "file": "tree3-b9-m0-high1-split4-reset-hold-control.mkv",
+        "frames": [
+          {
+            "offset": 19014,
+            "bytes": 158
+          },
+          {
+            "offset": 19172,
+            "bytes": 150
+          },
+          {
+            "offset": 19322,
+            "bytes": 150
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f1492492480",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f1000000000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f1000000000"
+        ]
+      }
+    },
+    {
+      "name": "tree3-b9-m1-high0-split4-initial",
+      "tree": 3,
+      "bands": 9,
+      "mode": 1,
+      "split": 4,
+      "pattern": "initial",
+      "asc": "f8e6402733c3000009904000",
+      "ssc": "33c30000099040",
+      "rate": 48000,
+      "samples": 1536,
+      "channels": 8,
+      "default": {
+        "video": "tree3-b9-m1-high0-split4-initial.mp4",
+        "file": "tree3-b9-m1-high0-split4-initial.mkv",
+        "frames": [
+          {
+            "offset": 19472,
+            "bytes": 150
+          },
+          {
+            "offset": 19622,
+            "bytes": 150
+          },
+          {
+            "offset": 19772,
+            "bytes": 142
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b74152000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f1492492480",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b74152000"
+        ]
+      },
+      "control": {
+        "video": "tree3-b9-m1-high0-split4-initial-control.mp4",
+        "file": "tree3-b9-m1-high0-split4-initial-control.mkv",
+        "frames": [
+          {
+            "offset": 19914,
+            "bytes": 158
+          },
+          {
+            "offset": 20072,
+            "bytes": 150
+          },
+          {
+            "offset": 20222,
+            "bytes": 150
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f1000000000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f1492492480",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f1000000000"
+        ]
+      }
+    },
+    {
+      "name": "tree3-b9-m1-high0-split4-reset-hold",
+      "tree": 3,
+      "bands": 9,
+      "mode": 1,
+      "split": 4,
+      "pattern": "reset-hold",
+      "asc": "f8e6402733c3000009904000",
+      "ssc": "33c30000099040",
+      "rate": 48000,
+      "samples": 1536,
+      "channels": 8,
+      "default": {
+        "video": "tree3-b9-m1-high0-split4-reset-hold.mp4",
+        "file": "tree3-b9-m1-high0-split4-reset-hold.mkv",
+        "frames": [
+          {
+            "offset": 20372,
+            "bytes": 158
+          },
+          {
+            "offset": 20530,
+            "bytes": 142
+          },
+          {
+            "offset": 20672,
+            "bytes": 142
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f1492492480",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b74152000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add05f8bdeff07bdfe0c31f16b5ba0d6b74152140"
+        ]
+      },
+      "control": {
+        "video": "tree3-b9-m1-high0-split4-reset-hold-control.mp4",
+        "file": "tree3-b9-m1-high0-split4-reset-hold-control.mkv",
+        "frames": [
+          {
+            "offset": 20814,
+            "bytes": 158
+          },
+          {
+            "offset": 20972,
+            "bytes": 150
+          },
+          {
+            "offset": 21122,
+            "bytes": 150
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f1492492480",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f1000000000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f1000000000"
         ]
       }
     },
@@ -1165,6 +1657,7 @@
       "tree": 3,
       "bands": 23,
       "mode": 0,
+      "split": null,
       "pattern": "initial",
       "asc": "f8e6402633930000170000",
       "ssc": "339300001700",
@@ -1176,15 +1669,15 @@
         "file": "tree3-b23-m0-initial.mkv",
         "frames": [
           {
-            "offset": 15032,
+            "offset": 21272,
             "bytes": 318
           },
           {
-            "offset": 15350,
+            "offset": 21590,
             "bytes": 329
           },
           {
-            "offset": 15679,
+            "offset": 21919,
             "bytes": 311
           }
         ],
@@ -1199,15 +1692,15 @@
         "file": "tree3-b23-m0-initial-control.mkv",
         "frames": [
           {
-            "offset": 15990,
+            "offset": 22230,
             "bytes": 336
           },
           {
-            "offset": 16326,
+            "offset": 22566,
             "bytes": 329
           },
           {
-            "offset": 16655,
+            "offset": 22895,
             "bytes": 329
           }
         ],
@@ -1223,6 +1716,7 @@
       "tree": 3,
       "bands": 23,
       "mode": 0,
+      "split": null,
       "pattern": "reset-hold",
       "asc": "f8e6402633930000170000",
       "ssc": "339300001700",
@@ -1234,15 +1728,15 @@
         "file": "tree3-b23-m0-reset-hold.mkv",
         "frames": [
           {
-            "offset": 16984,
+            "offset": 23224,
             "bytes": 336
           },
           {
-            "offset": 17320,
+            "offset": 23560,
             "bytes": 311
           },
           {
-            "offset": 17631,
+            "offset": 23871,
             "bytes": 311
           }
         ],
@@ -1257,15 +1751,15 @@
         "file": "tree3-b23-m0-reset-hold-control.mkv",
         "frames": [
           {
-            "offset": 17942,
+            "offset": 24182,
             "bytes": 336
           },
           {
-            "offset": 18278,
+            "offset": 24518,
             "bytes": 329
           },
           {
-            "offset": 18607,
+            "offset": 24847,
             "bytes": 329
           }
         ],
@@ -1281,6 +1775,7 @@
       "tree": 3,
       "bands": 23,
       "mode": 1,
+      "split": null,
       "pattern": "initial",
       "asc": "f8e6402633930000171000",
       "ssc": "339300001710",
@@ -1292,15 +1787,15 @@
         "file": "tree3-b23-m1-initial.mkv",
         "frames": [
           {
-            "offset": 18936,
+            "offset": 25176,
             "bytes": 318
           },
           {
-            "offset": 19254,
+            "offset": 25494,
             "bytes": 329
           },
           {
-            "offset": 19583,
+            "offset": 25823,
             "bytes": 311
           }
         ],
@@ -1315,15 +1810,15 @@
         "file": "tree3-b23-m1-initial-control.mkv",
         "frames": [
           {
-            "offset": 19894,
+            "offset": 26134,
             "bytes": 336
           },
           {
-            "offset": 20230,
+            "offset": 26470,
             "bytes": 329
           },
           {
-            "offset": 20559,
+            "offset": 26799,
             "bytes": 329
           }
         ],
@@ -1339,6 +1834,7 @@
       "tree": 3,
       "bands": 23,
       "mode": 1,
+      "split": null,
       "pattern": "reset-hold",
       "asc": "f8e6402633930000171000",
       "ssc": "339300001710",
@@ -1350,15 +1846,15 @@
         "file": "tree3-b23-m1-reset-hold.mkv",
         "frames": [
           {
-            "offset": 20888,
+            "offset": 27128,
             "bytes": 336
           },
           {
-            "offset": 21224,
+            "offset": 27464,
             "bytes": 311
           },
           {
-            "offset": 21535,
+            "offset": 27775,
             "bytes": 311
           }
         ],
@@ -1373,15 +1869,15 @@
         "file": "tree3-b23-m1-reset-hold-control.mkv",
         "frames": [
           {
-            "offset": 21846,
+            "offset": 28086,
             "bytes": 336
           },
           {
-            "offset": 22182,
+            "offset": 28422,
             "bytes": 329
           },
           {
-            "offset": 22511,
+            "offset": 28751,
             "bytes": 329
           }
         ],
@@ -1397,6 +1893,7 @@
       "tree": 4,
       "bands": 4,
       "mode": 0,
+      "split": null,
       "pattern": "initial",
       "asc": "f8e6402633f40000040000",
       "ssc": "33f400000400",
@@ -1408,15 +1905,15 @@
         "file": "tree4-b4-m0-initial.mkv",
         "frames": [
           {
-            "offset": 22840,
+            "offset": 29080,
             "bytes": 86
           },
           {
-            "offset": 22926,
+            "offset": 29166,
             "bytes": 82
           },
           {
-            "offset": 23008,
+            "offset": 29248,
             "bytes": 79
           }
         ],
@@ -1431,15 +1928,15 @@
         "file": "tree4-b4-m0-initial-control.mkv",
         "frames": [
           {
-            "offset": 23087,
+            "offset": 29327,
             "bytes": 89
           },
           {
-            "offset": 23176,
+            "offset": 29416,
             "bytes": 82
           },
           {
-            "offset": 23258,
+            "offset": 29498,
             "bytes": 82
           }
         ],
@@ -1455,6 +1952,7 @@
       "tree": 4,
       "bands": 4,
       "mode": 0,
+      "split": null,
       "pattern": "reset-hold",
       "asc": "f8e6402633f40000040000",
       "ssc": "33f400000400",
@@ -1466,15 +1964,15 @@
         "file": "tree4-b4-m0-reset-hold.mkv",
         "frames": [
           {
-            "offset": 23340,
+            "offset": 29580,
             "bytes": 89
           },
           {
-            "offset": 23429,
+            "offset": 29669,
             "bytes": 79
           },
           {
-            "offset": 23508,
+            "offset": 29748,
             "bytes": 79
           }
         ],
@@ -1489,15 +1987,15 @@
         "file": "tree4-b4-m0-reset-hold-control.mkv",
         "frames": [
           {
-            "offset": 23587,
+            "offset": 29827,
             "bytes": 89
           },
           {
-            "offset": 23676,
+            "offset": 29916,
             "bytes": 82
           },
           {
-            "offset": 23758,
+            "offset": 29998,
             "bytes": 82
           }
         ],
@@ -1513,6 +2011,7 @@
       "tree": 4,
       "bands": 4,
       "mode": 1,
+      "split": null,
       "pattern": "initial",
       "asc": "f8e6402633f40000041000",
       "ssc": "33f400000410",
@@ -1524,15 +2023,15 @@
         "file": "tree4-b4-m1-initial.mkv",
         "frames": [
           {
-            "offset": 23840,
+            "offset": 30080,
             "bytes": 86
           },
           {
-            "offset": 23926,
+            "offset": 30166,
             "bytes": 82
           },
           {
-            "offset": 24008,
+            "offset": 30248,
             "bytes": 79
           }
         ],
@@ -1547,15 +2046,15 @@
         "file": "tree4-b4-m1-initial-control.mkv",
         "frames": [
           {
-            "offset": 24087,
+            "offset": 30327,
             "bytes": 89
           },
           {
-            "offset": 24176,
+            "offset": 30416,
             "bytes": 82
           },
           {
-            "offset": 24258,
+            "offset": 30498,
             "bytes": 82
           }
         ],
@@ -1571,6 +2070,7 @@
       "tree": 4,
       "bands": 4,
       "mode": 1,
+      "split": null,
       "pattern": "reset-hold",
       "asc": "f8e6402633f40000041000",
       "ssc": "33f400000410",
@@ -1582,15 +2082,15 @@
         "file": "tree4-b4-m1-reset-hold.mkv",
         "frames": [
           {
-            "offset": 24340,
+            "offset": 30580,
             "bytes": 89
           },
           {
-            "offset": 24429,
+            "offset": 30669,
             "bytes": 79
           },
           {
-            "offset": 24508,
+            "offset": 30748,
             "bytes": 79
           }
         ],
@@ -1605,15 +2105,15 @@
         "file": "tree4-b4-m1-reset-hold-control.mkv",
         "frames": [
           {
-            "offset": 24587,
+            "offset": 30827,
             "bytes": 89
           },
           {
-            "offset": 24676,
+            "offset": 30916,
             "bytes": 82
           },
           {
-            "offset": 24758,
+            "offset": 30998,
             "bytes": 82
           }
         ],
@@ -1629,6 +2129,7 @@
       "tree": 4,
       "bands": 9,
       "mode": 0,
+      "split": null,
       "pattern": "initial",
       "asc": "f8e6402633c40000090000",
       "ssc": "33c400000900",
@@ -1640,15 +2141,15 @@
         "file": "tree4-b9-m0-initial.mkv",
         "frames": [
           {
-            "offset": 24840,
+            "offset": 31080,
             "bytes": 146
           },
           {
-            "offset": 24986,
+            "offset": 31226,
             "bytes": 147
           },
           {
-            "offset": 25133,
+            "offset": 31373,
             "bytes": 139
           }
         ],
@@ -1663,15 +2164,15 @@
         "file": "tree4-b9-m0-initial-control.mkv",
         "frames": [
           {
-            "offset": 25272,
+            "offset": 31512,
             "bytes": 154
           },
           {
-            "offset": 25426,
+            "offset": 31666,
             "bytes": 147
           },
           {
-            "offset": 25573,
+            "offset": 31813,
             "bytes": 147
           }
         ],
@@ -1687,6 +2188,7 @@
       "tree": 4,
       "bands": 9,
       "mode": 0,
+      "split": null,
       "pattern": "reset-hold",
       "asc": "f8e6402633c40000090000",
       "ssc": "33c400000900",
@@ -1698,15 +2200,15 @@
         "file": "tree4-b9-m0-reset-hold.mkv",
         "frames": [
           {
-            "offset": 25720,
+            "offset": 31960,
             "bytes": 154
           },
           {
-            "offset": 25874,
+            "offset": 32114,
             "bytes": 139
           },
           {
-            "offset": 26013,
+            "offset": 32253,
             "bytes": 139
           }
         ],
@@ -1721,15 +2223,15 @@
         "file": "tree4-b9-m0-reset-hold-control.mkv",
         "frames": [
           {
-            "offset": 26152,
+            "offset": 32392,
             "bytes": 154
           },
           {
-            "offset": 26306,
+            "offset": 32546,
             "bytes": 147
           },
           {
-            "offset": 26453,
+            "offset": 32693,
             "bytes": 147
           }
         ],
@@ -1745,6 +2247,7 @@
       "tree": 4,
       "bands": 9,
       "mode": 1,
+      "split": null,
       "pattern": "initial",
       "asc": "f8e6402633c40000091000",
       "ssc": "33c400000910",
@@ -1756,15 +2259,15 @@
         "file": "tree4-b9-m1-initial.mkv",
         "frames": [
           {
-            "offset": 26600,
+            "offset": 32840,
             "bytes": 146
           },
           {
-            "offset": 26746,
+            "offset": 32986,
             "bytes": 147
           },
           {
-            "offset": 26893,
+            "offset": 33133,
             "bytes": 139
           }
         ],
@@ -1779,15 +2282,15 @@
         "file": "tree4-b9-m1-initial-control.mkv",
         "frames": [
           {
-            "offset": 27032,
+            "offset": 33272,
             "bytes": 154
           },
           {
-            "offset": 27186,
+            "offset": 33426,
             "bytes": 147
           },
           {
-            "offset": 27333,
+            "offset": 33573,
             "bytes": 147
           }
         ],
@@ -1803,6 +2306,7 @@
       "tree": 4,
       "bands": 9,
       "mode": 1,
+      "split": null,
       "pattern": "reset-hold",
       "asc": "f8e6402633c40000091000",
       "ssc": "33c400000910",
@@ -1814,15 +2318,15 @@
         "file": "tree4-b9-m1-reset-hold.mkv",
         "frames": [
           {
-            "offset": 27480,
+            "offset": 33720,
             "bytes": 154
           },
           {
-            "offset": 27634,
+            "offset": 33874,
             "bytes": 139
           },
           {
-            "offset": 27773,
+            "offset": 34013,
             "bytes": 139
           }
         ],
@@ -1837,15 +2341,15 @@
         "file": "tree4-b9-m1-reset-hold-control.mkv",
         "frames": [
           {
-            "offset": 27912,
+            "offset": 34152,
             "bytes": 154
           },
           {
-            "offset": 28066,
+            "offset": 34306,
             "bytes": 147
           },
           {
-            "offset": 28213,
+            "offset": 34453,
             "bytes": 147
           }
         ],
@@ -1857,10 +2361,247 @@
       }
     },
     {
+      "name": "tree4-b9-m0-high1-split4-initial",
+      "tree": 4,
+      "bands": 9,
+      "mode": 0,
+      "split": 4,
+      "pattern": "initial",
+      "asc": "f8e6402733c4000009824000",
+      "ssc": "33c40000098240",
+      "rate": 48000,
+      "samples": 1536,
+      "channels": 8,
+      "default": {
+        "video": "tree4-b9-m0-high1-split4-initial.mp4",
+        "file": "tree4-b9-m0-high1-split4-initial.mkv",
+        "frames": [
+          {
+            "offset": 34600,
+            "bytes": 150
+          },
+          {
+            "offset": 34750,
+            "bytes": 150
+          },
+          {
+            "offset": 34900,
+            "bytes": 142
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b74152000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f1492492480",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b74152000"
+        ]
+      },
+      "control": {
+        "video": "tree4-b9-m0-high1-split4-initial-control.mp4",
+        "file": "tree4-b9-m0-high1-split4-initial-control.mkv",
+        "frames": [
+          {
+            "offset": 35042,
+            "bytes": 158
+          },
+          {
+            "offset": 35200,
+            "bytes": 150
+          },
+          {
+            "offset": 35350,
+            "bytes": 150
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f1000000000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f1492492480",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f1000000000"
+        ]
+      }
+    },
+    {
+      "name": "tree4-b9-m0-high1-split4-reset-hold",
+      "tree": 4,
+      "bands": 9,
+      "mode": 0,
+      "split": 4,
+      "pattern": "reset-hold",
+      "asc": "f8e6402733c4000009824000",
+      "ssc": "33c40000098240",
+      "rate": 48000,
+      "samples": 1536,
+      "channels": 8,
+      "default": {
+        "video": "tree4-b9-m0-high1-split4-reset-hold.mp4",
+        "file": "tree4-b9-m0-high1-split4-reset-hold.mkv",
+        "frames": [
+          {
+            "offset": 35500,
+            "bytes": 158
+          },
+          {
+            "offset": 35658,
+            "bytes": 142
+          },
+          {
+            "offset": 35800,
+            "bytes": 142
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f1492492480",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b74152000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add05f8bdeff07bdfe0c31f16b5ba0d6b74152140"
+        ]
+      },
+      "control": {
+        "video": "tree4-b9-m0-high1-split4-reset-hold-control.mp4",
+        "file": "tree4-b9-m0-high1-split4-reset-hold-control.mkv",
+        "frames": [
+          {
+            "offset": 35942,
+            "bytes": 158
+          },
+          {
+            "offset": 36100,
+            "bytes": 150
+          },
+          {
+            "offset": 36250,
+            "bytes": 150
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f1492492480",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f1000000000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f1000000000"
+        ]
+      }
+    },
+    {
+      "name": "tree4-b9-m1-high0-split4-initial",
+      "tree": 4,
+      "bands": 9,
+      "mode": 1,
+      "split": 4,
+      "pattern": "initial",
+      "asc": "f8e6402733c4000009904000",
+      "ssc": "33c40000099040",
+      "rate": 48000,
+      "samples": 1536,
+      "channels": 8,
+      "default": {
+        "video": "tree4-b9-m1-high0-split4-initial.mp4",
+        "file": "tree4-b9-m1-high0-split4-initial.mkv",
+        "frames": [
+          {
+            "offset": 36400,
+            "bytes": 150
+          },
+          {
+            "offset": 36550,
+            "bytes": 150
+          },
+          {
+            "offset": 36700,
+            "bytes": 142
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b74152000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f1492492480",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b74152000"
+        ]
+      },
+      "control": {
+        "video": "tree4-b9-m1-high0-split4-initial-control.mp4",
+        "file": "tree4-b9-m1-high0-split4-initial-control.mkv",
+        "frames": [
+          {
+            "offset": 36842,
+            "bytes": 158
+          },
+          {
+            "offset": 37000,
+            "bytes": 150
+          },
+          {
+            "offset": 37150,
+            "bytes": 150
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f1000000000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f1492492480",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f1000000000"
+        ]
+      }
+    },
+    {
+      "name": "tree4-b9-m1-high0-split4-reset-hold",
+      "tree": 4,
+      "bands": 9,
+      "mode": 1,
+      "split": 4,
+      "pattern": "reset-hold",
+      "asc": "f8e6402733c4000009904000",
+      "ssc": "33c40000099040",
+      "rate": 48000,
+      "samples": 1536,
+      "channels": 8,
+      "default": {
+        "video": "tree4-b9-m1-high0-split4-reset-hold.mp4",
+        "file": "tree4-b9-m1-high0-split4-reset-hold.mkv",
+        "frames": [
+          {
+            "offset": 37300,
+            "bytes": 158
+          },
+          {
+            "offset": 37458,
+            "bytes": 142
+          },
+          {
+            "offset": 37600,
+            "bytes": 142
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f1492492480",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add00f8bdeff07bdfe0c31f16b5ba0d6b74152000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add05f8bdeff07bdfe0c31f16b5ba0d6b74152140"
+        ]
+      },
+      "control": {
+        "video": "tree4-b9-m1-high0-split4-reset-hold-control.mp4",
+        "file": "tree4-b9-m1-high0-split4-reset-hold-control.mkv",
+        "frames": [
+          {
+            "offset": 37742,
+            "bytes": 158
+          },
+          {
+            "offset": 37900,
+            "bytes": 150
+          },
+          {
+            "offset": 38050,
+            "bytes": 150
+          }
+        ],
+        "spatial": [
+          "7f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f8a492497c5ef7f83deff0618f8b5add06b5ba0a91f1492492480",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f1000000000",
+          "5f16318c6318c6318c6318c633e2f7bdef7bdef7bdef7bdef7fc65294a5294a5294a5294a52f8b18c6318c6318c6318c6319f17bdef7bdef7bdef7bdef7bfe292492492492497c52492492492492f8a4924924924925f14924924924924be2f7bfc1ef7f87c5ad6e835add0f88000007c5ef7f83deff0618f8b5add06b5ba0a91f1000000000"
+        ]
+      }
+    },
+    {
       "name": "tree4-b23-m0-initial",
       "tree": 4,
       "bands": 23,
       "mode": 0,
+      "split": null,
       "pattern": "initial",
       "asc": "f8e6402633940000170000",
       "ssc": "339400001700",
@@ -1872,15 +2613,15 @@
         "file": "tree4-b23-m0-initial.mkv",
         "frames": [
           {
-            "offset": 28360,
+            "offset": 38200,
             "bytes": 318
           },
           {
-            "offset": 28678,
+            "offset": 38518,
             "bytes": 329
           },
           {
-            "offset": 29007,
+            "offset": 38847,
             "bytes": 311
           }
         ],
@@ -1895,15 +2636,15 @@
         "file": "tree4-b23-m0-initial-control.mkv",
         "frames": [
           {
-            "offset": 29318,
+            "offset": 39158,
             "bytes": 336
           },
           {
-            "offset": 29654,
+            "offset": 39494,
             "bytes": 329
           },
           {
-            "offset": 29983,
+            "offset": 39823,
             "bytes": 329
           }
         ],
@@ -1919,6 +2660,7 @@
       "tree": 4,
       "bands": 23,
       "mode": 0,
+      "split": null,
       "pattern": "reset-hold",
       "asc": "f8e6402633940000170000",
       "ssc": "339400001700",
@@ -1930,15 +2672,15 @@
         "file": "tree4-b23-m0-reset-hold.mkv",
         "frames": [
           {
-            "offset": 30312,
+            "offset": 40152,
             "bytes": 336
           },
           {
-            "offset": 30648,
+            "offset": 40488,
             "bytes": 311
           },
           {
-            "offset": 30959,
+            "offset": 40799,
             "bytes": 311
           }
         ],
@@ -1953,15 +2695,15 @@
         "file": "tree4-b23-m0-reset-hold-control.mkv",
         "frames": [
           {
-            "offset": 31270,
+            "offset": 41110,
             "bytes": 336
           },
           {
-            "offset": 31606,
+            "offset": 41446,
             "bytes": 329
           },
           {
-            "offset": 31935,
+            "offset": 41775,
             "bytes": 329
           }
         ],
@@ -1977,6 +2719,7 @@
       "tree": 4,
       "bands": 23,
       "mode": 1,
+      "split": null,
       "pattern": "initial",
       "asc": "f8e6402633940000171000",
       "ssc": "339400001710",
@@ -1988,15 +2731,15 @@
         "file": "tree4-b23-m1-initial.mkv",
         "frames": [
           {
-            "offset": 32264,
+            "offset": 42104,
             "bytes": 318
           },
           {
-            "offset": 32582,
+            "offset": 42422,
             "bytes": 329
           },
           {
-            "offset": 32911,
+            "offset": 42751,
             "bytes": 311
           }
         ],
@@ -2011,15 +2754,15 @@
         "file": "tree4-b23-m1-initial-control.mkv",
         "frames": [
           {
-            "offset": 33222,
+            "offset": 43062,
             "bytes": 336
           },
           {
-            "offset": 33558,
+            "offset": 43398,
             "bytes": 329
           },
           {
-            "offset": 33887,
+            "offset": 43727,
             "bytes": 329
           }
         ],
@@ -2035,6 +2778,7 @@
       "tree": 4,
       "bands": 23,
       "mode": 1,
+      "split": null,
       "pattern": "reset-hold",
       "asc": "f8e6402633940000171000",
       "ssc": "339400001710",
@@ -2046,15 +2790,15 @@
         "file": "tree4-b23-m1-reset-hold.mkv",
         "frames": [
           {
-            "offset": 34216,
+            "offset": 44056,
             "bytes": 336
           },
           {
-            "offset": 34552,
+            "offset": 44392,
             "bytes": 311
           },
           {
-            "offset": 34863,
+            "offset": 44703,
             "bytes": 311
           }
         ],
@@ -2069,15 +2813,15 @@
         "file": "tree4-b23-m1-reset-hold-control.mkv",
         "frames": [
           {
-            "offset": 35174,
+            "offset": 45014,
             "bytes": 336
           },
           {
-            "offset": 35510,
+            "offset": 45350,
             "bytes": 329
           },
           {
-            "offset": 35839,
+            "offset": 45679,
             "bytes": 329
           }
         ],
@@ -2089,5 +2833,5 @@
       }
     }
   ],
-  "scope": "36 authored predictive TTT default/reset/hold programmes and 36 explicit-unity coding controls. Own ELD core, three trees, modes0/1, grids4/9/23. Index0 dequantizes to coherence1; no forbidden physical coherence0 is authored. No private or ISO media."
+  "scope": "48 authored predictive TTT default/reset/hold programmes and 48 explicit-unity coding controls. Own ELD core, three trees, modes0/1, grids4/9/23; twelve dual-region cases use opposite predictive modes below/above band4 of grid9. Index0 dequantizes to coherence1; no forbidden physical coherence0 is authored. No private or ISO media."
 }

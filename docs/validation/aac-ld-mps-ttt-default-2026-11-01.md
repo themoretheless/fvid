@@ -80,3 +80,12 @@ cargo test --offline --no-default-features --features player \
 Reference/source hashes are in `aac-ld-mps-ttt-default-reference-2026-11-01.json`.
 Other codec gaps,including unequal HRTF grids and unqualified energy-quantization
 configurations,remain open. This correction does not complete the global goal.
+
+## Subsequent split-region extension
+
+The counts above describe the original36-programme milestone. The corpus now
+contains48 programmes after adding twelve split-region cases. See
+[aac-ld-mps-ttt-split-2026-11-01.md](aac-ld-mps-ttt-split-2026-11-01.md)
+for current counts and the explicit unmodified-reference versus modified-source
+count diagnostic boundary. The original source discrepancy is preserved,
+not silently replaced by the diagnostic waveform.

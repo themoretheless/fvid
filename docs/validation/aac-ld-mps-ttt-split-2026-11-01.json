@@ -1,0 +1,16 @@
+{
+  "scope": "Focused split-TTT/default PCM, native checkpoints, MP4/Matroska playback/rewind/seek and original-reference discrepancy reproduction. Not full codec conformance.",
+  "passed": 13,
+  "failed": 0,
+  "ignored": 0,
+  "suites": 4,
+  "log_sha256": "7d254be9c7cbea1e563aae5bc79f531170896abc17de0aa348241c5194662895",
+  "fixture_files": 197,
+  "regeneration_byte_identical": true,
+  "maximum_original_or_count_diagnostic_error": 1.1496013e-09,
+  "original_reference_outputs": 96,
+  "unmodified_reference_matching_outputs": 92,
+  "count_diagnostic_outputs": 4,
+  "scalar_comparisons": 1081344,
+  "device_phases": 24
+}

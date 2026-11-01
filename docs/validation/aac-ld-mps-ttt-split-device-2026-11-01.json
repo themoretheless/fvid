@@ -1,0 +1,43 @@
+{
+  "probe_sha256": "baf836ef9372dd0070d3796a19d1accbb7c8649edecdc06af9f75c33ef606793",
+  "command": "audio_probe --play-device INPUT.mp4",
+  "scope": "Six authored split-TTT programmes; four actual macOS device-drain phases each. Scheduling/navigation smoke, not subjective quality or sustained performance.",
+  "cases": [
+    {
+      "name": "tree2-b9-m0-high1-split4-reset-hold",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=6 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.060166 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.049298 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.041141 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.060823 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "tree2-b9-m1-high0-split4-reset-hold",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=6 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.053088 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.045395 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.042884 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.060248 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "tree3-b9-m0-high1-split4-reset-hold",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=8 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.060512 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.054641 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.043696 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.055804 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "tree3-b9-m1-high0-split4-reset-hold",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=8 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.053846 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.056331 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.038242 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.063340 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "tree4-b9-m0-high1-split4-reset-hold",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=8 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.058556 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.042711 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.044327 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.061743 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "tree4-b9-m1-high0-split4-reset-hold",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=8 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.059656 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.059468 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.048207 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.061798 device_drain=complete\n",
+      "stderr": ""
+    }
+  ]
+}

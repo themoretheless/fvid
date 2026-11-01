@@ -31,7 +31,7 @@ def main():
         raise ValueError('reference archive/transport pin')
     m = json.loads((OUT/'manifest.json').read_text())
     driver = ROOT/'scripts/support/aac_ld_mps_ttt_default_reference_probe.c'
-    result, cases, members, inputs = bytearray(), [], {}, {}
+    result, count_control, cases, members, inputs = bytearray(), bytearray(), [], {}, {}
     with tempfile.TemporaryDirectory(prefix='fvid-ttt-default-iso-') as tmp:
         work = Path(tmp)
         with zipfile.ZipFile(args.archive) as z:
@@ -50,14 +50,39 @@ def main():
             'AFILE *AFopnWrite(const char*,int,int,long,double,void*);\n'
             'void AFclose(AFILE*);\nlong AFfWriteData(AFILE*,const float*,long);\n')
         exe = work/'probe'
-        build = subprocess.run(['cc', '-O2', '-DLD_MPS', '-include', str(work/'decl.h'),
+        command = ['cc', '-O2', '-DLD_MPS', '-include', str(work/'decl.h'),
             '-ffunction-sections', '-fdata-sections',
             '-Wl,-dead_strip' if sys.platform == 'darwin' else '-Wl,--gc-sections',
             '-I'+str(work), '-I'+str(src), '-I'+str(src.parent/'include'),
             str(driver), *map(str, sorted(src.glob('sac_*.c'))), '-lm', '-pthread',
-            '-o', str(exe)], capture_output=True, timeout=60)
+            '-o', str(exe)]
+        build = subprocess.run(command, capture_output=True, timeout=60)
         if build.returncode:
             raise RuntimeError(build.stderr.decode())
+        # A diagnostic variant isolates the original TREE_525 last-region
+        # count overwrite. Preserve the complete unmodified output separately.
+        bitdec = src/'sac_bitdec.c'
+        original = bitdec.read_bytes()
+        start = original.index(b'  case TREE_525:', original.index(b'self->numDecorSignals'))
+        end = original.index(b'  case TREE_7271:', start)
+        block = original[start:end]
+        old = b'self->numDecorSignals = 2;'
+        replacement = b'self->numDecorSignals = self->tttConfig[0][0].mode == 0 ? 3 : 2;'
+        if block.count(old) != 1:
+            raise ValueError('TREE_525 diagnostic source pin')
+        changed = original[:start]+block.replace(old, replacement)+original[end:]
+        bitdec.write_bytes(changed)
+        diagnostic = work/'count-control'
+        command[-1] = str(diagnostic)
+        build = subprocess.run(command, capture_output=True, timeout=60)
+        bitdec.write_bytes(original)
+        if build.returncode:
+            raise RuntimeError(build.stderr.decode())
+        patch = dict(file='mp4spatialdec/src/sac_bitdec.c',
+            original_sha256=hashlib.sha256(original).hexdigest(),
+            changed_sha256=hashlib.sha256(changed).hexdigest(),
+            before=old.decode(), after=replacement.decode(),
+            scope='TREE_525 case only; diagnostic, not a normative oracle')
         for c in m['cases']:
             config = bytes.fromhex(c['ssc'])
             if len(config) >= 127:
@@ -91,16 +116,41 @@ def main():
                     value = b''.join(value[at+ch*4:at+ch*4+4]
                         for at in range(0, len(value), 32)
                         for ch in [0, 1, 2, 3, 6, 7, 4, 5])
-                cases.append(dict(name=c['name'], mode=name, offset=len(result),
-                    bytes=len(outputs[0]), default_control_byte_identical=True))
+                entry = dict(name=c['name'], mode=name, offset=len(result),
+                    bytes=len(outputs[0]), default_control_byte_identical=True)
+                affected = c['tree'] == 2 and c.get('split') is not None and c['mode'] == 0
+                if affected:
+                    controls = []
+                    for variant in ['default', 'control']:
+                        frames = [bytes.fromhex(v) for v in c[variant]['spatial']]
+                        (work/'frames.bin').write_bytes(struct.pack('<I', len(frames))+b''.join(
+                            struct.pack('<I', len(f))+f for f in frames))
+                        run = subprocess.run([str(diagnostic), str(work/'ssc.bin'),
+                            str(work/'frames.bin'), str(core), str(work/'count.f32le'), str(mode)],
+                            capture_output=True, timeout=30)
+                        if run.returncode:
+                            raise RuntimeError(run.stderr.decode())
+                        controls.append((work/'count.f32le').read_bytes())
+                    if controls[0] != controls[1] or len(controls[0]) != len(value):
+                        raise ValueError('count diagnostic output/default equivalence')
+                    if controls[0] == value:
+                        raise ValueError('count diagnostic did not reproduce the discrepancy')
+                    entry['count_control_offset'] = len(count_control)
+                    entry['unmodified_reference_count_overwrite_reproducer'] = True
+                    count_control += controls[0]
+                cases.append(entry)
                 result += value
     (OUT/'reference.f32le').write_bytes(result)
+    (OUT/'count-control.f32le').write_bytes(count_control)
     (OUT/'oracle.json').write_text(json.dumps(dict(cases=cases, scope='Full original '
         'spatial decoder on authored core PCM and authored SSC/frames; both '
         'decorrelators, default and explicit-unity outputs byte-identical. '
         '7272 outputs explicitly reordered to WAVE mask0x63f. '
+        'Four TREE_525 low0/high1 outputs additionally have a separately labelled '
+        'decorrelator-count source diagnostic; original outputs remain intact. '
         'Not an AAC core oracle or complete-profile conformance.'), indent=2)+'\n')
-    report = dict(archive_sha256=ARCHIVE_SHA, reference_members=members,
+    report = dict(count_control_source_patch=patch,
+        count_control_sha256=sha(OUT/'count-control.f32le'), archive_sha256=ARCHIVE_SHA, reference_members=members,
         driver_sha256=sha(driver), generator_sha256=sha(Path(__file__)),
         manifest_sha256=sha(OUT/'manifest.json'), input_core_sha256=inputs,
         pcm_sha256=sha(OUT/'reference.f32le'), cases=len(cases),

@@ -3355,3 +3355,19 @@ Tests cover native decode, checkpoint rollback, both MP4 APIs and player
 ranges/rewind/seek. The pre-fix acceptance failure was specifically
 `SBR extended audio/PS synthesis is not yet implemented`. Fixtures are
 original and generated offline, separately from ordinary test execution.
+
+### 2026-11-01: predictive TTT split-region validation
+
+The default/hold corpus adds twelve low/high predictive-region programmes,
+bringing it to48 programmes and48 coded controls in both MP4 and Matroska.
+Native complete PCM, checkpoint replay, both container readers' rewind/seek,
+and repeated MP4 intervals are covered. Six actual macOS device runs complete
+24 playback/navigation drain phases.
+
+The unmodified full ISO spatial frontend matches92 of96 programme/mode outputs
+within1e-7. Four TREE_525 lower0/upper1 outputs reproduce its global decorrelator
+count overwrite. A separately labelled single-assignment source diagnostic
+isolates that discrepancy and matches native PCM; original PCM is retained.
+This is not normative qualification of that combination or complete LD-MPS
+support. No production DSP changes are made for this reference discrepancy.
+See `validation/aac-ld-mps-ttt-split-2026-11-01.md` for exact boundaries.

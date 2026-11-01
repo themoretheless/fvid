@@ -28,17 +28,21 @@ def main():
         start = asc_bits.rfind(marker)
         assert start >= 0
         for bands in [4, 9, 23]:
-            for mode in [0, 1]:
+            for mode, split in [(0, None), (1, None)] + ([(0, 4), (1, 4)] if bands == 9 else []):
+                ttt = ('0'+field(mode, 3) if split is None else
+                    '1'+field(mode, 3)+field(1-mode, 3)+field(split, 5))
                 ssc = packed(field(3, 4)+field(7, 5)+field(BANDS.index(bands), 3)
                     +field(tree, 4)+'00'+'0'+'0'+'000000'+'000'+'0'+'0000'+'0'
-                    +field(bands, 5)+'0'+field(mode, 3))
+                    +field(bands, 5)+ttt)
                 asc = packed(asc_bits[:start]+field(2, 4)+length(len(ssc))+raw(ssc)+'000000')
                 regions = [('CLD', bands, (box % 3-1)*3, False) for box in range(len(TREES[tree][2]))]
                 regions += [('ICC', bands, 2, False) for lfe in TREES[tree][2] if not lfe]
-                regions += [('CPC', bands, 10, False), ('CPC', bands, 6, False), ('ICC', bands, 0, True)]
+                for count in ([bands] if split is None else [split, bands-split]):
+                    regions += [('CPC', count, 10, False), ('CPC', count, 6, False), ('ICC', count, 0, True)]
                 for pattern in ['initial', 'reset-hold']:
-                    record = dict(name=f'tree{tree}-b{bands}-m{mode}-{pattern}', tree=tree,
-                        bands=bands, mode=mode, pattern=pattern, asc=asc.hex(), ssc=ssc.hex(),
+                    suffix = '' if split is None else f'-high{1-mode}-split{split}'
+                    record = dict(name=f'tree{tree}-b{bands}-m{mode}{suffix}-{pattern}', tree=tree,
+                        bands=bands, mode=mode, split=split, pattern=pattern, asc=asc.hex(), ssc=ssc.hex(),
                         rate=48000, samples=1536, channels=TREES[tree][1])
                     for control in [False, True]:
                         frames, spatial = [], []
@@ -74,9 +78,10 @@ def main():
                     cases.append(record)
     (OUT/'packets.bin').write_bytes(blob)
     (OUT/'manifest.json').write_text(json.dumps(dict(cases=cases,
-        scope='36 authored predictive TTT default/reset/hold programmes and '
-        '36 explicit-unity coding controls. Own ELD core, three trees, modes0/1, '
-        'grids4/9/23. Index0 dequantizes to coherence1; no forbidden physical '
+        scope='48 authored predictive TTT default/reset/hold programmes and '
+        '48 explicit-unity coding controls. Own ELD core, three trees, modes0/1, '
+        'grids4/9/23; twelve dual-region cases use opposite predictive modes '
+        'below/above band4 of grid9. Index0 dequantizes to coherence1; no forbidden physical '
         'coherence0 is authored. No private or ISO media.'), indent=2)+'\n')
 
 
