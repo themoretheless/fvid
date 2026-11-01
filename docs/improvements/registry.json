@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 510,
-  "next_id": "FVID-0511",
+  "accepted_count": 511,
+  "next_id": "FVID-0512",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5760,6 +5760,17 @@
       "result": "Apply the newly selected segment minimum occupied-sample start on every alignment-loop traversal before deriving its native anchor. Original Duration fractions are already preserved;this fixes a distinct missed frontier after segment crossing. Seven gates pass975 executions,two prior ignores;three repeats pass33 tests each.",
       "status": "accepted",
       "validation": "batch-511-validation.json"
+    },
+    {
+      "id": "FVID-0511",
+      "batch": 512,
+      "title": "Bound occupied final-edit seek frontiers at the declared MP4 presentation end",
+      "source": "src/playback/audio/mp4_audio.rs",
+      "regression": "tests/mp4_edit_frontier_eof_seek.rs",
+      "before": "Six authored AAC/PCM movies pass independent full PCM/video and raw-grid controls,but exact and actual-worker seeks in fully occupied final edits anchor beyond duration. AAC1020833ns exceeds1000020/1000100ns EOF;PCM1125000ns exceeds1100000ns. Raw seeks return14406/54 instead of bounded14113/52 ticks. Final baseline passes2/fails3.",
+      "result": "Clamp the native-alignment loop and raw-variable minimum frontier at the declared presentation end before exposing seek clocks. Preserve complete final samples,raw tick units and FVID-0510 segment traversal. Seven frozen-source gates pass980 executions,two prior ignores;three repeats pass38 tests each.",
+      "status": "accepted",
+      "validation": "batch-512-validation.json"
     }
   ]
 }

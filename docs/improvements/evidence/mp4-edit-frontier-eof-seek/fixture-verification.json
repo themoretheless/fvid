@@ -1,0 +1,11 @@
+{
+  "reference-0.f32le": "61d65de18326375ba5df4a1ecf8b54882107d47c13046b54b64f9bf593f06ba1",
+  "reference-3.f32le": "c1c70c9d7f338ce770f79f6c60e8fb07532c05c2daafcbfa84ac2f44867b7965",
+  "changes-occupied-eof.mp4": "9e400cc768eab58316631d1d028a1df2f43141a639dcfcfef0869c8ebe378db6",
+  "third-occupied-eof.mp4": "893990827bbd547a8e9b581e7e3840c1d87cbd9d1e8c77e27b9acbaa95cfe4e4",
+  "fragmented-occupied-eof.mp4": "fbd644e837e75be9e1f05da53b312003c5fcd90b3daa24383df99be7756a27e7",
+  "occupied-silence-and-eof.mp4": "818b220fa186fc34fc6aa1ce50c69ba6d2da5cb567f2aa978258b4fc6194fb3e",
+  "raw-grid-occupied-eof.mp4": "eb2f9cec21376eb1662cf75c83d5a990fab13e1c14eb709a3aa937c00b8d8251",
+  "pcm-occupied-eof.mp4": "f3d6e35e68dd9a54017fe493e6f8e2eafa50b7c6e2b32850f43c29bdd2840ac1",
+  "manifest.json": "eb02f256900da13ec88bacf1a5ad17c0d4e3efff1cf26fdd3f97c0268757232a"
+}

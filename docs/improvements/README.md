@@ -1,6 +1,6 @@
 # Verified improvements
 
-Accepted: **510 / 1000 independent, useful changes**. Only entries marked `accepted` in
+Accepted: **511 / 1000 independent, useful changes**. Only entries marked `accepted` in
 [`registry.json`](registry.json) count. Fixture variants, test cases, documentation
 and baseline integration repairs do not inflate the count.
 
@@ -3491,3 +3491,7 @@ FVID-0509 preflights `destination.symlink_metadata().is_ok()` and `plan_loudnorm
 ## Batch 511 — Preserve native seek anchors across occupied edit boundaries
 
 FVID-0510 reapplies each selected edit segment minimum occupied-sample start after native-sample rounding crosses a segment boundary. Three authored AAC+VP9 movies reproduce correct PCM with an early clock anchor before the fix;direct navigation and actual AudioWorker flush anchors now match the first available native sample. Seven merged-state gates pass975 test executions,with two prior ignored tests,and three repeated33-test runs pass. The ADTS initial transport-admission integration repair restores two unchanged unit tests and adds zero IDs. Parallel entries through FVID-0509 are preserved. See `batch-511-validation.json` and `evidence/mp4-edit-frontier-seek`.
+
+## Batch 512 — Bound occupied final edit seek frontiers at declared EOF
+
+FVID-0511 prevents exact and raw MP4 seek clocks from escaping the declared presentation endpoint when a preceding native sample occupies every remaining edit. Six authored AAC/PCM+VP9 movies retain full independent PCM/video while direct and actual-worker EOF anchors now stay bounded. Raw navigation keeps its media-tick contract. Seven gates pass980 test executions,two prior ignored tests,and three repeated38-test runs pass. See `batch-512-validation.json` and `evidence/mp4-edit-frontier-eof-seek`.

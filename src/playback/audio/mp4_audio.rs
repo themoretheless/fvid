@@ -471,6 +471,9 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
     fn align_variable_seek(&self,mut position:EditTime,sample_aligned_silence:bool)->Result<EditTime> {
         let timeline=self.variable_edits.as_ref().ok_or_else(||invalid("missing MP4 edit timeline"))?;
         loop {
+            // A preceding native sample can occupy every remaining edit.
+            // The navigation clock still ends at the declared presentation end.
+            if position.cmp(timeline.end)!=std::cmp::Ordering::Less {return Ok(timeline.end);}
             timeline.cursor.set(position);
             let Some(index)=timeline.locate()else{return Ok(position);};
             // Native rounding can cross an edit boundary. Reapply the next
@@ -1533,6 +1536,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
                 let position=if position.cmp(timeline.end)==std::cmp::Ordering::Greater {timeline.end}else{position};
                 timeline.cursor.set(position);
                 let position=timeline.locate().map_or(position,|i|position.max(timeline.minimum_starts[i]));
+                let position=if position.cmp(timeline.end)==std::cmp::Ordering::Greater {timeline.end}else{position};
                 timeline.cursor.set(position);
                 let returned=i64::try_from(position.floor_ticks(self.track().timescale)?).map_err(|_|invalid("MP4 seek clock overflow"))?;
                 Ok((returned,position))

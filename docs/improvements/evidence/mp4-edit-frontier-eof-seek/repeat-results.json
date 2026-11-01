@@ -1,0 +1,40 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--test",
+    "mp4_native_grid_silence_seek",
+    "--test",
+    "mp4_native_grid_missing_extent_seek",
+    "--test",
+    "mp4_recovered_silence_seek",
+    "--test",
+    "mp4_clock_description_scan",
+    "--test",
+    "mp4_aac_subtick_seek",
+    "--test",
+    "mp4_aac_split_subtick_seek",
+    "--test",
+    "mp4_aac_gap_subtick_seek",
+    "--test",
+    "mp4_audio_eof_seek_clock",
+    "--test",
+    "mp4_aac_native_grid_seek",
+    "--test",
+    "mp4_aac_native_grid_missing_extent_seek",
+    "--test",
+    "mp4_edit_frontier_seek",
+    "--test",
+    "mp4_edit_frontier_eof_seek"
+  ],
+  "exit_codes": [
+    0,
+    0,
+    0
+  ]
+}

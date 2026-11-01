@@ -1,0 +1,21 @@
+"""Own AAC edit lists whose final edits are occupied by a preceding native sample."""
+from pathlib import Path
+from fractions import Fraction as F
+import json,hashlib
+from generate_mp4_aac_transitions import generate as transitions,SCALE
+from generate_mp4_variable_rate_edits import edit_movie
+OUT=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/mp4-edit-frontier-eof-seek'
+def generate():
+    src=transitions();files={'reference-0.f32le':src['control-0.f32le'][:49*2*4]};cases=[]
+    end=1000020;queries=[]
+    for ns in [0,1,999999,1000000,1000001,1000009,1000010,1000011,1000019,1000020,1000021,18446744073709551615999999999]:
+        first=min(49,(ns*48000+10**9-1)//10**9)
+        parts=[]if first==49 else[dict(control=0,rate=48000,channels=2,first=first,last=49,start_ns=0)]
+        queries.append(dict(target_ns=str(ns),parts=parts,anchor_ns=first*10**9//48000 if parts else end))
+    for stem in ['changes','third','fragmented']:
+        name=stem+'-occupied-eof.mp4';files[name]=edit_movie(src[stem+'.mp4'],[(1000010,0),(10,SCALE*64//1000)],clock=10**9);cases.append(dict(file=name,queries=queries,duration_ns=end))
+    name='occupied-silence-and-eof.mp4';files[name]=edit_movie(src['changes.mp4'],[(1000010,0),(3,-1),(7,SCALE*64//1000)],clock=10**9);cases.append(dict(file=name,queries=queries,duration_ns=end))
+    files['manifest.json']=(json.dumps(dict(provenance='Own LC/Main AAC pulse spectra, independent scalar IMDCT/overlap references and sixteen neutral VP9 frames. First edit1000010ns includes49 samples at48kHz;its occupied interval covers the final10ns edit(s). EOF is declared1000020ns. No private input,FFmpeg or network.',cases=cases,sha256={n:hashlib.sha256(b).hexdigest()for n,b in files.items()}),indent=2)+'\n').encode();return files
+if __name__=='__main__':
+    OUT.mkdir(parents=True,exist_ok=True)
+    for n,b in generate().items():(OUT/n).write_bytes(b)

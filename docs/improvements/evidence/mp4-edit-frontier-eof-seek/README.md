@@ -1,0 +1,11 @@
+# MP4 occupied final edit seek endpoint
+
+Six authored movies exercise five AAC LC/Main/VP9 presentations and one8kHz PCM/VP9 presentation. A non-native first edit includes a complete final native sample whose occupied interval covers all remaining tiny edits,including an explicit empty edit variant. Independent scalar AAC IMDCT/overlap PCM and exact0.125 PCM references preserve the full49-frame AAC or9-frame PCM playback. Video controls decode sixteen neutral pictures for AAC and three for PCM. Nine fixture/reference/manifest files regenerate byte-identically without FFmpeg,network or private media.
+
+Published8f3340184471b85c97781d80817741c1b0b81c34 passes full independent PCM/video and raw-grid compatibility but fails three final seek regressions. AAC EOF is1000020ns/1000100ns yet direct and actual-worker seeks in its occupied tail anchor at1020833ns;PCM EOF1100000ns anchors at1125000ns. Raw requests14113 AAC ticks or49 PCM ticks return14406 or54 instead of bounded14113 or52. The same reader seeks exactly at/beyond EOF to the smaller declared endpoint,so earlier requests can land later. Initial four-movie baseline/history is retained;the expanded final baseline has2passed/3failed and uses the unchanged final test and fixture bytes.
+
+The previous FVID-0510 addressed a skipped segment frontier when rounding traverses segments. This independent bounds failure also occurs when entering the final segment directly via raw seek:minimum occupied starts may exceed the whole presentation end. Bound the native-alignment loop at the declared end and clamp the raw-variable seek frontier before exposing its returned tick. Preserve full final samples,native PCM clipping,preroll,source-gap silence,raw tick units and the prior frontier traversal fix. No public API change.
+
+Focused final tests pass5/5. Acceptance requires seven frozen-source gates and three repeated actual-worker/seek runs. This does not claim complete MP4 timing coverage,physical audio hardware qualification or performance gains.
+
+Accepted FVID-0511 in batch-512-validation.json:all seven frozen-source gates pass980 test executions,two prior ignores,and three repeats pass38 tests each. The owned build target is removed after all handles completed. Fixtures,before/after logs and source hashes are retained. Counter511,next FVID-0512.

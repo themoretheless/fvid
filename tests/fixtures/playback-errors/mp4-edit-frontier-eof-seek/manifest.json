@@ -1,0 +1,653 @@
+{
+  "provenance": "Own LC/Main AAC pulse spectra, independent scalar IMDCT/overlap references;own8kHz PCM0.125 and neutral VP9 pictures. Initial edit includes a complete last native sample whose occupied interval covers final edit(s). Exact rational EOF and raw tick endpoints are independent controls. No private input,FFmpeg or network.",
+  "cases": [
+    {
+      "file": "changes-occupied-eof.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 48,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 48,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000001",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000009",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000010",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000011",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000019",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000020",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000021",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 1000020
+        }
+      ],
+      "duration_ns": 1000020,
+      "scale": 14112000,
+      "video_frames": 16
+    },
+    {
+      "file": "third-occupied-eof.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 48,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 48,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000001",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000009",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000010",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000011",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000019",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000020",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000021",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 1000020
+        }
+      ],
+      "duration_ns": 1000020,
+      "scale": 14112000,
+      "video_frames": 16
+    },
+    {
+      "file": "fragmented-occupied-eof.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 48,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 48,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000001",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000009",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000010",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000011",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000019",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000020",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000021",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 1000020
+        }
+      ],
+      "duration_ns": 1000020,
+      "scale": 14112000,
+      "video_frames": 16
+    },
+    {
+      "file": "occupied-silence-and-eof.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 48,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 48,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000001",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000009",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000010",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000011",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000019",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000020",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "1000021",
+          "parts": [],
+          "anchor_ns": 1000020
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 1000020
+        }
+      ],
+      "duration_ns": 1000020,
+      "scale": 14112000,
+      "video_frames": 16
+    },
+    {
+      "file": "raw-grid-occupied-eof.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 48,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 48,
+              "last": 49,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000001",
+          "parts": [],
+          "anchor_ns": 1000100
+        },
+        {
+          "target_ns": "1000009",
+          "parts": [],
+          "anchor_ns": 1000100
+        },
+        {
+          "target_ns": "1000010",
+          "parts": [],
+          "anchor_ns": 1000100
+        },
+        {
+          "target_ns": "1000011",
+          "parts": [],
+          "anchor_ns": 1000100
+        },
+        {
+          "target_ns": "1000019",
+          "parts": [],
+          "anchor_ns": 1000100
+        },
+        {
+          "target_ns": "1000099",
+          "parts": [],
+          "anchor_ns": 1000100
+        },
+        {
+          "target_ns": "1000100",
+          "parts": [],
+          "anchor_ns": 1000100
+        },
+        {
+          "target_ns": "1000101",
+          "parts": [],
+          "anchor_ns": 1000100
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 1000100
+        }
+      ],
+      "duration_ns": 1000100,
+      "scale": 14112000,
+      "video_frames": 16,
+      "raw_tick": 14113,
+      "raw_endpoint_tick": 14113
+    },
+    {
+      "file": "pcm-occupied-eof.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 3,
+              "rate": 8000,
+              "channels": 1,
+              "first": 0,
+              "last": 9,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 3,
+              "rate": 8000,
+              "channels": 1,
+              "first": 1,
+              "last": 9,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "999999",
+          "parts": [
+            {
+              "control": 3,
+              "rate": 8000,
+              "channels": 1,
+              "first": 8,
+              "last": 9,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000000",
+          "parts": [
+            {
+              "control": 3,
+              "rate": 8000,
+              "channels": 1,
+              "first": 8,
+              "last": 9,
+              "start_ns": 0
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000001",
+          "parts": [],
+          "anchor_ns": 1100000
+        },
+        {
+          "target_ns": "1000009",
+          "parts": [],
+          "anchor_ns": 1100000
+        },
+        {
+          "target_ns": "1000010",
+          "parts": [],
+          "anchor_ns": 1100000
+        },
+        {
+          "target_ns": "1000011",
+          "parts": [],
+          "anchor_ns": 1100000
+        },
+        {
+          "target_ns": "1000019",
+          "parts": [],
+          "anchor_ns": 1100000
+        },
+        {
+          "target_ns": "1099999",
+          "parts": [],
+          "anchor_ns": 1100000
+        },
+        {
+          "target_ns": "1100000",
+          "parts": [],
+          "anchor_ns": 1100000
+        },
+        {
+          "target_ns": "1100001",
+          "parts": [],
+          "anchor_ns": 1100000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 1100000
+        }
+      ],
+      "duration_ns": 1100000,
+      "scale": 48000,
+      "video_frames": 3,
+      "raw_tick": 49,
+      "raw_endpoint_tick": 52
+    }
+  ],
+  "sha256": {
+    "reference-0.f32le": "61d65de18326375ba5df4a1ecf8b54882107d47c13046b54b64f9bf593f06ba1",
+    "reference-3.f32le": "c1c70c9d7f338ce770f79f6c60e8fb07532c05c2daafcbfa84ac2f44867b7965",
+    "changes-occupied-eof.mp4": "9e400cc768eab58316631d1d028a1df2f43141a639dcfcfef0869c8ebe378db6",
+    "third-occupied-eof.mp4": "893990827bbd547a8e9b581e7e3840c1d87cbd9d1e8c77e27b9acbaa95cfe4e4",
+    "fragmented-occupied-eof.mp4": "fbd644e837e75be9e1f05da53b312003c5fcd90b3daa24383df99be7756a27e7",
+    "occupied-silence-and-eof.mp4": "818b220fa186fc34fc6aa1ce50c69ba6d2da5cb567f2aa978258b4fc6194fb3e",
+    "raw-grid-occupied-eof.mp4": "eb2f9cec21376eb1662cf75c83d5a990fab13e1c14eb709a3aa937c00b8d8251",
+    "pcm-occupied-eof.mp4": "f3d6e35e68dd9a54017fe493e6f8e2eafa50b7c6e2b32850f43c29bdd2840ac1"
+  }
+}
