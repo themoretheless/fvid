@@ -1,3 +1,13 @@
+## LD-MPS zero-alignment profile restriction, 2026-11-01
+
+Corrected the native diagnostic for nonzero `ldsacTimeAlign`: the2014 LD-MPS
+conformance amendment requires zero,so these values are profile violations
+rather than a pending decoder feature. A new three-AU movie family covers zero,
+1,32767,32768 and65535. Zero plays;each nonzero case reports the profile error
+and preserves state for a valid-packet retry. Raw header diagnostics retain
+the signalled field. No valid-stream PCM or timing algorithm changes.
+[Evidence](validation/aac-ld-mps-alignment-profile-2026-11-01.md).
+
 ## Unequal HRTF-grid refusal reproduction, 2026-11-01
 
 Added18 authored one-AU movies covering unequal pairs of spatial grids4/9/23

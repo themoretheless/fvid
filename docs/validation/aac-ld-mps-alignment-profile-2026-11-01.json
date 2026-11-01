@@ -1,0 +1,33 @@
+{
+  "scope": "Zero-alignment playback and nonzero profile-refusal classification; not nonzero-alignment acceptance.",
+  "values": [
+    0,
+    1,
+    32767,
+    32768,
+    65535
+  ],
+  "files": {
+    "alignment-32767.mp4": "5ec881b8378c33bf42d99b75893ccce750deb5127ff4a93013097d4214f96995",
+    "packets.bin": "2ce03ee4df048903f68f57e87604b24ebe10764721d9a2f7316ed3352660e83d",
+    "alignment-0.mp4": "d7cb0fe19aa731c4d148d05f3895f87c66c6f1b8d1218184264ac16591d205d1",
+    "alignment-1.mp4": "246d6cacc12f81e17810f5f14391e7b7b05856c68bc10a4c3cc5f5d2b29dcf33",
+    "alignment-65535.mp4": "df894d5798fb43efb4fd45e20b39b73ce4e76f4c2ec61bcdc6419d260cd7a064",
+    "manifest.json": "c649a46e0619409efe9f6705ba2002e4fddacef5fc8353d588863e630b0a5285",
+    "alignment-32768.mp4": "241aed6fc44f28413f7319629225cfa37afb9de2030a563867a7f0fee3c01d58"
+  },
+  "source_pdf_sha256": "8c5df9bd20d46fea1d74977894de60f26d9031038bc70cb505608e4ca622a868",
+  "tests_passed": 7,
+  "tests_failed": 0,
+  "tests_ignored": 0,
+  "targets": [
+    "aac_ld_mps_alignment_profile",
+    "aac_ld_mps_inband",
+    "aac_ld_mps_hrtf_grids"
+  ],
+  "before_failure": "LD-MPS in-band time alignment is not yet implemented",
+  "after_error": "nonzero LD-MPS time alignment is not permitted by the low-delay profile",
+  "generator_sha256": "d802e64ce1d649414991d1e55d92368a3a88c5ceffebf5e248a11586195d95e1",
+  "native_session_sha256": "9a86c87c76213b1c10c2182efbde0d486da68004cca92177b35584204e3f302f",
+  "test_sha256": "bd1f539c40acd2ca76bd57aae8df644df559c6c6eab3c6d3579013ee2102dde1"
+}

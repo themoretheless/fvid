@@ -1,0 +1,115 @@
+{
+  "cases": [
+    {
+      "name": "alignment-0",
+      "video": "alignment-0.mp4",
+      "asc": "f8e620243397000000",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 67
+        },
+        {
+          "offset": 67,
+          "bytes": 67
+        },
+        {
+          "offset": 134,
+          "bytes": 67
+        }
+      ],
+      "alignment": 0,
+      "samples": 1536,
+      "rate": 48000
+    },
+    {
+      "name": "alignment-1",
+      "video": "alignment-1.mp4",
+      "asc": "f8e620243397000000",
+      "frames": [
+        {
+          "offset": 201,
+          "bytes": 67
+        },
+        {
+          "offset": 268,
+          "bytes": 67
+        },
+        {
+          "offset": 335,
+          "bytes": 67
+        }
+      ],
+      "alignment": 1,
+      "samples": 1536,
+      "rate": 48000
+    },
+    {
+      "name": "alignment-32767",
+      "video": "alignment-32767.mp4",
+      "asc": "f8e620243397000000",
+      "frames": [
+        {
+          "offset": 402,
+          "bytes": 67
+        },
+        {
+          "offset": 469,
+          "bytes": 67
+        },
+        {
+          "offset": 536,
+          "bytes": 67
+        }
+      ],
+      "alignment": 32767,
+      "samples": 1536,
+      "rate": 48000
+    },
+    {
+      "name": "alignment-32768",
+      "video": "alignment-32768.mp4",
+      "asc": "f8e620243397000000",
+      "frames": [
+        {
+          "offset": 603,
+          "bytes": 67
+        },
+        {
+          "offset": 670,
+          "bytes": 67
+        },
+        {
+          "offset": 737,
+          "bytes": 67
+        }
+      ],
+      "alignment": 32768,
+      "samples": 1536,
+      "rate": 48000
+    },
+    {
+      "name": "alignment-65535",
+      "video": "alignment-65535.mp4",
+      "asc": "f8e620243397000000",
+      "frames": [
+        {
+          "offset": 804,
+          "bytes": 67
+        },
+        {
+          "offset": 871,
+          "bytes": 67
+        },
+        {
+          "offset": 938,
+          "bytes": 67
+        }
+      ],
+      "alignment": 65535,
+      "samples": 1536,
+      "rate": 48000
+    }
+  ],
+  "scope": "Own ELD mono core, tree212 stereo output, explicit alignment flag with zero control and four forbidden nonzero 16-bit patterns. Not acceptance of nonzero alignment. No private or ISO media."
+}

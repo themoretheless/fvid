@@ -157,7 +157,10 @@ including sub-core and multi-core initial SSCs. Original sample counts,PTS/durat
 and opaque IDs survive slicing. SourceSpan exposes offset,full size and original
 stamp;ordinary Session opaque-ID clients keep their strict contract. Shared SBR
 uses actual rate/mode compatibility independently of spatial frame length.
-Frequency,layout and nonzero time alignment remain unfinished.
+Frequency/layout transitions remain unfinished. LD-MPS nonzero time alignment
+is forbidden by the profile,not a pending decode feature; zero alignment with
+the flag present remains accepted. Ordinary MPEG Surround/HQ alignment is a
+separate integration. See validation/aac-ld-mps-alignment-profile-2026-11-01.md.
 
 Zero-width grouped CLD/ICC/CPC regions now consume entropy syntax and discard
 unused numeric results. This includes empty LFE OTT and split-TTT low regions

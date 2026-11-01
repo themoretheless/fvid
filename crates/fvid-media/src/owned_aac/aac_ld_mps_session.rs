@@ -261,8 +261,10 @@ impl Session {
                 let mut bits = BitReader::new(&message.payload);
                 let (config, delay) = Config::read_in_band(&mut bits)?;
                 if delay.is_some_and(|delay| delay != 0) {
-                    return Err(unsupported(
-                        "LD-MPS in-band time alignment is not yet implemented",
+                    // ISO/IEC 14496-26:2010/Amd.3:2014,7.26.1.2.1.9:
+                    // ldsacTimeAlign shall be zero in the LD-MPS profile.
+                    return Err(invalid(
+                        "nonzero LD-MPS time alignment is not permitted by the low-delay profile",
                     ));
                 }
                 if config.sample_rate != next.initial_config.sample_rate
