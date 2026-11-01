@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 482,
-  "next_id": "FVID-0483",
+  "accepted_count": 484,
+  "next_id": "FVID-0485",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5442,6 +5442,28 @@
       "result": "Compare complete headers and addressable endpoints over sparse runs; retain the reference walk for dense/expanded indexes. Final release median 0.094917ms,94.86percent reduction,7/7 wins;all21 paired plans identical. Full/prefix analytic PCM,duplicate/unused/changed headers,byte/memory refusals,coordinate guards and native video seek/EOF pass. All seven qualification gates pass;no decoder/player speedup claim.",
       "status": "accepted",
       "validation": "batch-479-validation.json"
+    },
+    {
+      "id": "FVID-0483",
+      "batch": 480,
+      "title": "Anchor unedited MP4 wall-time EOF seeks at the presentation end",
+      "source": "src/playback/audio/mp4_audio.rs",
+      "regression": "tests/mp4_audio_eof_seek_clock.rs",
+      "before": "Full PCM/video controls pass; actual worker EOF seeks on PCM, ALAC, coarse PCM and IMA4 emit no PCM but stay at 40 ms instead of the 48/60 ms endpoint. Raw packet landing is intentional and retained.",
+      "result": "Return the known end marker after wall-time seeking has already clipped the entire unedited presentation, preserving raw packet navigation and decoder validation.",
+      "status": "accepted",
+      "validation": "batch-480-validation.json"
+    },
+    {
+      "id": "FVID-0484",
+      "batch": 480,
+      "title": "Preserve exact AAC wall-time seek floors below MP4 media ticks",
+      "source": "src/playback/audio/mp4_audio.rs",
+      "regression": "tests/mp4_aac_subtick_seek.rs",
+      "before": "Authored 48 kHz AAC960 clips on 48 kHz/50 Hz media clocks emit extra or repeated samples after sub-tick seek; 50 Hz clips replay their entire 1/1.25 ms edit after EOF seek. Actual-worker and direct baselines fail with independent full-play controls passing.",
+      "result": "Keep an exact rational PCM clipping floor and native packet-phase clock anchor while preserving existing preroll, raw tick navigation and validation of empty terminal windows.",
+      "status": "accepted",
+      "validation": "batch-480-validation.json"
     }
   ]
 }

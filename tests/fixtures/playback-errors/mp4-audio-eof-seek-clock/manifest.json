@@ -1,0 +1,91 @@
+{
+  "provenance": "Only authored neutral VP9 and nonzero analytic PCM/uncompressed ALAC/IMA4/AAC pulse references from prior synthetic generators. No private media,codec parameters,FFmpeg or network.",
+  "cases": [
+    {
+      "file": "pcm.mp4",
+      "oracle": "pcm.mp4.f32le",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 480,
+      "exact": true,
+      "packet_frames": 160,
+      "raw_landing": true
+    },
+    {
+      "file": "alac.mp4",
+      "oracle": "alac.mp4.f32le",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 480,
+      "exact": true,
+      "packet_frames": 160,
+      "raw_landing": true
+    },
+    {
+      "file": "recovered.mp4",
+      "oracle": "recovered.mp4.f32le",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 480,
+      "exact": true,
+      "packet_frames": 160,
+      "raw_landing": true
+    },
+    {
+      "file": "edited.mp4",
+      "oracle": "edited.mp4.f32le",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 480,
+      "exact": true,
+      "packet_frames": 160,
+      "raw_landing": false
+    },
+    {
+      "file": "aac.mp4",
+      "oracle": "aac.mp4.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 3072,
+      "exact": false,
+      "packet_frames": 1024,
+      "raw_landing": false
+    },
+    {
+      "file": "changed.mp4",
+      "oracle": "changed.mp4.f32le",
+      "rate": 48000,
+      "channels": 1,
+      "frames": 64,
+      "exact": true,
+      "packet_frames": 1,
+      "raw_landing": false
+    },
+    {
+      "file": "ima4.mp4",
+      "oracle": "ima4.mp4.f32le",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 384,
+      "exact": true,
+      "packet_frames": 64,
+      "raw_landing": true
+    }
+  ],
+  "sha256": {
+    "pcm.mp4": "56a8b2fd0d842a36229b3294f434cacd0ce7036601b761acd0b6c3c1617b73ee",
+    "pcm.mp4.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "alac.mp4": "6a8dfb2a7060a95796abdcb0e52e932455ef9fd737afbdea0c4543cba6cf4dd4",
+    "alac.mp4.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "recovered.mp4": "0315e937c4680085e78cbe5ae8188b6a4d48b0ff2e8860015ca8abce81d08f87",
+    "recovered.mp4.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "edited.mp4": "509f825242991414be18e45efb92e16d5e44d0738ad64939a093be749d3bd492",
+    "edited.mp4.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "aac.mp4": "be8256d83655753920f512a7d2ced96e6fd705ced1916125f94f37bf15c2d465",
+    "aac.mp4.f32le": "e7d303920e33ab61afdd330a583bc41deef4914fa85fabdc05bf986b09497817",
+    "changed.mp4": "f19ba536aa68abd41e1af509d5180e1a3159359b763842872ff7110dea73cadd",
+    "changed.mp4.f32le": "f521dbc648eadbf6a83b90b978dbf7bddb6e5ace8ecf4a582059d1ec95c4ff1b",
+    "ima4.mp4": "5045bc4b28ebde3d547dfa5232b76d088880e8fe1d40c4e9971d4a310ad83993",
+    "ima4.mp4.f32le": "a22bdd9f04b80e5e3f1dbcec99772e538cffc6c623d872c0f4679cda3bce5cab"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "src/audio.rs": "45e3732a221ca67d06cce83ade17667bc287296c895203a5d49eeaf4e6b46ce3",
+  "src/audio_thread.rs": "bed97ff651ea434eb207a4b21736e0540ba8e289738093b67887b192fc399e32",
+  "src/playback/audio/mp4_audio.rs": "ad78deb06320f810ef4f40602e19d7f4be00836aa3aac85920977f1564e1cc99",
+  "tests/mp4_audio_eof_seek_clock.rs": "8aaccfb74aa7464415cce3f28c3e316e47a5d0afb37d166f3250c055f40389b0",
+  "scripts/generate_mp4_audio_eof_seek_clock.py": "00371ffb454fd980c8dee2c87d7b814e557f5f0b47502832fb2bcc9732a75a67"
+}

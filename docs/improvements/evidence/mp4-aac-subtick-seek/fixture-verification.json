@@ -1,0 +1,14 @@
+{
+  "files": 8,
+  "exact_regeneration": true,
+  "sha256": {
+    "reference.f32le": "f07d53bc0449246b5c609729704b20868e8c081258b744ab40c194a57fc00d3d",
+    "clock48000-start0-duration1-1000-v0.mp4": "28df2838268da900c1d249b3f28e48a68e0f56b9311ad72f340e9dd3edea91cc",
+    "clock48000-start1-duration1-1000-v1.mp4": "700e3e4ed04a577b33114f4b8a4f0067c6b7580b886a3b04db66840cee9d014f",
+    "clock48000-start0-duration5-4000-v1.mp4": "e83e663b3f5e3fc47f0226e8b231dcd80abf21f6786ff79aa7ba07ef9c2868d5",
+    "clock50-start0-duration1-1000-v0.mp4": "584f74138eb144a60043313d5b539ecec683c650e3f7b5e7e3705ddd5619559f",
+    "clock50-start1-duration1-1000-v1.mp4": "40a63adca758e4f466220d600692de3509e0fd8b5efe9a0d0ded582c688684c8",
+    "clock50-start0-duration5-4000-v1.mp4": "8d5b025d9c883c0a099d8b7776dad6b6406381bfe3c919c47597e833a6211c22",
+    "manifest.json": "6763bb00dc484456f67bfbdd108f7372b74cf68c16339085d142243b4a3d0ac2"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "production_sha256": "274d2d3fc925aefd9cc46750724db9ab56ad0bfdc1bf5a82fb9709e43971ce32",
+  "test_sha256": {
+    "tests/mp4_aac_subtick_seek.rs": "198aafe9fe9332b3abd7073905f326e1cb9d5050c617a291a49835805d8af6f1",
+    "tests/mp4_audio_eof_seek_clock.rs": "8aaccfb74aa7464415cce3f28c3e316e47a5d0afb37d166f3250c055f40389b0"
+  }
+}

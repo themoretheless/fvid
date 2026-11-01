@@ -1186,7 +1186,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
                 (EditTime::ZERO, EditTime::new(end, u128::from(scale))?)
             };
             Some((EditTime::signed_ticks(source_pts, scale)?,
-                EditTime::signed_ticks(self.presentation_floor.max(0), scale)?.max(origin), end, origin))
+                EditTime::signed_ticks(self.presentation_floor.max(0), scale)?.max(origin).max(self.clock_floor.get()), end, origin))
         } else { None };
         if let Some((start, floor, end, origin)) = absolute_window {
             let rate=self.sample_rate();let stride=usize::from(self.channels())*4;
@@ -1419,7 +1419,53 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         }
         let scale=u128::from(self.track().timescale);let mut ticks=target.as_nanos()*scale/1_000_000_000;
         if scale>0 && scale<1_000_000_000 && (ticks+1)*1_000_000_000/scale==target.as_nanos(){ticks+=1;}
-        self.seek_to(i64::try_from(ticks).unwrap_or(i64::MAX))
+        let landed=self.seek_to(i64::try_from(ticks).unwrap_or(i64::MAX));
+        if self.navigation_error.is_none() && !self.changing && self.variable_edits.is_none()
+            && self.timeline.is_none() && self.track().codec == *b"mp4a"
+            && self.track().edits.len() <= 1
+            && self.track().edits.first().is_none_or(|e|e.media_time >= 0) {
+            let precise = (|| -> Result<i64> {
+                let (origin,end)=if let Some(edit)=self.track().edits.first() {
+                    let origin=EditTime::signed_ticks(edit.media_time,self.track().timescale)?;
+                    (origin,origin.add(EditTime::ticks(edit.duration,self.demuxer.movie_timescale())?)?)
+                } else {
+                    (EditTime::ZERO,EditTime::new(i128::try_from(self.presentation_end_ticks().unwrap_or(0))
+                        .map_err(|_|invalid("MP4 AAC presentation endpoint overflow"))?,scale)?)
+                };
+                let wanted=origin.add(EditTime::new(target.as_nanos() as i128,1_000_000_000)?)?;
+                let wanted=if wanted.cmp(end)==std::cmp::Ordering::Greater {end}else{wanted};
+                self.clock_floor.set(wanted);
+                // Align on the selected packet's native sample lattice: its
+                // composition origin can itself lie between media samples.
+                let tick=i64::try_from(wanted.floor_ticks(self.track().timescale)?).unwrap_or(i64::MAX);
+                let first=self.track().samples.at_or_before(tick);
+                let mut aligned=end;
+                for index in first..self.track().samples.len() {
+                    let sample=self.track().samples.get(index).ok_or_else(||invalid("missing AAC seek sample"))?;
+                    // An explicit empty terminal presentation window still
+                    // decodes for validation, but cannot supply an anchor.
+                    if sample.duration==0 {continue;}
+                    let start=EditTime::signed_ticks(sample.pts,self.track().timescale)?;
+                    let offset=wanted.sub(start)?.ceil_frames(self.sample_rate())?.max(0);
+                    let frames=self.packet_sample_limit(u64::from(sample.duration))?.unwrap_or(0);
+                    if offset < frames as i128 {
+                        aligned=start.add(EditTime::new(offset,u128::from(self.sample_rate()))?)?;
+                        if aligned.cmp(end)==std::cmp::Ordering::Greater {aligned=end;}
+                        break;
+                    }
+                }
+                self.clock_anchor.set(Some((landed,aligned.sub(origin)?)));
+                Ok(landed)
+            })();
+            return match precise {Ok(at)=>at,Err(error)=>{self.navigation_error=Some(error);0}};
+        }
+        // Packet seeking can retain the final coded packet while its entire
+        // PCM is clipped by the requested floor. Wall-time navigation must
+        // then anchor the device at EOF, not at that packet's earlier PTS.
+        if self.track().edits.is_empty() && self.navigation_error.is_none()
+            && let Some(end)=self.presentation_end_ticks().and_then(|t|i64::try_from(t).ok())
+            && self.presentation_floor>=end {return end;}
+        landed
     }
     fn seek_to(&mut self, pts: i64) -> i64 {
         if self.clock.is_some() {

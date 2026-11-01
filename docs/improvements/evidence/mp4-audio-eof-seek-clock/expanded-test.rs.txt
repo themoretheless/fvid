@@ -1,0 +1,174 @@
+#![cfg(feature = "player")]
+#[path = "support/audio_transitions.rs"]
+mod transitions;
+use fvid::{audio::AudioStream, audio_thread::AudioPlayback, playback_mp4_audio::Mp4AudioReader};
+use std::{
+    io::Cursor,
+    path::{Path, PathBuf},
+    sync::{Arc, Mutex},
+    time::Duration,
+};
+fn root() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/mp4-audio-eof-seek-clock")
+}
+fn bytes(n: &str) -> Vec<u8> {
+    std::fs::read(root().join(n)).unwrap()
+}
+fn cases() -> Vec<serde_json::Value> {
+    serde_json::from_slice::<serde_json::Value>(&bytes("manifest.json")).unwrap()["cases"]
+        .as_array()
+        .unwrap()
+        .clone()
+}
+fn open(n: &str) -> Mp4AudioReader<Cursor<Vec<u8>>> {
+    Mp4AudioReader::open(Cursor::new(bytes(n)), Default::default()).unwrap()
+}
+fn end(c: &serde_json::Value) -> Duration {
+    let n = c["frames"].as_u64().unwrap() * 1_000_000_000 / c["rate"].as_u64().unwrap();
+    Duration::from_nanos(n)
+}
+fn natural_end(c: &serde_json::Value) -> Duration {
+    let frames = c["frames"].as_u64().unwrap();
+    let packet = c["packet_frames"].as_u64().unwrap();
+    let rate = c["rate"].as_u64().unwrap();
+    // Capture publishes floor(last PTS)+floor(last packet duration), matching
+    // its integer-nanosecond backend contract rather than rounding the sum.
+    Duration::from_nanos((frames - packet) * 1_000_000_000 / rate + packet * 1_000_000_000 / rate)
+}
+fn compare(actual: &[u8], c: &serde_json::Value) {
+    let want = bytes(c["oracle"].as_str().unwrap());
+    assert_eq!(actual.len(), want.len());
+    if c["exact"] == true {
+        assert_eq!(actual, want);
+    } else {
+        for (a, b) in actual.chunks_exact(4).zip(want.chunks_exact(4)) {
+            let a = f32::from_le_bytes(a.try_into().unwrap());
+            let b = f32::from_le_bytes(b.try_into().unwrap());
+            assert!(a.is_finite() && b.is_finite() && (a - b).abs() < 2e-6);
+        }
+    }
+}
+#[test]
+fn full_pcm_stream_duration_and_short_video_are_valid() {
+    for c in cases() {
+        let name = c["file"].as_str().unwrap();
+        let mut r = open(name);
+        assert_eq!(r.duration(), Some(end(&c)), "{name}");
+        let pcm: Vec<_> = transitions::collect(&mut r)
+            .into_iter()
+            .flat_map(|p| p.3)
+            .collect();
+        compare(&pcm, &c);
+        r.rewind();
+        compare(
+            &transitions::collect(&mut r)
+                .into_iter()
+                .flat_map(|p| p.3)
+                .collect::<Vec<_>>(),
+            &c,
+        );
+        let mut video =
+            fvid::playback_native::NativeReader::software(Cursor::new(bytes(name)), 32 << 20)
+                .unwrap();
+        let mut frames = 0;
+        while let Some(frame) = video.read_frame_raw().unwrap() {
+            assert_eq!(
+                frame.into_rgb(32 << 20).unwrap(),
+                vec![130; 16 * 16 * 3],
+                "{name}"
+            );
+            frames += 1;
+        }
+        assert!(frames >= 3);
+        assert!(video.read_frame_raw().unwrap().is_none());
+    }
+}
+#[test]
+fn actual_worker_eof_seeks_publish_the_end_clock_without_pcm() {
+    use transitions::{Capture, Trace, ended};
+    let mut failures = Vec::new();
+    for c in cases() {
+        let name = c["file"].as_str().unwrap();
+        let duration = end(&c);
+        let trace = Arc::new(Mutex::new(Trace::default()));
+        let shared = trace.clone();
+        let mut worker =
+            AudioPlayback::start(Box::new(open(name)), move || Box::new(Capture::new(shared)));
+        worker.play();
+        ended(&worker, 0);
+        compare(
+            &trace
+                .lock()
+                .unwrap()
+                .packets
+                .iter()
+                .flat_map(|p| p.3.iter().copied())
+                .collect::<Vec<_>>(),
+            &c,
+        );
+        assert_eq!(worker.position(), natural_end(&c), "{name}:natural EOF");
+        for target in [
+            duration,
+            duration + Duration::from_nanos(1),
+            duration + Duration::from_secs(1),
+            Duration::MAX,
+        ] {
+            trace.lock().unwrap().packets.clear();
+            worker.seek(target);
+            ended(&worker, worker.generation());
+            assert!(
+                trace.lock().unwrap().packets.is_empty(),
+                "{name}:EOF produced PCM"
+            );
+            if worker.position() != duration {
+                failures.push(format!(
+                    "{name}:request{target:?}:position{:?},expected{duration:?}",
+                    worker.position()
+                ));
+            }
+        }
+        worker.seek(Duration::ZERO);
+        ended(&worker, worker.generation());
+        compare(
+            &trace
+                .lock()
+                .unwrap()
+                .packets
+                .iter()
+                .flat_map(|p| p.3.iter().copied())
+                .collect::<Vec<_>>(),
+            &c,
+        );
+        assert_eq!(worker.position(), natural_end(&c), "{name}:reseek zero");
+    }
+    assert!(failures.is_empty(), "{failures:?}");
+}
+#[test]
+fn eof_wall_navigation_preserves_raw_packet_landings_and_reports_presentation_end() {
+    let mut failures = Vec::new();
+    for c in cases().into_iter().filter(|c| c["raw_landing"] == true) {
+        let name = c["file"].as_str().unwrap();
+        let mut r = open(name);
+        let expected = c["frames"].as_i64().unwrap() - c["packet_frames"].as_i64().unwrap();
+        let raw = r.seek_to(i64::MAX);
+        assert_eq!(raw, expected, "{name}:raw packet landing");
+        let raw_time =
+            Duration::from_nanos(expected as u64 * 1_000_000_000 / c["rate"].as_u64().unwrap());
+        assert_eq!(r.time_of(raw), raw_time, "{name}:raw packet time");
+        for target in [end(&c), Duration::MAX] {
+            let anchor = r.seek_time(target);
+            if r.time_of(anchor) != end(&c) {
+                failures.push(format!("{name}:{target:?}:anchor{:?}", r.time_of(anchor)));
+            }
+            assert!(transitions::collect(&mut r).is_empty());
+        }
+        r.seek_to(i64::MAX);
+        assert_eq!(
+            r.time_of(expected),
+            raw_time,
+            "{name}:raw time after wall navigation"
+        );
+    }
+    assert!(failures.is_empty(), "{failures:?}");
+}

@@ -1,0 +1,220 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0483",
+    "FVID-0484"
+  ],
+  "count_delta": 2,
+  "accepted_count": 484,
+  "next_id": "FVID-0485",
+  "qualification": {
+    "final-integration": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--no-fail-fast",
+        "--test",
+        "mp4_aac_subtick_seek",
+        "--test",
+        "mp4_audio_eof_seek_clock",
+        "--test",
+        "mp4_audio_packet_seek",
+        "--test",
+        "mp4_audio_wide_time",
+        "--test",
+        "mp4_quantized_audio_clock",
+        "--test",
+        "mp4_aac_edit_phase",
+        "--test",
+        "mp4_aac_fractional_origin",
+        "--test",
+        "mp4_open_ended_edit_audio",
+        "--test",
+        "mp4_audio_clocks",
+        "--test",
+        "mp4_variable_rate_edits",
+        "--test",
+        "mp4_edit_loop",
+        "--test",
+        "mp4_audio_reconfiguration",
+        "--test",
+        "mp4_aac_transitions",
+        "--test",
+        "mp4_unedited_audio_tail",
+        "--test",
+        "mp4_audio_presentation_end",
+        "--test",
+        "mp4_audio_composition_order",
+        "--test",
+        "mp4_unused_audio_descriptions",
+        "--test",
+        "mp4_audio_selection",
+        "--test",
+        "mp4_audio_preroll_navigation",
+        "--test",
+        "mp4_audio_partial_window",
+        "--test",
+        "mp4_audio_zero_window"
+      ],
+      "exit_code": 0,
+      "test_totals": {
+        "passed": 96,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-aac-subtick-seek/final-integration.log"
+    },
+    "root-mp4": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "mp4",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "test_totals": {
+        "passed": 83,
+        "failed": 0,
+        "ignored": 1
+      },
+      "log": "docs/improvements/evidence/mp4-aac-subtick-seek/root-mp4.log"
+    },
+    "root-webm": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "webm",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "test_totals": {
+        "passed": 67,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-aac-subtick-seek/root-webm.log"
+    },
+    "audio-worker": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio_thread",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "test_totals": {
+        "passed": 39,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-aac-subtick-seek/audio-worker.log"
+    },
+    "media-units": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fvid-media",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "test_totals": {
+        "passed": 548,
+        "failed": 0,
+        "ignored": 1
+      },
+      "log": "docs/improvements/evidence/mp4-aac-subtick-seek/media-units.log"
+    },
+    "core-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "test_totals": {
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-aac-subtick-seek/core-check.log"
+    },
+    "player-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "test_totals": {
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-aac-subtick-seek/player-check.log"
+    }
+  },
+  "new_regression_repeats": {
+    "runs": 3,
+    "passed_each": 7,
+    "exit_codes": [
+      0,
+      0,
+      0
+    ]
+  },
+  "unchanged_existing_tests": true,
+  "old_ignores": 2,
+  "source_frozen": {
+    "production_sha256": "274d2d3fc925aefd9cc46750724db9ab56ad0bfdc1bf5a82fb9709e43971ce32",
+    "test_sha256": {
+      "tests/mp4_aac_subtick_seek.rs": "198aafe9fe9332b3abd7073905f326e1cb9d5050c617a291a49835805d8af6f1",
+      "tests/mp4_audio_eof_seek_clock.rs": "8aaccfb74aa7464415cce3f28c3e316e47a5d0afb37d166f3250c055f40389b0"
+    }
+  },
+  "limitations": [
+    "Captured actual audio worker; no physical audio-device claim.",
+    "No performance claim.",
+    "Earlier candidate phase and zero-window regressions repaired within FVID-0484; no additional IDs.",
+    "FVID-0417 source-phase rounding is distinct: exact native-boundary controls already passed; this fix retains arbitrary wall-time fractions before media tick conversion."
+  ]
+}

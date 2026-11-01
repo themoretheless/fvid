@@ -1,0 +1,18 @@
+"""Own short MP4 audio EOF navigation witnesses; no external encoder."""
+from pathlib import Path
+import json,hashlib,struct
+OUT=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/mp4-audio-eof-seek-clock'
+def generate():
+    base=OUT.parent;files={};cases=[]
+    inputs=[('pcm','mp4-audio-clocks/pcm-8000.mp4','mp4-audio-clocks/expected.f32le',8000,1,480),('alac','mp4-audio-clocks/alac-8000.mp4','mp4-audio-clocks/expected.f32le',8000,1,480),('recovered','mp4-audio-clocks/pcm-1000.mp4','mp4-audio-clocks/expected.f32le',8000,1,480),('edited','mp4-open-ended-edit/pcm-v0-clock8000-trim0-known.mp4','mp4-open-ended-edit/pcm-oracle.f32le',8000,1,480),('aac','mp4-aac-transitions/control-0.mp4','mp4-aac-transitions/control-0.f32le',48000,2,3072),('changed','mp4-uniform-plan-scan/control-endian.mp4',None,48000,1,64),('ima4','mp4-audio-packet-seek/ordered.mp4',None,8000,1,384)]
+    for label,source,oracle,rate,channels,frames in inputs:
+        name=label+'.mp4';files[name]=(base/source).read_bytes()
+        if oracle is not None:pcm=(base/oracle).read_bytes()
+        elif label=='changed':pcm=struct.pack('<f',0.125)*frames
+        else:pcm=b''.join(struct.pack('<f',(predictor+n)/32768)for predictor in [128,1152,2176]*2 for n in range(1,65))
+        assert len(pcm)==frames*channels*4
+        files[name+'.f32le']=pcm;cases.append(dict(file=name,oracle=name+'.f32le',rate=rate,channels=channels,frames=frames,exact=label!='aac',packet_frames=1 if label=='changed'else 64 if label=='ima4'else 1024 if label=='aac'else 160,raw_landing=label in ['pcm','alac','ima4','recovered']))
+    files['manifest.json']=(json.dumps(dict(provenance='Only authored neutral VP9 and nonzero analytic PCM/uncompressed ALAC/IMA4/AAC pulse references from prior synthetic generators. No private media,codec parameters,FFmpeg or network.',cases=cases,sha256={n:hashlib.sha256(b).hexdigest()for n,b in files.items()}),indent=2)+'\n').encode();return files
+if __name__=='__main__':
+    OUT.mkdir(parents=True,exist_ok=True)
+    for n,b in generate().items():(OUT/n).write_bytes(b)

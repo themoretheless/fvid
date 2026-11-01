@@ -1,0 +1,21 @@
+{
+  "files": 15,
+  "exact_regeneration": true,
+  "sha256": {
+    "pcm.mp4": "56a8b2fd0d842a36229b3294f434cacd0ce7036601b761acd0b6c3c1617b73ee",
+    "pcm.mp4.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "alac.mp4": "6a8dfb2a7060a95796abdcb0e52e932455ef9fd737afbdea0c4543cba6cf4dd4",
+    "alac.mp4.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "recovered.mp4": "0315e937c4680085e78cbe5ae8188b6a4d48b0ff2e8860015ca8abce81d08f87",
+    "recovered.mp4.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "edited.mp4": "509f825242991414be18e45efb92e16d5e44d0738ad64939a093be749d3bd492",
+    "edited.mp4.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "aac.mp4": "be8256d83655753920f512a7d2ced96e6fd705ced1916125f94f37bf15c2d465",
+    "aac.mp4.f32le": "e7d303920e33ab61afdd330a583bc41deef4914fa85fabdc05bf986b09497817",
+    "changed.mp4": "f19ba536aa68abd41e1af509d5180e1a3159359b763842872ff7110dea73cadd",
+    "changed.mp4.f32le": "f521dbc648eadbf6a83b90b978dbf7bddb6e5ace8ecf4a582059d1ec95c4ff1b",
+    "ima4.mp4": "5045bc4b28ebde3d547dfa5232b76d088880e8fe1d40c4e9971d4a310ad83993",
+    "ima4.mp4.f32le": "a22bdd9f04b80e5e3f1dbcec99772e538cffc6c623d872c0f4679cda3bce5cab",
+    "manifest.json": "5e90564b27abdde6698241f06e4ffb4712d0c197d93215e9ae4625b6b9e7a1f6"
+  }
+}
