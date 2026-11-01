@@ -1,10 +1,11 @@
 {
-  "status": "qualified;pending delivery",
+  "status": "delivered",
   "accepted_count": 473,
   "next_id": "FVID-0474",
   "requalified_ids": [
     "FVID-0407"
   ],
   "count_delta": 0,
-  "session": null
+  "session": null,
+  "goal_complete": false
 }
