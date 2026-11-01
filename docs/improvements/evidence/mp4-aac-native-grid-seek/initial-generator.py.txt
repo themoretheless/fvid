@@ -1,0 +1,25 @@
+"""Own LC1024/Main960 transition with1ms finite edits on an exact media grid."""
+from pathlib import Path
+from fractions import Fraction as F
+import json,hashlib
+from generate_mp4_aac_transitions import generate as transitions,SCALE
+from generate_mp4_variable_rate_edits import edit_movie
+from generate_mp4_tfhd_defaults_regressions import atoms
+from generate_vp9_chroma import atom,word
+OUT=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/mp4-aac-native-grid-seek'
+def generate():
+    source=transitions();files={'reference-0.f32le':source['control-0.f32le'][:48*2*4],'reference-1.f32le':source['control-1.f32le'][:32*4]};cases=[]
+    queries=[]
+    for ns in [0,1,500001,999999,1000000,1000001,1500001,1999999,2000000,18446744073709551615999999999]:
+        wanted=F(ns,10**9);parts=[]
+        for control,rate,channels,count,start in [(0,48000,2,48,F(0)),(1,32000,1,32,F(1,1000))]:
+            first=min(count,max(0,((wanted-start)*rate).__ceil__()))
+            if first<count:parts.append(dict(control=control,rate=rate,channels=channels,first=first,last=count,start_ns=int(start*10**9)))
+        at=F(parts[0]['start_ns'],10**9)+F(parts[0]['first'],parts[0]['rate'])if parts else F(2,1000)
+        queries.append(dict(target_ns=str(ns),parts=parts,anchor_ns=at.numerator*10**9//at.denominator))
+    for stem in ['changes','third','fragmented']:
+        name=stem+'-two-edits.mp4';files[name]=edit_movie(source[stem+'.mp4'],[(1,0),(1,SCALE*64//1000)]);cases.append(dict(file=name,queries=queries))
+    files['manifest.json']=(json.dumps(dict(provenance='Own scalar AAC pulse spectra and independent IMDCT/overlap references. LC1024 stereo48k then Main960 mono32k;finite1ms edits,classic/reordered catalog/fragmented variants,16 neutral VP9 frames. Exact14112000Hz clock,no recovery. No private input,FFmpeg or network.',scale=SCALE,cases=cases,sha256={n:hashlib.sha256(b).hexdigest()for n,b in files.items()}),indent=2)+'\n').encode();return files
+if __name__=='__main__':
+    OUT.mkdir(parents=True,exist_ok=True)
+    for n,b in generate().items():(OUT/n).write_bytes(b)

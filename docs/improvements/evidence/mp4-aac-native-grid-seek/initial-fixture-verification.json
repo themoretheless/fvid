@@ -1,0 +1,11 @@
+{
+  "exact_regeneration": true,
+  "sha256": {
+    "reference-0.f32le": "b21cbb581d6b9d4f35663e060565f0de73bbe830d544337867101a50e8ce2a5b",
+    "reference-1.f32le": "c0bee1750b3e67796f09bb2ed032d9e9cd48f015bdb4f7d36fbc20ce548e7272",
+    "changes-two-edits.mp4": "8f472fdd305a7475fafea717ae595c2ffc489a0bd1b0d07d0444d9dc25980b5b",
+    "third-two-edits.mp4": "83dafaec3ed72cf5e83870cfee11a02877f08346d7ef925b6dc1b78602d388c1",
+    "fragmented-two-edits.mp4": "459a9ede1618df9634e5d7caaec79df67d1170ea01bc260f9457325c0ab83eff",
+    "manifest.json": "32f6df0b65bae60f9b0060bcdef6ffa052c9c88e18a3e0339a833cadafad1c17"
+  }
+}

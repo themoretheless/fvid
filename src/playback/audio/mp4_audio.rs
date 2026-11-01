@@ -1472,9 +1472,9 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
 
     fn seek_time(&mut self,target:std::time::Duration)->i64 {
-        let exact_aac_edits=self.variable_edits.is_some() && self.track().codec==*b"mp4a"
-            && self.track().sample_descriptions.first().is_some_and(|first|
-                self.track().sample_descriptions.iter().all(|entry|entry==first));
+        let exact_aac_edits=self.variable_edits.is_some() && self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
+            header.codec==*b"mp4a"
+                || !clock_recovery::clock_description_used(&self.track().samples,i+1));
         let exact_pcm_edits=self.variable_edits.is_some() && self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
             matches!(&header.codec,b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64")
                 || !clock_recovery::clock_description_used(&self.track().samples,i+1));
