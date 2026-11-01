@@ -123,8 +123,8 @@ fn audio_plan_with_controls(
     let mut total_out_channels = 0u32;
     for source in sources {
         validate_mix_controls(controls)?;
-        let info = crate::owned_audio_plan::source_descriptor(source, controls)?;
-        if crate::owned_g711_wave_export::recognizes(source, controls)? {
+        let (rate, channels) = if crate::owned_g711_wave_export::recognizes(source, controls)? {
+            let info = crate::owned_audio_plan::source_descriptor(source, controls)?;
             let g711_frames = crate::owned_g711_wave_export::descriptor(source, controls)?.4;
             if g711_frames == 0 {
                 return Err("audio mix/merge requires nonempty owned audio inputs".into());
@@ -134,11 +134,18 @@ fn audio_plan_with_controls(
                 .saturating_mul(4);
             total_input_pcm_bytes = total_input_pcm_bytes.saturating_add(decoded_bytes);
             min_frames = Some(min_frames.map_or(g711_frames, |m| m.min(g711_frames)));
+            (info.rate, info.channels)
         } else if crate::owned_wave_inspect::is_wave(source).map_err(|e| e.to_string())? {
             let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
             let wave_info = crate::owned_wave_inspect::inspect(&mut file, controls.cancel.as_ref())
                 .map_err(|e| e.to_string())?;
-            if wave_info.sample_frames == 0 {
+            if !wave_info.float || wave_info.bits_per_sample != 32 {
+                return Err(
+                    "mix-audio requires float PCM inputs (flt); integer formats are not qualified"
+                        .into(),
+                );
+            }
+            if wave_info.sample_frames == 0 || !(1..=255).contains(&wave_info.channels) {
                 return Err("audio mix/merge requires nonempty owned audio inputs".into());
             }
             let frame_bytes = usize::from(wave_info.block);
@@ -163,28 +170,78 @@ fn audio_plan_with_controls(
             }
             let wave_frames = (size / frame_bytes) as u64;
             let decoded_bytes = u128::from(wave_frames)
-                .saturating_mul(u128::from(info.channels))
+                .saturating_mul(u128::from(wave_info.channels))
                 .saturating_mul(4);
             total_input_pcm_bytes = total_input_pcm_bytes.saturating_add(decoded_bytes);
             min_frames = Some(min_frames.map_or(wave_frames, |m| m.min(wave_frames)));
+            (wave_info.sample_rate, wave_info.channels)
         } else {
+            let info = crate::owned_audio_plan::source_descriptor(source, controls)?;
             crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), controls)?;
-        }
-        if !(1..=255).contains(&info.channels) {
+            let est_frames: Option<u64> = if crate::owned_ogg_opus_export::recognizes(source)? {
+                match crate::owned_ogg_audio_export::coding(source, controls)? {
+                    crate::owned_ogg_audio_export::Backend::Opus => {
+                        let p = crate::owned_ogg_opus_export::open(source, controls)?;
+                        Some(u64::try_from(p.end_samples().max(0)).unwrap_or(0))
+                    }
+                    crate::owned_ogg_audio_export::Backend::Vorbis => {
+                        let (p, _) = crate::owned_ogg_vorbis_export::open(source, controls)?;
+                        Some(u64::try_from(p.end_samples().max(0)).unwrap_or(0))
+                    }
+                    crate::owned_ogg_audio_export::Backend::Joint => {
+                        let (p, _) = crate::owned_ogg_joint_export::open(source, controls)?;
+                        Some(u64::try_from(p.end_samples().max(0)).unwrap_or(0))
+                    }
+                }
+            } else if !crate::owned_adts_export::recognizes(source)?
+                && crate::owned_raw_flac::recognizes(source)?
+            {
+                let parsed = crate::owned_raw_flac::open(source, controls)?;
+                let mut packets = 0u64;
+                let mut total = 0u64;
+                for frame in &parsed.frames {
+                    if controls.max_packets.is_some_and(|limit| packets >= limit) {
+                        break;
+                    }
+                    packets += 1;
+                    total = total.saturating_add(u64::from(frame.samples));
+                }
+                Some(total.min(parsed.samples()))
+            } else if !crate::owned_adts_export::recognizes(source)?
+                && crate::owned_raw_mp3::recognizes(source)?
+            {
+                let parsed = crate::owned_raw_mp3::open(source, controls)?;
+                Some(parsed.presentation_samples())
+            } else {
+                None
+            };
+            if let Some(frames) = est_frames {
+                let decoded_bytes = u128::from(frames)
+                    .saturating_mul(u128::from(info.channels))
+                    .saturating_mul(4);
+                total_input_pcm_bytes = total_input_pcm_bytes.saturating_add(decoded_bytes);
+                min_frames = Some(min_frames.map_or(frames, |m| m.min(frames)));
+            }
+            (info.rate, info.channels)
+        };
+        if !(1..=255).contains(&channels) {
             return Err("audio mix/merge requires nonempty owned audio inputs".into());
         }
-        if let Some((rate, channels)) = geometry {
-            if rate != info.rate || (!merge && channels != info.channels) {
+        if let Some((expected_rate, expected_channels)) = geometry {
+            if expected_rate != rate || (!merge && expected_channels != channels) {
                 return Err("audio inputs must share sample rate and mixing channel count".into());
             }
         } else {
-            geometry = Some((info.rate, info.channels));
+            geometry = Some((rate, channels));
         }
         total_out_channels = if merge {
-            total_out_channels.saturating_add(u32::from(info.channels))
+            total_out_channels.saturating_add(u32::from(channels))
         } else {
-            u32::from(info.channels)
+            u32::from(channels)
         };
+    }
+    if merge && total_out_channels > 64 {
+        return Err("merge-audio output exceeds 64 channels".into());
     }
     if let (Some(frames), Some(max_bytes)) = (min_frames, controls.max_controlled_bytes) {
         let out_bytes = u128::from(frames) * u128::from(total_out_channels) * 4;

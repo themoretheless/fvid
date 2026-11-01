@@ -1,0 +1,16 @@
+{
+  "batch": 496,
+  "ids": [
+    "FVID-0495"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-496-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-496-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-496-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-496-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission",
+    "cargo test --test mp4_metadata_admission"
+  ],
+  "passed": 80,
+  "failed": 0
+}

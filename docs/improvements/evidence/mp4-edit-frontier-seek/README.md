@@ -9,3 +9,5 @@ Reapply each segment's precomputed minimum start whenever native rounding traver
 Scope:edited native-sample seek transitions and actual software AudioWorker backend flush anchors. No performance,physical audio hardware or complete MP4 audit claim.
 
 Accepted FVID-0486 in batch-487-validation.json:seven gates pass880 executions,three repeats pass33 tests each. Two pre-existing ignored tests remain. Owned build target removed after all handles completed. Counter486,next FVID-0487.
+
+Parallel main advanced to509 entries before delivery. Both original ID486 and batch487 were already occupied;this local fix is renumbered to FVID-0510/batch511. Standalone qualification is preserved in standalone-qualification. Combined-state qualification must pass before acceptance or push;no parallel entries are removed.

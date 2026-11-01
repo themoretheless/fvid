@@ -1,0 +1,16 @@
+{
+  "batch": 509,
+  "ids": [
+    "FVID-0508"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-509-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-509-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-509-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-509-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission loudness_and_loudnorm_preflight_meter_and_output_budgets_before_spool_decode_or_measurement",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 79,
+  "failed": 0
+}

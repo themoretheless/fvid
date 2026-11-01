@@ -502,6 +502,7 @@ pub fn try_apply(
         let mut publish_options = CopyOptions::default();
         publish_options.cancel = options.cancel.clone();
         publish_options.max_rss_bytes = options.max_rss_bytes;
+        publish_options.max_controlled_bytes = options.max_controlled_bytes;
         publish_options.progress = options.progress.clone();
         publish_options.metadata_set = options.metadata_set.clone();
         publish_options.metadata_delete = options.metadata_delete.clone();

@@ -358,6 +358,29 @@ pub(crate) fn apply(
     let target=normalization_target(source,transform,options,rate,channels,mask)?;
     let (rate,channels,mask)=target.unwrap_or((rate,channels,mask));
     let info = crate::owned_wave_metadata::mp4_source_info(source, options)?;
+    let aac_fold = target.is_none()
+        && !precise
+        && transform
+            .channels
+            .is_some_and(|output| output != i32::from(channels) && matches!(output, 1 | 2))
+        && crate::owned_aac_export_routing::router_for_decode(
+            source,
+            rate,
+            channels,
+            Some(transform),
+            options,
+        )?
+        .is_some();
+    crate::owned_adts_export::check_spool_wave_export_budget(
+        rate,
+        channels,
+        if precise { 64 } else { 32 },
+        1024,
+        info.len(),
+        aac_fold,
+        transform,
+        options,
+    )?;
     let spool = crate::owned_adts_export::spool_decoded_with_precision(
         rate,
         channels,

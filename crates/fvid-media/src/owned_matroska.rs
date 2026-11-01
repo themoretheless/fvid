@@ -361,8 +361,67 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
     track_options: Option<&fvid_control::CopyOptions>,
 ) -> Result<(fvid_media_info::DecodeStats, ProgressEvent, u64)> {
     check(cancel)?;
+    let mut description = VideoTrackDescription {
+        name: String::new(),
+        language: "und".into(),
+        legacy_language: "und".into(),
+        disposition: 1,
+    };
+    let mut track_tags = std::collections::BTreeMap::new();
+    let mut text_tags = std::collections::BTreeMap::new();
+    let mut meta_working_bytes = 0usize;
+    if let Some(options) = track_options {
+        for (key, value) in &options.metadata_set {
+            text_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+            if !crate::owned_file_tags::FileTags::supports_key(key) && !value.is_empty() {
+                text_tags.insert(key.to_ascii_uppercase(), value.clone());
+            }
+        }
+        for key in &options.metadata_delete {
+            text_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+        }
+        for (_, key, value) in &options.stream_metadata_set {
+            track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+            if !crate::owned_ffv1_export::edit_track_description(&mut description, key, value)
+                && !value.is_empty()
+            {
+                track_tags.insert(key.to_ascii_uppercase(), value.clone());
+            }
+        }
+        for (_, key) in &options.stream_metadata_delete {
+            track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+            crate::owned_ffv1_export::edit_track_description(&mut description, key, "");
+        }
+        meta_working_bytes = crate::owned_lossless::estimate_matroska_metadata_working_bytes(
+            file_metadata,
+            &text_tags,
+            &track_tags,
+            Some(&description),
+        );
+        if let Some(limit) = options.max_controlled_bytes
+            && meta_working_bytes > limit
+        {
+            return Err(Error(
+                "Matroska metadata working set exceeds controlled memory budget".into(),
+            ));
+        }
+    }
     let mut output = Some(output);
     let mut writer = None;
+    let geometry = crate::owned_y4m_decode::has_geometry_or_pixel_transform(transform);
+    let mut overlay_frame_len = 0usize;
+    if let Some(spec) = &transform.overlay {
+        if crate::owned_y4m_decode::supports(&spec.path) {
+            let mut ov_reader = std::io::BufReader::new(
+                std::fs::File::open(&spec.path).map_err(|e| Error(e.to_string()))?,
+            );
+            let mut ov_line = Vec::new();
+            if crate::owned_y4m::line(&mut ov_reader, &mut ov_line).map_err(Error)? {
+                let ov_header = crate::owned_y4m::Header::parse(&ov_line).map_err(Error)?;
+                overlay_frame_len = ov_header.frame_len().map_err(Error)?;
+            }
+        }
+    }
     let (stats, consumed) = crate::owned_ffv1_encoder::encode_y4m_counted(
         CancelReader { source, cancel },
         transform,
@@ -372,10 +431,24 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
             if let Some(options) = track_options {
                 crate::owned_budget::check_rss_budget(options)?;
                 let frame_len = header.frame_len()?;
-                if options
-                    .max_controlled_bytes
-                    .is_some_and(|limit| frame_len > limit || packet.len() > limit)
-                {
+                let working = crate::owned_lossless::estimate_transform_working_bytes(
+                    transform,
+                    frame_len,
+                    header.depth(),
+                    overlay_frame_len,
+                )?;
+                let live_frames = if geometry { 3usize } else { 2usize };
+                let frame_working_bytes = frame_len
+                    .saturating_mul(live_frames)
+                    .max(working.saturating_add(if geometry {
+                        frame_len.saturating_mul(2)
+                    } else {
+                        frame_len
+                    }))
+                    .saturating_add(meta_working_bytes);
+                if options.max_controlled_bytes.is_some_and(|limit| {
+                    frame_working_bytes.saturating_add(packet.len()) > limit
+                }) {
                     return Err("Y4M frame byte length exceeds controlled memory budget".into());
                 }
             }
@@ -386,44 +459,6 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
                 let width = u32::try_from(header.width).map_err(|_| "Matroska width overflow")?;
                 let height =
                     u32::try_from(header.height).map_err(|_| "Matroska height overflow")?;
-                let mut description = VideoTrackDescription { name: String::new(), language: "und".into(), legacy_language: "und".into(), disposition: 1 };
-                let mut track_tags = std::collections::BTreeMap::new();
-                let mut text_tags = std::collections::BTreeMap::new();
-                if let Some(options) = track_options {
-                    for (key, value) in &options.metadata_set {
-                        text_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
-                        if !crate::owned_file_tags::FileTags::supports_key(key) && !value.is_empty() {
-                            text_tags.insert(key.to_ascii_uppercase(), value.clone());
-                        }
-                    }
-                    for key in &options.metadata_delete {
-                        text_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
-                    }
-                    for (_, key, value) in &options.stream_metadata_set {
-                        track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
-                        if !crate::owned_ffv1_export::edit_track_description(&mut description, key, value) && !value.is_empty() {
-                            track_tags.insert(key.to_ascii_uppercase(), value.clone());
-                        }
-                    }
-                    for (_, key) in &options.stream_metadata_delete {
-                        track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
-                        crate::owned_ffv1_export::edit_track_description(&mut description, key, "");
-                    }
-                    if let Some(limit) = options.max_controlled_bytes {
-                        if crate::owned_lossless::estimate_matroska_metadata_working_bytes(
-                            file_metadata,
-                            &text_tags,
-                            &track_tags,
-                            Some(&description),
-                        ) > limit
-                        {
-                            return Err(
-                                "Matroska metadata working set exceeds controlled memory budget"
-                                    .into(),
-                            );
-                        }
-                    }
-                }
                 writer = Some(
                     PacketWriter::new_ffv1_described(
                         output.take().unwrap(),

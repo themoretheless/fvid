@@ -113,6 +113,27 @@ pub(crate) fn apply(
         prefix(transform, rate),
         options,
     )?;
+    let aac_fold = transform
+        .channels
+        .is_some_and(|output| output != i32::from(channels) && matches!(output, 1 | 2))
+        && crate::owned_aac_export_routing::router_for_decode(
+            source,
+            rate,
+            channels,
+            Some(transform),
+            options,
+        )?
+        .is_some();
+    crate::owned_adts_export::check_spool_wave_export_budget(
+        rate,
+        channels,
+        32,
+        1024,
+        info.len(),
+        aac_fold,
+        transform,
+        options,
+    )?;
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,

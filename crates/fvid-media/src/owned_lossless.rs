@@ -195,10 +195,7 @@ pub(crate) fn estimate_matroska_metadata_working_bytes(
     }
     raw_bytes.saturating_mul(8)
 }
-pub(crate) fn check_options_matroska_metadata_budget(o: &CopyOptions) -> Result<(), String> {
-    let Some(limit) = o.max_controlled_bytes.filter(|&limit| limit > 0) else {
-        return Ok(());
-    };
+pub(crate) fn options_matroska_metadata_working_bytes(o: &CopyOptions) -> Result<usize, String> {
     let file = metadata(o)?;
     let mut text_tags = std::collections::BTreeMap::new();
     for (key, value) in &o.metadata_set {
@@ -231,13 +228,18 @@ pub(crate) fn check_options_matroska_metadata_budget(o: &CopyOptions) -> Result<
         track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(&scoped_key));
         crate::owned_ffv1_export::edit_track_description(&mut description, key, "");
     }
-    if estimate_matroska_metadata_working_bytes(
+    Ok(estimate_matroska_metadata_working_bytes(
         &file,
         &text_tags,
         &track_tags,
         Some(&description),
-    ) > limit
-    {
+    ))
+}
+pub(crate) fn check_options_matroska_metadata_budget(o: &CopyOptions) -> Result<(), String> {
+    let Some(limit) = o.max_controlled_bytes.filter(|&limit| limit > 0) else {
+        return Ok(());
+    };
+    if options_matroska_metadata_working_bytes(o)? > limit {
         return Err("Matroska metadata working set exceeds controlled memory budget".into());
     }
     Ok(())
@@ -246,16 +248,16 @@ pub(crate) fn check_source_matroska_metadata_budget(
     source: &Path,
     interval: Option<(i64, i64)>,
     options: &CopyOptions,
-) -> Result<(), String> {
-    check_options_matroska_metadata_budget(options)?;
+) -> Result<usize, String> {
+    let options_meta_bytes = options_matroska_metadata_working_bytes(options)?;
     let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0) else {
-        return Ok(());
+        return Ok(options_meta_bytes);
     };
     let mut prefix = [0u8; 4];
     if !std::fs::File::open(source)
         .is_ok_and(|mut f| std::io::Read::read_exact(&mut f, &mut prefix).is_ok() && prefix == [0x1a, 0x45, 0xdf, 0xa3])
     {
-        return Ok(());
+        return Ok(options_meta_bytes);
     }
     let mut limits = crate::owned_webm::Limits::default();
     let memory_packets = limit / std::mem::size_of::<crate::owned_webm::Packet>();
@@ -277,15 +279,14 @@ pub(crate) fn check_source_matroska_metadata_budget(
     )
     .map_err(map_packet_limit)?;
     reader.scan_all().map_err(map_packet_limit)?;
-    if reader
+    let index_bytes = reader
         .estimated_index_payload_bytes()
-        .map_err(|e| e.to_string())?
-        > limit
-    {
+        .map_err(|e| e.to_string())?;
+    if index_bytes > limit {
         return Err("controlled memory budget exceeded: Matroska index and metadata".into());
     }
     let Some(track) = reader.tracks.iter().find(|t| t.kind == 1) else {
-        return Ok(());
+        return Ok(index_bytes.saturating_add(options_meta_bytes));
     };
     let mut description = crate::owned_matroska::VideoTrackDescription {
         name: track.name.clone(),
@@ -367,16 +368,17 @@ pub(crate) fn check_source_matroska_metadata_budget(
         file.tags.set(key, "");
         text_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
     }
-    if estimate_matroska_metadata_working_bytes(
+    let meta_working_bytes = estimate_matroska_metadata_working_bytes(
         &file,
         &text_tags,
         &track_tags,
         Some(&description),
-    ) > limit
-    {
+    );
+    let base_working_bytes = index_bytes.saturating_add(meta_working_bytes);
+    if base_working_bytes > limit {
         return Err("Matroska metadata working set exceeds controlled memory budget".into());
     }
-    Ok(())
+    Ok(base_working_bytes)
 }
 pub(crate) fn estimate_transform_working_bytes(
     transform: &DecodeTransform,
@@ -634,6 +636,8 @@ pub fn transcode_lossless(
         }
     }
     if crate::owned_y4m_decode::supports(source) {
+        let meta_working_bytes = options_matroska_metadata_working_bytes(options)?;
+        let geometry = crate::owned_y4m_decode::has_geometry_or_pixel_transform(&request);
         let mut reader =
             std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
         let mut line = Vec::new();
@@ -645,7 +649,7 @@ pub fn transcode_lossless(
             }
             if options
                 .max_controlled_bytes
-                .is_some_and(|limit| frame_len > limit)
+                .is_some_and(|limit| frame_len.saturating_add(meta_working_bytes) > limit)
             {
                 return Err("Y4M frame byte length exceeds controlled memory budget".into());
             }
@@ -659,7 +663,16 @@ pub fn transcode_lossless(
                     presented.depth(),
                     overlay_frame_len,
                 )?;
-                if working > limit {
+                let extra_buffers = if geometry {
+                    frame_len.saturating_add(out_len)
+                } else {
+                    out_len
+                };
+                if working
+                    .saturating_add(extra_buffers)
+                    .saturating_add(meta_working_bytes)
+                    > limit
+                {
                     return Err("Y4M frame byte length exceeds controlled memory budget".into());
                 }
             }
@@ -755,14 +768,42 @@ pub(crate) fn check_encoded_ffv1(
     view: crate::owned_video_decode::FrameView<'_>,
     max_packet_bytes: usize,
 ) -> Result<(), String> {
-    check_encoded_ffv1_with_controlled(view, max_packet_bytes, None)
+    check_encoded_ffv1_with_controlled(view, max_packet_bytes, None, 0)
 }
 
 pub(crate) fn check_encoded_ffv1_with_controlled(
     view: crate::owned_video_decode::FrameView<'_>,
     max_packet_bytes: usize,
     max_controlled_bytes: Option<usize>,
+    base_working_bytes: usize,
 ) -> Result<(), String> {
+    encode_ffv1_len_with_controlled(view, max_packet_bytes, max_controlled_bytes, base_working_bytes)
+        .map(|_| ())
+}
+
+pub(crate) fn encode_ffv1_len_with_controlled(
+    view: crate::owned_video_decode::FrameView<'_>,
+    max_packet_bytes: usize,
+    max_controlled_bytes: Option<usize>,
+    base_working_bytes: usize,
+) -> Result<usize, String> {
+    let frame_working_bytes = if view.monochrome {
+        view.pixels
+            .len()
+            .saturating_add(view.alpha.map_or(0, <[u8]>::len))
+            .saturating_add(view.extra_working_bytes)
+            .saturating_add(base_working_bytes)
+    } else {
+        view.pixels
+            .len()
+            .saturating_mul(2)
+            .saturating_add(view.alpha.map_or(0, <[u8]>::len))
+            .saturating_add(view.extra_working_bytes)
+            .saturating_add(base_working_bytes)
+    };
+    if max_controlled_bytes.is_some_and(|limit| frame_working_bytes > limit) {
+        return Err("video frame exceeds controlled memory budget".into());
+    }
     let packet = if view.monochrome {
         let samples = (view.width as usize)
             .checked_mul(view.height as usize)
@@ -802,10 +843,12 @@ pub(crate) fn check_encoded_ffv1_with_controlled(
     if packet.len() > max_packet_bytes {
         return Err("encoded FFV1 packet exceeds byte limit".into());
     }
-    if max_controlled_bytes.is_some_and(|limit| packet.len() > limit) {
+    if max_controlled_bytes
+        .is_some_and(|limit| frame_working_bytes.saturating_add(packet.len()) > limit)
+    {
         return Err("encoded FFV1 packet exceeds controlled memory budget".into());
     }
-    Ok(())
+    Ok(packet.len())
 }
 
 /// Plan the same owned Y4M-to-FFV1 execution admitted by the export API.
@@ -871,14 +914,6 @@ pub fn plan_transcode_lossless(
         if !policy(options, true) {
             return Err("owned Y4M lossless export does not yet implement requested policy".into());
         }
-        let mut check_encoded =
-            |view: crate::owned_video_decode::FrameView<'_>| -> Result<(), String> {
-                check_encoded_ffv1_with_controlled(
-                    view,
-                    options.max_packet_bytes,
-                    options.max_controlled_bytes,
-                )
-            };
         let enforce_encoded_budget =
             options.max_packet_bytes != CopyOptions::default().max_packet_bytes
                 || options.max_controlled_bytes.is_some();
@@ -886,7 +921,20 @@ pub fn plan_transcode_lossless(
             if let Some(temporary) =
                 crate::owned_mp4_video_bridge::prepare(source, Some(options))?
             {
-                check_source_matroska_metadata_budget(&temporary.path, request.interval, options)?;
+                let base_working_bytes = check_source_matroska_metadata_budget(
+                    &temporary.path,
+                    request.interval,
+                    options,
+                )?;
+                let mut check_encoded =
+                    |view: crate::owned_video_decode::FrameView<'_>| -> Result<(), String> {
+                        check_encoded_ffv1_with_controlled(
+                            view,
+                            options.max_packet_bytes,
+                            options.max_controlled_bytes,
+                            base_working_bytes,
+                        )
+                    };
                 let mut stage = options.clone();
                 stage.streams.clear();
                 stage.stream_metadata_set.clear();
@@ -916,7 +964,17 @@ pub fn plan_transcode_lossless(
                 );
             }
         } else if crate::owned_ffv1_export::supports_with_options(source, &request, Some(options)) {
-            check_source_matroska_metadata_budget(source, request.interval, options)?;
+            let base_working_bytes =
+                check_source_matroska_metadata_budget(source, request.interval, options)?;
+            let mut check_encoded =
+                |view: crate::owned_video_decode::FrameView<'_>| -> Result<(), String> {
+                    check_encoded_ffv1_with_controlled(
+                        view,
+                        options.max_packet_bytes,
+                        options.max_controlled_bytes,
+                        base_working_bytes,
+                    )
+                };
             let mut stage = options.clone();
             stage.streams.clear();
             stage.stream_metadata_set.clear();
@@ -978,6 +1036,8 @@ pub fn plan_transcode_lossless(
             || request.shuffleframes.is_some()
             || request.reverse.is_some()
         {
+            let meta_working_bytes = options_matroska_metadata_working_bytes(options)?;
+            let geometry = crate::owned_y4m_decode::has_geometry_or_pixel_transform(&request);
             let mut overlay_frame_len = 0usize;
             if let Some(spec) = &request.overlay {
                 if crate::owned_y4m_decode::supports(&spec.path) {
@@ -994,7 +1054,7 @@ pub fn plan_transcode_lossless(
                         }
                         if options
                             .max_controlled_bytes
-                            .is_some_and(|limit| ov_len > limit)
+                            .is_some_and(|limit| ov_len.saturating_add(meta_working_bytes) > limit)
                         {
                             return Err(
                                 "Y4M frame byte length exceeds controlled memory budget".into(),
@@ -1006,6 +1066,7 @@ pub fn plan_transcode_lossless(
             let mut reader =
                 std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
             let mut line = Vec::new();
+            let mut y4m_encode_working_bytes = 0usize;
             if crate::owned_y4m::line(&mut reader, &mut line)? {
                 let header = crate::owned_y4m::Header::parse(&line)?;
                 let frame_len = header.frame_len()?;
@@ -1014,25 +1075,31 @@ pub fn plan_transcode_lossless(
                 }
                 if options
                     .max_controlled_bytes
-                    .is_some_and(|limit| frame_len > limit)
+                    .is_some_and(|limit| frame_len.saturating_add(meta_working_bytes) > limit)
                 {
                     return Err("Y4M frame byte length exceeds controlled memory budget".into());
                 }
-                if let Some(limit) = options.max_controlled_bytes {
-                    let presented =
-                        crate::owned_y4m_decode::presented_header_after_geometry(&header, &request)?;
-                    let out_len = presented.frame_len()?;
-                    let working = estimate_transform_working_bytes(
-                        &request,
-                        out_len,
-                        presented.depth(),
-                        overlay_frame_len,
-                    )?;
-                    if working > limit {
-                        return Err(
-                            "Y4M frame byte length exceeds controlled memory budget".into(),
-                        );
-                    }
+                let presented =
+                    crate::owned_y4m_decode::presented_header_after_geometry(&header, &request)?;
+                let out_len = presented.frame_len()?;
+                let working = estimate_transform_working_bytes(
+                    &request,
+                    out_len,
+                    presented.depth(),
+                    overlay_frame_len,
+                )?;
+                let extra_buffers = if geometry {
+                    frame_len.saturating_add(out_len)
+                } else {
+                    out_len
+                };
+                y4m_encode_working_bytes = working
+                    .saturating_add(extra_buffers)
+                    .saturating_add(meta_working_bytes);
+                if let Some(limit) = options.max_controlled_bytes
+                    && y4m_encode_working_bytes > limit
+                {
+                    return Err("Y4M frame byte length exceeds controlled memory budget".into());
                 }
             }
             let mut reader =
@@ -1046,9 +1113,15 @@ pub fn plan_transcode_lossless(
                     return Err("media operation cancelled".into());
                 }
                 crate::owned_budget::check_rss_budget(options)?;
+                let live_frames = if geometry { 3usize } else { 2usize };
+                let frame_working_bytes = data
+                    .len()
+                    .saturating_mul(live_frames)
+                    .saturating_add(meta_working_bytes)
+                    .max(y4m_encode_working_bytes);
                 if options
                     .max_controlled_bytes
-                    .is_some_and(|limit| data.len() > limit)
+                    .is_some_and(|limit| frame_working_bytes > limit)
                 {
                     return Err("Y4M frame byte length exceeds controlled memory budget".into());
                 }
@@ -1066,10 +1139,9 @@ pub fn plan_transcode_lossless(
                     if packet.len() > options.max_packet_bytes {
                         return Err("encoded FFV1 packet exceeds byte limit".into());
                     }
-                    if options
-                        .max_controlled_bytes
-                        .is_some_and(|limit| packet.len() > limit)
-                    {
+                    if options.max_controlled_bytes.is_some_and(|limit| {
+                        frame_working_bytes.saturating_add(packet.len()) > limit
+                    }) {
                         return Err("encoded FFV1 packet exceeds controlled memory budget".into());
                     }
                 }

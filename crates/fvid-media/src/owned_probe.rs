@@ -456,7 +456,7 @@ pub fn probe_ogg_with_options(
         return Err("input does not have an Ogg signature".into());
     }
     let mut file = File::open(path).map_err(|e| e.to_string())?;
-    let (limits, _) = crate::owned_ogg_opus_export::preflight(&mut file, options)?;
+    let (limits, index_estimate) = crate::owned_ogg_opus_export::preflight(&mut file, options)?;
     if options
         .max_packets
         .is_some_and(|max| (limits.packets as u64) > max)
@@ -490,6 +490,14 @@ pub fn probe_ogg_with_options(
         let joint = crate::owned_ogg_audio_catalog::needs_joint_program(&ogg, nth)
             .map_err(|e| e.to_string())?;
         let (codec, rate, channels, duration, extradata_bytes) = if joint {
+            let reserve = crate::owned_ogg_audio_program::decoder_reserve(&ogg, nth)
+                .map_err(|e| e.to_string())?;
+            crate::owned_ogg_opus_export::admit(
+                index_estimate
+                    .checked_add(reserve)
+                    .ok_or("Ogg audio reserve overflow")?,
+                options,
+            )?;
             let program = crate::owned_ogg_audio_program::Program::from_ogg(ogg.clone(), nth)
                 .map_err(|e| e.to_string())?;
             (
@@ -508,6 +516,16 @@ pub fn probe_ogg_with_options(
                         Some(entry.source_index),
                     )
                     .map_err(|e| e.to_string())?;
+                    let decoder = program
+                        .decoder_admission_bytes()
+                        .map_err(|e| e.to_string())?;
+                    crate::owned_ogg_opus_export::admit(
+                        index_estimate
+                            .checked_add(decoder)
+                            .and_then(|n| n.checked_add(program.packet_count().saturating_mul(48)))
+                            .ok_or("Ogg Opus probe admission overflow")?,
+                        options,
+                    )?;
                     (
                         "opus",
                         48_000,
@@ -517,6 +535,29 @@ pub fn probe_ogg_with_options(
                     )
                 }
                 crate::owned_ogg::Coding::Vorbis => {
+                    let selected = crate::owned_ogg_vorbis::select_source_chains(
+                        &ogg,
+                        Some(entry.source_index),
+                    )
+                    .map_err(|e| e.to_string())?;
+                    let mut vorbis_working = 0usize;
+                    for &chain_idx in &selected {
+                        let chain = &ogg.chains()[chain_idx];
+                        let setup = chain.packets.get(2).ok_or("missing Vorbis setup")?;
+                        let admission = fvid_codecs::vorbis_admission::inspect(&setup.data)
+                            .map_err(|e| e.to_string())?;
+                        let chain_working = admission
+                            .bytes
+                            .checked_add(chain.packets.len().saturating_mul(128))
+                            .ok_or("Ogg Vorbis probe admission overflow")?;
+                        vorbis_working = vorbis_working.max(chain_working);
+                    }
+                    crate::owned_ogg_opus_export::admit(
+                        index_estimate
+                            .checked_add(vorbis_working)
+                            .ok_or("Ogg Vorbis probe admission overflow")?,
+                        options,
+                    )?;
                     let program = crate::owned_ogg_vorbis::Program::open_source_track(
                         std::io::Cursor::new(&bytes),
                         limits,

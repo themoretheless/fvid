@@ -389,14 +389,17 @@ pub(crate) fn presentation_durations<R: std::io::Read + std::io::Seek>(
     };
     let number = track.number;
     let default = track.default_duration_ns;
+    let index_bytes = reader
+        .estimated_index_payload_bytes()
+        .map_err(|e| e.to_string())?;
+    let durations_bytes = reader
+        .packets
+        .len()
+        .saturating_mul(std::mem::size_of::<Option<u64>>());
     if let Some(limit) = options
         .and_then(|o| o.max_controlled_bytes)
         .filter(|&limit| limit > 0)
-        && reader
-            .packets
-            .len()
-            .saturating_mul(std::mem::size_of::<Option<u64>>())
-            > limit
+        && index_bytes.saturating_add(durations_bytes) > limit
     {
         return Err("controlled memory budget exceeded: Matroska duration index".into());
     }
@@ -430,17 +433,16 @@ pub(crate) fn presentation_durations<R: std::io::Read + std::io::Seek>(
     else {
         return Ok(None);
     };
+    let tables_bytes = index_bytes.saturating_add(
+        reader.packets.len().saturating_mul(
+            std::mem::size_of::<Option<u64>>()
+                .saturating_add(std::mem::size_of::<(usize, i64)>()),
+        ),
+    );
     if let Some(limit) = options
         .and_then(|o| o.max_controlled_bytes)
         .filter(|&limit| limit > 0)
-        && reader
-            .packets
-            .len()
-            .saturating_mul(
-                std::mem::size_of::<Option<u64>>()
-                    .saturating_add(std::mem::size_of::<(usize, i64)>()),
-            )
-            > limit
+        && tables_bytes > limit
     {
         return Err("controlled memory budget exceeded: Matroska presentation index".into());
     }
@@ -476,15 +478,21 @@ pub(crate) fn presentation_durations<R: std::io::Read + std::io::Seek>(
         if options.is_some_and(|o| bytes.len() > o.max_packet_bytes) {
             return Err("input packet exceeds byte limit".into());
         }
+        if let Some(limit) = options
+            .and_then(|o| o.max_controlled_bytes)
+            .filter(|&limit| limit > 0)
+            && tables_bytes.saturating_add(bytes.len()) > limit
+        {
+            return Err("video packet exceeds controlled memory budget".into());
+        }
         let decoded = decoder.decode(&bytes);
         if let Ok(Some(ref dec)) = decoded
             && let Some(limit) = options
                 .and_then(|o| o.max_controlled_bytes)
                 .filter(|&limit| limit > 0)
-            && dec
-                .frame
-                .data
-                .len()
+            && tables_bytes
+                .saturating_add(bytes.len())
+                .saturating_add(dec.frame.data.len())
                 .saturating_add(dec.alpha.as_ref().map_or(0, Vec::len))
                 > limit
         {

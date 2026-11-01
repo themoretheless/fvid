@@ -36,6 +36,86 @@ pub(crate) fn check_wave_metadata_budget(options: &CopyOptions) -> Result<()> {
     Ok(())
 }
 
+pub(crate) fn check_spool_wave_export_budget(
+    rate: u32,
+    channels: u16,
+    bits: u16,
+    sample_frames: u64,
+    metadata_bytes: usize,
+    aac_fold: bool,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<()> {
+    let Some(max) = options.max_controlled_bytes else {
+        return Ok(());
+    };
+    if aac_fold {
+        let chunk_frames = 256usize;
+        let bytes = chunk_frames
+            .checked_mul(usize::from(channels))
+            .and_then(|n| n.checked_mul(4))
+            .ok_or("AAC routing memory estimate overflow")?;
+        let routing_estimate = bytes
+            .checked_add(chunk_frames * 2 * 4 * 2 + 4096 + std::mem::size_of::<crate::owned_stereo_router::StereoRouter>())
+            .ok_or("AAC routing memory estimate overflow")?;
+        if routing_estimate > max {
+            return Err("controlled memory budget exceeded: AAC spatial routing".into());
+        }
+    }
+    if !aac_fold
+        && transform.interval.is_none()
+        && transform.sample_rate.is_none()
+        && transform.channels.is_none()
+        && transform.volume.is_none()
+        && metadata_bytes == 0
+        && options.metadata_set.is_empty()
+        && options.metadata_delete.is_empty()
+        && options.stream_metadata_set.is_empty()
+        && options.stream_metadata_delete.is_empty()
+    {
+        return Ok(());
+    }
+    let stage2_channels = if aac_fold { 2 } else { channels };
+    let width = usize::from(bits / 8).max(1);
+    let block = u16::try_from(usize::from(stage2_channels).saturating_mul(width))
+        .map_err(|_| "invalid WAVE memory geometry")?;
+    let frames = sample_frames.max(1);
+    let input_bytes = usize::try_from(
+        frames
+            .checked_mul(u64::from(block))
+            .ok_or("decoded WAVE size overflow")?,
+    )
+    .map_err(|_| "WAVE PCM payload exceeds address space")?;
+    let data_bytes = u32::try_from(input_bytes).unwrap_or(u32::MAX);
+    let info = crate::owned_wave_inspect::WaveInfo {
+        channel_mask_explicit: false,
+        sample_rate: rate,
+        channels: stage2_channels,
+        bits_per_sample: bits,
+        float: true,
+        valid_bits: bits,
+        channel_mask: 0,
+        data_offset: 44,
+        sample_frames: frames,
+        block,
+        data_bytes,
+        end: 44u64.saturating_add(input_bytes as u64),
+    };
+    let estimated = crate::owned_budget::estimate_float_wave_export_bytes(
+        &info,
+        input_bytes,
+        metadata_bytes,
+        transform,
+        options,
+    )?;
+    if estimated > max {
+        return Err(format!(
+            "controlled memory budget exceeded: need {estimated} bytes, limit {max}"
+        ));
+    }
+    Ok(())
+}
+
 // The PCM phase cannot apply container tags. Build its policy directly rather
 // than cloning potentially unbounded tag strings and discarding them afterward.
 pub(crate) fn pcm_decode_options(options: &CopyOptions) -> CopyOptions {
@@ -85,13 +165,16 @@ pub(crate) fn supports(
             return Err("controlled memory limit must be positive".into());
         }
         crate::owned_budget::check_rss_budget(options)?;
-        let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
-            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-            options
-                .max_packet_bytes
-                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
-        )
-        .map_err(|e| e.to_string())?;
+        let reader = crate::owned_aac::adts::map_controlled_adts_packet_error(
+            crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+                options
+                    .max_packet_bytes
+                    .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+            )
+            .map_err(|e| e.to_string()),
+            options,
+        )?;
         let config = reader.configuration();
         crate::owned_aac::stream::check_adts_decode_admission(reader.audio_specific_config(), options)
             .map_err(|e| e.to_string())?;
@@ -229,6 +312,9 @@ pub(crate) fn apply(
     crate::owned_budget::check_rss_budget(options)?;
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
+    }
+    if options.max_controlled_bytes.is_some() {
+        let _ = crate::owned_audio_plan::plan_decode_audio(source, &transform, options)?;
     }
     let prefix = transform.interval.map(|(_, to)| {
         (

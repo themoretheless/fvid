@@ -95,7 +95,9 @@ pub(crate) fn inspect_with_packet_and_memory_limits<R: Read + Seek>(
         .map_err(|_| invalid("cannot allocate Matroska copy index"))?;
     for packet in reader.packets {
         check(cancel)?;
-        if max_controlled_bytes.is_some_and(|limit| packet.size > limit) {
+        if max_controlled_bytes
+            .is_some_and(|limit| index_bytes.saturating_add(packet.size) > limit)
+        {
             return Err(invalid("controlled memory budget exceeded"));
         }
         let end = packet

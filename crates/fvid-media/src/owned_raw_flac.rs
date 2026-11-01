@@ -137,7 +137,11 @@ fn open_with_interval(
         }
         let pcm_bytes = max_frame_samples
             .checked_mul(usize::from(parsed.channels))
-            .and_then(|n| n.checked_mul(std::mem::size_of::<f32>()))
+            .and_then(|n| {
+                n.checked_mul(
+                    std::mem::size_of::<i32>().saturating_add(std::mem::size_of::<f32>()),
+                )
+            })
             .ok_or("FLAC float allocation overflow")?;
         let index_bytes = parsed
             .frames
@@ -155,6 +159,28 @@ fn open_with_interval(
             .ok_or("FLAC allocation estimate overflow")?;
         if total > max {
             return Err("controlled memory budget exceeded: FLAC decoded PCM".into());
+        }
+        if let Some((transform, None)) = window {
+            let prefix_frames = match options.max_packets {
+                Some(_) => parsed
+                    .frames
+                    .iter()
+                    .take(packets as usize)
+                    .map(|f| u64::from(f.samples))
+                    .sum::<u64>()
+                    .min(to),
+                None => to,
+            };
+            crate::owned_adts_export::check_spool_wave_export_budget(
+                parsed.sample_rate,
+                parsed.channels,
+                32,
+                prefix_frames.max(1024),
+                info.len(),
+                false,
+                transform,
+                options,
+            )?;
         }
     }
     if let Some((transform, None)) = window {
@@ -312,7 +338,9 @@ fn decode_raw_checked(
             let pcm_bytes = decoded
                 .samples
                 .len()
-                .checked_mul(std::mem::size_of::<f32>())
+                .checked_mul(
+                    std::mem::size_of::<i32>().saturating_add(std::mem::size_of::<f32>()),
+                )
                 .ok_or("FLAC float allocation overflow")?;
             let index_bytes = parsed
                 .frames
@@ -382,6 +410,16 @@ pub(crate) fn apply(
     }
     let (rate, channels, mask) = descriptor_with_transform(source, Some(transform), options)?;
     let info = source_info(source, options)?;
+    crate::owned_adts_export::check_spool_wave_export_budget(
+        rate,
+        channels,
+        32,
+        1024,
+        info.len(),
+        false,
+        transform,
+        options,
+    )?;
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,

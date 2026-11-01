@@ -183,6 +183,75 @@ pub fn supports_request(
     }
 }
 
+/// Enforce the minimum controlled-memory working set required by the WAVE normalization
+/// stage on a decoded float32/float64 spool with `(rate, channels)` before decoding packets.
+pub(crate) fn check_spool_loudnorm_budget(
+    args: &str,
+    dual_pass: bool,
+    rate: u32,
+    channels: u16,
+    precise: bool,
+    options: &CopyOptions,
+) -> Result<()> {
+    let Some(limit) = options.max_controlled_bytes else {
+        return Ok(());
+    };
+    let params = parse(args)?;
+    let assignments = options.metadata_set.iter().try_fold(0u128, |sum, (_, v)| {
+        sum.checked_add(v.len() as u128 + 10)
+            .ok_or("loudnorm metadata estimate overflow")
+    })?;
+    let metadata_working = 8 * (assignments + 12);
+    let width = if precise { 8usize } else { 4usize };
+    let frame_bytes = usize::from(channels.max(1)) * width;
+    let size = frame_bytes;
+    let frames = 1usize;
+    let resampled_frames = (frames as u128 * 192000).div_ceil(u128::from(rate.max(1)));
+    let report_bytes = if params.print == Print::None {
+        0
+    } else if !dual_pass && params.gain.is_some() {
+        usize::try_from(report_memory(rate, frames as u64, channels))
+            .map_err(|_| "loudnorm report memory overflow")?
+    } else {
+        usize::try_from(report_memory(
+            192000,
+            u64::try_from(resampled_frames).map_err(|_| "loudnorm report memory overflow")?,
+            channels,
+        ))
+        .map_err(|_| "loudnorm report memory overflow")?
+    };
+    let estimate = if !dual_pass && params.gain.is_some() {
+        let output = (size / width)
+            .checked_mul(4)
+            .ok_or("loudnorm output size overflow")?;
+        (size
+            .checked_add(output)
+            .and_then(|n| n.checked_add(report_bytes))
+            .ok_or("loudnorm memory size overflow")? as u128)
+            .checked_add(metadata_working)
+            .ok_or("loudnorm memory size overflow")?
+    } else {
+        let samples = usize::try_from(resampled_frames * u128::from(channels))
+            .map_err(|_| "loudnorm output size overflow")?;
+        (size as u128)
+            + samples as u128 * 12
+            + 192000 * 34 / 10 * 8
+            + 512 * 1024
+            + 2 * frames.min(4096) as u128 * u128::from(channels) * 8
+            + samples as u128 / u128::from(channels) * 8
+            + (samples as u128 / u128::from(channels)).div_ceil(19200) * (40 + 1024)
+            + 19200 * u128::from(channels) * 8
+            + report_bytes as u128
+            + metadata_working
+    };
+    if estimate > limit as u128 {
+        return Err(format!(
+            "controlled memory budget exceeded: need {estimate} bytes"
+        ));
+    }
+    Ok(())
+}
+
 /// Metadata-only plan for the owned WAVE normalizer. Does not decode samples,
 /// measure loudness, emit progress or create output files.
 pub fn plan_loudnorm(
@@ -253,17 +322,25 @@ pub fn plan_loudnorm(
         let metadata_working = 8 * (metadata_bytes as u128 + assignments + 12);
         let width = usize::from(wave_info.bits_per_sample / 8).max(1);
         let frames = size / frame_bytes;
+        let resampled_frames = (frames as u128 * 192000).div_ceil(u128::from(wave_info.sample_rate));
         let report_bytes = if params.print == Print::None {
             0
-        } else {
+        } else if !dual_pass && params.gain.is_some() {
             usize::try_from(report_memory(
                 wave_info.sample_rate,
                 frames as u64,
                 wave_info.channels,
             ))
             .map_err(|_| "loudnorm report memory overflow")?
+        } else {
+            usize::try_from(report_memory(
+                192000,
+                u64::try_from(resampled_frames).map_err(|_| "loudnorm report memory overflow")?,
+                wave_info.channels,
+            ))
+            .map_err(|_| "loudnorm report memory overflow")?
         };
-        let estimate = if params.gain.is_some() {
+        let estimate = if !dual_pass && params.gain.is_some() {
             let output = (size / width)
                 .checked_mul(4)
                 .ok_or("loudnorm output size overflow")?;
@@ -273,11 +350,8 @@ pub fn plan_loudnorm(
                 .checked_add(metadata_working)
                 .ok_or("loudnorm memory size overflow")?
         } else {
-            let samples = usize::try_from(
-                (frames as u128 * 192000).div_ceil(u128::from(wave_info.sample_rate))
-                    * u128::from(wave_info.channels),
-            )
-            .map_err(|_| "loudnorm output size overflow")?;
+            let samples = usize::try_from(resampled_frames * u128::from(wave_info.channels))
+                .map_err(|_| "loudnorm output size overflow")?;
             (size as u128)
                 + samples as u128 * 12
                 + 192000 * 34 / 10 * 8
@@ -374,6 +448,10 @@ pub fn apply_loudnorm(
     let args = resolve_loudnorm_args(args)?;
     let params = parse(&args)?;
     if params.print != Print::None {
+        if destination.symlink_metadata().is_ok() {
+            return Err("output already exists".into());
+        }
+        plan_loudnorm(source, Some(&args), false, options)?;
         let (measurement, export_options) = measure_phase(source, params.dual_mono, options)?;
         return apply_resolved(
             source,
@@ -403,6 +481,10 @@ pub fn apply_loudnorm_dual(
     }
     let base = resolve_loudnorm_args(args)?;
     let original = parse(&base)?;
+    if destination.symlink_metadata().is_ok() {
+        return Err("output already exists".into());
+    }
+    plan_loudnorm(source, Some(&base), true, options)?;
     let (measurement, export_options) = measure_phase(source, original.dual_mono, options)?;
     let clean = base
         .split(':')
@@ -695,16 +777,18 @@ fn apply_dynamic(
             })?;
             let metadata_working = 8 * (metadata_bytes as u128 + assignments + 12);
             let frames = size / usize::from(info.block);
+            let resampled_frames = (frames as u128 * 192000).div_ceil(u128::from(info.sample_rate));
             let report_bytes = if params.print == Print::None {
                 0
             } else {
-                report_memory(info.sample_rate, frames as u64, info.channels)
+                report_memory(
+                    192000,
+                    u64::try_from(resampled_frames).map_err(|_| "loudnorm report memory overflow")?,
+                    info.channels,
+                )
             };
-            samples = usize::try_from(
-                (frames as u128 * 192000).div_ceil(u128::from(info.sample_rate))
-                    * u128::from(info.channels),
-            )
-            .map_err(|_| "loudnorm output size overflow")?;
+            samples = usize::try_from(resampled_frames * u128::from(info.channels))
+                .map_err(|_| "loudnorm output size overflow")?;
             // Raw input + exact output double storage + f32 publication buffer,
             // bounded resampler queues/scratch and the meter's 3.4 s energy rings.
             let estimate = (size as u128)

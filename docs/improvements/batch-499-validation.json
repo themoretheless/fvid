@@ -1,0 +1,16 @@
+{
+  "batch": 499,
+  "ids": [
+    "FVID-0498"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-499-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-499-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-499-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-499-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission wave_and_container_loudness_and_loudnorm_reject_speaker_masks_whose_bit_count_disagrees_with_channels -- --nocapture",
+    "cargo test --test mp4_audio_metadata_admission -- --nocapture"
+  ],
+  "passed": 69,
+  "failed": 0
+}

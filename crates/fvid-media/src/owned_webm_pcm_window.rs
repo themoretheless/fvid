@@ -22,9 +22,14 @@ pub(super) fn prepare(
     origin: i64,
     window: (i64, i64),
     options: &CopyOptions,
+    base_working_bytes: usize,
     private: &mut Directory,
 ) -> Result<Prepared> {
     let mut control = options.clone();
+    control.max_controlled_bytes = options
+        .max_controlled_bytes
+        .filter(|&limit| limit > 0)
+        .map(|limit| limit.saturating_sub(base_working_bytes).max(1));
     control.streams = vec![index];
     control.progress = None;
     control.metadata_set.clear();
@@ -105,11 +110,15 @@ pub(super) fn prepare(
     }];
     let mut writer = mkv::PacketWriter::new(&mut output, &specs).map_err(|e| e.to_string())?;
     let mut input = BufReader::new(File::open(raw_path).map_err(|e| e.to_string())?);
-    let mut data = crate::owned_frame::buffer(
-        packet_frames
-            .checked_mul(frame_bytes)
-            .ok_or("PCM packet size overflow")?,
-    )?;
+    let data_bytes = packet_frames
+        .checked_mul(frame_bytes)
+        .ok_or("PCM packet size overflow")?;
+    if let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0)
+        && base_working_bytes.saturating_add(data_bytes) > limit
+    {
+        return Err("controlled memory budget exceeded: Matroska PCM window limit".into());
+    }
+    let mut data = crate::owned_frame::buffer(data_bytes)?;
     let ns = |n: u64| -> Result<u64> {
         u64::try_from((u128::from(n) * 1_000_000_000 + u128::from(rate) / 2) / u128::from(rate))
             .map_err(|_| "PCM timestamp overflow".into())

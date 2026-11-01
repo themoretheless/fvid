@@ -52,8 +52,24 @@ pub(super) fn apply<R: Read + Seek>(
             .map_err(|e| e.to_string())?;
     }
     let first = reader.packets[indices[0]].pts_ns;
+    let index_and_meta_bytes = if options.max_controlled_bytes.is_some() {
+        reader
+            .estimated_index_payload_bytes()
+            .map_err(|e| e.to_string())?
+    } else {
+        0
+    };
+    let positions_bytes = indices
+        .len()
+        .checked_mul(std::mem::size_of::<(usize, u64, u64)>())
+        .ok_or("audio window sample overflow")?;
+    if let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0)
+        && index_and_meta_bytes.saturating_add(positions_bytes) > limit
+    {
+        return Err("controlled memory budget exceeded: Matroska audio window limit".into());
+    }
     let mut total = 0u64;
-    let mut positions = Vec::new();
+    let mut positions = Vec::with_capacity(indices.len());
     let tolerance =
         (u128::from(reader.timestamp_scale_ns()) * u128::from(rate) / 1_000_000_000) as u64;
     for (ordinal, &i) in indices.iter().enumerate() {
@@ -75,10 +91,19 @@ pub(super) fn apply<R: Read + Seek>(
         let frames = if let Some(frame) = aac_frame {
             frame
         } else {
+            let packet = reader.read_packet(i).map_err(|e| e.to_string())?;
+            if let Some(limit) = options.max_controlled_bytes.filter(|&limit| limit > 0)
+                && index_and_meta_bytes
+                    .saturating_add(positions_bytes)
+                    .saturating_add(packet.len())
+                    > limit
+            {
+                return Err("controlled memory budget exceeded: Matroska audio window limit".into());
+            }
             samples(
                 crate::owned_opus_packet::duration_ns_with_header(
                     &track.codec_private,
-                    &reader.read_packet(i).map_err(|e| e.to_string())?,
+                    &packet,
                 )
                 .map_err(|e| e.to_string())?,
             )?

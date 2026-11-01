@@ -1,0 +1,17 @@
+{
+  "batch": 493,
+  "ids": [
+    "FVID-0492"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-493-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-493-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-493-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-493-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission matroska_display_geometry_alpha_transform_and_mp4_bridge_charge_simultaneous_working_sets -- --exact",
+    "cargo test --test mp4_audio_metadata_admission",
+    "cargo test --test mp4_metadata_admission"
+  ],
+  "passed": 77,
+  "failed": 0
+}

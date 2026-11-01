@@ -141,12 +141,28 @@ pub fn measure_file_with_options(
             return Err(invalid("channel weights must match selected audio stream"));
         }
         LoudnessMeter::new(rate, weights).map_err(|e| invalid(&e))?;
+        if let Some(max) = options.max_controlled_bytes {
+            let frame = usize::from(channels.max(1)) * 4;
+            let capacity = 65536 / frame * frame;
+            let rate_sz = rate as usize;
+            let estimated = (rate_sz * 3 + rate_sz * 2 / 5) as u128 * 8
+                + capacity as u128
+                + (capacity / frame) as u128 * u128::from(channels) * 8
+                + u128::from(channels) * 512
+                + 16384;
+            if estimated > max as u128 {
+                return Err(invalid(&format!(
+                    "controlled memory budget exceeded: need {estimated} bytes"
+                )));
+            }
+        }
         let spool = fvid_media::owned_container_loudness::decode_to_wave_unqualified(
             source, options,
         )
         .map_err(|e| invalid(&e))?;
         let mut pcm_options = fvid_media::CopyOptions::default();
         pcm_options.cancel = options.cancel.clone();
+        pcm_options.max_controlled_bytes = options.max_controlled_bytes;
         pcm_options.max_rss_bytes = options.max_rss_bytes;
         let report = measure_file_with_options(&spool.wave, weights, &pcm_options)?;
         control.check()?;
@@ -199,7 +215,27 @@ pub fn measure_file_with_options(
         if selected.is_some_and(|s| s != 0) {
             return Err(invalid("ADTS has only stream 0"));
         }
-        if options.max_controlled_bytes.is_some() {
+        if let Some(max) = options.max_controlled_bytes {
+            let (rate, channels) =
+                fvid_media::owned_audio_plan::source_geometry(source, options)
+                    .map_err(|e| invalid(&e))?;
+            if weights.len() != usize::from(channels) {
+                return Err(invalid("channel weights must match selected audio stream"));
+            }
+            LoudnessMeter::new(rate, weights).map_err(|e| invalid(&e))?;
+            let frame = usize::from(channels.max(1)) * 4;
+            let capacity = 65536 / frame * frame;
+            let rate_sz = rate as usize;
+            let estimated = (rate_sz * 3 + rate_sz * 2 / 5) as u128 * 8
+                + capacity as u128
+                + (capacity / frame) as u128 * u128::from(channels) * 8
+                + u128::from(channels) * 512
+                + 16384;
+            if estimated > max as u128 {
+                return Err(invalid(&format!(
+                    "controlled memory budget exceeded: need {estimated} bytes"
+                )));
+            }
             let spool =
                 fvid_media::owned_container_loudness::decode_adts_to_wave(source, options)
                     .map_err(|e| invalid(&e))?;
@@ -209,6 +245,7 @@ pub fn measure_file_with_options(
             LoudnessMeter::new(spool.stats.sample_rate, weights).map_err(|e| invalid(&e))?;
             let mut pcm_options = fvid_media::CopyOptions::default();
             pcm_options.cancel = options.cancel.clone();
+            pcm_options.max_controlled_bytes = options.max_controlled_bytes;
             pcm_options.max_rss_bytes = options.max_rss_bytes;
             let report = measure_file_with_options(&spool.wave, weights, &pcm_options)?;
             control.check()?;

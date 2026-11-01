@@ -1,0 +1,17 @@
+{
+  "batch": 500,
+  "ids": [
+    "FVID-0499"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-500-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-500-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-500-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-500-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission wave_loudnorm_validates_metadata_keys_in_supports_and_plan_and_charges_dynamic_working_set_in_dual_pass_plan -- --nocapture",
+    "cargo test --test mp4_audio_metadata_admission -- --nocapture",
+    "cargo test -p fvid-media --lib loudnorm -- --nocapture"
+  ],
+  "passed": 82,
+  "failed": 0
+}

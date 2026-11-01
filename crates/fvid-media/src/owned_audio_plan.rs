@@ -238,13 +238,16 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
         if !crate::owned_audio_export::simple_options(options) {
             return Err("ADTS has only stream 0".into());
         }
-        let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
-            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-            options
-                .max_packet_bytes
-                .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
-        )
-        .map_err(|e| e.to_string())?;
+        let reader = crate::owned_aac::adts::map_controlled_adts_packet_error(
+            crate::owned_aac::adts::StreamReader::open_with_packet_limit(
+                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+                options
+                    .max_packet_bytes
+                    .min(options.max_controlled_bytes.unwrap_or(usize::MAX)),
+            )
+            .map_err(|e| e.to_string()),
+            options,
+        )?;
         let config = reader.configuration();
         let prefix = transform.and_then(|transform|
             crate::owned_adts_export::decoded_prefix(*transform, config.sample_rate));
@@ -395,6 +398,20 @@ pub fn plan_decode_audio(
         {
             return Err("unsupported speaker layout".into());
         }
+    }
+    if adts || mp4 || is_matroska || raw_encoded_audio || ogg || g711_wave {
+        let (stage2_rate, stage2_channels, _) = mp4_target.unwrap_or((rate, channels, mask));
+        let stage2_bits = if precision == "float64" { 64 } else { 32 };
+        crate::owned_adts_export::check_spool_wave_export_budget(
+            stage2_rate,
+            stage2_channels,
+            stage2_bits,
+            1024,
+            0,
+            aac_fold,
+            *transform,
+            options,
+        )?;
     }
     let mut steps = vec![PlanStep {
         action: "decode".into(),

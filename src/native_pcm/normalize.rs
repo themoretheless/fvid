@@ -80,6 +80,17 @@ pub fn normalize_file_with_options(
     measure_options.metadata_delete.clear();
     measure_options.stream_metadata_set.clear();
     measure_options.stream_metadata_delete.clear();
+    if options.max_controlled_bytes.is_some() {
+        let (_, channels) = fvid_media::owned_audio_plan::source_geometry(source, &measure_options)
+            .map_err(|e| invalid(&e))?;
+        crate::native_export::pcm_matroska::check_output_memory_budget(
+            source,
+            channels,
+            65536,
+            options,
+            Some(matroska_out),
+        )?;
+    }
     measure_options.progress = measure_hook;
     let measured = measure_loudness_file_with_options(source, weights, &measure_options)?;
     let plan = fvid_media::owned_normalize::GainPlan::new(&measured, target)

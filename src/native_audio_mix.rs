@@ -553,10 +553,13 @@ pub fn plan_with_controls(
         geometry = Some(shape);
     }
     let (_, channels) = geometry.unwrap();
+    let mix_stage_bytes = 32768usize
+        .saturating_mul(usize::from(channels))
+        .saturating_add(sources.len().saturating_mul(8 * 1024));
     crate::native_export::pcm_matroska::check_output_memory_budget(
         &sources[0],
         channels,
-        32768usize.saturating_mul(usize::from(channels)),
+        mix_stage_bytes,
         controls,
         None,
     )?;
@@ -904,10 +907,13 @@ fn merge_geometry_with_options(
     if !(1..=64).contains(&channels) {
         return Err(invalid("merge-audio output requires 1..=64 channels"));
     }
+    let merge_stage_bytes = 16384usize
+        .saturating_mul(usize::from(channels))
+        .saturating_add(sources.len().saturating_mul(8 * 1024));
     crate::native_export::pcm_matroska::check_output_memory_budget(
         &sources[0],
         channels,
-        16384usize.saturating_mul(usize::from(channels)),
+        merge_stage_bytes,
         options,
         None,
     )?;

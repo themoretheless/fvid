@@ -115,31 +115,43 @@ pub(crate) fn decode_presented(
         decode_errors: 0,
     };
     let mut frames = Vec::new();
+    let index_bytes = reader
+        .estimated_index_payload_bytes()
+        .map_err(|e| e.to_string())?;
+    let table_bytes = samples
+        .checked_mul(std::mem::size_of::<FrameMetadata>())
+        .and_then(|n| n.checked_add(index_bytes))
+        .ok_or("MP4 presentation metadata memory overflow")?;
     if let Some(limit) = options
         .and_then(|o| o.max_controlled_bytes)
         .filter(|&limit| limit > 0)
+        && table_bytes > limit
     {
-        let index_bytes = reader
-            .estimated_index_payload_bytes()
-            .map_err(|e| e.to_string())?;
-        let table_bytes = samples
-            .checked_mul(std::mem::size_of::<FrameMetadata>())
-            .and_then(|n| n.checked_add(index_bytes))
-            .ok_or("MP4 presentation metadata memory overflow")?;
-        if table_bytes > limit {
-            return Err(
-                "controlled memory budget exceeded: MP4 presentation metadata table".into(),
-            );
-        }
+        return Err(
+            "controlled memory budget exceeded: MP4 presentation metadata table".into(),
+        );
     }
     frames
         .try_reserve_exact(samples)
         .map_err(|_| "MP4 presentation metadata allocation failed")?;
-    let check_decoded_pixels = |pixels: &[u8]| -> Result<()> {
+    let check_packet_budget = |packet: &[u8]| -> Result<()> {
         if let Some(limit) = options
             .and_then(|o| o.max_controlled_bytes)
             .filter(|&limit| limit > 0)
-            && pixels.len() > limit
+            && table_bytes.saturating_add(packet.len()) > limit
+        {
+            return Err("MP4 video packet exceeds controlled memory budget".into());
+        }
+        Ok(())
+    };
+    let check_decoded_pixels = |packet: &[u8], pixels: &[u8]| -> Result<()> {
+        if let Some(limit) = options
+            .and_then(|o| o.max_controlled_bytes)
+            .filter(|&limit| limit > 0)
+            && table_bytes
+                .saturating_add(packet.len())
+                .saturating_add(pixels.len())
+                > limit
         {
             return Err("MP4 video frame exceeds controlled memory budget".into());
         }
@@ -165,6 +177,7 @@ pub(crate) fn decode_presented(
             reader
                 .read_packet(index, sample, &mut packet)
                 .map_err(|e| e.to_string())?;
+            check_packet_budget(&packet)?;
             let decoded = match decoder.decode_order(&packet) {
                 Ok(value) => value,
                 Err(Error::Unsupported(_)) => return Ok(None),
@@ -217,9 +230,19 @@ pub(crate) fn decode_presented(
                 let mut sub = sub;
                 if let Some(spool) = spool.as_mut() {
                     pixels = pack_avc_format(&picture, rgb)?;
-                    check_decoded_pixels(&pixels)?;
-                    rotate_packed(&mut size, &mut sub, output_depth, chroma == 0, rgb, rotation, Some(&mut pixels))?;
-                    check_decoded_pixels(&pixels)?;
+                    check_decoded_pixels(&packet, &pixels)?;
+                    rotate_packed(
+                        &mut size,
+                        &mut sub,
+                        output_depth,
+                        chroma == 0,
+                        rgb,
+                        rotation,
+                        Some(&mut pixels),
+                        table_bytes.saturating_add(packet.len()),
+                        options.and_then(|o| o.max_controlled_bytes),
+                    )?;
+                    check_decoded_pixels(&packet, &pixels)?;
                     let current = (size, output_depth, sub, chroma == 0, rgb);
                     if storage_format.is_some_and(|previous| previous != current) {
                         return Ok(None);
@@ -227,7 +250,17 @@ pub(crate) fn decode_presented(
                     storage_format = Some(current);
                     spool.push(&pixels, 0, 0)?;
                 } else {
-                    rotate_packed(&mut size, &mut sub, output_depth, chroma == 0, rgb, rotation, None)?;
+                    rotate_packed(
+                        &mut size,
+                        &mut sub,
+                        output_depth,
+                        chroma == 0,
+                        rgb,
+                        rotation,
+                        None,
+                        0,
+                        None,
+                    )?;
                 }
                 let mut colour = container_colour;
                 if let Some((_, full, codes)) = vui.and_then(|v| v.video_signal) {
@@ -275,6 +308,7 @@ pub(crate) fn decode_presented(
             reader
                 .read_packet(index, sample, &mut packet)
                 .map_err(|e| e.to_string())?;
+            check_packet_budget(&packet)?;
             let decoded = match decoder.decode_container_sample(&packet) {
                 Ok(value) => value,
                 Err(Error::Unsupported(_)) => return Ok(None),
@@ -287,9 +321,19 @@ pub(crate) fn decode_presented(
             let mut sub = decoded.color.subsampling;
             if let Some(spool) = spool.as_mut() {
                 pixels = crate::owned_webm_codec::pack_av1(&decoded)?.frame.data;
-                check_decoded_pixels(&pixels)?;
-                rotate_packed(&mut size, &mut sub, picture.depth, decoded.color.monochrome, rgb, rotation, Some(&mut pixels))?;
-                check_decoded_pixels(&pixels)?;
+                check_decoded_pixels(&packet, &pixels)?;
+                rotate_packed(
+                    &mut size,
+                    &mut sub,
+                    picture.depth,
+                    decoded.color.monochrome,
+                    rgb,
+                    rotation,
+                    Some(&mut pixels),
+                    table_bytes.saturating_add(packet.len()),
+                    options.and_then(|o| o.max_controlled_bytes),
+                )?;
+                check_decoded_pixels(&packet, &pixels)?;
                 let current = (size, picture.depth, sub, decoded.color.monochrome, rgb);
                 if storage_format.is_some_and(|previous| previous != current) {
                     return Ok(None);
@@ -297,7 +341,17 @@ pub(crate) fn decode_presented(
                 storage_format = Some(current);
                 spool.push(&pixels, 0, 0)?;
             } else {
-                rotate_packed(&mut size, &mut sub, picture.depth, decoded.color.monochrome, rgb, rotation, None)?;
+                rotate_packed(
+                    &mut size,
+                    &mut sub,
+                    picture.depth,
+                    decoded.color.monochrome,
+                    rgb,
+                    rotation,
+                    None,
+                    0,
+                    None,
+                )?;
             }
             // AV1 code 2 is unspecified: an explicit nclx signal fills it.
             let named = |sequence: u8, container: u8| {
@@ -351,6 +405,7 @@ pub(crate) fn decode_presented(
             let timing = reader.tracks()[index].samples.get(sample).ok_or("missing MP4 VP9 sample timing")?;
             let (pts, duration) = (timing.pts, i64::from(timing.duration));
             reader.read_packet(index, sample, &mut packet).map_err(|e| e.to_string())?;
+            check_packet_budget(&packet)?;
             let mut shown = false;
             for coded in fvid_codecs::codec::vp9::frames(&packet).map_err(|e| e.to_string())? {
                 let decoded = decoder.decode(coded).map_err(|e| e.to_string())?;
@@ -371,15 +426,25 @@ pub(crate) fn decode_presented(
                     let planes = p.planes.each_ref().map(|p| (p.width, p.height, p.samples.as_slice()));
                     pixels = if rgb { crate::owned_frame::pack_gbr(p.size, p.depth, planes)?.data }
                         else { crate::owned_webm_codec::pack(p.size, p.depth, planes, p.subsampling, false)?.frame.data };
-                    check_decoded_pixels(&pixels)?;
-                    rotate_packed(&mut size, &mut sub, p.depth, false, rgb, rotation, Some(&mut pixels))?;
-                    check_decoded_pixels(&pixels)?;
+                    check_decoded_pixels(&packet, &pixels)?;
+                    rotate_packed(
+                        &mut size,
+                        &mut sub,
+                        p.depth,
+                        false,
+                        rgb,
+                        rotation,
+                        Some(&mut pixels),
+                        table_bytes.saturating_add(packet.len()),
+                        options.and_then(|o| o.max_controlled_bytes),
+                    )?;
+                    check_decoded_pixels(&packet, &pixels)?;
                     let current = (size, p.depth, sub, false, rgb);
                     if storage_format.is_some_and(|previous| previous != current) { return Ok(None); }
                     storage_format = Some(current);
                     spool.push(&pixels, 0, 0)?;
                 } else {
-                    rotate_packed(&mut size, &mut sub, p.depth, false, rgb, rotation, None)?;
+                    rotate_packed(&mut size, &mut sub, p.depth, false, rgb, rotation, None, 0, None)?;
                 }
                 let mut colour = container_colour;
                 colour.full_range = format.full_range;
@@ -404,6 +469,7 @@ pub(crate) fn decode_presented(
             reader
                 .read_packet(index, sample, &mut packet)
                 .map_err(|e| e.to_string())?;
+            check_packet_budget(&packet)?;
             let decoded = match decoder.decode_packet(&packet) {
                 Ok(value) => value,
                 Err(Error::Unsupported(_)) => return Ok(None),
@@ -440,9 +506,19 @@ pub(crate) fn decode_presented(
                 };
                 if let Some(spool) = spool.as_mut() {
                     pixels = pack_hevc(picture, sub, chroma == 0, rgb)?;
-                    check_decoded_pixels(&pixels)?;
-                    rotate_packed(&mut size, &mut sub, output_depth, chroma == 0, rgb, rotation, Some(&mut pixels))?;
-                    check_decoded_pixels(&pixels)?;
+                    check_decoded_pixels(&packet, &pixels)?;
+                    rotate_packed(
+                        &mut size,
+                        &mut sub,
+                        output_depth,
+                        chroma == 0,
+                        rgb,
+                        rotation,
+                        Some(&mut pixels),
+                        table_bytes.saturating_add(packet.len()),
+                        options.and_then(|o| o.max_controlled_bytes),
+                    )?;
+                    check_decoded_pixels(&packet, &pixels)?;
                     let current = (size, output_depth, sub, chroma == 0, rgb);
                     if storage_format.is_some_and(|previous| previous != current) {
                         return Ok(None);
@@ -450,7 +526,17 @@ pub(crate) fn decode_presented(
                     storage_format = Some(current);
                     spool.push(&pixels, 0, 0)?;
                 } else {
-                    rotate_packed(&mut size, &mut sub, output_depth, chroma == 0, rgb, rotation, None)?;
+                    rotate_packed(
+                        &mut size,
+                        &mut sub,
+                        output_depth,
+                        chroma == 0,
+                        rgb,
+                        rotation,
+                        None,
+                        0,
+                        None,
+                    )?;
                 }
                 let mut colour = container_colour;
                 if let Some(signal) = decoder.parameters().0.vui.as_ref().and_then(|v| v.signal) {
@@ -1166,6 +1252,8 @@ fn rotate_packed(
     rgb: bool,
     rotation: u16,
     pixels: Option<&mut Vec<u8>>,
+    live_bytes: usize,
+    max_controlled_bytes: Option<usize>,
 ) -> Result<()> {
     if rotation == 0 {
         return Ok(());
@@ -1203,6 +1291,15 @@ fn rotate_packed(
         };
         let (mut rotated, _) =
             crate::owned_display_geometry::apply(&frame, None, depth, [0; 4], rotation)?;
+        if max_controlled_bytes.is_some_and(|limit| {
+            limit > 0
+                && live_bytes
+                    .saturating_add(frame.data.len())
+                    .saturating_add(rotated.data.len())
+                    > limit
+        }) {
+            return Err("MP4 video frame exceeds controlled memory budget".into());
+        }
         if let Some([sx, sy]) = rotated.subsampling {
             if !mono {
                 if !matches!([sx, sy], [1, 1] | [2, 1] | [2, 2]) {
@@ -1211,7 +1308,17 @@ fn rotate_packed(
                     let count = rw.checked_mul(rh).ok_or("stored display size overflow")?;
                     let (pw, ph) = (rw.div_ceil(sx), rh.div_ceil(sy));
                     let c_len = pw * ph * bytes;
-                    let mut promoted = crate::owned_frame::buffer(count * 3 * bytes)?;
+                    let promoted_len = count * 3 * bytes;
+                    if max_controlled_bytes.is_some_and(|limit| {
+                        limit > 0
+                            && live_bytes
+                                .saturating_add(rotated.data.len())
+                                .saturating_add(promoted_len)
+                                > limit
+                    }) {
+                        return Err("MP4 video frame exceeds controlled memory budget".into());
+                    }
+                    let mut promoted = crate::owned_frame::buffer(promoted_len)?;
                     promoted[..count * bytes].copy_from_slice(&rotated.data[..count * bytes]);
                     for comp in 0..2 {
                         let src = &rotated.data[count * bytes + comp * c_len..count * bytes + (comp + 1) * c_len];

@@ -268,10 +268,45 @@ pub(crate) fn inspect_first_y4m_frame_with_filters_and_options(
     let [visible_w, visible_h] =
         crate::virtual_camera::visible_dimensions([width, height], insets)?;
     let aspect = transformed_aspect(reader.pixel_aspect(), visible_w, visible_h, geometry)?;
-    let (width, height) = if geometry.is_identity() && rotation == 0 && insets == [0; 4] && filters.is_empty() {
+    let raw_frame_bytes = match &frame {
+        RawFrame::Planar(p) => p.frame.data.len(),
+        RawFrame::Planar8(p) => p.y.len().saturating_add(p.cb.len()).saturating_add(p.cr.len()),
+        RawFrame::Avc { picture, .. } => picture
+            .y
+            .len()
+            .saturating_add(picture.cb.len())
+            .saturating_add(picture.cr.len())
+            .saturating_mul(if picture.bit_depth > 8 { 2 } else { 1 }),
+        _ => 0,
+    };
+    let reader_base_bytes = match &reader {
+        NativeReader::Y4m(_) => width
+            .saturating_mul(height)
+            .saturating_mul(3)
+            .saturating_add(raw_frame_bytes),
+        _ => 0,
+    };
+    let is_passthrough =
+        geometry.is_identity() && rotation == 0 && insets == [0; 4] && filters.is_empty();
+    if let Some(mem_limit) = options.max_controlled_bytes
+        && reader_base_bytes.saturating_add(raw_frame_bytes) > mem_limit
+    {
+        return Err(invalid("Y4M frame exceeds controlled memory budget"));
+    }
+    let (width, height) = if is_passthrough {
         (width, height)
     } else {
         let mut picture = geometry.apply_cropped_display(&frame, width, height, rotation, insets)?;
+        if let Some(mem_limit) = options.max_controlled_bytes {
+            let picture_working = filters.working_bytes(picture.data.len(), depth);
+            if reader_base_bytes
+                .saturating_add(raw_frame_bytes)
+                .saturating_add(picture_working)
+                > mem_limit
+            {
+                return Err(invalid("Y4M frame exceeds controlled memory budget"));
+            }
+        }
         if !filters.is_empty() {
             filters.configure_vignette_source(&reader, geometry)?;
             filters.apply_colour_clock(
@@ -459,16 +494,26 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
     let mut prefix = [0u8; 9];
     let read = file.read(&mut prefix)?;
     if read == 9 && &prefix == b"YUV4MPEG2" {
+        let mut frame_len = 0usize;
+        let mut rgb_len = 0usize;
         let mut input = BufReader::new(File::open(source)?);
         let mut line = Vec::new();
         if crate::line(&mut input, &mut line)? {
             let header = crate::Header::parse(&line)?;
-            let frame_len = header.frame_len()?;
+            frame_len = header.frame_len()?;
+            rgb_len = header
+                .width
+                .checked_mul(header.height)
+                .and_then(|n| n.checked_mul(3))
+                .ok_or_else(|| invalid("RGB dimensions overflow"))?;
             if frame_len > options.max_packet_bytes {
                 return Err(invalid("Y4M frame exceeds byte limit"));
             }
             if let Some(mem_limit) = options.max_controlled_bytes
-                && frame_len > mem_limit
+                && frame_len
+                    .saturating_add(rgb_len)
+                    .saturating_add(frame_len)
+                    > mem_limit
             {
                 return Err(invalid("Y4M frame exceeds controlled memory budget"));
             }
@@ -478,10 +523,20 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
         if bytes > options.max_packet_bytes {
             return Err(invalid("Y4M frame exceeds byte limit"));
         }
-        if let Some(mem_limit) = options.max_controlled_bytes
-            && filters.working_bytes(bytes, depth) > mem_limit
-        {
-            return Err(invalid("Y4M frame exceeds controlled memory budget"));
+        if let Some(mem_limit) = options.max_controlled_bytes {
+            let total_working = if geometry.is_identity() && filters.is_empty() {
+                frame_len
+                    .saturating_add(rgb_len)
+                    .saturating_add(frame_len)
+            } else {
+                frame_len
+                    .saturating_add(rgb_len)
+                    .saturating_add(frame_len)
+                    .saturating_add(filters.working_bytes(bytes, depth))
+            };
+            if total_working > mem_limit {
+                return Err(invalid("Y4M frame exceeds controlled memory budget"));
+            }
         }
         if let Some((from, to)) = interval {
             if let Some(frame_count) = y4m_segment_frame_upper_bound_with_options(source, None, options)? {
@@ -521,11 +576,16 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
                 ..Default::default()
             },
         )?;
+        let index_bytes = reader.estimated_index_payload_bytes()?;
         if let Some(mem_limit) = options.max_controlled_bytes
-            && reader.estimated_index_payload_bytes()? > mem_limit
+            && index_bytes > mem_limit
         {
             return Err(invalid("controlled memory budget exceeded"));
         }
+        let sample_packet_limit = options.max_controlled_bytes.map_or(
+            effective_packet_limit,
+            |mem_limit| effective_packet_limit.min(mem_limit.saturating_sub(index_bytes)),
+        );
         for (idx, track) in reader.tracks().iter().enumerate() {
             if track.handler != *b"vide" || selected.is_some_and(|sel| sel != idx) {
                 continue;
@@ -545,7 +605,7 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
                     if !non_reordered {
                         samples
                             .iter()
-                            .any(|s| s.size as usize > effective_packet_limit)
+                            .any(|s| s.size as usize > sample_packet_limit)
                     } else if let Some((from, to)) = interval {
                         let first_pts =
                             samples.first().map_or(0u128, |s| s.pts.max(0) as u128);
@@ -565,7 +625,7 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
                             if stamp >= to_scaled || emitted_in_interval >= max_samples {
                                 break;
                             }
-                            if s.size as usize > effective_packet_limit {
+                            if s.size as usize > sample_packet_limit {
                                 bad = true;
                                 break;
                             }
@@ -581,13 +641,13 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
                         samples
                             .iter()
                             .take(max_samples)
-                            .any(|s| s.size as usize > effective_packet_limit)
+                            .any(|s| s.size as usize > sample_packet_limit)
                     }
                 }
                 crate::container::mp4::SampleIndex::Uniform(uniform) => {
                     uniform.count > 0
                         && max_samples > 0
-                        && uniform.bytes_per_frame as usize > effective_packet_limit
+                        && uniform.bytes_per_frame as usize > sample_packet_limit
                 }
             };
             if exceeds {
@@ -603,7 +663,7 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
             return Err(invalid("Y4M frame exceeds byte limit"));
         }
         if let Some(mem_limit) = options.max_controlled_bytes
-            && filters.working_bytes(bytes, depth) > mem_limit
+            && index_bytes.saturating_add(filters.working_bytes(bytes, depth)) > mem_limit
         {
             return Err(invalid("Y4M frame exceeds controlled memory budget"));
         }
@@ -633,14 +693,17 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
             crate::container::webm::WebmReader::open(BufReader::new(File::open(source)?), limits)
                 .map_err(map_packet_limit)?;
         reader.scan_all().map_err(map_packet_limit)?;
+        let index_bytes = reader.estimated_index_payload_bytes()?;
         if let Some(mem_limit) = options.max_controlled_bytes
-            && reader.estimated_index_payload_bytes()? > mem_limit
+            && index_bytes > mem_limit
         {
             return Err(invalid("controlled memory budget exceeded"));
         }
         let effective_packet_limit = options
             .max_packet_bytes
-            .min(options.max_controlled_bytes.unwrap_or(usize::MAX));
+            .min(options.max_controlled_bytes.map_or(usize::MAX, |mem_limit| {
+                mem_limit.saturating_sub(index_bytes)
+            }));
         let selected_tracks: Vec<(u64, bool)> = reader
             .tracks
             .iter()
@@ -700,7 +763,7 @@ pub(crate) fn validate_video_packet_budget_with_geometry_filters_interval_and_li
             return Err(invalid("Y4M frame exceeds byte limit"));
         }
         if let Some(mem_limit) = options.max_controlled_bytes
-            && filters.working_bytes(bytes, depth) > mem_limit
+            && index_bytes.saturating_add(filters.working_bytes(bytes, depth)) > mem_limit
         {
             return Err(invalid("Y4M frame exceeds controlled memory budget"));
         }
@@ -1345,7 +1408,12 @@ pub(crate) fn export_audio_pcm_transformed_with_source_metadata(
     options: &fvid_media::CopyOptions,
     source_matroska_metadata: Option<pcm_matroska::MatroskaPcmMetadata>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    crate::media::validate_owned_audio_options_for_destination(options, Some(destination))
+    if options.max_controlled_bytes == Some(0) {
+        return Err(invalid("controlled memory limit must be positive"));
+    }
+    let mut check_opts = options.clone();
+    check_opts.max_controlled_bytes = None;
+    crate::media::validate_owned_audio_options_for_destination(&check_opts, Some(destination))
         .map_err(|error| invalid(&error))?;
     export_pcm_selected(
         source, destination, interval,
@@ -1599,6 +1667,21 @@ fn export_pcm_selected(    source: &Path,
         let source_info = if wave.is_some() {
             let mut file = File::open(source)?;
             let inspected = fvid_media::owned_wave_inspect::inspect(&mut file, cancel)?;
+            if let Some(opts) = options
+                && let Some(max) = opts.max_controlled_bytes
+            {
+                let info_bytes =
+                    fvid_media::owned_wave_inspect::info_chunks_bytes(&mut file, &inspected, cancel)?;
+                let needed =
+                    fvid_media::owned_wave_metadata::wave_metadata_working_bytes(info_bytes, opts)
+                        .map_err(|e| invalid(&e))?
+                        .saturating_add(16 * 1024);
+                if needed > max {
+                    return Err(invalid(&format!(
+                        "controlled memory budget exceeded: need {needed} bytes, limit {max}"
+                    )));
+                }
+            }
             fvid_media::owned_wave_inspect::info_chunks(&mut file, &inspected, cancel)?
         } else if let Some(reader) = &mp4 {
             let index = if allow_wave {
@@ -1751,6 +1834,30 @@ fn export_pcm_selected(    source: &Path,
     } else {
         fvid_media::owned_pcm_channels::standard_mask(input_channels).unwrap_or(0) as u32
     };
+    if let Some((_, info)) = &wave
+        && let Some(limit) = options.and_then(|o| o.max_controlled_bytes)
+    {
+        let frame_bytes = usize::from(info.frame_bytes());
+        let capacity = if frame_bytes == 0 {
+            0
+        } else {
+            65536usize.min(max_packet_bytes.unwrap_or(usize::MAX)) / frame_bytes * frame_bytes
+        };
+        let sink_bytes = if matroska_output {
+            usize::from(output_channels).saturating_mul(4096)
+        } else {
+            info_chunks.len()
+        };
+        let needed = capacity
+            .max(frame_bytes)
+            .saturating_add(16 * 1024)
+            .saturating_add(sink_bytes);
+        if needed > limit {
+            return Err(invalid(&format!(
+                "controlled memory budget exceeded: need {needed} bytes, limit {limit}"
+            )));
+        }
+    }
     let mut pcm = fvid_media::owned_pcm_gain::PcmGain::with_mask(
         &mut resampler,
         volume,

@@ -1,0 +1,17 @@
+{
+  "batch": 492,
+  "ids": [
+    "FVID-0491"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-492-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-492-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-492-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-492-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission mp4_webm_and_ogg_probes_charge_simultaneous_index_packet_and_setup_working_sets -- --exact",
+    "cargo test --test mp4_audio_metadata_admission",
+    "cargo test --test mp4_metadata_admission"
+  ],
+  "passed": 76,
+  "failed": 0
+}

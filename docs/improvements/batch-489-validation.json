@@ -1,0 +1,16 @@
+{
+  "batch": 489,
+  "ids": [
+    "FVID-0488"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-489-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-489-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-489-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-489-related-after.txt",
+  "commands": [
+    "cargo test --test mp4_audio_metadata_admission multitrack_lossless_exports_and_subtitle_burn_visitors_charge_simultaneous_working_sets",
+    "cargo test --test mp4_audio_metadata_admission"
+  ],
+  "passed": 58,
+  "failed": 0
+}

@@ -1,0 +1,16 @@
+{
+  "batch": 507,
+  "ids": [
+    "FVID-0506"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-507-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-507-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-507-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-507-related-after.txt",
+  "commands": [
+    "cargo test --locked --offline --no-default-features --test mp4_audio_metadata_admission audio_mix_merge_and_raw_flac_mp3_pcm_charge_simultaneous_working_sets",
+    "cargo test --locked --offline --no-default-features --test mp4_audio_metadata_admission"
+  ],
+  "passed": 77,
+  "failed": 0
+}

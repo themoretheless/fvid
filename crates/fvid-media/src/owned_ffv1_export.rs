@@ -254,7 +254,7 @@ pub(crate) fn export(
     transform: &DecodeTransform,
     options: &CopyOptions,
 ) -> Result<(DecodeStats, fvid_control::ProgressEvent, u64)> {
-    export_processed(source, destination, transform, options, None)
+    export_processed(source, destination, transform, options, None, 0)
 }
 /// Process each decoded frame inside the existing atomic metadata-preserving exporter.
 pub(crate) fn export_processed(
@@ -263,6 +263,7 @@ pub(crate) fn export_processed(
     transform: &DecodeTransform,
     options: &CopyOptions,
     mut process: Option<&mut dyn FnMut(&mut crate::owned_frame::GeometryFrame, u8, i64, bool) -> Result<()>>,
+    extra_base_bytes: usize,
 ) -> Result<(DecodeStats, fvid_control::ProgressEvent, u64)> {
     if options
         .cancel
@@ -358,16 +359,22 @@ pub(crate) fn export_processed(
         metadata.tags.set(key, "");
         text_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
     }
+    let index_bytes = input
+        .estimated_index_payload_bytes()
+        .map_err(|e| e.to_string())?;
+    let mut preview = metadata.clone();
+    preview.chapters = input.chapters.clone();
+    let meta_working_bytes = crate::owned_lossless::estimate_matroska_metadata_working_bytes(
+        &preview,
+        &text_tags,
+        &track_tags,
+        Some(&description),
+    );
+    let base_working_bytes = index_bytes
+        .saturating_add(meta_working_bytes)
+        .saturating_add(extra_base_bytes);
     if let Some(limit) = options.max_controlled_bytes {
-        let mut preview = metadata.clone();
-        preview.chapters = input.chapters.clone();
-        if crate::owned_lossless::estimate_matroska_metadata_working_bytes(
-            &preview,
-            &text_tags,
-            &track_tags,
-            Some(&description),
-        ) > limit
-        {
+        if base_working_bytes > limit {
             return Err("Matroska metadata working set exceeds controlled memory budget".into());
         }
     }
@@ -380,6 +387,31 @@ pub(crate) fn export_processed(
             let mut writer = None;
             let mut visitor = |view: decode::FrameView<'_>| -> Result<()> {
                 crate::owned_budget::check_rss_budget(options)?;
+                let frame_working_bytes = if view.monochrome && process.is_none() {
+                    view.pixels
+                        .len()
+                        .saturating_add(view.alpha.map_or(0, <[u8]>::len))
+                        .saturating_add(view.extra_working_bytes)
+                        .saturating_add(base_working_bytes)
+                } else {
+                    view.pixels
+                        .len()
+                        .saturating_mul(2)
+                        .saturating_add(view.alpha.map_or(0, <[u8]>::len))
+                        .saturating_add(view.extra_working_bytes)
+                        .saturating_add(base_working_bytes)
+                };
+                if options
+                    .max_controlled_bytes
+                    .is_some_and(|limit| frame_working_bytes > limit)
+                {
+                    return Err(if process.is_some() {
+                        "subtitle burn frame exceeds controlled memory budget"
+                    } else {
+                        "video frame exceeds controlled memory budget"
+                    }
+                    .into());
+                }
                 let packet = if view.monochrome && process.is_none() {
                     let samples = (view.width as usize)
                         .checked_mul(view.height as usize)
@@ -441,7 +473,7 @@ pub(crate) fn export_processed(
                 }
                 if options
                     .max_controlled_bytes
-                    .is_some_and(|limit| packet.len() > limit)
+                    .is_some_and(|limit| frame_working_bytes.saturating_add(packet.len()) > limit)
                 {
                     return Err("encoded FFV1 packet exceeds controlled memory budget".into());
                 }

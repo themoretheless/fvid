@@ -73,6 +73,18 @@ pub fn apply(
     // Read-only configuration/policy preflight; actual packet failures propagate
     // once execution starts, without retry through the legacy backend.
     crate::owned_adts_loudness::validate_header_configuration(source, &decode_options)?;
+    if dual_pass || crate::owned_loudnorm::report_requested(Some(&resolved))? {
+        crate::owned_adts_loudness::plan_loudness(source, &decode_options)?;
+    }
+    let (rate, channels) = crate::owned_audio_plan::source_geometry(source, &decode_options)?;
+    crate::owned_loudnorm::check_spool_loudnorm_budget(
+        &resolved,
+        dual_pass,
+        rate,
+        channels,
+        false,
+        options,
+    )?;
     let spool = crate::owned_adts_export::decode_to_wave(source, None, options)?;
     if !crate::owned_wave_loudness::qualified_rate(spool.stats.sample_rate) {
         return Err(
@@ -130,7 +142,20 @@ pub fn plan_loudnorm(
     // A generic decode plan also negotiates PCM by decoding the ADTS stream;
     // normalization planning must leave packet-content validity to execution.
     let decode_options = crate::owned_adts_export::pcm_decode_options(options);
-    let mut plan = crate::owned_adts_loudness::plan_loudness(source, &decode_options)?;
+    let mut plan = if dual_pass || crate::owned_loudnorm::report_requested(Some(&resolved))? {
+        crate::owned_adts_loudness::plan_loudness(source, &decode_options)?
+    } else {
+        crate::owned_adts_loudness::plan_loudness_without_meter_budget(source, &decode_options)?
+    };
+    let (rate, channels) = crate::owned_audio_plan::source_geometry(source, &decode_options)?;
+    crate::owned_loudnorm::check_spool_loudnorm_budget(
+        &resolved,
+        dual_pass,
+        rate,
+        channels,
+        false,
+        options,
+    )?;
     plan.command = "loudnorm".into();
     plan.notes
         .retain(|note| !note.contains("measurement completion"));

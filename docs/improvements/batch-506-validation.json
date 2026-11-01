@@ -1,0 +1,16 @@
+{
+  "batch": 506,
+  "ids": [
+    "FVID-0505"
+  ],
+  "snapshot": "docs/improvements/snapshots/batch-506-pre-edit",
+  "before_evidence": "docs/improvements/evidence/batch-506-acceptance-before.txt",
+  "after_evidence": "docs/improvements/evidence/batch-506-acceptance-after.txt",
+  "related_evidence": "docs/improvements/evidence/batch-506-related-after.txt",
+  "commands": [
+    "cargo test --locked --offline --test mp4_audio_metadata_admission lossless_ffv1_export_and_plan_charge_simultaneous_filter_working_set_encoder_copy_and_stage_metadata -- --nocapture",
+    "cargo test --locked --offline --test mp4_audio_metadata_admission"
+  ],
+  "passed": 75,
+  "failed": 0
+}
