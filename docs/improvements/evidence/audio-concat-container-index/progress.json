@@ -1,6 +1,7 @@
 {
-  "status": "qualified;pending delivery",
+  "status": "delivered",
   "accepted_count": 478,
   "next_id": "FVID-0479",
+  "receipt": "../audio-concat-packet-work/delivery.json",
   "session": null
 }
