@@ -24521,3 +24521,15 @@ update indexed history with defined-band masks; unknown history is never used.
 1,716 own playback programmes and96 refusal programmes cover container decode,
 clocks, checkpoint/retry, seek and rewind. See [qualification](validation/aac-ld-mps-arbitrary-defined-2026-11-02.md). General active-uncovered semantics and
 other codec gaps remain open.
+
+### 2026-11-02: arbitrary-downmix input columns for OTT-only trees5/6/7
+
+Trees7571/7572 and212 now compensate every input column before M1 temporal
+smoothing and interpolation. Six-input cases use six independent gain regions;
+mono uses one. Same-format assembler reconfiguration preserves interpolation
+history for in-band ADG on/off/on. Qualification includes378 own programmes,
+126 disabled controls, seven grids and six PCM/shared-LD-SBR domains, an
+independent80-digit sparse-M1 oracle, unity PCM equality and reader navigation.
+The former constructor-refusal expectation is replaced by admission plus this
+acceptance corpus. Original C qualifies gain conversion only; no foreign full
+757/212 ADG composition comparison is claimed. See [qualification](validation/aac-ld-mps-arbdmx-columns-2026-11-02.md). HRTF and other gaps remain open.

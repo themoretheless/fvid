@@ -1,0 +1,410 @@
+{
+  "scope": "Unmodified CalculateArbDmxMtx conversion, non-residual ADG for1/6 inputs; no foreign whole757/212 ADG matrix/playback comparison",
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "original_algorithm_file_sha256": "ebdb752a1d74a5f7e5638366867b3b477918aa9f4d94169ee3b2e30bfbce6153",
+  "source_changes": [],
+  "harness_sha256": "409c0e7e8d27a7c737c8d5f54c0ba373c106f3009aaca37fd3b67750340cb501",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n",
+  "flags": [
+    "-O2",
+    "-DLD_MPS",
+    "-ffunction-sections",
+    "-fdata-sections",
+    "-Wl,-dead_strip"
+  ],
+  "maximum_absolute_error": 2.055581749260682e-07,
+  "cases": [
+    {
+      "inputs": 1,
+      "phase": 0,
+      "channel": 0,
+      "db": -16.0,
+      "reference": 0.15848931670188904,
+      "decimal": 0.15848931924611134
+    },
+    {
+      "inputs": 1,
+      "phase": 1,
+      "channel": 0,
+      "db": -6.0,
+      "reference": 0.5011872053146362,
+      "decimal": 0.5011872336272722
+    },
+    {
+      "inputs": 1,
+      "phase": 2,
+      "channel": 0,
+      "db": -2.0,
+      "reference": 0.7943282127380371,
+      "decimal": 0.7943282347242815
+    },
+    {
+      "inputs": 1,
+      "phase": 3,
+      "channel": 0,
+      "db": 0.0,
+      "reference": 1.0,
+      "decimal": 1.0
+    },
+    {
+      "inputs": 1,
+      "phase": 4,
+      "channel": 0,
+      "db": 2.0,
+      "reference": 1.258925437927246,
+      "decimal": 1.2589254117941673
+    },
+    {
+      "inputs": 1,
+      "phase": 5,
+      "channel": 0,
+      "db": 6.0,
+      "reference": 1.9952623844146729,
+      "decimal": 1.9952623149688795
+    },
+    {
+      "inputs": 1,
+      "phase": 6,
+      "channel": 0,
+      "db": 16.0,
+      "reference": 6.309573650360107,
+      "decimal": 6.3095734448019325
+    },
+    {
+      "inputs": 6,
+      "phase": 0,
+      "channel": 0,
+      "db": -16.0,
+      "reference": 0.15848931670188904,
+      "decimal": 0.15848931924611134
+    },
+    {
+      "inputs": 6,
+      "phase": 0,
+      "channel": 1,
+      "db": -6.0,
+      "reference": 0.5011872053146362,
+      "decimal": 0.5011872336272722
+    },
+    {
+      "inputs": 6,
+      "phase": 0,
+      "channel": 2,
+      "db": -2.0,
+      "reference": 0.7943282127380371,
+      "decimal": 0.7943282347242815
+    },
+    {
+      "inputs": 6,
+      "phase": 0,
+      "channel": 3,
+      "db": 0.0,
+      "reference": 1.0,
+      "decimal": 1.0
+    },
+    {
+      "inputs": 6,
+      "phase": 0,
+      "channel": 4,
+      "db": 2.0,
+      "reference": 1.258925437927246,
+      "decimal": 1.2589254117941673
+    },
+    {
+      "inputs": 6,
+      "phase": 0,
+      "channel": 5,
+      "db": 6.0,
+      "reference": 1.9952623844146729,
+      "decimal": 1.9952623149688795
+    },
+    {
+      "inputs": 6,
+      "phase": 1,
+      "channel": 0,
+      "db": -6.0,
+      "reference": 0.5011872053146362,
+      "decimal": 0.5011872336272722
+    },
+    {
+      "inputs": 6,
+      "phase": 1,
+      "channel": 1,
+      "db": -2.0,
+      "reference": 0.7943282127380371,
+      "decimal": 0.7943282347242815
+    },
+    {
+      "inputs": 6,
+      "phase": 1,
+      "channel": 2,
+      "db": 0.0,
+      "reference": 1.0,
+      "decimal": 1.0
+    },
+    {
+      "inputs": 6,
+      "phase": 1,
+      "channel": 3,
+      "db": 2.0,
+      "reference": 1.258925437927246,
+      "decimal": 1.2589254117941673
+    },
+    {
+      "inputs": 6,
+      "phase": 1,
+      "channel": 4,
+      "db": 6.0,
+      "reference": 1.9952623844146729,
+      "decimal": 1.9952623149688795
+    },
+    {
+      "inputs": 6,
+      "phase": 1,
+      "channel": 5,
+      "db": 16.0,
+      "reference": 6.309573650360107,
+      "decimal": 6.3095734448019325
+    },
+    {
+      "inputs": 6,
+      "phase": 2,
+      "channel": 0,
+      "db": -2.0,
+      "reference": 0.7943282127380371,
+      "decimal": 0.7943282347242815
+    },
+    {
+      "inputs": 6,
+      "phase": 2,
+      "channel": 1,
+      "db": 0.0,
+      "reference": 1.0,
+      "decimal": 1.0
+    },
+    {
+      "inputs": 6,
+      "phase": 2,
+      "channel": 2,
+      "db": 2.0,
+      "reference": 1.258925437927246,
+      "decimal": 1.2589254117941673
+    },
+    {
+      "inputs": 6,
+      "phase": 2,
+      "channel": 3,
+      "db": 6.0,
+      "reference": 1.9952623844146729,
+      "decimal": 1.9952623149688795
+    },
+    {
+      "inputs": 6,
+      "phase": 2,
+      "channel": 4,
+      "db": 16.0,
+      "reference": 6.309573650360107,
+      "decimal": 6.3095734448019325
+    },
+    {
+      "inputs": 6,
+      "phase": 2,
+      "channel": 5,
+      "db": -16.0,
+      "reference": 0.15848931670188904,
+      "decimal": 0.15848931924611134
+    },
+    {
+      "inputs": 6,
+      "phase": 3,
+      "channel": 0,
+      "db": 0.0,
+      "reference": 1.0,
+      "decimal": 1.0
+    },
+    {
+      "inputs": 6,
+      "phase": 3,
+      "channel": 1,
+      "db": 2.0,
+      "reference": 1.258925437927246,
+      "decimal": 1.2589254117941673
+    },
+    {
+      "inputs": 6,
+      "phase": 3,
+      "channel": 2,
+      "db": 6.0,
+      "reference": 1.9952623844146729,
+      "decimal": 1.9952623149688795
+    },
+    {
+      "inputs": 6,
+      "phase": 3,
+      "channel": 3,
+      "db": 16.0,
+      "reference": 6.309573650360107,
+      "decimal": 6.3095734448019325
+    },
+    {
+      "inputs": 6,
+      "phase": 3,
+      "channel": 4,
+      "db": -16.0,
+      "reference": 0.15848931670188904,
+      "decimal": 0.15848931924611134
+    },
+    {
+      "inputs": 6,
+      "phase": 3,
+      "channel": 5,
+      "db": -6.0,
+      "reference": 0.5011872053146362,
+      "decimal": 0.5011872336272722
+    },
+    {
+      "inputs": 6,
+      "phase": 4,
+      "channel": 0,
+      "db": 2.0,
+      "reference": 1.258925437927246,
+      "decimal": 1.2589254117941673
+    },
+    {
+      "inputs": 6,
+      "phase": 4,
+      "channel": 1,
+      "db": 6.0,
+      "reference": 1.9952623844146729,
+      "decimal": 1.9952623149688795
+    },
+    {
+      "inputs": 6,
+      "phase": 4,
+      "channel": 2,
+      "db": 16.0,
+      "reference": 6.309573650360107,
+      "decimal": 6.3095734448019325
+    },
+    {
+      "inputs": 6,
+      "phase": 4,
+      "channel": 3,
+      "db": -16.0,
+      "reference": 0.15848931670188904,
+      "decimal": 0.15848931924611134
+    },
+    {
+      "inputs": 6,
+      "phase": 4,
+      "channel": 4,
+      "db": -6.0,
+      "reference": 0.5011872053146362,
+      "decimal": 0.5011872336272722
+    },
+    {
+      "inputs": 6,
+      "phase": 4,
+      "channel": 5,
+      "db": -2.0,
+      "reference": 0.7943282127380371,
+      "decimal": 0.7943282347242815
+    },
+    {
+      "inputs": 6,
+      "phase": 5,
+      "channel": 0,
+      "db": 6.0,
+      "reference": 1.9952623844146729,
+      "decimal": 1.9952623149688795
+    },
+    {
+      "inputs": 6,
+      "phase": 5,
+      "channel": 1,
+      "db": 16.0,
+      "reference": 6.309573650360107,
+      "decimal": 6.3095734448019325
+    },
+    {
+      "inputs": 6,
+      "phase": 5,
+      "channel": 2,
+      "db": -16.0,
+      "reference": 0.15848931670188904,
+      "decimal": 0.15848931924611134
+    },
+    {
+      "inputs": 6,
+      "phase": 5,
+      "channel": 3,
+      "db": -6.0,
+      "reference": 0.5011872053146362,
+      "decimal": 0.5011872336272722
+    },
+    {
+      "inputs": 6,
+      "phase": 5,
+      "channel": 4,
+      "db": -2.0,
+      "reference": 0.7943282127380371,
+      "decimal": 0.7943282347242815
+    },
+    {
+      "inputs": 6,
+      "phase": 5,
+      "channel": 5,
+      "db": 0.0,
+      "reference": 1.0,
+      "decimal": 1.0
+    },
+    {
+      "inputs": 6,
+      "phase": 6,
+      "channel": 0,
+      "db": 16.0,
+      "reference": 6.309573650360107,
+      "decimal": 6.3095734448019325
+    },
+    {
+      "inputs": 6,
+      "phase": 6,
+      "channel": 1,
+      "db": -16.0,
+      "reference": 0.15848931670188904,
+      "decimal": 0.15848931924611134
+    },
+    {
+      "inputs": 6,
+      "phase": 6,
+      "channel": 2,
+      "db": -6.0,
+      "reference": 0.5011872053146362,
+      "decimal": 0.5011872336272722
+    },
+    {
+      "inputs": 6,
+      "phase": 6,
+      "channel": 3,
+      "db": -2.0,
+      "reference": 0.7943282127380371,
+      "decimal": 0.7943282347242815
+    },
+    {
+      "inputs": 6,
+      "phase": 6,
+      "channel": 4,
+      "db": 0.0,
+      "reference": 1.0,
+      "decimal": 1.0
+    },
+    {
+      "inputs": 6,
+      "phase": 6,
+      "channel": 5,
+      "db": 2.0,
+      "reference": 1.258925437927246,
+      "decimal": 1.2589254117941673
+    }
+  ]
+}

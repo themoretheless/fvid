@@ -78,14 +78,11 @@ fn value(p: &Prepared, id: ParameterId, set: usize, band: u8) -> Result<f64> {
 impl Decoder {
     pub fn new(config: &Config) -> Result<Self> {
         let physical = aac_ld_mps_prepare::Decoder::new(config)?;
-        if (config.arbitrary_downmix && config.tree.code > 4)
-            || config.hrtf.is_some() && !matches!(config.tree.code, 2..=4)
-            || config.extensions.iter().any(|e| {
-                matches!(
-                    &e.value,
-                    ExtensionValue::DownmixResidual { .. }
-                )
-            })
+        if config.hrtf.is_some() && !matches!(config.tree.code, 2..=4)
+            || config
+                .extensions
+                .iter()
+                .any(|e| matches!(&e.value, ExtensionValue::DownmixResidual { .. }))
         {
             return Err(unsupported(
                 "LD-MPS arbitrary-downmix/HRTF matrix composition is not yet implemented",
@@ -155,7 +152,9 @@ impl Decoder {
             wet: MatrixTime::new(config.parameter_bands, b)?,
         })
     }
-    pub(crate) fn reconfigure(&mut self, config: &Config) -> Result<()> {
+    /// Apply a same-format SSC while retaining matrix interpolation history.
+    /// Entropy and smoothing contexts restart; base input/output geometry must match.
+    pub fn reconfigure(&mut self, config: &Config) -> Result<()> {
         if config == &self.config {
             return Ok(());
         }
@@ -300,15 +299,25 @@ impl Decoder {
                     .is_some_and(|b| band < config.ott_bands[b]);
                 if config.tree.ttt_boxes == 0 {
                     let a = aac_ld_mps_tree_matrix::build(tree, &boxes, lfe_active)?;
-                    // Mono arbitrary-downmix compensation belongs to M1 before
-                    // temporal smoothing/interpolation (5151/5152 reference).
-                    // It must not scale already rendered PCM or M2 histories.
-                    let gain = if config.arbitrary_downmix {
-                        10.0f64.powf(value(&p, ParameterId::DownmixGain(0), set, band)? / 20.0)
-                    } else {
-                        1.0
-                    };
-                    m1.extend(a.m1.iter().flatten().map(|coefficient| coefficient * gain));
+                    // ADG compensates each input column before matrix-time
+                    // smoothing/interpolation. It never scales M2 or PCM.
+                    let mut gains = [1.0; 6];
+                    if config.arbitrary_downmix {
+                        for (input, gain) in gains
+                            .iter_mut()
+                            .take(usize::from(m1_layout.columns))
+                            .enumerate()
+                        {
+                            *gain = 10.0f64.powf(
+                                value(&p, ParameterId::DownmixGain(input as u8), set, band)? / 20.0,
+                            );
+                        }
+                    }
+                    m1.extend(a.m1.iter().flat_map(|row| {
+                        row.iter()
+                            .zip(&gains)
+                            .map(|(coefficient, gain)| coefficient * gain)
+                    }));
                     m1.extend(std::iter::repeat_n(
                         0.0,
                         usize::from(m1_layout.rows) * usize::from(m1_layout.columns),

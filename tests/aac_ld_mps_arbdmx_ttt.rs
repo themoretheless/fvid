@@ -138,7 +138,7 @@ fn ttt_gain_order_is_noncommutative_and_keeps_m2_unchanged() {
 }
 
 #[test]
-fn downmix_trees_without_qualified_gain_composition_remain_explicit() {
+fn ott_only_downmix_trees_are_admitted_after_column_qualification() {
     use fvid_media::owned_aac::aac_ld_mps_assemble;
     let parent = root().join("../aac-ld-mps-assemble");
     let manifest: Value =
@@ -154,11 +154,6 @@ fn downmix_trees_without_qualified_gain_composition_remain_explicit() {
         let at = n(&case["config_offset"]);
         let mut cfg = Config::parse(&configs[at..at + n(&case["config_bytes"])]).unwrap();
         cfg.arbitrary_downmix = true;
-        assert!(
-            aac_ld_mps_assemble::Decoder::new(&cfg)
-                .unwrap_err()
-                .to_string()
-                .contains("arbitrary-downmix")
-        );
+        aac_ld_mps_assemble::Decoder::new(&cfg).unwrap();
     }
 }
