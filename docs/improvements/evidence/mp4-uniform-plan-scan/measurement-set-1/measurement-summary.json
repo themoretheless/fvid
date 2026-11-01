@@ -1,0 +1,127 @@
+{
+  "criteria_passed": true,
+  "results": {
+    "bounded-large": {
+      "pairs": [
+        {
+          "baseline_ns": 1880875,
+          "candidate_ns": 141958
+        },
+        {
+          "baseline_ns": 1904375,
+          "candidate_ns": 101959
+        },
+        {
+          "baseline_ns": 1883500,
+          "candidate_ns": 99417
+        },
+        {
+          "baseline_ns": 1880083,
+          "candidate_ns": 98084
+        },
+        {
+          "baseline_ns": 1811542,
+          "candidate_ns": 94416
+        },
+        {
+          "baseline_ns": 1849500,
+          "candidate_ns": 96500
+        },
+        {
+          "baseline_ns": 1844875,
+          "candidate_ns": 95708
+        }
+      ],
+      "baseline_median_ns": 1880083,
+      "candidate_median_ns": 98084,
+      "median_reduction_fraction": 0.9478299628261093,
+      "winning_pairs": 7,
+      "plans_identical": true
+    },
+    "default-large": {
+      "pairs": [
+        {
+          "baseline_ns": 96000,
+          "candidate_ns": 121042
+        },
+        {
+          "baseline_ns": 98500,
+          "candidate_ns": 94583
+        },
+        {
+          "baseline_ns": 119875,
+          "candidate_ns": 95667
+        },
+        {
+          "baseline_ns": 98125,
+          "candidate_ns": 124292
+        },
+        {
+          "baseline_ns": 123875,
+          "candidate_ns": 96500
+        },
+        {
+          "baseline_ns": 118583,
+          "candidate_ns": 99333
+        },
+        {
+          "baseline_ns": 96166,
+          "candidate_ns": 96250
+        }
+      ],
+      "baseline_median_ns": 98500,
+      "candidate_median_ns": 96500,
+      "median_reduction_fraction": 0.02030456852791873,
+      "winning_pairs": 4,
+      "plans_identical": true
+    },
+    "bounded-small": {
+      "pairs": [
+        {
+          "baseline_ns": 99542,
+          "candidate_ns": 124167
+        },
+        {
+          "baseline_ns": 98500,
+          "candidate_ns": 118584
+        },
+        {
+          "baseline_ns": 96583,
+          "candidate_ns": 121792
+        },
+        {
+          "baseline_ns": 100000,
+          "candidate_ns": 97375
+        },
+        {
+          "baseline_ns": 98833,
+          "candidate_ns": 116625
+        },
+        {
+          "baseline_ns": 98833,
+          "candidate_ns": 99542
+        },
+        {
+          "baseline_ns": 100000,
+          "candidate_ns": 94708
+        }
+      ],
+      "baseline_median_ns": 98833,
+      "candidate_median_ns": 116625,
+      "median_reduction_fraction": -0.18002084324061807,
+      "winning_pairs": 2,
+      "plans_identical": true
+    }
+  },
+  "binaries": {
+    "baseline": {
+      "path": "/private/tmp/fvid-uniform-plan-target-20261101/release/examples/bench_mp4_uniform_plan_scan-baseline",
+      "sha256": "aa4b4817b2dbfbd0718392d6ab4de9780de31a230b15a3aaeb4fecd0735fd8e5"
+    },
+    "candidate": {
+      "path": "/private/tmp/fvid-uniform-plan-target-20261101/release/examples/bench_mp4_uniform_plan_scan",
+      "sha256": "c06d58bc0ab0dba1a1958be2c8836a29fe90148e76f4544249a4da38b3a8cee3"
+    }
+  },
+  "no_decode_or_player_speedup_claim": true
+}

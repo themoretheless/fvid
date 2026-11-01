@@ -1,0 +1,5 @@
+{
+  "reason": "Primary7pair improvement meets criteria,but bounded64-frame control median was18percent slower;repeat identical experiment to assess that material uncertainty.",
+  "production_or_harness_changes": false,
+  "discard_prior_results": false
+}

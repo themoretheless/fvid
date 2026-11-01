@@ -1,0 +1,7 @@
+{
+  "issue": "Default-focused command accidentally appended bare test target names;Cargo rejected arguments before running tests.",
+  "correction": "Each target is passed with --test;completed three gates retained from identical frozen sources;failed command rerun and remaining gates executed.",
+  "production_changes": false,
+  "count_delta": 0,
+  "tests_weakened": false
+}

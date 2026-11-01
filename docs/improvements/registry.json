@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 481,
-  "next_id": "FVID-0482",
+  "accepted_count": 482,
+  "next_id": "FVID-0483",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5431,6 +5431,17 @@
       "result": "Bound MP4 Duration requests by the indexed presentation extent before narrowing to signed track ticks. Both APIs select the same final picture/interval as ordinary end seeks and reach EOF. Both regressions and all seven qualification gates pass; WebM delegation and existing decoder/I/O checks remain unchanged.",
       "status": "accepted",
       "validation": "batch-478-validation.json"
+    },
+    {
+      "id": "FVID-0482",
+      "batch": 479,
+      "title": "Avoid per-sample description scans in controlled compact MP4 planning",
+      "source": "crates/fvid-media/src/owned_mp4_impl.rs",
+      "regression": "tests/mp4_uniform_plan_scan.rs",
+      "before": "Controlled planning queried every virtual PCM sample to detect header changes despite a one-run UniformIndex. Published-source correctness controls pass; final paired release baseline median is 1.845458ms for 262144 mono PCM frames with a 64MiB allocation cap.",
+      "result": "Compare complete headers and addressable endpoints over sparse runs; retain the reference walk for dense/expanded indexes. Final release median 0.094917ms,94.86percent reduction,7/7 wins;all21 paired plans identical. Full/prefix analytic PCM,duplicate/unused/changed headers,byte/memory refusals,coordinate guards and native video seek/EOF pass. All seven qualification gates pass;no decoder/player speedup claim.",
+      "status": "accepted",
+      "validation": "batch-479-validation.json"
     }
   ]
 }

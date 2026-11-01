@@ -1,0 +1,9 @@
+{
+  "removed_owned_completed_artifacts": [
+    "/private/tmp/fvid-uniform-plan-target-20261101"
+  ],
+  "baseline_and_candidate_binaries_deleted": true,
+  "owned_build_target_absent": true,
+  "fixtures_and_evidence_retained": true,
+  "foreign_worktrees_and_stashes_untouched": true
+}

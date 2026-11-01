@@ -257,8 +257,7 @@ pub(crate) fn normalization_target(source:&Path,transform:AudioDecodeTransform,o
     let index=crate::owned_mp4_audio::mp4_audio_index(&reader,options.streams.first().copied()).map_err(|e|e.to_string())?;
     let interval = prefix(transform, rate);
     let active_samples = crate::owned_mp4_audio::mp4_active_samples(&reader.tracks()[index], reader.movie_timescale(), interval, options.max_packets);
-    let first_desc = reader.tracks()[index].description_for_sample(0).cloned();
-    let changing = (0..active_samples).any(|i| reader.tracks()[index].description_for_sample(i) != first_desc.as_ref());
+    let changing = reader.tracks()[index].description_changes_before(active_samples);
     if !changing {
         let projection=transform.channels.is_some_and(|c|c!=i32::from(channels)&&(mask==0||(channels>2&&c>2)));
         if !projection {return Ok(None);}

@@ -1,0 +1,2478 @@
+{
+  "binaries": {
+    "baseline": {
+      "path": "/private/tmp/fvid-uniform-plan-target-20261101/release/examples/bench_mp4_uniform_plan_scan-baseline",
+      "sha256": "aa4b4817b2dbfbd0718392d6ab4de9780de31a230b15a3aaeb4fecd0735fd8e5"
+    },
+    "candidate": {
+      "path": "/private/tmp/fvid-uniform-plan-target-20261101/release/examples/bench_mp4_uniform_plan_scan",
+      "sha256": "3bde301992d504d262beb2eb2284c50e11d6983e834f0a3ceb9ea8f29a95917a"
+    }
+  },
+  "records": [
+    {
+      "case": "bounded-large",
+      "pair": 0,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          1765792,
+          1771958,
+          2155959,
+          1873875,
+          1842792,
+          1854167,
+          1845458,
+          1873625,
+          1839709,
+          1841958,
+          1845375,
+          1828125,
+          1882958,
+          1865458,
+          1955208
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-large",
+      "pair": 0,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          106167,
+          112459,
+          97333,
+          105584,
+          106917,
+          114791,
+          117791,
+          109833,
+          109708,
+          101542,
+          94208,
+          92167,
+          95417,
+          94125,
+          92375
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-large",
+      "pair": 1,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          94792,
+          93667,
+          94958,
+          92625,
+          91542,
+          93000,
+          94584,
+          93833,
+          91958,
+          92083,
+          92709,
+          91417,
+          90166,
+          90125,
+          92292
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-large",
+      "pair": 1,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          1781167,
+          1795584,
+          1801416,
+          1794583,
+          1906584,
+          1771250,
+          1728041,
+          1721542,
+          1717792,
+          1719667,
+          1847625,
+          1819458,
+          1808791,
+          1866916,
+          1867167
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-large",
+      "pair": 2,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          1800042,
+          1798959,
+          1828583,
+          1802250,
+          1799042,
+          1798083,
+          1805791,
+          1795792,
+          1764750,
+          1761958,
+          1762292,
+          1758458,
+          1744334,
+          1846792,
+          1840416
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-large",
+      "pair": 2,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          99500,
+          95625,
+          99334,
+          96125,
+          94584,
+          95792,
+          99542,
+          96792,
+          94709,
+          96125,
+          94125,
+          93292,
+          93041,
+          93500,
+          93125
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-large",
+      "pair": 3,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          93500,
+          93042,
+          94416,
+          92792,
+          92083,
+          97709,
+          94084,
+          92917,
+          91625,
+          92917,
+          91958,
+          91250,
+          93958,
+          91209,
+          90875
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-large",
+      "pair": 3,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          1810042,
+          1879916,
+          1896792,
+          1896500,
+          1782500,
+          1782834,
+          1806625,
+          1875750,
+          1878000,
+          1822250,
+          1803583,
+          1804292,
+          1883167,
+          1879834,
+          1896000
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-large",
+      "pair": 4,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          1911167,
+          1873917,
+          1883916,
+          1868458,
+          1899417,
+          1863708,
+          1888917,
+          1874083,
+          1875708,
+          1905875,
+          1786625,
+          1779583,
+          1784208,
+          1778375,
+          1874125
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-large",
+      "pair": 4,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          94750,
+          94083,
+          95459,
+          94917,
+          98083,
+          98000,
+          97042,
+          96542,
+          96834,
+          95958,
+          94792,
+          93875,
+          93625,
+          93666,
+          92500
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-large",
+      "pair": 5,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          97542,
+          96417,
+          97834,
+          96542,
+          95500,
+          96291,
+          99000,
+          96417,
+          95209,
+          96625,
+          95250,
+          94541,
+          94167,
+          93875,
+          94167
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-large",
+      "pair": 5,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          1771500,
+          1803166,
+          1798625,
+          1786792,
+          1765542,
+          1774708,
+          1802750,
+          1774833,
+          1761000,
+          1806042,
+          1788417,
+          1763334,
+          1762292,
+          1854083,
+          1793875
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-large",
+      "pair": 6,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          1843750,
+          1823250,
+          1811959,
+          1836125,
+          1857792,
+          1861000,
+          1891167,
+          1878708,
+          1858458,
+          1834125,
+          1834208,
+          1833417,
+          1850666,
+          1868125,
+          1855292
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-large",
+      "pair": 6,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          95083,
+          95208,
+          95542,
+          94875,
+          93917,
+          94458,
+          98250,
+          95250,
+          93875,
+          94042,
+          93208,
+          92375,
+          92292,
+          92541,
+          92125
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "default-large",
+      "pair": 0,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": null,
+        "elapsed_ns": [
+          96667,
+          96375,
+          99042,
+          95500,
+          95125,
+          143292,
+          107792,
+          98708,
+          96208,
+          97083,
+          95250,
+          95250,
+          95875,
+          95292,
+          96250
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "default-large",
+      "pair": 0,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": null,
+        "elapsed_ns": [
+          95500,
+          94875,
+          95875,
+          93500,
+          93500,
+          95625,
+          95500,
+          94042,
+          92958,
+          94750,
+          92958,
+          92584,
+          93750,
+          93125,
+          96375
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "default-large",
+      "pair": 1,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": null,
+        "elapsed_ns": [
+          94250,
+          94292,
+          97834,
+          94916,
+          93541,
+          95917,
+          93417,
+          93625,
+          93292,
+          95333,
+          93417,
+          93667,
+          92708,
+          92166,
+          93208
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "default-large",
+      "pair": 1,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": null,
+        "elapsed_ns": [
+          95333,
+          94334,
+          95791,
+          93375,
+          93125,
+          94083,
+          94833,
+          94042,
+          94084,
+          98959,
+          92959,
+          94125,
+          92834,
+          92167,
+          92916
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "default-large",
+      "pair": 2,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": null,
+        "elapsed_ns": [
+          100250,
+          99500,
+          100875,
+          98833,
+          98708,
+          100083,
+          103375,
+          103333,
+          101583,
+          101583,
+          100334,
+          100542,
+          98250,
+          97458,
+          99083
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "default-large",
+      "pair": 2,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": null,
+        "elapsed_ns": [
+          109291,
+          96417,
+          102250,
+          100458,
+          113625,
+          98916,
+          109875,
+          97250,
+          116125,
+          96875,
+          113833,
+          95166,
+          108208,
+          94625,
+          93042
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "default-large",
+      "pair": 3,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": null,
+        "elapsed_ns": [
+          110333,
+          103667,
+          100792,
+          96417,
+          94791,
+          100458,
+          96375,
+          96000,
+          97959,
+          209208,
+          107709,
+          96334,
+          93834,
+          92125,
+          94084
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "default-large",
+      "pair": 3,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": null,
+        "elapsed_ns": [
+          96708,
+          96334,
+          97542,
+          93917,
+          93000,
+          94167,
+          94458,
+          94458,
+          93333,
+          98459,
+          93750,
+          99250,
+          95417,
+          94083,
+          94833
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "default-large",
+      "pair": 4,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": null,
+        "elapsed_ns": [
+          97292,
+          95625,
+          97416,
+          95292,
+          97333,
+          99250,
+          97000,
+          96250,
+          95041,
+          96375,
+          95875,
+          94209,
+          94917,
+          98042,
+          95000
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "default-large",
+      "pair": 4,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": null,
+        "elapsed_ns": [
+          99209,
+          96500,
+          102791,
+          98583,
+          96625,
+          97000,
+          98250,
+          96375,
+          95000,
+          94958,
+          94125,
+          93417,
+          93333,
+          93458,
+          93334
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "default-large",
+      "pair": 5,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": null,
+        "elapsed_ns": [
+          93209,
+          92083,
+          93500,
+          92542,
+          93291,
+          93459,
+          92917,
+          93625,
+          102208,
+          93875,
+          91167,
+          90417,
+          89667,
+          90084,
+          89250
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "default-large",
+      "pair": 5,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": null,
+        "elapsed_ns": [
+          95875,
+          99708,
+          96333,
+          94041,
+          93250,
+          95625,
+          95958,
+          96958,
+          94125,
+          95375,
+          93666,
+          93750,
+          95708,
+          95375,
+          96375
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "default-large",
+      "pair": 6,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": null,
+        "elapsed_ns": [
+          96375,
+          95625,
+          99875,
+          95000,
+          94625,
+          95834,
+          97250,
+          95959,
+          94667,
+          98625,
+          94917,
+          95792,
+          94750,
+          95333,
+          95459
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "default-large",
+      "pair": 6,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": null,
+        "elapsed_ns": [
+          96375,
+          95041,
+          97125,
+          93500,
+          92458,
+          97167,
+          94834,
+          93916,
+          92500,
+          93834,
+          93250,
+          93166,
+          92416,
+          92166,
+          96917
+        ],
+        "frames": 262144,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-small",
+      "pair": 0,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          96125,
+          94791,
+          96917,
+          97208,
+          95000,
+          95333,
+          95375,
+          97458,
+          95375,
+          95125,
+          95709,
+          95791,
+          94375,
+          94500,
+          94917
+        ],
+        "frames": 64,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-small",
+      "pair": 0,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          95250,
+          93958,
+          95333,
+          93041,
+          92292,
+          96000,
+          96416,
+          93959,
+          92708,
+          94833,
+          92458,
+          91917,
+          92750,
+          92208,
+          91542
+        ],
+        "frames": 64,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-small",
+      "pair": 1,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          96916,
+          95167,
+          96334,
+          95500,
+          94167,
+          97000,
+          97167,
+          99416,
+          94375,
+          95417,
+          94000,
+          93000,
+          95083,
+          95583,
+          93458
+        ],
+        "frames": 64,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-small",
+      "pair": 1,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          97167,
+          97000,
+          98542,
+          95417,
+          97167,
+          96083,
+          96417,
+          95333,
+          94875,
+          96042,
+          93459,
+          94000,
+          96667,
+          92875,
+          93750
+        ],
+        "frames": 64,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-small",
+      "pair": 2,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          96834,
+          95750,
+          97792,
+          96416,
+          96416,
+          96834,
+          98416,
+          96000,
+          93834,
+          94625,
+          93583,
+          92958,
+          95833,
+          93583,
+          93958
+        ],
+        "frames": 64,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-small",
+      "pair": 2,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          94458,
+          93208,
+          94708,
+          93583,
+          93083,
+          93667,
+          95625,
+          93958,
+          91958,
+          93500,
+          91750,
+          91250,
+          91625,
+          92125,
+          93167
+        ],
+        "frames": 64,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-small",
+      "pair": 3,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          95000,
+          93583,
+          94750,
+          94125,
+          93459,
+          94334,
+          93916,
+          96833,
+          97417,
+          94791,
+          92709,
+          92042,
+          93125,
+          94000,
+          93250
+        ],
+        "frames": 64,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-small",
+      "pair": 3,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          95958,
+          94000,
+          94959,
+          95083,
+          93500,
+          93666,
+          95167,
+          99125,
+          92875,
+          95500,
+          92500,
+          92458,
+          94500,
+          92125,
+          92875
+        ],
+        "frames": 64,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-small",
+      "pair": 4,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          96250,
+          95083,
+          96708,
+          95833,
+          94959,
+          95416,
+          96292,
+          97875,
+          95333,
+          96875,
+          95375,
+          96250,
+          94916,
+          93667,
+          93625
+        ],
+        "frames": 64,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-small",
+      "pair": 4,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          96708,
+          93625,
+          97292,
+          95375,
+          93292,
+          96250,
+          95541,
+          93958,
+          92667,
+          93292,
+          92708,
+          92583,
+          91917,
+          92333,
+          92958
+        ],
+        "frames": 64,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-small",
+      "pair": 5,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          94541,
+          94000,
+          95042,
+          94167,
+          93250,
+          95458,
+          95833,
+          97958,
+          95000,
+          95375,
+          94208,
+          93458,
+          95750,
+          93625,
+          93250
+        ],
+        "frames": 64,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-small",
+      "pair": 5,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          94042,
+          93125,
+          95208,
+          94666,
+          93125,
+          93709,
+          95583,
+          94875,
+          94542,
+          95916,
+          94708,
+          95875,
+          95375,
+          93417,
+          95042
+        ],
+        "frames": 64,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-small",
+      "pair": 6,
+      "version": "baseline",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          98042,
+          95667,
+          98709,
+          95708,
+          95375,
+          98500,
+          96792,
+          96417,
+          93333,
+          94250,
+          92916,
+          92375,
+          92708,
+          91042,
+          90959
+        ],
+        "frames": 64,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "bounded-small",
+      "pair": 6,
+      "version": "candidate",
+      "data": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          94375,
+          97208,
+          95334,
+          94833,
+          93792,
+          95250,
+          95166,
+          93459,
+          96584,
+          94625,
+          93584,
+          93083,
+          93458,
+          94209,
+          94666
+        ],
+        "frames": 64,
+        "iterations": 15,
+        "plan": {
+          "command": "decode-audio",
+          "graph": null,
+          "input": "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4",
+          "inputs": [
+            "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4"
+          ],
+          "notes": [
+            "backend: owned fvid-media; no external demuxer, codec, resampler or muxer",
+            "read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution",
+            "packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded",
+            "encoded packet limit: 67108864 bytes; packet work limit: unbounded packets; controlled memory limit: 67108864 bytes; RSS limit: unbounded bytes"
+          ],
+          "steps": [
+            {
+              "action": "decode",
+              "detail": "owned MP4 pcm_sle decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float64 WAVE disk spool"
+            },
+            {
+              "action": "write",
+              "detail": "owned .wav writer; preserve float64 precision; publish without overwriting; cleanup on failure"
+            }
+          ],
+          "streams": [
+            {
+              "codec": "pcm_sle",
+              "disposition": "decode",
+              "index": 1,
+              "media_type": "audio"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

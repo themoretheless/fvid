@@ -1,0 +1,50 @@
+{
+  "provenance": "Authored compact PCM sample tables,analytic constant waveform,and neutral VP9. Maximum audible duration5.462s;no private data,encoder or network.",
+  "cases": [
+    {
+      "file": "frames-64.mp4",
+      "frames": 64,
+      "rate": 48000,
+      "channels": 1,
+      "pcm_value": 0.125
+    },
+    {
+      "file": "frames-262144.mp4",
+      "frames": 262144,
+      "rate": 48000,
+      "channels": 1,
+      "pcm_value": 0.125
+    },
+    {
+      "file": "control-alias.mp4",
+      "frames": 64,
+      "rate": 48000,
+      "channels": 1,
+      "pcm_value": 0.125,
+      "mode": "alias"
+    },
+    {
+      "file": "control-unused.mp4",
+      "frames": 64,
+      "rate": 48000,
+      "channels": 1,
+      "pcm_value": 0.125,
+      "mode": "unused"
+    },
+    {
+      "file": "control-endian.mp4",
+      "frames": 64,
+      "rate": 48000,
+      "channels": 1,
+      "pcm_value": 0.125,
+      "mode": "endian"
+    }
+  ],
+  "sha256": {
+    "frames-64.mp4": "ea90d98d8a1d90dfd17582ac56965b362fad1ea07ebdfad033ce49b4f51413fb",
+    "frames-262144.mp4": "def067a680ac1aba8031a4d69d938ceaeb86895e040d65e7be30c12138250951",
+    "control-alias.mp4": "c1a1fd9a6eb5d6aa46b54f88ffc14a9020e1e70460309810daddf588dfa4048d",
+    "control-unused.mp4": "5b83786792be1f7246cdae7b1d639fadc1a51cd1bc4f61d58c0f1d56afa1e2e9",
+    "control-endian.mp4": "f19ba536aa68abd41e1af509d5180e1a3159359b763842872ff7110dea73cadd"
+  }
+}

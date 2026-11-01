@@ -353,7 +353,7 @@ pub(crate) fn admit_audio_reader_with_interval<R: Read + Seek>(
         || track.description_for_sample(0).is_some_and(|d| d.sample_rate>0 && (track.timescale%d.sample_rate!=0
             || (track.edits.is_empty() && track.timescale>0
                 && (u128::from(track.duration)*u128::from(d.sample_rate))%u128::from(track.timescale)!=0)))
-        || (0..active_samples).any(|n|track.description_for_sample(n)!=track.description_for_sample(0)) {
+        || track.description_changes_before(active_samples) {
         let first=track.description_for_sample(0).ok_or_else(||invalid("MP4 audio has no samples"))?;
         let output_rate=target.map_or(first.sample_rate,|t|t.0);
         let output_channels=usize::from(target.map_or(first.channels.max(2),|t|t.1));

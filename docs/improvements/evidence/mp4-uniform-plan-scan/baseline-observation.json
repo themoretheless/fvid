@@ -1,0 +1,60 @@
+{
+  "status": "profiling opportunity only;unaccepted",
+  "measurements": {
+    "default": {
+      "median_ns": 92917,
+      "samples": {
+        "elapsed_ns": [
+          94042,
+          92917,
+          105125,
+          93250,
+          92375,
+          95041,
+          93000,
+          92041,
+          95917,
+          92958,
+          91792,
+          92083,
+          91458,
+          91250,
+          92500
+        ],
+        "frames": 262144,
+        "iterations": 15
+      },
+      "log": "initial-default-release.log"
+    },
+    "bounded": {
+      "median_ns": 1831208,
+      "samples": {
+        "controlled_bytes": 67108864,
+        "elapsed_ns": [
+          1815208,
+          1848833,
+          1843417,
+          1826458,
+          1838375,
+          1831208,
+          1828083,
+          1826500,
+          1825541,
+          1846375,
+          1832333,
+          1833916,
+          1826917,
+          1829250,
+          1853708
+        ],
+        "frames": 262144,
+        "iterations": 15
+      },
+      "log": "baseline-bounded-release.log"
+    }
+  },
+  "baseline_binary": "/private/tmp/fvid-uniform-plan-target-20261101/release/examples/bench_mp4_uniform_plan_scan-baseline",
+  "baseline_binary_sha256": "83859ed8df2fcb4958887ec04b0469fded580b7e14310a990773554b4058b401",
+  "release_profile": "Cargo release: opt-level3,thin LTO,codegen-units1;debug0,jobs2",
+  "production_changes": false
+}

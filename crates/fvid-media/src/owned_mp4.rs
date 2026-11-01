@@ -77,6 +77,31 @@ include!("owned_mp4_impl.rs");
 mod admission_tests {
     use super::*;
     #[test]
+    fn compact_description_prefix_keeps_unreadable_samples_visible() {
+        let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4");
+        let reader = Mp4Reader::open_indexed(std::io::BufReader::new(std::fs::File::open(source).unwrap()), Default::default()).unwrap();
+        let mut track = reader.tracks().iter().find(|t| t.handler == *b"soun").unwrap().clone();
+        track.samples = SampleIndex::Uniform(UniformIndex {
+            bytes_per_frame: 4, duration: 1, count: 3,
+            runs: vec![FrameRun { first: 0, offset: u64::MAX-4, frames: 3, description_index: 1 }],
+        });
+        let reference = (0..3).any(|i| track.description_for_sample(i) != track.description_for_sample(0));
+        assert!(reference);
+        assert_eq!(track.description_changes_before(3), reference);
+        assert!(!track.description_changes_before(1));
+        let count = (i64::MAX as u64 / u64::from(u32::MAX) + 2) as usize;
+        track.samples = SampleIndex::Uniform(UniformIndex {
+            bytes_per_frame: 1, duration: u32::MAX, count,
+            runs: vec![FrameRun { first: 0, offset: 0, frames: count, description_index: 1 }],
+        });
+        assert!(track.description_for_sample(0).is_some());
+        assert!(track.description_for_sample(count-1).is_none());
+        assert!(track.description_changes_before(count));
+        assert!(!track.description_changes_before(1));
+    }
+
+    #[test]
     fn index_payload_accounts_for_spare_capacity_and_both_sample_forms() {
         let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../../tests/fixtures/audio/aac-native-edit.m4a");

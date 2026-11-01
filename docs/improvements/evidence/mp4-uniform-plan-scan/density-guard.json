@@ -1,0 +1,6 @@
+{
+  "reason": "The compact walk checks two endpoints per run;retain the reference walk when total runs are not sparse relative to the reached sample prefix.",
+  "count_delta": 0,
+  "prior_completed_qualification_archived": true,
+  "final_binary_measurements_and_qualification_required": true
+}

@@ -1,0 +1,14 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--test",
+    "mp4_uniform_plan_scan"
+  ],
+  "exit_code": 0
+}

@@ -1,0 +1,10 @@
+{
+  "unchanged_baseline_and_candidate_regressions": {
+    "tests/mp4_uniform_plan_scan.rs": "56af3d78fa7a7289c15b58a9114b34d24b97ad4aca07aaaf1ee41e5f11bf6f86",
+    "scripts/generate_mp4_uniform_plan_scan.py": "2f92082f4ed15534fe6c7cb5dbe18707794e8a305d020ab061e0a6039798a4c1",
+    "crates/fvid-media/examples/bench_mp4_uniform_plan_scan.rs": "20a9e9efe3d54a82f8071e707710c3f404a1f5062caa9fbddc691fa568b366a6"
+  },
+  "existing_root_integration_tests_modified": false,
+  "existing_unit_assertions_weakened": false,
+  "new_private_unit_added": true
+}

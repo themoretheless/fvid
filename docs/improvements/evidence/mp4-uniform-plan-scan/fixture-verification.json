@@ -1,0 +1,15 @@
+{
+  "exact_offline_regeneration": true,
+  "private_media": false,
+  "ffmpeg_required": false,
+  "network_required": false,
+  "ordinary_tests_require_generator": false,
+  "files": {
+    "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-64.mp4": "ea90d98d8a1d90dfd17582ac56965b362fad1ea07ebdfad033ce49b4f51413fb",
+    "tests/fixtures/playback-errors/mp4-uniform-plan-scan/frames-262144.mp4": "def067a680ac1aba8031a4d69d938ceaeb86895e040d65e7be30c12138250951",
+    "tests/fixtures/playback-errors/mp4-uniform-plan-scan/control-alias.mp4": "c1a1fd9a6eb5d6aa46b54f88ffc14a9020e1e70460309810daddf588dfa4048d",
+    "tests/fixtures/playback-errors/mp4-uniform-plan-scan/control-unused.mp4": "5b83786792be1f7246cdae7b1d639fadc1a51cd1bc4f61d58c0f1d56afa1e2e9",
+    "tests/fixtures/playback-errors/mp4-uniform-plan-scan/control-endian.mp4": "f19ba536aa68abd41e1af509d5180e1a3159359b763842872ff7110dea73cadd",
+    "tests/fixtures/playback-errors/mp4-uniform-plan-scan/manifest.json": "6d451889eed0bc1e4bf7ee6adf3c9e3c2b9c2e7a55a758a6bcd1a253cf5fc382"
+  }
+}

@@ -346,6 +346,35 @@ impl Track {
         self.sample_descriptions.get(selected)
     }
 
+    /// Compare the selected headers over a prefix without expanding a compact
+    /// PCM index into one lookup per virtual sample. Header equality, rather
+    /// than description-number equality, preserves duplicate-entry semantics.
+    pub(crate) fn description_changes_before(&self, limit: usize) -> bool {
+        let first = self.description_for_sample(0);
+        match &self.samples {
+            SampleIndex::Uniform(index) if limit <= index.count && first.is_some()
+                && index.runs.len().saturating_mul(2) < limit => {
+                let mut covered = 0;
+                for run in index.runs.iter().take_while(|run| run.first < limit) {
+                    if run.frames == 0 { continue; }
+                    if run.first != covered {
+                        // Preserve the per-sample semantics for malformed runs.
+                        return (0..limit).any(|n| self.description_for_sample(n) != first);
+                    }
+                    let Some(end) = run.first.checked_add(run.frames) else { return true; };
+                    let end = end.min(limit);
+                    // The affine offset/timestamp mapping can become unreadable
+                    // even while every description number remains unchanged.
+                    if self.description_for_sample(run.first) != first
+                        || self.description_for_sample(end-1) != first { return true; }
+                    covered = end;
+                }
+                covered < limit
+            },
+            _ => (0..limit).any(|n| self.description_for_sample(n) != first),
+        }
+    }
+
     /// Playback paths that have not yet implemented decoder reconfiguration
     /// must never decode a changed entry using the initial configuration.
     pub fn ensure_constant_description(&self) -> Result<()> {

@@ -1,0 +1,237 @@
+{
+  "performance_criteria_passed": true,
+  "independent_sets": 2,
+  "primary_winning_pairs": 14,
+  "primary_total_pairs": 14,
+  "primary_summaries": [
+    {
+      "pairs": [
+        {
+          "baseline_ns": 1880875,
+          "candidate_ns": 141958
+        },
+        {
+          "baseline_ns": 1904375,
+          "candidate_ns": 101959
+        },
+        {
+          "baseline_ns": 1883500,
+          "candidate_ns": 99417
+        },
+        {
+          "baseline_ns": 1880083,
+          "candidate_ns": 98084
+        },
+        {
+          "baseline_ns": 1811542,
+          "candidate_ns": 94416
+        },
+        {
+          "baseline_ns": 1849500,
+          "candidate_ns": 96500
+        },
+        {
+          "baseline_ns": 1844875,
+          "candidate_ns": 95708
+        }
+      ],
+      "baseline_median_ns": 1880083,
+      "candidate_median_ns": 98084,
+      "median_reduction_fraction": 0.9478299628261093,
+      "winning_pairs": 7,
+      "plans_identical": true
+    },
+    {
+      "pairs": [
+        {
+          "baseline_ns": 1747000,
+          "candidate_ns": 85084
+        },
+        {
+          "baseline_ns": 1719041,
+          "candidate_ns": 84500
+        },
+        {
+          "baseline_ns": 1788000,
+          "candidate_ns": 83542
+        },
+        {
+          "baseline_ns": 1792750,
+          "candidate_ns": 90917
+        },
+        {
+          "baseline_ns": 1789875,
+          "candidate_ns": 86959
+        },
+        {
+          "baseline_ns": 1796750,
+          "candidate_ns": 90375
+        },
+        {
+          "baseline_ns": 1791375,
+          "candidate_ns": 84333
+        }
+      ],
+      "baseline_median_ns": 1789875,
+      "candidate_median_ns": 85084,
+      "median_reduction_fraction": 0.952463719533487,
+      "winning_pairs": 7,
+      "plans_identical": true
+    }
+  ],
+  "default_controls": [
+    {
+      "pairs": [
+        {
+          "baseline_ns": 96000,
+          "candidate_ns": 121042
+        },
+        {
+          "baseline_ns": 98500,
+          "candidate_ns": 94583
+        },
+        {
+          "baseline_ns": 119875,
+          "candidate_ns": 95667
+        },
+        {
+          "baseline_ns": 98125,
+          "candidate_ns": 124292
+        },
+        {
+          "baseline_ns": 123875,
+          "candidate_ns": 96500
+        },
+        {
+          "baseline_ns": 118583,
+          "candidate_ns": 99333
+        },
+        {
+          "baseline_ns": 96166,
+          "candidate_ns": 96250
+        }
+      ],
+      "baseline_median_ns": 98500,
+      "candidate_median_ns": 96500,
+      "median_reduction_fraction": 0.02030456852791873,
+      "winning_pairs": 4,
+      "plans_identical": true
+    },
+    {
+      "pairs": [
+        {
+          "baseline_ns": 85375,
+          "candidate_ns": 90500
+        },
+        {
+          "baseline_ns": 89459,
+          "candidate_ns": 87750
+        },
+        {
+          "baseline_ns": 91666,
+          "candidate_ns": 90791
+        },
+        {
+          "baseline_ns": 85583,
+          "candidate_ns": 87291
+        },
+        {
+          "baseline_ns": 91291,
+          "candidate_ns": 89208
+        },
+        {
+          "baseline_ns": 86459,
+          "candidate_ns": 90333
+        },
+        {
+          "baseline_ns": 91375,
+          "candidate_ns": 86750
+        }
+      ],
+      "baseline_median_ns": 89459,
+      "candidate_median_ns": 89208,
+      "median_reduction_fraction": 0.002805754591488796,
+      "winning_pairs": 4,
+      "plans_identical": true
+    }
+  ],
+  "small_controls": [
+    {
+      "pairs": [
+        {
+          "baseline_ns": 99542,
+          "candidate_ns": 124167
+        },
+        {
+          "baseline_ns": 98500,
+          "candidate_ns": 118584
+        },
+        {
+          "baseline_ns": 96583,
+          "candidate_ns": 121792
+        },
+        {
+          "baseline_ns": 100000,
+          "candidate_ns": 97375
+        },
+        {
+          "baseline_ns": 98833,
+          "candidate_ns": 116625
+        },
+        {
+          "baseline_ns": 98833,
+          "candidate_ns": 99542
+        },
+        {
+          "baseline_ns": 100000,
+          "candidate_ns": 94708
+        }
+      ],
+      "baseline_median_ns": 98833,
+      "candidate_median_ns": 116625,
+      "median_reduction_fraction": -0.18002084324061807,
+      "winning_pairs": 2,
+      "plans_identical": true
+    },
+    {
+      "pairs": [
+        {
+          "baseline_ns": 84583,
+          "candidate_ns": 90125
+        },
+        {
+          "baseline_ns": 92125,
+          "candidate_ns": 93292
+        },
+        {
+          "baseline_ns": 91042,
+          "candidate_ns": 90625
+        },
+        {
+          "baseline_ns": 91250,
+          "candidate_ns": 94334
+        },
+        {
+          "baseline_ns": 94583,
+          "candidate_ns": 88833
+        },
+        {
+          "baseline_ns": 90333,
+          "candidate_ns": 94417
+        },
+        {
+          "baseline_ns": 91750,
+          "candidate_ns": 89916
+        }
+      ],
+      "baseline_median_ns": 91250,
+      "candidate_median_ns": 90625,
+      "median_reduction_fraction": 0.006849315068493178,
+      "winning_pairs": 3,
+      "plans_identical": true
+    }
+  ],
+  "small_control_interpretation": "First-set18percent slowdown did not reproduce;second set0.7percent faster.No small-input speedup is claimed;both data sets retained.",
+  "plans_identical": true,
+  "no_decode_or_whole_player_speedup_claim": true
+}

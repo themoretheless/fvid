@@ -1,0 +1,11 @@
+{
+  "status": "accepted after final binary measurements and correctness qualification",
+  "comparison": "Seven alternating baseline/candidate pairs,15 warm plan calls per run,three warmups;fixed release configuration and identical source.",
+  "required_median_reduction_fraction": 0.2,
+  "minimum_winning_pairs": 6,
+  "correctness": "Identical plans and exact analytic PCM,packet/work/seek/EOF controls;ordinary tests use no generator,FFmpeg or network.",
+  "no_whole_player_speedup_claim": true,
+  "configuration": "Public plan_decode_audio; max_controlled_bytes=64 MiB; default unbounded mode retained as separate unchanged-cost control.",
+  "initial_default_observation": "Unbounded default planning is already about93us on this source; no optimization or defect claimed for that mode.",
+  "maximum_default_mode_median_regression_fraction": 0.2
+}
