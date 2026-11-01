@@ -1,0 +1,17 @@
+{
+  "source_commit": "b41d705ec12c3f4f108ca776e691d59f0f5ce34d",
+  "verified_remote_refs": {
+    "refs/heads/codex/deliver-fvid-20261029": "b41d705ec12c3f4f108ca776e691d59f0f5ce34d",
+    "refs/heads/main": "b41d705ec12c3f4f108ca776e691d59f0f5ce34d"
+  },
+  "accepted_ids": [
+    "FVID-0482"
+  ],
+  "accepted_count": 482,
+  "next_id": "FVID-0483",
+  "goal_complete": false,
+  "worktree_clean_before_receipt": true,
+  "source_and_fixture_hashes_verified": true,
+  "owned_build_target_and_benchmark_binaries_absent": true,
+  "performance_acceptance_set": "measurement-set-3"
+}
