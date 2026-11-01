@@ -609,3 +609,8 @@ fn eld_au_origin_keeps_worker_pcm_timestamps_and_navigation() {
 fn discarded_hf_tail_limiter_keeps_worker_audio_and_navigation() {
     check_corpus("aac-ld-sbr-limiter-tail");
 }
+
+#[test]
+fn coupled_noise_balance_keeps_worker_audio_and_navigation() {
+    check_corpus("aac-ld-sbr-noise-balance");
+}

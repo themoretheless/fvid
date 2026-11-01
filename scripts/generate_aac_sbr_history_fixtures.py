@@ -113,8 +113,8 @@ def sequence(kind, slots, crossover, poison_noise=False):
                 channels[1]['envelope'].append([str(t/(1+D(2)**((D(b)-pan)/a))) for t,b in zip(numerator,balances)])
             for levels,balances in zip(channels[0]['quantized_noise'],channels[1]['quantized_noise']):
                 numerator = [D(2)**(7-v) for v in levels]
-                channels[0]['noise'].append([str(t/(1+D(2)**(b-12))) for t,b in zip(numerator,balances)])
-                channels[1]['noise'].append([str(t/(1+D(2)**(12-b))) for t,b in zip(numerator,balances)])
+                channels[0]['noise'].append([str(t/(1+D(2)**(12-b))) for t,b in zip(numerator,balances)])
+                channels[1]['noise'].append([str(t/(1+D(2)**(b-12))) for t,b in zip(numerator,balances)])
         else:
             for ch in channels:
                 a = D(1 if ch['coarse'] else 2)

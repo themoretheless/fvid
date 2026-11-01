@@ -1,3 +1,15 @@
+## Coupled SBR noise orientation, 2026-11-01
+
+Corrected a reversed noise balance in coupled stereo. All26 ordinary LD-SBR
+original PCM24 WAV comparisons now have per-channel RMS at most2.016e-7 at
+zero lag,without gain fitting. The three S2 outputs improve to around9e-8;
+other23 outputs stay byte-identical. New own480/512 centered/asymmetric short
+videos reproduce the exact PCM error before the fix and accept complete PCM,
+both transport paths and playback navigation after it.661 scoped tests pass,
+0 fail,1 existing ignored;FFmpeg/ffprobe blocked. Broader LD-MPS/AnnexB
+and codec/profile qualification remain open.
+[Evidence](validation/aac-ld-sbr-noise-balance-2026-11-01.md).
+
 ## Complete-range SBR limiter partition, 2026-11-01
 
 Corrected protection of a retained patch end that coincides with a low-resolution

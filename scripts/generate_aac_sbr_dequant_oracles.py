@@ -23,7 +23,7 @@ with localcontext() as c:
   cases.append(dict(kind='noise',level=level,value=str(value)))
   for balance in range(0,25,2):
    numerator=D(2)**(7-level)
-   left=numerator/(1+D(2)**(balance-12));right=numerator/(1+D(2)**(12-balance))
+   left=numerator/(1+D(2)**(12-balance));right=numerator/(1+D(2)**(balance-12))
    cases.append(dict(kind='coupled_noise',level=level,balance=balance,left=str(left),right=str(right)))
 root=Path(__file__).resolve().parents[1]
 (root/'tests/fixtures/playback-errors/aac-sbr-dequant-oracles.json').write_text(json.dumps(cases,separators=(',',':'))+'\n')

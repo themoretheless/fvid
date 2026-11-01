@@ -42,7 +42,7 @@ def reconstruct(low,slots,noise,mode='base',channel=0,geometry=None,noise_levels
     target=128.;ratio=.5
     if mode=='coupled-pan':
         target=256/(1+2**(2 if channel==0 else -2))
-        ratio=1/(1+2**(-4 if channel==0 else 4))
+        ratio=1/(1+2**(4 if channel==0 else -4))
     base_ratio=ratio
     output=[];index=0;bandwidth=0.;previous_mode=0;gain_history=[];noise_history=[]
     _,hb,_,_=tables(kx,stop,0,False,0,0)

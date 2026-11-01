@@ -1,5 +1,17 @@
 # Audio Implementation Status
 
+Coupled SBR noise now follows the normative L/R balance orientation. This
+closes the three remaining ordinary LD-SBR S2 waveform discrepancies: all26
+original ISO PCM24 streams have per-channel RMS at most2.016e-7,with zero lag
+and no gain fitting. Only S2 outputs change;the other23 are byte-identical.
+Four own short stereo programmes cover centered/asymmetric480/512,both
+transports,player seek/rewind and actual device navigation.661 scoped tests pass,
+0 fail,1 existing ignored;FFmpeg/ffprobe blocked. Full LD-MPS/profile
+qualification remains open. See validation/aac-ld-sbr-noise-balance-2026-11-01.md.
+
+The following opening notes describe earlier qualification milestones.
+
+
 LD-SBR now uses only internal retained-patch boundaries and complete synthesis
 endpoints for limiter partitions. This removes all six GH waveform discrepancies
 caused by a discarded short HF tail.23/26 original ISO PCM24 streams now have

@@ -1,0 +1,454 @@
+{
+  "cases": [
+    {
+      "name": "n480-coupled",
+      "n": 480,
+      "slots": 15,
+      "bands": 64,
+      "rate": 48000,
+      "channels": 2,
+      "mode": "coupled",
+      "asc": "f8ec51c460c05800",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 25
+        },
+        {
+          "offset": 25,
+          "bytes": 25
+        },
+        {
+          "offset": 50,
+          "bytes": 25
+        },
+        {
+          "offset": 75,
+          "bytes": 25
+        },
+        {
+          "offset": 100,
+          "bytes": 25
+        },
+        {
+          "offset": 125,
+          "bytes": 25
+        },
+        {
+          "offset": 150,
+          "bytes": 25
+        },
+        {
+          "offset": 175,
+          "bytes": 21
+        }
+      ],
+      "samples": 7680,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "edges": [
+        960,
+        2880,
+        6720
+      ],
+      "video": "n480-coupled.mp4",
+      "file": "n480-coupled.mkv",
+      "golden": "n480-coupled.f32le"
+    },
+    {
+      "name": "n480-coupled-pan",
+      "n": 480,
+      "slots": 15,
+      "bands": 64,
+      "rate": 48000,
+      "channels": 2,
+      "mode": "coupled-pan",
+      "asc": "f8ec51c460c05800",
+      "frames": [
+        {
+          "offset": 196,
+          "bytes": 25
+        },
+        {
+          "offset": 221,
+          "bytes": 25
+        },
+        {
+          "offset": 246,
+          "bytes": 25
+        },
+        {
+          "offset": 271,
+          "bytes": 25
+        },
+        {
+          "offset": 296,
+          "bytes": 25
+        },
+        {
+          "offset": 321,
+          "bytes": 25
+        },
+        {
+          "offset": 346,
+          "bytes": 25
+        },
+        {
+          "offset": 371,
+          "bytes": 21
+        }
+      ],
+      "samples": 7680,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "edges": [
+        960,
+        2880,
+        6720
+      ],
+      "video": "n480-coupled-pan.mp4",
+      "file": "n480-coupled-pan.mkv",
+      "golden": "n480-coupled-pan.f32le"
+    },
+    {
+      "name": "n512-coupled",
+      "n": 512,
+      "slots": 16,
+      "bands": 64,
+      "rate": 48000,
+      "channels": 2,
+      "mode": "coupled",
+      "asc": "f8ec41c460c05800",
+      "frames": [
+        {
+          "offset": 392,
+          "bytes": 25
+        },
+        {
+          "offset": 417,
+          "bytes": 25
+        },
+        {
+          "offset": 442,
+          "bytes": 25
+        },
+        {
+          "offset": 467,
+          "bytes": 25
+        },
+        {
+          "offset": 492,
+          "bytes": 25
+        },
+        {
+          "offset": 517,
+          "bytes": 25
+        },
+        {
+          "offset": 542,
+          "bytes": 25
+        },
+        {
+          "offset": 567,
+          "bytes": 21
+        }
+      ],
+      "samples": 8192,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "edges": [
+        1024,
+        3072,
+        7168
+      ],
+      "video": "n512-coupled.mp4",
+      "file": "n512-coupled.mkv",
+      "golden": "n512-coupled.f32le"
+    },
+    {
+      "name": "n512-coupled-pan",
+      "n": 512,
+      "slots": 16,
+      "bands": 64,
+      "rate": 48000,
+      "channels": 2,
+      "mode": "coupled-pan",
+      "asc": "f8ec41c460c05800",
+      "frames": [
+        {
+          "offset": 588,
+          "bytes": 25
+        },
+        {
+          "offset": 613,
+          "bytes": 25
+        },
+        {
+          "offset": 638,
+          "bytes": 25
+        },
+        {
+          "offset": 663,
+          "bytes": 25
+        },
+        {
+          "offset": 688,
+          "bytes": 25
+        },
+        {
+          "offset": 713,
+          "bytes": 25
+        },
+        {
+          "offset": 738,
+          "bytes": 25
+        },
+        {
+          "offset": 763,
+          "bytes": 21
+        }
+      ],
+      "samples": 8192,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "edges": [
+        1024,
+        3072,
+        7168
+      ],
+      "video": "n512-coupled-pan.mp4",
+      "file": "n512-coupled-pan.mkv",
+      "golden": "n512-coupled-pan.f32le"
+    }
+  ],
+  "exports": [
+    {
+      "name": "n480-coupled-matroska",
+      "n": 480,
+      "slots": 15,
+      "bands": 64,
+      "rate": 48000,
+      "channels": 2,
+      "mode": "coupled",
+      "asc": "f8ec51c460c05800",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 25
+        },
+        {
+          "offset": 25,
+          "bytes": 25
+        },
+        {
+          "offset": 50,
+          "bytes": 25
+        },
+        {
+          "offset": 75,
+          "bytes": 25
+        },
+        {
+          "offset": 100,
+          "bytes": 25
+        },
+        {
+          "offset": 125,
+          "bytes": 25
+        },
+        {
+          "offset": 150,
+          "bytes": 25
+        },
+        {
+          "offset": 175,
+          "bytes": 21
+        }
+      ],
+      "samples": 7680,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "edges": [
+        960,
+        2880,
+        6720
+      ],
+      "video": "n480-coupled.mkv",
+      "file": "n480-coupled.mkv",
+      "golden": "n480-coupled.f32le"
+    },
+    {
+      "name": "n480-coupled-pan-matroska",
+      "n": 480,
+      "slots": 15,
+      "bands": 64,
+      "rate": 48000,
+      "channels": 2,
+      "mode": "coupled-pan",
+      "asc": "f8ec51c460c05800",
+      "frames": [
+        {
+          "offset": 196,
+          "bytes": 25
+        },
+        {
+          "offset": 221,
+          "bytes": 25
+        },
+        {
+          "offset": 246,
+          "bytes": 25
+        },
+        {
+          "offset": 271,
+          "bytes": 25
+        },
+        {
+          "offset": 296,
+          "bytes": 25
+        },
+        {
+          "offset": 321,
+          "bytes": 25
+        },
+        {
+          "offset": 346,
+          "bytes": 25
+        },
+        {
+          "offset": 371,
+          "bytes": 21
+        }
+      ],
+      "samples": 7680,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "edges": [
+        960,
+        2880,
+        6720
+      ],
+      "video": "n480-coupled-pan.mkv",
+      "file": "n480-coupled-pan.mkv",
+      "golden": "n480-coupled-pan.f32le"
+    },
+    {
+      "name": "n512-coupled-matroska",
+      "n": 512,
+      "slots": 16,
+      "bands": 64,
+      "rate": 48000,
+      "channels": 2,
+      "mode": "coupled",
+      "asc": "f8ec41c460c05800",
+      "frames": [
+        {
+          "offset": 392,
+          "bytes": 25
+        },
+        {
+          "offset": 417,
+          "bytes": 25
+        },
+        {
+          "offset": 442,
+          "bytes": 25
+        },
+        {
+          "offset": 467,
+          "bytes": 25
+        },
+        {
+          "offset": 492,
+          "bytes": 25
+        },
+        {
+          "offset": 517,
+          "bytes": 25
+        },
+        {
+          "offset": 542,
+          "bytes": 25
+        },
+        {
+          "offset": 567,
+          "bytes": 21
+        }
+      ],
+      "samples": 8192,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "edges": [
+        1024,
+        3072,
+        7168
+      ],
+      "video": "n512-coupled.mkv",
+      "file": "n512-coupled.mkv",
+      "golden": "n512-coupled.f32le"
+    },
+    {
+      "name": "n512-coupled-pan-matroska",
+      "n": 512,
+      "slots": 16,
+      "bands": 64,
+      "rate": 48000,
+      "channels": 2,
+      "mode": "coupled-pan",
+      "asc": "f8ec41c460c05800",
+      "frames": [
+        {
+          "offset": 588,
+          "bytes": 25
+        },
+        {
+          "offset": 613,
+          "bytes": 25
+        },
+        {
+          "offset": 638,
+          "bytes": 25
+        },
+        {
+          "offset": 663,
+          "bytes": 25
+        },
+        {
+          "offset": 688,
+          "bytes": 25
+        },
+        {
+          "offset": 713,
+          "bytes": 25
+        },
+        {
+          "offset": 738,
+          "bytes": 25
+        },
+        {
+          "offset": 763,
+          "bytes": 21
+        }
+      ],
+      "samples": 8192,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "edges": [
+        1024,
+        3072,
+        7168
+      ],
+      "video": "n512-coupled-pan.mkv",
+      "file": "n512-coupled-pan.mkv",
+      "golden": "n512-coupled-pan.f32le"
+    }
+  ]
+}

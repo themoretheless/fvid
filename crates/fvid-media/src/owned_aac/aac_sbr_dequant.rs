@@ -64,10 +64,10 @@ pub(crate) fn coupled_noise_with_q31(level: i16, balance: i16, allow_q31: bool) 
             "SBR noise balance exceeds normative range or parity",
         ));
     }
-    // Noise has the opposite balance orientation to envelope energy.
+    // 4.6.18.3.5: noise and envelope use the same L/R balance orientation.
     split(
         2.0 * noise_with_q31(level, allow_q31)?,
-        12.0 - f64::from(balance),
+        f64::from(balance) - 12.0,
     )
 }
 
@@ -89,8 +89,8 @@ mod tests {
         assert_eq!(centered.left, q31);
         assert_eq!(centered.right, q31);
         let panned = coupled_noise_with_q31(31, 8, true).unwrap();
-        close(panned.left, 2.0 * q31 * 16.0 / 17.0);
-        close(panned.right, 2.0 * q31 / 17.0);
+        close(panned.left, 2.0 * q31 / 17.0);
+        close(panned.right, 2.0 * q31 * 16.0 / 17.0);
         for balance in [-2, 1, 13, 25, 26] {
             assert!(coupled_noise_with_q31(31, balance, true).is_err());
         }
@@ -149,8 +149,8 @@ mod tests {
         close(e.left, 102.4);
         close(e.right, 25.6);
         let n = coupled_noise(6, 14).unwrap();
-        close(n.left, 0.4);
-        close(n.right, 1.6);
+        close(n.left, 1.6);
+        close(n.right, 0.4);
     }
     #[test]
     fn normative_noise_bounds_even_balance_and_numeric_extremes_are_checked() {

@@ -1,9 +1,9 @@
-//! Optional offline syntax/energy diagnostic for ordinary mono ELD FVIDAAC1
+//! Optional offline syntax/energy diagnostic for ordinary mono/stereo ELD FVIDAAC1
 //! records exported by aac_spatial_reference. Strict noise0..30 diagnostics.
 //! Not a waveform conformance oracle.
 use fvid_media::owned_aac::{
-    aac_channel::ChannelData, aac_sbr_data::Data, aac_sbr_header::Header, aac_sbr_history::History,
-    bits::BitReader, config::AudioSpecificConfig,
+    aac_channel::ChannelData, aac_pair::ChannelPair, aac_sbr_data::Data, aac_sbr_header::Header,
+    aac_sbr_history::History, bits::BitReader, config::AudioSpecificConfig,
 };
 use std::io::Read;
 
@@ -35,13 +35,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let asc = payload(&mut input, 65536)?;
     let config = AudioSpecificConfig::parse(&asc)?;
     if config.core.object_type != 39
-        || config.core.channel_configuration != 1
+        || !matches!(config.core.channel_configuration, 1 | 2)
         || config.protection.is_some()
         || config.separate_esc
         || config.ld_mps.is_some()
         || config.eld_downscale_sample_rate.is_some()
     {
-        return Err("diagnostic requires ordinary mono ELD/LD-SBR".into());
+        return Err("diagnostic requires ordinary mono/stereo ELD/LD-SBR".into());
     }
     let sbr = config.eld_sbr.ok_or("missing LD-SBR configuration")?;
     let mut header = sbr.headers[0].clone();
@@ -53,7 +53,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for index in 0..count {
         let packet = payload(&mut input, 1024 * 1024)?;
         let mut bits = BitReader::new(&packet);
-        let core = ChannelData::read_eld(&mut bits, &config.core, None, false)?;
+        let (cores, mid_side) = if config.core.channel_configuration == 2 {
+            let pair = ChannelPair::read_eld(&mut bits, &config.core)?;
+            (vec![pair.left, pair.right], pair.mid_side)
+        } else {
+            (
+                vec![ChannelData::read_eld(&mut bits, &config.core, None, false)?],
+                None,
+            )
+        };
+        let core = &cores[0];
         let core_bits = bits.position();
         let expected_crc = if sbr.crc { Some(bits.read(10)?) } else { None };
         let mut crc_input = bits.clone();
@@ -71,7 +80,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .checked_mul(2)
                 .ok_or("SBR rate overflow")?,
             slots,
-            1,
+            usize::from(config.core.channel_configuration),
         )?;
         let end = bits.position();
         if let Some(expected) = expected_crc {
@@ -89,6 +98,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "{}",
             serde_json::json!({
                 "frame":index,"core_bits":core_bits,"sbr_end_bits":end,
+                "coupled":data.coupled,"mid_side":mid_side,
+                "core_channels":cores.iter().map(|channel| serde_json::json!({
+                    "codebooks":channel.codebooks,
+                    "scales":format!("{:?}",channel.scales),
+                    "tns":format!("{:?}",channel.tns),
+                })).collect::<Vec<_>>(),
+                "sbr_channels":format!("{:?}",parameters.channels),
                 "core_max_sfb":core.info.max_sfb,
             "core_peak_quantized":core.quantized.iter().map(|v| i32::from(*v).abs()).max().unwrap_or(0),
                 "header":format!("{header:?}"),"frequency":format!("{:?}",data.frequency),
