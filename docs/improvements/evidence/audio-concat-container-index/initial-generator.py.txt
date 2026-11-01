@@ -1,0 +1,29 @@
+"""Short authored container audio already supported outside the legacy exporter."""
+from pathlib import Path
+import struct,json,hashlib
+from generate_loudnorm_budget_mix_concat_regressions import build_matroska_flac_mka,u,simple_block
+from generate_audio_resample_window_fixture import ebml
+from generate_eac3_aht_lfe import packet,audiovisual
+from generate_mp4_enabled_track_regressions import boxes
+from generate_vp9_chroma import atom
+OUT=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/audio-concat-container-index'
+def generate():
+    files={};cases=[]
+    def case(name,data,pcm,channels,frames,work,codec,exact=False):
+        files[name]=data;files[name+'.f32le']=pcm;cases.append(dict(file=name,oracle=name+'.f32le',channels=channels,frames=frames,work=work,codec=codec,exact=exact))
+    case('flac.mka',build_matroska_flac_mka(),b''.join(struct.pack('<f',v/32768)for v in [4096]*1920+[-4096]*1920),1,3840,2,'flac',True)
+    head=b'OpusHead'+struct.pack('<BBHIhB',1,1,0,48000,0,0)
+    header=ebml('1a45dfa3',ebml('4282',b'matroska'));info=ebml('1549a966',u('2ad7b1',1_000_000));track=ebml('ae',u('d7',1)+u('73c5',1)+u('83',2)+ebml('86',b'A_OPUS')+ebml('63a2',head)+ebml('e1',ebml('b5',struct.pack('>d',48000))+u('9f',1)))
+    blocks=u('e7',0)+b''.join(simple_block(1,i*20,0x80,bytes.fromhex('f8fffe000000'))for i in range(2))
+    case('opus.mka',header+ebml('18538067',info+ebml('1654ae6b',track)+ebml('1f43b675',blocks)),bytes(1920*4),1,1920,2,'opus')
+    frame=packet(0,False,0,aht=False,zero=True);video=audiovisual([frame]*3);files['video-control.mp4']=video
+    parts=list(boxes(video));assert [k for k,b in parts].index(b'mdat')<[k for k,b in parts].index(b'moov')
+    output=b''
+    for k,b in parts:
+        if k==b'moov':b=b''.join(atom(t,v)for t,v in boxes(b)if t!=b'trak'or b'soun'in v)
+        output+=atom(k,b)
+    case('eac3.mp4',output,bytes(4608*3*4),3,4608,3,'eac3')
+    files['manifest.json']=(json.dumps(dict(provenance='Authored constant FLAC and silent Opus in Matroska,plus pure authored3-channel EAC3 silence with a neutral VP9 audiovisual control and identical audio-only MP4 packet bytes. No private media,FFmpeg,encoder or network.',cases=cases,sha256={n:hashlib.sha256(b).hexdigest()for n,b in files.items()}),indent=2)+'\n').encode();return files
+if __name__=='__main__':
+    OUT.mkdir(parents=True,exist_ok=True)
+    for n,b in generate().items():(OUT/n).write_bytes(b)

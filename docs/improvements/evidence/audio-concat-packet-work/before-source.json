@@ -1,0 +1,8 @@
+{
+  "src/native_audio_mix/concat.rs": "ca81da78844297722730fb2e5d57a2da08ea0d1a773e20736203f546a98a032e",
+  "crates/fvid-media/src/owned_audio_plan.rs": "2087b2a7ea8790635590672c09263d2faaee42395aaabfcc2dfea05c816e0ae7",
+  "crates/fvid-media/src/owned_g711_wave_export.rs": "091756438f0745e259df38c8de66619eb02cc386650a71c2b4f4b9d154ea5081",
+  "crates/fvid-media/src/owned_ogg_audio_program.rs": "6413565ce06f6223558424a7b66ad1e11107ef04e9a659928f6b65358ec89e78",
+  "tests/audio_concat_packet_work.rs": "65a43700156a96d3074f40b8ba8f3cf3a8876fc5198a695a8b088162c6e708a4",
+  "scripts/generate_audio_concat_packet_work.py": "f2ce5d72e2437979f35329bb6878d4d8ac29f2b2a51465e7fcaa6f7e95ec3792"
+}

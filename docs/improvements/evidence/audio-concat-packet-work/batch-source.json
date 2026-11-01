@@ -1,0 +1,11 @@
+{
+  "crates/fvid-media/src/owned_audio_plan.rs": "164ced89b19cedfdab1d69d4620607b196cc847d48ddaf58c8fe9a2f0674ba37",
+  "crates/fvid-media/src/owned_g711_wave_export.rs": "e6c6f429877fbe9cac3b9438f40336173256565843b6f2a280d8e5412ac8862d",
+  "crates/fvid-media/src/owned_ogg_audio_program.rs": "785fd35c6e5dbd5126ea52c37b19c396a69068e9324009cbd2bc48fb57081c57",
+  "scripts/generate_audio_concat_container_index.py": "1041ad5165a1f65d25e87b9222ca6cfe089cadcb7adc2c48ed32c03052841bd6",
+  "scripts/generate_audio_concat_packet_work.py": "f2ce5d72e2437979f35329bb6878d4d8ac29f2b2a51465e7fcaa6f7e95ec3792",
+  "src/native_audio_mix/concat.rs": "50bab78d11262e4f3a948582201beec14f61aaf8efc360756b7be8d24deee523",
+  "src/native_media.rs": "82a673038bbc7288bab00e2c3da310ee5de94cc515d0e5158a7af27908dde592",
+  "tests/audio_concat_container_index.rs": "459f5c87449126f5fbd98b6b0531965943a2819f5d83e44ea123a1d3af676577",
+  "tests/audio_concat_packet_work.rs": "65a43700156a96d3074f40b8ba8f3cf3a8876fc5198a695a8b088162c6e708a4"
+}

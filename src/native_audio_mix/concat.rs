@@ -133,8 +133,8 @@ fn segment_packet_count(source: &Path, options: &fvid_media::CopyOptions) -> Res
         {
             return Err(invalid("controlled memory budget exceeded"));
         }
-        let info = crate::native_media::constant_audio_source_info_selected_with_options(source, None, options)?;
-        if let Some(track) = reader.tracks.get(info.stream_index) {
+        let index = crate::native_media::matroska_audio_header_index(&reader, None)?;
+        if let Some(track) = reader.tracks.get(index) {
             let track_number = track.number;
             return Ok(reader
                 .packets
@@ -164,7 +164,10 @@ fn segment_packet_count(source: &Path, options: &fvid_media::CopyOptions) -> Res
         }
         return Ok(count);
     }
-    Ok(u64::MAX)
+    drop(input);
+    fvid_media::owned_audio_plan::standalone_packet_work(source, options)
+        .map(|count| count.unwrap_or(u64::MAX))
+        .map_err(|error| invalid(&error))
 }
 
 pub fn validate_concat_segments_with_options(

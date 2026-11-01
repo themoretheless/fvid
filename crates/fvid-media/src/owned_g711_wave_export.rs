@@ -97,6 +97,17 @@ fn open(path: &Path, options: &CopyOptions) -> Result<(Input, Vec<u8>)> {
         info,
     ))
 }
+fn packet_window(channels: usize, options: &CopyOptions) -> Result<usize> {
+    let window = options.max_packet_bytes.checked_div(channels).unwrap_or(0).min(2048);
+    if window == 0 { return Err("G.711 channel frame exceeds byte limit".into()); }
+    Ok(window)
+}
+
+pub(crate) fn packet_work(source: &Path, options: &CopyOptions) -> Result<u64> {
+    let (_, channels, _, _, frames) = descriptor(source, options)?;
+    Ok(frames.div_ceil(packet_window(usize::from(channels), options)? as u64))
+}
+
 pub(crate) fn descriptor(
     path: &Path,
     options: &CopyOptions,
@@ -113,10 +124,7 @@ pub(crate) fn descriptor_with_transform(
         return Err("no decoded audio samples or invalid channel count (nonempty input required)".into());
     }
     let channels = usize::from(input.shape.channels);
-    let window = 2048.min(options.max_packet_bytes / channels);
-    if window == 0 {
-        return Err("G.711 channel frame exceeds byte limit".into());
-    }
+    let window = packet_window(channels, options)?;
     let rate = input.shape.sample_rate;
     let until = transform
         .and_then(|t| crate::owned_adts_export::decoded_prefix(t, rate))
@@ -206,10 +214,7 @@ fn decode(
     options: &CopyOptions,
 ) -> Result<crate::owned_matroska_audio::AudioDecodeStats> {
     let channels = usize::from(input.shape.channels);
-    let window = 2048.min(options.max_packet_bytes / channels);
-    if window == 0 {
-        return Err("G.711 channel frame exceeds byte limit".into());
-    }
+    let window = packet_window(channels, options)?;
     let end = until.map_or(input.shape.sample_frames, |n| {
         n.min(input.shape.sample_frames)
     });

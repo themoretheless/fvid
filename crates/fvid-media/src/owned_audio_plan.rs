@@ -122,6 +122,33 @@ pub fn source_geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
     Ok((desc.rate, desc.channels))
 }
 
+/// Decode work consumed by a standalone G.711/Ogg/FLAC/MPEG packet prefix.
+/// Uses the codec's admitted index or block geometry without decoding PCM.
+/// Returns None for formats whose container-specific caller owns the count.
+pub fn standalone_packet_work(source: &Path, options: &CopyOptions) -> Result<Option<u64>> {
+    crate::owned_ogg_opus_export::check(options)?;
+    let count = if crate::owned_g711_wave_export::recognizes(source, options)? {
+        crate::owned_g711_wave_export::packet_work(source, options)?
+    } else if crate::owned_ogg_opus_export::recognizes(source)? {
+        use crate::owned_ogg_audio_export::Backend;
+        match crate::owned_ogg_audio_export::coding(source, options)? {
+            Backend::Opus => u64::try_from(crate::owned_ogg_opus_export::open(source, options)?.packet_count())
+                .map_err(|_| "Opus packet work overflow")?,
+            Backend::Vorbis => u64::try_from(crate::owned_ogg_vorbis_export::open(source, options)?.0.packet_times().len())
+                .map_err(|_| "Vorbis packet work overflow")?,
+            Backend::Joint => crate::owned_ogg_joint_export::open(source, options)?.0.packet_work()
+                .map_err(|e| e.to_string())?,
+        }
+    } else if crate::owned_raw_flac::recognizes(source)? {
+        u64::try_from(crate::owned_raw_flac::open(source, options)?.frames.len())
+            .map_err(|_| "FLAC packet work overflow")?
+    } else if crate::owned_raw_mp3::recognizes(source)? {
+        u64::try_from(crate::owned_raw_mp3::open(source, options)?.frames.len())
+            .map_err(|_| "MPEG packet work overflow")?
+    } else { return Ok(None); };
+    Ok(Some(options.max_packets.map_or(count, |limit| count.min(limit))))
+}
+
 /// Read-only audio source geometry and speaker mask (`rate`, `channels`, `mask`).
 pub fn source_geometry_with_mask(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32)> {
     let desc = source_descriptor(source, options)?;

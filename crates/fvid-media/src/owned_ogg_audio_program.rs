@@ -242,6 +242,16 @@ impl Program {
     pub fn decoded_packets(&self) -> u64 {
         self.packets
     }
+    pub(crate) fn packet_work(&self) -> Result<u64> {
+        self.links.iter().try_fold(0u64, |total, link| {
+            let count = match &link.source {
+                Source::Vorbis(program) => program.packet_times().len(),
+                Source::Opus(program) => program.packet_count(),
+            };
+            total.checked_add(u64::try_from(count).map_err(|_| invalid("Ogg packet work overflow"))?)
+                .ok_or_else(|| invalid("Ogg packet work overflow"))
+        })
+    }
     pub(crate) fn max_packet_size_in_prefix(
         &self,
         until: Option<u64>,

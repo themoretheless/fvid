@@ -1,0 +1,30 @@
+{
+  "provenance": "Authored constant FLAC and silent Opus in short Matroska containers,plus80ms neutral VP9 with the identical FLAC packets and STREAMINFO. No private media,encoder,FFmpeg or network.",
+  "cases": [
+    {
+      "file": "flac.mka",
+      "oracle": "flac.mka.f32le",
+      "channels": 1,
+      "frames": 3840,
+      "work": 2,
+      "codec": "flac",
+      "exact": true
+    },
+    {
+      "file": "opus.mka",
+      "oracle": "opus.mka.f32le",
+      "channels": 1,
+      "frames": 1920,
+      "work": 2,
+      "codec": "opus",
+      "exact": false
+    }
+  ],
+  "sha256": {
+    "flac.mka": "e26049ecdcf9d42f67d17d379f6bf9bfb846870fdea816e8271455eb2b9dab8e",
+    "flac.mka.f32le": "a7ea320007991c0a0c645d4b1251d4e984b2e49c6a3fe122e24594979c0844bf",
+    "opus.mka": "45a61816088c2a9a14346315eb37cc47aef74cc4254cf2a3f7b3f30af9c37db9",
+    "opus.mka.f32le": "f6e28ad1753237d42be72be187a88f09a269097eeda24bcf12908db6bd361246",
+    "video-control.mkv": "a4e52a30b8355de7b96123538d57fe1322d18259a1dd2ee78796ef3f4aa6e098"
+  }
+}

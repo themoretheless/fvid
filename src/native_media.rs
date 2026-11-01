@@ -1413,9 +1413,13 @@ fn inspect_audio_source_selected(
     }
 }
 
-pub(crate) fn matroska_audio_index<R:std::io::Read+std::io::Seek>(reader:&crate::container::webm::WebmReader<R>,selected:Option<usize>)->Result<usize> {
+pub(crate) fn matroska_audio_header_index<R:std::io::Read+std::io::Seek>(reader:&crate::container::webm::WebmReader<R>,selected:Option<usize>)->Result<usize> {
     let preferred=if selected.is_none() {reader.preferred_track_numbers(&reader.tracks.iter().filter(|t|t.kind==2).map(|t|t.number).collect::<Vec<_>>())} else {Vec::new()};
-    let index=audio_index(reader.tracks.iter().map(|t|t.kind==2&&(selected.is_some()||preferred.contains(&t.number))),selected)?;
+    audio_index(reader.tracks.iter().map(|t|t.kind==2&&(selected.is_some()||preferred.contains(&t.number))),selected)
+}
+
+pub(crate) fn matroska_audio_index<R:std::io::Read+std::io::Seek>(reader:&crate::container::webm::WebmReader<R>,selected:Option<usize>)->Result<usize> {
+    let index=matroska_audio_header_index(reader,selected)?;
     if !matches!(reader.tracks[index].codec.as_str(),"A_AAC"|"A_ALAC"|"A_PCM/INT/LIT"|"A_PCM/INT/BIG"|"A_PCM/FLOAT/IEEE") {return Err(invalid("selected Matroska audio stream is not supported by the owned export"));}
     Ok(index)
 }

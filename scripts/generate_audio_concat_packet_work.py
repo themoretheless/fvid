@@ -1,0 +1,39 @@
+"""Authored short audio sources for concat encoded-work accounting."""
+from pathlib import Path
+import struct,json,hashlib
+from generate_wave_ogg_flac_plan_regressions import make_g711_wave,make_vorbis_link,ogg_page
+from generate_loudnorm_budget_mix_concat_regressions import build_raw_flac_48k
+ROOT=Path(__file__).resolve().parents[1];S=ROOT/'tests/fixtures/playback-errors';OUT=S/'audio-concat-packet-work'
+def padded_packet(length):
+    # One-frame code3 packet. Padding length octets use254 for each255 marker.
+    extra=length-4;markers=(extra-1)//255
+    header=bytes([0xfb,0x41])+bytes([255])*markers+bytes([extra-255*markers-1])
+    packet=header+bytes.fromhex('fffe')+bytes(length-len(header)-2)
+    assert len(packet)==length;return packet
+
+def opus(channels=1,lengths=(6,),serial=900,padded=False):
+    head=b'OpusHead'+struct.pack('<BBHIhB',1,channels,0,48000,0,0);tags=b'OpusTags'+struct.pack('<I',4)+b'fvid'+struct.pack('<I',0)
+    data=ogg_page(head,0,2,0,serial)+ogg_page(tags,0,0,1,serial)
+    for i,size in enumerate(lengths):data+=ogg_page(padded_packet(size)if padded else bytes.fromhex('f8fffe')+bytes(size-3),(i+1)*960,4 if i+1==len(lengths)else 0,i+2,serial)
+    return data
+def generate():
+    files={};cases=[]
+    def case(name,data,pcm,channels,frames,work,cap,kind='geometry',exact=False):
+        files[name]=data;oracle=name+'.f32le';files[oracle]=pcm
+        next_name=name+'-later.ogg';files[next_name]=opus(channels,(cap+8,),1000+len(cases),padded=True);kind='bytes'
+        cases.append(dict(file=name,oracle=oracle,channels=channels,frames=frames,work=work,cap=cap,kind=kind,next=next_name,exact=exact))
+    for law,ch,frames,cap in [('alaw',1,4,6),('mulaw',1,4,6),('alaw',1,13,6),('alaw',2,4,9),('alaw',1,2050,4096)]:
+        codes=bytes((0xd5 if i%2==0 else 0x55)if law=='alaw'else(0xfe if i%2==0 else 0x7e)for i in range(frames*ch));pcm=b''.join(struct.pack('<f',(8 if i%2==0 else -8)/32768)for i in range(frames*ch));name=f'{law}-{ch}-{frames}.wav';case(name,make_g711_wave(law=law,sample_rate=48000,channels=ch,codes=codes),pcm,ch,frames,(frames+min(2048,cap//ch)-1)//min(2048,cap//ch),cap,'geometry'if frames==2050 else'bytes',True)
+    for ch in [1,2]:
+        files[f'opus-{ch}-small.ogg']=opus(ch,(6,),910+ch)
+        files[f'opus-{ch}-large.ogg']=opus(ch,((9 if ch==1 else 12),),920+ch)
+    case('opus.ogg',opus(1,(6,6),930),bytes(1920*4),1,1920,2,4096)
+    vorbis=make_vorbis_link(serial=931,channels=1);case('vorbis.ogg',vorbis,bytes(411*4),1,411,6,4096)
+    case('joint.ogg',vorbis+opus(1,(6,),932),bytes(1371*4),1,1371,7,4096)
+    case('constant.flac',build_raw_flac_48k(),b''.join(struct.pack('<f',v/32768)for v in [4096]*1920+[-4096]*1920),1,3840,2,4096,exact=True)
+    for folder,name,extension in [('mp1-native','48000-m0-e0-plain','mp1'),('mp2-native','free-0-0-1-48000','mp2'),('mp3-decoder','48000-2ch','mp3')]:
+        manifest='free-manifest.json'if extension=='mp2'else'manifest.json';entry=next(c for c in json.loads((S/folder/manifest).read_text())['cases']if c['name']==name);data=(S/folder/f'{name}.{extension}').read_bytes();pcm=(S/folder/f'{name}.f32le').read_bytes();ch=entry['channels'];work=len(entry['sizes']);case('source.'+extension,data,pcm,ch,len(pcm)//(ch*4),work,4096)
+    files['manifest.json']=(json.dumps(dict(provenance='Own scalar G.711 law values,constant FLAC,short silent Opus/Vorbis links,and saved FVid-authored MPEG I/II/III with independent PCM oracles. No private media,encoder,FFmpeg or network. Decode work is cross-checked against actual decoder statistics.',cases=cases,sha256={n:hashlib.sha256(b).hexdigest()for n,b in files.items()}),indent=2)+'\n').encode();return files
+if __name__=='__main__':
+    OUT.mkdir(parents=True,exist_ok=True)
+    for n,b in generate().items():(OUT/n).write_bytes(b)
