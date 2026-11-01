@@ -1,10 +1,11 @@
 {
-  "status": "qualified;pending delivery",
-  "accepted_count": 476,
-  "next_id": "FVID-0477",
+  "status": "delivered",
   "accepted_ids": [
     "FVID-0474"
   ],
+  "accepted_count": 476,
+  "next_id": "FVID-0477",
   "session": null,
+  "delivery_evidence": "docs/improvements/evidence/mp4-concat-unselected-plan/delivery.json",
   "goal_complete": false
 }
