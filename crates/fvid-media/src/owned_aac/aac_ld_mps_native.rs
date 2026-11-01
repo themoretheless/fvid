@@ -371,8 +371,9 @@ impl Decoder {
             }
         }
         // Local fragments have not entered the spatial session and own no
-        // older source window. A cumulative replacement count cannot
-        // distinguish them from an inherited unfinished message.
+        // older source window. A whole retransmission preserving every inherited
+        // prefix byte is equivalent to a stop carrying the remaining suffix.
+        // Only prefix loss leaves the older source association unresolved.
         if replaced_inherited {
             return Err(unsupported(
                 "AAC LD-MPS replaced-fragment source association is not yet implemented",

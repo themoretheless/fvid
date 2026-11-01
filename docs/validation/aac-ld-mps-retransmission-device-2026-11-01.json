@@ -1,0 +1,30 @@
+{
+  "probe_sha256": "d8c4e74e02792c07118bfd9692edf3a59547a2e78bd5b151db1cbc5d9ae03e72",
+  "scope": "Four short authored programmes on actual macOS stereo output; full, two seeks, rewind. No subjective or physical multichannel qualification.",
+  "cases": [
+    {
+      "name": "plain-tree7-fragmented-gain-retransmit-then-local",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=2 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.051536 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.045901 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.032302 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.051936 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "plain-tree2-fragmented-gain-retransmit",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=6 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.054001 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.048311 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.040866 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.064390 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "n480-c1-base-x2-crc1-fragmented-gain-retransmit",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=2 rate=48000 duration=0.060000\nphase=full generation=0 from=0.000000 position=0.060000 wall=0.081455 device_drain=complete\nphase=seek-quarter generation=1 from=0.015000 position=0.060000 wall=0.073413 device_drain=complete\nphase=seek-60-percent generation=2 from=0.036000 position=0.060000 wall=0.050919 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.060000 wall=0.091351 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "n512-c1-base-x1-crc1-fragmented-gain-retransmit-then-local",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=2 rate=24000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.088432 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.070037 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.064000 wall=0.046112 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.086826 device_drain=complete\n",
+      "stderr": ""
+    }
+  ]
+}

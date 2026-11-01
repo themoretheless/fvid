@@ -80,3 +80,5 @@ cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline \
   --no-default-features --features player --test aac_ld_mps_local_replacement \
   --test aac_ld_mps_inband --test aac_ld_mps_session --test aac_ld_mps_transport
 ```
+
+Subsequent qualification: `aac-ld-mps-retransmission-2026-11-01.md` admits inherited whole-message retransmission preserving every accumulated prefix byte. The five negative movies now use a valid changed downmix gain in that prefix; the previous prefix-preserving pattern has new acceptance coverage. Arbitrary inherited prefix loss remains refused.

@@ -2,7 +2,7 @@
 """Authored in-tail ancillary replacement movies and inherited-fragment refusals."""
 import json
 from pathlib import Path
-from generate_aac_ld_mps_inband_fixtures import raw,header
+from generate_aac_ld_mps_inband_fixtures import raw,header,gain_changed
 from generate_aac_ld_mps_transport_fixtures import envelope,packed
 from generate_he_aac_packet_fixtures import video_fixture
 from generate_aac_eld_fixtures import mkv
@@ -40,7 +40,9 @@ def main():
                 if i==1:
                     old=raw(data);payload=header(bytes.fromhex(base['configs'][0]),bytes.fromhex(base['body']))
                     stop=envelope(9,1,1,payload[len(payload)//2:],True);tail=old[r['prefix_bits']:];assert tail.startswith(stop)
-                    data=packed(old[:r['prefix_bits']]+envelope(9,1,3,payload,True)+envelope(9,0,2,b'\xa5',True)+tail[len(stop):])
+                    replacement=header(gain_changed(bytes.fromhex(base['configs'][0]),base['tree']),bytes.fromhex(base['body']))
+                    assert not replacement.startswith(payload[:len(payload)//2])
+                    data=packed(old[:r['prefix_bits']]+envelope(9,1,3,replacement,True)+envelope(9,0,2,b'\xa5',True)+tail[len(stop):])
                 rows.append(dict(offset=len(blob),bytes=len(data),prefix_bits=r['prefix_bits']));blob+=data
             name=base['name']+'-inherited-refusal';c=dict(base,name=name,frames=rows,control=base['name']+'.mp4',output_channels=TREES[base['tree']][1],local_replacement_after_inherited=True)
             (OUT/(name+'.mp4')).write_bytes(video_fixture([c],blob,base['channels'],write=False)['data']);errors.append(c)

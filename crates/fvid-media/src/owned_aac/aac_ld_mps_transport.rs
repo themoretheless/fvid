@@ -1,6 +1,6 @@
 //! AAC ER extension envelope and MPEG Surround ancillary-fragment assembly.
 //! Payload bytes stay opaque here; config/frame parsing and PCM are downstream.
-use super::{Result, bits::BitReader, invalid};
+use super::{bits::BitReader, invalid, Result};
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Extension {
     LowDelay,
@@ -21,6 +21,7 @@ pub struct Message {
 pub struct Assembler {
     pending: Option<Vec<u8>>,
     replacements: u64,
+    prefix_losses: u64,
 }
 impl Assembler {
     /// End-of-stream validation does not discard an unfinished message.
@@ -34,6 +35,7 @@ impl Assembler {
     pub fn reset(&mut self) {
         self.pending = None;
         self.replacements = 0;
+        self.prefix_losses = 0;
     }
     pub fn has_pending(&self) -> bool {
         self.pending.is_some()
@@ -41,6 +43,12 @@ impl Assembler {
     /// Completed messages which replaced an unfinished ancillary sequence.
     pub fn replacements(&self) -> u64 {
         self.replacements
+    }
+    /// Replacements that do not preserve the complete accumulated prefix.
+    /// A full retransmission starting with that prefix assembles exactly the
+    /// same message as a stop fragment carrying only its remaining suffix.
+    pub fn prefix_losses(&self) -> u64 {
+        self.prefix_losses
     }
     /// `end` is the absolute bound supplied by the AAC envelope owner. Direct
     /// types9/12 consume that bound; type3 consumes only its length-delimited
@@ -143,11 +151,20 @@ impl Assembler {
                 }
             }
             3 => {
-                if self.pending.is_some() {
-                    self.replacements = self
+                if let Some(prefix) = &self.pending {
+                    let replacements = self
                         .replacements
                         .checked_add(1)
                         .ok_or_else(|| invalid("MPEG Surround replacement count overflow"))?;
+                    let losses = if payload.starts_with(prefix) {
+                        self.prefix_losses
+                    } else {
+                        self.prefix_losses
+                            .checked_add(1)
+                            .ok_or_else(|| invalid("MPEG Surround prefix-loss count overflow"))?
+                    };
+                    self.replacements = replacements;
+                    self.prefix_losses = losses;
                 }
                 self.pending = None;
                 Some(Message {

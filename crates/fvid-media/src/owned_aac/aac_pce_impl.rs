@@ -647,13 +647,13 @@ fn read_extension_bytes_dispatch(
             }
             9 | 12 if spatial.is_some() => {
                 let owner = spatial.as_deref_mut().unwrap();
-                let replacements = owner.assembler.replacements();
+                let prefix_losses = owner.assembler.prefix_losses();
                 let (message, position) = owner.assembler.read_bytes(
                     tag_start.source_bytes(),
                     tag_start.position(),
                     end,
                 )?;
-                if owner.assembler.replacements() != replacements && owner.inherited_fragment {
+                if owner.assembler.prefix_losses() != prefix_losses && owner.inherited_fragment {
                     owner.replaced_inherited = true;
                 }
                 if !owner.assembler.has_pending() {
