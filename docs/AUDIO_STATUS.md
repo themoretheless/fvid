@@ -1,12 +1,21 @@
 # Audio Implementation Status
 
+The original AAC-LD core is now independently decoded through the ISO generic
+frontend: all1443840 LD5151 core samples agree with FVid at RMS1.504e-9,
+max2.981e-8. The complete original core+spatial chain also agrees at worst-channel
+RMS1.787e-8 across both modes, while independently reproducing the historical
+Real WAV residual (~1.087e-5 RMS). No core/spatial production defect is established
+by that residual. Historical reference-generation settings remain unverified;
+other LD-MPS tools/profiles are still open. See
+validation/aac-ld-original-core-2026-11-01.md.
+
 Original LD5151 spatial reconstruction is now independently compared on the
 identical isolated core PCM: the complete ISO spatial parser/renderer agrees
 with FVid within worst-channel RMS1.789e-8 across both modes. The original Real
 renderer reproduces the remaining ~1.087e-5 RMS against the original WAV on that
-same core. The open numerical investigation therefore moves to independent
-AAC-LD core decoding/reference generation; this does not establish a core bug
-or certify the complete profile. No production arithmetic changes in this audit.
+same core. The subsequent independent core audit above also reproduces that
+residual; historical reference generation remains unverified. This does not
+certify the complete profile. No production arithmetic changes in these audits.
 See validation/aac-ld-mps-original-spatial-2026-11-01.md.
 
 Shared AAC LD-SBR/MPS single-rate synthesis now uses its own32-band phase2n-31,
@@ -15,16 +24,17 @@ The formerly large24kHz LD-QMF2 discrepancy falls from RMS0.0965 to7.77e-6,
 max error1.52514e-5,without delay/gain fitting. Other original renderer outputs
 stay byte-identical. Generic MPS PCM/default QMF banks retain their conventions.
 693 scoped checks pass,0 fail,1 existing ignored;FFmpeg/ffprobe blocked.
-See validation/aac-ld-mps-single-rate-2026-11-01.md. AAC-LD5151 numerical residual
-and broader LD-MPS tools/profiles remain open.
+See validation/aac-ld-mps-single-rate-2026-11-01.md. The AAC-LD5151 historical
+reference discrepancy is reproduced by the original chain above; broader
+LD-MPS tools/profiles remain open.
 
 
 Original AAC-LD core controls now have an explicit offline PNS-aware diagnostic.
 The480-sample24kHz control has full PCM24 RMS3.46e-8. The512-sample48kHz
 control's large raw-wave difference is confined to PNS-dependent AUs;the
 syntax-derived deterministic partition has RMS3.40e-8. Full-stream metrics stay
-visible;this is not a weaker conformance gate. LD5151 has no PNS/LTP,so its
-small numerical residual remains a separate open comparison.
+visible;this is not a weaker conformance gate. LD5151 has no PNS/LTP; its small
+numerical residual is independently reproduced by the complete original chain.
 See validation/aac-ld-core-original-2026-11-01.md.
 
 Coupled SBR noise now follows the normative L/R balance orientation. This
@@ -97,7 +107,8 @@ The current original-reference re-audit closes the former ELD5151 timing
 mismatch: Real-renderer full PCM16 comparison has maximum-channel RMS8.17e-6,
 max error1.5451e-5,without alignment or gain fitting. The frozen pre-origin
 probe has RMS0.0536 on the same input. The48-kHz LD-QMF input also matches at
-approximately the PCM16 quantization scale. AAC-LD tree5151 numerical residual remains open. The24-kHz shared-QMF
+approximately the PCM16 quantization scale. AAC-LD tree5151's residual is now
+independently reproduced by the original core+spatial chain above. The24-kHz shared-QMF
 phase discrepancy is now corrected separately;see the single-rate synthesis
 report above. The prior uncorrected audit remains available at
 validation/aac-ld-mps-original-pcm-2026-11-01.md.

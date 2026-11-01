@@ -1,3 +1,15 @@
+## Independent original AAC-LD core and full LD5151 chain, 2026-11-01
+
+All2820 isolated original core AUs now decode through the unmodified ISO AAC-LD
+core and generic frontend. All1443840 float samples agree with FVid at RMS1.504e-9,
+max2.981e-8. The complete original core+spatial chain agrees at worst-channel
+RMS1.787e-8 across both modes and reproduces the historical WAV residual itself.
+That residual therefore does not establish an owned core/spatial bug on this
+input. Reference-generation settings remain unverified; wider codec tools and
+profile conformance remain open. No production math changes or new acceptance
+fixtures arise from this diagnostic.
+[Evidence](validation/aac-ld-original-core-2026-11-01.md).
+
 ## Original LD5151 spatial decoder isolation, 2026-11-01
 
 The full original ISO spatial parser and renderer now process the identical
