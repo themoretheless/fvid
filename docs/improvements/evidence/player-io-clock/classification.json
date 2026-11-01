@@ -1,0 +1,12 @@
+{
+  "status": "provisional until final acceptance",
+  "new_id_proposal": "FVID-0466",
+  "new_problem": "Media clock rewinds across input-buffer recovery,including while a new picture is pending and at half rate. The unchanged six-case old diagnostic reproduces300ms->100ms and300ms->200ms while its source/freeze controls pass.",
+  "new_problem_old_source_evidence": "six-case-pre463-full.log",
+  "amendment_id": "FVID-0463",
+  "amendment_count_delta": 0,
+  "amendment_problem": "New continuous silent clock spends time during actual empty-queue input wait;current blocked75xx baseline advances while buffering and spends450ms before next data. Old source freeze control passes.",
+  "final_seven_case_expansion": "test-expansion.json",
+  "admission_diagnostic_excluded": "initial-admission-before.log",
+  "rule": "At most one new recovery improvement. Freeze regression,stop/pause/rate/seek variants,source/refusal controls and repeats do not create more IDs."
+}

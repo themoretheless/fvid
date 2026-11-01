@@ -1,0 +1,8 @@
+{
+  "base_source_sha256": "39ac6301c24dcda51593f91ec14ebce0fe03d20f209f5728a000aad68b7ba8ea",
+  "candidate_source_sha256": "1984fbccc839de58b911995c1b19cf7d6869075e7fe3687126df3874f052ce51",
+  "candidate_patch": "candidate.patch",
+  "byte_identical_reconstruction": true,
+  "production_mutated_by_preparation": false,
+  "scope": "Freeze genuine empty-queue input waits while retaining wall progression over ready prefetched pictures;retain and reanchor media phase across recovery;clear on navigation/source changes;preserve audio ownership and earlier terminal clock."
+}

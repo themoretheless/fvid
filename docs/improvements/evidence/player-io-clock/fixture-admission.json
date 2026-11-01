@@ -1,0 +1,8 @@
+{
+  "initial_result": "1source control passed;2fixture-state assertions failed;not a media-clock reproduction",
+  "initial_evidence": "initial-admission-before.log",
+  "cause": "read_frame_raw already reads samples0and1 to finalize first output duration. Gating sample1 after first frame cannot block a new read.",
+  "repair": "Gate sample2,which is required to finalize the next output. Preserve all phase,freeze,monotonic recovery,RGB,naturalEOF and stop assertions.",
+  "production_changed": false,
+  "count_delta": 0
+}

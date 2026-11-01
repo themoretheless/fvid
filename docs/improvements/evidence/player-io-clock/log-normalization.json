@@ -1,0 +1,38 @@
+[
+  {
+    "path": "pre463-buffering.log",
+    "before_sha256": "528f21d5fbd7b5e393d2b37faeeb32851484612df6d6384e6c57873aa9e18369",
+    "after_sha256": "8ab0b8492423c002720a25012d1abba3fa086ed9010aaf213777e9fd8c207a65",
+    "change": "Remove trailing whitespace and terminal blank lines only;all diagnostic lines retained."
+  },
+  {
+    "path": "three-case-pre463-buffering.log",
+    "before_sha256": "528f21d5fbd7b5e393d2b37faeeb32851484612df6d6384e6c57873aa9e18369",
+    "after_sha256": "8ab0b8492423c002720a25012d1abba3fa086ed9010aaf213777e9fd8c207a65",
+    "change": "Remove trailing whitespace and terminal blank lines only;all diagnostic lines retained."
+  },
+  {
+    "path": "three-case-pre463-source.log",
+    "before_sha256": "7051d23e67b2e8eb88bd4cb2bd6c5bef51df334e35da0d8f6a1f098579390965",
+    "after_sha256": "013b0e2ee335d5d061c1ea9cdb4aae3bbd4792a785386eaa9ab863fffceeab5f",
+    "change": "Remove trailing whitespace and terminal blank lines only;all diagnostic lines retained."
+  },
+  {
+    "path": "after-focused.log",
+    "before_sha256": "7f0cfa7e7583826ede03b301f983d2b35d53e80c61f63d8e3310d32ec35a5549",
+    "after_sha256": "d9bbd41e35449ee1268cea73a5b52d089e932e2818c73961dd3b3c24565f56e2",
+    "change": "Remove trailing whitespace and terminal blank lines only;all diagnostic lines retained."
+  },
+  {
+    "path": "repeat.log",
+    "before_sha256": "f7852b0d8da1115f0d6a6f10a54df79d52453d0cf50bff5e9ad2e8c59dc08303",
+    "after_sha256": "dd91acd5a38745529ed13e32d5e89521e3a0f540ae920f7df101bbeb23f4b851",
+    "change": "Remove trailing whitespace and terminal blank lines only;all diagnostic lines retained."
+  },
+  {
+    "path": "pre463-source.log",
+    "before_sha256": "7051d23e67b2e8eb88bd4cb2bd6c5bef51df334e35da0d8f6a1f098579390965",
+    "after_sha256": "013b0e2ee335d5d061c1ea9cdb4aae3bbd4792a785386eaa9ab863fffceeab5f",
+    "change": "Remove trailing whitespace and terminal blank lines only;all diagnostic lines retained."
+  }
+]

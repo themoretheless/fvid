@@ -1,0 +1,85 @@
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -1901,0 +1902,2 @@
++    /// Media phase held until missing picture input becomes presentable.
++    buffered_picture_time: Option<Duration>,
+@@ -2130,0 +2133 @@
++            buffered_picture_time: None,
+@@ -2326,0 +2330 @@
++        self.buffered_picture_time = None;
+@@ -2424,0 +2429 @@
++        self.buffered_picture_time = None;
+@@ -3070,0 +3076 @@
++        if let Some(at) = self.buffered_picture_time { return Some(at); }
+@@ -3078 +3084,33 @@
+-        Self::interval_time(nanos, 1_000_000_000)
++        let at = Self::interval_time(nanos, 1_000_000_000)?;
++        // A late UI callback still follows wall time when decoded pictures are
++        // ready. Missing input cannot spend media beyond the visible interval.
++        Some(if !self.picture_audio_clock && (self.awaiting_picture() || self.buffering) { at.min(end) } else { at })
++    }
++
++    fn awaiting_picture(&self) -> bool {
++        self.queued.is_none() && self.playback.as_ref().is_some_and(|p| p.filled() == 0)
++    }
++
++    fn deadline_for_phase(end: Duration, phase: Duration, rate: u32, now: Instant) -> Instant {
++        if end >= phase { now.checked_add(paced_period(end - phase, rate)).unwrap_or(now) }
++        else { now.checked_sub(paced_period(phase - end, rate)).unwrap_or(now) }
++    }
++
++    fn hold_picture_clock(&mut self) {
++        let active_audio = self.audio.is_some() && !self.audio_ended;
++        if self.playback.is_none() || self.presented.is_none() || self.ended
++            || self.seek_preview || self.step > 0 || active_audio
++        {
++            self.buffered_picture_time = None;
++            return;
++        }
++        if self.paused || self.buffered_picture_time.is_some() { return; }
++        if self.buffering
++            && let Some(end) = self.interval.and_then(|(_, end, scale)| Self::interval_time(end, scale))
++        {
++            // A completed/failed device can already be beyond the last video
++            // interval. Retain its published phase instead of rewinding it.
++            self.buffered_picture_time = Some(if self.picture_audio_clock {
++                self.presentation_clock().unwrap_or(end).max(end)
++            } else { end });
++        }
+@@ -3086,0 +3125 @@
++            self.buffered_picture_time = None;
+@@ -3551,0 +3591 @@
++                            self.buffered_picture_time = None;
+@@ -3717,0 +3758 @@
++        self.buffered_picture_time = None;
+@@ -3764,0 +3806 @@
++        self.buffered_picture_time = None;
+@@ -3857,0 +3900 @@
++        self.buffered_picture_time = None;
+@@ -4033,0 +4077 @@
++        self.hold_picture_clock();
+@@ -4155,0 +4200,8 @@
++        }
++        if self.queued.is_some()
++            && let Some(phase) = self.buffered_picture_time
++            && let Some(end) = self.interval.and_then(|(_, end, scale)| Self::interval_time(end, scale))
++        {
++            // Resume the held phase as soon as real data arrives; a new startup
++            // lead would move the visible clock backwards before presentation.
++            self.deadline = Self::deadline_for_phase(end, phase, self.rate_milli, now);
+@@ -4243,0 +4296 @@
++                let buffered_phase = self.buffered_picture_time;
+@@ -4308 +4361 @@
+-                    && let Some(phase) = sought_phase
++                    && let Some(phase) = sought_phase.or(buffered_phase)
+@@ -4312,2 +4365 @@
+-                    now.checked_add(paced_period(end.saturating_sub(phase), self.rate_milli))
+-                        .unwrap_or(now)
++                    Self::deadline_for_phase(end, phase, self.rate_milli, now)
+@@ -4316,0 +4369,6 @@
++                if let Some(phase) = buffered_phase
++                    && self.interval.and_then(|(_, end, scale)| Self::interval_time(end, scale))
++                        .is_none_or(|end| end > phase)
++                {
++                    self.buffered_picture_time = None;
++                }

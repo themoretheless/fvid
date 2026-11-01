@@ -1,0 +1,18 @@
+{
+  "baseline_and_candidate_test_sha256": "6d6d729db3453ca6870445c2a0736d3ad4209c4ff63fa786aeb7fdb47778b264",
+  "test_unchanged": true,
+  "baseline": {
+    "passed": 3,
+    "failed": 4,
+    "exit_code": 101
+  },
+  "focused_candidate": {
+    "passed": 7,
+    "failed": 0,
+    "exit_code": 0
+  },
+  "existing_tests_modified": false,
+  "earlier_six_case_historical_comparison": "six-case-pre463-comparison.json",
+  "seventh_case_expansion": "test-expansion.json",
+  "fixture_admission_excluded": "fixture-admission.json"
+}

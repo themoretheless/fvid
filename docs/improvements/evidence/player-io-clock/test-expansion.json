@@ -1,0 +1,8 @@
+{
+  "previous_six_case_sha256": "a630a552fd5767d76bbc652a6918da7334bd914271addc55c94b7c9e5115a0af",
+  "final_seven_case_sha256": "6d6d729db3453ca6870445c2a0736d3ad4209c4ff63fa786aeb7fdb47778b264",
+  "previous_cases_byte_identical_prefix": true,
+  "added_control": "Short400ms input gap before the existing500ms buffer-indicator threshold must retain wall-clock catchup. Long buffered recovery uses the held phase.",
+  "historical_comparison": "six-case-pre463-comparison.json",
+  "no_old_full_seven_case_pass_claim": true
+}

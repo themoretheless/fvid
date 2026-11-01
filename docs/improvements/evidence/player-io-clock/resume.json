@@ -1,0 +1,22 @@
+{
+  "previous_session": 76787,
+  "previous_handle": "missing",
+  "previous_pid": 84396,
+  "previous_process": "absent",
+  "temporary_target_and_logs": "absent",
+  "source_hashes": "unchanged",
+  "completed_gates_verified_from_archives": [
+    "integration",
+    "root-mp4",
+    "root-webm",
+    "player-units",
+    "media",
+    "core-check"
+  ],
+  "remaining_gates": [
+    "player-check",
+    "audio-thread",
+    "video-thread"
+  ],
+  "raw_hash_policy": "Lost raw logs have null raw_sha256;retained normalized archives are fingerprinted and checked against completed result counts. No raw hash is invented."
+}

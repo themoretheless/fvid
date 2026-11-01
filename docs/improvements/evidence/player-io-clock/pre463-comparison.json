@@ -1,0 +1,29 @@
+{
+  "old_commit": "9ca4c32089c216f82574c0895da3a0bdbbd76c57",
+  "unchanged_test_sha256": "a630a552fd5767d76bbc652a6918da7334bd914271addc55c94b7c9e5115a0af",
+  "case_scope": "Full identical six-case diagnostic on pre0463 source. Existing terminal-stop timing failures and recovery failures must remain visible. This is not an acceptance gate for old code.",
+  "cases": [],
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--lib",
+    "io_clock_regressions",
+    "--",
+    "--test-threads=2"
+  ],
+  "exit_code": 101,
+  "outcomes": {
+    "exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control": "ok",
+    "input_recovery_clock_never_rewinds_before_the_next_picture_is_shown": "FAILED",
+    "actual_missing_input_does_not_spend_a_later_media_stop_before_recovery": "FAILED",
+    "pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold": "FAILED",
+    "seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof": "ok",
+    "real_read_stall_freezes_media_time_then_resumes_without_rewinding": "ok"
+  },
+  "current_source_restored": true
+}

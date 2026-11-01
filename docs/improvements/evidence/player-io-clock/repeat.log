@@ -1,0 +1,259 @@
+run 1
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.68s
+
+run 2
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.69s
+
+run 3
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.69s
+
+run 4
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.68s
+
+run 5
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.68s
+
+run 6
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.68s
+
+run 7
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.68s
+
+run 8
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.68s
+
+run 9
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.68s
+
+run 10
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.69s
+
+run 11
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.68s
+
+run 12
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.68s
+
+run 13
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.69s
+
+run 14
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.69s
+
+run 15
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.68s
+
+run 16
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.69s
+
+run 17
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.68s
+
+run 18
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.70s
+
+run 19
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.71s
+
+run 20
+
+running 7 tests
+test player::io_clock_regressions::exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control ... ok
+test player::io_clock_regressions::input_recovery_clock_never_rewinds_before_the_next_picture_is_shown ... ok
+test player::io_clock_regressions::actual_missing_input_does_not_spend_a_later_media_stop_before_recovery ... ok
+test player::io_clock_regressions::pause_and_rate_change_during_read_wait_keep_recovery_phase_and_remaining_hold ... ok
+test player::io_clock_regressions::real_read_stall_freezes_media_time_then_resumes_without_rewinding ... ok
+test player::io_clock_regressions::short_input_wait_before_buffering_keeps_the_existing_wall_clock_catchup ... ok
+test player::io_clock_regressions::seek_while_input_waits_keeps_the_new_target_through_preroll_and_eof ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1152 filtered out; finished in 4.70s

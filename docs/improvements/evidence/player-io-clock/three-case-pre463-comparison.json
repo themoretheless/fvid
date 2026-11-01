@@ -1,0 +1,44 @@
+{
+  "old_commit": "9ca4c32089c216f82574c0895da3a0bdbbd76c57",
+  "unchanged_test_sha256": "66db5b16e8772fd3b2c7a4fc664ae85794f18dab65a69e745958526afa1bf141",
+  "case_scope": "Only exact-source and buffering-clock recovery diagnostics. The full current stop acceptance is not weakened or modified;its final terminal-clamp assertion concerns another already-known pre0463 defect. Do not claim a passing old full suite.",
+  "cases": [
+    {
+      "name": "source",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "io_clock_regressions::exact_",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "one_case_passed": true
+    },
+    {
+      "name": "buffering",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "io_clock_regressions::real_read_stall_",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "one_case_passed": true
+    }
+  ],
+  "current_source_restored": true
+}

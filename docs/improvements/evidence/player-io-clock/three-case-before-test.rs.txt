@@ -1,0 +1,286 @@
+//! A real empty-queue read stall is distinct from a missed UI repaint.
+use super::*;
+use std::io::{self, BufRead, Cursor, Read, Seek, SeekFrom};
+use std::sync::{Arc, Condvar, Mutex};
+fn root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/player-io-clock")
+}
+fn bytes(n: &str) -> Vec<u8> {
+    std::fs::read(root().join(n)).unwrap()
+}
+fn tick(p: &mut Player, ctx: &egui::Context) {
+    let mut out = ctx.run_ui(Default::default(), |ui| p.present(ui.ctx()));
+    out.textures_delta.clear();
+}
+#[derive(Default)]
+struct State {
+    armed: bool,
+    blocked: bool,
+    released: bool,
+}
+#[derive(Default)]
+struct Gate {
+    state: Mutex<State>,
+    wake: Condvar,
+}
+impl Gate {
+    fn arm(&self) {
+        self.state.lock().unwrap().armed = true;
+    }
+    fn blocked(&self) -> bool {
+        self.state.lock().unwrap().blocked
+    }
+    fn release(&self) {
+        self.state.lock().unwrap().released = true;
+        self.wake.notify_all();
+    }
+}
+struct Release(Arc<Gate>);
+impl Drop for Release {
+    fn drop(&mut self) {
+        self.0.release();
+    }
+}
+struct Input {
+    cursor: Cursor<Vec<u8>>,
+    gate: Arc<Gate>,
+    range: std::ops::Range<u64>,
+}
+impl Input {
+    fn wait(&self) -> io::Result<()> {
+        if !self.range.contains(&self.cursor.position()) {
+            return Ok(());
+        }
+        let mut s = self.gate.state.lock().unwrap();
+        while s.armed && !s.released {
+            s.blocked = true;
+            self.gate.wake.notify_all();
+            let (next, timeout) = self
+                .gate
+                .wake
+                .wait_timeout(s, Duration::from_secs(10))
+                .unwrap();
+            s = next;
+            if timeout.timed_out() && !s.released {
+                return Err(io::Error::new(
+                    io::ErrorKind::TimedOut,
+                    "test input gate was not released",
+                ));
+            }
+        }
+        Ok(())
+    }
+}
+impl Read for Input {
+    fn read(&mut self, out: &mut [u8]) -> io::Result<usize> {
+        if out.is_empty() {
+            return Ok(0);
+        }
+        self.wait()?;
+        let n = out.len().min(1);
+        self.cursor.read(&mut out[..n])
+    }
+}
+impl BufRead for Input {
+    fn fill_buf(&mut self) -> io::Result<&[u8]> {
+        self.wait()?;
+        let n = (self.cursor.position() as usize).min(self.cursor.get_ref().len());
+        let end = (n + 1).min(self.cursor.get_ref().len());
+        Ok(&self.cursor.get_ref()[n..end])
+    }
+    fn consume(&mut self, n: usize) {
+        self.cursor.consume(n);
+    }
+}
+impl Seek for Input {
+    fn seek(&mut self, from: SeekFrom) -> io::Result<u64> {
+        self.cursor.seek(from)
+    }
+}
+fn open(stop: Option<Duration>) -> (Player, Arc<Gate>) {
+    let file = bytes("movie.mp4");
+    let parsed =
+        crate::container::mp4::Mp4Reader::open(Cursor::new(file.clone()), Default::default())
+            .unwrap();
+    let sample = parsed.tracks()[0].samples.get(2).unwrap();
+    let gate = Arc::new(Gate::default());
+    let input = Input {
+        cursor: Cursor::new(file),
+        gate: gate.clone(),
+        range: sample.offset..sample.offset + u64::from(sample.size),
+    };
+    let mut reader = NativeReader::software(input, 32 << 20).unwrap();
+    let first = reader.read_frame_raw().unwrap().unwrap();
+    assert_eq!(reader.frame_interval(), Some((0, 300, 1000)));
+    gate.arm();
+    let period = reader.frame_period();
+    let signal = reader.colour();
+    let hdr = reader.hdr();
+    let playback = crate::playback_thread::Playback::start_from_frame(reader, first, None);
+    let p = Player {
+        playback: Some(playback),
+        duration: Some(Duration::from_millis(1500)),
+        seekable: true,
+        no_audio: true,
+        asynchronous_open: false,
+        queue: vec![root().join("movie.mp4")],
+        opened: Some(root().join("movie.mp4")),
+        buffering: true,
+        stop_time: stop,
+        period,
+        signal,
+        hdr,
+        ..Default::default()
+    };
+    (p, gate)
+}
+fn first(p: &mut Player, g: &Gate, ctx: &egui::Context) {
+    let until = Instant::now() + Duration::from_secs(4);
+    while p.presented.is_none() || !g.blocked() {
+        assert!(
+            Instant::now() < until,
+            "next-picture lookahead read did not actually block"
+        );
+        assert!(p.error.is_none(), "{:?}", p.error);
+        tick(p, ctx);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert_eq!(p.interval, Some((0, 300, 1000)));
+    assert!(!p.buffering);
+    assert_eq!(p.playback.as_ref().unwrap().filled(), 0);
+    assert!(p.queued.is_none());
+}
+#[test]
+fn exact_mp4_io_stall_source_pixels_pts_seek_and_eof_control() {
+    let mut r = crate::playback_mp4::Mp4VideoReader::open_software(
+        Cursor::new(bytes("movie.mp4")),
+        Default::default(),
+        32 << 20,
+    )
+    .unwrap();
+    for i in 0..5 {
+        let f = r.read_frame().unwrap().unwrap();
+        assert_eq!(
+            (f.sample_index, f.presentation_time.ticks, f.duration.ticks),
+            (i, i as i64 * 300, 300)
+        );
+        let yuv: Vec<_> = f
+            .picture
+            .y
+            .iter()
+            .chain(&f.picture.cb)
+            .chain(&f.picture.cr)
+            .flat_map(|v| v.to_le_bytes())
+            .collect();
+        assert_eq!(yuv, bytes(&format!("frame-{}.yuv16", i % 3)));
+    }
+    assert!(r.read_frame().unwrap().is_none());
+    let mut r = NativeReader::software(Cursor::new(bytes("movie.mp4")), 32 << 20).unwrap();
+    for (at, start) in [(300, 300), (1200, 1200), (1500, 1200)] {
+        assert!(r.seek_raw(Duration::from_millis(at)).unwrap().is_some());
+        assert_eq!(r.frame_interval(), Some((start, start + 300, 1000)));
+    }
+}
+
+#[test]
+fn real_read_stall_freezes_media_time_then_resumes_without_rewinding() {
+    let ctx = egui::Context::default();
+    let (mut p, g) = open(None);
+    let _release = Release(g.clone());
+    first(&mut p, &g, &ctx);
+    let until = Instant::now() + Duration::from_secs(3);
+    let mut previous = p.presentation_clock().unwrap();
+    while !p.buffering {
+        assert!(
+            Instant::now() < until,
+            "actual input stall never became buffering"
+        );
+        assert!(g.blocked());
+        assert!(!p.ended && p.error.is_none());
+        tick(&mut p, &ctx);
+        let current = p.presentation_clock().unwrap();
+        assert!(
+            current >= previous,
+            "buffering rewound the media clock:{previous:?}->{current:?}"
+        );
+        previous = current;
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    let held = p.presentation_clock().unwrap();
+    std::thread::sleep(Duration::from_millis(80));
+    tick(&mut p, &ctx);
+    assert!(p.buffering && g.blocked());
+    assert_eq!(
+        p.presentation_clock(),
+        Some(held),
+        "silent media clock advances while actual input is buffered"
+    );
+    g.release();
+    let until = Instant::now() + Duration::from_secs(3);
+    while p.buffering || p.interval.unwrap().0 == 0 {
+        assert!(Instant::now() < until);
+        assert!(p.error.is_none());
+        tick(&mut p, &ctx);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert!(
+        p.presentation_clock().unwrap() >= held,
+        "input recovery rewound the held phase"
+    );
+    let mut reference = NativeReader::software(Cursor::new(bytes("movie.mp4")), 32 << 20).unwrap();
+    let at = Duration::from_millis(p.interval.unwrap().0 as u64);
+    let rgb = reference
+        .seek_raw(at)
+        .unwrap()
+        .unwrap()
+        .into_rgb(32 << 20)
+        .unwrap();
+    assert_eq!(display_rgb(p.presented.as_ref().unwrap()).unwrap(), rgb);
+    while !p.ended {
+        assert!(Instant::now() < until);
+        assert!(p.error.is_none());
+        tick(&mut p, &ctx);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert_eq!(p.interval, Some((1200, 1500, 1000)));
+    assert_eq!(p.presentation_clock(), Some(Duration::from_millis(1500)));
+    assert!(!p.buffering);
+}
+#[test]
+fn actual_missing_input_does_not_spend_a_later_media_stop_before_recovery() {
+    let ctx = egui::Context::default();
+    let (mut p, g) = open(Some(Duration::from_millis(450)));
+    let _release = Release(g.clone());
+    first(&mut p, &g, &ctx);
+    let until = Instant::now() + Duration::from_secs(3);
+    while !p.buffering {
+        assert!(Instant::now() < until);
+        assert!(g.blocked());
+        tick(&mut p, &ctx);
+        assert!(
+            !p.ended,
+            "stop450ms consumed while the actual next-picture lookahead packet is blocked and only0..300ms exists:clock{:?}",
+            p.presentation_clock()
+        );
+        assert!(p.error.is_none());
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    std::thread::sleep(Duration::from_millis(80));
+    tick(&mut p, &ctx);
+    assert!(!p.ended && p.stop_time.is_some());
+    g.release();
+    let until = Instant::now() + Duration::from_secs(3);
+    while !p.ended {
+        assert!(
+            Instant::now() < until,
+            "recovered input never reaches stop450ms"
+        );
+        assert!(p.error.is_none());
+        tick(&mut p, &ctx);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert_eq!(p.presentation_clock(), Some(Duration::from_millis(450)));
+    assert_eq!(p.interval, Some((300, 600, 1000)));
+    assert!(p.stop_time.is_none());
+    assert!(!p.buffering);
+}
