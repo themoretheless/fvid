@@ -427,21 +427,44 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         let returned=i64::try_from(landed.floor_ticks(self.track().timescale)?).map_err(|_|invalid("MP4 seek clock overflow"))?;
         self.rewind();self.sample_index=first;self.clock_floor.set(landed);self.presentation_floor=returned;self.clock_anchor.set(Some((returned,landed)));Ok(returned)
     }
-    fn aac_native_landing(&self,wanted:EditTime)->Result<Option<EditTime>> {
+    fn native_rate_at(&self,index:usize)->Result<u32> {
+        if let Some(clock)=&self.clock {return clock.rate(index);}
+        let sample=self.track().samples.get(index).ok_or_else(||invalid("missing MP4 native-rate sample"))?;
+        let selected=sample.description_index.checked_sub(1).ok_or_else(||invalid("missing MP4 native-rate description"))? as usize;
+        let setup=self.track().sample_descriptions.get(selected).ok_or_else(||invalid("missing MP4 native-rate description"))?;
+        let rate=if setup==self.setup() {self.negotiated_rate()}else{
+            self.description_states.get(selected).and_then(|state|state.as_ref()).and_then(|state|state.rate).unwrap_or(setup.sample_rate)
+        };
+        if rate==0 {return Err(invalid("zero MP4 native seek rate"));}Ok(rate)
+    }
+    fn native_landing(&self,wanted:EditTime)->Result<Option<EditTime>> {
         let tick=i64::try_from(wanted.floor_ticks(self.track().timescale)?).unwrap_or(i64::MAX);
         let first=self.track().samples.at_or_before(tick);
         for index in first..self.track().samples.len() {
-            let sample=self.track().samples.get(index).ok_or_else(||invalid("missing AAC seek sample"))?;
+            let sample=self.track().samples.get(index).ok_or_else(||invalid("missing MP4 seek sample"))?;
             if sample.duration==0 {continue;}
+            let rate=self.native_rate_at(index)?;
             let start=EditTime::signed_ticks(sample.pts,self.track().timescale)?;
-            let offset=wanted.sub(start)?.ceil_frames(self.negotiated_rate())?.max(0);
-            let frames=u128::from(sample.duration)*u128::from(self.negotiated_rate());
-            let scale=u128::from(self.track().timescale);
-            if scale==0 || frames%scale!=0 {return Err(invalid("MP4 AAC packet duration is not sample aligned"));}
-            let frames=frames/scale;
-            if offset < frames as i128 {
-                return start.add(EditTime::new(offset,u128::from(self.negotiated_rate()))?).map(Some);
-            }
+            let offset=wanted.sub(start)?.ceil_frames(rate)?.max(0);
+            let setup=self.track().description_for_sample(index).ok_or_else(||invalid("missing MP4 seek header"))?;
+            let frames=if setup.codec==*b"mp4a" {
+                let frames=u128::from(sample.duration)*u128::from(rate);let scale=u128::from(self.track().timescale);
+                if scale==0 || frames%scale!=0 {return Err(invalid("MP4 AAC packet duration is not sample aligned"));}
+                i128::try_from(frames/scale).map_err(|_|invalid("MP4 seek frame count overflow"))?
+            }else{
+                let stride=usize::from(setup.bit_depth).div_ceil(8).checked_mul(usize::from(setup.channels)).filter(|n|*n>0).ok_or_else(||invalid("invalid PCM seek geometry"))?;
+                if !(sample.size as usize).is_multiple_of(stride) {return Err(invalid("unaligned PCM seek packet"));}
+                let coded=(sample.size as usize/stride) as i128;
+                coded.min(EditTime::ticks(u64::from(sample.duration),self.track().timescale)?.ceil_frames(rate)?)
+            };
+            if offset<frames {return start.add(EditTime::new(offset,u128::from(rate))?).map(Some);}
+            // Rounding past the final native sample can legitimately land at
+            // the available endpoint. Distinguish that from missing source.
+            let declared_end=start.add(EditTime::ticks(u64::from(sample.duration),self.track().timescale)?)?;
+            let native_end=start.add(EditTime::new(frames,u128::from(rate))?)?;
+            let available_end=if native_end.cmp(declared_end)==std::cmp::Ordering::Less {native_end}else{declared_end};
+            if wanted.cmp(available_end)!=std::cmp::Ordering::Greater {return Ok(Some(available_end));}
+            if wanted.cmp(declared_end)==std::cmp::Ordering::Less {return Err(invalid("MP4 audio edit extends beyond source packets"));}
         }
         Ok(None)
     }
@@ -459,7 +482,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 if self.clock.is_some() && !sample_aligned_silence {return Ok(position);}
                 // Exact wall-time seeks anchor on the same native silence
                 // lattice as next_source_silence, including the clipped end.
-                let rate=if let Some(clock)=&self.clock {clock.rate(self.gap_scan.get())?}else{self.negotiated_rate()};
+                let rate=self.native_rate_at(self.gap_scan.get())?;
                 let offset=position.sub(begin)?.ceil_frames(rate)?;
                 let aligned=begin.add(EditTime::new(offset,u128::from(rate))?)?;
                 let stop=if end.cmp(segment.end)==std::cmp::Ordering::Greater {segment.end}else{end};
@@ -469,14 +492,14 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             if let Some(media)=segment.media {
                 let wanted=media.add(position.sub(segment.start)?)?;
                 let landed=if self.clock.is_some() {self.clock_landing(wanted)?.1}
-                    else if let Some(at)=self.aac_native_landing(wanted)? {at}
-                    else {position=segment.end;continue;};
+                    else if let Some(at)=self.native_landing(wanted)? {at}
+                    else {return Err(invalid("MP4 audio edit extends beyond source packets"));};
                 let mapped=landed.add(segment.start)?.sub(media)?;
                 if mapped.cmp(segment.end)!=std::cmp::Ordering::Less {position=segment.end;continue;}
                 position=position.max(mapped);
             } else if self.clock.is_none() || sample_aligned_silence {
                 // Explicit empty edits use the opening source configuration.
-                let rate=if let Some(clock)=&self.clock {clock.rate(0)?}else{self.negotiated_rate()};
+                let rate=self.native_rate_at(0)?;
                 let offset=position.sub(segment.start)?.ceil_frames(rate)?;
                 position=segment.start.add(EditTime::new(offset,u128::from(rate))?)?;
                 if position.cmp(segment.end)!=std::cmp::Ordering::Less {position=segment.end;continue;}
@@ -1452,7 +1475,10 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         let exact_aac_edits=self.variable_edits.is_some() && self.track().codec==*b"mp4a"
             && self.track().sample_descriptions.first().is_some_and(|first|
                 self.track().sample_descriptions.iter().all(|entry|entry==first));
-        if self.clock.is_some() || exact_aac_edits {
+        let exact_pcm_edits=self.variable_edits.is_some() && self.track().sample_descriptions.iter().enumerate().all(|(i,header)|
+            matches!(&header.codec,b"sowt"|b"twos"|b"raw "|b"in24"|b"in32"|b"fl32"|b"fl64")
+                || !clock_recovery::clock_description_used(&self.track().samples,i+1));
+        if self.clock.is_some() || exact_aac_edits || exact_pcm_edits {
             let time=EditTime::new(target.as_nanos() as i128,1_000_000_000).and_then(|t|self.seek_exact(t,true));
             return match time {Ok(at)=>at,Err(error)=>{self.navigation_error=Some(error);0}};
         }
@@ -1474,7 +1500,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
                 let wanted=origin.add(EditTime::new(target.as_nanos() as i128,1_000_000_000)?)?;
                 let wanted=if wanted.cmp(end)==std::cmp::Ordering::Greater {end}else{wanted};
                 self.clock_floor.set(wanted);
-                let aligned=self.aac_native_landing(wanted)?.unwrap_or(end);
+                let aligned=self.native_landing(wanted)?.unwrap_or(end);
                 let aligned=if aligned.cmp(end)==std::cmp::Ordering::Greater {end}else{aligned};
                 self.clock_anchor.set(Some((landed,aligned.sub(origin)?)));
                 Ok(landed)

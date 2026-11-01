@@ -5457,7 +5457,7 @@
     {
       "id": "FVID-0484",
       "batch": 480,
-      "title": "Preserve exact AAC wall-time seek floors below MP4 media ticks",
+      "title": "Preserve exact MP4 audio wall-time seek floors and native anchors",
       "source": "src/playback/audio/mp4_audio.rs",
       "regression": "tests/mp4_aac_subtick_seek.rs",
       "before": "Authored 48 kHz AAC960 clips on 48 kHz/50 Hz media clocks emit extra or repeated samples after sub-tick seek; 50 Hz clips replay their entire 1/1.25 ms edit after EOF seek. Actual-worker and direct baselines fail with independent full-play controls passing.",
@@ -5469,7 +5469,9 @@
       "source_gap_follow_up_validation": "batch-482-validation.json",
       "source_gap_follow_up_note": "Zero-count exact AAC source-gap anchor extension: derive the backend flush clock from the same native silence lattice as emitted PCM and clamp to the edited endpoint. Identical baseline passes independent nonzero PCM/gap/video controls but fails both direct and actual-worker clock regressions. Seven gates and three repeated thirteen-test runs pass; recovered-clock and raw-navigation behavior unchanged.",
       "recovered_silence_follow_up_validation": "batch-484-validation.json",
-      "recovered_silence_follow_up_note": "Zero-count native silence anchoring extension for recovered clocks. Exact Duration seeks align source gaps at the preceding coded run rate and empty edits at the opening rate. Three authored movies cover49Hz AAC phase and8kHz-to16kHz PCM changes. Full PCM/video and raw900Hz grid controls pass before/after;two original direct/worker regressions fail then pass. Seven gates pass866 test executions;three repeats pass19 tests each. Raw tick compatibility retained;no performance or physical audio claim."
+      "recovered_silence_follow_up_note": "Zero-count native silence anchoring extension for recovered clocks. Exact Duration seeks align source gaps at the preceding coded run rate and empty edits at the opening rate. Three authored movies cover49Hz AAC phase and8kHz-to16kHz PCM changes. Full PCM/video and raw900Hz grid controls pass before/after;two original direct/worker regressions fail then pass. Seven gates pass866 test executions;three repeats pass19 tests each. Raw tick compatibility retained;no performance or physical audio claim.",
+      "native_grid_follow_up_validation": "batch-485-validation.json",
+      "native_grid_follow_up_note": "Zero-count exact-grid changing PCM extension. Duration requests retain their fraction;selected native rates and PCM geometry determine landings,including unused opaque headers. Three valid authored movies cover data,source-gap,whole-packet EOF and raw compatibility. A separate unavailable-source refusal passes on the original source;the intermediate candidate false-EOF regression is repaired and not counted. Final seven gates pass871 executions;three repeats pass24 tests each. No performance or physical audio claim."
     },
     {
       "id": "FVID-0485",

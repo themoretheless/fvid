@@ -39,7 +39,7 @@ include!("../../../crates/fvid-media/src/owned_mp4_audio_clock_runs_impl.rs");
 // Consult a readable sample at each run start so virtual coordinate failures
 // keep the same semantics as the reference sample walk. Dense/general indexes
 // retain that walk rather than adding one binary lookup per short run.
-fn clock_description_used(samples:&crate::container::mp4::SampleIndex,description:usize)->bool {
+pub(super) fn clock_description_used(samples:&crate::container::mp4::SampleIndex,description:usize)->bool {
     match samples {
         crate::container::mp4::SampleIndex::Uniform(index)
             if index.runs.len().saturating_mul(2)<index.count => {

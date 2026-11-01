@@ -1,0 +1,25 @@
+--- a/src/playback/audio/mp4_audio.rs
++++ b/src/playback/audio/mp4_audio.rs
+@@ -458,6 +458,13 @@
+                 coded.min(EditTime::ticks(u64::from(sample.duration),self.track().timescale)?.ceil_frames(rate)?)
+             };
+             if offset<frames {return start.add(EditTime::new(offset,u128::from(rate))?).map(Some);}
++            // Rounding past the final native sample can legitimately land at
++            // the available endpoint. Distinguish that from missing source.
++            let declared_end=start.add(EditTime::ticks(u64::from(sample.duration),self.track().timescale)?)?;
++            let native_end=start.add(EditTime::new(frames,u128::from(rate))?)?;
++            let available_end=if native_end.cmp(declared_end)==std::cmp::Ordering::Less {native_end}else{declared_end};
++            if wanted.cmp(available_end)!=std::cmp::Ordering::Greater {return Ok(Some(available_end));}
++            if wanted.cmp(declared_end)==std::cmp::Ordering::Less {return Err(invalid("MP4 audio edit extends beyond source packets"));}
+         }
+         Ok(None)
+     }
+@@ -486,7 +493,7 @@
+                 let wanted=media.add(position.sub(segment.start)?)?;
+                 let landed=if self.clock.is_some() {self.clock_landing(wanted)?.1}
+                     else if let Some(at)=self.native_landing(wanted)? {at}
+-                    else {position=segment.end;continue;};
++                    else {return Err(invalid("MP4 audio edit extends beyond source packets"));};
+                 let mapped=landed.add(segment.start)?.sub(media)?;
+                 if mapped.cmp(segment.end)!=std::cmp::Ordering::Less {position=segment.end;continue;}
+                 position=position.max(mapped);

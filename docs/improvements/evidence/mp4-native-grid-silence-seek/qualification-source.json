@@ -1,0 +1,8 @@
+{
+  "src/playback/audio/mp4_audio.rs": "b02b4dccc192ee49927010b3b44feeaabca48785c697c8512cb11e618eae5668",
+  "src/playback/audio/mp4_clock_recovery.rs": "4bd9dc0452bc30e79dad6985e57085cff81da2f522426c037930c3f27e3abad6",
+  "tests/mp4_native_grid_silence_seek.rs": "eddc9e0bf4dbf9d52bb8f1465568bc5ee1c62badd1373f5d63b7898feb8a57ca",
+  "scripts/generate_mp4_native_grid_silence_seek.py": "12946d7dc32dc8935365e00ee57bdde6e1df6b8d65808f4139919e6850c7ec6a",
+  "tests/mp4_native_grid_missing_extent_seek.rs": "649adedf43f3116ad998170be005f0218e2a9ab172f5c7db7e55a872999a3d12",
+  "scripts/generate_mp4_native_grid_missing_extent_seek.py": "e146d5ad6627edb4d7253a99575c744b6ce76beb79495900c6a641693b935aaa"
+}

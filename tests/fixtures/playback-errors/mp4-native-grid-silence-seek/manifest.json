@@ -1,0 +1,189 @@
+{
+  "provenance": "Own neutral VP9 and analytic0.125PCM with8k/16k setups. Exact packet durations384/189/189 on48000Hz grid;no quantization recovery. Finite1ms coded+1ms gap edits. No private input,FFmpeg or network.",
+  "cases": [
+    {
+      "file": "changing-pcm-native-grid.mp4",
+      "pcm": true,
+      "frames": 24,
+      "scale": 48000,
+      "first_duration": 384,
+      "duration_ns": 2000000,
+      "queries": [
+        {
+          "target_ns": "0",
+          "first": 0,
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "first": 1,
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "500001",
+          "first": 5,
+          "anchor_ns": 625000
+        },
+        {
+          "target_ns": "999999",
+          "first": 8,
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000000",
+          "first": 8,
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000001",
+          "first": 9,
+          "anchor_ns": 1062500
+        },
+        {
+          "target_ns": "1100001",
+          "first": 10,
+          "anchor_ns": 1125000
+        },
+        {
+          "target_ns": "1500001",
+          "first": 17,
+          "anchor_ns": 1562500
+        },
+        {
+          "target_ns": "1999999",
+          "first": 24,
+          "anchor_ns": 2000000
+        },
+        {
+          "target_ns": "2000000",
+          "first": 24,
+          "anchor_ns": 2000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "first": 24,
+          "anchor_ns": 2000000
+        }
+      ],
+      "descriptions": 2
+    },
+    {
+      "file": "changing-pcm-unused-entry.mp4",
+      "pcm": true,
+      "frames": 24,
+      "scale": 48000,
+      "first_duration": 384,
+      "duration_ns": 2000000,
+      "queries": [
+        {
+          "target_ns": "0",
+          "first": 0,
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "first": 1,
+          "anchor_ns": 125000
+        },
+        {
+          "target_ns": "500001",
+          "first": 5,
+          "anchor_ns": 625000
+        },
+        {
+          "target_ns": "999999",
+          "first": 8,
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000000",
+          "first": 8,
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000001",
+          "first": 9,
+          "anchor_ns": 1062500
+        },
+        {
+          "target_ns": "1100001",
+          "first": 10,
+          "anchor_ns": 1125000
+        },
+        {
+          "target_ns": "1500001",
+          "first": 17,
+          "anchor_ns": 1562500
+        },
+        {
+          "target_ns": "1999999",
+          "first": 24,
+          "anchor_ns": 2000000
+        },
+        {
+          "target_ns": "2000000",
+          "first": 24,
+          "anchor_ns": 2000000
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "first": 24,
+          "anchor_ns": 2000000
+        }
+      ],
+      "descriptions": 3
+    },
+    {
+      "file": "whole-final-packet.mp4",
+      "pcm": true,
+      "frames": 63,
+      "scale": 48000,
+      "first_duration": 384,
+      "duration_ns": 3937500,
+      "queries": [
+        {
+          "target_ns": "0",
+          "first": 0,
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "first": 1,
+          "anchor_ns": 62500
+        },
+        {
+          "target_ns": "500001",
+          "first": 9,
+          "anchor_ns": 562500
+        },
+        {
+          "target_ns": "3937499",
+          "first": 63,
+          "anchor_ns": 3937500
+        },
+        {
+          "target_ns": "3937500",
+          "first": 63,
+          "anchor_ns": 3937500
+        },
+        {
+          "target_ns": "3937501",
+          "first": 63,
+          "anchor_ns": 3937500
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "first": 63,
+          "anchor_ns": 3937500
+        }
+      ],
+      "descriptions": 2,
+      "whole": true
+    }
+  ],
+  "sha256": {
+    "changing-pcm-native-grid.mp4": "b97d412f800b0610397f2e9e5fac74f1ae362e3c47d28850ab81473b08af71d1",
+    "changing-pcm-unused-entry.mp4": "756c0cee9cbfb9a13aa98b818da4449f113f6f119f423ebf21579d1c4d79695c",
+    "whole-final-packet.mp4": "82b34c68ab8300443a40a31b2812da35b88c907329333aa41484cfeba16530bd"
+  }
+}

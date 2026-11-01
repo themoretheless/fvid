@@ -1,0 +1,244 @@
+{
+  "status": "accepted",
+  "accepted_ids": [],
+  "follow_up_ids": [
+    "FVID-0484"
+  ],
+  "count_delta": 0,
+  "accepted_count": 485,
+  "next_id": "FVID-0486",
+  "qualification": {
+    "integration": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--no-fail-fast",
+        "--test",
+        "mp4_aac_subtick_seek",
+        "--test",
+        "mp4_audio_eof_seek_clock",
+        "--test",
+        "mp4_audio_packet_seek",
+        "--test",
+        "mp4_audio_wide_time",
+        "--test",
+        "mp4_quantized_audio_clock",
+        "--test",
+        "mp4_aac_edit_phase",
+        "--test",
+        "mp4_aac_fractional_origin",
+        "--test",
+        "mp4_open_ended_edit_audio",
+        "--test",
+        "mp4_audio_clocks",
+        "--test",
+        "mp4_variable_rate_edits",
+        "--test",
+        "mp4_edit_loop",
+        "--test",
+        "mp4_audio_reconfiguration",
+        "--test",
+        "mp4_aac_transitions",
+        "--test",
+        "mp4_unedited_audio_tail",
+        "--test",
+        "mp4_audio_presentation_end",
+        "--test",
+        "mp4_audio_composition_order",
+        "--test",
+        "mp4_unused_audio_descriptions",
+        "--test",
+        "mp4_audio_selection",
+        "--test",
+        "mp4_audio_preroll_navigation",
+        "--test",
+        "mp4_audio_partial_window",
+        "--test",
+        "mp4_audio_zero_window",
+        "--test",
+        "mp4_aac_split_subtick_seek",
+        "--test",
+        "mp4_audio_middle_gap",
+        "--test",
+        "mp4_audio_composition_gap",
+        "--test",
+        "mp4_fixed_audio_edits",
+        "--test",
+        "mp4_aac_gap_subtick_seek",
+        "--test",
+        "mp4_clock_description_scan",
+        "--test",
+        "mp4_recovered_silence_seek",
+        "--test",
+        "mp4_native_grid_silence_seek",
+        "--test",
+        "mp4_native_grid_missing_extent_seek"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 133,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-native-grid-silence-seek/integration.log"
+    },
+    "root-mp4": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "mp4",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 84,
+        "failed": 0,
+        "ignored": 1
+      },
+      "log": "docs/improvements/evidence/mp4-native-grid-silence-seek/root-mp4.log"
+    },
+    "root-webm": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "webm",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 67,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-native-grid-silence-seek/root-webm.log"
+    },
+    "audio-worker": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio_thread",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 39,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-native-grid-silence-seek/audio-worker.log"
+    },
+    "media-units": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fvid-media",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 548,
+        "failed": 0,
+        "ignored": 1
+      },
+      "log": "docs/improvements/evidence/mp4-native-grid-silence-seek/media-units.log"
+    },
+    "core-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-native-grid-silence-seek/core-check.log"
+    },
+    "player-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-native-grid-silence-seek/player-check.log"
+    }
+  },
+  "repeat_runs": 3,
+  "repeat_passed_each": 24,
+  "source_frozen": {
+    "src/playback/audio/mp4_audio.rs": "b02b4dccc192ee49927010b3b44feeaabca48785c697c8512cb11e618eae5668",
+    "src/playback/audio/mp4_clock_recovery.rs": "4bd9dc0452bc30e79dad6985e57085cff81da2f522426c037930c3f27e3abad6",
+    "tests/mp4_native_grid_silence_seek.rs": "eddc9e0bf4dbf9d52bb8f1465568bc5ee1c62badd1373f5d63b7898feb8a57ca",
+    "scripts/generate_mp4_native_grid_silence_seek.py": "12946d7dc32dc8935365e00ee57bdde6e1df6b8d65808f4139919e6850c7ec6a",
+    "tests/mp4_native_grid_missing_extent_seek.rs": "649adedf43f3116ad998170be005f0218e2a9ab172f5c7db7e55a872999a3d12",
+    "scripts/generate_mp4_native_grid_missing_extent_seek.py": "e146d5ad6627edb4d7253a99575c744b6ce76beb79495900c6a641693b935aaa"
+  },
+  "before": {
+    "exit_code": 101,
+    "passed": 3,
+    "failed": 2,
+    "log": "docs/improvements/evidence/mp4-native-grid-silence-seek/before-guard-final.log"
+  },
+  "existing_tests_unchanged": true,
+  "old_ignores": 2,
+  "negative_control": {
+    "original_refusal": "passed",
+    "intermediate_candidate": "incorrect successful EOF",
+    "final_refusal": "passed",
+    "reproducer": "tests/fixtures/playback-errors/mp4-native-grid-missing-extent-seek/past-source-edit.mp4",
+    "repair_patch": "docs/improvements/evidence/mp4-native-grid-silence-seek/extent-guard-repair.patch"
+  },
+  "limitations": [
+    "No performance or physical audio-device claim.",
+    "Intermediate candidate validation regression and initial generator optional-key repair add zero IDs.",
+    "Real mixed non-PCM configuration changes retain their existing path."
+  ]
+}

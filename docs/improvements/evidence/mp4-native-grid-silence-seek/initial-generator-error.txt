@@ -1,0 +1,1 @@
+Initial generator case selection used c["pcm"] on AAC cases lacking that optional key;KeyError before fixture creation. Replaced with c.get("pcm",False) before baseline test execution. Stand repair,zero IDs.

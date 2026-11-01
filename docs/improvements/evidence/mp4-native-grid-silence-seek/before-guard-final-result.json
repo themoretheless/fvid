@@ -1,0 +1,16 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--test",
+    "mp4_native_grid_silence_seek",
+    "--test",
+    "mp4_native_grid_missing_extent_seek"
+  ],
+  "exit_code": 101
+}

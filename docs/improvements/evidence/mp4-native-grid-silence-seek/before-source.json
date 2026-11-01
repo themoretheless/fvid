@@ -1,0 +1,8 @@
+{
+  "base_commit": "65170a00d4d5a32139d04cc7031ab584308515f0",
+  "sha256": {
+    "src/playback/audio/mp4_audio.rs": "36e9d202ee793df2f1672b16deb305a160b3c6df899384fdd2ef9d6d30376607",
+    "tests/mp4_native_grid_silence_seek.rs": "12f38b3b51cc5737d665fbafc8aa9fac8aa14470b43bb99d15e54abd88a97d8d",
+    "scripts/generate_mp4_native_grid_silence_seek.py": "a5268a87d468162a65c2314b78d94b941d005a9d80788395b114b992f50ec569"
+  }
+}
