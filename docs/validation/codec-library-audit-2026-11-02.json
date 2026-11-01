@@ -1,0 +1,94 @@
+{
+  "source_commit": "d5149247559f84cfecc93ced5750b6e0123e1494",
+  "exit_code": 0,
+  "packages": {
+    "fvid": {
+      "passed": 1090,
+      "ignored": 26
+    },
+    "fvid-media": {
+      "passed": 596,
+      "ignored": 3
+    }
+  },
+  "passed": 1686,
+  "ignored": 29,
+  "failures": 0,
+  "command": "CARGO_TARGET_DIR=../target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --lib -p fvid -p fvid-media",
+  "log_sha256": "9e9c9ace2504785d27d0c509c48990183c80585098fb7bc8d41b227d55345370",
+  "executables": [
+    {
+      "path": "/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target/debug/deps/fvid-3762384d52f17f18",
+      "sha256": "025b16101aceba3232a45dd062f39401a79a5c8c144b7cc2c48ed512482b9517",
+      "direct_dynamic_dependencies": [
+        "\t/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit (compatibility version 45.0.0, current version 2775.10.103)",
+        "\t/System/Library/Frameworks/VideoToolbox.framework/Versions/A/VideoToolbox (compatibility version 1.0.0, current version 3350.77.5)",
+        "\t/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 5027.0.69)",
+        "\t/System/Library/Frameworks/CoreMedia.framework/Versions/A/CoreMedia (compatibility version 1.0.0, current version 3350.77.5)",
+        "\t/System/Library/Frameworks/CoreVideo.framework/Versions/A/CoreVideo (compatibility version 1.2.0, current version 758.27.0)",
+        "\t/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices (compatibility version 1.0.0, current version 66.0.0)",
+        "\t/System/Library/Frameworks/CoreGraphics.framework/Versions/A/CoreGraphics (compatibility version 64.0.0, current version 2050.0.0)",
+        "\t/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon (compatibility version 2.0.0, current version 170.0.0)",
+        "\t/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation (compatibility version 300.0.0, current version 5027.0.69)",
+        "\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.0.0)",
+        "\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)",
+        "\t/System/Library/Frameworks/QuartzCore.framework/Versions/A/QuartzCore (compatibility version 1.2.0, current version 1223.2.2)",
+        "\t/System/Library/Frameworks/Metal.framework/Versions/A/Metal (compatibility version 1.0.0, current version 382.5.3)",
+        "\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)",
+        "\t/System/Library/Frameworks/AudioUnit.framework/Versions/A/AudioUnit (compatibility version 1.0.0, current version 1.0.0)",
+        "\t/System/Library/Frameworks/CoreAudio.framework/Versions/A/CoreAudio (compatibility version 1.0.0, current version 1.0.0)",
+        "\t/System/Library/Frameworks/ColorSync.framework/Versions/A/ColorSync (compatibility version 1.0.0, current version 3929.0.0)",
+        "\t/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices (compatibility version 1.0.0, current version 1226.0.0)"
+      ]
+    },
+    {
+      "path": "/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target/debug/deps/fvid_media-73517f149a008b88",
+      "sha256": "f9826135455278244834864da09a2c6233ef541f52e67d993f8405dd3388322b",
+      "direct_dynamic_dependencies": [
+        "\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)",
+        "\t/System/Library/Frameworks/AudioUnit.framework/Versions/A/AudioUnit (compatibility version 1.0.0, current version 1.0.0)",
+        "\t/System/Library/Frameworks/CoreAudio.framework/Versions/A/CoreAudio (compatibility version 1.0.0, current version 1.0.0)",
+        "\t/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 5027.0.69)",
+        "\t/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation (compatibility version 300.0.0, current version 5027.0.69)",
+        "\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)",
+        "\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.0.0)"
+      ]
+    }
+  ],
+  "normal_build_dependency_tree_sha256": "86538dd233d027482535aff750d5ce4adb799509b4d59db1a3449a4bea27b271",
+  "ffmpeg_or_libav_in_tree_or_direct_linkage": false,
+  "ignored_tests": [
+    "test audio::cpal_backend::explicit_aac_speaker_route_regressions::real_device_aac_pce_layout_smoke ... ignored, requires physical default output; opens paused without emitting sound",
+    "test audio::cpal_backend::physical_layout_smoke::real_device_flac_layout_smoke ... ignored, requires a physical default output device; opens paused and emits no sound",
+    "test player::gpu_option_tests::metal_player_presents_shared_main10_and_can_snapshot_it ... ignored, requires physical VideoToolbox decoding",
+    "test player::http_input_tests::native_player_hls_decodes_all_frames_and_seeks ... ignored, explicit loopback HLS playback; ordinary tests need no network",
+    "test player::http_input_tests::native_player_http_input_retains_file_for_reopen_and_seek ... ignored, explicit loopback HTTP player acceptance; ordinary tests need no network",
+    "test player_gpu::tests::display_shader_converts_to_native_encoder_yuv ... ignored, requires physical Metal",
+    "test player_gpu::tests::display_shader_executes_after_colour_conversion ... ignored, requires a physical GPU; failure to initialize is a failure",
+    "test player_gpu::tests::encoder_chroma_averages_aligned_pixels_including_odd_edges ... ignored, requires physical Metal",
+    "test player_gpu::tests::encoder_crop_matches_independent_rgb_crop_in_all_planes ... ignored, requires physical Metal",
+    "test player_gpu::tests::encoder_rgb_scaling_matches_independent_bilinear_source_sampling ... ignored, requires physical Metal",
+    "test player_gpu::tests::encoder_rotates_output_geometry_and_chroma_sampling ... ignored, requires physical Metal",
+    "test player_gpu::tests::encoder_scales_native_output_and_aligns_chroma_to_output_pixels ... ignored, requires physical Metal",
+    "test player_gpu::tests::hardware_export_copies_mp4_audio_with_gapless_timing ... ignored, requires physical Metal and VideoToolbox",
+    "test player_gpu::tests::hardware_surfaces_render_with_colour_and_custom_shader ... ignored, requires physical VideoToolbox and Metal",
+    "test player_gpu::tests::hardware_video_mux_interleaves_subtitles_and_preserves_tail ... ignored, requires physical Metal and VideoToolbox",
+    "test player_gpu::tests::metal_output_surface_initializes_native_encoder_planes ... ignored, requires physical Metal and VideoToolbox",
+    "test player_gpu::tests::metal_p010_output_initializes_exact_codes_and_encodes_main10 ... ignored, requires physical Metal and Main10 VideoToolbox",
+    "test player_gpu::tests::native_crop_scaling_matches_cropped_rotated_packed_source ... ignored, requires physical Metal and VideoToolbox",
+    "test player_gpu::tests::native_shader_export_stream_encodes_muxes_and_reopens ... ignored, requires physical Metal and VideoToolbox",
+    "test player_gpu::tests::odd_native_crop_matches_independent_float_reference ... ignored, requires physical Metal and VideoToolbox",
+    "test player_gpu::tests::rgb_frames_run_display_shader_and_gpu_adjustment ... ignored, requires physical GPU",
+    "test player_gpu::tests::rgba_frames_composite_after_adjustment_without_transparent_color_bleeding ... ignored, requires physical GPU",
+    "test player_gpu::tests::sequential_1d_grading_preserves_float_nodes_and_long_tables ... ignored, requires a physical GPU for float 1D LUT qualification",
+    "test player_gpu::tests::sequential_3d_grading_preserves_authored_domains ... ignored, requires a physical GPU for sequential LUT qualification",
+    "test player_gpu::tests::shader_renders_into_native_encoder_surface ... ignored, requires physical Metal and VideoToolbox",
+    "test player_gpu::tests::source_precision_planes_use_gpu_conversion_and_display_shader ... ignored, requires a physical GPU; source precision must be tested by readback",
+    "test owned_exposure::integer_conversion_gap::complete_integer_float_rgb_pipeline_matches_reference ... ignored, acceptance pending complete integer-float RGB conversion compatibility",
+    "test owned_http::hls_tests::redirect_master_and_byte_ranges_open_owned_fragmented_media ... ignored, explicit loopback HTTP integration; ordinary tests do not use networking",
+    "test owned_http::tests::live_loopback_download_redirect_chunking_and_truncation ... ignored, explicit loopback HTTP integration; ordinary tests require no network"
+  ],
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "scope": "Library tests with player feature; separate integration audit has26 tests. Not full-workspace, all-feature, hardware, performance, full codec/profile conformance or absence-of-gaps qualification.",
+  "unresolved_acceptance": "owned_exposure::integer_conversion_gap::complete_integer_float_rgb_pipeline_matches_reference remains ignored and is a pending compatibility check, not an environment-only skip."
+}

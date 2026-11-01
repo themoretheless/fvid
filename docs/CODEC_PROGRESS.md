@@ -24548,3 +24548,13 @@ An explicit original-C diagnostic shows that 21 of 49 resolution pairs depend
 on untransmitted HRTF tail values. This changes the qualification approach:
 the original direct-index function alone cannot qualify unequal-grid mapping.
 No production refusal was removed. See [diagnostic](validation/aac-ld-mps-hrtf-tail-reference-2026-11-02.md).
+
+### 2026-11-02: broader native baseline and admission-route audit
+
+The offline player-feature library gate passed 1,686 tests with 29 explicit
+skips; five selected video integration targets passed another 26 tests.
+Dependency-tree/direct-link checks contain no FFmpeg/libav. The skipped exposure
+integer/float conversion acceptance is pending compatibility work, not a
+physical-device-only skip. Active LD-MPS gaps remain open. See
+[baseline](validation/codec-library-audit-2026-11-02.md) and
+[admission routes](validation/codec-admission-route-audit-2026-11-02.md).

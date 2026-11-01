@@ -1,0 +1,32 @@
+{
+  "scope": "Admission-route audit of existing functionality; no new decoder feature or full-codec completion claim",
+  "source_commit": "d5149247559f84cfecc93ced5750b6e0123e1494",
+  "exit_code": 0,
+  "passed": 26,
+  "targets": {
+    "av1_tile_list": 9,
+    "avc_primary_recovery": 5,
+    "avc_redundant_primary": 6,
+    "avc_redundant_recovery": 5,
+    "hevc_3d_chroma_constraints": 1
+  },
+  "command": "CARGO_TARGET_DIR=../target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test av1_tile_list --test avc_redundant_recovery --test avc_primary_recovery --test avc_redundant_primary --test hevc_3d_chroma_constraints",
+  "log_sha256": "704b6cf1b9e90ef4c8f215469ac58d88a13080d1bc07e4042d8f959265071317",
+  "source_sha256": {
+    "src/codec/avc_access_unit.rs": "4efbaa6ea3662e2fd83ac80247cc98328c86805bd4d3ec725e1a62ca0ace8ec3",
+    "src/codec/avc_redundant_recovery.rs": "6c419c27d6867f5ea3692c53c1517440ecca8352ee6f06398d250c336c8eae2d",
+    "src/codec/av1_decoder.rs": "3f1609a69c8ab9f5f2339c7e8fdfbb83016b0fe59f25b279d90a8d66a34abf50",
+    "src/codec/av1_tile_list.rs": "7e4d3f9911fecd79394797e435623c8dae97b67b103d666ac5545b83890dff18",
+    "src/codec/hevc_sps.rs": "32c075d985ae1a2cd1be176d7de40cd7f1dc82d5e681a480e67a3b7c9e6e51da",
+    "src/codec/vp9_decoder.rs": "7fd5853f99b1b9519a104f73905509f08ecef2e418a040921e20119e0f5c5ba0"
+  },
+  "test_source_sha256": {
+    "av1_tile_list": "1be0c09fcda001a6d2a54aebf90a954e05e0e4f04bc7655cb05563a8a4223fb4",
+    "avc_primary_recovery": "d92b29d886e411824500a558ef55adbeb9418317ea776475cdd11ca25b73f5bc",
+    "avc_redundant_primary": "69b1b3e9e417026279480892fc0d599d032b427c7bc8e0c21e5d29733beb1287",
+    "avc_redundant_recovery": "2c4cef9abe6c9feebad2203981fd7e95e240f6d3118799366c9055c242c6b6a6",
+    "hevc_3d_chroma_constraints": "a16f7bad7a888ab9b35b7c49c11c8e041806ad04fe800261e9f495fbfe62eb09"
+  },
+  "library_gate": "Separate completed receipt: codec-library-audit-2026-11-02.json; counts not included in this result",
+  "runtime_changes": false
+}
