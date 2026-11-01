@@ -5463,7 +5463,9 @@
       "before": "Authored 48 kHz AAC960 clips on 48 kHz/50 Hz media clocks emit extra or repeated samples after sub-tick seek; 50 Hz clips replay their entire 1/1.25 ms edit after EOF seek. Actual-worker and direct baselines fail with independent full-play controls passing.",
       "result": "Keep an exact rational PCM clipping floor and native packet-phase clock anchor while preserving existing preroll, raw tick navigation and validation of empty terminal windows.",
       "status": "accepted",
-      "validation": "batch-480-validation.json"
+      "validation": "batch-480-validation.json",
+      "follow_up_validation": "batch-481-validation.json",
+      "follow_up_note": "Zero-count extension: identical-header AAC split edits now retain arbitrary Duration floors and native packet phase, including explicit initial silence. Four authored video controls and actual workers prove full PCM, exact suffixes/PTS, EOF and raw-navigation recovery. All seven qualification gates and three repeated ten-test runs pass; configuration-changing paths retain prior behavior."
     }
   ]
 }

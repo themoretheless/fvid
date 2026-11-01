@@ -1,0 +1,227 @@
+{
+  "status": "accepted follow-up",
+  "accepted_ids": [],
+  "follow_up_ids": [
+    "FVID-0484"
+  ],
+  "count_delta": 0,
+  "accepted_count": 484,
+  "next_id": "FVID-0485",
+  "qualification": {
+    "final-integration": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--no-fail-fast",
+        "--test",
+        "mp4_aac_subtick_seek",
+        "--test",
+        "mp4_audio_eof_seek_clock",
+        "--test",
+        "mp4_audio_packet_seek",
+        "--test",
+        "mp4_audio_wide_time",
+        "--test",
+        "mp4_quantized_audio_clock",
+        "--test",
+        "mp4_aac_edit_phase",
+        "--test",
+        "mp4_aac_fractional_origin",
+        "--test",
+        "mp4_open_ended_edit_audio",
+        "--test",
+        "mp4_audio_clocks",
+        "--test",
+        "mp4_variable_rate_edits",
+        "--test",
+        "mp4_edit_loop",
+        "--test",
+        "mp4_audio_reconfiguration",
+        "--test",
+        "mp4_aac_transitions",
+        "--test",
+        "mp4_unedited_audio_tail",
+        "--test",
+        "mp4_audio_presentation_end",
+        "--test",
+        "mp4_audio_composition_order",
+        "--test",
+        "mp4_unused_audio_descriptions",
+        "--test",
+        "mp4_audio_selection",
+        "--test",
+        "mp4_audio_preroll_navigation",
+        "--test",
+        "mp4_audio_partial_window",
+        "--test",
+        "mp4_audio_zero_window",
+        "--test",
+        "mp4_aac_split_subtick_seek",
+        "--test",
+        "mp4_audio_middle_gap",
+        "--test",
+        "mp4_audio_composition_gap",
+        "--test",
+        "mp4_fixed_audio_edits"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 119,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-aac-split-subtick-seek/final-integration.log"
+    },
+    "root-mp4": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "mp4",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 83,
+        "failed": 0,
+        "ignored": 1
+      },
+      "log": "docs/improvements/evidence/mp4-aac-split-subtick-seek/root-mp4.log"
+    },
+    "root-webm": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "webm",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 67,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-aac-split-subtick-seek/root-webm.log"
+    },
+    "audio-worker": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio_thread",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 39,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-aac-split-subtick-seek/audio-worker.log"
+    },
+    "media-units": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fvid-media",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 548,
+        "failed": 0,
+        "ignored": 1
+      },
+      "log": "docs/improvements/evidence/mp4-aac-split-subtick-seek/media-units.log"
+    },
+    "core-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-aac-split-subtick-seek/core-check.log"
+    },
+    "player-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "docs/improvements/evidence/mp4-aac-split-subtick-seek/player-check.log"
+    }
+  },
+  "repeat_runs": 3,
+  "repeat_passed_each": 10,
+  "source_frozen": {
+    "production_sha256": "43aa9fcd2bc6a9537613b0d6c9c66b781948b4a93b32b8228c221ead0242dc14",
+    "test_sha256": {
+      "tests/mp4_aac_subtick_seek.rs": "198aafe9fe9332b3abd7073905f326e1cb9d5050c617a291a49835805d8af6f1",
+      "tests/mp4_audio_eof_seek_clock.rs": "8aaccfb74aa7464415cce3f28c3e316e47a5d0afb37d166f3250c055f40389b0",
+      "tests/mp4_aac_split_subtick_seek.rs": "24246ba63a83a51c6dde8984507905e224ea4e76a1448f8bf403bf9564365d49"
+    }
+  },
+  "existing_regressions_unchanged": true,
+  "old_ignores": 2,
+  "limitations": [
+    "No performance or physical audio-device claim.",
+    "Real configuration changes retain existing navigation.",
+    "Intermediate inherent-helper compile repair adds no ID."
+  ],
+  "before": {
+    "command_result": 101,
+    "passed": 1,
+    "failed": 2,
+    "log": "docs/improvements/evidence/mp4-aac-split-subtick-seek/before-final.log"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "base_commit": "9feaadc6909331f1bfdc7623f1cd9c6b6adb49ec",
+  "production_sha256": "274d2d3fc925aefd9cc46750724db9ab56ad0bfdc1bf5a82fb9709e43971ce32",
+  "test_sha256": "5ae6b3f72e939c2e99489409abe2b5062b44a7756f1dc2fe12bf91a21dd9337d",
+  "exact_fixture_regeneration": true,
+  "fixture_sha256": {
+    "reference.f32le": "f07d53bc0449246b5c609729704b20868e8c081258b744ab40c194a57fc00d3d",
+    "clock48000-two-1ms-edits.mp4": "ef3c19f84eb8c0802156692283907d78cc33ee5c9e61b11ce5ad077991606603",
+    "clock50-two-1ms-edits.mp4": "76d87b561521aa5b00e8937bdddf39bad4fea59d45d9e7ac989b01917a5efde9",
+    "manifest.json": "6d3380ed3f4d353420be787c1e7ac3e953c45906b32193b7779712b9830ee996"
+  }
+}

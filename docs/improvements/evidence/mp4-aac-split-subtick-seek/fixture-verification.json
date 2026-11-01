@@ -1,0 +1,12 @@
+{
+  "exact_regeneration": true,
+  "files": 6,
+  "sha256": {
+    "reference.f32le": "f07d53bc0449246b5c609729704b20868e8c081258b744ab40c194a57fc00d3d",
+    "clock48000-two-1ms-edits.mp4": "ef3c19f84eb8c0802156692283907d78cc33ee5c9e61b11ce5ad077991606603",
+    "clock50-two-1ms-edits.mp4": "76d87b561521aa5b00e8937bdddf39bad4fea59d45d9e7ac989b01917a5efde9",
+    "clock48000-silence-two-edits.mp4": "5b4d7a920982b3b7080b3bc3f4fc951be85a60b96211e264dfa2952ca722121a",
+    "clock50-silence-two-edits.mp4": "b516e184dd6e03503ccde561b1846daf59e6c9487ac460cf730eab37b0457d7c",
+    "manifest.json": "c2d98e26059ce62d0f845493be5da9928770d5baf0fb89156cc44a103301a441"
+  }
+}

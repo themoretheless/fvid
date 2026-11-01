@@ -427,6 +427,24 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         let returned=i64::try_from(landed.floor_ticks(self.track().timescale)?).map_err(|_|invalid("MP4 seek clock overflow"))?;
         self.rewind();self.sample_index=first;self.clock_floor.set(landed);self.presentation_floor=returned;self.clock_anchor.set(Some((returned,landed)));Ok(returned)
     }
+    fn aac_native_landing(&self,wanted:EditTime)->Result<Option<EditTime>> {
+        let tick=i64::try_from(wanted.floor_ticks(self.track().timescale)?).unwrap_or(i64::MAX);
+        let first=self.track().samples.at_or_before(tick);
+        for index in first..self.track().samples.len() {
+            let sample=self.track().samples.get(index).ok_or_else(||invalid("missing AAC seek sample"))?;
+            if sample.duration==0 {continue;}
+            let start=EditTime::signed_ticks(sample.pts,self.track().timescale)?;
+            let offset=wanted.sub(start)?.ceil_frames(self.negotiated_rate())?.max(0);
+            let frames=u128::from(sample.duration)*u128::from(self.negotiated_rate());
+            let scale=u128::from(self.track().timescale);
+            if scale==0 || frames%scale!=0 {return Err(invalid("MP4 AAC packet duration is not sample aligned"));}
+            let frames=frames/scale;
+            if offset < frames as i128 {
+                return start.add(EditTime::new(offset,u128::from(self.negotiated_rate()))?).map(Some);
+            }
+        }
+        Ok(None)
+    }
     fn align_variable_seek(&self,mut position:EditTime)->Result<EditTime> {
         let timeline=self.variable_edits.as_ref().ok_or_else(||invalid("missing MP4 edit timeline"))?;
         loop {
@@ -440,10 +458,16 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 && position.cmp(end)==std::cmp::Ordering::Less {return Ok(position);}
             if let Some(media)=segment.media {
                 let wanted=media.add(position.sub(segment.start)?)?;
-                let (_,landed)=self.clock_landing(wanted)?;
+                let landed=if self.clock.is_some() {self.clock_landing(wanted)?.1}
+                    else if let Some(at)=self.aac_native_landing(wanted)? {at}
+                    else {position=segment.end;continue;};
                 let mapped=landed.add(segment.start)?.sub(media)?;
                 if mapped.cmp(segment.end)!=std::cmp::Ordering::Less {position=segment.end;continue;}
                 position=position.max(mapped);
+            } else if self.clock.is_none() {
+                let offset=position.sub(segment.start)?.ceil_frames(self.negotiated_rate())?;
+                position=segment.start.add(EditTime::new(offset,u128::from(self.negotiated_rate()))?)?;
+                if position.cmp(segment.end)!=std::cmp::Ordering::Less {position=segment.end;continue;}
             }
             return Ok(position);
         }
@@ -1413,7 +1437,10 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
 
     fn seek_time(&mut self,target:std::time::Duration)->i64 {
-        if self.clock.is_some() {
+        let exact_aac_edits=self.variable_edits.is_some() && self.track().codec==*b"mp4a"
+            && self.track().sample_descriptions.first().is_some_and(|first|
+                self.track().sample_descriptions.iter().all(|entry|entry==first));
+        if self.clock.is_some() || exact_aac_edits {
             let time=EditTime::new(target.as_nanos() as i128,1_000_000_000).and_then(|t|self.seek_exact(t));
             return match time {Ok(at)=>at,Err(error)=>{self.navigation_error=Some(error);0}};
         }
@@ -1435,25 +1462,8 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
                 let wanted=origin.add(EditTime::new(target.as_nanos() as i128,1_000_000_000)?)?;
                 let wanted=if wanted.cmp(end)==std::cmp::Ordering::Greater {end}else{wanted};
                 self.clock_floor.set(wanted);
-                // Align on the selected packet's native sample lattice: its
-                // composition origin can itself lie between media samples.
-                let tick=i64::try_from(wanted.floor_ticks(self.track().timescale)?).unwrap_or(i64::MAX);
-                let first=self.track().samples.at_or_before(tick);
-                let mut aligned=end;
-                for index in first..self.track().samples.len() {
-                    let sample=self.track().samples.get(index).ok_or_else(||invalid("missing AAC seek sample"))?;
-                    // An explicit empty terminal presentation window still
-                    // decodes for validation, but cannot supply an anchor.
-                    if sample.duration==0 {continue;}
-                    let start=EditTime::signed_ticks(sample.pts,self.track().timescale)?;
-                    let offset=wanted.sub(start)?.ceil_frames(self.sample_rate())?.max(0);
-                    let frames=self.packet_sample_limit(u64::from(sample.duration))?.unwrap_or(0);
-                    if offset < frames as i128 {
-                        aligned=start.add(EditTime::new(offset,u128::from(self.sample_rate()))?)?;
-                        if aligned.cmp(end)==std::cmp::Ordering::Greater {aligned=end;}
-                        break;
-                    }
-                }
+                let aligned=self.aac_native_landing(wanted)?.unwrap_or(end);
+                let aligned=if aligned.cmp(end)==std::cmp::Ordering::Greater {end}else{aligned};
                 self.clock_anchor.set(Some((landed,aligned.sub(origin)?)));
                 Ok(landed)
             })();
