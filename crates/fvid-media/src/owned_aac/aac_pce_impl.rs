@@ -771,3 +771,29 @@ mod fill_tests {
         }
     }
 }
+
+
+/// MPEG configuration13 (22.2) elements in coded order. LFE elements occur
+/// inside the sequence, before the top/bottom layers.
+pub const CONFIGURATION_13_ELEMENTS: [u8; 16] = [
+    0, 1, 1, 1, 1, 0, 3, 3, 0, 1, 1, 0, 1, 0, 0, 1,
+];
+/// Coded channel -> explicit PCM order: normal/top/bottom, then front/side/
+/// back/LFE, center before pairs. WAVE's 32-bit mask cannot name all24 roles.
+pub const CONFIGURATION_13_MAPPING: [usize; 24] = [
+    0, 1, 2, 3, 4, 5, 6, 8, 9, 7, 10, 11,
+    12, 13, 14, 16, 17, 15, 19, 20, 18, 21, 22, 23,
+];
+/// Explicit positions in configuration13 emitted PCM order. The top-side
+/// center is the overhead speaker; both LFEs are preserved independently.
+pub fn configuration_13_positions() -> Vec<ChannelPosition> {
+    use HeightLayer::{Normal, Top, Bottom};
+    use Position::{Front, Side, Back, Lfe};
+    [(Normal, Front, 5), (Normal, Side, 2), (Normal, Back, 3),
+     (Normal, Lfe, 2), (Top, Front, 3), (Top, Side, 3),
+     (Top, Back, 3), (Bottom, Front, 3)]
+        .into_iter().flat_map(|(height, position, group_channels)|
+            (0..group_channels).map(move |index| ChannelPosition {
+                height, position, index, group_channels,
+            })).collect()
+}

@@ -535,6 +535,7 @@ fn reassemble_er_transport(
         7 | 12 => &[0, 1, 1, 1, 3],
         11 => &[0, 1, 1, 0, 3],
         14 => &[0, 1, 1, 3, 1],
+        13 => &super::aac_pce::CONFIGURATION_13_ELEMENTS,
         _ => return Err(invalid("unsupported ER ESC layout")),
     };
     let mut reader = Reader::new(frame)?;
@@ -599,6 +600,7 @@ fn reassemble_eld_transport(
         7 | 12 => &[0, 1, 1, 1, 3],
         11 => &[0, 1, 1, 0, 3],
         14 => &[0, 1, 1, 3, 1],
+        13 => &super::aac_pce::CONFIGURATION_13_ELEMENTS,
         _ => return Err(invalid("unsupported ELD ESC layout")),
     };
     let mut reader = Reader::new(frame)?;

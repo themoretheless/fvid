@@ -33,6 +33,7 @@ fn elements(configuration: u8) -> Result<&'static [u8]> {
         11 => &[0, 1, 1, 0, 3],
         12 => &[0, 1, 1, 1, 3],
         14 => &[0, 1, 1, 3, 1],
+        13 => &super::aac_pce::CONFIGURATION_13_ELEMENTS,
         _ => {
             return Err(invalid("invalid low-delay SBR channel configuration"));
         }
@@ -90,7 +91,7 @@ pub struct Decoder {
     slots: u8,
     configuration: u8,
     groups: Vec<Group>,
-    lfe: Option<Dsp>,
+    lfe: Vec<Dsp>,
 }
 impl Decoder {
     pub fn new(
@@ -134,9 +135,10 @@ impl Decoder {
                 dsp: Dsp::new_downscaled(config.double_rate, factor),
             });
         }
-        let lfe = kinds
-            .contains(&3)
-            .then(|| Dsp::new_downscaled(config.double_rate, factor));
+        // Every LFE owns its analysis/synthesis history. In configuration13
+        // two consecutive LFEs must not advance the same state twice per AU.
+        let lfe = kinds.iter().filter(|&&kind| kind == 3)
+            .map(|_| Dsp::new_downscaled(config.double_rate, factor)).collect();
         Ok(Self {
             noise_policy: NoisePolicy::default(),
             spatial: false,
@@ -163,8 +165,8 @@ impl Decoder {
         for group in &mut decoder.groups {
             group.dsp = Dsp::new_spatial(decoder.config.double_rate);
         }
-        if decoder.lfe.is_some() {
-            decoder.lfe = Some(Dsp::new_spatial(decoder.config.double_rate));
+        for lfe in &mut decoder.lfe {
+            *lfe = Dsp::new_spatial(decoder.config.double_rate);
         }
         Ok(decoder)
     }
@@ -236,7 +238,7 @@ impl Decoder {
             group.stream = Stream::with_low_delay_header(header.clone());
             group.dsp.reset();
         }
-        if let Some(lfe) = &mut self.lfe {
+        for lfe in &mut self.lfe {
             lfe.reset();
         }
     }
@@ -247,7 +249,8 @@ impl Decoder {
             group.stream.visit_retained(f)?;
             group.dsp.visit_retained(f)?;
         }
-        if let Some(lfe) = &self.lfe {
+        f.vector(&self.lfe)?;
+        for lfe in &self.lfe {
             lfe.visit_retained(f)?;
         }
         Ok(())
@@ -329,11 +332,12 @@ impl Decoder {
         let mut subbands = Vec::with_capacity(if qmf { channels } else { 0 });
         let mut at = 0;
         let mut group = 0;
+        let mut lfe_index = 0;
         for &kind in kinds {
             if kind == 3 {
                 let lfe = state
                     .lfe
-                    .as_mut()
+                    .get_mut(lfe_index)
                     .ok_or_else(|| invalid("missing low-delay SBR LFE state"))?;
                 if qmf {
                     subbands.push(lfe.upsample_lfe_qmf(&core[at], state.slots)?);
@@ -345,6 +349,7 @@ impl Decoder {
                     )?);
                 }
                 at += 1;
+                lfe_index += 1;
                 continue;
             }
             let width = if kind == 1 { 2 } else { 1 };

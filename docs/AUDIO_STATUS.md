@@ -3371,3 +3371,17 @@ isolates that discrepancy and matches native PCM; original PCM is retained.
 This is not normative qualification of that combination or complete LD-MPS
 support. No production DSP changes are made for this reference discrepancy.
 See `validation/aac-ld-mps-ttt-split-2026-11-01.md` for exact boundaries.
+
+### 2026-11-01: indexed AAC22.2 and separate LD-SBR LFE histories
+
+The owned ASC/native/LD/ELD paths now admit configuration13 and retain all24
+channels with explicit positions. Both LFEs remain separate and both bypass
+LD-SBR HF generation. Per-LFE filter histories replace the previous single
+LFE owner. Indexed ER's16th synthetic tag stays inside the four-bit domain.
+
+Fourteen authored six-AU programmes provide1,723,392 independent scalar PCM
+comparisons across Main/LC/LTP/ER-LC/ER-LTP/LD/ELD and CRC/non-CRC LD-SBR.
+MP4/Matroska playback, rewind/seek, checkpoint rollback and stereo role routing
+are checked. Four actual macOS device runs complete16 drain phases.
+See `validation/aac-22-2-2026-11-01.md` for precise tools, evidence and remaining
+qualification boundaries; complete codec/profile parity is still open.

@@ -67,9 +67,10 @@ pub fn coefficients(
         .collect())
 }
 
-/// Explicit channel order even when WAVE has no mask for the PCE positions.
+/// Explicit PCE/configuration13 channel order where WAVE has no speaker mask.
 pub fn opaque_positions(configuration:&[u8])->Result<Option<Vec<crate::owned_aac::aac_pce::ChannelPosition>>,String> {
     let asc=crate::owned_codec_config::aac_specific_config(configuration).map_err(|e|e.to_string())?;
     let config=crate::owned_aac::config::AudioSpecificConfig::parse(asc).map_err(|e|e.to_string())?;
+    if config.core.channel_configuration == 13 {return Ok(Some(crate::owned_aac::aac_pce::configuration_13_positions()));}
     config.program.map(|p|p.pcm_positions().map_err(|e|e.to_string())).transpose()
 }

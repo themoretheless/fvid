@@ -49,7 +49,7 @@ impl AacConfig {
         config: u32,
     ) -> Result<(Self, Option<super::aac_pce::ProgramConfig>, Option<super::aac_eld_sbr::Config>, Option<super::aac_ep::Config>, bool, bool, Option<u32>, Option<super::aac_ld_mps_config::Config>)> {
         if object_type == 39 {
-            let channels=match config {1..=6=>config as u8,7|12|14=>8,11=>7,_=>return Err(invalid("unsupported AAC ELD channel configuration"))};
+            let channels=match config {1..=6=>config as u8,7|12|14=>8,11=>7,13=>24,_=>return Err(invalid("unsupported AAC ELD channel configuration"))};
             let frame_samples=if b.bit()?{480}else{512};
             let section_data_resilience=b.bit()?;
             let scalefactor_data_resilience=b.bit()?;
@@ -101,6 +101,7 @@ impl AacConfig {
             1..=6 => config as u8,
             7 | 12 | 14 => 8,
             11 => 7,
+            13 => 24,
             _ => return Err(invalid("unsupported AAC channel configuration")),
         };
         let mut frame_samples = if b.bit()? { 960 } else { 1024 };

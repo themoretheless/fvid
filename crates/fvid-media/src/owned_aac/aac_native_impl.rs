@@ -311,7 +311,7 @@ pub struct AacCheckpoint {
 }
 fn sbr_layout(parsed: &AudioSpecificConfig) -> Result<bool> {
     let Some(_) = &parsed.program else {
-        return Ok(matches!(parsed.core.channel_configuration, 1..=7 | 11 | 12 | 14));
+        return Ok(matches!(parsed.core.channel_configuration, 1..=7 | 11..=14));
     };
     Ok(parsed.core.channel_configuration == 0)
 }
@@ -354,7 +354,7 @@ impl NativeAacDecoder {
         let config = parsed.core;
         let program = parsed.program;
         BandTables::for_config(&config)?;
-        if program.is_none() && !matches!(config.channels, 1..=8) {
+        if program.is_none() && !matches!(config.channels, 1..=8 | 24) {
             return Err(unsupported("unsupported owned AAC channel layout"));
         }
         let (mut channel_mask, mapping) = if let Some(program) = &program {
@@ -375,6 +375,7 @@ impl NativeAacDecoder {
                 // Configuration 14: normal FC, FL/FR, BL/BR, LFE,
                 // followed by top-front left/right.
                 14 => &[2, 0, 1, 4, 5, 3, 6, 7],
+                13 => &super::aac_pce::CONFIGURATION_13_MAPPING,
                 _ => unreachable!(),
             };
             (
@@ -384,6 +385,8 @@ impl NativeAacDecoder {
                     0x13f
                 } else if config.channel_configuration == 12 {
                     0x63f
+                } else if config.channel_configuration == 13 {
+                    0
                 } else if config.channel_configuration == 14 {
                     0x503f
                 } else {
@@ -506,8 +509,12 @@ impl NativeAacDecoder {
         self.channel_mask
     }
     /// Save overlap/window and perceptual-noise history after a complete packet.
-    /// Explicit PCE positions in emitted PCM order; None for indexed layouts.
+    /// Explicit PCM positions for PCEs and configuration13; other indexed
+    /// layouts are fully described by their WAVE speaker mask.
     pub fn channel_positions(&self) -> Result<Option<Vec<super::aac_pce::ChannelPosition>>> {
+        if self.config.channel_configuration == 13 {
+            return Ok(Some(super::aac_pce::configuration_13_positions()));
+        }
         self.program.as_ref().map(|p| p.pcm_positions()).transpose()
     }
     pub fn checkpoint(&self) -> AacCheckpoint {
@@ -733,6 +740,7 @@ impl NativeAacDecoder {
             7 | 12 => &[0, 1, 1, 1, 3],
             11 => &[0, 1, 1, 0, 3],
             14 => &[0, 1, 1, 3, 1],
+            13 => &[0, 1, 1, 1, 1, 0, 3, 3, 0, 1, 1, 0, 1, 0, 0, 1],
             _ => &[],
         };
         let mut element_index = 0;
@@ -751,7 +759,10 @@ impl NativeAacDecoder {
                 }
                 element_index += 1;
                 let signaled_tag = bits.read(4)?;
-                let tag = if er && current_program.is_none() {element_index as u32} else {signaled_tag};
+                // Indexed ER layouts use synthetic ordinal tags. Sixteen
+                // configured elements still fit the four-bit tag domain; the
+                // final ordinal wraps to the unused zero slot.
+                let tag = if er && current_program.is_none() {(element_index % 16) as u32} else {signaled_tag};
                 if let Some(program) = &current_program {
                     let mut offset = 0;
                     let mut found = None;

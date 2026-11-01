@@ -24449,3 +24449,14 @@ All original outputs remain available. See
 `validation/aac-ld-mps-ttt-split-2026-11-01.md`. Unequal HRTF grids, remaining
 EBQ configurations and replaced-fragment association remain open. The global
 codec-gap goal is not complete.
+
+### 2026-11-01: owned AAC configuration13 /22.2
+
+Configuration13 no longer fails metadata admission. The owned native, LD and
+ELD element sequences support24 channels, explicit ordered positions, two LFEs
+and height/bottom roles. LD-SBR now maintains separate filter histories for
+both LFEs. The16th ER element's synthetic tag no longer exceeds the tag domain.
+Authored before-fix reproductions become playback acceptance on14 programmes,
+with independent scalar PCM and MP4/Matroska rewind/seek/device evidence.
+See `validation/aac-22-2-2026-11-01.md`. Additional tool/profile combinations
+and the separate LD-MPS HRTF/EBQ/fragment-association gaps remain open.

@@ -36,6 +36,7 @@ impl NativeAacDecoder {
             7 | 12 => &[0, 1, 1, 1, 3],
             11 => &[0, 1, 1, 0, 3],
             14 => &[0, 1, 1, 3, 1],
+            13 => &super::aac_pce::CONFIGURATION_13_ELEMENTS,
             _ => return Err(invalid("unsupported AAC LD configured layout")),
         };
         let bands =
