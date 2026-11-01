@@ -1,9 +1,10 @@
 {
-  "status": "accepted zero-count follow-up; publication pending",
+  "status": "accepted zero-count follow-up and published",
   "accepted_count": 484,
   "next_id": "FVID-0485",
   "count_delta": 0,
   "goal_complete": false,
   "owned_build_target_absent": true,
-  "owned_generator_bytecode_removed": true
+  "owned_generator_bytecode_removed": true,
+  "source_commit": "aa6103996dcef66e94319e9bb92926704ff6a32f"
 }
