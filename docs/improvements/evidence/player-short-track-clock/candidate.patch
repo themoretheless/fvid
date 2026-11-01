@@ -1,0 +1,56 @@
+diff --git a/src/player.rs b/src/player.rs
+index 9783a23a81..0d15f9c275 100644
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -1899,0 +1900,2 @@ struct Player {
++    /// Minimum published video phase and its raw source anchor during audio replacement.
++    audio_clock_floor: Option<(Duration, Duration)>,
+@@ -2131,0 +2134 @@ impl Default for Player {
++            audio_clock_floor: None,
+@@ -2329,0 +2333 @@ impl Player {
++        self.audio_clock_floor = None;
+@@ -2428,0 +2433 @@ impl Player {
++        self.audio_clock_floor = None;
+@@ -2617 +2622,4 @@ impl Player {
+-                .map(|audio| audio.transport_position()))
++                .map(|audio| {
++                    let at = audio.transport_position();
++                    self.audio_clock_floor.map_or(at, |(_, floor)| at.max(floor))
++                }))
+@@ -2618,0 +2627 @@ impl Player {
++        let clock_floor = if picture { self.presentation_clock().zip(at) } else { None };
+@@ -2623,0 +2633 @@ impl Player {
++        self.audio_clock_floor = clock_floor;
+@@ -3098,0 +3109 @@ impl Player {
++            let clock = self.audio_clock_floor.map_or(clock, |(floor, _)| clock.max(floor));
+@@ -3157,0 +3169 @@ impl Player {
++            self.audio_clock_floor = None;
+@@ -3623,0 +3636 @@ impl Player {
++                            self.audio_clock_floor = None;
+@@ -3790,0 +3804 @@ impl Player {
++        self.audio_clock_floor = None;
+@@ -3838,0 +3853 @@ impl Player {
++        self.audio_clock_floor = None;
+@@ -3932,0 +3948 @@ impl Player {
++        self.audio_clock_floor = None;
+@@ -3996,0 +4013,8 @@ impl Player {
++        // A new source owns time once it actually reaches the requested raw
++        // anchor. An ended source can release the floor after a silent picture
++        // takes over; until then, its shorter endpoint cannot rewind the view.
++        if self.audio_clock_floor.is_some_and(|(_, at)| audio.position() >= at)
++            || (self.audio_ended && !self.picture_audio_clock)
++        {
++            self.audio_clock_floor = None;
++        }
+@@ -4019 +4043 @@ impl Player {
+-        if (ran_out || failure.is_some()) && !self.paused && !self.seek_preview && self.picture_audio_clock {
++        if (ran_out || failure.is_some()) && !self.paused && !self.seek_preview && (self.picture_audio_clock || self.audio_clock_floor.is_some()) {
+@@ -4023,0 +4048 @@ impl Player {
++                let clock = self.audio_clock_floor.map_or(clock, |(floor, _)| clock.max(floor));
+@@ -4036,0 +4062 @@ impl Player {
++            self.audio_clock_floor = None;
+@@ -13253,0 +13280,4 @@ mod track_source_lifetime_regressions;
++
++#[cfg(test)]
++#[path = "player_short_track_clock_tests.rs"]
++mod short_track_clock_regressions;

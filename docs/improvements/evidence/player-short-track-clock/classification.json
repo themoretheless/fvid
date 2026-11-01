@@ -1,0 +1,10 @@
+{
+  "proposed_id": "FVID-0473",
+  "count_delta": 1,
+  "baseline_commit": "700c13fd28a1484204579ce72d57b00ba0c3b2cc",
+  "older_commit": "9ca4c32089c216f82574c0895da3a0bdbbd76c57",
+  "independent_problem": "A replacement device can end before the already-published video phase;its physical endpoint must not become an earlier video clock.",
+  "historical_unconditional_new_clock_adoption": true,
+  "independent_of": "FVID-0458 handles continuous device completion;this source-identity change has no PCM at the current video phase.",
+  "variants_controls_and_test_expansion_count_delta": 0
+}

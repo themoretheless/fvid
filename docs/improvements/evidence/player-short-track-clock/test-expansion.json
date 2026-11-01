@@ -1,0 +1,9 @@
+{
+  "initial_tests": 8,
+  "initial_passed": 4,
+  "initial_failed": 4,
+  "final_tests": 9,
+  "added": "Immediate switch back to long source before processing replacement EOF.",
+  "synchronization": "Require actual old-device post-seek resume before assuming it is playing;no assertion removed or relaxed.",
+  "count_delta": 0
+}

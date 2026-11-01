@@ -1,0 +1,103 @@
+{
+  "completed": true,
+  "removed": [
+    {
+      "path": "/private/tmp/fvid-player-short-track-clock-after.log",
+      "bytes": 26808,
+      "raw_sha256": "b7f8f2e8c1d968333282b00c41edff75ce81ede8fcc6cfabbecf1ad4f6e65cd8",
+      "archive": "raw-history/after.log",
+      "archive_sha256": "048c82e8aeea1e2f829db9abd789b2f12edbda39bc4b298421f715c1a8fb6ec7"
+    },
+    {
+      "path": "/private/tmp/fvid-player-short-track-clock-audio-thread.log",
+      "bytes": 29884,
+      "raw_sha256": "4f2207b213667781d7909abd6393040ae2f4c994fd85a31da6c73449accb02a1",
+      "archive": "raw-history/audio-thread.log",
+      "archive_sha256": "330245527eb22537f37bb12ea62452e821da3378b9c5f08f2e21ee157fb3246d"
+    },
+    {
+      "path": "/private/tmp/fvid-player-short-track-clock-before.log",
+      "bytes": 29797,
+      "raw_sha256": "091c2d53fd0572cf62b490efd6853c9706314b6cc2bacd4791e482733c172d34",
+      "archive": "raw-history/before.log",
+      "archive_sha256": "091c2d53fd0572cf62b490efd6853c9706314b6cc2bacd4791e482733c172d34"
+    },
+    {
+      "path": "/private/tmp/fvid-player-short-track-clock-collection.log",
+      "bytes": 4405,
+      "raw_sha256": "385de4fa08b27d168a0b3f7db74d14c995713b57453869ca46750dbcd2e4fbad",
+      "archive": "raw-history/collection.log",
+      "archive_sha256": "385de4fa08b27d168a0b3f7db74d14c995713b57453869ca46750dbcd2e4fbad"
+    },
+    {
+      "path": "/private/tmp/fvid-player-short-track-clock-core-check.log",
+      "bytes": 26898,
+      "raw_sha256": "c3e62266fbac4053d9e3fdad3d662ce34ba375b42890c1dc078f2763f5143c24",
+      "archive": "raw-history/core-check.log",
+      "archive_sha256": "c3e62266fbac4053d9e3fdad3d662ce34ba375b42890c1dc078f2763f5143c24"
+    },
+    {
+      "path": "/private/tmp/fvid-player-short-track-clock-integration.log",
+      "bytes": 112310,
+      "raw_sha256": "d1ea5954bb6b2b14e75e964e7b274759582b73d08a648571b1fac5d1eb289f34",
+      "archive": "raw-history/integration.log",
+      "archive_sha256": "325b2d87fc78e29040159ec6d4be26334022a94d8e05e2d463047e096df36d40"
+    },
+    {
+      "path": "/private/tmp/fvid-player-short-track-clock-media.log",
+      "bytes": 71105,
+      "raw_sha256": "3a2257182377346b9788aae0357e36ea68a1ccbd9060dbd20a9b054cd8fbd29b",
+      "archive": "raw-history/media.log",
+      "archive_sha256": "2d43be315dffeda1f981d3ff0012c771f2d4f0997ae46f2e9ee2576b0c9b1aac"
+    },
+    {
+      "path": "/private/tmp/fvid-player-short-track-clock-player-check.log",
+      "bytes": 32684,
+      "raw_sha256": "84a17bad46008bae612834d71ff36c35861ba00f9f69de1367ba8c882889e526",
+      "archive": "raw-history/player-check.log",
+      "archive_sha256": "84a17bad46008bae612834d71ff36c35861ba00f9f69de1367ba8c882889e526"
+    },
+    {
+      "path": "/private/tmp/fvid-player-short-track-clock-player-units.log",
+      "bytes": 56894,
+      "raw_sha256": "8ae7ab018e0bad7059e2330c695425b0d665e3991a296b74fab09bb117fd6141",
+      "archive": "raw-history/player-units.log",
+      "archive_sha256": "c9a0a4e7efd2fc6f6844df7605f0bf63726e23573d8904ea4755f1748ef8a6e8"
+    },
+    {
+      "path": "/private/tmp/fvid-player-short-track-clock-qualification-driver.log",
+      "bytes": 145,
+      "raw_sha256": "7e002583d411a2fa740eab0604b15ef1db84699c18b50acd151c1169a24db548",
+      "archive": "raw-history/qualification-driver.log",
+      "archive_sha256": "7e002583d411a2fa740eab0604b15ef1db84699c18b50acd151c1169a24db548"
+    },
+    {
+      "path": "/private/tmp/fvid-player-short-track-clock-root-mp4.log",
+      "bytes": 33959,
+      "raw_sha256": "bd85532de23153a5dfd912c9f70ff18b8987e8251fddf1733cd2fc6eefd3256b",
+      "archive": "raw-history/root-mp4.log",
+      "archive_sha256": "ca66547df723a113cdc50cec0a571269ec5ef587f1b76954b2d55cb6a871a60f"
+    },
+    {
+      "path": "/private/tmp/fvid-player-short-track-clock-root-webm.log",
+      "bytes": 31813,
+      "raw_sha256": "be42b6e5bca9ecb3a82865470d37e9bec6e0e7bacec5f32ae1f19e882cc03c00",
+      "archive": "raw-history/root-webm.log",
+      "archive_sha256": "a60d047624d7dda8e63de99f70f72dd541798c34a2952f8642cf87be189072b8"
+    },
+    {
+      "path": "/private/tmp/fvid-player-short-track-clock-target-20261101",
+      "kind": "owned completed-run build target"
+    },
+    {
+      "path": "/private/tmp/fvid-player-short-track-clock-video-thread.log",
+      "bytes": 26223,
+      "raw_sha256": "4be8feac3debcb5d8c85bfbf7dc3877bd6f75fc32ae1ed2c2e478eeed9290e06",
+      "archive": "raw-history/video-thread.log",
+      "archive_sha256": "5c57e3edd70e076a746b7f40aecc8e8e1371cfac0dd44ee9f7a91142727a4302"
+    }
+  ],
+  "regression_fixtures_and_evidence_preserved": true,
+  "foreign_worktrees_branches_stashes_preserved": true,
+  "earliest_tmp_before_log": "qualified baseline;all final evidence archived"
+}

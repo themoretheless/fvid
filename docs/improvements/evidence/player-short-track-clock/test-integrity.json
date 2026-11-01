@@ -1,0 +1,16 @@
+{
+  "baseline_and_candidate_test_sha256": "6ffa2e8b6d008185adcc954f639a6a3ca75baad28d19da185ec94b9b8b888d1b",
+  "test_unchanged": true,
+  "existing_tests_modified": false,
+  "baseline": {
+    "passed": 4,
+    "failed": 5,
+    "exit_code": 101
+  },
+  "expansion": "test-expansion.json",
+  "focused_candidate": {
+    "passed": 9,
+    "failed": 0,
+    "exit_code": 0
+  }
+}

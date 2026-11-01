@@ -1,0 +1,11 @@
+# Already-ended replacement audio must not rewind video
+
+Accepted FVID-0473 after all nine gates and twenty final repetitions passed. A valid authored1.5s MP4 has five16x16 VP9 keyframes(300ms each),one1500ms and one600ms mono8kHz scalar PCM track. The switch is requested at750ms inside the actual600..900ms picture. The selected short source lands on its last599.875ms sample and should publish no past-end PCM. Independent YUV/F32 oracles and generator are checked in. No private media,codec parameter copying,FFmpeg,encoder or network. Generation is separate from ordinary tests.
+
+Real native video/audio workers and headless presentation drive the case. Tests observe the physical new-device anchor separately from the active video phase. The clock must remain monotonic through actual EOF,retain a paused picture,spend a775ms stop from the preserved phase,and allow backward450ms navigation with exact native PCM. A silent paused-picture variant checks handoff when the old frame had no audio owner. Healthy unexpired replacement,sound-only EOF and independent full-source controls distinguish acceptance from legitimate item completion.
+
+No physical audio,new native-window duration,hardware-codec or performance claim. The existing separate native viewport-close limitation remains at ../player-ab-clock/native-smoke/finding.json.
+
+The admitted final suite appends immediate return to the long track and awaits the actual old-device resume when preparing its playing state(test-expansion.json). Final baseline/candidate test hashes must be identical. The candidate retains a private video/raw-source floor only during clock replacement,uses it for physical-to-silent handoff and successive selections,and releases it on real device catch-up,silent-picture ownership or explicit navigation. It never infers successful EOF solely from a duration estimate or fabricates PCM.
+
+Final identical nine-case baseline:4pass5fail,candidate:9pass0fail. Twenty repetitions pass180case executions. All9gates pass1632physical-source-distinct checks and both builds;five old ignores unchanged. The initial eight-case baseline and final expansion are preserved separately. Variant controls and additional synchronization add0IDs;no existing assertion is removed or relaxed.

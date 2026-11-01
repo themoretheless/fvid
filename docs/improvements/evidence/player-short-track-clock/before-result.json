@@ -1,0 +1,6 @@
+{
+  "exit_code": 101,
+  "passed": 4,
+  "failed": 5,
+  "failure": "Actual ended-track anchor599.875ms rewinds live/paused/silent750ms picture;EOF loses stop phase;immediate long-track return flushes599.875ms instead750ms."
+}

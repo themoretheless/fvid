@@ -1,0 +1,299 @@
+run 1
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.76s
+
+run 2
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.78s
+
+run 3
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.72s
+
+run 4
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.70s
+
+run 5
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.74s
+
+run 6
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.72s
+
+run 7
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.75s
+
+run 8
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.73s
+
+run 9
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.74s
+
+run 10
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.71s
+
+run 11
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.71s
+
+run 12
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.74s
+
+run 13
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.75s
+
+run 14
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.75s
+
+run 15
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.73s
+
+run 16
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.74s
+
+run 17
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.75s
+
+run 18
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.71s
+
+run 19
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.71s
+
+run 20
+
+running 9 tests
+test player::short_track_clock_regressions::exact_mp4_unequal_tracks_video_pcm_seek_and_eof_controls ... ok
+test player::short_track_clock_regressions::already_ended_replacement_never_rewinds_live_video ... ok
+test player::short_track_clock_regressions::explicit_backward_seek_releases_any_replacement_clock_floor_control ... ok
+test player::short_track_clock_regressions::immediate_return_to_long_track_uses_the_preserved_source_phase ... ok
+test player::short_track_clock_regressions::paused_ended_replacement_keeps_phase_and_remaining_video_hold ... ok
+test player::short_track_clock_regressions::replacement_eof_keeps_stop_bound_and_allows_backward_recovery ... ok
+test player::short_track_clock_regressions::sound_only_already_ended_replacement_finishes_normally_control ... ok
+test player::short_track_clock_regressions::silent_paused_picture_keeps_its_phase_when_selected_audio_is_already_over ... ok
+test player::short_track_clock_regressions::unexpired_replacement_uses_real_audio_clock_and_exact_pcm_control ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 1206 filtered out; finished in 3.71s

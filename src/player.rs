@@ -1897,6 +1897,8 @@ struct Player {
     audio_ended: bool,
     /// Clock that paced the currently displayed picture.
     picture_audio_clock: bool,
+    /// Minimum published video phase and its raw source anchor during audio replacement.
+    audio_clock_floor: Option<(Duration, Duration)>,
     /// Media position retained while a silent picture is paused.
     paused_picture_time: Option<Duration>,
     /// Media phase held until missing picture input becomes presentable.
@@ -2129,6 +2131,7 @@ impl Default for Player {
             audio: None,
             audio_ended: false,
             picture_audio_clock: false,
+            audio_clock_floor: None,
             paused_picture_time: None,
             buffered_picture_time: None,
             terminal_clock: None,
@@ -2327,6 +2330,7 @@ impl Player {
         self.interval = None;
         self.picture_audio_clock = false;
         self.terminal_clock = None;
+        self.audio_clock_floor = None;
         self.buffered_picture_time = None;
         self.paused_picture_time = None;
         // Drop the old thread before starting the new one.
@@ -2426,6 +2430,7 @@ impl Player {
         self.interval = None;
         self.picture_audio_clock = false;
         self.terminal_clock = None;
+        self.audio_clock_floor = None;
         self.buffered_picture_time = None;
         self.paused_picture_time = None;
         self.dimensions = [0; 2];
@@ -2614,13 +2619,18 @@ impl Player {
         let at = self.seek_target
             .or_else(|| self.terminal_clock.map(source_phase))
             .or_else(|| self.audio.as_ref().filter(|_| !picture || !self.audio_ended)
-                .map(|audio| audio.transport_position()))
+                .map(|audio| {
+                    let at = audio.transport_position();
+                    self.audio_clock_floor.map_or(at, |(_, floor)| at.max(floor))
+                }))
             .or_else(|| self.presentation_clock().map(source_phase));
+        let clock_floor = if picture { self.presentation_clock().zip(at) } else { None };
         let playing = !self.paused && !self.ended && !self.buffering && !self.seek_preview;
         // Dropping the old handle stops its thread before the new one starts.
         self.audio = None;
         self.start_audio_stream_with_backend(stream, Some(nth), backend);
         self.audio_ended = false;
+        self.audio_clock_floor = clock_floor;
         if let (Some(at), Some(audio)) = (at, &mut self.audio) {
             audio.seek(at);
         }
@@ -3096,6 +3106,7 @@ impl Player {
         if self.playback.is_none() { return self.audio.as_ref().map(|audio| audio.transport_position()); }
         if let Some(audio) = &self.audio {
             let clock = delayed_clock(audio.position(), self.audio_delay_ms);
+            let clock = self.audio_clock_floor.map_or(clock, |(floor, _)| clock.max(floor));
             // Device completion must not rewind an audio-paced picture to a
             // wall deadline that A/V presentation deliberately did not use.
             let completed_picture = self.picture_audio_clock && self.interval
@@ -3155,6 +3166,7 @@ impl Player {
         let Some(stop) = self.stop_time else { return false; };
         if self.presentation_clock().is_some_and(|at| at >= stop) {
             self.terminal_clock = Some(stop);
+            self.audio_clock_floor = None;
             self.buffered_picture_time = None;
             self.stop_time = None;
             self.buffering = false;
@@ -3621,6 +3633,7 @@ impl Player {
                             self.interval = None;
                             self.picture_audio_clock = false;
                             self.terminal_clock = None;
+                            self.audio_clock_floor = None;
                             self.buffered_picture_time = None;
                             self.paused_picture_time = None;
                             self.deadline = Instant::now();
@@ -3788,6 +3801,7 @@ impl Player {
         self.seek_target = None;
         self.paused_picture_time = None;
         self.terminal_clock = None;
+        self.audio_clock_floor = None;
         self.buffered_picture_time = None;
         self.ended = false;
         self.paused = false;
@@ -3836,6 +3850,7 @@ impl Player {
         self.audio_ended = false;
         self.paused_picture_time = None;
         self.terminal_clock = None;
+        self.audio_clock_floor = None;
         self.buffered_picture_time = None;
         self.prioritize_swap(target);
         // The placeholder position stands in until the decoder hands over the
@@ -3930,6 +3945,7 @@ impl Player {
         }
         self.ended = false;
         self.terminal_clock = None;
+        self.audio_clock_floor = None;
         self.buffered_picture_time = None;
         if !forward {
             // No previous picture exists yet. Show the first picture and park
@@ -3994,6 +4010,14 @@ impl Player {
         if self.playback.is_none() && let Some(duration) = audio.duration() {
             self.duration = Some(duration);
         }
+        // A new source owns time once it actually reaches the requested raw
+        // anchor. An ended source can release the floor after a silent picture
+        // takes over; until then, its shorter endpoint cannot rewind the view.
+        if self.audio_clock_floor.is_some_and(|(_, at)| audio.position() >= at)
+            || (self.audio_ended && !self.picture_audio_clock)
+        {
+            self.audio_clock_floor = None;
+        }
         let generation = audio.generation();
         let mut ran_out = false;
         let mut failure = None;
@@ -4016,11 +4040,12 @@ impl Player {
         // Once sound drains, video must continue from that last device clock.
         // A/V presentation did not consume the silent startup deadline, so
         // carrying it into silent presentation would hold the next picture.
-        if (ran_out || failure.is_some()) && !self.paused && !self.seek_preview && self.picture_audio_clock {
+        if (ran_out || failure.is_some()) && !self.paused && !self.seek_preview && (self.picture_audio_clock || self.audio_clock_floor.is_some()) {
             if let Some(end) = self.interval
                 .and_then(|(_, end, scale)| Self::interval_time(end, scale))
             {
                 let clock = delayed_clock(audio.position(), self.audio_delay_ms);
+                let clock = self.audio_clock_floor.map_or(clock, |(floor, _)| clock.max(floor));
                 let now = Instant::now();
                 self.deadline = if end >= clock {
                     now.checked_add(paced_period(end - clock, self.rate_milli)).unwrap_or(now)
@@ -4034,6 +4059,7 @@ impl Player {
         // audio gate. Keep a healthy EOF handle: it can still seek and resume.
         if failure.is_some() {
             self.audio = None;
+            self.audio_clock_floor = None;
         }
         // For an item that is only sound the track running out is the item
         // running out, so the queue carries on as it does after a last frame.
@@ -13251,3 +13277,7 @@ mod track_preroll_regressions;
 #[cfg(test)]
 #[path = "player_track_source_lifetime_tests.rs"]
 mod track_source_lifetime_regressions;
+
+#[cfg(test)]
+#[path = "player_short_track_clock_tests.rs"]
+mod short_track_clock_regressions;

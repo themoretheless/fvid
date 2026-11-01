@@ -1,0 +1,6 @@
+{
+  "public_interfaces_changed": false,
+  "performance_claim": false,
+  "production_change": "Retain the published video floor and raw navigation anchor during replacement,release on actual clock catch-up or silent ownership,and clear on explicit navigation/source changes. Clamp real EOF/error handoff without bypassing decoding.",
+  "patch_sha256": "c96a0d54bac04d6ad49f6673ad686049d7993d6bc9f3991a2adea84aa7f97450"
+}

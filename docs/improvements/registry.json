@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 472,
-  "next_id": "FVID-0473",
+  "accepted_count": 473,
+  "next_id": "FVID-0474",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5325,6 +5325,17 @@
       "result": "Open the selected native reader while current source ownership is alive. Admission failure leaves the working handle intact. After successful admission,capture current transport phase,stop/join old output,and install the pinned reader. Metadata/worker installer body is byte-identical after private extraction. Eight unchanged tests verify moved-source forward/backward/paused playback,original-inode exact PCM despite namespace replacement,old-stream continuation on refusal,exclusive device order and native EOF. Twenty repeats pass160cases;all9gates pass1623physical-source-distinct checks and both builds with five old ignores unchanged. Source transaction does not claim rollback after later asynchronous decoder/device initialization failure. No performance,physical audio or new native-window duration claim.",
       "status": "accepted",
       "validation": "batch-472-validation.json"
+    },
+    {
+      "id": "FVID-0473",
+      "batch": 473,
+      "title": "Keep video time monotonic when a replacement audio track has already ended",
+      "source": "src/player.rs",
+      "regression": "src/player_short_track_clock_tests.rs",
+      "before": "Identical nine-case baseline passes exact unequal-track native video/PCM/EOF,unexpired replacement,explicit backward seek and sound-only completion controls,but five source-replacement transports fail. Physical599.875ms short-track endpoint rewinds750ms live/paused/silent video phase;stop timing is lost;immediate long-track return also requests599.875ms instead750ms.",
+      "result": "Retain the published picture phase and raw source anchor during audio-clock replacement. A shorter endpoint cannot take time backward;real EOF/error hands time to the retained phase. Real catch-up,silent-picture ownership and explicit navigation release the guard. Subsequent track selection preserves the raw intent. Nine unchanged tests verify no fabricated past-end PCM,exact native recovery PCM,paused and silent handoff,775ms stop,backward450ms recovery and natural1500ms video EOF. Twenty repeats pass180cases;all9gates pass1632physical-source-distinct checks and both builds with five old ignores unchanged. No metadata-only EOF shortcut,performance,physical audio or new native-window duration claim.",
+      "status": "accepted",
+      "validation": "batch-473-validation.json"
     }
   ]
 }
