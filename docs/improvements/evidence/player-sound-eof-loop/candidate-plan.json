@@ -1,0 +1,8 @@
+{
+  "production_change": "Retain healthy sound-only EOF while a reached stop or A-B rewind awaits tick_sound;leave device failure and unbounded EOF closure unchanged.",
+  "public_api_changed": false,
+  "performance_claim": false,
+  "patch_context_lines": 0,
+  "patch_sha256": "69fac486275fcf7897aa5df3a03b5c844eedf3b1b6e5a9537f2019df18360864",
+  "test_sha256": "8a47d1ac178c941a9b54fca81f52f10a9cc2e20ed78d7be83f18bd6c803942ff"
+}

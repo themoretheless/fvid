@@ -1,0 +1,6 @@
+{
+  "exit_code": 101,
+  "passed": 3,
+  "failed": 5,
+  "failure": "Queued healthy native EOF closes the A-B item,discards reached stop(terminalNone instead75ms),and ends paused pending-loop transport."
+}

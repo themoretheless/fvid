@@ -1,0 +1,24 @@
+diff --git a/src/player.rs b/src/player.rs
+index 5e0042c772..660991750c 100644
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -4008,2 +4008,12 @@ impl Player {
+-            self.stop_time = None;
+-            self.continue_queue();
++            // A healthy source can drain between UI callbacks, past B or a
++            // hard stop. Let tick_sound resolve those bounds in transport
++            // order; a paused item retains them until it resumes. Failed
++            // devices cannot answer the seek and must still close normally.
++            let pending_bound = failure.is_none() && self.presentation_clock().is_some_and(|at| {
++                self.stop_time.is_some_and(|stop| at >= stop)
++                    || loop_rewind(at, self.loop_a, self.loop_b).is_some()
++            });
++            if !pending_bound {
++                self.stop_time = None;
++                self.continue_queue();
++            }
+@@ -13190,0 +13201,4 @@ mod sound_stop_loop_regressions;
++
++#[cfg(test)]
++#[path = "player_sound_eof_loop_tests.rs"]
++mod sound_eof_loop_regressions;

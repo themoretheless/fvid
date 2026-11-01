@@ -4005,8 +4005,18 @@ impl Player {
         // For an item that is only sound the track running out is the item
         // running out, so the queue carries on as it does after a last frame.
         if (ran_out || failure.is_some()) && self.playback.is_none() && !self.ended {
-            self.stop_time = None;
-            self.continue_queue();
+            // A healthy source can drain between UI callbacks, past B or a
+            // hard stop. Let tick_sound resolve those bounds in transport
+            // order; a paused item retains them until it resumes. Failed
+            // devices cannot answer the seek and must still close normally.
+            let pending_bound = failure.is_none() && self.presentation_clock().is_some_and(|at| {
+                self.stop_time.is_some_and(|stop| at >= stop)
+                    || loop_rewind(at, self.loop_a, self.loop_b).is_some()
+            });
+            if !pending_bound {
+                self.stop_time = None;
+                self.continue_queue();
+            }
         }
     }
 
@@ -13188,3 +13198,7 @@ mod io_clock_regressions;
 #[cfg(test)]
 #[path = "player_sound_stop_loop_tests.rs"]
 mod sound_stop_loop_regressions;
+
+#[cfg(test)]
+#[path = "player_sound_eof_loop_tests.rs"]
+mod sound_eof_loop_regressions;

@@ -1,0 +1,17 @@
+{
+  "baseline_and_candidate_test_sha256": "8a47d1ac178c941a9b54fca81f52f10a9cc2e20ed78d7be83f18bd6c803942ff",
+  "test_unchanged": true,
+  "existing_tests_modified": false,
+  "baseline": {
+    "passed": 3,
+    "failed": 5,
+    "exit_code": 101
+  },
+  "initial_seven_case_evidence": "seven-case-before.log",
+  "expansion": "test-expansion.json",
+  "focused_candidate": {
+    "passed": 8,
+    "failed": 0,
+    "exit_code": 0
+  }
+}

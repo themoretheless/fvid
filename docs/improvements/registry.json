@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 467,
-  "next_id": "FVID-0468",
+  "accepted_count": 468,
+  "next_id": "FVID-0469",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5267,6 +5267,17 @@
       "result": "Check explicit stop before the sound-only loop and return once consumed. Actual producer pauses without a seek,terminal phase parks at the requested bound,and subsequent explicit navigation resumes to natural EOF. Five unchanged regressions pass20repetitions,100case executions. All9gates pass1581physical-source-distinct checks and both builds;five old ignores unchanged. No performance,physical audio or new native-window duration claim.",
       "status": "accepted",
       "validation": "batch-467-validation.json"
+    },
+    {
+      "id": "FVID-0468",
+      "batch": 468,
+      "title": "Resolve pending sound-only transport bounds before closing healthy native EOF",
+      "source": "src/player.rs",
+      "regression": "src/player_sound_eof_loop_tests.rs",
+      "before": "Identical eight-case baseline passes exact native video/PCM seek/EOF,unreachable-B and named device-error refusal controls,but five healthy EOF transports fail. Native EOF closes the loop at B or after B,clears reached75ms stop with or without loop,and ends a paused pending loop. The completion branch is byte-identical before0463/0467.",
+      "result": "Retain healthy EOF ownership when a reached stop or valid A-B rewind is pending. Existing tick_sound resolves stop before loop and defers while paused. Failed devices and unreachable B still complete normally. Eight unchanged regressions verify exact PCM suffix after native A seek and natural subsequent EOF;20repeats pass160case executions. All9gates pass1589physical-source-distinct checks and both builds;five old ignores unchanged. No performance,physical audio or new native-window duration claim.",
+      "status": "accepted",
+      "validation": "batch-468-validation.json"
     }
   ]
 }

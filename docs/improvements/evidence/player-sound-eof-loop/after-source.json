@@ -1,0 +1,5 @@
+{
+  "src/player.rs": "db3e33fca3932545199ccaebfcd48fedebb100318886bff5cd24eed729a7bbfb",
+  "src/player_sound_eof_loop_tests.rs": "8a47d1ac178c941a9b54fca81f52f10a9cc2e20ed78d7be83f18bd6c803942ff",
+  "scripts/generate_player_sound_eof_loop.py": "c05a3542b4bfedf23445a2b95ca2f35269e16f3727292a2964de068765f3ce79"
+}

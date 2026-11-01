@@ -1,0 +1,25 @@
+"""Accept only the unchanged fully qualified sound-only native EOF ownership fix."""
+from pathlib import Path
+import hashlib,json,sys
+q=Path(__file__).resolve().parent
+checks=json.loads((q/'qualification-results.json').read_text())
+assert len(checks)==9 and all(v['exit_code']==0 and v['failed']==0 for v in checks.values())
+for v in checks.values():assert hashlib.sha256((q/v['archive']).read_bytes()).hexdigest()==v['archived_sha256']
+for n,h in json.loads((q/'after-source.json').read_text()).items():assert hashlib.sha256(Path(n).read_bytes()).hexdigest()==h,n
+rep=json.loads((q/'repeat.json').read_text());assert len(rep['runs'])==20 and rep['total_case_executions']==160
+assert all(r['exit_code']==0 and r['passed']==8 for r in rep['runs'])
+d=json.loads((q/'deduplication.json').read_text());assert d['distinct_passed']==1589
+assert d['ignored_by_gate']==json.loads((q.parent/'player-sound-stop-loop/deduplication.json').read_text())['ignored_by_gate']
+sys.dont_write_bytecode=True;sys.path.insert(0,'scripts');from generate_player_sound_eof_loop import generate
+for n,b in generate().items():assert (Path('tests/fixtures/playback-errors/player-sound-eof-loop')/n).read_bytes()==b
+before=json.loads((q/'before-source.json').read_text());after=json.loads((q/'after-source.json').read_text())
+t='src/player_sound_eof_loop_tests.rs';assert before[t]==after[t]
+reg=Path('docs/improvements/registry.json');j=json.loads(reg.read_text());assert j['accepted_count']==467 and j['next_id']=='FVID-0468'
+j['entries'].append(dict(id='FVID-0468',batch=468,title='Resolve pending sound-only transport bounds before closing healthy native EOF',source='src/player.rs',regression=t,before='Identical eight-case baseline passes exact native video/PCM seek/EOF,unreachable-B and named device-error refusal controls,but five healthy EOF transports fail. Native EOF closes the loop at B or after B,clears reached75ms stop with or without loop,and ends a paused pending loop. The completion branch is byte-identical before0463/0467.',result='Retain healthy EOF ownership when a reached stop or valid A-B rewind is pending. Existing tick_sound resolves stop before loop and defers while paused. Failed devices and unreachable B still complete normally. Eight unchanged regressions verify exact PCM suffix after native A seek and natural subsequent EOF;20repeats pass160case executions. All9gates pass1589physical-source-distinct checks and both builds;five old ignores unchanged. No performance,physical audio or new native-window duration claim.',status='accepted',validation='batch-468-validation.json'))
+j['accepted_count']=468;j['next_id']='FVID-0469';reg.write_text(json.dumps(j,indent=2)+'\n')
+b=dict(status='accepted',accepted_ids=['FVID-0468'],count_delta=1,accepted_count=468,before_commit=(q/'base.txt').read_text().strip(),baseline=dict(passed=3,failed=5,evidence='evidence/player-sound-eof-loop/before.log'),focused_after=dict(passed=8,failed=0,evidence='evidence/player-sound-eof-loop/after-focused.log'),repetition=dict(runs=20,case_executions=160,failed=0,excluded_from_distinct_and_improvement_counts=True),checks=checks,physical_source_distinct_passed=1589,ignored_tests_unchanged=True,test_integrity='evidence/player-sound-eof-loop/test-integrity.json',evidence='evidence/player-sound-eof-loop/README.md',limitations=['Real native decoding/audio worker and headless egui controller with controlled output clock;no physical audio.','No new native-window duration qualification;pre-existing viewport-close-request limitation remains at evidence/player-ab-clock/native-smoke/finding.json.','No performance or hardware-codec claim.'])
+Path('docs/improvements/batch-468-validation.json').write_text(json.dumps(b,indent=2)+'\n')
+p=q/'README.md';s=p.read_text();s=s.replace('Unaccepted audit. Initial seven-case baseline is running; final acceptance will use an identical expanded eight-case baseline/candidate. No IDs counted yet.','Accepted FVID-0468 after the identical final eight-case baseline/candidate and all subsystem gates qualified. One independent healthy EOF ownership problem;endpoint variants and controls add0IDs.');s+='\nFinal baseline:3pass5fail;unchanged candidate:8pass0fail. Twenty repetitions pass160case executions. Nine gates pass1589physical-source-distinct checks and both builds;the same five old ignores remain. Initial seven-case3pass4fail and final expansion history are preserved separately(test-expansion.json);no existing assertion was removed or weakened. The old completion branch is byte-identical before0463(classification.json);no historical full-suite success is claimed.\n';p.write_text(s)
+i=json.loads((q/'test-integrity.json').read_text());i['focused_candidate']=dict(passed=8,failed=0,exit_code=0);(q/'test-integrity.json').write_text(json.dumps(i,indent=2)+'\n')
+(q/'progress.json').write_text(json.dumps(dict(status='qualified;pending delivery',accepted_count=468,next_id='FVID-0469',accepted_ids=['FVID-0468'],active_session=None),indent=2)+'\n')
+print('Accepted FVID-0468,468/1000;all gates,source and fixtures verified')

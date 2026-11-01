@@ -1,0 +1,19 @@
+{
+  "provenance": "Authored five16x16 VP9 keyframes and200ms mono8kHz scalar PCM with exact YUV/PCM oracles. A real audio worker drains its output;Pause/Play command acknowledgments fence actual EOF delivery without consuming its event. No private media,FFmpeg,encoder or network.",
+  "audio_ms": 200,
+  "a_ms": 25,
+  "b_ms": [
+    100,
+    200,
+    300
+  ],
+  "stop_ms": 75,
+  "sha256": {
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "movie.mp4": "c40d1df373b5e56c3780a3950d0f8e51bd989cdfeac30c6d4805e51fec381f8a",
+    "sound-short.wav": "8fc0be777d19d00fab9b509ac4d7dc102c66ee385a0ebf3de11cc38b1ac9b01e",
+    "sound-short.f32le": "11d1e18706d4b5a2321327f52a64a917ff2bb9b955fa7d32a53bb50dac90d78d"
+  }
+}

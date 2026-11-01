@@ -1,0 +1,6 @@
+        // For an item that is only sound the track running out is the item
+        // running out, so the queue carries on as it does after a last frame.
+        if (ran_out || failure.is_some()) && self.playback.is_none() && !self.ended {
+            self.stop_time = None;
+            self.continue_queue();
+        }

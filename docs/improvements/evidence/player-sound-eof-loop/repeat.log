@@ -1,0 +1,279 @@
+run 1
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.08s
+
+run 2
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.07s
+
+run 3
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.06s
+
+run 4
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.08s
+
+run 5
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.07s
+
+run 6
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.08s
+
+run 7
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.07s
+
+run 8
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.08s
+
+run 9
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.08s
+
+run 10
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.08s
+
+run 11
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.08s
+
+run 12
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.08s
+
+run 13
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.08s
+
+run 14
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.07s
+
+run 15
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.07s
+
+run 16
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.08s
+
+run 17
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.08s
+
+run 18
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.07s
+
+run 19
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.07s
+
+run 20
+
+running 8 tests
+test player::sound_eof_loop_regressions::eof_keeps_earlier_explicit_stop_ahead_of_loop_rewind ... ok
+test player::sound_eof_loop_regressions::delayed_eof_past_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::exact_authored_video_and_pcm_seek_native_eof_control ... ok
+test player::sound_eof_loop_regressions::failed_output_drain_is_refused_without_replaying_the_worker ... ok
+test player::sound_eof_loop_regressions::loop_b_beyond_native_end_does_not_fabricate_a_repeat ... ok
+test player::sound_eof_loop_regressions::native_eof_at_b_replays_exact_audio_from_a ... ok
+test player::sound_eof_loop_regressions::native_eof_preserves_a_reached_stop_without_any_loop ... ok
+test player::sound_eof_loop_regressions::paused_native_eof_defers_loop_until_actual_resume ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.07s

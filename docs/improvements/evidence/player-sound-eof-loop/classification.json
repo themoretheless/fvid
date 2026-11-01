@@ -1,0 +1,10 @@
+{
+  "proposed_id": "FVID-0468",
+  "count_delta": 1,
+  "root_cause": "Healthy sound-only EOF completes the item before pending transport bounds are resolved.",
+  "independent_of": "FVID-0467 changed tick_sound stop/loop order;this earlier poll_audio end-completion branch is byte-identical before0463.",
+  "baseline_commit": "d86efdf13b600d02b29f9d2fbc2e8b566931487e",
+  "older_commit": "9ca4c32089c216f82574c0895da3a0bdbbd76c57",
+  "identical_eof_branch_sha256": "ffa464163b3cf4d9bbbdafbe30fac414121f7f349530ff614564a6c5ee62e21b",
+  "variants_controls_and_fixture_expansion_count_delta": 0
+}
