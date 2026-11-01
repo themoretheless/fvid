@@ -1,9 +1,10 @@
 {
-  "status": "qualified;pending delivery",
+  "status": "delivered",
   "accepted_count": 473,
   "next_id": "FVID-0474",
   "accepted_ids": [
     "FVID-0473"
   ],
-  "active_session": null
+  "active_session": null,
+  "goal_complete": false
 }
