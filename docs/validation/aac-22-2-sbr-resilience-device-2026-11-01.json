@@ -1,0 +1,30 @@
+{
+  "probe_sha256": "5f9095ec76b45809bd48aa0fb1062bdc2294270c589825a038f495a7ff835ba9",
+  "scope": "Four short authored 24-channel programmes on actual macOS stereo output; full, two seeks, rewind. No subjective or physical 24-speaker qualification.",
+  "cases": [
+    {
+      "name": "n480-flags7-tns-x2-crc1",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=24 rate=48000 duration=0.080000\nphase=full generation=0 from=0.000000 position=0.080000 wall=0.167187 device_drain=complete\nphase=seek-quarter generation=1 from=0.020000 position=0.080000 wall=0.176033 device_drain=complete\nphase=seek-60-percent generation=2 from=0.048000 position=0.080000 wall=0.168193 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.080000 wall=0.169759 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "n512-flags7-tns-x2-crc1",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=24 rate=48000 duration=0.085333\nphase=full generation=0 from=0.000000 position=0.085333 wall=0.174275 device_drain=complete\nphase=seek-quarter generation=1 from=0.021333 position=0.085333 wall=0.174851 device_drain=complete\nphase=seek-60-percent generation=2 from=0.051200 position=0.085333 wall=0.177860 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.085333 wall=0.179677 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "n480-flags7-resilience-x1-crc0",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=24 rate=24000 duration=0.080000\nphase=full generation=0 from=0.000000 position=0.080000 wall=0.172479 device_drain=complete\nphase=seek-quarter generation=1 from=0.020000 position=0.080000 wall=0.169481 device_drain=complete\nphase=seek-60-percent generation=2 from=0.048000 position=0.080000 wall=0.171004 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.080000 wall=0.161132 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "n512-flags7-resilience-x1-crc0",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=24 rate=24000 duration=0.085333\nphase=full generation=0 from=0.000000 position=0.085333 wall=0.170919 device_drain=complete\nphase=seek-quarter generation=1 from=0.021333 position=0.085333 wall=0.162811 device_drain=complete\nphase=seek-60-percent generation=2 from=0.051200 position=0.085333 wall=0.167376 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.085333 wall=0.162455 device_drain=complete\n",
+      "stderr": ""
+    }
+  ]
+}

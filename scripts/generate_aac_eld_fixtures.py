@@ -140,7 +140,8 @@ def generate(include_payload_bits=False, specs=None, include_category_bits=False
                     direction=signs[c]
                     if direction is not None:
                         spectrum=spectra[-width+c];prior=0.
-                        for k in (range(7,-1,-1)if direction else range(8)):
+                        limit=offsets[band_count]
+                        for k in (range(limit-1,-1,-1)if direction else range(limit)):
                             v=spectrum.get(k,0.)-math.sin(math.pi/7)*prior;spectrum[k]=f32(v);prior=v
                 ch+=width
             payload=packed(bits);packets.append(payload);rows.append(dict(offset=len(blob),bytes=len(payload)));blob.extend(payload)
