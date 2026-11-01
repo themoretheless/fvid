@@ -1,0 +1,26 @@
+struct FlushCapture {
+    inner: transitions::Capture,
+    anchors: std::sync::Arc<std::sync::Mutex<Vec<Duration>>>,
+}
+impl fvid::audio::AudioBackend for FlushCapture {
+    fn start(&mut self,s:fvid::audio::AudioSpec)->Result<(),fvid::audio::AudioError>{self.inner.start(s)}
+    fn push(&mut self,p:fvid::audio::AudioPacket)->Result<(),fvid::audio::AudioError>{self.inner.push(p)}
+    fn position(&self)->Duration{self.inner.position()}
+    fn flush(&mut self,at:Duration)->Result<(),fvid::audio::AudioError>{self.anchors.lock().unwrap().push(at);self.inner.flush(at)}
+    fn begin_drain(&mut self)->Result<(),fvid::audio::AudioError>{self.inner.begin_drain()}
+    fn drain_status(&self)->Result<bool,fvid::audio::AudioError>{self.inner.drain_status()}
+    fn end_drain(&mut self)->Result<(),fvid::audio::AudioError>{self.inner.end_drain()}
+    fn pause(&mut self)->Result<(),fvid::audio::AudioError>{self.inner.pause()}
+    fn resume(&mut self)->Result<(),fvid::audio::AudioError>{self.inner.resume()}
+    fn stop(&mut self)->Result<(),fvid::audio::AudioError>{self.inner.stop()}
+    fn reconfigure(&mut self,s:fvid::audio::AudioSpec,r:Option<fvid_media::owned_stereo_router::StereoRouter>,at:Duration,p:bool)->Result<(),fvid::audio::AudioError>{self.inner.reconfigure(s,r,at,p)}
+}
+#[test]
+fn actual_worker_flushes_at_the_native_silence_sample_or_exact_eof(){
+    use fvid::audio_thread::AudioPlayback;use std::sync::{Arc,Mutex};use transitions::{Capture,Trace,ended};
+    let oracle=expected();let mut failures=Vec::new();
+    for c in cases(){let name=c["file"].as_str().unwrap();let trace=Arc::new(Mutex::new(Trace::default()));let anchors=Arc::new(Mutex::new(Vec::new()));let shared=trace.clone();let times=anchors.clone();let mut worker=AudioPlayback::start(Box::new(open(name)),move||Box::new(FlushCapture{inner:Capture::new(shared),anchors:times}));worker.play();ended(&worker,0);
+        let full:Vec<_>=trace.lock().unwrap().packets.iter().flat_map(|p|p.3.iter().copied()).collect();compare(&full,&oracle);
+        for target in [Duration::from_millis(1),Duration::from_nanos(1000001),Duration::from_nanos(1500001),Duration::from_nanos(1999999),Duration::from_millis(2),Duration::MAX]{anchors.lock().unwrap().clear();worker.seek(target);ended(&worker,worker.generation());let first=(target.as_nanos()*48000).div_ceil(1_000_000_000).min(96)as usize;let at=Duration::from_nanos(first as u64*1_000_000_000/48000);let got=anchors.lock().unwrap().clone();if got!=vec![at]{failures.push(format!("{name}:{target:?}:flush{got:?},expected{at:?}"));}let guard=trace.lock().unwrap();let pcm:Vec<_>=guard.packets.iter().flat_map(|p|p.3.iter().copied()).collect();compare(&pcm,&oracle[first*4..]);if let Some(p)=guard.packets.first(){assert_eq!(p.2,at);}else if worker.position()!=Duration::from_millis(2){failures.push(format!("{name}:{target:?}:EOF position{:?}",worker.position()));}}
+    }assert!(failures.is_empty(),"{failures:?}");
+}

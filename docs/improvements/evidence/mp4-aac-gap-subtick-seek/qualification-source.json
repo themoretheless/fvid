@@ -1,0 +1,9 @@
+{
+  "production_sha256": "80a27b6ddc108a792483a0313caec843c475b922b8e9e07277da06acab5494d4",
+  "test_sha256": {
+    "tests/mp4_aac_subtick_seek.rs": "198aafe9fe9332b3abd7073905f326e1cb9d5050c617a291a49835805d8af6f1",
+    "tests/mp4_audio_eof_seek_clock.rs": "8aaccfb74aa7464415cce3f28c3e316e47a5d0afb37d166f3250c055f40389b0",
+    "tests/mp4_aac_split_subtick_seek.rs": "24246ba63a83a51c6dde8984507905e224ea4e76a1448f8bf403bf9564365d49",
+    "tests/mp4_aac_gap_subtick_seek.rs": "ab3e1d503504a07329cbcfe01c11ae456516f2a6c527482a4d3c2bf9328c6109"
+  }
+}

@@ -455,7 +455,17 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             // snap forward to the first coded sample on the recovered clock.
             if let Some((begin,end))=self.source_gap_at(segment,position)?
                 && position.cmp(begin)!=std::cmp::Ordering::Less
-                && position.cmp(end)==std::cmp::Ordering::Less {return Ok(position);}
+                && position.cmp(end)==std::cmp::Ordering::Less {
+                if self.clock.is_some() {return Ok(position);}
+                // Exact AAC edit seeks must anchor on the same native silence
+                // lattice as next_source_silence, including the clipped end.
+                let rate=self.negotiated_rate();
+                let offset=position.sub(begin)?.ceil_frames(rate)?;
+                let aligned=begin.add(EditTime::new(offset,u128::from(rate))?)?;
+                let stop=if end.cmp(segment.end)==std::cmp::Ordering::Greater {segment.end}else{end};
+                if aligned.cmp(stop)!=std::cmp::Ordering::Less {position=stop;continue;}
+                return Ok(aligned);
+            }
             if let Some(media)=segment.media {
                 let wanted=media.add(position.sub(segment.start)?)?;
                 let landed=if self.clock.is_some() {self.clock_landing(wanted)?.1}

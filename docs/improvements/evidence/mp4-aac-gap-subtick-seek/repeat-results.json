@@ -1,0 +1,24 @@
+{
+  "command": [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "player",
+    "--test",
+    "mp4_aac_gap_subtick_seek",
+    "--test",
+    "mp4_aac_split_subtick_seek",
+    "--test",
+    "mp4_aac_subtick_seek",
+    "--test",
+    "mp4_audio_eof_seek_clock"
+  ],
+  "exit_codes": [
+    0,
+    0,
+    0
+  ]
+}

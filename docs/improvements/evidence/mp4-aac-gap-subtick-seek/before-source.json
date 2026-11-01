@@ -1,0 +1,8 @@
+{
+  "base_commit": "aa587246f72c4f89d628d6ab2ab9ecb031596599",
+  "sha256": {
+    "src/playback/audio/mp4_audio.rs": "43aa9fcd2bc6a9537613b0d6c9c66b781948b4a93b32b8228c221ead0242dc14",
+    "tests/mp4_aac_gap_subtick_seek.rs": "ae7eef36c1d956d4fadd5d132fc8bb0937453033afa99c67cf471de47c8fbce2",
+    "scripts/generate_mp4_aac_gap_subtick_seek.py": "f24c375ea65f50377cf5cc3f875e56e822972e40173eade61bde4a3d3b4380f9"
+  }
+}

@@ -5465,7 +5465,9 @@
       "status": "accepted",
       "validation": "batch-480-validation.json",
       "follow_up_validation": "batch-481-validation.json",
-      "follow_up_note": "Zero-count extension: identical-header AAC split edits now retain arbitrary Duration floors and native packet phase, including explicit initial silence. Four authored video controls and actual workers prove full PCM, exact suffixes/PTS, EOF and raw-navigation recovery. All seven qualification gates and three repeated ten-test runs pass; configuration-changing paths retain prior behavior."
+      "follow_up_note": "Zero-count extension: identical-header AAC split edits now retain arbitrary Duration floors and native packet phase, including explicit initial silence. Four authored video controls and actual workers prove full PCM, exact suffixes/PTS, EOF and raw-navigation recovery. All seven qualification gates and three repeated ten-test runs pass; configuration-changing paths retain prior behavior.",
+      "source_gap_follow_up_validation": "batch-482-validation.json",
+      "source_gap_follow_up_note": "Zero-count exact AAC source-gap anchor extension: derive the backend flush clock from the same native silence lattice as emitted PCM and clamp to the edited endpoint. Identical baseline passes independent nonzero PCM/gap/video controls but fails both direct and actual-worker clock regressions. Seven gates and three repeated thirteen-test runs pass; recovered-clock and raw-navigation behavior unchanged."
     }
   ]
 }

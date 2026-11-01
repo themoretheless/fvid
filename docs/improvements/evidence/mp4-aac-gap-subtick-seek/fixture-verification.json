@@ -1,0 +1,10 @@
+{
+  "exact_regeneration": true,
+  "files": 4,
+  "sha256": {
+    "reference.f32le": "f07d53bc0449246b5c609729704b20868e8c081258b744ab40c194a57fc00d3d",
+    "clock48000-coded-then-gap.mp4": "b5046e3037aa381fcaac061fd9e1f96a402acead80fbb4094bfd17d7b2ae189e",
+    "clock50-coded-then-gap.mp4": "96b3b5b8cd85095b660e58f07f69134db5106d207e14e59a6a67ee269b6ea11d",
+    "manifest.json": "1138976aaa6bfd02c206557f16e85341262c601285ba6860626efa68cfeb9a18"
+  }
+}

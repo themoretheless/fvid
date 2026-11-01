@@ -1,0 +1,8 @@
+{
+  "first_coded_frames": 48,
+  "nonzero_coded_samples": 48,
+  "coded_peak": 3.728297815541737e-05,
+  "literal_silence_frames": 48,
+  "pcm_compare_tolerance": 2e-06,
+  "coded_wave_cannot_be_replaced_by_silence": true
+}
