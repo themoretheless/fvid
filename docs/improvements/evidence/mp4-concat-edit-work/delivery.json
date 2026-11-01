@@ -1,0 +1,16 @@
+{
+  "source_commit": "26683eb76fd2f904932f3bb03456ce17208cbf31",
+  "verified_remote_refs": {
+    "refs/heads/codex/deliver-fvid-20261029": "26683eb76fd2f904932f3bb03456ce17208cbf31",
+    "refs/heads/main": "26683eb76fd2f904932f3bb03456ce17208cbf31"
+  },
+  "accepted_ids": [
+    "FVID-0479"
+  ],
+  "accepted_count": 479,
+  "next_id": "FVID-0480",
+  "goal_complete": false,
+  "worktree_clean_before_receipt": true,
+  "source_and_fixture_hashes_verified": true,
+  "owned_build_target_absent": true
+}
