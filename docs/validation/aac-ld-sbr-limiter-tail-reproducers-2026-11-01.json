@@ -1,0 +1,154 @@
+{
+  "complete": true,
+  "scope": "Own discarded-tail limiter videos;all decodes succeed;mode0 controls unchanged,modes1..3 fail frozen PCM before and pass after;no delay fitting or regenerated PCM",
+  "probes": {
+    "before": "5f050a5565b7165a840a6e25dd1ece6c6604b3a24c5c89b76676cee505dbe3fa",
+    "after": "0f6978a1e1d6238e4b610d0e4bd2e3a5ca225927baa1a72ab41bf8e5322a55c8"
+  },
+  "cases": [
+    {
+      "name": "n480-lim0",
+      "limiter_mode": 0,
+      "samples": 7680,
+      "input_sha256": "a264dad54c0cc0ef81ac26c450b985b48aba82888d7f193b239b53f3b0fdc7a6",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "69db012c9ecb47bbda1937503843fc8dce04aad1d3b6f8596185f7f4fde39e50",
+        "passed": true
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "69db012c9ecb47bbda1937503843fc8dce04aad1d3b6f8596185f7f4fde39e50",
+        "passed": true
+      }
+    },
+    {
+      "name": "n480-lim1",
+      "limiter_mode": 1,
+      "samples": 7680,
+      "input_sha256": "12bbfbe64ce3834b47e5a60023759c304a460f5068a0396d7833e13ebfd7b90b",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.014393882360309362,
+        "pcm_sha256": "f5deb7914b98105d347a1bbdcd938d3b19731e2946fce42f247f2c67367308a8",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "09df884f4d862613a251858c96408cc022594f0b7b9e97740ac656a0f8b6a05b",
+        "passed": true
+      }
+    },
+    {
+      "name": "n480-lim2",
+      "limiter_mode": 2,
+      "samples": 7680,
+      "input_sha256": "a2834de790ad3ad4b1bf0cae393d5f197fc6ab8239717956d58dab15bf596c74",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.01310822181403637,
+        "pcm_sha256": "7da646764c26aafc6e8b66f66b329ef0797d9919ab7d2ed557e6c089b28f912a",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "83303689529969450993657107c9978712d5a91ed7987074b2f1351c96cff8da",
+        "passed": true
+      }
+    },
+    {
+      "name": "n480-lim3",
+      "limiter_mode": 3,
+      "samples": 7680,
+      "input_sha256": "0c6c5cd9fe51e7d392eafddc88fbc40101033e441ca37e5550b3efb308ddb243",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.006669193506240845,
+        "pcm_sha256": "8dfaece6ec259bf481588708a7f046bad8f97a7ca8a92443c63fa53f1c3a850a",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "4d105250f7679de8a317d6aaf31d153408548cc5595aeaaad9023c75029fbec5",
+        "passed": true
+      }
+    },
+    {
+      "name": "n512-lim0",
+      "limiter_mode": 0,
+      "samples": 8192,
+      "input_sha256": "8dc893a93e3c3d040ec390d7a22aa7579b6a40f92b9c9638d5d44eb6d94288bb",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "adeb7ad5134ad2413bf403c74b7470172dc7f0c8305a2856d01509db25fa7dec",
+        "passed": true
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "adeb7ad5134ad2413bf403c74b7470172dc7f0c8305a2856d01509db25fa7dec",
+        "passed": true
+      }
+    },
+    {
+      "name": "n512-lim1",
+      "limiter_mode": 1,
+      "samples": 8192,
+      "input_sha256": "e810ecb1841575f0c1e393eb6e4069aac6c0c6ae8ee844215f265919efb8d570",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.012948630843311548,
+        "pcm_sha256": "e11ddb7d40b502ab88a14b2847202571c477702eee187701fb97abd482d65b0e",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "be2aa68df221b66682d335a964ee7257a1c3c7c3ee04a026af1f6f55c8a61f48",
+        "passed": true
+      }
+    },
+    {
+      "name": "n512-lim2",
+      "limiter_mode": 2,
+      "samples": 8192,
+      "input_sha256": "1badcd620c08062296344cbc34c27ffc9be9c3cdf67fb216ab033011ccde67b9",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.012674598023295403,
+        "pcm_sha256": "935a4a11fc8aa03b438a2088c50db0852a06b5bf033644f1b499cce4887f4832",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "897ea0152c56c57b1bc5a78422bdd219508bfdc439ac9815140a7e3d0b7b6ccd",
+        "passed": true
+      }
+    },
+    {
+      "name": "n512-lim3",
+      "limiter_mode": 3,
+      "samples": 8192,
+      "input_sha256": "7319618f87195b2039c3fde4e1b7ce240e07fab9360c46afcac6af60ce34dbb1",
+      "before": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.006769164465367794,
+        "pcm_sha256": "df99f17082406b926df439b2c6a3eaf1e9064d5ea3b94266b896a657dcef5756",
+        "passed": false
+      },
+      "after": {
+        "decoder_exit": 0,
+        "max_abs_error": 0.0,
+        "pcm_sha256": "7c2d53b05ee0b20053835b62b98d89c61652cbb8691fdb3e29d2f94a644f7413",
+        "passed": true
+      }
+    }
+  ]
+}

@@ -3,7 +3,7 @@ use super::{Result, aac_sbr_hf::Patch, invalid};
 /// Merge low-resolution borders and internal patch borders, then remove close
 /// non-patch borders. Patch borders win when only one of a close pair is a
 /// patch boundary; two distinct patch boundaries are both retained.
-/// Internal patch ends are candidates; all patch ends are protected. The SBR
+/// Internal patch ends are candidates and protected. The SBR
 /// range endpoints are also protected: Cor.1 gain equations define k(m) for
 /// every 0<=m<M, requiring a covering partition even after a short final HF
 /// patch was discarded. This resolves Figure 4.40's endpoint-removal ambiguity
@@ -55,7 +55,13 @@ pub fn borders(low: &[u8], patches: &[Patch], mode: u8) -> Result<Vec<u8>> {
             continue;
         }
         let protected = |border| {
-            border == low[0] || border == *low.last().unwrap() || patch_borders.contains(&border)
+            // A discarded tail does not create another transposition patch.
+            // The final retained patch end is therefore not an internal
+            // boundary, even when it coincides with a low-resolution border.
+            // The outer limiter boundary remains the complete SBR range end.
+            border == low[0]
+                || border == *low.last().unwrap()
+                || patch_borders[..patch_borders.len() - 1].contains(&border)
         };
         if current == previous || !protected(current) {
             candidates.remove(i);
@@ -73,6 +79,23 @@ pub fn borders(low: &[u8], patches: &[Patch], mode: u8) -> Result<Vec<u8>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn discarded_tail_end_is_not_an_internal_boundary_when_also_a_low_border() {
+        let low = [10, 12, 14, 16, 18, 20];
+        let patches = [Patch {
+            source: 2,
+            target: 10,
+            bands: 8,
+        }];
+        for (mode, expected) in [
+            (0, vec![10, 20]),
+            (1, vec![10, 14, 20]),
+            (2, vec![10, 12, 16, 20]),
+            (3, vec![10, 12, 14, 16, 20]),
+        ] {
+            assert_eq!(borders(&low, &patches, mode).unwrap(), expected);
+        }
+    }
     #[test]
     fn independent_high_precision_geometry_oracles_cover_all_modes_and_patch_priority() {
         let data = include_bytes!(

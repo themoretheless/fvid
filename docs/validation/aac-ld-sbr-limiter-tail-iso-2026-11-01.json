@@ -1,0 +1,1508 @@
+{
+  "complete": true,
+  "conformance_verdict": null,
+  "scope": "All26 original ISO LD-SBR PCM24 WAVs;complete streams,zero lag;before/after limiter cached PCM verified against pinned audit hashes;no accuracy threshold or fitting",
+  "source": "https://standards.iso.org/iso-iec/14496/-26/ed-2/en/referencesWav.zip",
+  "inventory_sha256": "865521883bbc19db177c71c00fcb57bd3619a8ae73a05a21532c3fc22cc13e92",
+  "before_probe_sha256": "5f050a5565b7165a840a6e25dd1ece6c6604b3a24c5c89b76676cee505dbe3fa",
+  "after_probe_sha256": "0f6978a1e1d6238e4b610d0e4bd2e3a5ca225927baa1a72ab41bf8e5322a55c8",
+  "comparison_script_sha256": "2558610333d2b987ee1e16e3205ad818da28bd74d8cd84683a9c529f594cb01c",
+  "cases": [
+    {
+      "name": "er_eld_sbr_e_1_32.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_e_1_32.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_e_1_32.wav",
+        "bytes": 1849498,
+        "iso_md5": "20223e82a4074f85d2dcdcc26f760988",
+        "sha256": "3581c720c3340457d29c14b49cf1afacaeb3d044fa895064525258c4ab396b8e"
+      },
+      "input_sha256": "5a08d12a43855894a06ee1bd15104c621f329a2322fb464df1af5bbf78f345df",
+      "records_sha256": "032d335cfcaa18e643d7831242a8c81b8d18628fcf02af3c8847b53e743f02ac",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "3581c720c3340457d29c14b49cf1afacaeb3d044fa895064525258c4ab396b8e",
+          "actual_sha256": "a9c7cc3897aba1692a762d53215ecfc50009eccc92d01820fd93cd0554410a83",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 616448,
+          "compared_frames": 616448,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.7424724494166167e-07,
+              "max_abs_error": 4.015862941741943e-06,
+              "snr_db": 114.90356434419138
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "3581c720c3340457d29c14b49cf1afacaeb3d044fa895064525258c4ab396b8e",
+          "actual_sha256": "a9c7cc3897aba1692a762d53215ecfc50009eccc92d01820fd93cd0554410a83",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 616448,
+          "compared_frames": 616448,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.7424724494166167e-07,
+              "max_abs_error": 4.015862941741943e-06,
+              "snr_db": 114.90356434419138
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_e_1_44.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_e_1_44.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_e_1_44.wav",
+        "bytes": 1235098,
+        "iso_md5": "d11ab6c7feb8dca182363a2e8965ae46",
+        "sha256": "8b1a4e1efc5fd830a021e476f55fa20fe3251e971a30248c7a20595fe3541cb5"
+      },
+      "input_sha256": "82db49e9853abf4e0881f9f4170c55c673d041c617cf29200e6a08986b76d6bc",
+      "records_sha256": "da68aacb4f0eefaa774de641b064ff81eb51ed020a0b4efd06fa8f1f53e79516",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "8b1a4e1efc5fd830a021e476f55fa20fe3251e971a30248c7a20595fe3541cb5",
+          "actual_sha256": "5e95a42a8d8ed99f4508c8bb5a9189e35dbbdceed5fa3627a283afa9f431f2b4",
+          "rate": 44100,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 411648,
+          "compared_frames": 411648,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 2.0159868404994132e-07,
+              "max_abs_error": 3.904104232788086e-06,
+              "snr_db": 113.59640668297531
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "8b1a4e1efc5fd830a021e476f55fa20fe3251e971a30248c7a20595fe3541cb5",
+          "actual_sha256": "5e95a42a8d8ed99f4508c8bb5a9189e35dbbdceed5fa3627a283afa9f431f2b4",
+          "rate": 44100,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 411648,
+          "compared_frames": 411648,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 2.0159868404994132e-07,
+              "max_abs_error": 3.904104232788086e-06,
+              "snr_db": 113.59640668297531
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_e_1_48.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_e_1_48.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_e_1_48.wav",
+        "bytes": 1235098,
+        "iso_md5": "a7eae77543c7c153d6b5b93b88728a26",
+        "sha256": "b1ac2984a536bfd0ae47cbd2a9582cbd5f83f4b9f68d2e527977094bed756ced"
+      },
+      "input_sha256": "6229ca1181207202bca9a192edc956f184d7f6fff0315313a66e4b4b7c963776",
+      "records_sha256": "3d609424a269e1a29832b26029ccb88f6a190985763957325ff12457063b7033",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "b1ac2984a536bfd0ae47cbd2a9582cbd5f83f4b9f68d2e527977094bed756ced",
+          "actual_sha256": "60b0c01656d963dc612c69ee6f50a60df411b066ec7723857b7cda257258cbd1",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 411648,
+          "compared_frames": 411648,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.8334191739094474e-07,
+              "max_abs_error": 3.7476420402526855e-06,
+              "snr_db": 114.39355053171573
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "b1ac2984a536bfd0ae47cbd2a9582cbd5f83f4b9f68d2e527977094bed756ced",
+          "actual_sha256": "60b0c01656d963dc612c69ee6f50a60df411b066ec7723857b7cda257258cbd1",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 411648,
+          "compared_frames": 411648,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.8334191739094474e-07,
+              "max_abs_error": 3.7476420402526855e-06,
+              "snr_db": 114.39355053171573
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_e_2_32.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_e_2_32.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_e_2_32.wav",
+        "bytes": 3698842,
+        "iso_md5": "912765576a24cc9e2d85c296b11c49fa",
+        "sha256": "4d4f9ebffb1b8f5944bb0460b5f39000255e7224ddf11559369e4f9b384509d9"
+      },
+      "input_sha256": "c1233e0e2b01085d23c65ef7aea3953ab64e4c3bc2b4a9e1f86208f19131e70b",
+      "records_sha256": "9ffce77ea1093be2383c512bfecb037bffc46f9b148830980bc38dbca9e215d9",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "4d4f9ebffb1b8f5944bb0460b5f39000255e7224ddf11559369e4f9b384509d9",
+          "actual_sha256": "7e6d172c97745a85e4a3a0e46ce8cf461d4768708480696313333c9103a325d2",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 616448,
+          "compared_frames": 616448,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.3536520126131648e-07,
+              "max_abs_error": 2.4437904357910156e-06,
+              "snr_db": 117.19401432281332
+            },
+            {
+              "channel": 1,
+              "rmse": 1.1714707093808536e-07,
+              "max_abs_error": 1.7136335372924805e-06,
+              "snr_db": 118.35848914809063
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "4d4f9ebffb1b8f5944bb0460b5f39000255e7224ddf11559369e4f9b384509d9",
+          "actual_sha256": "7e6d172c97745a85e4a3a0e46ce8cf461d4768708480696313333c9103a325d2",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 616448,
+          "compared_frames": 616448,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.3536520126131648e-07,
+              "max_abs_error": 2.4437904357910156e-06,
+              "snr_db": 117.19401432281332
+            },
+            {
+              "channel": 1,
+              "rmse": 1.1714707093808536e-07,
+              "max_abs_error": 1.7136335372924805e-06,
+              "snr_db": 118.35848914809063
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_e_2_44.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_e_2_44.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_e_2_44.wav",
+        "bytes": 2470042,
+        "iso_md5": "6d1a523480d985896d8e4404ea7a09cf",
+        "sha256": "e87e7a0a8a22090b0196df56eb4ae4e4cadba53d1a975c664cf81815981d3898"
+      },
+      "input_sha256": "21c027c5e7276b709e1c52f01b3d7122b0a4bffbfc4aa031614ad8a1568178ae",
+      "records_sha256": "ac51b22600d60b290d1b0f19c82ca9c1c8cc63324e54b88baf43042f42f51aa1",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "e87e7a0a8a22090b0196df56eb4ae4e4cadba53d1a975c664cf81815981d3898",
+          "actual_sha256": "e672fb2f38c577f5ca7d0c1a7393d197a99fe4437b7e631706efc0572e861cc2",
+          "rate": 44100,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 411648,
+          "compared_frames": 411648,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.5459780717743025e-07,
+              "max_abs_error": 3.039836883544922e-06,
+              "snr_db": 115.92507993646569
+            },
+            {
+              "channel": 1,
+              "rmse": 1.3501166014102532e-07,
+              "max_abs_error": 2.294778823852539e-06,
+              "snr_db": 117.0147026960268
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "e87e7a0a8a22090b0196df56eb4ae4e4cadba53d1a975c664cf81815981d3898",
+          "actual_sha256": "e672fb2f38c577f5ca7d0c1a7393d197a99fe4437b7e631706efc0572e861cc2",
+          "rate": 44100,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 411648,
+          "compared_frames": 411648,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.5459780717743025e-07,
+              "max_abs_error": 3.039836883544922e-06,
+              "snr_db": 115.92507993646569
+            },
+            {
+              "channel": 1,
+              "rmse": 1.3501166014102532e-07,
+              "max_abs_error": 2.294778823852539e-06,
+              "snr_db": 117.0147026960268
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_e_2_48.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_e_2_48.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_e_2_48.wav",
+        "bytes": 2470042,
+        "iso_md5": "f07956515a99d973fc40c20d993d9176",
+        "sha256": "cc9d3584a175daf1a22457c7beae215a3fade2af90003ac09f751965a8a4b6b6"
+      },
+      "input_sha256": "f0d2c49226f95b4398d32b5aa9008178858c47b4c3508d6ddbebda8a78400aac",
+      "records_sha256": "c8ec52c733ff6f1bcda82554e265ac824769cf92870cc89ab7d30a5236f2fb62",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "cc9d3584a175daf1a22457c7beae215a3fade2af90003ac09f751965a8a4b6b6",
+          "actual_sha256": "1da0567ddd36103e934117d2eb43cf4efb57c9c1a9d6260519e2ffcbb20f15c4",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 411648,
+          "compared_frames": 411648,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.45117270781419e-07,
+              "max_abs_error": 2.2649765014648438e-06,
+              "snr_db": 116.50691207668594
+            },
+            {
+              "channel": 1,
+              "rmse": 1.29850165661639e-07,
+              "max_abs_error": 1.7285346984863281e-06,
+              "snr_db": 117.39240704304567
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "cc9d3584a175daf1a22457c7beae215a3fade2af90003ac09f751965a8a4b6b6",
+          "actual_sha256": "1da0567ddd36103e934117d2eb43cf4efb57c9c1a9d6260519e2ffcbb20f15c4",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 411648,
+          "compared_frames": 411648,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.45117270781419e-07,
+              "max_abs_error": 2.2649765014648438e-06,
+              "snr_db": 116.50691207668594
+            },
+            {
+              "channel": 1,
+              "rmse": 1.29850165661639e-07,
+              "max_abs_error": 1.7285346984863281e-06,
+              "snr_db": 117.39240704304567
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_gh_1_32.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_gh_1_32.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_gh_1_32.wav",
+        "bytes": 4614298,
+        "iso_md5": "e7620490aaf78b104d1523cbf5ce67ae",
+        "sha256": "bc99dbe256a738d45ced227889f1cd0c4ad2ef78393c457cb16440410a287869"
+      },
+      "input_sha256": "967f1e0bfe44531c250f7cc83454551e2106aadcca9b15e4d64600ca9c17ca23",
+      "records_sha256": "f0a2dd19bbab7c8d2c281aeb8261d5d19df870d2cc27604c4b668e8fc022916b",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "bc99dbe256a738d45ced227889f1cd0c4ad2ef78393c457cb16440410a287869",
+          "actual_sha256": "a98b107396cd20726454bcff06819e77e655f56e2059b170e646cfb132f834a5",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 1538048,
+          "compared_frames": 1538048,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 3.7518482859110025e-05,
+              "max_abs_error": 0.0027424246072769165,
+              "snr_db": 68.14112961512151
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "bc99dbe256a738d45ced227889f1cd0c4ad2ef78393c457cb16440410a287869",
+          "actual_sha256": "41bcc795bc9c6dd8a79de12f4e4749d72a800466f29f14238f64f566ee224fe4",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 1538048,
+          "compared_frames": 1538048,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.227020893520338e-07,
+              "max_abs_error": 1.4379620552062988e-06,
+              "snr_db": 117.84899582588233
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_gh_1_44.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_gh_1_44.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_gh_1_44.wav",
+        "bytes": 3078298,
+        "iso_md5": "07e909931dc15987cbd4886c9a316879",
+        "sha256": "313f9fc83437b048a9f7b974558989498cad8900492a0f7f9d2884a730f8571c"
+      },
+      "input_sha256": "9b9b8c1a8e1ded1f2db6c6b5efa8067cc5cc81382003b03a5a83d5f1c9374e8e",
+      "records_sha256": "0524de96adb3900f40f2cdd25ecad8a9d9a5562a151bc32d461f111ef9a796c5",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "313f9fc83437b048a9f7b974558989498cad8900492a0f7f9d2884a730f8571c",
+          "actual_sha256": "ec4233958b17114a2c6b981a1a1e1fd7776c4b5406c2eefa99cf438261272e93",
+          "rate": 44100,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 1026048,
+          "compared_frames": 1026048,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 3.233451591390179e-05,
+              "max_abs_error": 0.0023795776069164276,
+              "snr_db": 69.47892279329298
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "313f9fc83437b048a9f7b974558989498cad8900492a0f7f9d2884a730f8571c",
+          "actual_sha256": "1a1efdd9ff262e4018706797435449ca5e8aa05bf520b302709d66e3950f24f9",
+          "rate": 44100,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 1026048,
+          "compared_frames": 1026048,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.4596606201755662e-07,
+              "max_abs_error": 1.389533281326294e-06,
+              "snr_db": 116.3872122327108
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_gh_1_48.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_gh_1_48.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_gh_1_48.wav",
+        "bytes": 3078298,
+        "iso_md5": "ce4f4abb0573a3a8f1cf70c58727c6a7",
+        "sha256": "f31d0dff8fada5a9dab98b859329b0d7fe909345181e62a94245fc6241a9ba3c"
+      },
+      "input_sha256": "bcb019f4fe7522661c69b4ea5291a8c05dfeae54810f1074ff8a58bd2c027d64",
+      "records_sha256": "385d86b2f16177103db16a6598d69916e1581e50988896387ca9e6e75da36004",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "f31d0dff8fada5a9dab98b859329b0d7fe909345181e62a94245fc6241a9ba3c",
+          "actual_sha256": "6483cf7e67467bb27b62683939855589cf1e6f4e2e06ee3971c49a72b72dae62",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 1026048,
+          "compared_frames": 1026048,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 4.076138800034727e-05,
+              "max_abs_error": 0.002068985253572464,
+              "snr_db": 67.4652422545296
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "f31d0dff8fada5a9dab98b859329b0d7fe909345181e62a94245fc6241a9ba3c",
+          "actual_sha256": "7b925dffddcf00bdc1b7c93792f3501cde056743832aa8af318748c1c7bfcf0c",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 1026048,
+          "compared_frames": 1026048,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.4161963224485397e-07,
+              "max_abs_error": 1.300126314163208e-06,
+              "snr_db": 116.64775229110433
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_gh_2_32.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_gh_2_32.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_gh_2_32.wav",
+        "bytes": 9228442,
+        "iso_md5": "1e6495ef814026d2268a5f11effd27fa",
+        "sha256": "d0aed87f7e5ab39f7d4578631541040f32af3878e977862a95d193c674c59625"
+      },
+      "input_sha256": "30266adf890b21ff4b09bbe429344c9fff9410c0df9baae271d47781b52b10cd",
+      "records_sha256": "a6c6dcb8c441e5949ff00175ea465f9a0eba61feb67b9127d6bbe3ca52683af0",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "d0aed87f7e5ab39f7d4578631541040f32af3878e977862a95d193c674c59625",
+          "actual_sha256": "c0a68b92f05039e83976876ecc040912101b4f83523b8c64d8f536ed00a4da31",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 1538048,
+          "compared_frames": 1538048,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 3.6937204388261045e-05,
+              "max_abs_error": 0.0023593008518218994,
+              "snr_db": 68.41128596429455
+            },
+            {
+              "channel": 1,
+              "rmse": 3.6937204388261045e-05,
+              "max_abs_error": 0.0023593008518218994,
+              "snr_db": 68.41128596429455
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "d0aed87f7e5ab39f7d4578631541040f32af3878e977862a95d193c674c59625",
+          "actual_sha256": "cac98247ab08c6b41a62adf93ca205c82dfc1d524a106a8118611f5ff0c38a67",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 1538048,
+          "compared_frames": 1538048,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.244254618019164e-07,
+              "max_abs_error": 1.4398247003555298e-06,
+              "snr_db": 117.86238118929228
+            },
+            {
+              "channel": 1,
+              "rmse": 1.244254618019164e-07,
+              "max_abs_error": 1.4398247003555298e-06,
+              "snr_db": 117.86238118929228
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_gh_2_44.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_gh_2_44.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_gh_2_44.wav",
+        "bytes": 6156442,
+        "iso_md5": "7495d06397973817a10beccec08816ca",
+        "sha256": "1f9476e7514329264c54f97365f6d8b7a789cca3055bfa1a319af0e519275bae"
+      },
+      "input_sha256": "c771a9f60638ab1a2688336cb022f5d708c09c34f11482aad75d4a5e02686058",
+      "records_sha256": "e3b8f672929379d3e187adb29694d46d085b0f601daf02ac42544248950ef2aa",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "1f9476e7514329264c54f97365f6d8b7a789cca3055bfa1a319af0e519275bae",
+          "actual_sha256": "666d8883726ae1fb66fa9dd45f9a44c7f4b47c910dee54d232ce5cdcfecd3984",
+          "rate": 44100,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 1026048,
+          "compared_frames": 1026048,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 3.145803980507412e-05,
+              "max_abs_error": 0.002301011234521866,
+              "snr_db": 69.71843670216633
+            },
+            {
+              "channel": 1,
+              "rmse": 3.145803980507412e-05,
+              "max_abs_error": 0.002301011234521866,
+              "snr_db": 69.71843670216633
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "1f9476e7514329264c54f97365f6d8b7a789cca3055bfa1a319af0e519275bae",
+          "actual_sha256": "fafdcdfe213e5977755103a46062f9d487a99b5dcba46222ec4a2b87c2fedb82",
+          "rate": 44100,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 1026048,
+          "compared_frames": 1026048,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.4475994338197413e-07,
+              "max_abs_error": 1.4118850231170654e-06,
+              "snr_db": 116.4601017631849
+            },
+            {
+              "channel": 1,
+              "rmse": 1.4475994338197413e-07,
+              "max_abs_error": 1.4118850231170654e-06,
+              "snr_db": 116.4601017631849
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_gh_2_48.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_gh_2_48.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_gh_2_48.wav",
+        "bytes": 6156442,
+        "iso_md5": "a39a11b91e45734b06992fc0429f8d62",
+        "sha256": "605d772fd070a7a37a3289a78ff4055ab68b30a9e06bbf4297c9e3fe3918be12"
+      },
+      "input_sha256": "8c3f8b12b84a0ef98d34d92a5a1d94d773056a660551fa91a5040426136f279b",
+      "records_sha256": "a6ed3ccf7a7f5d7e8629fe9868d42ecc0006c38aacb1ad193e390bc95857fd52",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "605d772fd070a7a37a3289a78ff4055ab68b30a9e06bbf4297c9e3fe3918be12",
+          "actual_sha256": "3a87dcc886d6c5ebc741517aae06dbef1cd3c8e509787449edcb1b302eca3964",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 1026048,
+          "compared_frames": 1026048,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 4.054634058670752e-05,
+              "max_abs_error": 0.002034515142440796,
+              "snr_db": 67.55512076518866
+            },
+            {
+              "channel": 1,
+              "rmse": 4.054634058670752e-05,
+              "max_abs_error": 0.002034515142440796,
+              "snr_db": 67.55512076518866
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "605d772fd070a7a37a3289a78ff4055ab68b30a9e06bbf4297c9e3fe3918be12",
+          "actual_sha256": "c36f4820ecb936367eaf8f0a5778370e6762d71a31e8f0b66e0fb9f92291b06e",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 1026048,
+          "compared_frames": 1026048,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.4257563841471342e-07,
+              "max_abs_error": 1.3113021850585938e-06,
+              "snr_db": 116.63324754897857
+            },
+            {
+              "channel": 1,
+              "rmse": 1.4257563841471342e-07,
+              "max_abs_error": 1.3113021850585938e-06,
+              "snr_db": 116.63324754897857
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_i_1_32.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_i_1_32.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_i_1_32.wav",
+        "bytes": 1849498,
+        "iso_md5": "342874c5ccf29dcbff59a44dea8a8529",
+        "sha256": "3a964c0693623080022f7c9d84e09ac24fc0f8fab553329ff566b46d1267cac4"
+      },
+      "input_sha256": "b6a0d9c65fa4a8d1fb91f765a20c703073a233f06047dde9c8abcaca0ab93e47",
+      "records_sha256": "5c4b6048217765d9f4aab86ca1daabf337f9a8d607a481de35c051867204f563",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "3a964c0693623080022f7c9d84e09ac24fc0f8fab553329ff566b46d1267cac4",
+          "actual_sha256": "b5ab121e5fbb783c9e09693bfa4ba9f94b0dc9e902c0b4a86cd8e43e98eb9f58",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 616448,
+          "compared_frames": 616448,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.3912115342327858e-07,
+              "max_abs_error": 1.0523945093154907e-06,
+              "snr_db": 116.79318367191554
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "3a964c0693623080022f7c9d84e09ac24fc0f8fab553329ff566b46d1267cac4",
+          "actual_sha256": "b5ab121e5fbb783c9e09693bfa4ba9f94b0dc9e902c0b4a86cd8e43e98eb9f58",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 616448,
+          "compared_frames": 616448,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.3912115342327858e-07,
+              "max_abs_error": 1.0523945093154907e-06,
+              "snr_db": 116.79318367191554
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_i_1_44.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_i_1_44.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_i_1_44.wav",
+        "bytes": 1235098,
+        "iso_md5": "25a182b87c6858eeea750902e8ea9037",
+        "sha256": "712442815cea8d2a25ba1858f14e48e2626ac1d6b31a6b4283076ec3402d7a40"
+      },
+      "input_sha256": "1589fc6b53f78d14cfb287a0c129ba3d4972e932e185bd38a35be1e73e875fed",
+      "records_sha256": "761e0e5c8639dc5cbe206a46f34b1ef7733c8bf2ac48241a5d89080f1a746406",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "712442815cea8d2a25ba1858f14e48e2626ac1d6b31a6b4283076ec3402d7a40",
+          "actual_sha256": "d891f6aba6dfc81ee5e16580c6a8f743ae245379363e83a0009ae747d2fd2daf",
+          "rate": 44100,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 411648,
+          "compared_frames": 411648,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.7202499991096102e-07,
+              "max_abs_error": 1.3485550880432129e-06,
+              "snr_db": 114.97981784244921
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "712442815cea8d2a25ba1858f14e48e2626ac1d6b31a6b4283076ec3402d7a40",
+          "actual_sha256": "d891f6aba6dfc81ee5e16580c6a8f743ae245379363e83a0009ae747d2fd2daf",
+          "rate": 44100,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 411648,
+          "compared_frames": 411648,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.7202499991096102e-07,
+              "max_abs_error": 1.3485550880432129e-06,
+              "snr_db": 114.97981784244921
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_i_1_48.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_i_1_48.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_i_1_48.wav",
+        "bytes": 1235098,
+        "iso_md5": "3b774f7c030664c5290f2643815c3988",
+        "sha256": "e3977009930746fb3c2b02ee51e53f995137efdd6882da0ee976b729b6c44fe1"
+      },
+      "input_sha256": "dbb4ea8b4826e31254c927914ddfeb2460ca762334cc7314591f42548842f05f",
+      "records_sha256": "a47702c61e44ff4ba553ba47070fcdf3ff1be8d2e30b0f23cbb8a7306a0f8f62",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "e3977009930746fb3c2b02ee51e53f995137efdd6882da0ee976b729b6c44fe1",
+          "actual_sha256": "3af491d35a5092a639a10fa99baec4a4e6396bd7d21bf0414428bdac936b03a0",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 411648,
+          "compared_frames": 411648,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.6703886633805742e-07,
+              "max_abs_error": 1.3355165719985962e-06,
+              "snr_db": 115.23059693278717
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "e3977009930746fb3c2b02ee51e53f995137efdd6882da0ee976b729b6c44fe1",
+          "actual_sha256": "3af491d35a5092a639a10fa99baec4a4e6396bd7d21bf0414428bdac936b03a0",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 411648,
+          "compared_frames": 411648,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.6703886633805742e-07,
+              "max_abs_error": 1.3355165719985962e-06,
+              "snr_db": 115.23059693278717
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_i_2_32.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_i_2_32.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_i_2_32.wav",
+        "bytes": 3698842,
+        "iso_md5": "35a4927b80a78cd2ffc0c9b759555ffd",
+        "sha256": "348548de0c758cd7686c6aab5b9503514191a11f848a4b69ca6f71830c3b5dae"
+      },
+      "input_sha256": "0a31c899240190ce7241c69f5b23d765d207a3e7ab1efa15b9cda24ce252c523",
+      "records_sha256": "361c8bea6a776ce61dc38bce55454d8d61443093750120bd985bb45a85eef7a9",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "348548de0c758cd7686c6aab5b9503514191a11f848a4b69ca6f71830c3b5dae",
+          "actual_sha256": "bdec542d10a12268b731a30665eebb62e8c34964545f7dbde96524681e1020f9",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 616448,
+          "compared_frames": 616448,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.1644195441174539e-07,
+              "max_abs_error": 9.57399606704712e-07,
+              "snr_db": 118.35368519688686
+            },
+            {
+              "channel": 1,
+              "rmse": 1.1644195441174539e-07,
+              "max_abs_error": 9.57399606704712e-07,
+              "snr_db": 118.35368519688686
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "348548de0c758cd7686c6aab5b9503514191a11f848a4b69ca6f71830c3b5dae",
+          "actual_sha256": "bdec542d10a12268b731a30665eebb62e8c34964545f7dbde96524681e1020f9",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 616448,
+          "compared_frames": 616448,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.1644195441174539e-07,
+              "max_abs_error": 9.57399606704712e-07,
+              "snr_db": 118.35368519688686
+            },
+            {
+              "channel": 1,
+              "rmse": 1.1644195441174539e-07,
+              "max_abs_error": 9.57399606704712e-07,
+              "snr_db": 118.35368519688686
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_i_2_44.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_i_2_44.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_i_2_44.wav",
+        "bytes": 2470042,
+        "iso_md5": "395b11cb4adb035ab2cf40e7babd6b7d",
+        "sha256": "6b0c3d28eb9bde2da1451aa5c75bb1f427d19b4af0c3a0a9e4992a8c454145e4"
+      },
+      "input_sha256": "df33405b0354dfd4ed338d6b13bb79fe8fb6fdb90ec8c44af0dd585297a45963",
+      "records_sha256": "37d506417b079fe3ee7a3087627b503ff80ed0772acac73c742a19cdbfb9300a",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "6b0c3d28eb9bde2da1451aa5c75bb1f427d19b4af0c3a0a9e4992a8c454145e4",
+          "actual_sha256": "f6c842909e3ca100e891de40bab40cd37f31856af5fa2b85ff0dbea4ba597dfa",
+          "rate": 44100,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 411648,
+          "compared_frames": 411648,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.4257497671723178e-07,
+              "max_abs_error": 9.98377799987793e-07,
+              "snr_db": 116.61084315409428
+            },
+            {
+              "channel": 1,
+              "rmse": 1.4257497671723178e-07,
+              "max_abs_error": 9.98377799987793e-07,
+              "snr_db": 116.61084315409428
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "6b0c3d28eb9bde2da1451aa5c75bb1f427d19b4af0c3a0a9e4992a8c454145e4",
+          "actual_sha256": "f6c842909e3ca100e891de40bab40cd37f31856af5fa2b85ff0dbea4ba597dfa",
+          "rate": 44100,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 411648,
+          "compared_frames": 411648,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.4257497671723178e-07,
+              "max_abs_error": 9.98377799987793e-07,
+              "snr_db": 116.61084315409428
+            },
+            {
+              "channel": 1,
+              "rmse": 1.4257497671723178e-07,
+              "max_abs_error": 9.98377799987793e-07,
+              "snr_db": 116.61084315409428
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_i_2_48.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_i_2_48.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_i_2_48.wav",
+        "bytes": 2470042,
+        "iso_md5": "3da196b30b3ae0dc509db944d7a8e838",
+        "sha256": "3d23fd0cf6021130d99e9eaf2a45cdbcff595be1897a714ae0796a7a27b4c3b1"
+      },
+      "input_sha256": "17570f8d6bafb94ac1120e2f4f3a124dc7de41bcd4626f6a70151b5b73707f6f",
+      "records_sha256": "7534a6897feccee2808dbc3f17c7f40fd2d08c11fa17710d999fe26fec034314",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "3d23fd0cf6021130d99e9eaf2a45cdbcff595be1897a714ae0796a7a27b4c3b1",
+          "actual_sha256": "0cd54885891be67fea2bc40cf8e71e6cd9b978b993a2094d1a255d51897c3235",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 411648,
+          "compared_frames": 411648,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.3715651245871182e-07,
+              "max_abs_error": 8.344650268554688e-07,
+              "snr_db": 116.94969519393379
+            },
+            {
+              "channel": 1,
+              "rmse": 1.3715651245871182e-07,
+              "max_abs_error": 8.344650268554688e-07,
+              "snr_db": 116.94969519393379
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "3d23fd0cf6021130d99e9eaf2a45cdbcff595be1897a714ae0796a7a27b4c3b1",
+          "actual_sha256": "0cd54885891be67fea2bc40cf8e71e6cd9b978b993a2094d1a255d51897c3235",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 411648,
+          "compared_frames": 411648,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.3715651245871182e-07,
+              "max_abs_error": 8.344650268554688e-07,
+              "snr_db": 116.94969519393379
+            },
+            {
+              "channel": 1,
+              "rmse": 1.3715651245871182e-07,
+              "max_abs_error": 8.344650268554688e-07,
+              "snr_db": 116.94969519393379
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_s_1_32.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_s_1_32.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_s_1_32.wav",
+        "bytes": 1846426,
+        "iso_md5": "bdc9f2f61f04e0087a3cbf415fa7da1a",
+        "sha256": "67fd2e3ce69054f33bf969c21a1b8c60abb8c599b1f94ccab6e4eba543e4cbca"
+      },
+      "input_sha256": "83ee5a66baca057d89478b9e7b6f5a5b7a568404736380cf00307568ba373ba0",
+      "records_sha256": "f63e117cff0e860062fa92c370171c93f0f4b4f3bca17f6bb5d30ac713008009",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "67fd2e3ce69054f33bf969c21a1b8c60abb8c599b1f94ccab6e4eba543e4cbca",
+          "actual_sha256": "5694b0049528065768bb91aedd444f02a6cc24569e813e4c0fb0941bb0f62bd4",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 615424,
+          "compared_frames": 615424,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 8.027546186294453e-08,
+              "max_abs_error": 4.2747706174850464e-07,
+              "snr_db": 113.04349552613367
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "67fd2e3ce69054f33bf969c21a1b8c60abb8c599b1f94ccab6e4eba543e4cbca",
+          "actual_sha256": "5694b0049528065768bb91aedd444f02a6cc24569e813e4c0fb0941bb0f62bd4",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 615424,
+          "compared_frames": 615424,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 8.027546186294453e-08,
+              "max_abs_error": 4.2747706174850464e-07,
+              "snr_db": 113.04349552613367
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_s_1_44.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_s_1_44.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_s_1_44.wav",
+        "bytes": 1232026,
+        "iso_md5": "d85189c06cd81e0228e18b0a483616d9",
+        "sha256": "56a536fbe3ee3ff0b11ef95824aca38cdc83151989313d9062b257fcab807ff8"
+      },
+      "input_sha256": "60d6f969cca1b3e83e7ac2c80d18debec5dcd4648ade3279617fe2912719d2e0",
+      "records_sha256": "fe4e504e98b01ae80b4e67c4ad778d8fc6052aa7a3625d4b98b62bb9b7372e28",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "56a536fbe3ee3ff0b11ef95824aca38cdc83151989313d9062b257fcab807ff8",
+          "actual_sha256": "352fa7051acfa2195d80b46d39d83b4de760a7284906a196aa63280110a12927",
+          "rate": 44100,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 410624,
+          "compared_frames": 410624,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 8.868061921496511e-08,
+              "max_abs_error": 5.327165126800537e-07,
+              "snr_db": 112.1395491618344
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "56a536fbe3ee3ff0b11ef95824aca38cdc83151989313d9062b257fcab807ff8",
+          "actual_sha256": "352fa7051acfa2195d80b46d39d83b4de760a7284906a196aa63280110a12927",
+          "rate": 44100,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 410624,
+          "compared_frames": 410624,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 8.868061921496511e-08,
+              "max_abs_error": 5.327165126800537e-07,
+              "snr_db": 112.1395491618344
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_s_1_48.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_s_1_48.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_s_1_48.wav",
+        "bytes": 1232026,
+        "iso_md5": "fe85626dcd9d1f091ec571b0d610fff3",
+        "sha256": "f9dbbfc6f1f3a17d806389f964de62d819141daa5990b013294267af7a547336"
+      },
+      "input_sha256": "99847dfe7c968c279f4fc7dd151b2b28ef41624289d2fab29ada8a67c6016aac",
+      "records_sha256": "81b6122882f75b55b8f11cc81dfb8672217e3d36b6a63bb843030d427f971d00",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "f9dbbfc6f1f3a17d806389f964de62d819141daa5990b013294267af7a547336",
+          "actual_sha256": "64980cfe825241e5fa83c0f0ce12084a465030a126cab1ea272d4bf3430b28db",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 410624,
+          "compared_frames": 410624,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 8.357319532105873e-08,
+              "max_abs_error": 5.038455128669739e-07,
+              "snr_db": 112.54979527143877
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "f9dbbfc6f1f3a17d806389f964de62d819141daa5990b013294267af7a547336",
+          "actual_sha256": "64980cfe825241e5fa83c0f0ce12084a465030a126cab1ea272d4bf3430b28db",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 410624,
+          "compared_frames": 410624,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 8.357319532105873e-08,
+              "max_abs_error": 5.038455128669739e-07,
+              "snr_db": 112.54979527143877
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_s_2_32.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_s_2_32.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_s_2_32.wav",
+        "bytes": 3692698,
+        "iso_md5": "d31d809c990019879e06e9789f982b2e",
+        "sha256": "f0ce88e0cc1ccd72741c61e296535605fcc6ef47a6c6c018aa70402ae736366e"
+      },
+      "input_sha256": "dcbd09453e319ca09da4039f2b5c776a4202fda856b182d4530584c3c01efb14",
+      "records_sha256": "5fe7d1b2dd4567e3de994ffc5cab17c110ac8debfa9964f9781601c696f51e45",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "f0ce88e0cc1ccd72741c61e296535605fcc6ef47a6c6c018aa70402ae736366e",
+          "actual_sha256": "f132b4e06955e30275018ca05622b5d5a8992ee47ad3eac3ef0458f67b65b30d",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 615424,
+          "compared_frames": 615424,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 7.013734284141088e-05,
+              "max_abs_error": 0.00044111208990216255,
+              "snr_db": 56.24635123786821
+            },
+            {
+              "channel": 1,
+              "rmse": 7.02346407057789e-05,
+              "max_abs_error": 0.0004959255456924438,
+              "snr_db": 56.719548137219896
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "f0ce88e0cc1ccd72741c61e296535605fcc6ef47a6c6c018aa70402ae736366e",
+          "actual_sha256": "f132b4e06955e30275018ca05622b5d5a8992ee47ad3eac3ef0458f67b65b30d",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 615424,
+          "compared_frames": 615424,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 7.013734284141088e-05,
+              "max_abs_error": 0.00044111208990216255,
+              "snr_db": 56.24635123786821
+            },
+            {
+              "channel": 1,
+              "rmse": 7.02346407057789e-05,
+              "max_abs_error": 0.0004959255456924438,
+              "snr_db": 56.719548137219896
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_s_2_44.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_s_2_44.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_s_2_44.wav",
+        "bytes": 2463898,
+        "iso_md5": "769e3cc422688a2541ae44c9d22d52b8",
+        "sha256": "0b5ab3391298478c9ceb1e8a1aef5ba6a79c578d2482d1e5bab1cc29d5d3275b"
+      },
+      "input_sha256": "75c53ac9c5ff99d2e16f23a4243b4c8435dbab886d15d496feaeb9b6e440ee4c",
+      "records_sha256": "1c9288140eec26ce8e9e2e8b51f59e5f9938f15a474db7a9f288fe7db8b99c08",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "0b5ab3391298478c9ceb1e8a1aef5ba6a79c578d2482d1e5bab1cc29d5d3275b",
+          "actual_sha256": "ddddbd85d41c40101513b4a4aa602d73822b9f4d3093c6e6fd4ccf6fdd4c63e6",
+          "rate": 44100,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 410624,
+          "compared_frames": 410624,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 7.765004813954883e-05,
+              "max_abs_error": 0.000519968569278717,
+              "snr_db": 55.32087784183613
+            },
+            {
+              "channel": 1,
+              "rmse": 7.827188149030804e-05,
+              "max_abs_error": 0.0005093440413475037,
+              "snr_db": 55.82444357083149
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "0b5ab3391298478c9ceb1e8a1aef5ba6a79c578d2482d1e5bab1cc29d5d3275b",
+          "actual_sha256": "ddddbd85d41c40101513b4a4aa602d73822b9f4d3093c6e6fd4ccf6fdd4c63e6",
+          "rate": 44100,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 410624,
+          "compared_frames": 410624,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 7.765004813954883e-05,
+              "max_abs_error": 0.000519968569278717,
+              "snr_db": 55.32087784183613
+            },
+            {
+              "channel": 1,
+              "rmse": 7.827188149030804e-05,
+              "max_abs_error": 0.0005093440413475037,
+              "snr_db": 55.82444357083149
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_s_2_48.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_s_2_48.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_s_2_48.wav",
+        "bytes": 2463898,
+        "iso_md5": "30666094e2837206b3240dd1def425f1",
+        "sha256": "ef8f3d44717a357c072d7946cdbfb2635110ccffc567d057906b6b3ac31a72bd"
+      },
+      "input_sha256": "dafd68ac71331f60376fc8cf465542468205183954ff169b0206b6a676c1a285",
+      "records_sha256": "9e1f5acc71fcc3b40dfa0b4c04663743a85b5ae73f0ff7f655cd9878b1d35b6b",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "ef8f3d44717a357c072d7946cdbfb2635110ccffc567d057906b6b3ac31a72bd",
+          "actual_sha256": "819ac2edd49558caf0e28014503d6c48f88bb3df70dd1a7962ee4aca4a7e2d5b",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 410624,
+          "compared_frames": 410624,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 8.178938392142029e-05,
+              "max_abs_error": 0.0005353912711143494,
+              "snr_db": 54.615088159462246
+            },
+            {
+              "channel": 1,
+              "rmse": 8.263965957149304e-05,
+              "max_abs_error": 0.000532766804099083,
+              "snr_db": 55.25311986836422
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "ef8f3d44717a357c072d7946cdbfb2635110ccffc567d057906b6b3ac31a72bd",
+          "actual_sha256": "819ac2edd49558caf0e28014503d6c48f88bb3df70dd1a7962ee4aca4a7e2d5b",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 2,
+          "input_frames": 410624,
+          "compared_frames": 410624,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 8.178938392142029e-05,
+              "max_abs_error": 0.0005353912711143494,
+              "snr_db": 54.615088159462246
+            },
+            {
+              "channel": 1,
+              "rmse": 8.263965957149304e-05,
+              "max_abs_error": 0.000532766804099083,
+              "snr_db": 55.25311986836422
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_twi_1_24.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_twi_1_24.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_twi_1_24.wav",
+        "bytes": 73882,
+        "iso_md5": "9c94ee30c2585b695dde0fe9d3f25f73",
+        "sha256": "b3014a1375dc9183c93690d2e158e7b9b059149a97e831b40d27d173a79b30b0"
+      },
+      "input_sha256": "4c0c5fd6a03bfcdf8497c5270b229ca8213226939cee75881c867784c2a66a44",
+      "records_sha256": "93c6c808204e51ce00463eac6751be7aecc8103efeccc0cc6c56d9f09e132fc2",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "b3014a1375dc9183c93690d2e158e7b9b059149a97e831b40d27d173a79b30b0",
+          "actual_sha256": "c13c8dab8bbad01cd13517c9113e371940281d6f5db4b5672924406f7b4ab892",
+          "rate": 24000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 24576,
+          "compared_frames": 24576,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 8.5301128122445e-08,
+              "max_abs_error": 4.3213367462158203e-07,
+              "snr_db": 118.04389946205804
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "b3014a1375dc9183c93690d2e158e7b9b059149a97e831b40d27d173a79b30b0",
+          "actual_sha256": "c13c8dab8bbad01cd13517c9113e371940281d6f5db4b5672924406f7b4ab892",
+          "rate": 24000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 24576,
+          "compared_frames": 24576,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 8.5301128122445e-08,
+              "max_abs_error": 4.3213367462158203e-07,
+              "snr_db": 118.04389946205804
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "er_eld_sbr_twi_1_48.mp4",
+      "original_reference": {
+        "name": "er_eld_sbr_twi_1_48.wav",
+        "member": "../mpeg4audio-conformance2ndEd_20230125/referencesWav/add-opt/er_eld_sbr_twi_1_48.wav",
+        "bytes": 147610,
+        "iso_md5": "973a2276aaa03711b2a8ec650b143143",
+        "sha256": "bc55167e874091fe3969dcc27b9914cbcf0751e220ce77a8e0bbf17e1bc3bb05"
+      },
+      "input_sha256": "6f2290f439f22b3e85196520a896c4702ff1d9e28a3486a5bb027bfa27622c5c",
+      "records_sha256": "e2da0a9da118c2b866c250387cc6b2b82c05250af080c66a703ba8c78432e317",
+      "comparisons": {
+        "before": {
+          "conformance_verdict": null,
+          "reference_sha256": "bc55167e874091fe3969dcc27b9914cbcf0751e220ce77a8e0bbf17e1bc3bb05",
+          "actual_sha256": "733405ce4e36c59b3532d246e925520bf84fe94bd52218c952fba3300a751899",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 49152,
+          "compared_frames": 49152,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.6424727282347332e-07,
+              "max_abs_error": 1.0132789611816406e-06,
+              "snr_db": 114.86227065790996
+            }
+          ]
+        },
+        "after": {
+          "conformance_verdict": null,
+          "reference_sha256": "bc55167e874091fe3969dcc27b9914cbcf0751e220ce77a8e0bbf17e1bc3bb05",
+          "actual_sha256": "733405ce4e36c59b3532d246e925520bf84fe94bd52218c952fba3300a751899",
+          "rate": 48000,
+          "reference_bits": 24,
+          "channels": 1,
+          "input_frames": 49152,
+          "compared_frames": 49152,
+          "explicit_lag": 0,
+          "per_channel": [
+            {
+              "channel": 0,
+              "rmse": 1.6424727282347332e-07,
+              "max_abs_error": 1.0132789611816406e-06,
+              "snr_db": 114.86227065790996
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

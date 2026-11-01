@@ -1,5 +1,13 @@
 # Audio Implementation Status
 
+LD-SBR now uses only internal retained-patch boundaries and complete synthesis
+endpoints for limiter partitions. This removes all six GH waveform discrepancies
+caused by a discarded short HF tail.23/26 original ISO PCM24 streams now have
+RMS at most2.016e-7;the three stereo S2 differences remain open. Eight own short
+programmes qualify all limiter modes,480/512,both transports and worker/device
+navigation.606 scoped checks pass,0 fail,1 existing ignored.
+See validation/aac-ld-sbr-limiter-tail-2026-11-01.md.
+
 AAC-ELD now emits the causal AU interval after the window's zero leading quarter,
 including the known EOF quarter. Both original24-bit ISO core references match
 at zero lag over their complete streams within one PCM24 LSB. The24 nonzero-core
@@ -10,8 +18,9 @@ their historical results and do not describe the corrected core origin.
 
 Four original PCM24 LD-SBR WAV controls corroborate complex reference rendering.
 The large e1_32 EOF error versus FDK is not native:against the original WAV,native
-maximum error is4e-6 versus FDK0.02586. Native gh1_44 and stereo s2_48 still differ
-from original WAVs and remain open;no full waveform conformance is claimed.
+maximum error is4e-6 versus FDK0.02586. The GH differences observed in that earlier
+audit are corrected by the limiter fix above. Stereo S2 remains open;no full
+waveform conformance is claimed.
 
 The preceding explicit-QMF reference audit selected complex in FDK because its
 automatic ordinary ELD mode is Low Power. At that checkpoint,the two zero-core

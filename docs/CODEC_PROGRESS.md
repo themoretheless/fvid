@@ -1,3 +1,15 @@
+## Complete-range SBR limiter partition, 2026-11-01
+
+Corrected protection of a retained patch end that coincides with a low-resolution
+border after a short final HF patch was discarded. Only boundaries between
+retained patches and the complete synthesis endpoints are protected. Six original
+GH outputs now match ISO WAVs with RMS1.23e-7–1.46e-7;the other20 native outputs
+are byte-identical.23/26 original streams now have RMS at most2.016e-7;stereo S2
+still needs investigation. Eight own short programmes reproduce the specific
+numeric failure,with mode0 controls passing before/after.606 scoped checks pass,
+including legacy SBR,all1680 geometry inputs and actual worker/device navigation.
+[Evidence](validation/aac-ld-sbr-limiter-tail-2026-11-01.md).
+
 ## Causal AAC-ELD origin, 2026-11-01
 
 Removed the extra quarter-frame delay from ELD synthesis while retaining the
