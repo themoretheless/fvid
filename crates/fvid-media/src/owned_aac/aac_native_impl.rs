@@ -512,6 +512,7 @@ impl NativeAacDecoder {
     /// Explicit PCM positions for PCEs and configuration13; other indexed
     /// layouts are fully described by their WAVE speaker mask.
     pub fn channel_positions(&self) -> Result<Option<Vec<super::aac_pce::ChannelPosition>>> {
+        if self.ld_mps.as_ref().is_some_and(|s|s.initial_config().has_arbitrary_tree()) {return Ok(None);}
         if self.config.channel_configuration == 13 {
             return Ok(Some(super::aac_pce::configuration_13_positions()));
         }

@@ -268,6 +268,7 @@ impl Session {
                     ));
                 }
                 if config.sample_rate != next.initial_config.sample_rate
+                    || config.output_channels() != next.initial_config.output_channels()
                     || config.tree.code != next.initial_config.tree.code
                 {
                     return Err(unsupported(

@@ -1,0 +1,90 @@
+{
+  "probe_sha256": "b8862dda6a85922d88e1d78cd58754dd299cee9e068e428808bb1ffb4193a54c",
+  "scope": "Actual default macOS output, six domain/layout representatives in MP4/Matroska. Full/two seeks/rewind drain phases; not listening or physical multichannel certification.",
+  "cases": [
+    {
+      "name": "plain32-tree7",
+      "container": "mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=3 rate=24000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.055019 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.047234 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.031162 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.053254 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "plain32-tree7",
+      "container": "mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=3 rate=24000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.051160 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.050406 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.031992 wall=0.032392 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.050102 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "plain64-tree0",
+      "container": "mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=7 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.054007 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.042114 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.035227 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.049334 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "plain64-tree0",
+      "container": "mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=7 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.056597 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.042145 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.031992 wall=0.032540 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.050020 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "shared32-tree5",
+      "container": "mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=24000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.087630 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.071092 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.064000 wall=0.047809 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.081049 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "shared32-tree5",
+      "container": "mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=24000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.083498 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.075161 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.063983 wall=0.050134 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.078901 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "shared64-tree6",
+      "container": "mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=48000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.086361 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.068031 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.064000 wall=0.052979 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.091893 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "shared64-tree6",
+      "container": "mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=48000 duration=0.064000\nphase=full generation=0 from=0.000000 position=0.064000 wall=0.086735 device_drain=complete\nphase=seek-quarter generation=1 from=0.016000 position=0.064000 wall=0.072725 device_drain=complete\nphase=seek-60-percent generation=2 from=0.038400 position=0.064004 wall=0.050424 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.064000 wall=0.089936 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "sbr-pcm64-tree4",
+      "container": "mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.059394 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.050418 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.041243 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.058113 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "sbr-pcm64-tree4",
+      "container": "mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=48000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.053672 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.048144 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.031992 wall=0.044280 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.059046 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "sbr-pcm128-tree3",
+      "container": "mp4",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=96000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.056154 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.050493 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032000 wall=0.042142 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.056290 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "sbr-pcm128-tree3",
+      "container": "mkv",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=9 rate=96000 duration=0.032000\nphase=full generation=0 from=0.000000 position=0.032000 wall=0.050469 device_drain=complete\nphase=seek-quarter generation=1 from=0.008000 position=0.032000 wall=0.048155 device_drain=complete\nphase=seek-60-percent generation=2 from=0.019200 position=0.032002 wall=0.042149 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.032000 wall=0.059238 device_drain=complete\n",
+      "stderr": ""
+    }
+  ]
+}

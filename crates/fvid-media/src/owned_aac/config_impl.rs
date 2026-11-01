@@ -270,7 +270,7 @@ impl AudioSpecificConfig {
         Err(invalid("AAC output clock disagrees with configuration"))
     }
     pub fn output_channels(&self) -> u8 {
-        if let Some(spatial)=&self.ld_mps {return spatial.tree.output_channels;}
+        if let Some(spatial)=&self.ld_mps {return spatial.output_channels();}
         if self.ps_present == Some(true) {
             2
         } else {

@@ -1,5 +1,9 @@
 # Arbitrary-tree post-shaping component
 
+Historical component milestone at8429dc0934. Native full-band playback is now
+integrated; see `aac-ld-mps-arbitrary-playback-2026-11-01.md` for current evidence
+and remaining boundaries. The earlier refusal fixture was promoted to acceptance.
+
 Arbitrary-tree extension syntax and physical CLD preparation already exist,
 but the matrix constructor refuses this tool. This work adds the owned
 post-shaping gain-routing component required to implement it. It does not

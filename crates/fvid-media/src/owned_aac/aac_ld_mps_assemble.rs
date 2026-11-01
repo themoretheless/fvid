@@ -83,7 +83,7 @@ impl Decoder {
             || config.extensions.iter().any(|e| {
                 matches!(
                     &e.value,
-                    ExtensionValue::DownmixResidual { .. } | ExtensionValue::ArbitraryTree { .. }
+                    ExtensionValue::DownmixResidual { .. }
                 )
             })
         {
@@ -91,6 +91,7 @@ impl Decoder {
                 "LD-MPS arbitrary-downmix/HRTF matrix composition is not yet implemented",
             ));
         }
+        let _arbitrary = super::aac_ld_mps_arbitrary_tree::Stage::new(config)?;
         let boxes = config.tree.ott_lfe.len() + usize::from(config.tree.ttt_boxes);
         let mut cutoffs = vec![0; boxes];
         let mut seen = false;

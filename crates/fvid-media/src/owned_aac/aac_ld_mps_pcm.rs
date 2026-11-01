@@ -17,6 +17,7 @@ pub struct Frame {
     pub channels: usize,
     /// Interleaved LF/RF/C/LFE/LS/RS[/AL/AR], or L/R for stereo.
     /// AL/AR retain the tree's additional-channel meaning; no speaker mask is guessed.
+    /// Arbitrary-tree streams use their declared dense output indices.
     pub samples: Vec<f64>,
 }
 #[derive(Clone, Debug, PartialEq)]
@@ -40,6 +41,7 @@ pub struct Decoder {
     ld_sbr_qmf: bool,
     mode: Mode,
     qmf: aac_ld_mps_qmf::Decoder,
+    arbitrary: Option<super::aac_ld_mps_arbitrary_tree::Stage>,
     banks: Banks,
     config: Config,
     order: Vec<usize>,
@@ -71,7 +73,12 @@ impl Decoder {
     }
     fn new_domain(config: &Config, mode: Mode, qmf_input: bool, ld_sbr_qmf: bool) -> Result<Self> {
         let qmf = aac_ld_mps_qmf::Decoder::new(config, mode)?;
-        let order = native_order(config.tree.code)?.to_vec();
+        let arbitrary = super::aac_ld_mps_arbitrary_tree::Stage::new(config)?;
+        let order = if let Some(stage) = &arbitrary {
+            (0..stage.channels()).collect()
+        } else {
+            native_order(config.tree.code)?.to_vec()
+        };
         let inputs = if qmf_input {
             0
         } else {
@@ -113,7 +120,7 @@ impl Decoder {
             }
         };
         let mut gains = vec![1.0; outputs];
-        if outputs > 2 {
+        if arbitrary.is_none() && outputs > 2 {
             gains[3] = facts::LFE[usize::from(config.lfe_gain.unwrap_or(0))];
             for index in [4, 5] {
                 gains[index] = facts::SURROUND[usize::from(config.surround_gain.unwrap_or(0))];
@@ -128,6 +135,7 @@ impl Decoder {
             ld_sbr_qmf,
             mode,
             qmf,
+            arbitrary,
             banks,
             config: config.clone(),
             order,
@@ -151,6 +159,15 @@ impl Decoder {
             ));
         }
         let mut next = Self::new_domain(config, self.mode, self.qmf_input, self.ld_sbr_qmf)?;
+        match (&mut next.arbitrary, &self.arbitrary) {
+            (Some(new), Some(old)) => new.inherit(old)?,
+            (None, None) => {}
+            _ => {
+                return Err(unsupported(
+                    "LD-MPS arbitrary-tree layout change requires stream reconfiguration",
+                ))
+            }
+        }
         next.qmf = self.qmf.clone();
         next.qmf.reconfigure(config, self.mode)?;
         let keep_synthesis = config.downmix_gain == self.config.downmix_gain;
@@ -207,6 +224,9 @@ impl Decoder {
     }
     pub fn reset(&mut self) {
         self.qmf.reset();
+        if let Some(stage) = &mut self.arbitrary {
+            stage.reset();
+        }
         match &mut self.banks {
             Banks::B32 {
                 analysis,
@@ -273,6 +293,7 @@ impl Decoder {
                 &next.order,
                 &next.gains,
                 next.clip_gain,
+                &mut next.arbitrary,
             )?,
             Banks::B64 {
                 analysis,
@@ -288,6 +309,7 @@ impl Decoder {
                 &next.order,
                 &next.gains,
                 next.clip_gain,
+                &mut next.arbitrary,
             )?,
             Banks::B128 {
                 analysis,
@@ -303,6 +325,7 @@ impl Decoder {
                 &next.order,
                 &next.gains,
                 next.clip_gain,
+                &mut next.arbitrary,
             )?,
         };
         let frame = Frame {
@@ -367,6 +390,7 @@ impl Decoder {
                 synthesis,
                 &next.order,
                 &next.gains,
+                &mut next.arbitrary,
             )?,
             Banks::B64 { synthesis, .. } => render_subbands(
                 &mut next.qmf,
@@ -377,6 +401,7 @@ impl Decoder {
                 synthesis,
                 &next.order,
                 &next.gains,
+                &mut next.arbitrary,
             )?,
             Banks::B128 { synthesis, .. } => render_subbands(
                 &mut next.qmf,
@@ -387,6 +412,7 @@ impl Decoder {
                 synthesis,
                 &next.order,
                 &next.gains,
+                &mut next.arbitrary,
             )?,
         };
         let frame = Frame {
@@ -411,6 +437,7 @@ fn render<const B: usize>(
     order: &[usize],
     gains: &[f64],
     clip: f64,
+    arbitrary: &mut Option<super::aac_ld_mps_arbitrary_tree::Stage>,
 ) -> Result<Vec<f64>> {
     if pcm.len() != analysis.len()
         || pcm
@@ -428,7 +455,7 @@ fn render<const B: usize>(
         }
     }
     render_subbands(
-        qmf, bits, &downmix, residuals, slots, synthesis, order, gains,
+        qmf, bits, &downmix, residuals, slots, synthesis, order, gains, arbitrary,
     )
 }
 fn render_subbands<const B: usize>(
@@ -440,17 +467,29 @@ fn render_subbands<const B: usize>(
     synthesis: &mut [Synthesis<B>],
     order: &[usize],
     gains: &[f64],
+    arbitrary: &mut Option<super::aac_ld_mps_arbitrary_tree::Stage>,
 ) -> Result<Vec<f64>> {
     let output = qmf.decode(bits, downmix, residuals)?;
+    let mut signal = output.dry.clone();
+    for (dry, wet) in signal
+        .iter_mut()
+        .flatten()
+        .flatten()
+        .zip(output.wet.iter().flatten().flatten())
+    {
+        dry.re += wet.re;
+        dry.im += wet.im;
+    }
+    if let Some(stage) = arbitrary {
+        signal = stage.process(&signal, &output.prepared)?;
+    }
+    if signal.iter().any(|s| s.len() != synthesis.len()) {
+        return Err(invalid("arbitrary-tree synthesis channel count mismatch"));
+    }
     let mut planar = Vec::with_capacity(synthesis.len());
     for (c, bank) in synthesis.iter_mut().enumerate() {
         let combined = (0..slots)
-            .map(|t| {
-                std::array::from_fn(|q| Complex {
-                    re: output.dry[t][c][q].re + output.wet[t][c][q].re,
-                    im: output.dry[t][c][q].im + output.wet[t][c][q].im,
-                })
-            })
+            .map(|t| std::array::from_fn(|q| signal[t][c][q]))
             .collect::<Vec<[Complex; B]>>();
         planar.push(bank.process(&combined)?);
     }
@@ -473,6 +512,9 @@ impl Decoder {
         f: &mut super::memory::Footprint,
     ) -> std::result::Result<(), String> {
         self.qmf.visit_retained(f)?;
+        if let Some(stage) = &self.arbitrary {
+            stage.visit_retained(f)?;
+        }
         self.config.visit_retained(f)?;
         f.vector(&self.order)?;
         f.vector(&self.gains)?;
@@ -578,5 +620,45 @@ mod inband_state_tests {
         decoder.reconfigure(&longer).unwrap();
         assert_eq!(decoder.banks, saved.banks);
         assert_eq!(decoder.config.frame_slots, longer.frame_slots);
+    }
+}
+
+#[cfg(test)]
+mod arbitrary_tree_state_tests {
+    use super::*;
+    #[test]
+    fn arbitrary_history_survives_same_layout_headers_and_layout_errors_are_atomic() {
+        let config=Config::parse(include_bytes!("../../../../tests/fixtures/playback-errors/aac-ld-mps-arbitrary-tree/tree7-extra-ott.ssc")).unwrap();
+        let packet=include_bytes!("../../../../tests/fixtures/playback-errors/aac-ld-mps-arbitrary-tree/tree7-extra-ott-0.spatial");
+        let source = vec![(0..256)
+            .map(|i| (i as f64 * 0.13).sin() * 0.01)
+            .collect::<Vec<_>>()];
+        let mut d = Decoder::new(&config, Mode::Complex).unwrap();
+        assert_eq!(
+            d.decode(&mut BitReader::new(packet), &source, &[None])
+                .unwrap()
+                .channels,
+            3
+        );
+        let old = d.clone();
+        let mut gain = config.clone();
+        gain.downmix_gain = 1;
+        d.reconfigure(&gain).unwrap();
+        assert_eq!(d.arbitrary, old.arbitrary);
+        let saved = d.clone();
+        let mut changed = gain.clone();
+        let super::super::aac_ld_mps_config::ExtensionValue::ArbitraryTree { positions, .. } =
+            &mut changed.extensions[0].value
+        else {
+            unreachable!()
+        };
+        positions.swap(0, 1);
+        changed.extensions[0].payload = vec![0x80, 0x20, 0x10];
+        let error = d.reconfigure(&changed).unwrap_err().to_string();
+        assert!(error.contains("layout/grid change"), "{error}");
+        assert_eq!(d, saved);
+        d.reset();
+        let fresh = Decoder::new(&gain, Mode::Complex).unwrap();
+        assert_eq!(d.arbitrary, fresh.arbitrary);
     }
 }

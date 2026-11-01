@@ -1,5 +1,5 @@
-//! Post-shaping arbitrary-tree gain routing. This component does not yet
-//! enable arbitrary-tree PCM playback or interpret sparse speaker layouts.
+//! Post-shaping arbitrary-tree gain routing. Native PCM currently qualifies
+//! full-band splits and dense output permutations; sparse layouts remain explicit refusals.
 use super::{aac_ld_mps_matrix_apply::Samples, aac_sbr_qmf::Complex, invalid, unsupported, Result};
 #[derive(Clone, Debug, PartialEq)]
 struct Leaf {
@@ -178,5 +178,136 @@ impl Decoder {
         }
         self.previous = previous;
         Ok(out)
+    }
+}
+
+/// Native post-shaping owner; the public component above also supports saved
+/// independent reference probes without parsing or synthesizing AAC.
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) struct Stage {
+    extension: usize,
+    decoder: Decoder,
+    fixed: Vec<f64>,
+}
+impl Stage {
+    pub(crate) fn new(config: &super::aac_ld_mps_config::Config) -> Result<Option<Self>> {
+        use super::aac_ld_mps_config::ExtensionValue;
+        let mut result = None;
+        for (extension, e) in config.extensions.iter().enumerate() {
+            if let ExtensionValue::ArbitraryTree {
+                nodes,
+                ott,
+                positions,
+            } = &e.value
+            {
+                if result.is_some() {
+                    return Err(invalid("multiple arbitrary-tree extensions"));
+                }
+                if nodes.len() != usize::from(config.tree.output_channels) {
+                    return Err(invalid("arbitrary-tree base output count mismatch"));
+                }
+                let decoder = Decoder::new(
+                    nodes,
+                    &ott.iter().map(|o| o.bands).collect::<Vec<_>>(),
+                    positions,
+                    config.parameter_bands,
+                )?;
+                let mut fixed = vec![1.0; nodes.len()];
+                let surround = *super::aac_ld_mps_prepare_facts::SURROUND
+                    .get(usize::from(config.surround_gain.unwrap_or(0)))
+                    .ok_or_else(|| invalid("invalid arbitrary-tree surround gain"))?;
+                let lfe = *super::aac_ld_mps_prepare_facts::LFE
+                    .get(usize::from(config.lfe_gain.unwrap_or(0)))
+                    .ok_or_else(|| invalid("invalid arbitrary-tree LFE gain"))?;
+                match config.tree.code {
+                    0 => {
+                        fixed[3] = lfe;
+                        fixed[4] = surround;
+                        fixed[5] = surround;
+                    }
+                    1 | 2 => {
+                        fixed[5] = lfe;
+                        fixed[1] = surround;
+                        fixed[3] = surround;
+                    }
+                    3..=6 => {
+                        fixed[7] = lfe;
+                        for i in [1, 2, 4, 5] {
+                            fixed[i] = surround;
+                        }
+                    }
+                    7 => {}
+                    _ => return Err(invalid("invalid arbitrary-tree base tree")),
+                }
+                result = Some(Self {
+                    extension,
+                    decoder,
+                    fixed,
+                });
+            }
+        }
+        Ok(result)
+    }
+    pub(crate) fn channels(&self) -> usize {
+        self.decoder.leaves.len()
+    }
+    pub(crate) fn inherit(&mut self, old: &Self) -> Result<()> {
+        if self.extension != old.extension
+            || self.decoder.bands != old.decoder.bands
+            || self.decoder.leaves != old.decoder.leaves
+        {
+            return Err(unsupported(
+                "LD-MPS arbitrary-tree layout/grid change requires stream reconfiguration",
+            ));
+        }
+        self.decoder.previous = old.decoder.previous.clone();
+        Ok(())
+    }
+    pub(crate) fn reset(&mut self) {
+        self.decoder.reset();
+    }
+    pub(crate) fn process(
+        &mut self,
+        input: &Samples,
+        p: &super::aac_ld_mps_prepare::Prepared,
+    ) -> Result<Samples> {
+        use super::aac_ld_mps_frame::ParameterId;
+        let mut cld = vec![vec![vec![0.0; self.decoder.bands]; self.decoder.boxes]; p.slots.len()];
+        for b in 0..self.decoder.boxes {
+            let values = &p
+                .parameters
+                .iter()
+                .find(|v| {
+                    v.id == ParameterId::ArbitraryCld {
+                        extension: self.extension,
+                        box_index: b,
+                    }
+                })
+                .ok_or_else(|| invalid("missing arbitrary-tree CLD parameters"))?
+                .values;
+            if values.len() != p.slots.len() {
+                return Err(invalid("arbitrary-tree CLD endpoint count mismatch"));
+            }
+            for (set, row) in values.iter().enumerate() {
+                cld[set][b] = row.clone();
+            }
+        }
+        self.decoder
+            .process(input, &p.slots, &cld, &p.qmf_parameter_bands, &self.fixed)
+    }
+    pub(crate) fn visit_retained(
+        &self,
+        f: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        f.vector(&self.fixed)?;
+        f.vector(&self.decoder.leaves)?;
+        for leaf in &self.decoder.leaves {
+            f.vector(&leaf.path)?;
+        }
+        f.vector(&self.decoder.previous)?;
+        for row in &self.decoder.previous {
+            f.vector(row)?;
+        }
+        Ok(())
     }
 }

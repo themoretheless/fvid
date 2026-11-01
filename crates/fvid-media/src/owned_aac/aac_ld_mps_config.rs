@@ -127,6 +127,17 @@ fn residual_rate(bits: &mut BitReader<'_>) -> Result<u32> {
     rate(bits.read(4)?)
 }
 impl Config {
+    /// Extension output count; zero denotes an unrepresentable channel count.
+    /// The native renderer validates topology and supported positions first.
+    pub fn output_channels(&self) -> u8 {
+        self.extensions.iter().find_map(|e| match &e.value {
+            ExtensionValue::ArbitraryTree {positions,..} => Some(u8::try_from(positions.len()).unwrap_or(0)),
+            _=>None,
+        }).unwrap_or(self.tree.output_channels)
+    }
+    pub fn has_arbitrary_tree(&self) -> bool {
+        self.extensions.iter().any(|e|matches!(e.value,ExtensionValue::ArbitraryTree {..}))
+    }
     /// Enforce the LD-MPS residual-extension boundary, including empty bands.
     /// ISO/IEC 14496-26:2010/Amd.3:2014, 7.26.1.2.1.5 allows types 2..15.
     /// Raw syntax remains available to diagnostics and numerical components.

@@ -134,6 +134,7 @@ impl Decoder {
         self.mode
     }
     pub fn mask(&self) -> u32 {
+        if self.config.has_arbitrary_tree() {return 0;}
         match self.config.tree.code {
             0..=2 => 0x3f,
             3 | 5 => 0xff,
@@ -191,8 +192,8 @@ impl Decoder {
         frames: Vec<super::aac_ld_mps_session::Frame>,
         clock: u32,
     ) -> Result<()> {
-        let channels = usize::from(self.config.tree.output_channels);
-        let order: &[usize] = if matches!(self.config.tree.code, 4 | 6) {
+        let channels = usize::from(self.config.output_channels());
+        let order: &[usize] = if !self.config.has_arbitrary_tree() && matches!(self.config.tree.code, 4 | 6) {
             &[0, 1, 2, 3, 6, 7, 4, 5]
         } else {
             &[]
@@ -294,7 +295,7 @@ impl Decoder {
         &self.config
     }
     pub fn channels(&self) -> u8 {
-        self.config.tree.output_channels
+        self.config.output_channels()
     }
     /// Canonical decoded PCM at the selected output clock. In the LD-SBR PCM
     /// domain this includes SBR synthesis, and used_bits includes its syntax.
