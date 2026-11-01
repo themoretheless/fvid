@@ -1,0 +1,239 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0486"
+  ],
+  "count_delta": 1,
+  "accepted_count": 486,
+  "next_id": "FVID-0487",
+  "qualification": {
+    "integration": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--no-fail-fast",
+        "--test",
+        "mp4_aac_subtick_seek",
+        "--test",
+        "mp4_audio_eof_seek_clock",
+        "--test",
+        "mp4_audio_packet_seek",
+        "--test",
+        "mp4_audio_wide_time",
+        "--test",
+        "mp4_quantized_audio_clock",
+        "--test",
+        "mp4_aac_edit_phase",
+        "--test",
+        "mp4_aac_fractional_origin",
+        "--test",
+        "mp4_open_ended_edit_audio",
+        "--test",
+        "mp4_audio_clocks",
+        "--test",
+        "mp4_variable_rate_edits",
+        "--test",
+        "mp4_edit_loop",
+        "--test",
+        "mp4_audio_reconfiguration",
+        "--test",
+        "mp4_aac_transitions",
+        "--test",
+        "mp4_unedited_audio_tail",
+        "--test",
+        "mp4_audio_presentation_end",
+        "--test",
+        "mp4_audio_composition_order",
+        "--test",
+        "mp4_unused_audio_descriptions",
+        "--test",
+        "mp4_audio_selection",
+        "--test",
+        "mp4_audio_preroll_navigation",
+        "--test",
+        "mp4_audio_partial_window",
+        "--test",
+        "mp4_audio_zero_window",
+        "--test",
+        "mp4_aac_split_subtick_seek",
+        "--test",
+        "mp4_audio_middle_gap",
+        "--test",
+        "mp4_audio_composition_gap",
+        "--test",
+        "mp4_fixed_audio_edits",
+        "--test",
+        "mp4_aac_gap_subtick_seek",
+        "--test",
+        "mp4_clock_description_scan",
+        "--test",
+        "mp4_recovered_silence_seek",
+        "--test",
+        "mp4_native_grid_silence_seek",
+        "--test",
+        "mp4_native_grid_missing_extent_seek",
+        "--test",
+        "mp4_aac_native_grid_seek",
+        "--test",
+        "mp4_aac_native_grid_missing_extent_seek",
+        "--test",
+        "mp4_edit_frontier_seek"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 142,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/docs/improvements/evidence/mp4-edit-frontier-seek/integration.log"
+    },
+    "root-mp4": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "mp4",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 84,
+        "failed": 0,
+        "ignored": 1
+      },
+      "log": "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/docs/improvements/evidence/mp4-edit-frontier-seek/root-mp4.log"
+    },
+    "root-webm": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "webm",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 67,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/docs/improvements/evidence/mp4-edit-frontier-seek/root-webm.log"
+    },
+    "audio-worker": {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "audio_thread",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 39,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/docs/improvements/evidence/mp4-edit-frontier-seek/audio-worker.log"
+    },
+    "media-units": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "fvid-media",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player",
+        "--lib",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 548,
+        "failed": 0,
+        "ignored": 1
+      },
+      "log": "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/docs/improvements/evidence/mp4-edit-frontier-seek/media-units.log"
+    },
+    "core-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/docs/improvements/evidence/mp4-edit-frontier-seek/core-check.log"
+    },
+    "player-check": {
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "totals": {
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0
+      },
+      "log": "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/docs/improvements/evidence/mp4-edit-frontier-seek/player-check.log"
+    }
+  },
+  "repeat_runs": 3,
+  "repeat_passed_each": 33,
+  "source_frozen": {
+    "src/playback/audio/mp4_audio.rs": "6e83e690e18a299c936f0315606ecb71ca83bd8fb623806135b386d961e72481",
+    "src/playback/audio/mp4_clock_recovery.rs": "4bd9dc0452bc30e79dad6985e57085cff81da2f522426c037930c3f27e3abad6",
+    "tests/mp4_edit_frontier_seek.rs": "8dea5cbde61b0234db884a4af2d9ef20e81afb4a6a3aef0d314438e67502f324",
+    "scripts/generate_mp4_edit_frontier_seek.py": "9dc74aec55c8a28700b0a53e05fe741b2093067c365853fe804ea568bec86048"
+  },
+  "before": {
+    "exit_code": 101,
+    "passed": 2,
+    "failed": 2,
+    "log": "/Users/themoretheless/.codex/worktrees/fvid-push-20261029/fvid/docs/improvements/evidence/mp4-edit-frontier-seek/before.log"
+  },
+  "existing_tests_unchanged": true,
+  "old_ignores": 2,
+  "limitations": [
+    "No performance or physical audio-device claim.",
+    "This is not certification of every MP4 timing or mixed codec-family path."
+  ]
+}

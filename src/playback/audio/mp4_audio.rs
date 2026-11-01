@@ -473,6 +473,11 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         loop {
             timeline.cursor.set(position);
             let Some(index)=timeline.locate()else{return Ok(position);};
+            // Native rounding can cross an edit boundary. Reapply the next
+            // segment's occupied-sample frontier before deriving its anchor.
+            if position.cmp(timeline.minimum_starts[index])==std::cmp::Ordering::Less {
+                position=timeline.minimum_starts[index];continue;
+            }
             let segment=timeline.segments[index];
             // A source gap is playable silence, so seeking into it must not
             // snap forward to the first coded sample on the recovered clock.

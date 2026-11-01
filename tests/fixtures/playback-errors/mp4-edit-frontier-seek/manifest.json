@@ -1,0 +1,591 @@
+{
+  "provenance": "Own LC/Main AAC pulse spectra, scalar IMDCT/overlap PCM and sixteen neutral VP9 frames. Non-native 1000010ns first edit followed by1ms edit; expected native windows derived with rational arithmetic. No private media,FFmpeg or network.",
+  "cases": [
+    {
+      "file": "changes-frontier.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 49,
+              "start_ns": 0
+            },
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 49,
+              "start_ns": 0
+            },
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 48,
+              "last": 49,
+              "start_ns": 0
+            },
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 48,
+              "last": 49,
+              "start_ns": 0
+            },
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000001",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "1000009",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "1000010",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "1000011",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "1020833",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "1031260",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "2000009",
+          "parts": [],
+          "anchor_ns": 2000010
+        },
+        {
+          "target_ns": "2000010",
+          "parts": [],
+          "anchor_ns": 2000010
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 2000010
+        }
+      ],
+      "duration_ns": 2000010
+    },
+    {
+      "file": "third-frontier.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 49,
+              "start_ns": 0
+            },
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 49,
+              "start_ns": 0
+            },
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 48,
+              "last": 49,
+              "start_ns": 0
+            },
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 48,
+              "last": 49,
+              "start_ns": 0
+            },
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000001",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "1000009",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "1000010",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "1000011",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "1020833",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "1031260",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "2000009",
+          "parts": [],
+          "anchor_ns": 2000010
+        },
+        {
+          "target_ns": "2000010",
+          "parts": [],
+          "anchor_ns": 2000010
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 2000010
+        }
+      ],
+      "duration_ns": 2000010
+    },
+    {
+      "file": "fragmented-frontier.mp4",
+      "queries": [
+        {
+          "target_ns": "0",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 0,
+              "last": 49,
+              "start_ns": 0
+            },
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 0
+        },
+        {
+          "target_ns": "1",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 1,
+              "last": 49,
+              "start_ns": 0
+            },
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 20833
+        },
+        {
+          "target_ns": "999999",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 48,
+              "last": 49,
+              "start_ns": 0
+            },
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000000",
+          "parts": [
+            {
+              "control": 0,
+              "rate": 48000,
+              "channels": 2,
+              "first": 48,
+              "last": 49,
+              "start_ns": 0
+            },
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1000000
+        },
+        {
+          "target_ns": "1000001",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "1000009",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "1000010",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "1000011",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "1020833",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "1031260",
+          "parts": [
+            {
+              "control": 1,
+              "rate": 32000,
+              "channels": 1,
+              "first": 1,
+              "last": 32,
+              "start_ns": 1000010
+            }
+          ],
+          "anchor_ns": 1031260
+        },
+        {
+          "target_ns": "2000009",
+          "parts": [],
+          "anchor_ns": 2000010
+        },
+        {
+          "target_ns": "2000010",
+          "parts": [],
+          "anchor_ns": 2000010
+        },
+        {
+          "target_ns": "18446744073709551615999999999",
+          "parts": [],
+          "anchor_ns": 2000010
+        }
+      ],
+      "duration_ns": 2000010
+    }
+  ],
+  "sha256": {
+    "reference-0.f32le": "61d65de18326375ba5df4a1ecf8b54882107d47c13046b54b64f9bf593f06ba1",
+    "reference-1.f32le": "22555ab80f96f851edddd936cfd9b2312f3ba5444fe679c2c1d83a2834f87e4f",
+    "changes-frontier.mp4": "c6873e2c92b66b5d1ac8e56ead71fb77f09c249122c5e2b250f93de95be60ce6",
+    "third-frontier.mp4": "41575d27fa1cf82fdfc2b00d53e7387fb7f9a24193b75bf4147b8964fa9546e8",
+    "fragmented-frontier.mp4": "de0420e447ee4965273a59932a80561a261be674ba2a481959e11b6ce016991a"
+  }
+}

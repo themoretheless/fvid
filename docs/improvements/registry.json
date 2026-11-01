@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 485,
-  "next_id": "FVID-0486",
+  "accepted_count": 486,
+  "next_id": "FVID-0487",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5485,6 +5485,17 @@
       "result": "Query readable run starts for sparse UniformIndex,retaining the reference walk for dense/expanded indexes. Paired medians8.23875ms and2.76375ms:83.94/84.79percent reduction,7/7wins in both sets,all fingerprints equal. Full analytic PCM,actual workers,video,seek/EOF,private coordinate semantics,eight gates and three repeated fifteen-test runs pass. No whole-player or decoder speedup claim.",
       "status": "accepted",
       "validation": "batch-483-validation.json"
+    },
+    {
+      "id": "FVID-0486",
+      "batch": 487,
+      "title": "Reapply occupied edit frontiers when native-sample seeking traverses segments",
+      "source": "src/playback/audio/mp4_audio.rs",
+      "regression": "tests/mp4_edit_frontier_seek.rs",
+      "before": "Three authored LC48k/Main32k movies pass full independent PCM/video and raw tick controls,but exact seek at1000001ns or1000009ns crosses the first edit and anchors at1000010ns rather than the first available sample1031260ns. Both direct and actual-worker regressions fail despite correct suffix PCM.",
+      "result": "Apply the newly selected segment minimum occupied-sample start on every alignment-loop traversal before deriving its native anchor. Original Duration fractions are already preserved;this fixes a distinct missed frontier after segment crossing. Seven gates pass880 executions,two prior ignores;three repeats pass33 tests each.",
+      "status": "accepted",
+      "validation": "batch-487-validation.json"
     }
   ]
 }

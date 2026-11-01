@@ -1,0 +1,8 @@
+{
+  "base": "aef465fb75db78501c794a0eb97b18112732299f",
+  "sha256": {
+    "src/playback/audio/mp4_audio.rs": "469b25232dd039edebeba13c8391ed853d9bf8affab7980cbfd14a6408c1dc3e",
+    "tests/mp4_edit_frontier_seek.rs": "8dea5cbde61b0234db884a4af2d9ef20e81afb4a6a3aef0d314438e67502f324",
+    "scripts/generate_mp4_edit_frontier_seek.py": "9dc74aec55c8a28700b0a53e05fe741b2093067c365853fe804ea568bec86048"
+  }
+}

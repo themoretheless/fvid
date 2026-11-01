@@ -1,0 +1,6 @@
+{
+  "src/playback/audio/mp4_audio.rs": "6e83e690e18a299c936f0315606ecb71ca83bd8fb623806135b386d961e72481",
+  "src/playback/audio/mp4_clock_recovery.rs": "4bd9dc0452bc30e79dad6985e57085cff81da2f522426c037930c3f27e3abad6",
+  "tests/mp4_edit_frontier_seek.rs": "8dea5cbde61b0234db884a4af2d9ef20e81afb4a6a3aef0d314438e67502f324",
+  "scripts/generate_mp4_edit_frontier_seek.py": "9dc74aec55c8a28700b0a53e05fe741b2093067c365853fe804ea568bec86048"
+}
