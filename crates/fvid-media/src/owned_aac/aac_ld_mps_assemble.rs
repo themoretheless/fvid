@@ -91,9 +91,6 @@ impl Decoder {
                 "LD-MPS arbitrary-downmix/HRTF matrix composition is not yet implemented",
             ));
         }
-        if let Some(hrtf) = &config.hrtf {
-            super::aac_ld_mps_3d::validate(hrtf, config.parameter_bands)?;
-        }
         let boxes = config.tree.ott_lfe.len() + usize::from(config.tree.ttt_boxes);
         let mut cutoffs = vec![0; boxes];
         let mut seen = false;
@@ -116,6 +113,22 @@ impl Decoder {
         } else {
             vec![]
         };
+        if let Some(hrtf) = &config.hrtf {
+            // Standard inversion supersedes HRTF projection in every active
+            // band for these modes (see ttt_tree::build_with_spatial). Keep
+            // validating metadata, but require matching grids only if used.
+            let standard_priority = config.matrix_mode == Some(true)
+                && !modes.is_empty()
+                && modes.iter().all(|m| matches!(m, 0 | 1 | 2 | 4));
+            super::aac_ld_mps_3d::validate(
+                hrtf,
+                if standard_priority {
+                    hrtf.bands
+                } else {
+                    config.parameter_bands
+                },
+            )?;
+        }
         let qmf = if config.sample_rate < 27713 {
             32
         } else if config.sample_rate >= 55426 {

@@ -1,0 +1,64 @@
+{
+  "date": "2026-11-01",
+  "base_commit": "a7c5801e22",
+  "scope": "Focused HRTF standard-inversion-priority fix and all-grid coverage; not full-current-tree or full LD-MPS qualification",
+  "command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test aac_ld_mps_hrtf_priority --test aac_ld_mps_hrtf_all_grids --test aac_ld_mps_3d -- --nocapture",
+  "exit_code": 0,
+  "log_path": "/tmp/fvid-hrtf-priority-final.log",
+  "log_sha256": "9d6621abb2217726149ebe23b62b1494ae723596d2ea75a97560ac6e0658c4d6",
+  "targets": [
+    {
+      "name": "aac_ld_mps_3d",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "aac_ld_mps_hrtf_all_grids",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "aac_ld_mps_hrtf_priority",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "passed": 20,
+  "failed": 0,
+  "ignored": 0,
+  "priority": {
+    "programmes": 50,
+    "controls": 8,
+    "activation_refusal_movies": 1,
+    "grid_pairs": 49,
+    "decorrelation_modes": 2,
+    "containers": [
+      "MP4",
+      "Matroska"
+    ],
+    "seeks_per_programme_per_container": 9,
+    "oracle": "Byte-exact no-HRTF standard-inversion equivalence; not an independent new whole-spatial oracle"
+  },
+  "active_hrtf": {
+    "equal_grid_acceptances": 7,
+    "unequal_grid_refusals": 42
+  },
+  "generator": {
+    "files": 222,
+    "deterministic": true,
+    "subprocess_and_socket_creation_forbidden": true
+  },
+  "before_fix": {
+    "log": "/tmp/fvid-hrtf-priority-before.log",
+    "case": "spatial23-hrtf15-priority",
+    "error": "HRTF grid conversion is not yet qualified"
+  },
+  "open": [
+    "active unequal-grid HRTF processing",
+    "unqualified EBQ combinations",
+    "arbitrary inherited-fragment prefix loss"
+  ]
+}

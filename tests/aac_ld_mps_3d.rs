@@ -239,3 +239,50 @@ fn unequal_hrtf_grid_movie_reproduces_specific_mapping_refusal() {
         .to_string();
     assert!(error.contains(bad["error"].as_str().unwrap()), "{error}");
 }
+
+#[test]
+fn standard_inverse_never_indexes_unused_hrtf_for_any_priority_mode() {
+    use fvid_media::owned_aac::{
+        aac_ld_mps_tree_matrix::Band,
+        aac_ld_mps_ttt_tree::{self, ThreeD, Ttt},
+    };
+    let h = hrtf(4);
+    for tree in 2..=4 {
+        let bands = vec![
+            Band {
+                cld_db: 3.,
+                coherence: 0.5,
+                residual: false
+            };
+            if tree == 2 { 3 } else { 5 }
+        ];
+        for mode in [0, 1, 2, 4] {
+            let t = Ttt {
+                mode,
+                parameters: if mode < 2 { [0.2, 0.1] } else { [-4., 6.] },
+                coherence: 0.7,
+                residual: false,
+                inversion: true,
+            };
+            let plain =
+                aac_ld_mps_ttt_tree::build_with_spatial(tree, &bands, t, true, [1., 1.], None)
+                    .unwrap();
+            // Index 22 cannot be read from this four-band HRTF. A successful
+            // identical matrix proves the metadata is unused by this branch.
+            let with_hrtf = aac_ld_mps_ttt_tree::build_with_spatial(
+                tree,
+                &bands,
+                t,
+                true,
+                [1., 1.],
+                Some(ThreeD {
+                    hrtf: &h,
+                    band: 22,
+                    surround_gain: 1.,
+                }),
+            )
+            .unwrap();
+            assert_eq!(plain, with_hrtf);
+        }
+    }
+}
