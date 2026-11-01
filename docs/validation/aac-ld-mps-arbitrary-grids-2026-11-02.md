@@ -61,3 +61,5 @@ two seeks, rewind). This proves delivery to the device, not subjective listening
 or physical multichannel wiring.
 
 Subsequent boundary update (2026-11-02): covered partial splits with uniform cutoffs now support resolution changes and return. See [uniform partial-grid qualification](aac-ld-mps-arbitrary-partial-grids-2026-11-02.md). Mixed-cutoff grid conversion remains open.
+
+Subsequent boundary update (2026-11-02): mixed-cutoff resolution changes now transfer exactly when every newly addressed band has defined history. See [defined-history qualification](aac-ld-mps-arbitrary-defined-2026-11-02.md). The blanket mixed-cutoff refusal above describes the historical snapshot.

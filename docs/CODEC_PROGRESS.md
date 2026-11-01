@@ -24511,3 +24511,13 @@ gain history, provided all extra splits within each header share one cutoff.
 Qualification includes218 own playback programmes,148 original-C component
 scenarios, precise mixed-cutoff refusal/retry videos and both container readers.
 Mixed-cutoff grid conversion remains open. See [qualification](validation/aac-ld-mps-arbitrary-partial-grids-2026-11-02.md).
+
+### 2026-11-02: defined mixed-cutoff ArbitraryTree history
+
+Mixed-cutoff grid changes now depend on actual per-band history definedness,
+replacing the blanket rejection. Preorder pushes/pops carry optional gains and
+update indexed history with defined-band masks; unknown history is never used.
+648 independent C scenarios qualify;48 retain precise later-frame refusals.
+1,716 own playback programmes and96 refusal programmes cover container decode,
+clocks, checkpoint/retry, seek and rewind. See [qualification](validation/aac-ld-mps-arbitrary-defined-2026-11-02.md). General active-uncovered semantics and
+other codec gaps remain open.

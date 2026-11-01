@@ -1,6 +1,6 @@
 //! Post-shaping arbitrary-tree routing. Coded splits must cover every band
 //! addressed by the QMF domain; sparse layouts remain explicit refusals.
-use super::{aac_ld_mps_matrix_apply::Samples, aac_sbr_qmf::Complex, invalid, unsupported, Result};
+use super::{Result, aac_ld_mps_matrix_apply::Samples, aac_sbr_qmf::Complex, invalid, unsupported};
 #[derive(Clone, Debug, PartialEq)]
 struct Leaf {
     source: usize,
@@ -15,6 +15,8 @@ pub struct Decoder {
     cutoffs: Vec<u8>,
     leaves: Vec<Leaf>,
     previous: Vec<Vec<f64>>,
+    defined: Vec<u32>,
+    required: u32,
 }
 fn dense_positions(positions: &[u8]) -> Result<()> {
     let mut seen = vec![false; positions.len()];
@@ -114,10 +116,11 @@ impl Decoder {
         if boxes != cutoffs.len() || leaves.len() != positions.len() {
             return Err(invalid("arbitrary-tree box/leaf count mismatch"));
         }
-        let previous = leaves
-            .iter()
-            .map(|_| vec![1.0; 23])
-            .collect();
+        let defined = vec![(1u32 << 23) - 1; leaves.len()];
+        let required = map.map_or((1u32 << bands) - 1, |m| {
+            m.iter().fold(0, |mask, &b| mask | (1u32 << b))
+        });
+        let previous = leaves.iter().map(|_| vec![1.0; 23]).collect();
         Ok(Self {
             bands: usize::from(bands),
             inputs: nodes.len(),
@@ -125,6 +128,8 @@ impl Decoder {
             cutoffs: cutoffs.to_vec(),
             leaves,
             previous,
+            defined,
+            required,
         })
     }
     /// Change only the output permutation. Histories belong to preorder leaves,
@@ -140,23 +145,36 @@ impl Decoder {
         Ok(())
     }
     /// Retain indexed gain history across headers with unchanged split paths.
-    /// Uniform coded cutoffs may change resolution; dormant values retain indices.
-    /// Mixed-cutoff grid conversion and changed topology remain explicit refusals.
+    /// Dormant values retain indices; only histories defined for every newly
+    /// addressed band may transfer. Changed source/split paths remain refused.
     pub fn inherit_history(&mut self, old: &Self) -> Result<()> {
-        if (self.bands != old.bands
-            && (self.cutoffs.windows(2).any(|b| b[0] != b[1])
-                || old.cutoffs.windows(2).any(|b| b[0] != b[1])))
-            || self.leaves.len() != old.leaves.len()
-            || self.leaves.iter().zip(&old.leaves).any(|(a, b)| a.source != b.source || a.path != b.path)
+        if self.leaves.len() != old.leaves.len()
+            || self
+                .leaves
+                .iter()
+                .zip(&old.leaves)
+                .any(|(a, b)| a.source != b.source || a.path != b.path)
         {
             return Err(unsupported(
                 "LD-MPS arbitrary-tree layout/grid change requires stream reconfiguration",
             ));
         }
+        if self
+            .leaves
+            .iter()
+            .zip(&old.defined)
+            .any(|(leaf, &mask)| !leaf.path.is_empty() && mask & self.required != self.required)
+        {
+            return Err(unsupported(
+                "LD-MPS arbitrary-tree layout/grid change requires stream reconfiguration: undefined dormant gain history",
+            ));
+        }
         self.previous = old.previous.clone();
+        self.defined = old.defined.clone();
         Ok(())
     }
     pub fn reset(&mut self) {
+        self.defined.fill((1u32 << 23) - 1);
         for p in &mut self.previous {
             p.fill(1.0);
         }
@@ -211,38 +229,70 @@ impl Decoder {
                 "partial-band arbitrary-tree splits require qualification",
             ));
         }
+        let required = map.iter().fold(0, |mask, &band| mask | (1u32 << band));
+        if self
+            .leaves
+            .iter()
+            .zip(&self.defined)
+            .any(|(leaf, &mask)| !leaf.path.is_empty() && mask & required != required)
+        {
+            return Err(unsupported(
+                "LD-MPS arbitrary-tree layout/grid change requires stream reconfiguration: undefined dormant gain history",
+            ));
+        }
         let mut previous = self.previous.clone();
+        let mut defined = self.defined.clone();
+        // Unwritten automatic stack rows have no coefficient. Carry that
+        // fact through pushes/pops instead of fabricating a dormant value.
+        let mut stack = vec![vec![None; 23]; self.boxes + 2];
         let mut out = vec![vec![vec![Complex::default(); map.len()]; self.leaves.len()]; slots];
         let mut begin = 0;
         for (&end, parameters) in endpoints.iter().zip(cld) {
             let stop = usize::from(end) + 1;
+            let mut visited = vec![false; self.boxes];
+            let mut owner = None;
+            let mut live = 0;
+            let mut last_cutoff = 0;
             for (i, leaf) in self.leaves.iter().enumerate() {
-                let mut target = vec![1.0; self.bands];
-                let available = leaf
-                    .path
-                    .iter()
-                    .map(|&(node, _)| usize::from(self.cutoffs[node]))
-                    .min()
-                    .unwrap_or(self.bands);
-                for &(node, left) in &leaf.path {
-                    for (band, gain) in target.iter_mut().enumerate() {
-                        if band >= available {
+                let split = !leaf.path.is_empty();
+                if split {
+                    if owner != Some(leaf.source) {
+                        stack[0].fill(Some(1.0));
+                        owner = Some(leaf.source);
+                        live = 1;
+                    }
+                    for &(node, _) in &leaf.path {
+                        if visited[node] {
                             continue;
                         }
-                        let ratio = 10.0f64.powf(parameters[node][band] / 10.0);
-                        *gain *= if left {
-                            (ratio / (1.0 + ratio)).sqrt()
-                        } else {
-                            (1.0 / (1.0 + ratio)).sqrt()
-                        };
+                        visited[node] = true;
+                        live += 1;
+                        last_cutoff = usize::from(self.cutoffs[node]);
+                        for band in 0..last_cutoff {
+                            let ratio = 10.0f64.powf(parameters[node][band] / 10.0);
+                            for row in (1..live).rev() {
+                                stack[row][band] = stack[row - 1][band];
+                            }
+                            stack[1][band] =
+                                stack[1][band].map(|v| v * (1.0 / (1.0 + ratio)).sqrt());
+                            stack[0][band] =
+                                stack[0][band].map(|v| v * (ratio / (1.0 + ratio)).sqrt());
+                        }
                     }
                 }
                 for t in begin..stop {
                     let alpha = (t + 1 - begin) as f64 / (stop - begin) as f64;
                     for (q, &band) in map.iter().enumerate() {
                         let band = usize::from(band);
-                        let gain = fixed[leaf.source]
-                            * ((1.0 - alpha) * previous[i][band] + alpha * target[band]);
+                        let gain = if split {
+                            let target = stack[0][band].ok_or_else(|| {
+                                unsupported("undefined arbitrary-tree active stack gain")
+                            })?;
+                            fixed[leaf.source]
+                                * ((1.0 - alpha) * previous[i][band] + alpha * target)
+                        } else {
+                            fixed[leaf.source]
+                        };
                         let z = input[t][leaf.source][q];
                         let result = Complex {
                             re: z.re * gain,
@@ -254,10 +304,24 @@ impl Decoder {
                         out[t][leaf.output][q] = result;
                     }
                 }
-                previous[i][..available].copy_from_slice(&target[..available]);
+                if split {
+                    live -= 1;
+                    for band in 0..last_cutoff {
+                        if let Some(value) = stack[0][band] {
+                            previous[i][band] = value;
+                            defined[i] |= 1u32 << band;
+                        } else {
+                            defined[i] &= !(1u32 << band);
+                        }
+                        for row in 0..live {
+                            stack[row][band] = stack[row + 1][band];
+                        }
+                    }
+                }
             }
             begin = stop;
         }
+        self.defined = defined;
         self.previous = previous;
         Ok(out)
     }
@@ -381,6 +445,7 @@ impl Stage {
     ) -> std::result::Result<(), String> {
         f.vector(&self.fixed)?;
         f.vector(&self.decoder.cutoffs)?;
+        f.vector(&self.decoder.defined)?;
         f.vector(&self.decoder.leaves)?;
         for leaf in &self.decoder.leaves {
             f.vector(&leaf.path)?;

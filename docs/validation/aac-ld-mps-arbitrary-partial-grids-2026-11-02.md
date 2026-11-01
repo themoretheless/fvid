@@ -55,3 +55,5 @@ scenario. The rebuilt default-device probe completed12 MP4/Matroska runs and
 48 drains (full playback, two seeks, rewind), spanning both input domains and
 all five partial cutoff values. This is device delivery evidence, not subjective
 listening or physical multichannel wiring certification.
+
+Subsequent boundary update (2026-11-02): mixed-cutoff resolution changes now transfer exactly when every newly addressed band has defined history. See [defined-history qualification](aac-ld-mps-arbitrary-defined-2026-11-02.md). The blanket mixed-cutoff refusal above describes the historical snapshot.

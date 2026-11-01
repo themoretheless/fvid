@@ -144,7 +144,7 @@ fn grid_history_matches_original_c_for_every_pair_and_return() {
     );
 }
 #[test]
-fn changed_paths_and_mixed_cutoff_grid_conversion_still_refuse_atomically() {
+fn changed_paths_and_undefined_dormant_grid_conversion_still_refuse_atomically() {
     use fvid_media::owned_aac::aac_ld_mps_arbitrary_tree::Decoder;
     let old = Decoder::new(
         &[vec![true, false, false], vec![false]],
@@ -163,19 +163,28 @@ fn changed_paths_and_mixed_cutoff_grid_conversion_still_refuse_atomically() {
     let saved = changed.clone();
     assert!(changed.inherit_history(&old).is_err());
     assert_eq!(changed, saved);
-    let partial = Decoder::new_for_qmf(
+    let mut partial = Decoder::new_for_qmf(
         &[vec![true, true, false, false, false], vec![false]],
-        &[20, 21],
+        &[11, 12],
         &[0, 1, 2, 3],
-        23,
+        12,
         32,
     )
     .unwrap();
+    partial
+        .process(
+            &vec![vec![vec![Complex { re: 0.01, im: 0.02 }; 32]; 2]; 3],
+            &[2],
+            &[vec![vec![0.; 11], vec![0.; 12]]],
+            &fvid_media::owned_aac::aac_ld_mps_prepare::qmf_map(12, 32).unwrap(),
+            &[1., 1.],
+        )
+        .unwrap();
     let mut full = Decoder::new_for_qmf(
         &[vec![true, true, false, false, false], vec![false]],
-        &[12, 12],
+        &[15, 15],
         &[0, 1, 2, 3],
-        12,
+        15,
         32,
     )
     .unwrap();

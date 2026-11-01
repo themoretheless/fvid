@@ -1,0 +1,97 @@
+{
+  "date": "2026-11-02",
+  "scope": "Per-band defined ArbitraryTree history, fixed topology and coded active QMF coverage; not whole codec parity",
+  "before_component": {
+    "scope": "Exact prior Decoder component, extracted before Stage; own canonical map stub, not a full old player run",
+    "commit": "79125a8c73",
+    "component_sha256": "efd4f1d2a4ab1d2d236c7306c197f33d4edf0d96957933d9da225daec2040af1",
+    "driver_sha256": "8a5d5cc2ffbebb0356281fe4691064e64cc387b260a76fb2de65e61e760e1626",
+    "stdout": "LD-MPS arbitrary-tree layout/grid change requires stream reconfiguration\n",
+    "exit_code": 0,
+    "fixture": "plain32-tree7-shape0-state12-6-return.mp4"
+  },
+  "corpus": {
+    "playback_programmes": 1716,
+    "undefined_history_refusal_programmes": 96,
+    "access_units": 3,
+    "reference_scenarios": 696,
+    "reference_accepted": 648,
+    "reference_undefined": 48,
+    "files": 3630,
+    "authored_regeneration_byte_identical": true,
+    "process_and_network_creation_forbidden": true,
+    "manifest": {
+      "path": "tests/fixtures/playback-errors/aac-ld-mps-arbitrary-defined/manifest.json",
+      "sha256": "54d0706be673794168fc3e7dc5d43f092b1cb257d14a85f4c04ec2dd30ea0092"
+    }
+  },
+  "gate": {
+    "existing_command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test aac_ld_mps_arbitrary_partial_grids --test aac_ld_mps_arbitrary_grids --test aac_ld_mps_arbitrary_partial --test aac_ld_mps_arbitrary_tree",
+    "existing_log": {
+      "path": "/tmp/fvid-arbitrary-defined-gate.log",
+      "sha256": "f7b9c0e92b1e689a3eeb4394672b2ebee9521e03e10fbd0e4aeed8d5becc4f04"
+    },
+    "existing_passed": 26,
+    "component_command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test aac_ld_mps_arbitrary_defined -- --nocapture",
+    "component_log": {
+      "path": "/tmp/fvid-arbitrary-defined-component.log",
+      "sha256": "d26df5c24fe6af53c3483c508f088c72e8b9b01725f026532e0a203d4f3af43e"
+    },
+    "component_passed": 1,
+    "media_command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test aac_ld_mps_arbitrary_defined_playback",
+    "media_log": {
+      "path": "/tmp/fvid-arbitrary-defined-playback.log",
+      "sha256": "53b82bc6406cd7adbfd28ae0108c924b3085fbe293098009f4d975d0e06c9e8f"
+    },
+    "media_passed": 5,
+    "unique_passed": 32,
+    "failed": 0,
+    "ignored": 0,
+    "scope": "Focused qualification, not a full-current-tree gate"
+  },
+  "final_checks": {
+    "syntax_command": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2 cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player --test aac_ld_mps_arbitrary_defined_playback every_defined_or_refused_movie_has_complete_covered_syntax",
+    "syntax_log": {
+      "path": "/tmp/fvid-arbitrary-defined-syntax-final.log",
+      "sha256": "cbb34fe37ff51a10622d0cd38a6f89a80577639970f282ba4652c993d7aeae9d"
+    },
+    "checks": "All coded CLD indices, row lengths, nominal grids and cutoff values; media bytes unchanged after manifest provenance cleanup",
+    "renamed_guard_filter": "changed_paths_and_undefined_dormant_grid_conversion_still_refuse_atomically",
+    "guard_log": {
+      "path": "/tmp/fvid-arbitrary-defined-atomic-final.log",
+      "sha256": "c7f92e038183e373b08bc403c177d7d186aa54eb244ece2ad3daebd031c17f38"
+    },
+    "repeats_not_added_to_unique_count": true
+  },
+  "reference": {
+    "scalars": 1548288,
+    "maximum_absolute_error": 3.913235131769444e-09,
+    "tolerance": 2e-08,
+    "source_report": {
+      "path": "docs/validation/aac-ld-mps-arbitrary-defined-reference-2026-11-02.json",
+      "sha256": "2c95e7f91bd98a67c2b4c5ade1bbfc7ad0fe9832511b8f4e57f382ebb14692e9"
+    },
+    "undefined_output_used_as_gold": false
+  },
+  "device": {
+    "runs": 12,
+    "completed_phases": 48,
+    "report": {
+      "path": "docs/validation/aac-ld-mps-arbitrary-defined-device-2026-11-02.json",
+      "sha256": "384aee42438c794c680e202abca77d8d7393240919f38cf72b1b9b3dba792fff"
+    },
+    "build_log": {
+      "path": "/tmp/fvid-arbitrary-defined-device-build.log",
+      "sha256": "0d16506de75125fd28f6663a8c96336f46efa379bc8fae70131945a17455a15f"
+    }
+  },
+  "remaining": [
+    "undefined dormant history semantics",
+    "active-uncovered bands",
+    "changed topology/source paths",
+    "sparse positions",
+    "nonzero EBQ with active arbitrary trees",
+    "active unequal-grid HRTF"
+  ],
+  "whole_codec_goal_complete": false
+}
