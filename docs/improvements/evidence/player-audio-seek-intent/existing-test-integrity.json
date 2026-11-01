@@ -1,0 +1,20 @@
+[
+  {
+    "path": "src/audio_thread.rs",
+    "existing_assertions_and_bodies_unchanged": true,
+    "original_test_body_sha256": "47625119a0c466a0ab25e53b6f04ebf44a27a2f4896e617e1ebf6acadf72945b",
+    "allowed_change": "Required private state initialization and incidental trailing space at its insertion only."
+  },
+  {
+    "path": "src/playback/audio/vorbis_worker_tests.rs",
+    "existing_assertions_and_bodies_unchanged": true,
+    "original_test_body_sha256": "56dc2e747977b7e9d02a667c22a497dfb2804bb8fc6aae9afd40939520ff3429",
+    "allowed_change": "Required private state initialization and incidental trailing space at its insertion only."
+  },
+  {
+    "path": "src/audio_thread_seek_resume_tests.rs",
+    "existing_assertions_and_bodies_unchanged": true,
+    "original_test_body_sha256": "3acdda7df31ff9a49f48aaedd4b87809287ecd9f3ed8d45268673eb2a35bfbbf",
+    "allowed_change": "Required private state initialization and incidental trailing space at its insertion only."
+  }
+]

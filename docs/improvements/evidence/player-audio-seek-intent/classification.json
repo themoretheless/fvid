@@ -1,0 +1,9 @@
+{
+  "proposed_id": "FVID-0469",
+  "count_delta": 1,
+  "baseline_commit": "d9a602db48358f80ce9aaa474829439a126dbacc",
+  "older_commit": "4f8121472fd7142a13fbcf1324e032b9000fc0e7",
+  "unchanged_navigation_and_position_sha256": "bb7be13e63ac4f79588a51a96f48520ccfd2ff32f5b13c1539b74c02d945ca04",
+  "independent_of": "Pending sound intent already absent before the video-relative-jump fix0461. Actual public device position semantics are retained.",
+  "controls_directions_and_constructor_fields_count_delta": 0
+}

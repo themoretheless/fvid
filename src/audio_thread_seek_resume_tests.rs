@@ -76,7 +76,7 @@ fn worker(codec: &str) -> (Worker, SyncSender<Command>, Arc<Mutex<Trace>>) {
     let trace = Arc::new(Mutex::new(Trace::default()));
     let (tx, commands) = sync_channel(16);
     let (events, _) = sync_channel(16);
-    let worker = Worker {
+    let worker = Worker { navigation_generation: Default::default(),
         output_configuration: None,
         reconfiguration: None,
         output_needs_restart: false,

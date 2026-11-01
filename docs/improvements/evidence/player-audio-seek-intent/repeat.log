@@ -1,0 +1,259 @@
+run 1
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.06s
+
+run 2
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.06s
+
+run 3
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.07s
+
+run 4
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.06s
+
+run 5
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.06s
+
+run 6
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.06s
+
+run 7
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.07s
+
+run 8
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.06s
+
+run 9
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.06s
+
+run 10
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.06s
+
+run 11
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.06s
+
+run 12
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.06s
+
+run 13
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.06s
+
+run 14
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.06s
+
+run 15
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.06s
+
+run 16
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.07s
+
+run 17
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.07s
+
+run 18
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.06s
+
+run 19
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.07s
+
+run 20
+
+running 7 tests
+test player::audio_seek_intent_regressions::exact_mp4_video_and_actual_pcm_seek_eof_control ... ok
+test player::audio_seek_intent_regressions::acknowledged_fractional_request_releases_to_quantized_actual_mp4_clock ... ok
+test player::audio_seek_intent_regressions::paused_backward_jumps_preserve_both_offsets_and_resume_pcm ... ok
+test player::audio_seek_intent_regressions::pending_absolute_seek_keeps_requested_transport_but_not_device_clock ... ok
+test player::audio_seek_intent_regressions::queued_backward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::queued_forward_jumps_preserve_both_offsets ... ok
+test player::audio_seek_intent_regressions::restart_supersedes_a_blocked_seek_with_zero_transport_phase ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1172 filtered out; finished in 0.07s

@@ -1,0 +1,151 @@
+diff --git a/src/audio_thread.rs b/src/audio_thread.rs
+index 09f9cc4687..cc56149494 100644
+--- a/src/audio_thread.rs
++++ b/src/audio_thread.rs
+@@ -5,0 +6 @@ use std::sync::{Arc, Mutex};
++use std::sync::atomic::{AtomicU64, Ordering};
+@@ -73,0 +75,2 @@ pub struct AudioPlayback {
++    pending_position: Option<(u64, Duration)>,
++    navigation_request: u64,
+@@ -75,0 +79 @@ pub struct AudioPlayback {
++    navigation_generation: Arc<AtomicU64>,
+@@ -112,0 +117,2 @@ impl AudioPlayback {
++        let navigation_generation = Arc::new(AtomicU64::new(0));
++        let worker_navigation = navigation_generation.clone();
+@@ -152 +158 @@ impl AudioPlayback {
+-                Worker { output_configuration, reconfiguration: None, output_needs_restart: false, duration: duration_clone, checkpoints:Vec::new(), dolby_policy:policy,
++                Worker { navigation_generation: worker_navigation, output_configuration, reconfiguration: None, output_needs_restart: false, duration: duration_clone, checkpoints:Vec::new(), dolby_policy:policy,
+@@ -170,0 +177,3 @@ impl AudioPlayback {
++            pending_position: None,
++            navigation_request: 0,
++            navigation_generation,
+@@ -211 +220,4 @@ impl AudioPlayback {
+-        let _ = self.commands.send(Command::Rewind);
++        if self.commands.send(Command::Rewind).is_ok() {
++            self.navigation_request += 1;
++            self.pending_position = Some((self.navigation_request, Duration::ZERO));
++        }
+@@ -217,2 +229,3 @@ impl AudioPlayback {
+-        if self.timescale > 0 {
+-            let _ = self.commands.send(Command::SeekTime(target));
++        if self.timescale > 0 && self.commands.send(Command::SeekTime(target)).is_ok() {
++            self.navigation_request += 1;
++            self.pending_position = Some((self.navigation_request, target));
+@@ -231,0 +245,12 @@ impl AudioPlayback {
++
++    /// UI/navigation intent until the worker commits the latest seek/rewind.
++    /// Device position remains the actual output clock used for A/V sync.
++    pub(crate) fn transport_position(&self) -> Duration {
++        if let Some((generation, target)) = self.pending_position
++            && self.navigation_generation.load(Ordering::Acquire) < generation
++        {
++            return target;
++        }
++        self.position()
++    }
++
+@@ -272,0 +298 @@ struct Worker {
++    navigation_generation: Arc<AtomicU64>,
+@@ -646,0 +673 @@ impl Worker {
++        let navigation = nav.is_some();
+@@ -675,0 +703,5 @@ impl Worker {
++        if navigation {
++            // Publish only after seek/rewind, backend flush and the actual
++            // sample anchor have all succeeded, including coalesced commands.
++            self.navigation_generation.store(self.generation, Ordering::Release);
++        }
+@@ -983 +1015 @@ mod presentation_window_tests {
+-        let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder,backend:Box::new(Capture(counts.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
++        let mut worker = Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder,backend:Box::new(Capture(counts.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+@@ -1033 +1065 @@ mod no_edit_seek_tests {
+-        let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
++        let mut worker = Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+@@ -1086 +1118 @@ mod preroll_control_tests {
+-            let worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder:Box::new(Decoder { inner,commands:worker_commands,calls:worker_calls }),backend:Box::new(Backend(paused_tx)),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
++            let worker = Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder:Box::new(Decoder { inner,commands:worker_commands,calls:worker_calls }),backend:Box::new(Backend(paused_tx)),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+@@ -1111 +1143 @@ mod adts_seek_tests {
+-        let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
++        let mut worker = Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+@@ -1138 +1170 @@ mod matroska_aac_seek_tests {
+-        let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
++        let mut worker = Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+@@ -1197 +1229 @@ mod scheduling_step_tests {
+-        let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(steps),decoder:Box::new(Decoder(resets.clone())),backend:Box::new(super::presentation_window_tests::Capture(counts.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
++        let mut worker=Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(steps),decoder:Box::new(Decoder(resets.clone())),backend:Box::new(super::presentation_window_tests::Capture(counts.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+@@ -1229 +1261 @@ mod mp4_edit_scheduler_tests {
+-        let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
++        let mut worker=Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+@@ -1281 +1313 @@ mod checkpoint_seek_tests {
+-            let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream,decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
++            let mut worker=Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream,decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+@@ -1312 +1344 @@ mod checkpoint_seek_tests {
+-        let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
++        let mut worker=Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+@@ -1362 +1394 @@ mod ps_eof_tests {
+-            let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:7,position:Arc::new(Mutex::new(Duration::ZERO))};
++            let mut worker=Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:7,position:Arc::new(Mutex::new(Duration::ZERO))};
+@@ -1412 +1444 @@ mod ps_edit_worker_tests {
+-            let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
++            let mut worker=Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+@@ -1439 +1471 @@ mod ps_edit_worker_tests {
+-            let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
++            let mut worker=Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+@@ -1465 +1497 @@ mod ps_edit_worker_tests {
+-            let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
++            let mut worker=Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+@@ -1477 +1509 @@ mod ps_edit_worker_tests {
+-            let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
++            let mut worker=Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+@@ -1521 +1553 @@ mod ps_matroska_preroll_tests {
+-            let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,
++            let mut worker = Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false,
+@@ -1629 +1661 @@ mod ogg_opus_configuration_tests {
+-        let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,
++        let mut worker = Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false,
+@@ -1779 +1811 @@ mod ogg_opus_output_layout_tests {
+-            let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,
++            let mut worker = Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false,
+@@ -1837 +1869 @@ mod exact_seek_clock_regressions {
+-        let mut playback=AudioPlayback{commands,events,generation:0,thread:None,
++        let mut playback=AudioPlayback{commands,events,generation:0,pending_position:None,navigation_generation:Default::default(),navigation_request:0,thread:None,
+@@ -1983 +2015 @@ mod duration_publication_guards {
+-            let mut worker=Worker{ output_configuration: None, reconfiguration: None, output_needs_restart: false,duration:duration.clone(),checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(crate::audio::NullBackend::default()),commands,events,playing:true,ended:false,draining:false,queued_frontier:Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
++            let mut worker=Worker{ navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false,duration:duration.clone(),checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(crate::audio::NullBackend::default()),commands,events,playing:true,ended:false,draining:false,queued_frontier:Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+@@ -2011 +2043 @@ mod sample_seek_clock_regressions {
+-            let mut playback=AudioPlayback{commands,events,generation:0,thread:None,position:Arc::new(Mutex::new(Duration::ZERO)),timescale:scale,duration:Arc::new(Mutex::new(None))};
++            let mut playback=AudioPlayback{commands,events,generation:0,pending_position:None,navigation_generation:Default::default(),navigation_request:0,thread:None,position:Arc::new(Mutex::new(Duration::ZERO)),timescale:scale,duration:Arc::new(Mutex::new(None))};
+diff --git a/src/audio_thread_seek_resume_tests.rs b/src/audio_thread_seek_resume_tests.rs
+index de369013cc..53e119a7f2 100644
+--- a/src/audio_thread_seek_resume_tests.rs
++++ b/src/audio_thread_seek_resume_tests.rs
+@@ -79 +79 @@ fn worker(codec: &str) -> (Worker, SyncSender<Command>, Arc<Mutex<Trace>>) {
+-    let worker = Worker {
++    let worker = Worker { navigation_generation: Default::default(),
+diff --git a/src/playback/audio/vorbis_worker_tests.rs b/src/playback/audio/vorbis_worker_tests.rs
+index 472dd7ae5a..cbf8e4b263 100644
+--- a/src/playback/audio/vorbis_worker_tests.rs
++++ b/src/playback/audio/vorbis_worker_tests.rs
+@@ -89 +89 @@ fn ogg_vorbis_channel_changes_keep_backend_geometry_through_seek_and_rewind() {
+-        let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,
++        let mut worker = Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false,
+@@ -165 +165 @@ fn ogg_vorbis_rate_changes_keep_backend_clock_through_seek_and_rewind() {
+-        let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,
++        let mut worker = Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false,
+@@ -238 +238 @@ fn ogg_codec_changes_keep_backend_pcm_clock_through_navigation() {
+-        let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,
++        let mut worker = Worker { navigation_generation: Default::default(), output_configuration: None, reconfiguration: None, output_needs_restart: false,
+diff --git a/src/player.rs b/src/player.rs
+index 660991750c..2d786c5779 100644
+--- a/src/player.rs
++++ b/src/player.rs
+@@ -3063 +3063 @@ impl Player {
+-        if self.playback.is_none() { return self.audio.as_ref().map(|audio| audio.position()); }
++        if self.playback.is_none() { return self.audio.as_ref().map(|audio| audio.transport_position()); }
+@@ -4442 +4442 @@ impl Player {
+-                self.audio.as_ref().map(|audio| audio.position()),
++                self.audio.as_ref().map(|audio| audio.transport_position()),
+@@ -13204,0 +13205,4 @@ mod sound_eof_loop_regressions;
++
++#[cfg(test)]
++#[path = "player_audio_seek_intent_tests.rs"]
++mod audio_seek_intent_regressions;

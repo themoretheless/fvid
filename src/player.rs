@@ -3060,7 +3060,7 @@ impl Player {
     fn presentation_clock(&self) -> Option<Duration> {
         if let Some(target) = self.seek_target { return Some(target); }
         if let Some(at) = self.terminal_clock { return Some(at); }
-        if self.playback.is_none() { return self.audio.as_ref().map(|audio| audio.position()); }
+        if self.playback.is_none() { return self.audio.as_ref().map(|audio| audio.transport_position()); }
         if let Some(audio) = &self.audio {
             let clock = delayed_clock(audio.position(), self.audio_delay_ms);
             // Device completion must not rewind an audio-paced picture to a
@@ -4439,7 +4439,7 @@ impl Player {
         if self.playback.is_none() {
             // With no picture the audio thread's own clock is the timeline.
             return (
-                self.audio.as_ref().map(|audio| audio.position()),
+                self.audio.as_ref().map(|audio| audio.transport_position()),
                 self.duration,
             );
         }
@@ -13202,3 +13202,7 @@ mod sound_stop_loop_regressions;
 #[cfg(test)]
 #[path = "player_sound_eof_loop_tests.rs"]
 mod sound_eof_loop_regressions;
+
+#[cfg(test)]
+#[path = "player_audio_seek_intent_tests.rs"]
+mod audio_seek_intent_regressions;

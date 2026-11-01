@@ -1,0 +1,16 @@
+    pub fn rewind(&mut self) {
+        self.generation += 1;
+        let _ = self.commands.send(Command::Rewind);
+    }
+
+    /// Seek the audio clock to a stream position.
+    pub fn seek(&mut self, target: Duration) {
+        self.generation += 1;
+        if self.timescale > 0 {
+            let _ = self.commands.send(Command::SeekTime(target));
+        }
+    }
+
+    pub fn position(&self) -> Duration {
+        *self.position.lock().unwrap()
+    }

@@ -1,0 +1,8 @@
+{
+  "src/player.rs": "5816af4bfb55dacb1132a706c9f9c0a1b7b527417885b5ae04331d73d13f91ae",
+  "src/audio_thread.rs": "49f0efc57d816d17345780007cf9800b026151831e1038c9a635cdf98ebbf070",
+  "src/player_audio_seek_intent_tests.rs": "e9aa2859dece943b22be350e7de1ac47b4f44c26d85777c78d1d46c3460546de",
+  "scripts/generate_player_audio_seek_intent.py": "c57c2eb93d51d896e78cb6147b7a7e2e8f3a19e3a50896d49b284d617adf1b2a",
+  "src/playback/audio/vorbis_worker_tests.rs": "56dc2e747977b7e9d02a667c22a497dfb2804bb8fc6aae9afd40939520ff3429",
+  "src/audio_thread_seek_resume_tests.rs": "3acdda7df31ff9a49f48aaedd4b87809287ecd9f3ed8d45268673eb2a35bfbbf"
+}

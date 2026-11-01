@@ -1,0 +1,103 @@
+{
+  "completed": true,
+  "removed": [
+    {
+      "path": "/private/tmp/fvid-player-audio-seek-intent-after.log",
+      "bytes": 26534,
+      "raw_sha256": "8e579055ebf6ce789fe42ace9dc5f89d92e8c103a59088b2e3f22fa51900fd21",
+      "archive": "raw-history/after.log",
+      "archive_sha256": "0c86d5535a17c4e1f72040e9f6ab00c02ca3fe4db13b14ebd093cfc144256bd3"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-seek-intent-audio-thread.log",
+      "bytes": 29884,
+      "raw_sha256": "b961f8d4f10f2fe9811e5a896b1299486f92f71b8be6d314f7838b15181e53a1",
+      "archive": "raw-history/audio-thread.log",
+      "archive_sha256": "3af17f50435599f7cad0995d4ad34b76189180feda0487aea4321d555bd8da2e"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-seek-intent-before.log",
+      "bytes": 39056,
+      "raw_sha256": "38a5566869f48ed5dea7950b36efd8068586860ce8636d73e91e8eff70864626",
+      "archive": "raw-history/before.log",
+      "archive_sha256": "38a5566869f48ed5dea7950b36efd8068586860ce8636d73e91e8eff70864626"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-seek-intent-collection.log",
+      "bytes": 4008,
+      "raw_sha256": "ced2bb36a12178aafe4f2870fb9ab32502f9a41c958e91a627c45fa9e698daf5",
+      "archive": "raw-history/collection.log",
+      "archive_sha256": "ced2bb36a12178aafe4f2870fb9ab32502f9a41c958e91a627c45fa9e698daf5"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-seek-intent-core-check.log",
+      "bytes": 26898,
+      "raw_sha256": "a438fa644b7cb67ce2320015148ea8a03cd97b99ef9fa0d2dd99bf47caf0bdfd",
+      "archive": "raw-history/core-check.log",
+      "archive_sha256": "a438fa644b7cb67ce2320015148ea8a03cd97b99ef9fa0d2dd99bf47caf0bdfd"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-seek-intent-integration.log",
+      "bytes": 112324,
+      "raw_sha256": "0a6c7223679f8a88c0aea3ee1e6381477b42ceb101a0bb73e8adfd21cd3a10e2",
+      "archive": "raw-history/integration.log",
+      "archive_sha256": "5fa70a11c0a76674387335deb94853ba0aba1eab95228b3f3ff50c7f8ae12e7a"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-seek-intent-media.log",
+      "bytes": 71105,
+      "raw_sha256": "9822d5675e532c8cf86af0f14d1b182819d5dd9696239f9d06e01f613d5471ba",
+      "archive": "raw-history/media.log",
+      "archive_sha256": "0dffcbc5944b42a29e62fa31760ca666fbb27c244d55a577e0dc7332e1071d36"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-seek-intent-player-check.log",
+      "bytes": 32684,
+      "raw_sha256": "62990765f81a9a6b37eb1a3e318d989f1c15d9365ac21120d161c1dd78b23893",
+      "archive": "raw-history/player-check.log",
+      "archive_sha256": "62990765f81a9a6b37eb1a3e318d989f1c15d9365ac21120d161c1dd78b23893"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-seek-intent-player-units.log",
+      "bytes": 52973,
+      "raw_sha256": "881399600e7969547825b459d1a35171ab3d11c6834c05f7ceaa5da906c65996",
+      "archive": "raw-history/player-units.log",
+      "archive_sha256": "4857968a0c2601cd8fb6ca8e985c4c424b0929f496b413ecabed2e9f9f86219e"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-seek-intent-qualification-driver.log",
+      "bytes": 145,
+      "raw_sha256": "d9278c1c2ce5095ee894b2a1239fcdd765fc05381ff48f9bf17f622eadf0f451",
+      "archive": "raw-history/qualification-driver.log",
+      "archive_sha256": "d9278c1c2ce5095ee894b2a1239fcdd765fc05381ff48f9bf17f622eadf0f451"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-seek-intent-root-mp4.log",
+      "bytes": 33542,
+      "raw_sha256": "a5a6c5496b029cfc87498b550ec6def4c8d9189d033a64f8b5425b00add47a93",
+      "archive": "raw-history/root-mp4.log",
+      "archive_sha256": "28a25d5e823ab7827fdad15bd9cac826e94216ee5368266b754949e3097d1425"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-seek-intent-root-webm.log",
+      "bytes": 31813,
+      "raw_sha256": "109114724d6b59cb40369f7df6d184d436b1c9890b1b86ee171df5ea72a96a4d",
+      "archive": "raw-history/root-webm.log",
+      "archive_sha256": "4d0d31af96e6d575ea302b3c5b7f046e959d09e660616964b3f321709fe40128"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-seek-intent-target-20261101",
+      "kind": "owned completed-run build target"
+    },
+    {
+      "path": "/private/tmp/fvid-player-audio-seek-intent-video-thread.log",
+      "bytes": 26223,
+      "raw_sha256": "30b579228416465a96c26fde1894a24e9e609f5e01512960bd0d821761d5935f",
+      "archive": "raw-history/video-thread.log",
+      "archive_sha256": "4f75bad63168fdde7c5c02a03528913de67259d2d2d47faf0049e867045c83f4"
+    }
+  ],
+  "regression_fixtures_and_evidence_preserved": true,
+  "foreign_worktrees_branches_stashes_preserved": true,
+  "earliest_tmp_before_log": "qualified baseline;all final evidence archived"
+}

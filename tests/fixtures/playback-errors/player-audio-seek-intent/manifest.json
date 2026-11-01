@@ -1,0 +1,13 @@
+{
+  "provenance": "Authored200ms mono8kHz PCM MP4 and1.5s five-frame16x16 VP9 video companion. Exact independent scalar PCM/YUV;actual backend flush can be delayed without private media,FFmpeg,network or codec parameter copying.",
+  "audio_ms": 200,
+  "video_ms": 1500,
+  "sha256": {
+    "frame-0.yuv16": "b4cc94ff03bd17b32107a79a64ba427cd43b6e49d209bb4d29190f3deb737a11",
+    "frame-1.yuv16": "31d05f629132273f660622387ef2865866de6688c0969265e891ad9d4c936237",
+    "frame-2.yuv16": "2f59155bee83baf25a0d39c17290257f055569e5b1d77ca8b866b1a4b2cee6f7",
+    "movie.mp4": "c40d1df373b5e56c3780a3950d0f8e51bd989cdfeac30c6d4805e51fec381f8a",
+    "sound.mp4": "22296c2652a407a0ea54462764a6038e45ac28a0a5bbd8c726fdbbb09b5f7199",
+    "sound.f32le": "11d1e18706d4b5a2321327f52a64a917ff2bb9b955fa7d32a53bb50dac90d78d"
+  }
+}

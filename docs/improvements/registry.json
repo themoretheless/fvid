@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 468,
-  "next_id": "FVID-0469",
+  "accepted_count": 469,
+  "next_id": "FVID-0470",
   "entries": [
     {
       "id": "FVID-0001",
@@ -5278,6 +5278,20 @@
       "result": "Retain healthy EOF ownership when a reached stop or valid A-B rewind is pending. Existing tick_sound resolves stop before loop and defers while paused. Failed devices and unreachable B still complete normally. Eight unchanged regressions verify exact PCM suffix after native A seek and natural subsequent EOF;20repeats pass160case executions. All9gates pass1589physical-source-distinct checks and both builds;five old ignores unchanged. No performance,physical audio or new native-window duration claim.",
       "status": "accepted",
       "validation": "batch-468-validation.json"
+    },
+    {
+      "id": "FVID-0469",
+      "batch": 469,
+      "title": "Preserve pending native audio seek intent across successive transport commands",
+      "source": "src/player.rs",
+      "related_sources": [
+        "src/audio_thread.rs"
+      ],
+      "regression": "src/player_audio_seek_intent_tests.rs",
+      "before": "Identical seven-case native MP4 baseline passes exact video/PCM seek/EOF and fractional sample-anchor controls,but five delayed-navigation cases fail. Actual forward flush targets75/50ms replace75/100ms;backward/paused targets75/100ms replace75/50ms. Pending absolute75ms and restart0ms still publish stale25ms transport. The missing intent predates0461.",
+      "result": "Retain accepted navigation intent separately from actual device position until the worker commits its latest seek/rewind after successful flush and sample anchoring. Use it only for sound-only navigation/timeline;public position and A/V sync keep actual clocks. Seven unchanged regressions verify requested versus actual phase,exact native PCM suffixes,paused resume,quantized75ms+1ns release and natural EOF. Twenty repeats pass140cases;all9gates pass1596physical-source-distinct checks and both builds with five old ignores unchanged. Existing Worker/mock fixtures receive required private fields only;assertions/bodies are independently verified unchanged. No performance,physical audio or new native-window duration claim.",
+      "status": "accepted",
+      "validation": "batch-469-validation.json"
     }
   ]
 }

@@ -1,0 +1,23 @@
+{
+  "baseline_and_candidate_test_sha256": "e9aa2859dece943b22be350e7de1ac47b4f44c26d85777c78d1d46c3460546de",
+  "test_unchanged": true,
+  "baseline": {
+    "passed": 2,
+    "failed": 5,
+    "exit_code": 101
+  },
+  "existing_assertions_modified": false,
+  "existing_worker_fixture_initializers": 22,
+  "fixture_change": "Add required private generation acknowledgment state with default;no assertions changed.",
+  "existing_mock_handle_initializers": 2,
+  "additional_fixture_paths": [
+    "src/playback/audio/vorbis_worker_tests.rs",
+    "src/audio_thread_seek_resume_tests.rs"
+  ],
+  "initial_candidate_compile_failure": "initial-candidate-compile.log;missing required private fields only;no test assertions ran or were weakened",
+  "focused_candidate": {
+    "passed": 7,
+    "failed": 0,
+    "exit_code": 0
+  }
+}
