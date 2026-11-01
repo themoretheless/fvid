@@ -24541,3 +24541,10 @@ in-band metadata changes, without changing multichannel PCM. Qualification
 uses 1,512 own programmes, 168 controls, source-C equivalence and device playback.
 Active HRTF projection and binaural rendering are outside this milestone;
 metadata validation remains enforced. See [qualification](validation/aac-ld-mps-hrtf-unused-2026-11-02.md).
+
+### 2026-11-02: active HRTF source-oracle limitation reproduced
+
+An explicit original-C diagnostic shows that 21 of 49 resolution pairs depend
+on untransmitted HRTF tail values. This changes the qualification approach:
+the original direct-index function alone cannot qualify unequal-grid mapping.
+No production refusal was removed. See [diagnostic](validation/aac-ld-mps-hrtf-tail-reference-2026-11-02.md).

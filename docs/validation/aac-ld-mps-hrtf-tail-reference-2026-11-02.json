@@ -1,0 +1,362 @@
+{
+  "scope": "Source-dataflow diagnostic only: same transmitted HRTF values, different finite untransmitted tail. No normative mapping, PCM acceptance or conformance claim.",
+  "pairs": [
+    {
+      "spatial_bands": 4,
+      "hrtf_bands": 4,
+      "selected_band": 3,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 4,
+      "hrtf_bands": 5,
+      "selected_band": 3,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 4,
+      "hrtf_bands": 7,
+      "selected_band": 3,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 4,
+      "hrtf_bands": 9,
+      "selected_band": 3,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 4,
+      "hrtf_bands": 12,
+      "selected_band": 3,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 4,
+      "hrtf_bands": 15,
+      "selected_band": 3,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 4,
+      "hrtf_bands": 23,
+      "selected_band": 3,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 5,
+      "hrtf_bands": 4,
+      "selected_band": 4,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.21129095500000006
+    },
+    {
+      "spatial_bands": 5,
+      "hrtf_bands": 5,
+      "selected_band": 4,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 5,
+      "hrtf_bands": 7,
+      "selected_band": 4,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 5,
+      "hrtf_bands": 9,
+      "selected_band": 4,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 5,
+      "hrtf_bands": 12,
+      "selected_band": 4,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 5,
+      "hrtf_bands": 15,
+      "selected_band": 4,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 5,
+      "hrtf_bands": 23,
+      "selected_band": 4,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 7,
+      "hrtf_bands": 4,
+      "selected_band": 6,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.20863104
+    },
+    {
+      "spatial_bands": 7,
+      "hrtf_bands": 5,
+      "selected_band": 6,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.20863104
+    },
+    {
+      "spatial_bands": 7,
+      "hrtf_bands": 7,
+      "selected_band": 6,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 7,
+      "hrtf_bands": 9,
+      "selected_band": 6,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 7,
+      "hrtf_bands": 12,
+      "selected_band": 6,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 7,
+      "hrtf_bands": 15,
+      "selected_band": 6,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 7,
+      "hrtf_bands": 23,
+      "selected_band": 6,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 9,
+      "hrtf_bands": 4,
+      "selected_band": 8,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.21543705999999996
+    },
+    {
+      "spatial_bands": 9,
+      "hrtf_bands": 5,
+      "selected_band": 8,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.21543705999999996
+    },
+    {
+      "spatial_bands": 9,
+      "hrtf_bands": 7,
+      "selected_band": 8,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.21543705999999996
+    },
+    {
+      "spatial_bands": 9,
+      "hrtf_bands": 9,
+      "selected_band": 8,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 9,
+      "hrtf_bands": 12,
+      "selected_band": 8,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 9,
+      "hrtf_bands": 15,
+      "selected_band": 8,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 9,
+      "hrtf_bands": 23,
+      "selected_band": 8,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 12,
+      "hrtf_bands": 4,
+      "selected_band": 11,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.22356116999999998
+    },
+    {
+      "spatial_bands": 12,
+      "hrtf_bands": 5,
+      "selected_band": 11,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.22356116999999998
+    },
+    {
+      "spatial_bands": 12,
+      "hrtf_bands": 7,
+      "selected_band": 11,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.22356116999999998
+    },
+    {
+      "spatial_bands": 12,
+      "hrtf_bands": 9,
+      "selected_band": 11,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.22356116999999998
+    },
+    {
+      "spatial_bands": 12,
+      "hrtf_bands": 12,
+      "selected_band": 11,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 12,
+      "hrtf_bands": 15,
+      "selected_band": 11,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 12,
+      "hrtf_bands": 23,
+      "selected_band": 11,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 15,
+      "hrtf_bands": 4,
+      "selected_band": 14,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.12786114999999998
+    },
+    {
+      "spatial_bands": 15,
+      "hrtf_bands": 5,
+      "selected_band": 14,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.12786114999999998
+    },
+    {
+      "spatial_bands": 15,
+      "hrtf_bands": 7,
+      "selected_band": 14,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.12786114999999998
+    },
+    {
+      "spatial_bands": 15,
+      "hrtf_bands": 9,
+      "selected_band": 14,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.12786114999999998
+    },
+    {
+      "spatial_bands": 15,
+      "hrtf_bands": 12,
+      "selected_band": 14,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.12786114999999998
+    },
+    {
+      "spatial_bands": 15,
+      "hrtf_bands": 15,
+      "selected_band": 14,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 15,
+      "hrtf_bands": 23,
+      "selected_band": 14,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    },
+    {
+      "spatial_bands": 23,
+      "hrtf_bands": 4,
+      "selected_band": 22,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.12595354999999997
+    },
+    {
+      "spatial_bands": 23,
+      "hrtf_bands": 5,
+      "selected_band": 22,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.12595354999999997
+    },
+    {
+      "spatial_bands": 23,
+      "hrtf_bands": 7,
+      "selected_band": 22,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.12595354999999997
+    },
+    {
+      "spatial_bands": 23,
+      "hrtf_bands": 9,
+      "selected_band": 22,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.12595354999999997
+    },
+    {
+      "spatial_bands": 23,
+      "hrtf_bands": 12,
+      "selected_band": 22,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.12595354999999997
+    },
+    {
+      "spatial_bands": 23,
+      "hrtf_bands": 15,
+      "selected_band": 22,
+      "tail_changes_matrix": true,
+      "max_absolute_difference": 0.12595354999999997
+    },
+    {
+      "spatial_bands": 23,
+      "hrtf_bands": 23,
+      "selected_band": 22,
+      "tail_changes_matrix": false,
+      "max_absolute_difference": 0.0
+    }
+  ],
+  "tail_sensitive_pairs": 21,
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "original_algorithm_sha256": "ebdb752a1d74a5f7e5638366867b3b477918aa9f4d94169ee3b2e30bfbce6153",
+  "source_changes": [],
+  "harness_sha256": "4bf11422d58c1ccd1702dc707980a0e0186848bbc09acfaa7e1463430833aa5e",
+  "output_sha256": "721cd8c8de33e4e4037deb0f38111e57da2aa3c2f889d43e348813aae7e54875",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n",
+  "flags": [
+    "-O2",
+    "-DLD_MPS",
+    "-ffunction-sections",
+    "-fdata-sections",
+    "-Wl,-dead_strip"
+  ]
+}
