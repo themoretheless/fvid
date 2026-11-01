@@ -62,6 +62,7 @@ pub struct Session {
     initial_config: Config,
     mode: Mode,
     qmf_input: bool,
+    ld_sbr_qmf: bool,
     bins: usize,
     pcm: aac_ld_mps_pcm::Decoder,
     inputs: usize,
@@ -75,12 +76,16 @@ pub struct Session {
 }
 impl Session {
     pub fn new(config: &Config, mode: Mode) -> Result<Self> {
-        Self::new_domain(config, mode, false)
+        Self::new_domain(config, mode, false, false)
     }
     pub fn new_qmf(config: &Config, mode: Mode) -> Result<Self> {
-        Self::new_domain(config, mode, true)
+        Self::new_domain(config, mode, true, false)
     }
-    fn new_domain(config: &Config, mode: Mode, qmf_input: bool) -> Result<Self> {
+    /// Shared AAC LD-SBR QMF retains its output-rate synthesis convention.
+    pub fn new_ld_sbr_qmf(config: &Config, mode: Mode) -> Result<Self> {
+        Self::new_domain(config, mode, true, true)
+    }
+    fn new_domain(config: &Config, mode: Mode, qmf_input: bool, ld_sbr_qmf: bool) -> Result<Self> {
         if config.frame_slots == 0 || config.tree.input_channels == 0 {
             return Err(invalid("zero LD-MPS session geometry"));
         }
@@ -91,7 +96,9 @@ impl Session {
         } else {
             64
         };
-        let mut pcm = if qmf_input {
+        let mut pcm = if ld_sbr_qmf {
+            aac_ld_mps_pcm::Decoder::new_ld_sbr_qmf(config, mode)?
+        } else if qmf_input {
             aac_ld_mps_pcm::Decoder::new_qmf(config, mode)?
         } else {
             aac_ld_mps_pcm::Decoder::new(config, mode)?
@@ -101,6 +108,7 @@ impl Session {
             initial_config: config.clone(),
             mode,
             qmf_input,
+            ld_sbr_qmf,
             bins,
             pcm,
             inputs: usize::from(config.tree.input_channels),
@@ -114,9 +122,14 @@ impl Session {
         })
     }
     pub fn reset(&mut self) {
-        self.pcm = Self::new_domain(&self.initial_config, self.mode, self.qmf_input)
-            .expect("previously validated LD-MPS reset configuration")
-            .pcm;
+        self.pcm = Self::new_domain(
+            &self.initial_config,
+            self.mode,
+            self.qmf_input,
+            self.ld_sbr_qmf,
+        )
+        .expect("previously validated LD-MPS reset configuration")
+        .pcm;
         self.frame_samples = usize::from(self.initial_config.frame_slots) * self.bins;
         self.chunks.clear();
         self.pending.clear();
@@ -259,7 +272,8 @@ impl Session {
                         "LD-MPS in-band output format change requires stream reconfiguration",
                     ));
                 }
-                let _validated = Self::new_domain(&config, next.mode, next.qmf_input)?;
+                let _validated =
+                    Self::new_domain(&config, next.mode, next.qmf_input, next.ld_sbr_qmf)?;
                 let offset = bits.position() / 8;
                 if offset == message.payload.len() {
                     return Err(invalid(

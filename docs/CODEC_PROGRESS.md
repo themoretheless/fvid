@@ -1,3 +1,16 @@
+## Shared single-rate AAC LD-QMF synthesis, 2026-11-01
+
+Corrected the AAC LD-SBR/MPS32 synthesis convention from generic2n-127 to2n-31.
+The unmodified original AAC function independently establishes the phase;all20480
+matrix scalars match the direct precise-PI control. Eight own short programmes
+isolate the waveform failure,with dual-rate controls,independent complete PCM,
+in-band gain resets,checkpoints/reset,both frontends/renderers and navigation.
+Original24kHz LD-QMF2 RMS falls0.0965→7.77e-6,with no alignment/gain fitting;
+the other six original renderer comparisons stay byte-identical. Generic
+PCM/default QMF conventions and old frozen fixtures remain unchanged.693 scoped
+checks pass,0 fail,1 existing ignored;FFmpeg/ffprobe blocked.
+[Evidence](validation/aac-ld-mps-single-rate-2026-11-01.md).
+
 ## Original LD-MPS timing re-audit, 2026-11-01
 
 Fresh zero-lag/no-fit comparisons confirm the causal ELD-origin correction also

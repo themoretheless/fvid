@@ -614,3 +614,8 @@ fn discarded_hf_tail_limiter_keeps_worker_audio_and_navigation() {
 fn coupled_noise_balance_keeps_worker_audio_and_navigation() {
     check_corpus("aac-ld-sbr-noise-balance");
 }
+
+#[test]
+fn single_rate_ld_mps_synthesis_keeps_worker_audio_and_navigation() {
+    check_corpus("aac-ld-mps-single-rate");
+}

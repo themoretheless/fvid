@@ -58,7 +58,13 @@ fn staged_reference<const B: usize>(c: &Value, qmf: &[u8], reset_everything: boo
     let mut chain = aac_ld_mps_qmf::Decoder::new(&configs[0], Mode::Complex).unwrap();
     let outputs = usize::from(configs[0].tree.output_channels);
     let mut synthesis: Vec<_> = (0..outputs)
-        .map(|_| Synthesis::<B>::new().unwrap())
+        .map(|_| {
+            if B == 32 && !c["qmf"].is_null() {
+                Synthesis::<B>::new_single_rate_ld_sbr().unwrap()
+            } else {
+                Synthesis::<B>::new().unwrap()
+            }
+        })
         .collect();
     let mut analysis: Vec<_> = (0..channels)
         .map(|_| Analysis::<B>::new().unwrap())

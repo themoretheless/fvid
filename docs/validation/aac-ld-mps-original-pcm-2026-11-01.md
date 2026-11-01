@@ -1,5 +1,10 @@
 # Original LD-MPS waveform re-audit, 2026-11-01
 
+Historical audit before the shared single-rate synthesis correction. The later
+[source-qualified fix](aac-ld-mps-single-rate-2026-11-01.md) resolves the24kHz
+LD-QMF2 discrepancy below;the measurements here retain their original values.
+
+
 The October31 observations predate the causal ELD origin correction. This audit
 uses current owned probe SHA256
 `f694c2c6658aa8eb4c22edc8f3ee153773d1e58335196975529d31d7e10c5477`

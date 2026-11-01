@@ -105,7 +105,7 @@ impl Decoder {
             ));
         }
         let mut session = if shared_qmf {
-            super::aac_ld_mps_session::Session::new_qmf(
+            super::aac_ld_mps_session::Session::new_ld_sbr_qmf(
                 config,
                 mode,
             )?

@@ -68,13 +68,13 @@ fn spatial_ld_sbr_subbands_match_independent_convolution_hf_noise_and_gain_contr
         )
         .unwrap();
         let mut decoder = fresh.clone();
-        let mut spatial_actual = fvid_media::owned_aac::aac_ld_mps_pcm::Decoder::new_qmf(
+        let mut spatial_actual = fvid_media::owned_aac::aac_ld_mps_pcm::Decoder::new_ld_sbr_qmf(
             parsed.ld_mps.as_ref().unwrap(),
             fvid_media::owned_aac::aac_ld_mps_decor::Mode::Complex,
         )
         .unwrap();
         let mut spatial_expected = spatial_actual.clone();
-        let mut whole_session = fvid_media::owned_aac::aac_ld_mps_session::Session::new_qmf(
+        let mut whole_session = fvid_media::owned_aac::aac_ld_mps_session::Session::new_ld_sbr_qmf(
             parsed.ld_mps.as_ref().unwrap(),
             fvid_media::owned_aac::aac_ld_mps_decor::Mode::Complex,
         )

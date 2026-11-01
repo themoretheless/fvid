@@ -82,7 +82,7 @@ fn component_reference(c: &Value) -> Vec<u8> {
     let initial = Config::parse(&hex(&c["ssc"])).unwrap();
     let shared = c["shared"].as_bool().unwrap();
     let mut decoder = if shared {
-        aac_ld_mps_pcm::Decoder::new_qmf(&initial, Mode::Complex)
+        aac_ld_mps_pcm::Decoder::new_ld_sbr_qmf(&initial, Mode::Complex)
     } else {
         aac_ld_mps_pcm::Decoder::new(&initial, Mode::Complex)
     }

@@ -37,6 +37,7 @@ enum Banks {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Decoder {
     qmf_input: bool,
+    ld_sbr_qmf: bool,
     mode: Mode,
     qmf: aac_ld_mps_qmf::Decoder,
     banks: Banks,
@@ -56,14 +57,19 @@ pub fn native_order(tree: u8) -> Result<&'static [usize]> {
 }
 impl Decoder {
     pub fn new(config: &Config, mode: Mode) -> Result<Self> {
-        Self::new_domain(config, mode, false)
+        Self::new_domain(config, mode, false, false)
     }
-    /// Consume already-normalized spatial-domain QMF (e.g. from LD-SBR).
+    /// Consume normalized QMF with the default spatial synthesis convention.
+    /// AAC LD-SBR callers use `new_ld_sbr_qmf` for single-rate coupling.
     /// The sole PCM synthesis bank remains here; no analysis round trip runs.
     pub fn new_qmf(config: &Config, mode: Mode) -> Result<Self> {
-        Self::new_domain(config, mode, true)
+        Self::new_domain(config, mode, true, false)
     }
-    fn new_domain(config: &Config, mode: Mode, qmf_input: bool) -> Result<Self> {
+    /// Shared AAC LD-SBR QMF retains its output-rate synthesis convention.
+    pub fn new_ld_sbr_qmf(config: &Config, mode: Mode) -> Result<Self> {
+        Self::new_domain(config, mode, true, true)
+    }
+    fn new_domain(config: &Config, mode: Mode, qmf_input: bool, ld_sbr_qmf: bool) -> Result<Self> {
         let qmf = aac_ld_mps_qmf::Decoder::new(config, mode)?;
         let order = native_order(config.tree.code)?.to_vec();
         let inputs = if qmf_input {
@@ -78,7 +84,13 @@ impl Decoder {
                     .map(|_| Analysis::new())
                     .collect::<Result<_>>()?,
                 synthesis: (0..outputs)
-                    .map(|_| Synthesis::new())
+                    .map(|_| {
+                        if ld_sbr_qmf {
+                            Synthesis::new_single_rate_ld_sbr()
+                        } else {
+                            Synthesis::new()
+                        }
+                    })
                     .collect::<Result<_>>()?,
             }
         } else if config.sample_rate >= 55426 {
@@ -113,6 +125,7 @@ impl Decoder {
         }
         Ok(Self {
             qmf_input,
+            ld_sbr_qmf,
             mode,
             qmf,
             banks,
@@ -137,7 +150,7 @@ impl Decoder {
                 "LD-MPS in-band output format change requires stream reconfiguration",
             ));
         }
-        let mut next = Self::new_domain(config, self.mode, self.qmf_input)?;
+        let mut next = Self::new_domain(config, self.mode, self.qmf_input, self.ld_sbr_qmf)?;
         next.qmf = self.qmf.clone();
         next.qmf.reconfigure(config, self.mode)?;
         let keep_synthesis = config.downmix_gain == self.config.downmix_gain;

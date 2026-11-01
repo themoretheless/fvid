@@ -1,5 +1,15 @@
 # Audio Implementation Status
 
+Shared AAC LD-SBR/MPS single-rate synthesis now uses its own32-band phase2n-31,
+qualified against the original AAC function and eight own short programmes.
+The formerly large24kHz LD-QMF2 discrepancy falls from RMS0.0965 to7.77e-6,
+max error1.52514e-5,without delay/gain fitting. Other original renderer outputs
+stay byte-identical. Generic MPS PCM/default QMF banks retain their conventions.
+693 scoped checks pass,0 fail,1 existing ignored;FFmpeg/ffprobe blocked.
+See validation/aac-ld-mps-single-rate-2026-11-01.md. AAC-LD5151 numerical residual
+and broader LD-MPS tools/profiles remain open.
+
+
 Coupled SBR noise now follows the normative L/R balance orientation. This
 closes the three remaining ordinary LD-SBR S2 waveform discrepancies: all26
 original ISO PCM24 streams have per-channel RMS at most2.016e-7,with zero lag
@@ -70,18 +80,18 @@ The current original-reference re-audit closes the former ELD5151 timing
 mismatch: Real-renderer full PCM16 comparison has maximum-channel RMS8.17e-6,
 max error1.5451e-5,without alignment or gain fitting. The frozen pre-origin
 probe has RMS0.0536 on the same input. The48-kHz LD-QMF input also matches at
-approximately the PCM16 quantization scale. AAC-LD tree5151 numerical residual
-and24-kHz LD-QMF phase/coupling qualification remain open. The24-kHz ISO WAV
-mismatch also occurs in independently built FDK;this is not proof of a native
-math defect. See validation/aac-ld-mps-original-pcm-2026-11-01.md.
+approximately the PCM16 quantization scale. AAC-LD tree5151 numerical residual remains open. The24-kHz shared-QMF
+phase discrepancy is now corrected separately;see the single-rate synthesis
+report above. The prior uncorrected audit remains available at
+validation/aac-ld-mps-original-pcm-2026-11-01.md.
 
 AAC-LD/ELD terminal byte alignment now accepts arbitrary padding values.
 33 authored programmes (132 variants in MP4/Matroska) preserve exact PCM,
 playback and navigation, including coupled LD-SBR and adapted PCM ingress.
 Four public ISO LD-MPS streams decode fully after this fix. Their raw
 PCM comparisons are observations,not full conformance qualification. The fresh
-November1 audit resolves the ELD5151 timing discrepancy;the24-kHz LD-QMF
-reference convention and remaining numerical differences still require work.
+November1 audits resolve ELD5151 timing and24-kHz shared-QMF synthesis phase.
+Remaining numerical differences and broader profile qualification still require work.
 
 Native LD/ELD supports explicitly adapted short-core PCM clocks into LD-MPS.
 Downscaled LD-SBR additionally uses owned CLDFB PCM synthesis followed by the

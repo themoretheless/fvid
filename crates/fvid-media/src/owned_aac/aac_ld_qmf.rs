@@ -20,16 +20,18 @@ fn coefficient<const B: usize>(i: usize) -> f64 {
         (WINDOW[j] + WINDOW.get(j + 1).copied().unwrap_or(0.0)) * 0.5
     }
 }
-fn matrix<const B: usize>(synthesis: bool) -> &'static [Complex] {
+fn matrix<const B: usize>(synthesis: bool, single_rate_ld_sbr: bool) -> &'static [Complex] {
     static A32: OnceLock<Vec<Complex>> = OnceLock::new();
     static A64: OnceLock<Vec<Complex>> = OnceLock::new();
     static A128: OnceLock<Vec<Complex>> = OnceLock::new();
     static S128: OnceLock<Vec<Complex>> = OnceLock::new();
+    static S32_SBR: OnceLock<Vec<Complex>> = OnceLock::new();
     static S32: OnceLock<Vec<Complex>> = OnceLock::new();
     static S64: OnceLock<Vec<Complex>> = OnceLock::new();
     let cache = match (B, synthesis) {
         (32, false) => &A32,
         (64, false) => &A64,
+        (32, true) if single_rate_ld_sbr => &S32_SBR,
         (32, true) => &S32,
         (64, true) => &S64,
         (128, false) => &A128,
@@ -41,7 +43,11 @@ fn matrix<const B: usize>(synthesis: bool) -> &'static [Complex] {
             .flat_map(|n| {
                 (0..B).map(move |k| {
                     let shift = if synthesis {
-                        -(4.0 * B as f64 - 1.0)
+                        if single_rate_ld_sbr {
+                            -31.0
+                        } else {
+                            -(4.0 * B as f64 - 1.0)
+                        }
                     } else {
                         2.0 * B as f64 + 1.0
                     };
@@ -83,7 +89,7 @@ impl<const B: usize> Analysis<B> {
         }
         let mut history = self.history.clone();
         let mut result = Vec::with_capacity(pcm.len() / B);
-        let m = matrix::<B>(false);
+        let m = matrix::<B>(false, false);
         for block in pcm.chunks_exact(B) {
             history.copy_within(0..9 * B, B);
             for (dst, src) in history[..B].iter_mut().zip(block.iter().rev()) {
@@ -121,12 +127,24 @@ impl<const B: usize> Analysis<B> {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Synthesis<const B: usize> {
     history: Vec<f64>,
+    single_rate_ld_sbr: bool,
 }
 impl<const B: usize> Synthesis<B> {
+    /// AAC LD-QMF single-rate coupling uses2n-31,distinct from the default
+    /// spatial32 bank2n-127. The double-rate64 convention stays unchanged.
+    pub fn new_single_rate_ld_sbr() -> Result<Self> {
+        if B != 32 {
+            return Err(invalid("single-rate LD-SBR synthesis requires32 bands"));
+        }
+        let mut bank = Self::new()?;
+        bank.single_rate_ld_sbr = true;
+        Ok(bank)
+    }
     pub fn new() -> Result<Self> {
         geometry::<B>()?;
         Ok(Self {
             history: vec![0.; 20 * B],
+            single_rate_ld_sbr: false,
         })
     }
     pub fn reset(&mut self) {
@@ -146,7 +164,7 @@ impl<const B: usize> Synthesis<B> {
             .ok_or_else(|| invalid("oversized LD-QMF synthesis input"))?;
         let mut history = self.history.clone();
         let mut result = Vec::with_capacity(capacity);
-        let m = matrix::<B>(true);
+        let m = matrix::<B>(true, self.single_rate_ld_sbr);
         for slot in slots {
             history.copy_within(0..18 * B, 2 * B);
             for n in 0..2 * B {
@@ -331,7 +349,7 @@ mod tests {
         // including the sign of each prototype tap. Constant MAX subbands can
         // cancel and are not necessarily an arithmetic overflow.
         let mut slots = vec![[Complex::default(); B]; 11];
-        let m = matrix::<B>(true);
+        let m = matrix::<B>(true, false);
         for p in 0..5 {
             for (delay, row, tap) in [(2 * p, 0, 2 * B * p), (2 * p + 1, B, 2 * B * p + B)] {
                 let weight = coefficient::<B>(tap);

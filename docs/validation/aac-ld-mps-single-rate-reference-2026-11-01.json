@@ -1,0 +1,17 @@
+{
+  "archive_sha256": "b6b27e2f9af6ee8f950af8d7074afc467e66d93372328c0ec55282fff71d1f83",
+  "reference_members": {
+    "audio/natural/mp4AudVm_Rewrite/src_tf/ct_polyphase.c": "ca36963cf3c9ebd0aac5f6c3c7894e3cf92ed61b54625c2e2bf7117e4534bf9c",
+    "audio/natural/mp4AudVm_Rewrite/src_tf/ct_polyphase.h": "e8f25f21032a08fcb5ddef78ec8a50a91a60d85129584ad7baa7226f43b4c0b7",
+    "audio/natural/mp4AudVm_Rewrite/src_tf/ct_sbrconst.h": "265d2e96fbc8f71b7b3bacc4893e7e2c8813d9e0f2f64d278743ea207556542a",
+    "audio/natural/mp4AudVm_Rewrite/src_tf/ct_sbrdecoder.h": "19cc645efea31e6f7caaa2de0ef4f6e64ecdf0c2f4ca8e82d1917e48a0d9680a"
+  },
+  "driver_sha256": "cf752fafff8ddff6e3c9ba58199ff152a0feef6200ff22de484256b7a19ed417",
+  "validator_sha256": "f672df8abcce18bec9eb5dbd809f6e27776ecceace2ab1532e72b3e11b077669",
+  "coefficients": 20480,
+  "precise_formula_max_error": 0.0,
+  "original_pi_max_error": 1.7278890137274673e-07,
+  "old_generic32_max_error": 0.028862539914660527,
+  "dual_rate_control_max_error": 0.0,
+  "scope": "Original AAC InitSbrSynFilterbank FBMODE_LDQMF: single-rate32 N uses2n-31;dual-rate64 uses2n-255. Separate PI control only;source files unchanged. This is not the generic standalone MPS32 PCM bank convention."
+}

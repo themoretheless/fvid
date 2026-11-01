@@ -206,7 +206,13 @@ fn reference<const B: usize>(c: &Value, golden: &[u8]) -> Vec<f64> {
     let mut ges: Option<Decoder> = None;
     let mut analysis: Vec<_> = (0..inputs).map(|_| Analysis::<B>::new().unwrap()).collect();
     let mut synthesis: Vec<_> = (0..outputs)
-        .map(|_| Synthesis::<B>::new().unwrap())
+        .map(|_| {
+            if B == 32 && !c["qmf"].is_null() {
+                Synthesis::<B>::new_single_rate_ld_sbr().unwrap()
+            } else {
+                Synthesis::<B>::new().unwrap()
+            }
+        })
         .collect();
     let parent = root().parent().unwrap().to_path_buf();
     let mut core = NativeAacDecoder::new(
