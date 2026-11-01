@@ -1,9 +1,10 @@
 //! Optional offline AAC-LD mono core syntax diagnostic, not a PCM oracle.
+//! Optional PCM export accepts only explicitly isolated non-spatial core records.
 //! Ancillary/spatial suffixes are not interpreted by this diagnostic.
 use fvid_media::owned_aac::{
     aac_channel::ChannelData, bits::BitReader, config::AudioSpecificConfig,
 };
-use std::io::Read;
+use std::io::{Read, Write};
 fn word(input: &mut impl Read) -> std::io::Result<usize> {
     let mut b = [0; 4];
     input.read_exact(&mut b)?;
@@ -20,8 +21,8 @@ fn payload(input: &mut impl Read, limit: usize) -> Result<Vec<u8>, Box<dyn std::
 }
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<_> = std::env::args_os().skip(1).collect();
-    if args.len() != 1 {
-        return Err("usage: aac_ld_core_inspect INPUT.records".into());
+    if !matches!(args.len(), 1 | 2) {
+        return Err("usage: aac_ld_core_inspect INPUT.records [CORE.f32le]".into());
     }
     let mut input = std::io::BufReader::new(std::fs::File::open(&args[0])?);
     let mut magic = [0; 8];
@@ -38,6 +39,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         return Err("diagnostic requires mono AAC-LD core".into());
     }
+    let mut decoder = if args.len() == 2 {
+        if config.ld_mps.is_some() {
+            return Err("PCM export requires explicitly isolated ordinary core records".into());
+        }
+        Some(fvid_media::owned_aac::NativeAacDecoder::new(&asc)?)
+    } else {
+        None
+    };
+    let mut output = if args.len() == 2 {
+        Some(std::io::BufWriter::new(std::fs::File::create(&args[1])?))
+    } else {
+        None
+    };
     let count = word(&mut input)?;
     if count == 0 || count > 1_000_000 {
         return Err("AU count admission bound".into());
@@ -47,6 +61,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut bits = BitReader::new(&packet);
         let tag = bits.read(4)?;
         let (core, ltp) = ChannelData::read_ld(&mut bits, &config.core, false)?;
+        if let (Some(d), Some(out)) = (&mut decoder, &mut output) {
+            let pcm = d.decode(&packet)?;
+            if pcm.len() != usize::from(config.core.frame_samples) {
+                return Err("unexpected isolated core PCM geometry".into());
+            }
+            for value in pcm {
+                out.write_all(&value.to_le_bytes())?;
+            }
+        }
         println!(
             "{}",
             serde_json::json!({"frame":index,"frame_samples":config.core.frame_samples,"tag":tag,"max_sfb":core.info.max_sfb,"window_shape":if core.info.shape == fvid_media::owned_aac::aac_synthesis::WindowShape::Sine {"Sine"} else {"LowOverlap"},"ltp":format!("{ltp:?}"),"has_ltp":ltp.is_some(),"spatial":config.ld_mps.is_some(),"tns":core.tns.is_some(),"books":core.codebooks,"core_bits":bits.position()})
@@ -54,6 +77,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     if input.read(&mut [0; 1])? != 0 {
         return Err("trailing records".into());
+    }
+    if let Some(d) = &mut decoder {
+        if d.finish()?.is_some() {
+            return Err("unexpected delayed ordinary core output".into());
+        }
+    }
+    if let Some(out) = &mut output {
+        out.flush()?;
     }
     Ok(())
 }

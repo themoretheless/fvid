@@ -1,0 +1,41 @@
+{
+  "scope": "Research-only transformed records; stage-boundary integrity, not independent spatial waveform oracle or conformance verdict. FDK output is fixed point PCM16.",
+  "conformance_verdict": null,
+  "delay_search": false,
+  "gain_fit": false,
+  "preparation": {
+    "source_sha256": "615b5b6da42d5455982670e24e09046d978f596d1161078ea3f8e1b21137e42c",
+    "syntax_sha256": "2c23d0850a3c2d7cf23001740b91cbc59555dc9ff8679f8d40f2a64fae6960b4",
+    "core_records_sha256": "11df174bf1aa8387c583c487c51c4159f5a58b059b1d0dbf3a9009d532cd3053",
+    "aus": 2820,
+    "frame_samples": 512,
+    "asc_sync_bit": 22,
+    "conformance_verdict": null,
+    "operation": "Research transform: disable ASC spatial extension, retain exact core prefix bits, remove ancillary suffix, zero-pad byte alignment. Not an unchanged original or fixture."
+  },
+  "stages": {
+    "recomposition": [
+      {
+        "mode": "real",
+        "byte_identical_to_full": true,
+        "output": "mode=Real packets=2820 rate=48000 channels=6 scalars=8663040\n",
+        "sha256": "c057cf1ab2a87e771a4cac34c48c0e03c21e94f377c2eca3e7580f6614591ca5"
+      },
+      {
+        "mode": "complex",
+        "byte_identical_to_full": true,
+        "output": "mode=Complex packets=2820 rate=48000 channels=6 scalars=8663040\n",
+        "sha256": "9f83aab620ee5fa2d5b3d8181dda2fb7ee13cc0061000dfbfe71a703647195aa"
+      }
+    ],
+    "core_vs_fdk": {
+      "scalars": 1443840,
+      "rmse": 8.781423281721406e-06,
+      "max_abs_error": 2.8848648071289062e-05
+    }
+  },
+  "tools": {
+    "aac_ld_core_inspect": "b06b75a238ae349eace0a034ae0217857b538c2d032b96e21d63168f78a18862",
+    "aac_ld_recompose_reference": "d6553eb5d9e545031c39a6e6e455659c4e585ea8b643bce0196b3828d4a01c73"
+  }
+}
