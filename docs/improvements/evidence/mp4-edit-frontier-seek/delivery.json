@@ -1,0 +1,23 @@
+{
+  "source_commit": "defdb1750d687a8ae1b8e0706c144e9f87fe2c2b",
+  "verified_remote_refs": {
+    "refs/heads/codex/deliver-fvid-20261029": "defdb1750d687a8ae1b8e0706c144e9f87fe2c2b",
+    "refs/heads/main": "defdb1750d687a8ae1b8e0706c144e9f87fe2c2b"
+  },
+  "preserved_parallel_main": "5e8814e76cc0760a90e8f2874cc8e3cccbc7554f",
+  "accepted_ids": [
+    "FVID-0510"
+  ],
+  "count_delta": 1,
+  "accepted_count": 510,
+  "next_id": "FVID-0511",
+  "goal_complete": false,
+  "worktree_clean_before_receipt": true,
+  "source_tests_and_six_fixture_hashes_verified": true,
+  "owned_build_targets_absent": true,
+  "merged_qualification_test_executions": 975,
+  "repeated_tests_passed_each": 33,
+  "repeat_runs": 3,
+  "adts_integration_repair_count_delta": 0,
+  "unchanged_adts_admission_tests_pass": true
+}
