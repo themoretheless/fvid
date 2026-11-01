@@ -50,11 +50,8 @@ pub(super) fn validate(config: &Config) -> Result<()> {
             if c.fec != 0 && c.interleave == Some(2) {
                 return Err(invalid("reserved RS intraclass interleave mode"));
             }
-            if c.fec != 0 && c.rate.is_none() {
-                return Err(invalid(
-                    "EP RS escaped correction rate is not yet implemented",
-                ));
-            }
+            // Both FEC families use the three-bit frame-header rate table.
+            // An RS class resolves its correction strength before sizing blocks.
             if c.fec == 0 && c.rate.is_some_and(|r| r > 24) {
                 return Err(invalid("reserved EP SRCPC code rate"));
             }

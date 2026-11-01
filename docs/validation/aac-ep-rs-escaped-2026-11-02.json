@@ -1,0 +1,102 @@
+{
+  "date": "2026-11-02",
+  "scope": "EP2 single-source-frame escaped RS strengths, not full codec parity",
+  "before_fix": {
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "Error: \"player read the container and a track coded mp4a, and has no decoder arm for it: EP RS escaped correction rate is not yet implemented\"\n",
+    "exe_sha256": "1c7e230bcb361a6521bfb20812c27a9a779a3122ceda520c632c834aed9775b5"
+  },
+  "generation": {
+    "accepted_programmes": 32,
+    "malformed_programmes": 24,
+    "successive_access_units": 12,
+    "rate_table": [
+      0,
+      3,
+      4,
+      6,
+      8,
+      12,
+      16,
+      24
+    ],
+    "group_component_cases": 8,
+    "files": 179,
+    "byte_identical": true,
+    "process_and_network_creation_forbidden": true,
+    "manifest": {
+      "path": "/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/fvid/tests/fixtures/playback-errors/aac-ep-rs-escaped/manifest.json",
+      "sha256": "5722c471bf09bcd9b2011f60e8709666862502c8c0e29bef9036f4c3f0662b96"
+    }
+  },
+  "gate": {
+    "environment": "CARGO_TARGET_DIR=/Users/themoretheless/.codex/worktrees/aac-eld-extension-gaps/target CARGO_BUILD_JOBS=2",
+    "cargo_prefix": "cargo --config profile.dev.package.fvid-media.opt-level=2 test --offline --no-default-features --features player",
+    "initial_targets": [
+      "aac_ep_rs_escaped",
+      "aac_ep_rs_playback",
+      "aac_ep_rs_group_playback",
+      "aac_ep_rs_group_concatenated",
+      "aac_ep_optional_playback"
+    ],
+    "initial_results": [
+      [
+        "7",
+        "0",
+        "0"
+      ],
+      [
+        "8",
+        "0",
+        "0"
+      ],
+      [
+        "9",
+        "0",
+        "0"
+      ],
+      [
+        "7",
+        "0",
+        "0"
+      ],
+      [
+        "7",
+        "0",
+        "0"
+      ]
+    ],
+    "initial_log": {
+      "path": "/tmp/fvid-ep-rs-escaped-gate.log",
+      "sha256": "632b7303f628b12f90fa1b863ff39a3a83d36aa778a43287a05a011cf9295b9c"
+    },
+    "final_target": "aac_ep_rs_escaped",
+    "final_passed": 9,
+    "final_failed": 0,
+    "final_ignored": 0,
+    "final_log": {
+      "path": "/tmp/fvid-ep-rs-escaped-final.log",
+      "sha256": "bae9913d1f0e06cf06ad1f5186672e167fa7142a97289b0e24bc03f8ae557412"
+    },
+    "unique_test_total": 39,
+    "note": "Initial escaped target had 8 tests; final 9-test run adds group coverage and supersedes that target, not additive duplicate counting."
+  },
+  "reference": {
+    "path": "docs/validation/aac-ep-rs-escaped-reference-2026-11-02.json",
+    "sha256": "6e053665d4771fc3efb9f32be54d6c4bf2c47efa1097ce3af055e0ae01c99fb4"
+  },
+  "device": {
+    "runs": 12,
+    "completed_phases": 48,
+    "report": {
+      "path": "docs/validation/aac-ep-rs-escaped-device-2026-11-02.json",
+      "sha256": "9ab18fd08409a94010f4ff382c32c7f237dd0bf3c8db331ba4c17bd545b5ee62"
+    },
+    "build_log": {
+      "path": "/tmp/fvid-ep-rs-escaped-device-build.log",
+      "sha256": "0d16506de75125fd28f6663a8c96336f46efa379bc8fae70131945a17455a15f"
+    }
+  },
+  "whole_codec_goal_complete": false
+}

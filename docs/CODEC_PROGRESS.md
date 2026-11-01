@@ -24483,3 +24483,13 @@ result is sticky and preserves the existing source-association refusal.
 completed message data remain byte-identical to parent controls. See
 `validation/aac-ld-mps-local-replacement-2026-11-01.md`.
 This does not close cross-AU replacement, HRTF/EBQ or the full codec-gap goal.
+
+### 2026-11-02: EP RS escaped correction strengths
+
+The previous escaped-RS-rate gap is closed for single-source-frame EP classes.
+The descriptor may defer strength to the three-bit frame header; all eight
+values are qualified with own ELD/LD-SBR media, error correction, container
+exports and navigation. Grouped RS members resolve their individual values
+before requiring group equality. Source-frame concatenation still forbids
+escaped parameters. See [qualification](validation/aac-ep-rs-escaped-2026-11-02.md).
+Earlier progress entries describing escaped RS as open are historical.
