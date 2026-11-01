@@ -1,3 +1,14 @@
+## Unequal HRTF-grid refusal reproduction, 2026-11-01
+
+Added18 authored one-AU movies covering unequal pairs of spatial grids4/9/23
+and all seven HRTF grids,with three equal-grid playback controls. Every spatial
+frame parses before the specific native mapping refusal is checked. Equal
+controls preserve the original first-AU PCM byte-for-byte. Regeneration is
+deterministic;the targeted21-case test passes. These are refusal reproductions,
+not unequal-grid playback acceptance. The conversion algorithm remains open;
+no production math or supported-codec claim changes.
+[Evidence](validation/aac-ld-mps-hrtf-grid-repro-2026-11-01.md).
+
 ## Independent original AAC-LD core and full LD5151 chain, 2026-11-01
 
 All2820 isolated original core AUs now decode through the unmodified ISO AAC-LD
