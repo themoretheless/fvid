@@ -24460,3 +24460,14 @@ Authored before-fix reproductions become playback acceptance on14 programmes,
 with independent scalar PCM and MP4/Matroska rewind/seek/device evidence.
 See `validation/aac-22-2-2026-11-01.md`. Additional tool/profile combinations
 and the separate LD-MPS HRTF/EBQ/fragment-association gaps remain open.
+
+### 2026-11-01: protected AAC22.2 acceptance
+
+EP3 ELD22.2 now has authored acceptance for56 reordered/protected classes and
+specific CRC failure/retry. EP1 adds80-instance RVLC/resilience and84-instance
+LD-SBR cases with40/42 dependency groups, exact bit bounds and rational clocks.
+Independent scalar PCM, checkpoints, exports, rewind/seek and12 actual macOS
+output-device phases pass. These are qualification of configured layouts
+implemented in5e5f059b99; production DSP is unchanged in this extension.
+See `validation/aac-22-2-esc-2026-11-01.md`. This does not complete the full
+codec/profile objective or qualify combined RVLC+LD-SBR22.2.

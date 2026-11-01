@@ -3385,3 +3385,15 @@ MP4/Matroska playback, rewind/seek, checkpoint rollback and stereo role routing
 are checked. Four actual macOS device runs complete16 drain phases.
 See `validation/aac-22-2-2026-11-01.md` for precise tools, evidence and remaining
 qualification boundaries; complete codec/profile parity is still open.
+
+### 2026-11-01: protected22.2 ESC qualification
+
+Eight EP3 programmes now qualify56 protected/reordered ELD classes; eight EP1
+RVLC/resilience programmes qualify80 instances in40 dependency groups, and two
+LD-SBR/CRC programmes qualify84 instances in42 groups with separate LFEs.
+The18 authored programmes compare952320 independent scalar samples, exercise
+checkpoint/dependency/CRC rollback and container playback/rewind/seek.
+Three actual macOS runs complete12 device-drain phases. This adds evidence
+for the existing configuration13 implementation, not new DSP. See
+`validation/aac-22-2-esc-2026-11-01.md` for transport boundaries and remaining
+unqualified combinations. The global codec-gap objective remains open.

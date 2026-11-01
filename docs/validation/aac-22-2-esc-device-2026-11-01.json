@@ -1,0 +1,25 @@
+{
+  "probe_sha256": "a3cb93f97360598bf1edb5b3324f6e218ed89c875e489cddb1cca92c14a2580b",
+  "command": "audio_probe --play-device INPUT.mp4",
+  "scope": "Three authored24-channel protected/resilient AAC programmes, four actual macOS stereo-device drain phases each; not physical24-speaker or subjective-quality validation.",
+  "cases": [
+    {
+      "name": "n480-flags5",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=24 rate=48000 duration=0.040000\nphase=full generation=0 from=0.000000 position=0.040000 wall=0.149977 device_drain=complete\nphase=seek-quarter generation=1 from=0.010000 position=0.040000 wall=0.146312 device_drain=complete\nphase=seek-60-percent generation=2 from=0.024000 position=0.040000 wall=0.138462 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.040000 wall=0.145350 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "ep1-n512-flags7",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=24 rate=48000 duration=0.042667\nphase=full generation=0 from=0.000000 position=0.042667 wall=0.153286 device_drain=complete\nphase=seek-quarter generation=1 from=0.010667 position=0.042667 wall=0.148304 device_drain=complete\nphase=seek-60-percent generation=2 from=0.025600 position=0.042667 wall=0.147963 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.042667 wall=0.147604 device_drain=complete\n",
+      "stderr": ""
+    },
+    {
+      "name": "ep1-sbr-n480-crc1",
+      "exit_code": 0,
+      "stdout": "platform_device=started source_channels=24 rate=48000 duration=0.080000\nphase=full generation=0 from=0.000000 position=0.080000 wall=0.113953 device_drain=complete\nphase=seek-quarter generation=1 from=0.020000 position=0.080000 wall=0.095835 device_drain=complete\nphase=seek-60-percent generation=2 from=0.048000 position=0.080000 wall=0.069158 device_drain=complete\nphase=rewind generation=3 from=0.000000 position=0.080000 wall=0.113348 device_drain=complete\n",
+      "stderr": ""
+    }
+  ]
+}
